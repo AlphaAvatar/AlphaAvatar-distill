@@ -70,14 +70,14 @@
    "reach": "H-N training +~39k-92k supervised tokens (1 turn x 40-120 tokens x 1-(1-p)^2; Qwen3-235B's first-step pass rate on these is 0.31): reaches 74,013 at the expected yield; H-N state_eval +~900 positions: about the 1,800 target at the expected yield, not guaranteed",
    "verification": "step gold (G2, exact arguments) + schema validity: the same level as today's Pivot schema_arguments, minus recorded execution",
    "protocol_change": "YES: an episode that ends on a call (today an episode must end on an answer) and a training document supervising only the call turn -- the maintainer's approval, for this category only",
-   "cost": "/bin/bash code (converter flag + a final-call episode rule in tool_episodes / verify_episode); generation inside the bounded plan"
+   "cost": "$0 code (converter flag + a final-call episode rule in tool_episodes / verify_episode); generation inside the bounded plan"
   },
   {
    "option": "WorkBench (olly-styles/WorkBench, MIT) generated instances",
    "what": "new task instances from WorkBench's own templates (never its 690 published tasks), executed against its sandbox; the source review v1's G1 candidate",
    "verification": "G1: the sandbox's final state against the ground truth -- the only task-success verifier among the candidates",
    "supply": "as many as the templates generate, in every split",
-   "cost": "/bin/bash but real engineering: an executable backend in the episode loop (today only replay / none run), the generator pinned and run, a converter, decontamination; then the plan rebuilt",
+   "cost": "$0 but real engineering: an executable backend in the episode loop (today only replay / none run), the generator pinned and run, a converter, decontamination; then the plan rebuilt",
    "protocol_change": "a new backend kind (executable, no network), within the registered task_record design"
   },
   {
@@ -91,6 +91,11 @@
    "consequence": "state_eval_hybrid@v2 can freeze with the approved gap recorded; A2-6cat's tool type stays ~6% short of 1/6, which also needs the maintainer's acceptance of that arm's proportion (the share check refuses it today)"
   }
  ],
- "recommendation": "the minimal verifiable path is the call-only gold episodes for schema_arguments (one approval of the episode shape, /bin/bash code, the same step-gold verification); WorkBench is the stronger G1 source if the maintainer prefers task-success verification and accepts the engineering; re-labelling Toucan is not acceptable; the seven shares stay unchanged in every option",
- "authorizes": "nothing"
+ "recommendation": "the minimal verifiable path is the call-only gold episodes for schema_arguments (one approval of the episode shape, $0 code, the same step-gold verification); WorkBench is the stronger G1 source if the maintainer prefers task-success verification and accepts the engineering; re-labelling Toucan is not acceptable; the seven shares stay unchanged in every option",
+ "authorizes": "nothing",
+ "corrections": [
+  "2026-11-04: three '$0' had been written as '/bin/bash' (the shell expanded $0 when this record was written); restored",
+  "2026-11-04: option 1's state-evaluation reach ('about the 1,800 target at the expected yield') assumed 40-120 tokens per call turn; the measured non-thinking gold call turn is ~50 tokens (median 47), so option 1 adds ~580 positions at the expected pass rate and H-N state_eval stays ~1,400 of 1,800 -- superseded by audit/schema_arguments_options.json",
+  "2026-11-04: 'packed_packs.shares refuses the pack (+-2%)' -- that check is withdrawn (audit/proportion_tolerance_audit.json); the A2-6cat selection is refused by the data admission instead: the unapproved schema_arguments training cell and the supporting category below its registered target"
+ ]
 }

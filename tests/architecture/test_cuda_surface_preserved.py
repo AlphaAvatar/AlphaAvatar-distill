@@ -2576,6 +2576,14 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "`ReductionSemantics.forward_context` (optional, versioned by absence): a packed "
             "measurement's protocol id is new; every historical id unchanged. NO CUDA SURFACE.",
      }),
+    ("fc6fa1d68aa79575d79f3a9e02c72ad9b0a4dcad",
+     "Packed round: data selection, proportion validation, admission and packing separated (maintainer 2026-11-04)",
+     {
+        "src/aadistill/data/mixture.py":
+            "NEW `validate_proportions(counts, quotas, shares)`: realized amounts against the caller's "
+            "registered quotas and shares, before packing; pure, no default tolerance, no import. "
+            "`interleave` and `order_blocks` unchanged. NO CUDA SURFACE.",
+     }),
 )
 
 

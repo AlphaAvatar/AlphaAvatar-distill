@@ -209,12 +209,18 @@ def test_the_packed_kinds_are_registered_and_refuse_without_a_grant_cap():
         assert (TM.REPO_ROOT / s).is_file(), s
 
 
-def test_binding_fills_a_built_packs_files_and_steps(tmp_path):
-    from aadistill.data.token_documents import TokenDocument, pack_sequential, write_pack
+def test_binding_fills_a_built_packs_files_and_steps(tmp_path, monkeypatch):
+    from aadistill.data.token_documents import TokenDocument
+    from stages.teacher_modes import packed_packs as PP
     from stages.teacher_modes import packed_training_plan as PTP
     docs = [TokenDocument(f"d{i}", (5, 6, 7), (8, 9, 0)) for i in range(30)]
-    write_pack(pack_sequential(docs[:25], 16, 0, order_seed=1), pack_sequential(docs[25:], 16, 0, order_seed=1),
-               tmp_path / "C1-6cat", data_type={d.doc_id: "t" for d in docs})
+    sel = {"arm": "C1-6cat", "mode": "T2507", "teacher": "thinking_2507", "train": docs[:25], "validation": docs[25:],
+           "data_type": {d.doc_id: "t" for d in docs}, "unit_of": {d.doc_id: d.doc_id for d in docs},
+           "missing_tasks_read_from_records": [], "sources": {}, "tool": {"quota": None, "approved_shortfalls": []}}
+    monkeypatch.setattr(PP, "admission_verdict", lambda *a: {"admitted": True, "unapproved": [],
+                                                             "approved_exceptions": []})  #: test_data_admission's
+    adm = PP.admit("C1-6cat", sel, {"toy": True}, tmp_path)
+    PP.pack(sel["train"], sel["validation"], adm["path"], tmp_path / "C1-6cat")      #: a built, admitted pack
     plan = PTP.bind(PTP.packed_units(), tmp_path)
     c1 = [u for u in plan["units"] if u["arm"] == "C1-6cat"]
     a1 = [u for u in plan["units"] if u["arm"] == "A1-6cat"]

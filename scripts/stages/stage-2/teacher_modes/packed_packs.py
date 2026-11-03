@@ -1,44 +1,57 @@
 #!/usr/bin/env python3
-"""A1-6cat, A2-6cat and C1-6cat training packs under the sequential causal packing. $0, dev box.
+"""A1-6cat, A2-6cat and C1-6cat training data: selection, proportion validation, admission and packing. $0, dev box.
 
     PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs \\
         --arm A1-6cat --tool-documents <tool_admission out>/tool_documents.jsonl \\
-        [--v1-records ... --v1-identity ... --records ... --identity ...] --out artifacts/stages/stage-2/teacher_modes/packs_6cat
+        [--v1-records ... --v1-identity ... --records ... --identity ...] [--validate-only] \\
+        --out artifacts/stages/stage-2/teacher_modes/packs_6cat
 
-Each arm's training set is its selected documents, token for token, plus its own teacher's admitted tool-calling
-documents (`tool_admission.py`), packed by `token_documents.pack_sequential` at the design's sequence length and
-seed (`packed_round_design.json :: stage3_packing`), validation likewise -- EVERY validation document, no sequence
-cap (a cap after the shuffle kept a random part of each category) -- written in the trainer's ladder contract
-(`write_pack`, no position ids: the trainer reads it with standard causal attention).
+Four separate steps (maintainer 2026-11-04); `build` is only the workflow that runs them in order and stops at the
+first refusal:
 
-Data volume and proportions are counted BEFORE packing (maintainer 2026-11-03): unique supervised tokens per
-document, once. The tool-calling documents enter as whole episodes, per category, in the pool's frozen training
-order up to each category's target in the frozen generation plan (`tool_documents`, `tool_generation_plan.select`:
-the rule the session stopped generating by; a short category is recorded, never filled from another), and the
-validation episodes likewise up to the validation cell; `shares` checks the six
-base-corpus types at ~1/6 each of the supporting total and fluid : supporting at ~50:50 within the design's
-tolerance (``stage3_packing.share_check``), refusing a pack outside it. Packing's repeated, truncated and padding
-tokens and the supervised-token exposure are recorded beside them as packing / compute measures only, never as the
-data's size or its proportions, and no loss weight corrects a quota. The record also lists the training data types
-the validation set does not cover (`validation_coverage`).
+1. **Data selection** (`select`): the arm's documents token for token, before packing -- its selected tasks plus its
+   own teacher's admitted tool-calling episodes (`tool_admission.py`), whole, per category in the pool's frozen
+   order up to each cell's target in the frozen generation plan (`tool_documents`, `tool_generation_plan.select`:
+   the rule the session stopped generating by). A short cell is recorded as SHORTFALL, never filled from another.
+   Nothing is packed and nothing is judged.
+2. **Proportion validation** (`proportions`): unique supervised tokens before packing per six base-corpus type and
+   fluid, against the arm's registered quotas and tolerances (`registered_quotas`: token_matched_design.json ::
+   scale and its whole-task selection rule, as six_category_design.json :: base_category keeps it), through the
+   generic `aadistill.data.mixture.validate_proportions`. It reads no packed sequence and no loss weight.
+3. **Admission / freeze** (`admit`): admits only a selection whose proportion check passed and whose tool cells all
+   reached their targets, a failure otherwise covered only by the maintainer's recorded approval
+   (packed_round_design.json :: data_admission.approved_exceptions; the plan's approved_shortfalls for a tool
+   cell). It writes the frozen data manifest -- every document's id, split, data type, category, whole unit,
+   supervised tokens and content sha256, the counts and proportions, the sources, the lineage -- or refuses
+   (`AdmissionError`) and writes nothing.
+4. **Packing** (`pack`): random shuffle -> sequential packing -> truncation (`token_documents.pack_sequential`) at
+   the design's sequence length and seed (`stage3_packing`), every validation document included (no sequence cap),
+   written in the trainer's ladder contract (`write_pack`, no position ids: standard causal attention). It checks
+   that its input is exactly the admitted manifest's documents and that the manifest is intact; it computes no
+   proportion. The ladder names the manifest, which keeps the data's size and proportions; packing's repeated,
+   truncated and padding tokens and the supervised-token exposure are packing / compute measures beside them.
+
+`verify_pack` is the formal consumer's check (`packed_training_plan.bind`): an admitted, unchanged manifest, the
+manifest's documents and the design's packing spec, or the pack is refused.
 
 * A1-6cat / A2-6cat: the mode's documents of the tasks `six_category_selection.json` selected. They are read from
   A1's / A2's packs (`packing_audit.documents_from_isolated_pack`, token for token); a selected task whose
   documents those packs do not hold is read from the verified admission records (`token_admission.load`), and
-  without them the build refuses, naming the task. Validation: the pack's own validation documents plus the tool
-  validation split's documents.
+  without them the selection refuses, naming the task. Validation: the pack's own validation documents plus the
+  tool validation split's documents.
 * C1-6cat: D4A_merged_whole's tool-free sessions (`packing_audit.documents_from_d4a`, system prompt + session
   tokens, the 352 historical cut traces kept as cut) plus Thinking-2507's tool documents; validation: the D4A
   validation tail's tool-free sessions plus the tool validation documents.
 
 The tool documents must be the arm's own teacher's and mode's (checked by their document ids' mode suffix): no arm
-reads another teacher's assistant tokens. Writes one directory per arm and returns its ladder record (file sha256,
-the A/B layers of the packing audit). Nothing is trained.
+reads another teacher's assistant tokens. Nothing is trained.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import sys
 from collections import Counter
 from pathlib import Path
@@ -51,13 +64,18 @@ for _p in ("src", "scripts", "scripts/stages/stage-1"):
 from stages.teacher_modes import packing_audit as PA  # noqa: E402
 
 DESIGN = REPO / "configs/stages/stage-2/teacher_modes/packed_round_design.json"
+TOKEN_MATCHED = REPO / "configs/stages/stage-2/teacher_modes/token_matched_design.json"
+SIX = REPO / "configs/stages/stage-2/teacher_modes/six_category_design.json"
 SELECTION = REPO / "logs/stages/stage-2/teacher_modes/data/six_category_selection.json"
 OUT = REPO / "artifacts/stages/stage-2/teacher_modes/packs_6cat"
-ARMS = {"A1-6cat": {"mode": "H-T", "source_pack": "A1", "teacher": "hybrid"},
-        "A2-6cat": {"mode": "H-N", "source_pack": "A2", "teacher": "hybrid"},
-        "C1-6cat": {"mode": "T2507", "source_pack": None, "teacher": "thinking_2507"}}
+#: ``base``: how the arm's five existing base-corpus types and its fluid part were obtained -- re-selected under the
+#: whole-task rule (A1/A2) or kept byte for byte from D4A_merged_whole (C1); `registered_quotas` reads them so.
+ARMS = {"A1-6cat": {"mode": "H-T", "source_pack": "A1", "teacher": "hybrid", "base": "selected"},
+        "A2-6cat": {"mode": "H-N", "source_pack": "A2", "teacher": "hybrid", "base": "selected"},
+        "C1-6cat": {"mode": "T2507", "source_pack": None, "teacher": "thinking_2507", "base": "kept"}}
 TOOL_TYPE = "supporting.tool_calling"
 PAD_ID = 151643
+THINK_CLOSE = 151668
 #: a document's data type -> the base-corpus type it counts toward (six_category_design.json :: base_category; C1's
 #: D4A types by their sources). A1's / A2's packs carry RAG and multi-hop reading as one data type,
 #: ``supporting.reading_verified``: its split between the two comes from the selection record and must sum to it.
@@ -66,11 +84,37 @@ SIX_TYPES = {"supporting.math_new": "competition_math", "openmath": "competition
              "supporting.code_algorithmic": "code", "code": "code",
              "rag_evidence": "rag_reading", "multihop_qa": "multihop_reading",
              "supporting.reading_verified": None, TOOL_TYPE: "tool_calling"}
+SIX_NAMES = ("competition_math", "gsm8k", "rag_reading", "multihop_reading", "code", "tool_calling")
 SELECTION_ARM = {"A1-6cat": "A1", "A2-6cat": "A2"}
+MANIFEST = "data_manifest.json"
+MANIFEST_SCHEMA = "aadistill.stage2.teacher_modes.data_manifest/v1"
+COLUMNS = ["doc_id", "data_type", "category", "unit", "supervised_tokens", "sha256"]
 
 
 class PackBuildError(RuntimeError):
     pass
+
+
+class AdmissionError(PackBuildError):
+    """A selection the data admission refuses; ``verdict`` names every unapproved failure."""
+
+    def __init__(self, message: str, verdict: dict):
+        super().__init__(message)
+        self.verdict = verdict
+
+
+def sha_file(path: Path) -> str:
+    from aadistill.infrastructure.manifest import sha256_file
+    return sha256_file(Path(path))
+
+
+def canonical_sha(obj) -> str:
+    return hashlib.sha256(json.dumps(obj, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def doc_sha256(d) -> str:
+    """A document's token content (ids and supervision), for TokenDocument and MaskedDocument alike."""
+    return canonical_sha([list(d.ids), [int(x) for x in d.target_mask]])
 
 
 def tool_documents(path: Path | None, mode: str, *, cells: dict | None = None, orders: dict | None = None):
@@ -91,7 +135,8 @@ def tool_documents(path: Path | None, mode: str, *, cells: dict | None = None, o
             raise PackBuildError(f"{r['doc_id']}: not a {mode} document; an arm reads only its own teacher's tokens")
         if r["split"] not in docs:
             continue
-        d = TokenDocument(r["doc_id"], tuple(r["prompt_ids"]), tuple(r["output_ids"]), {"category": r["category"]})
+        d = TokenDocument(r["doc_id"], tuple(r["prompt_ids"]), tuple(r["output_ids"]),
+                          {"category": r["category"], "task_id": r["task_id"]})
         docs[r["split"]].setdefault(r["task_id"], []).append(d)
         cat_of[r["task_id"]] = r["category"]
         units[r["split"]][r["task_id"]] = units[r["split"]].get(r["task_id"], 0) + len(d.output_ids)
@@ -108,52 +153,11 @@ def tool_documents(path: Path | None, mode: str, *, cells: dict | None = None, o
             u = units[split] if c["unit"] == "supervised_tokens" else {t: 1.0 for t in units[split]}
             ids, got = TGP.select(order, u, c["target"], c.get("min_tasks", 0))
             out[split] += [d for t in ids for d in docs[split][t]]
-            quota[f"{split}/{c['category']}"] = {"unit": c["unit"], "target": c["target"], "selected": got,
-                                                 "episodes": len(ids), "status": "REACHED" if got >= c["target"]
-                                                 else "SHORTFALL"}
+            quota[f"{split}/{c['category']}"] = {"split": split, "category": c["category"], "unit": c["unit"],
+                                                 "target": c["target"], "selected": got, "episodes": len(ids),
+                                                 "status": "REACHED" if got >= c["target"] else "SHORTFALL"}
     return out["training"], out["validation"], {"cells": quota, "rule": "whole episodes per cell in the pool's "
                                                 "frozen order, until the plan's target (tool_generation_plan.select)"}
-
-
-def shares(arm: str, train, dtype: dict, check: dict) -> dict:
-    """The six base-corpus types and fluid : supporting on unique supervised tokens BEFORE packing; raises
-    PackBuildError outside ``check`` (``per_type_relative``: each type's distance from 1/6 of the supporting total;
-    ``fluid_fraction``: [lo, hi] of fluid / (fluid + supporting))."""
-    by_dtype = Counter()
-    for x in train:
-        by_dtype[dtype[x.doc_id]] += int(sum(x.target_mask))
-    unknown = sorted(k for k in by_dtype if not k.startswith("primary.") and k not in SIX_TYPES)
-    if unknown:
-        raise PackBuildError(f"{arm}: data types outside the six base-corpus types: {unknown}")
-    fluid = sum(v for k, v in by_dtype.items() if k.startswith("primary."))
-    six = Counter()
-    for k, v in by_dtype.items():
-        if not k.startswith("primary.") and SIX_TYPES[k]:
-            six[SIX_TYPES[k]] += v
-    if by_dtype.get("supporting.reading_verified"):
-        sel = json.loads(SELECTION.read_text())["per_type_supervised_tokens"][SELECTION_ARM[arm]]
-        rag, multi = int(sel["rag_reading"]), int(sel["multihop_reading"])
-        if rag + multi != by_dtype["supporting.reading_verified"]:
-            raise PackBuildError(f"{arm}: reading_verified holds {by_dtype['supporting.reading_verified']} supervised "
-                                 f"tokens, not the selection's RAG {rag} + multi-hop {multi}")
-        six.update(rag_reading=rag, multihop_reading=multi)
-    supporting = sum(six.values())
-    per_type = supporting / 6
-    bad = []
-    if sorted(six) != sorted(set(v for v in SIX_TYPES.values() if v) | {"rag_reading", "multihop_reading"}):
-        bad.append(f"types present {sorted(six)}, not all six")
-    dev = {k: round(v / per_type - 1, 5) for k, v in sorted(six.items())}
-    bad += [f"{k} is {d:+.2%} from 1/6" for k, d in dev.items() if abs(d) > check["per_type_relative"]]
-    frac = fluid / (fluid + supporting) if fluid + supporting else 0.0
-    lo, hi = check["fluid_fraction"]
-    if not lo <= frac <= hi:
-        bad.append(f"fluid is {frac:.4f} of the total, outside [{lo}, {hi}]")
-    if bad:
-        raise PackBuildError(f"{arm}: proportions outside the registered check: " + "; ".join(bad))
-    return {"counted": "unique supervised tokens before packing", "fluid": fluid, "supporting": supporting,
-            "fluid_fraction": round(frac, 6), "six_types": dict(sorted(six.items())),
-            "six_type_deviation_from_one_sixth": dev, "by_data_type": dict(sorted(by_dtype.items())),
-            "check": check}
 
 
 def validation_coverage(train, val, dtype: dict) -> dict:
@@ -220,58 +224,395 @@ def c1_documents():
     return [d for d, _, _ in rows], val_docs, dtype
 
 
-def build(arm: str, *, tool_docs: Path | None, out: Path = OUT, records: dict | None = None,
-          require_tools: bool = True, pool_dir: Path | None = None) -> dict:
-    from aadistill.data.token_documents import pack_sequential, write_pack
+# --- 1. data selection ---------------------------------------------------------------------------------------------
+
+def _files(d: Path) -> dict:
+    """A source pack's identity: the files its reader reads (a reader that ran found them)."""
+    return {"dir": os.path.relpath(d, REPO), "files_sha256": {n: sha_file(d / n) for n in ("blocks.npz", "audit.jsonl")
+                                                             if (d / n).is_file()}}
+
+
+def select(arm: str, *, tool_docs: Path | None, records: dict | None = None, pool_dir: Path | None = None) -> dict:
+    """The arm's documents before packing, with each one's data type and whole unit (an example or an episode with
+    all its turns), the tool cells' quota record and the sources read. Packs nothing and judges nothing: a short
+    tool cell is SHORTFALL in the quota record, for the admission to refuse."""
+    from stages.teacher_modes import tool_generation_plan as TGP
     spec = ARMS[arm]
-    d = json.loads(DESIGN.read_text())["stage3_packing"]
-    seq, seed = int(d["sequence_length"]), int(d["shuffle_seed"])
+    plan = cells = orders = None
+    if tool_docs is not None:                       #: the plan's identity first: a drifted plan refuses before any read
+        plan, orders = TGP.for_consumers(pool_dir=pool_dir)
+        cells = {s: TGP.cells_for(plan, spec["teacher"], spec["mode"], s) for s in ("training", "validation")}
     if spec["source_pack"]:
         train, val, dtype, missing = a_arm_documents(arm, records=records)
+        unit_of = {d.doc_id: d.doc_id.split("|", 1)[0] for d in train + val}
+        pack = PA.PACKS / spec["source_pack"]
+        sources = {"selection_record_sha256": sha_file(SELECTION), "source_pack": _files(pack),
+                   "admission_records": ({k: records[k] for k in ("v1_identity", "identity")} if missing else None)}
     else:
         train, val, dtype = c1_documents()
         missing = []
-    cells = orders = None
-    if tool_docs is not None:
-        from stages.teacher_modes import tool_generation_plan as TGP
-        plan, orders = TGP.for_consumers(pool_dir=pool_dir)
-        cells = {s: TGP.cells_for(plan, spec["teacher"], spec["mode"], s) for s in ("training", "validation")}
+        unit_of = {d.doc_id: d.doc_id for d in train + val}
+        sources = {"d4a": _files(PA.D4A)}
     t_train, t_val, quota = tool_documents(tool_docs, spec["mode"], cells=cells, orders=orders)
-    if require_tools and not t_train:
-        raise PackBuildError(f"{arm}: no tool-calling training documents; the sixth type is required")
     for x in t_train + t_val:
         dtype[x.doc_id] = TOOL_TYPE
-    share = shares(arm, train + t_train, dtype, d["share_check"]) if require_tools else None
-    tr = pack_sequential(train + t_train, seq, PAD_ID, order_seed=seed)
-    v = pack_sequential(val + t_val, seq, PAD_ID, order_seed=seed)
-    by_type = Counter()
-    for x in train + t_train:
-        by_type[dtype[x.doc_id]] += int(sum(x.target_mask))
-    rec = write_pack(tr, v, Path(out) / arm, data_type=dtype,
-                     extra={"arm": arm, "mode": spec["mode"], "teacher": spec["teacher"],
-                            "context_strategy": "cross_context", "missing_tasks_read_from_records": missing,
-                            "unique_supervised_tokens_by_type": dict(sorted(by_type.items())),
-                            "proportions_before_packing": share,
-                            "validation_coverage": validation_coverage(train + t_train, val + t_val, dtype),
-                            "tool_documents": {"path": str(tool_docs) if tool_docs else None, "quota": quota,
-                                               "train": len(t_train), "validation": len(t_val)}})
-    return rec
+        unit_of[x.doc_id] = x.meta["task_id"]
+    sources["tool_documents"] = ({"path": str(tool_docs), "sha256": sha_file(tool_docs),
+                                  "pool": plan.get("pool") if plan else None,
+                                  "plan_protocol_sha256": plan.get("protocol_sha256") if plan else None}
+                                 if tool_docs is not None else None)
+    return {"arm": arm, "mode": spec["mode"], "teacher": spec["teacher"], "train": train + t_train,
+            "validation": val + t_val, "data_type": dtype, "unit_of": unit_of,
+            "missing_tasks_read_from_records": missing, "sources": sources,
+            "tool": {"quota": quota, "train": len(t_train), "validation": len(t_val),
+                     "approved_shortfalls": list((plan or {}).get("approved_shortfalls") or [])}}
+
+
+# --- 2. proportion validation --------------------------------------------------------------------------------------
+
+def type_counts(arm: str, train, dtype: dict, unit_of: dict) -> tuple[dict, dict, dict]:
+    """``(counts, by data type, largest whole unit)`` on unique supervised tokens BEFORE packing: per six
+    base-corpus type and ``fluid`` (every ``primary.*`` type), and the largest whole unit each holds."""
+    by_dtype, per_unit, unit_type = Counter(), Counter(), {}
+    for x in train:
+        t, n = dtype[x.doc_id], int(sum(x.target_mask))
+        by_dtype[t] += n
+        per_unit[unit_of[x.doc_id]] += n
+        unit_type[unit_of[x.doc_id]] = t
+    unknown = sorted(k for k in by_dtype if not k.startswith("primary.") and k not in SIX_TYPES)
+    if unknown:
+        raise PackBuildError(f"{arm}: data types outside the six base-corpus types: {unknown}")
+    leaf = lambda t: "fluid" if t.startswith("primary.") else SIX_TYPES[t]  # noqa: E731
+    counts = Counter()
+    for t, v in by_dtype.items():
+        if leaf(t):
+            counts[leaf(t)] += v
+    if by_dtype.get("supporting.reading_verified"):
+        sel = json.loads(SELECTION.read_text())["per_type_supervised_tokens"][SELECTION_ARM[arm]]
+        rag, multi = int(sel["rag_reading"]), int(sel["multihop_reading"])
+        if rag + multi != by_dtype["supporting.reading_verified"]:
+            raise PackBuildError(f"{arm}: reading_verified holds {by_dtype['supporting.reading_verified']} supervised "
+                                 f"tokens, not the selection's RAG {rag} + multi-hop {multi}")
+        counts.update(rag_reading=rag, multihop_reading=multi)
+    largest = Counter()
+    for u, n in per_unit.items():
+        for k in ((leaf(unit_type[u]),) if leaf(unit_type[u]) else ("rag_reading", "multihop_reading")):
+            largest[k] = max(largest[k], n)
+    return dict(counts), dict(sorted(by_dtype.items())), dict(largest)
+
+
+def registered_quotas(arm: str, largest: dict, tool_cells: int) -> tuple[dict, list, dict]:
+    """``(quotas, shares, rule)`` for `aadistill.data.mixture.validate_proportions`, every number from its owner:
+    token_matched_design.json :: scale (the per-mode total, the fluid and base-category targets, its ``tolerance``)
+    and the selection rule six_category_design.json :: base_category keeps unchanged -- whole tasks; each category
+    at least its target and the total at most ``total_over_target_max_fraction`` over it; fluid's share of the
+    total within ``category_share_deviation_max_points`` of its target share; each cell within one task of its
+    share, so a type within one largest whole unit per selection cell (the tool type's cells: the generation plan's
+    training categories). C1-6cat keeps its five types and its fluid part byte for byte (exact) and adds the tool
+    type at its registered target. Nothing here is a new tolerance."""
+    scale = json.loads(TOKEN_MATCHED.read_text())["scale"]
+    base = json.loads(SIX.read_text())["base_category"]
+    tol, cats, total = scale["tolerance"], scale["categories"], float(scale["per_mode_total"])
+    cells = {t: len(v["cells"]) for t, v in base["A1_6cat_and_A2_6cat"].items() if isinstance(v, dict)}
+    cells["tool_calling"] = tool_cells
+    width = lambda t: cells[t] * largest.get(t, 0)  # noqa: E731
+    quotas = {}
+    if ARMS[arm]["base"] == "kept":
+        c1 = base["C1_6cat"]
+        for k, v in c1["kept_byte_for_byte"].items():
+            if k != "_":
+                name = k.split(" ")[0]
+                quotas[SIX_TYPES.get(name) or name] = {"target": float(v), "below": 0, "above": 0}
+        quotas["fluid"] = {"target": float(cats["fluid"]), "below": 0, "above": 0}
+        tool_target = float(c1["tool_calling_target"])
+    else:
+        for t in SIX_NAMES[:-1]:
+            quotas[t] = {"target": float(base["per_type"]), "below": width(t), "above": width(t)}
+        quotas["fluid"] = {"target": float(cats["fluid"]), "below": 0, "above": None}
+        tool_target = float(base["per_type"])
+    quotas["tool_calling"] = {"target": tool_target, "below": width("tool_calling"), "above": width("tool_calling")}
+    quotas["supporting"] = {"of": list(SIX_NAMES), "target": float(cats["base_counterpart"]), "below": 0,
+                            "above": None}
+    quotas["total"] = {"of": [*SIX_NAMES, "fluid"], "target": total, "below": 0,
+                       "above": float(tol["total_over_target_max_fraction"]) * total}
+    shares = [{"name": "fluid_of_total", "part": ["fluid"], "whole": [*SIX_NAMES, "fluid"],
+               "target": float(cats["fluid"]) / total,
+               "max_deviation_points": float(tol["category_share_deviation_max_points"])}]
+    rule = {"owners": {"token_matched_design.json": sha_file(TOKEN_MATCHED), "six_category_design.json": sha_file(SIX)},
+            "tolerance": tol, "cells_per_type": cells, "base": ARMS[arm]["base"],
+            "rule": "whole tasks; fluid and supporting each at least their targets, the per-mode total at most "
+                    f"{tol['total_over_target_max_fraction']:.1%} over; fluid's share within "
+                    f"{tol['category_share_deviation_max_points']} points; each type within one largest whole unit "
+                    "per selection cell of its target" + ("; C1's five kept types and fluid exact"
+                                                          if ARMS[arm]["base"] == "kept" else "")}
+    return quotas, shares, rule
+
+
+def proportions(arm: str, sel: dict) -> dict:
+    """Data proportion validation of a selection, before and without packing: its counts against the arm's
+    registered quotas (`registered_quotas`) by `aadistill.data.mixture.validate_proportions`. Returns the report
+    (every row's target, amount, deviation, bounds and status, the share rows, ``passed``); deciding admission is
+    `admit`'s."""
+    from aadistill.data.mixture import validate_proportions
+    counts, by_dtype, largest = type_counts(arm, sel["train"], sel["data_type"], sel["unit_of"])
+    quota = (sel["tool"]["quota"] or {}).get("cells") or {}
+    quotas, shares, rule = registered_quotas(arm, largest, sum(c["split"] == "training" for c in quota.values()))
+    return {"counted": "unique supervised tokens before packing", **validate_proportions(counts, quotas, shares),
+            "counts": counts, "by_data_type": by_dtype, "largest_whole_unit": largest, "registered": rule}
+
+
+# --- 3. admission / freeze -----------------------------------------------------------------------------------------
+
+def _entries(docs, sel: dict) -> list[list]:
+    return [[d.doc_id, sel["data_type"][d.doc_id], (d.meta or {}).get("category"), sel["unit_of"][d.doc_id],
+             int(sum(d.target_mask)), doc_sha256(d)] for d in docs]
+
+
+def _composition(docs, sel: dict) -> dict:
+    """Examples, documents and supervised tokens; supervised tokens split into reasoning (each supervised span up to
+    and including its first ``</think>``), answer (the rest) and tool calling (the tool type's documents)."""
+    out = {"examples": len({sel["unit_of"][d.doc_id] for d in docs}), "documents": len(docs),
+           "unique_supervised_tokens": 0, "reasoning_tokens": 0, "answer_tokens": 0, "tool_calling_tokens": 0}
+    for d in docs:
+        if hasattr(d, "output_ids"):                        #: a TokenDocument: one trailing supervised span
+            spans = [d.output_ids]
+        else:
+            ids, mask, spans, i = d.ids, d.target_mask, [], 0
+            while i < len(mask):
+                j = i
+                while j < len(mask) and mask[j] == mask[i]:
+                    j += 1
+                if mask[i]:
+                    spans.append(ids[i:j])
+                i = j
+        n = sum(len(s) for s in spans)
+        out["unique_supervised_tokens"] += n
+        if sel["data_type"][d.doc_id] == TOOL_TYPE:
+            out["tool_calling_tokens"] += n
+        for span in spans:
+            r = span.index(THINK_CLOSE) + 1 if THINK_CLOSE in span else 0
+            out["reasoning_tokens"] += r
+            out["answer_tokens"] += len(span) - r
+    return out
+
+
+def admission_verdict(arm: str, sel: dict, report: dict) -> dict:
+    """Every failure of the proportion report and every SHORTFALL tool cell, each either approved by the maintainer
+    (``data_admission.approved_exceptions`` / the plan's ``approved_shortfalls``) or unapproved."""
+    from stages.teacher_modes import tool_generation_plan as TGP
+    exc = {e["quota"]: e for e in json.loads(DESIGN.read_text())["data_admission"]["approved_exceptions"]
+           if e.get("arm") == arm}
+    unapproved, used = [], []
+    for k, row in report["quotas"].items():
+        if row["status"] != "OK":
+            (used.append(exc[k]) if k in exc else
+             unapproved.append(f"{k}: {row['status']} ({row['amount']:.0f} against {row['target']:.0f}, "
+                               f"bounds {row['bounds']})"))
+    for name, row in report["shares"].items():
+        if not row["ok"]:
+            (used.append(exc[name]) if name in exc else
+             unapproved.append(f"{name}: {row['deviation_points']:+.3f} points (max {row['max_deviation_points']})"))
+    unapproved += [f"{k}: no registered quota" for k in report["unregistered"]]
+    quota = sel["tool"]["quota"]
+    if quota is None:
+        unapproved.append("the tool-calling documents were not selected by the frozen generation plan")
+    for key, c in ((quota or {}).get("cells") or {}).items():
+        if c["status"] != "REACHED":
+            a = TGP.approved({"approved_shortfalls": sel["tool"]["approved_shortfalls"]}, c["split"], sel["mode"],
+                             c["category"])
+            (used.append({**a, "cell": key}) if a else
+             unapproved.append(f"tool cell {key}: SHORTFALL ({c['selected']:.0f} of {c['target']:.0f} {c['unit']})"))
+    return {"admitted": not unapproved, "unapproved": unapproved, "approved_exceptions": used}
+
+
+def admit(arm: str, sel: dict, report: dict, out: Path = OUT) -> dict:
+    """Admit and freeze a selection, or refuse it (`AdmissionError`, nothing written). The frozen manifest
+    (``<out>/<arm>/data_manifest.json``) holds every document (``COLUMNS``), the counts before packing, the
+    proportion report, the tool cells, the approvals used, the sources and the lineage, sealed by its
+    ``content_sha256``. It authorizes nothing."""
+    from stages.teacher_modes import tool_generation_plan as TGP
+    verdict = admission_verdict(arm, sel, report)
+    if not verdict["admitted"]:
+        raise AdmissionError(f"{arm}: data admission refused: " + "; ".join(verdict["unapproved"]), verdict)
+    li = json.loads(TGP.PROTOCOL.read_text())["lineages"][sel["teacher"]]
+    docs = {"training": _entries(sel["train"], sel), "validation": _entries(sel["validation"], sel)}
+    man = {"schema": MANIFEST_SCHEMA, "arm": arm, "mode": sel["mode"],
+           "teacher": {"lineage": sel["teacher"], "model": li["model"], "revision": li["revision"]},
+           "admitted": True, "columns": COLUMNS, "documents": docs, "documents_sha256": canonical_sha(docs),
+           "before_packing": {"training": _composition(sel["train"], sel),
+                              "validation": _composition(sel["validation"], sel)},
+           "proportions": report, "tool_calling": sel["tool"], "approved_exceptions": verdict["approved_exceptions"],
+           "validation_coverage": validation_coverage(sel["train"], sel["validation"], sel["data_type"]),
+           "missing_tasks_read_from_records": sel["missing_tasks_read_from_records"], "sources": sel["sources"],
+           "authorizes": "nothing"}
+    man["content_sha256"] = canonical_sha(man)
+    p = Path(out) / arm / MANIFEST
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(man, indent=1) + "\n")
+    return {"path": str(p), "sha256": sha_file(p), "manifest": man}
+
+
+def read_manifest(path: Path) -> dict:
+    """An admitted, intact manifest, or PackBuildError."""
+    man = json.loads(Path(path).read_text())
+    body = {k: v for k, v in man.items() if k != "content_sha256"}
+    if man.get("schema") != MANIFEST_SCHEMA or man.get("admitted") is not True:
+        raise PackBuildError(f"{path}: not an admitted data manifest")
+    if canonical_sha(body) != man.get("content_sha256") or canonical_sha(man["documents"]) != man["documents_sha256"]:
+        raise PackBuildError(f"{path}: the manifest was edited after its admission (content_sha256)")
+    return man
+
+
+# --- 4. packing ----------------------------------------------------------------------------------------------------
+
+def pack(train, validation, manifest_path: Path, out_dir: Path) -> dict:
+    """Pack FROZEN data: random shuffle -> sequential packing -> truncation at the design's sequence length and seed
+    (``stage3_packing``), in the trainer's ladder contract. First checks that ``train`` / ``validation`` are exactly
+    the admitted manifest's documents (ids and token content) and that the manifest is intact; reads no quota and
+    computes no proportion. The ladder names the manifest."""
+    from aadistill.data.token_documents import pack_sequential, write_pack
+    man = read_manifest(manifest_path)
+    for split, docs in (("training", train), ("validation", validation)):
+        want = sorted((r[0], r[-1]) for r in man["documents"][split])
+        got = sorted((d.doc_id, doc_sha256(d)) for d in docs)
+        if want != got:
+            raise PackBuildError(f"the {split} documents are not the frozen manifest's ({len(got)} given, "
+                                 f"{len(want)} admitted, {len(set(got) ^ set(want))} differing)")
+    d = json.loads(DESIGN.read_text())["stage3_packing"]
+    seq, seed = int(d["sequence_length"]), int(d["shuffle_seed"])
+    tr = pack_sequential(list(train), seq, PAD_ID, order_seed=seed)
+    v = pack_sequential(list(validation), seq, PAD_ID, order_seed=seed)
+    dtype = {r[0]: r[1] for rows in man["documents"].values() for r in rows}
+    return write_pack(tr, v, Path(out_dir), data_type=dtype, extra={
+        "arm": man["arm"], "mode": man["mode"], "teacher": man["teacher"], "context_strategy": "cross_context",
+        "data_admission": {"manifest": os.path.relpath(manifest_path, out_dir), "manifest_sha256": sha_file(manifest_path),
+                           "content_sha256": man["content_sha256"]}})
+
+
+def verify_pack(pack_dir: Path) -> dict:
+    """A formal consumer's check of a built pack: it names an admitted manifest whose bytes are unchanged, holds
+    exactly that manifest's documents (by id, per split; its rung = the manifest's unique supervised tokens) and was
+    packed with the design's packing spec. Returns the manifest, or PackBuildError."""
+    from aadistill.data.sequence_packing import SequencePackingSpec
+    pack_dir = Path(pack_dir)
+    lad = json.loads((pack_dir / "ladder.json").read_text())
+    adm = lad.get("data_admission")
+    if not adm:
+        raise PackBuildError(f"{pack_dir}: the pack names no admitted data manifest")
+    mp = pack_dir / adm["manifest"]
+    if not mp.is_file() or sha_file(mp) != adm["manifest_sha256"]:
+        raise PackBuildError(f"{pack_dir}: its data manifest is missing or not the one it was packed from")
+    man = read_manifest(mp)
+    d = json.loads(DESIGN.read_text())["stage3_packing"]
+    want = SequencePackingSpec(sequence_length=int(d["sequence_length"]), shuffle_seed=int(d["shuffle_seed"])).as_dict()
+    for key in ("packing_spec", "val_packing_spec"):
+        if {k: (lad.get(key) or {}).get(k) for k in want} != want:
+            raise PackBuildError(f"{pack_dir}: {key} is not the design's stage3_packing ({want})")
+    ids = {"train": set(), "val": set()}
+    for line in (pack_dir / "audit.jsonl").read_text().splitlines():
+        row = json.loads(line)
+        ids[row["split"]].update(s["session_id"] for s in row["sessions"])
+    for split, key in (("training", "train"), ("validation", "val")):
+        if ids[key] != {r[0] for r in man["documents"][split]}:
+            raise PackBuildError(f"{pack_dir}: its {split} sequences do not hold exactly the manifest's documents")
+    if lad["rungs"][0]["target_supervised_tokens"] != man["before_packing"]["training"]["unique_supervised_tokens"]:
+        raise PackBuildError(f"{pack_dir}: its rung is not the manifest's unique supervised tokens")
+    return man
+
+
+# --- the workflow --------------------------------------------------------------------------------------------------
+
+def build(arm: str, *, tool_docs: Path | None, out: Path = OUT, records: dict | None = None,
+          pool_dir: Path | None = None) -> dict:
+    """Selection -> proportion validation -> admission / freeze -> packing. A refused admission raises
+    (`AdmissionError`) before anything is packed. Returns the pack's ladder record and its manifest."""
+    sel = select(arm, tool_docs=tool_docs, records=records, pool_dir=pool_dir)
+    report = proportions(arm, sel)
+    adm = admit(arm, sel, report, out)
+    rec = pack(sel["train"], sel["validation"], Path(adm["path"]), Path(out) / arm)
+    return {**rec, "data_manifest": {"path": adm["path"], "sha256": adm["sha256"]}, "manifest": adm["manifest"]}
+
+
+def proportion_audit() -> dict:
+    """The registered tolerance on every arm's real five base-corpus types and fluid part (the tool type is not
+    generated yet), beside the withdrawn ``stage3_packing.share_check``. A1/A2: counts from the selection record
+    (its five types and fluid as selected), largest whole units from the source packs (a selected task missing from
+    a pack is named); C1: D4A_merged_whole's kept sessions."""
+    from aadistill.data.mixture import validate_proportions
+    sel = json.loads(SELECTION.read_text())
+    arms = {}
+    for arm, spec in ARMS.items():
+        if spec["source_pack"]:
+            selected = {t for c in sel["selection"][spec["mode"]].values() for t in c}
+            pairs = [(d, t) for d, t in PA.documents_from_isolated_pack(PA.PACKS / spec["source_pack"], "train")
+                     if d.doc_id.split("|", 1)[0] in selected]
+            docs, dtype = [d for d, _ in pairs], {d.doc_id: t for d, t in pairs}
+            _, _, largest = type_counts(arm, docs, dtype, {d.doc_id: d.doc_id.split("|", 1)[0] for d in docs})
+            counts = {**{k: int(v) for k, v in sel["per_type_supervised_tokens"][SELECTION_ARM[arm]].items()
+                         if k != "tool_calling"}, "fluid": sel["arms"][arm]["by_category"]["fluid"]}
+            note = {"tasks_missing_from_the_pack": sorted(selected - {d.doc_id.split("|", 1)[0] for d in docs})}
+        else:
+            docs, _, dtype = c1_documents()
+            counts, _, largest = type_counts(arm, docs, dtype, {d.doc_id: d.doc_id for d in docs})
+            note = {}
+        quotas, _, rule = registered_quotas(arm, largest, 7)
+        five = {k: quotas[k] for k in (*SIX_NAMES[:-1], "fluid")}
+        rep = validate_proportions(counts, five)
+        withdrawn = round(0.02 * sum(counts[k] for k in SIX_NAMES[:-1]) / 5, 1)    #: 2% of 1/6 of the total
+        arms[arm] = {**note, "registered": {k: {**r, "width": five[k]["above"]} for k, r in rep["quotas"].items()},
+                     "passed": rep["passed"], "largest_whole_unit": largest, "withdrawn_width_per_type": withdrawn,
+                     "types_the_withdrawn_check_held_wider": sorted(
+                         k for k in SIX_NAMES[:-1] if five[k]["above"] is not None and withdrawn > five[k]["above"])}
+    return {"schema": "aadistill.stage2.teacher_modes.proportion_tolerance_audit/v1",
+            "command": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs "
+                       "--proportion-audit logs/stages/stage-2/teacher_modes/audit/proportion_tolerance_audit.json",
+            "question": "maintainer 2026-11-04: is stage3_packing.share_check (per_type_relative 0.02, fluid_fraction "
+                        "[0.49, 0.51]) the tolerance of the frozen data-selection protocol?",
+            "registered_rule": rule["rule"], "owners": rule["owners"], "tolerance": rule["tolerance"],
+            "withdrawn_check": {"per_type_relative": 0.02, "fluid_fraction": [0.49, 0.51],
+                                "introduced": "77be6e13 (2026-11-03), by the agent, without a maintainer decision",
+                                "status": "withdrawn 2026-11-04; the admission reads the registered rule"},
+            "verdict": "NOT the registered tolerance, and looser where it matters: (1) no floor -- the registered rule "
+                       "holds fluid and supporting each at least their targets, the withdrawn check measured each type "
+                       "against 1/6 of the ACTUAL supporting total, so a type ~2% short (or all six short together) "
+                       "passed; (2) fluid's share +-1 point instead of +-0.5; (3) no bound on the total's overshoot "
+                       "(registered: 0.5%); (4) a fixed ~2% width per type instead of one whole unit per selection "
+                       "cell, wider for most types (types_the_withdrawn_check_held_wider)",
+            "arms": arms, "tool_type": "not generated: its six-type row and its seven cells are checked at admission",
+            "authorizes": "nothing"}
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--arm", required=True, choices=sorted(ARMS))
+    ap.add_argument("--arm", choices=sorted(ARMS))
     ap.add_argument("--tool-documents", default=None)
     ap.add_argument("--tool-pool", default=None, help="the pool directory (default: tool_generation_protocol.json)")
     ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--validate-only", action="store_true",
+                    help="select and validate the proportions; admit and pack nothing")
+    ap.add_argument("--proportion-audit", default=None, help="write the registered-tolerance audit here and stop")
     for k in ("v1-records", "v1-identity", "records", "identity"):
         ap.add_argument(f"--{k}", default=None)
     a = ap.parse_args(argv)
+    if a.proportion_audit:
+        doc = proportion_audit()
+        Path(a.proportion_audit).write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({k: v["passed"] for k, v in doc["arms"].items()}))
+        return 0
+    if not a.arm:
+        ap.error("--arm is required")
     records = ({"v1_records": a.v1_records, "v1_identity": a.v1_identity, "records": a.records,
                 "identity": a.identity} if a.v1_records else None)
-    rec = build(a.arm, tool_docs=Path(a.tool_documents) if a.tool_documents else None, out=Path(a.out),
-                records=records, pool_dir=Path(a.tool_pool) if a.tool_pool else None)
-    print(json.dumps({k: rec[k] for k in ("packing", "n_blocks", "n_val_blocks", "files_sha256")}, indent=1))
+    tool_docs = Path(a.tool_documents) if a.tool_documents else None
+    pool_dir = Path(a.tool_pool) if a.tool_pool else None
+    if a.validate_only:
+        sel = select(a.arm, tool_docs=tool_docs, records=records, pool_dir=pool_dir)
+        rep = proportions(a.arm, sel)
+        print(json.dumps({"proportions": rep, "admission": admission_verdict(a.arm, sel, rep)}, indent=1))
+        return 0
+    rec = build(a.arm, tool_docs=tool_docs, out=Path(a.out), records=records, pool_dir=pool_dir)
+    print(json.dumps({k: rec[k] for k in ("packing", "n_blocks", "n_val_blocks", "files_sha256", "data_manifest")},
+                     indent=1))
     return 0
 
 

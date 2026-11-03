@@ -322,18 +322,6 @@ class TestSixTypePacks:
         with pytest.raises(PP.PackBuildError, match="frozen order"):
             PP.tool_documents(tmp_path / "t.jsonl", "T2507", cells=self.cells(), orders={**orders, "training": []})
 
-    def test_shares_are_counted_before_packing_and_refuse_outside_the_check(self):
-        from stages.teacher_modes import packed_packs as PP
-        check = {"per_type_relative": 0.02, "fluid_fraction": [0.49, 0.51]}
-        six = {"openmath": (2, 50), "gsm8k": (2, 50), "code": (2, 50), "rag_evidence": (2, 50),
-               "multihop_qa": (2, 50), PP.TOOL_TYPE: (2, 50)}
-        docs, dtype = self.docs({**six, "primary.x": (6, 100)})
-        s = PP.shares("C1-6cat", docs, dtype, check)
-        assert s["fluid_fraction"] == 0.5 and set(s["six_types"].values()) == {100}
-        docs, dtype = self.docs({**six, PP.TOOL_TYPE: (3, 50), "primary.x": (7, 100)})
-        with pytest.raises(PP.PackBuildError, match="tool_calling"):
-            PP.shares("C1-6cat", docs, dtype, check)
-
     def test_validation_keeps_every_document_and_reports_coverage(self, tmp_path, monkeypatch):
         from stages.teacher_modes import packed_packs as PP
         six = {"openmath": (2, 50), "gsm8k": (2, 50), "code": (2, 50), "rag_evidence": (2, 50),
@@ -354,12 +342,22 @@ class TestSixTypePacks:
         design["stage3_packing"]["sequence_length"] = 64
         (tmp_path / "design.json").write_text(json.dumps(design))
         monkeypatch.setattr(PP, "DESIGN", tmp_path / "design.json")
+        tm, six = json.loads(PP.TOKEN_MATCHED.read_text()), json.loads(PP.SIX.read_text())  #: C1's numbers, scaled
+        tm["scale"].update(per_mode_total=1200, categories={"base_counterpart": 600, "fluid": 600})
+        six["base_category"]["C1_6cat"].update(tool_calling_target=100, kept_byte_for_byte={
+            "competition_math (openmath)": 100, "gsm8k": 100, "multihop_qa": 100, "rag_evidence": 100, "code": 100})
+        for name, d in (("tm.json", tm), ("six.json", six)):
+            (tmp_path / name).write_text(json.dumps(d))
+        monkeypatch.setattr(PP, "TOKEN_MATCHED", tmp_path / "tm.json")
+        monkeypatch.setattr(PP, "SIX", tmp_path / "six.json")
         rec = PP.build("C1-6cat", tool_docs=tmp_path / "t.jsonl", out=tmp_path / "out")
         assert rec["n_val_blocks"] > 16                                       # no 16-sequence cap
-        assert rec["validation_coverage"]["training_types_without_validation"] == [
+        man = rec["manifest"]
+        assert man["validation_coverage"]["training_types_without_validation"] == [
             "code", "gsm8k", "multihop_qa", "primary.x", "rag_evidence"]
-        assert rec["proportions_before_packing"]["fluid_fraction"] == 0.5
-        assert rec["tool_documents"]["quota"]["cells"]["training/c"]["episodes"] == 2
+        assert man["proportions"]["shares"]["fluid_of_total"]["fraction"] == 0.5 and man["proportions"]["passed"]
+        assert man["tool_calling"]["quota"]["cells"]["training/c"]["episodes"] == 2
+        assert len(man["documents"]["validation"]) == 42 and PP.verify_pack(tmp_path / "out" / "C1-6cat") == man
 
 
 class TestPoolIdentity:

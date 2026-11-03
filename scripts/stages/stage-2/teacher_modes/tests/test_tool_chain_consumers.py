@@ -148,10 +148,18 @@ def test_the_c1_pack_takes_its_plan_quota_and_binds(chain, monkeypatch):
     val = [TokenDocument("v:0", (5,), (7, EOS))]
     dtype["v:0"] = "openmath"
     monkeypatch.setattr(PP, "c1_documents", lambda: (train, val, dtype))
+    tm, six = json.loads(PP.TOKEN_MATCHED.read_text()), json.loads(PP.SIX.read_text())   #: C1's design, scaled
+    tm["scale"].update(per_mode_total=12 * per, categories={"base_counterpart": 5 * per + tool_total, "fluid": 6 * per})
+    six["base_category"]["C1_6cat"].update(tool_calling_target=tool_total, kept_byte_for_byte={
+        "competition_math (openmath)": per, "gsm8k": per, "multihop_qa": per, "rag_evidence": per, "code": per})
+    for name, d in (("tm.json", tm), ("six.json", six)):
+        (t / name).write_text(json.dumps(d))
+    monkeypatch.setattr(PP, "TOKEN_MATCHED", t / "tm.json")
+    monkeypatch.setattr(PP, "SIX", t / "six.json")
     rec = PP.build("C1-6cat", tool_docs=docs_path, out=t / "packs", pool_dir=chain["pool"])
-    quota = rec["tool_documents"]["quota"]["cells"]
+    quota = rec["manifest"]["tool_calling"]["quota"]["cells"]
     assert all(v["status"] == "REACHED" for v in quota.values()), quota
-    assert rec["proportions_before_packing"]["six_types"]["tool_calling"] >= tool_total
+    assert rec["manifest"]["proportions"]["counts"]["tool_calling"] >= tool_total
     plan = PTP.bind(PTP.packed_units(), t / "packs")
     c1 = [u for u in plan["units"] if u["arm"] == "C1-6cat"]
     assert c1 and all(isinstance(u["config"]["schedule"]["total_steps"], int) for u in c1)

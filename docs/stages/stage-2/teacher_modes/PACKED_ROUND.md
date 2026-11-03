@@ -1,6 +1,6 @@
 # Research A — packed round: Stage-1 forward and Stage-3 training packing, preparation for the new search and trainings
 
-**Status: `PREPARATION_BLOCKED` (2026-11-03).** The maintainer's brief "Stage-1 Forward / Stage-3 Training Packing
+**Status: `PREPARATION_BLOCKED` (2026-11-04).** The maintainer's brief "Stage-1 Forward / Stage-3 Training Packing
 重构及 Research A 前置准备" authorized code, data protocol, $0 data preparation, tests and cost estimates only.
 - Code, identities, tests, the $0 data audits, the new full-search chain and the training plans are done.
 - The one real blocker is the tool-calling data. Its sources are candidates under the maintainer's review (section 5),
@@ -31,6 +31,17 @@
   - Every consumer now reads the pool and the plan through the same identity check as the session.
   - Toucan SFT and Pivot Conversational may be prepared as priority candidate sources. Pivot Function-Calling is not
     adopted, and Nemotron-SFT-Agentic-v4 stays deferred. None of this authorizes paid generation.
+- **The maintainer's review of `fc6fa1d6` (2026-11-04)** kept the per-category gates and the unified identity check,
+  and ruled that data selection, proportion validation, admission / freeze and sequential packing are four separate
+  functions. Done at $0 (sections 7 and 9):
+  - `packed_packs.py` now runs `select`, then `proportions` (the generic `aadistill.data.mixture.validate_proportions`),
+    then `admit` (a frozen `data_manifest.json`, or a refusal with nothing written), then `pack`. The packing judges
+    no proportion; it checks that its input is the manifest's documents. The training binding reads only a pack
+    `verify_pack` accepts.
+  - The withdrawn `share_check` (each type within 2% of 1/6, fluid 49-51%) was not the registered tolerance; the
+    admission reads the registered one (`audit/proportion_tolerance_audit.json`).
+  - Option 1 (call-only gold episodes) and option 2 (WorkBench) for the non-thinking schema_arguments SHORTFALL are
+    compared at $0 (`audit/schema_arguments_options.json`); neither is implemented.
 
 | record | owns |
 | --- | --- |
@@ -46,6 +57,8 @@
 | [`audit/pivot_conversion_v1.json`](../../../../logs/stages/stage-2/teacher_modes/audit/pivot_conversion_v1.json) | the Pivot pair rebuilt from the first user turn: what is kept and skipped, step gold, replay, feasibility, coverage |
 | [`plans/tool_generation_plan_dry_run.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_generation_plan_dry_run.json) | the bounded generation plan over the dry pool: every cell's target, supply, expected tasks and bound, and the price |
 | [`audit/schema_arguments_shortfall.json`](../../../../logs/stages/stage-2/teacher_modes/audit/schema_arguments_shortfall.json) | the non-thinking schema_arguments SHORTFALL: reach, impact, the verifiable options and the minimal preparation |
+| [`audit/schema_arguments_options.json`](../../../../logs/stages/stage-2/teacher_modes/audit/schema_arguments_options.json) | option 1 (call-only gold episodes) against option 2 (WorkBench): volume per split, reach, verification, protocol impact, cost (`schema_arguments_audit.py`) |
+| [`audit/proportion_tolerance_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/proportion_tolerance_audit.json) | the registered proportion tolerance on every arm's real data, beside the withdrawn share check (`packed_packs.py --proportion-audit`) |
 | [`audit/experiment_suite_baseline_20261103.json`](../../../../logs/stages/stage-2/teacher_modes/audit/experiment_suite_baseline_20261103.json) | the four experiment-suite failures run at `b7ee0c93` and `c861d704`: pre-existing, with their causes |
 
 ## 1. The rule, by stage (AGENTS.md P19)
@@ -307,20 +320,31 @@ SHORTFALL and never filled from another):
 **The non-thinking schema_arguments SHORTFALL**
 ([`audit/schema_arguments_shortfall.json`](../../../../logs/stages/stage-2/teacher_modes/audit/schema_arguments_shortfall.json)):
 - **Impact.**
-  - A2-6cat's tool type would come in about 6% short, and the share check refuses that pack.
+  - A2-6cat's tool type would come in about 6% short, and the data admission refuses that selection (the short cell
+    and the supporting category below its target).
   - The non-thinking category of `state_eval_hybrid@v2` stays short, so the suite cannot freeze. The packed search
     needs the suite, so the search cannot start either.
   - Thinking mode's 7 state-evaluation tasks may also leave it THIN.
-- **Minimal verifiable fix: call-only gold episodes for this category.**
-  - Source: Pivot Conversational trajectories whose first gold step is one structured call, but whose output was
-    never recorded. Estimated supply: about 1,560 training, 72 calibration and 22 state-evaluation tasks.
-  - Verification: step gold on the call alone, plus schema validity.
-  - Cost: it needs one approval, of an episode that ends on a call.
-- **Stronger option: WorkBench instances.** They are verified against the sandbox's final state (G1), at the cost of
-  building an executable backend.
+- **Option 1 against option 2, measured at $0** (the maintainer's review of `fc6fa1d6`;
+  [`audit/schema_arguments_options.json`](../../../../logs/stages/stage-2/teacher_modes/audit/schema_arguments_options.json),
+  `schema_arguments_audit.py`). Neither is implemented; reach is a prior until the pilot measures the pass rate.
+
+  | | option 1: call-only gold episodes (Pivot Conversational) | option 2: WorkBench generated instances |
+  | --- | --- | --- |
+  | schema_arguments supply | 1,595 training, 72 calibration, 22 state-evaluation, 19 validation tasks, split by the frozen environment rule | 2 of 69 templates qualify (direct `analytics.create_plot` requests, one tool); every other template looks something up first and is multi_turn |
+  | non-thinking training (74,013) | 85,015 at the expected pass rate, 42,079 at the pessimistic | possible only if its one environment hashes to training (87%), with one tool |
+  | non-thinking state evaluation (1,800) | 1,399 at the expected pass rate (a call turn is ~50 tokens), 2,416 at the optimistic; 1,800 needs a per-attempt pass rate ≥ ~0.70 | none expected: one environment means one split, and state evaluation is 4% of the hash range |
+  | verification | step gold + schema validity; nothing executed (recorded execution and task success stay unset) | final state, including side effects (G1): the strongest |
+  | what a sample is | a tool-call decision (the right call and arguments at step one), never a completed task | a completed task |
+  | protocol change | an episode that ends on a call; a new item version and pool identity | an executable backend; its sandbox pins numpy<2 (this venv: 2.5.1) |
+  | cost | $0 code; ~$0.2–0.6 of generation inside the hybrid session | days of engineering; cheap generation |
+
+  Option 1 is the stronger choice for this gap: it alone adds state-evaluation supply. Neither closes non-thinking
+  state evaluation at the expected pass rate; with option 1 it would reach about 1,400 of 1,800 positions. The
+  earlier estimate ("about the target") assumed 40–120 tokens per call turn and is corrected in the shortfall record.
 - **Rejected: relabelling Toucan.** Toucan has no gold arguments, so it would fill the category with weaker
   verification.
-- **Approving the shortfall** would also need acceptance of A2-6cat's proportion.
+- **Approving the shortfall** is not granted (2026-11-04). It would also need acceptance of A2-6cat's proportion.
 
 **Gaps that remain:**
 - gold arguments for parallel calls;
@@ -340,7 +364,7 @@ SHORTFALL and never filled from another):
 | verification by level; documents and items | `tool_admission.py` (from the sealed shards), `aadistill.data.tool_calls`, `tool_episodes.py` | no |
 | types v2, profiles v2, `state_eval_hybrid@v2` (tool items selected by the plan, THIN categories listed), the packed freeze | `packed_inputs.py` | no |
 | the packed hybrid full search | `packed_full_search.py` (kind `packed_search`) | yes |
-| the packs of A1-6cat / A2-6cat / C1-6cat: the plan's per-category tool selection, the share check before packing, every validation document | `packed_packs.py` | no |
+| the A1-6cat / A2-6cat / C1-6cat data: selection (the plan's per-category tool selection), proportion validation, admission / freeze, then packing with every validation document | `packed_packs.py` (`select`, `proportions`, `admit`, `pack`; `verify_pack` for the binding) | no |
 | the units bound to packs and Top-1 | `packed_training_plan.py --bind-packs` | no |
 | training and formal evaluation per arm | `a1_units.py --arm` (kinds `train_6cat_a1`, `_a2`, `_c1`) | yes |
 
@@ -432,9 +456,9 @@ GPU):
 - **Tool quota.** The tool type enters as whole episodes, in the pool's frozen training order, up to the arm's target:
   493,418 for A1-6cat and A2-6cat, 492,587 for C1-6cat. It is the shortest prefix that reaches the target, so at most
   one episode over.
-- **Share check.** `shares` checks each of the six types at 1/6 ± 2% of the supporting total, and fluid at 49–51% of
-  the whole. It counts unique supervised tokens before packing and refuses a pack outside the check. The five existing
-  types sit within 0.7%.
+- **Share check — withdrawn 2026-11-04.** `shares` checked each of the six types at 1/6 ± 2% of the supporting total
+  and fluid at 49–51% of the whole. That tolerance was the agent's (`77be6e13`), never the maintainer's, and it was
+  looser than the registered one (below). The proportion check now belongs to the data admission, not the packing.
 - **Validation keeps every document.** It used to be capped at 16 sequences after the shuffle:
   - A1-6cat: 77 validation documents fill 18 sequences, so the cap dropped two, among them 44% of its
     abstract-analogical and 36% of its GSM8K validation tokens;
@@ -442,6 +466,31 @@ GPU):
   - C1-6cat: 47 documents fill 12 sequences.
 - **Coverage gaps, now listed in the record.** C1-6cat's validation has no fluid type. A1-6cat's has no
   `interactive_adaptation`, and it carries answerability, which the six-type set no longer trains.
+
+**Four separate steps** (the maintainer's ruling of 2026-11-04; `packed_packs.py`). `build` only runs them in order
+and stops at the first refusal:
+
+| step | function | does | never does |
+| --- | --- | --- | --- |
+| data selection | `select` | the arm's documents token for token, whole examples and episodes, each with its data type, category, whole unit and source; the tool cells per the frozen plan, a short cell SHORTFALL | pack, judge, fill a cell from another |
+| proportion validation | `proportions` -> core `aadistill.data.mixture.validate_proportions` | unique supervised tokens before packing per type and fluid, against `registered_quotas`: every row's target, amount, deviation, bounds and status | read a packed sequence, an exposure or a loss weight; choose a tolerance |
+| admission / freeze | `admit` | admits only a passing selection whose tool cells all reached their targets, a failure covered only by the maintainer's recorded approval (`data_admission.approved_exceptions`, the plan's `approved_shortfalls`); writes `<pack>/data_manifest.json` (every document's id, split, data type, category, unit, supervised tokens and content sha256; counts, reasoning / answer / tool-calling tokens, proportions, sources, lineage), sealed by its `content_sha256` | admit an unapproved SHORTFALL; write anything when it refuses |
+| packing | `pack` | checks its input is exactly the manifest's documents and the manifest is intact, then random shuffle -> sequential packing -> truncation at `stage3_packing`; the ladder names the manifest | compute or correct a proportion, add or move data |
+
+`packed_training_plan.bind` reads a built pack only through `verify_pack`: the manifest unchanged and admitted, the
+pack holding exactly its documents, the design's packing spec. A pack without one is refused.
+
+**The registered tolerance** (`registered_quotas`, read from its owners: `token_matched_design.json :: scale` and the
+whole-task selection rule `six_category_design.json :: base_category` keeps):
+- fluid and supporting each at least their targets, and the per-mode total at most 0.5% over;
+- fluid's share within 0.5 points of its target share;
+- each type within one largest whole unit per selection cell of its target (code has two cells; the tool type one
+  per category cell of the plan);
+- C1-6cat's five kept types and its fluid part exact.
+On real data every arm's five types and fluid pass (`audit/proportion_tolerance_audit.json`). Against it, the
+withdrawn check had no floor (a type about 2% short, or all six short together, passed), allowed fluid ±1 point
+instead of ±0.5, did not bound the total, and was wider than one unit for most types. The tool type has not been
+generated, so its row and its seven cells are checked when the data are admitted.
 
 **C1-6cat** (Thinking-2507):
 - its own D4 Top-1 `fc28e0dd…` (a v1-context search; never called a packed-context initialization);
@@ -502,15 +551,20 @@ The maintainer has settled two former items: fragments are accepted, and loss no
 packed search runs unless it is requested.
 
 1. **Tool-calling sources.**
-   - Admit Toucan and Pivot Conversational, the priority candidates.
-   - Pivot Function-Calling fails T3; Nemotron-SFT-Agentic-v4 stays deferred.
+   - Toucan SFT and Pivot Conversational are being prepared as priority candidates (2026-11-03); their admission is
+     still the maintainer's. Pivot Function-Calling is not adopted; Nemotron-SFT-Agentic-v4 stays deferred; Glaive and
+     xLAM are isolation references only.
    - Also owed: the category shares (used unchanged by the plan), the prompt bound and the non-thinking state-evaluation
      floor.
 2. **Expected SHORTFALLS.**
-   - `schema_arguments` in non-thinking mode, in training and in state evaluation. It refuses the A2-6cat pack and
-     blocks the suite's freeze. Choose one: call-only gold episodes (recommended, minimal), WorkBench, or an approved
-     shortfall together with A2-6cat's proportion.
+   - `schema_arguments` in non-thinking mode, in training and in state evaluation. The data admission refuses the
+     A2-6cat selection and the suite cannot freeze. Option 1 vs option 2 is measured (section 5): option 1 fills
+     training at the expected pass rate and brings state evaluation to about 1,400 of 1,800; option 2 adds no
+     state-evaluation supply. The choice is owed, and after the pilot, any decision on the state-evaluation remainder.
+     Approving the shortfall is not granted.
    - "Ask for the missing value" in every mode.
+   - **Proportion exceptions:** none. `data_admission.approved_exceptions` is empty, and the registered tolerance stays
+     (the withdrawn share check is not a decision to make).
 3. **Isolation costs.**
    - Each evaluation split holds only 17–20 atoms.
    - eval-set-1's tool names are refused.
@@ -529,6 +583,9 @@ packed search runs unless it is requested.
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packing_audit --write logs/stages/stage-2/teacher_modes/audit/packing_audit.json
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_search_forecast --write logs/stages/stage-2/teacher_modes/plans/packed_search_budget.json
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_training_plan --write logs/stages/stage-2/teacher_modes/plans/packed_training_budget.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs --proportion-audit logs/stages/stage-2/teacher_modes/audit/proportion_tolerance_audit.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_arguments_audit --pivot <Pivot Conversational train.jsonl> \
+    --workbench <WorkBench@49c7dfd0 task files> --write logs/stages/stage-2/teacher_modes/audit/schema_arguments_options.json
 PYTHONPATH=src:scripts:scripts/stages/stage-1:scripts/stages/stage-0/calibration_volume .venv/bin/python -m stages.teacher_modes.packed_full_search \
     --check-only --inputs v1_dry_run --device cuda --durable-root <scratch> --status <scratch>/status --deadline-minutes 1
 ```

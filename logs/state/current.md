@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-03 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-11-04 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A PACKED ROUND: PREPARATION_BLOCKED (2026-11-03; maintainer brief "Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备"). Code, identities, tests, $0 audits, the new full-search chain, the training plans and the bounded tool-generation plan are done; nothing searched, trained, generated or evaluated (only candidate-source and decontamination-reference files downloaded, gitignored); no pod; no cap raised.**
+**RESEARCH A PACKED ROUND: PREPARATION_BLOCKED (2026-11-04; maintainer brief "Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备"). Code, identities, tests, $0 audits, the new full-search chain, the training plans and the bounded tool-generation plan are done; nothing searched, trained, generated or evaluated (only candidate-source and decontamination-reference files downloaded, gitignored); no pod; no cap raised.**
 The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)
 (design `configs/stages/stage-2/teacher_modes/packed_round_design.json`). Decision record: `logs/budget/decisions.md`
 2026-11-03 (sequential packing). AGENTS.md P19 states the rule by stage.
@@ -40,10 +40,18 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
 
   The maintainer allows Toucan SFT and Pivot Conversational to be PREPARED as priority sources; this is not
   generation.
+- **Review of `fc6fa1d6` (2026-11-04).** Done at $0:
+  - selection, proportion validation, admission / freeze and packing are four functions (`packed_packs.select`,
+    `proportions` -> core `aadistill.data.mixture.validate_proportions`, `admit` -> `data_manifest.json`, `pack`); the
+    packing judges no proportion, and `packed_training_plan.bind` reads only a pack `verify_pack` accepts;
+  - the agent's `share_check` (2% per type, fluid 49-51%) is withdrawn: it was looser than the registered tolerance,
+    which every arm's real data passes (`audit/proportion_tolerance_audit.json`);
+  - option 1 vs option 2 for `schema_arguments` measured (`audit/schema_arguments_options.json`).
 - **Blocked on tool calling.**
-  - The non-thinking `schema_arguments` SHORTFALL refuses the A2-6cat pack and blocks the suite's freeze, hence the
-    search (`audit/schema_arguments_shortfall.json`). The options are call-only gold episodes (minimal), WorkBench, or
-    an approved shortfall.
+  - The non-thinking `schema_arguments` SHORTFALL: the data admission refuses the A2-6cat selection, and the suite
+    cannot freeze, hence no search. Option 1 (call-only gold episodes) fills training at the expected pass rate and
+    brings state evaluation to ~1,400 of 1,800; option 2 (WorkBench) adds no state-evaluation supply. Owed: the
+    choice; no shortfall is approved.
   - The generation is a paid session to authorize.
   Calibration v2, `state_eval_hybrid@v2` and therefore the new search wait for it.
 - **Next: the maintainer's ruling** on:

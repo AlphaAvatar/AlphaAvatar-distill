@@ -15345,3 +15345,61 @@ on a paid pod.
 - **Not authorized and not done.** Generation, search, training, formal evaluation, GPU resources, a merge.
 - **Revisit when:** the maintainer rules on the schema_arguments option and the phased budget.
 
+
+## 2026-11-04 (UTC) — Maintainer: review of fc6fa1d6; data selection, proportion validation, admission / freeze and packing separated; the agent's share check withdrawn; schema_arguments options compared at $0
+
+- **Context.** The maintainer's review of `fc6fa1d6` kept the scientific protocol unchanged:
+  - the packing rule;
+  - pre-packing accounting;
+  - the per-category gates;
+  - the unified pool / plan identity;
+  - the isolation rules and the source directions (Toucan SFT and Pivot Conversational prepared; Pivot
+    Function-Calling not adopted; v4 deferred; Glaive and xLAM references only).
+
+  It ruled that the proportion validation must stay but be independent of the packing, and asked whether
+  `stage3_packing.share_check` matched the frozen tolerance.
+- **Decision (maintainer).** Four functions:
+  1. selection;
+  2. proportion validation, a reusable pure function;
+  3. admission / freeze, which accepts only approved exceptions;
+  4. sequential packing, which knows no proportion and may only verify its input against the frozen manifest.
+
+  A workflow runs them in order and refuses formal training material whose admission failed. The tool-calling
+  categories' internal proportion stays the plan's own protocol and is not the six-type check. Calibration and state
+  evaluation keep their registered domain and mode weights. Option 1 and option 2 were to be compared at $0, with
+  neither implemented. No SHORTFALL is approved.
+- **Implemented.**
+  - Core: `aadistill.data.mixture.validate_proportions(counts, quotas, shares)`. It takes generic keys and the caller's
+    tolerances, and imports and packs nothing.
+  - `packed_packs.py`: `select` -> `proportions` (with `registered_quotas`) -> `admit` (writes
+    `<pack>/data_manifest.json` sealed by `content_sha256`, or raises `AdmissionError` and writes nothing) -> `pack`
+    (input = the manifest's documents, else refused; `pack_sequential` at `stage3_packing`). `build` is the workflow.
+  - `verify_pack` is the formal consumer's check, called by `packed_training_plan.bind`. It requires an admitted,
+    unchanged manifest, exactly its documents, and the design's packing spec.
+  - `packed_round_design.json`: the new `data_admission` block, with `approved_exceptions: []`. `share_check` is removed
+    from `stage3_packing`.
+- **Tolerance finding** (`audit/proportion_tolerance_audit.json`). The withdrawn check (introduced at `77be6e13`, the
+  agent's own, never approved) is not the registered rule. The registered rule is
+  `token_matched_design.json :: scale.tolerance` with its whole-task selection:
+  - fluid and supporting each at least their targets, and the total at most 0.5% over;
+  - fluid's share within ±0.5 points;
+  - each type within one largest whole unit per selection cell;
+  - C1's kept types and fluid exact.
+
+  The withdrawn check had no floor, allowed fluid ±1 point, did not bound the total, and was wider for most types. All
+  three arms' real five types and fluid pass the registered rule.
+- **Options for the non-thinking schema_arguments SHORTFALL** (`audit/schema_arguments_options.json`,
+  `schema_arguments_audit.py`).
+  - Option 1: 1,595 training and 22 state-evaluation call-only candidates. Non-thinking training reaches 85,015 of
+    74,013 at the expected pass rate. State evaluation reaches about 1,399 of 1,800, because a call turn is about 50
+    tokens; reaching 1,800 needs a pass rate of at least ~0.70.
+  - Option 2 (WorkBench@49c7dfd0, MIT): only 2 of 69 templates are single-call schema_arguments, with one tool.
+    WorkBench is one environment, so it falls in one split (state evaluation: 4%). It cannot supply state evaluation
+    under the frozen isolation.
+- **Corrections.**
+  - `audit/schema_arguments_shortfall.json` had three `$0` expanded to `/bin/bash`; restored.
+  - Its option-1 state-evaluation reach ("about the target") assumed 40–120 tokens per call turn; corrected.
+- **Not authorized and not done.** Option 1 or 2, generation, search, training, formal evaluation, GPU resources, a
+  merge. The $3.62 / $11.34 and $32.43 figures remain estimates.
+- **Revisit when:** the maintainer chooses the schema_arguments option. After the pilot measures the pass rate, the
+  state-evaluation remainder.

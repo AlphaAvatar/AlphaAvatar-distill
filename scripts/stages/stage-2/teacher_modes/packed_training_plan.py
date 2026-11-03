@@ -118,10 +118,12 @@ BOUND = REPO / "logs/stages/stage-2/teacher_modes/plans/packed_training_plan.jso
 
 def bind(units: list[dict], packs_dir: Path, top1_products: Path | None = None) -> dict:
     """The units bound to their BUILT packs (files, rung, steps and schedule from the pack) and, for A1-6cat and
-    A2-6cat, to the packed search's committed Top-1 (`packed_full_search` products.json). An arm whose pack is
-    not built stays unbound and `training_plan.admit` refuses it."""
+    A2-6cat, to the packed search's committed Top-1 (`packed_full_search` products.json). A built pack must pass
+    `packed_packs.verify_pack` (an admitted, unchanged data manifest, its documents, the design's packing spec),
+    or the binding refuses. An arm whose pack is not built stays unbound and `training_plan.admit` refuses it."""
     import copy
     from aadistill.infrastructure.manifest import sha256_file
+    from stages.teacher_modes import packed_packs as PP
     from stages.teacher_modes import training_plan as TP
     top1 = json.loads(Path(top1_products).read_text()) if top1_products else None
     out = []
@@ -130,6 +132,7 @@ def bind(units: list[dict], packs_dir: Path, top1_products: Path | None = None) 
         arm = u["arm"]
         d = Path(packs_dir) / arm
         if (d / "ladder.json").is_file():
+            PP.verify_pack(d)
             lad = json.loads((d / "ladder.json").read_text())
             files = {n: sha256_file(d / n) for n in ("blocks.npz", "audit.jsonl", "ladder.json")}
             sch = TP.schedule(int(lad["n_blocks"]))

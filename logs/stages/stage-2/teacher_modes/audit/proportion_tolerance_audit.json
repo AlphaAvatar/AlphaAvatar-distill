@@ -1,0 +1,311 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.proportion_tolerance_audit/v1",
+ "command": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs --proportion-audit logs/stages/stage-2/teacher_modes/audit/proportion_tolerance_audit.json",
+ "question": "maintainer 2026-11-04: is stage3_packing.share_check (per_type_relative 0.02, fluid_fraction [0.49, 0.51]) the tolerance of the frozen data-selection protocol?",
+ "registered_rule": "whole tasks; fluid and supporting each at least their targets, the per-mode total at most 0.5% over; fluid's share within 0.5 points; each type within one largest whole unit per selection cell of its target; C1's five kept types and fluid exact",
+ "owners": {
+  "token_matched_design.json": "2ba937fbdf3827d6f28d461b799091a86fdbfbc96ec69f65e71f4ac3c3f04535",
+  "six_category_design.json": "b4d067f971f5699de460d1440f096d26b108d1f7e968a05aca8b578fda204f72"
+ },
+ "tolerance": {
+  "total_over_target_max_fraction": 0.005,
+  "category_share_deviation_max_points": 0.5,
+  "rule": "whole tasks only (an episode with all its turns); each category stops at the first task boundary that reaches its target, so the only excess is the last task's natural length; a shortfall is reported, never filled from another category or cell"
+ },
+ "withdrawn_check": {
+  "per_type_relative": 0.02,
+  "fluid_fraction": [
+   0.49,
+   0.51
+  ],
+  "introduced": "77be6e13 (2026-11-03), by the agent, without a maintainer decision",
+  "status": "withdrawn 2026-11-04; the admission reads the registered rule"
+ },
+ "verdict": "NOT the registered tolerance, and looser where it matters: (1) no floor -- the registered rule holds fluid and supporting each at least their targets, the withdrawn check measured each type against 1/6 of the ACTUAL supporting total, so a type ~2% short (or all six short together) passed; (2) fluid's share +-1 point instead of +-0.5; (3) no bound on the total's overshoot (registered: 0.5%); (4) a fixed ~2% width per type instead of one whole unit per selection cell, wider for most types (types_the_withdrawn_check_held_wider)",
+ "arms": {
+  "A1-6cat": {
+   "tasks_missing_from_the_pack": [],
+   "registered": {
+    "competition_math": {
+     "target": 493417.83,
+     "amount": 495452.0,
+     "deviation": 2034.1699999999837,
+     "deviation_fraction": 0.004122611458933261,
+     "bounds": [
+      485524.83,
+      501310.83
+     ],
+     "status": "OK",
+     "width": 7893
+    },
+    "gsm8k": {
+     "target": 493417.83,
+     "amount": 492622.0,
+     "deviation": -795.8300000000163,
+     "deviation_fraction": -0.001612892667457956,
+     "bounds": [
+      487502.83,
+      499332.83
+     ],
+     "status": "OK",
+     "width": 5915
+    },
+    "rag_reading": {
+     "target": 493417.83,
+     "amount": 492038.0,
+     "deviation": -1379.8300000000163,
+     "deviation_fraction": -0.0027964737309959316,
+     "bounds": [
+      490066.83,
+      496768.83
+     ],
+     "status": "OK",
+     "width": 3351
+    },
+    "multihop_reading": {
+     "target": 493417.83,
+     "amount": 492449.0,
+     "deviation": -968.8300000000163,
+     "deviation_fraction": -0.001963508290732048,
+     "bounds": [
+      490066.83,
+      496768.83
+     ],
+     "status": "OK",
+     "width": 3351
+    },
+    "code": {
+     "target": 493417.83,
+     "amount": 494656.0,
+     "deviation": 1238.1699999999837,
+     "deviation_fraction": 0.0025093742558917735,
+     "bounds": [
+      477475.83,
+      509359.83
+     ],
+     "status": "OK",
+     "width": 15942
+    },
+    "fluid": {
+     "target": 2962514.0,
+     "amount": 2969695.0,
+     "deviation": 7181.0,
+     "deviation_fraction": 0.002423954789749517,
+     "bounds": [
+      2962514.0,
+      null
+     ],
+     "status": "OK",
+     "width": null
+    }
+   },
+   "passed": true,
+   "largest_whole_unit": {
+    "rag_reading": 3351,
+    "multihop_reading": 3351,
+    "gsm8k": 5915,
+    "code": 7971,
+    "fluid": 44119,
+    "competition_math": 7893
+   },
+   "withdrawn_width_per_type": 9868.9,
+   "types_the_withdrawn_check_held_wider": [
+    "competition_math",
+    "gsm8k",
+    "multihop_reading",
+    "rag_reading"
+   ]
+  },
+  "A2-6cat": {
+   "tasks_missing_from_the_pack": [
+    "79c86b17e0b933ee3483"
+   ],
+   "registered": {
+    "competition_math": {
+     "target": 493417.83,
+     "amount": 493404.0,
+     "deviation": -13.830000000016298,
+     "deviation_fraction": -2.802898306292721e-05,
+     "bounds": [
+      488399.83,
+      498435.83
+     ],
+     "status": "OK",
+     "width": 5018
+    },
+    "gsm8k": {
+     "target": 493417.83,
+     "amount": 493495.0,
+     "deviation": 77.1699999999837,
+     "deviation_fraction": 0.00015639888813905183,
+     "bounds": [
+      492321.83,
+      494513.83
+     ],
+     "status": "OK",
+     "width": 1096
+    },
+    "rag_reading": {
+     "target": 493417.83,
+     "amount": 493276.0,
+     "deviation": -141.8300000000163,
+     "deviation_fraction": -0.00028744401068768894,
+     "bounds": [
+      492576.83,
+      494258.83
+     ],
+     "status": "OK",
+     "width": 841
+    },
+    "multihop_reading": {
+     "target": 493417.83,
+     "amount": 493296.0,
+     "deviation": -121.8300000000163,
+     "deviation_fraction": -0.00024691041262131996,
+     "bounds": [
+      492576.83,
+      494258.83
+     ],
+     "status": "OK",
+     "width": 841
+    },
+    "code": {
+     "target": 493417.83,
+     "amount": 493701.0,
+     "deviation": 283.1699999999837,
+     "deviation_fraction": 0.0005738949482226528,
+     "bounds": [
+      485897.83,
+      500937.83
+     ],
+     "status": "OK",
+     "width": 7520
+    },
+    "fluid": {
+     "target": 2962514.0,
+     "amount": 2963139.0,
+     "deviation": 625.0,
+     "deviation_fraction": 0.0002109694671485097,
+     "bounds": [
+      2962514.0,
+      null
+     ],
+     "status": "OK",
+     "width": null
+    }
+   },
+   "passed": true,
+   "largest_whole_unit": {
+    "rag_reading": 841,
+    "multihop_reading": 841,
+    "fluid": 4172,
+    "gsm8k": 1096,
+    "code": 3760,
+    "competition_math": 5018
+   },
+   "withdrawn_width_per_type": 9868.7,
+   "types_the_withdrawn_check_held_wider": [
+    "code",
+    "competition_math",
+    "gsm8k",
+    "multihop_reading",
+    "rag_reading"
+   ]
+  },
+  "C1-6cat": {
+   "registered": {
+    "competition_math": {
+     "target": 494130.0,
+     "amount": 494130.0,
+     "deviation": 0.0,
+     "deviation_fraction": 0.0,
+     "bounds": [
+      494130.0,
+      494130.0
+     ],
+     "status": "OK",
+     "width": 0
+    },
+    "gsm8k": {
+     "target": 494582.0,
+     "amount": 494582.0,
+     "deviation": 0.0,
+     "deviation_fraction": 0.0,
+     "bounds": [
+      494582.0,
+      494582.0
+     ],
+     "status": "OK",
+     "width": 0
+    },
+    "rag_reading": {
+     "target": 493581.0,
+     "amount": 493581.0,
+     "deviation": 0.0,
+     "deviation_fraction": 0.0,
+     "bounds": [
+      493581.0,
+      493581.0
+     ],
+     "status": "OK",
+     "width": 0
+    },
+    "multihop_reading": {
+     "target": 492790.0,
+     "amount": 492790.0,
+     "deviation": 0.0,
+     "deviation_fraction": 0.0,
+     "bounds": [
+      492790.0,
+      492790.0
+     ],
+     "status": "OK",
+     "width": 0
+    },
+    "code": {
+     "target": 492837.0,
+     "amount": 492837.0,
+     "deviation": 0.0,
+     "deviation_fraction": 0.0,
+     "bounds": [
+      492837.0,
+      492837.0
+     ],
+     "status": "OK",
+     "width": 0
+    },
+    "fluid": {
+     "target": 2962514.0,
+     "amount": 2962514.0,
+     "deviation": 0.0,
+     "deviation_fraction": 0.0,
+     "bounds": [
+      2962514.0,
+      2962514.0
+     ],
+     "status": "OK",
+     "width": 0
+    }
+   },
+   "passed": true,
+   "largest_whole_unit": {
+    "rag_reading": 2474,
+    "code": 4569,
+    "gsm8k": 3466,
+    "multihop_reading": 3503,
+    "competition_math": 4549,
+    "fluid": 8056
+   },
+   "withdrawn_width_per_type": 9871.7,
+   "types_the_withdrawn_check_held_wider": [
+    "code",
+    "competition_math",
+    "gsm8k",
+    "multihop_reading",
+    "rag_reading"
+   ]
+  }
+ },
+ "tool_type": "not generated: its six-type row and its seven cells are checked at admission",
+ "authorizes": "nothing"
+}

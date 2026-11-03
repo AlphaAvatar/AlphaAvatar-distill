@@ -1,0 +1,263 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.schema_arguments_options/v1",
+ "question": "maintainer 2026-11-04 (review of fc6fa1d6), item 5: option 1 against option 2 for the non-thinking schema_arguments SHORTFALL -- feasibility, verification strength, volume, cost and protocol impact; neither is implemented and nothing is generated before the decision",
+ "command": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_arguments_audit --pivot <Pivot Conversational train.jsonl> --workbench <WorkBench files> --write <this>",
+ "pass_rate_priors": {
+  "pessimistic": 0.15,
+  "expected": 0.32,
+  "optimistic": 0.5
+ },
+ "pool_screens_pass_share": 0.9755,
+ "option_1_call_only": {
+  "source": "artifacts/stages/stage-2/teacher_modes/tool_sources/nvidia__Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd/train.jsonl",
+  "kept_by_the_converter": 9051,
+  "call_only_candidates": 8743,
+  "not_counted": {
+   "first call answered, a later one not (a longer prefix episode, not counted)": 815
+  },
+  "by_split_category": {
+   "calibration/schema_arguments": 72,
+   "calibration/tool_selection": 453,
+   "reserve/schema_arguments": 1,
+   "reserve/tool_selection": 52,
+   "state_eval/schema_arguments": 22,
+   "state_eval/tool_selection": 64,
+   "training/schema_arguments": 1595,
+   "training/tool_selection": 6293,
+   "validation/schema_arguments": 19,
+   "validation/tool_selection": 172
+  },
+  "kept_tasks_whose_split_moves": 0,
+  "call_turn_tokens_non_thinking": {
+   "schema_arguments": {
+    "n": 1709,
+    "p25": 35,
+    "median": 47,
+    "p75": 63,
+    "mean": 49.9
+   },
+   "tool_selection": {
+    "n": 7034,
+    "p25": 31,
+    "median": 55,
+    "p75": 66,
+    "mean": 52.6
+   }
+  },
+  "qwen3_235b_first_step_pass_rate": {
+   "n": 1709,
+   "median": 0.3125,
+   "mean": 0.321
+  },
+  "reach_H-N_added": {
+   "training": {
+    "pessimistic": 21545,
+    "expected": 41738,
+    "optimistic": 58229
+   },
+   "state_eval": {
+    "pessimistic": 297,
+    "expected": 576,
+    "optimistic": 803
+   }
+  },
+  "reach_H-N_with_today": {
+   "training": {
+    "pessimistic": 42079,
+    "expected": 85015,
+    "optimistic": 143016
+   },
+   "state_eval": {
+    "pessimistic": 688,
+    "expected": 1399,
+    "optimistic": 2416
+   }
+  },
+  "targets": {
+   "training": 74013,
+   "state_eval": 1800
+  }
+ },
+ "option_2_workbench": {
+  "commit": "49c7dfd00c03d384ec59ea57374f50b766aa5613",
+  "files_sha256": {
+   "LICENSE": "e8bbcabb0cf6834062d9aec616ff9b52ee8c7ac2ff3e9f02a5a996e82717e26b",
+   "analytics_tasks_and_outcomes.csv": "d99dd61758a7ab6cd7c81cbc892701c8e54e0fe6711ea86395686a8ac5006290",
+   "calendar_tasks_and_outcomes.csv": "0a2e31639292bc341ad17d1c4917a5becb2f1ae5b3a7109639baa2de38db2758",
+   "customer_relationship_manager_tasks_and_outcomes.csv": "d10dedb1197c55202a551c337cd2a39cef619164fb1f9a8cdf66bbbb376173d8",
+   "email_tasks_and_outcomes.csv": "be57642f3eb74bce2aba8586088e12781aa71eb6b628ba5091db20c0f86c084d",
+   "multi_domain_tasks_and_outcomes.csv": "631491d266a03b71232629ce525c3718d7696c9d3243e1e1a7e00b36f0ac7b91",
+   "project_management_tasks_and_outcomes.csv": "c73d34bdf50cfe2310eb4c8300bca70832bcc909824af2a6a33b835f3b18fd4d"
+  },
+  "license": "MIT License",
+  "domains": {
+   "analytics": {
+    "tasks": 120,
+    "base_templates": 12,
+    "write_actions_per_task": {
+     "0": 40,
+     "1": 54,
+     "2": 26
+    },
+    "write_calls": {
+     "analytics.create_plot": 106
+    }
+   },
+   "calendar": {
+    "tasks": 110,
+    "base_templates": 11,
+    "write_actions_per_task": {
+     "0": 11,
+     "1": 82,
+     "2": 8,
+     "3": 5,
+     "4": 3,
+     "6": 1
+    },
+    "write_calls": {
+     "calendar.delete_event": 86,
+     "calendar.update_event": 30,
+     "calendar.create_event": 15
+    }
+   },
+   "customer_relationship_manager": {
+    "tasks": 80,
+    "base_templates": 8,
+    "write_actions_per_task": {
+     "0": 8,
+     "1": 48,
+     "2": 7,
+     "3": 8,
+     "4": 6,
+     "5": 2,
+     "6": 1
+    },
+    "write_calls": {
+     "customer_relationship_manager.update_customer": 94,
+     "customer_relationship_manager.delete_customer": 22,
+     "customer_relationship_manager.add_customer": 10
+    }
+   },
+   "email": {
+    "tasks": 90,
+    "base_templates": 9,
+    "write_actions_per_task": {
+     "0": 1,
+     "1": 74,
+     "2": 12,
+     "3": 2,
+     "6": 1
+    },
+    "write_calls": {
+     "email.forward_email": 51,
+     "email.delete_email": 29,
+     "email.reply_email": 20,
+     "email.send_email": 10
+    }
+   },
+   "multi_domain": {
+    "tasks": 210,
+    "base_templates": 21,
+    "write_actions_per_task": {
+     "0": 41,
+     "1": 123,
+     "2": 24,
+     "6": 2,
+     "7": 3,
+     "8": 4,
+     "9": 3,
+     "10": 2,
+     "11": 6,
+     "12": 2
+    },
+    "write_calls": {
+     "customer_relationship_manager.delete_customer": 152,
+     "email.send_email": 69,
+     "calendar.create_event": 59,
+     "project_management.create_task": 46,
+     "customer_relationship_manager.update_customer": 37,
+     "customer_relationship_manager.add_customer": 10
+    }
+   },
+   "project_management": {
+    "tasks": 80,
+    "base_templates": 8,
+    "write_actions_per_task": {
+     "0": 21,
+     "1": 35,
+     "2": 11,
+     "3": 8,
+     "4": 5
+    },
+    "write_calls": {
+     "project_management.update_task": 91,
+     "project_management.create_task": 10
+    }
+   }
+  },
+  "tasks": 690,
+  "base_templates": 69,
+  "single_call_templates": {
+   "Can you make a {plot_type} chart of {natural_language_metric} since {natural_language_date}?": 10,
+   "Plot the distribution of {natural_language_metric} on {natural_language_date}": 10
+  }
+ },
+ "authorizes": "nothing",
+ "analysis": {
+  "written_utc": "2026-11-04",
+  "gap_at_the_expected_yield": {
+   "H-N/training": "74,013 target, 43,277 reachable: 30,736 supervised tokens short",
+   "H-N/state_eval": "1,800 target, 823 reachable: 977 scored positions short (1,613 even at the optimistic yield)",
+   "H-T/state_eval": "7 tasks for a 5-task minimum: THIN risk"
+  },
+  "option_1_call_only": {
+   "volume": "1,595 training / 72 calibration / 22 state_eval / 19 validation / 1 reserve schema_arguments candidates (plus 6,293 / 453 / 64 / 172 / 52 tool_selection, not needed), split by the frozen environment rule; no task the pool already holds changes split when they join",
+   "fills": "H-N training: 85,015 at the expected pass rate (reached), 42,079 at the pessimistic (short); H-N state_eval: 1,399 at the expected (78% of 1,800, short), 2,416 at the optimistic; reaching 1,800 with today's episodes at their expected yield needs a per-attempt pass rate >= ~0.70 on these items (Qwen3-235B's recorded first-step rate on them: 0.32). H-T state_eval: 7 + 22 tasks, the THIN risk removed",
+   "training_target": "complete and unchanged in kind: every Stage-3 document is ONE assistant turn (prompt = system + tools + the first user turn, target = the teacher's own reply up to its <|im_end|>); a call-only episode yields exactly the document the first turn of a full episode yields, naturally terminated, teacher-native (generated from the first user turn, as every Pivot task)",
+   "gold": "deterministic: the single step's call name and arguments, compared exactly after canonicalization (tool_calls.step_matches_gold), as today",
+   "verification": "protocol + schema validity + step gold; recorded_execution and task_success stay None (no recorded response exists: nothing is replayed or executed, and none is claimed). Weaker than today's Pivot episodes by recorded execution only",
+   "what_it_is": "a tool-call decision sample -- the right call with the right arguments at step one -- never a completed task: no tool result, no final answer; it must be recorded as its own episode shape and verification-level combination, and never counted or reported as task success",
+   "calibration_and_state_eval": "one item per episode (the call turn), counted in the category's scored positions like any turn's; state_eval_hybrid@v2's schema_arguments category would mix call-only and full-episode items, so its items and its measurement protocol identity change -- it is not frozen yet, no historical identity is touched",
+   "stage3_token_counting": "unchanged: unique supervised tokens of the call turn, counted before packing as tool-calling tokens",
+   "protocol_and_identity": "needs, after approval: a task shape that ends on a call with no response (e.g. final_check kind ends_on_call), verify_episode accepting it only for tasks that declare it, the converter rule, a new pool content identity and a rebuilt plan, the tool-calling item version bumped (tool_calling@v1 -> v2) so measurement identities name the shape",
+   "cost": "$0 code (converter rule, the verify rule, tests); generation inside the hybrid session's existing rounds: ~1,140 non-thinking tasks at the expected pass rate (~1.7 attempts each, first prompts median 2,961 tokens) ~ 5.8M prefill + 0.1M decode tokens ~ 0.2-0.4 h on one L40S ~ $0.2-0.5; at the bound (all 1,595, both candidates) ~ 9.7M prefill ~ $0.6. A prior: the pilot measures it; nothing is approved"
+  },
+  "option_2_workbench": {
+   "source": "olly-styles/WorkBench@49c7dfd0 (MIT, (c) 2024 MindsDB): 690 tasks = 69 base templates x 10 (its generator's cap, seed 42), 5 sandbox databases, 26 tools; ground truth = the list of state-changing calls; graded by the sandbox's final state",
+   "schema_arguments_supply": "under the frozen category rule (one call step with structured arguments) only 2 of 69 templates qualify -- direct analytics.create_plot requests whose arguments all come from the request (20 published tasks, ONE tool); every other template reads first (an id, an address, a value) and is multi_turn. New instances of the 2 templates are near-identical single-tool calls: volume, but almost no diversity",
+   "isolation": "every WorkBench task is offered the same toolkit (its default --tool_selection all; the company directory is shared by every domain), so under the frozen environment rule it is ONE environment and ONE split: training with probability 0.87, state_eval 0.04. It cannot be counted on for state_eval -- the binding gap -- without changing the frozen atomic isolation",
+   "contamination": "a published benchmark: regenerated instances share its templates, so WorkBench can never be a held-out evaluation afterwards; its 690 tasks excluded exactly and by 13-grams",
+   "verification": "G1, final-state equality including side effects: the strongest of all candidates (for create_plot it amounts to an exact match of the arguments)",
+   "engineering": "an executable backend in the episode loop (its pandas sandbox at the pinned commit, a state reset per episode, no network; it pins numpy<2, this venv has numpy 2.5.1: its own environment or a port), JSON schemas for its 26 Python tools, a port of its final-state grader, the generator run under new seeds with de-duplication, a converter and tests: days, not hours; generation itself is cheap",
+   "fills": "H-N training only if its single environment hashes to training, and then with one tool; H-N state_eval: nothing expected"
+  },
+  "comparison": {
+   "fills_H-N_training": {
+    "option_1": "yes at the expected pass rate",
+    "option_2": "possibly (87%), one tool"
+   },
+   "fills_H-N_state_eval": {
+    "option_1": "partly: ~1,400 of 1,800 expected",
+    "option_2": "no (4% chance of any state_eval supply)"
+   },
+   "verification": {
+    "option_1": "G2 step gold + schema validity, no execution",
+    "option_2": "G1 final state"
+   },
+   "protocol_change": {
+    "option_1": "a new episode shape (ends on a call)",
+    "option_2": "a new backend kind (executable)"
+   },
+   "engineering": {
+    "option_1": "small",
+    "option_2": "large, plus a dependency conflict"
+   },
+   "generation_cost": {
+    "option_1": "~$0.2-0.6",
+    "option_2": "small; engineering dominates"
+   }
+  },
+  "conclusion": "For this gap option 1 is the stronger choice: it is the only one of the two that adds state-evaluation supply and it fills non-thinking training at the expected yield, at the same step-gold level as today's Pivot data minus recorded execution. Option 2 verifies more strongly but cannot supply state evaluation under the frozen isolation and supplies schema_arguments through one tool. Neither closes non-thinking state evaluation at the expected pass rate: with option 1 about 1,400 of 1,800 positions. Nothing is implemented or generated; the choice, and after the pilot's measured pass rate any SHORTFALL decision for that one cell, are the maintainer's",
+  "unchanged": "the seven category shares, every verifier, the isolation rules; Toucan is not re-labelled; no SHORTFALL is approved"
+ }
+}

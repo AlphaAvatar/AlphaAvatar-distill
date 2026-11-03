@@ -16,21 +16,21 @@
   "trainer_attention": "batch.context_strategy cross_context (the default): standard causal attention over each packed sequence, continuous positions, no position ids",
   "fragments": "a document that does not fit the room left fills it with its first tokens and is packed again from its first token in the next sequence; the fragment's supervised positions are trained (CE and KD) and counted as repeated supervised-token exposure. ACCEPTED by the maintainer (2026-11-03): no context-only mask, no loss re-weighting",
   "validation": "every validation document, packed the same way, with no sequence cap (a 16-sequence cap after the shuffle kept a random part of each category); the pack record lists the training data types the validation set does not cover",
-  "data_accounting": "maintainer 2026-11-03: every formal data volume, proportion and quota is counted BEFORE packing -- examples, turns, unique supervised tokens (reasoning / answer / tool-calling), fluid : supporting 50:50, the six supporting types ~1/6 each. Packed sequences, non-padding, repeated, truncated and padding tokens and supervised-token exposure are packing / compute / exposure measures only and never redefine a size or a share; no loss weight corrects a quota",
-  "share_check": {
-   "per_type_relative": 0.02,
-   "fluid_fraction": [
-    0.49,
-    0.51
-   ],
-   "_": "packed_packs.shares: each of the six base-corpus types within 2% of 1/6 of the supporting total, fluid 49-51% of the total, on unique supervised tokens before packing; the tool type is cut to its registered target first (whole episodes in the pool's frozen order). The five existing types sit within 0.7% (A1/A2 selection, C1's kept sessions)"
-  },
+  "data_accounting": "maintainer 2026-11-03: every formal data volume, proportion and quota is counted BEFORE packing -- examples, turns, unique supervised tokens (reasoning / answer / tool-calling), fluid : supporting 50:50, the six supporting types ~1/6 each. Packed sequences, non-padding, repeated, truncated and padding tokens and supervised-token exposure are packing / compute / exposure measures only and never redefine a size or a share; no loss weight corrects a quota. Proportions are checked by the data admission (data_admission below), never by the packing",
   "epoch_order": "the trainer's per-epoch permutation of the packed sequences (train.stream_block_indices); no re-packing between epochs",
   "applies_to": [
    "A1-6cat",
    "A2-6cat",
    "C1-6cat"
   ]
+ },
+ "data_admission": {
+  "decided_by": "maintainer 2026-11-04 (review of fc6fa1d6): data selection, proportion validation, admission / freeze and sequential packing are separate functions; the packing judges no proportion, and a workflow refuses formal training material whose admission failed",
+  "steps": "packed_packs.select (whole examples and episodes, the tool cells per the frozen generation plan, a short cell SHORTFALL) -> packed_packs.proportions (unique supervised tokens before packing, aadistill.data.mixture.validate_proportions against packed_packs.registered_quotas) -> packed_packs.admit (the frozen <pack>/data_manifest.json, or AdmissionError and nothing written) -> packed_packs.pack (token_documents.pack_sequential at stage3_packing; its input must be the manifest's documents) -> packed_training_plan.bind (only a pack packed_packs.verify_pack accepts)",
+  "tolerance": "the registered one, read from its owner and never restated here: token_matched_design.json :: scale.tolerance (total_over_target_max_fraction 0.005, category_share_deviation_max_points 0.5) with the whole-task selection rule six_category_design.json :: base_category keeps unchanged -- fluid and supporting each at least their targets, the per-mode total at most 0.5% over, fluid's share within 0.5 points, each type within one largest whole unit per selection cell; C1-6cat's five kept types and fluid exact",
+  "approved_exceptions": [],
+  "approved_exceptions_note": "the maintainer's recorded approval of one failing quota or share of one arm: {arm, quota, approved_by, date, reason}; with the generation plan's approved_shortfalls (a tool cell's SHORTFALL) the only way a failing selection is admitted. Empty: nothing is approved",
+  "superseded": "stage3_packing.share_check (per type within 2% of 1/6 of the supporting total, fluid 49-51% of the total), introduced by the agent at 77be6e13 without a maintainer decision, looser than the registered rule and blind to a shortfall: withdrawn 2026-11-04 (audit/proportion_tolerance_audit.json)"
  },
  "authorizes": "nothing",
  "full_search": {
@@ -181,7 +181,8 @@
    "tool-calling source review v2 (audit/tool_calling_source_review_v2.json) and Toucan's dry pool",
    "2026-11-03 review repairs: fragments and pre-packing accounting recorded (AGENTS.md P19, stage3_packing); tool_pool v2 (atoms, decontamination, the length bound in main); Toucan steps / errors / conflicts; verification levels; each lineage's tool-generation kind and L40S gate; packs with every validation document, the tool quota and the pre-packing share check (audit/tool_pool_dry_run_v2.json, audit/experiment_suite_baseline_20261103.json)",
    "2026-11-03 second review repairs: bounded generation plan (tool_generation_plan.py; plans/tool_generation_plan_dry_run.json), pool content identity verified at every read, T4 exact prompts and tool identities, fail-closed JSON Schema validation, verified reference caches incl. T3, the Pivot converter (audit/pivot_conversion_v1.json), audit/tool_pool_dry_run_v3.json, the position reconciliation of a_search's closeout, the consumer chain regression",
-   "2026-11-03 third review repairs: per-category gates (packed_inputs.tool_cell: a calibration cell or a state evaluation mode is met only when every category meets its share; an unapproved SHORTFALL or THIN freezes nothing; bounded_plan.approved_shortfalls), the consumers' identity through tool_generation_plan.verified (pool files, orders, content, pool.json bytes, protocol, design, cells), the pool's content identity over its orders; audit/schema_arguments_shortfall.json"
+   "2026-11-03 third review repairs: per-category gates (packed_inputs.tool_cell: a calibration cell or a state evaluation mode is met only when every category meets its share; an unapproved SHORTFALL or THIN freezes nothing; bounded_plan.approved_shortfalls), the consumers' identity through tool_generation_plan.verified (pool files, orders, content, pool.json bytes, protocol, design, cells), the pool's content identity over its orders; audit/schema_arguments_shortfall.json",
+   "2026-11-04 review of fc6fa1d6: selection, proportion validation (core aadistill.data.mixture.validate_proportions), admission / freeze (data_manifest.json) and sequential packing separated in packed_packs.py; verify_pack for the training binding; the agent's share_check withdrawn for the registered tolerance (audit/proportion_tolerance_audit.json); schema_arguments option 1 vs option 2 measured (audit/schema_arguments_options.json)"
   ],
   "pending": [
    "the maintainer's source admission (Toucan, Pivot Conversational), then tool_pool@v1 under data/ and the canonical plan over it (plans/tool_generation_plan.json)",
@@ -234,10 +235,10 @@
   "conclusion": "phases 1 and 2 together: $36.05 expected, $52.45 upper, caps $57.69 -- more than the $31.27 left: the Full Search Authorization needs a raised project cap"
  },
  "decisions_owed_to_the_maintainer": [
-  "tool-calling source admission: Toucan-1.5M and Pivot Conversational (priority); Pivot Function-Calling fails T3; Nemotron-SFT-Agentic-v4 deferred; the category shares (proposed, used unchanged by the plan), the 6,144-token prompt bound, the non-thinking state-evaluation floor",
-  "the non-thinking schema_arguments SHORTFALL (audit/schema_arguments_shortfall.json): it refuses the A2-6cat pack and keeps state_eval_hybrid@v2 from freezing, so it blocks the packed search. Options: call-only gold episodes for this category (minimal, $0, step gold; approve the episode shape), WorkBench G1 instances (engineering), or an approved SHORTFALL plus A2-6cat's proportion; Toucan re-labelling is not acceptable. 'Ask for the missing value' has no verified source in any mode",
+  "tool-calling source admission: Toucan-1.5M SFT and Pivot Conversational are prepared as priority candidates (maintainer 2026-11-03; not admitted, not a generation authorization); Pivot Function-Calling not adopted; Nemotron-SFT-Agentic-v4 deferred; Glaive / xLAM isolation references only; the category shares (proposed, used unchanged by the plan), the 6,144-token prompt bound, the non-thinking state-evaluation floor",
+  "the non-thinking schema_arguments SHORTFALL: the data admission refuses the A2-6cat selection and state_eval_hybrid@v2 cannot freeze, so the packed search is blocked. Option 1 vs option 2 measured at $0 (audit/schema_arguments_options.json): call-only gold episodes fill training at the expected pass rate and bring state evaluation to ~1,400 of 1,800; WorkBench adds no state-evaluation supply under the frozen isolation. The choice is owed (neither implemented); approving the SHORTFALL is not granted (2026-11-04); Toucan re-labelling is not acceptable. 'Ask for the missing value' has no verified source in any mode",
   "the isolation costs: per-atom splits leave 17-20 atoms per evaluation split (mostly no_tool); eval-set-1 tool names refused (1,878 tasks); tool identities shared by several MCP servers kept to one split (6,825 refused); T3 signature matches counted, not refused",
-  "validation coverage: C1-6cat's validation has no fluid type, A1-6cat's no interactive_adaptation (recorded; validation loss is diagnostic)",
+  "validation coverage, diagnostic only: C1-6cat's validation has no fluid type; A1-6cat's has no interactive_adaptation and carries answerability, which the six-type training no longer uses (recorded; no training data moved to validation; eval-set-1's identity unchanged)",
   "a registered tool-calling evaluation (eval-set-2) for closed-loop success",
   "a raised project cap for the Full Search Authorization (bounded generation $3.62 expected / $10.31 upper, cap $11.34; packed search $32.43 / $42.14, cap $46.35; $31.27 left)",
   "the lifecycle of volume 4rhubprswo (the v2 Top-1's only copy stays protected until a verified copy off the volume exists)"
