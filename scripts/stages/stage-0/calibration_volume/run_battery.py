@@ -65,7 +65,8 @@ def read_tasks(path) -> list[dict]:
 def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                  seed_base, system, check_every, degeneration_check,
                  split_generation, template_opens_think, label, log=print,
-                 action_protocol="v1", on_done=None, seed_of=None, template_kwargs=None):
+                 action_protocol="v1", on_done=None, seed_of=None, template_kwargs=None,
+                 env_factory=None):
     """Generate every task's turns through `eng`; returns (episodes, turns, tokens).
 
     ASYNCHRONOUS: one engine pass for everything. A finished turn is processed
@@ -91,19 +92,35 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
     `template_kwargs` go to every `apply_chat_template` call (a hybrid
     template's `enable_thinking`). Each turn records the `think_state` its
     rendered prompt left the continuation in, and is split under it.
+
+    TOOL TASKS. A task carrying ``tools`` has them rendered by the template
+    (``apply_chat_template(..., tools=...)``); tasks without keep the call they
+    always had. ``env_factory(task)`` builds a task's environment (``None``: the
+    interactive environments of `tasks.interactive`, as before); a tool
+    environment's ``step`` returns ``{"assistant": message, "messages": [tool
+    messages], "tool_calls": [...], "responses": [...]}`` -- the assistant turn
+    as the runtime re-renders it (structured ``tool_calls``) and the backend's
+    answers -- or ``None`` when the turn makes no call. Every later turn records
+    whether its re-rendered prompt starts with the previous turn's prompt and
+    generated ids (``rerender_reproduces_generation``); only generated ids are
+    ever supervised either way.
     """
     from aadistill.evaluation.behavior import template_think_state
 
     template_kwargs = dict(template_kwargs or {})
     episodes = {}
     for t in tasks:
-        env = (make_env(t["env"], action_protocol=action_protocol)
-               if t.get("interactive") else None)
+        if env_factory is not None:
+            env = env_factory(t)
+            turn_cap = int(getattr(env, "max_turns", 1)) if env is not None else 1
+        else:
+            env = (make_env(t["env"], action_protocol=action_protocol)
+                   if t.get("interactive") else None)
+            turn_cap = max_turns(t["env"]) if env else 1
         episodes[t["task_id"]] = {
             "task": t, "env": env, "history": [{"role": "system", "content": system},
                                               *t["messages"]],
-            "turns": [], "done": False, "end": None,
-            "max_turns": max_turns(t["env"]) if env else 1}
+            "turns": [], "done": False, "end": None, "max_turns": turn_cap, "last_ids": None}
 
     pending: dict[str, dict] = {}
     n_turns, out_tokens = 0, 0
@@ -117,9 +134,14 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
 
     def submit(e) -> None:
         tid = e["task"]["task_id"]
+        tools = e["task"].get("tools")
         prompt = tok.apply_chat_template(e["history"], tokenize=False,
-                                         add_generation_prompt=True, **template_kwargs)
+                                         add_generation_prompt=True, **template_kwargs,
+                                         **({"tools": tools} if tools else {}))
         p_ids = tok(prompt, add_special_tokens=False).input_ids
+        last = e["last_ids"] if tools else None      #: recorded for tool tasks only
+        rerender = (None if last is None else
+                    list(p_ids[:len(last)]) == list(last))
         allowance = limit - len(p_ids)
         if allowance <= 0:
             close(e, "context_exhausted")
@@ -132,7 +154,7 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                         "preopened": template_opens_think(prompt),
                         "think_state": template_think_state(prompt), "gen": [],
                         "last": 0, "degen": None, "finish": None, "t0": time.time(),
-                        "ttft": None, "seed": seed}
+                        "ttft": None, "seed": seed, "rerender": rerender}
 
     def finish(st) -> None:
         nonlocal n_turns, out_tokens
@@ -162,8 +184,11 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
             "raw": raw, "answer": parts["answer"],
             "prompt_token_ids": st["p_ids"] if mode == "generate" else None,
             "output_token_ids": gen,
+            **({} if st["rerender"] is None else
+               {"rerender_reproduces_generation": st["rerender"]}),
         }
         e["turns"].append(turn)
+        e["last_ids"] = list(st["p_ids"]) + list(gen)
         e["history"].append({"role": "assistant", "content": parts["answer"],
                              "reasoning_content": parts.get("think", "")})
         if reason != "eos":
@@ -173,11 +198,20 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
             close(e, "answered")
             return
         obs = e["env"].step(parts["answer"])
-        turn["observation"] = obs
+        if isinstance(obs, dict):
+            #: A tool turn: the assistant message as the runtime renders it
+            #: (structured calls) and the backend's tool messages.
+            turn["tool_calls"], turn["responses"] = obs.get("tool_calls"), obs.get("responses")
+            e["history"][-1] = {**e["history"][-1], **obs["assistant"]}
+        else:
+            turn["observation"] = obs
         if obs is None or e["env"].done:
             close(e, "episode_done")
         elif len(e["turns"]) >= e["max_turns"]:
             close(e, "turn_limit")
+        elif isinstance(obs, dict):
+            e["history"].extend(obs["messages"])
+            submit(e)
         else:
             e["history"].append({"role": "user", "content": obs})
             submit(e)
@@ -218,14 +252,28 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
     return episodes, n_turns, out_tokens
 
 
+def resolve_env_factory(spec: str):
+    """``module:attr[.attr]`` -> the callable it names."""
+    import importlib
+    mod, _, attr = spec.partition(":")
+    obj = importlib.import_module(mod)
+    for part in attr.split("."):
+        obj = getattr(obj, part)
+    if not callable(obj):
+        raise SystemExit(f"--env-factory {spec} is not callable")
+    return obj
+
+
 def episode_record(tid: str, e: dict, *, label: str, mode: str, action_protocol: str) -> dict:
     """One finished episode as a record line (the final file and the stream
-    write the same thing)."""
+    write the same thing). A tool task carries its category, family and split
+    instead of a generator's axis and difficulty."""
     t = e["task"]
+    tool = {k: t[k] for k in ("category", "family", "split") if "tools" in t and k in t}
     return {"task_id": tid, "label": label, "mode": mode,
-            "generator_id": t["generator_id"], "family_id": t["family_id"],
-            "axis": t["axis"], "difficulty": t["difficulty"],
-            "interactive": t["interactive"], "end": e["end"],
+            "generator_id": t.get("generator_id"), "family_id": t.get("family_id"),
+            "axis": t.get("axis"), "difficulty": t.get("difficulty"),
+            "interactive": t.get("interactive", bool(tool)), "end": e["end"], **tool,
             "turns": e["turns"],
             "env_result": e["env"].result() if e["env"] else None,
             **({"action_protocol": action_protocol} if e["env"] else {}),
@@ -287,8 +335,13 @@ def main(argv=None) -> int:
     ap.add_argument("--generate-sampling", default=None,
                     help="generate mode: JSON replacing the default teacher sampling "
                          "(GENERATE_SAMPLING), e.g. a mode's own official preset; recorded")
+    ap.add_argument("--env-factory", default=None,
+                    help="module:attribute of a callable task -> environment (tool tasks: "
+                         "stages.teacher_modes.tool_episodes:ToolEnv.factory); omitted, the "
+                         "interactive environments of tasks.interactive")
     args = ap.parse_args(argv)
     template_kwargs = json.loads(args.chat_template_kwargs)
+    env_factory = resolve_env_factory(args.env_factory) if args.env_factory else None
     if args.generate_sampling and args.mode != "generate":
         raise SystemExit("--generate-sampling is a data-generation setting; a measurement "
                          "uses --decoding")
@@ -369,7 +422,7 @@ def main(argv=None) -> int:
         template_opens_think=template_opens_think, label=args.label,
         action_protocol=args.action_protocol, on_done=stream[0] if stream else None,
         seed_of=(lambda tid, turn: DEC.request_seed(protocol, args.seed_namespace, tid, turn))
-        if protocol else None, template_kwargs=template_kwargs)
+        if protocol else None, template_kwargs=template_kwargs, env_factory=env_factory)
     if stream:
         stream[1].close()
     gen_s = round(time.time() - t_gen, 1)

@@ -1,0 +1,224 @@
+"""Tool-calling episodes through the real episode loop with a scripted engine, and what a verified episode becomes."""
+from __future__ import annotations
+
+import json
+from types import SimpleNamespace
+
+import pytest
+
+from aadistill.evaluation.behavior import split_generation, template_opens_think
+from stages.calibration_volume.run_battery import run_episodes
+from stages.teacher_modes import tool_episodes as TE
+
+EOS = 0
+TOOLS = [{"type": "function", "function": {"name": "get_weather", "description": "w", "parameters": {
+    "type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]}}}]
+
+
+def task(**over):
+    t = {"task_id": "tc1-test", "category": "multi_turn", "source": {"dataset": "toy"}, "family": "fam1",
+         "split": "training", "tools": TOOLS, "messages": [{"role": "user", "content": "weather in Paris?"}],
+         "backend": {"kind": "replay", "table": {json.dumps({"name": "get_weather", "arguments": {"city": "Paris"}},
+                                                            sort_keys=True, separators=(",", ":")): "sunny"}},
+         "max_turns": 4, "final_check": {"kind": "contains_all", "values": ["sunny"]}}
+    t.update(over)
+    return t
+
+
+class Tok:
+    """Characters as ids; renders tools, structured tool calls and tool messages like the Qwen3 template does."""
+
+    def apply_chat_template(self, msgs, tokenize=False, add_generation_prompt=True, tools=None):
+        out = (f"<tools>{json.dumps(tools)}</tools>" if tools else "")
+        for m in msgs:
+            body = m.get("content") or ""
+            for c in m.get("tool_calls") or []:
+                body += "<tool_call>" + json.dumps(c["function"]) + "</tool_call>"
+            out += f"<|{m['role']}|>{body}\n"
+        return out + "<|assistant|><think>\n"
+
+    def __call__(self, text, add_special_tokens=False):
+        return SimpleNamespace(input_ids=[ord(c) for c in text])
+
+    def decode(self, ids, skip_special_tokens=False):
+        return "".join("<|im_end|>" if i == EOS else chr(i) for i in ids)
+
+
+class Engine:
+    def __init__(self, replies):
+        self.replies, self.queue, self.prompts = list(replies), [], []
+
+    def add_request(self, rid, prompt, params):
+        self.prompts.append("".join(chr(i) for i in prompt["prompt_token_ids"]))
+        ids = [ord(c) for c in self.replies.pop(0)] + [EOS]
+        self.queue.append(SimpleNamespace(request_id=rid, finished=True,
+                                          outputs=[SimpleNamespace(token_ids=ids, finish_reason="stop")]))
+
+    def has_unfinished_requests(self):
+        return bool(self.queue)
+
+    def step(self):
+        out, self.queue = self.queue, []
+        return out
+
+    def abort_request(self, rid):
+        pass
+
+
+def run(tasks, replies):
+    eng = Engine(replies)
+    eps, n, _ = run_episodes(tasks, tok=Tok(), eng=eng, make_sampling=lambda n, seed: n, limit=10 ** 6, ctx=10 ** 6,
+                             stop_ids=[EOS], mode="generate", seed_base=1, system="SYS", check_every=10 ** 9,
+                             degeneration_check=lambda ids: None, split_generation=split_generation,
+                             template_opens_think=template_opens_think, label="t", log=lambda *a, **k: None,
+                             env_factory=TE.ToolEnv.factory)
+    return eps, eng
+
+
+CALL = '<tool_call>{"name": "get_weather", "arguments": {"city": "Paris"}}</tool_call>'
+
+
+def test_a_two_turn_episode_runs_verifies_and_becomes_documents():
+    eps, eng = run([task()], ["need the tool</think>\n" + CALL, "done</think>\nIt is sunny in Paris."])
+    e = eps["tc1-test"]
+    assert e["end"] == "episode_done" and len(e["turns"]) == 2
+    assert e["turns"][0]["tool_calls"] == [{"name": "get_weather", "arguments": {"city": "Paris"}}]
+    assert e["turns"][0]["responses"] == ["sunny"]
+    assert "<|tool|>sunny" in eng.prompts[1] and "<tools>" in eng.prompts[0]
+    assert "rerender_reproduces_generation" in e["turns"][1]
+    v = TE.verify(e["task"], e["turns"], thinking=True)
+    assert v.admitted, v.problems
+    docs = TE.documents(e["task"], e["turns"], mode="H-T", stop_ids=[EOS])
+    assert [d.doc_id for d in docs] == ["tc1-test|H-T|t0", "tc1-test|H-T|t1"]
+    assert docs[0].output_ids[-1] == EOS
+
+
+def test_an_off_script_call_ends_the_episode_and_is_refused():
+    bad = '<tool_call>{"name": "get_weather", "arguments": {"city": "Rome"}}</tool_call>'
+    eps, _ = run([task()], ["x</think>\n" + bad])
+    e = eps["tc1-test"]
+    assert e["end"] == "episode_done" and e["env"].off_script
+    assert not TE.verify(e["task"], e["turns"], thinking=True).checks["execution"]
+
+
+def test_later_user_turns_arrive_after_an_answer():
+    eps, eng = run([task(later_user_turns=["and tomorrow?"], final_check={"kind": "none"})],
+                   ["a</think>\nNo call needed.", "b</think>\nStill none."])
+    e = eps["tc1-test"]
+    assert len(e["turns"]) == 2 and "<|user|>and tomorrow?" in eng.prompts[1]
+
+
+def test_non_tool_tasks_keep_their_rendering():
+    eps, eng = run([{"task_id": "plain", "messages": [{"role": "user", "content": "hi"}]}], ["x</think>\nhello"])
+    assert eps["plain"]["end"] == "answered" and "<tools>" not in eng.prompts[0]
+    assert "rerender_reproduces_generation" not in eps["plain"]["turns"][0]
+
+
+def test_task_records_are_checked():
+    assert TE.task_problems(task()) == []
+    assert any("upstream assistant" in p for p in TE.task_problems(
+        task(messages=[{"role": "user", "content": "q"}, {"role": "assistant", "content": "a"}])))
+    assert any("backend" in p for p in TE.task_problems(task(backend={"kind": "live_api"})))
+    with pytest.raises(TE.ToolTaskError):
+        TE.ToolEnv(task(category="bogus"))
+
+
+def test_items_carry_the_tool_calling_critical_tags():
+    p = TE.TOOL_PROTOCOL
+    prompt = [5, 6, 7]
+    out = [11, p["think_close_id"], 12, p["open_id"], 13, p["close_id"], EOS]
+    turn = {"stop_reason": "eos", "prompt_token_ids": prompt, "output_token_ids": out}
+    it = TE.item_of_turn(task(), turn, 0, mode="H-T", thinking=True, domain="supporting", subtype="tool_calling@v1")
+    base = len(prompt) - 1
+    assert it["tags"]["tool_call_open"] == [base + 3] and it["tags"]["tool_call_close"] == [base + 5]
+    assert it["tags"]["think_close"] == [base + 1] and it["tags"]["eos"] == [base + 6]
+    assert it["subtype"] == "tool_calling@v1|H-T" and it["critical_group"] == "H-T"
+    assert TE.item_of_turn(task(), turn, 0, mode="H-N", thinking=False, domain="supporting",
+                           subtype="tool_calling@v1") is None
+
+
+def test_the_real_template_renders_the_env_turn_as_a_tool_call():
+    pytest.importorskip("transformers")
+    from transformers import AutoTokenizer
+    try:
+        tok = AutoTokenizer.from_pretrained("Qwen/Qwen3-4B", revision="1cfa9a7208912126459214e8b04321603b3df60c",
+                                            local_files_only=True)
+    except Exception:
+        pytest.skip("the hybrid's tokenizer is not cached here")
+    env = TE.ToolEnv(task())
+    obs = env.step("<think>\nneed it\n</think>\n\n" + CALL)
+    msgs = [{"role": "user", "content": "weather in Paris?"}, {"role": "assistant", **obs["assistant"]}, *obs["messages"]]
+    s = tok.apply_chat_template(msgs, tools=TOOLS, tokenize=False, add_generation_prompt=True, enable_thinking=True)
+    assert '<tool_call>\n{"name": "get_weather", "arguments": {"city": "Paris"}}\n</tool_call>' in s
+    assert "<tool_response>\nsunny\n</tool_response>" in s
+    assert tok.convert_tokens_to_ids(["<tool_call>", "</tool_call>"]) == [p for p in (TE.TOOL_PROTOCOL["open_id"],
+                                                                                     TE.TOOL_PROTOCOL["close_id"])]
+
+
+def test_the_cli_resolves_the_tool_env_and_records_tool_episodes():
+    from stages.calibration_volume.run_battery import episode_record, resolve_env_factory
+    assert resolve_env_factory("stages.teacher_modes.tool_episodes:ToolEnv.factory") is TE.ToolEnv.factory
+    eps, _ = run([task()], ["x</think>\n" + CALL, "y</think>\nIt is sunny."])
+    rec = episode_record("tc1-test", eps["tc1-test"], label="t", mode="generate", action_protocol="v1")
+    assert rec["category"] == "multi_turn" and rec["split"] == "training" and rec["env_result"]["done"]
+    assert rec["turns"][0]["prompt_token_ids"] and rec["turns"][0]["responses"] == ["sunny"]
+
+
+def test_admission_turns_verified_episodes_into_documents_and_items():
+    from stages.teacher_modes import tool_admission as TA
+    recs = []
+    for t in (task(), task(task_id="tc1-cal", split="calibration")):
+        eps, _ = run([t], ["x</think>\n" + CALL, "y</think>\nIt is sunny."])  # one episode at a time
+        recs += [{"task_id": tid, "turns": e["turns"]} for tid, e in eps.items()]
+    res = TA.admit([task(), task(task_id="tc1-cal", split="calibration")], recs, mode="H-T", stop_ids=[EOS])
+    assert [d["doc_id"] for d in res["documents"]] == ["tc1-test|H-T|t0", "tc1-test|H-T|t1"]
+    assert res["census"]["training|multi_turn"]["admitted"] == 1
+    # the fake engine's ids carry no </think> token id, so the calibration item is refused by the item protocol
+    assert res["census"]["calibration|multi_turn"]["refused_by_check"].get("item_protocol") == 1
+
+
+def test_the_pool_splits_by_family_dedupes_isolates_and_freezes_its_order():
+    from stages.teacher_modes import tool_pool as TP
+    tools_b = [{"type": "function", "function": {"name": "search", "parameters": {"type": "object"}}}]
+    base = [task(task_id=f"tc1-{k}", tools=TOOLS if k % 2 else tools_b,
+                 messages=[{"role": "user", "content": f"question {k}"}]) for k in range(40)]
+    dup = task(task_id="tc1-zz", messages=[{"role": "user", "content": "QUESTION   1"}])
+    long_ = task(task_id="tc1-long", messages=[{"role": "user", "content": "x" * 50}])
+    held = task(task_id="tc1-held", messages=[{"role": "user", "content": "held out"}])
+    pool = TP.assemble(base + [dup, long_, held], held_out_prompt_keys={TP.prompt_key(held)},
+                       prompt_lengths=[lambda t: len(TP.prompt_key(t)) if t["task_id"] != "tc1-long" else 10 ** 6])
+    reasons = {e["task_id"]: e["reason"] for e in pool["excluded"]}
+    assert reasons["tc1-zz"].startswith("T5") and reasons["tc1-held"].startswith("T1") and \
+        reasons["tc1-long"].startswith("length")
+    fam = {t["family"]: t["split"] for t in pool["tasks"]}
+    assert len(fam) == 2 and all(TP.split_of(f) == s for f, s in fam.items())
+    again = TP.assemble(list(reversed(base)), prompt_lengths=())
+    assert again["training_order"] == TP.assemble(base)["training_order"]
+
+
+def test_the_packed_kinds_are_registered_and_refuse_without_a_grant_cap():
+    from stages.teacher_modes import token_matched_phase as TM
+    new = ("tool_generation", "tool_generation_t2507", "packed_search", "train_6cat_a1", "train_6cat_a2", "train_6cat_c1")
+    assert set(new) <= set(TM.STUDY.kinds) and set(new) <= set(TM.DRIVERS) and set(new) <= set(TM.KIND_RECORDS)
+    for k in new:
+        assert TM.kind_cap_problems(k, 1.0), k                      # the grant names no cap for any of them
+        assert all(isinstance(r, str) for r in TM.KIND_RECORDS[k])
+    assert TM.main(["issue", "--kind", "packed_search", "--run-id", "x", "--expected-usd", "1",
+                    "--hard-cap-usd", "1", "--dry-run"]) == 11
+    for s in TM.STUDY.scripts:
+        assert (TM.REPO_ROOT / s).is_file(), s
+
+
+def test_binding_fills_a_built_packs_files_and_steps(tmp_path):
+    from aadistill.data.token_documents import TokenDocument, pack_sequential, write_pack
+    from stages.teacher_modes import packed_training_plan as PTP
+    docs = [TokenDocument(f"d{i}", (5, 6, 7), (8, 9, 0)) for i in range(30)]
+    write_pack(pack_sequential(docs[:25], 16, 0, order_seed=1), pack_sequential(docs[25:], 16, 0, order_seed=1),
+               tmp_path / "C1-6cat", data_type={d.doc_id: "t" for d in docs})
+    plan = PTP.bind(PTP.packed_units(), tmp_path)
+    c1 = [u for u in plan["units"] if u["arm"] == "C1-6cat"]
+    a1 = [u for u in plan["units"] if u["arm"] == "A1-6cat"]
+    assert all(isinstance(u["config"]["schedule"]["total_steps"], int) for u in c1)
+    assert all(u["config"]["lineage"]["data"][0]["files_sha256"]["blocks.npz"] != PTP.TO_BUILD for u in c1)
+    assert all(u["config"]["schedule"]["total_steps"] == PTP.TO_BUILD for u in a1)    # its pack is not built
+    assert plan["seed_order"] == [20260726, 20260801]

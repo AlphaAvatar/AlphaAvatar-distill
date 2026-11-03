@@ -68,7 +68,10 @@ STUDY = SE.Study(
                   ("token_matched_phase", "phase", "supplement_session", "teacher_session", "admission",
                    "supply_audit", "build_supplement_tasks", "build_tasks", "build_calibration_supplement",
                    "hybrid_calibration", "inputs_session", "full_search", "hybrid_state_eval",
-                   "freeze_state_eval", "a1_units", "training_plan")) + (
+                   "freeze_state_eval", "a1_units", "training_plan",
+                   #: the packed round (packed_round_design.json)
+                   "packed_full_search", "packed_inputs", "packed_packs", "packed_training_plan", "packing_audit",
+                   "tool_episodes", "tool_admission", "tool_pool", "tool_session", "six_category_selection")) + (
         "scripts/shared/study_engineering.py", "scripts/shared/project_position.py", "scripts/shared/eval_sets.py",
         "scripts/shared/pod/teacher_cache.py", "scripts/stages/stage-0/calibration_volume/run_battery.py",
         "scripts/stages/stage-0/calibration_volume/score_battery.py",
@@ -82,8 +85,14 @@ STUDY = SE.Study(
         "scripts/shared/pod/autoinit_preflight_setup.sh", "scripts/shared/pod/collect_artifacts.py"),
     wire_schema="aadistill.stage2.teacher_modes.tm_authorization/v1",
     claims=frozenset({"formal", "teacher_generation"}),
-    kinds=("supplement", "inputs", "search", "train_a1"),
-    kind_claims=(("search", frozenset({"formal"})), ("train_a1", frozenset({"formal", "training", "evaluation"}))))
+    kinds=("supplement", "inputs", "search", "train_a1",
+           #: the packed round: none runs before the grant names its hard cap (kind_cap_problems)
+           "tool_generation", "tool_generation_t2507", "packed_search",
+           "train_6cat_a1", "train_6cat_a2", "train_6cat_c1"),
+    kind_claims=(("search", frozenset({"formal"})), ("train_a1", frozenset({"formal", "training", "evaluation"})),
+                 ("packed_search", frozenset({"formal"})),
+                 *((k, frozenset({"formal", "training", "evaluation"}))
+                   for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1"))))
 
 
 class TMAuthorization(SE.EngineeringAuthorization):
@@ -98,7 +107,22 @@ KIND_RECORDS = {
     "search": ("configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json",
                "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_freeze.json"),
     "train_a1": ("logs/stages/stage-2/teacher_modes/plans/training_plan_a1.json",),
+    "tool_generation": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
+                        "data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json"),
+    "tool_generation_t2507": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
+                              "data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json"),
+    "packed_search": ("configs/stages/stage-2/teacher_modes/packed_round_design.json",
+                      "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
+                      "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
+                      "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v2_freeze.json",
+                      "configs/shared/baselines/selection.json",
+                      "configs/shared/baselines/initialization_forward_baseline_v2.json"),
+    **{k: ("logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json",)
+       for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
 }
+#: the packed training kinds' arms, and the arms trained with Thinking-2507 rather than the hybrid
+PACKED_TRAIN_ARMS = {"train_6cat_a1": "A1-6cat", "train_6cat_a2": "A2-6cat", "train_6cat_c1": "C1-6cat"}
+THINKING_2507_KINDS = frozenset({"tool_generation_t2507", "train_6cat_c1"})
 #: the full search's planned minutes and A1's per-unit deadline (budget_v2.json: the search's deadline-bounded
 #: 37.3 h; A1's 6.35 h per seed)
 SEARCH_DEADLINE_MINUTES = 37.29 * 60
@@ -109,7 +133,7 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
     """Generation runs the path the committed L40S check admitted (the same engine, card and protocol as the v1
     teacher session); every kind's artifact binds that record and its own `KIND_RECORDS`."""
     from stages.teacher_modes import l40s_check as LC
-    gate = "teacher" if kind in ("supplement", "inputs") else None
+    gate = "teacher" if kind in ("supplement", "inputs", "tool_generation") else None
     if gate:
         bad = LC.gate(LC.load_config(Path(root) / P1.CHECK_CONFIG)["gates"][gate], root)
         if bad:
@@ -264,6 +288,36 @@ def inputs_command(ctx, plan) -> str:
             f"--authorization {auth} --durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
 
 
+def tool_generation_command(ctx, plan, lineage: str = "hybrid") -> str:
+    a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
+    auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
+            f"--authorization {auth} --lineage {lineage} --durable-root {P1.durable(a)} --status {status}"
+            + P1._tail(status))
+
+
+def packed_search_command(ctx, plan, planned_minutes: float = SEARCH_DEADLINE_MINUTES) -> str:
+    a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
+    auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    minutes = max(30.0, float(planned_minutes) - 30.0)
+    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/packed_full_search.py "
+            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status} --deadline-minutes {minutes:.0f}"
+            + P1._tail(status))
+
+
+def train_6cat_command(ctx, plan, kind: str) -> str:
+    a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
+    auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/a1_units.py "
+            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status} "
+            f"--unit-deadline-hours {PACKED_UNIT_DEADLINE_HOURS[kind]} --kind {kind} "
+            f"--plan {KIND_RECORDS[kind][0]} --arm {PACKED_TRAIN_ARMS[kind]} --units-dir packed_units"
+            + P1._tail(status))
+
+
+#: per-unit deadlines of the packed trainings (plans/packed_training_budget.json, upper case per seed, rounded up)
+PACKED_UNIT_DEADLINE_HOURS = {"train_6cat_a1": 8.5, "train_6cat_a2": 24.0, "train_6cat_c1": 7.5}
+
 #: per kind: (driver, command, local assets beyond the battery, description)
 DRIVERS = {
     "supplement": ("scripts/stages/stage-2/teacher_modes/supplement_session.py", supplement_command, ("order",),
@@ -274,15 +328,34 @@ DRIVERS = {
                "Research A v2, A1 phase B: the hybrid D4 full search (one L40S, micro-batch 1)"),
     "train_a1": ("scripts/stages/stage-2/teacher_modes/a1_units.py", train_a1_command, ("a1_pack",),
                  "Research A v2, A1 phases C and D: A1's two seeds trained from the Top-1 and formally evaluated"),
+    "tool_generation": ("scripts/stages/stage-2/teacher_modes/tool_session.py", tool_generation_command,
+                        ("tool_pool",), "Research A packed round: the hybrid's tool-calling episodes, both modes"),
+    "tool_generation_t2507": ("scripts/stages/stage-2/teacher_modes/tool_session.py",
+                              lambda ctx, plan: tool_generation_command(ctx, plan, "thinking_2507"), ("tool_pool",),
+                              "Research A packed round: Thinking-2507's tool-calling episodes"),
+    "packed_search": ("scripts/stages/stage-2/teacher_modes/packed_full_search.py", packed_search_command,
+                      ("profiles_v2", "suite_v2"),
+                      "Research A packed round: the hybrid full search in the packed forward context (one L40S)"),
+    **{k: ("scripts/stages/stage-2/teacher_modes/a1_units.py",
+           (lambda ctx, plan, _k=k: train_6cat_command(ctx, plan, _k)), (f"pack_{k}",),
+           f"Research A packed round: {PACKED_TRAIN_ARMS[k]}'s two seeds trained and formally evaluated")
+       for k in PACKED_TRAIN_ARMS},
 }
 #: the plan's time contingency per kind: the search and A1's units stop themselves at their own deadlines with their
 #: state saved (full_search --deadline-minutes, a1_units --unit-deadline-hours), so 5% covers the closeout; the
 #: generation kinds keep the runner's 25%
-CONTINGENCY = {"search": 0.05, "train_a1": 0.05}
+CONTINGENCY = {"search": 0.05, "train_a1": 0.05, "packed_search": 0.05,
+               **{k: 0.05 for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")}}
 #: small evidence pulled on every poll, per kind (relative to the durable root)
 POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation_check.json",
                      "search_a1/search/states.jsonl", "search_a1/search/telemetry.jsonl", "search_a1/products.json"),
-          "train_a1": ("a1_units.json",)}
+          "train_a1": ("a1_units.json",),
+          "packed_search": ("search_packed/search_record.json", "search_packed/first_evaluation_check.json",
+                            "search_packed/search/states.jsonl", "search_packed/search/telemetry.jsonl",
+                            "search_packed/products.json"),
+          **{k: (f"{PACKED_TRAIN_ARMS[k]}_units.json",) for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
+          "tool_generation": ("tool_generation_hybrid/tool_session.json",),
+          "tool_generation_t2507": ("tool_generation_thinking_2507/tool_session.json",)}
 
 
 def secure_files(ctx) -> None:
@@ -324,12 +397,19 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     secure_files(ctx)
     root, st, kind = P1.durable(ctx.args), SE.store(ctx), _kind(ctx)
     got = {}
-    if kind == "search":
-        got["search_evidence"] = P1._tar(ctx, f"{root}/search_a1", "search_evidence",
+    if kind in ("search", "packed_search"):
+        sub = "search_a1" if kind == "search" else "search_packed"
+        got["search_evidence"] = P1._tar(ctx, f"{root}/{sub}", "search_evidence",
                                          excludes=("./search/states", "./top1", "./repeatability"))[0]
-        prod = st / "search_a1/products.json"
+        prod = st / f"{sub}/products.json"
         if prod.is_file():
-            got.update(top1_on_volume(ctx, f"{root}/search_a1/top1", json.loads(prod.read_text())["top1"]["files_sha256"]))
+            got.update(top1_on_volume(ctx, f"{root}/{sub}/top1", json.loads(prod.read_text())["top1"]["files_sha256"]))
+    elif kind in ("tool_generation", "tool_generation_t2507"):
+        sub = "tool_generation_hybrid" if kind == "tool_generation" else "tool_generation_thinking_2507"
+        got["tool_generation"] = P1._tar(ctx, f"{root}/{sub}", "tool_generation")[0]
+    elif kind in PACKED_TRAIN_ARMS:
+        got["packed_units_evidence"] = P1._tar(ctx, f"{root}/packed_units", "packed_units_evidence",
+                                               excludes=("./*/train/checkpoints", "./*/evaluation/package/*.safetensors"))[0]
     else:
         #: the evaluation's model package is the checkpoint's weights again (a_train_a1_20261102_184122 carried two
         #: 2.38 GB copies home that no analysis reads; their sha256 is in a1_units.json) -- they stay on the volume
@@ -348,21 +428,34 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
     driver, command, extra, description = DRIVERS[kind]
     if kind == "search" and minutes:
         command = (lambda ctx, plan, _m=float(minutes): search_command(ctx, plan, _m))
+    if kind == "packed_search" and minutes:
+        command = (lambda ctx, plan, _m=float(minutes): packed_search_command(ctx, plan, _m))
     t = json.loads((REPO_ROOT / P1.PROTOCOL).read_text())["teacher"]
+    if kind in THINKING_2507_KINDS:          #: C1-6cat's lineage: Thinking-2507 generates and teaches
+        li = json.loads((REPO_ROOT / "configs/stages/stage-2/teacher_modes/tool_generation_protocol.json")
+                        .read_text())["lineages"]["thinking_2507"]
+        t = {"model": li["model"], "revision": li["revision"]}
     battery = LocalAsset(repo_path="artifacts/stages/stage-3/eval/battery_v2", dest_name="battery_v2",
                          install_to="artifacts/stages/stage-3/eval")         #: the v1 teacher kind's assets, unchanged
     order = LocalAsset(repo_path=ORDER, dest_name=Path(ORDER).name, install_to=str(Path(ORDER).parent))
     cal = "artifacts/stages/stage-2/teacher_modes/calibration_v2"
     suite = "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v1"
     pack = "artifacts/stages/stage-2/teacher_modes/packs_tm/A1"
-    named = {"order": order,
+    def asset(path: str) -> LocalAsset:
+        return LocalAsset(repo_path=path, dest_name=Path(path).name, install_to=str(Path(path).parent))
+    packed = {"tool_pool": asset("data/stages/stage-2/teacher_modes/tool_pool_v1"),
+              "profiles_v2": asset("artifacts/stages/stage-2/teacher_modes/calibration_v3"),
+              "suite_v2": asset("artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v2"),
+              **{f"pack_{k}": asset(f"artifacts/stages/stage-2/teacher_modes/packs_6cat/{a}")
+                 for k, a in PACKED_TRAIN_ARMS.items()}}
+    named = {**packed, "order": order,
              "profiles": LocalAsset(repo_path=cal, dest_name=Path(cal).name, install_to=str(Path(cal).parent)),
              "suite": LocalAsset(repo_path=suite, dest_name=Path(suite).name, install_to=str(Path(suite).parent)),
              "a1_pack": LocalAsset(repo_path=pack, dest_name=Path(pack).name, install_to=str(Path(pack).parent))}
     assets = (battery,) + tuple(named[x] for x in extra)
     polls = (secure, products_secured) if kind in SHARDS else (secure_files, files_secured)
     relay = ()
-    if kind == "train_a1":                  #: the evaluation's relayed inputs, as v1's recovery kind (phase.py)
+    if kind == "train_a1" or kind in PACKED_TRAIN_ARMS:   #: the evaluation's relayed inputs (phase.py's recovery)
         from stages.phase_c1.autoinit_c1_launch import C1_EVAL_TOKENIZER
         relay = tuple(C1_EVAL_TOKENIZER)
     return SE.Launch(

@@ -100,7 +100,9 @@ def build_session(*, workdir: Path, device: str = "cuda", which: str = "v2", rep
     if any(terms["operator_kl_reference"].values()):
         raise PackedSearchError("the forward baseline declares a non-parent operator KL reference")
     fc = forward_context(baseline, d)
-    suite, items, manifest = HSE.load(src["suite_dir"], ident, src["suite_types"])
+    from stages.teacher_modes import packed_inputs as PI
+    suite, items, manifest = HSE.load(src["suite_dir"], ident, src["suite_types"],
+                                      critical_groups=(PI.CRITICAL_GROUPS_V2 if which == "v2" else None))
     execution = terms["execution"]
     evaluator = StateEvaluator(
         suite, items, device=device, vocab_size=int(ident["architecture"]["vocab_size"]),

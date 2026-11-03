@@ -23,7 +23,9 @@ class BindingError(ValueError):
 CRITICAL_GROUPS = {"H-T": ["think_close", "final_answer", "eos"], "H-N": ["final_answer", "eos"]}
 
 
-def binding_problems(manifest: dict, teacher_identity: dict, types_sha256: str, items_sha256: str) -> list[str]:
+def binding_problems(manifest: dict, teacher_identity: dict, types_sha256: str, items_sha256: str,
+                     critical_groups: dict | None = None) -> list[str]:
+    critical_groups = CRITICAL_GROUPS if critical_groups is None else critical_groups
     bad = []
     root = manifest.get("root_teacher") or {}
     want = {"model": teacher_identity["model"], "revision": teacher_identity["revision"],
@@ -36,9 +38,9 @@ def binding_problems(manifest: dict, teacher_identity: dict, types_sha256: str, 
             bad.append(f"root_teacher.{k} is {str(got)[:40]}, the search's root is {str(v)[:40]}")
     if sorted((manifest.get("modes") or {})) != ["H-N", "H-T"]:
         bad.append("the suite must hold both modes, H-T and H-N")
-    if manifest.get("critical_groups") != CRITICAL_GROUPS:
+    if manifest.get("critical_groups") != critical_groups:
         bad.append(f"the suite's critical groups are {manifest.get('critical_groups')}, not one group per mode "
-                   f"{CRITICAL_GROUPS}: the modes would not weigh 50:50 in the critical-token KL")
+                   f"{critical_groups}: the modes would not weigh 50:50 in the critical-token KL")
     if manifest.get("types_sha256") != types_sha256:
         bad.append("the suite was not built from this type table")
     if manifest.get("items_sha256") != items_sha256:
@@ -48,13 +50,15 @@ def binding_problems(manifest: dict, teacher_identity: dict, types_sha256: str, 
     return bad
 
 
-def load(root, teacher_identity: dict, types_path):
+def load(root, teacher_identity: dict, types_path, critical_groups: dict | None = None):
+    """``critical_groups``: the groups the suite must declare (v1's by default; v2 adds the tool-calling classes,
+    `packed_inputs.CRITICAL_GROUPS_V2`)."""
     from shared.evaluation.load_state_eval import load as shared_load
     root = Path(root)
     manifest = json.loads((root / "manifest.json").read_text())
     items = hashlib.sha256((root / "items.jsonl").read_bytes()).hexdigest()
     types = hashlib.sha256(Path(types_path).read_bytes()).hexdigest()
-    bad = binding_problems(manifest, teacher_identity, types, items)
+    bad = binding_problems(manifest, teacher_identity, types, items, critical_groups)
     if bad:
         raise BindingError("state_eval_hybrid refused: " + "; ".join(bad))
     return shared_load(root)

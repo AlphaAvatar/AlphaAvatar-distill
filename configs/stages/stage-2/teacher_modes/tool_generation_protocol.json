@@ -1,0 +1,87 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_generation_protocol/v1",
+ "status": "PREPARED (2026-11-03): code ready, nothing generated; a session needs its own authorization",
+ "_contract": "The teacher-native tool-calling generation of the packed round: which teacher, which modes, which pool splits, the runner's execution terms. The task protocol (task_record, verification, supervision) is six_category_design.json :: task_pool / protocol, executed by tool_episodes.py and tool_admission.py. AUTHORIZES NOTHING.",
+ "pool": {
+  "id": "tool_pool@v1",
+  "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1",
+  "sources_named_by_the_maintainer": [
+   "Team-ACE/ToolACE",
+   "Agent-Ark/Toucan-1.5M",
+   "nvidia/Nemotron-Agentic-v1"
+  ]
+ },
+ "lineages": {
+  "hybrid": {
+   "model": "Qwen/Qwen3-4B",
+   "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+   "modes": {
+    "H-T": {
+     "arm": "A1-6cat",
+     "template_kwargs": {
+      "enable_thinking": true
+     },
+     "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0.0
+     }
+    },
+    "H-N": {
+     "arm": "A2-6cat",
+     "template_kwargs": {
+      "enable_thinking": false
+     },
+     "sampling": {
+      "temperature": 0.7,
+      "top_p": 0.8,
+      "top_k": 20,
+      "min_p": 0.0
+     }
+    }
+   },
+   "splits": [
+    "training",
+    "validation",
+    "calibration",
+    "state_eval"
+   ]
+  },
+  "thinking_2507": {
+   "model": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "modes": {
+    "T2507": {
+     "arm": "C1-6cat",
+     "template_kwargs": {},
+     "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0.0
+     }
+    }
+   },
+   "splits": [
+    "training",
+    "validation"
+   ]
+  }
+ },
+ "execution": {
+  "seed_base": 2026110300,
+  "session_limit": 8184,
+  "candidates": 2,
+  "action_protocol": "v1",
+  "completion_shards": {
+   "seal_every_records": 50,
+   "seal_every_seconds": 300
+  },
+  "system_message_default": "You are a helpful Assistant.",
+  "env_factory": "stages.teacher_modes.tool_episodes:ToolEnv.factory",
+  "gpu_memory_utilization": 0.8,
+  "_": "request_seed(seed_base, task_id, turn), candidate pass k at seed_base + k, the same rule for every teacher, so a (task, candidate, turn) has one seed whatever the model; 2: pass 1 only for a task whose first candidate fails verification (the current protocol)"
+ },
+ "authorizes": "nothing"
+}

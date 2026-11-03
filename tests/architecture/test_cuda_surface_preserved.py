@@ -2492,6 +2492,9 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
      }),    ("b7ee0c93c2f1e96c376381c3db11ee4e2441f674",
      "Packed round: sequential causal packing for Stage-1 forwards and Stage-3 training (maintainer 2026-11-03)",
      {
+        "src/aadistill/data/tool_calls.py":
+            "NEW MODULE: tool calls in generated text -- parsing (caller-supplied delimiters), the JSON Schema "
+            "subset check, a replay backend, order-free gold matching and the five episode checks. NO CUDA SURFACE.",
         "src/aadistill/data/sequence_packing.py":
             "NEW MODULE: the maintainer's `packing_conversation` verbatim, `sequential_pack` (its "
             "index lists, checked against it on every call, with the prefix-restart token "

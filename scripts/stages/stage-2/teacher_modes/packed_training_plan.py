@@ -113,10 +113,55 @@ def packed_units() -> list[dict]:
     return out
 
 
+BOUND = REPO / "logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json"
+
+
+def bind(units: list[dict], packs_dir: Path, top1_products: Path | None = None) -> dict:
+    """The units bound to their BUILT packs (files, rung, steps and schedule from the pack) and, for A1-6cat and
+    A2-6cat, to the packed search's committed Top-1 (`packed_full_search` products.json). An arm whose pack is
+    not built stays unbound and `training_plan.admit` refuses it."""
+    import copy
+    from aadistill.infrastructure.manifest import sha256_file
+    from stages.teacher_modes import training_plan as TP
+    top1 = json.loads(Path(top1_products).read_text()) if top1_products else None
+    out = []
+    for u in units:
+        cfg = copy.deepcopy(u["config"])
+        arm = u["arm"]
+        d = Path(packs_dir) / arm
+        if (d / "ladder.json").is_file():
+            lad = json.loads((d / "ladder.json").read_text())
+            files = {n: sha256_file(d / n) for n in ("blocks.npz", "audit.jsonl", "ladder.json")}
+            sch = TP.schedule(int(lad["n_blocks"]))
+            cfg.update(data_dir=str(d.relative_to(REPO)) if d.is_relative_to(REPO) else str(d),
+                       rung=int(lad["rungs"][0]["target_supervised_tokens"]),
+                       val_blocks=int(lad.get("n_val_blocks") or 16))
+            cfg["schedule"] = {k: sch[k] for k in ("total_steps", "warmup_steps", "min_lr_frac")}
+            cfg["intervals"] = {**cfg["intervals"], "eval_every": sch["eval_every"], "eval_blocks": cfg["val_blocks"]}
+            cfg["checkpoint"] = {**cfg["checkpoint"], "save_every": sch["save_every"], "bind_identity": True}
+            cfg["lineage"]["data"][0]["files_sha256"] = files
+        if arm in ("A1-6cat", "A2-6cat") and top1 is not None:
+            t = top1["top1"]
+            cfg["student_path"] = t["path"]
+            cfg["lineage"]["initialization"]["model_safetensors_sha256"] = t["files_sha256"]["model.safetensors"]
+            cfg["lineage"]["initialization"]["provenance"] = {"record": str(top1_products),
+                                                              "record_sha256": sha256_file(top1_products)}
+        out.append({**u, "config": cfg})
+    return {"schema": "aadistill.stage2.teacher_modes.packed_training_plan/v1", "seed_order": list(SEEDS),
+            "units": out, "lineage_validation": TP.validate(out), "authorizes": "nothing"}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--write", default=None)
+    ap.add_argument("--bind-packs", default=None, help="bind the units to built packs under this directory")
+    ap.add_argument("--top1-products", default=None, help="the packed search's products.json")
     a = ap.parse_args(argv)
+    if a.bind_packs:
+        doc = bind(packed_units(), Path(a.bind_packs), Path(a.top1_products) if a.top1_products else None)
+        BOUND.write_text(json.dumps(doc, indent=1) + "\n")
+        print(BOUND)
+        return 0
     audit = json.loads(AUDIT.read_text())["stage3"]
     factor = {"A1-6cat": audit["A1"]["B_training_coverage"]["packed_sequences"]
               / audit["A1"]["isolated_pack_for_comparison"]["packed_sequences"],

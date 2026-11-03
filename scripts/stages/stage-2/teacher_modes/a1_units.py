@@ -44,11 +44,16 @@ PLAN = REPO / "logs/stages/stage-2/teacher_modes/plans/training_plan_a1.json"
 PREREG = REPO / "logs/stages/stage-2/teacher_modes/plans/token_matched_preregistration.json"
 SCHEMA = "aadistill.stage2.teacher_modes.a1_units/v1"
 TEMPLATE = {"enable_thinking": True}
+#: the packed round's arms (`--arm`, `--plan`, `--kind`): each in its own mode and template; C1-6cat's teacher is
+#: Thinking-2507, whose template opens the think block itself. A1 (the defaults) is unchanged.
+ARM_TEMPLATE = {"A1": TEMPLATE, "A1-6cat": {"enable_thinking": True}, "A2-6cat": {"enable_thinking": False},
+                "C1-6cat": {}}
+HYBRID_ARMS = frozenset({"A1", "A1-6cat", "A2-6cat"})
 
 
-def units(plan: dict) -> list[dict]:
-    """The plan's A1 units in their order (seed 20260726 first)."""
-    us = [u for u in plan["units"] if u["arm"] == "A1"]
+def units(plan: dict, arm: str = "A1") -> list[dict]:
+    """The plan's units of ``arm`` in their order (seed 20260726 first)."""
+    us = [u for u in plan["units"] if u["arm"] == arm]
     return sorted(us, key=lambda u: plan["seed_order"].index(u["seed"]))
 
 
@@ -100,10 +105,15 @@ def main(argv=None) -> int:
     ap.add_argument("--durable-root", required=True)
     ap.add_argument("--status", required=True)
     ap.add_argument("--unit-deadline-hours", type=float, required=True)
+    ap.add_argument("--kind", default="train_a1")
+    ap.add_argument("--plan", default=str(PLAN.relative_to(REPO)))
+    ap.add_argument("--arm", default="A1", choices=sorted(ARM_TEMPLATE))
+    ap.add_argument("--units-dir", default="v2_units")
     a = ap.parse_args(argv)
     durable, status = Path(a.durable_root), Path(a.status)
-    record = {"schema": SCHEMA, "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "units": {}}
-    evidence = durable / "a1_units.json"
+    record = {"schema": SCHEMA, "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "units": {},
+              "arm": a.arm, "kind": a.kind}
+    evidence = durable / ("a1_units.json" if a.arm == "A1" else f"{a.arm}_units.json")
 
     def mark(m: str) -> None:
         with status.open("a") as fh:
@@ -117,17 +127,21 @@ def main(argv=None) -> int:
     try:
         from stages.teacher_modes import token_matched_phase as TM
         from stages.teacher_modes import training_plan as TP
-        record["authorization"] = TM.require_on_pod(Path(a.authorization), "train_a1", REPO).get("authorization_id")
-        plan = json.loads(PLAN.read_text())
+        record["authorization"] = TM.require_on_pod(Path(a.authorization), a.kind, REPO).get("authorization_id")
+        plan = json.loads((REPO / a.plan).read_text())
         from shared.pod.teacher_cache import local_snapshot
-        t = plan["teacher"]
+        us = units(plan, a.arm)
+        if not us:
+            raise RuntimeError(f"{a.plan} holds no unit of arm {a.arm}")
+        t = plan.get("teacher") or us[0]["config"]["teacher"]
         snap = Path(local_snapshot(t["model_id"], t["revision"]))
-        record["tokenizer"] = TP.stage_tokenizers(snap)
+        if a.arm in HYBRID_ARMS:
+            record["tokenizer"] = TP.stage_tokenizers(snap)
         mark("CONTRACT_OK")
-        for u in units(plan):
+        for u in us:
             name, cfg = u["unit"], u["config"]
             row = record["units"].setdefault(name, {})
-            out_dir, eval_dir = Path(cfg["out_dir"]), durable / "v2_units" / name / "evaluation"
+            out_dir, eval_dir = Path(cfg["out_dir"]), durable / a.units_dir / name / "evaluation"
             out_dir.mkdir(parents=True, exist_ok=True)
             st = state(out_dir, eval_dir)
             row["state_at_start"] = st
@@ -156,11 +170,17 @@ def main(argv=None) -> int:
             mark(f"EVAL_START:{name}")
             from stages.reasoning_data import h1pa_driver as HD
             ident = json.loads((REPO / "configs/stages/stage-2/teacher_modes/teacher_identity.json").read_text())
-            pkg = {"tokenizer_source": str(REPO / TP.TOKENIZERS["hybrid"]),
-                   "sidecar_sha256": {n: ident["files_sha256"][n] for n in ("tokenizer.json", "tokenizer_config.json")}}
+            if a.arm in HYBRID_ARMS:
+                pkg = {"tokenizer_source": str(REPO / TP.TOKENIZERS["hybrid"]),
+                       "sidecar_sha256": {n: ident["files_sha256"][n] for n in ("tokenizer.json", "tokenizer_config.json")}}
+            else:                       #: Thinking-2507's tokenizer, the one its lineage trained with
+                src = REPO / TP.TOKENIZERS["thinking_2507"]
+                pkg = {"tokenizer_source": str(src),
+                       "sidecar_sha256": {n: sha256_file(src / n) for n in ("tokenizer.json", "tokenizer_config.json")}}
             t0 = time.time()
             rep, _files = HD.evaluate({"evaluation": evaluation_spec(), "out": eval_dir, "progress": eval_dir / "progress",
-                                       "label": name, "model_dir": model_dir, "package": pkg, "template_kwargs": TEMPLATE,
+                                       "label": name, "model_dir": model_dir, "package": pkg,
+                                       "template_kwargs": ARM_TEMPLATE[a.arm],
                                        "env": {**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1"}})
             row.update(eval_seconds=round(time.time() - t0, 1), formal_report=str(eval_dir / "formal_report.json"))
             save()
