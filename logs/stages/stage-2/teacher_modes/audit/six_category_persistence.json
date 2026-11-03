@@ -1,0 +1,109 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.six_category_persistence/v1",
+ "written_utc": "2026-11-03T15:30:00Z",
+ "question": "maintainer 2026-11-03 ('Thinking-2507 六类数据对照方案补充', section 8 item 9): where the hybrid Top-1, the Thinking-2507 D4 Top-1 and the historical training evidence the six-category arms build on are kept, and what their sha256 status is today",
+ "method": "read-only: sha256 recomputed on the dev box where the bytes are local; the private relay's LFS sha256 read through the Hub API (huggingface_hub.get_paths_info, no download); provider volumes and pods listed with runpodctl (no resource created, started or resized). Bytes that live only on a network volume cannot be re-hashed without a pod, which is not authorized: for them the last recorded hash is given with its record and time.",
+ "provider_today": {
+  "time_utc": "2026-11-03T15:20Z",
+  "pods": [],
+  "network_volumes": [
+   {"id": "4rhubprswo", "name": "aad-a1-phase", "size_gb": 350, "datacenter": "US-TX-3", "usd_per_month": 24.5,
+    "reserve": "the A1 phase booked $13.34 for 350 GB to 2026-11-15T12:55Z (grant teacher_modes_token_matched_grant.json)"},
+   {"id": "am5m373kuq", "name": "aad-h1pa", "size_gb": 55, "datacenter": "EUR-IS-2", "usd_per_month": 3.85}
+  ],
+  "price_basis": "network volume $0.07 per GB-month (audit/provider_resources_20261101.json)"
+ },
+ "artifacts": [
+  {
+   "what": "hybrid D4 full-search Top-1 (A1-6cat and A2-6cat's initialization)",
+   "identity": {"state_id": "159e73be3e1157e8367a476eb72e6afc",
+                "model.safetensors": "3459b9c99492b33ea41fc5545fc3a1d80a89bfba28fb5181c2d1606ea5c3220c",
+                "config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+                "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+                "bytes": 1192135096, "artifact_digest": "ab8ffb0d05ae95539432b5a31ea7cfa193ff0e7fb6ef854fd6b32958589f18f4"},
+   "copies": [
+    {"where": "volume 4rhubprswo :: /runpod-volume/teacher_modes/search_a1/top1",
+     "verified": "sha256sum on the search pod 2026-11-02T16:48Z (runs/a_search_20261101_153803/closeout/teardown.json); re-hashed by both A1 training units' lineage gate before step 0 on 2026-11-02 (run_manifest.json :: initialization_sha256 3459b9c9...)",
+     "re_verified_today": false}
+   ],
+   "single_copy": true,
+   "risk": "the only copy. The dev-box pull failed (5.7 MB in 1,200 s) and no relay copy was attempted. If 4rhubprswo is deleted, A1-6cat and A2-6cat have no initialization until the Top-1 is copied or re-materialized from the search record (search evidence below), which needs a pod",
+   "search_evidence": {"local": ".scratch/research_a/a_search_20261101_153803/store/search_evidence.tgz",
+                       "sha256": "ebc81e9fbc0a3c1a7eb31710bcabc2b561d95d728e9777ee05f6966a5ca985d9",
+                       "committed": "runs/a_search_20261101_153803/evidence/{search_record.json, stage1_selection.json, products.json, first_evaluation_check.json, telemetry.jsonl}",
+                       "on_the_volume_only": "the search's candidate states and journal (search/states.jsonl, sha256 5ee31414...)"}
+  },
+  {
+   "what": "Thinking-2507 D4 Top-1 (C1-6cat's initialization)",
+   "identity": {"candidate": "1301deb71685aa1ca5c7b6cf2c491ac4",
+                "model.safetensors": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+                "bytes": 1192135096, "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0"},
+   "copies": [
+    {"where": "dev box :: artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+     "verified": "sha256 recomputed 2026-11-03: fc28e0dd...", "re_verified_today": true},
+    {"where": "relay AlphaAvatar/aadistill-artifacts :: stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+     "verified": "LFS sha256 and size read through the Hub API 2026-11-03: fc28e0dd..., 1,192,135,096 bytes", "re_verified_today": true}
+   ],
+   "single_copy": false,
+   "record": "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json"
+  },
+  {
+   "what": "C1's historical pack D4A_merged_whole (kept as it is; C1-6cat keeps 989 of its training and 10 of its validation sequences byte for byte)",
+   "identity": {"blocks.npz": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+                "audit.jsonl": "0fab85184e83b5b5ebf0454cb656d3752e80f48eeabc75a092a2a9906949080b",
+                "ladder.json": "dabd1405236fe4823d944d8215f6c2a5e8abf765115436578c6446c035e4e8f7"},
+   "copies": [
+    {"where": "dev box :: artifacts/stages/stage-2/reasoning_data/packs/D4A_merged_whole",
+     "verified": "all three files re-hashed 2026-11-03 by c1_tool_replacement.py", "re_verified_today": true},
+    {"where": "relay :: stage2_h1pa/packs/D4A_merged_whole",
+     "verified": "blocks.npz LFS sha256 read 2026-11-03: 8b97b202...", "re_verified_today": true}
+   ],
+   "single_copy": false
+  },
+  {
+   "what": "A1's and A2's five-category packs (the A1 phase trained A1's)",
+   "identity": {"A1 blocks.npz": "32a87943433cf6747a897f09160b0068a1288a5cee45e1a306cca8c8e0c67a86",
+                "A2 blocks.npz": "a583763d27371a3635a165cda5b860c18d16b2c86bbc8d7fdba88e0158e33acb"},
+   "copies": [
+    {"where": "dev box :: artifacts/stages/stage-2/teacher_modes/packs_tm/{A1,A2}", "verified": "re-hashed 2026-11-03", "re_verified_today": true},
+    {"where": "volume 4rhubprswo (A1's staged for training)", "verified": "admitted by the train_a1 lineage gate 2026-11-02", "re_verified_today": false}
+   ],
+   "note": "A1-6cat and A2-6cat need new packs (the base category changes from five to six types); these stay the five-category record"
+  },
+  {
+   "what": "A1's trained students (both seeds, step 1,653)",
+   "identity": {"A1-s20260726 model": "1f3e5eead669c6bd76dc68a93a0ca071e716f82233f397a945edda5a03bc1188",
+                "A1-s20260801 model": "06c12901939ec6f04b8a10278385d339845bd31140534d6d96fae587139d21b3"},
+   "copies": [
+    {"where": "volume 4rhubprswo :: /runpod-volume/teacher_modes/v2_units/A1-s<seed>/train/checkpoints/step_001653/{model/, trainer_state.pt, resume_identity.json}",
+     "verified": "model sha256 by a1_units.py on the pod; trainer_state.pt never hashed", "re_verified_today": false},
+    {"where": "dev box :: .scratch/research_a/a_train_a1_20261102_184122/store/a1_evidence.tgz (sha256 a893547d...), each unit's evaluation/package/model.safetensors",
+     "verified": "the two models re-hashed on the dev box 2026-11-03 from the archive: equal to the trained ones", "re_verified_today": true}
+   ],
+   "single_copy": "the weights have two copies; the trainer states (optimizer, RNG) only one, unhashed",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/closeout/a1_evidence.json"
+  },
+  {
+   "what": "historical D4-Augmented's trained students (both seeds) and their evidence",
+   "identity": {"D4-Augmented-s20260726 checkpoint artifact_digest": "6889b9c97c0d16f0e17e0f746857701e195b40304c27cebf10dfd6da12fc13f7",
+                "D4-Augmented-s20260801 checkpoint artifact_digest": "2cbbee9ea52b27db3258fa4bb945159dc0375431edfdb0ce60c074543191702a",
+                "evidence s20260726": "2b670810ae03bb5c51340796862bee6d6caea773e6355d44a9265031e8801a81",
+                "evidence s20260801": "680a598ade1f8c5ba3ff6e1545daec172043643d016c409ba31b303524f29cab"},
+   "copies": [
+    {"where": "volume am5m373kuq :: /runpod-volume/h1pa/D4-Augmented-s<seed>/checkpoint", "verified": "persisted by h1pa2_20261024_203226 / h1pa2_20261025_055042 (closeout/outcome.json)", "re_verified_today": false},
+    {"where": "relay :: stage2_h1pa/units/evidence/D4-Augmented-s<seed>.evidence.tgz", "verified": "LFS sha256 of both read 2026-11-03: match", "re_verified_today": true},
+    {"where": "dev box :: artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/", "verified": "both archives re-hashed 2026-11-03: match", "re_verified_today": true}
+   ],
+   "single_copy": "the weights: one copy (am5m373kuq); the evidence: three"
+  },
+  {
+   "what": "Research A v1's six recovery units (historical, never read as v2 results)",
+   "copies": [{"where": "volume am5m373kuq", "verified": "runs/a_recovery_20261030_211948/closeout/maintainer_stop.json", "re_verified_today": false}]
+  }
+ ],
+ "decisions_owed": [
+  "4rhubprswo after 2026-11-15T12:55Z: it holds the hybrid Top-1's only copy, which A1-6cat and A2-6cat read; keeping it costs about $0.82 per day ($24.50 per month); copying the 1.19 GB Top-1 elsewhere first needs a pod (and, for the relay, room the relay may not have: logs/stages/stage-2/reasoning_data/plans/durability_plan.json :: relay_capacity)",
+  "whether A1's trainer states should be hashed or kept: no planned arm resumes A1's runs"
+ ],
+ "authorizes": "nothing"
+}

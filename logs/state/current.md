@@ -9,6 +9,22 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
+**RESEARCH A: SIX BASE-CORPUS TYPES — A1-6cat, A2-6cat, C1-6cat DESIGNED AT $0 (2026-11-03; maintainer brief "Thinking-2507 六类数据对照方案补充"). STOPPED at the maintainer's review: nothing generated, downloaded, searched, trained or evaluated; no pod; no cap raised.**
+The owner: [`docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md`](../../docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md)
+(design `configs/stages/stage-2/teacher_modes/six_category_design.json`). Decision record: `logs/budget/decisions.md`
+2026-11-03.
+- **Sources** (`audit/tool_calling_source_review.json`): none covered outright. Proposed under conditions:
+  Toucan-1.5M, the two NeMo Gym Pivot sets and WorkBench. Glaive, xLAM and everything built from them are excluded.
+  Three gaps (gold parallel arguments, missing-parameter questions, an MCP success check) are SHORTFALL risks.
+- **C1-6cat** (`audit/c1_tool_replacement.json`): replaces only the 1,479 tool-only training sequences (492,587
+  supervised tokens) and 6 validation sequences; 989 + 10 sequences are kept byte for byte; `D4A_merged_whole` is
+  untouched.
+- **Persistence** (`audit/six_category_persistence.json`): the hybrid Top-1's only copy is on `4rhubprswo`
+  (reserve to 2026-11-15T12:55Z); the D4 Top-1 was re-hashed on the dev box and relay.
+- **Next: the maintainer's ruling** on sources, category shares, a tool-calling evaluation, the volume, and a
+  phase-by-phase budget (six trainings about $47.58 expected). Nothing is running and nothing is billing apart from
+  the two retained volumes (0 pods).
+
 **RESEARCH A v2: THE A1 PHASE IS COMPLETE (2026-11-03; maintainer 2026-11-01, "Execute A1 First"). Both seeds trained and evaluated; A1 spent $33.74 of its $63.66 sessions envelope plus the volume's $13.34 storage reserve (cap $77.00). STOPPED: A2, C1 and Research B are NOT authorized; no merge.**
 The owner: [`docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md`](../../docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md)
 section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries). Grant:
@@ -27,7 +43,8 @@ section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries
   abstract 0/95) against the thinking-mode teacher's 511 (89.6%); interactive 0 and 2 of 144 (teacher 62).
   Result: `analyses/a1_result.json`; TOKEN_MATCHED.md D has the tables, the volume's contents and A2's plan.
   Attempts 1 ($0.2436) and 2 ($0) ended before any training step and were repaired. No GO / NO-GO is made.
-- **Next: the maintainer's decision** on A2 / C1 and on volume `4rhubprswo` (reserve to 2026-11-15T12:55Z).
+- **Next: the maintainer's decision** on A2 / C1 (C1's tool data is now redesigned as C1-6cat, above) and on
+  volume `4rhubprswo` (reserve to 2026-11-15T12:55Z).
   Nothing is running and nothing is billing apart from the two retained volumes (0 pods, provider-confirmed).
 - **Spent before the phase:** A-TM $15.8689; project position read at issue: $67.21 left after the new volume's reserve.
 

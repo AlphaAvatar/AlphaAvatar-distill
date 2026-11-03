@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-11-03T03:45:00Z",
+ "generated_utc": "2026-11-03T16:20:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Research A v2 A1 phase COMPLETE (a_train_a1_20261102_184122; analyses/a1_result.json). Stopped: the maintainer decides A2 / C1 and volume 4rhubprswo's lifecycle (TOKEN_MATCHED.md D).",
+ "next": "Six-type design at $0 (docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md: A1-6cat, A2-6cat, C1-6cat); stopped for the maintainer's ruling on sources, shares, budget and volume 4rhubprswo. A1 COMPLETE.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",

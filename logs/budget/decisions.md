@@ -15108,3 +15108,57 @@ on a paid pod.
   class present in each mode's group. Measurement protocol id `1c8305246073213e58d0c1098ba4e4e0` (group_balanced/v1).
 - **Search driver $0 check-only** with the real inputs: config hash `1dcae927...`, the evaluator's protocol id equals
   the frozen record's, numerical execution fingerprint `24787ea9...` (micro-batch 1). Phase B next.
+
+## 2026-11-03 (UTC) — Maintainer: six base-corpus types for A1, A2 and C1 (A1-6cat, A2-6cat, C1-6cat); the $0 design, source review and C1 replacement audit
+
+- **Context.** The maintainer's brief "Thinking-2507 六类数据对照方案补充" (2026-11-03), after A1's phase completed.
+  Only $0 design, source audit, data protocol and feasibility analysis are authorized: no teacher generation,
+  full search, student training or formal evaluation, no pod, no download or generation of data assets, no raised
+  cap. Owner of the numbers: `docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md`.
+- **Decision (maintainer).**
+  - A future A1 retrains with the base-corpus category back at six types, about 1/6 of its supervised tokens each.
+  - C1 uses tool-calling data of the same kind, source and task composition as the new A1, generated natively by
+    Thinking-2507. It never uses D4-Augmented's Glaive / xLAM records.
+  - C1's change is limited to replacing the tool data (plus the re-packing that forces). Its model, D4 Top-1
+    (`fc28e0dd…`), Top-200 + tail KD, CE 0.25 / KD 1.0 / T 1.0, 3 epochs, seeds and evaluation are unchanged.
+  - Steps are re-derived, and the historical D4 packing strategy is kept and disclosed.
+  - Three identities are kept apart: Historical D4-Augmented, C1-6cat and A1-6cat. A2-6cat shares A1-6cat's recipe
+    and Top-1 with its own mode's outputs.
+  - No full search is re-run. A tool-calling state evaluation may be prepared as a separate version that is never
+    applied retroactively.
+- **Done at $0.**
+  - **Source review** (`audit/tool_calling_source_review.json`; 25 sources, read only, eight re-checked
+    independently). No source is covered outright. Proposed under conditions:
+    - Toucan-1.5M (Apache-2.0; per-row generator allowlist; replay of recorded MCP responses);
+    - the two NeMo Gym Pivot sets (CC-BY-4.0; trajectories rebuilt so that the teacher runs from step one);
+    - WorkBench (MIT; regenerated template tasks; executable sandbox with a final-state check).
+  - **Excluded:**
+    - by rule T3: xLAM, Glaive and every set built from them (When2Call train included, by default);
+    - unproven, OpenAI-generated or non-commercial: ToolACE, ToolBench, APIGen-MT, ToolScale;
+    - benchmarks, evaluation-only: BFCL, tau-bench, ToolSandbox, NESTFUL, API-Bank, ToolHop.
+  - **Gaps with no legal deterministic source:** parallel calls with gold arguments, "ask for the missing
+    parameter", and an MCP success check beyond recorded-trajectory agreement.
+  - **Pool design** (`configs/stages/stage-2/teacher_modes/six_category_design.json`): `tool_pool@v1`, seven
+    categories with proposed shares, splits by tool family, isolation T1–T5, and a 6,144-token prompt bound.
+  - **Generation and verification protocol:** each teacher's template and preset; run_episodes' loop; protocol,
+    schema, gold, execution and task-success checks; whole-episode admission; only native assistant ids supervised.
+  - **C1 replacement audit** (`c1_tool_replacement.py` → `audit/c1_tool_replacement.json`):
+    - every tool turn sits in a tool-only sequence, so the 1,479 training sequences to replace (1,610 turns, 492,587
+      supervised tokens) and the 6 validation sequences (13 turns, 12,624) are listed;
+    - 989 training and 10 validation sequences are kept byte for byte;
+    - the `glaive-000941` train/validation crossing leaves with Glaive;
+    - the target is 492,587 (−0.168% from 2,960,507 / 6).
+  - **Feasibility:** step and cost method with lower / expected / upper per seed: A1-6cat $4.02 / $4.79 / $7.97,
+    A2-6cat $11.29 / $14.02 / $26.15, C1-6cat $3.42 / $4.98 / $9.79. Six trainings $37.46 / $47.58 / $87.82;
+    generation about $3.3–4.4 with a pilot. Beyond the A-TM envelope's $29.92: a new budget decision.
+  - **Persistence** (`audit/six_category_persistence.json`): the hybrid Top-1 has one copy, on `4rhubprswo` (reserve
+    to 2026-11-15T12:55Z). The D4 Top-1, `D4A_merged_whole`, A1's trained models (archive) and D4-Augmented's
+    evidence were re-hashed today on the dev box and/or relay.
+- **Owed to the maintainer:**
+  - the source ruling (including the Pivot reconstruction and whether G2 agreement counts as task success);
+  - the category shares and the prompt bound;
+  - a tool-calling evaluation (eval-set-2): eval-set-1 has 5 formal-core tool prompts;
+  - volume `4rhubprswo`'s lifecycle, or a second copy of the hybrid Top-1;
+  - phase-by-phase authorizations: pool construction, a generation pilot, the three lineages' generation, the six
+    trainings.
+- **Not authorized and not run:** anything paid; A2, C1, C1-6cat, A1-6cat, A2-6cat; Research B; a merge.

@@ -1,7 +1,8 @@
 # Research A v2 — token-matched data, the hybrid D4 full search (proposed), the 3 × 2 training matrix (proposed)
 
-**Status: the A1 phase is executing (maintainer 2026-11-01, "Execute A1 First"; section D). Before it, the $0 work
-after the maintainer's independent review (2026-11-01).**
+**Status: the A1 phase is complete (section D). Since 2026-11-03 the next arms are designed with six base-corpus
+types, and C1's Glaive / xLAM tool data is replaced: [SIX_CATEGORY.md](SIX_CATEGORY.md) (A1-6cat, A2-6cat,
+C1-6cat; $0, not authorized). Before A1, the $0 work after the maintainer's independent review (2026-11-01).**
 - Nothing searches, initializes, trains or evaluates a student, and no inputs session runs. Research B stays
   pending.
 - The review accepted A in principle, accepted B on conditions and confirmed C's matrix. It asked for:
