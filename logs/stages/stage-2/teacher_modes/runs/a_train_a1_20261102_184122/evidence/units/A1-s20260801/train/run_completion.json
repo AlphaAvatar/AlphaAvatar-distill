@@ -1,0 +1,87 @@
+{
+  "finished_utc": "2026-11-03T02:13:43.308626+00:00",
+  "config_sha256": "3a5283e68c730c575d6cca4722cb08421f41bb51a8c3f8e8bd6a5b6d4693ce31",
+  "summary": {
+    "steps": 1653,
+    "final_eval": {
+      "val_blocks": 16,
+      "val_ce": 0.790869,
+      "val_ppl": 2.2053,
+      "val_kd": 0.648641
+    },
+    "checkpoint": "/runpod-volume/teacher_modes/v2_units/A1-s20260801/train/checkpoints/step_001653"
+  },
+  "final_step": 1653,
+  "planned_total_steps": 1653,
+  "completed_all_steps": true,
+  "consumed_blocks": 3306,
+  "execution": {
+    "record_version": 1,
+    "optimizer": "AdamW",
+    "optimizer_defaults": {
+      "lr": 5e-05,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.01
+    },
+    "optimizer_param_groups": 1,
+    "grad_clip": 1.0,
+    "lr_schedule": "cosine to min_lr_frac",
+    "total_steps": 1653,
+    "warmup_steps": 83,
+    "min_lr_frac": 0.1,
+    "block_ordering": "per-epoch torch.randperm(n_blocks, seed*1000003 + epoch) over the rung's blocks, walked by the global consumed-block counter",
+    "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "assistant",
+    "kd_chunk": 512,
+    "kd_chunk_source": "trainer default KD_CHUNK_DEFAULT",
+    "kd_objective": {
+      "objective": "target_rows_reference_topk_tail_forward_kl/v1",
+      "support": {
+        "support_id": "reference_topk_tail_v1",
+        "top_k": 200
+      },
+      "support_selection": "torch.topk of the teacher's float32-widened logits / T",
+      "tail": "complement_logsumexp/v1",
+      "rows": "final hidden states at the loss's prediction positions, before the output head",
+      "position_policy": "kd_scope 'assistant'",
+      "temperature": 1.0,
+      "reduction": "sum over the step's KD positions of tau^2 * KL, divided by that step's KD position count (the trainer's normalizer); CE likewise over its own positions",
+      "is_full_vocabulary_kl": false
+    },
+    "resume_identity": {
+      "data": "accdd503473eeb3f2817e0761159bfa4e8d7cda9aefd4bd50af6bf0dba2a5916",
+      "initialization": "8e04e75c55eab7a9adb1e247a8694dd15b07f4cff56c5da2db9ac2fc528f7ce3",
+      "lineage": {
+        "lineage_sha256": "21d2d6d2d0b8b54e255feb77aa5b47dec08246ad7a411479b34e4f851f7d5d24",
+        "teacher": {
+          "model_id": "Qwen/Qwen3-4B",
+          "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+        },
+        "mode": "thinking",
+        "initialization_sha256": "3459b9c99492b33ea41fc5545fc3a1d80a89bfba28fb5181c2d1606ea5c3220c"
+      }
+    },
+    "blocks_per_step": 2,
+    "micro_blocks": 1,
+    "train_blocks_available": 1102,
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "gradient_checkpointing_applied": true,
+    "device": "cuda",
+    "student_attn_implementation": "sdpa",
+    "teacher_attn_implementation": "sdpa",
+    "seed": 20260801,
+    "step_at_record": 1653,
+    "consumed_blocks_at_record": 3306,
+    "trainable_params": 440467456
+  }
+}

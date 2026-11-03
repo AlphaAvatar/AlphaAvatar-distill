@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-02 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-11-03 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A v2: THE A1 PHASE IS EXECUTING (maintainer 2026-11-01, "Execute A1 First"). A1's new spend is capped at $77.00 (inputs $2.65, search $41.41, storage $13.34, $7.05 per seed). A2, C1 and Research B are NOT authorized; no merge.**
+**RESEARCH A v2: THE A1 PHASE IS COMPLETE (2026-11-03; maintainer 2026-11-01, "Execute A1 First"). Both seeds trained and evaluated; A1 spent $33.74 of its $63.66 sessions envelope plus the volume's $13.34 storage reserve (cap $77.00). STOPPED: A2, C1 and Research B are NOT authorized; no merge.**
 The owner: [`docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md`](../../docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md)
 section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries). Grant:
 `logs/budget/approvals/teacher_modes_token_matched_grant.json` (amended). Branch
@@ -21,9 +21,14 @@ section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries
 - **Phase B (search): COMPLETE** (`a_search_20261101_153803`, $23.96 of $41.21): 93 states, 12 complete leaves;
   Top-1 `159e73be` (DEPTH(base) → FFN(base) → ATTENTION(base) → RESIDUAL_WIDTH(rh), 596,049,920 parameters,
   `model.safetensors` `3459b9c9…`) on volume `4rhubprswo`, sha256-verified there. Pod gone; no observers remain.
-- **Phases C and D (A1's two seeds trained and evaluated): attempt 3 launched** (`a_train_a1_20261102_184122`,
-  hard cap $13.85, `training_plan_a1.json`). Attempts 1 ($0.2436, lineage gate read Xet hashes) and 2 ($0, no pod;
-  the trainer's offline lookup) ended before any training step and are repaired; TOKEN_MATCHED.md D has both.
+- **Phases C and D (A1's two seeds trained and evaluated): COMPLETE** (`a_train_a1_20261102_184122`, $8.7766 of
+  $13.85; pod gone, no observers remain). Both seeds ran all 1,653 steps (validation CE 0.790 / 0.791). On eval-set-1
+  v2's 570 formal static items each seed scored 30 (5.3%; deduction 26/189, induction 2/142, composition 2/144,
+  abstract 0/95) against the thinking-mode teacher's 511 (89.6%); interactive 0 and 2 of 144 (teacher 62).
+  Result: `analyses/a1_result.json`; TOKEN_MATCHED.md D has the tables, the volume's contents and A2's plan.
+  Attempts 1 ($0.2436) and 2 ($0) ended before any training step and were repaired. No GO / NO-GO is made.
+- **Next: the maintainer's decision** on A2 / C1 and on volume `4rhubprswo` (reserve to 2026-11-15T12:55Z).
+  Nothing is running and nothing is billing apart from the two retained volumes (0 pods, provider-confirmed).
 - **Spent before the phase:** A-TM $15.8689; project position read at issue: $67.21 left after the new volume's reserve.
 
 **RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**
@@ -4370,7 +4375,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$747.2192` spent of `$868.0000`, leaving `$120.7808` |
+| project cap | `$780.9633` spent of `$868.0000`, leaving `$87.0367` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

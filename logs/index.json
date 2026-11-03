@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 164,
+  "runs_unrecorded": 172,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -871,8 +871,8 @@
    },
    "teacher_modes": {
     "recorded": 0,
-    "unrecorded": 11,
-    "total": 11
+    "unrecorded": 19,
+    "total": 19
    }
   },
   "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
@@ -4030,11 +4030,51 @@
   },
   {
    "experiment_id": "teacher_modes",
+   "run_id": "a_inputs_20261101_125520",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_inputs_20261101_125520",
+   "n_files": 3,
+   "digest": "8d0d00523d9927709255ac386856699100dd13f7b31908b711bb4f691b339f08",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_inputs_20261101_125709",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_inputs_20261101_125709",
+   "n_files": 3,
+   "digest": "fc1fa93abd95dabc38cabc601f0456c93b4b37850b7eca23c73549edc754c4ff",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_inputs_20261101_125916",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_inputs_20261101_125916",
+   "n_files": 4,
+   "digest": "8c93f191de47d56a5be69dc2bceaef28b5e94a30c3e55a66594d61d24067032b",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
    "run_id": "a_recovery_20261030_211948",
    "root": "logs/stages/stage-2/teacher_modes/runs/a_recovery_20261030_211948",
    "n_files": 4,
    "digest": "5197c9c717e08bdb4e150f3c49e89a02a0bcb11ebb8d3091df9bb210fcc226e1",
    "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_search_20261101_142659",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_search_20261101_142659",
+   "n_files": 5,
+   "digest": "b097ce35b09f0070c4e8452beb821925530ca2be36fbad49c35b29e029af3d6f",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_search_20261101_153803",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_search_20261101_153803",
+   "n_files": 10,
+   "digest": "cf7766a5507139d601b2e8cf23d00b5e5760acfd9d2df8220fb2ff9c9de7a383",
+   "why": "no run manifest; its closeout states: COMPLETE"
   },
   {
    "experiment_id": "teacher_modes",
@@ -4074,6 +4114,30 @@
    "root": "logs/stages/stage-2/teacher_modes/runs/a_teacher_20261030_012648",
    "n_files": 5,
    "digest": "af848b516f544c96542b3529a80c93d2330fe616b58392588a29c1627117599e",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_train_a1_20261102_165858",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_165858",
+   "n_files": 7,
+   "digest": "fffa87ce5bb9c7803994cd4bc538013a53d57718ddbf0ae94ff895471da50e24",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_train_a1_20261102_183510",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_183510",
+   "n_files": 3,
+   "digest": "1f88f0882509c7fffbb4a4adcd5148f35359c335c63de976203259a06e856b03",
+   "why": "no run manifest; its closeout states: ABORTED_BEFORE_CREATE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_train_a1_20261102_184122",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122",
+   "n_files": 38,
+   "digest": "32ac2db93bb8867d928a37b346c0c1d1d2fdfca4602878dfbcdbdc7480f5e1be",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {

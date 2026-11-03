@@ -1,0 +1,1012 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.a1_result/v1",
+ "written_utc": "2026-11-03T03:22:07Z",
+ "set": "eval-set-1 v2 (frozen), scoring protocol v2, validity mask v1: 570 static + 144 interactive formal",
+ "decoding": {
+  "protocol_id": "nucleus_v1",
+  "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+ },
+ "units": {
+  "A1-s20260726": {
+   "fluid": {
+    "static_all": {
+     "n": 570,
+     "correct": 30,
+     "rate": 0.0526,
+     "wilson95": [
+      0.0371,
+      0.0741
+     ]
+    },
+    "by_axis": {
+     "task_contained_deduction": {
+      "n": 189,
+      "correct": 26,
+      "rate": 0.1376,
+      "wilson95": [
+       0.0956,
+       0.1939
+      ]
+     },
+     "inductive_rule_discovery": {
+      "n": 142,
+      "correct": 2,
+      "rate": 0.0141,
+      "wilson95": [
+       0.0039,
+       0.0499
+      ]
+     },
+     "compositional_generalization": {
+      "n": 144,
+      "correct": 2,
+      "rate": 0.0139,
+      "wilson95": [
+       0.0038,
+       0.0492
+      ]
+     },
+     "abstract_analogical": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0389
+      ]
+     }
+    },
+    "interactive_exploratory": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.026
+     ]
+    },
+    "rollout_static": {
+     "n": 570,
+     "usable_rate": 0.7228,
+     "natural_termination_rate": 0.7228,
+     "degeneration_stop_rate": 0.2754,
+     "context_limit_rate": 0.0018,
+     "reasoning_tokens": {
+      "mean": 1473.9,
+      "median": 1296.0
+     },
+     "answer_tokens": {
+      "mean": 891.8,
+      "median": 448.0
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "rollout_interactive": {
+     "n": 144,
+     "usable_rate": 1.0,
+     "natural_termination_rate": 0.0486,
+     "degeneration_stop_rate": 0.9167,
+     "context_limit_rate": 0.0347,
+     "reasoning_tokens": {
+      "mean": 1071.1,
+      "median": 413
+     },
+     "answer_tokens": {
+      "mean": 1581.2,
+      "median": 360.5
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "item_correct_count": 30
+   },
+   "capabilities": {
+    "fluid.abstract_analogical": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+       "n": 95,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.compositional_generalization": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+       "n": 144,
+       "correct": 2,
+       "rate": 0.0139
+      }
+     }
+    },
+    "fluid.inductive_rule_discovery": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+       "n": 142,
+       "correct": 2,
+       "rate": 0.0141
+      }
+     }
+    },
+    "fluid.interactive_adaptation": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+       "n": 144,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.task_contained_deduction": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+       "n": 189,
+       "correct": 26,
+       "rate": 0.1376
+      }
+     }
+    },
+    "supporting.closed_book_knowledge": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/knowledge": {
+       "n": 150,
+       "correct": 0.0067
+      }
+     }
+    },
+    "supporting.math_mixed": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/math_verified": {
+       "n": 100,
+       "correct": 0.02
+      },
+      "stage3_capability_846/gsm8k": {
+       "n": 100,
+       "correct": 0.02
+      }
+     }
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/multihop": {
+       "n": 100,
+       "correct": 0.16
+      }
+     }
+    },
+    "grounded.rag_reading": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/rag": {
+       "n": 100,
+       "correct": 0.27
+      }
+     }
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/answerability_paired": {
+       "n": 120,
+       "pair_correct": 0.0167
+      }
+     }
+    },
+    "safety.refusal": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/safety_paired": {
+       "n": 100,
+       "pair_correct": 0
+      }
+     }
+    },
+    "tool_use.function_calling": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+       "terminated": 0.2,
+       "truncated_at_cap": 0.8,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.8,
+       "rep_3gram": 0.0733
+      }
+     }
+    },
+    "interaction.instruction_and_realtime": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+       "terminated": 0.5,
+       "truncated_at_cap": 0.5,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.4167,
+       "rep_3gram": 0.1778
+      },
+      "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+       "terminated": 0.4,
+       "truncated_at_cap": 0.6,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.6,
+       "rep_3gram": 0.0571
+      }
+     }
+    },
+    "rollout.protocol_integrity": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0": {
+       "terminated": 0.6923,
+       "truncated_at_cap": 0.3077,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.2923,
+       "rep_3gram": 0.0654
+      }
+     }
+    },
+    "in_sample.recall_regression": {
+     "status": "measured",
+     "units": {
+      "stage3_legacy_150/items": {
+       "n": 150,
+       "correct": 40,
+       "rate": 0.2667
+      }
+     }
+    }
+   },
+   "training": {
+    "optimizer_steps": 1650,
+    "final_50_steps_mean": {
+     "loss": 0.55187,
+     "ce": 0.53766,
+     "kd": 0.41745
+    },
+    "seconds_per_step_median": 6.18,
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.026977,
+      "val_kd": 6.848024
+     },
+     {
+      "step": 206,
+      "val_ce": 1.351273,
+      "val_kd": 1.200569
+     },
+     {
+      "step": 412,
+      "val_ce": 1.076644,
+      "val_kd": 0.928604
+     },
+     {
+      "step": 618,
+      "val_ce": 0.967637,
+      "val_kd": 0.822998
+     },
+     {
+      "step": 824,
+      "val_ce": 0.893214,
+      "val_kd": 0.74814
+     },
+     {
+      "step": 1030,
+      "val_ce": 0.833532,
+      "val_kd": 0.688664
+     },
+     {
+      "step": 1236,
+      "val_ce": 0.818091,
+      "val_kd": 0.675985
+     },
+     {
+      "step": 1442,
+      "val_ce": 0.799525,
+      "val_kd": 0.65837
+     },
+     {
+      "step": 1648,
+      "val_ce": 0.790949,
+      "val_kd": 0.649374
+     },
+     {
+      "step": 1653,
+      "val_ce": 0.789844,
+      "val_kd": 0.648207
+     }
+    ],
+    "run_end": {
+     "time": "2026-11-02T22:25:37+00:00",
+     "event": "run_end",
+     "steps": 1653,
+     "seconds": 10476.5
+    }
+   }
+  },
+  "A1-s20260801": {
+   "fluid": {
+    "static_all": {
+     "n": 570,
+     "correct": 30,
+     "rate": 0.0526,
+     "wilson95": [
+      0.0371,
+      0.0741
+     ]
+    },
+    "by_axis": {
+     "task_contained_deduction": {
+      "n": 189,
+      "correct": 26,
+      "rate": 0.1376,
+      "wilson95": [
+       0.0956,
+       0.1939
+      ]
+     },
+     "inductive_rule_discovery": {
+      "n": 142,
+      "correct": 2,
+      "rate": 0.0141,
+      "wilson95": [
+       0.0039,
+       0.0499
+      ]
+     },
+     "compositional_generalization": {
+      "n": 144,
+      "correct": 2,
+      "rate": 0.0139,
+      "wilson95": [
+       0.0038,
+       0.0492
+      ]
+     },
+     "abstract_analogical": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0389
+      ]
+     }
+    },
+    "interactive_exploratory": {
+     "n": 144,
+     "correct": 2,
+     "rate": 0.0139,
+     "wilson95": [
+      0.0038,
+      0.0492
+     ]
+    },
+    "rollout_static": {
+     "n": 570,
+     "usable_rate": 0.6825,
+     "natural_termination_rate": 0.6825,
+     "degeneration_stop_rate": 0.3175,
+     "context_limit_rate": 0.0,
+     "reasoning_tokens": {
+      "mean": 1456.0,
+      "median": 1260.0
+     },
+     "answer_tokens": {
+      "mean": 960.4,
+      "median": 446.0
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "rollout_interactive": {
+     "n": 144,
+     "usable_rate": 1.0,
+     "natural_termination_rate": 0.1528,
+     "degeneration_stop_rate": 0.8333,
+     "context_limit_rate": 0.0139,
+     "reasoning_tokens": {
+      "mean": 1279.0,
+      "median": 484.0
+     },
+     "answer_tokens": {
+      "mean": 1068.8,
+      "median": 275.5
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "item_correct_count": 30
+   },
+   "capabilities": {
+    "fluid.abstract_analogical": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+       "n": 95,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.compositional_generalization": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+       "n": 144,
+       "correct": 2,
+       "rate": 0.0139
+      }
+     }
+    },
+    "fluid.inductive_rule_discovery": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+       "n": 142,
+       "correct": 2,
+       "rate": 0.0141
+      }
+     }
+    },
+    "fluid.interactive_adaptation": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+       "n": 144,
+       "correct": 2,
+       "rate": 0.0139
+      }
+     }
+    },
+    "fluid.task_contained_deduction": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+       "n": 189,
+       "correct": 26,
+       "rate": 0.1376
+      }
+     }
+    },
+    "supporting.closed_book_knowledge": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/knowledge": {
+       "n": 150,
+       "correct": 0.0133
+      }
+     }
+    },
+    "supporting.math_mixed": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/math_verified": {
+       "n": 100,
+       "correct": 0
+      },
+      "stage3_capability_846/gsm8k": {
+       "n": 100,
+       "correct": 0
+      }
+     }
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/multihop": {
+       "n": 100,
+       "correct": 0.13
+      }
+     }
+    },
+    "grounded.rag_reading": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/rag": {
+       "n": 100,
+       "correct": 0.3
+      }
+     }
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/answerability_paired": {
+       "n": 120,
+       "pair_correct": 0
+      }
+     }
+    },
+    "safety.refusal": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/safety_paired": {
+       "n": 100,
+       "pair_correct": 0
+      }
+     }
+    },
+    "tool_use.function_calling": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+       "terminated": 0.0,
+       "truncated_at_cap": 1.0,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 1.0,
+       "rep_3gram": 0.0
+      }
+     }
+    },
+    "interaction.instruction_and_realtime": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+       "terminated": 0.4167,
+       "truncated_at_cap": 0.5833,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.5833,
+       "rep_3gram": 0.0701
+      },
+      "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+       "terminated": 0.8,
+       "truncated_at_cap": 0.2,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.2,
+       "rep_3gram": 0.1504
+      }
+     }
+    },
+    "rollout.protocol_integrity": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0": {
+       "terminated": 0.7385,
+       "truncated_at_cap": 0.2615,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.2462,
+       "rep_3gram": 0.0603
+      }
+     }
+    },
+    "in_sample.recall_regression": {
+     "status": "measured",
+     "units": {
+      "stage3_legacy_150/items": {
+       "n": 150,
+       "correct": 32,
+       "rate": 0.2133
+      }
+     }
+    }
+   },
+   "training": {
+    "optimizer_steps": 1650,
+    "final_50_steps_mean": {
+     "loss": 0.55714,
+     "ce": 0.5506,
+     "kd": 0.41949
+    },
+    "seconds_per_step_median": 6.2,
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.026977,
+      "val_kd": 6.848024
+     },
+     {
+      "step": 206,
+      "val_ce": 1.348085,
+      "val_kd": 1.197132
+     },
+     {
+      "step": 412,
+      "val_ce": 1.081811,
+      "val_kd": 0.934272
+     },
+     {
+      "step": 618,
+      "val_ce": 0.968023,
+      "val_kd": 0.820556
+     },
+     {
+      "step": 824,
+      "val_ce": 0.880643,
+      "val_kd": 0.735849
+     },
+     {
+      "step": 1030,
+      "val_ce": 0.829329,
+      "val_kd": 0.685435
+     },
+     {
+      "step": 1236,
+      "val_ce": 0.818456,
+      "val_kd": 0.677707
+     },
+     {
+      "step": 1442,
+      "val_ce": 0.802374,
+      "val_kd": 0.660833
+     },
+     {
+      "step": 1648,
+      "val_ce": 0.79109,
+      "val_kd": 0.649021
+     },
+     {
+      "step": 1653,
+      "val_ce": 0.790869,
+      "val_kd": 0.648641
+     }
+    ],
+    "run_end": {
+     "time": "2026-11-03T02:13:43+00:00",
+     "event": "run_end",
+     "steps": 1653,
+     "seconds": 10465.9
+    }
+   }
+  }
+ },
+ "two_seeds": {
+  "static_all": {
+   "n_items": 570,
+   "mean": 0.0526,
+   "bootstrap95": [
+    0.0377,
+    0.0684
+   ],
+   "seed_difference": 0.0,
+   "items_correct_in_every_seed": 15,
+   "items_correct_in_any_seed": 45
+  },
+  "by_axis": {
+   "task_contained_deduction": {
+    "n_items": 189,
+    "mean": 0.1376,
+    "bootstrap95": [
+     0.0952,
+     0.1799
+    ],
+    "seed_difference": 0.0,
+    "items_correct_in_every_seed": 14,
+    "items_correct_in_any_seed": 38
+   },
+   "inductive_rule_discovery": {
+    "n_items": 142,
+    "mean": 0.0141,
+    "bootstrap95": [
+     0.0,
+     0.0317
+    ],
+    "seed_difference": 0.0,
+    "items_correct_in_every_seed": 1,
+    "items_correct_in_any_seed": 3
+   },
+   "compositional_generalization": {
+    "n_items": 144,
+    "mean": 0.0139,
+    "bootstrap95": [
+     0.0035,
+     0.0278
+    ],
+    "seed_difference": 0.0,
+    "items_correct_in_every_seed": 0,
+    "items_correct_in_any_seed": 4
+   },
+   "abstract_analogical": {
+    "n_items": 95,
+    "mean": 0.0,
+    "bootstrap95": [
+     0.0,
+     0.0
+    ],
+    "seed_difference": 0.0,
+    "items_correct_in_every_seed": 0,
+    "items_correct_in_any_seed": 0
+   }
+  }
+ },
+ "teacher_thinking_mode": {
+  "fluid": {
+   "static_all": {
+    "n": 570,
+    "correct": 511,
+    "rate": 0.8965,
+    "wilson95": [
+     0.8688,
+     0.9189
+    ]
+   },
+   "by_axis": {
+    "task_contained_deduction": {
+     "n": 189,
+     "correct": 189,
+     "rate": 1.0,
+     "wilson95": [
+      0.9801,
+      1.0
+     ]
+    },
+    "inductive_rule_discovery": {
+     "n": 142,
+     "correct": 130,
+     "rate": 0.9155,
+     "wilson95": [
+      0.8581,
+      0.951
+     ]
+    },
+    "compositional_generalization": {
+     "n": 144,
+     "correct": 129,
+     "rate": 0.8958,
+     "wilson95": [
+      0.8352,
+      0.9359
+     ]
+    },
+    "abstract_analogical": {
+     "n": 95,
+     "correct": 63,
+     "rate": 0.6632,
+     "wilson95": [
+      0.5634,
+      0.7502
+     ]
+    }
+   },
+   "interactive_exploratory": {
+    "n": 144,
+    "correct": 62,
+    "rate": 0.4306,
+    "wilson95": [
+     0.3525,
+     0.5122
+    ]
+   },
+   "rollout_static": {
+    "n": 570,
+    "usable_rate": 0.986,
+    "natural_termination_rate": 0.986,
+    "degeneration_stop_rate": 0.014,
+    "context_limit_rate": 0.0,
+    "reasoning_tokens": {
+     "mean": 2818.6,
+     "median": 1534.0
+    },
+    "answer_tokens": {
+     "mean": 531.4,
+     "median": 385.0
+    },
+    "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+   },
+   "rollout_interactive": {
+    "n": 144,
+    "usable_rate": 1.0,
+    "natural_termination_rate": 0.8681,
+    "degeneration_stop_rate": 0.1319,
+    "context_limit_rate": 0.0,
+    "reasoning_tokens": {
+     "mean": 4406.8,
+     "median": 3416
+    },
+    "answer_tokens": {
+     "mean": 309.6,
+     "median": 11.0
+    },
+    "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+   }
+  },
+  "capabilities": {
+   "fluid.abstract_analogical": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+      "n": 95,
+      "correct": 63,
+      "rate": 0.6632
+     }
+    }
+   },
+   "fluid.compositional_generalization": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+      "n": 144,
+      "correct": 129,
+      "rate": 0.8958
+     }
+    }
+   },
+   "fluid.inductive_rule_discovery": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+      "n": 142,
+      "correct": 130,
+      "rate": 0.9155
+     }
+    }
+   },
+   "fluid.interactive_adaptation": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+      "n": 144,
+      "correct": 62,
+      "rate": 0.4306
+     }
+    }
+   },
+   "fluid.task_contained_deduction": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+      "n": 189,
+      "correct": 189,
+      "rate": 1.0
+     }
+    }
+   },
+   "supporting.closed_book_knowledge": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/knowledge": {
+      "n": 150,
+      "correct": 0.5267
+     }
+    }
+   },
+   "supporting.math_mixed": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/math_verified": {
+      "n": 100,
+      "correct": 0.85
+     },
+     "stage3_capability_846/gsm8k": {
+      "n": 100,
+      "correct": 0.88
+     }
+    }
+   },
+   "grounded.multihop_evidence_reasoning": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/multihop": {
+      "n": 100,
+      "correct": 0.79
+     }
+    }
+   },
+   "grounded.rag_reading": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/rag": {
+      "n": 100,
+      "correct": 0.73
+     }
+    }
+   },
+   "uncertainty.evidence_conditioned_abstention": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/answerability_paired": {
+      "n": 120,
+      "pair_correct": 0.55
+     }
+    }
+   },
+   "safety.refusal": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/safety_paired": {
+      "n": 100,
+      "pair_correct": 0.44
+     }
+    }
+   },
+   "tool_use.function_calling": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 0.0,
+      "format_ok": 0.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0
+     }
+    }
+   },
+   "interaction.instruction_and_realtime": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 0.0,
+      "format_ok": 0.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0727
+     },
+     "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 0.0,
+      "format_ok": 0.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0103
+     }
+    }
+   },
+   "rollout.protocol_integrity": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 0.0,
+      "format_ok": 0.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0356
+     }
+    }
+   },
+   "in_sample.recall_regression": {
+    "status": "measured",
+    "units": {
+     "stage3_legacy_150/items": {
+      "n": 150,
+      "correct": 143,
+      "rate": 0.9533
+     }
+    }
+   }
+  }
+ },
+ "teacher_minus_student": {
+  "A1-s20260726": {
+   "static_all": 0.8439,
+   "task_contained_deduction": 0.8624,
+   "inductive_rule_discovery": 0.9014,
+   "compositional_generalization": 0.8819,
+   "abstract_analogical": 0.6632
+  },
+  "A1-s20260801": {
+   "static_all": 0.8439,
+   "task_contained_deduction": 0.8624,
+   "inductive_rule_discovery": 0.9014,
+   "compositional_generalization": 0.8819,
+   "abstract_analogical": 0.6632
+  }
+ },
+ "data": {
+  "sequences": 1102,
+  "supervised_tokens": 5930273,
+  "documents": 6105,
+  "tasks": 5957,
+  "non_padding_tokens": 8924771,
+  "supervised_token_exposure": 17790819,
+  "non_padding_token_exposure": 26774313,
+  "training_flops": 5.142e+17,
+  "optimizer_steps_at_3_epochs_batch_2": 1653
+ },
+ "reading": "static fluid correctness by axis is the primary reading; interactive episodes are exploratory; usable rollout, loss, KL and lengths are never read as reasoning; nothing here compares thinking with non-thinking (A2 is not run) or decides Research A",
+ "authorizes": "nothing"
+}

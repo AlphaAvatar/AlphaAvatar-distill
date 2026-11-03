@@ -510,7 +510,7 @@ earlier turns and function responses. Counts are exact, from the pack's `audit.j
 
 ---
 
-## D. The A1 phase (maintainer 2026-11-01, "Execute A1 First": executing)
+## D. The A1 phase (maintainer 2026-11-01, "Execute A1 First": complete 2026-11-03)
 
 A1 end to end: the hybrid D4 full search's inputs, the search, A1's two seeds trained from its Top-1 and formally
 evaluated. The 3 × 2 matrix is unchanged; A2 and C1 are neither trained nor evaluated and consume no budget. Research
@@ -664,7 +664,78 @@ B stays pending.
   - Found at $0 in the meantime: `train_stage3`'s own lineage check looked the teacher up offline as the whole
     repository, which huggingface_hub 1.x refuses when setup fetched only `teacher_cache.TEACHER_FILES`.
   - Repair: it goes through `teacher_cache.local_snapshot`, as admission does (ddd88001).
-- `a_train_a1_20261102_184122`: the current session, hard cap $13.85 (the kind's $14.10 less attempt 1).
+- `a_train_a1_20261102_184122`: attempt 3, hard cap $13.85 (the kind's $14.10 less attempt 1). It ran both seeds
+  (below).
+
+**Phases C and D result (2026-11-03).** Run `a_train_a1_20261102_184122`; records under its run directory
+(`closeout/a1_evidence.json` names every hash and what is committed); analysis
+[`analyses/a1_result.json`](../../../../logs/stages/stage-2/teacher_modes/analyses/a1_result.json).
+- COMPLETE: one L40S pod, created 2026-11-02T19:22:34Z, deleted 2026-11-03T03:16:45Z (474.2 min); the provider
+  confirms it gone and the account holds only the two accounted volumes. $8.7766 all-in of the $13.85 cap (provider
+  hourly billing $7.7419 posted through 02:00, the last bucket pending).
+- Both seeds ran fresh, in order, every one of 1,653 steps, with the frozen recipe; launch admission and the trainer's
+  lineage check passed (teacher `Qwen/Qwen3-4B@1cfa9a72`, initialization `3459b9c9…`, lineage `21d2d6d2…`).
+
+  | | seed 20260726 | seed 20260801 |
+  | --- | ---: | ---: |
+  | training time, median s per step | 10,489 s, 6.18 | 10,479 s, 6.20 |
+  | evaluation time | 3,198 s | 2,936 s |
+  | validation CE / KL, step 0 | 7.027 / 6.848 | 7.027 / 6.848 |
+  | validation CE / KL, step 1,653 | 0.7898 / 0.6482 | 0.7909 / 0.6486 |
+  | last 50 steps' mean loss / CE / KD | 0.552 / 0.538 / 0.417 | 0.557 / 0.551 / 0.419 |
+  | final model sha256 | `1f3e5eea…` | `06c12901…` |
+
+  Validation fell at every evaluation through the last one (0.8932 → 0.7898 CE over the second half for seed
+  20260726). Per seed: 1,102 packed sequences, 5,930,273 supervised tokens seen 3 times (17,790,819 supervised-token
+  exposure, 26,774,313 non-padding tokens), 5.142e17 training FLOPs (the admission record).
+- Evaluation: eval-set-1 v2 (frozen, identity `62a1a5d3…`), scoring protocol v2, nucleus_v1, thinking mode, every
+  item generated, effective context 8,192 (the trained context, recorded in each summary). The teacher is v1's
+  thinking-mode evaluation of the same model on the same set and decoding.
+
+  | static fluid items (formal) | n | seed 20260726 | seed 20260801 | two seeds' mean, paired bootstrap 95% | teacher |
+  | --- | ---: | ---: | ---: | ---: | ---: |
+  | task-contained deduction | 189 | 26 (13.8%, 9.6–19.4) | 26 (13.8%) | 13.8% (9.5–18.0) | 189 (100%) |
+  | inductive rule discovery | 142 | 2 (1.4%, 0.4–5.0) | 2 (1.4%) | 1.4% (0.0–3.2) | 130 (91.5%) |
+  | compositional generalization | 144 | 2 (1.4%, 0.4–4.9) | 2 (1.4%) | 1.4% (0.3–2.8) | 129 (89.6%) |
+  | abstract / analogical | 95 | 0 (0%, 0–3.9) | 0 (0%) | 0% (0–0) | 63 (66.3%) |
+  | all four static axes | 570 | 30 (5.3%, 3.7–7.4) | 30 (5.3%) | 5.3% (3.8–6.8) | 511 (89.6%) |
+  | interactive episodes (exploratory) | 144 | 0 (0%, 0–2.6) | 2 (1.4%, 0.4–4.9) | — | 62 (43.1%) |
+
+  Per-seed brackets are Wilson 95% intervals. The equal counts are not the same items: 15 of the 30 static items are
+  correct under both seeds and 45 under either (deduction 14 and 38). The gap to the teacher is 84.4 points over the
+  static axes (deduction 86.2, induction 90.1, composition 88.2, abstract 66.3), the same for both seeds.
+- Rollout integrity on the 570 static items (never a reasoning result): seed 20260726 / 20260801 / teacher —
+  usable and naturally terminated 72.3% / 68.3% / 98.6%; decoder repetition stops 27.5% / 31.8% / 1.4%; context-limit
+  hits (right-censored) 0.2% / 0% / 0%; reasoning tokens, mean (median) 1,474 (1,296) / 1,456 (1,260) /
+  2,819 (1,534); answer tokens after `</think>` 892 (448) / 960 (446) / 531 (385). On the interactive episodes most
+  student turns end in a repetition stop (91.7% / 83.3%, teacher 13.2%).
+- The other units of eval-set-1, as the formal report measured them (seed 20260726 / 20260801 / teacher): closed-book
+  knowledge 0.7% / 1.3% / 52.7%; MATH-verified 2% / 0% / 85%; GSM8K 2% / 0% / 88%; multihop 16% / 13% / 79%; RAG 27% /
+  30% / 73%; answerability pairs 1.7% / 0% / 55%; safety pairs 0% / 0% / 44%; the in-sample regression set
+  (training prompts, never generalization) 26.7% / 21.3% / 95.3%. The behaviour unit's `think_closed` and
+  `format_ok` read 0 for the teacher too, so they are not read here.
+- What this does not say: nothing about non-thinking mode (A2 is not run), no thinking-vs-non-thinking comparison,
+  and no GO / NO-GO for Research A.
+- Two repairs after the session, neither touching the measurement: the closeout's evidence tar carried both
+  evaluation packages' weights (2 × 2.38 GB) home and now excludes them; `a1_analysis` reports the seeds' item-level
+  agreement and clamps Wilson bounds to [0, 1].
+
+**After A1 (2026-11-03; nothing below is authorized).**
+- Money: A1's sessions $33.7441 of $63.66 (inputs $0.5713; search $0.1973 + $23.9553; train_a1 $0.2436 + $0 +
+  $8.7766); the sessions envelope has $29.9159 left (`study_engineering.envelope`). The volume's $13.34 reserve covers
+  350 GB to 2026-11-15T12:55Z; about $1.5 of it had accrued by 2026-11-03 at the reserve's own daily rate.
+- The volume `4rhubprswo` holds the search's states and journal, the inputs' shards, the Top-1, both seeds'
+  checkpoints with their trainer states (resumable, about 6 GB each) and both evaluations. Its lifecycle after the
+  reserve is the maintainer's decision: keeping it serves A2 (the Top-1 and the hybrid teacher cache are read there);
+  deleting it after the evidence audit retires the search states and A1's weights, whose hashes stay in the records.
+  `am5m373kuq` is kept.
+- A2, if authorized: the same Top-1 (on the volume), A2's pack (`packs_tm/A2`, 4,577 sequences, 6,866 steps), the
+  same recipe and lineage, eval-set-1 v2 in non-thinking mode, v1's non-thinking teacher evaluation
+  (`a_teacher_20261030_012648`) as the gap reference. Priced at $13.48 expected / $19.89 deadline per seed
+  (`plans/budget_v2.json`); A1's measured 6.2 s per step at about 10,200 KD positions per step does not reprice A2's
+  2,600-position steps. Reusable as they are: the train_a1 chain (issue, bundle, launch, closeout), the lineage gate
+  with both repairs, `training_plan`'s admission, the evaluation driver and `a1_analysis` (its A1 names would be
+  generalized for A2).
 
 ## Budget (re-estimated 2026-11-01; nothing below is authorized)
 
