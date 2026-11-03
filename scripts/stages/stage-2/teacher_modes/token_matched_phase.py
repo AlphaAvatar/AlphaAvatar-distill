@@ -30,6 +30,7 @@ cumulative envelope. Sealed shards are pulled on every poll; the volume keeps ev
 """
 from __future__ import annotations
 
+import functools
 import re
 import sys
 from pathlib import Path
@@ -426,10 +427,8 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
     if kind not in DRIVERS:
         raise SE.AuthorizationError(f"kind {kind!r} has no session driver yet")
     driver, command, extra, description = DRIVERS[kind]
-    if kind == "search" and minutes:
-        command = (lambda ctx, plan, _m=float(minutes): search_command(ctx, plan, _m))
-    if kind == "packed_search" and minutes:
-        command = (lambda ctx, plan, _m=float(minutes): packed_search_command(ctx, plan, _m))
+    if kind in ("search", "packed_search") and minutes:
+        command = functools.partial(command, planned_minutes=float(minutes))
     t = json.loads((REPO_ROOT / P1.PROTOCOL).read_text())["teacher"]
     if kind in THINKING_2507_KINDS:          #: C1-6cat's lineage: Thinking-2507 generates and teaches
         li = json.loads((REPO_ROOT / "configs/stages/stage-2/teacher_modes/tool_generation_protocol.json")

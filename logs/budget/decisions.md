@@ -15197,9 +15197,17 @@ on a paid pod.
     cap $46.35); the three trainings' plan $37.82 / $50.38 / $85.18 for six trainings.
   - The five existing base types re-selected at 1/6 each from the verified records (`data/six_category_selection.json`:
     no shortfall; A1-6cat 5,436,912 and A2-6cat 5,430,311 supervised tokens before tool calling).
-- **Blocked.** Tool calling: the maintainer named the sources (ToolACE, TOUCAN-1.5M, Nemotron-Agentic-v1) and paused
-  the pool's construction until the code is ready; its teacher-native generation is a paid session to authorize. Calibration v2 and `state_eval_hybrid@v2` (and so the search) wait for those
-  items; the three packs wait for the tool turns.
+- **Tool calling, code and review.** The chain from source rows to trained arms is written and tested at $0
+  (`aadistill.data.tool_calls`; `run_battery --env-factory`; `tool_episodes`, `tool_admission`, `tool_pool`,
+  `tool_session`, `packed_inputs`, `packed_packs`; `PACKED_ROUND.md` section 5a). The sources are CANDIDATES under the
+  maintainer's review, none approved (`audit/tool_calling_source_review_v2.json`): recommended base Toucan-1.5M (real
+  MCP executions) plus the NeMo Gym Pivot pair (deterministic per-step gold); Nemotron-SFT-Agentic-v4 conditional on
+  its OpenMDW-1.1 terms, GLM-5.2 output terms and tool-set provenance; Nemotron-Agentic-v1's `tool_calling` subset out
+  (Glaive tool sets), its `interactive_agent` on hold; ToolACE not recommended. Toucan's SFT config assembles dry into
+  91,044 tasks over 5,401 tool families, every category in every split.
+- **Blocked.** Tool calling: the maintainer's ruling on the candidates, then the paid teacher-native generation.
+  Calibration v2 and `state_eval_hybrid@v2` (and so the search) wait for those items; the three packs wait for the
+  tool turns.
 - **Budget.** Position read 2026-11-03T09:06Z: $836.73 committed of the $868.00 cap, $31.27 left; 0 pods; volumes
   `4rhubprswo` and `am5m373kuq`. The Full Search Authorization (generation + search, ~$37 expected) needs a raised cap.
 - **Risks / owed.** The fragments' repeated exposure under `truncate=True`; the step-level loss weighting

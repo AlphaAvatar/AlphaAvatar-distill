@@ -2,13 +2,13 @@
 """`tool_pool@v1`'s assembly: families, splits, isolation, the length bound and the frozen order. $0 code.
 
     PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pool \\
-        --source toucan=<converted tasks.jsonl> --source toolace=<...> --source nemotron_agentic=<...> \\
+        --source toucan=<converted tasks.jsonl> [--source <name>=<converted tasks.jsonl> ...] \\
         --out data/stages/stage-2/teacher_modes/tool_pool_v1
 
-The rules are six_category_design.json's (`task_pool`); the sources are the three the maintainer named (ToolACE,
-TOUCAN-1.5M, Nemotron-Agentic-v1). A source enters as CONVERTED task records (`tool_episodes.task_problems`
-must pass: upstream assistant turns are never in the context, the backend is a replay table or none); writing each
-source's converter is the pool's data step, outside this module, and the registry below names none until it exists.
+The rules are six_category_design.json's (`task_pool`). Every source is a CANDIDATE until the maintainer admits it
+(audit/tool_calling_source_review_v2.json). A source enters as CONVERTED task records (`tool_episodes.task_problems`
+must pass: upstream assistant turns are never in the context, the backend is a replay table or none); each source's
+converter is its own module, registered in `CONVERTERS` once it exists.
 
 * family -- sha256 of the canonical tool set (sorted names with their canonical JSON schemas); an MCP task may name
   its server instead (``family_hint``);
@@ -49,9 +49,15 @@ ORDER_SEED = 20261103
 PROMPT_BOUND = 6144
 SPLIT_RANGES = (("validation", 0, 2), ("state_eval", 3, 6), ("calibration", 7, 10), ("reserve", 11, 12),
                 ("training", 13, 99))
-#: source id -> converter(path) -> iterable of task records. Empty until each converter is written and checked
-#: against its source's real rows (the maintainer paused data probing on 2026-11-03).
-CONVERTERS: dict[str, Callable[[Path], Iterable[dict]]] = {}
+#: source id -> converter(path) -> iterable of task records, each written and checked against its source's real rows:
+#: Toucan's SFT config (tool_sources_toucan.py); the Pivot pair and Nemotron-SFT-Agentic-v4 are not converted yet
+#: (audit/tool_calling_source_review_v2.json). Every source remains a CANDIDATE until the maintainer admits it.
+def _toucan(path: Path) -> Iterable[dict]:
+    from stages.teacher_modes import tool_sources_toucan
+    return tool_sources_toucan.convert(path)
+
+
+CONVERTERS: dict[str, Callable[[Path], Iterable[dict]]] = {"toucan_sft": _toucan}
 SCHEMA = "aadistill.stage2.teacher_modes.tool_pool/v1"
 
 

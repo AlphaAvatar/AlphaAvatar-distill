@@ -6,29 +6,29 @@ from aadistill.data.tool_calls import (
     strip_tool_calls, unchecked_keywords, verify_episode,
 )
 
-O, C, T = "<tool_call>", "</tool_call>", "</think>"
+OPEN, C, T = "<tool_call>", "</tool_call>", "</think>"
 TOOLS = [{"type": "function", "function": {"name": "get_weather", "parameters": {
     "type": "object", "properties": {"city": {"type": "string"}, "unit": {"enum": ["c", "f"]}},
     "required": ["city"], "additionalProperties": False}}}]
 
 
 def call(name, **args):
-    return f'{O}\n{{"name": "{name}", "arguments": {__import__("json").dumps(args)}}}\n{C}'
+    return f'{OPEN}\n{{"name": "{name}", "arguments": {__import__("json").dumps(args)}}}\n{C}'
 
 
 class TestParsing:
     def test_calls_in_order_and_problems_reported(self):
-        text = "a " + call("x", k=1) + " b " + call("y") + f" {O}not json{C} {O}{{\"arguments\": {{}}}}{C}"
-        calls, bad = parse_tool_calls(text, open_tag=O, close_tag=C)
+        text = "a " + call("x", k=1) + " b " + call("y") + f" {OPEN}not json{C} {OPEN}{{\"arguments\": {{}}}}{C}"
+        calls, bad = parse_tool_calls(text, open_tag=OPEN, close_tag=C)
         assert [c.name for c in calls] == ["x", "y"] and calls[0].arguments == {"k": 1}
         assert len(bad) == 2
 
     def test_string_arguments_are_decoded_once_and_unclosed_is_a_problem(self):
-        calls, bad = parse_tool_calls(f'{O}{{"name": "x", "arguments": "{{\\"a\\": 2}}"}}{C}{O}', open_tag=O, close_tag=C)
+        calls, bad = parse_tool_calls(f'{OPEN}{{"name": "x", "arguments": "{{\\"a\\": 2}}"}}{C}{OPEN}', open_tag=OPEN, close_tag=C)
         assert calls[0].arguments == {"a": 2} and any("unclosed" in b for b in bad)
 
     def test_strip_leaves_the_prose(self):
-        assert strip_tool_calls("hi " + call("x") + " there", open_tag=O, close_tag=C) == "hi  there"
+        assert strip_tool_calls("hi " + call("x") + " there", open_tag=OPEN, close_tag=C) == "hi  there"
 
     def test_canonical_form_ignores_key_order(self):
         assert canonical_call(ToolCall("x", {"a": 1, "b": 2})) == canonical_call({"name": "x", "arguments": {"b": 2, "a": 1}})
@@ -61,7 +61,7 @@ class TestReplayAndGold:
 
 
 def _verify(turns, thinking=True, gold=None, final=None):
-    return verify_episode(turns, tools=TOOLS, open_tag=O, close_tag=C, think_close=T, expect_think=thinking,
+    return verify_episode(turns, tools=TOOLS, open_tag=OPEN, close_tag=C, think_close=T, expect_think=thinking,
                           gold_steps=gold, final_check=final)
 
 

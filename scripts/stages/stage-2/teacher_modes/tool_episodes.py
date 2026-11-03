@@ -133,6 +133,18 @@ def final_check(task: Mapping[str, Any]):
         p = TOOL_PROTOCOL
         return lambda turns: all(not parse_tool_calls(str(t.get("raw") or ""), open_tag=p["open_tag"],
                                                       close_tag=p["close_tag"])[0] for t in turns)
+    if kind == "calls_tools":
+        #: every listed tool called at least once over the episode (Toucan's target tools, G2); a listed name
+        #: matches a called name equal to it or ending in "-<name>" (MCP tools carry their server's slug)
+        want = [str(x) for x in spec["values"]]
+        p = TOOL_PROTOCOL
+
+        def called(turns):
+            names = {c.name for t in turns
+                     for c in parse_tool_calls(str(t.get("raw") or ""), open_tag=p["open_tag"],
+                                               close_tag=p["close_tag"])[0]}
+            return all(any(n == w or n.endswith("-" + w) for n in names) for w in want)
+        return called
     if kind == "contains_all":
         want = [str(x) for x in spec["values"]]
         return lambda turns: all(w in str(turns[-1].get("answer") or turns[-1].get("raw") or "") for w in want)

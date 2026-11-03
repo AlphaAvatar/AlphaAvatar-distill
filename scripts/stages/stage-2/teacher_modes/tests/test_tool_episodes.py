@@ -222,3 +222,26 @@ def test_binding_fills_a_built_packs_files_and_steps(tmp_path):
     assert all(u["config"]["lineage"]["data"][0]["files_sha256"]["blocks.npz"] != PTP.TO_BUILD for u in c1)
     assert all(u["config"]["schedule"]["total_steps"] == PTP.TO_BUILD for u in a1)    # its pack is not built
     assert plan["seed_order"] == [20260726, 20260801]
+
+
+def test_a_toucan_row_becomes_task_material_only():
+    from stages.teacher_modes import tool_sources_toucan as TS
+    row = {"uuid": "u1", "subset_name": "multi-turn", "target_tools": "Weather Server::get_weather",
+           "tools": json.dumps(TOOLS),
+           "messages": json.dumps([
+               {"role": "user", "content": "weather in Paris?"},
+               {"role": "assistant", "content": "Let me check."},
+               {"role": "tool_call", "content": "{'name': 'get_weather', 'arguments': '{\"city\": \"Paris\"}'}"},
+               {"role": "tool_response", "content": "sunny"},
+               {"role": "assistant", "content": "It is sunny."},
+               {"role": "user", "content": "and London?"}])}
+    t = TS.task_of(row)
+    assert t["messages"] == [{"role": "user", "content": "weather in Paris?"}]        # no upstream assistant turn
+    assert t["later_user_turns"] == ["and London?"] and t["category"] == "multi_turn"
+    assert list(t["backend"]["table"].values()) == ["sunny"] and t["family_hint"] == "Weather Server"
+    t = {**t, "family": "f", "split": "training"}
+    assert TE.task_problems(t) == []
+    env = TE.ToolEnv(t)
+    assert env.step(CALL)["responses"] == ["sunny"]
+    fc = TE.final_check(t)
+    assert fc([{"raw": "x</think>" + CALL}]) and not fc([{"raw": "x</think>no call"}])
