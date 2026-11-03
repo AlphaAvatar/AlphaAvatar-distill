@@ -9,6 +9,27 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
+**RESEARCH A PACKED ROUND: PREPARATION_BLOCKED (2026-11-03; maintainer brief "Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备"). Code, identities, tests, $0 audits, the new full-search chain and the training plans are done; nothing searched, trained, generated, downloaded or evaluated; no pod; no cap raised.**
+The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)
+(design `configs/stages/stage-2/teacher_modes/packed_round_design.json`). Decision record: `logs/budget/decisions.md`
+2026-11-03 (sequential packing). AGENTS.md P19 states the rule by stage.
+- **The rule:** Stage-1 search forwards and Stage-3 training read examples randomly shuffled, sequentially packed
+  with truncation (the maintainer's `packing_conversation`) and standard causal attention; Stage-5 rollouts keep
+  their real context and are never packed. Core: `aadistill.data.sequence_packing`; Stage 1's `ForwardContext`;
+  Stage 3's `pack_sequential`.
+- **Forward baseline version 2 selected** (`configs/shared/baselines/initialization_forward_baseline_v2.json`): D1's
+  method in the packed context, fingerprint `1dcaad69…`. Version 1 superseded, still loadable; Research A v2 and
+  Stage-0 drivers pin it, and the v2 search's identities reproduce exactly.
+- **Measured at $0** (`audit/packing_audit.json`): Stage-1 sets re-score 10–13% of scored positions in fragments; A1's
+  documents add 18.7% repeated supervised tokens (1,288 sequences vs 1,102), A2's 4.3%; on this data
+  `truncate=False` gives the same sequences.
+- **Blocked on tool calling:** sources named by the maintainer (ToolACE, TOUCAN-1.5M, Nemotron-Agentic-v1); the pool
+  is paused until the code is ready, and the generation is a paid session to authorize. Calibration v2,
+  `state_eval_hybrid@v2` and so the new search wait for them.
+- **Next: the maintainer's ruling** on fragments, Nemotron-Agentic's Glaive-derived subset and the tool shares, a raised cap (the generation + search
+  phase is ~$37 expected against $31.27 left), a Thinking-2507 packed search (not needed for C1-6cat as registered),
+  and volume `4rhubprswo`. 0 pods; the two volumes are retained.
+
 **RESEARCH A: SIX BASE-CORPUS TYPES — A1-6cat, A2-6cat, C1-6cat DESIGNED AT $0 (2026-11-03; maintainer brief "Thinking-2507 六类数据对照方案补充"). STOPPED at the maintainer's review: nothing generated, downloaded, searched, trained or evaluated; no pod; no cap raised.**
 The owner: [`docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md`](../../docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md)
 (design `configs/stages/stage-2/teacher_modes/six_category_design.json`). Decision record: `logs/budget/decisions.md`

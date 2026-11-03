@@ -156,7 +156,7 @@ def build_session(*, workdir: Path, device: str = "cuda", suite_dir: Path = SUIT
     from stages.phase_d1 import d1_session as D1S
     from stages.teacher_modes import hybrid_state_eval as HSE
     ident = json.loads(TEACHER.read_text())
-    baseline = FB.selected(repo_root)
+    baseline = FB.historical(1, repo_root)
     D1S._register_frozen_operators()
     FB.register_operators(baseline)
     terms = FB.session_terms(baseline)

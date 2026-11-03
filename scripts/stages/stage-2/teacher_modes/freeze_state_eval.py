@@ -183,7 +183,7 @@ def protocol_id(suite_dir: Path) -> dict:
     from stages.teacher_modes import full_search as FS
     ident = json.loads(TEACHER.read_text())
     suite, items, man = HSE.load(suite_dir, ident, REPO / "configs/stages/stage-2/teacher_modes/full_search_types.json")
-    terms = FB.session_terms(FB.selected(REPO))
+    terms = FB.session_terms(FB.historical(1, REPO))
     ex = dataclasses.replace(terms["execution"], micro_batch_size=FS.MICRO_BATCH)
     ev = StateEvaluator(suite, items, device="cpu", vocab_size=int(ident["architecture"]["vocab_size"]),
                         suite_content_sha256=man["content_sha256"], position_policy=terms["position_policy"],

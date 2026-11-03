@@ -15162,3 +15162,48 @@ on a paid pod.
   - phase-by-phase authorizations: pool construction, a generation pilot, the three lineages' generation, the six
     trainings.
 - **Not authorized and not run:** anything paid; A2, C1, C1-6cat, A1-6cat, A2-6cat; Research B; a merge.
+
+## 2026-11-03 (UTC) — Maintainer: sequential packing for Stage-1 forwards and Stage-3 training; Research A's packed round prepared at $0; stopped at PREPARATION_BLOCKED
+
+- **Context.** The maintainer's brief "Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备"
+  (2026-11-03). Authorized: code, data protocol, $0 data preparation, tests and cost estimates. Not authorized: any
+  full search (hybrid or Thinking-2507), any student training, formal evaluation, paid teacher generation, a new GPU
+  resource, a change to `main`, deleting a checkpoint with a consumer. Owner of the numbers:
+  `docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`.
+- **Decision (maintainer).**
+  - Stage-1 search forwards and Stage-3 recovery / SFT / KD training: random shuffle → sequential packing (the
+    maintainer's `packing_conversation`, `truncate=True`) → standard causal attention, continuous positions. No best
+    fit, no `document_isolated` in new experiments.
+  - Stage-5 on-policy distillation: the context is fixed before rollout; no random packing; standard causal
+    attention on the real context; rollouts never re-composed.
+  - The changed Stage-1 input distribution means the hybrid full search is re-run (later, under its own
+    authorization), with tool calling in calibration and state evaluation.
+  - The base-corpus category is six types at about 1/6 each (supporting ~2,960,507 and fluid ~2,962,514 unique
+    supervised tokens); A1-6cat, A2-6cat, C1-6cat each follow their own teacher lineage.
+- **Done at $0.**
+  - Core: `aadistill.data.sequence_packing` (the reference function verbatim; the prefix-restart materialization;
+    the sha256-keyed shuffle; token accounting); `token_documents.pack_sequential` and `MaskedDocument`; the Stage-1
+    packed forward context through every forward consumer, its identity in operator configs, protocol ids, the
+    search config hash and the statistics-cache key; AGENTS.md P19; the rollout context contract.
+  - Forward baseline version 2 selected (`initialization_forward_baseline_v2.json`, fingerprint `1dcaad69…`):
+    D1's method unchanged, read in the packed context. Version 1 is listed as superseded and stays loadable;
+    Research A v2's and Stage-0's drivers pin it, and the v2 search's identities reproduce exactly (config hash
+    `e8a43631…`, protocol `1c830524…`).
+  - Audits on existing data (`audit/packing_audit.json`): Stage-1 sets pack into 64 / 47 / 131 sequences with
+    10–13% of scored positions re-scored in fragments; A1's documents into 1,288 sequences (1,102 isolated) with
+    1,110,226 repeated supervised tokens (18.7%), A2's into 4,935 (4,577) with 257,500 (4.3%); C1's kept 3,681
+    sessions into 1,042 sequences with 23.3% repeated. On this data `truncate=False` gives the same sequences.
+  - The new search's driver and a $0 dry run over v1's inputs; its cost estimate $23.72 / $32.43 / $42.14 (proposed
+    cap $46.35); the three trainings' plan $37.82 / $50.38 / $85.18 for six trainings.
+  - The five existing base types re-selected at 1/6 each from the verified records (`data/six_category_selection.json`:
+    no shortfall; A1-6cat 5,436,912 and A2-6cat 5,430,311 supervised tokens before tool calling).
+- **Blocked.** Tool calling: the maintainer named the sources (ToolACE, TOUCAN-1.5M, Nemotron-Agentic-v1) and paused
+  the pool's construction until the code is ready; its teacher-native generation is a paid session to authorize. Calibration v2 and `state_eval_hybrid@v2` (and so the search) wait for those
+  items; the three packs wait for the tool turns.
+- **Budget.** Position read 2026-11-03T09:06Z: $836.73 committed of the $868.00 cap, $31.27 left; 0 pods; volumes
+  `4rhubprswo` and `am5m373kuq`. The Full Search Authorization (generation + search, ~$37 expected) needs a raised cap.
+- **Risks / owed.** The fragments' repeated exposure under `truncate=True`; the step-level loss weighting
+  (reading carries 1.13–1.28x its exposure share, unchanged from the isolated packs); the non-thinking tool
+  state-evaluation floor; the v2 Top-1's single copy; eval-set-2 for tool-call success; whether a Thinking-2507
+  packed search is wanted (not needed for C1-6cat as registered; ~$35–50).
+- **Revisit when:** the maintainer rules on the items above.

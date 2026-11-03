@@ -533,6 +533,12 @@ class AttentionCausalKLV1(OperatorImplementation):
     @torch.no_grad()
     def apply(self, ctx: OperatorContext) -> OperatorOutcome:
         apply_started = time.monotonic()
+        if ctx.forward_context is not None:
+            raise OperatorError(
+                f"{self.impl_id}: a packed forward context is implemented for "
+                "the forward baseline's operators only; this scorer groups its "
+                "own forwards (`calibration_batch_packing` in its config) and "
+                "has no packed path")
         adapter = ctx.adapter
         model = ctx.model
         items = list(ctx.calibration_items)

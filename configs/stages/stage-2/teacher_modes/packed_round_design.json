@@ -1,0 +1,244 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.packed_round_design/v1",
+ "status": "PREPARATION (2026-11-03): designed and partly prepared at $0; no search, no training, no generation, no pod",
+ "decided_by": "maintainer brief 2026-11-03 'Stage-1 Forward / Stage-3 Training Packing \u91cd\u6784\u53ca Research A \u524d\u7f6e\u51c6\u5907'",
+ "_contract": "The registered terms of Research A's packed round: the new hybrid full search under the packed forward context (Stage 1), and the packed training of A1-6cat, A2-6cat and C1-6cat (Stage 3). It supersedes the packing terms of six_category_design.json (document_isolated and E1's packer) and nothing else in it; its tool-calling pool, protocol, verification and quotas stay that record's. Sequence lengths and seeds are instance values of this experiment and live here, never in src/aadistill. AUTHORIZES NOTHING.",
+ "stage1_forward_context": {
+  "sequence_length": 8192,
+  "shuffle_seed": 20261105,
+  "rules": "configs/shared/baselines/initialization_forward_baseline_v2.json :: method.forward_context (random shuffle -> sequential packing -> truncate=True -> standard causal attention, continuous positions)",
+  "applies_to": "every calibration profile and the state-evaluation suite of the new hybrid full search; each set gets its own packing identity, fixed for every candidate"
+ },
+ "stage3_packing": {
+  "sequence_length": 8192,
+  "shuffle_seed": 20261106,
+  "packer": "aadistill.data.token_documents.pack_sequential (strategy sequential_causal)",
+  "trainer_attention": "batch.context_strategy cross_context (the default): standard causal attention over each packed sequence, continuous positions, no position ids",
+  "fragments": "a document that does not fit the room left fills it with its first tokens and is packed again from its first token in the next sequence; the fragment's supervised positions are trained (CE and KD) and counted as repeated supervised-token exposure",
+  "epoch_order": "the trainer's per-epoch permutation of the packed sequences (train.stream_block_indices); no re-packing between epochs",
+  "applies_to": [
+   "A1-6cat",
+   "A2-6cat",
+   "C1-6cat"
+  ]
+ },
+ "authorizes": "nothing",
+ "full_search": {
+  "search_run_id": "research_a_packed_hybrid_full_search",
+  "root_teacher": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c (configs/stages/stage-2/teacher_modes/teacher_identity.json)",
+  "target_geometry": "C3's frozen 596M target (stages.phase_c3.session._target_spec), as the v2 search",
+  "seed": "C3's search seed (stages.phase_c3.session.SEARCH_SEED), as the v2 search",
+  "method": "the selected forward baseline, version 2 (configs/shared/baselines/initialization_forward_baseline_v2.json): D1's four operators, operator order and profile per operator free, beam.delayed_prune@v1 width 6 warmup 1, Pareto v2, supervised_target_v1, Top-200 + tail, scored_v1, DEPTH vs the intact parent, state evaluation vs the root, the packed forward context",
+  "execution": {
+   "micro_batch_size": "1 packed sequence per forward (the baseline's)",
+   "depth_prefix_reuse": true,
+   "prune_weights": false,
+   "reference_strategy": "RECOMPUTE (teacher sketches cached per packed segment)"
+  },
+  "driver": "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+  "inputs": {
+   "v2": {
+    "status": "PENDING_TOOL_ITEMS",
+    "why": "the tool_calling@v1 items of the calibration profiles and of state_eval_hybrid@v2 are teacher-native verified episodes of the hybrid root, from the canonical pool's calibration and state_eval splits; the pool is built from the three named sources (paused by the maintainer until the code is ready), and the episodes need a paid generation session (six_category_design.json :: task_pool, protocol; this record's preparation_status)",
+    "profiles_doc": "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
+    "suite_dir": "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v2",
+    "suite_types": "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
+    "suite_freeze_record": "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v2_freeze.json"
+   },
+   "v1_dry_run": {
+    "status": "READY",
+    "why": "v1's profiles and suite, which exist: a $0 structural check of the chain and of every identity under the packed context; never a search input",
+    "profiles_doc": "configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json",
+    "suite_dir": "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v1",
+    "suite_types": "configs/stages/stage-2/teacher_modes/full_search_types.json",
+    "suite_freeze_record": "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_freeze.json"
+   }
+  },
+  "checkpoint_resume": "BeamSearch's journal (search/states.jsonl) and per-state checkpoints under <durable>/search_packed on the network volume; a replacement session of the same search_run_id, config_hash and measurement_protocol_id restores every journaled state and expands only what is missing (measurement_is_comparable); a deadline ends INCOMPLETE with the journal intact; a partial ranking is never a Top-1",
+  "top1_persistence": "on completion the Top-1's model.safetensors, config.json and generation_config.json are copied to <durable>/search_packed/top1 with their sha256 (must equal the commit's single_shard_sha256), products.json written; the session's closeout relays the evidence; a second copy of the Top-1 off the volume is owed before the volume's reserve ends (the v2 Top-1 has one copy only)",
+  "first_evaluation_check": "full_search.FirstEvaluationCheck: both modes' critical groups present and their 50:50 mean; the frozen epsilon rule measured on the device (the level-0 children are the real search and the device admission at once, as in v2)",
+  "never_reused_from_v2": "no state, statistic, reference or checkpoint of research_a_v2_hybrid_d4_full_search: the forward context is in every calibrated operator's hashed config and in the measurement protocol id, so no v2 identity can match; the v2 Top-1 159e73be... (model.safetensors 3459b9c9...) and its journal stay untouched as history"
+ },
+ "calibration_v2": {
+  "profiles": [
+   "calib.hybrid_d4_base@v2",
+   "calib.hybrid_d4_rh@v2"
+  ],
+  "status": "PENDING_TOOL_ITEMS (the thirteen existing types are reusable at $0)",
+  "types": "v1's thirteen (domain, subtype) types in both modes plus (supporting, tool_calling@v1) in both modes, the same type table as state_eval_hybrid@v2 (full_search_types_v2.json)",
+  "quotas": "v1's rule unchanged (D4's cells, order and domain weights; half of every cell from each mode): base 0.18 x 4 primary axes + 0.28 supporting, rh 0.22 x 4 + 0.12, of 180,000 scored positions. The supporting domain's share is split over SIX sub-types instead of five: per mode 4,200 scored positions (base) / 1,800 (rh) per supporting sub-type, tool calling included; the five existing supporting cells shrink from 5,040 / 2,160 per mode to 4,200 / 1,800",
+  "reuse": "the existing cells' items are v1's in v1's cell order, so a shrunk cell is a prefix of v1's (no new generation); the primary cells are v1's byte for byte",
+  "tool_cell": "teacher-native verified episodes of the hybrid root from tool_pool@v1's calibration split (family-disjoint from training, validation and state evaluation), both modes, whole episodes; tool schemas, user turns and tool responses are unscored context",
+  "forward_context": "stage1_forward_context above; each profile gets its own packing identity",
+  "isolation": "disjoint from state_eval_hybrid@v2, from every Stage-2 training and validation set and from eval-set-1 (shared.eval_sets.require_disjoint), as v1"
+ },
+ "state_eval_hybrid_v2": {
+  "suite_id": "state_eval_hybrid@v2",
+  "status": "PENDING_TOOL_ITEMS",
+  "items": "v1's 1,135 items (13 types, both modes) byte for byte, plus tool_calling@v1 items: teacher-native verified episodes of the hybrid root from tool_pool@v1's state_eval split, at least 12,000 scored positions per mode and at least 5 tasks in every tool category the split holds (a category with fewer is reported THIN)",
+  "critical_tokens": "each mode's critical group adds tool_call_open (the position predicting <tool_call>, 151657) and tool_call_close (</tool_call>, 151658) beside v1's classes; the two modes still weigh 50:50 (group_balanced/v1)",
+  "metrics": "unchanged: state.teacher_kl.equal_domain_mean, worst_domain, critical_token_kl; tool calling is a supporting sub-type, so the five domains and their weights are unchanged",
+  "forward_context": "stage1_forward_context above; teacher and candidate read in the same packed sequences",
+  "identity": "its own items file, manifest, content sha256, type table and measurement protocol id (frozen by freeze_state_eval for v2 under the packed protocol); v1 and its protocol 1c830524... stay frozen and are never re-scored",
+  "limit": "teacher-forced KL on tool turns is not tool-call success: closed-loop tool-execution success belongs to a registered tool-calling evaluation (eval-set-2, the maintainer's decision under P10.3)",
+  "cost_note": "a non-thinking tool turn supervises ~40-120 tokens behind a long tool catalog, so 12,000 scored positions in non-thinking mode take ~100-300 turns and ~0.2-0.45M context tokens -- the largest single growth of the suite (plans/packed_search_budget.json prices it)"
+ },
+ "tool_calling": {
+  "role": "a supporting capability AlphaAvatar-distill must keep; the sixth base-corpus type at 1/6 of the base category's supervised tokens",
+  "owner_of_the_protocol": "six_category_design.json :: task_pool, protocol (tool_pool@v1, seven categories, family splits 87/3/4/4/2, isolation T1-T5, the 6,144-token prompt bound, run_episodes' loop, the five-check verifier, whole-episode admission, only native assistant ids supervised); reused here unchanged",
+  "sources": "NAMED BY THE MAINTAINER (2026-11-03): Team-ACE/ToolACE @6bda777c, Agent-Ark/Toucan-1.5M @0df3cf37, nvidia/Nemotron-Agentic-v1 @650d5909. The source review's facts are carried as recorded risks: ToolACE's generators are undisclosed and its tool responses LLM-simulated (no executable backend; verification by schema and agreement with the upstream call, G2); Toucan's SFT config carries no per-row generator metadata (the card names only permissive generators); Nemotron-Agentic-v1's tool_calling subset takes its tool sets from glaive-function-calling-v2 (held back pending the maintainer; eval-set-1 holds Glaive tool prompts, so T1 isolation applies), its interactive_agent subset does not",
+  "status": "pool construction PAUSED by the maintainer (2026-11-03: code preparation first). Downloaded so far: Toucan's SFT config (0.43 GB, hub sha256 verified; artifacts/.../tool_sources/manifest.json) and three files of the review's proposal that the named sources replace (unused). The paid teacher-native generation stays unauthorized",
+  "per_lineage_need": {
+   "hybrid thinking (A1-6cat)": "training (493,418 supervised tokens), validation (32 tasks), calibration cells (4,200 + 1,800 scored positions), state evaluation (>= 12,000 scored positions)",
+   "hybrid non-thinking (A2-6cat)": "the same splits in its own mode",
+   "Thinking-2507 (C1-6cat)": "training (492,587) and validation (~12,624); calibration and state evaluation only if a Thinking-2507 packed search is authorized"
+  },
+  "implementation_owed_before_generation": "passing tools and tool messages through run_episodes' loop, the backend adapter (replay table / sandbox), the verifier; they depend on the admitted sources"
+ },
+ "training": {
+  "objective": "frozen, unchanged: CE weight 0.25, KD weight 1.0, KD temperature 1.0, KD and CE at the assistant target positions (kd_scope assistant), Top-200 + tail (loss.kd_support reference_topk_tail_v1, K=200), 3 epochs, batch size 2, micro-batch size 1, seeds 20260726 and 20260801; optimizer, learning rate and scheduler as registered for A1 (token_matched_design.json / the A1 training plan)",
+  "packing": "stage3_packing above for every arm; the trainer's per-epoch permutation of the packed sequences",
+  "steps": "re-derived from each arm's own pack: T = ceil(3 x packed sequences / 2); warmup max(10, round(0.05 T)); evaluation every max(25, T // 8); saves every max(200, T // 2). No historical step count is carried over (estimates: plans/packed_training_budget.json)",
+  "arms": {
+   "A1-6cat": {
+    "root_teacher": "Qwen/Qwen3-4B@1cfa9a72",
+    "mode": "thinking",
+    "initialization": "the Top-1 of research_a_packed_hybrid_full_search, UNKNOWN until that search completes (consumed by state id, artifact digest and single-shard sha256 from its products.json; never the v2 Top-1)",
+    "online_kd_teacher": "the same root, thinking mode",
+    "data": "fluid 2,962,514 (A1's selection) + base six types at 493,418 each: five re-selected from the verified supply (data/six_category_selection.json) + tool calling (pending)"
+   },
+   "A2-6cat": {
+    "root_teacher": "Qwen/Qwen3-4B@1cfa9a72",
+    "mode": "non-thinking",
+    "initialization": "the same packed Top-1 as A1-6cat",
+    "online_kd_teacher": "the same root, non-thinking mode",
+    "data": "the same recipe in its own mode's native outputs"
+   },
+   "C1-6cat": {
+    "root_teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d",
+    "mode": "thinking",
+    "initialization": "the Thinking-2507 D4 Top-1 fc28e0dd... (its own root's search, under forward baseline v1 -- NOT a packed-context search; see thinking_2507_search_review)",
+    "online_kd_teacher": "Thinking-2507",
+    "data": "D4A_merged_whole's 3,681 tool-free documents (5,430,434 supervised tokens, their tokens unchanged, 352 historical cut traces kept as cut) + Thinking-2507-native tool turns (target 492,587), the whole set re-packed sequentially (audit/packing_audit.json :: C1_kept_part)"
+   }
+  },
+  "lineage_invariant": "for every arm: root teacher -> calibration -> search -> initialization -> teacher-native targets -> online KD teacher -> tokenizer -> chat template -> config are ONE teacher; no arm reads another teacher's or mode's assistant tokens or reference logits; the canonical tool task pool is shared, its generated outputs are not",
+  "checkpoint_resume": "the trainer's checkpoints (student, optimizer state, step, RNG, config hash, lineage identity bound by checkpoint.bind_identity) saved every save_every steps to the network volume; a replacement session resumes the same unit from its latest checkpoint; every completed unit's final checkpoint persisted with its sha256 at completion (AGENTS.md P8.2.1)",
+  "evaluation": "eval-set-1 v2 formal measurement, every item generated, nucleus_v1, each arm in its own mode and template, unrestricted generation (P18), as A1; tool calling itself is barely measured by eval-set-1 (5 formal-core prompts) -- a registered tool-calling set is owed to the maintainer"
+ },
+ "thinking_2507_search_review": {
+  "question": "does C1-6cat need a new Thinking-2507 full search under the packed forward context for a strict comparison?",
+  "facts": [
+   "C1-6cat's initialization, the D4 Top-1 fc28e0dd..., comes from Thinking-2507's own search (lineage invariant holds) but under forward baseline v1 (one item per row) and state_eval@v1, whose tool domain is 28 Glaive items",
+   "A1-6cat and A2-6cat will start from a packed-context search Top-1 selected with tool_calling@v1 in calibration and state evaluation",
+   "the C1-6cat vs A1-6cat comparison is registered as END-TO-END and cross-lineage (six_category_design.json :: comparisons): teacher, initialization and the state evaluation that selected it, the five other base types and the fluid rendering are already unmatched"
+  ],
+  "judgement": "NOT NECESSARY for C1-6cat as registered: its question is end-to-end, and C1's initialization is fixed by the maintainer's 2026-11-03 decision. NECESSARY only if the maintainer wants the A1-6cat vs C1-6cat contrast to hold the initialization METHOD fixed (same packed forward context, same tool-calling state evaluation); then it is a separate authorization",
+  "cost_if_wanted": "the D4 Thinking-2507 search cost $28.22 over four sessions on an A100 at $1.79/h ($23.69 + $0.26 + $0.25 + $4.02); under the packed context and tool items the same scale factors as the hybrid's (1.45-1.88 backbone) give about $35-50, plus a Thinking-2507 state_eval v2 (its own tool episodes, Glaive removed under T3) and calibration tool cells in the shared generation session (~$1-2 more)",
+  "never": "the D4 Top-1 is never described as a packed-context initialization"
+ },
+ "reuse_and_persistence": {
+  "reused_at_zero_cost": [
+   "v1 calibration items (13 types) and state_eval_hybrid@v1 items: reused as v2's non-tool part",
+   "A1/A2 verified admission records (.scratch/research_a/...): the five-type re-selection",
+   "A1's fluid selection (unchanged)",
+   "D4A_merged_whole's tool-free sessions (C1-6cat, tokens unchanged)",
+   "the tool-calling source review, pool design and protocol (six_category_design.json)"
+  ],
+  "not_reusable": [
+   "any state, statistic, reference cache or checkpoint of the v2 search (identities differ by construction)",
+   "the A1/A2 document-isolated packs as training input (their documents are reused, their packing is not)",
+   "D4A_merged_whole's sequences as sequences (its sessions are reused)"
+  ],
+  "kept_as_history": [
+   "the v2 search's journal, evidence and Top-1 159e73be... (model.safetensors 3459b9c9..., one copy on 4rhubprswo)",
+   "the D4 Top-1 fc28e0dd... (dev box + relay)",
+   "A1's trained students (4rhubprswo + dev-box archive)"
+  ],
+  "risk": "the v2 Top-1 has a single copy on 4rhubprswo (reserve to 2026-11-15T12:55Z); it has no future consumer in this round (A1-6cat/A2-6cat take the packed Top-1), but it is the A1 result's initialization and stays protected until the maintainer decides its retention"
+ },
+ "preparation_status": {
+  "done": [
+   "core sequential packing (aadistill.data.sequence_packing) with the reference algorithm verbatim and checked on every call",
+   "Stage-3 packer pack_sequential, MaskedDocument, write_pack / ladder support; trainer unchanged (cross_context = standard causal)",
+   "Stage-1 packed forward context through statistics, DEPTH, state evaluation, search, fixed-path replay, identities",
+   "forward baseline v2 selected; v1 superseded and still loadable; historical drivers pinned to v1",
+   "AGENTS.md P19; rollout context contract",
+   "audit/packing_audit.json, plans/packed_search_budget.json, plans/packed_training_budget.json",
+   "validations/packed_round/dry_run_20261103.json (new chain over v1 inputs; v2 search identities reproduce)",
+   "the five existing base types re-selected at 1/6 each (data/six_category_selection.json: FIVE_TYPES_SELECTED, no shortfall; A1-6cat 5,163 tasks / 5,436,912 supervised tokens without tool calling, A2-6cat 42,606 / 5,430,311)"
+  ],
+  "pending": [
+   "tool_pool@v1 construction from the three named sources (paused by the maintainer)",
+   "teacher-native tool generation (hybrid both modes; Thinking-2507)",
+   "calibration v2 and state_eval_hybrid@v2 materialization and freeze",
+   "a GPU measurement of the packed path (first state evaluation / first DEPTH round)",
+   "the packs of A1-6cat, A2-6cat, C1-6cat (they wait for the tool turns)",
+   "code owed with the tool items, small and mechanical: the hybrid profiles v2 builder (v1's cells re-quota'd to the six-sub-type supporting share, prefixes of v1's, plus the tool cells), the state_eval_hybrid@v2 builder (v1's items plus the tool items, the v2 type table and critical groups), and a v2 mode of freeze_state_eval.py (forward baseline v2 + the forward context) -- each needs the items to be checked against, so none is written ahead of them"
+  ]
+ },
+ "budget": {
+  "position_read": "2026-11-03T09:06Z (scripts/shared/project_position.py --live): committed $836.73 of the $868.00 project cap, $31.27 left; 0 pods; volumes 4rhubprswo and am5m373kuq retained",
+  "phases": {
+   "1_pool_and_generation": {
+    "usd": {
+     "lower": 2.2,
+     "expected": 4.4,
+     "upper": 6.6
+    },
+    "basis": "six_category_design.json: a ~1 h pilot ($1.1) then one L40S session for both hybrid modes and Thinking-2507 (2-3 h, $2.2-3.3), widened for the hybrid's calibration and state-evaluation tool episodes"
+   },
+   "2_packed_hybrid_full_search": {
+    "usd": {
+     "lower": 23.72,
+     "expected": 32.43,
+     "upper": 42.14
+    },
+    "proposed_hard_cap": 46.35,
+    "basis": "plans/packed_search_budget.json (scaled from the v2 search's measured telemetry)"
+   },
+   "3_six_trainings": {
+    "usd": {
+     "lower": 37.82,
+     "expected": 50.38,
+     "upper": 85.18
+    },
+    "basis": "plans/packed_training_budget.json; plus session setup/teardown"
+   },
+   "optional_thinking_2507_packed_search": {
+    "usd": {
+     "lower": 35.0,
+     "expected": 42.0,
+     "upper": 50.0
+    },
+    "basis": "thinking_2507_search_review"
+   }
+  },
+  "storage": "4rhubprswo $0.82/day (350 GB) holds the v2 Top-1; the packed search needs a volume of similar size in the GPU's datacenter",
+  "conclusion": "phases 1 and 2 together (~$37 expected, ~$49 upper, cap ~$53 with the search's hard cap) do not fit the $31.27 left: the Full Search Authorization needs a raised project cap"
+ },
+ "decisions_owed_to_the_maintainer": [
+  "fragments: the mandated truncate=True places a repeated prefix where truncate=False would pad -- on this data the packed sequences are IDENTICAL either way (no example exceeds 8,192 tokens), and the fragments re-score 10-13% of Stage-1 scored positions and re-train 18.7% (A1), 4.3% (A2) and 23.3% (C1's kept part) extra supervised tokens per epoch; confirm, or choose fragments as context only (numerically the same as truncate=False for every scored position)",
+  "Nemotron-Agentic-v1's tool_calling subset (tool sets from glaive-function-calling-v2): include, or the interactive_agent subset only",
+  "tool category shares, the 6,144-token prompt bound, the non-thinking state-evaluation floor (12,000 scored positions)",
+  "a registered tool-calling evaluation (eval-set-2) for closed-loop tool-execution success",
+  "a raised project cap for the Full Search Authorization (pool generation + packed search)",
+  "whether a Thinking-2507 packed search is wanted (only for an initialization-matched C1-6cat vs A1-6cat contrast)",
+  "the lifecycle of volume 4rhubprswo and the v2 Top-1's single copy",
+  "the step-level loss weighting (per-step normalization makes a token's weight 1/N_step; reading_verified carries 1.13x (A1) to 1.28x (A2) its exposure share): keep (unchanged objective) or register a fixed-denominator normalization as a new objective"
+ ],
+ "gpu_execution_request": {
+  "operation": "research_a_packed_hybrid_full_search (packed_full_search.py), after calibration v2 and state_eval_hybrid@v2 exist; its level-0 first state evaluation and first DEPTH round are the GPU measurement of the packed path (throughput, scored rows/s, peak VRAM, repeatability), not a separate session",
+  "why_not_cpu": "a 4B teacher over 8,192-token packed sequences with bf16 kernels; CPU answers correctness (done) but not CUDA numerics, memory or throughput",
+  "gpu": "one NVIDIA L40S (48 GB) first; an A100-80GB only after a measured L40S OOM",
+  "memory_estimate": "teacher bf16 ~8 GB; one 8,192-token sequence's candidate rows [<=7.7k, 151,936] bf16 ~2.4 GB per model; DEPTH float32 KL in 2,048-row chunks ~1.2 GB per chunk plus temporaries; prefix-reuse captured block inputs ~1.5 GB; teacher sketches cached per packed segment ~1.1 GB (state evaluation) and ~0.5 GB per profile (DEPTH)",
+  "precision": "bf16 compute, float32 accumulation (the baseline's numerics)",
+  "count": 1,
+  "runtime_and_cost": "plans/packed_search_budget.json: ~21-38 h, $23.72 / $32.43 / $42.14, proposed hard cap $46.35, with a deadline and journal resume",
+  "disk": "a network volume in the GPU's datacenter for the search states and checkpoints (the v2 search used ~93 states of up to ~8 GB each with prune_weights false; 350 GB was enough)",
+  "cheaper_first": "the generation session that builds the tool items runs first anyway on one L40S; the search's own first evaluation is the device admission (as v2's)",
+  "verified_on_cpu": "tests/initialization/test_forward_context.py (packed batches, causal reading, masks, DEPTH and state evaluation against from-scratch computations, prefix reuse, a real BeamSearch and its resume, identity separation); validations/packed_round/dry_run_20261103.json",
+  "gate": "the first evaluation's critical-group check and the frozen epsilon rule; an L40S OOM is an ordinary engineering failure inside the authorized envelope (A100 fallback), not a protocol change",
+  "authorization": "NOT requested in this round: it needs the Full Search Authorization (and a raised project cap)"
+ }
+}

@@ -127,12 +127,43 @@ def resolve_pad_id(model: Any) -> int:
 
 
 @dataclass(frozen=True)
+class Segment:
+    """One item's tokens inside one row of a PACKED batch.
+
+    The row holds the item's first ``length`` tokens at ``start .. start+length-1``
+    (every placement is a prefix: `aadistill.data.sequence_packing`), and its
+    ``length - 1`` prediction positions are ``start .. start+length-2``. The
+    position after them predicts the NEXT segment's first token and belongs to no
+    item. ``index`` is the item's position in the list that was packed, and
+    ``final`` is ``False`` for a fragment.
+    """
+
+    row: int
+    start: int
+    length: int
+    index: int
+    final: bool = True
+
+    @property
+    def prediction_slice(self) -> slice:
+        return slice(self.start, self.start + self.length - 1)
+
+
+@dataclass(frozen=True)
 class ItemBatch:
     """Padded tokens for several items, and the means to undo the padding.
 
     ``items`` holds the original mappings in row order, so a consumer recovers
     every per-item fact it had before — ``item_id``, ``domain``, ``subtype`` —
     without this module knowing that any of them exist.
+
+    **A packed batch** (``segments`` set) holds several items per row, read with
+    standard causal attention and continuous positions, so a later item is
+    conditioned on the earlier ones in its row. ``items`` is then one mapping
+    PER SEGMENT, ``lengths`` the non-padding token count per row, and per-item
+    results come from the segment views (:meth:`segment_predictions`). The
+    per-row views that assume one item per row (:meth:`split_predictions`)
+    refuse a packed batch rather than attribute a row to its first item.
     """
 
     input_ids: torch.Tensor          #: [B, T_max], right-padded
@@ -140,10 +171,33 @@ class ItemBatch:
     lengths: tuple[int, ...]         #: true token count per row
     items: tuple[Mapping[str, Any], ...]
     pad_id: int
+    segments: tuple[Segment, ...] | None = None
 
     @property
     def size(self) -> int:
         return len(self.lengths)
+
+    @property
+    def packed(self) -> bool:
+        return self.segments is not None
+
+    def _require_unpacked(self, what: str) -> None:
+        if self.segments is not None:
+            raise BatchingError(
+                f"{what} assumes one item per row and this batch is packed "
+                f"({len(self.segments)} segments in {self.size} rows); use the "
+                "segment views")
+
+    def segment_predictions(self, batched: torch.Tensor) -> list[torch.Tensor]:
+        """``[B, T_max - 1, ...]`` -> one ``[L_s - 1, ...]`` tensor per segment,
+        in segment order. Each is the segment's own prediction slice."""
+        if self.segments is None:
+            return self.split_predictions(batched)
+        if batched.shape[0] != self.size:
+            raise BatchingError(
+                f"expected a leading batch dimension of {self.size}, got "
+                f"{tuple(batched.shape)}")
+        return [batched[s.row, s.prediction_slice] for s in self.segments]
 
     @property
     def is_padded(self) -> bool:
@@ -162,6 +216,12 @@ class ItemBatch:
         """
         mask = torch.zeros(self.size, self.input_ids.shape[1] - 1,
                            dtype=torch.bool, device=self.input_ids.device)
+        if self.segments is not None:
+            #: A segment's last token predicts the next segment's first token,
+            #: which belongs to no item: that position stays False.
+            for s in self.segments:
+                mask[s.row, s.prediction_slice] = True
+            return mask
         for row, length in enumerate(self.lengths):
             mask[row, :length - 1] = True
         return mask
@@ -175,6 +235,7 @@ class ItemBatch:
         ``logits[0, :-1]``, so the caller's existing per-item reduction runs
         unchanged over unchanged position counts.
         """
+        self._require_unpacked("split_predictions")
         if batched.shape[0] != self.size:
             raise BatchingError(
                 f"expected a leading batch dimension of {self.size}, got "
@@ -239,6 +300,60 @@ def build_batch(items: Sequence[Mapping[str, Any]], *, pad_id: int,
     return ItemBatch(input_ids=input_ids, attention_mask=attention_mask,
                      lengths=tuple(lengths), items=tuple(items),
                      pad_id=int(pad_id))
+
+
+def build_packed_batch(sequences: Sequence[Sequence[Any]],
+                       items: Sequence[Mapping[str, Any]], *, pad_id: int,
+                       device: Any = None) -> ItemBatch:
+    """One packed :class:`ItemBatch`: each row is one packed sequence.
+
+    ``sequences[r]`` lists row ``r``'s placements in order, each with
+    ``index`` (into ``items``), ``tokens`` (how many of the item's FIRST tokens)
+    and ``final`` -- `aadistill.data.sequence_packing.Placement`. Items are laid
+    end to end with no separator; rows are right-padded to the widest. No
+    position ids are built: the model's default ``0 .. T-1`` are the continuous
+    positions this layout is read with.
+    """
+    if not sequences:
+        raise BatchingError("refusing to build an empty packed batch")
+    rows: list[list[torch.Tensor]] = []
+    segments: list[Segment] = []
+    seg_items: list[Mapping[str, Any]] = []
+    lengths: list[int] = []
+    for r, seq in enumerate(sequences):
+        at, parts = 0, []
+        for p in seq:
+            item = items[int(p.index)]
+            ids = item.get("input_ids") if isinstance(item, Mapping) else None
+            if not isinstance(ids, torch.Tensor) or ids.dim() != 2 or ids.shape[0] != 1:
+                raise BatchingError(
+                    f"item {p.index}: a packed batch needs 'input_ids' of shape "
+                    "[1, T]; items reach an operator through "
+                    "`prepare_calibration_items`, which guarantees one")
+            n = int(p.tokens)
+            if not 1 <= n <= int(ids.shape[1]):
+                raise BatchingError(
+                    f"item {p.index}: placing {n} tokens of a {int(ids.shape[1])}"
+                    "-token item")
+            parts.append(ids[0, :n])
+            segments.append(Segment(row=r, start=at, length=n, index=int(p.index),
+                                    final=bool(p.final)))
+            seg_items.append(item)
+            at += n
+        rows.append(parts)
+        lengths.append(at)
+    width = max(lengths)
+    target = device if device is not None else rows[0][0].device
+    input_ids = torch.full((len(rows), width), int(pad_id), dtype=torch.long,
+                           device=target)
+    attention_mask = torch.zeros((len(rows), width), dtype=torch.long,
+                                 device=target)
+    for r, parts in enumerate(rows):
+        input_ids[r, :lengths[r]] = torch.cat(parts).to(target)
+        attention_mask[r, :lengths[r]] = 1
+    return ItemBatch(input_ids=input_ids, attention_mask=attention_mask,
+                     lengths=tuple(lengths), items=tuple(seg_items),
+                     pad_id=int(pad_id), segments=tuple(segments))
 
 
 def active_rows(mask: Any, shape: Any, device: Any = None):

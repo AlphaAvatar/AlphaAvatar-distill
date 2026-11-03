@@ -1,0 +1,120 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.packed_search_budget/v1",
+ "written_utc": "2026-11-03T09:08:52Z",
+ "is_an_estimate": "no packed forward has run on a GPU; replace with a measured first evaluation / DEPTH round",
+ "measured_basis": {
+  "run": "logs/stages/stage-2/teacher_modes/runs/a_search_20261101_153803",
+  "pod_minutes": 1298.76,
+  "rate_usd_per_hour": 1.1067,
+  "usd": 23.9553,
+  "operator_seconds": 58408.9,
+  "parent_load_seconds": 708.0,
+  "rest_seconds_state_evaluation_materialization_setup": 18808.7
+ },
+ "attention_coefficient_per_context_token": 4.0584415584415584e-05,
+ "set_terms": {
+  "calib.hybrid_d4_base@v1": {
+   "sum_L": 472966,
+   "sum_L2": 718901398,
+   "sum_T": 521613,
+   "sum_T2": 4258295721
+  },
+  "calib.hybrid_d4_rh@v1": {
+   "sum_L": 339452,
+   "sum_L2": 555262602,
+   "sum_T": 379534,
+   "sum_T2": 3094308548
+  },
+  "state_eval_hybrid@v1": {
+   "sum_L": 956195,
+   "sum_L2": 1536194683,
+   "sum_T": 1068600,
+   "sum_T2": 8737401920
+  }
+ },
+ "assumptions": {
+  "tool_scored_positions_per_mode": {
+   "calib.hybrid_d4_base@v1": 4200,
+   "calib.hybrid_d4_rh@v1": 1800,
+   "state_eval_hybrid@v1": 12000
+  },
+  "tool_tokens_per_scored_lower_expected_upper": {
+   "H-T": [
+    2.0,
+    4.0,
+    6.0
+   ],
+   "H-N": [
+    4.333333333333333,
+    13.857142857142858,
+    38.5
+   ]
+  },
+  "state_evaluation_share_of_rest": 0.7,
+  "setup_minutes": 25.0,
+  "teardown_minutes": 15.0,
+  "gpu": "one L40S at the v2 search's posted rate (GPU + container disk); an A100-80GB only after a measured L40S OOM (largest packed sequence: ~7.7k scored rows, DEPTH's float32 KL now reduced in 2,048-row chunks)"
+ },
+ "cases": {
+  "lower": {
+   "pod_minutes": 1286.2,
+   "usd": 23.72,
+   "scale_factors": {
+    "calib.hybrid_d4_base@v1": {
+     "backbone": 1.4535,
+     "scored_rows": 1.1585
+    },
+    "calib.hybrid_d4_rh@v1": {
+     "backbone": 1.4374,
+     "scored_rows": 1.1452
+    },
+    "state_eval_hybrid@v1": {
+     "backbone": 1.4967,
+     "scored_rows": 1.2275
+    }
+   },
+   "throughput_vs_v2": 1.3
+  },
+  "expected": {
+   "pod_minutes": 1758.3,
+   "usd": 32.43,
+   "scale_factors": {
+    "calib.hybrid_d4_base@v1": {
+     "backbone": 1.582,
+     "scored_rows": 1.1585
+    },
+    "calib.hybrid_d4_rh@v1": {
+     "backbone": 1.5137,
+     "scored_rows": 1.1452
+    },
+    "state_eval_hybrid@v1": {
+     "backbone": 1.6776,
+     "scored_rows": 1.2275
+    }
+   },
+   "throughput_vs_v2": 1.0
+  },
+  "upper": {
+   "pod_minutes": 2284.8,
+   "usd": 42.14,
+   "scale_factors": {
+    "calib.hybrid_d4_base@v1": {
+     "backbone": 1.8789,
+     "scored_rows": 1.1585
+    },
+    "calib.hybrid_d4_rh@v1": {
+     "backbone": 1.6902,
+     "scored_rows": 1.1452
+    },
+    "state_eval_hybrid@v1": {
+     "backbone": 2.0959,
+     "scored_rows": 1.2275
+    }
+   },
+   "throughput_vs_v2": 0.87
+  }
+ },
+ "proposed_hard_cap_usd": 46.35,
+ "_hard_cap_rule": "the upper case plus 10% for the measured-cost uncertainty; storage is booked separately",
+ "authorizes": "nothing"
+}

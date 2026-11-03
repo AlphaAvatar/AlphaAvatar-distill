@@ -6,6 +6,14 @@ asked for $0 design, source audit, data protocol and feasibility analysis.
 - No cap was raised. Research B stays pending and `main` is unchanged.
 - Everything below waits for the maintainer's ruling at the review boundary.
 
+**Packing superseded (2026-11-03).** The maintainer's packing decision replaces this design's packing terms:
+- `document_isolated` (A1-6cat, A2-6cat) and E1's packer (C1-6cat) give way to sequential causal packing for all
+  three arms;
+- the hybrid Top-1 is re-searched under the packed forward context;
+- the rest of this design (sources, pool, protocol, verifier, quotas) stands.
+
+See [`PACKED_ROUND.md`](PACKED_ROUND.md) and `packed_round_design.json`.
+
 **What the brief decides.**
 - A future A1 retrains with the base-corpus category restored to six types, about 1/6 of its supervised tokens
   each. Tool calling comes back as the sixth type.

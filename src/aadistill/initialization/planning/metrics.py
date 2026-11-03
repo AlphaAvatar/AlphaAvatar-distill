@@ -41,6 +41,7 @@ from aadistill.initialization.specs.metrics import (
 from aadistill.initialization.calibration.batching import resolve_pad_id
 from aadistill.initialization.calibration.packing import (
     ORIGINAL_ORDER_V1,
+    forward_context_profile,
     item_lengths,
     packed_batches,
     padding_profile,
@@ -143,6 +144,11 @@ class StateEvaluator:
         #: historical KL-only metrics and every protocol id byte-identical; a
         #: declared objective ADDS `state.objective.*` and moves the id.
         scoring_objective: Any = None,
+        #: HOW THE SUITE IS READ: a `calibration.packing.ForwardContext` packs
+        #: the items into causal sequences, and the teacher and every candidate
+        #: are read in the same sequences. A different measurement, so it moves
+        #: the protocol id; `None` is the historical one-item-per-row reading.
+        forward_context: Any = None,
     ) -> None:
         if not items:
             raise MeasurementError(f"{suite.qualified_id}: no items to score")
@@ -270,12 +276,30 @@ class StateEvaluator:
                     raise MeasurementError(str(exc)) from exc
         if suite.critical_groups is not None:
             _require_critical_groups(suite, self.items, self._weights)
+        self.forward_context = forward_context
+        if forward_context is not None:
+            unsupported = [why for why, bad in (
+                ("prediction_rows must be scored_v1",
+                 not execution.selects_prediction_rows),
+                ("the support must be a reference Top-K + tail",
+                 distribution_support.is_full_vocab or distribution_support.is_union),
+                ("no scoring objective", scoring_objective is not None),
+                ("reference_strategy must be RECOMPUTE (the packed path caches "
+                 "the teacher's sketches per packed segment itself)",
+                 reference_strategy is not ReferenceStrategy.RECOMPUTE),
+            ) if bad]
+            if unsupported:
+                raise MeasurementError(
+                    "a packed forward context is implemented for the forward "
+                    f"baseline's state evaluation only; it needs {'; '.join(unsupported)}")
         self.reduction = ReductionSemantics(
             chunk=int(chunk), reference_strategy=reference_strategy.value,
             distribution_support=distribution_support,
             scoring_objective=scoring_objective,
             critical_aggregation=(None if suite.critical_groups is None
-                                  else CRITICAL_GROUP_AGGREGATION))
+                                  else CRITICAL_GROUP_AGGREGATION),
+            forward_context=(None if forward_context is None
+                             else forward_context.as_dict()))
         self.measurement_protocol_id = measurement_protocol_id(
             suite_structural_identity=suite.suite_hash,
             suite_content_identity=(suite_content_sha256
@@ -296,7 +320,14 @@ class StateEvaluator:
         #: either way.
         self._reference_path = (int(execution.micro_batch_size) <= 1
                                 and execution.calibration_batch_packing
-                                == ORIGINAL_ORDER_V1)
+                                == ORIGINAL_ORDER_V1
+                                and forward_context is None)
+        #: Packed path: the teacher's sketch per (group, segment), and how many
+        #: teacher forwards the cache saved. Execution evidence only, read off
+        #: the evaluator (`packed_teacher_forwards`), never put in a result.
+        self._packed_sketches: dict[tuple[int, int], ReferenceDistributionSketch] = {}
+        self.packed_teacher_forwards = 0
+        self.packed_teacher_forwards_skipped = 0
         #: Built at the first `evaluate`, because the pad id comes from a model.
         #: Built ONCE and reused for every candidate: the grouping depends only on
         #: the suite's lengths, and a grouping that could differ between
@@ -479,9 +510,14 @@ class StateEvaluator:
         count them. See ``_logit_pairs``.
         """
         lengths = [int(i.input_ids.shape[1]) for i in self.items]
-        profile = padding_profile(
-            lengths, max(int(self.execution.micro_batch_size), 1),
-            packing=self.execution.calibration_batch_packing)
+        if self.forward_context is not None:
+            profile = forward_context_profile(
+                self.items, max(int(self.execution.micro_batch_size), 1),
+                self.forward_context)
+        else:
+            profile = padding_profile(
+                lengths, max(int(self.execution.micro_batch_size), 1),
+                packing=self.execution.calibration_batch_packing)
         width = int(profile["max_group_width"])
         rows = max(int(self.execution.micro_batch_size), 1)
         peak = 2 * rows * max(width - 1, 1) * int(vocab_size) * int(bytes_per_logit)
@@ -517,8 +553,110 @@ class StateEvaluator:
         self._groups = list(packed_batches(
             shim, max(int(self.execution.micro_batch_size), 1),
             packing=self.execution.calibration_batch_packing,
-            pad_id=resolve_pad_id(model), device=self.device))
+            pad_id=resolve_pad_id(model), device=self.device,
+            forward_context=self.forward_context))
         return self._groups
+
+    @torch.no_grad()
+    def _packed_segments(self, model):
+        """``(item, key, n_tokens, reference rows | None, candidate rows, select)``
+        per packed segment, in group then segment order.
+
+        Each segment is item ``index``'s first ``n_tokens`` tokens; its scored
+        rows are the item's selection over its first ``n_tokens - 1``
+        prediction positions, placed at the segment's offset. The teacher is
+        forwarded on the same group only when one of the group's segment
+        sketches is not cached yet; its rows are ``None`` otherwise.
+        """
+        adapter = adapter_for_config(model.config)
+        for g, packed in enumerate(self._ensure_groups(model)):
+            batch = packed.batch
+            ids = batch.input_ids.to(self.device)
+            attn = batch.attention_mask.to(self.device)
+            rows = torch.zeros(int(ids.shape[0]), int(ids.shape[1]) - 1,
+                               dtype=torch.bool, device=self.device)
+            selects = []
+            for seg in batch.segments:
+                item = self.items[seg.index]
+                if batch.items[len(selects)]["item_id"] != item.item_id:
+                    raise MeasurementError(
+                        f"segment {len(selects)} of packed group {g} claims "
+                        f"{batch.items[len(selects)]['item_id']!r} at suite index "
+                        f"{seg.index}, which holds {item.item_id!r}")
+                select = self._row_select[item.item_id][:seg.length - 1]
+                rows[seg.row, seg.prediction_slice] = select.to(self.device)
+                selects.append(select)
+            counts = [int(s.sum()) for s in selects]
+            cand = torch.split(scored_prediction_logits(adapter, model, ids, attn, rows),
+                               counts, dim=0)
+            keys = [(g, k) for k in range(len(selects))]
+            if all(k in self._packed_sketches or not counts[i]
+                   for i, k in enumerate(keys)):
+                ref = [None] * len(keys)
+                self.packed_teacher_forwards_skipped += 1
+            else:
+                ref = torch.split(scored_prediction_logits(
+                    adapter_for_config(self._teacher.config), self._teacher,
+                    ids, attn, rows), counts, dim=0)
+                self.packed_teacher_forwards += 1
+            for k, seg in enumerate(batch.segments):
+                yield (self.items[seg.index], keys[k], seg.length, ref[k], cand[k],
+                       selects[k])
+            del cand, ref
+
+    @torch.no_grad()
+    def _accumulate_packed(self, model, per_subtype, per_group, totals) -> None:
+        """The scored-row reduction of `evaluate`, per packed segment.
+
+        Each segment's targets, tags and weights are its item's, cut to the
+        segment's prediction positions; everything after that is the same
+        `distortion_on_reference_support` call with the same chunk, merged by
+        the item's sub-type and critical group. A fragment's positions merge
+        into its item's sub-type like any other scored positions.
+        """
+        for item, key, n_tokens, ref, cand, select in self._packed_segments(model):
+            dev = cand.device
+            select = select.to(dev)
+            targets = item.input_ids[0, 1:n_tokens].to(dev)[select]
+            full_tags = {name: mask[:n_tokens - 1].to(dev)
+                         for name, mask in item.tags.items()}
+            tags = {name: mask[select] for name, mask in full_tags.items()}
+            weights = (None if self._weights is None else
+                       self._weights[item.item_id][:n_tokens - 1].to(dev)[select])
+            if not bool(select.any()):
+                #: A placement holding none of its item's scored positions (a
+                #: fragment cut inside the prompt): nothing to reduce, but its
+                #: positions and tag counts are evidence like any other's.
+                #: weight 0.0, not None: `merge` reads an absent weight as
+                #: "unweighted" and would add these positions to the
+                #: denominator of every weighted mean they are merged into.
+                sums = DistortionSums(weight=0.0)
+                _restore_unselected_counts(sums, select, full_tags)
+                per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
+                if item.critical_group is not None:
+                    per_group.setdefault(item.critical_group,
+                                         DistortionSums()).merge(sums)
+                totals.merge(sums)
+                continue
+            sketch = self._packed_sketches.get(key)
+            if sketch is None:
+                sketch = sketch_reference(ref, targets,
+                                          top_k=int(self.distribution_support.top_k),
+                                          chunk=self.chunk)
+                if (self._sketch_cache_bytes + sketch.bytes_held()
+                        <= self.cache_budget_bytes):
+                    self._packed_sketches[key] = sketch
+                    self._sketch_cache_bytes += sketch.bytes_held()
+            sums = distortion_on_reference_support(
+                sketch, cand, targets, tags=tags, weights=weights,
+                chunk=self.chunk)
+            _restore_unselected_counts(sums, select, full_tags)
+            per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
+            if item.critical_group is not None:
+                per_group.setdefault(item.critical_group,
+                                     DistortionSums()).merge(sums)
+            totals.merge(sums)
+            del cand, ref
 
     @torch.no_grad()
     def _logit_pairs(self, model):
@@ -766,8 +904,12 @@ class StateEvaluator:
                          else _ObjectiveAccumulator(self.scoring_objective,
                                                     self.suite.critical_tags,
                                                     self.suite.critical_groups))
-        pairs = (self._union_pairs(model) if self._union_store is not None
-                 else self._logit_pairs(model))
+        if self.forward_context is not None:
+            self._accumulate_packed(model, per_subtype, per_group, totals)
+            pairs = ()
+        else:
+            pairs = (self._union_pairs(model) if self._union_store is not None
+                     else self._logit_pairs(model))
         for item, ref, cand, select in pairs:
             if ref is None:
                 #: THE UNION SUPPORT: the teacher's side is the store.
@@ -948,6 +1090,11 @@ class StateEvaluator:
                     #: that binds it lives on the state, not here.
                     "execution": self.execution.as_trace(),
                     "reference_path": self._reference_path,
+                    #: The packed context the suite was read in. The teacher-
+                    #: forward counters stay on the evaluator: they depend on
+                    #: how many evaluations came before, not on this one.
+                    **({} if self.forward_context is None else
+                       {"forward_context": self.forward_context.as_dict()}),
                     **({} if self._union_store is None else
                        {"union_reference": {
                            "identity_hash": self._union_store.identity_hash,

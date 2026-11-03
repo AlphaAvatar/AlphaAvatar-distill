@@ -15,7 +15,16 @@ Two records, two facts, both supplied by the caller:
   any artifact that instantiates the method;
 * the SELECTION -- which record is in force for a role, bound by the record's
   sha256, so editing a record without a deliberate re-selection fails rather
-  than silently changing what every forward session runs.
+  than silently changing what every forward session runs. A selection also
+  lists the records it SUPERSEDED, each still bound by its sha256, so a replay
+  of a past experiment loads the method that experiment ran rather than
+  whatever is selected today (`resolve_superseded`).
+
+A record may name a FORWARD CONTEXT policy (`method.forward_context`): how
+calibration and state-evaluation items are composed into forwards. Its rules
+are checked against what the core implements; its instance values (sequence
+length, shuffle seed) belong to each experiment and are supplied by the caller
+(`ForwardBaseline.forward_context`).
 
 Every term is checked against what the core actually implements: an id the core
 does not ship, or a hash that disagrees with the shipped object, is refused at
@@ -39,6 +48,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from aadistill.data.sequence_packing import (
+    ATTENTION_ID, MATERIALIZATION_ID, PACKING_ID, SHUFFLE_ID,
+)
+from aadistill.initialization.calibration.packing import (
+    ORIGINAL_ORDER_V1, ForwardContext,
+)
 from aadistill.initialization.execution import ExecutionConfig, ExecutionError
 from aadistill.initialization.planning.ranking import (
     PARETO_V1, SCHEDULE_V1, BeamRankingPolicy, BeamSchedule,
@@ -81,6 +96,13 @@ ARTIFACT_IDENTITY_FIELDS: tuple[str, ...] = (
     "artifact_digest", "weights_digest", "single_shard_sha256",
     "arch_signature",
 )
+
+
+#: The forward-context rules the core implements; a record's policy must name
+#: exactly these (`aadistill.data.sequence_packing`).
+FORWARD_CONTEXT_RULES: Mapping[str, Any] = {
+    "packing": PACKING_ID, "truncate": True, "materialization": MATERIALIZATION_ID,
+    "shuffle": SHUFFLE_ID, "attention": ATTENTION_ID}
 
 
 class BaselineError(ValueError):
@@ -160,10 +182,21 @@ class ForwardBaseline:
     reference_artifacts: tuple[RecordedArtifact, ...]
     forward_materializations: tuple[RecordedArtifact, ...]
     record: Mapping[str, Any]
+    #: The record's forward-context RULES, or `None` (one item per row).
+    forward_context_policy: Mapping[str, Any] | None = None
 
     @property
     def qualified_id(self) -> str:
         return f"{self.baseline_id}@v{self.version}"
+
+    def forward_context(self, *, sequence_length: int,
+                        shuffle_seed: int) -> ForwardContext | None:
+        """This method's forward context with an experiment's instance values,
+        or `None` when the method reads one item per row."""
+        if self.forward_context_policy is None:
+            return None
+        return ForwardContext(sequence_length=int(sequence_length),
+                              shuffle_seed=int(shuffle_seed))
 
     @property
     def execution_fingerprint(self) -> str:
@@ -256,6 +289,8 @@ class ForwardBaseline:
             "implementations": self.implementation_ids(),
             "position_policy": self.position_policy.qualified_id,
             "distribution_support": self.distribution_support.as_dict(),
+            **({} if self.forward_context_policy is None else
+               {"forward_context_policy": dict(self.forward_context_policy)}),
         }
 
 
@@ -370,6 +405,22 @@ def parse_baseline(doc: Mapping[str, Any], *, record_sha256: str) -> ForwardBase
             f"{STATE_EVALUATION_REFERENCE!r}, the only one the state evaluator "
             "implements")
 
+    context_policy = None
+    if method.get("forward_context") is not None:
+        raw_fc = method["forward_context"]
+        rules = {k: raw_fc.get(k) for k in FORWARD_CONTEXT_RULES}
+        if rules != dict(FORWARD_CONTEXT_RULES):
+            raise BaselineError(
+                f"{where}: forward context {rules!r} is not the one the core "
+                f"implements ({dict(FORWARD_CONTEXT_RULES)!r})")
+        if execution.calibration_batch_packing != ORIGINAL_ORDER_V1:
+            raise BaselineError(
+                f"{where}: a forward context fixes which items share a forward, "
+                f"so the execution's calibration_batch_packing must be "
+                f"{ORIGINAL_ORDER_V1!r}, not "
+                f"{execution.calibration_batch_packing!r}")
+        context_policy = rules
+
     references = tuple(_artifact(a, numerics, f"{where} reference artifact")
                        for a in doc.get("reference_artifacts") or ())
     forward = tuple(_artifact(a, numerics, f"{where} forward materialization")
@@ -387,7 +438,8 @@ def parse_baseline(doc: Mapping[str, Any], *, record_sha256: str) -> ForwardBase
         position_policy=policy, schedule=schedule, ranking_policy=ranking,
         operators=operators, operator_kl_references=local,
         state_evaluation_reference=state_ref, reference_artifacts=references,
-        forward_materializations=forward, record=doc)
+        forward_materializations=forward, record=doc,
+        forward_context_policy=context_policy)
 
 
 def load_baseline(path: str | Path, *,
@@ -438,8 +490,27 @@ def resolve_selection(selection_path: str | Path, role: str) -> ForwardBaseline:
                                                     f"{sp} {role}")))
 
 
+def resolve_superseded(selection_path: str | Path, role: str,
+                       version: int) -> ForwardBaseline:
+    """A record `role` USED to select, by its version, still sha256-bound.
+
+    For replaying a past experiment under the method it ran. The selection's
+    ``superseded`` list owns which records these are; a record that is neither
+    selected nor listed there cannot be loaded through a selection at all.
+    """
+    sp = Path(selection_path)
+    doc = json.loads(sp.read_text())
+    for entry in (doc.get("superseded") or {}).get(role, ()):
+        record = sp.parent / str(_require(entry, "record", f"{sp} {role}"))
+        b = load_baseline(record, expect_sha256=str(_require(entry, "sha256",
+                                                             f"{sp} {role}")))
+        if b.version == int(version):
+            return b
+    raise BaselineError(f"{sp} lists no superseded {role!r} record of version {version}")
+
+
 __all__ = ["ARTIFACT_IDENTITY_FIELDS", "BaselineError", "ForwardBaseline",
            "OPERATOR_REFERENCES", "RecordedArtifact", "SCHEMA",
            "SELECTION_SCHEMA", "SHIPPED_RANKING_POLICIES", "SHIPPED_SCHEDULES",
-           "STATE_EVALUATION_REFERENCE", "load_baseline", "parse_baseline",
-           "resolve_selection"]
+           "STATE_EVALUATION_REFERENCE", "FORWARD_CONTEXT_RULES", "load_baseline",
+           "parse_baseline", "resolve_selection", "resolve_superseded"]

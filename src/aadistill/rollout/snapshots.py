@@ -23,6 +23,20 @@ things, and this module is all three:
    off-policy fraction, which are what a pre-registered stability bound is
    stated in.
 
+Context and attention (AGENTS.md P19)
+-------------------------------------
+A rollout's context is fixed BEFORE generation: ``prompt_tokens`` is exactly the
+token sequence the engine was given (rendered from the real conversation by the
+policy's own tokenizer and chat template), and ``tokens`` is what it generated.
+Every on-policy quantity is computed on THAT rollout's own ``prompt_tokens +
+tokens`` with standard causal attention and continuous positions --
+:func:`score_tokens` takes one rollout at a time for this reason. Rollouts may
+be batched with padding; they are never packed together or re-composed after
+generation. The random sequential packing of Stage 1 and Stage 3
+(`aadistill.data.sequence_packing`) is an offline protocol and does not apply
+here; an off-policy SFT experiment that packs rollouts is a separate, separately
+authorized experiment, not this objective.
+
 What this module does not do
 ----------------------------
 It does not train. Applying the correction inside a loss belongs to the Stage 5

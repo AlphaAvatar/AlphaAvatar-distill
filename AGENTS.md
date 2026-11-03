@@ -1223,6 +1223,41 @@ distillation, numerical format, quantization, operators, kernels, target
 hardware and deployment-runtime optimization — not by truncating or changing the
 intended model behaviour during model-quality measurement.
 
+### P19. Packing and attention by stage
+
+**MAINTAINER DECISION 2026-11-03.** How examples are composed into sequences is
+part of what a measurement or a training run IS, so it is decided per stage and
+never changed as a performance optimization.
+
+| stage | context |
+| --- | --- |
+| Stage 1 search forwards (calibration statistics, DEPTH causal KL, teacher reference, candidates, state evaluation) | random shuffle → sequential packing → truncation → standard causal attention |
+| Stage 3 recovery / SFT / KD training | the same |
+| Stage 0 | not packed by rule; data a Stage-1 forward consumes is read under Stage 1's rule |
+| Stage 2 | prepares teacher-native data; builds Stage 3's packed training set |
+| Stage 4 / 5 rollout and on-policy training, Stage 6 deployment | the real context, fixed BEFORE generation; standard causal attention; rollouts are batched (padding), never packed together or re-composed after generation |
+
+The packing is the maintainer's reference algorithm
+(`aadistill.data.sequence_packing.packing_conversation`, `truncate=True`) over a
+seeded shuffle of stable ids: no best fit, no length sorting or bucketing, no
+skipping ahead. Every placement is a prefix of its example; an example that does
+not fit the room left fills it with its first tokens (a fragment, trained and
+scored like any placement and counted as repeated exposure) and is read again
+from its first token in the next sequence. Position ids run continuously over
+the packed sequence; there is no block-diagonal mask and no per-example reset.
+Padding appears only at the end of the last sequence.
+
+* The packing (rules, sequence length, seed) is SCIENTIFIC identity: it enters
+  hashed operator configs, measurement protocol ids and data identities.
+  `document_isolated` and best-fit packers stay only so historical packs remain
+  readable; no new experiment uses them.
+* Sequence length and seed are each experiment's configuration, never core
+  constants (P3).
+* Report a packed data set's three layers apart: the selected data before
+  packing (unique supervised tokens), what the sequences train on (repeated,
+  truncated and padding tokens, supervised-token exposure), and the loss
+  weighting.
+
 ---
 
 ## 2. Project Writing Requirements

@@ -27,9 +27,21 @@ the training distribution; neither is a correction of the other.
   positions, a separate segment no real token can see.
 
 Neither cuts a document (P17: a trace that does not fit is not trained, it is
-not trimmed). Everything model- or mode-specific -- which template, which
-kwargs, which stop ids, which shared system block -- arrives as arguments
-(AGENTS.md P3).
+not trimmed). Both place documents by best fit and are kept so historical packs
+stay readable and re-checkable; neither is the packing of a new experiment.
+
+**The packing of new experiments** (maintainer decision 2026-11-03) is
+``pack_sequential``: documents ordered by id, shuffled with a frozen seed, packed
+in that order by the maintainer's reference algorithm with truncation
+(`aadistill.data.sequence_packing`), read with standard causal attention and
+continuous positions -- the trainer's ``cross_context`` attention. Its
+strategy name is ``sequential_causal``. A document that does not fit the room
+left in a sequence fills it with its first tokens (a fragment, supervised like
+any other placement and counted as repeated exposure) and is packed again from
+its first token in the next sequence.
+
+Everything model- or mode-specific -- which template, which kwargs, which stop
+ids, which shared system block -- arrives as arguments (AGENTS.md P3).
 """
 
 from __future__ import annotations
@@ -47,6 +59,7 @@ __all__ = [
     "CONTEXT_STRATEGIES",
     "DocumentError",
     "TokenDocument",
+    "MaskedDocument",
     "document_from_turn",
     "generation_suffix",
     "prompt_mode_problems",
@@ -55,14 +68,22 @@ __all__ = [
     "pack_isolated",
     "isolated_sequence_count",
     "pack_cross_context",
+    "pack_sequential",
     "pack_documents",
     "write_pack",
     "context_exposure",
     "isolation_report",
 ]
 
-#: The trainer's ``batch.context_strategy`` values; the first is the default.
+#: The trainer's ``batch.context_strategy`` values; the first is the default. They
+#: name ATTENTION, not packing: ``cross_context`` is standard causal attention over
+#: the whole packed sequence with continuous positions -- what a
+#: ``sequential_causal`` pack is trained with -- and ``document_isolated`` the
+#: historical block-diagonal reading of a ``pack_isolated`` pack.
 CONTEXT_STRATEGIES = ("cross_context", "document_isolated")
+
+#: ``PackedDocuments.strategy`` of a ``pack_sequential`` pack.
+SEQUENTIAL_CAUSAL = "sequential_causal"
 
 
 class DocumentError(ValueError):
@@ -98,6 +119,32 @@ class TokenDocument:
 
     def content_sha256(self) -> str:
         return hashlib.sha256(json.dumps([self.prompt_ids, self.output_ids]).encode()).hexdigest()
+
+
+@dataclass(frozen=True)
+class MaskedDocument:
+    """A training document whose supervised tokens are given by an explicit mask.
+
+    For records whose targets are not one trailing generation -- a multi-turn
+    session already rendered as tokens, with each assistant turn supervised and
+    everything else context. ``pack_sequential`` reads it like a `TokenDocument`.
+    """
+
+    doc_id: str
+    ids: tuple[int, ...]
+    target_mask: tuple[bool, ...]
+    meta: Mapping = field(default_factory=dict)
+
+    def __post_init__(self):
+        if len(self.ids) != len(self.target_mask):
+            raise DocumentError(f"{self.doc_id}: {len(self.ids)} ids for {len(self.target_mask)} mask entries")
+        if not self.ids or self.target_mask[0]:
+            raise DocumentError(f"{self.doc_id}: a document's first token must be context, never a target")
+        if not any(self.target_mask):
+            raise DocumentError(f"{self.doc_id}: no supervised token")
+
+    def __len__(self) -> int:
+        return len(self.ids)
 
 
 def document_from_turn(turn: Mapping, *, doc_id: str, stop_ids: Iterable[int],
@@ -177,11 +224,13 @@ class PackedDocuments:
     refused: list[dict]              # documents that fit no sequence
     strategy: str = "document_isolated"
     shared_prefix_length: int = 0    # cross_context: the shared block emitted once per sequence
+    #: sequential_causal: the packing spec and its token accounting (`plan_report`)
+    packing: dict | None = None
 
     def blocks(self):
         """The trainer's tuple: (ids, loss mask, content mask, position ids) under
-        isolation, (ids, loss mask, content mask) under cross_context, whose
-        positions are the default continuous ones."""
+        isolation, (ids, loss mask, content mask) otherwise, whose positions are
+        the default continuous ones (the trainer's ``cross_context`` attention)."""
         if self.strategy == "document_isolated":
             return self.input_ids, self.target_mask, self.content_mask, self.position_ids
         return self.input_ids, self.target_mask, self.content_mask
@@ -189,12 +238,25 @@ class PackedDocuments:
     def stats(self) -> dict:
         n, length = self.input_ids.shape
         real = int(self.content_mask.sum())
-        return {"strategy": self.strategy, "sequences": n, "sequence_length": length,
-                "documents": sum(map(len, self.members)),
-                "refused": len(self.refused), "non_padding_tokens": real,
-                "supervised_tokens": int(self.target_mask.sum()),
-                "context_tokens": real - int(self.target_mask.sum()),
-                "padding_fraction": round(1 - real / (n * length), 6) if n else None}
+        out = {"strategy": self.strategy, "sequences": n, "sequence_length": length,
+               "documents": len({m["doc_id"] for ms in self.members for m in ms}),
+               "refused": len(self.refused), "non_padding_tokens": real,
+               "supervised_tokens": int(self.target_mask.sum()),
+               "context_tokens": real - int(self.target_mask.sum()),
+               "padding_fraction": round(1 - real / (n * length), 6) if n else None}
+        if self.strategy == SEQUENTIAL_CAUSAL:
+            #: `supervised_tokens` above counts supervised POSITIONS in the
+            #: sequences (fragments included); the unique count is the data size.
+            p = self.packing or {}
+            out.update(placements=sum(map(len, self.members)),
+                       fragments=sum(not m["final"] for ms in self.members for m in ms),
+                       unique_tokens=p.get("unique_tokens"),
+                       unique_supervised_tokens=p.get("unique_supervised_tokens"),
+                       repeated_tokens=p.get("repeated_tokens"),
+                       repeated_supervised_tokens=p.get("repeated_supervised_tokens"),
+                       truncated_tokens=p.get("truncated_tokens"),
+                       truncated_supervised_tokens=p.get("truncated_supervised_tokens"))
+        return out
 
     def composition(self) -> list[list[str]]:
         """Each sequence's documents in order: the composition a run's identity records."""
@@ -344,6 +406,59 @@ def pack_cross_context(docs: Sequence[TokenDocument], seq_len: int, pad_id: int,
                            "cross_context", len(prefix))
 
 
+def pack_sequential(docs: Sequence[TokenDocument | MaskedDocument], seq_len: int, pad_id: int, *,
+                    order_seed: int, namespace: str = "") -> PackedDocuments:
+    """Random shuffle -> sequential packing -> truncation, read causally.
+
+    Documents are ordered by ``sequence_packing.shuffled_order`` of their ids
+    under ``order_seed`` (so the result does not depend on the order they are
+    passed in), then packed in that order by the maintainer's reference
+    algorithm (``sequence_packing.sequential_pack``). Each document's tokens go
+    in whole, prompt then generation; no shared prefix is factored out and no
+    separator is inserted, so the position predicting the next document's first
+    token is the previous document's last token and its target is a prompt
+    token, never a supervised one. Positions are continuous over the sequence.
+
+    A member records its placement: ``start``, ``length`` (tokens placed),
+    ``document_length``, ``final`` (``False`` for a fragment), ``foreign_context``
+    (tokens of other documents before it), ``supervised`` (supervised tokens
+    placed) and ``supervised_total``. Nothing is refused: a document longer than
+    ``seq_len`` is placed truncated to ``seq_len`` and its remaining tokens are
+    counted as truncated.
+    """
+    from .sequence_packing import SequencePackingSpec, plan_report
+
+    if seq_len < 2:
+        raise ValueError("seq_len must be at least 2")
+    spec = SequencePackingSpec(sequence_length=int(seq_len), shuffle_seed=int(order_seed),
+                               namespace=namespace)
+    order, plan = spec.plan([d.doc_id for d in docs], [len(d) for d in docs])
+    ordered = [docs[i] for i in order]
+    n = len(plan)
+    ids = torch.full((n, seq_len), int(pad_id), dtype=torch.long)
+    target = torch.zeros((n, seq_len), dtype=torch.bool)
+    content = torch.zeros((n, seq_len), dtype=torch.bool)
+    members = []
+    for b, seq in enumerate(plan):
+        at, mem = 0, []
+        for p in seq:
+            d, k = ordered[p.index], p.tokens
+            ids[b, at:at + k] = torch.tensor(d.ids[:k], dtype=torch.long)
+            mask = d.target_mask[:k]
+            target[b, at:at + k] = torch.tensor(mask)
+            content[b, at:at + k] = True
+            mem.append({"doc_id": d.doc_id, "start": at, "length": k, "document_length": len(d),
+                        "final": bool(p.final), "foreign_context": at, "supervised": int(sum(mask)),
+                        "supervised_total": int(sum(d.target_mask))})
+            at += k
+        members.append(mem)
+    pos = torch.arange(seq_len).expand(n, seq_len).clone()
+    packed = PackedDocuments(ids, target, content, pos, members, [], SEQUENTIAL_CAUSAL, 0)
+    packed.packing = {**spec.as_dict(), **plan_report(
+        [len(d) for d in ordered], plan, seq_len, supervised=[d.target_mask for d in ordered])}
+    return packed
+
+
 def pack_documents(docs: Sequence[TokenDocument], seq_len: int, pad_id: int, *, strategy: str,
                    order_seed: int | None = None, shared_prefix: Sequence[int] = (),
                    separator_ids: Sequence[int] = ()) -> PackedDocuments:
@@ -353,7 +468,12 @@ def pack_documents(docs: Sequence[TokenDocument], seq_len: int, pad_id: int, *, 
     if strategy == "cross_context":
         return pack_cross_context(docs, seq_len, pad_id, shared_prefix=shared_prefix,
                                   separator_ids=separator_ids, order_seed=order_seed)
-    raise ValueError(f"unknown context strategy {strategy!r}; one of {CONTEXT_STRATEGIES}")
+    if strategy == SEQUENTIAL_CAUSAL:
+        if order_seed is None:
+            raise ValueError("sequential_causal packing needs a frozen order_seed")
+        return pack_sequential(docs, seq_len, pad_id, order_seed=order_seed)
+    raise ValueError(f"unknown context strategy {strategy!r}; one of "
+                     f"{CONTEXT_STRATEGIES + (SEQUENTIAL_CAUSAL,)}")
 
 
 def write_pack(train: PackedDocuments, val: PackedDocuments, out_dir, *, data_type: Mapping[str, str],
@@ -362,7 +482,8 @@ def write_pack(train: PackedDocuments, val: PackedDocuments, out_dir, *, data_ty
 
     One rung covering ``train``'s sequences; ``val``'s sequences follow them as
     the tail the loader validates on (`aadistill.data.ladder.ladder_blocks`).
-    Isolated packs also store ``position_ids``. ``data_type`` maps every doc id
+    Isolated packs also store ``position_ids``; a sequential pack stores none (its
+    positions are continuous). ``data_type`` maps every doc id
     to the category its validation mixture and audit count it under. Returns
     the ladder record, with the sha256 of each written file.
     """
@@ -385,14 +506,29 @@ def write_pack(train: PackedDocuments, val: PackedDocuments, out_dir, *, data_ty
             f.write(json.dumps({"block": b, "split": "train" if b < len(train.members) else "val",
                                 "sessions": [{"session_id": m["doc_id"], "data_type": data_type[m["doc_id"]],
                                               "supervised_retained": m["supervised"], "start": m["start"],
-                                              "length": m["length"], "foreign_context": m["foreign_context"]}
+                                              "length": m["length"], "foreign_context": m["foreign_context"],
+                                              **({"final": m["final"], "document_length": m["document_length"]}
+                                                 if "final" in m else {})}
                                              for m in members]}) + "\n")
     st = train.stats()
+    #: A sequential pack's rung is named by its UNIQUE supervised tokens (the data
+    #: size); `supervised_tokens` in `train` counts the supervised positions in the
+    #: sequences, fragments included, and is the per-epoch exposure.
+    rung_tokens = (st["unique_supervised_tokens"] if train.strategy == SEQUENTIAL_CAUSAL
+                   else st["supervised_tokens"])
     ladder = {"packing": f"token_documents.{train.strategy}", "block_len": int(train.input_ids.shape[1]),
               "n_blocks": st["sequences"], "n_val_blocks": len(val.members),
-              "rungs": [{"target_supervised_tokens": st["supervised_tokens"], "n_blocks": st["sequences"],
-                         "reachable": True, "actual_supervised_tokens": st["supervised_tokens"]}],
-              "train": st, "val": val.stats(), **dict(extra or {})}
+              "rungs": [{"target_supervised_tokens": rung_tokens, "n_blocks": st["sequences"],
+                         "reachable": True, "actual_supervised_tokens": rung_tokens}],
+              "train": st, "val": val.stats(),
+              **({"packing_spec": {k: train.packing[k] for k in (
+                  "packing", "truncate", "materialization", "shuffle", "attention", "sequence_length",
+                  "shuffle_seed") if k in train.packing},
+                  "val_packing_spec": {k: val.packing[k] for k in (
+                      "packing", "truncate", "materialization", "shuffle", "attention", "sequence_length",
+                      "shuffle_seed") if k in (val.packing or {})}}
+                 if train.strategy == SEQUENTIAL_CAUSAL else {}),
+              **dict(extra or {})}
     (out / "ladder.json").write_text(json.dumps(ladder, indent=1) + "\n")
     return {**ladder, "files_sha256": {n: sha256_file(out / n) for n in ("blocks.npz", "ladder.json", "audit.jsonl")}}
 

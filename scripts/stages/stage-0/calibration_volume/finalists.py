@@ -105,7 +105,7 @@ def _registries(repo_root: Path = REPO):
     from stages.phase_d1 import d1_session as D1S
 
     prereg = json.loads(PREREG.read_text())
-    baseline = FB.selected(repo_root)
+    baseline = FB.historical(1, repo_root)
     D1S._register_frozen_operators()
     FB.register_operators(baseline)
     register_stage0_profiles(repo_root / prereg["profiles_doc"])

@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Research A v2 A1 phase EXECUTING (maintainer 2026-11-01): inputs done; hybrid D4 full search COMPLETE (Top-1 159e73be); A1 x 2 seeds launched; cap $77; volume 4rhubprswo (US-TX-3). A2, C1, Research B not authorized. Owner: TOKEN_MATCHED.md D.",
+ "blocker": "BLOCKED NO (no open blocker record). Research A packed round stopped at PREPARATION_BLOCKED for the maintainer's review (2026-11-03): tool-calling data needs the source ruling, its download and a paid generation; the new hybrid full search and the A1-6cat/A2-6cat/C1-6cat trainings are NOT authorized. Owner: PACKED_ROUND.md.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-11-03T16:20:00Z",
+ "generated_utc": "2026-11-03T18:00:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Six-type design at $0 (docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md: A1-6cat, A2-6cat, C1-6cat); stopped for the maintainer's ruling on sources, shares, budget and volume 4rhubprswo. A1 COMPLETE.",
+ "next": "The maintainer's ruling (PACKED_ROUND.md section 9): fragments under truncate=True, tool sources/shares/eval-set-2, a raised cap for generation + the packed search, a Thinking-2507 search, volume 4rhubprswo.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -153,7 +153,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
@@ -241,9 +241,9 @@
  },
  "forward_baseline": {
   "_derived_by": "render_log_navigation.py, via shared.forward_baseline",
-  "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+  "baseline": "stage1_init.d1_target_aware.scored_v1@v2",
   "owner": "configs/shared/baselines/selection.json",
-  "execution": "micro_batch_size=3, length_sorted_v1, prediction_rows=scored_v1",
+  "execution": "micro_batch_size=1, original_order_v1, prediction_rows=scored_v1",
   "historical_reference": "d1_q2 afd50c9f/3a4b4ede under prediction_rows=all_v1",
   "forward_materialization": null
  }

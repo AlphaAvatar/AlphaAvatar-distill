@@ -83,7 +83,7 @@ def build_session(*, workdir: Path, run_id: str, profiles: tuple,
 
     if len(profiles) < 1:
         raise Stage0SessionError("a search needs at least one calibration profile")
-    baseline = FB.selected(repo_root)
+    baseline = FB.historical(1, repo_root)
     D1S._register_frozen_operators()
     FB.register_operators(baseline)
     terms = FB.session_terms(baseline)

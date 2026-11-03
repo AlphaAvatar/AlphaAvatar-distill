@@ -45,7 +45,9 @@ from typing import Any
 from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
 from aadistill.initialization.specs.arch import ArchitectureAdapter, ArchSpec
 from aadistill.initialization.calibration.profiles import CalibrationProfile
-from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.calibration.profiles import (
+    CalibrationNeed, consumes_calibration,
+)
 from aadistill.initialization.scoring.support import (
     FULL_VOCAB_V1, DistributionSupport,
 )
@@ -198,6 +200,13 @@ class OperatorContext:
     #: reference: DEPTH's KL reference and the confidence weights of the
     #: activation statistics. `None` everywhere else.
     root_reference: Any = None
+    #: HOW ITEMS ARE COMPOSED INTO FORWARDS, when they are packed: a
+    #: `calibration.packing.ForwardContext` (sequential packing, standard causal
+    #: attention over each packed sequence). Science, like `position_policy`:
+    #: it changes what every statistic and KL is conditioned on, so the caller
+    #: also declares it in `config` and `execute` checks the two agree. `None`
+    #: is the historical one-item-per-row reading.
+    forward_context: Any = None
 
     def cached_stats(self, collect):
         """Statistics for this parent under this profile, collected at most once."""
@@ -436,6 +445,19 @@ class OperatorImplementation(ABC):
                 f"{self.impl_id} does not consume a scoring objective, so its "
                 "config may not declare one; the state id would name an "
                 "objective the selection never read")
+        #: THE FORWARD CONTEXT, by the same two-sides rule: the config names it
+        #: (and so the state id) and the operator reads the object. An operator
+        #: that consumes no calibration data has nothing it could pack.
+        declared_context = (ctx.config or {}).get("forward_context")
+        actual_context = (None if ctx.forward_context is None
+                          or not consumes_calibration(self)
+                          else ctx.forward_context.as_dict())
+        if declared_context != actual_context:
+            raise ContractViolation(
+                f"{self.impl_id}: config declares forward context "
+                f"{declared_context!r} but was handed {actual_context!r}. The "
+                "declared value is what the state id is derived from, so a "
+                "mismatch records a context the statistics were not read in")
         outcome = self.apply(ctx)
         if outcome.model is ctx.model:
             raise ContractViolation(

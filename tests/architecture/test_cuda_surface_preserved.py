@@ -2489,6 +2489,89 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "`ReductionSemantics.critical_aggregation` (optional, versioned by absence): set "
             "for a grouped suite, so its measurement protocol id is new; every historical id "
             "unchanged. NO CUDA SURFACE.",
+     }),    ("b7ee0c93c2f1e96c376381c3db11ee4e2441f674",
+     "Packed round: sequential causal packing for Stage-1 forwards and Stage-3 training (maintainer 2026-11-03)",
+     {
+        "src/aadistill/data/sequence_packing.py":
+            "NEW MODULE: the maintainer's `packing_conversation` verbatim, `sequential_pack` (its "
+            "index lists, checked against it on every call, with the prefix-restart token "
+            "materialization), `shuffled_order` (sha256-keyed), `SequencePackingSpec`, "
+            "`plan_report`. NO CUDA SURFACE.",
+        "src/aadistill/data/token_documents.py":
+            "NEW `pack_sequential` (strategy `sequential_causal`), `MaskedDocument`; "
+            "`PackedDocuments.packing` and sequential statistics; `write_pack` names a "
+            "sequential pack's rung by its unique supervised tokens and records placements' "
+            "`final`. Isolated and cross-context packs are unchanged. NO CUDA SURFACE.",
+        "src/aadistill/data/ladder.py":
+            "`ladder_blocks` reports `train_unique_supervised_tokens` for a sequential pack; "
+            "every other pack loads as before. NO CUDA SURFACE.",
+        "src/aadistill/initialization/baseline.py":
+            "a record may name `method.forward_context` (its rules checked against the core); "
+            "`ForwardBaseline.forward_context(...)`; `resolve_superseded` loads a superseded "
+            "record through the selection. A record without the block parses as before. NO "
+            "CUDA SURFACE.",
+        "src/aadistill/initialization/calibration/batching.py":
+            "NEW `Segment`, `build_packed_batch`; `ItemBatch.segments` (optional): a packed "
+            "batch's `prediction_mask` excludes each segment's boundary position and its "
+            "per-row views refuse. Unpacked batches are unchanged. CUDA SURFACE: packed "
+            "8,192-token forwards, owed to a GPU validation.",
+        "src/aadistill/initialization/calibration/packing.py":
+            "NEW `ForwardContext`, `forward_context_from`, `forward_context_profile`; "
+            "`packed_batches(..., forward_context=)` yields packed batches. THIS IS A DECLARED "
+            "SEMANTIC CHANGE only under a forward context; every historical grouping is "
+            "unchanged. CUDA SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/operators/_common.py":
+            "`collect_activation_stats(..., forward_context=)`: the statistics pass reads packed "
+            "sequences; absent, the historical paths. CUDA SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/operators/attention/gqa/activation_importance.py":
+            "passes `ctx.forward_context` to its batched loop and traces it; its reference "
+            "path requires no forward context. Unchanged without one. CUDA SURFACE: owed to a "
+            "GPU validation.",
+        "src/aadistill/initialization/operators/attention/gqa/causal_kl.py":
+            "refuses a forward context (no packed path). NO CUDA SURFACE.",
+        "src/aadistill/initialization/operators/base.py":
+            "`OperatorContext.forward_context`; `execute` refuses a disagreement between the "
+            "config's `forward_context` and the object, by the two-sides rule. NO CUDA SURFACE.",
+        "src/aadistill/initialization/operators/composite/stage1_sandwich.py":
+            "passes `ctx.forward_context` to the statistics pass. Unchanged without one. CUDA "
+            "SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "NEW `_PackedDepthScorer`, `_PackedReferenceSketches`, `PACKED_KL_ROW_CHUNK`: under a "
+            "forward context, the scored-row Top-K + tail parent KL over packed sequences, "
+            "per-item means pooling every placement, prefix reuse; other configurations "
+            "refused. Unchanged without one. CUDA SURFACE: memory and numerics of 8,192-token "
+            "sequences, owed to a GPU validation.",
+        "src/aadistill/initialization/operators/ffn/dense/activation_importance.py":
+            "passes `ctx.forward_context` to the statistics pass and traces it. Unchanged "
+            "without one. CUDA SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/operators/width/residual/global_pca.py":
+            "passes `ctx.forward_context` to the statistics pass and traces it. Unchanged "
+            "without one. CUDA SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "`FixedPathSpec.forward_context` (absent from `as_dict` when unset): a replay "
+            "passes it to the operator config, the context and the statistics-cache key. "
+            "Every historical spec hash and replay unchanged. On the historical surface: "
+            "listed in HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION. NO NEW CUDA SURFACE "
+            "without a forward context.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "`StateEvaluator(forward_context=)`: the packed path (scored rows, Top-K + tail, "
+            "RECOMPUTE with teacher sketches cached per packed segment), its protocol id "
+            "carrying the context. Unchanged without one. CUDA SURFACE: owed to a GPU "
+            "validation.",
+        "src/aadistill/initialization/planning/operator_config.py":
+            "`hashed_operator_config(..., forward_context=)` adds `forward_context` for a "
+            "calibrated operator; absent, every config hash unchanged. NO CUDA SURFACE.",
+        "src/aadistill/initialization/planning/search.py":
+            "`SearchConfig.forward_context` (absent from `as_dict` when unset); passed to every "
+            "operator config and context and to the statistics-cache key; a measurer reading "
+            "another context, or an objective, is refused at construction. Every historical "
+            "config hash unchanged. NO CUDA SURFACE.",
+        "src/aadistill/initialization/scoring/batches.py":
+            "`ActivePositions` places each segment's token and prediction weights at its "
+            "offset in a packed batch; unpacked batches unchanged. NO CUDA SURFACE.",
+        "src/aadistill/initialization/scoring/protocol_identity.py":
+            "`ReductionSemantics.forward_context` (optional, versioned by absence): a packed "
+            "measurement's protocol id is new; every historical id unchanged. NO CUDA SURFACE.",
      }),
 )
 

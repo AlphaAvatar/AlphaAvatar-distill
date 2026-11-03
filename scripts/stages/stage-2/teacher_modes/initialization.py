@@ -143,7 +143,7 @@ def register_operators() -> None:
     from shared import forward_baseline as FB
     from stages.phase_d1 import d1_session as D1S
     D1S._register_frozen_operators()
-    FB.register_operators(FB.selected(REPO))
+    FB.register_operators(FB.historical(1, REPO))
 
 
 def fixed_path_spec(device: str, profile_of=None):
@@ -156,7 +156,7 @@ def fixed_path_spec(device: str, profile_of=None):
     from stages.phase_a3 import a3_session as A3S
     register_operators()
     teacher = json.loads(PROTOCOL.read_text())["teacher"]
-    terms = FB.session_terms(FB.selected(REPO))
+    terms = FB.session_terms(FB.historical(1, REPO))
     target = A3S.path_spec(workdir_device=device).target_spec
     steps = tuple(FixedPathStep(impl_id=impl, profile_id=profile_of[prof], expected_artifact_digest=None,
                                 label=f"{impl.split('.')[0].upper()}({profile_of[prof]})") for impl, prof in PATH)
@@ -170,7 +170,7 @@ def execution(micro_batch_size: int | None = None):
     """The Stage-0 search's execution: the forward baseline's, with DEPTH prefix reuse as its prereg ran it;
     ``micro_batch_size`` only as the design's out-of-memory fallback."""
     from shared import forward_baseline as FB
-    ex = FB.session_terms(FB.selected(REPO))["execution"]
+    ex = FB.session_terms(FB.historical(1, REPO))["execution"]
     if json.loads(STAGE0_PREREG.read_text())["execution"]["depth_prefix_reuse"]:
         ex = dataclasses.replace(ex, depth_prefix_reuse=True)
     if micro_batch_size is not None:

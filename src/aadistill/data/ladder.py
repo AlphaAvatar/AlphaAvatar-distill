@@ -110,7 +110,8 @@ def ladder_blocks(packed_dir: str | Path, rung: int, n_val: int = 16):
     the pack tail, disjoint from every rung by construction. A pack that stores
     its own ``position_ids`` (document-isolated sequences,
     `token_documents.write_pack`) gives four-tuples with them last, the layout
-    ``batch.context_strategy: document_isolated`` requires.
+    ``batch.context_strategy: document_isolated`` requires; a sequential pack
+    stores none and is read with continuous positions (``cross_context``).
     """
     packed_dir = Path(packed_dir)
     meta = load_ladder_meta(packed_dir)
@@ -145,6 +146,9 @@ def ladder_blocks(packed_dir: str | Path, rung: int, n_val: int = 16):
         val_tokens += _block_type_tokens(audit[idx])
     train_total = sum(train_tokens.values()) or 1
     val_total = sum(val_tokens.values()) or 1
+    #: A sequential pack (`token_documents.pack_sequential`) marks each placement
+    #: `final` or fragment; its unique supervised tokens are the final placements'.
+    sequential = any("final" in s for row in audit[:n_blocks] for s in row["sessions"])
 
     stats = {
         "source": "token_ladder",
@@ -152,6 +156,10 @@ def ladder_blocks(packed_dir: str | Path, rung: int, n_val: int = 16):
         "rung_target_supervised_tokens": int(rung),
         "train_blocks": int(n_blocks),
         "train_supervised_tokens": int(train_total),
+        **({"train_supervised_positions_include_fragments": True,
+            "train_unique_supervised_tokens": sum(
+                int(s["supervised_retained"]) for row in audit[:n_blocks]
+                for s in row["sessions"] if s.get("final"))} if sequential else {}),
         "train_token_mix": {t: round(v / train_total, 4)
                             for t, v in sorted(train_tokens.items())},
         "val_block_indices": val_idx,

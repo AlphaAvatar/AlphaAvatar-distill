@@ -267,6 +267,9 @@ class FixedPathSpec:
     #: produced. Same contract as the two above: it changes what a consuming
     #: operator computes, so a replay must run under the one that ran.
     scoring_objective: Any = None
+    #: The packed causal `ForwardContext` the path was produced under, for a
+    #: search that read its calibration items packed. Same contract again.
+    forward_context: Any = None
 
     def __post_init__(self) -> None:
         if not self.steps:
@@ -352,6 +355,8 @@ class FixedPathSpec:
                else {"position_policy": self.position_policy.policy_hash}),
             **({} if self.scoring_objective is None
                else {"scoring_objective": self.scoring_objective.as_dict()}),
+            **({} if self.forward_context is None
+               else {"forward_context": self.forward_context.as_dict()}),
         }
 
     @property
@@ -733,7 +738,8 @@ def _run_steps(
         operator_config = hashed_operator_config(
             implementation=impl, policy=spec.position_policy,
             support=spec.distribution_support, items=items,
-            declared=step.config, objective=spec.scoring_objective)
+            declared=step.config, objective=spec.scoring_objective,
+            forward_context=spec.forward_context)
         #: PINNED INPUTS, CHECKED BEFORE THE OPERATOR RUNS. The output pin is
         #: what the path exists for, but it only speaks afterwards: the DEPTH
         #: operator takes half an hour to tell you its inputs were wrong. This
@@ -803,10 +809,13 @@ def _run_steps(
                         "accumulation": spec.stats_spec.accumulation_dtype,
                         **execution.as_fingerprint(),
                         "position_policy_hash": position_policy.policy_hash,
+                        **({} if spec.forward_context is None else
+                           {"forward_context": spec.forward_context.context_hash}),
                         **({"token_weighting": root_reference.identity_hash}
                            if statistics_weighted_by_root(
                                impl, spec.scoring_objective) else {})})),
             root_reference=root_reference,
+            forward_context=spec.forward_context,
             deadline=deadline,
         )
 
