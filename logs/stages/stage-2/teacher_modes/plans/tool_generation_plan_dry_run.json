@@ -1,12 +1,12 @@
 {
  "schema": "aadistill.stage2.teacher_modes.tool_generation_plan/v1",
- "written_utc": "2026-11-03T14:26:50Z",
+ "written_utc": "2026-11-03T15:33:25Z",
  "pool": {
   "dir": "<scratch>/tool_pool_dry_v3",
-  "content_sha256": "811f4870e5087b1ce50887f4c840065115426322cc87011eebc02349092e7ac1",
-  "pool_json_sha256": "fbf8adfc8fcb07421ba08d2cc35ad0dbb60f864f4dbd4af89016d0df45799893"
+  "content_sha256": "98fed03b52aa87a9563bef0dc9861f8983d635f3397f895384571129b56707c8",
+  "pool_json_sha256": "49b9a4ac235a87b5dace58d6e698bc7553c11a84436988b6e35d8f0429048197"
  },
- "protocol_sha256": "f3d464d53c7ee8e5cb65fe31238d39920c3c5cc5b47151ec639322f3834ecf9e",
+ "protocol_sha256": "d1f9f888c744676b93f83cdaf9bf64514e136536651b837fad849b38328fa264",
  "six_category_design_sha256": "b4d067f971f5699de460d1440f096d26b108d1f7e968a05aca8b578fda204f72",
  "shares": {
   "tool_selection": 0.15,
@@ -29,6 +29,7 @@
   "bound": "a cell never attempts more than the frozen-order prefix whose pessimistic yield (low tokens per turn, low pass rate) reaches its target, nor more than its supply; a cell still short at its bound or after max_rounds is a SHORTFALL",
   "invocations": "one engine invocation per mode and round for the first candidates, one for the second candidates of the round's refused tasks"
  },
+ "approved_shortfalls": [],
  "lineages": {
   "hybrid": {
    "modes": {
@@ -974,6 +975,7 @@
  },
  "dry_run": {
   "pool": "the scratch candidate pool (Toucan-1.5M SFT + Pivot Conversational, audit/tool_pool_dry_run_v3.json); no source is admitted",
-  "canonical": "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json is written by the same command over the ADMITTED pool under data/ before any authorization; the tool kinds bind that file, not this one"
+  "canonical": "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json is written by the same command over the ADMITTED pool under data/ before any authorization; the tool kinds bind that file, not this one",
+  "verified": "tool_generation_plan.verified passes on this plan and the dry pool (pool files, orders, content, pool.json bytes, protocol, design, cells; 10.8 s for 83,764 tasks)"
  }
 }

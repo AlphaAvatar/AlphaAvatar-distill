@@ -23,6 +23,14 @@
   - the Pivot pair is converted and decontaminated;
   - the `a_search` position reconciliation and an end-to-end consumer regression are added.
   Loss normalization stays as it is, and no further ruling is owed on it.
+- **The maintainer's third review, of `acbbbbfb` (2026-11-03),** confirmed those repairs and asked for two more,
+  done at $0 (sections 5 and 5a):
+  - Calibration v2 and `state_eval_hybrid@v2` now check every tool category on its own. A category that falls short,
+    or is THIN, is never covered by another category's surplus. Nothing freezes unless the maintainer has approved
+    that category's shortfall.
+  - Every consumer now reads the pool and the plan through the same identity check as the session.
+  - Toucan SFT and Pivot Conversational may be prepared as priority candidate sources. Pivot Function-Calling is not
+    adopted, and Nemotron-SFT-Agentic-v4 stays deferred. None of this authorizes paid generation.
 
 | record | owns |
 | --- | --- |
@@ -37,6 +45,7 @@
 | [`audit/tool_pool_dry_run_v3.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pool_dry_run_v3.json) | the candidate pool (Toucan + Pivot Conversational) dry: identity (every split file's sha256), census, verification levels, atoms, every exclusion, T1/T2/T3 findings, the seven categories' coverage |
 | [`audit/pivot_conversion_v1.json`](../../../../logs/stages/stage-2/teacher_modes/audit/pivot_conversion_v1.json) | the Pivot pair rebuilt from the first user turn: what is kept and skipped, step gold, replay, feasibility, coverage |
 | [`plans/tool_generation_plan_dry_run.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_generation_plan_dry_run.json) | the bounded generation plan over the dry pool: every cell's target, supply, expected tasks and bound, and the price |
+| [`audit/schema_arguments_shortfall.json`](../../../../logs/stages/stage-2/teacher_modes/audit/schema_arguments_shortfall.json) | the non-thinking schema_arguments SHORTFALL: reach, impact, the verifiable options and the minimal preparation |
 | [`audit/experiment_suite_baseline_20261103.json`](../../../../logs/stages/stage-2/teacher_modes/audit/experiment_suite_baseline_20261103.json) | the four experiment-suite failures run at `b7ee0c93` and `c861d704`: pre-existing, with their causes |
 
 ## 1. The rule, by stage (AGENTS.md P19)
@@ -206,6 +215,8 @@ found five defects, repaired at $0:
 | (`77be6e13`) one prompt in several splits could pass the 13-gram screen (template n-grams are dropped) and T5 (keyed by family) | T4 also refuses an earlier split's exact prompt key and any earlier split's tool identity |
 | (`77be6e13`) `schema_problems` checked a subset and ignored other keywords | the common assertion keywords are enforced (numbers, strings, arrays, `const`, `oneOf` / `allOf` / `not`, local `$ref`, `additionalProperties` as a schema); any other keyword fails closed, and the pool refuses such tasks up front |
 | (`77be6e13`) a cached benchmark copy was reused without checking it | `tool_benchmarks.fetch` re-hashes every registered file on every use and refuses a missing or changed one |
+| (`acbbbbfb`) a calibration tool cell and a state-evaluation mode were judged on their totals, so one category's whole-episode surplus could hide another's SHORTFALL or THIN | `packed_inputs.tool_cell` selects each category to its own share of the cell (the plan's shares, unchanged) and its task minimum. A cell or mode is met only when every category is. A category with no admitted episode is short. A shortfall counts as met only if the maintainer approved it (`bounded_plan.approved_shortfalls`, carried and checked by the plan); otherwise nothing is frozen |
+| (`acbbbbfb`) `for_consumers` compared only the pool's content sha | `tool_generation_plan.verified` is the one check for the session and every consumer. It re-verifies the pool files, the orders and a content sha that now includes the orders, then requires the plan's bindings to pool.json's exact bytes, the protocol and the design, and unchanged cells |
 
 **Candidates, none approved** (maintainer, 2026-11-03).
 - Review: [`audit/tool_calling_source_review_v2.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_calling_source_review_v2.json),
@@ -263,7 +274,7 @@ task can be rebuilt only from the first user turn, and the teacher then runs eve
 - **Schema.** 157 Pivot tasks use keywords the validator does not check (fail closed).
 
 **Data prepared ($0, dry)** into scratch, not under `data/`. 83,764 of 128,338 tasks were admitted, and every split
-file is registered with its sha256 (content `811f4870…`):
+file is registered with its sha256 (content `98fed03b…`; the sha now also covers the frozen orders):
 
 | split | tasks | no_tool | tool_selection | schema_arguments | multi_turn | multiple_parallel | mcp_agent | error_recovery |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -286,12 +297,30 @@ SHORTFALL and never filled from another):
 | category | source and verification | gap |
 | --- | --- | --- |
 | tool_selection | Toucan (tool selection); Pivot (step gold) | — |
-| schema_arguments | Pivot Conversational only (step gold): 368 training, 28 calibration, 7 state-evaluation tasks | **SHORTFALL in non-thinking mode** (training target 74,013 tokens; state evaluation) |
+| schema_arguments | Pivot Conversational only (step gold): 368 training, 28 calibration, 7 state-evaluation tasks | **SHORTFALL in non-thinking mode** (training 43,277 of 74,013 tokens expected; state evaluation 823 of 1,800 positions). It refuses the A2-6cat pack and blocks the suite's freeze. Options are below |
 | no_tool | Toucan irrelevant subset, Pivot message steps (tool selection: no call) | — |
 | multiple_parallel | Toucan only (tool selection; no gold parallel arguments) | no gold arguments |
 | multi_turn | Toucan (2–4 user turns), Pivot (sequential steps, step gold) | — |
 | error_recovery | Toucan's recorded errors (`corrected_retry` / `tool_failure`; tool selection) | **"ask for the missing value": no verified source in any mode** |
 | mcp_agent | Toucan only (tool selection) | no task-success check |
+
+**The non-thinking schema_arguments SHORTFALL**
+([`audit/schema_arguments_shortfall.json`](../../../../logs/stages/stage-2/teacher_modes/audit/schema_arguments_shortfall.json)):
+- **Impact.**
+  - A2-6cat's tool type would come in about 6% short, and the share check refuses that pack.
+  - The non-thinking category of `state_eval_hybrid@v2` stays short, so the suite cannot freeze. The packed search
+    needs the suite, so the search cannot start either.
+  - Thinking mode's 7 state-evaluation tasks may also leave it THIN.
+- **Minimal verifiable fix: call-only gold episodes for this category.**
+  - Source: Pivot Conversational trajectories whose first gold step is one structured call, but whose output was
+    never recorded. Estimated supply: about 1,560 training, 72 calibration and 22 state-evaluation tasks.
+  - Verification: step gold on the call alone, plus schema validity.
+  - Cost: it needs one approval, of an episode that ends on a call.
+- **Stronger option: WorkBench instances.** They are verified against the sandbox's final state (G1), at the cost of
+  building an executable backend.
+- **Rejected: relabelling Toucan.** Toucan has no gold arguments, so it would fill the category with weaker
+  verification.
+- **Approving the shortfall** would also need acceptance of A2-6cat's proportion.
 
 **Gaps that remain:**
 - gold arguments for parallel calls;
@@ -478,7 +507,9 @@ packed search runs unless it is requested.
    - Also owed: the category shares (used unchanged by the plan), the prompt bound and the non-thinking state-evaluation
      floor.
 2. **Expected SHORTFALLS.**
-   - `schema_arguments` in non-thinking mode, in training and in state evaluation (Pivot is its only source).
+   - `schema_arguments` in non-thinking mode, in training and in state evaluation. It refuses the A2-6cat pack and
+     blocks the suite's freeze. Choose one: call-only gold episodes (recommended, minimal), WorkBench, or an approved
+     shortfall together with A2-6cat's proportion.
    - "Ask for the missing value" in every mode.
 3. **Isolation costs.**
    - Each evaluation split holds only 17–20 atoms.

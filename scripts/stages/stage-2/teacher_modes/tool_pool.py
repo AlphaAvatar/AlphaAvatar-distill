@@ -39,9 +39,11 @@ context, the backend is a replay table or none); each source's converter is its 
   longest of those lengths (``first_prompt_tokens``, the generation plan's prefill term);
 * orders -- every split's canonical order is a seeded shuffle (``ORDER_SEED``) of its task ids, frozen with its
   sha256 before any generation; every teacher walks the same order (``training_order`` is the training split's);
-* identity -- pool.json registers every split file's sha256, task count and sources, every converted input's
-  sha256, and ``content_sha256`` over them; `load_pool` re-verifies all of it before anything reads a task and
-  refuses a missing file, a changed byte, a task in the wrong file or an unregistered source revision.
+* identity -- pool.json registers every split file's sha256, task count, sources and frozen order's sha256, every
+  converted input's sha256, and ``content_sha256`` over files, orders and sources; `load_pool` re-verifies all of it
+  before anything reads a task and refuses a missing file, a changed byte, a task in the wrong file, an unregistered
+  source revision, an order that is not its registered one or a content sha256 that is not its parts';
+  `tool_generation_plan.verified` then binds the plan to that content and to pool.json's exact bytes.
 
 Every exclusion is listed with its reason and counted by reason, source, category and split; nothing is silently
 dropped. The census registers every admitted task's verification levels (`tool_episodes.verification_levels`).
@@ -447,6 +449,13 @@ def _sha_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def content_sha256(files: Mapping, sources: Mapping) -> str:
+    """The pool's content identity: every split file's sha256, its frozen order's sha256, and the sources."""
+    return hashlib.sha256(canonical({"files": {k: v["sha256"] for k, v in files.items()},
+                                     "orders": {k: v["order_sha256"] for k, v in files.items()},
+                                     "sources": sources}).encode()).hexdigest()
+
+
 def write_pool(pool: dict, out: Path, *, sources: dict, extra: dict) -> dict:
     """The split files and pool.json with the identity `load_pool` checks; returns pool.json's content."""
     out.mkdir(parents=True, exist_ok=True)
@@ -464,8 +473,7 @@ def write_pool(pool: dict, out: Path, *, sources: dict, extra: dict) -> dict:
     doc = {"schema": SCHEMA, "pool_id": POOL_ID,
            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "files": files, "sources": sources, "source_revisions": [list(x) for x in revisions],
-           "content_sha256": hashlib.sha256(canonical({"files": {k: v["sha256"] for k, v in files.items()},
-                                                       "sources": sources}).encode()).hexdigest(),
+           "content_sha256": content_sha256(files, sources),
            "census": pool["census"], "verification_levels": pool["verification_levels"], "atoms": pool["atoms"],
            "by_source": pool["by_source"], "excluded_by": pool["excluded_by"],
            "tool_name_only_matches_counted": pool["tool_name_only_matches_counted"], "excluded": pool["excluded"],
@@ -489,6 +497,8 @@ def load_pool(pool_dir: Path, splits: Sequence[str] | None = None) -> tuple[dict
     man = json.loads(man_path.read_text())
     if man.get("schema") != SCHEMA or not isinstance(man.get("files"), dict):
         raise PoolIdentityError(f"{man_path} is not a {SCHEMA} manifest with registered files")
+    if man.get("content_sha256") != content_sha256(man["files"], man.get("sources") or {}):
+        raise PoolIdentityError("pool.json's content_sha256 is not its registered files, orders and sources")
     want = sorted(man["files"]) if splits is None else list(splits)
     revisions = {tuple(x) for x in man.get("source_revisions") or []}
     out = {}

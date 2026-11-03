@@ -8,8 +8,8 @@
 `tool_generation_protocol.json` names the lineage's teacher, modes, pool and execution terms; the frozen generation
 plan (`tool_generation_plan.py`, bound by the artifact with the pool manifest) names every cell -- split, category,
 unit, target and bound. Before anything runs, the plan must name this pool's content and this protocol, and
-`tool_pool.load_pool` re-verifies every split file the lineage reads: a missing file, a changed byte or a foreign
-source refuses the session.
+`tool_generation_plan.verified` re-verifies every split file the lineage reads and the plan's cells: a missing file, a
+changed byte, a foreign source, an edited order or target refuses the session.
 
 Per mode, the cells are generated in ROUNDS (`tool_generation_plan.round_tasks`): each round takes every unfinished
 cell's next tasks in its frozen order, runs them through `run_battery` in generate mode with the tool environment
@@ -45,7 +45,7 @@ SCHEMA = "aadistill.stage2.teacher_modes.tool_session/v2"
 
 
 class PlanError(RuntimeError):
-    """A plan that does not belong to this pool or protocol."""
+    """A plan that cannot be run (an unknown unit, a task picked by two cells)."""
 
 
 def protocol() -> dict:
@@ -53,21 +53,9 @@ def protocol() -> dict:
 
 
 def checked_plan(proto: dict, lineage: str):
-    """``(plan, pool manifest, tasks by id)``: the frozen plan, verified to name this pool's content and this
-    protocol, and the lineage's split files re-verified by `tool_pool.load_pool`."""
-    from stages.teacher_modes import tool_pool as TP
-    plan = json.loads((REPO / proto["pool"]["plan"]).read_text())
-    pool_dir = REPO / proto["pool"]["dir"]
-    man, splits = TP.load_pool(pool_dir, proto["lineages"][lineage]["splits"])
-    if plan.get("schema") != TGP.SCHEMA:
-        raise PlanError("the plan is not a tool generation plan")
-    if plan["pool"]["content_sha256"] != man["content_sha256"]:
-        raise PlanError("the plan was built from another pool")
-    if plan["protocol_sha256"] != hashlib.sha256(PROTOCOL.read_bytes()).hexdigest():
-        raise PlanError("the plan was built under another protocol")
-    if lineage not in plan["lineages"]:
-        raise PlanError(f"the plan holds no {lineage} lineage")
-    return plan, man, {t["task_id"]: t for rows in splits.values() for t in rows}
+    """``(plan, pool manifest, tasks by id)``: `tool_generation_plan.verified` for the lineage -- its split files
+    re-verified, the plan bound to this pool's content, pool.json, protocol and design, its cells unchanged."""
+    return TGP.verified(proto, lineage=lineage)
 
 
 def write_round(tasks: list[dict], out: Path, label: str, default_system: str) -> dict:

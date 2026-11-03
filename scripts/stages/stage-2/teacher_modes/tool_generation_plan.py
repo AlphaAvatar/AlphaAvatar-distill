@@ -107,39 +107,94 @@ def cell_order(order: Sequence[str], by_id: Mapping[str, Mapping], category: str
     return [by_id[t] for t in order if category is None or by_id[t]["category"] == category]
 
 
+class PlanIdentityError(RuntimeError):
+    """A plan that does not belong to the pool, protocol or design it is read with, or whose cells drifted."""
+
+
+def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man: Mapping, by_id: Mapping) -> dict:
+    """One lineage's ``{mode: {"cells": [...]}}``: targets, supply, expected tasks and bound per cell."""
+    bp, li = proto["bounded_plan"], proto["lineages"][lineage]
+    cand = int(proto["execution"]["candidates"])
+    modes = {}
+    for mode in sorted(li["modes"]):
+        tpt = bp["priors"]["supervised_tokens_per_turn"][mode]
+        pr = bp["priors"]["episode_pass_rate"]
+        cells = []
+        for c in cell_targets(bp, shares, lineage, mode, li["splits"]):
+            tasks = cell_order(man["orders"].get(c["split"], []), by_id, c["category"])
+            tasks_at = {lvl: prefix_reaching(tasks, c["target"], c["unit"], tpt[i], pr[i], cand)
+                        for lvl, i in (("lower", 2), ("expected", 1), ("upper", 0))}
+            bound = max(tasks_at["upper"], min(len(tasks), c["min_tasks"]))
+            reach = sum(per_task_units(t, c["unit"], tpt[0], pr[0], cand) for t in tasks)
+            cells.append({**c, "supply": len(tasks), "tasks": tasks_at, "bound": bound,
+                          "shortfall_at_pessimistic_yield": reach < c["target"],
+                          "expected_turns_in_bound": sum(expected_turns(t) for t in tasks[:bound])})
+        modes[mode] = {"cells": cells}
+    return modes
+
+
+def design_shares() -> dict[str, float]:
+    return {k: float(v["share"]) for k, v in json.loads(SIX.read_text())["tool_calling"]["categories"].items()}
+
+
 def build(pool_dir: Path, *, protocol: Mapping | None = None) -> dict:
     from stages.teacher_modes import tool_pool as TP
     proto = protocol or json.loads(PROTOCOL.read_text())
     bp = proto["bounded_plan"]
-    shares = {k: float(v["share"]) for k, v in json.loads(SIX.read_text())["tool_calling"]["categories"].items()}
+    shares = design_shares()
     man, splits = TP.load_pool(Path(pool_dir))
     by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
-    cand = int(proto["execution"]["candidates"])
-    lineages = {}
-    for lineage, li in sorted(proto["lineages"].items()):
-        modes = {}
-        for mode in sorted(li["modes"]):
-            tpt = bp["priors"]["supervised_tokens_per_turn"][mode]
-            pr = bp["priors"]["episode_pass_rate"]
-            cells = []
-            for c in cell_targets(bp, shares, lineage, mode, li["splits"]):
-                tasks = cell_order(man["orders"].get(c["split"], []), by_id, c["category"])
-                tasks_at = {lvl: prefix_reaching(tasks, c["target"], c["unit"], tpt[i], pr[i], cand)
-                            for lvl, i in (("lower", 2), ("expected", 1), ("upper", 0))}
-                bound = max(tasks_at["upper"], min(len(tasks), c["min_tasks"]))
-                reach = sum(per_task_units(t, c["unit"], tpt[0], pr[0], cand) for t in tasks)
-                cells.append({**c, "supply": len(tasks), "tasks": tasks_at, "bound": bound,
-                              "shortfall_at_pessimistic_yield": reach < c["target"],
-                              "expected_turns_in_bound": sum(expected_turns(t) for t in tasks[:bound])})
-            modes[mode] = {"cells": cells}
-        lineages[lineage] = {"modes": modes, "splits": li["splits"]}
+    lineages = {li: {"modes": lineage_cells(proto, shares, li, man, by_id), "splits": proto["lineages"][li]["splits"]}
+                for li in sorted(proto["lineages"])}
     plan = {"schema": SCHEMA, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "pool": {"dir": str(Path(pool_dir)), "content_sha256": man["content_sha256"],
                      "pool_json_sha256": sha_file(Path(pool_dir) / "pool.json")},
             "protocol_sha256": sha_file(PROTOCOL), "six_category_design_sha256": sha_file(SIX),
-            "shares": shares, "rules": bp["rounds"], "lineages": lineages, "authorizes": "nothing"}
+            "shares": shares, "rules": bp["rounds"],
+            "approved_shortfalls": list(bp.get("approved_shortfalls") or []),
+            "lineages": lineages, "authorizes": "nothing"}
     plan["price"] = price(plan, by_id, man, proto)
     return plan
+
+
+def verified(protocol: Mapping | None = None, pool_dir: Path | None = None, lineage: str | None = None
+             ) -> tuple[dict, dict, dict]:
+    """``(plan, pool manifest, tasks by id)`` after checking every identity the plan binds, for the session and for
+    every dev-box consumer alike: `tool_pool.load_pool` re-verifies the split files, their task counts, sources,
+    frozen orders and the pool's content sha256; the plan must name that content, the exact bytes of pool.json, the
+    protocol file and the design (the shares) it is read with; and its cells must be the cells this pool, protocol
+    and design produce now -- an edited target, bound, order or binding refuses (`PlanIdentityError`). ``lineage``
+    restricts the reading and the cell check to that lineage's splits."""
+    from stages.teacher_modes import tool_pool as TP
+    proto = protocol or json.loads(PROTOCOL.read_text())
+    pool_dir = Path(pool_dir) if pool_dir else REPO / proto["pool"]["dir"]
+    splits_wanted = proto["lineages"][lineage]["splits"] if lineage else None
+    man, splits = TP.load_pool(pool_dir, splits_wanted)
+    plan = json.loads((REPO / proto["pool"]["plan"]).read_text())
+    bad = []
+    if plan.get("schema") != SCHEMA:
+        bad.append("not a tool generation plan")
+    pool = plan.get("pool") or {}
+    if pool.get("content_sha256") != man["content_sha256"]:
+        bad.append("built from another pool content")
+    if pool.get("pool_json_sha256") != sha_file(pool_dir / "pool.json"):
+        bad.append("built from another pool.json (its orders, files or sources differ)")
+    if plan.get("protocol_sha256") != sha_file(PROTOCOL):
+        bad.append("built under another protocol")
+    if plan.get("six_category_design_sha256") != sha_file(SIX) or plan.get("shares") != design_shares():
+        bad.append("built under other category shares")
+    if plan.get("approved_shortfalls") != list(proto["bounded_plan"].get("approved_shortfalls") or []):
+        bad.append("its approved shortfalls are not the protocol's")
+    if not bad:
+        by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
+        for li in ([lineage] if lineage else sorted(proto["lineages"])):
+            now = lineage_cells(proto, plan["shares"], li, man, by_id)
+            if json.dumps(now, sort_keys=True) != json.dumps((plan.get("lineages") or {}).get(li, {}).get("modes"),
+                                                             sort_keys=True):
+                bad.append(f"its {li} cells are not the cells this pool, protocol and design produce")
+    if bad:
+        raise PlanIdentityError("the generation plan refuses: " + "; ".join(bad))
+    return plan, man, by_id
 
 
 #: per price level: (the task count used, the prior index for tokens per turn, for the pass rate, for the throughput
@@ -238,14 +293,16 @@ def cells_for(plan: Mapping, lineage: str, mode: str, split: str) -> list[dict]:
 
 
 def for_consumers(protocol: Mapping | None = None, pool_dir: Path | None = None) -> tuple[dict, dict]:
-    """``(plan, pool orders)`` for a dev-box consumer: the committed plan, checked to name the pool's content."""
-    proto = protocol or json.loads(PROTOCOL.read_text())
-    pool_dir = Path(pool_dir) if pool_dir else REPO / proto["pool"]["dir"]
-    man = json.loads((pool_dir / "pool.json").read_text())
-    plan = json.loads((REPO / proto["pool"]["plan"]).read_text())
-    if plan["pool"]["content_sha256"] != man.get("content_sha256"):
-        raise ValueError("the generation plan was built from another pool than the one the consumer reads")
+    """``(plan, pool orders)`` for a dev-box consumer (admission's packs, packed inputs), through `verified`: the
+    same identity checks the session runs before it generates."""
+    plan, man, _ = verified(protocol, pool_dir)
     return plan, man["orders"]
+
+
+def approved(plan: Mapping, split: str, mode: str, category: str | None) -> dict | None:
+    """The maintainer's recorded approval of a cell's SHORTFALL (``bounded_plan.approved_shortfalls``), or None."""
+    return next((a for a in plan.get("approved_shortfalls") or []
+                 if (a.get("split"), a.get("mode"), a.get("category")) == (split, mode, category)), None)
 
 
 def main(argv=None) -> int:

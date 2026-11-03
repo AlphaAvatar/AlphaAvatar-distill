@@ -110,7 +110,8 @@ def test_the_plan_bounds_every_cell_and_admission_counts_by_level(chain):
 
 def test_packed_inputs_select_by_the_plan_and_freeze(chain):
     items = {m: chain["admitted"][m]["items"] for m in ("H-T", "H-N")}
-    sel, census = PI.tool_episodes_by_plan(items["H-T"], "state_eval", "H-T")
+    sel, got, census = PI.tool_cell(items["H-T"], "state_eval", "H-T", PI.SE_POSITIONS)
+    assert got >= PI.SE_POSITIONS and not PI.unmet(census)
     assert {c for c, v in census.items() if v["tasks"]} == set(CATS) and all(v["tasks"] >= 5 for v in census.values())
     order = chain["man"]["orders"]["state_eval"]
     seen = list(dict.fromkeys(x["task_id"] for x in sel))

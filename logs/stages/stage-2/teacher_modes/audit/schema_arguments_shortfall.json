@@ -1,0 +1,96 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.schema_arguments_shortfall/v1",
+ "written_utc": "2026-11-03",
+ "question": "the maintainer's third review: the non-thinking schema_arguments SHORTFALL in training and state evaluation -- its impact, verifiable supplementary sources, and the minimal data preparation, without changing the seven shares",
+ "supply": "Pivot Conversational is the only schema_arguments source (step gold): in the dry pool 368 training, 28 calibration, 7 state_eval tasks (one structured call, then an answer). Toucan's single calls are tool_selection: Toucan has no gold arguments",
+ "reach_under_the_plan_priors": {
+  "basis": "expected turns x the mode's tokens per turn x 1-(1-p)^2 over the whole supply (tool_generation_protocol.json :: bounded_plan.priors); a pilot measures the real values",
+  "H-N/training": {
+   "target": 74013,
+   "supply_tasks": 368,
+   "reachable": {
+    "pessimistic": 20534,
+    "expected": 43277,
+    "optimistic": 84787
+   }
+  },
+  "H-N/state_eval": {
+   "target": 1800,
+   "supply_tasks": 7,
+   "reachable": {
+    "pessimistic": 391,
+    "expected": 823,
+    "optimistic": 1613
+   }
+  },
+  "H-N/calibration": {
+   "target": 630,
+   "supply_tasks": 28,
+   "reachable": {
+    "pessimistic": 1562,
+    "expected": 3293,
+    "optimistic": 6451
+   }
+  },
+  "H-T/training": {
+   "target": 74013,
+   "reachable": {
+    "pessimistic": 128340,
+    "expected": 216384
+   }
+  },
+  "H-T/state_eval": {
+   "target": 1800,
+   "supply_tasks": 7,
+   "reachable": {
+    "pessimistic": 2441,
+    "expected": 4116
+   },
+   "min_tasks": 5,
+   "expected_admitted_tasks": 5.9,
+   "_": "THIN is possible: 7 tasks for a 5-task minimum"
+  }
+ },
+ "impact": [
+  "A2-6cat (hybrid non-thinking): the tool type would hold ~462,700 supervised tokens instead of 493,418 at the expected yield (-6.2%), about -5.2% from 1/6 of the supporting total: packed_packs.shares refuses the pack (+-2%); a category is never filled from another",
+  "state_eval_hybrid@v2: the H-N schema_arguments category stays SHORT (823 of 1,800 expected, 1,613 even at the optimistic yield), so under the per-category gate the suite cannot freeze -- and the packed hybrid full search, which needs it, cannot start. H-T's 7 state_eval tasks may also leave it THIN",
+  "calibration v2 is not affected (28 tasks reach 630 positions in both modes); A1-6cat and C1-6cat are not affected"
+ ],
+ "options": [
+  {
+   "option": "call-only gold episodes for schema_arguments",
+   "what": "Pivot Conversational trajectories whose first gold step is ONE structured call but whose output was never recorded (skipped today for the missing replay): the episode is that call turn alone, verified by step gold (exact arguments) and schema validity; nothing replays",
+   "supply_estimate": {
+    "training": 1560,
+    "calibration": 72,
+    "state_eval": 22,
+    "validation": 19,
+    "_": "before the pool's screens; environments recomputed with them, so splits are estimates"
+   },
+   "reach": "H-N training +~39k-92k supervised tokens (1 turn x 40-120 tokens x 1-(1-p)^2; Qwen3-235B's first-step pass rate on these is 0.31): reaches 74,013 at the expected yield; H-N state_eval +~900 positions: about the 1,800 target at the expected yield, not guaranteed",
+   "verification": "step gold (G2, exact arguments) + schema validity: the same level as today's Pivot schema_arguments, minus recorded execution",
+   "protocol_change": "YES: an episode that ends on a call (today an episode must end on an answer) and a training document supervising only the call turn -- the maintainer's approval, for this category only",
+   "cost": "/bin/bash code (converter flag + a final-call episode rule in tool_episodes / verify_episode); generation inside the bounded plan"
+  },
+  {
+   "option": "WorkBench (olly-styles/WorkBench, MIT) generated instances",
+   "what": "new task instances from WorkBench's own templates (never its 690 published tasks), executed against its sandbox; the source review v1's G1 candidate",
+   "verification": "G1: the sandbox's final state against the ground truth -- the only task-success verifier among the candidates",
+   "supply": "as many as the templates generate, in every split",
+   "cost": "/bin/bash but real engineering: an executable backend in the episode loop (today only replay / none run), the generator pinned and run, a converter, decontamination; then the plan rebuilt",
+   "protocol_change": "a new backend kind (executable, no network), within the registered task_record design"
+  },
+  {
+   "option": "Toucan single calls with structured arguments re-labelled schema_arguments",
+   "verification": "tool selection + schema validity only (no gold arguments)",
+   "verdict": "NOT recommended: it would fill the category with weaker verification than the category requires"
+  },
+  {
+   "option": "approve the SHORTFALL",
+   "what": "record H-N schema_arguments (training, state_eval) in bounded_plan.approved_shortfalls",
+   "consequence": "state_eval_hybrid@v2 can freeze with the approved gap recorded; A2-6cat's tool type stays ~6% short of 1/6, which also needs the maintainer's acceptance of that arm's proportion (the share check refuses it today)"
+  }
+ ],
+ "recommendation": "the minimal verifiable path is the call-only gold episodes for schema_arguments (one approval of the episode shape, /bin/bash code, the same step-gold verification); WorkBench is the stronger G1 source if the maintainer prefers task-success verification and accepts the engineering; re-labelling Toucan is not acceptable; the seven shares stay unchanged in every option",
+ "authorizes": "nothing"
+}

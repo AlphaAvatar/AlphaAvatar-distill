@@ -15309,3 +15309,39 @@ on a paid pod.
   resources, a merge to main.
 - **Revisit when:** the maintainer admits the sources and reviews the phased budget.
 
+## 2026-11-03 (UTC) — Maintainer: third review of acbbbbfb; per-category gates and the consumers' identity; source preparation allowed, not generation
+
+- **Context.** "acbbbbfb 第三轮独立复核" confirmed the bounded generation, the pool manifest, cross-split isolation,
+  the validator, the Pivot converter, the budget reconciliation and the consumer regression. The packing protocol,
+  the pre-packing accounting, CE/KD, loss normalization and the Stage-5 boundary stand. Two $0 repairs remained.
+- **Decision (maintainer).**
+  - Toucan SFT and Pivot Conversational may be prepared as priority candidate task sources, keeping their licence,
+    revision, attribution, provenance and verification level.
+  - Pivot Function-Calling is not adopted; Nemotron-SFT-Agentic-v4 stays deferred.
+  - This is not a paid generation authorization. The $11.34 estimate is not approved; the L40S pilot decides the
+    real cost.
+- **Repairs.**
+  - `packed_inputs.tool_cell`: a calibration tool cell or a state-evaluation mode is met only when every category
+    meets its own share and task minimum. Another category's surplus never covers it, and a category with no
+    admitted episode is short. An unapproved SHORTFALL or THIN freezes nothing; `bounded_plan.approved_shortfalls`
+    is empty.
+  - `tool_generation_plan.verified` is now the one identity check for the session and every consumer
+    (`for_consumers`).
+    - Pool side: `load_pool` re-verifies files, counts, sources and orders, and a content sha256 that now covers the
+      orders.
+    - Plan side: the plan must bind pool.json's exact bytes, the protocol, the design shares and the approvals, and
+      its cells must equal a rebuild.
+  - Regressions: total met but a category short or thin refuses the freeze; only an approval lets it freeze; an
+    edited order with the old content sha, a rewritten pool.json, an edited target, bound, approval or share all
+    refuse, including through `packed_inputs` and `packed_packs`.
+- **Evidence.**
+  - The dry pool rerun is byte-identical except its new content sha `98fed03b…`.
+  - `verified` passes at full scale in 10.8 s.
+  - `audit/schema_arguments_shortfall.json`: non-thinking training reaches 43,277 of 74,013 tokens and state
+    evaluation 823 of 1,800 positions at the expected yield. This refuses the A2-6cat pack and blocks the suite's
+    freeze, hence the search.
+  - Options: call-only gold episodes (minimal; approve the episode shape), WorkBench G1, or an approved SHORTFALL;
+    Toucan relabelling is rejected.
+- **Not authorized and not done.** Generation, search, training, formal evaluation, GPU resources, a merge.
+- **Revisit when:** the maintainer rules on the schema_arguments option and the phased budget.
+

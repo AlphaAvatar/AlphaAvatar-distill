@@ -198,6 +198,8 @@
    "prompt_tokens_default": 690,
    "_": "decode: the supplement's measured batched throughput on one L40S (SIX_CATEGORY.md); the tool-workload efficiency, prefill rate and model load are UNMEASURED ranges [slow, expected, fast] until the pilot; prompt_tokens_default only where a task has no first_prompt_tokens"
   },
-  "rate_usd_per_hour": 1.1067
+  "rate_usd_per_hour": 1.1067,
+  "approved_shortfalls": [],
+  "_approved_shortfalls": "the maintainer's approvals of a cell's SHORTFALL, each {split, mode, category, approved_by}; empty: no category may fall short. The plan carries them (tool_generation_plan.verified checks the copy); packed_inputs counts an unapproved short or thin category as unmet, so calibration v2 and state_eval_hybrid@v2 stay SHORT and nothing is frozen"
  }
 }

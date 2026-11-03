@@ -14,18 +14,21 @@ The design is `packed_round_design.json` (`calibration_v2`, `state_eval_hybrid_v
   sub-types and halved per mode, of the profile's token budget -- with the supporting domain now split over SIX
   sub-types. Every non-supporting cell is v1's, item for item; each existing supporting cell is the PREFIX of v1's
   cell (v1's item order) that first reaches the new quota, whole items; the tool cell takes the hybrid's admitted
-  calibration-split tool items (`tool_admission.py`) selected per category by the frozen generation plan
-  (`tool_episodes_by_plan`: whole episodes in the pool's frozen calibration order, each category to its share of
-  the cell) and then, in that frozen order, whole episodes until the profile's quota (the reasoning-heavy profile's
-  is a prefix of the base's). A short cell leaves the profile document's status SHORT and nothing downstream may
-  read it.
-* STATE_EVAL v2: v1's 1,135 items byte for byte, plus per mode the state_eval split's tool episodes selected by the
-  plan the same way (each category to its share of ``SE_POSITIONS`` and at least ``SE_MIN_TASKS`` tasks where the
-  split holds them); reached when the total is at least ``SE_POSITIONS``, with every category short of
-  ``SE_MIN_TASKS`` listed as THIN. Its manifest declares v2's critical groups and type table. `freeze` writes its record with the measurement protocol id of the packed search's
-  evaluator (forward baseline v2 in the design's forward context).
+  calibration-split tool items (`tool_admission.py`) per CATEGORY (`tool_cell`): each of the seven categories to its
+  share of the profile's quota (the plan's shares, unchanged), whole episodes in the pool's frozen calibration
+  order (the reasoning-heavy profile's per-category picks are prefixes of the base's). The cell reaches its quota
+  only when EVERY category reaches its own: another category's surplus never covers a short one. A short cell
+  leaves the profile document's status SHORT and nothing downstream may read it.
+* STATE_EVAL v2: v1's 1,135 items byte for byte, plus per mode the state_eval split's tool episodes selected the
+  same way: each category to its share of ``SE_POSITIONS`` and at least ``SE_MIN_TASKS`` tasks. A mode is reached
+  only when its total, its task count AND every category meet their requirement; a category short of its positions
+  is SHORT, one short of its tasks THIN -- including a category the split holds no admitted episode of. Its
+  manifest declares v2's critical groups and type table. `freeze` writes its record with the measurement protocol
+  id of the packed search's evaluator (forward baseline v2 in the design's forward context).
 
-Every item keeps its source fields; nothing generates, and nothing is cut.
+A category SHORTFALL counts as met only where the maintainer has approved it (``bounded_plan.approved_shortfalls``,
+carried and checked by the plan); then it is recorded beside the cell as approved. Without that, `build` writes no
+freeze record. Every item keeps its source fields; nothing generates, and nothing is cut.
 """
 from __future__ import annotations
 
@@ -142,10 +145,13 @@ def take_whole(items: list[dict], quota: float, key=None) -> tuple[list[dict], i
     return out, got
 
 
-def tool_episodes_by_plan(items: list[dict], split: str, mode: str, *, plan: dict | None = None,
-                          orders: dict | None = None) -> tuple[list[dict], dict]:
-    """``(items, census)``: the mode's admitted ``split`` tool items, whole episodes per category in the pool's
-    frozen order up to the plan's cell targets (`tool_generation_plan.select`), returned in the frozen order."""
+def tool_cell(items: list[dict], split: str, mode: str, quota: float, *, plan: dict | None = None,
+              orders: dict | None = None) -> tuple[list[dict], float, dict]:
+    """``(items, scored, census)``: the mode's admitted ``split`` tool items selected per category -- each category's
+    target its share (the plan's cells, unchanged) of ``quota``, with the cell's minimum tasks -- as whole episodes in
+    the pool's frozen order (`tool_generation_plan.select`), returned in that order. ``census[category]`` says
+    whether the category reached its own target (``short``) and task minimum (``thin``) and whether a SHORTFALL there
+    is the maintainer's approved one; a category with no admitted episode at all is short too."""
     from stages.teacher_modes import tool_generation_plan as TGP
     if plan is None:
         plan, orders = TGP.for_consumers()
@@ -159,16 +165,27 @@ def tool_episodes_by_plan(items: list[dict], split: str, mode: str, *, plan: dic
     stray = sorted(set(by_task) - set(order))
     if stray:
         raise InputsError(f"{len(stray)} {split} tool episode(s) outside the pool's frozen order, e.g. {stray[:3]}")
+    cells = TGP.cells_for(plan, "hybrid", mode, split)
+    total = sum(c["target"] for c in cells)
     chosen, census = set(), {}
-    for c in TGP.cells_for(plan, "hybrid", mode, split):
-        ids, got = TGP.select([t for t in order if cat_of.get(t) == c["category"]], units, c["target"],
+    for c in cells:
+        target = quota * c["target"] / total if total else 0.0
+        ids, got = TGP.select([t for t in order if cat_of.get(t) == c["category"]], units, target,
                               c.get("min_tasks", 0))
         chosen |= set(ids)
-        supply = sum(1 for t in by_task if cat_of[t] == c["category"])
-        census[c["category"]] = {"target": c["target"], "scored": got, "tasks": len(ids), "admitted_supply": supply,
-                                 "short": got < c["target"],
-                                 "thin": len(ids) < c.get("min_tasks", 0)}
-    return [x for t in order if t in chosen for x in by_task[t]], census
+        ok = TGP.approved(plan, split, mode, c["category"])
+        census[c["category"]] = {"target": target, "scored": got, "tasks": len(ids),
+                                 "min_tasks": c.get("min_tasks", 0),
+                                 "admitted_supply": sum(1 for t in by_task if cat_of[t] == c["category"]),
+                                 "short": got < target - QUOTA_EPS, "thin": len(ids) < c.get("min_tasks", 0),
+                                 "approved_shortfall": ok}
+    picked = [x for t in order if t in chosen for x in by_task[t]]
+    return picked, float(sum(scored(x) for x in picked)), census
+
+
+def unmet(census: dict) -> list[str]:
+    """The categories short or thin without the maintainer's approval."""
+    return sorted(k for k, v in census.items() if (v["short"] or v["thin"]) and not v["approved_shortfall"])
 
 
 def profiles_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = ITEMS_V2) -> dict:
@@ -194,8 +211,7 @@ def profiles_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = ITEMS_V2) 
         for (dom, sm), quota in sorted(q.items()):
             sub, mode = sm.rsplit("|", 1)
             if dom == SUPPORTING and sub == TOOL_SUBTYPE:
-                pool, _ = tool_episodes_by_plan(tool_items.get(mode, []), "calibration", mode)
-                got_items, got = take_whole(pool, quota, key=lambda x: x["task_id"])
+                got_items, got, cats = tool_cell(tool_items.get(mode, []), "calibration", mode, quota)
             elif dom == SUPPORTING:
                 got_items, got = take_whole(by_cell[(dom, sm)], quota)
             else:
@@ -204,8 +220,15 @@ def profiles_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = ITEMS_V2) 
             chosen += got_items
             census[f"{dom}/{sm}"] = {"quota": quota, "scored": got, "items": len(got_items),
                                      "short": got < quota - QUOTA_EPS, "rule": ("v1's cell" if dom != SUPPORTING else
-                                                                    "tool items, whole episodes" if sub == TOOL_SUBTYPE
-                                                                    else "prefix of v1's cell")}
+                                                                    "tool items, whole episodes per category"
+                                                                    if sub == TOOL_SUBTYPE else "prefix of v1's cell")}
+            if dom == SUPPORTING and sub == TOOL_SUBTYPE:
+                #: the tool cell is met when every category meets its own share (their sum is the quota); an
+                #: approved category SHORTFALL is the only gap allowed, and it is recorded
+                bad = unmet(cats)
+                census[f"{dom}/{sm}"].update(categories=cats, unmet_categories=bad, short=bool(bad),
+                                             below_quota_by_approved_shortfalls=max(0.0, quota - got) if not bad
+                                             else None)
         short = sorted(k for k, v in census.items() if v["short"])
         short_all += [f"{p['profile_id']}:{k}" for k in short]
         path = Path(out_dir) / f"{p['profile_id']}.v2.items.jsonl"
@@ -226,7 +249,11 @@ def profiles_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = ITEMS_V2) 
                                               "note": "tool_pool@v1 calibration split"}]
         doc["profiles"].append(e)
         doc["census"][p["profile_id"]] = census
-    doc["status"] = ("COMPLETE: every cell reaches its v2 quota" if not short_all
+    approved_all = sorted(f"{pid}:{cell}:{cat}" for pid, cen in doc["census"].items() for cell, v in cen.items()
+                          for cat, c in (v.get("categories") or {}).items()
+                          if (c["short"] or c["thin"]) and c["approved_shortfall"])
+    doc["status"] = ((("COMPLETE: every cell reaches its v2 quota" if not approved_all else
+                       f"COMPLETE with the maintainer's approved shortfalls {approved_all}")) if not short_all
                      else f"SHORT: {short_all}")
     doc["supersedes"] = {"path": str(PROFILES_V1.relative_to(REPO)), "sha256": sha(PROFILES_V1)}
     doc["types"] = {"path": str(TYPES_V2.relative_to(REPO))}
@@ -240,13 +267,14 @@ def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2) -> 
     items = jsonl(SUITE_V1 / "items.jsonl")
     counts = dict(v1m["counts"])
     reached = {}
-    thin = {}
+    thin, short = {}, {}
     for m in MODES:
-        got_items, census = tool_episodes_by_plan(tool_items.get(m, []), "state_eval", m)
-        got = sum(scored(x) for x in got_items)
+        got_items, got, census = tool_cell(tool_items.get(m, []), "state_eval", m, SE_POSITIONS)
         tasks = len({x["task_id"] for x in got_items})
-        thin[m] = sorted(k for k, v in census.items() if v["thin"] and v["admitted_supply"])
-        reached[m] = got >= SE_POSITIONS and tasks >= SE_MIN_TASKS
+        thin[m] = sorted(k for k, v in census.items() if v["thin"] and not v["approved_shortfall"])
+        short[m] = sorted(k for k, v in census.items() if v["short"] and not v["approved_shortfall"])
+        #: every category's own share and minimum (their sum is SE_POSITIONS); only an approved SHORTFALL may be short
+        reached[m] = tasks >= SE_MIN_TASKS and not unmet(census)
         items += got_items
         counts[f"{TOOL_SUBTYPE}|{m}"] = {"tasks": tasks, "scored_positions": got, "by_category": census}
     man = copy.deepcopy(v1m)
@@ -257,11 +285,12 @@ def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2) -> 
     man["critical_groups"] = dict(CRITICAL_GROUPS_V2)
     man["types_sha256"] = None              #: set when the v2 table is committed (`build`)
     man["counts"] = counts
-    man["tool_calling"] = {"reached": reached, "thin_categories": thin,
-                           "rule": f"the state_eval split's episodes selected per category by the frozen generation "
-                                   f"plan (whole episodes, frozen order, each category to its share of "
-                                   f"{SE_POSITIONS} scored positions and >= {SE_MIN_TASKS} tasks); reached at >= "
-                                   f"{SE_POSITIONS} in total"}
+    man["tool_calling"] = {"reached": reached, "short_categories": short, "thin_categories": thin,
+                           "rule": f"the state_eval split's episodes selected per category (whole episodes, frozen "
+                                   f"order, each category to its share of {SE_POSITIONS} scored positions and >= "
+                                   f"{SE_MIN_TASKS} tasks); a mode is reached only when its total, its tasks and "
+                                   f"EVERY category meet them, a category's SHORTFALL counting only where the "
+                                   f"maintainer approved it"}
     man["content_sha256"] = mixture_content_sha256(items)
     man["n_items"] = len(items)
     man["supersedes"] = {"suite": f"{v1m['suite_id']}@v{v1m['version']}", "content_sha256": v1m["content_sha256"]}

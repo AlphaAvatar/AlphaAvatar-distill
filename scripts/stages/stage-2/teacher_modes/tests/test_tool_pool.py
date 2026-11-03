@@ -399,7 +399,8 @@ class TestPoolIdentity:
         (tmp_path / "plan.json").write_text(json.dumps({"schema": "aadistill.stage2.teacher_modes.tool_generation_plan/v1",
                                                         "pool": {"content_sha256": "x"}, "protocol_sha256": "y",
                                                         "lineages": {"hybrid": {}}}))
-        with pytest.raises(TS.PlanError, match="another pool"):
+        from stages.teacher_modes import tool_generation_plan as TGP
+        with pytest.raises(TGP.PlanIdentityError, match="another pool content"):
             TS.checked_plan(proto, "hybrid")
 
 

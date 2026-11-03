@@ -8,7 +8,7 @@
   "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_generation_plan --pool <scratch>/tool_pool_dry_v3 --write <plan>"
  ],
  "identity": {
-  "content_sha256": "811f4870e5087b1ce50887f4c840065115426322cc87011eebc02349092e7ac1",
+  "content_sha256": "98fed03b52aa87a9563bef0dc9861f8983d635f3397f895384571129b56707c8",
   "files": {
    "calibration": {
     "file": "calibration.tasks.jsonl",
@@ -88,7 +88,8 @@
    ]
   ],
   "training_order_sha256": "3392806fb26a03f9dd5242b2e4f62127c4c6e57daf5552acbe9bc8b1fe11693b",
-  "rule": "load_pool re-verifies every registered file (sha256, task count, split, source revision, order) and refuses on any difference; the tool kinds bind pool.json and the plan"
+  "rule": "load_pool re-verifies every registered file (sha256, task count, split, source revision, order) and recomputes the content sha256 over files, ORDERS and sources (third review: the orders joined the content identity); tool_generation_plan.verified binds the plan to that content and to pool.json's exact bytes, for the session and every consumer",
+  "rerun_2026_11_03": "rerun under the new content definition: every split file, order, census and exclusion byte-identical to the acbbbbfb run (content then 811f4870..., under the old definition)"
  },
  "admitted": {
   "total": 83764,

@@ -34,8 +34,17 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
   - **Pivot.** Pivot Conversational is rebuilt (9,051 tasks, step gold); Pivot Function-Calling fails T3.
   - **Evidence.** The dry pool: 83,764 tasks (`audit/tool_pool_dry_run_v3.json`). The `a_search` position
     reconciliation is repaired, and the four experiment-suite failures are closed.
-- **Blocked on tool calling.** The code chain is ready end to end. The sources are candidates under review, none
-  approved: Toucan-1.5M and Pivot Conversational are the priority. The generation is a paid session to authorize.
+- **Third review, of `acbbbbfb`.** Two repairs are done:
+  - per-category gates on calibration v2 and `state_eval_hybrid@v2`: an unapproved SHORTFALL or THIN freezes nothing;
+  - every consumer reads through `tool_generation_plan.verified`.
+
+  The maintainer allows Toucan SFT and Pivot Conversational to be PREPARED as priority sources; this is not
+  generation.
+- **Blocked on tool calling.**
+  - The non-thinking `schema_arguments` SHORTFALL refuses the A2-6cat pack and blocks the suite's freeze, hence the
+    search (`audit/schema_arguments_shortfall.json`). The options are call-only gold episodes (minimal), WorkBench, or
+    an approved shortfall.
+  - The generation is a paid session to authorize.
   Calibration v2, `state_eval_hybrid@v2` and therefore the new search wait for it.
 - **Next: the maintainer's ruling** on:
   - source admission;
