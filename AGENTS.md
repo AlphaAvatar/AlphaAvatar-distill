@@ -1257,6 +1257,20 @@ Padding appears only at the end of the last sequence.
   packing (unique supervised tokens), what the sequences train on (repeated,
   truncated and padding tokens, supervised-token exposure), and the loss
   weighting.
+* **Fragments are accepted as specified** (maintainer 2026-11-03): a
+  fragment's supervised and scored positions count in CE/KD and KL like any
+  other placement. No context-only mask, no extra supervision mask, no loss
+  re-weighting. The new contexts and repeated scoring packing creates are part
+  of the measurement identity, not a defect to correct.
+* **Formal data volumes and proportions are counted BEFORE packing**
+  (maintainer 2026-11-03): examples and turns; unique supervised tokens,
+  split into reasoning, answer and tool-calling tokens; fluid : supporting
+  50:50 and each supporting type's share; calibration and state-evaluation
+  unique scored positions, their domain / subtype / mode quotas and critical-
+  token counts. Packed sequences, non-padding, repeated, truncated and padding
+  tokens and supervised-token exposure are recorded as packing, compute and
+  exposure measures only. They never redefine a data set's size or its
+  proportions, and no loss weight corrects a quota.
 
 ---
 

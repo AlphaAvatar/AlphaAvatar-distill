@@ -9,8 +9,11 @@ half, shared by every lineage (the hybrid in either mode, Thinking-2507). Nothin
   and hands back the assistant turn as a runtime re-renders it (structured ``tool_calls``) with the tool messages.
   A turn without a call ends the user turn: the next scripted user message follows, or the episode ends. An
   off-script call (no recorded response) ends the episode, and the verifier refuses it.
-* `verify` -- the five checks (`aadistill.data.tool_calls.verify_episode`) under the mode's think rule: thinking
-  mode closes its think block before any call; non-thinking mode never generates ``</think>``.
+* `verify` -- `aadistill.data.tool_calls.verify_episode`'s levels under the mode's think rule (thinking mode closes
+  its think block before any call; non-thinking mode never generates ``</think>``): protocol, schema validity and
+  recorded execution on every episode; step gold where the task carries gold calls; the task's final check at its
+  declared level (`FINAL_CHECK_LEVELS`). `verification_levels` is what a task CAN verify, registered in the pool:
+  a check that the target tools were called is tool selection, and no Toucan task verifies task success.
 * `documents` -- a verified episode's turns as token-in/token-out training documents, one per turn
   (`token_documents.document_from_turn`): the engine's own prompt ids as context, the generated ids as targets.
 * `items` -- a verified episode's turns as calibration / state-evaluation items in `freeze_state_eval`'s form,
@@ -40,7 +43,10 @@ TOOL_PROTOCOL = {"open_tag": "<tool_call>", "close_tag": "</tool_call>", "think_
                  "open_id": 151657, "close_id": 151658, "think_close_id": 151668}
 TASK_FIELDS = ("task_id", "category", "source", "family", "split", "tools", "messages", "backend", "max_turns")
 CATEGORIES = ("tool_selection", "schema_arguments", "no_tool", "multiple_parallel", "multi_turn",
-              "errors_missing_parameters", "mcp_agent")
+              "error_recovery", "mcp_agent")
+#: the level each final-check kind verifies: whether the target tools were called (or none was) is tool selection;
+#: only an answer check against the task's gold is task success
+FINAL_CHECK_LEVELS = {"no_call": "tool_selection", "calls_tools": "tool_selection", "contains_all": "task_success"}
 SPLITS = ("training", "validation", "state_eval", "calibration", "reserve")
 
 
@@ -122,9 +128,30 @@ class ToolEnv:
         return {"off_script": self.off_script, "done": self.done}
 
 
+def final_check_level(task: Mapping[str, Any]) -> str | None:
+    """The level the task's final check verifies (`FINAL_CHECK_LEVELS`), or None without one."""
+    kind = (task.get("final_check") or {}).get("kind", "none")
+    if kind == "none":
+        return None
+    if kind not in FINAL_CHECK_LEVELS:
+        raise ToolTaskError(f"{task['task_id']}: final check {kind!r} is not implemented")
+    return FINAL_CHECK_LEVELS[kind]
+
+
+def verification_levels(task: Mapping[str, Any]) -> list[str]:
+    """The levels an episode of ``task`` can be verified at (`tool_calls.LEVELS` order)."""
+    from aadistill.data.tool_calls import LEVELS
+    have = {"protocol", "schema_validity", "recorded_execution"}
+    if any(g is not None for g in task.get("gold_steps") or []):
+        have.add("step_gold")
+    if final_check_level(task):
+        have.add(final_check_level(task))
+    return [k for k in LEVELS if k in have]
+
+
 def final_check(task: Mapping[str, Any]):
-    """The task's final check over its turns: none, no_call (every turn answers without a call), or contains_all
-    (the last turn's answer contains every listed string)."""
+    """The task's final check over its turns: none, no_call (every turn answers without a call), calls_tools (every
+    target tool called) or contains_all (the last turn's answer contains every listed string)."""
     spec = task.get("final_check") or {"kind": "none"}
     kind = spec.get("kind", "none")
     if kind == "none":
@@ -134,8 +161,9 @@ def final_check(task: Mapping[str, Any]):
         return lambda turns: all(not parse_tool_calls(str(t.get("raw") or ""), open_tag=p["open_tag"],
                                                       close_tag=p["close_tag"])[0] for t in turns)
     if kind == "calls_tools":
-        #: every listed tool called at least once over the episode (Toucan's target tools, G2); a listed name
-        #: matches a called name equal to it or ending in "-<name>" (MCP tools carry their server's slug)
+        #: every listed tool called at least once over the episode (Toucan's target tools): tool selection only,
+        #: never task success; a listed name matches a called name equal to it or ending in "-<name>" (MCP tools
+        #: carry their server's slug)
         want = [str(x) for x in spec["values"]]
         p = TOOL_PROTOCOL
 
@@ -152,11 +180,12 @@ def final_check(task: Mapping[str, Any]):
 
 
 def verify(task: Mapping[str, Any], episode_turns: Sequence[Mapping[str, Any]], *, thinking: bool):
-    """The five checks on every turn of one episode (`EpisodeVerdict`)."""
+    """Every level on every turn of one episode (`EpisodeVerdict`)."""
     p = TOOL_PROTOCOL
+    fc, level = final_check(task), final_check_level(task)
     return verify_episode(episode_turns, tools=task["tools"], open_tag=p["open_tag"], close_tag=p["close_tag"],
                           think_close=p["think_close"], expect_think=thinking,
-                          gold_steps=task.get("gold_steps"), final_check=final_check(task))
+                          gold_steps=task.get("gold_steps"), final_checks={level: fc} if fc else None)
 
 
 def documents(task: Mapping[str, Any], episode_turns: Sequence[Mapping[str, Any]], *, mode: str, stop_ids):

@@ -128,11 +128,14 @@ Upstream assistant turns are never kept as targets.
 Verification strength is reported per category. A category without a legal, deterministic source is a SHORTFALL in
 every arm. It is never filled from another category.
 
-**Splits by tool family, not by task.**
-- A family is the canonical tool set (an MCP task's server). It is assigned by `sha256('tool_pool@v1|' + family) mod
-  100`: 3% validation, 4% state evaluation, 4% calibration, 2% reserve, 87% training.
-- So no validation, calibration or state-evaluation task shares a tool family with a training task. This is the
-  tool-calling counterpart of P10.2's held-out families.
+**Splits by atomic tool identity, not by task** (revised 2026-11-03 after the maintainer's review; see
+[`PACKED_ROUND.md`](PACKED_ROUND.md) section 5).
+- An atom is every MCP server a task's converter declares, and every tool no declared server owns (its bare name and
+  schema). Each atom is assigned by `sha256('tool_pool@v1|' + atom) mod 100`: 3% validation, 4% state evaluation, 4%
+  calibration, 2% reserve, 87% training. A task enters the split all its atoms share, and is refused when they
+  disagree.
+- So no server or tool appears in two splits. This is the tool-calling counterpart of P10.2's held-out families. The
+  first version hashed a task's servers joined into one string, which could put one server in two splits.
 - The training split's order is a seeded shuffle (seed 20261103), frozen with its sha256 before any generation.
 
 **Isolation** (T1–T5 in the design):
@@ -140,7 +143,8 @@ every arm. It is never filled from another category.
   share no content key or tool family with the pool (`shared.eval_sets.require_disjoint`).
 - T2: no benchmark's evaluation data (BFCL, API-Bank, ToolBench test, τ-bench, When2Call test) enters the pool.
 - T3: no Glaive or xLAM row, and no task that duplicates one, including through a dataset that repackages them.
-- T4: the four splits are disjoint by family and content key.
+- T4: the splits are disjoint by atom and content key, and a 13-gram near-duplicate of an earlier split's task is
+  refused.
 - T5: exact and normalized-query duplicates collapse to one task.
 
 **Length.** A task whose first rendered prompt exceeds 6,144 tokens under any of the three templates is left out for

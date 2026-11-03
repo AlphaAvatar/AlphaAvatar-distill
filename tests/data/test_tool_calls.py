@@ -1,4 +1,4 @@
-"""`aadistill.data.tool_calls`: parsing, schema checks, replay, gold matching, the five episode checks."""
+"""`aadistill.data.tool_calls`: parsing, schema checks, replay, gold matching, an episode's verification levels."""
 from __future__ import annotations
 
 from aadistill.data.tool_calls import (
@@ -60,12 +60,12 @@ class TestReplayAndGold:
         assert not step_matches_gold([ToolCall("x", {}), ToolCall("x", {})], gold)
 
 
-def _verify(turns, thinking=True, gold=None, final=None):
+def _verify(turns, thinking=True, gold=None, final=None, level="task_success"):
     return verify_episode(turns, tools=TOOLS, open_tag=OPEN, close_tag=C, think_close=T, expect_think=thinking,
-                          gold_steps=gold, final_check=final)
+                          gold_steps=gold, final_checks={level: final} if final else None)
 
 
-class TestTheFiveChecks:
+class TestTheLevels:
     def test_an_admitted_episode(self):
         turns = [{"raw": f"plan{T}\n" + call("get_weather", city="Paris"), "stop_reason": "eos", "responses": ["sun"]},
                  {"raw": f"ok{T}\nIt is sunny.", "stop_reason": "eos", "responses": []}]
@@ -79,11 +79,30 @@ class TestTheFiveChecks:
                             {"raw": f"x{T}done", "stop_reason": "eos"}]).checks["protocol"]
         assert not _verify([{"raw": f"x{T}done", "stop_reason": "eos"}], thinking=False).checks["protocol"]
         assert not _verify([{"raw": f"x{T}done", "stop_reason": "degeneration"}]).checks["protocol"]
-        assert not _verify([{"raw": f"x{T}" + call("nope"), "stop_reason": "eos", "responses": ["s"]},
-                            {"raw": f"x{T}d", "stop_reason": "eos"}]).checks["schema"]
-        assert not _verify([{"raw": f"x{T}" + good_call, "stop_reason": "eos", "responses": ["s"]},
-                            {"raw": f"x{T}d", "stop_reason": "eos"}],
-                           gold=[[[{"name": "get_weather", "arguments": {"city": "Rome"}}]]]).checks["gold"]
-        assert not _verify([{"raw": f"x{T}" + good_call, "stop_reason": "eos", "responses": [None]}]).checks["execution"]
-        assert not _verify([{"raw": f"x{T}" + good_call, "stop_reason": "eos", "responses": ["s"]}]).checks["task_success"]
-        assert not _verify([{"raw": f"x{T}d", "stop_reason": "eos"}], final=lambda ts: False).checks["task_success"]
+        assert _verify([{"raw": f"x{T}" + call("nope"), "stop_reason": "eos", "responses": ["s"]},
+                        {"raw": f"x{T}d", "stop_reason": "eos"}]).checks["schema_validity"] is False
+        assert _verify([{"raw": f"x{T}" + good_call, "stop_reason": "eos", "responses": ["s"]},
+                        {"raw": f"x{T}d", "stop_reason": "eos"}],
+                       gold=[[[{"name": "get_weather", "arguments": {"city": "Rome"}}]]]).checks["step_gold"] is False
+        v = _verify([{"raw": f"x{T}" + good_call, "stop_reason": "eos", "responses": [None]}])
+        assert v.checks["recorded_execution"] is False
+        assert _verify([{"raw": f"x{T}" + good_call, "stop_reason": "eos", "responses": ["s"]}]).checks["protocol"] is False
+        assert _verify([{"raw": f"x{T}d", "stop_reason": "eos"}], final=lambda ts: False).checks["task_success"] is False
+
+    def test_a_level_without_a_verifier_is_not_checked_never_passed(self):
+        v = _verify([{"raw": f"x{T}" + call("get_weather", city="Paris"), "stop_reason": "eos", "responses": ["s"]},
+                     {"raw": f"x{T}done", "stop_reason": "eos"}])
+        assert v.admitted and v.checks["step_gold"] is None and v.checks["task_success"] is None
+        assert v.checks["tool_selection"] is None
+        assert v.verified_levels() == ["protocol", "schema_validity", "recorded_execution"]
+
+    def test_a_tool_selection_check_is_not_task_success(self):
+        v = _verify([{"raw": f"x{T}" + call("get_weather", city="Paris"), "stop_reason": "eos", "responses": ["s"]},
+                     {"raw": f"x{T}done", "stop_reason": "eos"}], final=lambda ts: True, level="tool_selection")
+        assert v.checks["tool_selection"] is True and v.checks["task_success"] is None
+        assert "task_success" not in v.as_dict()["verified_levels"]
+
+    def test_an_unknown_final_level_is_refused(self):
+        import pytest
+        with pytest.raises(ValueError):
+            _verify([{"raw": f"x{T}d", "stop_reason": "eos"}], final=lambda ts: True, level="success")

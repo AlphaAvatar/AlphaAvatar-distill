@@ -19,8 +19,11 @@ delimiters, the tools, the gold and the backend are all the caller's (P3).
   canonical form, and nothing otherwise: an off-script call ends the episode.
 * :func:`step_matches_gold` compares one turn's calls with the step's allowed
   call sets, order-free (a turn's parallel calls are a multiset).
-* :func:`verify_episode` runs the five checks an episode must pass on every turn
-  before it enters training: protocol, schema, gold, execution, task success.
+* :func:`verify_episode` checks an episode on every turn before it enters
+  training, level by level (`LEVELS`): protocol, schema validity, recorded
+  execution, step gold, tool selection, task success. A level the task carries
+  no verifier for is reported ``None`` (not checked), never passed: a check
+  that the target tools were called is tool selection, not task success.
 """
 from __future__ import annotations
 
@@ -33,7 +36,7 @@ from typing import Any
 __all__ = [
     "ToolCall", "ToolCallError", "parse_tool_calls", "strip_tool_calls", "canonical_call",
     "schema_problems", "unchecked_keywords", "tool_index", "call_problems", "ReplayBackend",
-    "step_matches_gold", "EpisodeVerdict", "verify_episode",
+    "step_matches_gold", "EpisodeVerdict", "verify_episode", "LEVELS", "FINAL_LEVELS",
 ]
 
 #: JSON Schema keywords `schema_problems` enforces; anything else is reported, not enforced.
@@ -222,36 +225,57 @@ def step_matches_gold(calls: Sequence[ToolCall], gold: Sequence[Sequence[Mapping
     return any(got == Counter(canonical_call(g) for g in option) for option in gold)
 
 
+#: What an episode's verdict reports, in order. ``protocol``, ``schema_validity`` and ``recorded_execution`` are
+#: checked on every episode; ``step_gold`` only where the task carries per-step gold calls; ``tool_selection`` and
+#: ``task_success`` only where the task carries a final check of that level.
+LEVELS = ("protocol", "schema_validity", "recorded_execution", "step_gold", "tool_selection", "task_success")
+FINAL_LEVELS = ("tool_selection", "task_success")
+
+
 @dataclass
 class EpisodeVerdict:
     admitted: bool
-    checks: dict[str, bool] = field(default_factory=dict)
+    #: level -> True (passed) / False (failed) / None (the task carries no verifier for it)
+    checks: dict[str, bool | None] = field(default_factory=dict)
     problems: list[str] = field(default_factory=list)
 
+    def verified_levels(self) -> list[str]:
+        return [k for k in LEVELS if self.checks.get(k) is True]
+
     def as_dict(self) -> dict[str, Any]:
-        return {"admitted": self.admitted, "checks": dict(self.checks), "problems": list(self.problems)}
+        return {"admitted": self.admitted, "checks": dict(self.checks), "problems": list(self.problems),
+                "verified_levels": self.verified_levels()}
 
 
 def verify_episode(turns: Sequence[Mapping[str, Any]], *, tools: Sequence[Mapping[str, Any]],
                    open_tag: str, close_tag: str, think_close: str | None,
                    expect_think: bool, gold_steps: Sequence[Sequence[Sequence[Mapping[str, Any]]]] | None = None,
-                   final_check: Callable[[Sequence[Mapping[str, Any]]], bool] | None = None,
+                   final_checks: Mapping[str, Callable[[Sequence[Mapping[str, Any]]], bool]] | None = None,
                    ) -> EpisodeVerdict:
-    """The five checks, every turn (six_category_design.json :: protocol.verification).
+    """Every level of `LEVELS`, every turn.
 
     ``turns`` are the generated turns in order, each with ``raw`` (the generated
     text), ``stop_reason`` and ``responses`` (one backend response per call, or
     ``None`` for an off-script call). ``expect_think``: the turn must close its
     think block before any call (thinking mode); otherwise it may not generate
     ``think_close`` at all (a non-thinking mode's think block is the template's).
-    ``gold_steps[k]`` lists turn ``k``'s allowed call sets (absent: no gold for
-    that turn). ``final_check`` sees every turn and decides task success.
+    The episode must end on a turn without a call. ``gold_steps[k]`` lists turn
+    ``k``'s allowed call sets (absent or ``None``: no gold for that turn).
+    ``final_checks`` maps a level of `FINAL_LEVELS` to a check that sees every
+    turn. An episode is admitted when no level fails; levels without a verifier
+    stay ``None`` and are reported as such.
     """
+    unknown = set(final_checks or {}) - set(FINAL_LEVELS)
+    if unknown:
+        raise ValueError(f"final checks of unknown levels {sorted(unknown)}; levels are {FINAL_LEVELS}")
     index = tool_index(tools)
     problems: list[str] = []
-    checks = {"protocol": True, "schema": True, "gold": True, "execution": True, "task_success": True}
+    has_gold = gold_steps is not None and any(g is not None for g in gold_steps)
+    checks: dict[str, bool | None] = {"protocol": True, "schema_validity": True, "recorded_execution": True,
+                                      "step_gold": True if has_gold else None,
+                                      **{k: (True if k in (final_checks or {}) else None) for k in FINAL_LEVELS}}
     if not turns:
-        return EpisodeVerdict(False, {k: False for k in checks}, ["no turn"])
+        return EpisodeVerdict(False, {k: (False if v is not None else None) for k, v in checks.items()}, ["no turn"])
     for k, t in enumerate(turns):
         raw = str(t.get("raw") or "")
         if t.get("stop_reason") != "eos":
@@ -273,21 +297,22 @@ def verify_episode(turns: Sequence[Mapping[str, Any]], *, tools: Sequence[Mappin
         for call in calls:
             p = call_problems(call, index)
             if p:
-                checks["schema"] = False
+                checks["schema_validity"] = False
                 problems += [f"turn {k}: {x}" for x in p]
-        if gold_steps is not None and k < len(gold_steps) and gold_steps[k] is not None:
+        if has_gold and k < len(gold_steps) and gold_steps[k] is not None:
             if not step_matches_gold(calls, gold_steps[k]):
-                checks["gold"] = False
+                checks["step_gold"] = False
                 problems.append(f"turn {k}: the calls are not one of the step's allowed sets")
         responses = list(t.get("responses") or [])
         if calls and (len(responses) != len(calls) or any(r is None for r in responses)):
-            checks["execution"] = False
+            checks["recorded_execution"] = False
             problems.append(f"turn {k}: the backend did not answer every call")
     last_calls, _ = parse_tool_calls(str(turns[-1].get("raw") or ""), open_tag=open_tag, close_tag=close_tag)
     if last_calls:
-        checks["task_success"] = False
-        problems.append("the last turn still makes a call")
-    elif final_check is not None and not final_check(turns):
-        checks["task_success"] = False
-        problems.append("the task's final check failed")
-    return EpisodeVerdict(all(checks.values()), checks, problems)
+        checks["protocol"] = False
+        problems.append("the episode ends on a call, not on an answer")
+    for level, check in (final_checks or {}).items():
+        if not check(turns):
+            checks[level] = False
+            problems.append(f"the task's {level} check failed")
+    return EpisodeVerdict(not any(v is False for v in checks.values()), checks, problems)

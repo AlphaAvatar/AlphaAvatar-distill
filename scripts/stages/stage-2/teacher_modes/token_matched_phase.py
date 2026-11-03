@@ -124,6 +124,9 @@ KIND_RECORDS = {
 #: the packed training kinds' arms, and the arms trained with Thinking-2507 rather than the hybrid
 PACKED_TRAIN_ARMS = {"train_6cat_a1": "A1-6cat", "train_6cat_a2": "A2-6cat", "train_6cat_c1": "C1-6cat"}
 THINKING_2507_KINDS = frozenset({"tool_generation_t2507", "train_6cat_c1"})
+#: each teacher lineage's tool-generation kind: a lineage's session runs only under an artifact of its own kind, so
+#: the two lineages' authorizations, identities and caps (`kind_cap_problems`) never stand in for each other
+TOOL_GENERATION_KINDS = {"hybrid": "tool_generation", "thinking_2507": "tool_generation_t2507"}
 #: the full search's planned minutes and A1's per-unit deadline (budget_v2.json: the search's deadline-bounded
 #: 37.3 h; A1's 6.35 h per seed)
 SEARCH_DEADLINE_MINUTES = 37.29 * 60
@@ -132,9 +135,11 @@ A1_UNIT_DEADLINE_HOURS = 6.35
 
 def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
     """Generation runs the path the committed L40S check admitted (the same engine, card and protocol as the v1
-    teacher session); every kind's artifact binds that record and its own `KIND_RECORDS`."""
+    teacher session); every kind's artifact binds that record and its own `KIND_RECORDS`. Both lineages' tool
+    generation pass the teacher gate: Thinking-2507 is the hybrid's architecture (Qwen3ForCausalLM, 36 layers,
+    2,560 / 9,728, 32 / 8 heads, the same vocabulary) on the same engine at the same session limit."""
     from stages.teacher_modes import l40s_check as LC
-    gate = "teacher" if kind in ("supplement", "inputs", "tool_generation") else None
+    gate = "teacher" if kind in ("supplement", "inputs", *TOOL_GENERATION_KINDS.values()) else None
     if gate:
         bad = LC.gate(LC.load_config(Path(root) / P1.CHECK_CONFIG)["gates"][gate], root)
         if bad:

@@ -6,16 +6,18 @@
         --mode H-T --out <dir>
 
 Every episode the teacher generated (``run_battery.run_episodes`` in ``generate`` mode, so each turn keeps the
-engine's own prompt and output token ids) goes through `tool_episodes.verify` -- protocol, schema, gold, execution,
-task success, on every turn -- and is admitted WHOLE or not at all. An admitted episode becomes, by its task's split:
+engine's own prompt and output token ids) goes through `tool_episodes.verify` -- protocol, schema validity, recorded
+execution, and step gold / tool selection / task success where the task carries that verifier, on every turn -- and
+is admitted WHOLE or not at all. An admitted episode becomes, by its task's split:
 
 * training / validation -> one token-in/token-out document per turn (`tool_documents.jsonl`), targets = the
   generated ids only;
 * calibration / state_eval -> one item per turn with the tool-calling critical tags (`tool_items.jsonl`), the input
   of the hybrid profiles v2 and of state_eval_hybrid@v2.
 
-The census reports, per split and category: tasks offered, episodes generated, admitted, and refusals by check, and
-the supervised tokens / scored positions admitted. A second candidate (pass k > 0) is read only for a task whose
+The census reports, per split and category: tasks offered, episodes generated, admitted, refusals by level, the
+admitted episodes by the levels they were actually verified at (a level without a verifier is never counted as
+passed), and the supervised tokens / scored positions admitted. A second candidate (pass k > 0) is read only for a task whose
 earlier candidate was refused. Nothing reads a student result or an evaluation item.
 """
 from __future__ import annotations
@@ -45,8 +47,8 @@ def admit(tasks: list[dict], episodes: list[dict], *, mode: str, stop_ids) -> di
     for ep in episodes:
         cands[ep["task_id"]].append(ep)
     docs, items, census = [], [], defaultdict(lambda: {"offered": 0, "generated": 0, "admitted": 0,
-                                                        "refused_by_check": Counter(), "supervised_tokens": 0,
-                                                        "scored_positions": 0})
+                                                        "refused_by_check": Counter(), "admitted_by_verification":
+                                                        Counter(), "supervised_tokens": 0, "scored_positions": 0})
     verdicts = {}
     for t in tasks:
         c = census[(t["split"], t["category"])]
@@ -56,7 +58,7 @@ def admit(tasks: list[dict], episodes: list[dict], *, mode: str, stop_ids) -> di
             v = TE.verify(t, ep["turns"], thinking=thinking)
             if not v.admitted:
                 for k, ok in v.checks.items():
-                    if not ok:
+                    if ok is False:
                         c["refused_by_check"][k] += 1
                 verdicts.setdefault(t["task_id"], []).append(v.as_dict())
                 continue
@@ -74,11 +76,13 @@ def admit(tasks: list[dict], episodes: list[dict], *, mode: str, stop_ids) -> di
                 items += [{**it, "split": t["split"]} for it in its]
                 c["scored_positions"] += sum(len(it["tags"]["assistant"]) for it in its)
             c["admitted"] += 1
+            c["admitted_by_verification"]["+".join(v.verified_levels())] += 1
             verdicts[t["task_id"]] = [v.as_dict()]
             break
     stray = sorted(set(cands) - set(by_task))
     return {"documents": docs, "items": items, "stray_episodes": stray,
-            "census": {f"{s}|{k}": {**v, "refused_by_check": dict(v["refused_by_check"])}
+            "census": {f"{s}|{k}": {**v, "refused_by_check": dict(v["refused_by_check"]),
+                                    "admitted_by_verification": dict(v["admitted_by_verification"])}
                        for (s, k), v in sorted(census.items())}}
 
 

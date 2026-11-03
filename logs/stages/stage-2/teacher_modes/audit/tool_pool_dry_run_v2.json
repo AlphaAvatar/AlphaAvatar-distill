@@ -1,0 +1,907 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_pool_dry_run/v2",
+ "written_utc": "2026-11-03",
+ "what": "Toucan-1.5M's SFT config (a CANDIDATE source, not admitted) converted by tool_sources_toucan.py and assembled by tool_pool.py's real entry point (main: eval-set-1 and benchmark references, the three teachers' length checkers) into scratch. Nothing under data/, nothing generated, no GPU. Supersedes tool_calling_source_review_v2.json :: data_preparation.toucan_dry_pool (v1 family rule, no length check, 'error' substring categories)",
+ "commands": [
+  "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_benchmarks fetch",
+  "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_sources_toucan --sft-dir artifacts/stages/stage-2/teacher_modes/tool_sources/Agent-Ark__Toucan-1.5M@0df3cf37/SFT --out <scratch>/toucan_tasks_v2.jsonl",
+  "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pool --source toucan=<scratch>/toucan_tasks_v2.jsonl --out <scratch>/tool_pool_dry_v2"
+ ],
+ "local_files_not_tracked": {
+  "converted_tasks_sha256": "83b288fd7e304ea0432f51415bd724ae0ac3f52198a5a2978da590e8724c3478",
+  "pool_json_sha256": "5f481b4718b153ec4900d162afbe8de864f296b25ae6292563c9ed362bca2d72",
+  "training_order_sha256": "6fb8bc22957dce91497429f2bb69ae73788774613f5de1e8e17b966924f9a535"
+ },
+ "conversion": {
+  "rows": 119287,
+  "category": {
+   "no_tool": 40000,
+   "multi_turn": 31647,
+   "tool_selection": 22170,
+   "multiple_parallel": 10591,
+   "mcp_agent": 8964,
+   "error_recovery": 5915
+  },
+  "error_recovery_detail": {
+   "corrected_retry": 2960,
+   "tool_failure": 2955
+  },
+  "servers_per_task": {
+   "0": 223,
+   "1": 94993,
+   "2": 21103,
+   "3": 2767,
+   "4": 201
+  },
+  "tasks_with_unattributed_tools": 236,
+  "tasks_with_conflicting_recorded_responses": 1445,
+  "recorded_error_responses": {
+   "invalid_arguments": 331,
+   "tool_failure": 8302
+  },
+  "_reading": "parallel = a step with >= 2 calls (10,591 tasks), not a call count; error_recovery needs a recorded error response (a non-null 'error', isError, success:false, status:error, or an error-report opening; '\"error\": null' in a successful result is not one): 'corrected_retry' = an error then a successful call of the same tool with other arguments (2,960), 'tool_failure' = errors without one (2,955). v1 counted any response containing the substring 'error' and labelled 4,891 training tasks missing-parameter recovery; no Toucan task is 'ask for the missing value'"
+ },
+ "pool": {
+  "admitted": 82083,
+  "per_split": {
+   "calibration": 4364,
+   "reserve": 305,
+   "state_eval": 2180,
+   "training": 73759,
+   "validation": 1475
+  },
+  "census": {
+   "calibration": {
+    "no_tool": 2101,
+    "tool_selection": 1009,
+    "multi_turn": 682,
+    "error_recovery": 40,
+    "multiple_parallel": 427,
+    "mcp_agent": 105
+   },
+   "reserve": {
+    "no_tool": 283,
+    "error_recovery": 5,
+    "multi_turn": 6,
+    "mcp_agent": 4,
+    "tool_selection": 2,
+    "multiple_parallel": 5
+   },
+   "state_eval": {
+    "no_tool": 1420,
+    "tool_selection": 324,
+    "multi_turn": 204,
+    "mcp_agent": 78,
+    "multiple_parallel": 125,
+    "error_recovery": 29
+   },
+   "training": {
+    "mcp_agent": 4886,
+    "no_tool": 33431,
+    "multi_turn": 14391,
+    "multiple_parallel": 5546,
+    "tool_selection": 12674,
+    "error_recovery": 2831
+   },
+   "validation": {
+    "no_tool": 775,
+    "error_recovery": 53,
+    "tool_selection": 241,
+    "mcp_agent": 133,
+    "multi_turn": 221,
+    "multiple_parallel": 52
+   }
+  },
+  "verification_levels": {
+   "calibration": {
+    "protocol+schema_validity+recorded_execution+tool_selection": 4364
+   },
+   "reserve": {
+    "protocol+schema_validity+recorded_execution+tool_selection": 305
+   },
+   "state_eval": {
+    "protocol+schema_validity+recorded_execution+tool_selection": 2180
+   },
+   "training": {
+    "protocol+schema_validity+recorded_execution+tool_selection": 73759
+   },
+   "validation": {
+    "protocol+schema_validity+recorded_execution+tool_selection": 1475
+   }
+  },
+  "atoms": {
+   "total": 360,
+   "by_split": {
+    "training": 321,
+    "calibration": 11,
+    "state_eval": 13,
+    "validation": 11,
+    "reserve": 4
+   },
+   "by_kind": {
+    "server": 345,
+    "tool": 15
+   }
+  },
+  "excluded_total": 37204,
+  "excluded_by_reason": {
+   "T5": {
+    "tasks": 25107,
+    "by_split": {
+     "calibration": 1395,
+     "reserve": 10,
+     "state_eval": 403,
+     "training": 22837,
+     "validation": 462
+    },
+    "by_category": {
+     "error_recovery": 1251,
+     "mcp_agent": 2660,
+     "multi_turn": 11749,
+     "multiple_parallel": 2579,
+     "no_tool": 2,
+     "tool_selection": 6866
+    }
+   },
+   "T4: its atoms fall in different splits": {
+    "tasks": 5707,
+    "by_split": {
+     "conflict": 5707
+    },
+    "by_category": {
+     "error_recovery": 996,
+     "mcp_agent": 563,
+     "multi_turn": 2607,
+     "multiple_parallel": 1519,
+     "no_tool": 22
+    }
+   },
+   "T4: a 13-gram near-duplicate of an earlier split's task": {
+    "tasks": 2199,
+    "by_split": {
+     "training": 2114,
+     "validation": 41,
+     "calibration": 36,
+     "reserve": 8
+    },
+    "by_category": {
+     "error_recovery": 62,
+     "mcp_agent": 139,
+     "multi_turn": 71,
+     "multiple_parallel": 126,
+     "no_tool": 1208,
+     "tool_selection": 593
+    }
+   },
+   "T1/T2: a eval-set-1 tool name": {
+    "tasks": 1878,
+    "by_split": {
+     "training": 1878
+    },
+    "by_category": {
+     "error_recovery": 124,
+     "mcp_agent": 267,
+     "multi_turn": 674,
+     "multiple_parallel": 86,
+     "no_tool": 362,
+     "tool_selection": 365
+    }
+   },
+   "replay": {
+    "tasks": 1321,
+    "by_split": {
+     "calibration": 38,
+     "training": 1273,
+     "validation": 4,
+     "reserve": 1,
+     "state_eval": 5
+    },
+    "by_category": {
+     "error_recovery": 451,
+     "mcp_agent": 26,
+     "multi_turn": 818,
+     "multiple_parallel": 26
+    }
+   },
+   "length": {
+    "tasks": 990,
+    "by_split": {
+     "training": 952,
+     "validation": 4,
+     "calibration": 34
+    },
+    "by_category": {
+     "error_recovery": 73,
+     "mcp_agent": 103,
+     "multi_turn": 222,
+     "multiple_parallel": 100,
+     "no_tool": 396,
+     "tool_selection": 96
+    }
+   },
+   "T1/T2: a bfcl_v3 prompt": {
+    "tasks": 1,
+    "by_split": {
+     "training": 1
+    },
+    "by_category": {
+     "multi_turn": 1
+    }
+   },
+   "T1/T2: a when2call prompt": {
+    "tasks": 1,
+    "by_split": {
+     "training": 1
+    },
+    "by_category": {
+     "multi_turn": 1
+    }
+   }
+  },
+  "excluded_by_reason_source_category_split": [
+   {
+    "reason": "T1/T2: a bfcl_v3 prompt",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "training",
+    "tasks": 1
+   },
+   {
+    "reason": "T1/T2: a eval-set-1 tool name",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "training",
+    "tasks": 124
+   },
+   {
+    "reason": "T1/T2: a eval-set-1 tool name",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "training",
+    "tasks": 267
+   },
+   {
+    "reason": "T1/T2: a eval-set-1 tool name",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "training",
+    "tasks": 674
+   },
+   {
+    "reason": "T1/T2: a eval-set-1 tool name",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "training",
+    "tasks": 86
+   },
+   {
+    "reason": "T1/T2: a eval-set-1 tool name",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "training",
+    "tasks": 362
+   },
+   {
+    "reason": "T1/T2: a eval-set-1 tool name",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "training",
+    "tasks": 365
+   },
+   {
+    "reason": "T1/T2: a when2call prompt",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "training",
+    "tasks": 1
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "training",
+    "tasks": 61
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "validation",
+    "tasks": 1
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "calibration",
+    "tasks": 1
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "training",
+    "tasks": 136
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "validation",
+    "tasks": 2
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "training",
+    "tasks": 66
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "validation",
+    "tasks": 5
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "calibration",
+    "tasks": 11
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "training",
+    "tasks": 115
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "calibration",
+    "tasks": 13
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "reserve",
+    "tasks": 8
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "training",
+    "tasks": 1163
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "validation",
+    "tasks": 24
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "calibration",
+    "tasks": 11
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "training",
+    "tasks": 573
+   },
+   {
+    "reason": "T4: a 13-gram near-duplicate of an earlier split's task",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "validation",
+    "tasks": 9
+   },
+   {
+    "reason": "T4: its atoms fall in different splits",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "conflict",
+    "tasks": 996
+   },
+   {
+    "reason": "T4: its atoms fall in different splits",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "conflict",
+    "tasks": 563
+   },
+   {
+    "reason": "T4: its atoms fall in different splits",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "conflict",
+    "tasks": 2607
+   },
+   {
+    "reason": "T4: its atoms fall in different splits",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "conflict",
+    "tasks": 1519
+   },
+   {
+    "reason": "T4: its atoms fall in different splits",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "conflict",
+    "tasks": 22
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "calibration",
+    "tasks": 23
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "reserve",
+    "tasks": 2
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "state_eval",
+    "tasks": 21
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "training",
+    "tasks": 1155
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "validation",
+    "tasks": 50
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "calibration",
+    "tasks": 24
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "reserve",
+    "tasks": 3
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "state_eval",
+    "tasks": 30
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "training",
+    "tasks": 2508
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "validation",
+    "tasks": 95
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "calibration",
+    "tasks": 685
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "reserve",
+    "tasks": 2
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "state_eval",
+    "tasks": 187
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "training",
+    "tasks": 10683
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "validation",
+    "tasks": 192
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "calibration",
+    "tasks": 198
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "reserve",
+    "tasks": 3
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "state_eval",
+    "tasks": 52
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "training",
+    "tasks": 2313
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "validation",
+    "tasks": 13
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "training",
+    "tasks": 1
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "validation",
+    "tasks": 1
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "calibration",
+    "tasks": 465
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "state_eval",
+    "tasks": 113
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "training",
+    "tasks": 6177
+   },
+   {
+    "reason": "T5",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "validation",
+    "tasks": 111
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "training",
+    "tasks": 72
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "validation",
+    "tasks": 1
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "calibration",
+    "tasks": 6
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "training",
+    "tasks": 97
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "calibration",
+    "tasks": 9
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "training",
+    "tasks": 211
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "validation",
+    "tasks": 2
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "calibration",
+    "tasks": 1
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "training",
+    "tasks": 98
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "validation",
+    "tasks": 1
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "calibration",
+    "tasks": 13
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "no_tool",
+    "split": "training",
+    "tasks": 383
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "calibration",
+    "tasks": 5
+   },
+   {
+    "reason": "length",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "tool_selection",
+    "split": "training",
+    "tasks": 91
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "calibration",
+    "tasks": 2
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "training",
+    "tasks": 448
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "error_recovery",
+    "split": "validation",
+    "tasks": 1
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "reserve",
+    "tasks": 1
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "state_eval",
+    "tasks": 2
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "mcp_agent",
+    "split": "training",
+    "tasks": 23
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "calibration",
+    "tasks": 35
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "state_eval",
+    "tasks": 3
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "training",
+    "tasks": 777
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multi_turn",
+    "split": "validation",
+    "tasks": 3
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "calibration",
+    "tasks": 1
+   },
+   {
+    "reason": "replay",
+    "source": "Agent-Ark/Toucan-1.5M",
+    "category": "multiple_parallel",
+    "split": "training",
+    "tasks": 25
+   }
+  ],
+  "tool_name_only_matches_counted_not_refused": {
+   "bfcl_v3": 23848,
+   "when2call": 15914,
+   "tau_bench": 5265,
+   "toolsandbox": 594
+  },
+  "length_checkers": [
+   "hybrid:H-N",
+   "hybrid:H-T",
+   "thinking_2507:T2507"
+  ],
+  "prompt_bound": 6144,
+  "near_duplicate_protocol": {
+   "n": 13,
+   "containment": 0.5,
+   "max_document_frequency": 5
+  }
+ },
+ "references": {
+  "summary": {
+   "eval-set-1": {
+    "prompts": 1422,
+    "prompt_keys": 1419,
+    "ngrams": 161981,
+    "tools": 27,
+    "tool_names_refused": true
+   },
+   "api_bank": {
+    "prompts": 1602,
+    "prompt_keys": 483,
+    "ngrams": 4310,
+    "tools": 1007,
+    "tool_names_refused": false
+   },
+   "bfcl_v3": {
+    "prompts": 5051,
+    "prompt_keys": 4411,
+    "ngrams": 91545,
+    "tools": 9443,
+    "tool_names_refused": false
+   },
+   "tau_bench": {
+    "prompts": 685,
+    "prompt_keys": 684,
+    "ngrams": 24869,
+    "tools": 30,
+    "tool_names_refused": false
+   },
+   "toolsandbox": {
+    "prompts": 333,
+    "prompt_keys": 195,
+    "ngrams": 317,
+    "tools": 38,
+    "tool_names_refused": false
+   },
+   "when2call": {
+    "prompts": 3952,
+    "prompt_keys": 2295,
+    "ngrams": 14244,
+    "tools": 11973,
+    "tool_names_refused": false
+   }
+  },
+  "benchmarks": {
+   "bfcl_v3": {
+    "repository": "gorilla-llm/Berkeley-Function-Calling-Leaderboard",
+    "revision": "61fc0608cfd831fcfbbaa676ebdfef0ed963eeda"
+   },
+   "when2call": {
+    "repository": "nvidia/When2Call",
+    "revision": "0582f7749df63a96fdc3070932e83e72396ace53"
+   },
+   "api_bank": {
+    "repository": "liminghao1630/API-Bank",
+    "revision": "12e8158b7628c168f07e8f31fbbe3445e99f44cf"
+   },
+   "tau_bench": {
+    "repository": "sierra-research/tau-bench",
+    "revision": "59a200c6d575d595120f1cb70fea53cef0632f6b"
+   },
+   "toolsandbox": {
+    "repository": "apple-aiml-research/ToolSandbox",
+    "revision": "c8571d7854316d2e1c5f288e59fe1e34e53f6dd1"
+   }
+  }
+ },
+ "findings": [
+  "Isolation is by atom: 360 atoms among the admitted tasks (345 MCP servers + 15 unattributed tool identities), 321 in training, 11 validation, 13 state_eval, 11 calibration, 4 reserve; no atom in two splits (assemble asserts it). 5,707 multi-server tasks whose servers hash to different splits are refused. The v1 combined 'server1|server2' family could put one server in two splits",
+  "eval-set-1: 0 prompt-key matches and 0 13-gram near-duplicates; 1,878 tasks refused for offering a tool whose bare name is one of eval-set-1's 26 tool names (factorial 1,856, get_news 22), none with the same name AND schema; eval-set-1's tools are bare-named OpenAI envelopes, Toucan's are '<server slug>-<tool>' envelopes, compared on the bare name",
+  "public benchmarks: 2 exact prompt matches refused (BFCL v3 1, When2Call 1), 0 13-gram near-duplicates, 0 tool identity (name + schema) matches; bare-name-only matches are counted, not refused (BFCL 23,848, When2Call 15,914, tau-bench 5,265, ToolSandbox 594 task-level hits on generic names)",
+  "between splits: 2,199 13-gram near-duplicates of an earlier split's task refused (2,114 from training)",
+  "length: 990 tasks over 6,144 first-prompt tokens under at least one teacher's template (952 training, 34 calibration, 4 validation)",
+  "replay: 1,321 tasks with a call recorded with different responses refused (1,445 converted; the rest left earlier)",
+  "verification: every admitted task verifies protocol, schema validity, recorded execution and tool selection; none has per-step gold or a task-success verifier",
+  "the evaluation splits are small in servers (11-13 each) and dominated by no_tool (state_eval: 1,420 of 2,180), error_recovery thin outside training (29-53 per split): server-level isolation on 356 servers costs breadth there; Pivot (no servers, per-step gold) would add tool identities"
+ ],
+ "authorizes": "nothing"
+}

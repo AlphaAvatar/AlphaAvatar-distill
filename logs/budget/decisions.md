@@ -15215,3 +15215,51 @@ on a paid pod.
   state-evaluation floor; the v2 Top-1's single copy; eval-set-2 for tool-call success; whether a Thinking-2507
   packed search is wanted (not needed for C1-6cat as registered; ~$35–50).
 - **Revisit when:** the maintainer rules on the items above.
+
+## 2026-11-03 (UTC) — Maintainer: independent review of the packed round (649d25dd); fragments accepted, formal data counted before packing; $0 repairs
+
+- **Context.** The maintainer's "Research A Packed Round 独立审查修复（Maintainer 修订版）" reviewed
+  `research/teacher-modes-and-projected-residual@649d25dd`. Stage-1 / Stage-3 random sequential packing,
+  truncate=True and standard causal attention were judged correct; the core and its consumers stay.
+- **Decision (maintainer).**
+  - The packing behaviour `prefix_restart_v1` is the accepted protocol. A fragment's positions count in CE/KD and KL;
+    there is no context-only mask, no extra supervision mask and no loss re-weighting. It is no longer a decision owed.
+  - Every formal data volume, proportion and quota is counted BEFORE packing (examples, turns, unique supervised
+    tokens with their reasoning / answer / tool-calling split, fluid : supporting 50:50, six supporting types ~1/6,
+    calibration and state-evaluation unique scored positions and their quotas, critical-token counts). Packing-layer
+    counts are packing / compute / exposure measures only. Recorded in AGENTS.md P19 and `stage3_packing`.
+- **Repairs ($0).**
+  - `tool_pool.py` v2:
+    - splits per atom: a declared MCP server, or a tool no declared server owns;
+    - a task whose atoms disagree is refused, so no atom is in two splits;
+    - decontamination against eval-set-1 (prompt keys, 13-gram containment, tool names and identities) and against
+      the pinned BFCL v3 / When2Call / API-Bank / tau-bench / ToolSandbox copies (`tool_benchmarks.py`);
+    - T4 between splits, and replay conflicts refused;
+    - the length bound run by `main` through each teacher's tokenizer and template;
+    - exclusions counted by reason, source, category and split.
+  - `tool_sources_toucan.py`:
+    - parallel means two or more calls in one step;
+    - an error is one the response reports; `error_recovery` is split into `corrected_retry` and `tool_failure`;
+    - conflicting recorded responses are listed, never chosen;
+    - every tool is attributed to its server.
+  - `aadistill.data.tool_calls.verify_episode` reports `LEVELS`: protocol, schema validity, recorded execution, step
+    gold, tool selection, task success. A level without a verifier is `None`, and a target-tools check is tool
+    selection.
+  - `tool_session.py` runs each lineage under its own kind (`tool_generation` / `tool_generation_t2507`). Both pass
+    the L40S teacher gate.
+  - `packed_packs.py`:
+    - every validation document is kept (the 16-sequence cap dropped part of A1-6cat's validation);
+    - the tool type is cut to its target, as whole episodes in the frozen order;
+    - the six-type / fluid shares are checked before packing;
+    - the validation coverage gaps are listed.
+  - Outdated source statements fixed in `tool_generation_protocol.json` and `six_category_design.json`.
+- **Evidence.**
+  - `audit/tool_pool_dry_run_v2.json`: Toucan dry pool, 82,083 of 119,287 admitted. Refused: T5 25,107, atoms
+    across splits 5,707, between-split near-duplicates 2,199, eval-set-1 tool names 1,878, replay conflicts 1,321,
+    length 990, benchmark prompts 2. Every task verifies tool selection at most.
+  - `audit/experiment_suite_baseline_20261103.json`: the four experiment failures reproduce at `b7ee0c93` and
+    `c861d704`.
+- **Not authorized and not done.** Paid teacher generation, the formal full search, student training, new GPU
+  resources, a merge to main.
+- **Revisit when:** the maintainer completes the source admission review and the phased budget review.
+

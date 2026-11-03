@@ -23,13 +23,29 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
 - **Measured at $0** (`audit/packing_audit.json`): Stage-1 sets re-score 10–13% of scored positions in fragments; A1's
   documents add 18.7% repeated supervised tokens (1,288 sequences vs 1,102), A2's 4.3%; on this data
   `truncate=False` gives the same sequences.
-- **Blocked on tool calling:** the code chain is ready end to end; the sources are candidates under review, none
-  approved (`audit/tool_calling_source_review_v2.json`: Toucan-1.5M + the Pivot pair recommended, Nemotron-SFT-Agentic-v4
-  conditional). The generation is a paid session to authorize. Calibration v2, `state_eval_hybrid@v2` and so the new
-  search wait for them.
-- **Next: the maintainer's ruling** on fragments, the tool-calling candidates and shares, a raised cap (the generation
-  + search phase is ~$37 expected against $31.27 left), a Thinking-2507 packed search (not needed for C1-6cat as
-  registered), and volume `4rhubprswo`. 0 pods; the two volumes are retained.
+- **The maintainer's independent review of `649d25dd` (2026-11-03):** the packing core stands. Fragments are ACCEPTED
+  as specified, and formal data volumes and shares are counted BEFORE packing (both in AGENTS.md P19). The $0 repairs
+  are done:
+  - the tool pool splits per atom (MCP server or tool identity), decontaminates against eval-set-1, the five pinned
+    benchmarks and earlier splits, and applies the 6,144-token bound in its entry point;
+  - Toucan's categories are read from steps and real errors, and replay conflicts are refused;
+  - verification is reported by level, so a target-tools check is tool selection, never task success;
+  - each lineage generates under its own kind;
+  - the packs keep every validation document, cut the tool type to its target and check the shares before packing.
+  - Toucan's dry pool: 82,083 of 119,287 tasks (`audit/tool_pool_dry_run_v2.json`).
+  - The four experiment-suite failures are pre-existing (`audit/experiment_suite_baseline_20261103.json`).
+- **Blocked on tool calling:** the code chain is ready end to end. The sources are candidates under review, none
+  approved: Toucan-1.5M and the Pivot pair have priority and still owe their admission review;
+  Nemotron-SFT-Agentic-v4 is deferred. The generation is a paid session to authorize. Calibration v2,
+  `state_eval_hybrid@v2` and so the new search wait for them.
+- **Next: the maintainer's ruling** on:
+  - the tool-calling candidates, shares and isolation costs, and the validation-coverage gaps (C1-6cat's validation
+    has no fluid type);
+  - a raised cap (the generation + search phase is ~$37 expected against $31.27 left);
+  - a Thinking-2507 packed search (not needed for C1-6cat as registered);
+  - volume `4rhubprswo`.
+
+  0 pods; the two volumes are retained.
 
 **RESEARCH A: SIX BASE-CORPUS TYPES — A1-6cat, A2-6cat, C1-6cat DESIGNED AT $0 (2026-11-03; maintainer brief "Thinking-2507 六类数据对照方案补充"). STOPPED at the maintainer's review: nothing generated, downloaded, searched, trained or evaluated; no pod; no cap raised.**
 The owner: [`docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md`](../../docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md)

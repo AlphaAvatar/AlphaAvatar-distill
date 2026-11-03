@@ -7,7 +7,13 @@
   and its teacher-native generation is a paid step that needs its own authorization. The code for every step from
   source rows to trained arms is in place (section 5a).
 - The new full search cannot start without tool items in its calibration and state evaluation.
-- Nothing was searched, trained, generated, downloaded or evaluated. No pod was created and `main` is unchanged.
+- Nothing was searched, trained, generated or evaluated. No pod was created and `main` is unchanged.
+- **The maintainer's independent review of `649d25dd` (2026-11-03)** kept the packing core and its consumers.
+  - It accepted the fragments (`prefix_restart_v1`) as specified, so they are no longer a decision owed.
+  - It ruled that every formal data volume and proportion is counted before packing (AGENTS.md P19).
+  - It asked for the $0 repairs recorded in sections 5, 5a and 7: the tool pool's isolation and length bound,
+    Toucan's categories and replay conflicts, verification by level, each lineage's generation kind, and the packs'
+    validation and share check.
 
 | record | owns |
 | --- | --- |
@@ -18,6 +24,8 @@
 | [`plans/packed_training_budget.json`](../../../../logs/stages/stage-2/teacher_modes/plans/packed_training_budget.json) | steps, schedule and cost of A1-6cat, A2-6cat, C1-6cat (`packed_training_plan.py`) |
 | [`validations/packed_round/dry_run_20261103.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/dry_run_20261103.json) | the $0 dry run of the new search chain, and the historical search's identities reproduced |
 | [`data/six_category_selection.json`](../../../../logs/stages/stage-2/teacher_modes/data/six_category_selection.json) | the five existing base types re-selected at 1/6 each (`six_category_selection.py`; see section 7) |
+| [`audit/tool_pool_dry_run_v2.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pool_dry_run_v2.json) | Toucan converted and assembled dry through `tool_pool.py`'s entry point: census, verification levels, atoms, every exclusion by reason, source, category and split, the decontamination references |
+| [`audit/experiment_suite_baseline_20261103.json`](../../../../logs/stages/stage-2/teacher_modes/audit/experiment_suite_baseline_20261103.json) | the four experiment-suite failures run at `b7ee0c93` and `c861d704`: pre-existing, with their causes |
 
 ## 1. The rule, by stage (AGENTS.md P19)
 
@@ -149,6 +157,10 @@ repacked at 8,192, seed 20261106):
   answers) carry more weight than their exposure share. The isolated packs show the same skew (0.92–1.12 and
   0.83–1.27).
 - **Nothing was changed.** It is reported, not corrected; the objective is frozen.
+- **Layer A is the data's size** (maintainer 2026-11-03). Examples, turns, unique supervised tokens and the category
+  shares are counted before packing. A1 stays at 5,930,273 unique supervised tokens whatever its sequences repeat.
+  Layer B is packing, compute and exposure; layer C is the objective's arithmetic. Neither redefines a size or a
+  share, and no loss weight corrects a quota.
 
 **C1's kept part.** `D4A_merged_whole`'s 3,681 tool-free sessions, each its block's system prompt plus its own tokens,
 5,430,434 supervised tokens, 352 historical cut traces kept as cut. Repacked, they fill 1,042 sequences (989 before)
@@ -166,11 +178,17 @@ conversation by the policy's own template.
 
 ## 5. Tool calling
 
-The pool, protocol and verifier are [`SIX_CATEGORY.md`](SIX_CATEGORY.md)'s, reused unchanged:
-- `tool_pool@v1`, seven categories, splits by tool family;
-- isolation T1–T5 and the 6,144-token prompt bound;
-- the five-check verifier and whole-episode admission;
-- only native assistant ids are supervised.
+The pool and protocol are [`SIX_CATEGORY.md`](SIX_CATEGORY.md)'s: `tool_pool@v1`, seven categories, the
+6,144-token prompt bound, whole-episode admission, and only native assistant ids supervised. The maintainer's review
+found five defects, repaired at $0:
+
+| defect (`649d25dd`) | repair |
+| --- | --- |
+| a task's family was its servers joined into one string (`a\|b`), so one MCP server could land in two splits | splits per **atom**: every declared MCP server, and every tool no declared server owns (bare name + schema). A task enters the split all its atoms share and is refused otherwise; `assemble` asserts that no atom is in two splits. Connected components are not an option: Toucan's multi-server tasks chain 99.8% of it into one |
+| `main()` passed no length checker, so the 6,144-token bound was never applied | `length_checkers`: each lineage's and mode's own tokenizer, official template, tools and system text, exactly `run_episodes`' first turn |
+| "parallel" was two calls in total; "missing-parameter recovery" was any response containing `error`, including `"error": null` | steps are read from the trajectory: parallel = a step with two or more calls. An error is one the response reports. `error_recovery` is split into `corrected_retry` (an error, then a successful call of the same tool with other arguments) and `tool_failure`. No Toucan task is "ask for the missing value" |
+| a call recorded twice with different responses kept the first silently | listed under `backend.conflicts`; the pool refuses the task |
+| `calls_tools` set `task_success`, and checks without a verifier passed | `verify_episode` reports `LEVELS`: protocol, schema validity, recorded execution, step gold, tool selection, task success. A level without a verifier is `None`, never passed. A target-tools check is tool selection, and every task registers its levels |
 
 **Candidates, none approved** (maintainer, 2026-11-03).
 - Review: [`audit/tool_calling_source_review_v2.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_calling_source_review_v2.json),
@@ -196,24 +214,53 @@ The pool, protocol and verifier are [`SIX_CATEGORY.md`](SIX_CATEGORY.md)'s, reus
 - GLM-5.2's output terms are not reviewed;
 - the origin of its tool sets is unstated, and its predecessor v2 drew on Glaive/xLAM (T3).
 
-**Isolation screen.** No sampled row of any candidate shares an exact prompt key or a tool family with eval-set-1's
-1,419 held-out prompts and 12 tool families. The 13-gram near-duplicate screen and benchmark decontamination (BFCL,
-API-Bank, tau-bench, ToolSandbox, When2Call test) are still to run on the full sources.
+**Isolation and decontamination** (Toucan in full, [`audit/tool_pool_dry_run_v2.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pool_dry_run_v2.json)):
+- **eval-set-1**: 0 prompt keys and 0 13-gram near-duplicates. 1,878 tasks were refused for offering a tool whose
+  bare name is one of eval-set-1's 26 tool names (`factorial` 1,856, `get_news` 22); none shares a name and a schema.
+  eval-set-1's tools are bare-named OpenAI envelopes and Toucan's are `<server slug>-<tool>`, so the comparison uses
+  the bare name.
+- **Public benchmarks** (`tool_benchmarks.py`; BFCL v3, When2Call test, API-Bank test, tau-bench, ToolSandbox, each
+  pinned): 2 exact prompts refused, 0 near-duplicates, 0 tool identities. Bare-name-only hits on generic names are
+  counted, not refused.
+- **Between splits**: 2,199 near-duplicates of a task in an earlier split were refused, 2,114 of them from training.
+- **Protocol**: 13-gram containment ≥ 0.5, template n-grams (document frequency > 5) dropped, as
+  `isolation_rules.json`.
+- **Not yet screened**: the other candidates, which are not converted. T3 detection for v4.
 
-**Data prepared ($0, dry).** Toucan's SFT config was converted (`tool_sources_toucan.py`) and assembled
-(`tool_pool.assemble`) into scratch, not under `data/`:
-- 91,044 tasks after T5 collapsed 28,243 duplicates, in 5,401 tool families;
-- every category in every split: about 81,900 training, 3,200 state-evaluation, 2,500 calibration and 2,500
-  validation tasks;
-- every calling task has its replay table;
-- the 6,144-token bound would exclude about 1%.
+**Data prepared ($0, dry)**, through `tool_pool.py`'s entry point into scratch, not under `data/`:
+
+| split | tasks | no_tool | tool_selection | multi_turn | multiple_parallel | mcp_agent | error_recovery |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| training | 73,759 | 33,431 | 12,674 | 14,391 | 5,546 | 4,886 | 2,831 |
+| validation | 1,475 | 775 | 241 | 221 | 52 | 133 | 53 |
+| state_eval | 2,180 | 1,420 | 324 | 204 | 125 | 78 | 29 |
+| calibration | 4,364 | 2,101 | 1,009 | 682 | 427 | 105 | 40 |
+| reserve | 305 | 283 | 2 | 6 | 5 | 4 | 5 |
+
+- **Admitted**: 82,083 of 119,287 converted tasks. There are 360 atoms (345 servers, 15 tool identities): 321 in
+  training, 11 to 13 in each evaluation split, none in two splits.
+- **Refused**: 37,204 tasks, each with its reason:
+
+  | reason | tasks |
+  | --- | ---: |
+  | T5 duplicates | 25,107 |
+  | atoms in different splits | 5,707 |
+  | near-duplicates between splits | 2,199 |
+  | eval-set-1 tool names | 1,878 |
+  | replay conflicts | 1,321 |
+  | over 6,144 tokens | 990 |
+  | benchmark prompts | 2 |
+
+- **Verification**: every admitted task verifies protocol, schema validity, recorded execution and tool selection.
+  None carries step gold or a task-success verifier.
+- **Cost of server-level isolation**: the evaluation splits come from 11–13 servers each and are mostly no_tool.
 
 The Pivot pair and v4 are not converted yet.
 
 **Gaps that remain:**
 - gold arguments for parallel calls;
 - "ask for the missing parameter" with gold;
-- an MCP task-success check beyond recorded agreement;
+- a task-success verifier (Toucan verifies tool selection, Pivot adds step gold, neither verifies task success);
 - a registered tool-calling evaluation (eval-set-2): teacher-forced KL on tool turns is not tool-call success.
 
 ## 5a. The code chain, end to end (ready, nothing run)
@@ -221,12 +268,13 @@ The Pivot pair and v4 are not converted yet.
 | step | code | paid? |
 | --- | --- | --- |
 | task records from a source | `tool_sources_toucan.py` (others to write) | no |
-| the pool: families, splits, T1/T2/T5, length bound, frozen order | `tool_pool.py` | no |
-| teacher-native episodes, one lineage per session | `tool_session.py` (kinds `tool_generation`, `tool_generation_t2507`) over `run_battery --env-factory` | yes |
-| the five checks; documents and items | `tool_admission.py` (from the sealed shards), `aadistill.data.tool_calls`, `tool_episodes.py` | no |
+| pinned benchmark copies for decontamination | `tool_benchmarks.py fetch` | no |
+| the pool: atoms, splits, T1/T2/T4/T5, replay conflicts, length bound, frozen order | `tool_pool.py` | no |
+| teacher-native episodes, one lineage per session, each under its own kind and the L40S teacher gate | `tool_session.py` (hybrid `tool_generation`, Thinking-2507 `tool_generation_t2507`) over `run_battery --env-factory` | yes |
+| verification by level; documents and items | `tool_admission.py` (from the sealed shards), `aadistill.data.tool_calls`, `tool_episodes.py` | no |
 | types v2, profiles v2, `state_eval_hybrid@v2`, the packed freeze | `packed_inputs.py` | no |
 | the packed hybrid full search | `packed_full_search.py` (kind `packed_search`) | yes |
-| the packs of A1-6cat / A2-6cat / C1-6cat | `packed_packs.py` | no |
+| the packs of A1-6cat / A2-6cat / C1-6cat: the tool quota, the share check before packing, every validation document | `packed_packs.py` | no |
 | the units bound to packs and Top-1 | `packed_training_plan.py --bind-packs` | no |
 | training and formal evaluation per arm | `a1_units.py --arm` (kinds `train_6cat_a1`, `_a2`, `_c1`) | yes |
 
@@ -289,6 +337,21 @@ GPU):
 - tool calling: pending.
 - fluid: 2,962,514, unchanged.
 
+**Pack repairs** (the 2026-11-03 review; `packed_packs.py`):
+- **Tool quota.** The tool type enters as whole episodes, in the pool's frozen training order, up to the arm's target:
+  493,418 for A1-6cat and A2-6cat, 492,587 for C1-6cat. It is the shortest prefix that reaches the target, so at most
+  one episode over.
+- **Share check.** `shares` checks each of the six types at 1/6 ± 2% of the supporting total, and fluid at 49–51% of
+  the whole. It counts unique supervised tokens before packing and refuses a pack outside the check. The five existing
+  types sit within 0.7%.
+- **Validation keeps every document.** It used to be capped at 16 sequences after the shuffle:
+  - A1-6cat: 77 validation documents fill 18 sequences, so the cap dropped two, among them 44% of its
+    abstract-analogical and 36% of its GSM8K validation tokens;
+  - A2-6cat: 201 documents fill 17 sequences, and the cap kept every token;
+  - C1-6cat: 47 documents fill 12 sequences.
+- **Coverage gaps, now listed in the record.** C1-6cat's validation has no fluid type. A1-6cat's has no
+  `interactive_adaptation`, and it carries answerability, which the six-type set no longer trains.
+
 **C1-6cat** (Thinking-2507):
 - its own D4 Top-1 `fc28e0dd…` (a v1-context search; never called a packed-context initialization);
 - its kept 3,681 documents plus Thinking-2507-native tool turns (target 492,587), the whole set repacked sequentially.
@@ -335,16 +398,22 @@ is left.
 
 ## 9. Decisions owed to the maintainer
 
-1. **Fragments.** `truncate=True` replaces padding with a repeated prefix. The sequences are identical to
-   `truncate=False` on this data. The fragments re-score 10–13% of Stage-1 scored positions and add 18.7% (A1), 4.3%
-   (A2) and 23.3% (C1's kept part) of supervised tokens per epoch. Confirm, or choose fragments as context only, which
-   is numerically `truncate=False` at every scored position.
-2. **Tool calling.** Which candidates enter the pool (recommended: Toucan plus Pivot, with v4 conditional on its three
-   blockers), the category shares, the prompt bound, the non-thinking state-evaluation floor, and an eval-set-2.
-3. **Budget.** A raised project cap for the Full Search Authorization.
-4. **Thinking-2507.** Whether a Thinking-2507 packed search is wanted.
-5. **Storage.** Volume `4rhubprswo` and the v2 Top-1's single copy.
-6. **Loss weighting.** Keep the step-level weighting, or register a fixed-denominator objective.
+Fragments are no longer on this list: the maintainer accepted them as specified (2026-11-03).
+
+1. **Tool-calling sources.** Complete the admission review of Toucan and the Pivot pair (the priority candidates).
+   Nemotron-SFT-Agentic-v4 is deferred until its licence, generator-output terms and upstream tool provenance are
+   confirmed. Also owed: the category shares, the prompt bound, the non-thinking state-evaluation floor, and an
+   eval-set-2.
+2. **Isolation costs.** Server-level splits leave 11–13 servers per evaluation split, mostly no_tool. eval-set-1's
+   tool names are refused, which removes 1,856 tasks of the server that offers `factorial`. Bare-name-only benchmark
+   matches are counted, not refused. Confirm or change.
+3. **Validation coverage.** C1-6cat's validation documents (D4A's validation tail) hold no fluid type, and A1-6cat's
+   none of `interactive_adaptation`. The packs record the gap; validation loss is diagnostic.
+4. **Budget.** A raised project cap for the Full Search Authorization.
+5. **Thinking-2507.** Whether a Thinking-2507 packed search is wanted.
+6. **Storage.** Volume `4rhubprswo` and the v2 Top-1's single copy. The four pre-existing experiment-suite failures
+   come from it and from the `a_search` records' unreconciled pod `jzslup672m2jiy`.
+7. **Loss weighting.** Keep the step-level weighting, or register a fixed-denominator objective.
 
 ## Reproduce ($0)
 

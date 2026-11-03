@@ -92,7 +92,7 @@ def mode_args(proto: dict, lineage: str, mode: str) -> tuple[str, ...]:
 
 
 def retry_ids(tasks: dict[str, dict], records: dict[str, dict], *, thinking: bool) -> list[str]:
-    """Task ids whose first episode fails the five checks (the second candidate's only reason to run)."""
+    """Task ids whose first episode fails verification (the second candidate's only reason to run)."""
     return sorted(tid for tid, rec in records.items()
                   if not TE.verify(tasks[tid], rec.get("turns") or [], thinking=thinking).admitted)
 
@@ -146,8 +146,10 @@ def main(argv=None, *, run=None) -> int:
     try:
         from stages.reasoning_data import generation_driver as GD
         from stages.teacher_modes import token_matched_phase as TM
-        bound = TM.require_on_pod(Path(a.authorization), "tool_generation", REPO)
-        record["authorization"] = bound.get("authorization_id")
+        #: the lineage's own kind: a hybrid artifact never runs Thinking-2507, nor the reverse
+        kind = TM.TOOL_GENERATION_KINDS[a.lineage]
+        bound = TM.require_on_pod(Path(a.authorization), kind, REPO)
+        record.update(kind=kind, authorization=bound.get("authorization_id"))
         proto = protocol()
         tasks = lineage_tasks(proto, a.lineage, REPO / proto["pool"]["dir"])
         record["tasks"] = len(tasks)

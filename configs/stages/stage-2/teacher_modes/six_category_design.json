@@ -213,7 +213,7 @@
  },
  "task_pool": {
   "id": "tool_pool@v1",
-  "status": "DESIGN: no row downloaded; the proposed sources (task_pool.sources) wait for the maintainer's ruling",
+  "status": "DESIGN, revised 2026-11-03 (the maintainer's independent review): the sources are CANDIDATES, none approved (audit/tool_calling_source_review_v2.json supersedes the v1 review and the 'proposed' list below); Toucan's SFT config is downloaded and converted dry into scratch, never into data/. data/six_category_selection.json cites this file's earlier revision (116e186b), whose base-category quotas are unchanged here",
   "shared_by": [
    "A1-6cat (hybrid thinking)",
    "A2-6cat (hybrid non-thinking)",
@@ -224,7 +224,7 @@
    "task_id": "tc1- + sha256('<dataset>@<revision>|<upstream row key>|<variant>')[:20]: one id per task, the same for every teacher",
    "category": "one of tool_calling.categories",
    "source": "dataset id, revision, split, upstream row key, the review's verdict",
-   "family": "sha256 of the canonical tool-set signature (sorted function names with their canonical JSON schemas); an MCP task's family is its server id",
+   "family": "the task's environment: sha256 of its sorted atoms. Atoms are the atomic identities a split may not share -- every MCP server the converter declares (it owns the tools named '<slug>-<tool>') and every offered tool no declared server owns (sha256 of its bare name and canonical schema)",
    "tools": "the function schemas as JSON Schema, canonicalized (keys sorted); never edited beyond canonical serialization",
    "inputs": "the non-assistant messages: system text a source carries, user turns and when scripted later user turns arrive",
    "backend": "kind replay | executable | none; replay: canonical call -> recorded response; executable: pinned code with no network run inside the episode loop (WorkBench's sandbox); never a live API, a network call or a tool simulated by an LLM at generation time; scripted errors by step",
@@ -234,11 +234,11 @@
    "content_keys": "sha256 of the normalized first user message and of the canonical tool set"
   },
   "splits": {
-   "rule": "by family, never by task: int(sha256('tool_pool@v1|' + family), 16) mod 100 -> 0-2 validation, 3-6 state_eval, 7-10 calibration, 11-12 reserve, 13-99 training, so no evaluation, calibration or state-evaluation task shares a tool family with a training task",
+   "rule": "by ATOM, never by task or by a combined family string: int(sha256('tool_pool@v1|' + atom), 16) mod 100 -> 0-2 validation, 3-6 state_eval, 7-10 calibration, 11-12 reserve, 13-99 training; a task enters the split all its atoms share and is refused when they disagree, so no server or tool is in two splits. A combined 'server1|server2' family (v1) could put one server in two splits, and connected components are no option (Toucan's multi-server tasks chain 99.8% of it into one)",
    "order": "the training split's canonical order is a seeded shuffle (seed 20261103) frozen with its sha256 before any generation; every teacher walks the same order"
   },
   "sources": {
-   "status": "PROPOSED for the maintainer's ruling (audit/tool_calling_source_review.json): no source is 'covered' outright; each below is 'conditional' and enters only under its conditions",
+   "status": "SUPERSEDED by audit/tool_calling_source_review_v2.json: every source is a CANDIDATE, none approved; the entries below are the v1 proposal, kept as written except where a statement was wrong",
    "verification_classes": {
     "G1": "deterministic ground truth: the task's own program defines the answer (an executable sandbox's final state)",
     "G2": "model-generated gold compared deterministically (an expert model's recorded call or trajectory, filtered by its authors' judge): agreement, not human-verified correctness",
@@ -249,21 +249,22 @@
      "id": "Agent-Ark/Toucan-1.5M",
      "revision": "0df3cf37f2abefb380370cfb02eabea2a35ae782",
      "licence": "Apache-2.0",
-     "take": "the SFT config (119,287 rows) and its irrelevance and multi-turn subsets, only rows whose metadata.synthetic_data_gen_configs names Qwen3-*, gpt-oss-*, Kimi-K2*, Mistral-Small-3.x or Devstral-Small",
+     "take": "the SFT config (119,287 rows: irrelevant, multi-turn, single-turn-original, single-turn-diversify). CORRECTED 2026-11-03: the SFT config carries no metadata column, so the v1 per-row generator allowlist cannot be applied to it; its assistant turns are never read into a context or a target, so the generators matter only for the task text",
      "categories": [
       "tool_selection",
       "no_tool",
       "multiple_parallel",
       "multi_turn",
+      "error_recovery",
       "mcp_agent"
      ],
      "backend": "replay of the recorded real MCP responses for a call equal to a recorded one after canonicalization; no live server",
-     "success": "target_tools covered in order, every call answered by the replay table, a final turn without a call; G2 (no gold arguments: arguments are checked by schema and by agreement with the recorded call); no_tool rows B",
+     "success": "tool selection only: every target tool called (calls_tools), or no call in the irrelevant subset (B); no gold arguments, no per-step gold, no task-success verifier; schema validity and recorded execution (every call answered by the replay table) on every episode",
      "conditions": [
-      "the per-row generator allowlist",
       "Apache-2.0 notice; third-party MCP content may carry residual PII, so its generations stay outside git (P15)",
       "tool responses are dated June-September 2025",
-      "only the configs the pool reads are downloaded (P8.4)"
+      "only the configs the pool reads are downloaded (P8.4)",
+      "a call recorded with conflicting responses makes its task refused, never resolved silently"
      ]
     },
     {

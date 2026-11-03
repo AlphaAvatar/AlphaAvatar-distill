@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.teacher_modes.packed_round_design/v1",
  "status": "PREPARATION (2026-11-03): designed and partly prepared at $0; no search, no training, no generation, no pod",
- "decided_by": "maintainer brief 2026-11-03 'Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备'",
+ "decided_by": "maintainer brief 2026-11-03 'Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备'; revised by the maintainer's independent review of 649d25dd (2026-11-03): fragments accepted, formal data counted before packing, the tool pool / Toucan / verification / lineage-kind / validation repairs",
  "_contract": "The registered terms of Research A's packed round: the new hybrid full search under the packed forward context (Stage 1), and the packed training of A1-6cat, A2-6cat and C1-6cat (Stage 3). It supersedes the packing terms of six_category_design.json (document_isolated and E1's packer) and nothing else in it; its tool-calling pool, protocol, verification and quotas stay that record's. Sequence lengths and seeds are instance values of this experiment and live here, never in src/aadistill. AUTHORIZES NOTHING.",
  "stage1_forward_context": {
   "sequence_length": 8192,
@@ -14,7 +14,17 @@
   "shuffle_seed": 20261106,
   "packer": "aadistill.data.token_documents.pack_sequential (strategy sequential_causal)",
   "trainer_attention": "batch.context_strategy cross_context (the default): standard causal attention over each packed sequence, continuous positions, no position ids",
-  "fragments": "a document that does not fit the room left fills it with its first tokens and is packed again from its first token in the next sequence; the fragment's supervised positions are trained (CE and KD) and counted as repeated supervised-token exposure",
+  "fragments": "a document that does not fit the room left fills it with its first tokens and is packed again from its first token in the next sequence; the fragment's supervised positions are trained (CE and KD) and counted as repeated supervised-token exposure. ACCEPTED by the maintainer (2026-11-03): no context-only mask, no loss re-weighting",
+  "validation": "every validation document, packed the same way, with no sequence cap (a 16-sequence cap after the shuffle kept a random part of each category); the pack record lists the training data types the validation set does not cover",
+  "data_accounting": "maintainer 2026-11-03: every formal data volume, proportion and quota is counted BEFORE packing -- examples, turns, unique supervised tokens (reasoning / answer / tool-calling), fluid : supporting 50:50, the six supporting types ~1/6 each. Packed sequences, non-padding, repeated, truncated and padding tokens and supervised-token exposure are packing / compute / exposure measures only and never redefine a size or a share; no loss weight corrects a quota",
+  "share_check": {
+   "per_type_relative": 0.02,
+   "fluid_fraction": [
+    0.49,
+    0.51
+   ],
+   "_": "packed_packs.shares: each of the six base-corpus types within 2% of 1/6 of the supporting total, fluid 49-51% of the total, on unique supervised tokens before packing; the tool type is cut to its registered target first (whole episodes in the pool's frozen order). The five existing types sit within 0.7% (A1/A2 selection, C1's kept sessions)"
+  },
   "epoch_order": "the trainer's per-epoch permutation of the packed sequences (train.stream_block_indices); no re-packing between epochs",
   "applies_to": [
    "A1-6cat",
@@ -85,15 +95,15 @@
  },
  "tool_calling": {
   "role": "a supporting capability AlphaAvatar-distill must keep; the sixth base-corpus type at 1/6 of the base category's supervised tokens",
-  "owner_of_the_protocol": "six_category_design.json :: task_pool, protocol (tool_pool@v1, seven categories, family splits 87/3/4/4/2, isolation T1-T5, the 6,144-token prompt bound, run_episodes' loop, the five-check verifier, whole-episode admission, only native assistant ids supervised); reused here unchanged",
+  "owner_of_the_protocol": "six_category_design.json :: task_pool, protocol (tool_pool@v1, seven categories, the 87/3/4/4/2 split ranges, the 6,144-token prompt bound, run_episodes' loop, whole-episode admission, only native assistant ids supervised), with the 2026-11-03 repairs: splits per ATOM (MCP server or tool identity, tool_pool.py schema v2), eval-set-1 / public-benchmark / between-split decontamination, verification reported by level (aadistill.data.tool_calls.LEVELS: a target-tools check is tool selection, never task success)",
   "sources": "CANDIDATES under the maintainer's review, none approved (audit/tool_calling_source_review_v2.json). Recommended base: Agent-Ark/Toucan-1.5M @0df3cf37 (real MCP executions, Apache-2.0) + the NeMo Gym Pivot pair @0ac34ec8/@bfc7a4dd (deterministic per-step gold, CC-BY-4.0). Conditional supplement: nvidia/Nemotron-SFT-Agentic-v4 tool_calling @a4593a26 (OpenMDW-1.1 terms, GLM-5.2 output terms and tool-set provenance open). On hold: nvidia/Nemotron-Agentic-v1 interactive_agent @650d5909; its tool_calling subset excluded (glaive-function-calling-v2 tool sets, T3). Not recommended: Team-ACE/ToolACE @6bda777c (undisclosed generators, simulated responses, 2024). External assistant turns are never targets",
-  "status": "code ready end to end (PACKED_ROUND.md section 5a). Toucan's SFT config converted and assembled dry into scratch: 91,044 tasks after T5 collapsed 28,243 duplicates, 5,401 tool families, every category in every split. The Pivot pair and v4 are not converted. The paid teacher-native generation stays unauthorized",
+  "status": "code ready end to end (PACKED_ROUND.md section 5a). Toucan's SFT config converted and assembled DRY into scratch through tool_pool.py's entry point (audit/tool_pool_dry_run_v2.json): 82,083 of 119,287 tasks admitted (training 73,759, validation 1,475, state_eval 2,180, calibration 4,364, reserve 305), every category in training, validation, state_eval and calibration; 360 atoms, none in two splits; 37,204 refused with reasons (T5 25,107, atoms in different splits 5,707, between-split near-duplicates 2,199, eval-set-1 tool names 1,878, replay conflicts 1,321, length 990, benchmark prompts 2). Every admitted task verifies tool selection at most. The Pivot pair and v4 are not converted. The paid teacher-native generation stays unauthorized",
   "per_lineage_need": {
    "hybrid thinking (A1-6cat)": "training (493,418 supervised tokens), validation (32 tasks), calibration cells (4,200 + 1,800 scored positions), state evaluation (>= 12,000 scored positions)",
    "hybrid non-thinking (A2-6cat)": "the same splits in its own mode",
    "Thinking-2507 (C1-6cat)": "training (492,587) and validation (~12,624); calibration and state evaluation only if a Thinking-2507 packed search is authorized"
   },
-  "implementation_owed_before_generation": "done: run_episodes carries tools and tool messages (--env-factory), the replay backend and the five-check verifier (aadistill.data.tool_calls, tool_episodes), admission, the pool, the session driver. Owed: converters for each admitted source beyond Toucan (Pivot needs its trajectories rebuilt so the teacher runs from step one)"
+  "implementation_owed_before_generation": "done: run_episodes carries tools and tool messages (--env-factory), the replay backend and level-reporting verifier (aadistill.data.tool_calls, tool_episodes), admission, the pool with atomic isolation, decontamination and the length bound, the benchmark copies (tool_benchmarks.py), the session driver under each lineage's own kind. Owed: the Pivot converter (trajectories rebuilt so the teacher runs from step one), then each admitted source's decontamination run"
  },
  "training": {
   "objective": "frozen, unchanged: CE weight 0.25, KD weight 1.0, KD temperature 1.0, KD and CE at the assistant target positions (kd_scope assistant), Top-200 + tail (loss.kd_support reference_topk_tail_v1, K=200), 3 epochs, batch size 2, micro-batch size 1, seeds 20260726 and 20260801; optimizer, learning rate and scheduler as registered for A1 (token_matched_design.json / the A1 training plan)",
@@ -168,7 +178,8 @@
    "validations/packed_round/dry_run_20261103.json (new chain over v1 inputs; v2 search identities reproduce)",
    "the five existing base types re-selected at 1/6 each (data/six_category_selection.json: FIVE_TYPES_SELECTED, no shortfall; A1-6cat 5,163 tasks / 5,436,912 supervised tokens without tool calling, A2-6cat 42,606 / 5,430,311)",
    "tool-calling code chain: aadistill.data.tool_calls, run_battery tool tasks, tool_episodes, tool_admission, tool_pool, tool_session, packed_inputs, packed_packs, packed_training_plan bind, launcher kinds",
-   "tool-calling source review v2 (audit/tool_calling_source_review_v2.json) and Toucan's dry pool"
+   "tool-calling source review v2 (audit/tool_calling_source_review_v2.json) and Toucan's dry pool",
+   "2026-11-03 review repairs: fragments and pre-packing accounting recorded (AGENTS.md P19, stage3_packing); tool_pool v2 (atoms, decontamination, the length bound in main); Toucan steps / errors / conflicts; verification levels; each lineage's tool-generation kind and L40S gate; packs with every validation document, the tool quota and the pre-packing share check (audit/tool_pool_dry_run_v2.json, audit/experiment_suite_baseline_20261103.json)"
   ],
   "pending": [
    "the maintainer's ruling on the tool-calling candidates, then converters for each admitted source beyond Toucan (the Pivot pair: trajectories rebuilt so the teacher runs from step one) and tool_pool@v1 assembled under data/",
@@ -219,8 +230,9 @@
   "conclusion": "phases 1 and 2 together (~$37 expected, ~$49 upper, cap ~$53 with the search's hard cap) do not fit the $31.27 left: the Full Search Authorization needs a raised project cap"
  },
  "decisions_owed_to_the_maintainer": [
-  "fragments: the mandated truncate=True places a repeated prefix where truncate=False would pad -- on this data the packed sequences are IDENTICAL either way (no example exceeds 8,192 tokens), and the fragments re-score 10-13% of Stage-1 scored positions and re-train 18.7% (A1), 4.3% (A2) and 23.3% (C1's kept part) extra supervised tokens per epoch; confirm, or choose fragments as context only (numerically the same as truncate=False for every scored position)",
-  "tool-calling candidates: admit Toucan-1.5M + the Pivot pair (recommended); Nemotron-SFT-Agentic-v4 once its OpenMDW-1.1 terms, GLM-5.2 output terms and tool-set provenance are confirmed; Nemotron-Agentic-v1's tool_calling subset stays out (Glaive tool sets), its interactive_agent subset on hold; ToolACE not recommended",
+  "tool-calling sources: complete the admission review of Toucan-1.5M and the Pivot pair (priority candidates); Nemotron-SFT-Agentic-v4 deferred until its licence, generator-output terms and upstream tool provenance are confirmed; Nemotron-Agentic-v1's tool_calling subset stays out (Glaive tool sets), its interactive_agent subset on hold; ToolACE not recommended",
+  "the tool pool's isolation costs: server-level splits leave 11-13 servers per evaluation split, dominated by no_tool; eval-set-1's tool NAMES are refused (1,856 tasks of the server offering 'factorial'); bare-name-only benchmark matches are counted, not refused -- confirm or change",
+  "validation coverage: C1-6cat's validation documents (D4A's validation tail) hold no fluid type and A1-6cat's none of interactive_adaptation (packed_packs.validation_coverage); validation loss is diagnostic, so the packs record the gap rather than move training documents into validation",
   "tool category shares, the 6,144-token prompt bound, the non-thinking state-evaluation floor (12,000 scored positions)",
   "a registered tool-calling evaluation (eval-set-2) for closed-loop tool-execution success",
   "a raised project cap for the Full Search Authorization (pool generation + packed search)",

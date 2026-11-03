@@ -147,10 +147,10 @@
    }
   },
   "not_yet_run": [
-   "13-gram near-duplicate screen (R2) against eval-set-1",
-   "benchmark decontamination (BFCL, API-Bank, tau-bench, ToolSandbox, When2Call test) against the full sources",
-   "Glaive/xLAM-derived tool-set detection (T3) for Nemotron-SFT-Agentic-v4 beyond exact family matches"
-  ]
+   "the 13-gram (R2) and benchmark screens for the Pivot pair, v4, ToolACE and Nemotron-Agentic-v1 (they are not converted)",
+   "Glaive/xLAM-derived tool-set detection (T3) for Nemotron-SFT-Agentic-v4 beyond exact matches"
+  ],
+  "toucan_full_screen_2026_11_03": "audit/tool_pool_dry_run_v2.json: against eval-set-1 0 prompt keys, 0 13-gram near-duplicates, 1,878 tasks refused for a held-out tool's bare name (factorial 1,856, get_news 22; none with the same name and schema); against BFCL v3, When2Call, API-Bank, tau-bench and ToolSandbox 2 exact prompts refused, 0 near-duplicates, 0 tool identities (bare-name-only hits counted, not refused). The 'tool family' column above compared whole tool-set hashes, which cannot see a shared tool inside different sets: superseded for Toucan by the atomic comparison"
  },
  "comparison": {
   "criteria": "verifiable gold or real executions or a reproducible backend first; then recency and quality (2025-2026); licence and generator provenance; teacher-native conversion cost; category coverage",
@@ -198,14 +198,14 @@
    "no_tool": "Toucan irrelevant subset (B), Pivot message steps (B)",
    "multiple_parallel": "Toucan (names/replay, no gold args), v4 parallel 5% (G2-weak)",
    "multi_turn": "Toucan (2-4 user turns, real results), Pivot conversational (G2 per step), v4",
-   "errors_missing_parameters": "Toucan real failures + recovery (no gold); missing parameter: none confirmed",
+   "error_recovery": "Toucan: recorded real tool errors, 'corrected_retry' (an error, then a successful call of the same tool with other arguments) and 'tool_failure' (errors without one), no gold; 'ask for the missing value': no source (revised 2026-11-03; v1 counted any response containing 'error', including '\"error\": null')",
    "mcp_agent": "Toucan only"
   },
   "remaining_gaps": [
    "gold arguments for parallel calls",
    "'ask for the missing parameter' with gold",
-   "an MCP task-success check beyond recorded agreement",
-   "near-duplicate and benchmark decontamination runs",
+   "a task-success verifier: no candidate's Toucan task verifies more than tool selection (calls_tools / no call); Pivot adds per-step gold, not task success",
+   "near-duplicate and benchmark decontamination of the Pivot pair and v4 once converted (Toucan's is done: audit/tool_pool_dry_run_v2.json)",
    "a registered tool-calling evaluation (eval-set-2) for closed-loop success"
   ]
  },
@@ -284,7 +284,14 @@
      "over_6144": 19
     }
    },
-   "_reading": "91,044 tasks after T5 collapsed 28,243 duplicates; every category in every split; the length bound (6,144) would exclude about 1% (19 of a 2,000-task sample under each of the three templates)"
+   "_reading": "91,044 tasks after T5 collapsed 28,243 duplicates; every category in every split; the length bound (6,144) would exclude about 1% (19 of a 2,000-task sample under each of the three templates)",
+   "superseded_by": "audit/tool_pool_dry_run_v2.json (2026-11-03, the maintainer's independent review): per-atom splits, step-based categories, real error detection, replay conflicts refused, eval-set-1 / benchmark / between-split decontamination, the length bound applied by the entry point; 82,083 tasks admitted of 119,287",
+   "v1_defects": [
+    "the combined server-string family could put one MCP server in two splits",
+    "'errors_missing_parameters' was any response containing the substring 'error' (including '\"error\": null'); 'multiple_parallel' was two calls in total, not two in one step",
+    "a call recorded with different responses kept the first silently",
+    "the 6,144-token bound was sampled (2,000 tasks), not applied: main() passed no length checker"
+   ]
   },
   "not_converted_yet": [
    "the Pivot pair (trajectory rebuild so the teacher runs from step one; replay when the call equals expected_action)",

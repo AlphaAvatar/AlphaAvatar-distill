@@ -98,7 +98,7 @@ def test_an_off_script_call_ends_the_episode_and_is_refused():
     eps, _ = run([task()], ["x</think>\n" + bad])
     e = eps["tc1-test"]
     assert e["end"] == "episode_done" and e["env"].off_script
-    assert not TE.verify(e["task"], e["turns"], thinking=True).checks["execution"]
+    assert TE.verify(e["task"], e["turns"], thinking=True).checks["recorded_execution"] is False
 
 
 def test_later_user_turns_arrive_after_an_answer():
@@ -177,7 +177,7 @@ def test_admission_turns_verified_episodes_into_documents_and_items():
     assert res["census"]["calibration|multi_turn"]["refused_by_check"].get("item_protocol") == 1
 
 
-def test_the_pool_splits_by_family_dedupes_isolates_and_freezes_its_order():
+def test_the_pool_splits_by_atom_dedupes_isolates_and_freezes_its_order():
     from stages.teacher_modes import tool_pool as TP
     tools_b = [{"type": "function", "function": {"name": "search", "parameters": {"type": "object"}}}]
     base = [task(task_id=f"tc1-{k}", tools=TOOLS if k % 2 else tools_b,
@@ -185,13 +185,13 @@ def test_the_pool_splits_by_family_dedupes_isolates_and_freezes_its_order():
     dup = task(task_id="tc1-zz", messages=[{"role": "user", "content": "QUESTION   1"}])
     long_ = task(task_id="tc1-long", messages=[{"role": "user", "content": "x" * 50}])
     held = task(task_id="tc1-held", messages=[{"role": "user", "content": "held out"}])
-    pool = TP.assemble(base + [dup, long_, held], held_out_prompt_keys={TP.prompt_key(held)},
+    pool = TP.assemble(base + [dup, long_, held], reference=TP.Reference().add("eval-set-1", prompts=["held out"]),
                        prompt_lengths=[lambda t: len(TP.prompt_key(t)) if t["task_id"] != "tc1-long" else 10 ** 6])
     reasons = {e["task_id"]: e["reason"] for e in pool["excluded"]}
     assert reasons["tc1-zz"].startswith("T5") and reasons["tc1-held"].startswith("T1") and \
         reasons["tc1-long"].startswith("length")
     fam = {t["family"]: t["split"] for t in pool["tasks"]}
-    assert len(fam) == 2 and all(TP.split_of(f) == s for f, s in fam.items())
+    assert len(fam) == 2 and all(TP.split_of(t["atoms"][0]) == t["split"] for t in pool["tasks"])
     again = TP.assemble(list(reversed(base)), prompt_lengths=())
     assert again["training_order"] == TP.assemble(base)["training_order"]
 
@@ -238,7 +238,8 @@ def test_a_toucan_row_becomes_task_material_only():
     t = TS.task_of(row)
     assert t["messages"] == [{"role": "user", "content": "weather in Paris?"}]        # no upstream assistant turn
     assert t["later_user_turns"] == ["and London?"] and t["category"] == "multi_turn"
-    assert list(t["backend"]["table"].values()) == ["sunny"] and t["family_hint"] == "Weather Server"
+    assert list(t["backend"]["table"].values()) == ["sunny"]
+    assert t["servers"] == [] and t["unattributed_tools"] == ["get_weather"]       # no "<slug>-" prefix to read
     t = {**t, "family": "f", "split": "training"}
     assert TE.task_problems(t) == []
     env = TE.ToolEnv(t)
