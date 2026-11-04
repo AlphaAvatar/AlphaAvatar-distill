@@ -9,21 +9,25 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A FORMAL TOOL SOURCES ADMITTED; THINKING-2507 FORMAL TOOL GENERATION AUTHORIZED ($2.78 cumulative, kind `tool_generation_t2507`) AND BEING LAUNCHED; THE HYBRID'S GENERATION GRANT DEFERRED (maintainer review of `a143b7ed`, 2026-11-04).**
-- Done at $0:
-  - the formal source admission, signed (`logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json`);
-  - the canonical pool `data/stages/stage-2/teacher_modes/tool_pool_v1` (gitignored; content `be4652d7`, split files
-    byte-identical to the reviewed copy);
-  - the canonical plan `plans/tool_generation_plan.json` (the dry run's cells and prices);
-  - Thinking-2507's in-session L40S device admission (`configs/stages/stage-2/teacher_modes/t2507_device_admission.json`);
-  - the grant's `tool_generation_t2507` block.
-- Owner: `PACKED_ROUND.md` section 8, "Formal sources, the canonical pool and Thinking-2507"; the run's own record once
-  it is launched.
-- **Not approved:** the non-thinking `schema_arguments` training SHORTFALL (the A2-6cat proportion exception is
-  refused). A new comparable control design is being prepared, as is the state evaluation's limited-coverage plan.
-  Neither starts anything.
-- **Not authorized:** the hybrid's `tool_generation` (at least $8.48 later), packed full search, training, formal
-  evaluation, a merge.
+**RESEARCH A: FORMAL TOOL SOURCES ADMITTED; THINKING-2507 TOOL GENERATION COMPLETE (`a_tool_generation_t2507_20261104_195411`, $1.097; with attempt 1's $0.1459, $1.2429 of the kind's cumulative $2.78); THE A2 COMMON-SUPPORT DESIGN AND THE STATE-EVALUATION LIMITED-COVERAGE PLAN READY FOR REVIEW; THE HYBRID'S GENERATION GRANT DEFERRED (maintainer review of `a143b7ed`, 2026-11-04).**
+- Done:
+  - the formal source admission, signed (`audit/tool_source_admission.json`);
+  - the canonical pool `data/stages/stage-2/teacher_modes/tool_pool_v1` (gitignored; content `be4652d7`);
+  - the canonical plan;
+  - Thinking-2507's in-session device admission: PASSED, 8.26 GiB free at peak on the L40S;
+  - its generation: six of eight cells REACHED, error_recovery and mcp_agent SHORTFALL at the plan's prior-derived
+    bound. That shortfall is not approved; a top-up of about $0.42 to $0.46 is left to the maintainer's choice of
+    composition.
+- No pod and no watcher is left; the provider holds only the two accounted volumes.
+- **For review:**
+  - `audit/six_category_common_support.json` (A1/A2/C1-6cat-cs: one composition, schema_arguments at 11,800 tokens,
+    2.39% of the tool type);
+  - `audit/state_eval_hn_schema_limited_coverage.json` (`state_eval_hybrid@v2-lc1`).
+  - Both are $0 designs that start nothing.
+- **Not approved:** the A2-6cat schema exception (refused), any SHORTFALL.
+- **Not authorized:** the hybrid's `tool_generation` (at least $8.48 registered, $9.13 under the common-support
+  plan), packed full search, training, formal evaluation, a merge.
+- Owner: `PACKED_ROUND.md` sections 8 and 9.
 
 **RESEARCH A TOOL PILOT: COMPLETE AND ACCEPTED (`a_tool_pilot_20261104_164531`; $0.4328 estimated, $0.4286 posted by the provider). THE BOUNDED TOOL GENERATION: REVISED ON IT, READY FOR ONE REVIEW, NOT AUTHORIZED.**
 - Revised (2026-11-04, $0): measured priors, an explicit import of the pilot's 794 tasks, the plan's sealed /
@@ -4521,7 +4525,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$781.3961` spent of `$868.0000`, leaving `$86.6039` |
+| project cap | `$782.6390` spent of `$868.0000`, leaving `$85.3610` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

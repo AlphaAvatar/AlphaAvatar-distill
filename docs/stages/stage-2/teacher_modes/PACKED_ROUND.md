@@ -922,6 +922,34 @@ by `tool_pilot.py application --live-position`).
     attempts, with its block (`t2507_grant_problems`). It covers the device admission and the formal generation only.
     The hybrid's `tool_generation` grant (at least $8.48) is deferred until the A2 design and the state-evaluation
     coverage plan are settled.
+  - **Thinking-2507's formal tool generation: COMPLETE** (2026-11-04 UTC).
+    - **Attempt 1** (`a_tool_generation_t2507_20261104_194048`) failed at pod setup, $0.1459: the binding step
+      recomputes `kind_conditions` on the pod, and its tool-generation branch read the canonical pool, which the pod
+      never holds. Repaired: the conditions read the plan and its bound task file, and the pool check moved to
+      `issue_problems` at issue. The repair was then checked at $0 in a pool-less worktree of the session commit.
+    - **Attempt 2** (`a_tool_generation_t2507_20261104_195411`, pod `0lbf43rtt6yn2a`, US-TX-4, $1.09/h): ALL_DONE in
+      59.3 billed minutes, $1.097 all-in. The kind has spent $1.2429 of its cumulative $2.78. The pod is confirmed
+      gone and the watchdog ended `pod_gone`.
+    - **Device admission: PASSED**, every one of 16 checks.
+      - Teacher files and shards were hashed in 7.0 s.
+      - Engine ready in 157.9 s, with a KV cache of 195,009 tokens (concurrency 23.8 at 8,184).
+      - Peak 37,611 of 46,068 MiB, so 8.26 GiB free against the 4 GiB wanted.
+      - vLLM 0.27.1; template `3802169b`.
+    - **Formal generation:** 2,277,197 output tokens over two rounds (four invocations), 900 tokens/s.
+    - **Cells** (supervised tokens before packing, admitted / attempted tasks):
+      - REACHED: multi_turn 113,880 (20/64), multiple_parallel 123,617 (63/116), no_tool 100,510 (151/168),
+        schema_arguments 75,152 (39/136), tool_selection 106,617 (76/126), validation 16,345 (14/18).
+      - SHORTFALL at the plan's bound, every bounded task attempted: error_recovery 45,631 of 49,259 (11/39) and
+        mcp_agent 48,874 of 73,888 (16/86). The bounds came from protocol priors, which overestimated this teacher's
+        yield. The supply is far from exhausted (2,668 and 4,542 tasks). Neither shortfall is approved.
+    - **Dev-box admission** (`tool_admission.py` on the secured shards) reproduces every cell's episodes and tokens.
+    - **Top-up at the measured yields** (expected values), from each cell's frozen order, new tasks only: about 49
+      tasks, about $0.42, for the registered targets; about 74 tasks, about $0.46, for the common-support targets. It
+      needs the plan rebuilt with these measured strata, so it is left to the maintainer's choice of composition.
+    - Records: `runs/a_tool_generation_t2507_20261104_195411/evidence/generation_summary.json`; the device admission
+      and session record inside the secured archive (`artifacts/.../tool_generation_sessions/`, sha256 `7cdb61f3`).
+    - Provider posting (`logs/budget/provider/runpod_posting_t2507_2026-11-04T2100Z.json`): attempt 1 is posted at
+      $0.1417. Attempt 2 was only partly posted at fetch time; the ledger keeps the estimates.
 
 ## 9. Decisions owed to the maintainer
 
@@ -934,14 +962,48 @@ packed search runs unless it is requested.
      and xLAM are isolation references only.
    - Also owed: the category shares (used unchanged by the plan), the prompt bound and the non-thinking state-evaluation
      floor.
-2. **Expected SHORTFALLS.**
-   - `schema_arguments` in non-thinking mode, in training and in state evaluation. Option 1 is implemented at $0
-     (`single_step_gold_tool_call@v1`, section 5): at the priors it fills training and leaves state evaluation about
-     1,400 of 1,800. No SHORTFALL is approved, so the A2-6cat admission refuses and the suite cannot freeze. Owed: the
-     pilot (section 8), then any decision on a measured state-evaluation remainder.
+2. **Non-thinking `schema_arguments` (review of `a143b7ed`, 2026-11-04).**
+   - **Training: the SHORTFALL is refused (NO-GO).** No `approved_exceptions` entry is allowed, so A2-6cat is not
+     realizable as registered. That identity stays as written, and no data is deleted or regenerated.
+   - **The new comparable design, for review** (`six_category_common_support@v1`;
+     [`audit/six_category_common_support.json`](../../../../logs/stages/stage-2/teacher_modes/audit/six_category_common_support.json),
+     `six_category_common_support.py`):
+     - **What changes, and only this:** one tool-type composition for A1-6cat-cs, A2-6cat-cs and C1-6cat-cs.
+       `schema_arguments` is fixed BEFORE further generation at the non-thinking cell's projected lower bound, rounded
+       down: 11,800 supervised tokens, 2.39% of the tool type instead of 15%. The six other tool categories are each
+       x1.148 in their registered proportions.
+     - **Size of the change:** 62,213 supervised tokens move between tool categories, 1.05% of an A arm's 5,923,021.
+     - **Unchanged:** each arm's total supervised tokens, the six supporting types at 1/6 each, the fluid category,
+       lineage, protocols, verifier, selection rule, packing and loss.
+     - **Supply:** every cell of every lineage is REACHABLE at the lower projection.
+     - **Cost:** the hybrid session would be priced $2.65 expected, runner all-in $9.127 (registered plan: $8.4738).
+       The training cost is the registered matrix's (three arms x two seeds).
+     - **Interpretation limits:** a result of this identity is never pooled with, or described as, the registered
+       equal-proportion A1/A2. Schema-heavy tool use is under-weighted in every arm. The composition is
+       supply-conditioned, fixed before generation, and never set by an outcome.
+     - **Alternatives priced and not recommended:** keeping the registered A1 and C1 as well (+$10.98 to $17.72 for a
+       contrast two seeds cannot resolve); a quota set from the realized supply; a matched-task schema cell
+       (incompatible with token matching); dropping the category.
+     - **Arithmetic correction:** the refused v2 record's "14.29% of six types" double-counted the tool type. The
+       registered share is 1/6, and its -1.56% whole-set change is -0.91% of an A arm.
+   - **State evaluation: 1,063 / 1,800 accepted as measured; a limited-coverage plan, for review**
+     ([`audit/state_eval_hn_schema_limited_coverage.json`](../../../../logs/stages/stage-2/teacher_modes/audit/state_eval_hn_schema_limited_coverage.json),
+     `state_eval_limited_coverage.py`):
+     - **What the cell holds:** 29 Pivot Conversational tasks, all attempted; 11 episodes admitted (4 full, 7
+       single-step). Four episodes carry 78.7% of the positions, so the Kish effective count is 5.0 episodes.
+     - **Weight in the objectives:** 0.157% of the equal-domain mean (0.25% at the registered 1,800). Moving that
+       objective by its epsilon (1e-4) needs a 0.064-nat difference in this cell; moving the worst domain when
+       supporting is worst needs 0.013 nats.
+     - **Uncertainty:** an episode jackknife with t at 10 degrees of freedom.
+     - **Reporting rule beside every ranking:** the objectives with the cell left out, and a
+       SENSITIVE_TO_THE_LIMITED_CELL flag. The ranking itself is unchanged.
+     - **Proposed identity:** `state_eval_hybrid@v2-lc1`. It has its own content and a coverage declaration marked
+       LIMITED_COVERAGE, never REACHED. The 1,800-target v2 stays PENDING. Its registration is bound separately.
+     - **AT_RISK:** non-thinking state-evaluation `multi_turn` (2,400 target; projection 1,944 to 10,463 over 205
+       tasks) is monitored in the hybrid session. Nothing is pre-approved.
    - "Ask for the missing value" in every mode.
-   - **Proportion exceptions:** none. `data_admission.approved_exceptions` is empty, and the registered tolerance stays
-     (the withdrawn share check is not a decision to make).
+   - **Proportion exceptions:** none. `data_admission.approved_exceptions` is empty, and the registered tolerance
+     stays.
 3. **Isolation costs.**
    - Each evaluation split holds only 17–20 atoms.
    - eval-set-1's tool names are refused.
@@ -950,9 +1012,10 @@ packed search runs unless it is requested.
 4. **Validation coverage.** C1-6cat's validation has no fluid type, and A1-6cat's no `interactive_adaptation`. Both
    gaps are recorded.
 5. **eval-set-2** for closed-loop tool success.
-6. **Budget.** The L40S pilot (sign its source admission, its cap in the grant: option B, $2.50, recommended); a raised
-   project cap for the Full Search Authorization. The packed 8,192-token forward / DEPTH / training GPU validation is
-   a separate request.
+6. **Budget.** The hybrid's `tool_generation` grant is deferred until the A2 design and the state-evaluation coverage
+   plan are settled. It is at least $8.48 on the registered plan, or $9.13 on the common-support plan. A raised
+   project cap is still needed for the Full Search Authorization. The packed 8,192-token forward / DEPTH / training
+   GPU validation is a separate request.
 7. **Storage.** Volume `4rhubprswo`. The v2 Top-1's only copy stays protected until a verified copy exists off the
    volume.
 

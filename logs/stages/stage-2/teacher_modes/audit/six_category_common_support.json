@@ -1,0 +1,797 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.six_category_common_support/v1",
+ "study_id": "six_category_common_support@v1",
+ "written_utc": "2026-11-04T20:57:53Z",
+ "status": "DESIGN at $0 for the maintainer's review: nothing generated, packed or trained for it",
+ "decided_by": "maintainer 2026-11-04 (review of a143b7ed), section 2: H-N schema_arguments training SHORTFALL NO-GO; no approved_exceptions; design a new, scientifically comparable control with its research question, controls, token budget, category proportions, data reuse and interpretation limits; a registered matched-task or common-support design allowed, never presented as the original equal-proportion, equal-token A1/A2 experiment, nor replacing the original study identity",
+ "inputs": {
+  "configs/stages/stage-2/teacher_modes/six_category_design.json": "d41cc3b0fe6b90db64622aaec9dcd5917c18a9dbee335771e5e718dd25b44ce2",
+  "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json": "2e98393062814b205e90681882720a14036bd31da3d198ba38deb64615ca368f",
+  "logs/stages/stage-2/teacher_modes/plans/packed_training_budget.json": "5e2fa826188a14f255c14c8e33ff67f040241817a0c8e2a704c3097351a7762c",
+  "logs/stages/stage-2/teacher_modes/audit/schema_arguments_shortfall_v2.json": "1ea256c540cbcf9057b9825ccc7a0babaad7427b20909ad40cf8af972d3d6965"
+ },
+ "registered_identity": {
+  "id": "six_category_design.json (A1-6cat / A2-6cat / C1-6cat)",
+  "status": "unchanged and kept: A2-6cat is NOT realizable as registered (schema_arguments 74,013 registered vs 19,968 [11,803, 33,175] projected); A1-6cat and C1-6cat stay buildable as registered; no result of this design is a result of that identity"
+ },
+ "research_question": "With ONE hybrid teacher (Qwen/Qwen3-4B@1cfa9a72), does distilling from its thinking mode or its non-thinking mode give the better student, at the same unique supervised tokens and the same category composition -- the composition both modes can supply in full (common support)? Secondary, with the same composition: hybrid thinking vs Thinking-2507 (A1-6cat-cs vs C1-6cat-cs), each lineage end to end",
+ "arms": {
+  "A1-6cat-cs": "hybrid thinking mode",
+  "A2-6cat-cs": "hybrid non-thinking mode",
+  "C1-6cat-cs": "Thinking-2507",
+  "seeds": [
+   20260726,
+   20260801
+  ]
+ },
+ "changed_scientific_variable": {
+  "only": "the tool type's internal category composition, identically in every arm: schema_arguments from 15% to 2.39% of the tool type, the six other tool categories x1.1483 in their registered proportions",
+  "size": {
+   "tokens_per_A_arm": 62212.7,
+   "share_of_tool_type_pct": 12.61,
+   "share_of_the_six_supporting_types_pct": 2.101,
+   "share_of_the_whole_A_arm_pct": 1.05,
+   "whole_A_arm_supervised_tokens": 5923021.0,
+   "unchanged": "each arm's total supervised tokens, the tool type's 1/6 of the six supporting types, the five other types, the fluid category, fluid : supporting"
+  }
+ },
+ "controls": [
+  "each arm's total unique supervised tokens (A arms 5,923,021; C1 its registered total)",
+  "the six supporting types at 1/6 each and the fluid category, cells and shares unchanged",
+  "one teacher lineage per arm end to end (P17.1); each teacher's official template and preset",
+  "the pool, splits, frozen orders, tool_verification@v2 and every admission rule unchanged",
+  "selection: the registered largest-remainder interleave on supervised tokens, whole examples, frozen order, never by observed quality",
+  "Stage 3: random shuffle, sequential packing with truncation, causal attention, counted before packing; the registered recipe, loss and schedule rule (training_plan.schedule)"
+ ],
+ "not_controlled_and_reported": [
+  "compute: equal supervised tokens are not equal compute -- A2's non-thinking turns carry far more context per supervised token (registered budget: 5,161 vs 1,436 expected packed sequences per seed); report non-padding tokens, packed sequences, optimizer steps, exposure and training FLOPs beside every result",
+  "the schema_arguments tasks differ between arms: each arm's own admitted episodes, by frozen order, as in the registered design"
+ ],
+ "token_budget": {
+  "A1-6cat-cs": {
+   "tool_type_tokens": 493417.83,
+   "categories": {
+    "error_recovery": {
+     "registered": 49341.8,
+     "common_support": 56660.9,
+     "change": 7319.1,
+     "change_pct": 14.83
+    },
+    "mcp_agent": {
+     "registered": 74012.7,
+     "common_support": 84991.4,
+     "change": 10978.7,
+     "change_pct": 14.83
+    },
+    "multi_turn": {
+     "registered": 98683.6,
+     "common_support": 113321.8,
+     "change": 14638.3,
+     "change_pct": 14.83
+    },
+    "multiple_parallel": {
+     "registered": 74012.7,
+     "common_support": 84991.4,
+     "change": 10978.7,
+     "change_pct": 14.83
+    },
+    "no_tool": {
+     "registered": 49341.8,
+     "common_support": 56660.9,
+     "change": 7319.1,
+     "change_pct": 14.83
+    },
+    "schema_arguments": {
+     "registered": 74012.7,
+     "common_support": 11800.0,
+     "change": -62212.7,
+     "change_pct": -84.06
+    },
+    "tool_selection": {
+     "registered": 74012.7,
+     "common_support": 84991.4,
+     "change": 10978.7,
+     "change_pct": 14.83
+    }
+   },
+   "moved_tokens": 62212.7
+  },
+  "A2-6cat-cs": {
+   "tool_type_tokens": 493417.83,
+   "categories": {
+    "error_recovery": {
+     "registered": 49341.8,
+     "common_support": 56660.9,
+     "change": 7319.1,
+     "change_pct": 14.83
+    },
+    "mcp_agent": {
+     "registered": 74012.7,
+     "common_support": 84991.4,
+     "change": 10978.7,
+     "change_pct": 14.83
+    },
+    "multi_turn": {
+     "registered": 98683.6,
+     "common_support": 113321.8,
+     "change": 14638.3,
+     "change_pct": 14.83
+    },
+    "multiple_parallel": {
+     "registered": 74012.7,
+     "common_support": 84991.4,
+     "change": 10978.7,
+     "change_pct": 14.83
+    },
+    "no_tool": {
+     "registered": 49341.8,
+     "common_support": 56660.9,
+     "change": 7319.1,
+     "change_pct": 14.83
+    },
+    "schema_arguments": {
+     "registered": 74012.7,
+     "common_support": 11800.0,
+     "change": -62212.7,
+     "change_pct": -84.06
+    },
+    "tool_selection": {
+     "registered": 74012.7,
+     "common_support": 84991.4,
+     "change": 10978.7,
+     "change_pct": 14.83
+    }
+   },
+   "moved_tokens": 62212.7
+  },
+  "C1-6cat-cs": {
+   "tool_type_tokens": 492587.0,
+   "categories": {
+    "error_recovery": {
+     "registered": 49258.7,
+     "common_support": 56565.5,
+     "change": 7306.8,
+     "change_pct": 14.83
+    },
+    "mcp_agent": {
+     "registered": 73888.1,
+     "common_support": 84848.3,
+     "change": 10960.2,
+     "change_pct": 14.83
+    },
+    "multi_turn": {
+     "registered": 98517.4,
+     "common_support": 113131.0,
+     "change": 14613.6,
+     "change_pct": 14.83
+    },
+    "multiple_parallel": {
+     "registered": 73888.1,
+     "common_support": 84848.3,
+     "change": 10960.2,
+     "change_pct": 14.83
+    },
+    "no_tool": {
+     "registered": 49258.7,
+     "common_support": 56565.5,
+     "change": 7306.8,
+     "change_pct": 14.83
+    },
+    "schema_arguments": {
+     "registered": 73888.1,
+     "common_support": 11780.1,
+     "change": -62107.9,
+     "change_pct": -84.06
+    },
+    "tool_selection": {
+     "registered": 73888.1,
+     "common_support": 84848.3,
+     "change": 10960.2,
+     "change_pct": 14.83
+    }
+   },
+   "moved_tokens": 62107.9
+  }
+ },
+ "proportions": {
+  "registered": {
+   "tool_selection": 0.15,
+   "schema_arguments": 0.15,
+   "no_tool": 0.1,
+   "multiple_parallel": 0.15,
+   "multi_turn": 0.2,
+   "error_recovery": 0.1,
+   "mcp_agent": 0.15
+  },
+  "common_support": {
+   "tool_selection": 0.17225,
+   "schema_arguments": 0.023915,
+   "no_tool": 0.114834,
+   "multiple_parallel": 0.17225,
+   "multi_turn": 0.229667,
+   "error_recovery": 0.114834,
+   "mcp_agent": 0.17225
+  }
+ },
+ "quota": {
+  "rule": "the H-N training schema_arguments cell's projected LOWER bound (Wilson 90% x measured units per admitted episode over its whole supply, tool_generation_plan.json), rounded DOWN to a hundred supervised tokens, fixed before any further generation; the same share of the tool type in every arm",
+  "hn_projection": [
+   11802.7,
+   19968.0,
+   33174.7
+  ],
+  "quota_tokens": 11800.0,
+  "share_of_tool_type": 0.023915,
+  "registered_share": 0.15,
+  "fallback": "realized H-N supply below the quota: the realized supply, rounded down to a hundred, for every arm (recorded; never filled by duplication, relabelling, another split or a loss weight)"
+ },
+ "feasibility": {
+  "hybrid|H-N|error_recovery": {
+   "cs_target": 56660.9,
+   "registered_target": 49341.8,
+   "projection": [
+    136839.6,
+    238007.0,
+    373313.7
+   ],
+   "supply_tasks": 2668,
+   "sealed_units": 2141.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-N|mcp_agent": {
+   "cs_target": 84991.4,
+   "registered_target": 74012.7,
+   "projection": [
+    172173.8,
+    338946.8,
+    601365.7
+   ],
+   "supply_tasks": 4542,
+   "sealed_units": 1791.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-N|multi_turn": {
+   "cs_target": 113321.8,
+   "registered_target": 98683.6,
+   "projection": [
+    116261.8,
+    283694.6,
+    623257.2
+   ],
+   "supply_tasks": 12224,
+   "sealed_units": 557.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-N|multiple_parallel": {
+   "cs_target": 84991.4,
+   "registered_target": 74012.7,
+   "projection": [
+    363618.7,
+    518798.2,
+    665934.7
+   ],
+   "supply_tasks": 4581,
+   "sealed_units": 2718.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-N|no_tool": {
+   "cs_target": 56660.9,
+   "registered_target": 49341.8,
+   "projection": [
+    3552397.8,
+    4466696.0,
+    5047747.7
+   ],
+   "supply_tasks": 37880,
+   "sealed_units": 2830.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-N|schema_arguments": {
+   "cs_target": 11800.0,
+   "registered_target": 74012.7,
+   "projection": [
+    11802.7,
+    19968.0,
+    33174.7
+   ],
+   "supply_tasks": 1928,
+   "sealed_units": 1292.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-N|tool_selection": {
+   "cs_target": 84991.4,
+   "registered_target": 74012.7,
+   "projection": [
+    987047.9,
+    1410299.7,
+    1811620.4
+   ],
+   "supply_tasks": 12499,
+   "sealed_units": 2708.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-T|error_recovery": {
+   "cs_target": 56660.9,
+   "registered_target": 49341.8,
+   "projection": [
+    1044187.8,
+    1671056.5,
+    2409779.5
+   ],
+   "supply_tasks": 2668,
+   "sealed_units": 15032.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-T|mcp_agent": {
+   "cs_target": 84991.4,
+   "registered_target": 74012.7,
+   "projection": [
+    434137.1,
+    854654.5,
+    1516338.2
+   ],
+   "supply_tasks": 4542,
+   "sealed_units": 4516.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-T|multi_turn": {
+   "cs_target": 113321.8,
+   "registered_target": 98683.6,
+   "projection": [
+    2753842.8,
+    5939336.0,
+    11527082.4
+   ],
+   "supply_tasks": 12224,
+   "sealed_units": 11661.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-T|multiple_parallel": {
+   "cs_target": 84991.4,
+   "registered_target": 74012.7,
+   "projection": [
+    1742857.4,
+    2428695.0,
+    3044591.8
+   ],
+   "supply_tasks": 4581,
+   "sealed_units": 12724.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-T|no_tool": {
+   "cs_target": 56660.9,
+   "registered_target": 49341.8,
+   "projection": [
+    10200274.6,
+    12568281.0,
+    13918225.9
+   ],
+   "supply_tasks": 37880,
+   "sealed_units": 7963.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-T|schema_arguments": {
+   "cs_target": 11800.0,
+   "registered_target": 74012.7,
+   "projection": [
+    320717.2,
+    432640.6,
+    572435.8
+   ],
+   "supply_tasks": 1928,
+   "sealed_units": 27837.0,
+   "status": "REACHABLE"
+  },
+  "hybrid|H-T|tool_selection": {
+   "cs_target": 84991.4,
+   "registered_target": 74012.7,
+   "projection": [
+    4285367.7,
+    6122947.6,
+    7865268.5
+   ],
+   "supply_tasks": 12499,
+   "sealed_units": 11757.0,
+   "status": "REACHABLE"
+  },
+  "thinking_2507|T2507|error_recovery": {
+   "cs_target": 56565.5,
+   "registered_target": 49258.7,
+   "projection": [
+    3599518.5,
+    5057388.0,
+    7431264.0
+   ],
+   "supply_tasks": 2668,
+   "sealed_units": 0,
+   "status": "REACHABLE"
+  },
+  "thinking_2507|T2507|mcp_agent": {
+   "cs_target": 84848.3,
+   "registered_target": 73888.1,
+   "projection": [
+    3903558.8,
+    5484570.0,
+    8058960.0
+   ],
+   "supply_tasks": 4542,
+   "sealed_units": 0,
+   "status": "REACHABLE"
+  },
+  "thinking_2507|T2507|multi_turn": {
+   "cs_target": 113131.0,
+   "registered_target": 98517.4,
+   "projection": [
+    15809046.8,
+    22211994.0,
+    32638032.0
+   ],
+   "supply_tasks": 12224,
+   "sealed_units": 0,
+   "status": "REACHABLE"
+  },
+  "thinking_2507|T2507|multiple_parallel": {
+   "cs_target": 84848.3,
+   "registered_target": 73888.1,
+   "projection": [
+    2292752.2,
+    3221358.0,
+    4733424.0
+   ],
+   "supply_tasks": 4581,
+   "sealed_units": 0,
+   "status": "REACHABLE"
+  },
+  "thinking_2507|T2507|no_tool": {
+   "cs_target": 56565.5,
+   "registered_target": 49258.7,
+   "projection": [
+    7926390.0,
+    11136720.0,
+    16364160.0
+   ],
+   "supply_tasks": 37880,
+   "sealed_units": 0,
+   "status": "REACHABLE"
+  },
+  "thinking_2507|T2507|schema_arguments": {
+   "cs_target": 11780.1,
+   "registered_target": 73888.1,
+   "projection": [
+    480438.0,
+    675024.0,
+    991872.0
+   ],
+   "supply_tasks": 1928,
+   "sealed_units": 0,
+   "status": "REACHABLE"
+  },
+  "thinking_2507|T2507|tool_selection": {
+   "cs_target": 84848.3,
+   "registered_target": 73888.1,
+   "projection": [
+    5230831.5,
+    7349412.0,
+    10799136.0
+   ],
+   "supply_tasks": 12499,
+   "sealed_units": 0,
+   "status": "REACHABLE"
+  }
+ },
+ "data_reuse": [
+  "every sealed episode is reused: the pilot's 397 tasks x 2 modes (the explicit import), the running Thinking-2507 session's shards, the hybrid session's when it runs -- nothing regenerated, relabelled, duplicated or borrowed across splits",
+  "the hybrid plan is rebuilt at these training targets before its session (one session, no top-up); its non-thinking schema cell still generates its whole remaining supply (the realized number is reported), and its thinking schema cell needs fewer tasks (the pilot's import already seals 27837.0 supervised tokens of the 11800 quota)",
+  "Thinking-2507: the running session's episodes are kept; the six other categories' extra quota is a later top-up from each cell's frozen order",
+  "admitted episodes beyond a quota stay in the records, unused, never selected by outcome"
+ ],
+ "price": {
+  "sessions": {
+   "hybrid": {
+    "expected": {
+     "usd": 2.65,
+     "minutes": 145.7,
+     "generated_tokens": 5525662,
+     "generated_tokens_by_basis": {
+      "measured": 5264275,
+      "proxy:training": 261386
+     },
+     "rounds": 2,
+     "rate_usd_per_hour": 1.09
+    },
+    "upper": {
+     "usd": 7.0,
+     "minutes": 352.9,
+     "generated_tokens": 11512187,
+     "generated_tokens_by_basis": {
+      "measured": 11084322,
+      "proxy:training": 427865
+     },
+     "rounds": 4,
+     "rate_usd_per_hour": 1.19
+    },
+    "runner_cap": {
+     "driver_minutes": 317.9,
+     "hard_terminate_minutes": 451.1,
+     "rate_usd_per_hour": 1.19,
+     "all_in_usd": 9.127
+    }
+   },
+   "thinking_2507": {
+    "expected": {
+     "usd": 0.66,
+     "minutes": 36.1,
+     "generated_tokens": 848680,
+     "generated_tokens_by_basis": {
+      "prior": 848680
+     },
+     "rounds": 2,
+     "rate_usd_per_hour": 1.09
+    },
+    "upper": {
+     "usd": 2.0,
+     "minutes": 100.9,
+     "generated_tokens": 1189720,
+     "generated_tokens_by_basis": {
+      "prior": 1189720
+     },
+     "rounds": 4,
+     "rate_usd_per_hour": 1.19
+    },
+    "runner_cap": {
+     "driver_minutes": 65.9,
+     "hard_terminate_minutes": 136.1,
+     "rate_usd_per_hour": 1.19,
+     "all_in_usd": 2.7717
+    }
+   }
+  },
+  "registered_plan_sessions": {
+   "hybrid": {
+    "expected": {
+     "usd": 2.54,
+     "minutes": 139.6,
+     "generated_tokens": 5357285,
+     "generated_tokens_by_basis": {
+      "measured": 5095898,
+      "proxy:training": 261386
+     },
+     "rounds": 2,
+     "rate_usd_per_hour": 1.09
+    },
+    "upper": {
+     "usd": 6.49,
+     "minutes": 327.0,
+     "generated_tokens": 10762285,
+     "generated_tokens_by_basis": {
+      "measured": 10334419,
+      "proxy:training": 427865
+     },
+     "rounds": 4,
+     "rate_usd_per_hour": 1.19
+    },
+    "runner_cap": {
+     "driver_minutes": 292.0,
+     "hard_terminate_minutes": 418.8,
+     "rate_usd_per_hour": 1.19,
+     "all_in_usd": 8.4738
+    }
+   },
+   "thinking_2507": {
+    "expected": {
+     "usd": 0.66,
+     "minutes": 36.2,
+     "generated_tokens": 851620,
+     "generated_tokens_by_basis": {
+      "prior": 851620
+     },
+     "rounds": 2,
+     "rate_usd_per_hour": 1.09
+    },
+    "upper": {
+     "usd": 2.0,
+     "minutes": 101.0,
+     "generated_tokens": 1191680,
+     "generated_tokens_by_basis": {
+      "prior": 1191680
+     },
+     "rounds": 4,
+     "rate_usd_per_hour": 1.19
+    },
+    "runner_cap": {
+     "driver_minutes": 66.0,
+     "hard_terminate_minutes": 136.2,
+     "rate_usd_per_hour": 1.19,
+     "all_in_usd": 2.7742
+    }
+   }
+  },
+  "training_cells": {
+   "hybrid|H-N|error_recovery": {
+    "target": 56660.91089359412,
+    "bound": 1071,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-N|mcp_agent": {
+    "target": 84991.36634039116,
+    "bound": 2207,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-N|multi_turn": {
+    "target": 113321.82178718824,
+    "bound": 11891,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-N|multiple_parallel": {
+    "target": 84991.36634039116,
+    "bound": 1039,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-N|no_tool": {
+    "target": 56660.91089359412,
+    "bound": 575,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-N|schema_arguments": {
+    "target": 11800.08740445,
+    "bound": 1804,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-N|tool_selection": {
+    "target": 84991.36634039116,
+    "bound": 1043,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-T|error_recovery": {
+    "target": 56660.91089359412,
+    "bound": 107,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-T|mcp_agent": {
+    "target": 84991.36634039116,
+    "bound": 847,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-T|multi_turn": {
+    "target": 113321.82178718824,
+    "bound": 453,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-T|multiple_parallel": {
+    "target": 84991.36634039116,
+    "bound": 191,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-T|no_tool": {
+    "target": 56660.91089359412,
+    "bound": 181,
+    "status": "REACHABLE"
+   },
+   "hybrid|H-T|schema_arguments": {
+    "target": 11800.08740445,
+    "bound": 0,
+    "status": "REACHED"
+   },
+   "hybrid|H-T|tool_selection": {
+    "target": 84991.36634039116,
+    "bound": 214,
+    "status": "REACHABLE"
+   },
+   "thinking_2507|T2507|error_recovery": {
+    "target": 56565.503752352946,
+    "bound": 44,
+    "status": "REACHABLE"
+   },
+   "thinking_2507|T2507|mcp_agent": {
+    "target": 84848.2556285294,
+    "bound": 100,
+    "status": "REACHABLE"
+   },
+   "thinking_2507|T2507|multi_turn": {
+    "target": 113131.00750470589,
+    "bound": 90,
+    "status": "REACHABLE"
+   },
+   "thinking_2507|T2507|multiple_parallel": {
+    "target": 84848.2556285294,
+    "bound": 182,
+    "status": "REACHABLE"
+   },
+   "thinking_2507|T2507|no_tool": {
+    "target": 56565.503752352946,
+    "bound": 271,
+    "status": "REACHABLE"
+   },
+   "thinking_2507|T2507|schema_arguments": {
+    "target": 11780.218105,
+    "bound": 29,
+    "status": "REACHABLE"
+   },
+   "thinking_2507|T2507|tool_selection": {
+    "target": 84848.2556285294,
+    "bound": 203,
+    "status": "REACHABLE"
+   }
+  },
+  "_": "the plan builder's own measured price (priors, import, throughput) at the common-support training targets; a dry run written nowhere in the repository"
+ },
+ "t2507_topup": {
+  "status": "MEASURED",
+  "realized": {
+   "error_recovery": 45631.0,
+   "mcp_agent": 48874.0,
+   "multi_turn": 113880.0,
+   "multiple_parallel": 123617.0,
+   "no_tool": 100510.0,
+   "schema_arguments": 75152.0,
+   "tool_selection": 106617.0
+  },
+  "missing_supervised_tokens": {
+   "error_recovery": 10934.5,
+   "mcp_agent": 35974.3,
+   "multi_turn": 0.0,
+   "multiple_parallel": 0.0,
+   "no_tool": 0.0,
+   "schema_arguments": 0.0,
+   "tool_selection": 0.0
+  },
+  "total": 46908.8,
+  "source": {
+   "path": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_t2507_20261104_195411/evidence/generation_summary.json",
+   "sha256": "8e43aa22d8b5c54f13ef0875d1795de4375e191d310ee171e1de86640348d309",
+   "run_id": "a_tool_generation_t2507_20261104_195411"
+  }
+ },
+ "training_budget_usd_both_seeds": {
+  "registered_estimates": {
+   "A1-6cat": {
+    "lower": 8.18,
+    "expected": 10.98,
+    "upper": 17.72
+   },
+   "A2-6cat": {
+    "lower": 22.08,
+    "expected": 29.78,
+    "upper": 52.02
+   },
+   "C1-6cat": {
+    "lower": 7.56,
+    "expected": 9.62,
+    "upper": 15.44
+   }
+  },
+  "this_design": "the same three arms: A2-6cat-cs ~ A2-6cat, A1-6cat-cs ~ A1-6cat, C1-6cat-cs ~ C1-6cat (the composition moves 1.05% of an A arm's tokens between tool categories)"
+ },
+ "alternatives": {
+  "keep_the_registered_A1_and_C1_too": {
+   "what": "train A1-6cat and C1-6cat as registered AND A1-6cat-cs and A2-6cat-cs (4 arms x 2 seeds)",
+   "extra_usd_both_seeds": {
+    "lower": 8.18,
+    "expected": 10.98,
+    "upper": 17.72
+   },
+   "buys": "the registered A1-vs-C1 contrast unchanged, plus A1-6cat vs A1-6cat-cs as a composition sensitivity check whose difference (well under 1% of the tokens) two seeds cannot resolve",
+   "verdict": "not recommended: about $11-18 more for a contrast the seeds cannot measure"
+  },
+  "realized_quota": {
+   "what": "the quota set to the REALIZED non-thinking schema supply after the hybrid session",
+   "verdict": "not recommended: it keeps about 8k more schema tokens, but the composition would then depend on an observed generation outcome; the fixed quota is registered before it"
+  },
+  "matched_task_schema_cell": {
+   "what": "both arms' schema cell restricted to the tasks admitted in BOTH modes",
+   "verdict": "not recommended: a same-tasks cell has unequal tokens (~19x per task), so the arms could not stay token-matched; a same-tasks comparison is a different comparison and is never pooled with a token-matched one"
+  },
+  "drop_schema_arguments": {
+   "what": "quota 0 in every arm",
+   "verdict": "not recommended: discards verified data both modes supply"
+  }
+ },
+ "interpretation_limits": [
+  "a result of six_category_common_support@v1, never of the registered six-category identity, never pooled with it, and never described as the registered equal-proportion, equal-token A1/A2 comparison",
+  "argument construction (schema_arguments) carries about 2.4% of the tool type instead of 15% in every arm: the contrast says less about schema-heavy tool use, and nothing about the registered composition",
+  "the composition is supply-conditioned: it was chosen because the non-thinking teacher's verified output on this pool is short -- a property of the data, fixed before generation, not of any training or evaluation outcome",
+  "tool-calling and every other capability reported separately (P10.2, P10.3); eval-set-1 unchanged",
+  "two seeds per arm: differences below the seed-to-seed variance are not findings"
+ ],
+ "authorizes": "nothing: no generation, pack or training; the hybrid's grant stays deferred"
+}

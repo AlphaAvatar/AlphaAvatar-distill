@@ -270,6 +270,7 @@ def test_the_pod_refuses_a_plan_whose_content_the_admission_does_not_admit(monke
 
 def test_the_t2507_cap_is_cumulative_and_its_block_required(tmp_path, monkeypatch):
     kind = "tool_generation_t2507"
+    monkeypatch.setattr(TM, "kind_spent", lambda k, root: {"runs": [], "unknown": [], "usd": 0.0})
     assert TM.kind_cap_problems(kind, 2.78) == [] and TM.kind_cap_problems(kind, 2.79)
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
     assert TM.t2507_grant_problems(g, kind) == []

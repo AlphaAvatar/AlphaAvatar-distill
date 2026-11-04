@@ -284,15 +284,22 @@ def main(argv=None) -> int:
     ap.add_argument("--write", default=str(OUT))
     ap.add_argument("--price-pool", default=None)
     ap.add_argument("--keep-price", action="store_true", help="reuse the price already in --write")
-    ap.add_argument("--t2507-realized", default=None, help="JSON {category: admitted supervised tokens}")
+    ap.add_argument("--t2507-summary", default=None, help="the Thinking-2507 session's evidence/generation_summary.json")
     a = ap.parse_args(argv)
     rec = recompute()
     if a.keep_price:
         price = json.loads(Path(a.write).read_text()).get("price")
     else:
         price = priced(Path(a.price_pool), rec["quota"]["share_of_tool_type"]) if a.price_pool else None
-    realized = json.loads(Path(a.t2507_realized).read_text()) if a.t2507_realized else None
+    realized = None
+    if a.t2507_summary:
+        summ = json.loads(Path(a.t2507_summary).read_text())
+        realized = {c["category"]: c["supervised_tokens"] for c in summ["cells"] if c["split"] == "training"}
     doc = design(rec, price, realized)
+    if a.t2507_summary:
+        src = Path(a.t2507_summary).resolve()
+        doc["t2507_topup"]["source"] = {"path": src.relative_to(REPO).as_posix(), "sha256": _sha(src),
+                                        "run_id": summ["run_id"]}
     Path(a.write).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
     print(json.dumps({"quota": doc["quota"], "moves": rec["what_moves"],
                       "price": (price or {}).get("sessions") and {li: {k: v["usd"] for k, v in s.items() if k != "runner_cap"}

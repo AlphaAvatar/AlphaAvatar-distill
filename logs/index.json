@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 174,
+  "runs_unrecorded": 176,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -871,8 +871,8 @@
    },
    "teacher_modes": {
     "recorded": 0,
-    "unrecorded": 21,
-    "total": 21
+    "unrecorded": 23,
+    "total": 23
    }
   },
   "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
@@ -4114,6 +4114,22 @@
    "root": "logs/stages/stage-2/teacher_modes/runs/a_teacher_20261030_012648",
    "n_files": 5,
    "digest": "af848b516f544c96542b3529a80c93d2330fe616b58392588a29c1627117599e",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_tool_generation_t2507_20261104_194048",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_t2507_20261104_194048",
+   "n_files": 4,
+   "digest": "aa38898b6b445c495fe73e71e41e067fe0f04aabe0c1eaae2d93932493905b13",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_tool_generation_t2507_20261104_195411",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_t2507_20261104_195411",
+   "n_files": 4,
+   "digest": "4f2b8f024b28b2bde223af24bfc949a42f87d28b9c7d8f3e39f158ade4100880",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {

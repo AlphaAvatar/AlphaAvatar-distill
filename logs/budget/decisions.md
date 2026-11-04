@@ -15777,3 +15777,33 @@ on a paid pod.
 - **Revisit when:** the run closes. Its priors are then measured, and the hybrid grant is revisited after the A2 design
   and the state-evaluation coverage plan.
 
+## 2026-11-04 (UTC) — Thinking-2507's tool generation run; two $0 designs for the A2 schema shortfall and the state evaluation's coverage
+
+- **Context.** The same review (`a143b7ed`), sections 2 to 4.
+- **Attempt 1, $0.1459.** It failed at pod setup: the binding step recomputes `kind_conditions` from the pod's own
+  files, and the tool-generation branch read the dev-box-only pool. This was an ordinary engineering failure. The fix:
+  `kind_conditions` reads only the plan and its bound task file, and `issue_problems` checks the pool at issue. It was
+  verified at $0 in a pool-less worktree before attempt 2.
+- **Attempt 2, $1.097.**
+  - The device admission PASSED.
+  - Two rounds; six cells REACHED.
+  - error_recovery and mcp_agent are SHORTFALL at their prior-derived bounds, with supply left; not approved.
+  - The dev-box admission reproduces the session's counts.
+- **Designs owed to the maintainer:**
+  - **`six_category_common_support@v1`**, a new identity that never replaces or stands in for the registered A1/A2:
+    - one tool-type composition for all three arms;
+    - schema_arguments fixed before generation at the non-thinking cell's projected lower bound (11,800 tokens);
+    - the six other tool categories x1.148;
+    - 1.05% of an A arm's tokens moved; every cell REACHABLE;
+    - hybrid plan $2.65 expected, runner all-in $9.127.
+  - **`state_eval_hybrid@v2-lc1`**, a limited-coverage identity:
+    - the same KL, positions and aggregation;
+    - the cell is 0.157% of the equal-domain mean;
+    - Kish effective count 5.0 episodes; an episode jackknife;
+    - a leave-the-cell-out reporting rule; registration bound separately.
+  - **The Thinking-2507 top-up composition:** registered or common-support.
+- **Arithmetic correction.** The refused v2 shortfall record double-counted the tool type: its 14.29% share is really
+  1/6, and its -1.56% whole-set change is -0.91% of an A arm. The record is kept as written.
+- **Revisit when:** the maintainer decides the design, the coverage identity and the top-up. The hybrid grant follows
+  those decisions.
+

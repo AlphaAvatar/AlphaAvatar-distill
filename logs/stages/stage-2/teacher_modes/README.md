@@ -29,6 +29,8 @@ Everything this experiment produced, in one place.
 * [`a_supplement_20261031_144618`](runs/a_supplement_20261031_144618/)
 * [`a_teacher_20261029_201915`](runs/a_teacher_20261029_201915/)
 * [`a_teacher_20261030_012648`](runs/a_teacher_20261030_012648/)
+* [`a_tool_generation_t2507_20261104_194048`](runs/a_tool_generation_t2507_20261104_194048/)
+* [`a_tool_generation_t2507_20261104_195411`](runs/a_tool_generation_t2507_20261104_195411/)
 * [`a_tool_pilot_20261104_140656`](runs/a_tool_pilot_20261104_140656/)
 * [`a_tool_pilot_20261104_164531`](runs/a_tool_pilot_20261104_164531/)
 * [`a_train_a1_20261102_165858`](runs/a_train_a1_20261102_165858/)
