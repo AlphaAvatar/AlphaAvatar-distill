@@ -15699,3 +15699,45 @@ on a paid pod.
   and state evaluation (1,063 of 1,800 scored positions).
 - **Revisit when:** the maintainer reviews the pilot. Open questions: formal tool generation's cap re-priced from these
   rates; the two SHORTFALL cells; whether G2 on free-text arguments and replay coverage stay as registered.
+
+
+## 2026-11-04 (UTC) — The bounded tool generation revised on the accepted pilot; create protection; billing reconciled ($0)
+
+- **Context.** The maintainer accepted the tool pilot (`a_tool_pilot_20261104_164531`) as a completed
+  `tool_verification@v2` measurement of admission, throughput and cost. The brief: keep every sealed artifact, revise
+  everything before formal tool generation, and do not re-run the pilot or launch anything.
+- **Done.**
+  - **Priors measured** (`audit/tool_generation_priors.json`). The plan is rebuilt on them
+    (`plans/tool_generation_plan_dry_run.json`, candidate pool v4 `be4652d7`). Each cell reports apart its sealed
+    units, the whole-supply projection by shape, the bound, the unmeasured share and a status.
+  - **The pilot's tasks imported, not regenerated** (`plans/tool_generation_import.json`). All checks equal: input,
+    lineage, execution and seeds, teacher identity, vLLM pins, generation code.
+  - **The formal kinds use the pilot's placement.** No volume; sealed shards are receipted; resume is from receipted
+    copies; the bound task file goes by the relay. The generation-scoped gate admits the hybrid and refuses
+    Thinking-2507.
+  - **Create protection** (`SessionRunner.create`):
+    - each request has a unique name and a recorded start;
+    - the pod's start is the provider's `createdAt` when it can be read, else the request's start;
+    - an uncertain answer is reconciled across a window, and a pod that appears late is owned;
+    - further pods of the session's requests are released with confirmation and billed;
+    - the datacenter is recorded.
+  - **Refusals diagnosed** (`evidence/refusal_diagnosis.json`, `audit/tool_pilot_free_text_review.json`); v2 unchanged.
+  - **schema_arguments** (`audit/schema_arguments_shortfall_v2.json`): no adaptation defect and no compliant supply;
+    a recommended design.
+- **Billing reconciled.** Read the same window from both APIs, item by item
+  (`logs/budget/provider/runpod_billing_v1_v2_2026-11-04T1833Z.json`, raw beside it).
+  - All 361 pods the two APIs share are equal to the cent.
+  - The 16 pods only v2 bills are CPU pods: $0.816.
+  - Volume days: v1 bills $1.156 more than v2. v2's per-volume rows equal size x hours x $0.07/720 exactly; v1's
+    single daily row exceeds it.
+  - The pilot pod is posted at $0.4286 by both APIs (GPU $0.4216, disk $0.0069, 23.21 billed minutes), against the
+    closeout's estimated all-in of $0.4328. The envelope keeps the higher figure.
+  - Not recoverable: the account balance updates with a lag, so no snapshot here confirms the cash ledger
+    independently of either billing API.
+  - The next tool-generation caps ($8.47 + $2.77) fit the v1-basis remainder without the v2 headroom.
+- **Owed from the maintainer** (one review):
+  - the formal source admission (Toucan SFT and Pivot Conversational), so the canonical pool can be built (content
+    `be4652d7`);
+  - the grant's caps for `tool_generation` ($8.47) and `tool_generation_t2507` ($2.77, unmeasured);
+  - the schema_arguments design;
+  - Thinking-2507's L40S evidence: the generation-scoped gate refuses it.

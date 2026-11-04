@@ -9,7 +9,11 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A TOOL PILOT: COMPLETE (`a_tool_pilot_20261104_164531`, $0.4328; maintainer "GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正").**
+**RESEARCH A TOOL PILOT: COMPLETE AND ACCEPTED (`a_tool_pilot_20261104_164531`; $0.4328 estimated, $0.4286 posted by the provider). THE BOUNDED TOOL GENERATION: REVISED ON IT, READY FOR ONE REVIEW, NOT AUTHORIZED.**
+- Revised (2026-11-04, $0): measured priors, an explicit import of the pilot's 794 tasks, the plan's sealed /
+  projected / bounded / unmeasured units per cell, a measured price (hybrid $2.54 expected, cap $8.47; Thinking-2507
+  unmeasured, cap $2.77), the formal kinds on the pilot's placement with receipts and a relayed task file, the refusal
+  diagnosis, the schema_arguments design. Owner: `PACKED_ROUND.md` section 8, "The bounded tool generation, revised".
 Attempt 1 (`a_tool_pilot_20261104_140656`) ended at $0 (no L40S in EUR-IS-2). Attempt 2, on any Secure Cloud L40S,
 was created after 15 minutes and finished ALL_DONE in 23.4 billed minutes. The pod is confirmed gone.
 - **Measured:** first-candidate admission rate 99/397 (non-thinking) and 118/397 (thinking); admission yield of up to

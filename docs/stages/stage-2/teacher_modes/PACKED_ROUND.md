@@ -757,7 +757,7 @@ by `tool_pilot.py application --live-position`).
   any Secure Cloud datacenter offering one L40S at or below the grant's $1.19/h, and NO network volume
   (`tool_pilot.PLACEMENT`). The pilot reads nothing a volume holds: its tasks are a local asset and the teacher comes
   from the hub at its pinned revision. `am5m373kuq` locked every draw to EUR-IS-2, which had no L40S on 2026-11-04,
-  and it supports no new storage. The session writes to the container disk under `/workspace/teacher_modes`
+  and EUR-IS-2 supports no new network volume. The session writes to the container disk under `/workspace/teacher_modes`
   (`token_matched_phase.durable`).
   - The poll pulls every sealed shard by its sha256 into `<scr>/store/tool_pilot_hybrid` (`secure_pilot`).
   - A replacement pod gets that copy through `--resume-from` (`tool_session.bring_sealed`, then `resumable` re-verifies
@@ -769,7 +769,9 @@ by `tool_pilot.py application --live-position`).
   - `tool_pilot placement` reads each datacenter's L40S stock (read-only) as a hint for `--data-center-ids`.
   - The runner computes the provider deadline at each create, settles an answer without a pod id from the account,
     and rotates datacenter groups (section 8 of [`aadistill-gpu-experiments`](../../../../.agents/skills/aadistill-gpu-experiments/SKILL.md)).
-- **Pilot result** (`a_tool_pilot_20261104_164531`, COMPLETE, $0.4328 all-in; records in
+- **Pilot result** (`a_tool_pilot_20261104_164531`, COMPLETE; $0.4328 all-in ESTIMATED at closeout, $0.4286 POSTED by
+  the provider (v1 = v2, read 2026-11-04T18:34Z: GPU $0.4216 + disk $0.0069, 23.21 billed minutes); no new network
+  volume (the 150 GB container disk is inside the all-in); records in
   [`runs/a_tool_pilot_20261104_164531/evidence/`](../../../../logs/stages/stage-2/teacher_modes/runs/a_tool_pilot_20261104_164531/evidence/tool_pilot_report.json)).
   Teacher data admission under `tool_verification@v2`, never a benchmark score (METRIC_CONTRACT 2.2):
 
@@ -788,6 +790,71 @@ by `tool_pilot.py application --live-position`).
     tokens) and state evaluation (1,063 of 1,800 scored positions). Nothing is approved.
   - Telemetry: peak 37,965 MiB at a memory fraction of 0.80; KV cache ~197k tokens, 0.99 used in thinking mode with
     298 + 126 preemptions; decode 536-1,020 tokens/s; TTFT p50 45.6 s, p90 142 s.
+- **The bounded tool generation, revised on the pilot (maintainer 2026-11-04, "the pilot accepted ... 正式 tool_generation 前的完整修订"; nothing generated, nothing launched)**:
+  - **Priors measured** ([`audit/tool_generation_priors.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json),
+    `tool_generation_priors.py`): per lineage, mode, split, category and shape, the units per attempted task under the
+    two-candidate rule ([Wilson 90% low, measured, high]), generated tokens of every candidate, the second-candidate
+    rate, prompt tokens and turns; throughput and engine starts per mode. Thinking-2507: nothing measured.
+  - **Reuse** ([`plans/tool_generation_import.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json),
+    `tool_generation_import.py`): all 794 pilot tasks (H-N 695 candidates, H-T 676), each candidate's shard, sha256,
+    the pilot identity, its candidate index and verdict, imported after checking the same input (397 task sha256s), the
+    lineage, the execution terms and seeds, `teacher_identity.json`, the vLLM pins and the generation code. An imported
+    task is DONE (never re-sampled); the dev box's admission reads the pilot's shards (`--import-record`).
+  - **Plan** ([`plans/tool_generation_plan_dry_run.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_generation_plan_dry_run.json),
+    over the candidate pool v4, content `be4652d7`): per cell, apart, the SEALED units, the WHOLE SUPPLY's projection,
+    what the BOUND buys and the unmeasured share (proxy or prior), with a status. The corrected readings:
+
+    | cell | sealed | whole supply (low / expected / high) | new tasks: round 1 / bound | status |
+    | --- | --- | --- | --- | --- |
+    | H-N calibration schema_arguments (630) | 772 (all 100 tasks) | measured | 0 / 0 (was 12) | REACHED |
+    | H-N state_eval schema_arguments (1,800) | 1,063 (all 29 tasks) | measured | 0 / 0 | SHORTFALL_EXHAUSTED |
+    | H-N training schema_arguments (74,013) | 1,292 | 11,803 / 19,968 / 33,175 (full 368 x 29.25 + single 1,560 x 5.9) | 1,804 / 1,804 | SHORTFALL_PROJECTED |
+    | H-T state_eval schema_arguments (1,800) | 4,236 (all 29 tasks) | measured | 0 / 0 (was 6) | REACHED |
+    | H-N training multi_turn (98,684) | 557 | 116,262 / 283,695 / 623,257 | 4,229 / 10,347 (was 561) | REACHABLE |
+
+    Validation and the calibration / state-evaluation categories other than schema_arguments are UNMEASURED strata
+    (priced and bounded by the training split's measurement of the same mode, category and shape, labelled
+    ``proxy``); H-N state_eval multi_turn is AT_RISK (its low projection 1,944 < 2,400).
+  - **Price** (measured tokens of every candidate, measured throughput 574 / 1,003 tokens per s, engine starts,
+    session overhead; $1.09/h, the upper level at the grant's $1.19/h):
+
+    | session | lower | expected | upper | the runner's hard cap (all-in) |
+    | --- | --- | --- | --- | --- |
+    | hybrid (both modes) | $1.53 | $2.54 | $6.49 (327 min) | $8.47 |
+    | Thinking-2507 (UNMEASURED: protocol priors) | $0.39 | $0.66 | $2.00 | $2.77 |
+
+  - **Launch path** (`token_matched_phase.CONTAINER_KINDS`): the formal kinds now run like the pilot -- no network
+    volume, every sealed shard pulled and RECEIPTED on the dev box (`receipts.json`), `--resume-from` a receipted copy,
+    the bound task file (hybrid 17,868 tasks / 206 MB; Thinking-2507 979) staged on the relay at $0
+    (`stage_tasks`) and fetched by setup at hub speed, never the 700 MB pool. The generation-scoped L40S gate admits
+    the hybrid's generation (the same engine as the check) and REFUSES Thinking-2507's (another teacher, template and
+    revision: no L40S evidence for it). Issue also needs the canonical pool (`TGP.verified`): the sources'
+    admission is the maintainer's.
+  - **Reuse inventory** (nothing regenerated or re-sampled; heavy bytes outside git, identities in the records):
+
+    | reused | where | identity |
+    | --- | --- | --- |
+    | the pilot's sealed episodes (794 tasks, 1,371 candidates, verdicts) | `artifacts/.../tool_pilot_sessions/a_tool_pilot_20261104_164531/` (`polled/`, the closeout archive) | `plans/tool_generation_import.json` (each shard's sha256; archive `2336efd3…`; pilot identity `4c208793…`) |
+    | the measured priors and throughput | `audit/tool_generation_priors.json` | bound by the plan |
+    | the candidate pool v4 (Toucan SFT `83b288fd…`, Pivot Conversational `4e60dac0…`, both tiers, decontaminated) | `artifacts/.../tool_pool_candidates/v4_be4652d7/` (verified by `tool_pool.load_pool`) | content `be4652d7…`, pool.json `b893e965…` |
+    | the bound task files | `artifacts/.../tool_generation/<lineage>/tasks.jsonl` (relay at launch) | hybrid `9f7c9f2e…`, Thinking-2507 `c555322b…` |
+    | the L40S check's generation measurement | `audit/l40s_generation_scope.json` | the generation-scoped gate (hybrid only) |
+    | the teacher at its revision | the hub (`Qwen/Qwen3-4B@1cfa9a72`) | `teacher_identity.json` |
+
+    The import applies only while the canonical pool's content is `be4652d7`; a rebuilt pool of other content
+    imports nothing and is priced on the protocol's priors (`tool_generation_plan.build`).
+  - **schema_arguments** ([`audit/schema_arguments_shortfall_v2.json`](../../../../logs/stages/stage-2/teacher_modes/audit/schema_arguments_shortfall_v2.json)):
+    no adaptation defect, no compliant independent supply; the recommended design and its mixture, evaluation and cost
+    impacts are there (A2-6cat's tool type 439,373 tokens, -10.95%, schema 4.5% of it; the state-evaluation category
+    at 59% of its positions, SE x1.30; ~$0.11).
+  - **Refusals** ([`runs/a_tool_pilot_20261104_164531/evidence/refusal_diagnosis.json`](../../../../logs/stages/stage-2/teacher_modes/runs/a_tool_pilot_20261104_164531/evidence/refusal_diagnosis.json),
+    `tool_pilot_diagnosis.py`; v2 verdicts unchanged): causes apart and their overlap -- replay misses (and their
+    consequence, the episode ending on the unanswered call), G2 disagreements (other tool, no call, value, free text),
+    target tools not called (no call at all, or other tools), schema and the model's own protocol breaks -- with
+    traceable cases and admission against the source's recorded Qwen3-235B pass rate. The 45 free-text cases were read
+    one by one ([`audit/tool_pilot_free_text_review.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pilot_free_text_review.json)):
+    24 equivalent, 20 omit user-supplied facts, 1 contradicts the input; an identifier rule agreed on 39 of 45 and is
+    not proposed; `tool_verification@v2` stays.
 - **Storage until 2026-11-04T16Z** ([`pilot_storage_precheck_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json),
   read-only, superseded by the placement above): the provider reported `am5m373kuq` at 55 GB in EUR-IS-2, `4rhubprswo` beside it, 0 pods, but no used
   bytes; the records put at least 14.3 GB there (H1-PA's and the mixed calibration's checkpoints) plus Research A v1's

@@ -1,0 +1,557 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_generation_priors/v1",
+ "written_utc": "2026-11-04T18:38:32Z",
+ "measured_by": {
+  "run_id": "a_tool_pilot_20261104_164531",
+  "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
+  "pool_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+  "tasks_sha256": "e67e8acb7050bd6e150b93af76683a2c77937e4d01c650ee398448b747b6fea1",
+  "pilot_identity": "4c208793f4e9ec52d9aa01af5dbdfa896dedba7cf2ceeb4592cbd20d860b777a",
+  "verification_version": "tool_verification@v2",
+  "lineage": "hybrid"
+ },
+ "strata": {
+  "hybrid|H-N|calibration|schema_arguments|full_episode@v1": {
+   "attempted": 28,
+   "admitted": 1,
+   "second_candidate_rate": 0.9643,
+   "units": 202.0,
+   "units_per_admitted": 202.0,
+   "admission_yield": 0.0357,
+   "admission_yield_wilson90": [
+    0.008,
+    0.1452
+   ],
+   "units_per_attempted_task": [
+    1.618,
+    7.214,
+    29.339
+   ],
+   "generated_tokens_per_attempted_task": 132.6,
+   "prompt_tokens_per_turn": 2745.4,
+   "turns_per_candidate": 1.055
+  },
+  "hybrid|H-N|calibration|schema_arguments|single_step_gold_tool_call@v1": {
+   "attempted": 72,
+   "admitted": 13,
+   "second_candidate_rate": 0.8194,
+   "units": 570.0,
+   "units_per_admitted": 43.85,
+   "admission_yield": 0.1806,
+   "admission_yield_wilson90": [
+    0.118,
+    0.2662
+   ],
+   "units_per_attempted_task": [
+    5.174,
+    7.917,
+    11.673
+   ],
+   "generated_tokens_per_attempted_task": 110.9,
+   "prompt_tokens_per_turn": 2733.5,
+   "turns_per_candidate": 1.0
+  },
+  "hybrid|H-N|state_eval|schema_arguments|full_episode@v1": {
+   "attempted": 7,
+   "admitted": 4,
+   "second_candidate_rate": 0.4286,
+   "units": 837.0,
+   "units_per_admitted": 209.25,
+   "admission_yield": 0.5714,
+   "admission_yield_wilson90": [
+    0.2895,
+    0.8136
+   ],
+   "units_per_attempted_task": [
+    60.572,
+    119.571,
+    170.238
+   ],
+   "generated_tokens_per_attempted_task": 170.9,
+   "prompt_tokens_per_turn": 2782.3,
+   "turns_per_candidate": 1.4
+  },
+  "hybrid|H-N|state_eval|schema_arguments|single_step_gold_tool_call@v1": {
+   "attempted": 22,
+   "admitted": 7,
+   "second_candidate_rate": 0.8182,
+   "units": 226.0,
+   "units_per_admitted": 32.29,
+   "admission_yield": 0.3182,
+   "admission_yield_wilson90": [
+    0.1827,
+    0.4935
+   ],
+   "units_per_attempted_task": [
+    5.898,
+    10.273,
+    15.933
+   ],
+   "generated_tokens_per_attempted_task": 131.8,
+   "prompt_tokens_per_turn": 2988.9,
+   "turns_per_candidate": 1.0
+  },
+  "hybrid|H-N|training|error_recovery|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 7,
+   "second_candidate_rate": 0.7083,
+   "units": 2141.0,
+   "units_per_admitted": 305.86,
+   "admission_yield": 0.2917,
+   "admission_yield_wilson90": [
+    0.1666,
+    0.459
+   ],
+   "units_per_attempted_task": [
+    50.945,
+    89.208,
+    140.383
+   ],
+   "generated_tokens_per_attempted_task": 373.9,
+   "prompt_tokens_per_turn": 1261.4,
+   "turns_per_candidate": 1.488
+  },
+  "hybrid|H-N|training|mcp_agent|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 5,
+   "second_candidate_rate": 0.8333,
+   "units": 1791.0,
+   "units_per_admitted": 358.2,
+   "admission_yield": 0.2083,
+   "admission_yield_wilson90": [
+    0.1053,
+    0.3705
+   ],
+   "units_per_attempted_task": [
+    37.712,
+    74.625,
+    132.708
+   ],
+   "generated_tokens_per_attempted_task": 331.1,
+   "prompt_tokens_per_turn": 1381.9,
+   "turns_per_candidate": 1.432
+  },
+  "hybrid|H-N|training|multi_turn|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 3,
+   "second_candidate_rate": 0.875,
+   "units": 557.0,
+   "units_per_admitted": 185.67,
+   "admission_yield": 0.125,
+   "admission_yield_wilson90": [
+    0.0511,
+    0.2749
+   ],
+   "units_per_attempted_task": [
+    9.484,
+    23.208,
+    51.041
+   ],
+   "generated_tokens_per_attempted_task": 461.0,
+   "prompt_tokens_per_turn": 1160.5,
+   "turns_per_candidate": 1.689
+  },
+  "hybrid|H-N|training|multiple_parallel|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 13,
+   "second_candidate_rate": 0.5,
+   "units": 2718.0,
+   "units_per_admitted": 209.08,
+   "admission_yield": 0.5417,
+   "admission_yield_wilson90": [
+    0.3788,
+    0.6961
+   ],
+   "units_per_attempted_task": [
+    79.197,
+    113.25,
+    145.538
+   ],
+   "generated_tokens_per_attempted_task": 222.8,
+   "prompt_tokens_per_turn": 1288.5,
+   "turns_per_candidate": 1.611
+  },
+  "hybrid|H-N|training|no_tool|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 19,
+   "second_candidate_rate": 0.2083,
+   "units": 2830.0,
+   "units_per_admitted": 148.95,
+   "admission_yield": 0.7917,
+   "admission_yield_wilson90": [
+    0.6295,
+    0.8947
+   ],
+   "units_per_attempted_task": [
+    93.765,
+    117.917,
+    133.266
+   ],
+   "generated_tokens_per_attempted_task": 138.8,
+   "prompt_tokens_per_turn": 1905.7,
+   "turns_per_candidate": 1.0
+  },
+  "hybrid|H-N|training|schema_arguments|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 4,
+   "second_candidate_rate": 0.8333,
+   "units": 702.0,
+   "units_per_admitted": 175.5,
+   "admission_yield": 0.1667,
+   "admission_yield_wilson90": [
+    0.0771,
+    0.3238
+   ],
+   "units_per_attempted_task": [
+    13.531,
+    29.25,
+    56.823
+   ],
+   "generated_tokens_per_attempted_task": 138.0,
+   "prompt_tokens_per_turn": 3189.5,
+   "turns_per_candidate": 1.136
+  },
+  "hybrid|H-N|training|schema_arguments|single_step_gold_tool_call@v1": {
+   "attempted": 100,
+   "admitted": 16,
+   "second_candidate_rate": 0.84,
+   "units": 590.0,
+   "units_per_admitted": 36.88,
+   "admission_yield": 0.16,
+   "admission_yield_wilson90": [
+    0.1088,
+    0.2291
+   ],
+   "units_per_attempted_task": [
+    4.011,
+    5.9,
+    8.449
+   ],
+   "generated_tokens_per_attempted_task": 109.4,
+   "prompt_tokens_per_turn": 3066.9,
+   "turns_per_candidate": 1.0
+  },
+  "hybrid|H-N|training|tool_selection|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 13,
+   "second_candidate_rate": 0.5,
+   "units": 2708.0,
+   "units_per_admitted": 208.31,
+   "admission_yield": 0.5417,
+   "admission_yield_wilson90": [
+    0.3788,
+    0.6961
+   ],
+   "units_per_attempted_task": [
+    78.905,
+    112.833,
+    145.003
+   ],
+   "generated_tokens_per_attempted_task": 192.3,
+   "prompt_tokens_per_turn": 964.1,
+   "turns_per_candidate": 1.361
+  },
+  "hybrid|H-T|calibration|schema_arguments|full_episode@v1": {
+   "attempted": 28,
+   "admitted": 2,
+   "second_candidate_rate": 0.9286,
+   "units": 5215.0,
+   "units_per_admitted": 2607.5,
+   "admission_yield": 0.0714,
+   "admission_yield_wilson90": [
+    0.0239,
+    0.1945
+   ],
+   "units_per_attempted_task": [
+    62.384,
+    186.25,
+    507.057
+   ],
+   "generated_tokens_per_attempted_task": 2535.5,
+   "prompt_tokens_per_turn": 2961.6,
+   "turns_per_candidate": 1.167
+  },
+  "hybrid|H-T|calibration|schema_arguments|single_step_gold_tool_call@v1": {
+   "attempted": 72,
+   "admitted": 20,
+   "second_candidate_rate": 0.75,
+   "units": 18935.0,
+   "units_per_admitted": 946.75,
+   "admission_yield": 0.2778,
+   "admission_yield_wilson90": [
+    0.2002,
+    0.3714
+   ],
+   "units_per_attempted_task": [
+    189.545,
+    262.986,
+    351.667
+   ],
+   "generated_tokens_per_attempted_task": 1379.6,
+   "prompt_tokens_per_turn": 2720.4,
+   "turns_per_candidate": 1.0
+  },
+  "hybrid|H-T|state_eval|schema_arguments|full_episode@v1": {
+   "attempted": 7,
+   "admitted": 2,
+   "second_candidate_rate": 0.7143,
+   "units": 1447.0,
+   "units_per_admitted": 723.5,
+   "admission_yield": 0.2857,
+   "admission_yield_wilson90": [
+    0.0996,
+    0.5913
+   ],
+   "units_per_attempted_task": [
+    72.034,
+    206.714,
+    427.835
+   ],
+   "generated_tokens_per_attempted_task": 2186.0,
+   "prompt_tokens_per_turn": 2814.9,
+   "turns_per_candidate": 1.167
+  },
+  "hybrid|H-T|state_eval|schema_arguments|single_step_gold_tool_call@v1": {
+   "attempted": 22,
+   "admitted": 9,
+   "second_candidate_rate": 0.5909,
+   "units": 2789.0,
+   "units_per_admitted": 309.89,
+   "admission_yield": 0.4091,
+   "admission_yield_wilson90": [
+    0.256,
+    0.5821
+   ],
+   "units_per_attempted_task": [
+    79.342,
+    126.773,
+    180.374
+   ],
+   "generated_tokens_per_attempted_task": 1054.7,
+   "prompt_tokens_per_turn": 3013.9,
+   "turns_per_candidate": 1.0
+  },
+  "hybrid|H-T|training|error_recovery|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 9,
+   "second_candidate_rate": 0.75,
+   "units": 15032.0,
+   "units_per_admitted": 1670.22,
+   "admission_yield": 0.375,
+   "admission_yield_wilson90": [
+    0.233,
+    0.5423
+   ],
+   "units_per_attempted_task": [
+    389.242,
+    626.333,
+    905.729
+   ],
+   "generated_tokens_per_attempted_task": 2099.7,
+   "prompt_tokens_per_turn": 1545.6,
+   "turns_per_candidate": 1.786
+  },
+  "hybrid|H-T|training|mcp_agent|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 5,
+   "second_candidate_rate": 0.7917,
+   "units": 4516.0,
+   "units_per_admitted": 903.2,
+   "admission_yield": 0.2083,
+   "admission_yield_wilson90": [
+    0.1053,
+    0.3705
+   ],
+   "units_per_attempted_task": [
+    95.091,
+    188.167,
+    334.622
+   ],
+   "generated_tokens_per_attempted_task": 2240.0,
+   "prompt_tokens_per_turn": 1365.1,
+   "turns_per_candidate": 1.326
+  },
+  "hybrid|H-T|training|multi_turn|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 4,
+   "second_candidate_rate": 0.9167,
+   "units": 11661.0,
+   "units_per_admitted": 2915.25,
+   "admission_yield": 0.1667,
+   "admission_yield_wilson90": [
+    0.0771,
+    0.3238
+   ],
+   "units_per_attempted_task": [
+    224.769,
+    485.875,
+    943.887
+   ],
+   "generated_tokens_per_attempted_task": 2343.1,
+   "prompt_tokens_per_turn": 1368.1,
+   "turns_per_candidate": 1.891
+  },
+  "hybrid|H-T|training|multiple_parallel|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 14,
+   "second_candidate_rate": 0.4583,
+   "units": 12724.0,
+   "units_per_admitted": 908.86,
+   "admission_yield": 0.5833,
+   "admission_yield_wilson90": [
+    0.4177,
+    0.732
+   ],
+   "units_per_attempted_task": [
+    379.665,
+    530.167,
+    665.321
+   ],
+   "generated_tokens_per_attempted_task": 1318.0,
+   "prompt_tokens_per_turn": 1443.5,
+   "turns_per_candidate": 1.6
+  },
+  "hybrid|H-T|training|no_tool|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 20,
+   "second_candidate_rate": 0.1667,
+   "units": 7963.0,
+   "units_per_admitted": 398.15,
+   "admission_yield": 0.8333,
+   "admission_yield_wilson90": [
+    0.6762,
+    0.9229
+   ],
+   "units_per_attempted_task": [
+    269.239,
+    331.792,
+    367.452
+   ],
+   "generated_tokens_per_attempted_task": 513.6,
+   "prompt_tokens_per_turn": 1787.7,
+   "turns_per_candidate": 1.0
+  },
+  "hybrid|H-T|training|schema_arguments|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 6,
+   "second_candidate_rate": 0.8333,
+   "units": 6062.0,
+   "units_per_admitted": 1010.33,
+   "admission_yield": 0.25,
+   "admission_yield_wilson90": [
+    0.1352,
+    0.4155
+   ],
+   "units_per_attempted_task": [
+    136.59,
+    252.583,
+    419.758
+   ],
+   "generated_tokens_per_attempted_task": 2111.9,
+   "prompt_tokens_per_turn": 3294.1,
+   "turns_per_candidate": 1.182
+  },
+  "hybrid|H-T|training|schema_arguments|single_step_gold_tool_call@v1": {
+   "attempted": 100,
+   "admitted": 31,
+   "second_candidate_rate": 0.76,
+   "units": 21775.0,
+   "units_per_admitted": 702.42,
+   "admission_yield": 0.31,
+   "admission_yield_wilson90": [
+    0.2398,
+    0.3902
+   ],
+   "units_per_attempted_task": [
+    168.42,
+    217.75,
+    274.111
+   ],
+   "generated_tokens_per_attempted_task": 1487.5,
+   "prompt_tokens_per_turn": 3038.4,
+   "turns_per_candidate": 1.0
+  },
+  "hybrid|H-T|training|tool_selection|full_episode@v1": {
+   "attempted": 24,
+   "admitted": 13,
+   "second_candidate_rate": 0.4583,
+   "units": 11757.0,
+   "units_per_admitted": 904.38,
+   "admission_yield": 0.5417,
+   "admission_yield_wilson90": [
+    0.3788,
+    0.6961
+   ],
+   "units_per_attempted_task": [
+    342.574,
+    489.875,
+    629.54
+   ],
+   "generated_tokens_per_attempted_task": 1047.9,
+   "prompt_tokens_per_turn": 1332.4,
+   "turns_per_candidate": 1.429
+  }
+ },
+ "throughput": {
+  "H-N": {
+   "invocations": [
+    {
+     "label": "pilot_H-N_r1_pass0",
+     "wall_seconds": 191.9,
+     "engine_start_seconds": 104.9,
+     "output_tokens": 44235,
+     "generation_seconds": 73.8,
+     "output_tokens_per_second": 599.4
+    },
+    {
+     "label": "pilot_H-N_r1_pass1",
+     "wall_seconds": 76.7,
+     "engine_start_seconds": 14.9,
+     "output_tokens": 27085,
+     "generation_seconds": 50.5,
+     "output_tokens_per_second": 536.3
+    }
+   ],
+   "output_tokens_per_second": 573.8,
+   "slowest_invocation_tokens_per_second": 536.3,
+   "engine_start_seconds": {
+    "first": 104.9,
+    "later": 14.9
+   }
+  },
+  "H-T": {
+   "invocations": [
+    {
+     "label": "pilot_H-T_r1_pass0",
+     "wall_seconds": 405.2,
+     "engine_start_seconds": 14.7,
+     "output_tokens": 387480,
+     "generation_seconds": 380.0,
+     "output_tokens_per_second": 1019.7
+    },
+    {
+     "label": "pilot_H-T_r1_pass1",
+     "wall_seconds": 280.9,
+     "engine_start_seconds": 14.6,
+     "output_tokens": 250280,
+     "generation_seconds": 255.7,
+     "output_tokens_per_second": 978.8
+    }
+   ],
+   "output_tokens_per_second": 1003.2,
+   "slowest_invocation_tokens_per_second": 978.8,
+   "engine_start_seconds": {
+    "first": 14.7,
+    "later": 14.6
+   }
+  }
+ },
+ "unmeasured": {
+  "lineages": [
+   "thinking_2507"
+  ],
+  "hybrid": "every stratum not listed: the validation split, and calibration / state evaluation in every category but schema_arguments"
+ },
+ "interval": "Wilson 90% on the admission proportion x the measured units per admitted episode",
+ "authorizes": "nothing"
+}

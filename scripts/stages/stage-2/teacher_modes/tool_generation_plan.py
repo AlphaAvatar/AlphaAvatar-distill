@@ -48,6 +48,12 @@ PROTOCOL = REPO / "configs/stages/stage-2/teacher_modes/tool_generation_protocol
 SIX = REPO / "configs/stages/stage-2/teacher_modes/six_category_design.json"
 SCHEMA = "aadistill.stage2.teacher_modes.tool_generation_plan/v1"
 PLAN = REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json"
+#: the pilot's measured priors and its import record (maintainer 2026-11-04: the pilot is a completed tool_verification@v2
+#: measurement; its episodes are reused, never regenerated); a plan binds both by sha256
+PRIORS = REPO / "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json"
+IMPORT = REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json"
+#: the measured rate and the grant's per-GPU ceiling the price's upper level pays (USD per hour, one L40S)
+RATE_EXPECTED, RATE_UPPER = 1.09, 1.19
 
 
 def sha_file(p: Path) -> str:
@@ -111,24 +117,108 @@ class PlanIdentityError(RuntimeError):
     """A plan that does not belong to the pool, protocol or design it is read with, or whose cells drifted."""
 
 
-def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man: Mapping, by_id: Mapping) -> dict:
-    """One lineage's ``{mode: {"cells": [...]}}``: targets, supply, expected tasks and bound per cell."""
-    bp, li = proto["bounded_plan"], proto["lineages"][lineage]
-    cand = int(proto["execution"]["candidates"])
+def task_units(task: Mapping, unit: str, *, lineage: str, mode: str, proto: Mapping,
+               priors: Mapping | None) -> tuple[tuple[float, float, float], str]:
+    """``((low, expected, high), basis)``: the units ONE attempted task is expected to yield under the two-candidate
+    rule. ``measured`` -- the pilot's stratum (lineage, mode, split, category, shape; `tool_generation_priors`);
+    ``proxy:training`` -- not measured on this split: the same lineage, mode, category and shape on the training split
+    (a calibration or state-evaluation item's scored positions are its assistant turn's tokens, the unit a training
+    turn's supervised tokens count); ``proxy:mode`` -- a task-count cell: the mode's pooled training admission yield;
+    ``prior`` -- nothing measured in this lineage and mode: the protocol's priors (`per_task_units`)."""
+    from stages.teacher_modes import tool_episodes as TE
+    strata = (priors or {}).get("strata") or {}
+    shape = TE.episode_shape(task)
+    if unit == "tasks":
+        rows = [v for k, v in strata.items() if k.startswith(f"{lineage}|{mode}|training|") and k.endswith("|" + TE.FULL_EPISODE)]
+        n, a = sum(v["attempted"] for v in rows), sum(v["admitted"] for v in rows)
+        if n:
+            from stages.teacher_modes.tool_generation_priors import wilson
+            lo, hi = wilson(a, n)
+            return (lo, a / n, hi), "proxy:mode"
+    else:
+        for key, basis in ((f"{lineage}|{mode}|{task['split']}|{task['category']}|{shape}", "measured"),
+                           (f"{lineage}|{mode}|training|{task['category']}|{shape}", "proxy:training")):
+            v = strata.get(key)
+            if v and isinstance(v.get("units_per_attempted_task"), list):
+                return tuple(float(x) for x in v["units_per_attempted_task"]), basis
+    bp, cand = proto["bounded_plan"], int(proto["execution"]["candidates"])
+    tpt, pr = bp["priors"]["supervised_tokens_per_turn"][mode], bp["priors"]["episode_pass_rate"]
+    return tuple(per_task_units(task, unit, tpt[i], pr[i], cand) for i in (0, 1, 2)), "prior"
+
+
+def prefix_reaching_units(units: Sequence[float], target: float) -> int:
+    """The shortest prefix of per-task ``units`` whose sum reaches ``target`` (all of them when none does)."""
+    got = 0.0
+    for i, u in enumerate(units):
+        if got >= target:
+            return i
+        got += u
+    return len(units)
+
+
+#: a cell's state: its sealed units already reach the target; its bound reaches it at the expected yield; every task
+#: is attempted and it is short (an exact gap); its whole supply is short at the expected yield (a projection); it
+#: reaches only beyond the expected yield's reach of the bound (AT_RISK); or nothing measured decides it
+STATUSES = ("REACHED", "REACHABLE", "SHORTFALL_EXHAUSTED", "SHORTFALL_PROJECTED", "AT_RISK")
+
+
+def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man: Mapping, by_id: Mapping,
+                  priors: Mapping | None = None, imported: Mapping | None = None) -> dict:
+    """One lineage's ``{mode: {"cells": [...]}}``. Per cell, apart: what is SEALED (the import record's episodes of
+    this cell, `tool_generation_import`), the WHOLE SUPPLY's projection (sealed + every remaining task at the
+    measured, proxy or prior yield), what the BOUND buys (the remaining tasks the plan may attempt), and the share
+    of that resting on UNMEASURED strata (a proxy or a prior); the round-1 prefix and the bound count NEW tasks only,
+    walked in the frozen order with the imported ones skipped."""
+    from stages.teacher_modes import tool_episodes as TE
+    from stages.teacher_modes import tool_generation_import as TGI
+    li = proto["lineages"][lineage]
     modes = {}
     for mode in sorted(li["modes"]):
-        tpt = bp["priors"]["supervised_tokens_per_turn"][mode]
-        pr = bp["priors"]["episode_pass_rate"]
+        done = TGI.outcomes(imported, mode) if imported else {}
         cells = []
-        for c in cell_targets(bp, shares, lineage, mode, li["splits"]):
+        for c in cell_targets(proto["bounded_plan"], shares, lineage, mode, li["splits"]):
             tasks = cell_order(man["orders"].get(c["split"], []), by_id, c["category"])
-            tasks_at = {lvl: prefix_reaching(tasks, c["target"], c["unit"], tpt[i], pr[i], cand)
+            mine = {t["task_id"]: done[t["task_id"]] for t in tasks if t["task_id"] in done}
+            new = [t for t in tasks if t["task_id"] not in mine]
+            sealed = sum(o["units"] for o in mine.values() if o["admitted"]) if c["unit"] != "tasks" else \
+                float(sum(o["admitted"] for o in mine.values()))
+            per = [task_units(t, c["unit"], lineage=lineage, mode=mode, proto=proto, priors=priors) for t in new]
+            rest = max(c["target"] - sealed, 0.0)
+            tasks_at = {lvl: prefix_reaching_units([u[0][i] for u in per], rest)
                         for lvl, i in (("lower", 2), ("expected", 1), ("upper", 0))}
-            bound = max(tasks_at["upper"], min(len(tasks), c["min_tasks"]))
-            reach = sum(per_task_units(t, c["unit"], tpt[0], pr[0], cand) for t in tasks)
-            cells.append({**c, "supply": len(tasks), "tasks": tasks_at, "bound": bound,
-                          "shortfall_at_pessimistic_yield": reach < c["target"],
-                          "expected_turns_in_bound": sum(expected_turns(t) for t in tasks[:bound])})
+            admitted = sum(o["admitted"] for o in mine.values())
+            bound = min(len(new), max(tasks_at["upper"], max(0, c["min_tasks"] - admitted)))
+            whole = [round(sealed + sum(u[0][i] for u in per), 1) for i in (0, 1, 2)]
+            in_bound = [round(sealed + sum(u[0][i] for u in per[:bound]), 1) for i in (0, 1, 2)]
+            unmeasured = round(sum(u[0][1] for u in per[:bound] if u[1] != "measured"), 1)
+            if sealed >= c["target"]:
+                status = "REACHED"
+            elif not new:
+                status = "SHORTFALL_EXHAUSTED"
+            elif whole[1] < c["target"]:
+                status = "SHORTFALL_PROJECTED"
+            elif in_bound[1] >= c["target"] and whole[0] >= c["target"]:
+                status = "REACHABLE"
+            else:
+                status = "AT_RISK"
+            basis = {}
+            for t, u in zip(new, per):
+                basis.setdefault(f"{TE.episode_shape(t)}:{u[1]}", 0)
+                basis[f"{TE.episode_shape(t)}:{u[1]}"] += 1
+            cells.append({**c, "supply": len(tasks),
+                          "supply_by_shape": {sh: sum(TE.episode_shape(t) == sh for t in tasks)
+                                              for sh in TE.EPISODE_SHAPES if any(TE.episode_shape(t) == sh for t in tasks)},
+                          "sealed": {"tasks": len(mine), "admitted": admitted, "units": round(sealed, 1)},
+                          "new_supply": len(new), "tasks": tasks_at, "bound": bound,
+                          "projection": {"whole_supply_units": whole, "within_bound_units": in_bound,
+                                         "unmeasured_units_within_bound": unmeasured,
+                                         "_": "[low, expected, high]; sealed units included"},
+                          "basis_of_new_tasks": dict(sorted(basis.items())), "status": status,
+                          #: what the session may attempt, in order: the new tasks up to the bound (P8.4: the pod
+                          #: receives these tasks, `bound_tasks_file`, never the whole pool)
+                          "task_ids": [t["task_id"] for t in new[:bound]],
+                          "shortfall_at_pessimistic_yield": whole[0] < c["target"],
+                          "expected_turns_in_bound": sum(expected_turns(t) for t in new[:bound])})
         modes[mode] = {"cells": cells}
     return modes
 
@@ -144,16 +234,25 @@ def build(pool_dir: Path, *, protocol: Mapping | None = None) -> dict:
     shares = design_shares()
     man, splits = TP.load_pool(Path(pool_dir))
     by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
-    lineages = {li: {"modes": lineage_cells(proto, shares, li, man, by_id), "splits": proto["lineages"][li]["splits"]}
-                for li in sorted(proto["lineages"])}
+    #: the pilot's priors and import apply to the pool the pilot ran on, and to no other (a test pool, a rebuilt one)
+    priors = json.loads(PRIORS.read_text()) if PRIORS.is_file() else None
+    imported = json.loads(IMPORT.read_text()) if IMPORT.is_file() else None
+    if priors and (priors.get("measured_by") or {}).get("pool_content_sha256") != man["content_sha256"]:
+        priors = None
+    if imported and imported.get("pool_content_sha256") != man["content_sha256"]:
+        imported = None
+    lineages = {li: {"modes": lineage_cells(proto, shares, li, man, by_id, priors, imported),
+                     "splits": proto["lineages"][li]["splits"]} for li in sorted(proto["lineages"])}
     plan = {"schema": SCHEMA, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "pool": {"dir": str(Path(pool_dir)), "content_sha256": man["content_sha256"],
                      "pool_json_sha256": sha_file(Path(pool_dir) / "pool.json")},
             "protocol_sha256": sha_file(PROTOCOL), "six_category_design_sha256": sha_file(SIX),
             "shares": shares, "rules": bp["rounds"],
             "approved_shortfalls": list(bp.get("approved_shortfalls") or []),
+            "priors": {"path": PRIORS.relative_to(REPO).as_posix(), "sha256": sha_file(PRIORS)} if priors else None,
+            "import": {"path": IMPORT.relative_to(REPO).as_posix(), "sha256": sha_file(IMPORT)} if imported else None,
             "lineages": lineages, "authorizes": "nothing"}
-    plan["price"] = price(plan, by_id, man, proto)
+    plan["price"] = price_measured(plan, by_id, man, proto, priors) if priors else price(plan, by_id, man, proto)
     return plan
 
 
@@ -185,16 +284,85 @@ def verified(protocol: Mapping | None = None, pool_dir: Path | None = None, line
         bad.append("built under other category shares")
     if plan.get("approved_shortfalls") != list(proto["bounded_plan"].get("approved_shortfalls") or []):
         bad.append("its approved shortfalls are not the protocol's")
+    bound_records = {}
+    for key in ("priors", "import"):
+        ref = plan.get(key)
+        if ref:
+            path = REPO / ref["path"]
+            if not path.is_file() or sha_file(path) != ref["sha256"]:
+                bad.append(f"its {key} record {ref['path']} is not the one it was built with")
+            else:
+                bound_records[key] = json.loads(path.read_text())
     if not bad:
         by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
         for li in ([lineage] if lineage else sorted(proto["lineages"])):
-            now = lineage_cells(proto, plan["shares"], li, man, by_id)
+            now = lineage_cells(proto, plan["shares"], li, man, by_id, bound_records.get("priors"),
+                                bound_records.get("import"))
             if json.dumps(now, sort_keys=True) != json.dumps((plan.get("lineages") or {}).get(li, {}).get("modes"),
                                                              sort_keys=True):
                 bad.append(f"its {li} cells are not the cells this pool, protocol and design produce")
+    if not bad:
+        for li in ([lineage] if lineage else sorted(proto["lineages"])):
+            tf = (plan["lineages"].get(li) or {}).get("tasks_file")
+            if tf:
+                want = sorted({t for m in plan["lineages"][li]["modes"].values() for c in m["cells"] for t in c["task_ids"]})
+                path = REPO / tf["path"]
+                if not path.is_file() or sha_file(path) != tf["sha256"]:
+                    bad.append(f"its {li} task file {tf['path']} is not the one it was written with")
+                elif [json.loads(x)["task_id"] for x in path.read_text().splitlines()] != want:
+                    bad.append(f"its {li} task file does not hold exactly the cells' tasks")
     if bad:
         raise PlanIdentityError("the generation plan refuses: " + "; ".join(bad))
     return plan, man, by_id
+
+
+#: where a lineage's bound task file goes (gitignored artifacts; the plan binds it by sha256)
+TASKS_DIR = REPO / "artifacts/stages/stage-2/teacher_modes/tool_generation"
+
+
+def bound_tasks_file(plan: dict, by_id: Mapping, lineage: str, out_dir: Path = TASKS_DIR) -> dict:
+    """Write ``<out_dir>/<lineage>/tasks.jsonl``: every task some cell of the lineage may attempt (its ``task_ids``),
+    once, sorted by id, as the pool holds it -- the session's whole input (P8.4) -- and record it in the plan."""
+    ids = sorted({t for m in plan["lineages"][lineage]["modes"].values() for c in m["cells"] for t in c["task_ids"]})
+    path = Path(out_dir) / lineage / "tasks.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(json.dumps(by_id[t], sort_keys=True, ensure_ascii=False) + "\n" for t in ids))
+    ref = {"path": path.relative_to(REPO).as_posix() if REPO in path.resolve().parents else str(path),
+           "sha256": sha_file(path), "tasks": len(ids), "bytes": path.stat().st_size}
+    plan["lineages"][lineage]["tasks_file"] = ref
+    return ref
+
+
+def verified_bound(protocol: Mapping | None = None, lineage: str = "hybrid", plan_path: Path | None = None
+                   ) -> tuple[dict, dict]:
+    """``(plan, tasks by id)`` on the pod, which holds the lineage's bound task file and not the pool: the plan (bound
+    by the session's artifact) must be this schema, name this protocol and design, and the task file must hash to the
+    plan's sha256 and hold exactly its cells' ``task_ids``. The dev box ran `verified` against the pool at issue."""
+    proto = protocol or json.loads(PROTOCOL.read_text())
+    plan = json.loads(Path(plan_path or REPO / proto["pool"]["plan"]).read_text())
+    bad = []
+    if plan.get("schema") != SCHEMA:
+        bad.append("not a tool generation plan")
+    if plan.get("protocol_sha256") != sha_file(PROTOCOL):
+        bad.append("built under another protocol")
+    if plan.get("six_category_design_sha256") != sha_file(SIX):
+        bad.append("built under other category shares")
+    tf = (plan.get("lineages", {}).get(lineage) or {}).get("tasks_file")
+    if not tf:
+        raise PlanIdentityError(f"the plan writes no task file for {lineage}")
+    path = REPO / tf["path"]
+    if not path.is_file() or sha_file(path) != tf["sha256"]:
+        bad.append(f"the {lineage} task file is not the plan's")
+    if bad:
+        raise PlanIdentityError("the generation plan refuses: " + "; ".join(bad))
+    by_id = {}
+    for line in path.read_text().splitlines():
+        t = json.loads(line)
+        by_id[t["task_id"]] = t
+    want = {t for m in plan["lineages"][lineage]["modes"].values() for c in m["cells"] for t in c["task_ids"]}
+    if set(by_id) != want:
+        raise PlanIdentityError("the generation plan refuses: its task file does not hold exactly the cells' tasks")
+    return plan, by_id
 
 
 #: per price level: (the task count used, the prior index for tokens per turn, for the pass rate, for the throughput
@@ -250,6 +418,119 @@ def price(plan: Mapping, by_id: Mapping, man: Mapping, proto: Mapping, *, rounds
                      "it); a model load per engine invocation (rounds x candidates per mode); setup and teardown"}
 
 
+#: measured session overheads (a_tool_pilot_20261104_164531: 2.1 min to SSH, 2.6 min setup, 2.1 min closeout and
+#: teardown) at the expected level; the runner's own setup and teardown allowances at the upper level
+OVERHEAD_MINUTES = {"expected": 10.0, "upper": 35.0}
+
+
+def task_generated_tokens(task: Mapping, *, lineage: str, mode: str, proto: Mapping, priors: Mapping | None
+                          ) -> tuple[float, str]:
+    """``(generated tokens, basis)`` ONE attempted task costs, every candidate's turns and reasoning included: the
+    pilot's stratum (measured, at its measured second-candidate rate), the training split's (proxy), else the
+    protocol priors (expected turns x tokens per turn x the expected second-candidate share)."""
+    from stages.teacher_modes import tool_episodes as TE
+    strata = (priors or {}).get("strata") or {}
+    shape = TE.episode_shape(task)
+    for key, basis in ((f"{lineage}|{mode}|{task['split']}|{task['category']}|{shape}", "measured"),
+                       (f"{lineage}|{mode}|training|{task['category']}|{shape}", "proxy:training")):
+        v = strata.get(key)
+        if v and v.get("generated_tokens_per_attempted_task"):
+            return float(v["generated_tokens_per_attempted_task"]), basis
+    if task.get("category") is None or task["split"] == "validation":
+        rows = [v for k, v in strata.items() if k.startswith(f"{lineage}|{mode}|training|") and k.endswith("|" + shape)]
+        if rows:
+            return (sum(v["generated_tokens_per_attempted_task"] * v["attempted"] for v in rows)
+                    / sum(v["attempted"] for v in rows)), "proxy:mode"
+    bp, cand = proto["bounded_plan"], int(proto["execution"]["candidates"])
+    tpt, pr = bp["priors"]["supervised_tokens_per_turn"][mode][1], bp["priors"]["episode_pass_rate"][1]
+    return expected_turns(task) * tpt * (1.0 + (1.0 - pr) * (cand - 1)), "prior"
+
+
+def runner_all_in(driver_minutes: float, rate: float, kind: str = "tool_generation") -> dict:
+    """The shared runner's own plan for a session of ``kind`` whose driver needs ``driver_minutes``
+    (`study_engineering.session_spec` -> `BudgetSpec.plan`: setup, transfer, the driver, contingency, the closeout
+    reserve, the recovery reserve) and its all-in at ``rate`` (`study_engineering.all_in`: GPU and container disk to
+    the hard deadline plus the watchdog's time to act): what a launch's ``all_in_within_cap`` refuses on."""
+    from types import SimpleNamespace
+
+    from shared import study_engineering as SE
+    from stages.teacher_modes import token_matched_phase as TM
+    spec = TM.launch_spec(kind, driver_minutes)
+    sess = SE.session_spec(TM.STUDY, spec, SimpleNamespace(run_id="price_check", dry_run=False))
+    plan = sess.budget.plan(price_per_hour=rate, authorized_usd=10 ** 6)
+    b = SE.all_in(plan, rate, spec.disk_gb)
+    return {"driver_minutes": round(driver_minutes, 1), "hard_terminate_minutes": round(plan.hard_terminate_minutes, 1),
+            "rate_usd_per_hour": rate, "all_in_usd": b["all_in_usd"]}
+
+
+def price_measured(plan: Mapping, by_id: Mapping, man: Mapping, proto: Mapping, priors: Mapping) -> dict:
+    """lower / expected / upper per lineage session from what the pilot measured (module docstring's priors
+    replaced): per NEW task its stratum's generated tokens over every candidate, at its measured second-candidate
+    rate; the mode's measured output tokens per second (the slowest invocation at the upper level); a measured engine
+    start per invocation (two per round and mode: first and second candidates); the measured session overhead
+    (expected) or the runner's allowance (upper); $1.09/h measured, $1.19/h (the grant's ceiling) at the upper level.
+    A stratum the pilot did not measure is priced by its proxy or the protocol prior and counted apart; Thinking-2507
+    has no measured stratum or throughput (protocol terms, ``prior``)."""
+    bp, tp = proto["bounded_plan"], proto["bounded_plan"]["throughput"]
+    cand = int(proto["execution"]["candidates"])
+    thr = (priors or {}).get("throughput") or {}
+    levels = {"lower": ("lower", 1), "expected": ("expected", bp["rounds"]["expected_rounds"]["expected"]),
+              "upper": ("bound", bp["rounds"]["max_rounds"])}
+    out = {}
+    for lineage, li in plan["lineages"].items():
+        row = {}
+        for lvl, (count, rounds) in levels.items():
+            minutes = OVERHEAD_MINUTES["upper" if lvl == "upper" else "expected"]
+            gen = 0.0
+            by_basis: dict[str, float] = {}
+            starts = 0.0
+            for mode, m in li["modes"].items():
+                mode_tokens = 0.0
+                imported = set()
+                imp = plan.get("import")
+                if imp:
+                    from stages.teacher_modes import tool_generation_import as TGI
+                    imported = set(TGI.outcomes(json.loads((REPO / imp["path"]).read_text()), mode))
+                for c in m["cells"]:
+                    n = c["bound"] if count == "bound" else c["tasks"][count]
+                    new = [t for t in cell_order(man["orders"].get(c["split"], []), by_id, c["category"])
+                           if t["task_id"] not in imported][:n]
+                    for t in new:
+                        g, basis = task_generated_tokens(t, lineage=lineage, mode=mode, proto=proto, priors=priors)
+                        mode_tokens += g
+                        by_basis[basis] = by_basis.get(basis, 0.0) + g
+                t_m = thr.get(mode)
+                if t_m:
+                    tps = float(t_m["slowest_invocation_tokens_per_second"] if lvl == "upper" else t_m["output_tokens_per_second"])
+                    first = float(t_m["engine_start_seconds"]["first"] or 0)
+                    later = float(t_m["engine_start_seconds"]["later"] or first)
+                    starts += (first if lvl == "upper" else later) * rounds * cand / 60
+                else:
+                    kind = "thinking" if mode in tp["thinking_modes"] else "non_thinking"
+                    eff = tp["tool_workload_efficiency"][{"lower": 2, "expected": 1, "upper": 0}[lvl]]
+                    tps = tp["decode_tokens_per_s"][kind] * eff
+                    starts += tp["model_load_minutes"][{"lower": 2, "expected": 1, "upper": 0}[lvl]] * rounds * cand
+                minutes += mode_tokens / tps / 60
+                gen += mode_tokens
+            minutes += starts
+            rate = RATE_UPPER if lvl == "upper" else RATE_EXPECTED
+            row[lvl] = {"usd": round(minutes / 60 * rate, 2), "minutes": round(minutes, 1),
+                        "generated_tokens": int(gen), "generated_tokens_by_basis": {k: int(v) for k, v in sorted(by_basis.items())},
+                        "rounds": rounds, "rate_usd_per_hour": rate}
+        drive = row["upper"]["minutes"] - OVERHEAD_MINUTES["upper"]
+        kind = "tool_generation" if lineage == "hybrid" else "tool_generation_t2507"
+        row["runner_cap"] = runner_all_in(max(drive, 1.0), RATE_UPPER, kind)
+        out[lineage] = row
+    tot = {lvl: round(sum(out[li][lvl]["usd"] for li in out), 2) for lvl in levels}
+    return {"sessions": out, "total_usd": tot,
+            "proposed_hard_caps_usd": {li: out[li]["runner_cap"]["all_in_usd"] for li in out},
+            "levels": {k: {"tasks": v[0], "rounds": v[1]} for k, v in levels.items()},
+            "basis": "the pilot's measured generated tokens per attempted task (every candidate, its measured second-"
+                     "candidate rate), measured output tokens per second and engine starts, measured session overhead; "
+                     "the cap is the runner's own all-in at $1.19/h for the upper level's driver minutes; strata the "
+                     "pilot did not measure are priced by proxy or prior and listed in generated_tokens_by_basis"}
+
+
 #: The L40S pilot (tool_pilot.py; logs/budget/applications/research_a_tool_pilot_2026-11-04):
 #: the hybrid lineage, both modes, one round (first candidates, then second candidates of refused tasks). Per mode:
 #: the first ``training_per_category`` tasks of every training cell's frozen order (full episodes, the order's first
@@ -288,10 +569,13 @@ def pilot_sample(plan: Mapping, by_id: Mapping, man: Mapping, spec: Mapping = PI
 def round_tasks(cell: Mapping, order_tasks: Sequence[Mapping], state: Mapping, round_no: int, *,
                 bp: Mapping, mode: str, candidates: int) -> list[str]:
     """The task ids a cell attempts in round ``round_no`` (1-based), given its ``state`` after earlier rounds:
-    ``{"attempted": int, "units": float, "admitted": int}``. Empty when the cell is done, bounded or out of rounds."""
+    ``{"attempted": int, "units": float, "admitted": int, "imported": int}`` -- ``attempted`` counts the NEW tasks of
+    ``order_tasks`` (the frozen order without the imported ones), ``units`` and ``admitted`` include the imported
+    tasks' outcomes, ``imported`` is how many there are. Empty when the cell is done, bounded or out of rounds."""
     if round_no > int(bp["rounds"]["max_rounds"]):
         return []
     attempted, units = int(state.get("attempted", 0)), float(state.get("units", 0.0))
+    seen = attempted + int(state.get("imported", 0))
     done = units >= cell["target"] and int(state.get("admitted", 0)) >= cell.get("min_tasks", 0)
     room = min(int(cell["bound"]), len(order_tasks)) - attempted
     if done or room <= 0:
@@ -300,8 +584,8 @@ def round_tasks(cell: Mapping, order_tasks: Sequence[Mapping], state: Mapping, r
         n = int(cell["tasks"]["expected"])
     else:
         rest = order_tasks[attempted:]
-        if units > 0 and attempted:
-            y = units / attempted
+        if units > 0 and seen:
+            y = units / seen
             n = math.ceil(max(cell["target"] - units, 0.0) / y * float(bp["rounds"]["top_up_margin"]))
         else:                                   #: nothing admitted yet: the pessimistic prefix of what is left
             pr, tpt = bp["priors"]["episode_pass_rate"][0], bp["priors"]["supervised_tokens_per_turn"][mode][0]
@@ -349,9 +633,14 @@ def main(argv=None) -> int:
     ap.add_argument("--write", default=None)
     a = ap.parse_args(argv)
     plan = build(Path(a.pool))
-    summary = {li: {m: {f"{c['split']}/{c['category']}": (c["supply"], c["tasks"]["expected"], c["bound"])
+    summary = {li: {m: {f"{c['split']}/{c['category']}": (c["supply"], c["tasks"]["expected"], c["bound"], c.get("status"))
                         for c in mm["cells"]} for m, mm in v["modes"].items()} for li, v in plan["lineages"].items()}
     if a.write:
+        from stages.teacher_modes import tool_pool as TP
+        _, splits = TP.load_pool(Path(a.pool))
+        by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
+        for li in plan["lineages"]:
+            bound_tasks_file(plan, by_id, li)
         Path(a.write).parent.mkdir(parents=True, exist_ok=True)
         Path(a.write).write_text(json.dumps(plan, indent=1) + "\n")
     print(json.dumps({"price": plan["price"]["total_usd"], "cap": plan["price"]["proposed_hard_cap_usd"],

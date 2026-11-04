@@ -145,7 +145,8 @@ def test_the_pilot_runs_on_one_l40s_and_never_falls_back_to_an_a100():
     assert not ok and "measured L40S OOM and a separate authorization" in why
     assert not TM.the_pilot_runs_on_an_l40s(ctx("NVIDIA L40S", 2))[0]
     assert TM.the_pilot_runs_on_an_l40s in TM.launch_spec("tool_pilot", 27).extra_prechecks
-    assert TM.the_pilot_runs_on_an_l40s not in TM.launch_spec("tool_generation", 27).extra_prechecks
+    assert TM.the_pilot_runs_on_an_l40s in TM.launch_spec("tool_generation", 27).extra_prechecks   #: L40S-only too
+    assert TM.the_pilot_runs_on_an_l40s not in TM.launch_spec("search", 27).extra_prechecks
 
 
 def test_the_hard_cap_check_prices_setup_execution_teardown_and_disk_at_the_provider_rate():
@@ -531,7 +532,7 @@ def test_the_pilot_attaches_no_volume_and_may_be_drawn_in_any_datacenter(tmp_pat
     assert TM.the_pilot_placement_is_the_planned_one in spec.extra_prechecks
     from stages.teacher_modes import phase as P1
     assert P1.the_volume_is_the_planned_one not in spec.extra_prechecks       #: the pilot reads nothing a volume holds
-    assert P1.the_volume_is_the_planned_one in TM.launch_spec("tool_generation", 55).extra_prechecks
+    assert P1.the_volume_is_the_planned_one in TM.launch_spec("inputs", 55).extra_prechecks       #: a volume kind
     assert (spec.on_poll, spec.products_secured) == (TM.secure_pilot, TM.pilot_secured)
     a = SimpleNamespace(volume_mount_path="", volume_gb=None, run_id="r", resume_from=None)
     assert TM.durable(a) == "/workspace/teacher_modes"
@@ -582,6 +583,10 @@ def test_a_replacement_pod_resumes_from_the_dev_box_copy_without_regenerating(fr
     secured.mkdir(parents=True)
     for f in pod_a.glob("pilot_*.part*.*"):
         shutil.copy2(f, secured / f.name)
+    bad, _ = TPL.resume_problems(secured)
+    assert bad and all("no receipt" in b for b in bad)                  #: copied, but never confirmed received
+    for d in secured.glob("*.done"):                                     #: what token_matched_phase.secure records
+        TM.receipt(secured, d.with_suffix(".jsonl").name, d.read_text().strip())
     assert TPL.resume_problems(secured)[0] == [] and TPL.resume_problems(secured)[1]["records"] == 3
     submitted = []
 
@@ -606,7 +611,12 @@ def test_a_replacement_pod_resumes_from_the_dev_box_copy_without_regenerating(fr
     part.write_text(part.read_text() + "\n")
     with pytest.raises(TPL.PilotError, match="does not hash to its marker"):
         TS.bring_sealed(secured, frozen["tmp"] / "pod_d")
-    part.with_suffix(".done").write_text(TPL.sha(part) + "\n")       #: re-marked, but not what pod B holds
+    part.with_suffix(".done").write_text(TPL.sha(part) + "\n")       #: re-marked: its receipt still names the old bytes
+    with pytest.raises(TPL.PilotError, match="no receipt of its sha256"):
+        TS.bring_sealed(secured, frozen["tmp"] / "pod_e")
+    (secured / TM.RECEIPTS).unlink()                                     #: even freshly receipted, not what pod B holds
+    for d in secured.glob("*.done"):
+        TM.receipt(secured, d.with_suffix(".jsonl").name, d.read_text().strip())
     with pytest.raises(TPL.PilotError, match="differs from the shard already"):
         TS.bring_sealed(secured, pod_b)
 
@@ -638,6 +648,8 @@ def test_the_poll_secures_every_sealed_pilot_shard(tmp_path, monkeypatch):
     assert ("/workspace/teacher_modes/tool_pilot_hybrid/tool_session.json", None) in pulled
     assert not any("s01t_" in r for r, _ in pulled)                   #: another study's stage label is not the pilot's
     assert ctx.evidence["secured"] == {"pilot_H-N_r1_pass0.part0000.jsonl": {"ok": True, "sha256": "a" * 64}}
+    rec = json.loads((store / TPL.PILOT_DIR / TM.RECEIPTS).read_text())   #: the durable receipt of each pulled shard
+    assert rec["pilot_H-N_r1_pass0.part0000.jsonl"]["sha256"] == "a" * 64 and rec["pilot_H-N_r1_pass0.part0000.jsonl"]["received_utc"]
     pulled.clear()
     TM.secure(ctx)
     assert not any(r.endswith(".part0000.jsonl") for r, _ in pulled)
@@ -837,7 +849,7 @@ def test_the_report_names_admission_metrics_with_their_counts_levels_and_coverag
     rec.update(terminal="ALL_DONE")
     (out / "tool_session.json").write_text(json.dumps(rec))
     r = TPL.report(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
-    assert r["state"] == "COMPLETE" and r["schema"].endswith("tool_pilot_report/v3")
+    assert r["state"] == "COMPLETE" and r["schema"].endswith("tool_pilot_report/v4")
     assert set(r["metrics"]) >= {"first_candidate_admission_rate", "admission_yield_up_to_two_candidates",
                                  "gold_tool_call_match", "recorded_execution", "target_tools_called"}
     assert "not pass@2" in r["metrics"]["admission_yield_up_to_two_candidates"]
@@ -861,7 +873,8 @@ def test_the_report_names_admission_metrics_with_their_counts_levels_and_coverag
     sa = r["schema_arguments_non_thinking_supply"]
     assert sa["training|single_step_gold_tool_call@v1"]["supervised_tokens"] > 0
     assert sa["state_eval|single_step_gold_tool_call@v1"]["scored_positions"] > 0
-    assert all(v["status"] in ("REACHABLE", "SHORTFALL") for v in r["formal_plan_projection"].values())
+    assert all(v["status"] in ("REACHED", "SHORTFALL_EXHAUSTED", "REACHABLE", "SHORTFALL_PROJECTED", TPL.UNMEASURED)
+               for v in r["formal_plan_projection"].values())
 
 
 # --- the L40S generation-scoped gate, on the pilot's real generation path --------------------------------------------
@@ -915,4 +928,121 @@ def test_the_committed_pilot_passes_the_generation_scope_and_the_whole_phase_gat
     whole = LC.gate(LC.load_config()["gates"]["teacher"])
     assert whole == ["the check ran under another phase identity than the files hold now"]
     with pytest.raises(SE.AuthorizationError, match="another phase identity"):
+        TM.kind_conditions("inputs")
+    #: the formal generation reuses the generation-scoped gate (maintainer 2026-11-04): the hybrid's engine passes and
+    #: issue then needs the plan verified against the ADMITTED pool; Thinking-2507 is another teacher and is refused
+    with pytest.raises(SE.AuthorizationError, match="plan is not verified"):
         TM.kind_conditions("tool_generation")
+    with pytest.raises(SE.AuthorizationError, match="does not admit the tool_generation_t2507 generation"):
+        TM.kind_conditions("tool_generation_t2507")
+
+
+# --- the revision on the accepted pilot (maintainer 2026-11-04): priors, import, diagnosis, projection by shape --------
+
+def _complete_pilot(frozen, monkeypatch):
+    runner = _interrupt_then_resume(frozen, monkeypatch)
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    rec = {}
+    assert pilot(frozen, out, runner(None), rec=rec)
+    rec.update(terminal="ALL_DONE", identity=TPL.pilot_identity("id", frozen["plan"])["sha256"])
+    (out / "tool_session.json").write_text(json.dumps(rec))
+    return out
+
+
+def test_the_priors_are_the_reports_own_counts_by_stratum(frozen, monkeypatch):
+    from stages.teacher_modes import tool_generation_priors as TGPR
+    out = _complete_pilot(frozen, monkeypatch)
+    doc = TGPR.measure(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    rep = TPL.report(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    for mode, m in rep["modes"].items():
+        for key, row in m["cells"].items():
+            split, cat, shape = key.split("|")
+            st = doc["strata"][f"hybrid|{mode}|{split}|{cat}|{shape}"]
+            assert st["attempted"] == row["c0"].get("admitted", 0) + row["c0"].get("rejected", 0)
+            assert st["admitted"] == row["final"]["admitted"]
+            assert st["units"] == row["supervised_tokens"] + row["scored_positions"]
+            lo, mid, hi = st["units_per_attempted_task"]
+            assert lo <= mid <= hi and mid == pytest.approx(st["units"] / st["attempted"], abs=1e-3)
+    assert TGPR.wilson(0, 10)[0] == 0.0 and TGPR.wilson(10, 10)[1] == 1.0
+
+
+def test_the_projection_reads_the_whole_supply_or_projects_by_shape():
+    doc = {"modes": {"H-N": [{"split": "state_eval", "category": "c", "unit": "scored_positions", "target": 100, "supply": 4},
+                             {"split": "training", "category": "c", "unit": "supervised_tokens", "target": 1000, "supply": 30}]}}
+    row = lambda a, r, u, unit="scored_positions": {"final": {"admitted": a, "rejected": r},  # noqa: E731
+                                                     "supervised_tokens": u if unit != "scored_positions" else 0,
+                                                     "scored_positions": u if unit == "scored_positions" else 0}
+    modes = {"H-N": {"cells": {"state_eval|c|full_episode@v1": row(2, 2, 60),
+                               "training|c|full_episode@v1": row(1, 1, 50, "t"),
+                               "training|c|single_step_gold_tool_call@v1": row(2, 8, 40, "t")}}}
+    sup = {"H-N|training|c": {"full_episode@v1": 10, "single_step_gold_tool_call@v1": 20}}
+    out = TPL._projection(doc, modes, sup)
+    assert out["H-N|state_eval|c"]["status"] == "SHORTFALL_EXHAUSTED" and out["H-N|state_eval|c"]["sealed_units"] == 60
+    t = out["H-N|training|c"]
+    assert t["projected_units_from_whole_supply"] == pytest.approx(50 + 8 * 25 + 40 + 10 * 4)    #: 330, by shape
+    assert t["status"] == "SHORTFALL_PROJECTED"
+    assert TPL._projection(doc, modes)["H-N|training|c"]["status"] == TPL.UNMEASURED            #: no per-shape supply
+
+
+def test_the_diagnosis_separates_replay_misses_from_their_consequences_and_gold_kinds():
+    from stages.teacher_modes import tool_pilot_diagnosis as D
+    v = SimpleNamespace(problems=["turn 0: the backend did not answer every call", "the episode ends on a call, not on an answer"],
+                        checks={"schema_validity": True, "step_gold": None, "target_tools_called": False})
+    assert D.causes({}, [], v) == ["replay_consequence", "replay_no_response"]
+    v = SimpleNamespace(problems=["the episode ends on a call, not on an answer"], checks={"schema_validity": True})
+    assert D.causes({}, [], v) == ["ends_on_answered_call"]
+    v = SimpleNamespace(problems=["turn 0: stopped by 'length', not its end of turn",
+                                  "the task's target_tools_called check failed"],
+                        checks={"schema_validity": True, "target_tools_called": False})
+    assert D.causes({}, [], v) == ["model_protocol", "target_tools_not_called"]
+    task = {"gold_steps": [[[{"name": "f", "arguments": {"summary": "x" * 40, "n": 1}}]]]}
+    turn = lambda args: [{"raw": f"<tool_call>{json.dumps({'name': 'f', 'arguments': args})}</tool_call>"}]  # noqa: E731
+    assert D.gold_kind(task, turn({"summary": "y" * 40, "n": 1}))[0] == "free_text"
+    assert D.gold_kind(task, turn({"summary": "x" * 40, "n": 2}))[0] == "value"
+    assert D.gold_kind(task, [{"raw": "<tool_call>{\"name\": \"g\", \"arguments\": {}}</tool_call>"}])[0] == "other_tool"
+    assert D.gold_kind(task, [{"raw": "I will look it up."}])[0] == "no_call"
+
+
+def test_the_committed_import_record_and_its_shards_agree():
+    """The import of the accepted pilot: every check equal, both modes' 397 tasks DONE, each candidate's shard by its
+    sha256; the dev box's admission reads exactly those candidates and refuses a changed shard."""
+    from stages.teacher_modes import tool_admission as TA
+    from stages.teacher_modes import tool_generation_import as TGI
+    rec = TGI.load()
+    assert rec["compatibility"]["ok"] and all(c["equal"] for c in rec["compatibility"]["checks"].values())
+    assert {m: v["totals"]["tasks"] for m, v in rec["modes"].items()} == {"H-N": 397, "H-T": 397}
+    assert all(t["final"]["outcome"] == "admitted" or len(t["candidates"]) == 2 for v in rec["modes"].values()
+               for t in v["tasks"].values())                                   #: a refused task spent both candidates
+    store = TGI.REPO / rec["store"]
+    if not store.is_dir():
+        pytest.skip("the pilot's secured shards are an artifact outside git")
+    eps = TA.episodes_from_import(rec, store, "H-N")
+    assert len(eps) == rec["modes"]["H-N"]["totals"]["candidates"]
+    bad = json.loads(json.dumps(rec))
+    t = next(iter(bad["modes"]["H-N"]["tasks"].values()))
+    t["candidates"][0]["shard_sha256"] = "0" * 64
+    with pytest.raises(SystemExit, match="is not the import record's"):
+        TA.episodes_from_import(bad, store, "H-N")
+
+
+def test_an_import_refuses_when_a_generation_term_differs(monkeypatch):
+    from stages.teacher_modes import tool_generation_import as TGI
+    rec = TGI.load()
+    real = TGI._at
+
+    def other(commit, rel):
+        b = real(commit, rel)
+        if rel == TGI.PROTOCOL_REL:
+            d = json.loads(b)
+            d["execution"]["seed_base"] += 1
+            return json.dumps(d).encode()
+        return b
+    monkeypatch.setattr(TGI, "_at", other)
+    doc, by_id = TPL.load(TPL.PLAN, TPL.TASKS) if TPL.TASKS.is_file() else (None, None)
+    if doc is None:
+        pytest.skip("the pilot's task file is an artifact outside git")
+    session = {"identity_parts": {"implementation_sha256": {f: TPL.sha(TGI.REPO / f) for f in TGI.GENERATION_CODE},
+                                  "verification_version": TE.VERIFICATION_VERSION}}
+    comp = TGI.compatibility(rec["run_id"], session, by_id, doc, by_id)
+    assert not comp["ok"] and comp["checks"]["execution"]["equal"] is False and comp["checks"]["inputs"]["equal"]

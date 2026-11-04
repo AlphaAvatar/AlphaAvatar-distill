@@ -53,8 +53,14 @@ def protocol() -> dict:
 
 
 def checked_plan(proto: dict, lineage: str):
-    """``(plan, pool manifest, tasks by id)``: `tool_generation_plan.verified` for the lineage -- its split files
-    re-verified, the plan bound to this pool's content, pool.json, protocol and design, its cells unchanged."""
+    """``(plan, pool manifest or None, tasks by id)``. A plan that writes the lineage's bound task file (P8.4) is read
+    with `tool_generation_plan.verified_bound` -- the pod holds that file, never the pool; the dev box checked the
+    plan against the pool at issue. Otherwise `tool_generation_plan.verified`: its split files re-verified, the plan
+    bound to this pool's content, pool.json, protocol and design, its cells unchanged."""
+    plan = json.loads((REPO / proto["pool"]["plan"]).read_text())
+    if (plan.get("lineages", {}).get(lineage) or {}).get("tasks_file"):
+        plan, by_id = TGP.verified_bound(proto, lineage)
+        return plan, None, by_id
     return TGP.verified(proto, lineage=lineage)
 
 
@@ -107,18 +113,32 @@ def units(task: dict, turns: list, unit: str, *, mode: str, thinking: bool, stop
 def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict, man: dict, out: Path,
                   identity: str, run, mark, *, cells: list[dict] | None = None, orders: list | None = None,
                   max_rounds: int | None = None, label_prefix: str = "tool", telemetry: Path | None = None,
-                  extra_args: tuple[str, ...] = ()) -> dict:
+                  extra_args: tuple[str, ...] = (), imported: dict | None = None) -> dict:
     """Every cell of one mode, round by round, to its target or its bound; returns the cells' final states. A pilot
     passes its frozen ``cells`` and ``orders`` (`tool_pilot.cells`), one round and its own label prefix; with
-    ``telemetry`` every engine invocation appends its GPU and engine telemetry there (`tool_pilot`)."""
+    ``telemetry`` every engine invocation appends its GPU and engine telemetry there (`tool_pilot`). ``imported``
+    (`tool_generation_import.outcomes`): tasks already DONE in this mode -- each cell starts from their units and
+    admissions, and its rounds walk the frozen order without them, so none is attempted or re-sampled again."""
     from stages.reasoning_data import generation_driver as GD
     bp, ex = proto["bounded_plan"], proto["execution"]
     cand, stop_ids = int(ex["candidates"]), [int(x) for x in ex["stop_ids"]]
     thinking = bool(proto["lineages"][lineage]["modes"][mode]["template_kwargs"].get("enable_thinking", True))
+    done = imported or {}
     if cells is None:
         cells = plan["lineages"][lineage]["modes"][mode]["cells"]
-        orders = [TGP.cell_order(man["orders"].get(c["split"], []), by_id, c["category"]) for c in cells]
-    state = [{"attempted": 0, "units": 0.0, "admitted": 0} for _ in cells]
+        orders = [([by_id[t] for t in c["task_ids"]] if "task_ids" in c else
+                   TGP.cell_order(man["orders"].get(c["split"], []), by_id, c["category"])) for c in cells]
+    state = []
+    for i, c in enumerate(cells):
+        if "sealed" in c and "task_ids" in c:       #: a plan that bound the import record: its cells carry the outcomes
+            state.append({"attempted": 0, "units": float(c["sealed"]["units"]), "admitted": int(c["sealed"]["admitted"]),
+                          "imported": int(c["sealed"]["tasks"])})
+            continue
+        mine = [done[t["task_id"]] for t in orders[i] if t["task_id"] in done]
+        units_of = (lambda o: float(o["admitted"])) if c["unit"] == "tasks" else (lambda o: o["units"] if o["admitted"] else 0.0)
+        state.append({"attempted": 0, "units": sum(units_of(o) for o in mine), "admitted": sum(o["admitted"] for o in mine),
+                      "imported": len(mine)})
+        orders[i] = [t for t in orders[i] if t["task_id"] not in done]
     c, groups = context(proto, lineage, identity), []
     for r in range(1, int(max_rounds or bp["rounds"]["max_rounds"]) + 1):
         picks = [TGP.round_tasks(cell, orders[i], state[i], r, bp=bp, mode=mode, candidates=cand)
@@ -157,7 +177,7 @@ def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict,
                     admitted[tid] = u
             retry = sorted(t for t in ids if t not in admitted)
         for i, p in enumerate(picks):
-            state[i]["attempted"] += len(p)
+            state[i]["attempted"] += len(p)              #: new tasks only; ``imported`` holds the rest
             state[i]["units"] += sum(admitted.get(t, 0.0) for t in p)
             state[i]["admitted"] += sum(t in admitted for t in p)
         mark(f"ROUND_DONE:{label}")
@@ -238,18 +258,18 @@ def run_pilot(proto: dict, plan_path: Path, tasks_path: Path, out: Path, identit
     return True
 
 
-def bring_sealed(src: Path, out: Path) -> dict:
+def bring_sealed(src: Path, out: Path, prefix: str = "pilot") -> dict:
     """Copy an earlier session's sealed pilot shards and their markers into ``out``; a file already there must be
     byte-identical (a shard is never overwritten). What they hold is checked by `resumable` and
     `generation_driver.sealed` exactly as for shards this pod sealed itself."""
     import shutil
     from stages.teacher_modes import tool_pilot as TPL
-    bad, _ = TPL.resume_problems(src)
+    bad, _ = TPL.resume_problems(src, prefix=prefix)
     if bad:
         raise TPL.PilotError("the resume source refuses: " + "; ".join(bad))
     out.mkdir(parents=True, exist_ok=True)
     copied = kept = 0
-    for f in sorted(src.glob("pilot_*_r1_pass*.part*.*")):
+    for f in sorted(src.glob(f"{prefix}_*_r*_pass*.part*.*")):
         if f.suffix not in (".jsonl", ".done"):
             continue
         dest = out / f.name
@@ -291,7 +311,7 @@ def main(argv=None, *, run=None) -> int:
     ap.add_argument("--pilot-tasks", default=None, help="the pilot's task file, by the plan's sha256")
     ap.add_argument("--volume-gb", type=float, default=None, help="a network volume's size, as the provider reports "
                     "it (its free space is checked before generating); none: the container disk's own free space")
-    ap.add_argument("--resume-from", default=None, help="the pilot only: the dev box's copy of earlier sessions' sealed "
+    ap.add_argument("--resume-from", default=None, help="the dev box's receipted copy of earlier sessions' sealed "
                     "shards, staged on this pod")
     a = ap.parse_args(argv)
     if bool(a.pilot) != bool(a.pilot_tasks):
@@ -325,6 +345,10 @@ def main(argv=None, *, run=None) -> int:
             raise _Done(ok)
         plan, man, by_id = checked_plan(proto, a.lineage)
         record.update(plan_pool_content_sha256=plan["pool"]["content_sha256"], tasks_readable=len(by_id))
+        if a.resume_from:
+            record["resumed_from"] = bring_sealed(Path(a.resume_from), out, prefix="tool")
+        if plan.get("import"):                  #: the cells carry the imported outcomes (the plan binds the record)
+            record["imported_from"] = plan["import"]
         mark("CONTRACT_OK")
         record["modes"] = {}
         for mode in sorted(proto["lineages"][a.lineage]["modes"]):

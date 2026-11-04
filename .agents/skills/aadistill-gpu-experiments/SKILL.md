@@ -26,8 +26,18 @@ provider's own reference; where it and this project differ, this project's recor
 - Stock (`runpodctl gpu list`, GraphQL `dataCenters.gpuAvailability`, `tool_pilot placement`) is a hint. The
   create's own answer decides, and it is classified (`SessionRunner.create`): an id; the provider's capacity refusal
   (`CAPACITY_REFUSAL`, retried on the window); or unknown -- a timeout, a transport error, `create_uncertain`, an
-  answer with no id -- settled by reading the account (`reconcile_create`): a pod with the session's name is owned,
-  an unreadable account stops everything. "No pod id parsed" never means "no pod".
+  answer with no id. "No pod id parsed" never means "no pod":
+  - every create request carries a UNIQUE name (`pod_name(request)`) and its start time, recorded before the call;
+  - an unknown answer is settled by reading the account over a window (`reconcile_create`,
+    `--reconcile-window-seconds`, default 180): any pod of this session's requests is owned at once; nothing counts
+    as uncreated until two listings read empty and the last one was read; until then no other create is made;
+  - before each further create the account is read again: a pod an earlier request made late is owned, and no
+    second create is sent;
+  - every pod of this session's requests is registered: one is owned, each further one is released with the
+    provider's confirmation and billed from its own request's start (`release_extra`); an unconfirmed release tears
+    down and stops.
+- Right after a pod exists, its REST v2 record is read (`RunPodProvider.pod_record`) and kept in the session record
+  (`pod_record`: ``dataCenterId``, ``createdAt``, cost): the datacenter a provider-chosen draw landed in is recorded.
 
 ## 2. Content identity is not location
 
@@ -53,10 +63,19 @@ provider's own reference; where it and this project differ, this project's recor
 | teacher generation | every sealed shard (task, mode, candidate), verified by its marker and launch identity | the unsealed tasks only |
 
 A session on a network volume resumes from the volume. A session on the container disk resumes from the dev box:
-the poll pulls each sealed shard as it is sealed (`token_matched_phase.secure`), and the replacement pod receives
-that copy (`--resume-from`, `tool_session.bring_sealed`, then `resumable` re-verifies identity, round input,
-protocol and runner). A shard from another plan, protocol or implementation refuses; nothing sealed is
-overwritten. Never select or discard sealed results by their outcome.
+the poll pulls each sealed shard as it is sealed and writes its RECEIPT (`token_matched_phase.receipt`:
+`receipts.json`, the shard's sha256 and when it was received and verified); the replacement pod receives that copy
+(`--resume-from`, `tool_session.bring_sealed`); only receipted shards count as done (`tool_pilot.resume_problems`),
+and `resumable` / `generation_driver.sealed` re-verify identity, round input, protocol and runner. A shard from
+another plan, protocol or implementation refuses; nothing sealed is overwritten. Never select or discard sealed
+results by their outcome.
+
+**Reuse across runs is an explicit import, never a resample.** Episodes an earlier run sealed under another identity
+(the tool pilot's) enter a formal generation only through an import record (`tool_generation_import`): every
+candidate's shard, sha256, original identity, candidate index and verdict, after checking the same input (each
+task's sha256), teacher lineage and template, generation code, execution terms and seeds. An imported task is DONE in
+its mode -- both candidates spent, never attempted again; top-up rounds take NEW tasks of the frozen order. The plan
+binds the import record and the measured priors by sha256 and carries each cell's sealed state.
 
 ## 4. Save expensive work at completion; retire only dead weights
 
@@ -68,11 +87,16 @@ overwritten. Never select or discard sealed results by their outcome.
 ## 5. Windows and budgets
 
 - Three different budgets: the **acquisition window** at $0 (`--create-attempts` x `--create-retry-seconds`); the
-  **billed run window** from the first resource's creation to the plan's hard deadline, enforced by the
-  **independent watchdog** (`scripts/shared/pod/watchdog.py`, started the moment an id exists); and the
-  **cumulative cost cap**, which no window extends. Queue time never shortens a run: the deadline is computed at
-  each create. `--terminate-after` was never enforced by RunPod and runpodctl >= 2.12 has no such flag; the runner
-  passes it only to a CLI that takes it (`provider_cli_facts`), and never relies on it.
+  **billed run window** from the resource's start to the plan's hard deadline, enforced by the **independent
+  watchdog** (`scripts/shared/pod/watchdog.py`, started the moment an id exists); and the **cumulative cost cap**,
+  which no window extends. The start is the provider's verifiable ``createdAt`` (`pod_record`) when it reads one,
+  else the request's own start -- never the later moment the answer arrived; cost, deadline and watchdog all count
+  from it (`SessionRunner.own`). Queue time never shortens a run. `--terminate-after` was never enforced by RunPod
+  and runpodctl >= 2.12 has no such flag; the runner passes it only to a CLI that takes it (`provider_cli_facts`),
+  and never relies on it.
+- A large input reaches the pod by the relay at hub speed, staged at $0 before the launch (`RelayInput` with its
+  sha256; the bounded generation's task file, `token_matched_phase.stage_tasks`), never pushed from the dev box
+  (0.7 MB/s) while a GPU bills.
 - Each attempt is a new run with a new one-use artifact; its cap is what the cumulative cap leaves after every
   earlier attempt's closeout (e.g. `token_matched_phase.kind_cap_problems` for the tool pilot). Never start a run
   that cannot reach a saved, valid result inside what is left.
@@ -98,8 +122,16 @@ overwritten. Never select or discard sealed results by their outcome.
 
 - REST v1 (`rest.runpod.io/v1`) retires 2026-11-15; GraphQL in early 2027. Billing reads REST v2
   (`provider_billing.fetch`: `/v2/billing/pods`, `/v2/billing/network-volumes`; v2 counts CPU pods and bills
-  volumes per volume id). runpodctl >= 3.0 is REST v2 throughout; its legacy `remove pod` and `pod delete` call the
-  same v2 delete. Each session records the CLI's version (`session.json :: provider_cli`).
+  volumes per volume id; `provider_billing compare-v1-v2` reconciles one window item by item). runpodctl >= 3.0 is
+  REST v2 throughout; its legacy `remove pod` and `pod delete` call the same v2 delete. Each session records the
+  CLI's version (`session.json :: provider_cli`).
+- GraphQL calls still on the active launch path, to move to REST v2 in one scoped change before GraphQL's
+  retirement (no fixed date yet; target: before 2026-12-31, after the bounded tool generation, with recorded v2
+  responses as test fixtures): `RunPodProvider.account_balance` (`myself`), `.account_resources` (`myself.pods` /
+  `networkVolumes` -> `GET /v2/pods`, `/v2/network-volumes`), `.get` (`pod` -> `GET /v2/pods/{id}`), the
+  `podTerminate` fallback (-> `DELETE /v2/pods/{id}`); `SessionRunner.check_gpu_offered` (`gpuTypes` ->
+  `/v2/catalog/gpus`), `.wait_endpoint` and `.read_image_digest` (`pod` -> `GET /v2/pods/{id}`); `tool_pilot.placement`
+  (`dataCenters` -> `/v2/catalog/datacenters`). Historical launchers are not migrated.
 - Upgrading the CLI or the skill is provider support, never a change of the frozen experiment environment (vLLM,
   PyTorch, teacher revision, tokenizer, chat template stay pinned by the experiment's identity). Upgrade
   deliberately between sessions, never during one.

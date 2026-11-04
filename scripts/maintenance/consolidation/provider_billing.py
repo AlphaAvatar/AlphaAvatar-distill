@@ -180,6 +180,42 @@ def volumes_by_day(snapshot: dict) -> dict[str, float]:
     return dict(days)
 
 
+def compare_v1_v2(raw: dict) -> dict:
+    """Item by item, one window read from both APIs (``raw``: ``{"fetched_utc", "v1": {"pods", "networkvolumes"},
+    "v2": {"pods", "network_volumes"}}``, the answers as received): every pod's v1 and v2 totals and their difference,
+    the pods only one of them bills, and per UTC day v1's single volume row against v2's per-volume rows summed."""
+    v1p, v1v = raw["v1"]["pods"], raw["v1"]["networkvolumes"]
+    v2p, v2v = raw["v2"]["pods"]["records"], raw["v2"]["network_volumes"]["records"]
+    pods: dict[str, dict] = defaultdict(lambda: {"v1": 0.0, "v2": 0.0, "v2_cpu": 0.0})
+    for r in v1p:
+        pods[r["podId"]]["v1"] += float(r["amount"])
+    for r in v2p:
+        pods[r["podId"]]["v2"] += float(r["totalAmount"])
+        pods[r["podId"]]["v2_cpu"] += float(r.get("cpuAmount") or 0.0)
+    rows = {pid: {k: round(v, 6) for k, v in d.items()} | {"diff": round(d["v2"] - d["v1"], 6)} for pid, d in pods.items()}
+    days: dict[str, dict] = defaultdict(lambda: {"v1": 0.0, "v2": 0.0, "v2_by_volume": {}})
+    for r in v1v:
+        days[r["startDate"][:10]]["v1"] += float(r["amount"])
+    for r in v2v:
+        d = days[str(r["startTime"])[:10]]
+        d["v2"] += float(r["totalAmount"])
+        d["v2_by_volume"][r["networkVolumeId"]] = round(float(r["totalAmount"]), 6)
+    vol = {k: {"v1": round(v["v1"], 6), "v2": round(v["v2"], 6), "diff": round(v["v2"] - v["v1"], 6),
+               "v2_by_volume": v["v2_by_volume"]} for k, v in sorted(days.items())}
+    t1 = sum(r["v1"] for r in rows.values()) + sum(v["v1"] for v in vol.values())
+    t2 = sum(r["v2"] for r in rows.values()) + sum(v["v2"] for v in vol.values())
+    return {"fetched_utc": raw.get("fetched_utc"), "windows": {"v1": raw["v1"].get("window"), "v2": raw["v2"].get("window")},
+            "totals": {"pods": {"v1": round(sum(r["v1"] for r in rows.values()), 4), "v2": round(sum(r["v2"] for r in rows.values()), 4)},
+                       "network_volumes": {"v1": round(sum(v["v1"] for v in vol.values()), 4),
+                                           "v2": round(sum(v["v2"] for v in vol.values()), 4)},
+                       "all": {"v1": round(t1, 4), "v2": round(t2, 4), "diff": round(t2 - t1, 4)}},
+            "pods_only_in_v2": {k: v for k, v in rows.items() if v["v1"] == 0 and v["v2"] > 0},
+            "pods_only_in_v1": {k: v for k, v in rows.items() if v["v2"] == 0 and v["v1"] > 0},
+            "pods_that_differ": {k: v for k, v in rows.items() if v["v1"] and v["v2"] and abs(v["diff"]) > 1e-6},
+            "pods_equal": sum(1 for v in rows.values() if v["v1"] and v["v2"] and abs(v["diff"]) <= 1e-6),
+            "volume_days": vol}
+
+
 def snapshot_identity(path: Path, root: Path) -> dict:
     return {"path": path.relative_to(root).as_posix(),
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
@@ -230,7 +266,17 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--runpod-config", default="~/.runpod/config.toml")
     r = sub.add_parser("report")
     r.add_argument("--snapshot", required=True)
+    c = sub.add_parser("compare-v1-v2", help="item-by-item v1 / v2 reconciliation of one raw same-window read")
+    c.add_argument("--raw", required=True)
+    c.add_argument("--write", required=True)
     a = ap.parse_args(argv)
+    if a.cmd == "compare-v1-v2":
+        doc = {"schema": "aadistill.provider_billing_v1_v2/v1", "raw": a.raw,
+               "raw_sha256": hashlib.sha256(Path(a.raw).read_bytes()).hexdigest(),
+               **compare_v1_v2(json.loads(Path(a.raw).read_text()))}
+        Path(a.write).write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({k: doc[k] for k in ("totals", "pods_only_in_v2", "pods_only_in_v1", "pods_equal")}, indent=1))
+        return 0
     if a.cmd == "fetch":
         sys.path.insert(0, str(REPO_ROOT / "src"))
         from aadistill.infrastructure.provider import read_api_key

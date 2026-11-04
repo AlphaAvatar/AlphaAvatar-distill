@@ -713,6 +713,9 @@ def build_parser(description: str, *, gpu: str):
     ap.add_argument("--startup-limit-min", type=float, default=15.0)
     ap.add_argument("--create-attempts", type=int, default=1)
     ap.add_argument("--create-retry-seconds", type=float, default=300.0)
+    ap.add_argument("--reconcile-window-seconds", type=float, default=180.0,
+                    help="after a create whose answer names no pod: how long the account is read before nothing "
+                         "counts as created (SessionRunner.reconcile_create)")
     ap.add_argument("--host-draws", type=int, default=3)
     ap.add_argument("--country-code", default=None)
     ap.add_argument("--image-digest", default=None)

@@ -36,6 +36,7 @@ import shutil
 import subprocess
 import sys
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -719,29 +720,119 @@ class SessionRunner:
                 "--volume-mount-path", mount,
                 *(("--data-center-ids", centre) if centre else ()))
 
-    def pod_name(self) -> str:
-        return f"aadistill-{self.spec.session_id}"
+    def pod_name(self, request: str = "") -> str:
+        """``aadistill-<session id>``, and per create request a unique suffix:
+        the identity reconciliation matches, so a pod one request made is never
+        taken for another's."""
+        return f"aadistill-{self.spec.session_id}" + (f"-{request}" if request else "")
 
-    def reconcile_create(self) -> tuple[bool, dict | None]:
-        """After a create whose answer named no pod: does one exist anyway?
+    def session_pods(self, res) -> list[dict]:
+        """The live pods on the account that one of THIS session's create
+        requests made, by their unique names."""
+        names = set(getattr(self, "_requests", {}))
+        return [p for p in res.pods if p.get("name") in names
+                and str(p.get("desiredStatus") or "").upper() not in GONE_STATUSES]
 
-        ``(known, pod)``. A timeout, a transport error or an unparseable answer
-        is not evidence that nothing was created. The account was shown to hold
-        nothing unaccounted before the first create (`check_account_resources`)
-        and an abandoned draw is released and confirmed before the next, so a
-        live pod with this session's name is the one this create made.
+    def reconcile_create(self, window_seconds: float | None = None) -> tuple[bool, list[dict]]:
+        """Does a pod of this session's requests exist although no create named it?
+
+        ``(known, pods)``. A timeout, a transport error, ``create_uncertain`` or
+        an unparseable answer is not evidence that nothing was created, and
+        neither is ONE empty listing: a pod can appear after its create
+        returned. The account is read every 20 s for ``window_seconds``
+        (``--reconcile-window-seconds``, default 180); any pod named by one of
+        this session's requests ends it at once. Nothing is known unless at
+        least two listings were read and every one was empty, the last one
+        included (unreadable listings in between settle nothing) -- until
+        then no other create is made.
         """
         lister = getattr(getattr(self, "provider", None), "account_resources", None)
         if lister is None:
-            return False, None
-        for _ in range(3):
+            return False, []
+        window = float(window_seconds if window_seconds is not None
+                       else getattr(self.a, "reconcile_window_seconds", 180.0) or 180.0)
+        t0, empty, last_known = time.time(), 0, False
+        while True:
             res = lister()
+            last_known = bool(res.known)
             if res.known:
-                mine = [p for p in res.pods if p.get("name") == self.pod_name()
-                        and str(p.get("desiredStatus") or "").upper() not in GONE_STATUSES]
-                return True, (mine[0] if mine else None)
-            time.sleep(10)
-        return False, None
+                mine = self.session_pods(res)
+                if mine:
+                    return True, mine
+                empty += 1
+            if time.time() - t0 >= window and (empty >= 2 or window == 0):
+                return (last_known and (empty >= 2 or window == 0)), []
+            if time.time() - t0 >= 3 * max(window, 60.0):
+                return False, []
+            time.sleep(20)
+
+    def own(self, pid: str, *, request: dict, returned=None) -> None:
+        """Register one provider resource of this session: its id, price,
+        start, the provider's own record and its independent watchdog, SAVED
+        before anything can reject it. The start is the provider's verifiable
+        ``createdAt`` when it reads one inside the request's window, else the
+        request's own start (the earlier, so cost, deadline and watchdog never
+        count from a later instant than the bill)."""
+        rec = None
+        getter = getattr(getattr(self, "provider", None), "pod_record", None)
+        if getter is not None:
+            try:
+                rec = getter(pid)
+            except Exception:                                      # noqa: BLE001
+                rec = None
+        try:
+            price = returned if returned is not None else (rec or {}).get("costPerHr", (rec or {}).get("cost"))
+            if price is not None:
+                self.price = float(price)
+        except (TypeError, ValueError):
+            pass
+        created = None
+        if rec and rec.get("createdAt"):
+            try:
+                created = datetime.fromisoformat(str(rec["createdAt"]).replace("Z", "+00:00")).timestamp()
+            except ValueError:
+                created = None
+        start = created if created is not None and request["epoch"] - 300 <= created <= time.time() + 60 \
+            else request["epoch"]
+        if not self.start_epoch:
+            self.start_epoch = start
+            (self.scr / "pod_start_epoch").write_text(str(self.start_epoch))
+        self.pod_id = pid
+        (self.scr / "pod_id").write_text(pid)
+        self.ev["pod_id"] = pid
+        self.ev["actual_price_per_hour"] = self.price
+        self.ev["pod_record"] = {k: (rec or {}).get(k) for k in
+                                 ("dataCenterId", "createdAt", "costPerHr", "cost", "machineId", "name")} \
+            if rec else {"read": False}
+        self.ev["start"] = {"basis": "provider createdAt" if start == created else "request start",
+                            "request_utc": datetime.fromtimestamp(request["epoch"], timezone.utc).isoformat(timespec="seconds"),
+                            "provider_created_utc": (rec or {}).get("createdAt"), "start_epoch": self.start_epoch}
+        self.ev["provider_resource_created"] = True
+        self.ev["one_use_grant_consumed"] = True
+        #: The independent backstop starts HERE, not after `create()`
+        #: returns success. A pod rejected on its returned price is
+        #: still a billing pod, and the watchdog is the only thing that
+        #: survives this process dying mid-teardown.
+        self.launch_watchdog()
+        self.save()
+
+    def release_extra(self, pod: dict) -> bool:
+        """A further live pod of this session's requests (a create that named no
+        id, then a second create): registered with its request, released with
+        the provider's confirmation and billed from its request start. False
+        when its release cannot be confirmed."""
+        req = getattr(self, "_requests", {}).get(pod.get("name"), {})
+        start = req.get("epoch", time.time())
+        released = self.release_and_confirm(str(pod["id"]), "a further resource of this session's requests")
+        price = float(pod.get("costPerHr") or self.price or self.a.max_price)
+        minutes = (time.time() - start) / 60
+        entry = {"pod_id": pod["id"], "name": pod.get("name"), "request": req.get("request"),
+                 "request_utc": datetime.fromtimestamp(start, timezone.utc).isoformat(timespec="seconds"),
+                 "price_per_hour": price, "minutes": round(minutes, 2), "usd": round(minutes / 60 * price, 4),
+                 **released}
+        self.ev.setdefault("extra_resources", []).append(entry)
+        self.save()
+        return bool(released["confirmed_not_billing"])
 
     def create(self) -> bool:
         """One provider resource, or none, inside the acquisition window.
@@ -751,33 +842,52 @@ class SessionRunner:
         * the ACQUISITION window, at $0: ``create_attempts`` creates,
           ``create_retry_seconds`` apart, waiting for capacity;
         * the BILLED run window: from this session's first resource
-          (`start_epoch`) to the plan's hard deadline. The provider's
-          ``--terminate-after`` is computed at EACH create from it. It was
-          computed once before this loop, so every minute spent queueing for
-          capacity came off the backstop of a pod created at the end of the
-          queue;
+          (`own`: the provider's ``createdAt``, else the request's start) to
+          the plan's hard deadline. The provider's ``--terminate-after`` (only
+          for a CLI that takes it) is computed at EACH create from it, so
+          queueing never comes off a late pod's run;
         * the cost cap, which neither window extends: the plan and the
           independent watchdog bound it from the moment a resource exists.
 
-        Each answer is classified. An id is a resource. The provider's own
-        capacity refusal (`CAPACITY_REFUSAL`) is retried on the window, on the
-        next datacenter group when the launcher declared several
-        (`placement`). Anything else -- a timeout, a transport error, an answer
-        with no id that is not a capacity refusal -- leaves it UNKNOWN whether a
-        pod exists, so the account is read (`reconcile_create`): a pod found is
-        adopted like a returned one, an unreadable account stops the
-        acquisition, and the same non-capacity refusal twice in a row stops it
-        as deterministic.
+        Each request carries a unique name (`pod_name`) and its start time.
+        An id is a resource. The provider's capacity refusal
+        (`CAPACITY_REFUSAL`) is retried on the window, on the next datacenter
+        group when the launcher declared several (`placement`). Anything else
+        -- a timeout, a transport error, ``create_uncertain``, an answer with no
+        id -- is settled by reading the account over a window
+        (`reconcile_create`): a pod of this session's requests is owned; an
+        unreadable account, or one never read empty twice, stops everything;
+        the same non-capacity refusal twice in a row stops it as deterministic.
+        Before each further create, and after a pod is owned, the account is
+        read again: a pod an earlier request made late is owned (no second
+        create), and every further one is released with confirmation and
+        billed (`release_extra`).
         """
         if not hasattr(self, "ev"):          #: a hand-built runner; `__init__` always sets it
             self.ev = {}
+        self.__dict__.setdefault("_requests", {})
+        self.__dict__.setdefault("start_epoch", 0.0)
         acq = self.ev.setdefault("acquisition", {
             "create_attempts": self.a.create_attempts,
             "create_retry_seconds": self.a.create_retry_seconds,
             "attempts": []})
         last_refusal = None
+        uncertain = False
         for attempt in range(1, self.a.create_attempts + 1):
-            deadline = (datetime.fromtimestamp(getattr(self, "start_epoch", 0.0) or time.time(), timezone.utc)
+            if uncertain:
+                known, late = self.reconcile_create(window_seconds=0)
+                if not known:
+                    self.ev["provider_state_unknown"] = True
+                    self.say("ABORT: the account cannot be read before a further create; "
+                             "an earlier request's outcome is unknown")
+                    return False
+                if late:
+                    return self._take(late, None, None, acq, attempt, [], "adopted late")
+            request = f"d{self.draw}a{attempt}{uuid.uuid4().hex[:6]}"
+            name = self.pod_name(request)
+            t_req = time.time()
+            self._requests[name] = {"request": request, "epoch": t_req, "draw": self.draw, "attempt": attempt}
+            deadline = (datetime.fromtimestamp(self.start_epoch or t_req, timezone.utc)
                         + timedelta(minutes=self.plan.hard_terminate_minutes))
             where = self.placement(attempt)
             try:
@@ -790,7 +900,7 @@ class SessionRunner:
                      *(("--min-cuda-version", self.spec.commands.min_cuda_version)
                        if self.spec.commands.min_cuda_version else ()),
                      "--ports", "22/tcp",
-                     "--name", self.pod_name(),
+                     "--name", name,
                      *(("--terminate-after", deadline.strftime("%Y-%m-%dT%H:%M:%SZ"))
                        if getattr(self, "cli_facts", {}).get("pod_create_terminate_after", True) else ())],
                     capture_output=True, text=True, timeout=300)
@@ -806,96 +916,24 @@ class SessionRunner:
             pid, returned = answer_pod(stdout, text)
             outcome = ("created" if pid else
                        "capacity" if CAPACITY_REFUSAL.search(text) else "unknown")
+            entry = {"draw": self.draw, "attempt": attempt, "request": request, "placement": list(where),
+                     "request_utc": datetime.fromtimestamp(t_req, timezone.utc).isoformat(timespec="seconds"),
+                     "terminate_after_utc": deadline.strftime("%Y-%m-%dT%H:%M:%SZ")}
+            found: list[dict] = []
             if outcome == "unknown":
-                known, pod = self.reconcile_create()
+                uncertain = True
+                known, found = self.reconcile_create()
                 if not known:
-                    acq["attempts"].append({"draw": self.draw, "attempt": attempt,
-                                            "placement": list(where), "outcome": "unknown"})
+                    acq["attempts"].append({**entry, "outcome": "unknown"})
                     self.ev["provider_state_unknown"] = True
                     self.say("ABORT: the create's answer named no pod and the account "
-                             "could not be read; nothing else is created until it is "
-                             f"reconciled — {text.strip()[:200]}")
+                             "was not read empty twice across the reconcile window; nothing "
+                             f"else is created until it is reconciled — {text.strip()[:200]}")
                     return False
-                if pod:
-                    pid, returned, outcome = str(pod["id"]), pod.get("costPerHr"), "adopted"
-                else:
-                    outcome = "refused"
-            acq["attempts"].append({
-                "draw": self.draw, "attempt": attempt, "placement": list(where),
-                "outcome": outcome,
-                "utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                "terminate_after_utc": deadline.strftime("%Y-%m-%dT%H:%M:%SZ")})
-            if pid:
-                #: THE PROVIDER BOUNDARY IS THE ID, NOT THE PRICE CHECK.
-                #:
-                #: A non-empty id means a resource EXISTS and is billing. Until
-                #: 2026-09-07 the over-price branch ran BEFORE any of this:
-                #: `remove pod <pid>` one-shot, unconfirmed, then `return False`
-                #: — so `pod_id` was never set, no watchdog was launched, the
-                #: exception path in `run_session` had nothing to tear down, and
-                #: a session that had created and been billed for a pod recorded
-                #: itself exactly like a `$0` pre-provider refusal. The one-use
-                #: grant would have been reported unconsumed after consuming it.
-                #:
-                #: So registration comes first, unconditionally, and is SAVED
-                #: before anything can reject the resource.
-                try:
-                    if returned is not None:
-                        self.price = float(returned)
-                except (TypeError, ValueError):
-                    pass
-                if not self.start_epoch:
-                    self.start_epoch = time.time()
-                    (self.scr / "pod_start_epoch").write_text(str(self.start_epoch))
-                self.pod_id = pid
-                (self.scr / "pod_id").write_text(pid)
-                self.ev["pod_id"] = pid
-                self.ev["actual_price_per_hour"] = self.price
-                #: the billed window's end, from the first resource: the watchdog's
-                #: deadline; `terminate_after_utc` only when the CLI passed it on
-                self.ev["billed_window_deadline_utc"] = deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
-                self.ev["terminate_after_utc"] = (
-                    deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
-                    if getattr(self, "cli_facts", {}).get("pod_create_terminate_after", True) else None)
-                self.ev["provider_resource_created"] = True
-                self.ev["one_use_grant_consumed"] = True
-                #: The independent backstop starts HERE, not after `create()`
-                #: returns success. A pod rejected on its returned price is
-                #: still a billing pod, and the watchdog is the only thing that
-                #: survives this process dying mid-teardown.
-                self.launch_watchdog()
-                self.save()
-
-                if self.price > self.a.max_price:
-                    #: A POST-PROVIDER abort. Not a price refusal — the refusal
-                    #: that costs nothing happens in `check_gpu_offered`, before
-                    #: `create` is called at all. Here the money has started.
-                    self.say(f"ABORT: provisioned at ${self.price}/h, above the "
-                             f"${self.a.max_price}/h ceiling — a provider "
-                             f"resource EXISTS ({pid}) and the one-use grant is "
-                             "CONSUMED. Tearing down with confirmation.")
-                    self.ev["post_provider_abort"] = {
-                        "reason": "returned costPerHr above max_price",
-                        "returned_price_per_hour": self.price,
-                        "max_price_per_hour": self.a.max_price,
-                        "provider_resource_created": True,
-                        "one_use_grant_consumed": True,
-                        "is_zero_dollar_pre_provider_refusal": False,
-                        "setup_started": False,
-                        "driver_started": False,
-                        "retried": False,
-                        "replaced": False,
-                        "note": ("the pod id is retained after termination: an "
-                                 "abort that deletes its own evidence cannot be "
-                                 "ledgered, and this one has a real cost."),
-                    }
-                    self.teardown_now(
-                        f"provisioned at ${self.price}/h above ${self.a.max_price}/h")
-                    return False
-
-                self.say(f"{'created' if outcome == 'created' else 'found (the create named no id)'} "
-                         f"{pid} at ${self.price}/h")
-                return True
+                outcome = "adopted" if found else "refused"
+            if pid or found:
+                return self._take(found, pid, returned, acq, attempt, [entry], outcome)
+            acq["attempts"].append({**entry, "outcome": outcome})
             self.say(f"attempt {attempt} ({' '.join(where) or 'any datacenter'}): "
                      f"{outcome} — {text.strip()[:200]}")
             if outcome == "refused":
@@ -909,6 +947,82 @@ class SessionRunner:
                 time.sleep(self.a.create_retry_seconds)
         self.say("ABORT: could not create a pod")
         return False
+
+    def _take(self, found: list[dict], pid: str, returned, acq: dict, attempt: int,
+              entries: list[dict], outcome: str) -> bool:
+        """Own one resource -- the returned id, else the earliest request's pod
+        found -- and release every further pod of this session's requests,
+        each with confirmation. False (and torn down) when a release cannot be
+        confirmed or the resource is above the price."""
+        reqs = self._requests
+        if not pid:
+            found = sorted(found, key=lambda p: reqs.get(p.get("name"), {}).get("epoch", 0.0))
+            pid, returned = str(found[0]["id"]), found[0].get("costPerHr")
+        name = next((p.get("name") for p in found if str(p.get("id")) == pid), None)
+        request = reqs.get(name) or max(reqs.values(), key=lambda r: r["epoch"])
+        for e in entries:
+            acq["attempts"].append({**e, "outcome": outcome, "pod_id": pid})
+        if not entries:
+            acq["attempts"].append({"draw": self.draw, "attempt": attempt, "outcome": outcome, "pod_id": pid})
+        #: THE PROVIDER BOUNDARY IS THE ID, NOT THE PRICE CHECK. A non-empty id
+        #: means a resource EXISTS and is billing, so registration comes first,
+        #: unconditionally, and is SAVED before anything can reject it.
+        self.own(pid, request=request, returned=returned)
+        deadline = (datetime.fromtimestamp(self.start_epoch, timezone.utc)
+                    + timedelta(minutes=self.plan.hard_terminate_minutes))
+        #: the billed window's end, from the first resource: the watchdog's
+        #: deadline; `terminate_after_utc` only when the CLI passed it on
+        self.ev["billed_window_deadline_utc"] = deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.ev["terminate_after_utc"] = (
+            deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
+            if getattr(self, "cli_facts", {}).get("pod_create_terminate_after", True) else None)
+        #: every further pod of this session's requests (one listed beside the
+        #: owned one, or one an uncertain request made late) is released
+        others = [p for p in found if str(p.get("id")) != pid]
+        lister = getattr(getattr(self, "provider", None), "account_resources", None)
+        if lister is not None and len(reqs) > 1:
+            res = lister()
+            if res.known:
+                others += [p for p in self.session_pods(res)
+                           if str(p.get("id")) != pid and p.get("id") not in {o.get("id") for o in others}]
+            else:
+                self.ev["provider_state_unknown"] = True
+        for extra in others:
+            if not self.release_extra(extra):
+                self.ev["provider_state_unknown"] = True
+                self.say(f"ABORT: a further resource {extra.get('id')} of this session's requests "
+                         "could not be confirmed released; tearing down the owned one")
+                self.teardown_now("a further resource could not be confirmed released")
+                return False
+        if self.price > self.a.max_price:
+            #: A POST-PROVIDER abort. Not a price refusal — the refusal
+            #: that costs nothing happens in `check_gpu_offered`, before
+            #: `create` is called at all. Here the money has started.
+            self.say(f"ABORT: provisioned at ${self.price}/h, above the "
+                     f"${self.a.max_price}/h ceiling — a provider "
+                     f"resource EXISTS ({pid}) and the one-use grant is "
+                     "CONSUMED. Tearing down with confirmation.")
+            self.ev["post_provider_abort"] = {
+                "reason": "returned costPerHr above max_price",
+                "returned_price_per_hour": self.price,
+                "max_price_per_hour": self.a.max_price,
+                "provider_resource_created": True,
+                "one_use_grant_consumed": True,
+                "is_zero_dollar_pre_provider_refusal": False,
+                "setup_started": False,
+                "driver_started": False,
+                "retried": False,
+                "replaced": False,
+                "note": ("the pod id is retained after termination: an "
+                         "abort that deletes its own evidence cannot be "
+                         "ledgered, and this one has a real cost."),
+            }
+            self.teardown_now(
+                f"provisioned at ${self.price}/h above ${self.a.max_price}/h")
+            return False
+        self.say(f"{'created' if outcome == 'created' else 'found (no create named it)'} "
+                 f"{pid} at ${self.price}/h in {self.ev.get('pod_record', {}).get('dataCenterId') or 'an unread datacenter'}")
+        return True
 
     def launch_watchdog(self) -> Path:
         """Independent of the driver and of this runner, by construction.
@@ -1226,14 +1340,16 @@ class SessionRunner:
                 #: provider's refusal is the only evidence of why. Recorded with
                 #: no pod id rather than left out of `draws` entirely.
                 unknown = bool(self.ev.get("provider_state_unknown"))
+                created = bool(self.ev.get("provider_resource_created"))
                 if unknown:
                     self.ev["abort_reason"] = "provider_state_unknown"
-                self.record_draw(draw, "create_failed", {
-                    "pod_id": None, "why": "create_failed",
+                self.record_draw(draw, "create_failed" if not created else "created_then_aborted", {
+                    "pod_id": self.pod_id or None, "why": "create_failed" if not created else
+                    "a resource was owned and torn down before setup",
                     #: unknown when a create named no pod and the account could
                     #: not be read: never recorded as confirmed
-                    "confirmed_not_billing": not unknown,
-                    "provider_resource_created": None if unknown else False,
+                    "confirmed_not_billing": (not unknown) and (not created or bool(self.ev.get("provider_confirms_gone"))),
+                    "provider_resource_created": None if unknown and not created else created,
                     #: Every attempt this draw made, not a guessed name:
                     #: `create_attempts` may be more than one, and the refusal
                     #: worth reading is usually the LAST one.
@@ -1241,7 +1357,10 @@ class SessionRunner:
                         q.name for q in self.scr.glob(f"create_raw_d{draw}_a*.txt")),
                     "rule": ("no id was returned, so no resource exists and "
                              "nothing is billing; the raw provider response is "
-                             "kept beside this record"),
+                             "kept beside this record" if not created else
+                             "a resource was owned, then torn down with the "
+                             "provider's confirmation before setup (its cost is "
+                             "in this session's record)"),
                 })
                 self.save()
                 return False
@@ -1760,11 +1879,16 @@ class SessionRunner:
             "desired_status": released["desired_status"],
             "billing": released["billing"]}
         self.ev["provider_confirms_gone"] = released["confirmed_not_billing"]
+        #: a further resource of this session's requests, released at once, is
+        #: billed too: from its request start to its confirmed release
+        extra = sum(float(e.get("usd") or 0.0) for e in self.ev.get("extra_resources") or [])
+        total = self.usd() + extra
         self.ev["cost"] = {"price_per_hour": self.price,
                            "elapsed_minutes": round(self.elapsed(), 2),
-                           "actual_usd": round(self.usd(), 4),
+                           "actual_usd": round(total, 4),
+                           "extra_resources_usd": round(extra, 4),
                            "authorized_usd": self.auth.hard_cap_usd,
-                           "within_authorization": self.usd() <= self.auth.hard_cap_usd}
+                           "within_authorization": total <= self.auth.hard_cap_usd}
         self.say(f"pod deleted — {self.elapsed():.1f} min, ${self.usd():.2f}; "
                  f"provider confirms gone: {self.ev['provider_confirms_gone']}")
         self.save()

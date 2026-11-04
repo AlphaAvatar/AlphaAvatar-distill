@@ -1,215 +1,949 @@
 {
- "schema": "aadistill.stage2.teacher_modes.tool_pilot_refusal_diagnosis/v1",
- "run_id": "a_tool_pilot_20261104_164531",
- "method": "every sealed first candidate re-verified on the dev box under tool_verification@v2 (tool_episodes.verify, the pod's own check), its problems counted with turn indexes and quoted values normalized; single-step gold refusals split by what differs from the allowed gold set. Diagnostic only: no admission changed",
- "first_candidate_problems": {
+ "schema": "aadistill.stage2.teacher_modes.tool_pilot_refusal_diagnosis/v2",
+ "session": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/40abda2f-efac-4413-af84-45085d7650d4/scratchpad/pilot2/scr_a_tool_pilot_20261104_164531/store/unpacked",
+ "verification_version": "tool_verification@v2",
+ "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
+ "modes": {
   "H-N": {
-   "sealed": 397,
-   "problems": [
-    [
-     "turn k: the calls are not one of the step's allowed sets",
-     217
-    ],
-    [
-     "the episode ends on a call, not on an answer",
-     103
-    ],
-    [
-     "turn k: the backend did not answer every call",
-     101
-    ],
-    [
-     "a decision-step episode ends on its calls, and its last turn makes none",
-     51
-    ],
-    [
-     "the task's target_tools_called check failed",
-     44
-    ],
-    [
-     "turn k: schedule_hazardous_waste: $.waste_items[0]: dict is not string",
-     3
-    ],
-    [
-     "turn k: manage_gate_appointment: $.operation: '…' is not one of ['…', '…', '…']",
-     1
-    ],
-    [
-     "turn k: transfer_to_human_agent: $.issue_category: '…' is not one of ['…', '…', '…', '…']",
-     1
-    ],
-    [
-     "turn k: mytime-add_num: $.nums[0]: float is not integer",
-     1
-    ],
-    [
-     "turn k: mytime-add_num: $.nums[1]: float is not integer",
-     1
-    ],
-    [
-     "turn k: mytime-add_num: $.nums[2]: float is not integer",
-     1
-    ],
-    [
-     "turn k: mytime-add_num: $.nums[3]: float is not integer",
-     1
-    ],
-    [
-     "turn k: transfer_to_human_agent: $.category: '…' is not one of ['…', '…', '…']",
-     1
-    ],
-    [
-     "turn k: a tool call is not JSON (Extra data)",
-     1
-    ],
-    [
-     "turn k: a tool call is not JSON (Expecting '…' delimiter)",
-     1
-    ],
-    [
-     "turn k: scientific-method-server-scientificMethod: $: missing required '…'",
-     1
-    ],
-    [
-     "turn k: scientific-method-server-scientificMethod: $.experiment: missing required '…'",
-     1
-    ]
-   ],
-   "stops": [
-    [
-     "eos",
-     483
-    ]
-   ]
+   "by_candidate_source_shape": {
+    "candidate_0|Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "sealed": 135,
+     "admitted": 55,
+     "refused": 80,
+     "causes": {
+      "replay_consequence": 57,
+      "replay_no_response": 57,
+      "target_tools_not_called": 22,
+      "ends_on_answered_call": 2,
+      "schema_invalid": 2,
+      "model_protocol": 2
+     },
+     "sole": {
+      "replay_no_response": 55,
+      "target_tools_not_called": 20,
+      "ends_on_answered_call": 1
+     },
+     "combinations": {
+      "replay_consequence+replay_no_response": 55,
+      "target_tools_not_called": 20,
+      "ends_on_answered_call+target_tools_not_called": 1,
+      "replay_consequence+replay_no_response+schema_invalid": 1,
+      "ends_on_answered_call": 1,
+      "model_protocol+target_tools_not_called": 1,
+      "model_protocol+replay_consequence+replay_no_response+schema_invalid": 1
+     },
+     "replay_misses": {
+      "different values": 54,
+      "an extra argument, the recorded ones equal": 15,
+      "an argument omitted, the rest equal": 3,
+      "tool not among the recorded calls": 2
+     },
+     "free_text": {},
+     "target_unmet": {
+      "other tools only": 11,
+      "no call at all": 11
+     }
+    },
+    "candidate_0|nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "sealed": 68,
+     "admitted": 11,
+     "refused": 57,
+     "causes": {
+      "replay_consequence": 44,
+      "replay_no_response": 44,
+      "gold_other_tool": 29,
+      "gold_no_call": 13,
+      "gold_value": 12,
+      "schema_invalid": 1,
+      "gold_free_text": 1,
+      "gold_other": 1
+     },
+     "sole": {
+      "gold_no_call": 13,
+      "replay_no_response": 1
+     },
+     "combinations": {
+      "gold_other_tool+replay_consequence+replay_no_response": 28,
+      "gold_no_call": 13,
+      "gold_value+replay_consequence+replay_no_response": 12,
+      "gold_other_tool+replay_consequence+replay_no_response+schema_invalid": 1,
+      "gold_free_text+replay_consequence+replay_no_response": 1,
+      "replay_consequence+replay_no_response": 1,
+      "gold_other+replay_consequence+replay_no_response": 1
+     },
+     "replay_misses": {
+      "tool not among the recorded calls": 31,
+      "different values": 8,
+      "an extra argument, the recorded ones equal": 3,
+      "an argument omitted, the rest equal": 2
+     },
+     "free_text": {
+      "omits_user_facts": 1
+     },
+     "target_unmet": {}
+    },
+    "candidate_0|nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "sealed": 194,
+     "admitted": 33,
+     "refused": 161,
+     "causes": {
+      "gold_other_tool": 68,
+      "gold_no_call": 51,
+      "gold_value": 22,
+      "gold_free_text": 20,
+      "schema_invalid": 5
+     },
+     "sole": {
+      "gold_other_tool": 65,
+      "gold_no_call": 51,
+      "gold_value": 20,
+      "gold_free_text": 20
+     },
+     "combinations": {
+      "gold_other_tool": 65,
+      "gold_no_call": 51,
+      "gold_value": 20,
+      "gold_free_text": 20,
+      "gold_other_tool+schema_invalid": 3,
+      "gold_value+schema_invalid": 2
+     },
+     "replay_misses": {},
+     "free_text": {
+      "omits_user_facts": 11,
+      "equivalent": 9
+     },
+     "target_unmet": {}
+    },
+    "candidate_1|Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "sealed": 80,
+     "admitted": 3,
+     "refused": 77,
+     "causes": {
+      "replay_consequence": 60,
+      "replay_no_response": 60,
+      "target_tools_not_called": 16,
+      "schema_invalid": 3,
+      "ends_on_answered_call": 2
+     },
+     "sole": {
+      "replay_no_response": 57,
+      "target_tools_not_called": 15,
+      "ends_on_answered_call": 1
+     },
+     "combinations": {
+      "replay_consequence+replay_no_response": 57,
+      "target_tools_not_called": 15,
+      "replay_consequence+replay_no_response+schema_invalid": 3,
+      "ends_on_answered_call+target_tools_not_called": 1,
+      "ends_on_answered_call": 1
+     },
+     "replay_misses": {
+      "different values": 57,
+      "an extra argument, the recorded ones equal": 6,
+      "tool not among the recorded calls": 3,
+      "an argument omitted, the rest equal": 2
+     },
+     "free_text": {},
+     "target_unmet": {
+      "other tools only": 9,
+      "no call at all": 7
+     }
+    },
+    "candidate_1|nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "sealed": 57,
+     "admitted": 0,
+     "refused": 57,
+     "causes": {
+      "replay_consequence": 46,
+      "replay_no_response": 46,
+      "gold_other_tool": 29,
+      "gold_value": 14,
+      "gold_no_call": 11,
+      "schema_invalid": 1,
+      "gold_free_text": 1,
+      "model_protocol": 1,
+      "gold_other": 1
+     },
+     "sole": {
+      "gold_no_call": 10,
+      "replay_no_response": 1
+     },
+     "combinations": {
+      "gold_other_tool+replay_consequence+replay_no_response": 28,
+      "gold_value+replay_consequence+replay_no_response": 14,
+      "gold_no_call": 10,
+      "gold_other_tool+replay_consequence+replay_no_response+schema_invalid": 1,
+      "gold_free_text+replay_consequence+replay_no_response": 1,
+      "gold_no_call+model_protocol": 1,
+      "replay_consequence+replay_no_response": 1,
+      "gold_other+replay_consequence+replay_no_response": 1
+     },
+     "replay_misses": {
+      "tool not among the recorded calls": 31,
+      "different values": 10,
+      "an extra argument, the recorded ones equal": 3,
+      "an argument omitted, the rest equal": 2
+     },
+     "free_text": {
+      "omits_user_facts": 1
+     },
+     "target_unmet": {}
+    },
+    "candidate_1|nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "sealed": 161,
+     "admitted": 3,
+     "refused": 158,
+     "causes": {
+      "gold_other_tool": 68,
+      "gold_no_call": 47,
+      "gold_value": 22,
+      "gold_free_text": 21,
+      "schema_invalid": 6,
+      "model_protocol": 1
+     },
+     "sole": {
+      "gold_other_tool": 64,
+      "gold_no_call": 46,
+      "gold_free_text": 21,
+      "gold_value": 20
+     },
+     "combinations": {
+      "gold_other_tool": 64,
+      "gold_no_call": 46,
+      "gold_free_text": 21,
+      "gold_value": 20,
+      "gold_other_tool+schema_invalid": 4,
+      "gold_value+schema_invalid": 2,
+      "gold_no_call+model_protocol": 1
+     },
+     "replay_misses": {},
+     "free_text": {
+      "omits_user_facts": 11,
+      "equivalent": 9,
+      "unreviewed": 1
+     },
+     "target_unmet": {}
+    }
+   },
+   "admission_by_recorded_step_pass_rate": {
+    "full_episode@v1|0.00-0.25": {
+     "tasks": 32,
+     "admitted_first_candidate": 5,
+     "rate": 0.1562
+    },
+    "full_episode@v1|0.25-0.50": {
+     "tasks": 27,
+     "admitted_first_candidate": 4,
+     "rate": 0.1481
+    },
+    "full_episode@v1|0.50-0.75": {
+     "tasks": 9,
+     "admitted_first_candidate": 2,
+     "rate": 0.2222
+    },
+    "single_step_gold_tool_call@v1|0.00-0.25": {
+     "tasks": 72,
+     "admitted_first_candidate": 9,
+     "rate": 0.125
+    },
+    "single_step_gold_tool_call@v1|0.25-0.50": {
+     "tasks": 72,
+     "admitted_first_candidate": 14,
+     "rate": 0.1944
+    },
+    "single_step_gold_tool_call@v1|0.50-0.75": {
+     "tasks": 50,
+     "admitted_first_candidate": 10,
+     "rate": 0.2
+    }
+   }
   },
   "H-T": {
-   "sealed": 397,
-   "problems": [
-    [
-     "turn k: the calls are not one of the step's allowed sets",
-     197
-    ],
-    [
-     "the episode ends on a call, not on an answer",
-     105
-    ],
-    [
-     "turn k: the backend did not answer every call",
-     103
-    ],
-    [
-     "a decision-step episode ends on its calls, and its last turn makes none",
-     58
-    ],
-    [
-     "the task's target_tools_called check failed",
-     29
-    ],
-    [
-     "turn k: stopped by '…', not its end of turn",
-     5
-    ],
-    [
-     "turn k: the think block is not closed before the first call",
-     3
-    ],
-    [
-     "turn k: metacognitive-monitoring-server-metacognitiveMonitoring: $: missing required '…'",
-     2
-    ],
-    [
-     "turn k: leetcode-search_problems: $.category: '…' is not one of ['…', '…', '…', '…', '…', '…', '…']",
-     1
-    ],
-    [
-     "turn k: sequential-thinking-sequentialthinking: $.revisesThought: below the minimum 1",
-     1
-    ],
-    [
-     "turn k: sequential-thinking-sequentialthinking: $.branchFromThought: below the minimum 1",
-     1
-    ],
-    [
-     "turn k: sequential-thinking-tools-sequentialthinking_tools: $.revises_thought: below the minimum 1",
-     1
-    ],
-    [
-     "turn k: sequential-thinking-tools-sequentialthinking_tools: $.branch_from_thought: below the minimum 1",
-     1
-    ],
-    [
-     "turn k: a tool call is not JSON (Expecting '…' delimiter)",
-     1
-    ],
-    [
-     "turn k: mytime-add_num: $.nums[0]: float is not integer",
-     1
-    ],
-    [
-     "turn k: mytime-add_num: $.nums[1]: float is not integer",
-     1
-    ],
-    [
-     "turn k: mytime-add_num: $.nums[2]: float is not integer",
-     1
-    ],
-    [
-     "turn k: mytime-add_num: $.nums[3]: float is not integer",
-     1
-    ],
-    [
-     "turn k: a tool call is not JSON (Extra data)",
-     1
-    ],
-    [
-     "turn k: scientific-method-server-scientificMethod: $: missing required '…'",
-     1
-    ],
-    [
-     "turn k: scientific-method-server-scientificMethod: $.experiment: missing required '…'",
-     1
-    ],
-    [
-     "turn k: text after its last call ('…'); V1 allows only whitespace",
-     1
-    ]
-   ],
-   "stops": [
-    [
-     "eos",
-     490
-    ],
-    [
-     "degeneration",
-     4
-    ],
-    [
-     "length_limited",
-     1
-    ]
-   ]
+   "by_candidate_source_shape": {
+    "candidate_0|Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "sealed": 135,
+     "admitted": 56,
+     "refused": 79,
+     "causes": {
+      "replay_consequence": 63,
+      "replay_no_response": 63,
+      "target_tools_not_called": 12,
+      "schema_invalid": 6,
+      "model_protocol": 6,
+      "ends_on_answered_call": 2
+     },
+     "sole": {
+      "replay_no_response": 57,
+      "target_tools_not_called": 9,
+      "model_protocol": 3,
+      "ends_on_answered_call": 1
+     },
+     "combinations": {
+      "replay_consequence+replay_no_response": 57,
+      "target_tools_not_called": 9,
+      "replay_consequence+replay_no_response+schema_invalid": 5,
+      "model_protocol": 3,
+      "model_protocol+target_tools_not_called": 2,
+      "ends_on_answered_call+target_tools_not_called": 1,
+      "ends_on_answered_call": 1,
+      "model_protocol+replay_consequence+replay_no_response+schema_invalid": 1
+     },
+     "replay_misses": {
+      "different values": 72,
+      "an extra argument, the recorded ones equal": 6,
+      "an argument omitted, the rest equal": 3,
+      "tool not among the recorded calls": 3
+     },
+     "free_text": {},
+     "target_unmet": {
+      "other tools only": 7,
+      "no call at all": 5
+     }
+    },
+    "candidate_0|nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "sealed": 68,
+     "admitted": 11,
+     "refused": 57,
+     "causes": {
+      "replay_consequence": 40,
+      "replay_no_response": 40,
+      "gold_other_tool": 21,
+      "gold_no_call": 17,
+      "gold_value": 14,
+      "gold_free_text": 1,
+      "gold_other": 1,
+      "model_protocol": 1
+     },
+     "sole": {
+      "gold_no_call": 16,
+      "replay_no_response": 3
+     },
+     "combinations": {
+      "gold_other_tool+replay_consequence+replay_no_response": 21,
+      "gold_no_call": 16,
+      "gold_value+replay_consequence+replay_no_response": 14,
+      "replay_consequence+replay_no_response": 3,
+      "gold_free_text+replay_consequence+replay_no_response": 1,
+      "gold_other+replay_consequence+replay_no_response": 1,
+      "gold_no_call+model_protocol": 1
+     },
+     "replay_misses": {
+      "tool not among the recorded calls": 24,
+      "different values": 12,
+      "an argument omitted, the rest equal": 2,
+      "an extra argument, the recorded ones equal": 2
+     },
+     "free_text": {
+      "equivalent": 1
+     },
+     "target_unmet": {}
+    },
+    "candidate_0|nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "sealed": 194,
+     "admitted": 51,
+     "refused": 143,
+     "causes": {
+      "gold_no_call": 58,
+      "gold_other_tool": 31,
+      "gold_value": 31,
+      "gold_free_text": 23,
+      "model_protocol": 1
+     },
+     "sole": {
+      "gold_no_call": 57,
+      "gold_other_tool": 31,
+      "gold_value": 31,
+      "gold_free_text": 23
+     },
+     "combinations": {
+      "gold_no_call": 57,
+      "gold_other_tool": 31,
+      "gold_value": 31,
+      "gold_free_text": 23,
+      "gold_no_call+model_protocol": 1
+     },
+     "replay_misses": {},
+     "free_text": {
+      "equivalent": 14,
+      "omits_user_facts": 8,
+      "contradicts_input": 1
+     },
+     "target_unmet": {}
+    },
+    "candidate_1|Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "sealed": 79,
+     "admitted": 6,
+     "refused": 73,
+     "causes": {
+      "replay_consequence": 62,
+      "replay_no_response": 62,
+      "target_tools_not_called": 9,
+      "schema_invalid": 7,
+      "ends_on_answered_call": 2,
+      "model_protocol": 2
+     },
+     "sole": {
+      "replay_no_response": 55,
+      "target_tools_not_called": 7,
+      "ends_on_answered_call": 1,
+      "model_protocol": 1
+     },
+     "combinations": {
+      "replay_consequence+replay_no_response": 55,
+      "replay_consequence+replay_no_response+schema_invalid": 7,
+      "target_tools_not_called": 7,
+      "ends_on_answered_call+target_tools_not_called": 1,
+      "ends_on_answered_call": 1,
+      "model_protocol+target_tools_not_called": 1,
+      "model_protocol": 1
+     },
+     "replay_misses": {
+      "different values": 63,
+      "an extra argument, the recorded ones equal": 7,
+      "an argument omitted, the rest equal": 3,
+      "tool not among the recorded calls": 1
+     },
+     "free_text": {},
+     "target_unmet": {
+      "other tools only": 6,
+      "no call at all": 3
+     }
+    },
+    "candidate_1|nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "sealed": 57,
+     "admitted": 2,
+     "refused": 55,
+     "causes": {
+      "replay_consequence": 38,
+      "replay_no_response": 38,
+      "gold_other_tool": 21,
+      "gold_no_call": 17,
+      "gold_value": 11,
+      "gold_other": 2,
+      "gold_free_text": 1
+     },
+     "sole": {
+      "gold_no_call": 17,
+      "replay_no_response": 3
+     },
+     "combinations": {
+      "gold_other_tool+replay_consequence+replay_no_response": 21,
+      "gold_no_call": 17,
+      "gold_value+replay_consequence+replay_no_response": 11,
+      "replay_consequence+replay_no_response": 3,
+      "gold_other+replay_consequence+replay_no_response": 2,
+      "gold_free_text+replay_consequence+replay_no_response": 1
+     },
+     "replay_misses": {
+      "tool not among the recorded calls": 26,
+      "different values": 7,
+      "an extra argument, the recorded ones equal": 3,
+      "an argument omitted, the rest equal": 2
+     },
+     "free_text": {
+      "equivalent": 1
+     },
+     "target_unmet": {}
+    },
+    "candidate_1|nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "sealed": 143,
+     "admitted": 9,
+     "refused": 134,
+     "causes": {
+      "gold_no_call": 49,
+      "gold_other_tool": 33,
+      "gold_value": 32,
+      "gold_free_text": 20,
+      "schema_invalid": 2,
+      "model_protocol": 2
+     },
+     "sole": {
+      "gold_no_call": 47,
+      "gold_other_tool": 33,
+      "gold_value": 30,
+      "gold_free_text": 20
+     },
+     "combinations": {
+      "gold_no_call": 47,
+      "gold_other_tool": 33,
+      "gold_value": 30,
+      "gold_free_text": 20,
+      "gold_value+schema_invalid": 2,
+      "gold_no_call+model_protocol": 2
+     },
+     "replay_misses": {},
+     "free_text": {
+      "equivalent": 11,
+      "omits_user_facts": 5,
+      "unreviewed": 3,
+      "contradicts_input": 1
+     },
+     "target_unmet": {}
+    }
+   },
+   "admission_by_recorded_step_pass_rate": {
+    "full_episode@v1|0.00-0.25": {
+     "tasks": 32,
+     "admitted_first_candidate": 4,
+     "rate": 0.125
+    },
+    "full_episode@v1|0.25-0.50": {
+     "tasks": 27,
+     "admitted_first_candidate": 4,
+     "rate": 0.1481
+    },
+    "full_episode@v1|0.50-0.75": {
+     "tasks": 9,
+     "admitted_first_candidate": 3,
+     "rate": 0.3333
+    },
+    "single_step_gold_tool_call@v1|0.00-0.25": {
+     "tasks": 72,
+     "admitted_first_candidate": 12,
+     "rate": 0.1667
+    },
+    "single_step_gold_tool_call@v1|0.25-0.50": {
+     "tasks": 72,
+     "admitted_first_candidate": 21,
+     "rate": 0.2917
+    },
+    "single_step_gold_tool_call@v1|0.50-0.75": {
+     "tasks": 50,
+     "admitted_first_candidate": 18,
+     "rate": 0.36
+    }
+   }
   }
  },
- "single_step_gold_refusals": {
-  "H-N": {
-   "single_step": 194,
-   "gold_mismatch_tools": 119,
-   "admitted": 33,
-   "gold_mismatch_values": 22,
-   "gold_mismatch_free_text_only": 20
-  },
-  "H-T": {
-   "single_step": 194,
-   "gold_mismatch_free_text_only": 23,
-   "admitted": 51,
-   "gold_mismatch_tools": 89,
-   "gold_mismatch_values": 31
-  }
+ "free_text_review": "logs/stages/stage-2/teacher_modes/audit/tool_pilot_free_text_review.json",
+ "cases": {
+  "no_call": [
+   {
+    "mode": "H-N",
+    "task_id": "tc1-574af16418a92da7119b",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 66253 turn1-step1",
+    "recorded_step_pass_rates": [
+     0.5625
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I'm reaching out regarding a custom paint matching request for a 1930s classic yacht I'm restoring. My member ID is CY88446 and you can reach me at history@marinerestoration.com. The vessel originally used a rare three-part alkyd enamel blend that's no longer commercially available. I need precise color matching for the hull (1934 British Admiralty blue) and the superstructure (1930s French Ivory). The original paint samples show unique mica and iron oxide pigments that require specialize",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "issue_category": "fabrication",
+         "issue_summary": "Custom paint matching request for 1930s classic yacht restoration. Member ID: CY88446, email: history@marinerestoration.com. Requires precise color matching for hull (1934 British Admiralty blue) and superstructure (1930s French Ivory). Original paint samples show unique mica and iron oxide pigments needing specialized formulation. Needs custom fabrication specialist for marine heritage projects."
+        },
+        "name": "transfer_to_human_agent"
+       }
+      ]
+     ]
+    ],
+    "teacher_calls": [],
+    "teacher_answer": "I'm transferring you to a human agent. Please hold.<|im_end|>"
+   },
+   {
+    "mode": "H-N",
+    "task_id": "tc1-6e3fad2c9ad5c7e4811d",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 4306 turn1-step1",
+    "recorded_step_pass_rates": [
+     0.3125
+    ],
+    "policy_requires_verification": true,
+    "user": "Hi, I'm calling to schedule a viewing for the downtown loft listed as Property ID P-789. I'd like to request a time on Tuesday at 10 AM if available. Can you confirm my status as a prospect first? I'm a recent graduate starting my first job and this is my first time renting. My email is j.smith@email.com and phone number is 555-1234.",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "auth_method": "email_phone",
+         "user_id": "j.smith@email.com",
+         "verification_data": "555-1234"
+        },
+        "name": "authenticate_user"
+       }
+      ]
+     ]
+    ],
+    "teacher_calls": [],
+    "teacher_answer": "To confirm your status as a prospect, I will verify your email and phone number. Please hold on while I process this.<|im_end|>"
+   },
+   {
+    "mode": "H-N",
+    "task_id": "tc1-fc6ecd9fece701693624",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 104555 turn1",
+    "recorded_step_pass_rates": [
+     0.53125
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I'm a Premium-tier freelance video editor and recently submitted a proposal for project PROJ-9910, but it was rejected due to \"missing portfolio samples.\" I only submitted one sample, though the platform requires 2+. Could you clarify if client references (e.g., testimonials from past projects) count toward this requirement? If not, I'll need to upload two additional recent portfolio items matching the project's category.",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "policy_topic": "Bidding Process"
+        },
+        "name": "explain_platform_policy"
+       }
+      ]
+     ],
+     null
+    ],
+    "teacher_calls": [],
+    "teacher_answer": "The platform requires 2+ portfolio samples for proposals. Client references or testimonials do not count toward this requirement. You will need to upload two additional recent portfolio items matching the project's category. Let me know if you need help finding suitable portfolio items.<|im_end|>"
+   },
+   {
+    "mode": "H-N",
+    "task_id": "tc1-8d0f0d79a0d3e800056b",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 88445 turn1-step1",
+    "recorded_step_pass_rates": [
+     0.5625
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I'm calling regarding my child's immunization records. Our documents are expiring on September 30th, and I need to upload updated ones before the deadline. My child's ID is CH-113 with active enrollment. Could you confirm what file formats you accept (PDF/JPEG) and if there are any specific state requirements I should follow when preparing the documents?",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "child_id": "CH-113",
+         "deadline": "2024-09-30",
+         "document_type": "immunization"
+        },
+        "name": "request_document_upload"
+       }
+      ]
+     ]
+    ],
+    "teacher_calls": [],
+    "teacher_answer": "The preschool center requires immunization records in PDF or JPEG format. Please ensure the documents are up-to-date and meet any state-specific requirements. You can upload the documents by September 30th. Would you like assistance with the upload process?<|im_end|>"
+   },
+   {
+    "mode": "H-T",
+    "task_id": "tc1-fc6ecd9fece701693624",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 104555 turn1",
+    "recorded_step_pass_rates": [
+     0.53125
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I'm a Premium-tier freelance video editor and recently submitted a proposal for project PROJ-9910, but it was rejected due to \"missing portfolio samples.\" I only submitted one sample, though the platform requires 2+. Could you clarify if client references (e.g., testimonials from past projects) count toward this requirement? If not, I'll need to upload two additional recent portfolio items matching the project's category.",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "policy_topic": "Bidding Process"
+        },
+        "name": "explain_platform_policy"
+       }
+      ]
+     ],
+     null
+    ],
+    "teacher_calls": [],
+    "teacher_answer": "The platform requires **2+ portfolio samples** for proposals, and client testimonials (evidence of past work) do **not** count toward this requirement. You must upload **two additional portfolio items** matching the \"Video Editing\" category for the proposal to be accepted. Would you like assistance locating suitable samples?<|im_end|>"
+   },
+   {
+    "mode": "H-T",
+    "task_id": "tc1-e8a7e3c22e6aab0bf253",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 71297 turn1",
+    "recorded_step_pass_rates": [
+     0.375
+    ],
+    "policy_requires_verification": true,
+    "user": "Hi, I’m a VIP ticket holder currently at Shelter A, and the shelter is at full capacity (200/200) due to the weather. I need to activate the overflow shelter protocol and request alternative locations for affected guests. Can you assist with this?",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "info_type": "facilities"
+        },
+        "name": "get_event_info"
+       }
+      ]
+     ],
+     null
+    ],
+    "teacher_calls": [],
+    "teacher_answer": "I'm sorry to hear about the shelter capacity issue. According to our weather protocols, you should contact venue staff immediately for overflow shelter assistance. While I can't directly initiate shelter reassignment, I recommend:\n\n1. Finding the venue's emergency contact information on your ticket or through the official festival app\n2. Head to the main entrance where staff will direct you to available overflow shelters\n3. Show your VIP ticket and proof of purchase when requesting assistance\n\nW"
+   },
+   {
+    "mode": "H-T",
+    "task_id": "tc1-762f6fb8ecc1a9ca6098",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 13620 turn1",
+    "recorded_step_pass_rates": [
+     0.5
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I recently tried to make a $500 reservation deposit for Stock #PAY123, but my payment was declined. Can you assist me in verifying an alternative payment method to ensure the reservation is processed?",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "stock_number": "PAY123"
+        },
+        "name": "get_vehicle_inventory"
+       }
+      ]
+     ],
+     null
+    ],
+    "teacher_calls": [],
+    "teacher_answer": "I'll need your customer ID to check your account details and assist with the payment issue. Could you please provide your customer ID?<|im_end|>"
+   },
+   {
+    "mode": "H-T",
+    "task_id": "tc1-63c8471cc367bcfffc93",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 83985 turn1-step1",
+    "recorded_step_pass_rates": [
+     0.46875
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I'm calling to request that all written communications from the preschool center, including progress reports and urgent notifications, be provided in my native language, which is Spanish. Could you please confirm if your center offers translation services for these materials beyond just emergency contact notifications? I want to ensure I receive all important updates in a language I'm most comfortable with.",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "summary": "Guardian requests all written communications including progress reports and urgent notifications be provided in Spanish. Asks if translation services are available beyond emergency contact notifications.",
+         "transfer_reason": "authorization"
+        },
+        "name": "transfer_to_staff"
+       }
+      ]
+     ]
+    ],
+    "teacher_calls": [],
+    "teacher_answer": "The Bright Beginnings Preschool Center does not offer translation services for written communications like progress reports or urgent notifications. Our systems are currently designed to provide emergency contact notifications in multiple languages, but routine communications are delivered in English. For multilingual support, please contact our staff directly to arrange personalized assistance.<|im_end|>"
+   }
+  ],
+  "other_tool": [
+   {
+    "mode": "H-N",
+    "task_id": "tc1-9853c50a792838bb1f05",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 103247 turn1",
+    "recorded_step_pass_rates": [
+     0.3125
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, my name is [Customer Name], and I’m a tenant at property P-5530 with Tenant ID T-2245. I’m calling to discuss my upcoming lease renewal, which is set to expire in 100 days. I’d like to request a 6-month lease extension instead of the standard 12-month term. Could you confirm my account details to proceed?",
+    "gold": [
+     [
+      []
+     ]
+    ],
+    "teacher_calls": [
+     {
+      "name": "authenticate_user",
+      "arguments": {
+       "user_id": "T-2245",
+       "auth_method": "property_code"
+      }
+     }
+    ],
+    "teacher_answer": "<tool_call>\n{\"name\": \"authenticate_user\", \"arguments\": {\"user_id\": \"T-2245\", \"auth_method\": \"property_code\"}}\n</tool_call><|im_end|>"
+   },
+   {
+    "mode": "H-N",
+    "task_id": "tc1-8e34d932d158c61b598e",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 21942 turn1",
+    "recorded_step_pass_rates": [
+     0.3125
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I’m a homeowner at 2828 Claim St. I’m calling about water damage that occurred on May 1, 2025, under claim number IC-2025-456. I need to request a formal damage assessment report for my insurance documentation. Additionally, please note that this case requires escalation to the insurance claims department. Can you confirm the next steps for processing this request?",
+    "gold": [
+     [
+      []
+     ]
+    ],
+    "teacher_calls": [
+     {
+      "name": "transfer_to_human_agent",
+      "arguments": {
+       "summary": "Request for formal damage assessment report for insurance documentation and escalation to insurance claims department."
+      }
+     }
+    ],
+    "teacher_answer": "<tool_call>\n{\"name\": \"transfer_to_human_agent\", \"arguments\": {\"summary\": \"Request for formal damage assessment report for insurance documentation and escalation to insurance claims department.\"}}\n</tool_call><|im_end|>"
+   },
+   {
+    "mode": "H-N",
+    "task_id": "tc1-db034f1778e8727ae083",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 43852 turn1-step1",
+    "recorded_step_pass_rates": [
+     0.5
+    ],
+    "policy_requires_verification": true,
+    "user": "Hi, I’m reaching out about my tattoo booking #INK441 scheduled for July 10, 2025. I’d like to modify my design by adding 3D elements, which would require upgrading the complexity tier from 2 to 4. Can you confirm if this change is possible and guide me through the approval process?",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "booking_id": "INK441"
+        },
+        "name": "authenticate_user"
+       }
+      ]
+     ]
+    ],
+    "teacher_calls": [
+     {
+      "name": "modify_appointment",
+      "arguments": {
+       "appointment_id": "INK441",
+       "new_complexity_tier": 4
+      }
+     }
+    ],
+    "teacher_answer": "<tool_call>\n{\"name\": \"modify_appointment\", \"arguments\": {\"appointment_id\": \"INK441\", \"new_complexity_tier\": 4}}\n</tool_call><|im_end|>"
+   },
+   {
+    "mode": "H-N",
+    "task_id": "tc1-c3bbc2ce13979a64d68a",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 23749 turn1",
+    "recorded_step_pass_rates": [
+     0.15625
+    ],
+    "policy_requires_verification": true,
+    "user": "Hi, I'm a student in course MATH202, and I have a religious observance on October 15 that conflicts with my scheduled exam. I need to request a proctoring exception. Could you please transfer me to academic support to discuss this further?",
+    "gold": [
+     [
+      []
+     ]
+    ],
+    "teacher_calls": [
+     {
+      "name": "transfer_to_academic_support",
+      "arguments": {
+       "category": "Disability",
+       "issue_summary": "Religious observance conflict with scheduled exam in course MATH202."
+      }
+     }
+    ],
+    "teacher_answer": "<tool_call>\n{\"name\": \"transfer_to_academic_support\", \"arguments\": {\"category\": \"Disability\", \"issue_summary\": \"Religious observance conflict with scheduled exam in course MATH202.\"}}\n</tool_call><|im_end|>"
+   },
+   {
+    "mode": "H-T",
+    "task_id": "tc1-8e34d932d158c61b598e",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 21942 turn1",
+    "recorded_step_pass_rates": [
+     0.3125
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I’m a homeowner at 2828 Claim St. I’m calling about water damage that occurred on May 1, 2025, under claim number IC-2025-456. I need to request a formal damage assessment report for my insurance documentation. Additionally, please note that this case requires escalation to the insurance claims department. Can you confirm the next steps for processing this request?",
+    "gold": [
+     [
+      []
+     ]
+    ],
+    "teacher_calls": [
+     {
+      "name": "transfer_to_human_agent",
+      "arguments": {
+       "summary": "Homeowner at 2828 Claim St. requesting formal damage assessment report for insurance documentation (claim number IC-2025-456) and escalation to insurance claims department"
+      }
+     }
+    ],
+    "teacher_answer": "<tool_call>\n{\"name\": \"transfer_to_human_agent\", \"arguments\": {\"summary\": \"Homeowner at 2828 Claim St. requesting formal damage assessment report for insurance documentation (claim number IC-2025-456) and escalation to insurance claims department\"}}\n</tool_call><|im_end|>"
+   },
+   {
+    "mode": "H-T",
+    "task_id": "tc1-8cb4760f37747fedf063",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 27505 turn1",
+    "recorded_step_pass_rates": [
+     0.28125,
+     0.34375
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I'm reaching out as a brokerage client (SELL-117) currently evaluating listing terms for Vessel ID BROKER-774. I'd like to better understand your 10% commission policy and how it compares to standard industry rates for yacht/boat dealership listings. Could you provide a detailed breakdown of how this rate aligns with or differs from typical commission structures in our market?",
+    "gold": [
+     [
+      [
+       {
+        "arguments": {
+         "method": "vessel_id_ownership",
+         "vessel_id": "BROKER-774"
+        },
+        "name": "verify_credentials"
+       }
+      ]
+     ],
+     [
+      []
+     ]
+    ],
+    "teacher_calls": [
+     {
+      "name": "transfer_to_specialist",
+      "arguments": {
+       "summary": "Inquiry about brokerage commission rates comparison for Vessel ID BROKER-774 (SELL-117)"
+      }
+     }
+    ],
+    "teacher_answer": "<tool_call>\n{\"name\": \"transfer_to_specialist\", \"arguments\": {\"summary\": \"Inquiry about brokerage commission rates comparison for Vessel ID BROKER-774 (SELL-117)\"}}\n</tool_call><|im_end|>"
+   },
+   {
+    "mode": "H-T",
+    "task_id": "tc1-58a3dd7b37ad5ac071d9",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 56037 turn1",
+    "recorded_step_pass_rates": [
+     0.3125
+    ],
+    "policy_requires_verification": true,
+    "user": "Hello, I need to report a serious issue with my recent order. I specifically requested gluten-free bread due to a severe allergy, but I received regular wheat bread instead. Despite the allergy alert I provided, the substitution was incorrect. I need to file a complaint and request an immediate refund as per your protocol. Can you assist with this?",
+    "gold": [
+     [
+      []
+     ]
+    ],
+    "teacher_calls": [
+     {
+      "name": "transfer_to_human_agent",
+      "arguments": {
+       "summary": "User reported receiving incorrect gluten-free bread despite allergy alert, requesting immediate refund."
+      }
+     }
+    ],
+    "teacher_answer": "<tool_call>\n{\"name\": \"transfer_to_human_agent\", \"arguments\": {\"summary\": \"User reported receiving incorrect gluten-free bread despite allergy alert, requesting immediate refund.\"}}\n</tool_call><|im_end|>"
+   },
+   {
+    "mode": "H-T",
+    "task_id": "tc1-c3bbc2ce13979a64d68a",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd row 23749 turn1",
+    "recorded_step_pass_rates": [
+     0.15625
+    ],
+    "policy_requires_verification": true,
+    "user": "Hi, I'm a student in course MATH202, and I have a religious observance on October 15 that conflicts with my scheduled exam. I need to request a proctoring exception. Could you please transfer me to academic support to discuss this further?",
+    "gold": [
+     [
+      []
+     ]
+    ],
+    "teacher_calls": [
+     {
+      "name": "transfer_to_academic_support",
+      "arguments": {
+       "category": "Disability",
+       "issue_summary": "Request for proctoring exception due to religious observance on October 15 conflicting with scheduled exam in course MATH202"
+      }
+     }
+    ],
+    "teacher_answer": "<tool_call>\n{\"name\": \"transfer_to_academic_support\", \"arguments\": {\"category\": \"Disability\", \"issue_summary\": \"Request for proctoring exception due to religious observance on October 15 conflicting with scheduled exam in course MATH202\"}}\n</tool_call><|im_end|>"
+   }
+  ]
  },
  "reading": {
-  "recorded_execution": "a call the recorded-response table has no answer for leaves the episode ending on a call (protocol False) and recorded_execution False: the coverage limit of replay, by design",
-  "step_gold": "exact canonical equality with the source's recorded call (G2 agreement): other tool, no call, a different value, or a free-text argument (> 30 characters) worded differently",
-  "harness": "the verifier behaved as registered; no mechanical defect found"
+  "replay": "an unanswered call ends the episode on it (ToolEnv: off-script -> done); the recorded table answers only the expert's exact calls, so a different but legitimate call is unexecuted, never executed from another call's response",
+  "gold": "G2 agreement with ONE recorded expert action; the source's own Qwen3-235B pass rates on the same steps (difficulty) are beside the teacher's admission",
+  "verifier": "the v2 verdicts are unchanged; this record adds causes only",
+  "adaptation": "Pivot single-step tasks keep the original step-1 context (the system policy and the first user message, tools unedited); the representative cases show the context the teacher saw"
  },
  "authorizes": "nothing"
 }

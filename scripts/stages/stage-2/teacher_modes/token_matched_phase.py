@@ -126,12 +126,17 @@ KIND_RECORDS = {
     "train_a1": ("logs/stages/stage-2/teacher_modes/plans/training_plan_a1.json",),
     #: the protocol, the pool manifest (which registers every split file's sha256, re-verified on the pod by
     #: tool_pool.load_pool) and the frozen bounded plan (which names the pool's content)
+    #: since 2026-11-04 the plan binds the pool's content and pool.json (checked against the pool at issue,
+    #: `kind_conditions`), the pilot's measured priors and import record, and each lineage's bound task file: the pod
+    #: reads that file and the plan, never the pool (P8.4)
     "tool_generation": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
-                        "data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json",
-                        "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json"),
+                        "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json",
+                        "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json",
+                        "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json"),
     "tool_generation_t2507": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
-                              "data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json",
-                              "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json"),
+                              "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json",
+                              "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json",
+                              "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json"),
     "packed_search": ("configs/stages/stage-2/teacher_modes/packed_round_design.json",
                       "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
                       "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
@@ -154,6 +159,9 @@ THINKING_2507_KINDS = frozenset({"tool_generation_t2507", "train_6cat_c1"})
 #: the two lineages' authorizations, identities and caps (`kind_cap_problems`) never stand in for each other
 TOOL_GENERATION_KINDS = {"hybrid": "tool_generation", "thinking_2507": "tool_generation_t2507"}
 TOOL_PILOT_KIND = "tool_pilot"
+#: the kinds that run on the pod's container disk with no network volume (`tool_pilot.PLACEMENT`): every sealed shard
+#: pulled and receipted on the dev box on each poll, a replacement pod resumed from that copy
+CONTAINER_KINDS = frozenset({TOOL_PILOT_KIND, *TOOL_GENERATION_KINDS.values()})
 #: the full search's planned minutes and A1's per-unit deadline (budget_v2.json: the search's deadline-bounded
 #: 37.3 h; A1's 6.35 h per seed)
 SEARCH_DEADLINE_MINUTES = 37.29 * 60
@@ -171,21 +179,32 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
     (`tool_pilot.l40s_generation_problems`), and its artifact binds that gate's record too. Every other kind keeps the
     teacher gate on the whole phase identity."""
     from stages.teacher_modes import l40s_check as LC
-    gate = "teacher" if kind in ("supplement", "inputs", *TOOL_GENERATION_KINDS.values()) else None
+    gate = "teacher" if kind in ("supplement", "inputs") else None
     if gate:
         bad = LC.gate(LC.load_config(Path(root) / P1.CHECK_CONFIG)["gates"][gate], root)
         if bad:
             raise SE.AuthorizationError("the L40S check record does not admit generation: " + "; ".join(bad))
-    if kind == TOOL_PILOT_KIND:
+    if kind in CONTAINER_KINDS:
+        #: the generation-scoped gate, reused where the dependencies and the engine contract are the same (it admits
+        #: compatibility, never a kind's execution: that is the grant's)
         from stages.teacher_modes import tool_pilot as TPL
-        bad = TPL.l40s_generation_problems(root)
+        lineage = next((li for li, k in TOOL_GENERATION_KINDS.items() if k == kind), "hybrid")
+        bad = TPL.l40s_generation_problems(root, kind=kind, lineage=lineage)
         if bad:
-            raise SE.AuthorizationError("the L40S check record does not admit the pilot's generation: " + "; ".join(bad))
+            raise SE.AuthorizationError(f"the L40S check record does not admit the {kind} generation: " + "; ".join(bad))
+    if kind == TOOL_PILOT_KIND:
         bad = pilot_problems(root)
         if bad:
             raise SE.AuthorizationError("the tool pilot is not ready: " + "; ".join(bad))
+    if kind in TOOL_GENERATION_KINDS.values():
+        from stages.teacher_modes import tool_generation_plan as TGP
+        from stages.teacher_modes import tool_pool as TP
+        try:
+            TGP.verified()                    #: the plan against the ADMITTED pool on the dev box (data/...)
+        except (TGP.PlanIdentityError, TP.PoolIdentityError, FileNotFoundError, OSError, KeyError) as exc:
+            raise SE.AuthorizationError(f"the bounded generation plan is not verified: {exc}") from exc
     out = {"l40s_check_record_sha256": P1._sha(P1.CHECK_RECORD, root)}
-    if kind == TOOL_PILOT_KIND:
+    if kind in CONTAINER_KINDS:
         out["l40s_generation_scope_sha256"] = P1._sha(LC.GENERATION_SCOPE, root)
     for rel in KIND_RECORDS.get(kind, ()):
         out[f"record:{rel}"] = P1._sha(rel, root)
@@ -238,7 +257,7 @@ def the_pilot_placement_is_the_planned_one(ctx) -> tuple[bool, str]:
     msg = f"no network volume; drawn in {' then '.join(groups) if groups else 'any Secure Cloud datacenter'}"
     src = getattr(a, "resume_from", None)
     if src:
-        bad, got = TPL.resume_problems(Path(src))
+        bad, got = TPL.resume_problems(Path(src), prefix="pilot" if _kind(ctx) == TOOL_PILOT_KIND else "tool")
         ctx.evidence["resume_source"] = got
         if bad:
             return False, "the resume source refuses: " + "; ".join(bad)
@@ -359,11 +378,29 @@ OWN_SHARD = re.compile(r"^s\d\d[tn]_")
 SHARDS = {"supplement": ("generation", OWN_SHARD, "supplement_session.json"),
           "inputs": ("inputs_generation", re.compile(r"^(c00|e\d\d)[tn]_"), "inputs_session.json"),
           #: on the container disk: every sealed shard leaves the pod on the poll after it is sealed
-          "tool_pilot": ("tool_pilot_hybrid", re.compile(r"^pilot_"), "tool_pilot_hybrid/tool_session.json")}
+          "tool_pilot": ("tool_pilot_hybrid", re.compile(r"^pilot_"), "tool_pilot_hybrid/tool_session.json"),
+          "tool_generation": ("tool_generation_hybrid", re.compile(r"^tool_"), "tool_generation_hybrid/tool_session.json"),
+          "tool_generation_t2507": ("tool_generation_thinking_2507", re.compile(r"^tool_"),
+                                    "tool_generation_thinking_2507/tool_session.json")}
 
 
 def _kind(ctx) -> str:
     return (ctx.auth.stage_conditions or {}).get("kind", "supplement") if getattr(ctx, "auth", None) else "supplement"
+
+
+RECEIPTS = "receipts.json"
+
+
+def receipt(directory: Path, shard: str, sha256: str) -> None:
+    """The durable receipt of one sealed shard on the dev box: its name, sha256 and when it was received and verified
+    (`RECEIPTS` in the store's directory). A resume reads only receipted shards (`tool_pilot.resume_problems`), so
+    what counts as done is what is confirmed off the pod."""
+    import json
+    from datetime import datetime, timezone
+    path = Path(directory) / RECEIPTS
+    doc = json.loads(path.read_text()) if path.is_file() else {}
+    doc.setdefault(shard, {"sha256": sha256, "received_utc": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    path.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
 
 
 def secure(ctx) -> None:
@@ -392,6 +429,8 @@ def secure(ctx) -> None:
                 if ok:
                     (st / gdir / parts[0]).write_text(parts[1] + "\n")
                 got[name] = {"ok": ok, "sha256": parts[1]}
+                if ok:
+                    receipt(st / gdir, name, parts[1])
             elif len(parts) == 1 and parts[0].endswith(".complete"):
                 P1._pull(ctx, f"{root}/{gdir}/{parts[0]}", st / gdir / parts[0], None)
         P1._pull(ctx, f"{root}/{session_record}", st / session_record, None)
@@ -424,7 +463,7 @@ def products_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     bad = sorted(k for k, v in got.items() if not v.get("ok"))
     if bad or ctx.evidence.get("listing_unknown"):
         return False, f"not secured off-pod: {bad[:6]} {ctx.evidence.get('listing_unknown') or ''}"
-    where = ("the pod's disk goes with it" if _kind(ctx) == TOOL_PILOT_KIND
+    where = ("the pod's disk goes with it" if _kind(ctx) in CONTAINER_KINDS
              else "everything is on the network volume")
     return True, f"{len(got)} sealed shard(s) secured off-pod; {where}"
 
@@ -474,8 +513,10 @@ def inputs_command(ctx, plan) -> str:
 def tool_generation_command(ctx, plan, lineage: str = "hybrid") -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    resume = (f" --resume-from {SE.POD_REPO}/{PILOT_RESUME_DIR}/{Path(a.resume_from).name}"
+              if getattr(a, "resume_from", None) else "")
     return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
-            f"--authorization {auth} --lineage {lineage} --durable-root {durable(a)} --status {status}"
+            f"--authorization {auth} --lineage {lineage}{resume} --durable-root {durable(a)} --status {status}"
             + P1._tail(status))
 
 
@@ -493,7 +534,7 @@ def tool_pilot_command(ctx, plan) -> str:
             + f"{resume} --durable-root {durable(a)} --status {status}" + P1._tail(status))
 
 
-#: where a resume source (the dev box's secured copy of earlier pilot sessions) is installed on the pod
+#: where a resume source (the dev box's receipted copy of earlier sessions of a container kind) is installed on the pod
 PILOT_RESUME_DIR = "artifacts/stages/stage-2/teacher_modes/tool_pilot_resume"
 
 
@@ -544,9 +585,9 @@ DRIVERS = {
     "train_a1": ("scripts/stages/stage-2/teacher_modes/a1_units.py", train_a1_command, ("a1_pack",),
                  "Research A v2, A1 phases C and D: A1's two seeds trained from the Top-1 and formally evaluated"),
     "tool_generation": ("scripts/stages/stage-2/teacher_modes/tool_session.py", tool_generation_command,
-                        ("tool_pool",), "Research A packed round: the hybrid's tool-calling episodes, both modes"),
+                        (), "Research A packed round: the hybrid's tool-calling episodes, both modes"),
     "tool_generation_t2507": ("scripts/stages/stage-2/teacher_modes/tool_session.py",
-                              lambda ctx, plan: tool_generation_command(ctx, plan, "thinking_2507"), ("tool_pool",),
+                              lambda ctx, plan: tool_generation_command(ctx, plan, "thinking_2507"), (),
                               "Research A packed round: Thinking-2507's tool-calling episodes"),
     "tool_pilot": ("scripts/stages/stage-2/teacher_modes/tool_session.py", tool_pilot_command, ("pilot_tasks",),
                    "Research A packed round: the hybrid's L40S tool pilot on its frozen cells (measurement only)"),
@@ -639,6 +680,48 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     return (not bad, "secured: " + ", ".join(sorted(got)) if not bad else f"not secured: {bad}")
 
 
+def tasks_relay_input(kind: str):
+    """The bounded generation's task file for ``kind``'s lineage as a relay input: the plan's ``tasks_file``
+    (path, sha256), staged at $0 before the launch (`stage_tasks`) and fetched by setup at hub speed into the
+    repository path the plan names, verified there by its sha256 -- the 200 MB file is never pushed from the dev box
+    while a GPU bills."""
+    import json
+    from aadistill.infrastructure.session import RelayInput
+    from shared.deployment import MAIN_RELAY
+    lineage = next(li for li, k in TOOL_GENERATION_KINDS.items() if k == kind)
+    plan = json.loads((REPO_ROOT / KIND_RECORDS[kind][1]).read_text()) if (REPO_ROOT / KIND_RECORDS[kind][1]).is_file() else {}
+    tf = ((plan.get("lineages") or {}).get(lineage) or {}).get("tasks_file")
+    if not tf:
+        raise SE.AuthorizationError(f"the bounded generation plan writes no task file for {lineage}")
+    return RelayInput(path=f"transfer/tool_generation/{lineage}/{tf['sha256'][:16]}/tasks.jsonl", repo=MAIN_RELAY,
+                      dest=str(Path(tf["path"]).parent), sha256=tf["sha256"])
+
+
+def the_bound_task_file_is_relayed(ctx) -> tuple[bool, str]:
+    """A bounded generation reads its lineage's task file and nothing else of the pool: the plan must write one, and
+    the launch declares it as a relay input (the runner's precheck then lists the relay for it, $0)."""
+    try:
+        ri = tasks_relay_input(_kind(ctx))
+    except SE.AuthorizationError as exc:
+        return False, str(exc)
+    return True, f"task file {ri.sha256[:12]} relayed at {ri.path}"
+
+
+def stage_tasks(kind: str) -> dict:
+    """Upload the lineage's task file to the relay path `tasks_relay_input` names ($0, the dev box's uplink); an object
+    already there must be these bytes."""
+    from huggingface_hub import HfApi
+    ri = tasks_relay_input(kind)
+    plan = __import__("json").loads((REPO_ROOT / KIND_RECORDS[kind][1]).read_text())
+    lineage = next(li for li, k in TOOL_GENERATION_KINDS.items() if k == kind)
+    local = REPO_ROOT / plan["lineages"][lineage]["tasks_file"]["path"]
+    api = HfApi()
+    if ri.path in set(api.list_repo_files(ri.repo, repo_type="model")):
+        return {"relay": f"{ri.repo}:{ri.path}", "uploaded": False, "already_there": True}
+    api.upload_file(path_or_fileobj=str(local), path_in_repo=ri.path, repo_id=ri.repo, repo_type="model")
+    return {"relay": f"{ri.repo}:{ri.path}", "uploaded": True, "sha256": ri.sha256}
+
+
 def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str | None = None) -> SE.Launch:
     """``resume_from`` (the tool pilot only): the dev box's secured copy of earlier pilot sessions, staged on the pod
     as a local asset under `PILOT_RESUME_DIR` (`tool_pilot_command` passes it to the driver)."""
@@ -662,7 +745,7 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
     pack = "artifacts/stages/stage-2/teacher_modes/packs_tm/A1"
     def asset(path: str) -> LocalAsset:
         return LocalAsset(repo_path=path, dest_name=Path(path).name, install_to=str(Path(path).parent))
-    packed = {"tool_pool": asset("data/stages/stage-2/teacher_modes/tool_pool_v1"),
+    packed = {
               "pilot_tasks": asset("artifacts/stages/stage-2/teacher_modes/tool_pilot"),
               "profiles_v2": asset("artifacts/stages/stage-2/teacher_modes/calibration_v3"),
               "suite_v2": asset("artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v2"),
@@ -674,14 +757,19 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
              "a1_pack": LocalAsset(repo_path=pack, dest_name=Path(pack).name, install_to=str(Path(pack).parent))}
     assets = (battery,) + tuple(named[x] for x in extra)
     if resume_from:
-        if kind != TOOL_PILOT_KIND:
-            raise SE.AuthorizationError(f"--resume-from is the tool pilot's; kind {kind!r} resumes from its volume")
+        if kind not in CONTAINER_KINDS:
+            raise SE.AuthorizationError(f"--resume-from is for the container kinds; kind {kind!r} resumes from its volume")
         src = Path(resume_from).resolve()
         rel = src.relative_to(REPO_ROOT) if REPO_ROOT in src.parents else src
         assets += (LocalAsset(repo_path=str(rel), dest_name=src.name, install_to=PILOT_RESUME_DIR),)
-    polls = ((secure_pilot, pilot_secured) if kind == TOOL_PILOT_KIND else
+    polls = ((secure_pilot, pilot_secured) if kind in CONTAINER_KINDS else
              (secure, products_secured) if kind in SHARDS else (secure_files, files_secured))
     relay = ()
+    if kind in TOOL_GENERATION_KINDS.values():           #: the bound task file, pulled at hub speed (P8.4)
+        try:
+            relay = (tasks_relay_input(kind),)
+        except SE.AuthorizationError:
+            relay = ()                                    #: refused at $0 by the_bound_task_file_is_relayed
     if kind == "train_a1" or kind in PACKED_TRAIN_ARMS:   #: the evaluation's relayed inputs (phase.py's recovery)
         from stages.phase_c1.autoinit_c1_launch import C1_EVAL_TOKENIZER
         relay = tuple(C1_EVAL_TOKENIZER)
@@ -692,12 +780,14 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
         setup_env={"PHASE_KIND": kind},
         #: every kind but the pilot runs on the phase's network volume; the pilot on the container disk (PLACEMENT)
         extra_prechecks=((the_kind_records_are_the_bound_ones, the_pilot_runs_on_an_l40s,
-                          the_pilot_placement_is_the_planned_one) if kind == TOOL_PILOT_KIND else
+                          the_pilot_placement_is_the_planned_one,
+                          *((the_bound_task_file_is_relayed,) if kind in TOOL_GENERATION_KINDS.values() else ()))
+                         if kind in CONTAINER_KINDS else
                          (P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones)),
         on_poll=polls[0], products_secured=polls[1],
         artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; every sealed shard is already "
-                       "on the dev box (secure_pilot) and nothing stays on the provider" if kind == TOOL_PILOT_KIND else
+                       "on the dev box (secure_pilot) and nothing stays on the provider" if kind in CONTAINER_KINDS else
                        "delete the pod, verify from the provider that it is gone, STOP; the network volume is KEPT: it "
                        "holds every shard and the phase's states"),
         driver=driver, validation_minutes=minutes, setup_minutes=20.0, command=command, description=description,

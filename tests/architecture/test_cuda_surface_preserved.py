@@ -2614,6 +2614,22 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "stops. `placement(attempt)`: without a volume, `--data-center-ids` groups (`A,B;C`) rotate per attempt; "
             "a launcher that declares none gets the command it always got. NO CUDA SURFACE.",
      }),
+    ("1937bdc6bd4f47246d4e45dc9a22be8730581890",
+     "Create protection: request identity, provider creation time, reconcile across a window, every matching resource (maintainer 2026-11-04)",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "`create()`: each request carries a unique name (`pod_name(request)`) and its start, recorded before "
+            "the call; an answer with no id is settled by reading the account across a window (`reconcile_create`, "
+            "`--reconcile-window-seconds`: two empty reads, the last one read; a found pod ends it), and before each "
+            "further create; `own()` starts cost, deadline and watchdog at the provider's `createdAt` (else the "
+            "request's start) and records the pod's REST v2 record (datacenter); `_take()` keeps one resource and "
+            "releases every further one of this session's requests with confirmation, billed from its request "
+            "(`release_extra`, `teardown_now`'s `extra_resources_usd`); a created-then-aborted draw is recorded as "
+            "created. NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/provider.py":
+            "`RunPodProvider.pod_record(pod_id)`: one REST v2 `GET /v2/pods/{id}` read, never raising (None when "
+            "unread); `RUNPOD_REST_V2`. Termination, polling and listing unchanged. NO CUDA SURFACE.",
+     }),
 )
 
 

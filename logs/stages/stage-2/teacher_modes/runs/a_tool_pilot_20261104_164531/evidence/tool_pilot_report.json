@@ -1,5 +1,5 @@
 {
- "schema": "aadistill.stage2.teacher_modes.tool_pilot_report/v3",
+ "schema": "aadistill.stage2.teacher_modes.tool_pilot_report/v4",
  "state": "COMPLETE",
  "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
  "identity": "4c208793f4e9ec52d9aa01af5dbdfa896dedba7cf2ceeb4592cbd20d860b777a",
@@ -1909,8 +1909,17 @@
    "unit": "supervised_tokens",
    "target": 49341.783,
    "supply_tasks": 2668,
-   "measured_yield": 0.2917,
-   "measured_units_per_admitted_episode": 305.9,
+   "attempted_tasks": 24,
+   "sealed_units": 2141,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 2668,
+     "attempted": 24,
+     "units_per_attempted_task": 89.208,
+     "projected_units": 238007.8
+    }
+   },
    "projected_units_from_whole_supply": 238007.8,
    "status": "REACHABLE"
   },
@@ -1918,8 +1927,17 @@
    "unit": "supervised_tokens",
    "target": 74012.6745,
    "supply_tasks": 4542,
-   "measured_yield": 0.2083,
-   "measured_units_per_admitted_episode": 358.2,
+   "attempted_tasks": 24,
+   "sealed_units": 1791,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 4542,
+     "attempted": 24,
+     "units_per_attempted_task": 74.625,
+     "projected_units": 338946.8
+    }
+   },
    "projected_units_from_whole_supply": 338946.8,
    "status": "REACHABLE"
   },
@@ -1927,8 +1945,17 @@
    "unit": "supervised_tokens",
    "target": 98683.566,
    "supply_tasks": 12224,
-   "measured_yield": 0.125,
-   "measured_units_per_admitted_episode": 185.7,
+   "attempted_tasks": 24,
+   "sealed_units": 557,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 12224,
+     "attempted": 24,
+     "units_per_attempted_task": 23.208,
+     "projected_units": 283698.7
+    }
+   },
    "projected_units_from_whole_supply": 283698.7,
    "status": "REACHABLE"
   },
@@ -1936,8 +1963,17 @@
    "unit": "supervised_tokens",
    "target": 74012.6745,
    "supply_tasks": 4581,
-   "measured_yield": 0.5417,
-   "measured_units_per_admitted_episode": 209.1,
+   "attempted_tasks": 24,
+   "sealed_units": 2718,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 4581,
+     "attempted": 24,
+     "units_per_attempted_task": 113.25,
+     "projected_units": 518798.2
+    }
+   },
    "projected_units_from_whole_supply": 518798.2,
    "status": "REACHABLE"
   },
@@ -1945,8 +1981,17 @@
    "unit": "supervised_tokens",
    "target": 49341.783,
    "supply_tasks": 37880,
-   "measured_yield": 0.7917,
-   "measured_units_per_admitted_episode": 148.9,
+   "attempted_tasks": 24,
+   "sealed_units": 2830,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 37880,
+     "attempted": 24,
+     "units_per_attempted_task": 117.917,
+     "projected_units": 4466683.3
+    }
+   },
    "projected_units_from_whole_supply": 4466683.3,
    "status": "REACHABLE"
   },
@@ -1954,17 +1999,41 @@
    "unit": "supervised_tokens",
    "target": 74012.6745,
    "supply_tasks": 1928,
-   "measured_yield": 0.1613,
-   "measured_units_per_admitted_episode": 64.6,
-   "projected_units_from_whole_supply": 20088.5,
-   "status": "SHORTFALL"
+   "attempted_tasks": 124,
+   "sealed_units": 1292,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 368,
+     "attempted": 24,
+     "units_per_attempted_task": 29.25,
+     "projected_units": 10764.0
+    },
+    "single_step_gold_tool_call@v1": {
+     "supply_tasks": 1560,
+     "attempted": 100,
+     "units_per_attempted_task": 5.9,
+     "projected_units": 9204.0
+    }
+   },
+   "projected_units_from_whole_supply": 19968.0,
+   "status": "SHORTFALL_PROJECTED"
   },
   "H-N|training|tool_selection": {
    "unit": "supervised_tokens",
    "target": 74012.6745,
    "supply_tasks": 12499,
-   "measured_yield": 0.5417,
-   "measured_units_per_admitted_episode": 208.3,
+   "attempted_tasks": 24,
+   "sealed_units": 2708,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 12499,
+     "attempted": 24,
+     "units_per_attempted_task": 112.833,
+     "projected_units": 1410303.8
+    }
+   },
    "projected_units_from_whole_supply": 1410303.8,
    "status": "REACHABLE"
   },
@@ -1972,26 +2041,35 @@
    "unit": "scored_positions",
    "target": 630.0,
    "supply_tasks": 100,
-   "measured_yield": 0.14,
-   "measured_units_per_admitted_episode": 55.1,
-   "projected_units_from_whole_supply": 772.0,
-   "status": "REACHABLE"
+   "attempted_tasks": 100,
+   "sealed_units": 772,
+   "basis": "measured: the whole supply attempted",
+   "status": "REACHED"
   },
   "H-N|state_eval|schema_arguments": {
    "unit": "scored_positions",
    "target": 1800.0,
    "supply_tasks": 29,
-   "measured_yield": 0.3793,
-   "measured_units_per_admitted_episode": 96.6,
-   "projected_units_from_whole_supply": 1063.0,
-   "status": "SHORTFALL"
+   "attempted_tasks": 29,
+   "sealed_units": 1063,
+   "basis": "measured: the whole supply attempted",
+   "status": "SHORTFALL_EXHAUSTED"
   },
   "H-T|training|error_recovery": {
    "unit": "supervised_tokens",
    "target": 49341.783,
    "supply_tasks": 2668,
-   "measured_yield": 0.375,
-   "measured_units_per_admitted_episode": 1670.2,
+   "attempted_tasks": 24,
+   "sealed_units": 15032,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 2668,
+     "attempted": 24,
+     "units_per_attempted_task": 626.333,
+     "projected_units": 1671057.3
+    }
+   },
    "projected_units_from_whole_supply": 1671057.3,
    "status": "REACHABLE"
   },
@@ -1999,8 +2077,17 @@
    "unit": "supervised_tokens",
    "target": 74012.6745,
    "supply_tasks": 4542,
-   "measured_yield": 0.2083,
-   "measured_units_per_admitted_episode": 903.2,
+   "attempted_tasks": 24,
+   "sealed_units": 4516,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 4542,
+     "attempted": 24,
+     "units_per_attempted_task": 188.167,
+     "projected_units": 854653.0
+    }
+   },
    "projected_units_from_whole_supply": 854653.0,
    "status": "REACHABLE"
   },
@@ -2008,8 +2095,17 @@
    "unit": "supervised_tokens",
    "target": 98683.566,
    "supply_tasks": 12224,
-   "measured_yield": 0.1667,
-   "measured_units_per_admitted_episode": 2915.2,
+   "attempted_tasks": 24,
+   "sealed_units": 11661,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 12224,
+     "attempted": 24,
+     "units_per_attempted_task": 485.875,
+     "projected_units": 5939336.0
+    }
+   },
    "projected_units_from_whole_supply": 5939336.0,
    "status": "REACHABLE"
   },
@@ -2017,8 +2113,17 @@
    "unit": "supervised_tokens",
    "target": 74012.6745,
    "supply_tasks": 4581,
-   "measured_yield": 0.5833,
-   "measured_units_per_admitted_episode": 908.9,
+   "attempted_tasks": 24,
+   "sealed_units": 12724,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 4581,
+     "attempted": 24,
+     "units_per_attempted_task": 530.167,
+     "projected_units": 2428693.5
+    }
+   },
    "projected_units_from_whole_supply": 2428693.5,
    "status": "REACHABLE"
   },
@@ -2026,8 +2131,17 @@
    "unit": "supervised_tokens",
    "target": 49341.783,
    "supply_tasks": 37880,
-   "measured_yield": 0.8333,
-   "measured_units_per_admitted_episode": 398.1,
+   "attempted_tasks": 24,
+   "sealed_units": 7963,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 37880,
+     "attempted": 24,
+     "units_per_attempted_task": 331.792,
+     "projected_units": 12568268.3
+    }
+   },
    "projected_units_from_whole_supply": 12568268.3,
    "status": "REACHABLE"
   },
@@ -2035,17 +2149,41 @@
    "unit": "supervised_tokens",
    "target": 74012.6745,
    "supply_tasks": 1928,
-   "measured_yield": 0.2984,
-   "measured_units_per_admitted_episode": 752.4,
-   "projected_units_from_whole_supply": 432820.5,
+   "attempted_tasks": 124,
+   "sealed_units": 27837,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 368,
+     "attempted": 24,
+     "units_per_attempted_task": 252.583,
+     "projected_units": 92950.7
+    },
+    "single_step_gold_tool_call@v1": {
+     "supply_tasks": 1560,
+     "attempted": 100,
+     "units_per_attempted_task": 217.75,
+     "projected_units": 339690.0
+    }
+   },
+   "projected_units_from_whole_supply": 432640.7,
    "status": "REACHABLE"
   },
   "H-T|training|tool_selection": {
    "unit": "supervised_tokens",
    "target": 74012.6745,
    "supply_tasks": 12499,
-   "measured_yield": 0.5417,
-   "measured_units_per_admitted_episode": 904.4,
+   "attempted_tasks": 24,
+   "sealed_units": 11757,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 12499,
+     "attempted": 24,
+     "units_per_attempted_task": 489.875,
+     "projected_units": 6122947.6
+    }
+   },
    "projected_units_from_whole_supply": 6122947.6,
    "status": "REACHABLE"
   },
@@ -2053,19 +2191,19 @@
    "unit": "scored_positions",
    "target": 630.0,
    "supply_tasks": 100,
-   "measured_yield": 0.22,
-   "measured_units_per_admitted_episode": 1097.7,
-   "projected_units_from_whole_supply": 24150.0,
-   "status": "REACHABLE"
+   "attempted_tasks": 100,
+   "sealed_units": 24150,
+   "basis": "measured: the whole supply attempted",
+   "status": "REACHED"
   },
   "H-T|state_eval|schema_arguments": {
    "unit": "scored_positions",
    "target": 1800.0,
    "supply_tasks": 29,
-   "measured_yield": 0.3793,
-   "measured_units_per_admitted_episode": 385.1,
-   "projected_units_from_whole_supply": 4236.0,
-   "status": "REACHABLE"
+   "attempted_tasks": 29,
+   "sealed_units": 4236,
+   "basis": "measured: the whole supply attempted",
+   "status": "REACHED"
   }
  },
  "telemetry": {

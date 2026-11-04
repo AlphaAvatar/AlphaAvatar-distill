@@ -206,14 +206,14 @@ SESSION_MODULES = ("scripts/stages/stage-2/teacher_modes/tool_session.py",
                    "scripts/stages/stage-2/teacher_modes/tool_generation_plan.py")
 
 
-def generation_engine(root: Path = REPO) -> dict:
-    """The engine the pilot's generation runs (`l40s_check.generation_engine`): the hybrid lineage of the tool
+def generation_engine(root: Path = REPO, lineage: str = LINEAGE) -> dict:
+    """The engine a tool generation of ``lineage`` runs (`l40s_check.generation_engine`): the lineage of the tool
     generation protocol -- its teacher, per-mode template switch and sampling -- through `tool_session.mode_args`'
     memory fraction and `generation_driver.run_group`'s session limit, in this tree's runner and vLLM pins."""
     from stages.teacher_modes import l40s_check as LC
     root = Path(root)
     proto = json.loads((root / TGP.PROTOCOL.relative_to(REPO)).read_text())
-    li, ex = proto["lineages"][LINEAGE], proto["execution"]
+    li, ex = proto["lineages"][lineage], proto["execution"]
     return LC.generation_engine(model=li["model"], revision=li["revision"], modes=li["modes"],
                                 session_limit=ex["session_limit"], gpu_memory_utilization=ex["gpu_memory_utilization"],
                                 stop_ids=ex["stop_ids"], runner_source=(root / LC.RUNNER).read_text(),
@@ -221,15 +221,18 @@ def generation_engine(root: Path = REPO) -> dict:
                                 vllm_pins=(root / LC.VLLM_PINS).read_bytes())
 
 
-def generation_inputs(root: Path = REPO) -> tuple[str, ...]:
-    """The files the pilot's generation reads: the kind's bound records, its task file, the teacher identity (its
-    tokenizer and template), the runner and the vLLM pins."""
+def generation_inputs(root: Path = REPO, kind: str = "tool_pilot", lineage: str = LINEAGE) -> tuple[str, ...]:
+    """The files a tool generation of ``kind`` reads: the kind's bound records, its task file (the pilot plan's, or
+    the bounded plan's for the lineage), the teacher identity (its tokenizer and template), the runner and the vLLM
+    pins."""
     from stages.teacher_modes import l40s_check as LC
     from stages.teacher_modes import token_matched_phase as TM
-    plan = Path(root) / TM.KIND_RECORDS[TM.TOOL_PILOT_KIND][2]
-    tasks = (json.loads(plan.read_text()).get("tasks_file") or {}).get("path") if plan.is_file() else None
-    return tuple(TM.KIND_RECORDS[TM.TOOL_PILOT_KIND]) + ((tasks,) if tasks else ()) + (
-        LC.TEACHER_IDENTITY, LC.RUNNER, LC.VLLM_PINS)
+    recs = TM.KIND_RECORDS[kind]
+    plan = Path(root) / (recs[2] if kind == TM.TOOL_PILOT_KIND else recs[1])
+    doc = json.loads(plan.read_text()) if plan.is_file() else {}
+    tasks = ((doc.get("tasks_file") or {}).get("path") if kind == TM.TOOL_PILOT_KIND else
+             (((doc.get("lineages") or {}).get(lineage) or {}).get("tasks_file") or {}).get("path"))
+    return tuple(recs) + ((tasks,) if tasks else ()) + (LC.TEACHER_IDENTITY, LC.RUNNER, LC.VLLM_PINS)
 
 
 def generation_path(root: Path = REPO) -> tuple[str, ...]:
@@ -247,11 +250,14 @@ def generation_path(root: Path = REPO) -> tuple[str, ...]:
     return tuple(sorted(set(files) | set(SESSION_MODULES)))
 
 
-def l40s_generation_problems(root: Path = REPO) -> list[str]:
-    """Why the committed L40S check does not admit the pilot's generation (`l40s_check.generation_scope_problems`):
-    the pilot only generates, so only the check's generation measurement can admit it."""
+def l40s_generation_problems(root: Path = REPO, *, kind: str = "tool_pilot", lineage: str = LINEAGE) -> list[str]:
+    """Why the committed L40S check does not admit a tool generation (`l40s_check.generation_scope_problems`): a
+    generation-only kind is admitted on the check's generation measurement exactly when it runs the generation the
+    check measured -- the same engine, teacher, template and runner (Thinking-2507 is another teacher: refused). It
+    is a compatibility check: whether the kind may run is the grant's."""
     from stages.teacher_modes import l40s_check as LC
-    return LC.generation_scope_problems(generation_engine(root), generation_inputs(root), generation_path(root), root)
+    return LC.generation_scope_problems(generation_engine(root, lineage), generation_inputs(root, kind, lineage),
+                                        generation_path(root), root)
 
 
 # --- the pilot-only source admission -------------------------------------------------------------------------------
@@ -372,7 +378,7 @@ PILOT_DIR = "tool_pilot_hybrid"
 MIN_FREE_BYTES = 2 * 10 ** 9
 #: what the pilot writes inside its own directory, and nothing else may be there
 OWN = re.compile(r"^(pilot_[A-Za-z0-9-]+_r1_pass\d+\..+|pilot_[A-Za-z0-9-]+_r1\.jsonl|inputs|telemetry\.jsonl|"
-                 r"tool_session\.json)$")
+                 r"tool_session\.json|receipts\.json)$")
 #: Where the pilot runs (maintainer 2026-11-04: every Secure Cloud L40S that meets the runtime, price, resource and
 #: persistence requirements, no longer EUR-IS-2 alone). One L40S and NO network volume: the pilot reads nothing a
 #: volume holds (its tasks are a local asset, the teacher comes from the hub at its pinned revision), so a volume would
@@ -417,19 +423,25 @@ def storage_problems(out: Path, mount: Path, volume_gb: float | None, *, used=No
                  "required_free_bytes": MIN_FREE_BYTES, "pilot_dir": out.name, "pilot_dir_entries": len(names)}
 
 
-def resume_problems(src: Path) -> tuple[list[str], dict]:
+def resume_problems(src: Path, prefix: str = "pilot") -> tuple[list[str], dict]:
     """A dev-box copy of an earlier pilot session (`token_matched_phase.secure` pulled it) offered to a replacement
-    pod: every ``.done`` marker's shard present and hashing to it, nothing but the pilot's own files. The pod checks
-    the rest -- the pilot identity, the round input, the protocol, the runner (`tool_session.resumable`)."""
+    pod: every ``.done`` marker's shard present, hashing to it AND receipted (`token_matched_phase.receipt`: received
+    and verified off the pod), nothing but the pilot's own files. The pod checks the rest -- the pilot identity, the
+    round input, the protocol, the runner (`tool_session.resumable`)."""
     src, bad = Path(src), []
     if not src.is_dir():
         return [f"no secured pilot session at {src}"], {}
-    dones = sorted(src.glob("pilot_*_r1_pass*.part*.done"))
+    receipts = json.loads((src / "receipts.json").read_text()) if (src / "receipts.json").is_file() else {}
+    dones = sorted(src.glob(f"{prefix}_*_r*_pass*.part*.done"))
     for d in dones:
         shard = d.with_suffix(".jsonl")
         if not shard.is_file() or sha(shard) != d.read_text().strip():
             bad.append(f"{shard.name} does not hash to its marker")
-    foreign = [f.name for f in src.iterdir() if not OWN.match(f.name)]
+        elif (receipts.get(shard.name) or {}).get("sha256") != d.read_text().strip():
+            bad.append(f"{shard.name} has no receipt of its sha256: not confirmed received off the pod")
+    own = OWN if prefix == "pilot" else re.compile(rf"^({prefix}_[A-Za-z0-9-]+_r\d+_pass\d+\..+|{prefix}_[A-Za-z0-9-]+_r\d+"
+                                                   r"\.jsonl|inputs|telemetry\.jsonl|tool_session\.json|receipts\.json)$")
+    foreign = [f.name for f in src.iterdir() if not own.match(f.name)]
     if foreign:
         bad.append(f"{src} holds files the pilot did not write, e.g. {foreign[:3]}")
     return bad, {"path": str(src), "sealed_shards": len(dones),
@@ -1057,7 +1069,7 @@ def _source(task: dict) -> str:
 
 
 def report(session_dirs, *, study_identity: str | None = None, plan_path: Path = PLAN,
-           tasks_path: Path = TASKS) -> dict:
+           tasks_path: Path = TASKS, supply_by_shape: dict | None = None) -> dict:
     """The pilot's measurements from one or more secured copies of its session directory, complete or not:
 
     * every sealed record is read -- a group need not have a ``.complete`` -- after `generation_driver.sealed` verifies
@@ -1156,7 +1168,7 @@ def report(session_dirs, *, study_identity: str | None = None, plan_path: Path =
     gpu = [g for t in tel for g in ((t.get("gpu") or {}).get("gpus") or {}).values()]
     eng = [e for t in tel for e in t.get("engine") or []]
     turns = turn_telemetry(every)
-    return {"schema": "aadistill.stage2.teacher_modes.tool_pilot_report/v3", "state": state,
+    return {"schema": "aadistill.stage2.teacher_modes.tool_pilot_report/v4", "state": state,
             "pilot_plan_sha256": sha(plan_path), "identity": ident,
             "metrics": METRICS, "metric_contract": "docs/shared/METRIC_CONTRACT.md",
             "session_evidence": {d: ({k: r.get(k) for k in ("kind", "authorization", "terminal", "started_utc",
@@ -1165,7 +1177,7 @@ def report(session_dirs, *, study_identity: str | None = None, plan_path: Path =
                                      "shards alone") for d, r in sessions.items()},
             "modes": modes,
             "schema_arguments_non_thinking_supply": _schema_arguments_supply(doc, modes),
-            "formal_plan_projection": _projection(doc, modes),
+            "formal_plan_projection": _projection(doc, modes, supply_by_shape),
             "telemetry": {
                 "invocations": len(tel),
                 "peak_vram_mib": _measured(max((g["peak_memory_used_mib"] for g in gpu), default=None),
@@ -1215,29 +1227,54 @@ def _schema_arguments_supply(doc: dict, modes: dict) -> dict:
     return out
 
 
-def _projection(doc: dict, modes: dict) -> dict:
-    """Per formal cell (the pilot plan carries its target and its pool supply in tasks): the units the cell's WHOLE
-    supply would yield at the pilot's measured admission yield and units per admitted episode -- a projection from a
-    sample, never a measurement or a decision -- and REACHABLE or SHORTFALL against the target (UNMEASURED without an
-    admitted episode). No SHORTFALL is approved here."""
+def supply_from_plan(plan_path: Path) -> dict:
+    """``{"<mode>|<split>|<category>": {shape: tasks}}`` from a bounded generation plan (`tool_generation_plan`'s
+    ``supply_by_shape``): the per-shape supply a projection multiplies, which the frozen pilot plan does not carry."""
+    plan = json.loads(Path(plan_path).read_text())
+    return {f"{m}|{c['split']}|{c['category']}": c["supply_by_shape"]
+            for li in plan["lineages"].values() for m, mm in li["modes"].items() for c in mm["cells"]
+            if "supply_by_shape" in c}
+
+
+def _projection(doc: dict, modes: dict, supply_by_shape: dict | None = None) -> dict:
+    """Per formal cell (the pilot plan carries its target and its pool supply in tasks), three things kept apart:
+    the SEALED units (admitted episodes of the pilot, measured); when the pilot attempted the cell's WHOLE supply, that
+    is the cell's measured total (REACHED or SHORTFALL_EXHAUSTED: an exact gap, no projection); otherwise the WHOLE
+    SUPPLY's projection, shape by shape -- each shape's untried tasks at that shape's measured units per attempted
+    task (its admission yield x units per admitted episode) -- which needs the per-shape supply (``supply_by_shape``,
+    `supply_from_plan`); without it, or without an admitted episode of a shape, UNMEASURED. A projection from a sample,
+    never a measurement or a decision; no SHORTFALL is approved here."""
     out = {}
     for mode, cs in doc["modes"].items():
         got = (modes.get(mode) or {}).get("cells", {})
         for c in cs:
-            rows = [r for k, r in got.items() if k.startswith(f"{c['split']}|{c['category']}|")]
-            adm = sum(r["final"]["admitted"] for r in rows)
-            det = adm + sum(r["final"]["rejected"] for r in rows)
-            units = sum(r["supervised_tokens"] + r["scored_positions"] for r in rows)
-            if not adm:
-                out[f"{mode}|{c['split']}|{c['category']}"] = {"unit": c["unit"], "target": c["target"],
-                                                               "supply_tasks": c["supply"], "status": UNMEASURED}
+            key = f"{mode}|{c['split']}|{c['category']}"
+            rows = {k.split("|")[2]: r for k, r in got.items() if k.startswith(f"{c['split']}|{c['category']}|")}
+            det = {sh: r["final"]["admitted"] + r["final"]["rejected"] for sh, r in rows.items()}
+            sealed = round(sum(r["supervised_tokens"] + r["scored_positions"] for r in rows.values()), 1)
+            row = {"unit": c["unit"], "target": c["target"], "supply_tasks": c["supply"],
+                   "attempted_tasks": sum(det.values()), "sealed_units": sealed}
+            if sum(det.values()) >= c["supply"]:
+                out[key] = {**row, "basis": "measured: the whole supply attempted",
+                            "status": "REACHED" if sealed >= c["target"] else "SHORTFALL_EXHAUSTED"}
                 continue
-            proj = c["supply"] * (adm / det) * (units / adm)
-            out[f"{mode}|{c['split']}|{c['category']}"] = {
-                "unit": c["unit"], "target": c["target"], "supply_tasks": c["supply"],
-                "measured_yield": round(adm / det, 4), "measured_units_per_admitted_episode": round(units / adm, 1),
-                "projected_units_from_whole_supply": round(proj, 1),
-                "status": "REACHABLE" if proj >= c["target"] else "SHORTFALL"}
+            sup = (supply_by_shape or {}).get(key)
+            if not sup or any(rows.get(sh, {}).get("final", {}).get("admitted", 0) == 0 for sh in sup if sup[sh]):
+                out[key] = {**row, "status": UNMEASURED,
+                            "why": "no per-shape supply" if not sup else "a shape with no admitted episode"}
+                continue
+            by_shape = {}
+            proj = sealed
+            for sh, n in sup.items():
+                r = rows[sh]
+                units = r["supervised_tokens"] + r["scored_positions"]
+                per = units / det[sh]
+                by_shape[sh] = {"supply_tasks": n, "attempted": det[sh], "units_per_attempted_task": round(per, 3),
+                                "projected_units": round(units + (n - det[sh]) * per, 1)}
+                proj += (n - det[sh]) * per
+            out[key] = {**row, "basis": "projection by shape", "by_shape": by_shape,
+                        "projected_units_from_whole_supply": round(proj, 1),
+                        "status": "REACHABLE" if proj >= c["target"] else "SHORTFALL_PROJECTED"}
     return out
 
 
@@ -1264,6 +1301,7 @@ def main(argv=None) -> int:
     r.add_argument("--study-identity", default=None,
                    help="the run's authorization plan_hash, when tool_session.json is missing")
     r.add_argument("--write", required=True)
+    r.add_argument("--supply-plan", default=None, help="a bounded generation plan: its per-shape supply for the projection")
     a = ap.parse_args(argv)
     if a.cmd == "build":
         doc, tasks = build(Path(a.pool))
@@ -1298,8 +1336,9 @@ def main(argv=None) -> int:
         Path(a.write).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
         print(json.dumps(doc["hard_cap_check"]["options"], indent=1)[:3000])
     else:
-        Path(a.write).write_text(json.dumps(report([Path(x) for x in a.session], study_identity=a.study_identity),
-                                            indent=1) + "\n")
+        sup = supply_from_plan(Path(a.supply_plan)) if a.supply_plan else None
+        Path(a.write).write_text(json.dumps(report([Path(x) for x in a.session], study_identity=a.study_identity,
+                                                   supply_by_shape=sup), indent=1) + "\n")
     return 0
 
 
