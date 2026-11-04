@@ -30,6 +30,7 @@ Everything this experiment produced, in one place.
 * [`a_teacher_20261029_201915`](runs/a_teacher_20261029_201915/)
 * [`a_teacher_20261030_012648`](runs/a_teacher_20261030_012648/)
 * [`a_tool_pilot_20261104_140656`](runs/a_tool_pilot_20261104_140656/)
+* [`a_tool_pilot_20261104_164531`](runs/a_tool_pilot_20261104_164531/)
 * [`a_train_a1_20261102_165858`](runs/a_train_a1_20261102_165858/)
 * [`a_train_a1_20261102_183510`](runs/a_train_a1_20261102_183510/)
 * [`a_train_a1_20261102_184122`](runs/a_train_a1_20261102_184122/)

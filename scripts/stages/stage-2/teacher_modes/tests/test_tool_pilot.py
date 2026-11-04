@@ -35,7 +35,10 @@ def test_the_pilot_kind_claims_generation_only_and_its_committed_issue_path_pass
     assert TM.STUDY.claims_of("tool_pilot") == frozenset({"teacher_generation"})       #: never formal or training
     if not TPL.TASKS.is_file():
         pytest.skip("the pilot's task file is an artifact outside git")
-    assert TM.kind_cap_problems("tool_pilot", 2.50) == []
+    left = round(2.50 - TM.kind_spent("tool_pilot")["usd"], 4)          #: the cap is cumulative over attempts
+    assert TM.kind_cap_problems("tool_pilot", left) == []
+    if left < 2.50:
+        assert any("cumulative $2.5" in p for p in TM.kind_cap_problems("tool_pilot", 2.50))
     assert TM.kind_cap_problems("tool_pilot", 2.51) == ["$2.51 exceeds the grant's $2.5 for kind 'tool_pilot'"]
     got = TM.kind_conditions("tool_pilot")
     from stages.teacher_modes import l40s_check as LC

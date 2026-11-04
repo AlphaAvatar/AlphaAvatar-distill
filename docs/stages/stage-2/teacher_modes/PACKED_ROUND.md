@@ -769,6 +769,25 @@ by `tool_pilot.py application --live-position`).
   - `tool_pilot placement` reads each datacenter's L40S stock (read-only) as a hint for `--data-center-ids`.
   - The runner computes the provider deadline at each create, settles an answer without a pod id from the account,
     and rotates datacenter groups (section 8 of [`aadistill-gpu-experiments`](../../../../.agents/skills/aadistill-gpu-experiments/SKILL.md)).
+- **Pilot result** (`a_tool_pilot_20261104_164531`, COMPLETE, $0.4328 all-in; records in
+  [`runs/a_tool_pilot_20261104_164531/evidence/`](../../../../logs/stages/stage-2/teacher_modes/runs/a_tool_pilot_20261104_164531/evidence/tool_pilot_report.json)).
+  Teacher data admission under `tool_verification@v2`, never a benchmark score (METRIC_CONTRACT 2.2):
+
+  | mode | first-candidate admission rate | admission yield, up to two candidates | supervised tokens | scored positions |
+  | --- | --- | --- | --- | --- |
+  | non-thinking | 99/397 = 0.249 | 105/397 = 0.265 | 14,037 | 1,835 |
+  | thinking | 118/397 = 0.297 | 135/397 = 0.340 | 91,490 | 28,386 |
+
+  - By source and shape: Toucan full episodes admit 0.43 / 0.46 (non-thinking / thinking). Pivot full episodes
+    admit 0.16 / 0.19 and Pivot single-step gold calls 0.19 / 0.31.
+  - Refusals (`evidence/refusal_diagnosis.json`, re-verified on the dev box): the verifier behaved as registered, and no
+    harness defect was found. The refusals come from two causes:
+    - recorded-response replay has no answer for an unrecorded call, so the episode ends on a call;
+    - G2 gold disagreement, of which 20 / 23 single-step tasks differ only in a free-text argument's wording.
+  - The formal plan projects SHORTFALL for non-thinking `schema_arguments` training (20,088 of 74,013 supervised
+    tokens) and state evaluation (1,063 of 1,800 scored positions). Nothing is approved.
+  - Telemetry: peak 37,965 MiB at a memory fraction of 0.80; KV cache ~197k tokens, 0.99 used in thinking mode with
+    298 + 126 preemptions; decode 536-1,020 tokens/s; TTFT p50 45.6 s, p90 142 s.
 - **Storage until 2026-11-04T16Z** ([`pilot_storage_precheck_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json),
   read-only, superseded by the placement above): the provider reported `am5m373kuq` at 55 GB in EUR-IS-2, `4rhubprswo` beside it, 0 pods, but no used
   bytes; the records put at least 14.3 GB there (H1-PA's and the mixed calibration's checkpoints) plus Research A v1's

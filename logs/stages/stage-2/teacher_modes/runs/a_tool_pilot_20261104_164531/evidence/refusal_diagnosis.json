@@ -1,0 +1,215 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_pilot_refusal_diagnosis/v1",
+ "run_id": "a_tool_pilot_20261104_164531",
+ "method": "every sealed first candidate re-verified on the dev box under tool_verification@v2 (tool_episodes.verify, the pod's own check), its problems counted with turn indexes and quoted values normalized; single-step gold refusals split by what differs from the allowed gold set. Diagnostic only: no admission changed",
+ "first_candidate_problems": {
+  "H-N": {
+   "sealed": 397,
+   "problems": [
+    [
+     "turn k: the calls are not one of the step's allowed sets",
+     217
+    ],
+    [
+     "the episode ends on a call, not on an answer",
+     103
+    ],
+    [
+     "turn k: the backend did not answer every call",
+     101
+    ],
+    [
+     "a decision-step episode ends on its calls, and its last turn makes none",
+     51
+    ],
+    [
+     "the task's target_tools_called check failed",
+     44
+    ],
+    [
+     "turn k: schedule_hazardous_waste: $.waste_items[0]: dict is not string",
+     3
+    ],
+    [
+     "turn k: manage_gate_appointment: $.operation: '…' is not one of ['…', '…', '…']",
+     1
+    ],
+    [
+     "turn k: transfer_to_human_agent: $.issue_category: '…' is not one of ['…', '…', '…', '…']",
+     1
+    ],
+    [
+     "turn k: mytime-add_num: $.nums[0]: float is not integer",
+     1
+    ],
+    [
+     "turn k: mytime-add_num: $.nums[1]: float is not integer",
+     1
+    ],
+    [
+     "turn k: mytime-add_num: $.nums[2]: float is not integer",
+     1
+    ],
+    [
+     "turn k: mytime-add_num: $.nums[3]: float is not integer",
+     1
+    ],
+    [
+     "turn k: transfer_to_human_agent: $.category: '…' is not one of ['…', '…', '…']",
+     1
+    ],
+    [
+     "turn k: a tool call is not JSON (Extra data)",
+     1
+    ],
+    [
+     "turn k: a tool call is not JSON (Expecting '…' delimiter)",
+     1
+    ],
+    [
+     "turn k: scientific-method-server-scientificMethod: $: missing required '…'",
+     1
+    ],
+    [
+     "turn k: scientific-method-server-scientificMethod: $.experiment: missing required '…'",
+     1
+    ]
+   ],
+   "stops": [
+    [
+     "eos",
+     483
+    ]
+   ]
+  },
+  "H-T": {
+   "sealed": 397,
+   "problems": [
+    [
+     "turn k: the calls are not one of the step's allowed sets",
+     197
+    ],
+    [
+     "the episode ends on a call, not on an answer",
+     105
+    ],
+    [
+     "turn k: the backend did not answer every call",
+     103
+    ],
+    [
+     "a decision-step episode ends on its calls, and its last turn makes none",
+     58
+    ],
+    [
+     "the task's target_tools_called check failed",
+     29
+    ],
+    [
+     "turn k: stopped by '…', not its end of turn",
+     5
+    ],
+    [
+     "turn k: the think block is not closed before the first call",
+     3
+    ],
+    [
+     "turn k: metacognitive-monitoring-server-metacognitiveMonitoring: $: missing required '…'",
+     2
+    ],
+    [
+     "turn k: leetcode-search_problems: $.category: '…' is not one of ['…', '…', '…', '…', '…', '…', '…']",
+     1
+    ],
+    [
+     "turn k: sequential-thinking-sequentialthinking: $.revisesThought: below the minimum 1",
+     1
+    ],
+    [
+     "turn k: sequential-thinking-sequentialthinking: $.branchFromThought: below the minimum 1",
+     1
+    ],
+    [
+     "turn k: sequential-thinking-tools-sequentialthinking_tools: $.revises_thought: below the minimum 1",
+     1
+    ],
+    [
+     "turn k: sequential-thinking-tools-sequentialthinking_tools: $.branch_from_thought: below the minimum 1",
+     1
+    ],
+    [
+     "turn k: a tool call is not JSON (Expecting '…' delimiter)",
+     1
+    ],
+    [
+     "turn k: mytime-add_num: $.nums[0]: float is not integer",
+     1
+    ],
+    [
+     "turn k: mytime-add_num: $.nums[1]: float is not integer",
+     1
+    ],
+    [
+     "turn k: mytime-add_num: $.nums[2]: float is not integer",
+     1
+    ],
+    [
+     "turn k: mytime-add_num: $.nums[3]: float is not integer",
+     1
+    ],
+    [
+     "turn k: a tool call is not JSON (Extra data)",
+     1
+    ],
+    [
+     "turn k: scientific-method-server-scientificMethod: $: missing required '…'",
+     1
+    ],
+    [
+     "turn k: scientific-method-server-scientificMethod: $.experiment: missing required '…'",
+     1
+    ],
+    [
+     "turn k: text after its last call ('…'); V1 allows only whitespace",
+     1
+    ]
+   ],
+   "stops": [
+    [
+     "eos",
+     490
+    ],
+    [
+     "degeneration",
+     4
+    ],
+    [
+     "length_limited",
+     1
+    ]
+   ]
+  }
+ },
+ "single_step_gold_refusals": {
+  "H-N": {
+   "single_step": 194,
+   "gold_mismatch_tools": 119,
+   "admitted": 33,
+   "gold_mismatch_values": 22,
+   "gold_mismatch_free_text_only": 20
+  },
+  "H-T": {
+   "single_step": 194,
+   "gold_mismatch_free_text_only": 23,
+   "admitted": 51,
+   "gold_mismatch_tools": 89,
+   "gold_mismatch_values": 31
+  }
+ },
+ "reading": {
+  "recorded_execution": "a call the recorded-response table has no answer for leaves the episode ending on a call (protocol False) and recorded_execution False: the coverage limit of replay, by design",
+  "step_gold": "exact canonical equality with the source's recorded call (G2 agreement): other tool, no call, a different value, or a free-text argument (> 30 characters) worded differently",
+  "harness": "the verifier behaved as registered; no mechanical defect found"
+ },
+ "authorizes": "nothing"
+}

@@ -15657,3 +15657,45 @@ on a paid pod.
   - No cap moved and nothing was rebooked.
 - **Revisit when:** GraphQL's retirement date is fixed. The provider's polling, terminate fallback and the placement
   read are GraphQL.
+
+
+## 2026-11-04 (UTC) — Research A tool pilot `a_tool_pilot_20261104_164531`: COMPLETE, $0.4328 all-in
+
+- **Run.** The artifact was issued at 16:45:31 with a hard cap of $2.50. Together with attempt 1's $0.00 it fits the
+  cumulative $2.50.
+  - Session commit `766acb69` on code `b0edfd55`; bundle `e46f5849…`.
+  - Acquisition window: 144 × 300 s. Attempts 1-3 met a capacity refusal; attempt 4 created `ugfmxda8y1tuyo` at
+    17:01:52, $1.09/h, on any Secure Cloud datacenter with no volume.
+  - Setup took 2.6 min. The driver ran 17:07-17:23 and ended ALL_DONE.
+  - Teardown 17:25:15: the provider confirms the pod gone and the watchdog ended `pod_gone`. The account holds 0 pods
+    and only 4rhubprswo and am5m373kuq.
+  - runpodctl 3.0.1 was used, and `--terminate-after` was not passed.
+- **Measured** (teacher data admission, never a benchmark score; `evidence/tool_pilot_report.json` v3).
+
+  | mode | first-candidate admission rate | admission yield, up to two candidates | supervised tokens | scored positions |
+  | --- | --- | --- | --- | --- |
+  | non-thinking | 99/397 | 105/397 | 14,037 | 1,835 |
+  | thinking | 118/397 | 135/397 | 91,490 | 28,386 |
+
+  - Candidate 1 was required for 298 and 279 tasks and admitted 6 and 17.
+  - Level pass rates at candidate 0 (non-thinking / thinking):
+
+    | level | non-thinking | thinking |
+    | --- | --- | --- |
+    | protocol | 0.610 | 0.574 |
+    | schema validity | 0.980 | 0.985 |
+    | gold tool call match | 45/262 | 65/262 |
+    | recorded execution | 59/160 | 58/161 |
+
+  - Task success: UNMEASURED.
+  - Telemetry: peak VRAM 37,965 MiB; decode 536-1,020 tokens/s; TTFT p50 45.6 s.
+- **Refusals diagnosed at $0** (`evidence/refusal_diagnosis.json`). The verifier behaved as registered, so no harness
+  defect was found. There are two causes:
+  - replay coverage: an unrecorded call gets no answer, so the episode ends on a call;
+  - G2 gold disagreement: another tool, no call, another value, or a free-text argument worded differently. The last
+    covers 20 and 23 single-step tasks.
+  - No admission rule was changed. That would be a new verification version.
+- **SHORTFALL projected, not approved:** non-thinking `schema_arguments` training (20,088 of 74,013 supervised tokens)
+  and state evaluation (1,063 of 1,800 scored positions).
+- **Revisit when:** the maintainer reviews the pilot. Open questions: formal tool generation's cap re-priced from these
+  rates; the two SHORTFALL cells; whether G2 on free-text arguments and replay coverage stay as registered.

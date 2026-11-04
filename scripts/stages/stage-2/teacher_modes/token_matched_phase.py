@@ -424,7 +424,9 @@ def products_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     bad = sorted(k for k, v in got.items() if not v.get("ok"))
     if bad or ctx.evidence.get("listing_unknown"):
         return False, f"not secured off-pod: {bad[:6]} {ctx.evidence.get('listing_unknown') or ''}"
-    return True, f"{len(got)} sealed shard(s) secured off-pod; everything is on the network volume"
+    where = ("the pod's disk goes with it" if _kind(ctx) == TOOL_PILOT_KIND
+             else "everything is on the network volume")
+    return True, f"{len(got)} sealed shard(s) secured off-pod; {where}"
 
 
 def the_kind_records_are_the_bound_ones(ctx) -> tuple[bool, str]:

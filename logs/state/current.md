@@ -9,9 +9,14 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A TOOL PILOT: RE-AUTHORIZED ACROSS DATACENTERS (2026-11-04; maintainer "GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正").**
-The 2026-11-04 attempt `a_tool_pilot_20261104_140656` ended at $0 (no L40S in EUR-IS-2; artifact consumed). The pilot
-now runs on any Secure Cloud L40S datacenter.
+**RESEARCH A TOOL PILOT: COMPLETE (`a_tool_pilot_20261104_164531`, $0.4328; maintainer "GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正").**
+Attempt 1 (`a_tool_pilot_20261104_140656`) ended at $0 (no L40S in EUR-IS-2). Attempt 2, on any Secure Cloud L40S,
+was created after 15 minutes and finished ALL_DONE in 23.4 billed minutes. The pod is confirmed gone.
+- **Measured:** first-candidate admission rate 99/397 (non-thinking) and 118/397 (thinking); admission yield of up to
+  two candidates 105/397 and 135/397.
+- **Supervised tokens before packing:** 14,037 and 91,490.
+- **SHORTFALL projected for non-thinking `schema_arguments`** (training and state evaluation), not approved.
+- **Owner:** `PACKED_ROUND.md` section 8, "Pilot result"; awaiting the maintainer's review.
 - **Storage and placement:** no network volume. The session writes to the pod's container disk, sealed shards are
   pulled to the dev box on every poll, and a replacement pod resumes from that copy (`--resume-from`).
 - **Cap:** $2.50 cumulative over every attempt (`token_matched_phase.kind_cap_problems`); each attempt is a new run
@@ -4496,7 +4501,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$780.9633` spent of `$868.0000`, leaving `$87.0367` |
+| project cap | `$781.3961` spent of `$868.0000`, leaving `$86.6039` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 
