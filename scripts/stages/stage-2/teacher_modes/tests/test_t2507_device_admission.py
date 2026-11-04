@@ -209,6 +209,21 @@ def test_only_the_hybrid_takes_the_generation_scoped_gate(monkeypatch):
     assert seen == [("tool_generation", "hybrid")]
 
 
+def test_the_pod_recomputes_the_conditions_without_the_pool(monkeypatch):
+    """Attempt 1 (2026-11-04): the pod's setup recomputes `kind_conditions` from its own files and refused on the
+    pool it never holds. The conditions read only the plan and the bound task file; the pool is the issue's check."""
+    plan = json.loads((TM.REPO_ROOT / "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json").read_text())
+    if not (TM.REPO_ROOT / plan["lineages"]["thinking_2507"]["tasks_file"]["path"]).is_file():
+        pytest.skip("the bound task file is an artifact outside git")
+
+    def no_pool(*a, **k):
+        raise FileNotFoundError("data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json does not exist")
+    monkeypatch.setattr(TGP, "verified", no_pool)
+    got = TM.kind_conditions("tool_generation_t2507")
+    assert f"record:{TM.KIND_RECORDS['tool_generation_t2507'][1]}" in got
+    assert any("admitted pool" in b for b in TM.issue_problems("tool_generation_t2507"))
+
+
 # --- the formal source admission ------------------------------------------------------------------------------
 
 REC = TSA.load()

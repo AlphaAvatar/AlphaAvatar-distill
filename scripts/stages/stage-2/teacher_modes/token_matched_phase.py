@@ -207,19 +207,17 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
         if bad:
             raise SE.AuthorizationError("the tool pilot is not ready: " + "; ".join(bad))
     if kind in TOOL_GENERATION_KINDS.values():
-        import json
+        #: what BOTH sides hold: the plan and its lineage's bound task file (the pod never holds the pool, P8.4; the
+        #: dev box checks the plan against the pool at issue, `issue_problems`)
         from stages.teacher_modes import tool_generation_plan as TGP
-        from stages.teacher_modes import tool_pool as TP
         from stages.teacher_modes import tool_source_admission as TSA
         lineage = next(li for li, k in TOOL_GENERATION_KINDS.items() if k == kind)
         try:
-            plan, man, by_id = TGP.verified()  #: the plan against the ADMITTED pool on the dev box (data/...)
-            tf = REPO_ROOT / plan["lineages"][lineage]["tasks_file"]["path"]
-            tasks = [json.loads(x) for x in tf.read_text().splitlines() if x.strip()]
-        except (TGP.PlanIdentityError, TP.PoolIdentityError, FileNotFoundError, OSError, KeyError, TypeError) as exc:
+            plan, by_id = TGP.verified_bound(lineage=lineage)
+        except (TGP.PlanIdentityError, FileNotFoundError, OSError, KeyError, TypeError) as exc:
             raise SE.AuthorizationError(f"the bounded generation plan is not verified: {exc!r}") from exc
         bad = TSA.problems(TSA.load(Path(root) / TSA.RECORD.relative_to(REPO_ROOT)),
-                           pool_content_sha256=man["content_sha256"], tasks=tasks)
+                           pool_content_sha256=plan["pool"]["content_sha256"], tasks=by_id.values())
         if bad:
             raise SE.AuthorizationError("the formal source admission refuses: " + "; ".join(bad))
     out = {"l40s_check_record_sha256": P1._sha(P1.CHECK_RECORD, root)}
@@ -228,6 +226,26 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
     for rel in KIND_RECORDS.get(kind, ()):
         out[f"record:{rel}"] = P1._sha(rel, root)
     return out
+
+
+def issue_problems(kind: str, root: Path = REPO_ROOT) -> list[str]:
+    """What only the dev box can check, at issue (empty when it passes): a bounded tool generation's plan against the
+    ADMITTED canonical pool (`tool_generation_plan.verified`: every split file, the orders, the cells), whose content
+    the formal source admission must name. Not part of `kind_conditions`, which the pod recomputes from its own files
+    and which therefore reads only the plan and the lineage's bound task file (attempt 1 of tool_generation_t2507,
+    2026-11-04: the pod's setup refused on the pool it never holds)."""
+    if kind not in TOOL_GENERATION_KINDS.values():
+        return []
+    from stages.teacher_modes import tool_generation_plan as TGP
+    from stages.teacher_modes import tool_pool as TP
+    from stages.teacher_modes import tool_source_admission as TSA
+    try:
+        _, man, _ = TGP.verified()
+    except (TGP.PlanIdentityError, TP.PoolIdentityError, FileNotFoundError, OSError, KeyError) as exc:
+        return [f"the bounded generation plan is not verified against the admitted pool: {exc!r}"]
+    return [f"the formal source admission: {b}" for b in
+            TSA.problems(TSA.load(Path(root) / TSA.RECORD.relative_to(REPO_ROOT)),
+                         pool_content_sha256=man["content_sha256"])]
 
 
 #: kinds whose teacher no committed L40S record measured: their formal session admits the device first
@@ -902,7 +920,7 @@ def main(argv=None) -> int:
             ap.add_argument("--out", default=None)
             ap.add_argument("--note", default="")
             x = ap.parse_args(rest[1:])
-            bad = kind_cap_problems(kind, x.hard_cap_usd)
+            bad = kind_cap_problems(kind, x.hard_cap_usd) + issue_problems(kind)
             if bad:
                 print(f"REFUSED at $0: {bad}")
                 return 11

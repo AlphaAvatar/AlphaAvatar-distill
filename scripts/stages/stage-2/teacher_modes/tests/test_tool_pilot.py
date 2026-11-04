@@ -936,9 +936,9 @@ def test_the_committed_pilot_passes_the_generation_scope_and_the_whole_phase_gat
     #: so its gate is the in-session device admission's record instead (review of a143b7ed, section 4)
     pool = TM.REPO_ROOT / json.loads(TPL.TGP.PROTOCOL.read_text())["pool"]["dir"] / "pool.json"
     if not pool.is_file():
-        with pytest.raises(SE.AuthorizationError, match="plan is not verified"):
-            TM.kind_conditions("tool_generation")
+        assert any("admitted pool" in b for b in TM.issue_problems("tool_generation"))
         return
+    assert TM.issue_problems("tool_generation") == [] == TM.issue_problems("tool_generation_t2507")
     hybrid, t2507 = TM.kind_conditions("tool_generation"), TM.kind_conditions("tool_generation_t2507")
     assert "l40s_generation_scope_sha256" in hybrid and "l40s_generation_scope_sha256" not in t2507
     assert f"record:{TM.IN_SESSION_DEVICE_ADMISSION['tool_generation_t2507']}" in t2507
