@@ -32,7 +32,7 @@
   "approved_exceptions_note": "the maintainer's recorded approval of one failing quota or share of one arm: {arm, quota, approved_by, date, reason}; with the generation plan's approved_shortfalls (a tool cell's SHORTFALL) the only way a failing selection is admitted. Empty: nothing is approved",
   "superseded": "stage3_packing.share_check (per type within 2% of 1/6 of the supporting total, fluid 49-51% of the total), introduced by the agent at 77be6e13 without a maintainer decision, looser than the registered rule and blind to a shortfall: withdrawn 2026-11-04 (audit/proportion_tolerance_audit.json)",
   "report_binding": "maintainer 2026-11-04 (review of 647eea0e, P1): a proportion report is bound to the selection it validated -- packed_packs.selection_identity over every document's id, data type, category, unit, supervised tokens and token content (ids and supervision mask) per split, the tool cells with their targets and approvals, the sources read and the quota designs (token_matched_design.json, six_category_design.json) -- and sealed (report_sha256). admit refuses another selection's report, an edited report and any drift after the validation; the manifest records selection_sha256",
-  "pack_content": "maintainer 2026-11-04 (review of 647eea0e, P1): pack records packed_content_sha256 -- the token ids, supervision mask and content mask of every sequence, named, dtype- and shape-normalized, with the training-sequence count -- from the sequences the packing produced, before writing them. verify_pack (the training binding) recomputes it from blocks.npz and requires it, then reads every document back from its final placement, checks it against the manifest's content sha256 and re-packs them at the design's spec, which must reproduce every sequence and placement exactly; the bound lineage carries packed_content_sha256 and the manifest's content_sha256 beside the files' sha256"
+  "pack_content": "maintainer 2026-11-04 (review of 647eea0e, P1; truncation, review of 2468c1aa): pack records packed_content_sha256 -- the token ids, supervision mask and content mask of every sequence, named, dtype- and shape-normalized, with the training-sequence count -- from the sequences the packing produced, before writing them; the admission freezes the documents themselves beside the manifest (data_documents.npz, its sha256 in the manifest, schema data_manifest/v2). verify_pack (the training binding) recomputes the identity from blocks.npz and requires it, then checks the frozen documents against the manifest and re-packs them by the formal algorithm at the design's spec -- truncation of an overlong document and the prefix restarts included -- which must reproduce every sequence and placement; the bound lineage carries packed_content_sha256 and the manifest's content_sha256 beside the files' sha256"
  },
  "authorizes": "nothing",
  "full_search": {
@@ -186,11 +186,12 @@
    "2026-11-03 second review repairs: bounded generation plan (tool_generation_plan.py; plans/tool_generation_plan_dry_run.json), pool content identity verified at every read, T4 exact prompts and tool identities, fail-closed JSON Schema validation, verified reference caches incl. T3, the Pivot converter (audit/pivot_conversion_v1.json), audit/tool_pool_dry_run_v3.json, the position reconciliation of a_search's closeout, the consumer chain regression",
    "2026-11-03 third review repairs: per-category gates (packed_inputs.tool_cell: a calibration cell or a state evaluation mode is met only when every category meets its share; an unapproved SHORTFALL or THIN freezes nothing; bounded_plan.approved_shortfalls), the consumers' identity through tool_generation_plan.verified (pool files, orders, content, pool.json bytes, protocol, design, cells), the pool's content identity over its orders; audit/schema_arguments_shortfall.json",
    "2026-11-04 review of fc6fa1d6: selection, proportion validation (core aadistill.data.mixture.validate_proportions), admission / freeze (data_manifest.json) and sequential packing separated in packed_packs.py; verify_pack for the training binding; the agent's share_check withdrawn for the registered tolerance (audit/proportion_tolerance_audit.json); schema_arguments option 1 vs option 2 measured (audit/schema_arguments_options.json)",
-   "2026-11-04 review of 647eea0e: the admission binds the proportion report to the selection's content identity (packed_packs.selection_identity / report_problems); the training binding verifies the actual packed tokens and supervision (packed_content_sha256, documents against the manifest, exact re-packing); single_step_gold_tool_call@v1 implemented at $0 (aadistill.data.tool_calls unexecuted_final_call, tool_episodes, tool_sources_pivot, tool_pool schema v4 order tiers, tool_admission census; audit/single_step_supply_audit.json); the token identity audit's intermittent failure diagnosed and repaired; the L40S pilot's application prepared (not authorized)"
+   "2026-11-04 review of 647eea0e: the admission binds the proportion report to the selection's content identity (packed_packs.selection_identity / report_problems); the training binding verifies the actual packed tokens and supervision (packed_content_sha256, documents against the manifest, exact re-packing); single_step_gold_tool_call@v1 implemented at $0 (aadistill.data.tool_calls unexecuted_final_call, tool_episodes, tool_sources_pivot, tool_pool schema v4 order tiers, tool_admission census; audit/single_step_supply_audit.json); the token identity audit's intermittent failure diagnosed and repaired; the L40S pilot's application prepared (not authorized)",
+   "2026-11-04 review of 2468c1aa: verify_pack re-derives the packed sequences from the frozen documents (data_documents.npz, manifest v2), so truncate=True is verified, not refused; tool_verification@v2 enforces V1's tail rule on every call turn (audit/v1_tail_audit.json: 0 of the hybrid's 22 recorded call turns affected); the tool pilot's execution preparation: kind tool_pilot (its refusals and the L40S-only card), the frozen cells and task file (plans/tool_pilot_plan.json), tool_session --pilot (one round, second candidates for refusals, resume without regeneration), GPU and engine telemetry (run_battery --engine-metrics), the runner's hard-cap check, the pilot-only source admission (unsigned), the re-verified application"
   ],
   "pending": [
    "the maintainer's source admission (Toucan, Pivot Conversational), then tool_pool@v1 under data/ and the canonical plan over it (plans/tool_generation_plan.json)",
-   "the L40S pilot (logs/budget/applications/research_a_tool_pilot_2026-11-04: application only, not authorized) measuring pass rates per mode, category and episode shape, turn lengths, throughput, peak VRAM and model loads, replacing the plan's priors before the cap is final",
+   "the L40S pilot: the maintainer's signature on its source admission, its cap in the grant (option A $1.80 or B $2.50), then its session (logs/budget/applications/research_a_tool_pilot_2026-11-04)",
    "teacher-native tool generation (hybrid both modes; Thinking-2507): paid, unauthorized",
    "calibration v2 and state_eval_hybrid@v2 built and frozen (packed_inputs.py build)",
    "a GPU measurement of the packed path (first state evaluation / first DEPTH round)",
@@ -206,8 +207,19 @@
      "expected": 1.14,
      "upper": 1.64
     },
-    "proposed_hard_cap": 1.8,
-    "basis": "logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json: 794 hybrid tasks, one round, priced by the plan's own terms; NOT authorized"
+    "hard_cap_options": {
+     "A": {
+      "cap": 1.8,
+      "driver_minutes": 27,
+      "all_in_at_1.19_per_h": 1.79
+     },
+     "B": {
+      "cap": 2.5,
+      "driver_minutes": 55,
+      "all_in_at_1.19_per_h": 2.5
+     }
+    },
+    "basis": "logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json: 794 mode-specific runs of 397 tasks, one round, priced by the plan's terms; the caps by the shared runner's own hard deadline and all-in (tool_pilot.runner_cap); NOT authorized"
    },
    "1_pool_and_generation": {
     "usd": {
@@ -245,7 +257,7 @@
    }
   },
   "storage": "4rhubprswo $0.82/day (350 GB) holds the v2 Top-1; the packed search needs a volume of similar size in the GPU's datacenter",
-  "conclusion": "phases 1 and 2 together: $36.15 expected, $53.15 upper, caps $58.46 -- more than the $30.05 left: the Full Search Authorization needs a raised project cap; the pilot ($1.14 expected, cap $1.80) is a separate application"
+  "conclusion": "phases 1 and 2 together: $36.15 expected, $53.15 upper, caps $58.46 -- more than the $30.05 left: the Full Search Authorization needs a raised project cap; the pilot ($1.14 expected; cap option A $1.80 or B $2.50) is a separate application"
  },
  "decisions_owed_to_the_maintainer": [
   "tool-calling source admission: Toucan-1.5M SFT and Pivot Conversational are prepared as priority candidates (maintainer 2026-11-03; not admitted, not a generation authorization); Pivot Function-Calling not adopted; Nemotron-SFT-Agentic-v4 deferred; Glaive / xLAM isolation references only; the category shares (proposed, used unchanged by the plan), the 6,144-token prompt bound, the non-thinking state-evaluation floor",
@@ -255,7 +267,7 @@
   "a registered tool-calling evaluation (eval-set-2) for closed-loop success",
   "a raised project cap for the Full Search Authorization (bounded generation $3.72 expected / $11.01 upper, cap $12.11; packed search $32.43 / $42.14, cap $46.35; $30.05 left)",
   "the lifecycle of volume 4rhubprswo (the v2 Top-1's only copy stays protected until a verified copy off the volume exists)",
-  "the L40S tool pilot (logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json): GPU and spend not authorized; the packed 8,192-token forward / DEPTH / training GPU validation is a separate request"
+  "the L40S tool pilot (logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json, re-verified after the $0 execution preparation): sign the pilot-only source admission (audit/tool_pilot_source_admission.json), amend the grant with session_hard_caps_usd.tool_pilot, choose option A ($1.80, 27 driver minutes, the expected workload) or B ($2.50, 55 minutes, the upper workload in one session); GPU and spend not authorized; the packed 8,192-token forward / DEPTH / training GPU validation is a separate request"
  ],
  "gpu_execution_request": {
   "operation": "research_a_packed_hybrid_full_search (packed_full_search.py), after calibration v2 and state_eval_hybrid@v2 exist; its level-0 first state evaluation and first DEPTH round are the GPU measurement of the packed path (throughput, scored rows/s, peak VRAM, repeatability), not a separate session",

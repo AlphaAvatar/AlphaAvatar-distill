@@ -402,12 +402,18 @@
   },
   "verification": {
    "where": "the dev box, pure Python, one verifier for every teacher, no teacher-specific leniency",
+   "version": "tool_verification@v2",
+   "version_history": {
+    "tool_verification@v1": "through 2468c1aa: V1's tail rule (below) enforced only on a single-step gold tool call's turn; nothing was generated or admitted under it",
+    "tool_verification@v2": "maintainer 2026-11-04 (review of 2468c1aa): V1's tail rule enforced on EVERY assistant turn that makes a call, as registered; an answer turn without a call is not subject to it. Recorded with every admission (tool_admission.json :: verification_version); historical frozen data and measurement identities are not re-verified or rewritten"
+   },
    "V1_protocol": "natural termination, no degeneration stop; thinking modes close </think> before any call, non-thinking keeps the preclosed empty think; every <tool_call> block is JSON with name and arguments; nothing but whitespace after the last </tool_call>",
    "V2_schema": "the name is an offered tool; the arguments validate against its JSON Schema (required, types, enums, nesting, no undeclared field where additionalProperties is false)",
    "V3_gold_calls": "each step's call set equals the gold set (order-free for parallel calls) under the task's declared argument variants (G2); an executable task's final state equals its ground truth (G1)",
    "V4_execution": "the backend answered every call: recorded or executed response, or the step's scripted error; an off-script call ends the episode (refused, counted per teacher)",
    "V5_task_success": "the final turn makes no call and passes the task's final check (no_call; contains_all values from the tool results or the gold answer; number; asks_for the missing parameter)",
-   "admission": "an episode enters training whole only if V1-V5 pass on every turn; otherwise the task's next candidate, then nothing"
+   "admission": "an episode enters training whole only if V1-V5 pass on every turn; otherwise the task's next candidate, then nothing",
+   "V1_tail_rule_scope": "the tail rule applies to each assistant turn that contains a <tool_call> block: after its last </tool_call> only whitespace and the stop token's text may follow; a final-answer turn (no call) is checked by the other V1 terms only (tool_episodes.text_after_last_call)"
   },
   "episode_shapes": {
    "_contract": "How an episode ends and what it can verify, per registered shape (tool_episodes.EPISODE_SHAPES executes it; a test holds the two equal). A new shape is a protocol version, registered here before any task of it enters a pool.",

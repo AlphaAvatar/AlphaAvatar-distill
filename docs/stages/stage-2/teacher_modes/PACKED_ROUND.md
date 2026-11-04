@@ -42,6 +42,13 @@
     admission reads the registered one (`audit/proportion_tolerance_audit.json`).
   - Option 1 (call-only gold episodes) and option 2 (WorkBench) for the non-thinking schema_arguments SHORTFALL are
     compared at $0 (`audit/schema_arguments_options.json`); neither is implemented.
+- **The maintainer's fifth review, of `2468c1aa` (2026-11-04),** accepted the identity hardening and the single-step
+  protocol and asked for the following, done at $0 (sections 5, 7, 8):
+  - `verify_pack` verifies truncated documents instead of refusing them (the frozen documents re-packed);
+  - V1's tail rule on every turn that makes a call (`tool_verification@v2`), with a $0 audit;
+  - the L40S pilot's execution preparation: its own kind and refusals, the frozen cells and task file, the session
+    wiring, telemetry, the runner's hard-cap check, the pilot-only source admission (unsigned) and a re-verified
+    application. Nothing is authorized.
 - **The maintainer's fourth review, of `647eea0e` (2026-11-04),** accepted and froze the packing protocol, the
   pre-packing accounting and the four-step decoupling, and asked for the following, done at $0 (sections 5, 7, 8, 10):
   - the admission takes only the proportion report of the selection it admits (`selection_identity`);
@@ -70,6 +77,9 @@
 | [`audit/single_step_supply_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/single_step_supply_audit.json) | the single-step implementation's dry pool (schema v4) against v3: every earlier task's admission, split and order; `schema_arguments` supply per split and shape; the plan's `schema_arguments` cells; reach at the priors (`schema_arguments_audit.py --supply-pool`) |
 | [`audit/a2_recovery_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/a2_recovery_audit.json) | A2-6cat's one selected task outside A2's pack, recovered from the frozen records, with the counts it completes (`packed_packs.py --recovery-audit`) |
 | [`budget/applications/research_a_tool_pilot_2026-11-04/application.json`](../../../../logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json) | the proposed L40S tool pilot: sample, measurements, price, hard cap, stop conditions; authorizes nothing (`tool_generation_plan.py --pilot-application`) |
+| [`plans/tool_pilot_plan.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_pilot_plan.json) | the pilot's frozen cells: exact task ids per mode and cell, every task's sha256, the task file's sha256, the pool, protocol, design and plan cells it binds (`tool_pilot.py build`) |
+| [`audit/tool_pilot_source_admission.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json) | Toucan SFT and Pivot Conversational admitted for the pilot's measurement only; PREPARED, unsigned (`tool_pilot.py admission`) |
+| [`audit/v1_tail_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/v1_tail_audit.json) | V1's tail rule on the hybrid's recorded tool-call turns (`tool_admission.py --v1-tail-audit`) |
 | [`validations/packed_round/environment_blocked_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/environment_blocked_20261104.json) | the 25 simulator-restore tests the core suite could not run (11 GiB free, 20 GiB gate unchanged): ENVIRONMENT_BLOCKED, not verified |
 | [`audit/proportion_tolerance_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/proportion_tolerance_audit.json) | the registered proportion tolerance on every arm's real data, beside the withdrawn share check (`packed_packs.py --proportion-audit`) |
 | [`audit/experiment_suite_baseline_20261103.json`](../../../../logs/stages/stage-2/teacher_modes/audit/experiment_suite_baseline_20261103.json) | the four experiment-suite failures run at `b7ee0c93` and `c861d704`: pre-existing, with their causes |
@@ -355,6 +365,17 @@ SHORTFALL and never filled from another):
   Option 1 is the stronger choice for this gap: it alone adds state-evaluation supply. Neither closes non-thinking
   state evaluation at the expected pass rate; with option 1 it would reach about 1,400 of 1,800 positions. The
   earlier estimate ("about the target") assumed 40–120 tokens per call turn and is corrected in the shortfall record.
+- **V1's tail rule on every call turn: `tool_verification@v2`** (the maintainer's review of `2468c1aa`, item 3). The
+  registered V1 says nothing but whitespace may follow the last `</tool_call>`; the shared verifier did not enforce it
+  on full episodes. It now applies to every assistant turn that makes a call (`tool_episodes.text_after_last_call`);
+  a final-answer turn without a call is not subject to it. The version is registered
+  (`six_category_design.json :: protocol.verification.version`) and recorded with every admission. $0 audit
+  ([`audit/v1_tail_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/v1_tail_audit.json)): the
+  hybrid's 22 recorded teacher-native tool-call turns (11 per mode, its eval-set-1 teacher evaluation, read as a
+  format statistic only) have no text after the call, so no measured change to the admission set or the cost;
+  Thinking-2507 has no recorded raw tool output locally (D4A's tool turns are template re-renderings, which cannot
+  show a tail), and the pilot measures the hybrid's rate. Nothing was generated or admitted under v1, and no
+  historical data or measurement identity is re-verified.
 - **Option 1 implemented at $0: `single_step_gold_tool_call@v1`** (the maintainer's review of `647eea0e`, item 4;
   [`six_category_design.json :: protocol.episode_shapes`](../../../../configs/stages/stage-2/teacher_modes/six_category_design.json),
   [`audit/single_step_supply_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/single_step_supply_audit.json)).
@@ -538,15 +559,25 @@ only through `verify_pack`:
 2. `packed_content_sha256` recomputed from `blocks.npz` -- token ids, supervision mask and content mask of every
    sequence, each array named with its normalized dtype and shape, and the training-sequence count -- equal to the
    one the packing recorded before writing;
-3. every document read back from its final placement (a fragment is a prefix and restarts from its first token) with
-   the content sha256 the manifest admitted, and those documents packed again at the design's spec reproducing every
-   sequence, mask and placement exactly. A document truncated at the sequence length could not be verified and
-   refuses (none exists by construction: isolated-pack documents, D4A sessions with their system block and tool turns within the 8,184-token session limit all fit 8,192).
+3. the frozen documents themselves -- `data_documents.npz`, which the admission writes beside the manifest (every
+   document's token ids, supervision mask and offsets, per split, in the manifest's row order) and whose sha256 the
+   manifest carries -- checked file and document by document against the manifest, then packed again by the formal
+   algorithm at the design's spec, reproducing every sequence, mask and placement exactly.
 
 So one changed non-padding token, a changed mask bit or a replaced `blocks.npz` refuses at (2), and a forged pack
 whose recorded identity was rewritten to match refuses at (3): the identity alone never makes a pack correct. The
 bound lineage carries `packed_content_sha256` and the manifest's `content_sha256` beside the files' sha256. A pack
 without a manifest is refused.
+
+**Truncation is verified, not refused** (the maintainer's review of `2468c1aa`, item 2). The first version re-read
+each document from its final placement in the pack, which cannot recover a document the formal packing truncated, so
+it refused every overlong document -- incompatible with the frozen `truncate=True`. Re-deriving from the frozen
+documents reproduces the truncation and the prefix restarts exactly, with the packing algorithm unchanged and no
+document excluded. The manifest schema is now `data_manifest/v2`. Regressions: an overlong example packs truncated
+(its tail counted as truncated supervised tokens, the fragments restarted) while the manifest's unique supervised
+tokens still count it whole and equal the rung; the pack binds; a changed token in the truncated placement refuses
+(and, with the identity re-sealed, the re-derivation refuses); changed frozen documents refuse, and so does a manifest
+re-pointed at them.
 
 **The registered tolerance** (`registered_quotas`, read from its owners: `token_matched_design.json :: scale` and the
 whole-task selection rule `six_category_design.json :: base_category` keeps):
@@ -630,22 +661,47 @@ items and a suite without Glaive.
 The Full Search Authorization (generation plus search) needs $36.15 expected and $53.15 at the upper bounds, with caps
 of $58.46. That is more than the $30.05 left.
 
-**The L40S pilot application** (the maintainer's review of `647eea0e`, item 7;
-[`logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json`](../../../../logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json),
-`tool_generation_plan.py --pilot-application`). **Prepared only; no GPU, pod or spend is authorized.**
-- **Sample** (`tool_generation_plan.pilot_sample`): the hybrid, both modes, one round. Per mode: the first 24 full
-  episodes of every training category, the first 100 single-step `schema_arguments` training tasks, and EVERY
-  calibration (28 + 72) and state-evaluation (7 + 22) `schema_arguments` task; 794 tasks in all.
-- **Measures:** pass rates per mode, category and shape (first and second candidates apart, refusals by level), the
-  single-step pass rate, unique supervised tokens per admitted episode, `schema_arguments`' real supply per split,
-  prefill and decode tokens/s, time to first token, peak VRAM and model-load time.
-- **Price** by the plan's own terms, one round: $0.97 / $1.14 / $1.64 (1.49 h at the upper level, setup and teardown
-  included); **hard cap $1.80** (the plan's 1.1 x upper rule).
-- **State-evaluation rule:** every state-evaluation `schema_arguments` task is generated with both candidates under
-  the unchanged verifier, so the category is either met with measured evidence or its SHORTFALL is measured -- never
-  filled by a weaker verifier, another category, a lowered quota or floor, or an approval the agent gives itself.
-- **Owed before a launch, at $0:** the source admission (or a pilot-only approval), a pilot kind with its own grant
-  and cap, the session reading the pilot's cells, per-round GPU telemetry.
+**The L40S pilot** (design accepted in principle in the review of `2468c1aa`; **no GPU, pod or spend authorized**;
+[`application.json`](../../../../logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json), written
+by `tool_pilot.py application --live-position`).
+- **Frozen cells** ([`plans/tool_pilot_plan.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_pilot_plan.json),
+  `tool_pilot.py build`): the plan's pilot sample -- per mode, the first 24 full episodes of every training category,
+  the first 100 single-step `schema_arguments` training tasks, every calibration (28 + 72) and state-evaluation
+  (7 + 22) `schema_arguments` task -- 397 unique tasks, 794 mode-specific runs. Every task's sha256 is frozen, and
+  the pod receives a 4.8 MB task file (by its sha256) instead of the 700 MB pool. The plan binds the pool content
+  (`be4652d7…`), its converted sources, the protocol, the design (hence `tool_verification@v2`) and the plan's cells.
+- **Kind `tool_pilot`** (`token_matched_phase.py`): claims teacher generation only. Issue refuses until the grant names
+  its cap, the L40S check admits generation, the pilot plan and task file load, and the pilot-only source admission
+  is signed, pilot-scoped and names this plan. The launch adds `the_pilot_runs_on_an_l40s` (one L40S; an A100 is
+  never a fallback) to the runner's prechecks (unused artifact, the grant's price, all-in within the cap, the study
+  identity, the bound files, the live project position, the planned volume, the bound records, the bundle).
+- **Session** (`tool_session.py --pilot`): verifies the plan, the task file and the signed admission again, then one
+  round per mode: first candidates of every frozen task, second candidates of the refused tasks only. Sealed shards
+  make a replacement session (a new run) regenerate nothing; a generation failure ends RUN_FAILED with every finished
+  episode sealed.
+- **Telemetry** (`telemetry.jsonl`, one line per engine invocation): wall time; nvidia-smi peak memory and
+  utilization; the engine's model-load, KV-cache-size and concurrency lines and preemption lines; run_battery's
+  summary (engine init seconds, output tokens/s) and, with its new `--engine-metrics`, the engine's preemption and
+  KV-cache-usage metrics; per-turn prompt tokens, generated tokens, TTFT and seconds.
+- **Pilot-only source admission**
+  ([`audit/tool_pilot_source_admission.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json)):
+  Toucan SFT (Apache-2.0; 135 tasks) and Pivot Conversational (CC-BY-4.0; 68 full + 194 single-step) for this
+  pilot's measurement only, by exact task ids and sha256. PREPARED: inactive until the maintainer signs it. It is not
+  a training admission, builds no canonical pool and authorizes no spend.
+- **Hard cap, by the runner's own arithmetic** (`tool_pilot.runner_cap`): the hard deadline is (setup 20 + transfer 5
+  + the driver's minutes) x 1.25 + the 12.5-min teardown reserve + the 10-min recovery reserve; the all-in adds the
+  watchdog's 1.25 min and 150 GB of container disk; the volume `am5m373kuq` (55 GB, EUR-IS-2) is retained, its
+  storage already committed. The plan-priced $1.80 did not include the runner's contingency and reserves:
+
+  | option | hard cap | driver minutes | all-in at $0.86 / $1.1067 / $1.19 per h |
+  | --- | --- | --- | --- |
+  | A | $1.80 | 27 (the plan's expected 26.8) | $1.30 / $1.67 / $1.79 |
+  | B | $2.50 | 55 (the plan's upper 54.4) | $1.82 / $2.33 / $2.50 |
+
+  Option A stops at its deadline with everything sealed if the workload is slower than expected; B covers the upper
+  case in one session. The plan's own price is $0.97 / $1.14 / $1.64.
+- **Owed from the maintainer:** sign the source admission, amend the grant with `session_hard_caps_usd.tool_pilot`,
+  choose A or B. The project position is re-read at issue and at launch.
 - **Separate:** the packed 8,192-token forward / DEPTH / training GPU validation is its own engineering request on
   existing frozen inputs (v1 items, A1's documents); it is not combined with the pilot.
 
@@ -676,8 +732,9 @@ packed search runs unless it is requested.
 4. **Validation coverage.** C1-6cat's validation has no fluid type, and A1-6cat's no `interactive_adaptation`. Both
    gaps are recorded.
 5. **eval-set-2** for closed-loop tool success.
-6. **Budget.** The L40S pilot application ($1.14 expected, cap $1.80); a raised project cap for the Full Search
-   Authorization. The packed 8,192-token forward / DEPTH / training GPU validation is a separate request.
+6. **Budget.** The L40S pilot (sign its source admission, its cap in the grant, option A $1.80 or B $2.50); a raised
+   project cap for the Full Search Authorization. The packed 8,192-token forward / DEPTH / training GPU validation is
+   a separate request.
 7. **Storage.** Volume `4rhubprswo`. The v2 Top-1's only copy stays protected until a verified copy exists off the
    volume.
 
@@ -724,8 +781,14 @@ PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_sources_piv
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pool --source toucan_sft=<scratch>/toucan_tasks_v2.jsonl \
     --source pivot_conversational=<scratch>/pivot_conversational_v2.jsonl --out <scratch>/tool_pool_dry_v4
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_generation_plan --pool <scratch>/tool_pool_dry_v4 \
-    --write logs/stages/stage-2/teacher_modes/plans/tool_generation_plan_dry_run.json \
-    --pilot-application logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json
+    --write logs/stages/stage-2/teacher_modes/plans/tool_generation_plan_dry_run.json
+# the pilot (review of 2468c1aa)
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot build --pool <scratch>/tool_pool_dry_v4
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot admission
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot application --live-position
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_admission --v1-tail-audit \
+    logs/stages/stage-2/teacher_modes/audit/v1_tail_audit.json --generations hybrid_thinking=<H-T eval generations> \
+    --generations hybrid_non_thinking=<H-N eval generations>
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_arguments_audit --supply-pool <scratch>/tool_pool_dry_v4 \
     --before-pool <scratch>/tool_pool_dry_v3 --write logs/stages/stage-2/teacher_modes/audit/single_step_supply_audit.json
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs --arm A2-6cat \

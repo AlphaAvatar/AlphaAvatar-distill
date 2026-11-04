@@ -15454,3 +15454,42 @@ on a paid pod.
   a cap change, any SHORTFALL approval, deleting from `4rhubprswo`, a merge.
 - **Revisit when:** the maintainer rules on the pilot application and the source admission; after the pilot, on the
   measured state-evaluation supply of non-thinking `schema_arguments`.
+
+
+## 2026-11-04 (UTC) — Maintainer: fifth review of 2468c1aa; truncation verified at binding, V1's tail rule on every call turn, the L40S pilot's $0 execution preparation
+
+- **Context.** The maintainer accepted the report–selection binding, the packed-content check, the single-step gold
+  tool call and the token identity repair, and kept every frozen protocol (packing, pre-packing accounting, the
+  four-step decoupling, CE/KD, KL, loss normalization, the proportions). Three items remained, plus the pilot's
+  preparation.
+- **Decision (maintainer).**
+  1. `verify_pack` must stay strict and accept documents the formal `truncate=True` packing truncates (not by changing
+     the packing or excluding overlong documents).
+  2. V1's registered tail rule (nothing but whitespace after the last `</tool_call>`) must hold for full episodes'
+     call turns, not answer turns, for new data; historical data and identities untouched.
+  3. The 794-task pilot design is accepted in principle; prepare its execution at $0: its own kind, plan identity and
+     refusals, the session wiring, candidates and resumption, GPU telemetry, the hard cap with setup, execution,
+     teardown and storage, the live re-read before launch, L40S only, the refusal paths, a pilot-only source
+     admission, and a re-verified application. Not a paid authorization.
+- **Implemented.**
+  - The admission freezes the documents beside the manifest (`data_documents.npz`, sha256 in the manifest, schema
+    `data_manifest/v2`); `verify_pack` checks them and re-packs them by the formal algorithm, which must reproduce
+    every sequence and placement -- truncation and prefix restarts included. Regressions cover an overlong example
+    (truncated tail, restarts, unique supervised tokens counted whole, binds) and tampering with the truncated
+    placement or the frozen documents.
+  - `tool_verification@v2` (`tool_episodes.text_after_last_call`, registered in `six_category_design.json`, recorded
+    by every admission). `audit/v1_tail_audit.json`: 0 of the hybrid's 22 recorded call turns have text after the
+    call; Thinking-2507 has no recorded raw tool output locally. No measured change to the admission set or cost.
+  - The pilot: `tool_pilot.py` (frozen cells and a 4.8 MB task file with every task's sha256 instead of the 700 MB
+    pool; the pilot-only source admission, PREPARED and unsigned; GPU and engine telemetry; the runner's hard cap;
+    the application); kind `tool_pilot` in `token_matched_phase.py` (teacher generation only; refuses without the
+    grant's cap, the L40S check, the frozen files or the signed admission; L40S only at launch);
+    `tool_session.py --pilot` (one round, second candidates for refusals only, resumption through sealed shards);
+    `run_battery --engine-metrics` (preemptions, KV-cache usage).
+  - Hard cap by the runner's own arithmetic: the plan-priced $1.80 did not include the runner's contingency and
+    reserves. Option A: $1.80 with 27 driver minutes (all-in $1.79 at $1.19/h), the expected workload. Option B:
+    $2.50 with 55 minutes ($2.50 at $1.19/h), the upper workload in one session. Live position 2026-11-04T08:45Z:
+    $837.95 committed of $868.00, $30.05 left, 0 pods, volumes 4rhubprswo and am5m373kuq.
+- **Not authorized and not done.** The pilot, any generation, search, training or evaluation, a pod, a cap change, a
+  SHORTFALL approval, the canonical pool under data/, anything on 4rhubprswo, a merge.
+- **Revisit when:** the maintainer signs the pilot's source admission, sets its cap in the grant and chooses A or B.

@@ -10,7 +10,8 @@ half, shared by every lineage (the hybrid in either mode, Thinking-2507). Nothin
   A turn without a call ends the user turn: the next scripted user message follows, or the episode ends. An
   off-script call (no recorded response) ends the episode, and the verifier refuses it.
 * `verify` -- `aadistill.data.tool_calls.verify_episode`'s levels under the mode's think rule (thinking mode closes
-  its think block before any call; non-thinking mode never generates ``</think>``): protocol, schema validity and
+  its think block before any call; non-thinking mode never generates ``</think>``) and V1's tail rule on every turn
+  that makes a call (`VERIFICATION_VERSION`): protocol, schema validity and
   recorded execution on every episode; step gold where the task carries gold calls; the task's final check at its
   declared level (`FINAL_CHECK_LEVELS`). `verification_levels` is what a task CAN verify, registered in the pool:
   a check that the target tools were called is tool selection, and no Toucan task verifies task success.
@@ -62,6 +63,10 @@ CATEGORIES = ("tool_selection", "schema_arguments", "no_tool", "multiple_paralle
 #: only an answer check against the task's gold is task success
 FINAL_CHECK_LEVELS = {"no_call": "tool_selection", "calls_tools": "tool_selection", "contains_all": "task_success"}
 SPLITS = ("training", "validation", "state_eval", "calibration", "reserve")
+#: the verifier's version, recorded with every admission (six_category_design.json :: protocol.verification.version):
+#: v2 enforces V1's registered tail rule on every turn that makes a call (maintainer 2026-11-04, review of 2468c1aa);
+#: v1 (through 2468c1aa) enforced it only on a single-step gold tool call's turn
+VERIFICATION_VERSION = "tool_verification@v2"
 FULL_EPISODE = "full_episode@v1"
 SINGLE_STEP = "single_step_gold_tool_call@v1"
 #: the registered episode shapes (six_category_design.json :: protocol.episode_shapes) and the categories each may
@@ -244,10 +249,25 @@ def final_check(task: Mapping[str, Any]):
     raise ToolTaskError(f"{task['task_id']}: final check {kind!r} is not implemented")
 
 
+def text_after_last_call(raw: str) -> str | None:
+    """V1's tail: the text of a turn after its LAST ``</tool_call>``, the stop token's text removed; None for a turn
+    that makes no call (an answer turn: V1's tail rule does not apply to it)."""
+    p = TOOL_PROTOCOL
+    calls, _ = parse_tool_calls(raw, open_tag=p["open_tag"], close_tag=p["close_tag"])
+    if not calls or p["close_tag"] not in raw:
+        return None
+    tail = raw[raw.rfind(p["close_tag"]) + len(p["close_tag"]):]
+    for stop in p["stop_texts"]:
+        tail = tail.replace(stop, "")
+    return tail
+
+
 def verify(task: Mapping[str, Any], episode_turns: Sequence[Mapping[str, Any]], *, thinking: bool):
-    """Every level on every turn of one episode (`EpisodeVerdict`). A single-step gold tool call is one turn that
-    ends on its call (`verify_episode`'s ``unexecuted_final_call``): protocol, schema validity and the exact gold
-    call are checked; recorded execution, tool selection and task success stay None."""
+    """Every level on every turn of one episode (`EpisodeVerdict`), under `VERIFICATION_VERSION`. V1 includes the
+    registered tail rule on EVERY turn that makes a call: nothing but whitespace after its last ``</tool_call>``
+    (`text_after_last_call`); an answer turn without a call is not subject to it. A single-step gold tool call is
+    one turn that ends on its call (`verify_episode`'s ``unexecuted_final_call``): protocol, schema validity and the
+    exact gold call are checked; recorded execution, tool selection and task success stay None."""
     from aadistill.data.tool_calls import EpisodeVerdict
     p = TOOL_PROTOCOL
     fc, level = final_check(task), final_check_level(task)
@@ -256,16 +276,14 @@ def verify(task: Mapping[str, Any], episode_turns: Sequence[Mapping[str, Any]], 
                        think_close=p["think_close"], expect_think=thinking,
                        gold_steps=task.get("gold_steps"), final_checks={level: fc} if fc else None,
                        unexecuted_final_call=single)
-    if single:
-        bad = [] if len(episode_turns) == 1 else [f"{SINGLE_STEP} has exactly one turn, not {len(episode_turns)}"]
-        raw = str((episode_turns[-1] if episode_turns else {}).get("raw") or "")
-        tail = raw[raw.rfind(p["close_tag"]) + len(p["close_tag"]):] if p["close_tag"] in raw else ""
-        for stop in p["stop_texts"]:
-            tail = tail.replace(stop, "")
-        if tail.strip():                                     #: V1: nothing but whitespace after the last call
-            bad.append(f"{SINGLE_STEP}: text after its call ({tail.strip()[:40]!r}); the sample ends on the call")
-        if bad:
-            return EpisodeVerdict(False, {**v.checks, "protocol": False}, v.problems + bad)
+    bad = [] if not single or len(episode_turns) == 1 else [
+        f"{SINGLE_STEP} has exactly one turn, not {len(episode_turns)}"]
+    for k, t in enumerate(episode_turns):
+        tail = text_after_last_call(str(t.get("raw") or ""))
+        if tail is not None and tail.strip():
+            bad.append(f"turn {k}: text after its last call ({tail.strip()[:40]!r}); V1 allows only whitespace")
+    if bad:
+        return EpisodeVerdict(False, {**v.checks, "protocol": False}, v.problems + bad)
     return v
 
 

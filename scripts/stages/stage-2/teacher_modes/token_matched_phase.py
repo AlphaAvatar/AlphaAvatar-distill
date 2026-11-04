@@ -27,6 +27,12 @@ THE A1 PHASE (maintainer 2026-11-01, 'Research A v2: Execute A1 First'; the gran
 * ``train_a1`` -- A1's two seeds, trained and evaluated in turn.
 Each kind's hard cap is the grant's ``session_hard_caps_usd[kind]``, enforced at issue; all of them draw on one
 cumulative envelope. Sealed shards are pulled on every poll; the volume keeps everything.
+
+KIND ``tool_pilot`` (maintainer 2026-11-04, review of 2468c1aa; NOT authorized): `tool_session.py --pilot` -- the
+hybrid's tool pilot on its frozen cells (`tool_pilot.py`), one L40S. It claims teacher generation only (measurement,
+never formal). Issue refuses it until the grant names its cap, the pilot-only source admission is signed and names
+the bound pilot plan, and the pilot's task file is the one that plan froze; the launch refuses any card but the L40S
+(an A100 needs a measured L40S OOM and a separate authorization, never an automatic fallback).
 """
 from __future__ import annotations
 
@@ -73,7 +79,8 @@ STUDY = SE.Study(
                    #: the packed round (packed_round_design.json)
                    "packed_full_search", "packed_inputs", "packed_packs", "packed_training_plan", "packing_audit",
                    "tool_episodes", "tool_admission", "tool_pool", "tool_session", "six_category_selection",
-                   "tool_generation_plan", "tool_benchmarks", "tool_sources_toucan", "tool_sources_pivot")) + (
+                   "tool_generation_plan", "tool_benchmarks", "tool_sources_toucan", "tool_sources_pivot",
+                   "tool_pilot")) + (
         "scripts/shared/study_engineering.py", "scripts/shared/project_position.py", "scripts/shared/eval_sets.py",
         "scripts/shared/pod/teacher_cache.py", "scripts/stages/stage-0/calibration_volume/run_battery.py",
         "scripts/stages/stage-0/calibration_volume/score_battery.py",
@@ -90,8 +97,9 @@ STUDY = SE.Study(
     kinds=("supplement", "inputs", "search", "train_a1",
            #: the packed round: none runs before the grant names its hard cap (kind_cap_problems)
            "tool_generation", "tool_generation_t2507", "packed_search",
-           "train_6cat_a1", "train_6cat_a2", "train_6cat_c1"),
+           "train_6cat_a1", "train_6cat_a2", "train_6cat_c1", "tool_pilot"),
     kind_claims=(("search", frozenset({"formal"})), ("train_a1", frozenset({"formal", "training", "evaluation"})),
+                 ("tool_pilot", frozenset({"teacher_generation"})),
                  ("packed_search", frozenset({"formal"})),
                  *((k, frozenset({"formal", "training", "evaluation"}))
                    for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1"))))
@@ -125,6 +133,12 @@ KIND_RECORDS = {
                       "configs/shared/baselines/initialization_forward_baseline_v2.json"),
     **{k: ("logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json",)
        for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
+    #: the protocol, the task protocol (the verification version), the frozen pilot plan (which names its task file's
+    #: sha256, the pool content and the plan cells it came from) and the pilot-only source admission
+    "tool_pilot": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
+                   "configs/stages/stage-2/teacher_modes/six_category_design.json",
+                   "logs/stages/stage-2/teacher_modes/plans/tool_pilot_plan.json",
+                   "logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json"),
 }
 #: the packed training kinds' arms, and the arms trained with Thinking-2507 rather than the hybrid
 PACKED_TRAIN_ARMS = {"train_6cat_a1": "A1-6cat", "train_6cat_a2": "A2-6cat", "train_6cat_c1": "C1-6cat"}
@@ -132,6 +146,7 @@ THINKING_2507_KINDS = frozenset({"tool_generation_t2507", "train_6cat_c1"})
 #: each teacher lineage's tool-generation kind: a lineage's session runs only under an artifact of its own kind, so
 #: the two lineages' authorizations, identities and caps (`kind_cap_problems`) never stand in for each other
 TOOL_GENERATION_KINDS = {"hybrid": "tool_generation", "thinking_2507": "tool_generation_t2507"}
+TOOL_PILOT_KIND = "tool_pilot"
 #: the full search's planned minutes and A1's per-unit deadline (budget_v2.json: the search's deadline-bounded
 #: 37.3 h; A1's 6.35 h per seed)
 SEARCH_DEADLINE_MINUTES = 37.29 * 60
@@ -144,15 +159,57 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
     generation pass the teacher gate: Thinking-2507 is the hybrid's architecture (Qwen3ForCausalLM, 36 layers,
     2,560 / 9,728, 32 / 8 heads, the same vocabulary) on the same engine at the same session limit."""
     from stages.teacher_modes import l40s_check as LC
-    gate = "teacher" if kind in ("supplement", "inputs", *TOOL_GENERATION_KINDS.values()) else None
+    gate = "teacher" if kind in ("supplement", "inputs", *TOOL_GENERATION_KINDS.values(), TOOL_PILOT_KIND) else None
     if gate:
         bad = LC.gate(LC.load_config(Path(root) / P1.CHECK_CONFIG)["gates"][gate], root)
         if bad:
             raise SE.AuthorizationError("the L40S check record does not admit generation: " + "; ".join(bad))
+    if kind == TOOL_PILOT_KIND:
+        bad = pilot_problems(root)
+        if bad:
+            raise SE.AuthorizationError("the tool pilot is not ready: " + "; ".join(bad))
     out = {"l40s_check_record_sha256": P1._sha(P1.CHECK_RECORD, root)}
     for rel in KIND_RECORDS.get(kind, ()):
         out[f"record:{rel}"] = P1._sha(rel, root)
     return out
+
+
+def pilot_problems(root: Path = REPO_ROOT) -> list[str]:
+    """Why the tool pilot's bound records do not let it run (empty when they do): its frozen plan and task file
+    (`tool_pilot.load`), and the pilot-only source admission -- signed by the maintainer, scoped to the pilot, naming
+    exactly this plan."""
+    import json
+    from stages.teacher_modes import tool_pilot as TPL
+    root, bad = Path(root), []
+    plan, adm = root / KIND_RECORDS[TOOL_PILOT_KIND][2], root / KIND_RECORDS[TOOL_PILOT_KIND][3]
+    if not plan.is_file():
+        return [f"no frozen pilot plan at {KIND_RECORDS[TOOL_PILOT_KIND][2]}"]
+    doc = json.loads(plan.read_text())
+    tasks = root / str((doc.get("tasks_file") or {}).get("path"))
+    try:
+        TPL.load(plan, tasks, protocol_path=root / KIND_RECORDS[TOOL_PILOT_KIND][0],
+                 six_path=root / KIND_RECORDS[TOOL_PILOT_KIND][1])
+    except (TPL.PilotError, OSError) as exc:
+        bad.append(str(exc))
+    if not adm.is_file():
+        return bad + [f"no pilot-only source admission at {KIND_RECORDS[TOOL_PILOT_KIND][3]}"]
+    a = json.loads(adm.read_text())
+    if a.get("schema") != TPL.ADMISSION_SCHEMA or not str(a.get("scope", "")).startswith("the tool_pilot kind's"):
+        bad.append("the source admission is not the pilot-only record")
+    if not (a.get("signature") or {}).get("signed_by"):
+        bad.append("the pilot-only source admission is PREPARED, not signed by the maintainer")
+    if (a.get("pilot_plan") or {}).get("sha256") != P1._sha(KIND_RECORDS[TOOL_PILOT_KIND][2], root):
+        bad.append("the source admission names another pilot plan")
+    return bad
+
+
+def the_pilot_runs_on_an_l40s(ctx) -> tuple[bool, str]:
+    """The pilot's card: the L40S only. An A100 is never a fallback: it needs a measured L40S out-of-memory and a
+    separate authorization, whatever the grant's card list."""
+    if ctx.args.gpu != GPU or int(getattr(ctx.args, "gpu_count", 1) or 1) != 1:
+        return False, (f"the tool pilot runs on one {GPU}, not {getattr(ctx.args, 'gpu_count', 1)} x {ctx.args.gpu!r}: "
+                       "an A100 needs a measured L40S OOM and a separate authorization")
+    return True, f"one {GPU}"
 
 
 def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) -> list[str]:
@@ -307,6 +364,17 @@ def tool_generation_command(ctx, plan, lineage: str = "hybrid") -> str:
             + P1._tail(status))
 
 
+def tool_pilot_command(ctx, plan) -> str:
+    import json
+    a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
+    auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    rec = KIND_RECORDS[TOOL_PILOT_KIND]
+    tasks = json.loads((REPO_ROOT / rec[2]).read_text())["tasks_file"]["path"]
+    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
+            f"--authorization {auth} --lineage hybrid --pilot {rec[2]} --pilot-tasks {tasks} "
+            f"--durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
+
+
 def packed_search_command(ctx, plan, planned_minutes: float = SEARCH_DEADLINE_MINUTES) -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
@@ -344,6 +412,8 @@ DRIVERS = {
     "tool_generation_t2507": ("scripts/stages/stage-2/teacher_modes/tool_session.py",
                               lambda ctx, plan: tool_generation_command(ctx, plan, "thinking_2507"), ("tool_pool",),
                               "Research A packed round: Thinking-2507's tool-calling episodes"),
+    "tool_pilot": ("scripts/stages/stage-2/teacher_modes/tool_session.py", tool_pilot_command, ("pilot_tasks",),
+                   "Research A packed round: the hybrid's L40S tool pilot on its frozen cells (measurement only)"),
     "packed_search": ("scripts/stages/stage-2/teacher_modes/packed_full_search.py", packed_search_command,
                       ("profiles_v2", "suite_v2"),
                       "Research A packed round: the hybrid full search in the packed forward context (one L40S)"),
@@ -366,7 +436,8 @@ POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation
                             "search_packed/products.json"),
           **{k: (f"{PACKED_TRAIN_ARMS[k]}_units.json",) for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
           "tool_generation": ("tool_generation_hybrid/tool_session.json",),
-          "tool_generation_t2507": ("tool_generation_thinking_2507/tool_session.json",)}
+          "tool_generation_t2507": ("tool_generation_thinking_2507/tool_session.json",),
+          "tool_pilot": ("tool_pilot_hybrid/tool_session.json", "tool_pilot_hybrid/telemetry.jsonl")}
 
 
 def secure_files(ctx) -> None:
@@ -415,9 +486,10 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
         prod = st / f"{sub}/products.json"
         if prod.is_file():
             got.update(top1_on_volume(ctx, f"{root}/{sub}/top1", json.loads(prod.read_text())["top1"]["files_sha256"]))
-    elif kind in ("tool_generation", "tool_generation_t2507"):
-        sub = "tool_generation_hybrid" if kind == "tool_generation" else "tool_generation_thinking_2507"
-        got["tool_generation"] = P1._tar(ctx, f"{root}/{sub}", "tool_generation")[0]
+    elif kind in ("tool_generation", "tool_generation_t2507", TOOL_PILOT_KIND):
+        sub = {"tool_generation": "tool_generation_hybrid", "tool_generation_t2507": "tool_generation_thinking_2507",
+               TOOL_PILOT_KIND: "tool_pilot_hybrid"}[kind]
+        got[kind if kind == TOOL_PILOT_KIND else "tool_generation"] = P1._tar(ctx, f"{root}/{sub}", sub)[0]
     elif kind in PACKED_TRAIN_ARMS:
         got["packed_units_evidence"] = P1._tar(ctx, f"{root}/packed_units", "packed_units_evidence",
                                                excludes=("./*/train/checkpoints", "./*/evaluation/package/*.safetensors"))[0]
@@ -453,6 +525,7 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
     def asset(path: str) -> LocalAsset:
         return LocalAsset(repo_path=path, dest_name=Path(path).name, install_to=str(Path(path).parent))
     packed = {"tool_pool": asset("data/stages/stage-2/teacher_modes/tool_pool_v1"),
+              "pilot_tasks": asset("artifacts/stages/stage-2/teacher_modes/tool_pilot"),
               "profiles_v2": asset("artifacts/stages/stage-2/teacher_modes/calibration_v3"),
               "suite_v2": asset("artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v2"),
               **{f"pack_{k}": asset(f"artifacts/stages/stage-2/teacher_modes/packs_6cat/{a}")
@@ -472,7 +545,8 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
         teacher_revision=t["revision"], kind=kind, local_assets=assets, disk_gb=150,
         contingency_fraction=CONTINGENCY.get(kind, 0.25),
         setup_env={"PHASE_KIND": kind},
-        extra_prechecks=(P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones),
+        extra_prechecks=(P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones,
+                         *((the_pilot_runs_on_an_l40s,) if kind == TOOL_PILOT_KIND else ())),
         on_poll=polls[0], products_secured=polls[1],
         artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; the network volume is KEPT: it "

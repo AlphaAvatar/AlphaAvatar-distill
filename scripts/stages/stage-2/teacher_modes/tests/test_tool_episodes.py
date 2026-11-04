@@ -376,3 +376,27 @@ class TestSingleStepGoldToolCall:
         assert tiers == sorted(tiers, key=TP.SHAPE_TIERS.get) and set(tiers) == set(TP.SHAPE_TIERS)
         assert [t for t in order if shape[t] == TE.FULL_EPISODE] == TP.assemble(full)["training_order"]
         assert pool["episode_shapes"]["training"][f"{TE.SINGLE_STEP}|schema_arguments"] == 30
+
+
+# --- V1's tail rule on every turn that makes a call (tool_verification@v2, maintainer review of 2468c1aa) ----------
+
+class TestV1TailRule:
+    def test_text_after_a_full_episodes_call_is_refused(self):
+        eps, _ = run([task()], ["x</think>\n" + CALL + "\nLet me check that.", "y</think>\nIt is sunny."])
+        v = TE.verify(eps["tc1-test"]["task"], eps["tc1-test"]["turns"], thinking=True)
+        assert not v.admitted and v.checks["protocol"] is False
+        assert any("turn 0: text after its last call" in p for p in v.problems)
+
+    def test_an_answer_turn_and_whitespace_after_a_call_are_not_subject_to_it(self):
+        eps, _ = run([task()], ["x</think>\n" + CALL + "\n  \n", "y</think>\nIt is sunny, and more prose follows."])
+        assert TE.verify(eps["tc1-test"]["task"], eps["tc1-test"]["turns"], thinking=True).admitted
+        assert TE.text_after_last_call("no call, just an answer") is None
+        assert TE.text_after_last_call(CALL + "<|im_end|>") == ""
+        assert TE.text_after_last_call(CALL + " more " + CALL + "\n<|endoftext|>") == "\n"
+
+    def test_the_registered_version_is_the_executed_one(self):
+        from stages.teacher_modes import packed_packs as PP
+        ver = json.loads(PP.SIX.read_text())["protocol"]["verification"]
+        assert ver["version"] == TE.VERIFICATION_VERSION == "tool_verification@v2"
+        from stages.teacher_modes import tool_admission as TA
+        assert TA.admit([], [], mode="H-T", stop_ids=[EOS])["verification_version"] == TE.VERIFICATION_VERSION

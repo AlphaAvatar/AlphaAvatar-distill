@@ -1,0 +1,58 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_pilot_source_admission/v1",
+ "written_utc": "2026-11-04T08:40:47Z",
+ "status": "PREPARED: inactive until the maintainer signs it (signature below)",
+ "decided_by": "maintainer 2026-11-04 (review of 2468c1aa), item 5: prepare a source admission limited to the pilot, from the accepted candidates Toucan SFT and Pivot Conversational; it must not widen into a training-data admission and authorizes no paid action",
+ "scope": "the tool_pilot kind's measurement only: the hybrid's teacher-native generation on exactly the tasks below (by id and sha256), its episodes measurement records by default",
+ "pilot_plan": {
+  "path": "logs/stages/stage-2/teacher_modes/plans/tool_pilot_plan.json",
+  "sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83"
+ },
+ "pool_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+ "sources": [
+  {
+   "dataset": "Agent-Ark/Toucan-1.5M",
+   "revision": "0df3cf37f2abefb380370cfb02eabea2a35ae782",
+   "licence": "Apache-2.0",
+   "tasks": 135,
+   "episode_shapes": {
+    "full_episode@v1": 135
+   },
+   "converted_sha256": {
+    "toucan_sft": "83b288fd7e304ea0432f51415bd724ae0ac3f52198a5a2978da590e8724c3478"
+   }
+  },
+  {
+   "dataset": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1",
+   "revision": "bfc7a4dd55ec1424cc3761ceacdd85a5743b4f4e",
+   "licence": "CC-BY-4.0",
+   "tasks": 262,
+   "episode_shapes": {
+    "full_episode@v1": 68,
+    "single_step_gold_tool_call@v1": 194
+   },
+   "converted_sha256": {
+    "pivot_conversational": "4e60dac04b322e9fe81f0e39de4b3d4c92cd3346b20a410b6f4b9c34b68f1f18"
+   }
+  }
+ ],
+ "tasks_sha256": "e67e8acb7050bd6e150b93af76683a2c77937e4d01c650ee398448b747b6fea1",
+ "tasks": 397,
+ "conditions": [
+  "each source's licence and attribution kept with every derived record (Apache-2.0 notice for Toucan; CC-BY-4.0 attribution for Pivot)",
+  "third-party MCP and tool content may carry residual PII: the pilot's generations stay outside git (P15); only counts, hashes and measurements enter the repository",
+  "the pool's decontamination (T1-T5), isolation and verification levels unchanged"
+ ],
+ "does_not": [
+  "admit any source or task to formal training, calibration or state evaluation",
+  "build or replace the canonical tool_pool@v1 under data/",
+  "decide any category's supply or any SHORTFALL",
+  "authorize a GPU, a pod or any spend (the pilot's grant does that, separately)"
+ ],
+ "signature": {
+  "signed_by": null,
+  "decision": null,
+  "date": null
+ },
+ "authorizes": "nothing by itself"
+}

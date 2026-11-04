@@ -250,7 +250,7 @@ def price(plan: Mapping, by_id: Mapping, man: Mapping, proto: Mapping, *, rounds
                      "it); a model load per engine invocation (rounds x candidates per mode); setup and teardown"}
 
 
-#: The L40S pilot PROPOSED for the maintainer's next review (logs/budget/applications/research_a_tool_pilot_2026-11-04):
+#: The L40S pilot (tool_pilot.py; logs/budget/applications/research_a_tool_pilot_2026-11-04):
 #: the hybrid lineage, both modes, one round (first candidates, then second candidates of refused tasks). Per mode:
 #: the first ``training_per_category`` tasks of every training cell's frozen order (full episodes, the order's first
 #: tier); the first ``single_step_training`` single-step tasks of the schema_arguments training cell; and EVERY
@@ -343,53 +343,12 @@ def approved(plan: Mapping, split: str, mode: str, category: str | None) -> dict
                  if (a.get("split"), a.get("mode"), a.get("category")) == (split, mode, category)), None)
 
 
-def pilot_application(plan: Mapping, by_id: Mapping, man: Mapping, proto: Mapping, spec: Mapping = PILOT) -> dict:
-    """The L40S pilot's application for the maintainer's next review: the sample (`pilot_sample`), its price by the
-    plan's own terms (`price`, one round), its hard cap by the plan's rule, and what it measures. AUTHORIZES NOTHING."""
-    sample = pilot_sample(plan, by_id, man, spec)
-    pplan = {"lineages": {spec["lineage"]: {"modes": {m: {"cells": cs} for m, cs in sample.items()}}}}
-    pr = price(pplan, by_id, man, proto, rounds=spec["rounds"])
-    row = pr["sessions"][spec["lineage"]]
-    cells = {m: {f"{c['split']}/{c['category']}": {"tasks": len(c["task_ids"]), "shapes": c["shapes"],
-                                                    "plan_target": c["target"], "unit": c["unit"],
-                                                    "cell_supply": c["supply"]} for c in cs}
-             for m, cs in sample.items()}
-    return {"schema": "aadistill.budget.application/tool_pilot_v1",
-            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "status": "PROPOSED for the maintainer's next review; AUTHORIZES NOTHING: no GPU, no pod, no spend",
-            "decided_by": "maintainer 2026-11-04 (review of 647eea0e), item 7: prepare the L40S pilot's application "
-                          "only; GPU and spend are not authorized",
-            "plan": {"pool": plan["pool"], "protocol_sha256": plan["protocol_sha256"],
-                     "six_category_design_sha256": plan["six_category_design_sha256"]},
-            "sample_rule": {k: (list(map(list, v)) if k == "whole_cells" else v) for k, v in spec.items()},
-            "sample": cells, "tasks": sum(len(c["task_ids"]) for cs in sample.values() for c in cs),
-            "task_ids": {m: {f"{c['split']}/{c['category']}": c["task_ids"] for c in cs} for m, cs in sample.items()},
-            "price": {**row, "basis": pr["basis"] + "; ONE round (first candidates, then the refused tasks' second)",
-                      "rate_usd_per_hour": pr["rate_usd_per_hour"]},
-            "hard_cap_usd": round(row["upper"]["usd"] * 1.1, 2),
-            "hard_cap_rule": "the plan's rule: 1.1 x the upper level (bound task counts, long turns, low pass rate, "
-                             "slow ends of every unmeasured range), which already includes setup and teardown",
-            "authorizes": "nothing"}
-
-
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--pool", required=True)
     ap.add_argument("--write", default=None)
-    ap.add_argument("--pilot-application", default=None,
-                    help="write the proposed L40S pilot's quantitative application here (authorizes nothing)")
     a = ap.parse_args(argv)
     plan = build(Path(a.pool))
-    if a.pilot_application:
-        from stages.teacher_modes import tool_pool as TP
-        man, splits = TP.load_pool(Path(a.pool))
-        by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
-        out = Path(a.pilot_application)
-        old = json.loads(out.read_text()) if out.is_file() else {}
-        doc = pilot_application(plan, by_id, man, json.loads(PROTOCOL.read_text()))
-        doc.update({k: old[k] for k in ("request",) if k in old})      #: the written request, kept on regeneration
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
     summary = {li: {m: {f"{c['split']}/{c['category']}": (c["supply"], c["tasks"]["expected"], c["bound"])
                         for c in mm["cells"]} for m, mm in v["modes"].items()} for li, v in plan["lineages"].items()}
     if a.write:

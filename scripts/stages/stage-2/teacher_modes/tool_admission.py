@@ -86,11 +86,33 @@ def admit(tasks: list[dict], episodes: list[dict], *, mode: str, stop_ids) -> di
             verdicts[t["task_id"]] = [v.as_dict()]
             break
     stray = sorted(set(cands) - set(by_task))
-    return {"documents": docs, "items": items, "stray_episodes": stray,
+    return {"documents": docs, "items": items, "stray_episodes": stray, "verification_version": TE.VERIFICATION_VERSION,
             "census": {f"{s}|{k}": {**v, "refused_by_check": dict(v["refused_by_check"]),
                                     "admitted_by_verification": dict(v["admitted_by_verification"]),
                                     "admitted_by_shape": dict(v["admitted_by_shape"])}
                        for (s, k), v in sorted(census.items())}}
+
+
+def v1_tail_audit(generations: dict[str, Path]) -> dict:
+    """V1's tail rule (`tool_episodes.text_after_last_call`) on recorded teacher-native turns: per source, the turns
+    that make a call, and those with text after their last ``</tool_call>`` -- which `VERIFICATION_VERSION` v2
+    refuses and v1 admitted. A $0 measurement of what the rule changes; the turns are read, never used as data."""
+    out = {}
+    for name, path in generations.items():
+        rows = [json.loads(x) for x in Path(path).read_text(encoding="utf-8").splitlines() if x.strip()]
+        calls, tails = 0, []
+        for r in rows:
+            tail = TE.text_after_last_call(str(r.get("raw") or ""))
+            if tail is None:
+                continue
+            calls += 1
+            if tail.strip():
+                tails.append({"id": r.get("id"), "tail": tail.strip()[:120]})
+        out[name] = {"file_sha256": __import__("hashlib").sha256(Path(path).read_bytes()).hexdigest(),
+                     "turns": len(rows), "turns_with_a_call": calls, "with_text_after_the_last_call": len(tails),
+                     "examples": tails[:5]}
+    return {"schema": "aadistill.stage2.teacher_modes.v1_tail_audit/v1", "rule": TE.VERIFICATION_VERSION,
+            "sources": out, "authorizes": "nothing"}
 
 
 def episodes_from_store(store: Path, identity: str, mode: str) -> list[dict]:
@@ -116,14 +138,23 @@ def episodes_from_store(store: Path, identity: str, mode: str) -> list[dict]:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--pool", required=True, help="the tool_pool@v1 directory (verified by tool_pool.load_pool)")
+    ap.add_argument("--v1-tail-audit", default=None, help="write V1's tail-rule audit of --generations here and stop")
+    ap.add_argument("--generations", action="append", default=[], help="name=recorded generations (jsonl with raw)")
+    ap.add_argument("--pool", default=None, help="the tool_pool@v1 directory (verified by tool_pool.load_pool)")
     ap.add_argument("--episodes", default=None, help="run_battery records (jsonl)")
     ap.add_argument("--store", default=None, help="a tool_session.py store (sealed shards), with --identity")
     ap.add_argument("--identity", default=None)
-    ap.add_argument("--mode", required=True, choices=sorted(MODES))
+    ap.add_argument("--mode", default=None, choices=sorted(MODES))
     ap.add_argument("--stop-ids", default="151645,151643")
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
+    if a.v1_tail_audit:
+        doc = v1_tail_audit({k: Path(v) for k, v in (g.split("=", 1) for g in a.generations)})
+        Path(a.v1_tail_audit).write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({k: v["with_text_after_the_last_call"] for k, v in doc["sources"].items()}))
+        return 0
+    if not (a.pool and a.mode and a.out):
+        ap.error("--pool, --mode and --out are required")
     from stages.teacher_modes import tool_pool as TP
     man, splits = TP.load_pool(Path(a.pool))
     tasks = []
@@ -148,7 +179,9 @@ def main(argv=None) -> int:
     with (out / "tool_items.jsonl").open("w") as f:
         for it in res["items"]:
             f.write(json.dumps(it) + "\n")
-    (out / "tool_admission.json").write_text(json.dumps({"schema": SCHEMA, "mode": a.mode, "census": res["census"],
+    (out / "tool_admission.json").write_text(json.dumps({"schema": SCHEMA, "mode": a.mode,
+                                                         "verification_version": TE.VERIFICATION_VERSION,
+                                                         "census": res["census"],
                                                          "stray_episodes": res["stray_episodes"],
                                                          "authorizes": "nothing"}, indent=1) + "\n")
     print(json.dumps({k: {x: v[x] for x in ("offered", "admitted")} for k, v in res["census"].items()}, indent=1))

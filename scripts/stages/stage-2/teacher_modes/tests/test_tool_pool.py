@@ -339,7 +339,7 @@ class TestSixTypePacks:
         monkeypatch.setattr(TGP, "for_consumers", lambda **k: (plan, {"training": order,
                                                                       "validation": ["tc1-v0", "tc1-v1"]}))
         design = json.loads(PP.DESIGN.read_text())
-        design["stage3_packing"]["sequence_length"] = 128      #: every document fits, as every admitted one does
+        design["stage3_packing"]["sequence_length"] = 64       #: fluid examples of 102 tokens pack truncated
         (tmp_path / "design.json").write_text(json.dumps(design))
         monkeypatch.setattr(PP, "DESIGN", tmp_path / "design.json")
         tm, six = json.loads(PP.TOKEN_MATCHED.read_text()), json.loads(PP.SIX.read_text())  #: C1's numbers, scaled

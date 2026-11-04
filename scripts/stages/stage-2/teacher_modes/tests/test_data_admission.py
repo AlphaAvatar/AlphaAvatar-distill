@@ -10,7 +10,10 @@
    selection's report, an edited report, or content, mask, category, split, tool-cell or quota-design drift after
    the validation refuses -- without the admission validating anything again;
 8. the formal binding verifies the ACTUAL packed tokens and supervision (P1): one changed token, a changed mask, a
-   replaced file or a forged pack with a re-sealed identity refuses; an untouched pack binds.
+   replaced file or a forged pack with a re-sealed identity refuses; an untouched pack binds;
+9. truncate=True holds through the binding (maintainer review of 2468c1aa): an overlong document packs truncated with
+   prefix restarts, its unique supervised tokens still count whole, the pack is re-derived from the frozen
+   documents and binds, and tampering with the truncated placement or the frozen documents refuses.
 
 The designs are the real files with their numbers scaled down (`scaled`); the structure and the tolerance are kept."""
 from __future__ import annotations
@@ -410,14 +413,12 @@ class TestPackContent:
         with pytest.raises(PP.PackBuildError, match="packed_content_sha256"):
             PP.verify_pack(out)
 
-    @pytest.mark.parametrize("forgery,why", [
-        ("token", "whose tokens or supervision are not the manifest's"),
-        ("swapped sequences", "not a document|not the manifest's"),
-        ("reordered sequences, audit rewritten to match", "not the packing of the manifest's documents")])
-    def test_a_forged_pack_with_a_resealed_identity_is_refused(self, scaled, forgery, why):
-        """The recorded identity rewritten to match the edit: the manifest's documents and their re-packing still
-        refuse it -- the identity alone never makes a pack correct. The last forgery keeps every document intact and
-        its placements consistent, so only the re-derivation of the sequences can see it."""
+    @pytest.mark.parametrize("forgery", ["token", "swapped sequences", "reordered sequences, audit rewritten to match"])
+    def test_a_forged_pack_with_a_resealed_identity_is_refused(self, scaled, forgery):
+        """The recorded identity rewritten to match the edit: the sequences re-derived from the frozen documents
+        still refuse it -- the identity alone never makes a pack correct. The last forgery keeps every document
+        intact and its placements consistent."""
+        why = "not the packing of the manifest's documents"
         out, rec = built(scaled)
         n_train = rec["n_blocks"]
 
@@ -438,4 +439,93 @@ class TestPackContent:
             arr["input_ids"], arr["ce_mask"], arr["content_mask"], n_train)
         (out / "ladder.json").write_text(json.dumps(lad))
         with pytest.raises(PP.PackBuildError, match=why):
+            PP.verify_pack(out)
+
+
+def overlong():
+    """A1-6cat's selection with one fluid example of 1,000 supervised tokens (two of 500 merged: the same total),
+    longer than the scaled 700-token sequence."""
+    return selection({**{t: [UNIT] * 4 for t in TYPES}, "primary.x": [1000] + [500] * 10})
+
+
+class TestTruncation:
+    def test_an_overlong_document_packs_truncated_and_binds(self, scaled):
+        sel = overlong()
+        big = next(d for d in sel["train"] if len(d) > 700)
+        adm = PP.admit("A1-6cat", sel, PP.proportions("A1-6cat", sel), scaled / "out")
+        out = scaled / "out" / "A1-6cat"
+        rec = PP.pack(sel["train"], sel["validation"], adm["path"], out)
+        st = rec["train"]
+        assert st["truncated_supervised_tokens"] == len(big) - 700 and st["fragments"] > 0      #: truncate + restart
+        n = adm["manifest"]["before_packing"]["training"]["unique_supervised_tokens"]
+        assert n == st["unique_supervised_tokens"] == 6 * PER + FLUID == rec["rungs"][0]["target_supervised_tokens"]
+        rows = [json.loads(x) for x in (out / "audit.jsonl").read_text().splitlines()]
+        final = [m for r in rows for m in r["sessions"] if m["session_id"] == big.doc_id and m["final"]]
+        assert [(m["length"], m["document_length"]) for m in final] == [(700, len(big))]          #: placed truncated
+        assert PP.verify_pack(out)["documents_file"]["name"] == PP.DOCUMENTS
+        unit = PTP.bind(a1_units(), scaled / "out")["units"][0]
+        assert unit["config"]["lineage"]["data"][0]["packed_content_sha256"] == rec["data_admission"]["packed_content_sha256"]
+
+    def test_tampering_with_the_truncated_placement_is_refused(self, scaled):
+        sel = overlong()
+        big = next(d for d in sel["train"] if len(d) > 700)
+        adm = PP.admit("A1-6cat", sel, PP.proportions("A1-6cat", sel), scaled / "out")
+        out = scaled / "out" / "A1-6cat"
+        rec = PP.pack(sel["train"], sel["validation"], adm["path"], out)
+        rows = [json.loads(x) for x in (out / "audit.jsonl").read_text().splitlines()]
+        b, m = next((r["block"], m) for r in rows for m in r["sessions"] if m["session_id"] == big.doc_id and m["final"])
+
+        def edit(arr):
+            arr["input_ids"][b, m["start"] + m["length"] - 1] += 1                #: the last token placed
+        arr = rewrite_blocks(out, edit)
+        with pytest.raises(PP.PackBuildError, match="packed_content_sha256"):
+            PP.verify_pack(out)
+        lad = json.loads((out / "ladder.json").read_text())                       #: re-sealed: re-derivation refuses
+        lad["data_admission"]["packed_content_sha256"] = PP.packed_content_sha256(
+            arr["input_ids"], arr["ce_mask"], arr["content_mask"], rec["n_blocks"])
+        (out / "ladder.json").write_text(json.dumps(lad))
+        with pytest.raises(PP.PackBuildError, match="not the packing of the manifest's documents"):
+            PP.verify_pack(out)
+
+    def test_changed_frozen_documents_are_refused(self, scaled):
+        import numpy as np
+        sel = overlong()
+        adm = PP.admit("A1-6cat", sel, PP.proportions("A1-6cat", sel), scaled / "out")
+        out = scaled / "out" / "A1-6cat"
+        PP.pack(sel["train"], sel["validation"], adm["path"], out)
+        f = out / PP.DOCUMENTS
+        with np.load(f) as z:
+            arr = {k: z[k].copy() for k in z.files}
+        arr["training_ids"][-2] += 1                            #: a tail token beyond any truncation point
+        np.savez(f, **arr)
+        with pytest.raises(PP.PackBuildError, match="frozen documents are missing or not the admitted ones"):
+            PP.verify_pack(out)
+        man = json.loads((out / PP.MANIFEST).read_text())       #: the manifest re-pointed and re-sealed
+        man["documents_file"]["sha256"] = PP.sha_file(f)
+        man["content_sha256"] = PP.canonical_sha({k: v for k, v in man.items() if k != "content_sha256"})
+        (out / PP.MANIFEST).write_text(json.dumps(man))
+        with pytest.raises(PP.PackBuildError, match="not the one it was packed from"):
+            PP.verify_pack(out)
+
+    def test_frozen_documents_must_match_the_manifests_rows(self, scaled):
+        """The manifest's document rows are the admission's record: frozen documents re-pointed by a re-sealed
+        manifest and ladder -- the packed sequences untouched -- still refuse, document by document."""
+        import numpy as np
+        sel = overlong()
+        adm = PP.admit("A1-6cat", sel, PP.proportions("A1-6cat", sel), scaled / "out")
+        out = scaled / "out" / "A1-6cat"
+        PP.pack(sel["train"], sel["validation"], adm["path"], out)
+        f = out / PP.DOCUMENTS
+        with np.load(f) as z:
+            arr = {k: z[k].copy() for k in z.files}
+        arr["training_ids"][-2] += 1
+        np.savez(f, **arr)
+        man = json.loads((out / PP.MANIFEST).read_text())
+        man["documents_file"]["sha256"] = PP.sha_file(f)
+        man["content_sha256"] = PP.canonical_sha({k: v for k, v in man.items() if k != "content_sha256"})
+        (out / PP.MANIFEST).write_text(json.dumps(man))
+        lad = json.loads((out / "ladder.json").read_text())
+        lad["data_admission"].update(manifest_sha256=PP.sha_file(out / PP.MANIFEST), content_sha256=man["content_sha256"])
+        (out / "ladder.json").write_text(json.dumps(lad))
+        with pytest.raises(PP.PackBuildError, match="tokens or supervision are not the admitted ones"):
             PP.verify_pack(out)

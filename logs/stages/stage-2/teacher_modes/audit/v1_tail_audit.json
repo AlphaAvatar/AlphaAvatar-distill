@@ -1,0 +1,21 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.v1_tail_audit/v1",
+ "rule": "tool_verification@v2",
+ "sources": {
+  "hybrid_thinking": {
+   "file_sha256": "edb2ad707b1e0acf7c93732e1b91f9e0277e9624717bc968cb8a018ebf11ea4e",
+   "turns": 76,
+   "turns_with_a_call": 11,
+   "with_text_after_the_last_call": 0,
+   "examples": []
+  },
+  "hybrid_non_thinking": {
+   "file_sha256": "20b2ea1b7c664f63a7286f195b210deff6f82ce1019c16247406c79315f90f49",
+   "turns": 76,
+   "turns_with_a_call": 11,
+   "with_text_after_the_last_call": 0,
+   "examples": []
+  }
+ },
+ "authorizes": "nothing"
+}

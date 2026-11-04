@@ -253,6 +253,29 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
     return episodes, n_turns, out_tokens
 
 
+#: the engine metrics a tool pilot reads (`--engine-metrics`): preemptions, KV-cache usage, prefix-cache hits,
+#: running / waiting requests, token counters -- by substring of the installed vLLM's metric names
+ENGINE_METRICS = ("preempt", "kv_cache_usage", "gpu_cache_usage", "prefix_cache", "num_requests_running",
+                  "num_requests_waiting", "prompt_tokens", "generation_tokens")
+
+
+def sample_engine_metrics(llm, into: dict) -> dict:
+    """The engine's current scalar metrics of `ENGINE_METRICS` (``LLM.get_metrics``), each running maximum kept in
+    ``into["max"]``; an engine without the API records the error. Reading metrics changes no generation."""
+    now = {}
+    try:
+        for m in llm.get_metrics():
+            name, value = getattr(m, "name", ""), getattr(m, "value", None)
+            if any(k in name for k in ENGINE_METRICS) and isinstance(value, (int, float)):
+                now[name] = value
+                into["max"][name] = max(value, into["max"].get(name, value))
+        into["samples"] += 1
+    except Exception as exc:  # noqa: BLE001 -- telemetry never stops a generation
+        if len(into["errors"]) < 5:
+            into["errors"].append(repr(exc)[:200])
+    return now
+
+
 def resolve_env_factory(spec: str):
     """``module:attr[.attr]`` -> the callable it names."""
     import importlib
@@ -316,6 +339,9 @@ def main(argv=None) -> int:
                     help="generate mode only: the data-construction bound")
     ap.add_argument("--seed-base", type=int, default=20261018)
     ap.add_argument("--gpu-mem-util", type=float, default=0.90)
+    ap.add_argument("--engine-metrics", action="store_true",
+                    help="enable the engine's stats and record its metrics (preemptions, KV-cache usage peaks, "
+                         "token counters) in the summary; off by default: the generation is the same either way")
     ap.add_argument("--check-every", type=int, default=256)
     ap.add_argument("--system", default="You are a helpful Assistant.")
     ap.add_argument("--limit", type=int, default=None, help="first N tasks (smoke)")
@@ -396,7 +422,8 @@ def main(argv=None) -> int:
     # The engine is sized to what can be generated: the resolved context for a
     # measurement, the data-construction session limit for generation.
     llm = LLM(model=args.model, dtype="bfloat16", max_model_len=limit,
-              gpu_memory_utilization=args.gpu_mem_util, **rev)
+              gpu_memory_utilization=args.gpu_mem_util, **rev,
+              **({"disable_log_stats": False} if args.engine_metrics else {}))
     eng = llm.llm_engine
     init_s = round(time.time() - t0, 1)
     engine = engine_config(llm, limit, args.gpu_mem_util)
@@ -414,9 +441,15 @@ def main(argv=None) -> int:
 
     stream = (streamer(Path(args.stream_completed), label=args.label, mode=args.mode,
                        action_protocol=args.action_protocol) if args.stream_completed else None)
+    metrics = {"samples": 0, "max": {}, "final": {}, "errors": []} if args.engine_metrics else None
+
+    def progress(*a, **k):
+        print(*a, **k)
+        if metrics is not None:
+            sample_engine_metrics(llm, metrics)
     t_gen = time.time()
     episodes, rnd, out_tokens = run_episodes(
-        tasks, tok=tok, eng=eng, make_sampling=make_sampling, limit=limit, ctx=ctx,
+        tasks, tok=tok, eng=eng, make_sampling=make_sampling, limit=limit, ctx=ctx, log=progress,
         stop_ids=stop_ids, mode=args.mode, seed_base=args.seed_base,
         system=args.system, check_every=args.check_every,
         degeneration_check=degeneration.check, split_generation=split_generation,
@@ -427,6 +460,8 @@ def main(argv=None) -> int:
     if stream:
         stream[1].close()
     gen_s = round(time.time() - t_gen, 1)
+    if metrics is not None:
+        metrics["final"] = sample_engine_metrics(llm, metrics)
     identity = {
         "label": args.label, "model": args.model, "revision": args.revision,
         "mode": args.mode, "tasks_file": args.tasks,
@@ -455,6 +490,7 @@ def main(argv=None) -> int:
                                  action_protocol=args.action_protocol)
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     summary = {"identity": identity, "n_tasks": len(episodes), "turns": rnd,
+               **({"engine_metrics": metrics} if metrics is not None else {}),
                "output_tokens": out_tokens, "generation_seconds": gen_s,
                "output_tokens_per_second": round(out_tokens / gen_s, 1) if gen_s else None,
                "ends": {k: sum(e["end"] == k for e in episodes.values())

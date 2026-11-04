@@ -60,6 +60,13 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
     single-threaded probe (PACKED_ROUND.md section 10);
   - the L40S pilot's application prepared, not authorized
     (`logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json`).
+- **Review of `2468c1aa` (2026-11-04).** The identity hardening and the single-step protocol are accepted. Done at $0:
+  - `verify_pack` re-derives the packed sequences from the documents the admission froze (`data_documents.npz`), so
+    `truncate=True` is verified rather than refused;
+  - `tool_verification@v2`: V1's tail rule on every call turn (0 of the hybrid's 22 recorded call turns affected);
+  - the L40S pilot's execution preparation: kind `tool_pilot`, frozen cells (`plans/tool_pilot_plan.json`, 397 tasks,
+    794 runs), `tool_session.py --pilot`, telemetry, the runner's hard-cap check, a pilot-only source admission
+    (unsigned) and the re-verified application. Owed: the signature, the grant's cap, option A ($1.80) or B ($2.50).
 - **Blocked on tool calling.**
   - The non-thinking `schema_arguments` SHORTFALL: option 1 is implemented; at the priors it fills training and leaves
     state evaluation short (~1,400 of 1,800). No SHORTFALL is approved, so the A2-6cat admission refuses and the suite
@@ -70,7 +77,7 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
   - source admission;
   - the expected SHORTFALLS: non-thinking `schema_arguments`, and "ask for the missing value";
   - the isolation costs and the validation-coverage gaps;
-  - the L40S pilot application ($1.14 expected, cap $1.80; not authorized);
+  - the L40S pilot (signature, grant cap, option A $1.80 or B $2.50; not authorized);
   - a raised cap: generation plus search is $36.15 expected against $30.05 left (live 2026-11-04T08:06Z);
   - volume `4rhubprswo`.
 

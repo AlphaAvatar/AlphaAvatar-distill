@@ -101,17 +101,22 @@ def units(task: dict, turns: list, unit: str, *, mode: str, thinking: bool, stop
 
 
 def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict, man: dict, out: Path,
-                  identity: str, run, mark) -> dict:
-    """Every cell of one mode, round by round, to its target or its bound; returns the cells' final states."""
+                  identity: str, run, mark, *, cells: list[dict] | None = None, orders: list | None = None,
+                  max_rounds: int | None = None, label_prefix: str = "tool", telemetry: Path | None = None,
+                  extra_args: tuple[str, ...] = ()) -> dict:
+    """Every cell of one mode, round by round, to its target or its bound; returns the cells' final states. A pilot
+    passes its frozen ``cells`` and ``orders`` (`tool_pilot.cells`), one round and its own label prefix; with
+    ``telemetry`` every engine invocation appends its GPU and engine telemetry there (`tool_pilot`)."""
     from stages.reasoning_data import generation_driver as GD
     bp, ex = proto["bounded_plan"], proto["execution"]
     cand, stop_ids = int(ex["candidates"]), [int(x) for x in ex["stop_ids"]]
     thinking = bool(proto["lineages"][lineage]["modes"][mode]["template_kwargs"].get("enable_thinking", True))
-    cells = plan["lineages"][lineage]["modes"][mode]["cells"]
-    orders = [TGP.cell_order(man["orders"].get(c["split"], []), by_id, c["category"]) for c in cells]
+    if cells is None:
+        cells = plan["lineages"][lineage]["modes"][mode]["cells"]
+        orders = [TGP.cell_order(man["orders"].get(c["split"], []), by_id, c["category"]) for c in cells]
     state = [{"attempted": 0, "units": 0.0, "admitted": 0} for _ in cells]
     c, groups = context(proto, lineage, identity), []
-    for r in range(1, int(bp["rounds"]["max_rounds"]) + 1):
+    for r in range(1, int(max_rounds or bp["rounds"]["max_rounds"]) + 1):
         picks = [TGP.round_tasks(cell, orders[i], state[i], r, bp=bp, mode=mode, candidates=cand)
                  for i, cell in enumerate(cells)]
         ids = [t for p in picks for t in p]
@@ -119,17 +124,21 @@ def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict,
             break
         if len(set(ids)) != len(ids):
             raise PlanError(f"round {r}: a task picked by two cells")
-        label = f"tool_{mode}_r{r}"
+        label = f"{label_prefix}_{mode}_r{r}"
         f = write_round([by_id[t] for t in ids], out, label, ex["system_message_default"])
         admitted: dict[str, float] = {}
         retry = None
         for k in range(cand):
             if k and not retry:
                 break
-            g = GD.run_group(c, out, out / "inputs", f, k, retry, run, mark, label=f"{label}_pass{k}",
-                             extra_args=mode_args(proto, lineage, mode))
+            t0 = time.time()
+            with _gpu(telemetry) as gpu:
+                g = GD.run_group(c, out, out / "inputs", f, k, retry, run, mark, label=f"{label}_pass{k}",
+                                 extra_args=mode_args(proto, lineage, mode) + tuple(extra_args))
             recs = g.pop("records")
             groups.append(g)
+            if telemetry is not None:
+                _telemetry(telemetry, out, f"{label}_pass{k}", g, gpu, time.time() - t0, recs)
             if not g["complete"]:
                 mark(f"{GD.UNIT_FAILED}:{label}_pass{k}")
                 return {"complete": False, "groups": groups, "cells": _report(cells, state)}
@@ -151,6 +160,28 @@ def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict,
     return {"complete": True, "groups": groups, "cells": _report(cells, state)}
 
 
+def _gpu(telemetry: Path | None):
+    import contextlib
+    from stages.teacher_modes import tool_pilot as TPL
+    return TPL.GpuSampler() if telemetry is not None else contextlib.nullcontext()
+
+
+def _telemetry(path: Path, out: Path, label: str, g: dict, gpu, seconds: float, recs: dict) -> None:
+    """One engine invocation's line of ``telemetry.jsonl``: wall time, GPU peaks, each new segment's engine lines and
+    summary, the per-turn timings of the records it sealed. Never raises: telemetry does not stop a session."""
+    from stages.teacher_modes import tool_pilot as TPL
+    try:
+        segs = [x["segment"] for x in g.get("segments") or [] if "segment" in x]
+        row = {"label": label, "wall_seconds": round(seconds, 1), "complete": g.get("complete"),
+               "gpu": gpu.as_dict() if hasattr(gpu, "as_dict") else None,
+               "engine": [TPL.engine_telemetry(out / f"{label}.seg{n}.log", out / f"{label}.seg{n}.raw.summary.json")
+                          for n in segs], "turns": TPL.turn_telemetry(recs)}
+    except Exception as exc:  # noqa: BLE001
+        row = {"label": label, "error": repr(exc)[:300]}
+    with Path(path).open("a") as fh:
+        fh.write(json.dumps(row, default=str) + "\n")
+
+
 def _report(cells: list[dict], state: list[dict]) -> list[dict]:
     out = []
     for cell, s in zip(cells, state):
@@ -160,15 +191,55 @@ def _report(cells: list[dict], state: list[dict]) -> list[dict]:
     return out
 
 
+class _Done(Exception):
+    def __init__(self, ok: bool):
+        super().__init__(ok)
+        self.ok = ok
+
+
+def run_pilot(proto: dict, plan_path: Path, tasks_path: Path, out: Path, identity: str, run, mark,
+              record: dict) -> bool:
+    """The tool pilot (`tool_pilot.py`): its frozen plan and task file verified (`tool_pilot.load`) and its signed,
+    pilot-only source admission naming this plan; then each mode's frozen cells in ONE round -- first candidates,
+    second candidates for the refused tasks only -- with GPU and engine telemetry beside the sealed shards. A
+    replacement session regenerates nothing sealed (`generation_driver.run_group`)."""
+    from stages.teacher_modes import tool_pilot as TPL
+    doc, by_id = TPL.load(plan_path, tasks_path)
+    adm = json.loads(TPL.ADMISSION.read_text())
+    if adm.get("schema") != TPL.ADMISSION_SCHEMA or not (adm.get("signature") or {}).get("signed_by"):
+        raise TPL.PilotError("the pilot-only source admission is not signed")
+    if adm["pilot_plan"]["sha256"] != hashlib.sha256(Path(plan_path).read_bytes()).hexdigest():
+        raise TPL.PilotError("the source admission names another pilot plan")
+    record.update(pilot_plan_sha256=adm["pilot_plan"]["sha256"], tasks=len(by_id),
+                  verification_version=TE.VERIFICATION_VERSION)
+    mark("CONTRACT_OK")
+    record["modes"] = {}
+    for mode in sorted(doc["modes"]):
+        cells, orders = TPL.cells(doc, mode, by_id)
+        res = generate_mode(proto, None, doc["lineage"], mode, by_id, None, out, identity, run, mark, cells=cells,
+                            orders=orders, max_rounds=doc["rounds"], label_prefix="pilot",
+                            telemetry=out / "telemetry.jsonl", extra_args=("--engine-metrics",))
+        record["modes"][mode] = res
+        if not res["complete"]:
+            return False
+    return True
+
+
 def main(argv=None, *, run=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--authorization", required=True)
     ap.add_argument("--lineage", required=True, choices=("hybrid", "thinking_2507"))
     ap.add_argument("--durable-root", required=True)
     ap.add_argument("--status", required=True)
+    ap.add_argument("--pilot", default=None, help="the frozen pilot plan (tool_pilot.py): runs the tool_pilot kind")
+    ap.add_argument("--pilot-tasks", default=None, help="the pilot's task file, by the plan's sha256")
     a = ap.parse_args(argv)
+    if bool(a.pilot) != bool(a.pilot_tasks):
+        ap.error("--pilot and --pilot-tasks go together")
+    if a.pilot and a.lineage != "hybrid":
+        ap.error("the pilot is the hybrid's")
     durable, status = Path(a.durable_root), Path(a.status)
-    out = durable / f"tool_generation_{a.lineage}"
+    out = durable / (f"tool_pilot_{a.lineage}" if a.pilot else f"tool_generation_{a.lineage}")
     out.mkdir(parents=True, exist_ok=True)
     record = {"schema": SCHEMA, "lineage": a.lineage, "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 
@@ -181,11 +252,16 @@ def main(argv=None, *, run=None) -> int:
     try:
         from stages.reasoning_data import generation_driver as GD
         from stages.teacher_modes import token_matched_phase as TM
-        #: the lineage's own kind: a hybrid artifact never runs Thinking-2507, nor the reverse
-        kind = TM.TOOL_GENERATION_KINDS[a.lineage]
+        #: the lineage's own kind: a hybrid artifact never runs Thinking-2507, nor the reverse; a pilot's never runs
+        #: the bounded generation, nor the reverse
+        kind = TM.TOOL_PILOT_KIND if a.pilot else TM.TOOL_GENERATION_KINDS[a.lineage]
         bound = TM.require_on_pod(Path(a.authorization), kind, REPO)
-        record.update(kind=kind, authorization=bound.get("authorization_id"))
+        record.update(kind=kind, authorization=bound.get("authorization_id"), identity=bound["identity"])
         proto = protocol()
+        if a.pilot:
+            ok = run_pilot(proto, Path(a.pilot), Path(a.pilot_tasks), out, bound["identity"], run or GD.run_battery,
+                           mark, record)
+            raise _Done(ok)
         plan, man, by_id = checked_plan(proto, a.lineage)
         record.update(plan_pool_content_sha256=plan["pool"]["content_sha256"], tasks_readable=len(by_id))
         mark("CONTRACT_OK")
@@ -197,6 +273,8 @@ def main(argv=None, *, run=None) -> int:
             if not res["complete"]:
                 ok = False
                 break
+    except _Done as done:
+        ok = done.ok
     except BaseException as exc:  # noqa: BLE001
         ok = False
         record["error"] = {"error": repr(exc)[:2000], "traceback": traceback.format_exc()[-6000:]}

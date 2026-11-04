@@ -25,7 +25,7 @@ first refusal:
    (packed_round_design.json :: data_admission.approved_exceptions; the plan's approved_shortfalls for a tool
    cell). It writes the frozen data manifest -- every document's id, split, data type, category, whole unit,
    supervised tokens and content sha256, the counts and proportions, the sources, the lineage -- or refuses
-   (`AdmissionError`) and writes nothing.
+   (`AdmissionError`) and writes nothing. The documents' token content is frozen beside it (`write_documents`).
 4. **Packing** (`pack`): random shuffle -> sequential packing -> truncation (`token_documents.pack_sequential`) at
    the design's sequence length and seed (`stage3_packing`), every validation document included (no sequence cap),
    written in the trainer's ladder contract (`write_pack`, no position ids: standard causal attention). It checks
@@ -35,8 +35,9 @@ first refusal:
 
 `verify_pack` is the formal consumer's check (`packed_training_plan.bind`): an admitted, unchanged manifest, the
 manifest's documents and the design's packing spec, and the actual packed tokens and supervision mask -- the content
-identity the packing recorded (`packed_content_sha256`), every document's content against the manifest, and the
-sequences re-derived from them exactly -- or the pack is refused.
+identity the packing recorded (`packed_content_sha256`), and the sequences re-derived exactly from the documents the
+admission froze beside the manifest (`data_documents.npz`, by sha256), overlong documents truncated as the formal
+packing truncates them -- or the pack is refused.
 
 * A1-6cat / A2-6cat: the mode's documents of the tasks `six_category_selection.json` selected. They are read from
   A1's / A2's packs (`packing_audit.documents_from_isolated_pack`, token for token); a selected task whose
@@ -91,7 +92,9 @@ SIX_TYPES = {"supporting.math_new": "competition_math", "openmath": "competition
 SIX_NAMES = ("competition_math", "gsm8k", "rag_reading", "multihop_reading", "code", "tool_calling")
 SELECTION_ARM = {"A1-6cat": "A1", "A2-6cat": "A2"}
 MANIFEST = "data_manifest.json"
-MANIFEST_SCHEMA = "aadistill.stage2.teacher_modes.data_manifest/v1"
+MANIFEST_SCHEMA = "aadistill.stage2.teacher_modes.data_manifest/v2"
+#: the frozen documents themselves, beside the manifest that holds their sha256 (`write_documents`)
+DOCUMENTS = "data_documents.npz"
 COLUMNS = ["doc_id", "data_type", "category", "unit", "supervised_tokens", "sha256"]
 
 
@@ -481,10 +484,13 @@ def admit(arm: str, sel: dict, report: dict, out: Path = OUT) -> dict:
         raise AdmissionError(f"{arm}: data admission refused: " + "; ".join(verdict["unapproved"]), verdict)
     li = json.loads(TGP.PROTOCOL.read_text())["lineages"][sel["teacher"]]
     docs = {"training": _entries(sel["train"], sel), "validation": _entries(sel["validation"], sel)}
+    p = Path(out) / arm / MANIFEST
+    p.parent.mkdir(parents=True, exist_ok=True)
+    frozen = write_documents(sel, p.parent / DOCUMENTS)
     man = {"schema": MANIFEST_SCHEMA, "arm": arm, "mode": sel["mode"],
            "teacher": {"lineage": sel["teacher"], "model": li["model"], "revision": li["revision"]},
            "admitted": True, "columns": COLUMNS, "documents": docs, "documents_sha256": canonical_sha(docs),
-           "selection_sha256": report["selection_sha256"],
+           "documents_file": frozen, "selection_sha256": report["selection_sha256"],
            "before_packing": {"training": _composition(sel["train"], sel),
                               "validation": _composition(sel["validation"], sel)},
            "proportions": report, "tool_calling": sel["tool"], "approved_exceptions": verdict["approved_exceptions"],
@@ -492,10 +498,54 @@ def admit(arm: str, sel: dict, report: dict, out: Path = OUT) -> dict:
            "missing_tasks_read_from_records": sel["missing_tasks_read_from_records"], "sources": sel["sources"],
            "authorizes": "nothing"}
     man["content_sha256"] = canonical_sha(man)
-    p = Path(out) / arm / MANIFEST
-    p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(man, indent=1) + "\n")
     return {"path": str(p), "sha256": sha_file(p), "manifest": man}
+
+
+def write_documents(sel: dict, path: Path) -> dict:
+    """The admitted documents' token content, frozen beside the manifest: per split the concatenated token ids,
+    supervision masks and offsets, in the manifest's row order. Its sha256 enters the manifest, so the training
+    binding can re-derive the packed sequences from exactly the admitted documents (`verify_pack`) -- a document
+    the packing truncates at the sequence length included."""
+    import numpy as np
+    arrays = {}
+    for split, docs in (("training", sel["train"]), ("validation", sel["validation"])):
+        n = [len(d.ids) for d in docs]
+        arrays[f"{split}_ids"] = np.fromiter((t for d in docs for t in d.ids), dtype=np.int32, count=sum(n))
+        arrays[f"{split}_mask"] = np.fromiter((bool(x) for d in docs for x in d.target_mask), dtype=bool, count=sum(n))
+        arrays[f"{split}_offsets"] = np.concatenate([[0], np.cumsum(n, dtype=np.int64)]).astype(np.int64)
+    np.savez(path, **arrays)
+    return {"name": path.name, "sha256": sha_file(path), "arrays": sorted(arrays),
+            "order": "per split, the manifest's document rows in order"}
+
+
+def read_documents(manifest_path: Path, man: dict) -> dict:
+    """``{split: [MaskedDocument]}``: the frozen documents of an admitted manifest, the file checked against the
+    manifest's sha256 and every document against its row's content sha256 (`doc_sha256`), or PackBuildError."""
+    import numpy as np
+    from aadistill.data.token_documents import DocumentError, MaskedDocument
+    f = man.get("documents_file") or {}
+    path = Path(manifest_path).parent / str(f.get("name"))
+    if not path.is_file() or sha_file(path) != f.get("sha256"):
+        raise PackBuildError(f"{path}: the frozen documents are missing or not the admitted ones (sha256)")
+    out = {}
+    with np.load(path) as z:
+        for split, rows in man["documents"].items():
+            ids, mask, off = z[f"{split}_ids"], z[f"{split}_mask"], z[f"{split}_offsets"]
+            if len(off) != len(rows) + 1:
+                raise PackBuildError(f"{path}: {len(off) - 1} {split} documents, the manifest admits {len(rows)}")
+            docs = []
+            for k, r in enumerate(rows):
+                a, b = int(off[k]), int(off[k + 1])
+                try:
+                    d = MaskedDocument(r[0], tuple(int(x) for x in ids[a:b]), tuple(bool(x) for x in mask[a:b]))
+                except DocumentError as exc:
+                    raise PackBuildError(f"{path}: {r[0]} is not a document ({exc})") from exc
+                if doc_sha256(d) != r[-1]:
+                    raise PackBuildError(f"{path}: {r[0]}'s tokens or supervision are not the admitted ones")
+                docs.append(d)
+            out[split] = docs
+    return out
 
 
 def read_manifest(path: Path) -> dict:
@@ -556,39 +606,15 @@ def pack(train, validation, manifest_path: Path, out_dir: Path) -> dict:
                                              "the packing produced them, before they were written"}})
 
 
-def documents_in_pack(input_ids, ce_mask, rows: list[dict]) -> list:
-    """Every document of one split read back from its sequences: its final placement holds it whole, from its first
-    token (a fragment is a prefix and is read again from the start in the next sequence). A document the packing
-    truncated at the sequence length is not whole anywhere and cannot be verified, so it refuses."""
-    from aadistill.data.token_documents import DocumentError, MaskedDocument
-    out = []
-    for row in rows:
-        b = row["block"]
-        for m in row["sessions"]:
-            if not m.get("final"):
-                continue
-            if m["length"] != m["document_length"]:
-                raise PackBuildError(f"{m['session_id']}: truncated at the sequence length ({m['length']} of "
-                                     f"{m['document_length']} tokens placed); its content cannot be verified")
-            s, k = m["start"], m["length"]
-            try:
-                out.append(MaskedDocument(m["session_id"], tuple(int(x) for x in input_ids[b, s:s + k]),
-                                          tuple(bool(x) for x in ce_mask[b, s:s + k])))
-            except DocumentError as exc:
-                raise PackBuildError(f"its placement of {m['session_id']} is not a document, not the manifest's: "
-                                     f"{exc}") from exc
-    return out
-
-
 def verify_pack(pack_dir: Path) -> dict:
     """A formal consumer's check of a built pack: it names an admitted manifest whose bytes are unchanged, holds
     exactly that manifest's documents (by id, per split; its rung = the manifest's unique supervised tokens) and was
     packed with the design's packing spec; and its ACTUAL sequences are the ones its packing produced and the
     packing of the manifest's documents: (1) `packed_content_sha256` of ``blocks.npz``'s token ids, supervision mask
-    and content mask equals the identity the packing recorded before writing them; (2) every document read back from
-    its final placement (`documents_in_pack`) has the content sha256 the frozen manifest admitted, and packing those
-    documents again at the design's spec reproduces every sequence -- tokens, supervision, content and placements --
-    exactly. Returns the manifest, or PackBuildError."""
+    and content mask equals the identity the packing recorded before writing them; (2) the frozen documents
+    (`read_documents`: the file by the manifest's sha256, every document by its row's content sha256), packed again
+    by the formal algorithm at the design's spec -- truncation and prefix restarts included -- reproduce every
+    sequence (tokens, supervision, content) and every placement exactly. Returns the manifest, or PackBuildError."""
     import numpy as np
     from aadistill.data.sequence_packing import SequencePackingSpec
     from aadistill.data.token_documents import pack_sequential
@@ -622,15 +648,9 @@ def verify_pack(pack_dir: Path) -> dict:
         raise PackBuildError(f"{pack_dir}: its packed token ids, supervision mask or content mask are not the ones its "
                              "packing produced (packed_content_sha256)")
     rows = [json.loads(x) for x in (pack_dir / "audit.jsonl").read_text().splitlines() if x.strip()]
+    frozen = read_documents(mp, man)
     for split, key, lo, hi in (("training", "train", 0, n_train), ("validation", "val", n_train, len(tok))):
-        docs = documents_in_pack(tok, ce, [r for r in rows if r["split"] == key])
-        admitted = {r[0]: r[-1] for r in man["documents"][split]}
-        changed = [x.doc_id for x in docs if admitted.get(x.doc_id) != doc_sha256(x)]
-        if changed or len(docs) != len(admitted):
-            raise PackBuildError(f"{pack_dir}: its {split} sequences hold {len(changed)} document(s) whose tokens or "
-                                 f"supervision are not the manifest's (e.g. {changed[:2]}), {len(docs)} of "
-                                 f"{len(admitted)} whole")
-        again = pack_sequential(docs, int(d["sequence_length"]), PAD_ID, order_seed=int(d["shuffle_seed"]))
+        again = pack_sequential(frozen[split], int(d["sequence_length"]), PAD_ID, order_seed=int(d["shuffle_seed"]))
         placed = [[(m["session_id"], m["start"], m["length"], m["final"]) for m in r["sessions"]]
                   for r in rows if r["split"] == key]
         if not (np.array_equal(again.input_ids.numpy(), tok[lo:hi]) and np.array_equal(again.target_mask.numpy(), ce[lo:hi])
