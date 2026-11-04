@@ -5,6 +5,7 @@ failure, and the telemetry. Nothing here creates a resource."""
 from __future__ import annotations
 
 import json
+from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -207,12 +208,27 @@ def episode(task: dict, k: int, thinking: bool) -> dict:
     return {"turns": [{**turn, "responses": ["booked"]}, answer]}
 
 
-def signed(frozen, monkeypatch, *, plan_sha=None):
-    rec = {"schema": TPL.ADMISSION_SCHEMA, "scope": "the tool_pilot kind's measurement only (test)",
-           "pilot_plan": {"sha256": plan_sha or TPL.sha(frozen["plan"])},
-           "signature": {"signed_by": "maintainer (test)"}}
+def sign(rec: dict, **over) -> dict:
+    """A test's stand-in for the maintainer's signature on a temporary copy (the real record stays unsigned)."""
+    import datetime as dt
+    rec = json.loads(json.dumps(rec))
+    rec["signature"] = {"signed_by": TPL.SIGNER, "approves": TPL.APPROVAL, "decision": "approved for the test",
+                        "date": dt.datetime.now(dt.timezone.utc).date().isoformat(),
+                        "pilot_plan_sha256": rec["pilot_plan"]["sha256"], "tasks_sha256": rec["tasks_sha256"],
+                        "tasks": rec["tasks"], **over}
+    return rec
+
+
+def signed(frozen, monkeypatch, **over):
+    rec = sign(TPL.source_admission(frozen["doc"], frozen["plan"]), **over)
     (frozen["tmp"] / "admission.json").write_text(json.dumps(rec))
     monkeypatch.setattr(TPL, "ADMISSION", frozen["tmp"] / "admission.json")
+    return rec
+
+
+def pilot(frozen, out, run=None, rec=None, volume_gb=55):
+    return TS.run_pilot(frozen["proto"], frozen["plan"], frozen["tasks"], out, "id", run, lambda m: None,
+                        {} if rec is None else rec, mount=frozen["tmp"], volume_gb=volume_gb)
 
 
 def test_one_round_of_the_frozen_cells_second_candidates_only_for_refusals(frozen, monkeypatch):
@@ -231,7 +247,8 @@ def test_one_round_of_the_frozen_cells_second_candidates_only_for_refusals(froze
     monkeypatch.setattr(GD, "run_group", run_group)
     rec, out = {}, frozen["tmp"] / "out"
     out.mkdir()
-    assert TS.run_pilot(frozen["proto"], frozen["plan"], frozen["tasks"], out, "id", None, lambda m: None, rec)
+    assert pilot(frozen, out, rec=rec)
+    assert rec["storage"]["free_bytes"] > TPL.MIN_FREE_BYTES
     n = sum(len(c["task_ids"]) for c in frozen["doc"]["modes"]["H-N"])
     first = {lab: k for lab, k, _ in calls if lab.endswith("pass0")}
     second = {lab: k for lab, k, _ in calls if lab.endswith("pass1")}
@@ -245,15 +262,14 @@ def test_one_round_of_the_frozen_cells_second_candidates_only_for_refusals(froze
 
 @pytest.mark.parametrize("which", ["unsigned", "another plan"])
 def test_the_session_refuses_without_the_signed_admission_of_this_plan(frozen, monkeypatch, which):
+    rec = signed(frozen, monkeypatch)
     if which == "unsigned":
-        signed(frozen, monkeypatch)
-        rec = json.loads(TPL.ADMISSION.read_text())
-        rec["signature"]["signed_by"] = None
-        TPL.ADMISSION.write_text(json.dumps(rec))
+        rec["signature"] = dict.fromkeys(TPL.SIGNATURE_FIELDS)
     else:
-        signed(frozen, monkeypatch, plan_sha="0" * 64)
+        rec["pilot_plan"]["sha256"] = rec["signature"]["pilot_plan_sha256"] = "0" * 64
+    TPL.ADMISSION.write_text(json.dumps(rec))
     with pytest.raises(TPL.PilotError, match="not signed|another pilot plan"):
-        TS.run_pilot(frozen["proto"], frozen["plan"], frozen["tasks"], frozen["tmp"], "id", None, lambda m: None, {})
+        pilot(frozen, frozen["tmp"] / "out")
 
 
 def test_an_interrupted_generation_fails_then_resumes_without_regenerating(frozen, monkeypatch):
@@ -280,11 +296,11 @@ def test_an_interrupted_generation_fails_then_resumes_without_regenerating(froze
         return run
     out = frozen["tmp"] / "out"
     out.mkdir()
-    assert not TS.run_pilot(frozen["proto"], frozen["plan"], frozen["tasks"], out, "id", runner(3), lambda m: None, {})
+    assert not pilot(frozen, out, runner(3))
     assert submitted[-1][1] > 3
     total = submitted[-1][1]
     submitted.clear()
-    assert TS.run_pilot(frozen["proto"], frozen["plan"], frozen["tasks"], out, "id", runner(None), lambda m: None, {})
+    assert pilot(frozen, out, runner(None))
     assert submitted[0][1] == total - 3                                     #: the three sealed ones never rerun
     tel = [json.loads(x) for x in (out / "telemetry.jsonl").read_text().splitlines()]
     assert any(e["engine_ready_seconds"] == [42.0] for t in tel for e in t.get("engine") or [])
@@ -335,5 +351,220 @@ def test_the_committed_pilot_records_hold_together():
         pytest.skip("the pilot's task file is an artifact outside git")
     adm = json.loads(TPL.ADMISSION.read_text())
     assert adm["pilot_plan"]["sha256"] == TPL.sha(TPL.PLAN) and adm["tasks"] == len(by_id) == len(doc["tasks"])
-    assert adm["signature"]["signed_by"] is None                             #: prepared, not signed
+    assert set(adm["signature"]) == set(TPL.SIGNATURE_FIELDS) and not any(adm["signature"].values())   #: unsigned
+    assert TPL.admission_problems(adm, TPL.PLAN, TPL.TASKS) == ["PREPARED, not signed by the maintainer"]
     assert sum(len(c["task_ids"]) for cs in doc["modes"].values() for c in cs) == 794
+
+
+# --- the pilot-only admission's signature (one check, issue and pod) -------------------------------------------------
+
+def _bad(rec, path, value):
+    rec = json.loads(json.dumps(rec))
+    *head, last = path
+    tgt = rec
+    for k in head:
+        tgt = tgt[k]
+    tgt[last] = value
+    return rec
+
+
+@pytest.mark.parametrize("path,value,match", [
+    (("signature", "approves"), "tool_generation and training", "not exactly 'tool_pilot measurement only'"),
+    (("signature", "decision"), None, "carries no decision"), (("signature", "decision"), "  ", "carries no decision"),
+    (("signature", "date"), None, "not an ISO date"), (("signature", "date"), "2099-01-01", "outside"),
+    (("signature", "signed_by"), "claude", "not the maintainer"),
+    (("signature", "tasks_sha256"), "0" * 64, "signature's tasks_sha256"),
+    (("tasks_sha256",), "0" * 64, "another task file"), (("pilot_plan", "sha256"), "0" * 64, "another pilot plan"),
+    (("tasks",), 1, "task count"), (("scope",), "the bounded tool generation and formal training", "scope is not"),
+    (("does_not",), [], "scope is not")])
+def test_a_signature_that_is_not_exactly_the_pilots_refuses(frozen, path, value, match):
+    good = sign(TPL.source_admission(frozen["doc"], frozen["plan"]))
+    assert TPL.admission_problems(good, frozen["plan"], frozen["tasks"]) == []
+    assert any(match in p for p in TPL.admission_problems(_bad(good, path, value), frozen["plan"], frozen["tasks"]))
+
+
+def test_signed_by_alone_is_not_a_signature(frozen):
+    rec = TPL.source_admission(frozen["doc"], frozen["plan"])
+    rec["signature"]["signed_by"] = "maintainer"
+    bad = TPL.admission_problems(rec, frozen["plan"], frozen["tasks"])
+    assert any("approves None" in p for p in bad) and any("no decision" in p for p in bad)
+
+
+def test_another_task_file_or_source_refuses(frozen):
+    good = sign(TPL.source_admission(frozen["doc"], frozen["plan"]))
+    other = frozen["tmp"] / "other.jsonl"
+    other.write_text(frozen["tasks"].read_text() + "\n")
+    assert any("another task file" in p for p in TPL.admission_problems(good, frozen["plan"], other))
+    good["sources"][0]["tasks"] += 1
+    assert any("sources are not" in p for p in TPL.admission_problems(good, frozen["plan"], frozen["tasks"]))
+
+
+def test_issue_and_the_pod_apply_the_same_admission_check(frozen, tmp_path, monkeypatch):
+    """`token_matched_phase.pilot_problems` (issue) reads the bound records under a root and refuses on exactly what
+    `tool_session.run_pilot` (the pod) refuses on: both call `tool_pilot.admission_problems`."""
+    import shutil
+    rec = TM.KIND_RECORDS["tool_pilot"]
+    root = tmp_path / "root"
+    for rel in rec[:2]:
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(TM.REPO_ROOT / rel, root / rel)
+    doc = json.loads(frozen["plan"].read_text())
+    doc["tasks_file"]["path"] = "artifacts/pilot_tasks.jsonl"
+    (root / "artifacts").mkdir()
+    shutil.copy(frozen["tasks"], root / doc["tasks_file"]["path"])
+    (root / rec[2]).parent.mkdir(parents=True, exist_ok=True)
+    (root / rec[2]).write_text(json.dumps(doc))
+    seen = []
+    real = TPL.admission_problems
+    monkeypatch.setattr(TPL, "admission_problems", lambda *a, **k: (seen.append("called"), real(*a, **k))[1])
+    adm = sign(TPL.source_admission(doc, root / rec[2], root / doc["tasks_file"]["path"]))
+    (root / rec[3]).parent.mkdir(parents=True, exist_ok=True)
+    (root / rec[3]).write_text(json.dumps(adm))
+    assert TM.pilot_problems(root) == [] and seen
+    (root / rec[3]).write_text(json.dumps(_bad(adm, ("signature", "approves"), "anything else")))
+    assert any("source admission: the signature approves" in p for p in TM.pilot_problems(root))
+
+
+# --- the volume ------------------------------------------------------------------------------------------------------
+
+def test_the_pod_refuses_a_full_volume_or_a_directory_it_did_not_write(frozen, monkeypatch):
+    signed(frozen, monkeypatch)
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    with pytest.raises(TPL.PilotError, match="below the 2 GB the pilot requires"):
+        pilot(frozen, out, volume_gb=1)
+    (out / "checkpoint").mkdir()                                    #: someone else's work in the pilot's directory
+    with pytest.raises(TPL.PilotError, match="files the pilot did not write"):
+        pilot(frozen, out)
+    with pytest.raises(TPL.PilotError, match="provider size is unknown"):
+        pilot(frozen, frozen["tmp"] / "out2", volume_gb=None)
+
+
+def test_the_pilot_volume_is_am5m373kuq_and_never_4rhubprswo():
+    args = lambda **o: SimpleNamespace(args=SimpleNamespace(**{"network_volume_id": "am5m373kuq", "volume_gb": 55,  # noqa: E731
+                                                               "data_center_ids": "EUR-IS-2",
+                                                               "volume_mount_path": "/runpod-volume", **o}))
+    assert TM.the_pilot_volume_is_the_planned_one(args())[0]
+    for bad in ({"network_volume_id": "4rhubprswo", "volume_gb": 350, "data_center_ids": "US-TX-3"},
+                {"volume_gb": 30}, {"data_center_ids": "US-TX-3"}):
+        assert not TM.the_pilot_volume_is_the_planned_one(args(**bad))[0]
+    assert TM.the_pilot_volume_is_the_planned_one in TM.launch_spec("tool_pilot", 55).extra_prechecks
+
+
+# --- the report on partial, resumed and forcibly ended sessions --------------------------------------------------------
+
+def _interrupt_then_resume(frozen, monkeypatch, stop_after=3):
+    signed(frozen, monkeypatch)
+    _, by_id = TPL.load(frozen["plan"], frozen["tasks"])
+
+    def runner(stop):
+        def run(cmd, log, tick):
+            tasks = [json.loads(x) for x in Path(cmd[cmd.index("--tasks") + 1]).read_text().splitlines()]
+            stream = Path(cmd[cmd.index("--stream-completed") + 1])
+            k = int(cmd[cmd.index("--seed-base") + 1]) - TS.protocol()["execution"]["seed_base"]
+            thinking = json.loads(cmd[cmd.index("--chat-template-kwargs") + 1]).get("enable_thinking")
+            with stream.open("a") as fh:
+                for i, t in enumerate(tasks):
+                    if stop is not None and i >= stop:
+                        return 1
+                    fh.write(json.dumps({"task_id": t["task_id"], **episode(by_id[t["task_id"]], k, thinking)}) + "\n")
+            return 0
+        return run
+    return runner
+
+
+def test_a_partial_session_is_reported_from_its_sealed_shards(frozen, monkeypatch):
+    """A generation killed after three records: the real sealer left them in .part shards with .done markers and no
+    .complete; the report reads them, calls the run PARTIAL, and never counts an unattempted task as a failure."""
+    runner = _interrupt_then_resume(frozen, monkeypatch)
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    rec = {}
+    assert not pilot(frozen, out, runner(3), rec=rec)
+    rec.update(identity="id", terminal="RUN_FAILED")
+    (out / "tool_session.json").write_text(json.dumps(rec))
+    assert not list(out.glob("*.complete")) and list(out.glob("pilot_H-N_r1_pass0.part*.done"))
+    r = TPL.report(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    assert r["state"] == "PARTIAL"
+    hn = r["modes"]["H-N"]
+    c0 = Counter()
+    for row in hn["cells"].values():
+        c0.update(row["c0"])
+        assert row["final"].get("rejected", 0) <= row["c0"].get("rejected", 0)
+    n = sum(len(c["task_ids"]) for c in frozen["doc"]["modes"]["H-N"])
+    assert c0["admitted"] + c0["rejected"] == 3 == hn["sealed_records"]                #: exactly what was sealed
+    assert c0["attempted_unsealed"] == n - 3 and c0.get("unattempted", 0) == 0       #: submitted, never sealed
+    assert r["modes"]["H-T"]["sealed_records"] == 0                                   #: the session stopped at H-N
+    ht = Counter()
+    for row in r["modes"]["H-T"]["cells"].values():
+        ht.update(row["c0"])
+        assert row["first_candidate_pass_rate"] == TPL.UNMEASURED and "rejected" not in row["final"]
+    assert ht["unattempted"] == n
+    assert r["telemetry"]["peak_vram_mib"]["value"] == TPL.UNMEASURED                #: no nvidia-smi here: not 0
+
+
+def test_without_session_evidence_the_identity_is_required_and_the_gap_recorded(frozen, monkeypatch):
+    runner = _interrupt_then_resume(frozen, monkeypatch)
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    pilot(frozen, out, runner(3))
+    with pytest.raises(TPL.PilotError, match="identity is unknown"):
+        TPL.report(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    r = TPL.report(out, identity="id", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    assert r["state"] == "PARTIAL" and str(r["session_evidence"][str(out)]).startswith("MISSING")
+    from stages.reasoning_data import generation_driver as GD
+    with pytest.raises(GD.ShardError, match="another launch identity"):
+        TPL.report(out, identity="another", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    (out / "tool_session.json").write_text(json.dumps({"identity": "id", "terminal": "RUN_FAILED"}))
+    with pytest.raises(TPL.PilotError, match="identity is ambiguous"):          #: the caller's and the session's differ
+        TPL.report(out, identity="another", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+
+
+def test_a_resumed_session_completes_and_merges_without_changing_what_was_sealed(frozen, monkeypatch):
+    import shutil
+    runner = _interrupt_then_resume(frozen, monkeypatch)
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    pilot(frozen, out, runner(3))
+    copy1 = frozen["tmp"] / "secured_run1"
+    shutil.copytree(out, copy1)                                       #: the first run's secured evidence
+    before = {p.name: p.read_bytes() for p in out.glob("*.part*.jsonl")}
+    rec = {}
+    assert pilot(frozen, out, runner(None), rec=rec)
+    assert all(out.joinpath(k).read_bytes() == v for k, v in before.items())   #: sealed shards untouched
+    rec.update(identity="id", terminal="ALL_DONE")
+    (out / "tool_session.json").write_text(json.dumps(rec))
+    r = TPL.report([copy1, out], plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    assert r["state"] == "COMPLETE"
+    for mode, m in r["modes"].items():
+        n = sum(len(c["task_ids"]) for c in frozen["doc"]["modes"][mode])
+        tot = Counter()
+        for row in m["cells"].values():
+            tot.update(row["final"])
+            assert row["c1"].get("required", 0) == row["c0"].get("rejected", 0)
+            assert row["c1"].get("required", 0) == sum(row["c1"].get(k, 0) for k in ("admitted", "rejected"))
+        assert tot["admitted"] + tot["rejected"] == n and not tot["undetermined"]       #: each task once
+    (out / "tool_session.json").unlink()
+    r2 = TPL.report([copy1, out], identity="id", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    assert r2["state"] == "INCOMPLETE" and r2["modes"] == r["modes"]                  #: data complete, evidence not
+
+
+def test_a_task_sealed_differently_in_two_copies_or_nothing_sealed(frozen, monkeypatch):
+    import shutil
+    runner = _interrupt_then_resume(frozen, monkeypatch)
+    empty = frozen["tmp"] / "empty"
+    empty.mkdir()
+    (empty / "tool_session.json").write_text(json.dumps({"identity": "id", "terminal": "RUN_FAILED"}))
+    assert TPL.report(empty, plan_path=frozen["plan"], tasks_path=frozen["tasks"])["state"] == "FAILED"
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    pilot(frozen, out, runner(3))
+    other = frozen["tmp"] / "other"
+    shutil.copytree(out, other)
+    part = sorted(other.glob("pilot_H-N_r1_pass0.part*.jsonl"))[0]
+    rows = [json.loads(x) for x in part.read_text().splitlines()]
+    rows[0]["turns"][0]["raw"] += " "
+    part.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    part.with_suffix(".done").write_text(TPL.sha(part) + "\n")                #: a re-sealed, different record
+    with pytest.raises(TPL.PilotError, match="sealed differently in two session copies"):
+        TPL.report([out, other], identity="id", plan_path=frozen["plan"], tasks_path=frozen["tasks"])

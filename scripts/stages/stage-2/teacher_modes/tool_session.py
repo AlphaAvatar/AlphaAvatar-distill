@@ -198,7 +198,7 @@ class _Done(Exception):
 
 
 def run_pilot(proto: dict, plan_path: Path, tasks_path: Path, out: Path, identity: str, run, mark,
-              record: dict) -> bool:
+              record: dict, *, mount: Path, volume_gb: float | None) -> bool:
     """The tool pilot (`tool_pilot.py`): its frozen plan and task file verified (`tool_pilot.load`) and its signed,
     pilot-only source admission naming this plan; then each mode's frozen cells in ONE round -- first candidates,
     second candidates for the refused tasks only -- with GPU and engine telemetry beside the sealed shards. A
@@ -206,10 +206,12 @@ def run_pilot(proto: dict, plan_path: Path, tasks_path: Path, out: Path, identit
     from stages.teacher_modes import tool_pilot as TPL
     doc, by_id = TPL.load(plan_path, tasks_path)
     adm = json.loads(TPL.ADMISSION.read_text())
-    if adm.get("schema") != TPL.ADMISSION_SCHEMA or not (adm.get("signature") or {}).get("signed_by"):
-        raise TPL.PilotError("the pilot-only source admission is not signed")
-    if adm["pilot_plan"]["sha256"] != hashlib.sha256(Path(plan_path).read_bytes()).hexdigest():
-        raise TPL.PilotError("the source admission names another pilot plan")
+    bad = TPL.admission_problems(adm, plan_path, tasks_path)
+    if bad:
+        raise TPL.PilotError("the pilot-only source admission refuses: " + "; ".join(bad))
+    bad, record["storage"] = TPL.storage_problems(out, mount, volume_gb)
+    if bad:
+        raise TPL.PilotError("the volume refuses: " + "; ".join(bad))
     record.update(pilot_plan_sha256=adm["pilot_plan"]["sha256"], tasks=len(by_id),
                   verification_version=TE.VERIFICATION_VERSION)
     mark("CONTRACT_OK")
@@ -233,6 +235,8 @@ def main(argv=None, *, run=None) -> int:
     ap.add_argument("--status", required=True)
     ap.add_argument("--pilot", default=None, help="the frozen pilot plan (tool_pilot.py): runs the tool_pilot kind")
     ap.add_argument("--pilot-tasks", default=None, help="the pilot's task file, by the plan's sha256")
+    ap.add_argument("--volume-gb", type=float, default=None, help="the pilot's network volume size, as the provider "
+                    "reports it (its free space is checked before generating)")
     a = ap.parse_args(argv)
     if bool(a.pilot) != bool(a.pilot_tasks):
         ap.error("--pilot and --pilot-tasks go together")
@@ -260,7 +264,7 @@ def main(argv=None, *, run=None) -> int:
         proto = protocol()
         if a.pilot:
             ok = run_pilot(proto, Path(a.pilot), Path(a.pilot_tasks), out, bound["identity"], run or GD.run_battery,
-                           mark, record)
+                           mark, record, mount=durable.parent, volume_gb=a.volume_gb)
             raise _Done(ok)
         plan, man, by_id = checked_plan(proto, a.lineage)
         record.update(plan_pool_content_sha256=plan["pool"]["content_sha256"], tasks_readable=len(by_id))

@@ -15493,3 +15493,32 @@ on a paid pod.
 - **Not authorized and not done.** The pilot, any generation, search, training or evaluation, a pod, a cap change, a
   SHORTFALL approval, the canonical pool under data/, anything on 4rhubprswo, a merge.
 - **Revisit when:** the maintainer signs the pilot's source admission, sets its cap in the grant and chooses A or B.
+
+
+## 2026-11-04 (UTC) — Maintainer: sixth review of 29b62c93; option B recommended for the pilot; partial-report integrity, the admission's signature, the volume
+
+- **Context.** The maintainer accepted `data_manifest/v2` with re-packing at binding, `tool_verification@v2`, the
+  single-step semantics and the pilot's structure, and recommended option B ($2.50 hard cap, 55 driver minutes) so that
+  one session can finish the 794 runs and measure all 29 state-evaluation `schema_arguments` tasks -- a recommendation,
+  not an authorization: no grant change, no signature, no pod.
+- **Decision (maintainer).** Before the final authorization review: the pilot report must survive partial, forced or
+  resumed sessions; the pilot-only source admission's signature must be checked strictly, by one rule at issue and on
+  the pod; the volume must be checked read-only and the pilot must not write over existing results; unreadable
+  metrics are UNMEASURED, never 0.
+- **Implemented.**
+  - `tool_pilot.report`: sealed shards read without `.complete`, verified by sha256 and the launch identity; outcomes
+    per task and candidate (admitted, rejected, attempted but unsealed, unattempted); candidate 1 only where candidate 0
+    was rejected; states COMPLETE / PARTIAL / INCOMPLETE / FAILED; the identity from the caller when
+    `tool_session.json` is missing (the gap recorded, an ambiguous identity refused); resumed copies merged, a task
+    sealed differently refused; UNMEASURED telemetry. Regressions use the real generation driver's sealing after a
+    synthetic interruption.
+  - `tool_pilot.admission_problems`: signer, approval token, decision, date window, signed plan / task file / count,
+    exact scope and exclusions, plan, task file, count and sources -- used by `token_matched_phase.pilot_problems` and
+    `tool_session.run_pilot` alike; the record's signature block now has all seven fields (unsigned).
+  - Storage: the provider (read-only, 2026-11-04T09:54Z) reports am5m373kuq 55 GB EUR-IS-2, 4rhubprswo, 0 pods, no used
+    bytes; the records give at least 14.3 GB used plus unlisted Research A v1 entries. The pod requires 2 GB free and a
+    pilot-only directory before generating (`storage_problems`); the launch refuses any volume but am5m373kuq.
+  - The application updated for option B, with every issue, launch and pod check and what $0 cannot verify.
+- **Not authorized and not done.** The grant change, the signature, the pilot, any generation, search, training or
+  evaluation, a pod, a cap change, a SHORTFALL approval, a merge.
+- **Revisit when:** the maintainer's final authorization review of the pilot.

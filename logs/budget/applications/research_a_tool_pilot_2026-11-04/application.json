@@ -1,10 +1,18 @@
 {
- "schema": "aadistill.budget.application/tool_pilot_v2",
- "written_utc": "2026-11-04T08:51:19Z",
- "status": "RE-VERIFIED after the execution preparation (maintainer review of 2468c1aa); AUTHORIZES NOTHING: no GPU, no pod, no spend",
+ "schema": "aadistill.budget.application/tool_pilot_v3",
+ "written_utc": "2026-11-04T10:03:56Z",
+ "status": "RE-VERIFIED for the final authorization review (maintainer review of 29b62c93: option B recommended); AUTHORIZES NOTHING: no grant change, no signature, no GPU, no pod, no spend",
+ "recommended_option": {
+  "option": "B",
+  "hard_cap_usd": 2.5,
+  "driver_minutes": 55.0,
+  "by": "the maintainer's independent review of 29b62c93: one session should complete the 794 runs, the 29 state-evaluation schema_arguments tasks above all",
+  "caveat": "a ceiling, not a promise: the launch recomputes the all-in at the live quote and refuses above the cap, and the workload may still not finish inside it"
+ },
  "decided_by": [
   "maintainer 2026-11-04 (review of 647eea0e), item 7: prepare the pilot's application",
-  "maintainer 2026-11-04 (review of 2468c1aa), item 5: the 794-task design accepted in principle; complete the $0 execution preparation; not a paid authorization"
+  "maintainer 2026-11-04 (review of 2468c1aa), item 5: the 794-task design accepted in principle; complete the $0 execution preparation; not a paid authorization",
+  "maintainer 2026-11-04 (review of 29b62c93): option B recommended; partial-report integrity, the admission's signature semantics, the storage precheck; still not a paid authorization"
  ],
  "kind": {
   "study": "A-TM",
@@ -36,7 +44,7 @@
   "verification_version": "tool_verification@v2",
   "source_admission": {
    "path": "logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json",
-   "sha256": "bfb8790351d7aa9a02679afd3cb66662f8afb0c208016c7ff8b84b8cd076c8b3",
+   "sha256": "ef3dd54b0f45e6697b8d41b2e3019349a7084b772ccffae18218c14ea171d0c2",
    "signed": false
   }
  },
@@ -303,12 +311,12 @@
   {
    "step": "the maintainer signs the pilot-only source admission",
    "who": "maintainer",
-   "how": "its signature fields in logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json (signed_by, decision, date); the kind refuses until then"
+   "how": "every signature field in logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json: signed_by 'maintainer', approves exactly 'tool_pilot measurement only', the decision quoted, the date, and the plan sha256, task file sha256 and task count copied from the record; issue and the pod refuse anything less (admission_problems)"
   },
   {
    "step": "the maintainer amends the study grant with the pilot's cap",
    "who": "maintainer",
-   "how": "logs/budget/approvals/teacher_modes_token_matched_grant.json :: session_hard_caps_usd.tool_pilot = the chosen option's cap, and its scope naming the pilot; issue refuses until then"
+   "how": "logs/budget/approvals/teacher_modes_token_matched_grant.json :: session_hard_caps_usd.tool_pilot = 2.50 (option B), and its scope naming the pilot; issue refuses until then"
   },
   {
    "step": "commit; stage the session bundle of that commit on the relay",
@@ -320,19 +328,19 @@
   },
   {
    "step": "issue the one-use artifact",
-   "how": "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py issue --kind tool_pilot --run-id <run> --expected-usd 1.14 --hard-cap-usd <cap>"
+   "how": "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py issue --kind tool_pilot --run-id <run> --expected-usd 1.14 --hard-cap-usd 2.50"
   },
   {
    "step": "dry-run every pre-provider gate at the live quote (no create)",
-   "how": "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py issue --kind tool_pilot --run-id <run>_dry --expected-usd 1.14 --hard-cap-usd <cap> --dry-run --out <scratch>/auth.json && PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py launch --kind tool_pilot --minutes <minutes> --run-id <run>_dry --scr <scratch> --session-commit <sha> --bundle <name> --max-price <live> --gpu 'NVIDIA L40S' --disk-gb 150 --network-volume-id am5m373kuq --volume-mount-path /runpod-volume --data-center-ids EUR-IS-2 --volume-gb 55 --dry-run --authorization <scratch>/auth.json"
+   "how": "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py issue --kind tool_pilot --run-id <run>_dry --expected-usd 1.14 --hard-cap-usd 2.50 --dry-run --out <scratch>/auth.json && PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py launch --kind tool_pilot --minutes 55 --run-id <run>_dry --scr <scratch> --session-commit <sha> --bundle <name> --max-price <live> --gpu 'NVIDIA L40S' --disk-gb 150 --network-volume-id am5m373kuq --volume-mount-path /runpod-volume --data-center-ids EUR-IS-2 --volume-gb 55 --dry-run --authorization <scratch>/auth.json"
   },
   {
    "step": "launch (only after the grant and the signature)",
-   "how": "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py launch --kind tool_pilot --minutes <minutes> --run-id <run> --scr <scratch> --session-commit <sha> --bundle <name> --max-price <live> --gpu 'NVIDIA L40S' --disk-gb 150 --network-volume-id am5m373kuq --volume-mount-path /runpod-volume --data-center-ids EUR-IS-2 --volume-gb 55"
+   "how": "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py launch --kind tool_pilot --minutes 55 --run-id <run> --scr <scratch> --session-commit <sha> --bundle <name> --max-price <live> --gpu 'NVIDIA L40S' --disk-gb 150 --network-volume-id am5m373kuq --volume-mount-path /runpod-volume --data-center-ids EUR-IS-2 --volume-gb 55"
   },
   {
    "step": "closeout (the launcher runs it on every terminal path) and the dev box's report",
-   "how": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot report --session <scratch>/store/tool_pilot_hybrid --write <report>"
+   "how": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot report --session <scratch>/store/tool_pilot_hybrid [--session <a resumed run's copy>] [--identity <the run's authorization plan_hash, when tool_session.json is missing>] --write <report>"
   }
  ],
  "gates": {
@@ -340,7 +348,7 @@
    "the grant names a tool_pilot cap and the cap fits it (kind_cap_problems)",
    "the cap fits the study envelope, the project cap as the provider bills it now and the account balance (funding_problems on a live, fail-closed position)",
    "the L40S check record admits teacher generation (kind_conditions)",
-   "the pilot plan and task file load (tool_pilot.load) and the source admission is signed, pilot-scoped and names this plan (pilot_problems)",
+   "the pilot plan and task file load (tool_pilot.load) and the source admission passes tool_pilot.admission_problems: signed by the maintainer, approving exactly 'tool_pilot measurement only', a decision and a valid date, the exact scope, and the plan sha256, task file sha256, task count and sources it signs equal to the record and the files",
    "the protocol, design, pilot plan and admission bound by sha256 (KIND_RECORDS)"
   ],
   "at_launch": [
@@ -349,14 +357,23 @@
    "the all-in fits the hard cap at the live quote (all_in_within_cap)",
    "the study identity and the bound files are the session commit's",
    "the project cap holds now: committed spend, remaining cap, balance, pods and volumes re-read from the provider (the_project_cap_holds_now; an unreadable provider, a pod in the account or an unowned volume refuses)",
-   "the network volume is the planned one (the_volume_is_the_planned_one)",
+   "the network volume is the planned one as the provider reports it (the_volume_is_the_planned_one) and it is am5m373kuq at 55 GB in EUR-IS-2, never 4rhubprswo (the_pilot_volume_is_the_planned_one)",
    "the kind's bound records are the committed ones",
    "the session bundle is on the relay"
   ],
   "on_the_pod": [
    "setup re-checks the artifact against the pod's files (require_on_pod)",
-   "the session re-checks the pilot plan, the task file and the signed admission (tool_session.run_pilot)"
+   "the session re-checks the pilot plan, the task file and the admission with the same admission_problems (tool_session.run_pilot)",
+   "before generating: at least 2 GB free on the volume (its size less the bytes on the mount) and the pilot's directory new or only the pilot's own files (tool_pilot.storage_problems)"
   ]
+ },
+ "storage_precheck": "logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json",
+ "report_states": {
+  "COMPLETE": "every required attempt sealed and the session ended ALL_DONE",
+  "PARTIAL": "some sealed, some required attempt not (deadline, interruption, failure); pass rates over the sealed attempts only",
+  "INCOMPLETE": "every required attempt sealed, the session's terminal evidence missing or not ALL_DONE",
+  "FAILED": "nothing sealed",
+  "_": "sealed shards are read whether or not their group completed, each verified by sha256 and the launch identity; an unattempted task is never a failure; candidates 0 and 1 are counted apart and a task once; copies of a resumed run merge, and a task sealed differently in two copies refuses; an unreadable measurement is UNMEASURED, never 0"
  },
  "stop_conditions": [
   "the sample complete: every task's first candidate, then second candidates of the refused tasks only",
@@ -374,11 +391,11 @@
  ],
  "outputs": "measurement records only by default (sealed episodes, census, telemetry, report); reuse in formal data is a separate maintainer decision",
  "position": {
-  "fetched_utc": "2026-11-04T08:51:18+00:00",
-  "committed_usd": 837.9514,
+  "fetched_utc": "2026-11-04T10:03:55+00:00",
+  "committed_usd": 838.0302,
   "project_cap_usd": 868.0,
-  "project_remaining_usd": 30.0486,
-  "balance_usd": 92.8445593863,
+  "project_remaining_usd": 29.9698,
+  "balance_usd": 92.8051843863,
   "account_pods": [],
   "account_volumes": [
    "4rhubprswo",
@@ -387,8 +404,8 @@
  },
  "tests": {
   "run_at_commit": "the commit carrying this application (dev box, CPU, $0)",
-  "convergence": "338 passed, 1 skipped: the teacher_modes experiment suite, run_battery's consumers (test_episode_loop, test_generation_driver, test_h1_generation_launch), test_study_engineering, the docs structure test, core test_tool_calls",
-  "pilot_tests": "scripts/stages/stage-2/teacher_modes/tests/test_tool_pilot.py: 22 passed",
+  "convergence": "310 passed, 1 skipped: the teacher_modes experiment suite, test_study_engineering, test_episode_loop, test_generation_driver, the docs structure test",
+  "pilot_tests": "scripts/stages/stage-2/teacher_modes/tests/test_tool_pilot.py: 43 passed",
   "refusal_paths_simulated": {
    "no grant cap / unsigned admission / issue": "test_the_pilot_kind_claims_generation_only_and_refuses_without_its_records_and_cap",
    "cap above the grant's": "test_a_grant_cap_admits_the_pilot_only_up_to_it",
@@ -400,18 +417,37 @@
    "unsigned admission or another plan on the pod": "test_the_session_refuses_without_the_signed_admission_of_this_plan",
    "session interrupted / generation failure, then resumption": "test_an_interrupted_generation_fails_then_resumes_without_regenerating",
    "cleanup failure (a created resource with no closeout cost refuses every later issue)": "scripts/shared/tests/test_study_engineering.py::test_a_blocked_closeout_records_an_unknown_cost_and_the_envelope_refuses",
-   "one round, second candidates for refusals only, telemetry per invocation": "test_one_round_of_the_frozen_cells_second_candidates_only_for_refusals"
+   "one round, second candidates for refusals only, telemetry per invocation": "test_one_round_of_the_frozen_cells_second_candidates_only_for_refusals",
+   "partial session read from .part shards without .complete (PARTIAL; unattempted never a failure)": "test_a_partial_session_is_reported_from_its_sealed_shards",
+   "forced end without tool_session.json: identity required, ambiguity refused, gap recorded": "test_without_session_evidence_the_identity_is_required_and_the_gap_recorded",
+   "resumed run: copies merge, sealed shards unchanged, COMPLETE / INCOMPLETE": "test_a_resumed_session_completes_and_merges_without_changing_what_was_sealed",
+   "a task sealed differently in two copies; nothing sealed (FAILED)": "test_a_task_sealed_differently_in_two_copies_or_nothing_sealed",
+   "wrong approval, empty decision, missing or future date, another signer, task file, plan, count, scope": "test_a_signature_that_is_not_exactly_the_pilots_refuses",
+   "signed_by alone": "test_signed_by_alone_is_not_a_signature",
+   "another task file or sources": "test_another_task_file_or_source_refuses",
+   "issue and pod share one admission check": "test_issue_and_the_pod_apply_the_same_admission_check",
+   "volume too full or a foreign file in the pilot's directory": "test_the_pod_refuses_a_full_volume_or_a_directory_it_did_not_write",
+   "4rhubprswo or another volume, size or datacenter": "test_the_pilot_volume_is_am5m373kuq_and_never_4rhubprswo"
   },
-  "mutation": "13 new gates mutated one at a time; 12 caught by a test, 1 redundant (the one-round limit is also held by each frozen cell's bound, so removing it changes nothing)",
+  "mutation": "this round: 18 checks mutated one at a time, each caught by a test (one only after adding the ambiguous-identity case); previous round: 13, 12 caught, 1 redundant (the one-round limit also held by each frozen cell's bound)",
   "not_verified": [
    "any GPU execution: vLLM's metric names, nvidia-smi on the pod and the throughput are read on the first real run",
    "the shared runner's live create/teardown path (exercised by earlier paid sessions, not by this $0 round)"
   ]
  },
  "needed_from_the_maintainer": [
-  "sign the pilot-only source admission",
-  "amend the grant with the pilot's cap",
-  "choose cap option A ($1.80, the expected workload) or B ($2.50, the upper workload in one session)"
+  "sign the pilot-only source admission (every signature field)",
+  "amend the grant with session_hard_caps_usd.tool_pilot (option B: $2.50)",
+  "the final authorization"
+ ],
+ "not_verifiable_at_zero_cost": [
+  "the installed vLLM's metric names and values (KV-cache usage, preemptions) and its log lines: read on the first run, UNMEASURED where absent",
+  "nvidia-smi on the pod (peak VRAM): UNMEASURED if it gives no sample",
+  "throughput, TTFT, model-load time and the real pass rates",
+  "the live L40S quote and stock in EUR-IS-2 at launch",
+  "the bytes actually on am5m373kuq (the provider reports none; the pod measures them before generating)",
+  "the shared runner's create, watchdog, deadline, teardown and the provider's confirmation on a real pod (exercised by earlier paid sessions, not here)",
+  "the bundle staged on the relay for the session commit"
  ],
  "not_requested": [
   "the bounded tool generation",

@@ -42,6 +42,10 @@
     admission reads the registered one (`audit/proportion_tolerance_audit.json`).
   - Option 1 (call-only gold episodes) and option 2 (WorkBench) for the non-thinking schema_arguments SHORTFALL are
     compared at $0 (`audit/schema_arguments_options.json`); neither is implemented.
+- **The maintainer's sixth review, of `29b62c93` (2026-11-04),** accepted the truncation fix, `tool_verification@v2` and
+  the pilot's structure, recommended option B ($2.50) and asked for the following, done at $0 (section 8): the pilot
+  report reads partial, verified results with explicit states; the source admission's signature is checked strictly by
+  one shared function; the volume is checked read-only now and measured on the pod. Nothing is authorized.
 - **The maintainer's fifth review, of `2468c1aa` (2026-11-04),** accepted the identity hardening and the single-step
   protocol and asked for the following, done at $0 (sections 5, 7, 8):
   - `verify_pack` verifies truncated documents instead of refusing them (the frozen documents re-packed);
@@ -79,6 +83,7 @@
 | [`budget/applications/research_a_tool_pilot_2026-11-04/application.json`](../../../../logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json) | the proposed L40S tool pilot: sample, measurements, price, hard cap, stop conditions; authorizes nothing (`tool_generation_plan.py --pilot-application`) |
 | [`plans/tool_pilot_plan.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_pilot_plan.json) | the pilot's frozen cells: exact task ids per mode and cell, every task's sha256, the task file's sha256, the pool, protocol, design and plan cells it binds (`tool_pilot.py build`) |
 | [`audit/tool_pilot_source_admission.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json) | Toucan SFT and Pivot Conversational admitted for the pilot's measurement only; PREPARED, unsigned (`tool_pilot.py admission`) |
+| [`validations/packed_round/pilot_storage_precheck_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json) | the pilot volume read-only: the provider's report, the recorded contents, where the pilot writes, the pod-side rule (`tool_pilot.py storage-precheck`) |
 | [`audit/v1_tail_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/v1_tail_audit.json) | V1's tail rule on the hybrid's recorded tool-call turns (`tool_admission.py --v1-tail-audit`) |
 | [`validations/packed_round/environment_blocked_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/environment_blocked_20261104.json) | the 25 simulator-restore tests the core suite could not run (11 GiB free, 20 GiB gate unchanged): ENVIRONMENT_BLOCKED, not verified |
 | [`audit/proportion_tolerance_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/proportion_tolerance_audit.json) | the registered proportion tolerance on every arm's real data, beside the withdrawn share check (`packed_packs.py --proportion-audit`) |
@@ -700,8 +705,33 @@ by `tool_pilot.py application --live-position`).
 
   Option A stops at its deadline with everything sealed if the workload is slower than expected; B covers the upper
   case in one session. The plan's own price is $0.97 / $1.14 / $1.64.
-- **Owed from the maintainer:** sign the source admission, amend the grant with `session_hard_caps_usd.tool_pilot`,
-  choose A or B. The project position is re-read at issue and at launch.
+- **Option B recommended** by the maintainer's review of `29b62c93` ($2.50, 55 driver minutes): one session should
+  finish the 794 runs, the 29 state-evaluation `schema_arguments` tasks above all. It is a ceiling, not a promise:
+  the launch recomputes the all-in at the live quote and refuses above it.
+- **Partial results** (`tool_pilot.report`, review of `29b62c93`): sealed shards are read whether or not their group
+  completed, each verified by its sha256 marker and the launch identity; per task and candidate the outcome is
+  admitted, rejected, attempted but unsealed, or unattempted (never a failure); candidate 1 is counted only where
+  candidate 0 was sealed and rejected, a task once; first-candidate pass rates divide by sealed attempts, two-candidate
+  rates by determined tasks. State: COMPLETE (every required attempt sealed, the session ALL_DONE), PARTIAL (some
+  required attempt unsealed), INCOMPLETE (all sealed, the session's terminal evidence missing or not ALL_DONE), FAILED
+  (nothing sealed). Without `tool_session.json` the run's authorization `plan_hash` gives the identity and the report
+  records the missing evidence; copies of a resumed run merge, and a task sealed differently in two copies refuses.
+  An unreadable measurement is UNMEASURED, never 0.
+- **The admission's signature** (`tool_pilot.admission_problems`, the one check issue and the pod both apply): signed
+  by the maintainer, approving exactly `tool_pilot measurement only`, a decision quote, an ISO date between the
+  record's writing and today, and the plan sha256, task file sha256 and task count it signs equal to the record's;
+  the record's exact scope and exclusions, the plan, the task file, the count and the sources (datasets, revisions,
+  counts) equal to the files. `signed_by` alone is no signature. The agent never fills these fields.
+- **Storage** ([`pilot_storage_precheck_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json),
+  read-only): the provider reports `am5m373kuq` at 55 GB in EUR-IS-2, `4rhubprswo` beside it, 0 pods, but no used
+  bytes; the records put at least 14.3 GB there (H1-PA's and the mixed calibration's checkpoints) plus Research A v1's
+  `teacher_modes` entries, not re-listed since 2026-10-30. So the pod measures it: before generating,
+  `storage_problems` requires 2 GB free (the size less the bytes on the mount; the pilot writes well under 0.5 GB) and a
+  pilot directory that is new or holds only the pilot's own files; the teacher snapshot goes to the container disk. The
+  launch refuses any volume but `am5m373kuq` (`the_pilot_volume_is_the_planned_one`).
+- **Owed from the maintainer:** sign the source admission (every signature field), amend the grant with
+  `session_hard_caps_usd.tool_pilot` ($2.50 for option B), and the final authorization. The project position is
+  re-read at issue and at launch.
 - **Separate:** the packed 8,192-token forward / DEPTH / training GPU validation is its own engineering request on
   existing frozen inputs (v1 items, A1's documents); it is not combined with the pilot.
 
@@ -732,7 +762,7 @@ packed search runs unless it is requested.
 4. **Validation coverage.** C1-6cat's validation has no fluid type, and A1-6cat's no `interactive_adaptation`. Both
    gaps are recorded.
 5. **eval-set-2** for closed-loop tool success.
-6. **Budget.** The L40S pilot (sign its source admission, its cap in the grant, option A $1.80 or B $2.50); a raised
+6. **Budget.** The L40S pilot (sign its source admission, its cap in the grant: option B, $2.50, recommended); a raised
    project cap for the Full Search Authorization. The packed 8,192-token forward / DEPTH / training GPU validation is
    a separate request.
 7. **Storage.** Volume `4rhubprswo`. The v2 Top-1's only copy stays protected until a verified copy exists off the
@@ -785,7 +815,9 @@ PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_generation_
 # the pilot (review of 2468c1aa)
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot build --pool <scratch>/tool_pool_dry_v4
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot admission
-PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot application --live-position
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot storage-precheck \
+    --write logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot application --live-position --tests <evidence>
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_admission --v1-tail-audit \
     logs/stages/stage-2/teacher_modes/audit/v1_tail_audit.json --generations hybrid_thinking=<H-T eval generations> \
     --generations hybrid_non_thinking=<H-N eval generations>

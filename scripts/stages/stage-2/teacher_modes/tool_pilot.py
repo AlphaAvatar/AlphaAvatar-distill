@@ -40,7 +40,7 @@ import re
 import subprocess
 import sys
 import threading
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -174,7 +174,74 @@ def cells(doc: dict, mode: str, by_id: dict) -> tuple[list[dict], list[list[dict
 
 # --- the pilot-only source admission -------------------------------------------------------------------------------
 
-def source_admission(doc: dict, plan_path: Path = PLAN) -> dict:
+#: the exact scope the record grants and the exact token a signature must approve: nothing broader is a pilot admission
+SCOPE = ("the tool_pilot kind's measurement only: the hybrid's teacher-native generation on exactly the tasks below "
+         "(by id and sha256), its episodes measurement records by default")
+APPROVAL = "tool_pilot measurement only"
+DOES_NOT = ["admit any source or task to formal training, calibration or state evaluation",
+            "build or replace the canonical tool_pool@v1 under data/",
+            "decide any category's supply or any SHORTFALL",
+            "authorize a GPU, a pod or any spend (the pilot's grant does that, separately)"]
+SIGNER = "maintainer"
+SIGNATURE_FIELDS = ("signed_by", "approves", "decision", "date", "pilot_plan_sha256", "tasks_sha256", "tasks")
+
+
+def admission_problems(rec: dict, plan_path: Path, tasks_path: Path, *, today: str | None = None) -> list[str]:
+    """Why ``rec`` does not let the pilot run (empty when it does) -- the ONE check issue (`token_matched_phase.
+    pilot_problems`) and the pod (`tool_session.run_pilot`) both apply:
+
+    * the record: this schema, exactly `SCOPE` and `DOES_NOT`, bound to the frozen pilot plan (its sha256), its task
+      file (sha256, as the plan names it) and task count, and sources whose dataset, revision and task counts are the
+      task file's;
+    * the signature: signed by the `SIGNER`, approving exactly `APPROVAL`, a non-empty decision quote, an ISO date
+      between the record's writing and today, and the plan sha256, task file sha256 and task count it signs equal to
+      the record's. A signature with any field missing or different -- ``signed_by`` alone included -- is not one.
+    The agent never fills these fields: the maintainer signs."""
+    import datetime as dt
+    plan_path, tasks_path = Path(plan_path), Path(tasks_path)
+    bad = []
+    if rec.get("schema") != ADMISSION_SCHEMA:
+        return ["not a pilot-only source admission record"]
+    if rec.get("scope") != SCOPE or rec.get("does_not") != DOES_NOT:
+        bad.append("its scope is not exactly the tool_pilot measurement scope")
+    doc = json.loads(plan_path.read_text())
+    if (rec.get("pilot_plan") or {}).get("sha256") != sha(plan_path):
+        bad.append("it names another pilot plan")
+    tsha = sha(tasks_path) if tasks_path.is_file() else None
+    if rec.get("tasks_sha256") != tsha or tsha != (doc.get("tasks_file") or {}).get("sha256"):
+        bad.append("it names another task file")
+    if rec.get("tasks") != len(doc.get("tasks") or {}):
+        bad.append("its task count is not the pilot plan's")
+    if tsha:
+        rows = [json.loads(x) for x in tasks_path.read_text().splitlines() if x.strip()]
+        have = Counter((str(t["source"].get("dataset")), str(t["source"].get("revision"))) for t in rows)
+        named = {(x.get("dataset"), x.get("revision")): x.get("tasks") for x in rec.get("sources") or []}
+        if named != dict(have):
+            bad.append("its sources are not the task file's datasets, revisions and counts")
+    sig = rec.get("signature") or {}
+    if not any(sig.get(k) for k in SIGNATURE_FIELDS):
+        return bad + ["PREPARED, not signed by the maintainer"]
+    if sig.get("signed_by") != SIGNER:
+        bad.append(f"signed_by is {sig.get('signed_by')!r}, not the {SIGNER}")
+    if sig.get("approves") != APPROVAL:
+        bad.append(f"the signature approves {sig.get('approves')!r}, not exactly {APPROVAL!r}")
+    if not isinstance(sig.get("decision"), str) or not sig["decision"].strip():
+        bad.append("the signature carries no decision")
+    try:
+        day = dt.date.fromisoformat(str(sig.get("date")))
+        start = dt.date.fromisoformat(str(rec.get("written_utc", ""))[:10])
+        now = dt.date.fromisoformat(today) if today else dt.datetime.now(dt.timezone.utc).date()
+        if not start <= day <= now:
+            bad.append(f"the signature's date {day} is outside {start} .. {now}")
+    except ValueError:
+        bad.append(f"the signature's date {sig.get('date')!r} is not an ISO date")
+    for k, want in (("pilot_plan_sha256", (rec.get("pilot_plan") or {}).get("sha256")),
+                    ("tasks_sha256", rec.get("tasks_sha256")), ("tasks", rec.get("tasks"))):
+        if sig.get(k) != want:
+            bad.append(f"the signature's {k} is not the record's")
+    return bad
+
+def source_admission(doc: dict, plan_path: Path = PLAN, tasks_path: Path | None = None) -> dict:
     """The record admitting the two candidate sources for THIS pilot's measurement only (module docstring). It is
     PREPARED, not active: ``signature.signed_by`` stays null until the maintainer signs, and the ``tool_pilot`` kind
     refuses an unsigned record (`token_matched_phase.kind_conditions`)."""
@@ -182,7 +249,8 @@ def source_admission(doc: dict, plan_path: Path = PLAN) -> dict:
     lic = {"Agent-Ark/Toucan-1.5M": review["Agent-Ark/Toucan-1.5M"]["licence"],
            "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1":
                review["nvidia/Nemotron-RL-Agentic-Function-Calling-Pivot-v1 + Conversational-Tool-Use-Pivot-v1"]["licence"]}
-    tasks = [json.loads(x) for x in (REPO / doc["tasks_file"]["path"]).read_text().splitlines() if x.strip()]
+    tasks = [json.loads(x) for x in Path(tasks_path or REPO / doc["tasks_file"]["path"]).read_text().splitlines()
+             if x.strip()]
     per = Counter((str(t["source"].get("dataset")), str(t["source"].get("revision"))) for t in tasks)
     shapes = Counter((str(t["source"].get("dataset")), TE.episode_shape(t)) for t in tasks)
     return {"schema": ADMISSION_SCHEMA, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -190,8 +258,7 @@ def source_admission(doc: dict, plan_path: Path = PLAN) -> dict:
             "decided_by": "maintainer 2026-11-04 (review of 2468c1aa), item 5: prepare a source admission limited to "
                           "the pilot, from the accepted candidates Toucan SFT and Pivot Conversational; it must not "
                           "widen into a training-data admission and authorizes no paid action",
-            "scope": "the tool_pilot kind's measurement only: the hybrid's teacher-native generation on exactly the "
-                     "tasks below (by id and sha256), its episodes measurement records by default",
+            "scope": SCOPE,
             "pilot_plan": {"path": _rel(plan_path), "sha256": sha(plan_path)},
             "pool_content_sha256": doc["source"]["pool_content_sha256"],
             "sources": [{"dataset": ds, "revision": rev, "licence": lic.get(ds), "tasks": n,
@@ -206,11 +273,89 @@ def source_admission(doc: dict, plan_path: Path = PLAN) -> dict:
                            "third-party MCP and tool content may carry residual PII: the pilot's generations stay "
                            "outside git (P15); only counts, hashes and measurements enter the repository",
                            "the pool's decontamination (T1-T5), isolation and verification levels unchanged"],
-            "does_not": ["admit any source or task to formal training, calibration or state evaluation",
-                         "build or replace the canonical tool_pool@v1 under data/",
-                         "decide any category's supply or any SHORTFALL",
-                         "authorize a GPU, a pod or any spend (the pilot's grant does that, separately)"],
-            "signature": {"signed_by": None, "decision": None, "date": None}, "authorizes": "nothing by itself"}
+            "does_not": DOES_NOT,
+            "signature": dict.fromkeys(SIGNATURE_FIELDS),
+            "_signature": f"the maintainer signs by filling every field: signed_by {SIGNER!r}, approves exactly "
+                          f"{APPROVAL!r}, the decision quoted, the date (YYYY-MM-DD), and the pilot plan sha256, task "
+                          "file sha256 and task count copied from this record (admission_problems checks all of them); "
+                          "the agent never fills them",
+            "authorizes": "nothing by itself"}
+
+
+# --- the volume ------------------------------------------------------------------------------------------------------
+
+PILOT_DIR = "tool_pilot_hybrid"
+#: the free space the pod must find before generating: about four times what 794 episodes' shards, raw outputs,
+#: inputs and logs take (well under 0.5 GB); the teacher snapshot goes to the container disk (setup's HF_HOME)
+MIN_FREE_BYTES = 2 * 10 ** 9
+#: what the pilot writes inside its own directory, and nothing else may be there
+OWN = re.compile(r"^(pilot_[A-Za-z0-9-]+_r1_pass\d+\..+|pilot_[A-Za-z0-9-]+_r1\.jsonl|inputs|telemetry\.jsonl|"
+                 r"tool_session\.json)$")
+
+
+def storage_problems(out: Path, mount: Path, volume_gb: float | None, *, used=None) -> tuple[list[str], dict]:
+    """The pod's volume check before the pilot generates: the provider's size less the bytes actually on the mount
+    (`h1pa_driver.used_bytes`: a network volume's df reports the host) leaves at least `MIN_FREE_BYTES`, and the
+    pilot's directory is new or holds only the pilot's own files -- so nothing of H1-PA, the mixed calibration or
+    Research A on the volume is written over. Returns (problems, the measurement)."""
+    from stages.reasoning_data.h1pa_driver import used_bytes
+    out, mount = Path(out), Path(mount)
+    if volume_gb is None:
+        return ["the volume's provider size is unknown (--volume-gb)"], {}
+    if mount not in out.resolve().parents and mount.resolve() not in out.resolve().parents:
+        return [f"{out} is not on the mount {mount}"], {}
+    used_b = (used or used_bytes)(mount)
+    free = int(float(volume_gb) * 10 ** 9) - used_b
+    names = sorted(f.name for f in out.iterdir()) if out.is_dir() else []
+    names += sorted(f"inputs/{f.name}" for f in (out / "inputs").iterdir()) if (out / "inputs").is_dir() else []
+    foreign = [n for n in names if not OWN.match(n.split("/")[-1])]
+    bad = []
+    if free < MIN_FREE_BYTES:
+        bad.append(f"{free / 1e9:.2f} GB free on the {volume_gb} GB volume, below the {MIN_FREE_BYTES / 1e9:g} GB the "
+                   "pilot requires")
+    if foreign:
+        bad.append(f"{out.name} holds files the pilot did not write, e.g. {foreign[:3]}: nothing is written over")
+    return bad, {"mount": str(mount), "volume_gb": volume_gb, "used_bytes": used_b, "free_bytes": free,
+                 "required_free_bytes": MIN_FREE_BYTES, "pilot_dir": out.name, "pilot_dir_entries": len(names)}
+
+
+STORAGE_RECORD = REPO / "logs/stages/stage-2/reasoning_data/storage/h1pa_volume_am5m373kuq.json"
+
+
+def storage_precheck(resources=None) -> dict:
+    """The $0, read-only look at the pilot's volume before any grant: what the provider reports now (the volume, its
+    size and datacenter, the pods), what the records say is on it, where the pilot would write, and why the free
+    space itself is measured on the pod (`storage_problems`): the provider reports no used bytes, and a network
+    volume's df reports the host."""
+    if resources is None:
+        from aadistill.infrastructure.provider import RunPodProvider, read_api_key
+        resources = RunPodProvider(read_api_key(str(Path("~/.runpod/config.toml").expanduser()))).account_resources()
+    rec = json.loads(STORAGE_RECORD.read_text())
+    known = {"h1pa (4 checkpoints, contents_after_pa2)": sum(m["bytes"] for m in rec["contents_after_pa2"]["members"]),
+             "mixed_v2 (2 checkpoints, contents_after_mc2)": sum(m["bytes"]
+                                                                 for m in rec["contents_after_mc2"]["members_added"])}
+    vol = next((v for v in resources.network_volumes if v.get("id") == VOLUME["id"]), None)
+    return {"schema": "aadistill.stage2.teacher_modes.pilot_storage_precheck/v1",
+            "read_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "provider": {"known": resources.known, "error": resources.error, "volume": vol,
+                         "other_volumes": [v.get("id") for v in resources.network_volumes if v.get("id") != VOLUME["id"]],
+                         "pods": list(getattr(resources, "pods", ()) or [])},
+            "matches_the_planned_volume": bool(vol) and int(vol.get("size") or 0) == VOLUME["size_gb"]
+            and vol.get("dataCenterId") == VOLUME["data_center"],
+            "recorded_contents_bytes": {**known, "teacher_modes (Research A v1: teacher shards, the common "
+                                        "initialization, the recovery units)": "not re-listed since 2026-10-30"},
+            "recorded_lower_bound_bytes": sum(known.values()),
+            "pilot_writes": {"path": f"{VOLUME['mount']}/teacher_modes/{PILOT_DIR}", "estimate_bytes": "< 5e8",
+                             "required_free_bytes": MIN_FREE_BYTES,
+                             "teacher_snapshot": "container disk (setup's HF_HOME=/root/.cache/huggingface), not the "
+                                                 "volume"},
+            "never_written": ["<mount>/h1pa", "<mount>/mixed_v2", "<mount>/teacher_modes/<every other entry>"],
+            "pod_side_rule": "tool_session.run_pilot refuses before generating unless the provider's size less the "
+                             "bytes on the mount (h1pa_driver.used_bytes) leaves MIN_FREE_BYTES and the pilot's directory "
+                             "is new or holds only the pilot's own files (tool_pilot.storage_problems)",
+            "4rhubprswo": "never attached: the launch refuses any volume but am5m373kuq "
+                          "(token_matched_phase.the_pilot_volume_is_the_planned_one)",
+            "authorizes": "nothing"}
 
 
 # --- telemetry -----------------------------------------------------------------------------------------------------
@@ -311,10 +456,10 @@ def turn_telemetry(records: dict[str, dict]) -> dict:
                 prompt.append(int(t["prompt_tokens"]))
 
     def q(xs, p):
-        return round(sorted(xs)[int(p * (len(xs) - 1))], 3) if xs else None
+        return round(sorted(xs)[int(p * (len(xs) - 1))], 3) if xs else UNMEASURED
     return {"turns": len(ttft), "ttft_seconds": {"p50": q(ttft, .5), "p90": q(ttft, .9), "max": q(ttft, 1.0)},
             "per_request_decode_tokens_per_second": {"p50": q(decode, .5), "p10": q(decode, .1)},
-            "prompt_tokens": {"p50": q(prompt, .5), "p90": q(prompt, .9), "total": sum(prompt)},
+            "prompt_tokens": {"p50": q(prompt, .5), "p90": q(prompt, .9), "total": sum(prompt) if prompt else UNMEASURED},
             "_": "batched engine: a request's TTFT includes its queueing"}
 
 
@@ -365,13 +510,20 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                   for c in cs} for m, cs in doc["modes"].items()}
     cmd = "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py"
     return {
-        "schema": "aadistill.budget.application/tool_pilot_v2",
+        "schema": "aadistill.budget.application/tool_pilot_v3",
         "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "status": "RE-VERIFIED after the execution preparation (maintainer review of 2468c1aa); AUTHORIZES NOTHING: "
-                  "no GPU, no pod, no spend",
+        "status": "RE-VERIFIED for the final authorization review (maintainer review of 29b62c93: option B "
+                  "recommended); AUTHORIZES NOTHING: no grant change, no signature, no GPU, no pod, no spend",
+        "recommended_option": {"option": "B", "hard_cap_usd": CAP_OPTIONS["B"][0], "driver_minutes": CAP_OPTIONS["B"][1],
+                               "by": "the maintainer's independent review of 29b62c93: one session should complete "
+                                     "the 794 runs, the 29 state-evaluation schema_arguments tasks above all",
+                               "caveat": "a ceiling, not a promise: the launch recomputes the all-in at the live quote "
+                                         "and refuses above the cap, and the workload may still not finish inside it"},
         "decided_by": ["maintainer 2026-11-04 (review of 647eea0e), item 7: prepare the pilot's application",
                        "maintainer 2026-11-04 (review of 2468c1aa), item 5: the 794-task design accepted in principle; "
-                       "complete the $0 execution preparation; not a paid authorization"],
+                       "complete the $0 execution preparation; not a paid authorization",
+                       "maintainer 2026-11-04 (review of 29b62c93): option B recommended; partial-report integrity, "
+                       "the admission's signature semantics, the storage precheck; still not a paid authorization"],
         "kind": {"study": "A-TM", "kind": "tool_pilot", "claims": ["teacher_generation"],
                  "driver": "scripts/stages/stage-2/teacher_modes/tool_session.py --pilot",
                  "never": ["formal", "training", "evaluation"]},
@@ -408,11 +560,12 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                        f"case in one session for ${CAP_OPTIONS['B'][0]:.2f}"},
         "commands": [
             {"step": "the maintainer signs the pilot-only source admission", "who": "maintainer",
-             "how": f"its signature fields in {_rel(admission_path)} (signed_by, decision, date); the kind refuses "
-                    "until then"},
+             "how": f"every signature field in {_rel(admission_path)}: signed_by 'maintainer', approves exactly "
+                    f"{APPROVAL!r}, the decision quoted, the date, and the plan sha256, task file sha256 and task count "
+                    "copied from the record; issue and the pod refuse anything less (admission_problems)"},
             {"step": "the maintainer amends the study grant with the pilot's cap", "who": "maintainer",
              "how": "logs/budget/approvals/teacher_modes_token_matched_grant.json :: session_hard_caps_usd.tool_pilot "
-                    "= the chosen option's cap, and its scope naming the pilot; issue refuses until then"},
+                    f"= {CAP_OPTIONS['B'][0]:.2f} (option B), and its scope naming the pilot; issue refuses until then"},
             {"step": "commit; stage the session bundle of that commit on the relay",
              "how": "stages.phase_c1.bundle.stage_bundle (the procedure of every Research A session); the launch's "
                     "bundle_on_relay gate refuses without it"},
@@ -420,28 +573,33 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
              "how": "PYTHONPATH=src:scripts .venv/bin/python scripts/shared/project_position.py --live "
                     "--request tool_pilot=<cap>"},
             {"step": "issue the one-use artifact",
-             "how": f"{cmd} issue --kind tool_pilot --run-id <run> --expected-usd 1.14 --hard-cap-usd <cap>"},
+             "how": f"{cmd} issue --kind tool_pilot --run-id <run> --expected-usd 1.14 --hard-cap-usd "
+                    f"{CAP_OPTIONS['B'][0]:.2f}"},
             {"step": "dry-run every pre-provider gate at the live quote (no create)",
-             "how": f"{cmd} issue --kind tool_pilot --run-id <run>_dry --expected-usd 1.14 --hard-cap-usd <cap> "
-                    f"--dry-run --out <scratch>/auth.json && {cmd} launch --kind tool_pilot --minutes <minutes> "
+             "how": f"{cmd} issue --kind tool_pilot --run-id <run>_dry --expected-usd 1.14 --hard-cap-usd "
+                    f"{CAP_OPTIONS['B'][0]:.2f} --dry-run --out <scratch>/auth.json && {cmd} launch --kind tool_pilot "
+                    f"--minutes {CAP_OPTIONS['B'][1]:g} "
                     "--run-id <run>_dry --scr <scratch> --session-commit <sha> --bundle <name> --max-price <live> "
                     f"--gpu 'NVIDIA L40S' --disk-gb {DISK_GB} --network-volume-id {VOLUME['id']} --volume-mount-path "
                     f"{VOLUME['mount']} --data-center-ids {VOLUME['data_center']} --volume-gb {VOLUME['size_gb']} "
                     "--dry-run --authorization <scratch>/auth.json"},
             {"step": "launch (only after the grant and the signature)",
-             "how": f"{cmd} launch --kind tool_pilot --minutes <minutes> --run-id <run> --scr <scratch> "
+             "how": f"{cmd} launch --kind tool_pilot --minutes {CAP_OPTIONS['B'][1]:g} --run-id <run> --scr <scratch> "
                     "--session-commit <sha> --bundle <name> --max-price <live> --gpu 'NVIDIA L40S' "
                     f"--disk-gb {DISK_GB} --network-volume-id {VOLUME['id']} --volume-mount-path {VOLUME['mount']} "
                     f"--data-center-ids {VOLUME['data_center']} --volume-gb {VOLUME['size_gb']}"},
             {"step": "closeout (the launcher runs it on every terminal path) and the dev box's report",
              "how": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot report --session "
-                    "<scratch>/store/tool_pilot_hybrid --write <report>"}],
+                    "<scratch>/store/tool_pilot_hybrid [--session <a resumed run's copy>] [--identity <the run's "
+                    "authorization plan_hash, when tool_session.json is missing>] --write <report>"}],
         "gates": {"at_issue": ["the grant names a tool_pilot cap and the cap fits it (kind_cap_problems)",
                                "the cap fits the study envelope, the project cap as the provider bills it now and the "
                                "account balance (funding_problems on a live, fail-closed position)",
                                "the L40S check record admits teacher generation (kind_conditions)",
-                               "the pilot plan and task file load (tool_pilot.load) and the source admission is signed, "
-                               "pilot-scoped and names this plan (pilot_problems)",
+                               "the pilot plan and task file load (tool_pilot.load) and the source admission passes "
+                               "tool_pilot.admission_problems: signed by the maintainer, approving exactly 'tool_pilot "
+                               "measurement only', a decision and a valid date, the exact scope, and the plan sha256, "
+                               "task file sha256, task count and sources it signs equal to the record and the files",
                                "the protocol, design, pilot plan and admission bound by sha256 (KIND_RECORDS)"],
                   "at_launch": ["the artifact is this study's tool_pilot artifact, unused, not a dry run",
                                 "one NVIDIA L40S only (the_pilot_runs_on_an_l40s; the grant's price ceiling)",
@@ -450,12 +608,28 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                                 "the project cap holds now: committed spend, remaining cap, balance, pods and volumes "
                                 "re-read from the provider (the_project_cap_holds_now; an unreadable provider, a pod in "
                                 "the account or an unowned volume refuses)",
-                                "the network volume is the planned one (the_volume_is_the_planned_one)",
+                                "the network volume is the planned one as the provider reports it "
+                                "(the_volume_is_the_planned_one) and it is am5m373kuq at 55 GB in EUR-IS-2, never "
+                                "4rhubprswo (the_pilot_volume_is_the_planned_one)",
                                 "the kind's bound records are the committed ones",
                                 "the session bundle is on the relay"],
                   "on_the_pod": ["setup re-checks the artifact against the pod's files (require_on_pod)",
-                                 "the session re-checks the pilot plan, the task file and the signed admission "
-                                 "(tool_session.run_pilot)"]},
+                                 "the session re-checks the pilot plan, the task file and the admission with the same "
+                                 "admission_problems (tool_session.run_pilot)",
+                                 "before generating: at least 2 GB free on the volume (its size less the bytes on the "
+                                 "mount) and the pilot's directory new or only the pilot's own files "
+                                 "(tool_pilot.storage_problems)"]},
+        "storage_precheck": "logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json",
+        "report_states": {"COMPLETE": "every required attempt sealed and the session ended ALL_DONE",
+                          "PARTIAL": "some sealed, some required attempt not (deadline, interruption, failure); pass "
+                                     "rates over the sealed attempts only",
+                          "INCOMPLETE": "every required attempt sealed, the session's terminal evidence missing or "
+                                        "not ALL_DONE",
+                          "FAILED": "nothing sealed",
+                          "_": "sealed shards are read whether or not their group completed, each verified by sha256 "
+                               "and the launch identity; an unattempted task is never a failure; candidates 0 and 1 "
+                               "are counted apart and a task once; copies of a resumed run merge, and a task sealed "
+                               "differently in two copies refuses; an unreadable measurement is UNMEASURED, never 0"},
         "stop_conditions": ["the sample complete: every task's first candidate, then second candidates of the refused "
                             "tasks only",
                             "the runner's soft stop and hard deadline from the accepted price (watchdog)",
@@ -482,9 +656,19 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
         "outputs": "measurement records only by default (sealed episodes, census, telemetry, report); reuse in formal "
                    "data is a separate maintainer decision",
         "position": position, "tests": tests,
-        "needed_from_the_maintainer": ["sign the pilot-only source admission", "amend the grant with the pilot's cap",
-                                       "choose cap option A ($1.80, the expected workload) or B ($2.50, the upper "
-                                       "workload in one session)"],
+        "needed_from_the_maintainer": ["sign the pilot-only source admission (every signature field)",
+                                       "amend the grant with session_hard_caps_usd.tool_pilot (option B: $2.50)",
+                                       "the final authorization"],
+        "not_verifiable_at_zero_cost": ["the installed vLLM's metric names and values (KV-cache usage, preemptions) "
+                                        "and its log lines: read on the first run, UNMEASURED where absent",
+                                        "nvidia-smi on the pod (peak VRAM): UNMEASURED if it gives no sample",
+                                        "throughput, TTFT, model-load time and the real pass rates",
+                                        "the live L40S quote and stock in EUR-IS-2 at launch",
+                                        "the bytes actually on am5m373kuq (the provider reports none; the pod measures "
+                                        "them before generating)",
+                                        "the shared runner's create, watchdog, deadline, teardown and the provider's "
+                                        "confirmation on a real pod (exercised by earlier paid sessions, not here)",
+                                        "the bundle staged on the relay for the session commit"],
         "not_requested": ["the bounded tool generation", "the packed full search", "any training", "formal evaluation",
                           "a Thinking-2507 session", "a raised project cap", "any SHORTFALL approval",
                           "anything on 4rhubprswo", "a merge"],
@@ -493,61 +677,183 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
 
 # --- the report ------------------------------------------------------------------------------------------------------
 
-def report(session_dir: Path, plan_path: Path = PLAN, tasks_path: Path = TASKS) -> dict:
-    """The pilot's measurements from a secured session directory (its sealed shards, ``tool_session.json`` and
-    ``telemetry.jsonl``), every pass rate under the frozen verifier (`tool_admission.admit`), beside the priors."""
+#: a report's state: every required attempt sealed and the session ended ALL_DONE; some sealed, some required attempt
+#: still unsealed (a deadline, an interruption, a failed generation); every required attempt sealed but the session's
+#: terminal evidence missing or not ALL_DONE; nothing sealed at all
+STATES = ("COMPLETE", "PARTIAL", "INCOMPLETE", "FAILED")
+UNMEASURED = "UNMEASURED"
+LABEL = re.compile(r"^(pilot_(?P<mode>[A-Za-z0-9-]+)_r1_pass(?P<k>\d+))\.(?:part\d+\.done|complete|seg\d+\.input\.jsonl)$")
+
+
+def _labels(dirs: list[Path]) -> dict[tuple[str, int], str]:
+    """``(mode, candidate) -> label`` of every generation group any session left a trace of: a sealed shard's marker, a
+    completion record or a segment's input -- a group need not be complete to be read."""
+    out = {}
+    for d in dirs:
+        for f in Path(d).iterdir():
+            m = LABEL.match(f.name)
+            if m:
+                out[(m.group("mode"), int(m.group("k")))] = m.group(1)
+    return out
+
+
+def _sealed(dirs: list[Path], label: str, identity: str) -> dict[str, dict]:
+    """Every sealed record of ``label`` across ``dirs``, each shard verified by its sha256 marker and the launch
+    identity (`generation_driver.sealed`); a task sealed differently in two places refuses: a resumed session never
+    changes what was sealed."""
     from stages.reasoning_data import generation_driver as GD
-    from stages.teacher_modes import tool_admission as TA
+    out: dict[str, dict] = {}
+    for d in dirs:
+        for tid, rec in GD.sealed(Path(d), label, identity).items():
+            if tid in out and canonical(out[tid]) != canonical(rec):
+                raise PilotError(f"{label}: {tid} is sealed differently in two session copies")
+            out[tid] = rec
+    return out
+
+
+def _attempted(dirs: list[Path], label: str) -> set[str]:
+    """The tasks a session submitted to the engine in ``label`` (its segments' inputs), sealed or not."""
+    got = set()
+    for d in dirs:
+        for f in Path(d).glob(f"{label}.seg*.input.jsonl"):
+            got |= {json.loads(x)["task_id"] for x in f.read_text().splitlines() if x.strip()}
+    return got
+
+
+def _outcome(task: dict, rec: dict | None, attempted: set, *, mode: str, thinking: bool, stop_ids) -> tuple[str, float]:
+    """One candidate's outcome: admitted or rejected (sealed and verified), attempted_unsealed, or unattempted -- an
+    unattempted or unsealed task is never a verification failure."""
+    if rec is None:
+        return ("attempted_unsealed" if task["task_id"] in attempted else "unattempted"), 0.0
+    turns = rec.get("turns") or []
+    if not TE.verify(task, turns, thinking=thinking).admitted:
+        return "rejected", 0.0
+    if task["split"] in ("calibration", "state_eval"):
+        its = TE.items(task, turns, mode=mode, thinking=thinking)
+        return ("admitted", float(sum(len(i["tags"]["assistant"]) for i in its))) if its else ("rejected", 0.0)
+    return "admitted", float(sum(len(d.output_ids) for d in TE.documents(task, turns, mode=mode, stop_ids=stop_ids)))
+
+
+def _measured(v, why: str = "not reported by the engine or the GPU tools on this run"):
+    return {"value": v} if v not in (None, {}, []) else {"value": UNMEASURED, "why": why}
+
+
+def report(session_dirs, *, identity: str | None = None, plan_path: Path = PLAN, tasks_path: Path = TASKS) -> dict:
+    """The pilot's measurements from one or more secured copies of its session directory, complete or not:
+
+    * every sealed record is read -- a group need not have a ``.complete`` -- after `generation_driver.sealed` verifies
+      each shard's sha256 and the launch identity; copies of a resumed session merge, and a task sealed differently in
+      two copies refuses;
+    * per task and candidate: admitted or rejected (sealed, under the frozen verifier), attempted but unsealed, or
+      unattempted; candidate 1 is required only where candidate 0 was sealed and rejected; a task counts once;
+    * pass rates divide by the SEALED attempts (first candidate) and by the DETERMINED tasks (both candidates), never
+      by tasks that were not attempted;
+    * the state (`STATES`), and the session evidence present or missing: without ``tool_session.json`` (a forced end)
+      the identity comes from the caller (the run's authorization ``plan_hash``) and the report says so;
+    * telemetry, every quantity a run could not read marked UNMEASURED, never 0."""
     doc, by_id = load(plan_path, tasks_path)
-    session_dir = Path(session_dir)
-    rec = json.loads((session_dir / "tool_session.json").read_text())
-    ident = rec["identity"]
+    dirs = [Path(d) for d in ([session_dirs] if isinstance(session_dirs, (str, Path)) else session_dirs)]
+    sessions = {str(d): json.loads((d / "tool_session.json").read_text()) if (d / "tool_session.json").is_file() else None
+                for d in dirs}
+    idents = {r["identity"] for r in sessions.values() if r and r.get("identity")}
+    if identity:
+        idents.add(identity)
+    if len(idents) != 1:
+        raise PilotError(f"the launch identity is {'unknown' if not idents else 'ambiguous'}: pass the run's "
+                         "authorization plan_hash (--identity) when tool_session.json is missing")
+    ident = idents.pop()
     proto = json.loads(TGP.PROTOCOL.read_text())
     stop_ids = [int(x) for x in proto["execution"]["stop_ids"]]
-    out = {"schema": "aadistill.stage2.teacher_modes.tool_pilot_report/v1", "pilot_plan_sha256": sha(plan_path),
-           "session": {k: rec.get(k) for k in ("kind", "authorization", "terminal", "started_utc", "finished_utc")},
-           "modes": {}}
+    labels = _labels(dirs)
+    stray = sorted(m for m, _ in labels if m not in doc["modes"])
+    if stray:
+        raise PilotError(f"generation groups of modes the pilot does not run: {stray}")
+    modes, all_sealed, all_required_sealed, every = {}, 0, True, {}
     for mode in doc["modes"]:
-        cand = defaultdict(dict)
-        for done in sorted(session_dir.glob(f"pilot_{mode}_r1_pass*.complete")):
-            label = done.name[:-len(".complete")]
-            k = int(label.rsplit("pass", 1)[1])
-            for tid, r in GD.sealed(session_dir, label, ident).items():
-                cand[k][tid] = r
-        tasks = [by_id[t] for c in doc["modes"][mode] for t in c["task_ids"]]
-        eps = [{"task_id": t, "turns": r.get("turns") or [], "candidate": k} for k, rs in cand.items() for t, r in rs.items()]
-        res = TA.admit(tasks, eps, mode=mode, stop_ids=stop_ids)
-        first = TA.admit(tasks, [e for e in eps if e["candidate"] == 0], mode=mode, stop_ids=stop_ids)
-        by = defaultdict(lambda: {"offered": 0, "first_candidate_admitted": 0, "admitted": 0, "units": 0.0})
-        shape_of = {t["task_id"]: TE.episode_shape(t) for t in tasks}
+        thinking = bool(proto["lineages"][doc["lineage"]]["modes"][mode]["template_kwargs"].get("enable_thinking", True))
+        recs = {k: _sealed(dirs, labels[(mode, k)], ident) if (mode, k) in labels else {} for k in (0, 1)}
+        att = {k: _attempted(dirs, labels[(mode, k)]) if (mode, k) in labels else set() for k in (0, 1)}
+        frozen = {t for c in doc["modes"][mode] for t in c["task_ids"]}
+        outside = sorted((set(recs[0]) | set(recs[1])) - frozen)
+        if outside:
+            raise PilotError(f"{mode}: sealed records of tasks outside the frozen cells, e.g. {outside[:2]}")
+        cells = {}
         for c in doc["modes"][mode]:
             for t in c["task_ids"]:
-                by[f"{c['split']}|{c['category']}|{shape_of[t]}"]["offered"] += 1
-        admitted = {d["task_id"] for d in res["documents"]} | {i["task_id"] for i in res["items"]}
-        first_ok = {d["task_id"] for d in first["documents"]} | {i["task_id"] for i in first["items"]}
-        units = Counter()
-        for d in res["documents"]:
-            units[d["task_id"]] += len(d["output_ids"])
-        for i in res["items"]:
-            units[i["task_id"]] += len(i["tags"]["assistant"])
-        for c in doc["modes"][mode]:
-            for t in c["task_ids"]:
-                key = f"{c['split']}|{c['category']}|{shape_of[t]}"
-                by[key]["first_candidate_admitted"] += t in first_ok
-                by[key]["admitted"] += t in admitted
-                by[key]["units"] += units[t]
-        for v in by.values():
-            v["first_candidate_pass_rate"] = round(v["first_candidate_admitted"] / v["offered"], 4) if v["offered"] else None
-            v["pass_rate_two_candidates"] = round(v["admitted"] / v["offered"], 4) if v["offered"] else None
-            v["units_per_admitted_episode"] = round(v["units"] / v["admitted"], 1) if v["admitted"] else None
-        every = {f"{t}#{k}": r for k, rs in cand.items() for t, r in rs.items()}
-        out["modes"][mode] = {"cells": dict(sorted(by.items())), "census": res["census"],
-                              "turns": turn_telemetry(every)}
-    tel = session_dir / "telemetry.jsonl"
-    out["telemetry"] = [json.loads(x) for x in tel.read_text().splitlines() if x.strip()] if tel.is_file() else []
-    out["priors"] = proto["bounded_plan"]["priors"]
-    out["authorizes"] = "nothing"
-    return out
+                task = by_id[t]
+                key = f"{c['split']}|{c['category']}|{TE.episode_shape(task)}"
+                row = cells.setdefault(key, {"offered": 0, "c0": Counter(), "c1": Counter(), "final": Counter(),
+                                             "units": 0.0})
+                row["offered"] += 1
+                o0, u0 = _outcome(task, recs[0].get(t), att[0], mode=mode, thinking=thinking, stop_ids=stop_ids)
+                row["c0"][o0] += 1
+                o1, u1 = "not_required", 0.0
+                if o0 == "rejected":
+                    o1, u1 = _outcome(task, recs[1].get(t), att[1], mode=mode, thinking=thinking, stop_ids=stop_ids)
+                    row["c1"]["required"] += 1
+                    row["c1"][o1] += 1
+                elif t in recs[1]:
+                    raise PilotError(f"{mode}: {t} has a second candidate its first did not call for")
+                final = ("admitted" if "admitted" in (o0, o1) else "rejected" if (o0, o1) == ("rejected", "rejected")
+                         else "undetermined")
+                row["final"][final] += 1
+                row["units"] += u0 + u1
+                all_required_sealed &= o0 in ("admitted", "rejected") and o1 in ("admitted", "rejected", "not_required")
+        for row in cells.values():
+            sealed0 = row["c0"]["admitted"] + row["c0"]["rejected"]
+            determined = row["final"]["admitted"] + row["final"]["rejected"]
+            row.update(c0=dict(row["c0"]), c1=dict(row["c1"]), final=dict(row["final"]),
+                       first_candidate_pass_rate=round(row["c0"]["admitted"] / sealed0, 4) if sealed0 else UNMEASURED,
+                       pass_rate_two_candidates=(round(row["final"]["admitted"] / determined, 4) if determined
+                                                 else UNMEASURED),
+                       units_per_admitted_episode=(round(row["units"] / row["final"]["admitted"], 1)
+                                                   if row["final"]["admitted"] else UNMEASURED))
+        n = len(recs[0]) + len(recs[1])
+        all_sealed += n
+        every.update({f"{t}#{k}": r for k, rs in recs.items() for t, r in rs.items()})
+        modes[mode] = {"cells": dict(sorted(cells.items())), "sealed_records": n,
+                       "attempted": {f"candidate_{k}": len(att[k]) for k in (0, 1)},
+                       "groups_complete": {f"candidate_{k}": any((Path(d) / f"{labels[(mode, k)]}.complete").is_file()
+                                                                 for d in dirs) if (mode, k) in labels else False
+                                           for k in (0, 1)}}
+    terminals = [r.get("terminal") for r in sessions.values() if r]
+    state = ("FAILED" if not all_sealed else
+             ("COMPLETE" if "ALL_DONE" in terminals else "INCOMPLETE") if all_required_sealed else "PARTIAL")
+    tel = [json.loads(x) for d in dirs if (d / "telemetry.jsonl").is_file()
+           for x in (d / "telemetry.jsonl").read_text().splitlines() if x.strip()]
+    gpu = [g for t in tel for g in ((t.get("gpu") or {}).get("gpus") or {}).values()]
+    eng = [e for t in tel for e in t.get("engine") or []]
+    turns = turn_telemetry(every)
+    return {"schema": "aadistill.stage2.teacher_modes.tool_pilot_report/v2", "state": state,
+            "pilot_plan_sha256": sha(plan_path), "identity": ident,
+            "session_evidence": {d: ({k: r.get(k) for k in ("kind", "authorization", "terminal", "started_utc",
+                                                           "finished_utc")} if r else
+                                     "MISSING: no tool_session.json (a forced end); the report rests on the sealed "
+                                     "shards alone") for d, r in sessions.items()},
+            "modes": modes,
+            "telemetry": {
+                "invocations": len(tel),
+                "peak_vram_mib": _measured(max((g["peak_memory_used_mib"] for g in gpu), default=None),
+                                           "nvidia-smi gave no sample"),
+                "model_load_seconds": _measured([e.get("init_seconds") or (e.get("engine_ready_seconds") or [None])[0]
+                                                 for e in eng if e.get("init_seconds") or e.get("engine_ready_seconds")]),
+                "kv_cache_tokens": _measured([e["kv_cache_tokens"][0] for e in eng if e.get("kv_cache_tokens")]),
+                "kv_cache_usage_peak": _measured([v for e in eng for k, v in ((e.get("engine_metrics") or {})
+                                                                               .get("max") or {}).items()
+                                                  if "cache_usage" in k]),
+                "preemptions": _measured([v for e in eng for k, v in ((e.get("engine_metrics") or {}).get("max") or {})
+                                          .items() if "preempt" in k] or None,
+                                         "the engine reported no preemption metric (preemption log lines are "
+                                         "counted separately)"),
+                "preemption_log_lines": sum(e.get("preemption_lines") or 0 for e in eng) if eng else UNMEASURED,
+                "decode_output_tokens_per_second": _measured([e["output_tokens_per_second"] for e in eng
+                                                              if e.get("output_tokens_per_second")]),
+                "ttft_seconds": turns["ttft_seconds"] if turns["turns"] else {"value": UNMEASURED},
+                "per_request_decode_tokens_per_second": turns["per_request_decode_tokens_per_second"],
+                "prompt_tokens": turns["prompt_tokens"],
+                "prefill_tokens_per_second": {"value": UNMEASURED, "why": "the batched engine interleaves prefill "
+                                              "and decode; the TTFT distribution and the prompt tokens are reported"}},
+            "priors": proto["bounded_plan"]["priors"], "authorizes": "nothing"}
 
 
 def main(argv=None) -> int:
@@ -564,8 +870,11 @@ def main(argv=None) -> int:
     ap_.add_argument("--write", default=str(APPLICATION))
     ap_.add_argument("--live-position", action="store_true", help="re-read the project position (read-only)")
     ap_.add_argument("--tests", default=None, help="a JSON file of the test evidence to record")
+    sp = sub.add_parser("storage-precheck")
+    sp.add_argument("--write", required=True)
     r = sub.add_parser("report")
-    r.add_argument("--session", required=True)
+    r.add_argument("--session", action="append", required=True, help="a secured session directory (repeatable)")
+    r.add_argument("--identity", default=None, help="the run's authorization plan_hash, when tool_session.json is missing")
     r.add_argument("--write", required=True)
     a = ap.parse_args(argv)
     if a.cmd == "build":
@@ -577,6 +886,11 @@ def main(argv=None) -> int:
         rec = source_admission(doc, Path(a.plan))
         Path(a.write).write_text(json.dumps(rec, indent=1, ensure_ascii=False) + "\n")
         print(json.dumps({k: rec[k] for k in ("status", "tasks", "tasks_sha256")}, indent=1))
+    elif a.cmd == "storage-precheck":
+        doc = storage_precheck()
+        Path(a.write).write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({k: doc[k] for k in ("provider", "matches_the_planned_volume", "recorded_lower_bound_bytes")},
+                         indent=1, default=str))
     elif a.cmd == "application":
         pos = None
         if a.live_position:
@@ -591,7 +905,7 @@ def main(argv=None) -> int:
         Path(a.write).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
         print(json.dumps(doc["hard_cap_check"]["options"], indent=1)[:3000])
     else:
-        Path(a.write).write_text(json.dumps(report(Path(a.session)), indent=1) + "\n")
+        Path(a.write).write_text(json.dumps(report([Path(x) for x in a.session], identity=a.identity), indent=1) + "\n")
     return 0
 
 

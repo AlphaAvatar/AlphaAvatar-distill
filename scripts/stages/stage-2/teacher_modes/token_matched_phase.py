@@ -176,8 +176,8 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
 
 def pilot_problems(root: Path = REPO_ROOT) -> list[str]:
     """Why the tool pilot's bound records do not let it run (empty when they do): its frozen plan and task file
-    (`tool_pilot.load`), and the pilot-only source admission -- signed by the maintainer, scoped to the pilot, naming
-    exactly this plan."""
+    (`tool_pilot.load`), and the pilot-only source admission under `tool_pilot.admission_problems` -- the same check
+    the pod applies (`tool_session.run_pilot`)."""
     import json
     from stages.teacher_modes import tool_pilot as TPL
     root, bad = Path(root), []
@@ -193,14 +193,7 @@ def pilot_problems(root: Path = REPO_ROOT) -> list[str]:
         bad.append(str(exc))
     if not adm.is_file():
         return bad + [f"no pilot-only source admission at {KIND_RECORDS[TOOL_PILOT_KIND][3]}"]
-    a = json.loads(adm.read_text())
-    if a.get("schema") != TPL.ADMISSION_SCHEMA or not str(a.get("scope", "")).startswith("the tool_pilot kind's"):
-        bad.append("the source admission is not the pilot-only record")
-    if not (a.get("signature") or {}).get("signed_by"):
-        bad.append("the pilot-only source admission is PREPARED, not signed by the maintainer")
-    if (a.get("pilot_plan") or {}).get("sha256") != P1._sha(KIND_RECORDS[TOOL_PILOT_KIND][2], root):
-        bad.append("the source admission names another pilot plan")
-    return bad
+    return bad + [f"source admission: {x}" for x in TPL.admission_problems(json.loads(adm.read_text()), plan, tasks)]
 
 
 def the_pilot_runs_on_an_l40s(ctx) -> tuple[bool, str]:
@@ -210,6 +203,18 @@ def the_pilot_runs_on_an_l40s(ctx) -> tuple[bool, str]:
         return False, (f"the tool pilot runs on one {GPU}, not {getattr(ctx.args, 'gpu_count', 1)} x {ctx.args.gpu!r}: "
                        "an A100 needs a measured L40S OOM and a separate authorization")
     return True, f"one {GPU}"
+
+
+def the_pilot_volume_is_the_planned_one(ctx) -> tuple[bool, str]:
+    """The pilot's volume: the retained am5m373kuq at its recorded size and datacenter (the provider's own report is
+    `phase.the_volume_is_the_planned_one`); 4rhubprswo, the v2 Top-1's only copy, is never attached."""
+    from stages.teacher_modes import tool_pilot as TPL
+    a, v = ctx.args, TPL.VOLUME
+    if a.network_volume_id != v["id"] or int(a.volume_gb or 0) != v["size_gb"] or a.data_center_ids != v["data_center"] \
+            or a.volume_mount_path != v["mount"]:
+        return False, (f"the tool pilot runs on {v['id']} ({v['size_gb']} GB, {v['data_center']}, at {v['mount']}), not "
+                       f"{a.network_volume_id!r} ({a.volume_gb} GB, {a.data_center_ids!r}, {a.volume_mount_path!r})")
+    return True, f"volume {v['id']}, {v['size_gb']} GB in {v['data_center']}"
 
 
 def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) -> list[str]:
@@ -372,7 +377,7 @@ def tool_pilot_command(ctx, plan) -> str:
     tasks = json.loads((REPO_ROOT / rec[2]).read_text())["tasks_file"]["path"]
     return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
             f"--authorization {auth} --lineage hybrid --pilot {rec[2]} --pilot-tasks {tasks} "
-            f"--durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
+            f"--volume-gb {a.volume_gb} --durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
 
 
 def packed_search_command(ctx, plan, planned_minutes: float = SEARCH_DEADLINE_MINUTES) -> str:
@@ -546,7 +551,8 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
         contingency_fraction=CONTINGENCY.get(kind, 0.25),
         setup_env={"PHASE_KIND": kind},
         extra_prechecks=(P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones,
-                         *((the_pilot_runs_on_an_l40s,) if kind == TOOL_PILOT_KIND else ())),
+                         *((the_pilot_runs_on_an_l40s, the_pilot_volume_is_the_planned_one)
+                           if kind == TOOL_PILOT_KIND else ())),
         on_poll=polls[0], products_secured=polls[1],
         artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; the network volume is KEPT: it "

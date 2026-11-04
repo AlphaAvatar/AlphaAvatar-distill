@@ -67,6 +67,10 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
   - the L40S pilot's execution preparation: kind `tool_pilot`, frozen cells (`plans/tool_pilot_plan.json`, 397 tasks,
     794 runs), `tool_session.py --pilot`, telemetry, the runner's hard-cap check, a pilot-only source admission
     (unsigned) and the re-verified application. Owed: the signature, the grant's cap, option A ($1.80) or B ($2.50).
+- **Review of `29b62c93` (2026-11-04).** Option B ($2.50) recommended for the pilot; done at $0: the pilot report reads
+  partial, verified sealed results (COMPLETE / PARTIAL / INCOMPLETE / FAILED, UNMEASURED never 0); one strict check of
+  the source admission's signature at issue and on the pod; the volume checked read-only and measured on the pod.
+  Owed: the signature, the grant's cap, the final authorization.
 - **Blocked on tool calling.**
   - The non-thinking `schema_arguments` SHORTFALL: option 1 is implemented; at the priors it fills training and leaves
     state evaluation short (~1,400 of 1,800). No SHORTFALL is approved, so the A2-6cat admission refuses and the suite
@@ -77,7 +81,7 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
   - source admission;
   - the expected SHORTFALLS: non-thinking `schema_arguments`, and "ask for the missing value";
   - the isolation costs and the validation-coverage gaps;
-  - the L40S pilot (signature, grant cap, option A $1.80 or B $2.50; not authorized);
+  - the L40S pilot (signature, grant cap, option B $2.50 recommended; not authorized);
   - a raised cap: generation plus search is $36.15 expected against $30.05 left (live 2026-11-04T08:06Z);
   - volume `4rhubprswo`.
 

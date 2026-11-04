@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.tool_pilot_source_admission/v1",
- "written_utc": "2026-11-04T08:40:47Z",
+ "written_utc": "2026-11-04T09:58:41Z",
  "status": "PREPARED: inactive until the maintainer signs it (signature below)",
  "decided_by": "maintainer 2026-11-04 (review of 2468c1aa), item 5: prepare a source admission limited to the pilot, from the accepted candidates Toucan SFT and Pivot Conversational; it must not widen into a training-data admission and authorizes no paid action",
  "scope": "the tool_pilot kind's measurement only: the hybrid's teacher-native generation on exactly the tasks below (by id and sha256), its episodes measurement records by default",
@@ -51,8 +51,13 @@
  ],
  "signature": {
   "signed_by": null,
+  "approves": null,
   "decision": null,
-  "date": null
+  "date": null,
+  "pilot_plan_sha256": null,
+  "tasks_sha256": null,
+  "tasks": null
  },
+ "_signature": "the maintainer signs by filling every field: signed_by 'maintainer', approves exactly 'tool_pilot measurement only', the decision quoted, the date (YYYY-MM-DD), and the pilot plan sha256, task file sha256 and task count copied from this record (admission_problems checks all of them); the agent never fills them",
  "authorizes": "nothing by itself"
 }
