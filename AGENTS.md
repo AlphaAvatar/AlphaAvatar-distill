@@ -789,6 +789,14 @@ authorized identities; `data/eval-set/README.md` is the contract.
   tool use, interaction and rollout integrity are reported beside them, each on
   its own. No pooled score across units or capabilities is defined, and none is
   invented in a report.
+* **A benchmark's metric is the benchmark's** (maintainer 2026-11-04). An accuracy,
+  pass rate, task success, pass@k or pass^k of a public benchmark (BFCL, τ-bench /
+  τ²-bench, AgentBench, GAIA, ARC-AGI, …) uses that benchmark's dataset, interface,
+  scorer, aggregation, attempt budget and version; an agent never chooses its
+  meaning, numerator or denominator. Internal metrics (data admission yields,
+  verifier levels, usable rollout, registered composites, state-evaluation KL) are
+  reported under their own names and never as a benchmark score.
+  `docs/shared/METRIC_CONTRACT.md` defines each one.
 * **Unsupported is not zero.** A unit a model's modality or interface cannot take
   is reported `unsupported`; a withheld unit without its verified copy is
   `withheld`; an unrun one `not_run`. None is dropped silently or scored zero.

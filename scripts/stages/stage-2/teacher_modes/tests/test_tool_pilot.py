@@ -27,13 +27,23 @@ SPEC = {"lineage": "hybrid", "training_per_category": 2, "single_step_training":
 
 # --- the kind, its funding and its card ------------------------------------------------------------------------------
 
-def test_the_pilot_kind_claims_generation_only_and_refuses_without_its_records_and_cap():
+def test_the_pilot_kind_claims_generation_only_and_its_committed_issue_path_passes():
+    """The maintainer's 2026-11-04 authorization applied: the grant names the pilot's cap and scope, the admission is
+    signed, and the WHOLE issue path's conditions pass on the committed tree -- asserted on what it returns, not on an
+    exit code; a cap above the grant's still refuses, for that reason."""
     assert "tool_pilot" in TM.STUDY.kinds and "tool_pilot" in TM.DRIVERS and "tool_pilot" in TM.KIND_RECORDS
     assert TM.STUDY.claims_of("tool_pilot") == frozenset({"teacher_generation"})       #: never formal or training
-    assert TM.kind_cap_problems("tool_pilot", 1.0) == ["the grant names no hard cap for kind 'tool_pilot'"]
-    assert any("PREPARED, not signed" in p for p in TM.pilot_problems())               #: the admission is unsigned
+    if not TPL.TASKS.is_file():
+        pytest.skip("the pilot's task file is an artifact outside git")
+    assert TM.kind_cap_problems("tool_pilot", 2.50) == []
+    assert TM.kind_cap_problems("tool_pilot", 2.51) == ["$2.51 exceeds the grant's $2.5 for kind 'tool_pilot'"]
+    got = TM.kind_conditions("tool_pilot")
+    from stages.teacher_modes import l40s_check as LC
+    assert got["l40s_generation_scope_sha256"] == TPL.sha(TM.REPO_ROOT / LC.GENERATION_SCOPE)
+    assert {f"record:{r}" for r in TM.KIND_RECORDS["tool_pilot"]} <= set(got)
+    assert got["record:" + TM.KIND_RECORDS["tool_pilot"][2]] == "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83"
     assert TM.main(["issue", "--kind", "tool_pilot", "--run-id", "x", "--expected-usd", "1", "--hard-cap-usd",
-                    "1.8", "--dry-run"]) == 11
+                    "2.51", "--dry-run"]) == 11
 
 
 def _grant_root(tmp_path, *, block=True, **over):
@@ -41,6 +51,7 @@ def _grant_root(tmp_path, *, block=True, **over):
     filled for the test), the bound pilot records copied beside it; ``over`` edits the tool_pilot block."""
     import shutil
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
+    g.pop("tool_pilot", None)                   #: the committed grant carries the maintainer's block since 2026-11-04
     amend = TPL.grant_amendment()
     g["session_hard_caps_usd"]["tool_pilot"] = amend["edits"]["session_hard_caps_usd.tool_pilot"]
     if block:
@@ -81,7 +92,16 @@ def test_the_envelope_covers_the_pilot_and_the_amendment_raises_nothing():
     a = TPL.grant_amendment()
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
     assert a["unchanged"]["ceiling_usd"] == g["ceiling_usd"] and a["unchanged"]["project_cumulative_cap_usd"] == 868.0
-    assert "tool_pilot" not in g and "tool_pilot" not in g["session_hard_caps_usd"]          #: the grant is untouched
+    #: the maintainer's amendment (2026-11-04) applied exactly as proposed: the pilot's cap and block, nothing else
+    assert g["session_hard_caps_usd"]["tool_pilot"] == a["edits"]["session_hard_caps_usd.tool_pilot"] == 2.5
+    assert {k: v for k, v in g["tool_pilot"].items() if k not in ("decision", "date")} == {
+        k: v for k, v in a["edits"]["tool_pilot"].items() if k not in ("decision", "date")}
+    assert g["tool_pilot"]["decision"] and g["tool_pilot"]["date"] == "2026-11-04"
+    assert (g["per_session_hard_cap_usd"], g["gpus"], g["gpu_count_max"]) == (
+        a["unchanged"]["per_session_hard_cap_usd"], a["unchanged"]["gpus"], a["unchanged"]["gpu_count_max"])
+    applied = json.loads(TPL.AMENDMENT.read_text())                  #: the proposal the maintainer approved
+    assert {k: v for k, v in g["session_hard_caps_usd"].items() if k != "tool_pilot"} == \
+        applied["unchanged"]["session_hard_caps_usd (the A1 kinds)"]
     assert a["edits"]["tool_pilot"]["decision"] is None and a["edits"]["tool_pilot"]["date"] is None
 
 
@@ -391,8 +411,10 @@ def test_the_committed_pilot_records_hold_together():
         pytest.skip("the pilot's task file is an artifact outside git")
     adm = json.loads(TPL.ADMISSION.read_text())
     assert adm["pilot_plan"]["sha256"] == TPL.sha(TPL.PLAN) and adm["tasks"] == len(by_id) == len(doc["tasks"])
-    assert set(adm["signature"]) == set(TPL.SIGNATURE_FIELDS) and not any(adm["signature"].values())   #: unsigned
-    assert TPL.admission_problems(adm, TPL.PLAN, TPL.TASKS) == ["PREPARED, not signed by the maintainer"]
+    #: signed on the maintainer's written decision of 2026-11-04, every field, nothing broader than the pilot
+    assert set(adm["signature"]) == set(TPL.SIGNATURE_FIELDS) and all(adm["signature"].values())
+    assert adm["signature"]["approves"] == TPL.APPROVAL and adm["signature"]["date"] == "2026-11-04"
+    assert TPL.admission_problems(adm, TPL.PLAN, TPL.TASKS) == []
     assert sum(len(c["task_ids"]) for cs in doc["modes"].values() for c in cs) == 794
 
 
@@ -538,7 +560,8 @@ def test_a_partial_session_is_reported_from_its_sealed_shards(frozen, monkeypatc
     ht = Counter()
     for row in r["modes"]["H-T"]["cells"].values():
         ht.update(row["c0"])
-        assert row["first_candidate_pass_rate"] == TPL.UNMEASURED and "rejected" not in row["final"]
+        assert row["first_candidate_admission_rate"] == TPL.UNMEASURED and row["final"]["rejected"] == 0
+        assert row["admission_yield_up_to_two_candidates"] == TPL.UNMEASURED
     assert ht["unattempted"] == n
     assert r["telemetry"]["peak_vram_mib"]["value"] == TPL.UNMEASURED                #: no nvidia-smi here: not 0
 
@@ -667,3 +690,99 @@ def test_a_sealed_episode_from_another_round_input_refuses(frozen, monkeypatch):
     part.with_suffix(".done").write_text(TPL.sha(part) + "\n")
     with pytest.raises(TPL.PilotError, match="sealed from another input, protocol or runner"):
         pilot(frozen, out, runner(None))
+
+
+# --- the metric names (maintainer 2026-11-04: data admission, never a benchmark score) ------------------------------
+
+def test_the_report_names_admission_metrics_with_their_counts_levels_and_coverage(frozen, monkeypatch):
+    """A complete pilot through the real sealer: every rate is an admission rate with its numerator and denominator in
+    the row, the second candidate is counted only where the first was rejected (a bounded retry, not pass@2), each
+    verifier level's passed / failed / unverified counts are per candidate, and coverage counts admitted episodes by
+    the levels they were verified at."""
+    runner = _interrupt_then_resume(frozen, monkeypatch)
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    rec = {}
+    assert pilot(frozen, out, runner(None), rec=rec)
+    rec.update(terminal="ALL_DONE")
+    (out / "tool_session.json").write_text(json.dumps(rec))
+    r = TPL.report(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    assert r["state"] == "COMPLETE" and r["schema"].endswith("tool_pilot_report/v3")
+    assert set(r["metrics"]) >= {"first_candidate_admission_rate", "admission_yield_up_to_two_candidates",
+                                 "gold_tool_call_match", "recorded_execution", "target_tools_called"}
+    assert "not pass@2" in r["metrics"]["admission_yield_up_to_two_candidates"]
+    assert not any("pass_rate" in k for row in r["modes"]["H-N"]["cells"].values() for k in row)
+    for row in r["modes"]["H-N"]["cells"].values():
+        c0, c1, fin = row["candidate_0"], row["candidate_1"], row["final"]
+        assert c1["required"] == c0["rejected"] and fin["admitted"] == c0["admitted"] + c1["admitted"]
+        assert row["first_candidate_admission_rate"] == round(c0["admitted"] / c0["sealed"], 4)
+        assert row["admission_yield_up_to_two_candidates"] == round(
+            fin["admitted"] / (fin["admitted"] + fin["rejected"]), 4)
+    single = "toy/tools|single_step_gold_tool_call@v1"
+    lv = r["modes"]["H-N"]["levels"][single]["candidate_0"]
+    assert lv["recorded_execution"] == {"passed": 0, "failed": 0, "unverified": lv["protocol"]["passed"]
+                                        + lv["protocol"]["failed"], "pass_rate": TPL.UNMEASURED}
+    assert lv["step_gold"]["failed"] == 0 and lv["task_success"]["pass_rate"] == TPL.UNMEASURED
+    cov = r["modes"]["H-N"]["verification_coverage"]
+    assert set(cov[single]) == {"protocol+schema_validity+step_gold"}
+    assert set(cov["toy/tools|full_episode@v1"]) == {"protocol+schema_validity+recorded_execution+step_gold"}
+    tot = r["modes"]["H-N"]["totals"]
+    assert tot["offered"] == sum(len(c["task_ids"]) for c in frozen["doc"]["modes"]["H-N"])
+    sa = r["schema_arguments_non_thinking_supply"]
+    assert sa["training|single_step_gold_tool_call@v1"]["supervised_tokens"] > 0
+    assert sa["state_eval|single_step_gold_tool_call@v1"]["scored_positions"] > 0
+    assert all(v["status"] in ("REACHABLE", "SHORTFALL") for v in r["formal_plan_projection"].values())
+
+
+# --- the L40S generation-scoped gate, on the pilot's real generation path --------------------------------------------
+
+def test_the_pilots_generation_path_never_reads_the_forward_baseline_selection(frozen, monkeypatch):
+    """The maintainer's condition for the generation-scoped gate, OBSERVED: the pilot's real session path
+    (`tool_session.run_pilot` -> `generate_mode` -> `generation_driver.run_group`) up to the engine command opens no
+    forward-baseline file, and the engine command names none -- it carries exactly the engine the gate compares
+    (`tool_pilot.generation_engine`). The engine process's own code is the gate's static scan."""
+    import os
+    import sys
+    opened, on = [], [False]
+
+    def hook(event, args):
+        if on[0] and event == "open" and args and isinstance(args[0], (str, bytes, os.PathLike)):
+            opened.append(os.fsdecode(args[0]))
+    sys.addaudithook(hook)
+    signed(frozen, monkeypatch)
+    cmds = []
+
+    def run(cmd, log, tick):
+        cmds.append([str(x) for x in cmd])
+        return 1
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    on[0] = True
+    try:
+        assert not pilot(frozen, out, run)
+    finally:
+        on[0] = False
+    assert cmds and any(p.endswith("pilot_tasks.jsonl") for p in opened)               #: the trace sees the reads
+    assert not [p for p in opened if "baselines" in p or p.endswith("selection.json")]
+    cmd = cmds[0]
+    assert not any("selection" in x or "baseline" in x for x in cmd)
+    e = TPL.generation_engine()
+    arg = lambda k: cmd[cmd.index(k) + 1]
+    assert (arg("--model"), arg("--revision"), int(arg("--session-limit"))) == (e["model"], e["revision"],
+                                                                                 e["max_model_len"])
+    assert float(arg("--gpu-mem-util")) == e["gpu_memory_utilization"] and "--engine-metrics" in cmd
+    assert json.loads(arg("--generate-sampling")) == e["modes"]["H-N"]["sampling"]
+    assert json.loads(arg("--chat-template-kwargs")) == e["modes"]["H-N"]["template_kwargs"]
+
+
+def test_the_committed_pilot_passes_the_generation_scope_and_the_whole_phase_gate_still_refuses():
+    """On the committed tree: the pilot's generation is admitted by the check's generation measurement; the teacher
+    gate on the whole phase identity still refuses (the forward baseline changed), so no other kind is widened."""
+    from stages.teacher_modes import l40s_check as LC
+    if not TPL.TASKS.is_file():
+        pytest.skip("the pilot's task file is an artifact outside git")
+    assert TPL.l40s_generation_problems() == []
+    whole = LC.gate(LC.load_config()["gates"]["teacher"])
+    assert whole == ["the check ran under another phase identity than the files hold now"]
+    with pytest.raises(SE.AuthorizationError, match="another phase identity"):
+        TM.kind_conditions("tool_generation")

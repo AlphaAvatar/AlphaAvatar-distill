@@ -22,10 +22,26 @@ delimiters, the tools, the gold and the backend are all the caller's (P3).
 * :func:`step_matches_gold` compares one turn's calls with the step's allowed
   call sets, order-free (a turn's parallel calls are a multiset).
 * :func:`verify_episode` checks an episode on every turn before it enters
-  training, level by level (`LEVELS`): protocol, schema validity, recorded
-  execution, step gold, tool selection, task success. A level the task carries
-  no verifier for is reported ``None`` (not checked), never passed: a check
-  that the target tools were called is tool selection, not task success.
+  training, level by level (`LEVELS`). Each level reports exactly what was
+  checked, and a level with nothing to check is ``None`` (unverified), never
+  passed:
+
+  - ``protocol`` -- natural termination and the call syntax on every turn;
+  - ``schema_validity`` -- every call names an offered tool and its arguments
+    satisfy that tool's JSON Schema;
+  - ``recorded_execution`` -- recorded-response replay: every call the episode
+    made was answered by the backend (a replay of recorded responses). It is
+    ``None`` when the episode made no call, and it never means that an
+    executable environment ran the call or that a final state was checked;
+  - ``step_gold`` -- each gold-carrying turn's calls equal one allowed gold set;
+  - ``target_tools_called`` -- every target tool was called at least once
+    (recall of the target set; extra or wrong calls are not checked, so this is
+    not tool-selection accuracy);
+  - ``tool_selection`` -- a complete check of the episode's tool decision (for
+    example: no call at all where no tool is wanted);
+  - ``task_success`` -- the task's registered success criterion, in full; only
+    a check that IS that criterion may report it.
+
   A decision-step episode (``unexecuted_final_call``) ends on calls nothing
   executes: they are verified for protocol, schema and gold, never reported
   as executed.
@@ -343,11 +359,13 @@ def step_matches_gold(calls: Sequence[ToolCall], gold: Sequence[Sequence[Mapping
     return any(got == Counter(canonical_call(g) for g in option) for option in gold)
 
 
-#: What an episode's verdict reports, in order. ``protocol``, ``schema_validity`` and ``recorded_execution`` are
-#: checked on every episode; ``step_gold`` only where the task carries per-step gold calls; ``tool_selection`` and
-#: ``task_success`` only where the task carries a final check of that level.
-LEVELS = ("protocol", "schema_validity", "recorded_execution", "step_gold", "tool_selection", "task_success")
-FINAL_LEVELS = ("tool_selection", "task_success")
+#: What an episode's verdict reports, in order (the module docstring defines each). ``protocol`` and
+#: ``schema_validity`` are checked on every episode; ``recorded_execution`` on every episode that executed a call;
+#: ``step_gold`` only where the task carries per-step gold calls; the final levels only where the task carries a
+#: final check of that level.
+LEVELS = ("protocol", "schema_validity", "recorded_execution", "step_gold", "target_tools_called", "tool_selection",
+          "task_success")
+FINAL_LEVELS = ("target_tools_called", "tool_selection", "task_success")
 
 
 @dataclass
@@ -383,11 +401,14 @@ def verify_episode(turns: Sequence[Mapping[str, Any]], *, tools: Sequence[Mappin
     turn. An episode is admitted when no level fails; levels without a verifier
     stay ``None`` and are reported as such.
 
+    ``recorded_execution`` covers the calls that were executed: ``None``
+    (unverified, never passed) when the episode executed none -- an answer
+    without a call verifies no execution.
+
     ``unexecuted_final_call``: a decision-step episode instead ENDS on its last
     turn's calls, which nothing executes -- they must exist and carry no
     response, and they are checked for protocol, schema validity and gold, never
-    for execution. ``recorded_execution`` then covers only earlier turns' calls
-    and is ``None`` (unverified, never passed) when there are none.
+    for execution. ``recorded_execution`` then covers only earlier turns' calls.
     """
     unknown = set(final_checks or {}) - set(FINAL_LEVELS)
     if unknown:
@@ -399,7 +420,7 @@ def verify_episode(turns: Sequence[Mapping[str, Any]], *, tools: Sequence[Mappin
     any_executed = any(parse_tool_calls(str(t.get("raw") or ""), open_tag=open_tag, close_tag=close_tag)[0]
                        for t in executed)
     checks: dict[str, bool | None] = {"protocol": True, "schema_validity": True,
-                                      "recorded_execution": None if unexecuted_final_call and not any_executed else True,
+                                      "recorded_execution": True if any_executed else None,
                                       "step_gold": True if has_gold else None,
                                       **{k: (True if k in (final_checks or {}) else None) for k in FINAL_LEVELS}}
     if not turns:

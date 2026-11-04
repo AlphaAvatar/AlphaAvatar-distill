@@ -157,18 +157,29 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
     """Generation runs the path the committed L40S check admitted (the same engine, card and protocol as the v1
     teacher session); every kind's artifact binds that record and its own `KIND_RECORDS`. Both lineages' tool
     generation pass the teacher gate: Thinking-2507 is the hybrid's architecture (Qwen3ForCausalLM, 36 layers,
-    2,560 / 9,728, 32 / 8 heads, the same vocabulary) on the same engine at the same session limit."""
+    2,560 / 9,728, 32 / 8 heads, the same vocabulary) on the same engine at the same session limit.
+
+    The tool pilot only generates: the maintainer's 2026-11-04 generation-scoped gate admits it on the check's
+    generation measurement when the generation it runs is the one the check measured
+    (`tool_pilot.l40s_generation_problems`), and its artifact binds that gate's record too. Every other kind keeps the
+    teacher gate on the whole phase identity."""
     from stages.teacher_modes import l40s_check as LC
-    gate = "teacher" if kind in ("supplement", "inputs", *TOOL_GENERATION_KINDS.values(), TOOL_PILOT_KIND) else None
+    gate = "teacher" if kind in ("supplement", "inputs", *TOOL_GENERATION_KINDS.values()) else None
     if gate:
         bad = LC.gate(LC.load_config(Path(root) / P1.CHECK_CONFIG)["gates"][gate], root)
         if bad:
             raise SE.AuthorizationError("the L40S check record does not admit generation: " + "; ".join(bad))
     if kind == TOOL_PILOT_KIND:
+        from stages.teacher_modes import tool_pilot as TPL
+        bad = TPL.l40s_generation_problems(root)
+        if bad:
+            raise SE.AuthorizationError("the L40S check record does not admit the pilot's generation: " + "; ".join(bad))
         bad = pilot_problems(root)
         if bad:
             raise SE.AuthorizationError("the tool pilot is not ready: " + "; ".join(bad))
     out = {"l40s_check_record_sha256": P1._sha(P1.CHECK_RECORD, root)}
+    if kind == TOOL_PILOT_KIND:
+        out["l40s_generation_scope_sha256"] = P1._sha(LC.GENERATION_SCOPE, root)
     for rel in KIND_RECORDS.get(kind, ()):
         out[f"record:{rel}"] = P1._sha(rel, root)
     return out

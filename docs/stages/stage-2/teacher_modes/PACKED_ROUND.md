@@ -42,6 +42,13 @@
     admission reads the registered one (`audit/proportion_tolerance_audit.json`).
   - Option 1 (call-only gold episodes) and option 2 (WorkBench) for the non-thinking schema_arguments SHORTFALL are
     compared at $0 (`audit/schema_arguments_options.json`); neither is implemented.
+- **The maintainer's metric review and pilot authorization (2026-11-04, after `0b96ed38`).** The pilot (option B) is
+  authorized: the pilot-only source admission is signed and the grant amended exactly as proposed. The L40S check's
+  whole-phase gate refused it (forward baseline v2 changed `selection.json`), so the pilot is admitted by the
+  maintainer's generation-scoped gate instead (`l40s_check.generation_scope_problems`, section 8). The tool-call
+  verifier now reports only what it checked: `recorded_execution` is None without a call, and `calls_tools` is
+  `target_tools_called`, which measures recall. The pilot report names admission rates. See
+  [`docs/shared/METRIC_CONTRACT.md`](../../../shared/METRIC_CONTRACT.md). Admission verdicts are unchanged.
 - **The maintainer's final authorization review of `56381f55` (2026-11-04): conditional GO for option B.** Two $0 items,
   done (section 8): issue requires the grant's explicit pilot-only scope (drafted as an amendment, the envelope
   reconciled read-only, nothing raised), and resumption is bound to the pilot plan, the round input, the protocol, the
@@ -86,7 +93,8 @@
 | [`audit/a2_recovery_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/a2_recovery_audit.json) | A2-6cat's one selected task outside A2's pack, recovered from the frozen records, with the counts it completes (`packed_packs.py --recovery-audit`) |
 | [`budget/applications/research_a_tool_pilot_2026-11-04/application.json`](../../../../logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json) | the proposed L40S tool pilot: sample, measurements, price, hard cap, stop conditions; authorizes nothing (`tool_generation_plan.py --pilot-application`) |
 | [`plans/tool_pilot_plan.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_pilot_plan.json) | the pilot's frozen cells: exact task ids per mode and cell, every task's sha256, the task file's sha256, the pool, protocol, design and plan cells it binds (`tool_pilot.py build`) |
-| [`audit/tool_pilot_source_admission.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json) | Toucan SFT and Pivot Conversational admitted for the pilot's measurement only; PREPARED, unsigned (`tool_pilot.py admission`) |
+| [`audit/tool_pilot_source_admission.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json) | Toucan SFT and Pivot Conversational admitted for the pilot's measurement only; SIGNED 2026-11-04 by the maintainer's written decision (`tool_pilot.py admission`) |
+| [`audit/l40s_generation_scope.json`](../../../../logs/stages/stage-2/teacher_modes/audit/l40s_generation_scope.json) | the L40S check's identity files at its session commit (reproducing `848f6508…`), the engine its generation ran and the measurement, read by the generation-scoped gate (`l40s_check.py generation-scope`) |
 | [`validations/packed_round/pilot_storage_precheck_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json) | the pilot volume read-only: the provider's report, the recorded contents, where the pilot writes, the pod-side rule (`tool_pilot.py storage-precheck`) |
 | [`audit/v1_tail_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/v1_tail_audit.json) | V1's tail rule on the hybrid's recorded tool-call turns (`tool_admission.py --v1-tail-audit`) |
 | [`validations/packed_round/environment_blocked_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/environment_blocked_20261104.json) | the 25 simulator-restore tests the core suite could not run (11 GiB free, 20 GiB gate unchanged): ENVIRONMENT_BLOCKED, not verified |
@@ -670,7 +678,8 @@ items and a suite without Glaive.
 The Full Search Authorization (generation plus search) needs $36.15 expected and $53.15 at the upper bounds, with caps
 of $58.46. That is more than the $30.05 left.
 
-**The L40S pilot** (design accepted in principle in the review of `2468c1aa`; **no GPU, pod or spend authorized**;
+**The L40S pilot** (design accepted in principle in the review of `2468c1aa`; AUTHORIZED 2026-11-04 as option B: one
+L40S, 55 driver minutes, new-cost hard cap $2.50, measurement only;
 [`application.json`](../../../../logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json), written
 by `tool_pilot.py application --live-position`).
 - **Frozen cells** ([`plans/tool_pilot_plan.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_pilot_plan.json),
@@ -680,8 +689,22 @@ by `tool_pilot.py application --live-position`).
   the pod receives a 4.8 MB task file (by its sha256) instead of the 700 MB pool. The plan binds the pool content
   (`be4652d7…`), its converted sources, the protocol, the design (hence `tool_verification@v2`) and the plan's cells.
 - **Kind `tool_pilot`** (`token_matched_phase.py`): claims teacher generation only. Issue refuses until the grant names
-  its cap, the L40S check admits generation, the pilot plan and task file load, and the pilot-only source admission
-  is signed, pilot-scoped and names this plan. The launch adds `the_pilot_runs_on_an_l40s` (one L40S; an A100 is
+  its cap, the L40S check admits the pilot's generation, the pilot plan and task file load, and the pilot-only source
+  admission is signed, pilot-scoped and names this plan.
+- **The generation-scoped gate.** The pilot only generates, so the check's GENERATION measurement admits it, and
+  only when the pilot runs the generation that was measured (`tool_pilot.l40s_generation_problems`). The check
+  measured 40.23 of 44.99 GiB at peak. The gate requires:
+  - the record valid and its generation measured with the 4 GiB margin;
+  - the identity files at the check's session commit `f37578a7` reproducing `848f6508…`
+    ([`audit/l40s_generation_scope.json`](../../../../logs/stages/stage-2/teacher_modes/audit/l40s_generation_scope.json));
+  - every identity file changed since then (only `selection.json`) neither a pilot input nor named anywhere on the
+    generation path;
+  - the same engine: teacher, tokenizer, chat template, `LLM(...)` construction, 8,184 context, stop ids, vLLM pins,
+    and per-mode switch and sampling.
+
+  Two allowances are declared: gpu_memory_utilization 0.80 ≤ 0.87, and the `--engine-metrics` stats flag. The
+  evaluation engine and initialization are never read for the pilot. Every other kind keeps the whole-identity gate,
+  which still refuses. The launch adds `the_pilot_runs_on_an_l40s` (one L40S; an A100 is
   never a fallback) to the runner's prechecks (unused artifact, the grant's price, all-in within the cap, the study
   identity, the bound files, the live project position, the planned volume, the bound records, the bundle).
 - **Session** (`tool_session.py --pilot`): verifies the plan, the task file and the signed admission again, then one
@@ -695,7 +718,7 @@ by `tool_pilot.py application --live-position`).
 - **Pilot-only source admission**
   ([`audit/tool_pilot_source_admission.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json)):
   Toucan SFT (Apache-2.0; 135 tasks) and Pivot Conversational (CC-BY-4.0; 68 full + 194 single-step) for this
-  pilot's measurement only, by exact task ids and sha256. PREPARED: inactive until the maintainer signs it. It is not
+  pilot's measurement only, by exact task ids and sha256. SIGNED 2026-11-04 on the maintainer's written decision. It is not
   a training admission, builds no canonical pool and authorizes no spend.
 - **Hard cap, by the runner's own arithmetic** (`tool_pilot.runner_cap`): the hard deadline is (setup 20 + transfer 5
   + the driver's minutes) x 1.25 + the 12.5-min teardown reserve + the 10-min recovery reserve; the all-in adds the

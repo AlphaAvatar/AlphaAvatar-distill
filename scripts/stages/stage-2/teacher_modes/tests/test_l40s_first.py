@@ -202,6 +202,106 @@ def test_a_margin_below_the_wanted_one_always_refuses_and_never_names_an_a100(tm
     assert [b.split(":")[0] for b in L.gate(TEACHER, root)] == ["generation"]
 
 
+# --- the generation-scoped compatibility gate (maintainer 2026-11-04) -------------------------------------------------
+
+def _engine(**over) -> dict:
+    e = {"model": "Qwen/Qwen3-4B", "revision": "r1", "chat_template_sha256": "t", "tokenizer_files_sha256": "k",
+         "engine_construction": ["**rev", "dtype='bfloat16'", "gpu_memory_utilization=args.gpu_mem_util",
+                                 "max_model_len=limit", "model=args.model"],
+         "max_model_len": 8184, "gpu_memory_utilization": 0.87, "stop_ids": [151645, 151643], "vllm_pins_sha256": "v",
+         "modes": {"H-N": {"template_kwargs": {"enable_thinking": False}, "sampling": {"temperature": 0.7}},
+                   "H-T": {"template_kwargs": {"enable_thinking": True}, "sampling": {"temperature": 0.6}}}}
+    return {**e, **over}
+
+
+def _scoped(tmp: Path, monkeypatch, **evidence) -> Path:
+    """A closed check (`_chain`) and its generation scope record, written over the identity files as they are."""
+    root, scr = _chain(tmp, monkeypatch, **evidence)
+    L.record(RUN, scr, root)
+    rec = json.loads((root / PH.CHECK_RECORD).read_text())
+    files = [{"path": f, "sha256": L._sha(root / f)} for f in PH.STUDY.identity_files]
+    (root / L.GENERATION_SCOPE).parent.mkdir(parents=True, exist_ok=True)
+    (root / L.GENERATION_SCOPE).write_text(json.dumps({
+        "schema": L.GENERATION_SCOPE_SCHEMA, "check_record": {"sha256": L._sha(root / PH.CHECK_RECORD)},
+        "check_identity": rec["identity"], "identity_files_at_check": files, "generation_at_check": _engine()}))
+    return root
+
+
+def _change(root: Path, rel: str) -> None:
+    (root / rel).unlink()
+    (root / rel).write_text('{"changed": true}\n')
+
+
+def test_a_generation_only_session_is_admitted_on_the_generation_measurement_alone(tmp_path, monkeypatch):
+    root = _scoped(tmp_path, monkeypatch)
+    sel = "configs/shared/baselines/selection.json"
+    assert L.generation_scope_problems(_engine(), (), (), root) == []
+    _change(root, sel)                                         #: what initialization reads, not generation
+    assert L.gate(TEACHER, root) == ["the check ran under another phase identity than the files hold now"]
+    assert L.generation_scope_problems(_engine(), ("configs/x.json",), (), root) == []
+    #: the changed file is refused when the session reads it, or when its generation path names it
+    assert any(f"{sel} changed since the check, and the session's generation reads it" == b
+               for b in L.generation_scope_problems(_engine(), (sel,), (), root))
+    named = tmp_path / "named.py"
+    named.write_text('PATH = "configs/shared/baselines/selection.json"\n')
+    bad = L.generation_scope_problems(_engine(), (), (str(named),), root)
+    assert bad and "its generation path names it" in bad[0]
+    #: a generation input changing is refused whatever else holds
+    _change(root, PH.PROTOCOL)
+    assert any(PH.PROTOCOL in b for b in L.generation_scope_problems(_engine(), (PH.PROTOCOL,), (), root))
+
+
+@pytest.mark.parametrize("over,why", [
+    ({"revision": "r2"}, "revision is 'r2'"), ({"chat_template_sha256": None}, "chat_template_sha256"),
+    ({"max_model_len": 40960}, "max_model_len"), ({"stop_ids": [151645]}, "stop_ids"),
+    ({"vllm_pins_sha256": "w"}, "vllm_pins_sha256"), ({"gpu_memory_utilization": 0.9}, "above the check's 0.87"),
+    ({"engine_construction": _engine()["engine_construction"] + ["enforce_eager=True"]}, "enforce_eager=True"),
+    ({"engine_construction": _engine()["engine_construction"][1:]}, "removed"),
+    ({"modes": {"H-N": {"template_kwargs": {"enable_thinking": False}, "sampling": {"temperature": 1.0}}}}, "mode H-N"),
+    ({"modes": {"T2507": {"template_kwargs": {}, "sampling": {"temperature": 0.6}}}}, "mode T2507"),
+    ({"modes": {}}, "names no mode")])
+def test_any_other_engine_refuses(tmp_path, monkeypatch, over, why):
+    root = _scoped(tmp_path, monkeypatch)
+    assert any(why in b for b in L.generation_scope_problems(_engine(**over), (), (), root))
+
+
+def test_a_smaller_memory_fraction_and_the_telemetry_flag_are_the_only_allowances(tmp_path, monkeypatch):
+    root = _scoped(tmp_path, monkeypatch)
+    e = _engine(gpu_memory_utilization=0.8,
+                engine_construction=_engine()["engine_construction"] + list(L.TELEMETRY_ONLY_ENGINE_ARGS))
+    assert L.generation_scope_problems(e, (), (), root) == []
+    assert L.engine_construction("LLM(model=m, dtype='bfloat16', **({'disable_log_stats': False} if args.engine_metrics "
+                                 "else {}))") == sorted(["model=m", "dtype='bfloat16'", *L.TELEMETRY_ONLY_ENGINE_ARGS])
+
+
+def test_the_scope_record_and_the_generation_measurement_are_both_required(tmp_path, monkeypatch):
+    root = _scoped(tmp_path / "a", monkeypatch)
+    sc = json.loads((root / L.GENERATION_SCOPE).read_text())
+    sc["identity_files_at_check"][0]["sha256"] = "0" * 64       #: a list that is not what the check ran under
+    (root / L.GENERATION_SCOPE).write_text(json.dumps(sc))
+    assert any("do not reproduce" in b for b in L.generation_scope_problems(_engine(), (), (), root))
+    (root / L.GENERATION_SCOPE).unlink()
+    assert any("does not exist" in b for b in L.generation_scope_problems(_engine(), (), (), root))
+    #: generation below the wanted margin refuses; the evaluation engine and initialization are never asked for
+    tight = _scoped(tmp_path / "b", monkeypatch, gen_used=43000)
+    assert [b.split(":")[0] for b in L.generation_scope_problems(_engine(), (), (), tight)] == ["generation"]
+    oom = _scoped(tmp_path / "c", monkeypatch, init=("oom", "oom"))
+    assert L.generation_scope_problems(_engine(), (), (), oom) == []
+    assert any("initialization: FAILED" in b for b in L.gate(TEACHER, oom))
+
+
+def test_the_committed_scope_record_is_what_the_checks_session_commit_held():
+    """The committed record re-derived from git: the identity files at the check's session commit reproduce the
+    check's identity (`generation_scope` refuses otherwise), and the engine is that commit's generation."""
+    import subprocess
+    if subprocess.run(["git", "cat-file", "-e", "f37578a7757625f6fbed08a453d290c4a2659e73"], cwd=REPO).returncode:
+        pytest.skip("the check's session commit is not in this checkout")
+    got = json.loads((REPO / L.GENERATION_SCOPE).read_text())
+    assert L.generation_scope() == got
+    assert got["generation_at_check"]["gpu_memory_utilization"] == 0.87
+    assert got["generation_measured"]["memory"]["fits_with_margin"] is True
+
+
 class FakeEngine:
     """run_battery's contract in both modes: generate streams one record per task; eval writes --out at the end."""
 

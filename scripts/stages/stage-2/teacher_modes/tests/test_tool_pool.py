@@ -254,8 +254,8 @@ class TestToucan:
         t = TS.task_of(self.row([U], sub="irrelevant", targets="", tools=[tool("ws-get_weather"), tool("loose")]),
                        known_slugs={"ws"})
         assert t["servers"] == ["ws"] and t["unattributed_tools"] == ["loose"]
-        assert t["source"]["verification"] == {"levels": ["protocol", "schema_validity", "recorded_execution",
-                                                          "tool_selection"],
+        #: the irrelevant subset's no-call check: the tool decision, and no call to have executed
+        assert t["source"]["verification"] == {"levels": ["protocol", "schema_validity", "tool_selection"],
                                                "step_gold": False, "task_success_verifier": None}
 
 

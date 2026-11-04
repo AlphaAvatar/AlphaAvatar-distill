@@ -123,6 +123,24 @@ class TestTheLevels:
         assert v.checks["tool_selection"] is None
         assert v.verified_levels() == ["protocol", "schema_validity", "recorded_execution"]
 
+    def test_an_episode_without_a_call_verifies_no_execution(self):
+        #: an answer without a call executed nothing: recorded execution is unverified, never passed -- and admission
+        #: is unchanged (None is not a failure)
+        v = _verify([{"raw": f"x{T}It is sunny.", "stop_reason": "eos", "responses": []}])
+        assert v.admitted and v.checks["recorded_execution"] is None
+        assert v.verified_levels() == ["protocol", "schema_validity"]
+        v = _verify([{"raw": f"x{T}none needed", "stop_reason": "eos"}], final=lambda ts: True, level="tool_selection")
+        assert v.admitted and v.checks["recorded_execution"] is None and v.checks["tool_selection"] is True
+
+    def test_target_tool_recall_is_its_own_level(self):
+        v = _verify([{"raw": f"x{T}" + call("get_weather", city="Paris"), "stop_reason": "eos", "responses": ["s"]},
+                     {"raw": f"x{T}done", "stop_reason": "eos"}], final=lambda ts: True, level="target_tools_called")
+        assert v.checks["target_tools_called"] is True
+        assert v.checks["tool_selection"] is None and v.checks["task_success"] is None
+        assert v.verified_levels() == ["protocol", "schema_validity", "recorded_execution", "target_tools_called"]
+        assert not _verify([{"raw": f"x{T}d", "stop_reason": "eos"}], final=lambda ts: False,
+                           level="target_tools_called").admitted
+
     def test_a_tool_selection_check_is_not_task_success(self):
         v = _verify([{"raw": f"x{T}" + call("get_weather", city="Paris"), "stop_reason": "eos", "responses": ["s"]},
                      {"raw": f"x{T}done", "stop_reason": "eos"}], final=lambda ts: True, level="tool_selection")

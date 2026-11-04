@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.teacher_modes.tool_pilot_source_admission/v1",
  "written_utc": "2026-11-04T09:58:41Z",
- "status": "PREPARED: inactive until the maintainer signs it (signature below)",
+ "status": "SIGNED by the maintainer's written decision of 2026-11-04 (signature below): the pilot's measurement only",
  "decided_by": "maintainer 2026-11-04 (review of 2468c1aa), item 5: prepare a source admission limited to the pilot, from the accepted candidates Toucan SFT and Pivot Conversational; it must not widen into a training-data admission and authorizes no paid action",
  "scope": "the tool_pilot kind's measurement only: the hybrid's teacher-native generation on exactly the tasks below (by id and sha256), its episodes measurement records by default",
  "pilot_plan": {
@@ -50,13 +50,13 @@
   "authorize a GPU, a pod or any spend (the pilot's grant does that, separately)"
  ],
  "signature": {
-  "signed_by": null,
-  "approves": null,
-  "decision": null,
-  "date": null,
-  "pilot_plan_sha256": null,
-  "tasks_sha256": null,
-  "tasks": null
+  "signed_by": "maintainer",
+  "approves": "tool_pilot measurement only",
+  "decision": "Research A Tool Pilot 正式授权（方案 B）(2026-11-04), reaffirmed 2026-11-04 in '评估标准独立复核、L40S Generation Gate 修复及 Pilot 执行', section 5: '此前 Pilot 授权保持有效 ... 按已有批准完成 Pilot-Only Source Admission 与最小 Grant Amendment' -- kind tool_pilot, Qwen/Qwen3-4B@1cfa9a72 Hybrid Thinking and Non-Thinking, 397 tasks / 794 runs, one NVIDIA L40S, 55-minute driver budget, new-cost hard cap $2.50, volume am5m373kuq; the 7 signature fields filled by the agent on that explicit written instruction",
+  "date": "2026-11-04",
+  "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
+  "tasks_sha256": "e67e8acb7050bd6e150b93af76683a2c77937e4d01c650ee398448b747b6fea1",
+  "tasks": 397
  },
  "_signature": "the maintainer signs by filling every field: signed_by 'maintainer', approves exactly 'tool_pilot measurement only', the decision quoted, the date (YYYY-MM-DD), and the pilot plan sha256, task file sha256 and task count copied from this record (admission_problems checks all of them); the agent never fills them",
  "authorizes": "nothing by itself"

@@ -2593,6 +2593,15 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "and gold, and `recorded_execution` is None when no earlier turn executed a call. The default "
             "(an episode ends on an answer) is unchanged. NO CUDA SURFACE.",
      }),
+    ("0b96ed38f608bed5d48632b05b0fa67ecc2ad29a",
+     "Metric review: verifier levels report what they check (maintainer 2026-11-04)",
+     {
+        "src/aadistill/data/tool_calls.py":
+            "`verify_episode`: `recorded_execution` is None for an episode that executed no call (a vacuous True "
+            "before); new final level `target_tools_called` (recall of a target tool set, not tool-selection "
+            "accuracy) in `LEVELS` / `FINAL_LEVELS`. Admission unchanged: a level is still admitted unless False. "
+            "NO CUDA SURFACE.",
+     }),
 )
 
 

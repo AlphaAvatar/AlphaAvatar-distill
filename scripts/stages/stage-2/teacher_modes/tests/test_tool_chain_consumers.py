@@ -104,7 +104,7 @@ def test_the_plan_bounds_every_cell_and_admission_counts_by_level(chain):
     census = chain["admitted"]["H-T"]["census"]
     assert census["training|tool_selection"]["admitted"] == 6
     assert census["training|tool_selection"]["admitted_by_verification"] == {
-        "protocol+schema_validity+recorded_execution+tool_selection": 6}
+        "protocol+schema_validity+recorded_execution+target_tools_called": 6}   #: calls_tools checks recall only
     assert {d["doc_id"].split("|")[1] for d in chain["admitted"]["H-N"]["documents"]} == {"H-N"}
 
 

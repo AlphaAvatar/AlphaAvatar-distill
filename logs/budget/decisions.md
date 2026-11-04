@@ -15547,3 +15547,40 @@ on a paid pod.
     implementation refuse, and so does an episode sealed from another round input.
 - **Not authorized and not done.** Signing the source admission, the grant amendment, issue, launch, a pod, any spend.
 - **Revisit when:** the maintainer's authorization decision on the $2.50 pilot.
+
+
+## 2026-11-04 (UTC) — Maintainer: metric review, the L40S generation-scoped gate, the pilot authorized (option B)
+
+- **Context.** The pilot's issue path refused before signing: `l40s_check.gate` binds Research A v1's whole phase
+  identity (`848f6508…`, 19 files), and `configs/shared/baselines/selection.json` changed on 2026-11-03 (forward
+  baseline v2), so every A-TM generation kind refused. Separately, the maintainer required every accuracy, pass rate,
+  task success, pass@k and pass^k to take its benchmark's official definition, and an audit of the current scorers.
+- **Decision (maintainer).** (1) A strict generation-scoped compatibility gate for the pilot, in the experiment layer,
+  instead of re-running the L40S check: historical record, config and evidence unmodified; the generation measurement
+  re-verified; the pilot's real generation dependencies compared; the forward-baseline change shown not to reach the
+  generation path; evaluation engine and initialization never carried over. (2) The pilot authorization stands:
+  `tool_pilot`, the hybrid in both modes, 397 tasks / 794 runs, one L40S, 55 driver minutes, new-cost hard cap $2.50,
+  am5m373kuq; sign the pilot-only admission and apply the minimal grant amendment. (3) A reusable metric contract;
+  benchmark metrics never redefined; internal metrics under their own names; no SHORTFALL approved.
+- **Implemented.**
+  - `l40s_check.generation_scope_problems` + `GENERATION_SCOPE` (`logs/.../audit/l40s_generation_scope.json`, written
+    from git by `l40s_check.py generation-scope`): the 19 identity files at the check's session commit `f37578a7`
+    reproduce `848f6508…` exactly; since then only selection.json changed; it is no pilot input and no module of the
+    generation path (the runner, the generation driver, the env factory, the verifier and core parser with their import
+    closures, the session's own modules: 49 files) names it; the engine equals the check's (Qwen/Qwen3-4B@1cfa9a72, the
+    teacher identity's tokenizer and template, `LLM(model, dtype='bfloat16', max_model_len=8184, …)`, stop ids, vLLM
+    pins, both modes' switch and sampling) with two declared allowances: gpu_memory_utilization 0.80 ≤ the check's
+    0.87, and `--engine-metrics`' stats-logging flag. The check measured generation at 40.23 of 44.99 GiB (4.76 free).
+    `gate` (whole identity) unchanged and still refuses every other kind. 7/7 mutations of the gate caught.
+  - Metric review: `verify_episode` no longer reports `recorded_execution: True` for an episode without a call (None);
+    `calls_tools` reports `target_tools_called` (recall), not `tool_selection`; `contains_all` -> task_success removed
+    (no source registers it); `tool_pilot.report` v3 names first-candidate admission rate and admission yield of up to
+    two candidates (not pass@2), every count, per-level pass/fail/unverified and coverage. `score_battery` and
+    `eval_set_scoring` are not changed: their bytes bind Research A v1's `evaluation_identity.json`, so the contract
+    defines each pooled `rate`'s parts and reads them from the rows. Admission verdicts and `tool_verification@v2`
+    unchanged. `docs/shared/METRIC_CONTRACT.md`; AGENTS.md P10.3.
+  - The admission signed and the grant amended exactly as proposed (`session_hard_caps_usd.tool_pilot = 2.5`, the
+    `tool_pilot` block, scope / amendments / authorizes appended); nothing else in the grant changed.
+- **Not authorized.** Formal tool generation, packed full search, training, formal evaluation, a second paid session,
+  a budget or cap increase, a SHORTFALL approval, a merge; the generation-scoped gate covers `tool_pilot` only.
+- **Revisit when:** the pilot's closeout, or a decision to give another generation-only kind the same gate.

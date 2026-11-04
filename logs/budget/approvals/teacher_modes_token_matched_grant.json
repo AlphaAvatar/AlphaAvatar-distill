@@ -13,7 +13,8 @@
   "supplement": 0.0,
   "inputs": 2.65,
   "search": 41.41,
-  "train_a1": 14.1
+  "train_a1": 14.1,
+  "tool_pilot": 2.5
  },
  "project_cumulative_cap_usd": 868.0,
  "gpus": {
@@ -37,7 +38,7 @@
    "created_utc": "2026-11-01T12:55:01Z"
   }
  },
- "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them",
+ "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them || AMENDED 2026-11-04: the L40S tool pilot -- kind tool_pilot through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --pilot) on the frozen pilot plan 0a1c831fdfe4... and task file e67e8acb7050..., measurement only, one L40S on am5m373kuq, hard cap $2.50, inside this grant's remaining envelope",
  "retries": "ordinary pre-generation engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); sealed records are never regenerated; a deterministic failure is never retried unchanged",
  "application": {
   "path": "logs/budget/applications/research_a_tm_2026-10-31/proposal.json"
@@ -48,7 +49,7 @@
   "Research A v1's frozen identity or grant as authority for any of this",
   "Research B"
  ],
- "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind",
+ "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind; and one tool_pilot artifact, measurement only, capped by its kind",
  "_session_hard_caps": "supplement 0: done, closed for new work. inputs: the calibration top-up and the state evaluation's generation ($2.65). search: the hybrid D4 full search ($41.41). train_a1: A1's two seeds trained and evaluated in turn ($7.05 each). A retry of a kind draws on the same envelope; the phase total never exceeds the ceiling.",
  "phase_a1": {
   "decided_utc": "2026-11-01",
@@ -92,6 +93,38 @@
    "previous_session_hard_caps_usd": {
     "supplement": 63.76
    }
+  },
+  {
+   "utc": "2026-11-04",
+   "by": "maintainer decision 'Research A Tool Pilot 正式授权（方案 B）' (2026-11-04), reaffirmed the same day",
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1
+   },
+   "previous_scope_sha256": "ee8723d727c4580fa87f0dee9cb19ce2ffb4d3b625c52496aa03e7a6b4337d7a",
+   "added": "kind tool_pilot and its block"
   }
- ]
+ ],
+ "tool_pilot": {
+  "approves": "tool_pilot measurement only",
+  "granted_by": "maintainer",
+  "decision": "Research A Tool Pilot 正式授权（方案 B）(2026-11-04), reaffirmed 2026-11-04 in '评估标准独立复核、L40S Generation Gate 修复及 Pilot 执行', section 5: '此前 Pilot 授权保持有效 ... 按已有批准完成 Pilot-Only Source Admission 与最小 Grant Amendment' -- kind tool_pilot, Qwen/Qwen3-4B@1cfa9a72 Hybrid Thinking and Non-Thinking, 397 tasks / 794 runs, one NVIDIA L40S, 55-minute driver budget, new-cost hard cap $2.50, volume am5m373kuq; the 7 signature fields filled by the agent on that explicit written instruction",
+  "date": "2026-11-04",
+  "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
+  "tasks_sha256": "e67e8acb7050bd6e150b93af76683a2c77937e4d01c650ee398448b747b6fea1",
+  "source_admission": "logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json",
+  "hard_cap_usd": 2.5,
+  "driver_minutes": 55.0,
+  "gpu": "NVIDIA L40S",
+  "network_volume": "am5m373kuq",
+  "ceiling_usd_at_amendment": 79.5289,
+  "draws_on": "this grant's remaining envelope; the ceiling, the per-session cap, the project cap and the card list unchanged",
+  "kind": "tool_pilot (teacher_generation only; never formal, training or evaluation)",
+  "requires": [
+   "the pilot-only source admission signed (tool_pilot.admission_problems)",
+   "issue, launch and pod checks as the application lists them"
+  ]
+ }
 }

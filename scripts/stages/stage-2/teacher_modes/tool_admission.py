@@ -10,7 +10,8 @@ frozen order, so the documents and items come out in the order the session walke
 
 Every episode the teacher generated (``run_battery.run_episodes`` in ``generate`` mode, so each turn keeps the
 engine's own prompt and output token ids) goes through `tool_episodes.verify` -- protocol, schema validity, recorded
-execution, and step gold / tool selection / task success where the task carries that verifier, on every turn -- and
+execution where a call was executed, and step gold / target-tool recall / tool selection where the task carries that
+verifier, on every turn (docs/shared/METRIC_CONTRACT.md defines each level) -- and
 is admitted WHOLE or not at all. An admitted episode becomes, by its task's split:
 
 * training / validation -> one token-in/token-out document per turn (`tool_documents.jsonl`), targets = the

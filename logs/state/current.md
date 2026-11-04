@@ -9,6 +9,22 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
+**RESEARCH A TOOL PILOT: AUTHORIZED AND RUNNING (2026-11-04; maintainer "Research A Tool Pilot 正式授权（方案 B）", reaffirmed in "评估标准独立复核、L40S Generation Gate 修复及 Pilot 执行"). One L40S, 55 driver minutes, new-cost hard cap $2.50, am5m373kuq; measurement only.**
+The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)
+section 8. Decision record: `logs/budget/decisions.md` 2026-11-04 (metric review, generation-scoped gate).
+- **Authorized:**
+  - the pilot-only source admission signed and the grant amended exactly as proposed;
+  - the pilot admitted by the maintainer's generation-scoped L40S gate (`l40s_check.generation_scope_problems`,
+    `audit/l40s_generation_scope.json`).
+  - The whole-phase gate still refuses every other A-TM generation kind: forward baseline v2 changed
+    `selection.json`.
+- **Metric contract:** `docs/shared/METRIC_CONTRACT.md` (AGENTS.md P10.3). The tool-call verifier reports what it
+  checked (`recorded_execution` None without a call; `calls_tools` is `target_tools_called`, recall). The pilot
+  reports teacher data admission rates, never a benchmark score.
+- **Not authorized:** formal tool generation, packed full search, training, formal evaluation, a second paid
+  session, a SHORTFALL approval, a merge. The pilot's state and results are recorded in its run directory after
+  closeout.
+
 **RESEARCH A PACKED ROUND: PREPARATION_BLOCKED (2026-11-04; maintainer brief "Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备"). Code, identities, tests, $0 audits, the new full-search chain, the training plans and the bounded tool-generation plan are done; nothing searched, trained, generated or evaluated (only candidate-source and decontamination-reference files downloaded, gitignored); no pod; no cap raised.**
 The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)
 (design `configs/stages/stage-2/teacher_modes/packed_round_design.json`). Decision record: `logs/budget/decisions.md`

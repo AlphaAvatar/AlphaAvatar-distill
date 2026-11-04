@@ -62,10 +62,25 @@ margin always refuses (maintainer, 2026-10-29: no exception is approved, and
 none can be declared from here); it is answered by a protocol-neutral memory
 optimization and a new check, never by another card. An exception, if the
 maintainer ever approves one, is a new mechanism citing that decision.
+
+``generation_scope_problems`` is the maintainer's 2026-11-04 decision for a
+session that only GENERATES (the tool pilot): instead of the whole phase
+identity -- which also binds what initialization reads, the forward baseline
+among it -- it admits the session when the record is valid and its
+``generation`` was measured with the margin, every identity file changed since
+the check is neither read by the session's generation nor named on its
+generation path, and the session's engine is the one the check measured (the
+same teacher, tokenizer, chat template, engine construction, context, stop ids,
+vLLM pins, template switch and sampling per mode; a memory fraction at most the
+check's). ``generation_scope`` writes the record it reads (`GENERATION_SCOPE`):
+the identity files as the check's session commit held them, which must
+reproduce the record's identity, and the engine that commit ran. The evaluation
+engine's and initialization's measurements are never carried over to it.
 """
 from __future__ import annotations
 
 import argparse
+import ast
 import copy
 import hashlib
 import json
@@ -608,26 +623,26 @@ def record(run_id: str, scr: Path, repo: Path = REPO) -> dict:
     return rec
 
 
-def gate(operations, repo: Path = REPO) -> list[str]:
-    """Why the committed record does NOT admit a session that runs `operations` (empty: it does). Fail-closed:
-    anything unmeasured, failed, unverifiable or not this phase's refuses."""
-    from stages.teacher_modes import phase as PH
+def record_problems(repo: Path = REPO) -> tuple[list[str], dict | None, dict | None]:
+    """``(problems, record, verdict)``: the committed record's own validity, FAIL-CLOSED -- the check config as it is
+    now, the run's committed check authorization and shared closeout, the committed evidence hashing to the record and
+    re-deriving exactly its verdict and the pod's report. ``verdict`` is the re-derivation, None where the evidence
+    could not be read; `gate` and `generation_scope_problems` both start here."""
     repo = Path(repo)
+    from stages.teacher_modes import phase as PH
     if not (repo / RECORD).is_file():
-        return [f"{RECORD} does not exist: the L40S check (kind check) and its dev-box record come first"]
+        return [f"{RECORD} does not exist: the L40S check (kind check) and its dev-box record come first"], None, None
     rec = json.loads((repo / RECORD).read_text())
     if rec.get("schema") != f"{SCHEMA}_record":
-        return [f"{RECORD} is not a check record"]
+        return [f"{RECORD} is not a check record"], None, None
     bad = []
     if rec.get("config_sha256") != _sha(repo / CONFIG):
         bad.append("the check config is not the one the check ran under")
-    if rec.get("identity") != PH.SE.identity_hash(PH.STUDY, repo):
-        bad.append("the check ran under another phase identity than the files hold now")
     try:
         run = repo / PH.STUDY.run_dir(str(rec.get("run_id") or ""))
         auth = PH.PhaseAuthorization.load(repo / PH.STUDY.authorization_path(rec["run_id"]))
     except Exception as exc:  # noqa: BLE001 -- every reason is a refusal
-        return bad + [f"run {rec.get('run_id')!r} has no committed check authorization ({exc})"]
+        return bad + [f"run {rec.get('run_id')!r} has no committed check authorization ({exc})"], rec, None
     if (auth.stage_conditions or {}).get("kind") != "check" or auth.authorization_id != rec.get("authorization_id"):
         bad.append(f"run {rec['run_id']}'s committed authorization is not the check the record names")
     out = _read(run / "closeout", "outcome") or {}
@@ -637,7 +652,7 @@ def gate(operations, repo: Path = REPO) -> list[str]:
         bad.append(f"run {rec['run_id']}'s shared closeout did not verify this evidence archive and its verdict")
     copy = run / EVIDENCE_COPY
     if not rec.get("evidence_files") or {q.name: _sha(q) for q in sorted(copy.glob("*.json"))} != rec["evidence_files"]:
-        return bad + ["the committed evidence is not the evidence the record hashed"]
+        return bad + ["the committed evidence is not the evidence the record hashed"], rec, None
     run_doc = _read(copy, "run") or {}
     if ((run_doc.get("contract") or {}).get("identity"), (run_doc.get("contract") or {}).get("authorization_id"),
             run_doc.get("config_sha256")) != (rec.get("identity"), rec.get("authorization_id"), rec.get("config_sha256")):
@@ -647,6 +662,12 @@ def gate(operations, repo: Path = REPO) -> list[str]:
         bad.append("the record's verdict is not the one its evidence derives")
     if v != _read(copy, "report"):
         bad.append("the pod's verdict and the dev box's re-derivation disagree")
+    return bad, rec, v
+
+
+def operation_problems(v: dict, operations) -> list[str]:
+    """Each of ``operations`` MEASURED in the re-derived verdict with the wanted free memory."""
+    bad = []
     for op in operations:
         o = v["operations"].get(op) or {}
         mem = o.get("memory") or {}
@@ -656,6 +677,185 @@ def gate(operations, repo: Path = REPO) -> list[str]:
             bad.append(f"{op}: free memory {mem.get('free_gib')} GiB, not the {v['free_memory_wanted_gib']} GiB wanted "
                        "(a protocol-neutral memory optimization and a new check; no exception is approved)")
     return bad
+
+
+def gate(operations, repo: Path = REPO) -> list[str]:
+    """Why the committed record does NOT admit a session that runs `operations` (empty: it does). Fail-closed:
+    anything unmeasured, failed, unverifiable or not this phase's refuses -- the record's validity
+    (`record_problems`), the WHOLE phase identity as the files hold it now, and every operation measured."""
+    from stages.teacher_modes import phase as PH
+    repo = Path(repo)
+    bad, rec, v = record_problems(repo)
+    if rec is not None and rec.get("identity") != PH.SE.identity_hash(PH.STUDY, repo):
+        bad.insert(0, "the check ran under another phase identity than the files hold now")
+    return bad + (operation_problems(v, operations) if v is not None else [])
+
+
+# ---- the generation-scoped compatibility gate ---------------------------------------------------------------
+
+#: MAINTAINER DECISION 2026-11-04 ('评估标准独立复核、L40S Generation Gate 修复及 Pilot 执行', section 4): a session
+#: that only GENERATES is admitted by the check's generation measurement when the generation it runs is the one the
+#: check measured -- not by the whole phase identity, which also binds what initialization and the evaluation engine
+#: read. The record, the check config and the evidence stay as they are; this record adds what the check ran under.
+GENERATION_SCOPE = "logs/stages/stage-2/teacher_modes/audit/l40s_generation_scope.json"
+GENERATION_SCOPE_SCHEMA = "aadistill.stage2.teacher_modes.l40s_generation_scope/v1"
+RUNNER = "scripts/stages/stage-0/calibration_volume/run_battery.py"
+TEACHER_SESSION = "scripts/stages/stage-2/teacher_modes/teacher_session.py"
+TEACHER_IDENTITY = "configs/stages/stage-2/teacher_modes/teacher_identity.json"
+VLLM_PINS = "requirements-vllm.txt"
+#: the one engine-construction argument the runner adds for telemetry only: --engine-metrics turns vLLM's stats
+#: logging on (run_battery.py: "the generation is the same either way"); any other difference refuses
+TELEMETRY_ONLY_ENGINE_ARGS = ("**{'disable_log_stats': False} if args.engine_metrics else {}",)
+#: the engine fields that must equal the check's (the memory fraction is compared apart: at most the check's)
+ENGINE_EQUAL = ("model", "revision", "chat_template_sha256", "tokenizer_files_sha256", "max_model_len", "stop_ids",
+                "vllm_pins_sha256")
+
+
+def engine_construction(source: str) -> list[str]:
+    """The arguments of the runner's engine construction (every ``LLM(...)`` call), as source text, sorted: dtype,
+    the context the engine is sized to, the memory fraction, the revision and anything else passed to it."""
+    out = []
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "LLM":
+            out += [ast.unparse(k) for k in node.keywords]
+    return sorted(out)
+
+
+def generation_engine(*, model: str, revision: str, modes: dict, session_limit: int, gpu_memory_utilization: float,
+                      stop_ids, runner_source: str, teacher_identity: dict, vllm_pins: bytes) -> dict:
+    """One generation operation's engine, as the generation-scoped gate compares it: the teacher (model, revision,
+    and the tokenizer and chat template the teacher identity binds for exactly that model and revision), the engine
+    (the runner's construction arguments, the context it is sized to, its memory fraction, the stop ids, the vLLM
+    pins) and per mode the template switch and the sampling."""
+    same = (teacher_identity.get("model"), teacher_identity.get("revision")) == (model, revision)
+    return {"model": model, "revision": revision,
+            "chat_template_sha256": teacher_identity.get("chat_template_sha256") if same else None,
+            "tokenizer_files_sha256": teacher_identity.get("tokenizer_files_sha256") if same else None,
+            "engine_construction": engine_construction(runner_source), "max_model_len": int(session_limit),
+            "gpu_memory_utilization": float(gpu_memory_utilization), "stop_ids": [int(x) for x in stop_ids],
+            "vllm_pins_sha256": hashlib.sha256(vllm_pins).hexdigest(),
+            "modes": {m: {"template_kwargs": dict(v["template_kwargs"]), "sampling": dict(v["sampling"])}
+                      for m, v in sorted(modes.items()) if not m.startswith("_")}}
+
+
+def _git_show(repo: Path, commit: str, path: str) -> bytes:
+    r = subprocess.run(["git", "show", f"{commit}:{path}"], cwd=repo, capture_output=True)
+    if r.returncode:
+        raise SystemExit(f"{path} at {commit[:12]}: {r.stderr.decode(errors='replace').strip()}")
+    return r.stdout
+
+
+def _constant(source: str, name: str):
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+            return ast.literal_eval(node.value)
+    raise SystemExit(f"{name} is not assigned in the source")
+
+
+def check_generation_engine(commit: str, repo: Path = REPO) -> dict:
+    """The engine the check's generation phase ran, from its session commit's files: `teacher_session.run_stage` on
+    generation_protocol.json (teacher, per-mode template switch and official sampling, session limit, stop ids) with
+    teacher_session's own memory fraction, through that commit's runner and vLLM pins."""
+    proto = json.loads(_git_show(repo, commit, PROTOCOL))
+    gpu = _constant(_git_show(repo, commit, TEACHER_SESSION).decode(), "GENERATION_GPU_MEMORY_UTILIZATION")
+    return generation_engine(model=proto["teacher"]["model"], revision=proto["teacher"]["revision"],
+                             modes=proto["modes"], session_limit=proto["execution"]["session_limit"],
+                             gpu_memory_utilization=gpu, stop_ids=proto["teacher"]["stop_ids"],
+                             runner_source=_git_show(repo, commit, RUNNER).decode(),
+                             teacher_identity=json.loads(_git_show(repo, commit, TEACHER_IDENTITY)),
+                             vllm_pins=_git_show(repo, commit, VLLM_PINS))
+
+
+def generation_scope(repo: Path = REPO) -> dict:
+    """The record the generation-scoped gate reads, derived at $0 from git: the phase identity's files as the check's
+    session commit held them (they must reproduce the record's identity exactly), the engine its generation phase
+    ran (`check_generation_engine`) and the generation measurement itself. Refuses an invalid check record."""
+    from stages.teacher_modes import phase as PH
+    repo = Path(repo)
+    bad, rec, v = record_problems(repo)
+    if bad or v is None:
+        raise SystemExit(f"the check record is not valid: {bad}")
+    session = json.loads((repo / PH.STUDY.run_dir(rec["run_id"]) / "runtime" / "session.json").read_text())
+    commit = session["setup_environment"]["SESSION_COMMIT"]
+    files = [{"path": f, "sha256": hashlib.sha256(_git_show(repo, commit, f)).hexdigest()}
+             for f in PH.STUDY.identity_files]
+    if PH.SE.sha256_json({"study": PH.STUDY.key, "files": files}) != rec["identity"]:
+        raise SystemExit(f"the identity files at {commit[:12]} do not reproduce the check's identity")
+    return {"schema": GENERATION_SCOPE_SCHEMA,
+            "decided_by": "maintainer 2026-11-04 ('评估标准独立复核、L40S Generation Gate 修复及 Pilot 执行', section 4): "
+                          "a strict generation-scoped compatibility gate for the tool pilot instead of re-running the "
+                          "whole L40S check; the check record, its config and its evidence are not modified",
+            "check_record": {"path": RECORD, "sha256": _sha(repo / RECORD)}, "check_run": rec["run_id"],
+            "check_session_commit": commit, "check_identity": rec["identity"],
+            "identity_files_at_check": files,
+            "generation_at_check": check_generation_engine(commit, repo),
+            "generation_measured": v["operations"]["generation"],
+            "_rule": "generation_scope_problems: the record valid and its generation MEASURED with the wanted margin; "
+                     "these files reproduce the check's identity; every identity file changed since is neither an "
+                     "input the session binds nor named by any module of its generation path; the session's engine "
+                     "equals generation_at_check on every ENGINE_EQUAL field, the runner's construction arguments and "
+                     "each mode's template switch and sampling, with a memory fraction at most the check's. The "
+                     "evaluation engine's and initialization's measurements are never read",
+            "authorizes": "nothing"}
+
+
+def engine_differences(check: dict, session: dict) -> list[str]:
+    """Why ``session``'s engine is not the generation the check measured (empty: it is)."""
+    out = [f"{k} is {session.get(k)!r}, the check measured {check.get(k)!r}" for k in ENGINE_EQUAL
+           if check.get(k) is None or session.get(k) != check.get(k)]
+    have, want = set(session.get("engine_construction") or []), set(check.get("engine_construction") or [])
+    extra, missing = sorted(have - want - set(TELEMETRY_ONLY_ENGINE_ARGS)), sorted(want - have)
+    if extra or missing or not want:
+        out.append(f"the runner constructs its engine with {extra} added and {missing} removed")
+    got, cap = session.get("gpu_memory_utilization"), check.get("gpu_memory_utilization")
+    if got is None or cap is None or got > cap:
+        out.append(f"gpu_memory_utilization {got} above the check's {cap}: the measured peak no longer bounds it")
+    for m, cfg in (session.get("modes") or {}).items():
+        if (check.get("modes") or {}).get(m) != cfg:
+            out.append(f"mode {m}: {cfg} is not the check's {(check.get('modes') or {}).get(m)}")
+    if not session.get("modes"):
+        out.append("the session names no mode")
+    return out
+
+
+def generation_scope_problems(session_engine: dict, session_inputs, path_files, repo: Path = REPO) -> list[str]:
+    """Why the committed check does NOT admit a GENERATION-ONLY session (empty: it does). Fail-closed:
+
+    * the record valid (`record_problems`) and its ``generation`` MEASURED with the wanted margin; the evaluation
+      engine and initialization are not this session's operations and are never read for it;
+    * `GENERATION_SCOPE` this record's, its identity files reproducing the check's phase identity exactly;
+    * every identity file whose content changed since the check is neither one of ``session_inputs`` (the records and
+      files the session's generation reads) nor named -- by its file name -- in any of ``path_files`` (the modules of
+      the session's generation path: the runner and the generation driver with their import closures, the session's
+      own modules);
+    * ``session_engine`` the engine the check measured (`engine_differences`)."""
+    from stages.teacher_modes import phase as PH
+    repo = Path(repo)
+    bad, rec, v = record_problems(repo)
+    if v is None:
+        return bad
+    bad += operation_problems(v, ("generation",))
+    p = repo / GENERATION_SCOPE
+    if not p.is_file():
+        return bad + [f"{GENERATION_SCOPE} does not exist (l40s_check.py generation-scope writes it)"]
+    sc = json.loads(p.read_text())
+    if sc.get("schema") != GENERATION_SCOPE_SCHEMA:
+        return bad + [f"{GENERATION_SCOPE} is not a generation scope record"]
+    if (sc.get("check_record") or {}).get("sha256") != _sha(repo / RECORD) or sc.get("check_identity") != rec["identity"]:
+        bad.append("the generation scope record was written for another check record")
+    files = sc.get("identity_files_at_check") or []
+    if PH.SE.sha256_json({"study": PH.STUDY.key, "files": files}) != rec["identity"]:
+        return bad + ["the generation scope's identity files do not reproduce the check's phase identity"]
+    texts = {f: (repo / f).read_text(errors="replace") for f in path_files}
+    for f in (x["path"] for x in files if _sha(repo / x["path"]) != x["sha256"]):
+        if f in set(session_inputs):
+            bad.append(f"{f} changed since the check, and the session's generation reads it")
+            continue
+        users = sorted(q for q, t in texts.items() if Path(f).name in t)
+        if users:
+            bad.append(f"{f} changed since the check, and its generation path names it: {users[:4]}")
+    return bad + [f"generation engine: {x}" for x in engine_differences(sc.get("generation_at_check") or {},
+                                                                         session_engine)]
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -677,6 +877,8 @@ def build_parser() -> argparse.ArgumentParser:
     rec = sub.add_parser("record")
     rec.add_argument("--run-id", required=True)
     rec.add_argument("--scr", required=True, help="the check launch's scratch (its store holds the evidence archive)")
+    gs = sub.add_parser("generation-scope", help="write the generation-scoped gate's record (git, $0)")
+    gs.add_argument("--write", default=GENERATION_SCOPE)
     return ap
 
 
@@ -694,6 +896,11 @@ def main(argv=None) -> int:
             _write(a.out, f"train_{a.mode}_error", {"out_of_memory": oom, "error": str(exc)[:2000],
                                                     "traceback": traceback.format_exc()[-3000:]})
             return IN.OOM_EXIT if oom else 1
+    if a.cmd == "generation-scope":
+        doc = generation_scope()
+        (REPO / a.write).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
+        print(json.dumps({k: doc[k] for k in ("check_run", "check_session_commit", "check_identity")}, indent=1))
+        return 0
     if a.cmd == "record":
         rec = record(a.run_id, Path(a.scr))
         from stages.teacher_modes import phase as PH

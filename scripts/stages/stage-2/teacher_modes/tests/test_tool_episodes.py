@@ -20,7 +20,7 @@ def task(**over):
          "split": "training", "tools": TOOLS, "messages": [{"role": "user", "content": "weather in Paris?"}],
          "backend": {"kind": "replay", "table": {json.dumps({"name": "get_weather", "arguments": {"city": "Paris"}},
                                                             sort_keys=True, separators=(",", ":")): "sunny"}},
-         "max_turns": 4, "final_check": {"kind": "contains_all", "values": ["sunny"]}}
+         "max_turns": 4, "final_check": {"kind": "calls_tools", "values": ["get_weather"]}}
     t.update(over)
     return t
 
@@ -99,6 +99,37 @@ def test_an_off_script_call_ends_the_episode_and_is_refused():
     e = eps["tc1-test"]
     assert e["end"] == "episode_done" and e["env"].off_script
     assert TE.verify(e["task"], e["turns"], thinking=True).checks["recorded_execution"] is False
+
+
+class TestLevelsReportWhatTheyCheck:
+    """The 2026-11-04 metric review: each level names what it verified; admission is unchanged."""
+
+    def test_target_tools_called_is_recall_not_tool_selection(self):
+        eps, _ = run([task()], ["x</think>\n" + CALL, "y</think>\nIt is sunny."])
+        v = TE.verify(eps["tc1-test"]["task"], eps["tc1-test"]["turns"], thinking=True)
+        assert v.admitted and v.checks["target_tools_called"] is True
+        assert v.checks["tool_selection"] is None and v.checks["task_success"] is None
+        assert TE.verification_levels(task()) == ["protocol", "schema_validity", "recorded_execution",
+                                                  "target_tools_called"]
+        assert TE.FINAL_CHECK_LEVELS == {"no_call": "tool_selection", "calls_tools": "target_tools_called"}
+
+    def test_a_no_call_task_verifies_no_execution(self):
+        t = task(final_check={"kind": "no_call"})
+        eps, _ = run([t], ["x</think>\nNo tool is needed: it is a greeting."])
+        v = TE.verify(t, eps["tc1-test"]["turns"], thinking=True)
+        assert v.admitted and v.checks["tool_selection"] is True and v.checks["recorded_execution"] is None
+        assert TE.verification_levels(t) == ["protocol", "schema_validity", "tool_selection"]
+        #: a gold that allows only the empty call set on every turn forbids calls the same way
+        assert "recorded_execution" not in TE.verification_levels(task(final_check={"kind": "none"},
+                                                                       gold_steps=[[[]]], max_turns=1))
+        assert "recorded_execution" in TE.verification_levels(task(final_check={"kind": "none"}))
+
+    def test_a_substring_check_is_not_task_success(self):
+        t = task(final_check={"kind": "contains_all", "values": ["sunny"]})
+        with pytest.raises(TE.ToolTaskError, match="not implemented"):
+            TE.final_check_level(t)
+        with pytest.raises(TE.ToolTaskError, match="not implemented"):
+            TE.verify(t, [{"raw": "x</think>\nIt is sunny.", "stop_reason": "eos"}], thinking=True)
 
 
 def test_later_user_turns_arrive_after_an_answer():

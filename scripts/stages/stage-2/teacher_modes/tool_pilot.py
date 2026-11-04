@@ -28,8 +28,10 @@ generates or spends.
   ids and sha256; never a training admission, never the canonical pool, never a spend;
 * `GpuSampler` / `engine_telemetry` -- peak VRAM from nvidia-smi, and the engine's own lines and summary (model load,
   KV cache size and concurrency, preemptions, KV-cache usage and throughput where the engine reports them);
-* `report` -- pass rates per mode, split, category and shape (first and second candidates apart), supervised tokens
-  per admitted episode, schema_arguments' supply per split, and the telemetry, beside the plan's priors.
+* `report` -- the teacher data admission measurements (`METRICS`: first-candidate admission rate, admission yield of
+  up to two candidates, each verifier level's pass rate, verification coverage; never a benchmark score) per mode,
+  split, category, shape and source, supervised tokens and scored positions, schema_arguments' supply per split, the
+  formal cells' projection, and the telemetry, beside the plan's priors.
 """
 from __future__ import annotations
 
@@ -193,6 +195,63 @@ def pilot_identity(study_identity: str, plan_path: Path = PLAN, *, protocol_path
              "protocol_sha256": sha(protocol_path or TGP.PROTOCOL), "verification_version": TE.VERIFICATION_VERSION,
              "implementation_sha256": {f: sha(Path(root) / f) for f in IMPLEMENTATION}}
     return {"sha256": hashlib.sha256(canonical(parts).encode()).hexdigest(), "parts": parts}
+
+
+# --- the L40S generation-scoped gate -----------------------------------------------------------------------------------
+
+#: the pilot's own modules on its generation path, read as they are (their imports include the authorization's
+#: governance, which feeds the engine nothing: the engine command is built from the protocol, the plan and the tasks)
+SESSION_MODULES = ("scripts/stages/stage-2/teacher_modes/tool_session.py",
+                   "scripts/stages/stage-2/teacher_modes/tool_pilot.py",
+                   "scripts/stages/stage-2/teacher_modes/tool_generation_plan.py")
+
+
+def generation_engine(root: Path = REPO) -> dict:
+    """The engine the pilot's generation runs (`l40s_check.generation_engine`): the hybrid lineage of the tool
+    generation protocol -- its teacher, per-mode template switch and sampling -- through `tool_session.mode_args`'
+    memory fraction and `generation_driver.run_group`'s session limit, in this tree's runner and vLLM pins."""
+    from stages.teacher_modes import l40s_check as LC
+    root = Path(root)
+    proto = json.loads((root / TGP.PROTOCOL.relative_to(REPO)).read_text())
+    li, ex = proto["lineages"][LINEAGE], proto["execution"]
+    return LC.generation_engine(model=li["model"], revision=li["revision"], modes=li["modes"],
+                                session_limit=ex["session_limit"], gpu_memory_utilization=ex["gpu_memory_utilization"],
+                                stop_ids=ex["stop_ids"], runner_source=(root / LC.RUNNER).read_text(),
+                                teacher_identity=json.loads((root / LC.TEACHER_IDENTITY).read_text()),
+                                vllm_pins=(root / LC.VLLM_PINS).read_bytes())
+
+
+def generation_inputs(root: Path = REPO) -> tuple[str, ...]:
+    """The files the pilot's generation reads: the kind's bound records, its task file, the teacher identity (its
+    tokenizer and template), the runner and the vLLM pins."""
+    from stages.teacher_modes import l40s_check as LC
+    from stages.teacher_modes import token_matched_phase as TM
+    plan = Path(root) / TM.KIND_RECORDS[TM.TOOL_PILOT_KIND][2]
+    tasks = (json.loads(plan.read_text()).get("tasks_file") or {}).get("path") if plan.is_file() else None
+    return tuple(TM.KIND_RECORDS[TM.TOOL_PILOT_KIND]) + ((tasks,) if tasks else ()) + (
+        LC.TEACHER_IDENTITY, LC.RUNNER, LC.VLLM_PINS)
+
+
+def generation_path(root: Path = REPO) -> tuple[str, ...]:
+    """The modules of the pilot's generation path: the runner, the generation driver, the environment factory the
+    protocol names, the verifier and the core parser (`IMPLEMENTATION` but the session driver) with their import
+    closures (`aadistill.governance.closure.walk`), and the pilot's own `SESSION_MODULES`."""
+    import importlib.util
+    from aadistill.governance.closure import walk
+    root = Path(root)
+    proto = json.loads((root / TGP.PROTOCOL.relative_to(REPO)).read_text())
+    env = importlib.util.find_spec(proto["execution"]["env_factory"].split(":")[0])
+    entries = tuple(f for f in IMPLEMENTATION if f not in SESSION_MODULES) + (
+        Path(env.origin).resolve().relative_to(REPO).as_posix(),)
+    files, _ = walk(root, tuple(sorted(set(entries))), roots=("src", "scripts"))
+    return tuple(sorted(set(files) | set(SESSION_MODULES)))
+
+
+def l40s_generation_problems(root: Path = REPO) -> list[str]:
+    """Why the committed L40S check does not admit the pilot's generation (`l40s_check.generation_scope_problems`):
+    the pilot only generates, so only the check's generation measurement can admit it."""
+    from stages.teacher_modes import l40s_check as LC
+    return LC.generation_scope_problems(generation_engine(root), generation_inputs(root), generation_path(root), root)
 
 
 # --- the pilot-only source admission -------------------------------------------------------------------------------
@@ -800,7 +859,7 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
         "not_verifiable_at_zero_cost": ["the installed vLLM's metric names and values (KV-cache usage, preemptions) "
                                         "and its log lines: read on the first run, UNMEASURED where absent",
                                         "nvidia-smi on the pod (peak VRAM): UNMEASURED if it gives no sample",
-                                        "throughput, TTFT, model-load time and the real pass rates",
+                                        "throughput, TTFT, model-load time and the real admission rates",
                                         "the live L40S quote and stock in EUR-IS-2 at launch",
                                         "the bytes actually on am5m373kuq (the provider reports none; the pod measures "
                                         "them before generating)",
@@ -858,22 +917,106 @@ def _attempted(dirs: list[Path], label: str) -> set[str]:
     return got
 
 
-def _outcome(task: dict, rec: dict | None, attempted: set, *, mode: str, thinking: bool, stop_ids) -> tuple[str, float]:
-    """One candidate's outcome: admitted or rejected (sealed and verified), attempted_unsealed, or unattempted -- an
-    unattempted or unsealed task is never a verification failure."""
+def _outcome(task: dict, rec: dict | None, attempted: set, *, mode: str, thinking: bool,
+             stop_ids) -> tuple[str, dict, dict | None]:
+    """One candidate's outcome -- admitted or rejected (sealed and verified), attempted_unsealed, or unattempted (an
+    unattempted or unsealed task is never a verification failure) -- with its admitted units (supervised tokens of its
+    documents, scored positions of its items) and its verdict (`EpisodeVerdict.as_dict`; None when unsealed)."""
+    none = {"supervised_tokens": 0, "scored_positions": 0}
     if rec is None:
-        return ("attempted_unsealed" if task["task_id"] in attempted else "unattempted"), 0.0
+        return ("attempted_unsealed" if task["task_id"] in attempted else "unattempted"), none, None
     turns = rec.get("turns") or []
-    if not TE.verify(task, turns, thinking=thinking).admitted:
-        return "rejected", 0.0
+    v = TE.verify(task, turns, thinking=thinking)
+    if not v.admitted:
+        return "rejected", none, v.as_dict()
     if task["split"] in ("calibration", "state_eval"):
         its = TE.items(task, turns, mode=mode, thinking=thinking)
-        return ("admitted", float(sum(len(i["tags"]["assistant"]) for i in its))) if its else ("rejected", 0.0)
-    return "admitted", float(sum(len(d.output_ids) for d in TE.documents(task, turns, mode=mode, stop_ids=stop_ids)))
+        if not its:
+            return "rejected", none, {**v.as_dict(), "admitted": False, "problems": ["item protocol"]}
+        return "admitted", {**none, "scored_positions": sum(len(i["tags"]["assistant"]) for i in its)}, v.as_dict()
+    docs = TE.documents(task, turns, mode=mode, stop_ids=stop_ids)
+    return "admitted", {**none, "supervised_tokens": sum(len(d.output_ids) for d in docs)}, v.as_dict()
 
 
 def _measured(v, why: str = "not reported by the engine or the GPU tools on this run"):
     return {"value": v} if v not in (None, {}, []) else {"value": UNMEASURED, "why": why}
+
+
+def _rate(num: int, den: int):
+    return round(num / den, 4) if den else UNMEASURED
+
+
+#: the report's metrics, each by its exact numerator and denominator (docs/shared/METRIC_CONTRACT.md :: tool pilot).
+#: They measure TEACHER DATA ADMISSION under the frozen verifier: none is a BFCL, tau-bench or other benchmark score,
+#: and none is a model-capability measurement
+METRICS = {
+    "first_candidate_admission_rate": "candidate-0 episodes admitted / candidate-0 episodes sealed (unattempted and "
+                                      "attempted-but-unsealed tasks are in neither)",
+    "admission_yield_up_to_two_candidates": "tasks with an admitted episode / tasks whose outcome is determined "
+                                            "(admitted at candidate 0, or candidate 0 rejected and candidate 1 sealed). "
+                                            "Candidate 1 is generated ONLY for a task whose candidate 0 was sealed and "
+                                            "rejected: a bounded data-admission retry, not pass@2 (which samples two "
+                                            "candidates for every task) and not pass^k",
+    "level_pass_rate": "per verifier level and candidate: sealed episodes that passed it / sealed episodes it was "
+                       "checked on (passed + failed); unverified (None) episodes are counted apart, never as passed",
+    "protocol_validity": "level protocol: natural termination, the mode's think rule, every tool-call block parsed, "
+                         "V1's tail rule",
+    "schema_validity": "level schema_validity: every call names an offered tool and its arguments satisfy its JSON "
+                       "Schema",
+    "gold_tool_call_match": "level step_gold: the call set of every gold-carrying turn equals one allowed gold set "
+                            "(name + arguments, canonicalized; order-free) -- exact match against the source's "
+                            "recorded expert call (G2: agreement with a model-generated gold, not human-verified)",
+    "recorded_execution": "level recorded_execution: every executed call matched a recorded response of the replay "
+                          "table (recorded-response replay; no executable environment, no final-state check); None "
+                          "when the episode executed no call",
+    "target_tools_called": "level target_tools_called: every target tool called at least once (recall; extra or wrong "
+                           "calls unchecked) -- not tool-selection accuracy",
+    "tool_selection": "level tool_selection: here only no_call -- no call on any turn of a no-tool task",
+    "verification_coverage": "admitted episodes by the exact set of levels they were verified at (True), per source "
+                             "and episode shape",
+    "supervised_tokens": "generated token ids of the admitted training/validation episodes' turns (each counted once)",
+    "scored_positions": "assistant positions of the admitted calibration/state-evaluation episodes' items",
+}
+
+
+def _blank() -> dict:
+    return {"offered": 0, "c0": Counter(), "c1": Counter(), "final": Counter(), "supervised_tokens": 0,
+            "scored_positions": 0}
+
+
+def _finish(row: dict) -> dict:
+    """A cell's counts closed into its metrics (`METRICS`)."""
+    c0, c1, final = row["c0"], row["c1"], row["final"]
+    sealed0 = c0["admitted"] + c0["rejected"]
+    determined = final["admitted"] + final["rejected"]
+    units = row["supervised_tokens"] + row["scored_positions"]
+    return {"offered": row["offered"],
+            "candidate_0": {"attempted": c0["admitted"] + c0["rejected"] + c0["attempted_unsealed"], "sealed": sealed0,
+                            **{k: c0[k] for k in ("admitted", "rejected", "attempted_unsealed", "unattempted")}},
+            "candidate_1": {"required": c1["required"], "sealed": c1["admitted"] + c1["rejected"],
+                            **{k: c1[k] for k in ("admitted", "rejected", "attempted_unsealed", "unattempted")}},
+            "final": {k: final[k] for k in ("admitted", "rejected", "undetermined")},
+            "first_candidate_admission_rate": _rate(c0["admitted"], sealed0),
+            "admission_yield_up_to_two_candidates": _rate(final["admitted"], determined),
+            "supervised_tokens": row["supervised_tokens"], "scored_positions": row["scored_positions"],
+            "units_per_admitted_episode": (round(units / final["admitted"], 1) if final["admitted"] else UNMEASURED),
+            #: the counts as earlier report versions keyed them
+            "c0": dict(c0), "c1": dict(c1)}
+
+
+def _levels(verdicts: list[dict]) -> dict:
+    """Per verifier level: passed / failed / unverified over sealed episodes, and the level pass rate."""
+    from aadistill.data.tool_calls import LEVELS
+    out = {}
+    for lv in LEVELS:
+        got = Counter({True: "passed", False: "failed", None: "unverified"}[v["checks"].get(lv)] for v in verdicts)
+        out[lv] = {"passed": got["passed"], "failed": got["failed"], "unverified": got["unverified"],
+                   "pass_rate": _rate(got["passed"], got["passed"] + got["failed"])}
+    return out
+
+
+def _source(task: dict) -> str:
+    return str(task["source"].get("dataset"))
 
 
 def report(session_dirs, *, study_identity: str | None = None, plan_path: Path = PLAN,
@@ -885,8 +1028,12 @@ def report(session_dirs, *, study_identity: str | None = None, plan_path: Path =
       two copies refuses;
     * per task and candidate: admitted or rejected (sealed, under the frozen verifier), attempted but unsealed, or
       unattempted; candidate 1 is required only where candidate 0 was sealed and rejected; a task counts once;
-    * pass rates divide by the SEALED attempts (first candidate) and by the DETERMINED tasks (both candidates), never
-      by tasks that were not attempted;
+    * per mode, by split / category / shape and by source / shape: offered, attempted, sealed, admitted, rejected and
+      incomplete tasks; the first-candidate admission rate and the admission yield of up to two candidates
+      (`METRICS`: data admission, never a benchmark score); each verifier level's passed / failed / unverified counts
+      per candidate; the admitted episodes' verification coverage; supervised tokens and scored positions;
+    * the non-thinking schema_arguments supply per split, and each formal cell's projection from the measured yield
+      (a projection, labelled as one);
     * the state (`STATES`), and the session evidence present or missing: without ``tool_session.json`` (a forced end)
       the caller gives the study identity (the run's authorization ``plan_hash``), the pilot identity is derived from
       it and the frozen plan (`pilot_identity`), and the report says so;
@@ -917,41 +1064,49 @@ def report(session_dirs, *, study_identity: str | None = None, plan_path: Path =
         outside = sorted((set(recs[0]) | set(recs[1])) - frozen)
         if outside:
             raise PilotError(f"{mode}: sealed records of tasks outside the frozen cells, e.g. {outside[:2]}")
-        cells = {}
+        cells, by_source, verdicts, coverage = {}, {}, {}, {}
         for c in doc["modes"][mode]:
             for t in c["task_ids"]:
                 task = by_id[t]
-                key = f"{c['split']}|{c['category']}|{TE.episode_shape(task)}"
-                row = cells.setdefault(key, {"offered": 0, "c0": Counter(), "c1": Counter(), "final": Counter(),
-                                             "units": 0.0})
-                row["offered"] += 1
-                o0, u0 = _outcome(task, recs[0].get(t), att[0], mode=mode, thinking=thinking, stop_ids=stop_ids)
-                row["c0"][o0] += 1
-                o1, u1 = "not_required", 0.0
+                shape = TE.episode_shape(task)
+                rows = (cells.setdefault(f"{c['split']}|{c['category']}|{shape}", _blank()),
+                        by_source.setdefault(f"{_source(task)}|{shape}", _blank()))
+                o0, u0, v0 = _outcome(task, recs[0].get(t), att[0], mode=mode, thinking=thinking, stop_ids=stop_ids)
+                o1, u1, v1 = "not_required", {"supervised_tokens": 0, "scored_positions": 0}, None
                 if o0 == "rejected":
-                    o1, u1 = _outcome(task, recs[1].get(t), att[1], mode=mode, thinking=thinking, stop_ids=stop_ids)
-                    row["c1"]["required"] += 1
-                    row["c1"][o1] += 1
+                    o1, u1, v1 = _outcome(task, recs[1].get(t), att[1], mode=mode, thinking=thinking,
+                                          stop_ids=stop_ids)
                 elif t in recs[1]:
                     raise PilotError(f"{mode}: {t} has a second candidate its first did not call for")
                 final = ("admitted" if "admitted" in (o0, o1) else "rejected" if (o0, o1) == ("rejected", "rejected")
                          else "undetermined")
-                row["final"][final] += 1
-                row["units"] += u0 + u1
+                for row in rows:
+                    row["offered"] += 1
+                    row["c0"][o0] += 1
+                    if o0 == "rejected":
+                        row["c1"]["required"] += 1
+                        row["c1"][o1] += 1
+                    row["final"][final] += 1
+                    for u in ("supervised_tokens", "scored_positions"):
+                        row[u] += u0[u] + u1[u]
+                key = f"{_source(task)}|{shape}"
+                for k, v in ((0, v0), (1, v1)):
+                    if v is not None:
+                        verdicts.setdefault(key, {}).setdefault(k, []).append(v)
+                won = v0 if o0 == "admitted" else v1 if o1 == "admitted" else None
+                if won is not None:
+                    coverage.setdefault(key, Counter())["+".join(won["verified_levels"])] += 1
                 all_required_sealed &= o0 in ("admitted", "rejected") and o1 in ("admitted", "rejected", "not_required")
-        for row in cells.values():
-            sealed0 = row["c0"]["admitted"] + row["c0"]["rejected"]
-            determined = row["final"]["admitted"] + row["final"]["rejected"]
-            row.update(c0=dict(row["c0"]), c1=dict(row["c1"]), final=dict(row["final"]),
-                       first_candidate_pass_rate=round(row["c0"]["admitted"] / sealed0, 4) if sealed0 else UNMEASURED,
-                       pass_rate_two_candidates=(round(row["final"]["admitted"] / determined, 4) if determined
-                                                 else UNMEASURED),
-                       units_per_admitted_episode=(round(row["units"] / row["final"]["admitted"], 1)
-                                                   if row["final"]["admitted"] else UNMEASURED))
         n = len(recs[0]) + len(recs[1])
         all_sealed += n
         every.update({f"{t}#{k}": r for k, rs in recs.items() for t, r in rs.items()})
-        modes[mode] = {"cells": dict(sorted(cells.items())), "sealed_records": n,
+        done = {k: _finish(v) for k, v in sorted(cells.items())}
+        modes[mode] = {"cells": done, "by_source_and_shape": {k: _finish(v) for k, v in sorted(by_source.items())},
+                       "levels": {key: {f"candidate_{k}": _levels(vs) for k, vs in sorted(per.items())}
+                                  for key, per in sorted(verdicts.items())},
+                       "verification_coverage": {k: dict(v) for k, v in sorted(coverage.items())},
+                       "totals": _finish(_sum(cells.values())),
+                       "sealed_records": n,
                        "attempted": {f"candidate_{k}": len(att[k]) for k in (0, 1)},
                        "groups_complete": {f"candidate_{k}": any((Path(d) / f"{labels[(mode, k)]}.complete").is_file()
                                                                  for d in dirs) if (mode, k) in labels else False
@@ -964,13 +1119,16 @@ def report(session_dirs, *, study_identity: str | None = None, plan_path: Path =
     gpu = [g for t in tel for g in ((t.get("gpu") or {}).get("gpus") or {}).values()]
     eng = [e for t in tel for e in t.get("engine") or []]
     turns = turn_telemetry(every)
-    return {"schema": "aadistill.stage2.teacher_modes.tool_pilot_report/v2", "state": state,
+    return {"schema": "aadistill.stage2.teacher_modes.tool_pilot_report/v3", "state": state,
             "pilot_plan_sha256": sha(plan_path), "identity": ident,
+            "metrics": METRICS, "metric_contract": "docs/shared/METRIC_CONTRACT.md",
             "session_evidence": {d: ({k: r.get(k) for k in ("kind", "authorization", "terminal", "started_utc",
                                                            "finished_utc")} if r else
                                      "MISSING: no tool_session.json (a forced end); the report rests on the sealed "
                                      "shards alone") for d, r in sessions.items()},
             "modes": modes,
+            "schema_arguments_non_thinking_supply": _schema_arguments_supply(doc, modes),
+            "formal_plan_projection": _projection(doc, modes),
             "telemetry": {
                 "invocations": len(tel),
                 "peak_vram_mib": _measured(max((g["peak_memory_used_mib"] for g in gpu), default=None),
@@ -994,6 +1152,56 @@ def report(session_dirs, *, study_identity: str | None = None, plan_path: Path =
                 "prefill_tokens_per_second": {"value": UNMEASURED, "why": "the batched engine interleaves prefill "
                                               "and decode; the TTFT distribution and the prompt tokens are reported"}},
             "priors": proto["bounded_plan"]["priors"], "authorizes": "nothing"}
+
+
+def _sum(rows) -> dict:
+    out = _blank()
+    for r in rows:
+        out["offered"] += r["offered"]
+        for k in ("c0", "c1", "final"):
+            out[k].update(r[k])
+        for u in ("supervised_tokens", "scored_positions"):
+            out[u] += r[u]
+    return out
+
+
+def _schema_arguments_supply(doc: dict, modes: dict) -> dict:
+    """The non-thinking mode's schema_arguments data the pilot admitted, per split and shape: supervised tokens for
+    training, scored positions for calibration and state evaluation (the gap option 1 addressed)."""
+    out = {}
+    for key, row in (modes.get("H-N") or {}).get("cells", {}).items():
+        split, cat, shape = key.split("|")
+        if cat == "schema_arguments":
+            out[f"{split}|{shape}"] = {k: row[k] for k in ("offered", "final", "supervised_tokens", "scored_positions",
+                                                            "first_candidate_admission_rate",
+                                                            "admission_yield_up_to_two_candidates")}
+    return out
+
+
+def _projection(doc: dict, modes: dict) -> dict:
+    """Per formal cell (the pilot plan carries its target and its pool supply in tasks): the units the cell's WHOLE
+    supply would yield at the pilot's measured admission yield and units per admitted episode -- a projection from a
+    sample, never a measurement or a decision -- and REACHABLE or SHORTFALL against the target (UNMEASURED without an
+    admitted episode). No SHORTFALL is approved here."""
+    out = {}
+    for mode, cs in doc["modes"].items():
+        got = (modes.get(mode) or {}).get("cells", {})
+        for c in cs:
+            rows = [r for k, r in got.items() if k.startswith(f"{c['split']}|{c['category']}|")]
+            adm = sum(r["final"]["admitted"] for r in rows)
+            det = adm + sum(r["final"]["rejected"] for r in rows)
+            units = sum(r["supervised_tokens"] + r["scored_positions"] for r in rows)
+            if not adm:
+                out[f"{mode}|{c['split']}|{c['category']}"] = {"unit": c["unit"], "target": c["target"],
+                                                               "supply_tasks": c["supply"], "status": UNMEASURED}
+                continue
+            proj = c["supply"] * (adm / det) * (units / adm)
+            out[f"{mode}|{c['split']}|{c['category']}"] = {
+                "unit": c["unit"], "target": c["target"], "supply_tasks": c["supply"],
+                "measured_yield": round(adm / det, 4), "measured_units_per_admitted_episode": round(units / adm, 1),
+                "projected_units_from_whole_supply": round(proj, 1),
+                "status": "REACHABLE" if proj >= c["target"] else "SHORTFALL"}
+    return out
 
 
 def main(argv=None) -> int:
