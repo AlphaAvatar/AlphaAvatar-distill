@@ -1,0 +1,111 @@
+{
+ "schema": "aadistill.budget.grant_amendment_proposal/v1",
+ "status": "PROPOSED for the maintainer: NOT applied; the grant is unchanged until the maintainer writes it",
+ "target": {
+  "path": "logs/budget/approvals/teacher_modes_token_matched_grant.json",
+  "sha256_now": "1194e6d57408fbfbc3d07eb928901975c45121afa2d9990f0c044169208861af"
+ },
+ "edits": {
+  "session_hard_caps_usd.tool_pilot": 2.5,
+  "tool_pilot": {
+   "approves": "tool_pilot measurement only",
+   "granted_by": "maintainer",
+   "decision": null,
+   "date": null,
+   "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
+   "tasks_sha256": "e67e8acb7050bd6e150b93af76683a2c77937e4d01c650ee398448b747b6fea1",
+   "source_admission": "logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json",
+   "hard_cap_usd": 2.5,
+   "driver_minutes": 55.0,
+   "gpu": "NVIDIA L40S",
+   "network_volume": "am5m373kuq",
+   "ceiling_usd_at_amendment": 79.5289,
+   "draws_on": "this grant's remaining envelope; the ceiling, the per-session cap, the project cap and the card list unchanged",
+   "kind": "tool_pilot (teacher_generation only; never formal, training or evaluation)",
+   "requires": [
+    "the pilot-only source admission signed (tool_pilot.admission_problems)",
+    "issue, launch and pod checks as the application lists them"
+   ]
+  },
+  "scope (append)": " || AMENDED <date>: the L40S tool pilot -- kind tool_pilot through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --pilot) on the frozen pilot plan 0a1c831fdfe4... and task file e67e8acb7050..., measurement only, one L40S on am5m373kuq, hard cap $2.50, inside this grant's remaining envelope",
+  "amendments (append)": {
+   "utc": "<date>",
+   "by": "maintainer decision '<quote>'",
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1
+   },
+   "previous_scope_sha256": "ee8723d727c4580fa87f0dee9cb19ce2ffb4d3b625c52496aa03e7a6b4337d7a",
+   "added": "kind tool_pilot and its block"
+  },
+  "authorizes (append)": "; and one tool_pilot artifact, measurement only, capped by its kind"
+ },
+ "unchanged": {
+  "ceiling_usd": 79.5289,
+  "per_session_hard_cap_usd": 41.41,
+  "project_cumulative_cap_usd": 868.0,
+  "gpus": {
+   "NVIDIA L40S": 1.19
+  },
+  "gpu_count_max": 1,
+  "never": [
+   "A2's or C1's training or evaluation; any arm but A1",
+   "an A100 or any card other than the L40S; a budget or limit increase",
+   "Research A v1's frozen identity or grant as authority for any of this",
+   "Research B"
+  ],
+  "session_hard_caps_usd (the A1 kinds)": {
+   "supplement": 0.0,
+   "inputs": 2.65,
+   "search": 41.41,
+   "train_a1": 14.1
+  },
+  "phase_a1": "unchanged, with its spend",
+  "amendments": "kept; one entry appended"
+ },
+ "envelope": {
+  "read_utc": "2026-11-04T10:33:37Z",
+  "grant": "logs/budget/approvals/teacher_modes_token_matched_grant.json",
+  "grant_sha256": "1194e6d57408fbfbc3d07eb928901975c45121afa2d9990f0c044169208861af",
+  "envelope": {
+   "ceiling_usd": 79.5289,
+   "spent_usd": 49.613,
+   "remaining_usd": 29.9159,
+   "unknown_runs": [],
+   "runs": 11,
+   "by_kind_usd": {
+    "inputs": 0.5713,
+    "search": 24.1526,
+    "supplement": 15.8689,
+    "train_a1": 9.0202
+   },
+   "covers_the_pilot": true,
+   "remaining_after_the_pilot_cap_usd": 27.4159
+  },
+  "a1_phase": {
+   "hard_cap_usd": 77.0,
+   "sessions_usd": 33.7441,
+   "storage_booked_usd": 13.34,
+   "new_spend_usd": 47.0841,
+   "headroom_usd": 29.9159,
+   "_": "the pilot is not in the A1 phase's scope: drawing on this grant needs the amendment"
+  },
+  "research_a_cumulative": {
+   "cap_usd": 142.19,
+   "before_the_a1_phase_usd": 62.17,
+   "now_usd": 109.2541,
+   "with_the_pilot_cap_usd": 111.7541,
+   "headroom_after_usd": 30.4359,
+   "cross_check": {
+    "cap_less_the_first_ceiling_plus_the_supplement_usd": 62.1706,
+    "_": "Research A v1's spend is the cap less the token-matched grant's first ceiling; with the supplement's closeouts it must equal the spend before the phase"
+   },
+   "_": "the grant's own statement (_ceiling) for the cap and the spend before the phase; the A1 phase's sessions from the closeouts; the 350 GB volume at its booked 14-day reservation (to 2026-11-15) -- storage past that date is not booked here and is a separate decision"
+  },
+  "project_cap_usd": 868.0,
+  "raises_nothing": true
+ },
+ "authorizes": "nothing"
+}

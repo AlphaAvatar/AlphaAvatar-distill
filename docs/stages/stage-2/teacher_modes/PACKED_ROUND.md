@@ -42,6 +42,10 @@
     admission reads the registered one (`audit/proportion_tolerance_audit.json`).
   - Option 1 (call-only gold episodes) and option 2 (WorkBench) for the non-thinking schema_arguments SHORTFALL are
     compared at $0 (`audit/schema_arguments_options.json`); neither is implemented.
+- **The maintainer's final authorization review of `56381f55` (2026-11-04): conditional GO for option B.** Two $0 items,
+  done (section 8): issue requires the grant's explicit pilot-only scope (drafted as an amendment, the envelope
+  reconciled read-only, nothing raised), and resumption is bound to the pilot plan, the round input, the protocol, the
+  verification version and the generation implementation. The grant and the source admission are untouched.
 - **The maintainer's sixth review, of `29b62c93` (2026-11-04),** accepted the truncation fix, `tool_verification@v2` and
   the pilot's structure, recommended option B ($2.50) and asked for the following, done at $0 (section 8): the pilot
   report reads partial, verified results with explicit states; the source admission's signature is checked strictly by
@@ -729,9 +733,29 @@ by `tool_pilot.py application --live-position`).
   `storage_problems` requires 2 GB free (the size less the bytes on the mount; the pilot writes well under 0.5 GB) and a
   pilot directory that is new or holds only the pilot's own files; the teacher snapshot goes to the container disk. The
   launch refuses any volume but `am5m373kuq` (`the_pilot_volume_is_the_planned_one`).
-- **Owed from the maintainer:** sign the source admission (every signature field), amend the grant with
-  `session_hard_caps_usd.tool_pilot` ($2.50 for option B), and the final authorization. The project position is
-  re-read at issue and at launch.
+- **The grant's pilot-only scope** (review of `56381f55`). A kind cap alone no longer issues: `pilot_grant_problems`
+  requires a `tool_pilot` block in the study grant -- approving exactly `tool_pilot measurement only`, granted by the
+  maintainer with a decision and a date, naming the frozen plan and task file by sha256, the source admission, the
+  cap, the L40S, `am5m373kuq` and the ceiling it was written under (still the grant's). The exact amendment is drafted,
+  not applied ([`grant_amendment_proposal.json`](../../../../logs/budget/applications/research_a_tool_pilot_2026-11-04/grant_amendment_proposal.json)):
+  the block (decision and date left to the maintainer), `session_hard_caps_usd.tool_pilot = 2.50`, and appends to the
+  scope, the amendments and `authorizes`; the ceiling ($79.5289), the per-session cap, the $868 project cap, the card
+  list, `never`, the A1 kinds' caps and `phase_a1` unchanged.
+- **Envelope, read-only** (2026-11-04T10:33Z): 11 sessions, no unknown cost; spent $49.613 (supplement $15.8689,
+  inputs $0.5713, search $24.1526, train_a1 $9.0202) of the $79.5289 ceiling, $29.9159 left, $27.4159 after the pilot's
+  cap. The A1 phase: $33.7441 sessions + $13.34 booked storage = $47.0841 of its $77.00. Research A cumulative: $62.17
+  before the phase (cross-checked: $142.19 less the first ceiling $95.8883 plus the supplement = $62.1706) + $47.0841 =
+  $109.2541 of $142.19, $111.7541 with the pilot's cap. The 350 GB volume's storage past its 2026-11-15 reservation is
+  not booked here.
+- **Resumption identity** (review of `56381f55`). Episodes are sealed and resumed under the pilot identity -- the study
+  identity, the pilot plan's sha256, the protocol's sha256, `tool_verification@v2` and the sha256 of the generation
+  implementation (run_battery, generation_driver, tool_session, tool_episodes, `aadistill.data.tool_calls`)
+  (`tool_pilot.pilot_identity`) -- so `generation_driver.sealed` refuses another plan's, protocol's or implementation's
+  shards; before resuming, `tool_session.resumable` requires every sealed episode's group input, protocol and runner
+  sha256 to be this round's. The same sealing, no second system. The report derives the pilot identity from the study
+  identity when `tool_session.json` is missing (`--study-identity`).
+- **Owed from the maintainer:** sign the source admission (every signature field), write the pilot-only grant
+  amendment, and the final authorization. The project position is re-read at issue and at launch.
 - **Separate:** the packed 8,192-token forward / DEPTH / training GPU validation is its own engineering request on
   existing frozen inputs (v1 items, A1's documents); it is not combined with the pilot.
 
@@ -817,6 +841,7 @@ PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot build
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot admission
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot storage-precheck \
     --write logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot grant-amendment
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot application --live-position --tests <evidence>
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_admission --v1-tail-audit \
     logs/stages/stage-2/teacher_modes/audit/v1_tail_audit.json --generations hybrid_thinking=<H-T eval generations> \

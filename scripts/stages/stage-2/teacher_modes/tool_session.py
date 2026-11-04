@@ -58,12 +58,16 @@ def checked_plan(proto: dict, lineage: str):
     return TGP.verified(proto, lineage=lineage)
 
 
+def round_body(tasks: list[dict]) -> str:
+    return "".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in tasks)
+
+
 def write_round(tasks: list[dict], out: Path, label: str, default_system: str) -> dict:
     """The round's run_battery input (each task keeps its own ``system``); an existing file must be identical."""
     d = out / "inputs"
     d.mkdir(parents=True, exist_ok=True)
     path = d / f"{label}.jsonl"
-    body = "".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in tasks)
+    body = round_body(tasks)
     if path.is_file() and path.read_text() != body:
         raise RuntimeError(f"{path.name} on the volume is not this session's input")
     path.write_text(body)
@@ -212,19 +216,41 @@ def run_pilot(proto: dict, plan_path: Path, tasks_path: Path, out: Path, identit
     bad, record["storage"] = TPL.storage_problems(out, mount, volume_gb)
     if bad:
         raise TPL.PilotError("the volume refuses: " + "; ".join(bad))
+    pid = TPL.pilot_identity(identity, plan_path)
     record.update(pilot_plan_sha256=adm["pilot_plan"]["sha256"], tasks=len(by_id),
-                  verification_version=TE.VERIFICATION_VERSION)
+                  verification_version=TE.VERIFICATION_VERSION, study_identity=identity, identity=pid["sha256"],
+                  identity_parts=pid["parts"])
+    for mode in sorted(doc["modes"]):
+        resumable(out, mode, doc, by_id, pid["sha256"])
     mark("CONTRACT_OK")
     record["modes"] = {}
     for mode in sorted(doc["modes"]):
         cells, orders = TPL.cells(doc, mode, by_id)
-        res = generate_mode(proto, None, doc["lineage"], mode, by_id, None, out, identity, run, mark, cells=cells,
+        res = generate_mode(proto, None, doc["lineage"], mode, by_id, None, out, pid["sha256"], run, mark, cells=cells,
                             orders=orders, max_rounds=doc["rounds"], label_prefix="pilot",
                             telemetry=out / "telemetry.jsonl", extra_args=("--engine-metrics",))
         record["modes"][mode] = res
         if not res["complete"]:
             return False
     return True
+
+
+def resumable(out: Path, mode: str, doc: dict, by_id: dict, identity: str) -> None:
+    """Before a pilot resumes: every episode already sealed for ``mode`` must be this pilot's -- sealed under its pilot
+    identity (plan, protocol, verification version, implementation; `generation_driver.sealed` refuses another), from
+    exactly this round's input (its sha256), under this protocol file and this runner. Anything else refuses
+    (`tool_pilot.PilotError`): an earlier plan's or generation's episodes are never reused."""
+    from stages.reasoning_data import generation_driver as GD
+    from stages.teacher_modes import tool_pilot as TPL
+    body = round_body([by_id[t] for c in doc["modes"][mode] for t in c["task_ids"]])
+    want = {"group_input_sha256": hashlib.sha256(body.encode()).hexdigest(),
+            "protocol_sha256": GD.sha(PROTOCOL), "runner_sha256": GD.sha(REPO / GD.RUNNER)}
+    for k in range(int(protocol()["execution"]["candidates"])):
+        for tid, rec in GD.sealed(out, f"pilot_{mode}_r1_pass{k}", identity).items():
+            got = {f: (rec.get("generation_pass") or {}).get(f) for f in want}
+            if got != want:
+                raise TPL.PilotError(f"{tid} (pilot_{mode}_r1_pass{k}) was sealed from another input, protocol or "
+                                     f"runner: {sorted(f for f in want if got[f] != want[f])}")
 
 
 def main(argv=None, *, run=None) -> int:

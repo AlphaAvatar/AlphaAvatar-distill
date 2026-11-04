@@ -15522,3 +15522,28 @@ on a paid pod.
 - **Not authorized and not done.** The grant change, the signature, the pilot, any generation, search, training or
   evaluation, a pod, a cap change, a SHORTFALL approval, a merge.
 - **Revisit when:** the maintainer's final authorization review of the pilot.
+
+
+## 2026-11-04 (UTC) — Maintainer: final authorization review of 56381f55; conditional GO for the $2.50 L40S pilot (option B); the grant's pilot scope and the resumption identity at $0
+
+- **Context.** The partial report, the strict signature check and the volume protection were accepted; option B
+  (one L40S, $2.50 hard cap, 55 driver minutes) chosen in principle -- not yet a paid authorization.
+- **Decision (maintainer).** Two $0 items: the study grant (the historical A1 phase's) needs an explicit pilot-only
+  scope, not just a kind cap, and the envelope must be reconciled read-only without raising anything; resumed episodes
+  must match the pilot plan, the round input, the protocol and verification version and the generation implementation,
+  not only the study identity.
+- **Implemented.**
+  - `token_matched_phase.pilot_grant_problems` (from `kind_cap_problems`): the grant's `tool_pilot` block must approve
+    exactly 'tool_pilot measurement only', be granted by the maintainer with a decision and a date, and name the plan
+    and task file sha256, the source admission, the cap, the L40S, am5m373kuq and the ceiling written under.
+  - `tool_pilot.envelope_reconciliation` / `grant_amendment`
+    (`logs/budget/applications/research_a_tool_pilot_2026-11-04/grant_amendment_proposal.json`, a proposal): 11 sessions,
+    no unknown cost, $49.613 spent of $79.5289, $29.9159 left ($27.4159 after the pilot); A1 phase $47.0841 of $77.00;
+    Research A cumulative $109.2541 of $142.19 ($111.7541 with the pilot); the ceiling, the per-session cap, the $868
+    project cap, the card list, `never`, the A1 caps and `phase_a1` unchanged; the grant file untouched.
+  - `tool_pilot.pilot_identity` (study identity + pilot plan + protocol + verification version + implementation sha256)
+    as the sealing and resumption identity, and `tool_session.resumable` (each sealed episode's group input, protocol
+    and runner sha256 before reuse); regressions: same study identity and task ids under another plan, protocol or
+    implementation refuse, and so does an episode sealed from another round input.
+- **Not authorized and not done.** Signing the source admission, the grant amendment, issue, launch, a pod, any spend.
+- **Revisit when:** the maintainer's authorization decision on the $2.50 pilot.

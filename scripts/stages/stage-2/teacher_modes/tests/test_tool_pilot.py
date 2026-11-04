@@ -36,13 +36,53 @@ def test_the_pilot_kind_claims_generation_only_and_refuses_without_its_records_a
                     "1.8", "--dry-run"]) == 11
 
 
-def test_a_grant_cap_admits_the_pilot_only_up_to_it(tmp_path):
+def _grant_root(tmp_path, *, block=True, **over):
+    """A temporary root holding the study grant amended as `tool_pilot.grant_amendment` proposes (decision and date
+    filled for the test), the bound pilot records copied beside it; ``over`` edits the tool_pilot block."""
+    import shutil
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
-    g["session_hard_caps_usd"]["tool_pilot"] = 1.80
+    amend = TPL.grant_amendment()
+    g["session_hard_caps_usd"]["tool_pilot"] = amend["edits"]["session_hard_caps_usd.tool_pilot"]
+    if block:
+        g["tool_pilot"] = {**amend["edits"]["tool_pilot"], "decision": "approved for the test", "date": "2026-11-04",
+                           **over}
     (tmp_path / TM.STUDY.grant).parent.mkdir(parents=True)
     (tmp_path / TM.STUDY.grant).write_text(json.dumps(g))
-    assert TM.kind_cap_problems("tool_pilot", 1.80, root=tmp_path) == []
-    assert TM.kind_cap_problems("tool_pilot", 1.81, root=tmp_path)
+    for rel in TM.KIND_RECORDS["tool_pilot"]:
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(TM.REPO_ROOT / rel, tmp_path / rel)
+    return tmp_path
+
+
+def test_the_grant_must_carry_the_pilot_only_scope_not_just_a_cap(tmp_path):
+    assert TM.kind_cap_problems("tool_pilot", 2.50, root=_grant_root(tmp_path / "a")) == []
+    assert TM.kind_cap_problems("tool_pilot", 2.51, root=_grant_root(tmp_path / "b"))
+    bad = TM.kind_cap_problems("tool_pilot", 2.50, root=_grant_root(tmp_path / "c", block=False))
+    assert bad == ["the grant carries no tool_pilot scope: the maintainer's pilot-only amendment is required"]
+
+
+@pytest.mark.parametrize("over,match", [
+    ({"approves": "tool generation"}, "tool_pilot.approves"), ({"granted_by": "claude"}, "tool_pilot.granted_by"),
+    ({"decision": None}, "quotes no decision"), ({"date": "soon"}, "not an ISO date"),
+    ({"pilot_plan_sha256": "0" * 64}, "pilot_plan_sha256"), ({"tasks_sha256": "0" * 64}, "tasks_sha256"),
+    ({"hard_cap_usd": 5.0}, "hard_cap_usd"), ({"gpu": "NVIDIA A100 80GB PCIe"}, "tool_pilot.gpu"),
+    ({"network_volume": "4rhubprswo"}, "network_volume"), ({"ceiling_usd_at_amendment": 99.0}, "ceiling_usd_at_amendment")])
+def test_a_pilot_grant_block_that_is_not_exactly_the_pilots_refuses(tmp_path, over, match):
+    assert any(match in p for p in TM.kind_cap_problems("tool_pilot", 2.50, root=_grant_root(tmp_path, **over)))
+
+
+def test_the_envelope_covers_the_pilot_and_the_amendment_raises_nothing():
+    env = TPL.envelope_reconciliation()
+    assert env["envelope"]["unknown_runs"] == [] and env["envelope"]["covers_the_pilot"]
+    assert abs(env["envelope"]["spent_usd"] + env["envelope"]["remaining_usd"] - env["envelope"]["ceiling_usd"]) < 1e-6
+    rc = env["research_a_cumulative"]
+    assert abs(rc["cross_check"]["cap_less_the_first_ceiling_plus_the_supplement_usd"] - rc["before_the_a1_phase_usd"]) < 0.01
+    assert rc["headroom_after_usd"] > 0
+    a = TPL.grant_amendment()
+    g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
+    assert a["unchanged"]["ceiling_usd"] == g["ceiling_usd"] and a["unchanged"]["project_cumulative_cap_usd"] == 868.0
+    assert "tool_pilot" not in g and "tool_pilot" not in g["session_hard_caps_usd"]          #: the grant is untouched
+    assert a["edits"]["tool_pilot"]["decision"] is None and a["edits"]["tool_pilot"]["date"] is None
 
 
 @pytest.mark.parametrize("change,match", [
@@ -481,7 +521,7 @@ def test_a_partial_session_is_reported_from_its_sealed_shards(frozen, monkeypatc
     out.mkdir()
     rec = {}
     assert not pilot(frozen, out, runner(3), rec=rec)
-    rec.update(identity="id", terminal="RUN_FAILED")
+    rec.update(terminal="RUN_FAILED")
     (out / "tool_session.json").write_text(json.dumps(rec))
     assert not list(out.glob("*.complete")) and list(out.glob("pilot_H-N_r1_pass0.part*.done"))
     r = TPL.report(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
@@ -510,14 +550,15 @@ def test_without_session_evidence_the_identity_is_required_and_the_gap_recorded(
     pilot(frozen, out, runner(3))
     with pytest.raises(TPL.PilotError, match="identity is unknown"):
         TPL.report(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
-    r = TPL.report(out, identity="id", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    r = TPL.report(out, study_identity="id", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
     assert r["state"] == "PARTIAL" and str(r["session_evidence"][str(out)]).startswith("MISSING")
     from stages.reasoning_data import generation_driver as GD
     with pytest.raises(GD.ShardError, match="another launch identity"):
-        TPL.report(out, identity="another", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
-    (out / "tool_session.json").write_text(json.dumps({"identity": "id", "terminal": "RUN_FAILED"}))
+        TPL.report(out, study_identity="another", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    (out / "tool_session.json").write_text(json.dumps({"identity": TPL.pilot_identity("id", frozen["plan"])["sha256"],
+                                                       "terminal": "RUN_FAILED"}))
     with pytest.raises(TPL.PilotError, match="identity is ambiguous"):          #: the caller's and the session's differ
-        TPL.report(out, identity="another", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+        TPL.report(out, study_identity="another", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
 
 
 def test_a_resumed_session_completes_and_merges_without_changing_what_was_sealed(frozen, monkeypatch):
@@ -532,7 +573,7 @@ def test_a_resumed_session_completes_and_merges_without_changing_what_was_sealed
     rec = {}
     assert pilot(frozen, out, runner(None), rec=rec)
     assert all(out.joinpath(k).read_bytes() == v for k, v in before.items())   #: sealed shards untouched
-    rec.update(identity="id", terminal="ALL_DONE")
+    rec.update(terminal="ALL_DONE")
     (out / "tool_session.json").write_text(json.dumps(rec))
     r = TPL.report([copy1, out], plan_path=frozen["plan"], tasks_path=frozen["tasks"])
     assert r["state"] == "COMPLETE"
@@ -545,7 +586,7 @@ def test_a_resumed_session_completes_and_merges_without_changing_what_was_sealed
             assert row["c1"].get("required", 0) == sum(row["c1"].get(k, 0) for k in ("admitted", "rejected"))
         assert tot["admitted"] + tot["rejected"] == n and not tot["undetermined"]       #: each task once
     (out / "tool_session.json").unlink()
-    r2 = TPL.report([copy1, out], identity="id", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    r2 = TPL.report([copy1, out], study_identity="id", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
     assert r2["state"] == "INCOMPLETE" and r2["modes"] == r["modes"]                  #: data complete, evidence not
 
 
@@ -554,7 +595,8 @@ def test_a_task_sealed_differently_in_two_copies_or_nothing_sealed(frozen, monke
     runner = _interrupt_then_resume(frozen, monkeypatch)
     empty = frozen["tmp"] / "empty"
     empty.mkdir()
-    (empty / "tool_session.json").write_text(json.dumps({"identity": "id", "terminal": "RUN_FAILED"}))
+    (empty / "tool_session.json").write_text(json.dumps({"identity": TPL.pilot_identity("id", frozen["plan"])["sha256"],
+                                                         "terminal": "RUN_FAILED"}))
     assert TPL.report(empty, plan_path=frozen["plan"], tasks_path=frozen["tasks"])["state"] == "FAILED"
     out = frozen["tmp"] / "out"
     out.mkdir()
@@ -567,4 +609,61 @@ def test_a_task_sealed_differently_in_two_copies_or_nothing_sealed(frozen, monke
     part.write_text("".join(json.dumps(r) + "\n" for r in rows))
     part.with_suffix(".done").write_text(TPL.sha(part) + "\n")                #: a re-sealed, different record
     with pytest.raises(TPL.PilotError, match="sealed differently in two session copies"):
-        TPL.report([out, other], identity="id", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+        TPL.report([out, other], study_identity="id", plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+
+
+
+# --- resumption identity -------------------------------------------------------------------------------------------
+
+def test_an_earlier_plan_protocol_or_implementation_never_resumes(frozen, monkeypatch, tmp_path):
+    """The same study identity and the same task ids, but sealed under another pilot plan, another protocol or another
+    generation implementation: the resumed session refuses those shards instead of reusing them."""
+    import shutil
+    from stages.reasoning_data import generation_driver as GD
+    runner = _interrupt_then_resume(frozen, monkeypatch)
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    pilot(frozen, out, runner(3))                                     #: three episodes sealed under plan A
+    sealed = sorted(out.glob("pilot_H-N_r1_pass0.part*.jsonl"))
+    assert sealed
+    for case in ("plan", "protocol", "implementation"):
+        work = tmp_path / case
+        shutil.copytree(out, work / "out")
+        f = dict(frozen)
+        if case == "plan":                                            #: plan B: same tasks, another frozen document
+            doc = json.loads(frozen["plan"].read_text())
+            doc["written_utc"] = "2026-11-05T00:00:00Z"
+            f["plan"] = work / "plan_b.json"
+            f["plan"].write_text(json.dumps(doc))
+            signed(f, monkeypatch)
+        elif case == "protocol":                                      #: another tool generation protocol file
+            other = work / "tool_generation_protocol_b.json"
+            proto = json.loads(TS.PROTOCOL.read_text())
+            proto["status"] += " (another revision)"
+            other.write_text(json.dumps(proto))
+            from stages.teacher_modes import tool_generation_plan as TGP
+            monkeypatch.setattr(TGP, "PROTOCOL", other)
+        else:
+            changed = work / "run_battery_b.py"
+            changed.write_text("# another runner\n")
+            monkeypatch.setattr(TPL, "IMPLEMENTATION", (str(changed),))
+        with pytest.raises(GD.ShardError, match="another launch identity"):
+            TS.run_pilot(f["proto"], f["plan"], f["tasks"], work / "out", "id", runner(None), lambda m: None, {},
+                         mount=f["tmp"], volume_gb=55)
+        monkeypatch.undo()
+        signed(frozen, monkeypatch)
+    assert pilot(frozen, out, runner(None))                           #: the same frozen plan resumes normally
+
+
+def test_a_sealed_episode_from_another_round_input_refuses(frozen, monkeypatch):
+    runner = _interrupt_then_resume(frozen, monkeypatch)
+    out = frozen["tmp"] / "out"
+    out.mkdir()
+    pilot(frozen, out, runner(3))
+    part = sorted(out.glob("pilot_H-N_r1_pass0.part*.jsonl"))[0]
+    rows = [json.loads(x) for x in part.read_text().splitlines()]
+    rows[0]["generation_pass"]["group_input_sha256"] = "0" * 64      #: sealed from another input, re-marked
+    part.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    part.with_suffix(".done").write_text(TPL.sha(part) + "\n")
+    with pytest.raises(TPL.PilotError, match="sealed from another input, protocol or runner"):
+        pilot(frozen, out, runner(None))

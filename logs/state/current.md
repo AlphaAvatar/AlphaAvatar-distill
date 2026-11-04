@@ -67,6 +67,10 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
   - the L40S pilot's execution preparation: kind `tool_pilot`, frozen cells (`plans/tool_pilot_plan.json`, 397 tasks,
     794 runs), `tool_session.py --pilot`, telemetry, the runner's hard-cap check, a pilot-only source admission
     (unsigned) and the re-verified application. Owed: the signature, the grant's cap, option A ($1.80) or B ($2.50).
+- **Final authorization review of `56381f55` (2026-11-04): conditional GO for option B ($2.50).** Done at $0: issue
+  requires the grant's pilot-only `tool_pilot` block (amendment drafted, not applied; envelope $29.9159 left of
+  $79.5289, no unknown cost); resumption bound to the pilot plan, round input, protocol, verification version and
+  generation implementation. Owed: the signature, the amendment, the final authorization.
 - **Review of `29b62c93` (2026-11-04).** Option B ($2.50) recommended for the pilot; done at $0: the pilot report reads
   partial, verified sealed results (COMPLETE / PARTIAL / INCOMPLETE / FAILED, UNMEASURED never 0); one strict check of
   the source admission's signature at issue and on the pod; the volume checked read-only and measured on the pod.

@@ -218,7 +218,8 @@ def the_pilot_volume_is_the_planned_one(ctx) -> tuple[bool, str]:
 
 
 def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) -> list[str]:
-    """The grant's cap for this kind (``session_hard_caps_usd``): a kind without one, or a cap above it, refuses."""
+    """The grant's cap for this kind (``session_hard_caps_usd``): a kind without one, or a cap above it, refuses. The
+    tool pilot needs its pilot-only scope in the grant as well (`pilot_grant_problems`): a cap alone is not one."""
     import json
     g = json.loads((Path(root) / STUDY.grant).read_text())
     caps = g.get("session_hard_caps_usd") or {}
@@ -226,7 +227,39 @@ def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) ->
         return [f"the grant names no hard cap for kind {kind!r}"]
     if hard_cap_usd > float(caps[kind]) + 1e-9:
         return [f"${hard_cap_usd} exceeds the grant's ${caps[kind]} for kind {kind!r}"]
-    return []
+    return pilot_grant_problems(g, root) if kind == TOOL_PILOT_KIND else []
+
+
+def pilot_grant_problems(g: dict, root: Path = REPO_ROOT) -> list[str]:
+    """Why the grant does not authorize the tool pilot beyond its kind cap (empty when it does): its ``tool_pilot``
+    block -- the maintainer's pilot-only amendment (`tool_pilot.grant_amendment` drafts it) -- must approve exactly
+    the pilot's measurement, be granted by the maintainer with a decision and a date, name the frozen pilot plan and
+    task file by sha256, the source admission it requires, the kind cap, the L40S and am5m373kuq, and the ceiling it
+    was written under, which must still be the grant's (an amendment never raises it)."""
+    import datetime as dt
+    import json
+    from stages.teacher_modes import tool_pilot as TPL
+    b = g.get(TOOL_PILOT_KIND)
+    if not isinstance(b, dict):
+        return ["the grant carries no tool_pilot scope: the maintainer's pilot-only amendment is required"]
+    rec = KIND_RECORDS[TOOL_PILOT_KIND]
+    plan = Path(root) / rec[2]
+    tasks = (json.loads(plan.read_text()).get("tasks_file") or {}).get("sha256") if plan.is_file() else None
+    bad = []
+    want = {"approves": TPL.APPROVAL, "granted_by": "maintainer", "pilot_plan_sha256": P1._sha(rec[2], root),
+            "tasks_sha256": tasks, "source_admission": rec[3],
+            "hard_cap_usd": float((g.get("session_hard_caps_usd") or {}).get(TOOL_PILOT_KIND, -1)), "gpu": GPU,
+            "network_volume": TPL.VOLUME["id"], "ceiling_usd_at_amendment": g.get("ceiling_usd")}
+    for k, v in want.items():
+        if b.get(k) != v:
+            bad.append(f"the grant's tool_pilot.{k} is {b.get(k)!r}, not {v!r}")
+    if not isinstance(b.get("decision"), str) or not b["decision"].strip():
+        bad.append("the grant's tool_pilot block quotes no decision")
+    try:
+        dt.date.fromisoformat(str(b.get("date")))
+    except ValueError:
+        bad.append(f"the grant's tool_pilot.date {b.get('date')!r} is not an ISO date")
+    return bad
 
 
 def require_on_pod(path: Path, kind: str, root: Path = REPO_ROOT) -> dict:

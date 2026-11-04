@@ -172,6 +172,29 @@ def cells(doc: dict, mode: str, by_id: dict) -> tuple[list[dict], list[list[dict
     return out, orders
 
 
+# --- the resumable identity ------------------------------------------------------------------------------------------
+
+#: the generation implementation a sealed pilot episode depends on: the runner, the sealing driver, the session, the
+#: tool environment and verifier, the core call parser
+IMPLEMENTATION = ("scripts/stages/stage-0/calibration_volume/run_battery.py",
+                  "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+                  "scripts/stages/stage-2/teacher_modes/tool_session.py",
+                  "scripts/stages/stage-2/teacher_modes/tool_episodes.py",
+                  "src/aadistill/data/tool_calls.py")
+
+
+def pilot_identity(study_identity: str, plan_path: Path = PLAN, *, protocol_path: Path | None = None,
+                   root: Path = REPO) -> dict:
+    """The launch identity a pilot's episodes are sealed under and resumed by: the study identity AND the frozen pilot
+    plan's content, the tool generation protocol, the verification version and the generation implementation
+    (`IMPLEMENTATION`, by sha256). `generation_driver.sealed` refuses a shard sealed under any other, so an earlier
+    plan's, protocol's or implementation's episodes are never reused -- the same sealing, no second system."""
+    parts = {"study_identity_sha256": study_identity, "pilot_plan_sha256": sha(plan_path),
+             "protocol_sha256": sha(protocol_path or TGP.PROTOCOL), "verification_version": TE.VERIFICATION_VERSION,
+             "implementation_sha256": {f: sha(Path(root) / f) for f in IMPLEMENTATION}}
+    return {"sha256": hashlib.sha256(canonical(parts).encode()).hexdigest(), "parts": parts}
+
+
 # --- the pilot-only source admission -------------------------------------------------------------------------------
 
 #: the exact scope the record grants and the exact token a signature must approve: nothing broader is a pilot admission
@@ -463,6 +486,99 @@ def turn_telemetry(records: dict[str, dict]) -> dict:
             "_": "batched engine: a request's TTFT includes its queueing"}
 
 
+# --- the grant: envelope and the pilot-only amendment -----------------------------------------------------------------
+
+AMENDMENT = REPO / "logs/budget/applications/research_a_tool_pilot_2026-11-04/grant_amendment_proposal.json"
+
+
+def envelope_reconciliation() -> dict:
+    """The study grant's envelope read-only (`study_engineering.spent` / `envelope`: every session's closeout cost, an
+    unknown refusing), per kind, beside the A1 phase's $77.00 and Research A's cumulative cap as the grant itself
+    states them -- what the $2.50 pilot would draw on. Nothing here changes a grant."""
+    from shared import study_engineering as SE
+    from stages.teacher_modes import token_matched_phase as TM
+    g = SE.grant(TM.STUDY)
+    spent = SE.spent(TM.STUDY)
+    env = SE.envelope(TM.STUDY, g)
+    by_kind = Counter()
+    for r in spent["runs"]:
+        a = json.loads((REPO / TM.STUDY.run_dir(r["run_id"]) / "governance/authorization.json").read_text())
+        by_kind[(a.get("stage_conditions") or {}).get("kind")] += r["usd"]
+    m = re.search(r"cumulative \$([0-9.]+) is not exceeded \(\$([0-9.]+) spent before the phase\)", g.get("_ceiling", ""))
+    cap_a, before = (float(m.group(1)), float(m.group(2))) if m else (None, None)
+    storage = float(g["phase_a1"]["phase_caps_usd"]["storage_350gb_14d"])
+    phase_sessions = round(spent["sessions_usd"] - by_kind.get("supplement", 0.0), 4)
+    cum = round(before + phase_sessions + storage, 4) if before is not None else None
+    pilot = CAP_OPTIONS["B"][0]
+    return {"read_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "grant": str(TM.STUDY.grant),
+            "grant_sha256": sha(REPO / TM.STUDY.grant),
+            "envelope": {"ceiling_usd": env["ceiling_usd"], "spent_usd": env["spent_usd"],
+                         "remaining_usd": env["remaining_usd"], "unknown_runs": spent["unknown"],
+                         "runs": len(spent["runs"]), "by_kind_usd": {k: round(v, 4) for k, v in sorted(by_kind.items())},
+                         "covers_the_pilot": env["remaining_usd"] >= pilot,
+                         "remaining_after_the_pilot_cap_usd": round(env["remaining_usd"] - pilot, 4)},
+            "a1_phase": {"hard_cap_usd": g["phase_a1"]["hard_cap_usd"], "sessions_usd": phase_sessions,
+                         "storage_booked_usd": storage, "new_spend_usd": round(phase_sessions + storage, 4),
+                         "headroom_usd": round(g["phase_a1"]["hard_cap_usd"] - phase_sessions - storage, 4),
+                         "_": "the pilot is not in the A1 phase's scope: drawing on this grant needs the amendment"},
+            "research_a_cumulative": {"cap_usd": cap_a, "before_the_a1_phase_usd": before,
+                                      "now_usd": cum, "with_the_pilot_cap_usd": round(cum + pilot, 4) if cum else None,
+                                      "headroom_after_usd": round(cap_a - cum - pilot, 4) if cum else None,
+                                      "cross_check": {
+                                          "cap_less_the_first_ceiling_plus_the_supplement_usd": round(
+                                              cap_a - float(g["amendments"][0]["previous_ceiling_usd"])
+                                              + by_kind.get("supplement", 0.0), 4) if cap_a else None,
+                                          "_": "Research A v1's spend is the cap less the token-matched grant's first "
+                                               "ceiling; with the supplement's closeouts it must equal the spend "
+                                               "before the phase"},
+                                      "_": "the grant's own statement (_ceiling) for the cap and the spend before the "
+                                           "phase; the A1 phase's sessions from the closeouts; the 350 GB volume at its "
+                                           "booked 14-day reservation (to 2026-11-15) -- storage past that date is not "
+                                           "booked here and is a separate decision"},
+            "project_cap_usd": g["project_cumulative_cap_usd"], "raises_nothing": True}
+
+
+def grant_amendment(plan_path: Path = PLAN) -> dict:
+    """The exact pilot-only amendment the maintainer would write into the study grant (a PROPOSAL: nothing applies
+    it). Its ``tool_pilot`` block is what `token_matched_phase.pilot_grant_problems` requires at issue; ``decision``
+    and ``date`` stay null for the maintainer."""
+    from shared import study_engineering as SE
+    from stages.teacher_modes import token_matched_phase as TM
+    g = SE.grant(TM.STUDY)
+    doc = json.loads(Path(plan_path).read_text())
+    cap, minutes = CAP_OPTIONS["B"]
+    block = {"approves": APPROVAL, "granted_by": "maintainer", "decision": None, "date": None,
+             "pilot_plan_sha256": sha(plan_path), "tasks_sha256": doc["tasks_file"]["sha256"],
+             "source_admission": _rel(ADMISSION), "hard_cap_usd": cap, "driver_minutes": minutes,
+             "gpu": TM.GPU, "network_volume": VOLUME["id"], "ceiling_usd_at_amendment": g["ceiling_usd"],
+             "draws_on": "this grant's remaining envelope; the ceiling, the per-session cap, the project cap and the "
+                         "card list unchanged",
+             "kind": "tool_pilot (teacher_generation only; never formal, training or evaluation)",
+             "requires": ["the pilot-only source admission signed (tool_pilot.admission_problems)",
+                          "issue, launch and pod checks as the application lists them"]}
+    return {"schema": "aadistill.budget.grant_amendment_proposal/v1",
+            "status": "PROPOSED for the maintainer: NOT applied; the grant is unchanged until the maintainer writes it",
+            "target": {"path": str(TM.STUDY.grant), "sha256_now": sha(REPO / TM.STUDY.grant)},
+            "edits": {"session_hard_caps_usd.tool_pilot": cap, "tool_pilot": block,
+                      "scope (append)": " || AMENDED <date>: the L40S tool pilot -- kind tool_pilot through "
+                                        "scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py "
+                                        f"--pilot) on the frozen pilot plan {block['pilot_plan_sha256'][:12]}... and task "
+                                        f"file {block['tasks_sha256'][:12]}..., measurement only, one L40S on "
+                                        f"{VOLUME['id']}, hard cap ${cap:.2f}, inside this grant's remaining envelope",
+                      "amendments (append)": {"utc": "<date>", "by": "maintainer decision '<quote>'",
+                                              "previous_session_hard_caps_usd": dict(g.get("session_hard_caps_usd") or {}),
+                                              "previous_scope_sha256": hashlib.sha256(
+                                                  str(g.get("scope", "")).encode()).hexdigest(),
+                                              "added": "kind tool_pilot and its block"},
+                      "authorizes (append)": "; and one tool_pilot artifact, measurement only, capped by its kind"},
+            "unchanged": {"ceiling_usd": g["ceiling_usd"], "per_session_hard_cap_usd": g["per_session_hard_cap_usd"],
+                          "project_cumulative_cap_usd": g["project_cumulative_cap_usd"], "gpus": g["gpus"],
+                          "gpu_count_max": g["gpu_count_max"], "never": g.get("never"),
+                          "session_hard_caps_usd (the A1 kinds)": g.get("session_hard_caps_usd"),
+                          "phase_a1": "unchanged, with its spend", "amendments": "kept; one entry appended"},
+            "envelope": envelope_reconciliation(), "authorizes": "nothing"}
+
+
 # --- the application -------------------------------------------------------------------------------------------------
 
 APPLICATION = REPO / "logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json"
@@ -510,10 +626,10 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                   for c in cs} for m, cs in doc["modes"].items()}
     cmd = "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py"
     return {
-        "schema": "aadistill.budget.application/tool_pilot_v3",
+        "schema": "aadistill.budget.application/tool_pilot_v4",
         "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "status": "RE-VERIFIED for the final authorization review (maintainer review of 29b62c93: option B "
-                  "recommended); AUTHORIZES NOTHING: no grant change, no signature, no GPU, no pod, no spend",
+        "status": "FINAL AUTHORIZATION EVIDENCE (maintainer review of 56381f55: conditional GO for option B); "
+                  "AUTHORIZES NOTHING: no grant change, no signature, no issue, no launch, no pod, no spend",
         "recommended_option": {"option": "B", "hard_cap_usd": CAP_OPTIONS["B"][0], "driver_minutes": CAP_OPTIONS["B"][1],
                                "by": "the maintainer's independent review of 29b62c93: one session should complete "
                                      "the 794 runs, the 29 state-evaluation schema_arguments tasks above all",
@@ -563,9 +679,11 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
              "how": f"every signature field in {_rel(admission_path)}: signed_by 'maintainer', approves exactly "
                     f"{APPROVAL!r}, the decision quoted, the date, and the plan sha256, task file sha256 and task count "
                     "copied from the record; issue and the pod refuse anything less (admission_problems)"},
-            {"step": "the maintainer amends the study grant with the pilot's cap", "who": "maintainer",
-             "how": "logs/budget/approvals/teacher_modes_token_matched_grant.json :: session_hard_caps_usd.tool_pilot "
-                    f"= {CAP_OPTIONS['B'][0]:.2f} (option B), and its scope naming the pilot; issue refuses until then"},
+            {"step": "the maintainer writes the pilot-only grant amendment", "who": "maintainer",
+             "how": f"{_rel(AMENDMENT)} into logs/budget/approvals/teacher_modes_token_matched_grant.json: "
+                    f"session_hard_caps_usd.tool_pilot = {CAP_OPTIONS['B'][0]:.2f} and the tool_pilot block (decision, "
+                    "date filled) with the scope, amendments and authorizes appends; issue refuses a cap without the "
+                    "block (pilot_grant_problems)"},
             {"step": "commit; stage the session bundle of that commit on the relay",
              "how": "stages.phase_c1.bundle.stage_bundle (the procedure of every Research A session); the launch's "
                     "bundle_on_relay gate refuses without it"},
@@ -590,9 +708,13 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                     f"--data-center-ids {VOLUME['data_center']} --volume-gb {VOLUME['size_gb']}"},
             {"step": "closeout (the launcher runs it on every terminal path) and the dev box's report",
              "how": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot report --session "
-                    "<scratch>/store/tool_pilot_hybrid [--session <a resumed run's copy>] [--identity <the run's "
-                    "authorization plan_hash, when tool_session.json is missing>] --write <report>"}],
+                    "<scratch>/store/tool_pilot_hybrid [--session <a resumed run's copy>] [--study-identity <the "
+                    "run's authorization plan_hash, when tool_session.json is missing>] --write <report>"}],
         "gates": {"at_issue": ["the grant names a tool_pilot cap and the cap fits it (kind_cap_problems)",
+                               "the grant carries the pilot-only tool_pilot block: approves exactly 'tool_pilot "
+                               "measurement only', granted by the maintainer with a decision and a date, the plan and "
+                               "task file sha256, the source admission, the cap, the L40S, am5m373kuq and the unchanged "
+                               "ceiling (pilot_grant_problems)",
                                "the cap fits the study envelope, the project cap as the provider bills it now and the "
                                "account balance (funding_problems on a live, fail-closed position)",
                                "the L40S check record admits teacher generation (kind_conditions)",
@@ -620,6 +742,20 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                                  "mount) and the pilot's directory new or only the pilot's own files "
                                  "(tool_pilot.storage_problems)"]},
         "storage_precheck": "logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json",
+        "grant": {"amendment_proposal": _rel(AMENDMENT),
+                  "amendment_proposal_sha256": sha(AMENDMENT) if AMENDMENT.is_file() else None,
+                  "envelope": envelope_reconciliation(),
+                  "issue_requires": "the grant's tool_pilot block (token_matched_phase.pilot_grant_problems) beside "
+                                    "session_hard_caps_usd.tool_pilot: a kind cap alone refuses"},
+        "resumption_identity": {"rule": "episodes are sealed and resumed under the pilot identity: the study identity, "
+                                        "the pilot plan's sha256, the protocol's sha256, the verification version and "
+                                        "the generation implementation's sha256 (tool_pilot.pilot_identity); before "
+                                        "resuming, every sealed episode's group input, protocol and runner sha256 must be "
+                                        "this round's (tool_session.resumable); anything else refuses",
+                                "implementation_sha256": {f: sha(REPO / f) for f in IMPLEMENTATION}},
+        "prefill": "UNMEASURED by design: the batched engine interleaves prefill and decode; the formal generation's "
+                   "re-pricing must not treat any prefill rate as measured (the TTFT distribution and prompt tokens are "
+                   "reported instead)",
         "report_states": {"COMPLETE": "every required attempt sealed and the session ended ALL_DONE",
                           "PARTIAL": "some sealed, some required attempt not (deadline, interruption, failure); pass "
                                      "rates over the sealed attempts only",
@@ -657,7 +793,9 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                    "data is a separate maintainer decision",
         "position": position, "tests": tests,
         "needed_from_the_maintainer": ["sign the pilot-only source admission (every signature field)",
-                                       "amend the grant with session_hard_caps_usd.tool_pilot (option B: $2.50)",
+                                       "write the pilot-only grant amendment (grant_amendment_proposal.json: the "
+                                       "tool_pilot block with its decision and date, session_hard_caps_usd.tool_pilot "
+                                       "$2.50, the scope, amendments and authorizes appends; nothing else changes)",
                                        "the final authorization"],
         "not_verifiable_at_zero_cost": ["the installed vLLM's metric names and values (KV-cache usage, preemptions) "
                                         "and its log lines: read on the first run, UNMEASURED where absent",
@@ -738,7 +876,8 @@ def _measured(v, why: str = "not reported by the engine or the GPU tools on this
     return {"value": v} if v not in (None, {}, []) else {"value": UNMEASURED, "why": why}
 
 
-def report(session_dirs, *, identity: str | None = None, plan_path: Path = PLAN, tasks_path: Path = TASKS) -> dict:
+def report(session_dirs, *, study_identity: str | None = None, plan_path: Path = PLAN,
+           tasks_path: Path = TASKS) -> dict:
     """The pilot's measurements from one or more secured copies of its session directory, complete or not:
 
     * every sealed record is read -- a group need not have a ``.complete`` -- after `generation_driver.sealed` verifies
@@ -749,18 +888,19 @@ def report(session_dirs, *, identity: str | None = None, plan_path: Path = PLAN,
     * pass rates divide by the SEALED attempts (first candidate) and by the DETERMINED tasks (both candidates), never
       by tasks that were not attempted;
     * the state (`STATES`), and the session evidence present or missing: without ``tool_session.json`` (a forced end)
-      the identity comes from the caller (the run's authorization ``plan_hash``) and the report says so;
+      the caller gives the study identity (the run's authorization ``plan_hash``), the pilot identity is derived from
+      it and the frozen plan (`pilot_identity`), and the report says so;
     * telemetry, every quantity a run could not read marked UNMEASURED, never 0."""
     doc, by_id = load(plan_path, tasks_path)
     dirs = [Path(d) for d in ([session_dirs] if isinstance(session_dirs, (str, Path)) else session_dirs)]
     sessions = {str(d): json.loads((d / "tool_session.json").read_text()) if (d / "tool_session.json").is_file() else None
                 for d in dirs}
     idents = {r["identity"] for r in sessions.values() if r and r.get("identity")}
-    if identity:
-        idents.add(identity)
+    if study_identity:
+        idents.add(pilot_identity(study_identity, plan_path)["sha256"])
     if len(idents) != 1:
         raise PilotError(f"the launch identity is {'unknown' if not idents else 'ambiguous'}: pass the run's "
-                         "authorization plan_hash (--identity) when tool_session.json is missing")
+                         "authorization plan_hash (--study-identity) when tool_session.json is missing")
     ident = idents.pop()
     proto = json.loads(TGP.PROTOCOL.read_text())
     stop_ids = [int(x) for x in proto["execution"]["stop_ids"]]
@@ -870,11 +1010,14 @@ def main(argv=None) -> int:
     ap_.add_argument("--write", default=str(APPLICATION))
     ap_.add_argument("--live-position", action="store_true", help="re-read the project position (read-only)")
     ap_.add_argument("--tests", default=None, help="a JSON file of the test evidence to record")
+    ga = sub.add_parser("grant-amendment")
+    ga.add_argument("--write", default=str(AMENDMENT))
     sp = sub.add_parser("storage-precheck")
     sp.add_argument("--write", required=True)
     r = sub.add_parser("report")
     r.add_argument("--session", action="append", required=True, help="a secured session directory (repeatable)")
-    r.add_argument("--identity", default=None, help="the run's authorization plan_hash, when tool_session.json is missing")
+    r.add_argument("--study-identity", default=None,
+                   help="the run's authorization plan_hash, when tool_session.json is missing")
     r.add_argument("--write", required=True)
     a = ap.parse_args(argv)
     if a.cmd == "build":
@@ -886,6 +1029,10 @@ def main(argv=None) -> int:
         rec = source_admission(doc, Path(a.plan))
         Path(a.write).write_text(json.dumps(rec, indent=1, ensure_ascii=False) + "\n")
         print(json.dumps({k: rec[k] for k in ("status", "tasks", "tasks_sha256")}, indent=1))
+    elif a.cmd == "grant-amendment":
+        doc = grant_amendment()
+        Path(a.write).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
+        print(json.dumps(doc["envelope"], indent=1))
     elif a.cmd == "storage-precheck":
         doc = storage_precheck()
         Path(a.write).write_text(json.dumps(doc, indent=1) + "\n")
@@ -905,7 +1052,8 @@ def main(argv=None) -> int:
         Path(a.write).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
         print(json.dumps(doc["hard_cap_check"]["options"], indent=1)[:3000])
     else:
-        Path(a.write).write_text(json.dumps(report([Path(x) for x in a.session], identity=a.identity), indent=1) + "\n")
+        Path(a.write).write_text(json.dumps(report([Path(x) for x in a.session], study_identity=a.study_identity),
+                                            indent=1) + "\n")
     return 0
 
 

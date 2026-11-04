@@ -1,7 +1,7 @@
 {
- "schema": "aadistill.budget.application/tool_pilot_v3",
- "written_utc": "2026-11-04T10:03:56Z",
- "status": "RE-VERIFIED for the final authorization review (maintainer review of 29b62c93: option B recommended); AUTHORIZES NOTHING: no grant change, no signature, no GPU, no pod, no spend",
+ "schema": "aadistill.budget.application/tool_pilot_v4",
+ "written_utc": "2026-11-04T10:37:55Z",
+ "status": "FINAL AUTHORIZATION EVIDENCE (maintainer review of 56381f55: conditional GO for option B); AUTHORIZES NOTHING: no grant change, no signature, no issue, no launch, no pod, no spend",
  "recommended_option": {
   "option": "B",
   "hard_cap_usd": 2.5,
@@ -314,9 +314,9 @@
    "how": "every signature field in logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json: signed_by 'maintainer', approves exactly 'tool_pilot measurement only', the decision quoted, the date, and the plan sha256, task file sha256 and task count copied from the record; issue and the pod refuse anything less (admission_problems)"
   },
   {
-   "step": "the maintainer amends the study grant with the pilot's cap",
+   "step": "the maintainer writes the pilot-only grant amendment",
    "who": "maintainer",
-   "how": "logs/budget/approvals/teacher_modes_token_matched_grant.json :: session_hard_caps_usd.tool_pilot = 2.50 (option B), and its scope naming the pilot; issue refuses until then"
+   "how": "logs/budget/applications/research_a_tool_pilot_2026-11-04/grant_amendment_proposal.json into logs/budget/approvals/teacher_modes_token_matched_grant.json: session_hard_caps_usd.tool_pilot = 2.50 and the tool_pilot block (decision, date filled) with the scope, amendments and authorizes appends; issue refuses a cap without the block (pilot_grant_problems)"
   },
   {
    "step": "commit; stage the session bundle of that commit on the relay",
@@ -340,12 +340,13 @@
   },
   {
    "step": "closeout (the launcher runs it on every terminal path) and the dev box's report",
-   "how": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot report --session <scratch>/store/tool_pilot_hybrid [--session <a resumed run's copy>] [--identity <the run's authorization plan_hash, when tool_session.json is missing>] --write <report>"
+   "how": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot report --session <scratch>/store/tool_pilot_hybrid [--session <a resumed run's copy>] [--study-identity <the run's authorization plan_hash, when tool_session.json is missing>] --write <report>"
   }
  ],
  "gates": {
   "at_issue": [
    "the grant names a tool_pilot cap and the cap fits it (kind_cap_problems)",
+   "the grant carries the pilot-only tool_pilot block: approves exactly 'tool_pilot measurement only', granted by the maintainer with a decision and a date, the plan and task file sha256, the source admission, the cap, the L40S, am5m373kuq and the unchanged ceiling (pilot_grant_problems)",
    "the cap fits the study envelope, the project cap as the provider bills it now and the account balance (funding_problems on a live, fail-closed position)",
    "the L40S check record admits teacher generation (kind_conditions)",
    "the pilot plan and task file load (tool_pilot.load) and the source admission passes tool_pilot.admission_problems: signed by the maintainer, approving exactly 'tool_pilot measurement only', a decision and a valid date, the exact scope, and the plan sha256, task file sha256, task count and sources it signs equal to the record and the files",
@@ -368,6 +369,64 @@
   ]
  },
  "storage_precheck": "logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json",
+ "grant": {
+  "amendment_proposal": "logs/budget/applications/research_a_tool_pilot_2026-11-04/grant_amendment_proposal.json",
+  "amendment_proposal_sha256": "fdb62eb3bec34111f1e08c600c238729f6e79aa9cb7339dbb11ffc512caa9526",
+  "envelope": {
+   "read_utc": "2026-11-04T10:37:55Z",
+   "grant": "logs/budget/approvals/teacher_modes_token_matched_grant.json",
+   "grant_sha256": "1194e6d57408fbfbc3d07eb928901975c45121afa2d9990f0c044169208861af",
+   "envelope": {
+    "ceiling_usd": 79.5289,
+    "spent_usd": 49.613,
+    "remaining_usd": 29.9159,
+    "unknown_runs": [],
+    "runs": 11,
+    "by_kind_usd": {
+     "inputs": 0.5713,
+     "search": 24.1526,
+     "supplement": 15.8689,
+     "train_a1": 9.0202
+    },
+    "covers_the_pilot": true,
+    "remaining_after_the_pilot_cap_usd": 27.4159
+   },
+   "a1_phase": {
+    "hard_cap_usd": 77.0,
+    "sessions_usd": 33.7441,
+    "storage_booked_usd": 13.34,
+    "new_spend_usd": 47.0841,
+    "headroom_usd": 29.9159,
+    "_": "the pilot is not in the A1 phase's scope: drawing on this grant needs the amendment"
+   },
+   "research_a_cumulative": {
+    "cap_usd": 142.19,
+    "before_the_a1_phase_usd": 62.17,
+    "now_usd": 109.2541,
+    "with_the_pilot_cap_usd": 111.7541,
+    "headroom_after_usd": 30.4359,
+    "cross_check": {
+     "cap_less_the_first_ceiling_plus_the_supplement_usd": 62.1706,
+     "_": "Research A v1's spend is the cap less the token-matched grant's first ceiling; with the supplement's closeouts it must equal the spend before the phase"
+    },
+    "_": "the grant's own statement (_ceiling) for the cap and the spend before the phase; the A1 phase's sessions from the closeouts; the 350 GB volume at its booked 14-day reservation (to 2026-11-15) -- storage past that date is not booked here and is a separate decision"
+   },
+   "project_cap_usd": 868.0,
+   "raises_nothing": true
+  },
+  "issue_requires": "the grant's tool_pilot block (token_matched_phase.pilot_grant_problems) beside session_hard_caps_usd.tool_pilot: a kind cap alone refuses"
+ },
+ "resumption_identity": {
+  "rule": "episodes are sealed and resumed under the pilot identity: the study identity, the pilot plan's sha256, the protocol's sha256, the verification version and the generation implementation's sha256 (tool_pilot.pilot_identity); before resuming, every sealed episode's group input, protocol and runner sha256 must be this round's (tool_session.resumable); anything else refuses",
+  "implementation_sha256": {
+   "scripts/stages/stage-0/calibration_volume/run_battery.py": "5cb6529dfc64eea4c3511ff59537b897bc75669a726d0f3c82a262d5d19fdd9a",
+   "scripts/stages/stage-2/reasoning_data/generation_driver.py": "35ce01bb6d84244b607831917eebac2e1b23e44ff689031f1292c225cc4c5c41",
+   "scripts/stages/stage-2/teacher_modes/tool_session.py": "5ddd3d4a5170090dd9569b6bf2ef9517d867ed515b3f7c3af21c8d16b751af52",
+   "scripts/stages/stage-2/teacher_modes/tool_episodes.py": "d9464a3531a18e754184ba066c93479d24d616cb546949a49f817332d1f6f32f",
+   "src/aadistill/data/tool_calls.py": "2f9a42badf1fe03be8dc9c58ac3170b3a8c5c755bbec630950cc18ae9dd6a6d6"
+  }
+ },
+ "prefill": "UNMEASURED by design: the batched engine interleaves prefill and decode; the formal generation's re-pricing must not treat any prefill rate as measured (the TTFT distribution and prompt tokens are reported instead)",
  "report_states": {
   "COMPLETE": "every required attempt sealed and the session ended ALL_DONE",
   "PARTIAL": "some sealed, some required attempt not (deadline, interruption, failure); pass rates over the sealed attempts only",
@@ -391,11 +450,11 @@
  ],
  "outputs": "measurement records only by default (sealed episodes, census, telemetry, report); reuse in formal data is a separate maintainer decision",
  "position": {
-  "fetched_utc": "2026-11-04T10:03:55+00:00",
+  "fetched_utc": "2026-11-04T10:37:54+00:00",
   "committed_usd": 838.0302,
   "project_cap_usd": 868.0,
   "project_remaining_usd": 29.9698,
-  "balance_usd": 92.8051843863,
+  "balance_usd": 92.7658093863,
   "account_pods": [],
   "account_volumes": [
    "4rhubprswo",
@@ -404,8 +463,8 @@
  },
  "tests": {
   "run_at_commit": "the commit carrying this application (dev box, CPU, $0)",
-  "convergence": "310 passed, 1 skipped: the teacher_modes experiment suite, test_study_engineering, test_episode_loop, test_generation_driver, the docs structure test",
-  "pilot_tests": "scripts/stages/stage-2/teacher_modes/tests/test_tool_pilot.py: 43 passed",
+  "convergence": "316 passed, 1 skipped: the teacher_modes experiment suite, test_study_engineering, test_generation_driver, the docs structure test",
+  "pilot_tests": "scripts/stages/stage-2/teacher_modes/tests/test_tool_pilot.py: 56 passed",
   "refusal_paths_simulated": {
    "no grant cap / unsigned admission / issue": "test_the_pilot_kind_claims_generation_only_and_refuses_without_its_records_and_cap",
    "cap above the grant's": "test_a_grant_cap_admits_the_pilot_only_up_to_it",
@@ -427,9 +486,14 @@
    "another task file or sources": "test_another_task_file_or_source_refuses",
    "issue and pod share one admission check": "test_issue_and_the_pod_apply_the_same_admission_check",
    "volume too full or a foreign file in the pilot's directory": "test_the_pod_refuses_a_full_volume_or_a_directory_it_did_not_write",
-   "4rhubprswo or another volume, size or datacenter": "test_the_pilot_volume_is_am5m373kuq_and_never_4rhubprswo"
+   "4rhubprswo or another volume, size or datacenter": "test_the_pilot_volume_is_am5m373kuq_and_never_4rhubprswo",
+   "a kind cap without the grant's pilot-only block": "test_the_grant_must_carry_the_pilot_only_scope_not_just_a_cap",
+   "a grant block with another approval, signer, decision, date, plan, task file, cap, card, volume or ceiling": "test_a_pilot_grant_block_that_is_not_exactly_the_pilots_refuses",
+   "the envelope covers the pilot; the amendment raises nothing; the grant untouched": "test_the_envelope_covers_the_pilot_and_the_amendment_raises_nothing",
+   "same study identity and task ids, another plan / protocol / implementation: old shards refused": "test_an_earlier_plan_protocol_or_implementation_never_resumes",
+   "an episode sealed from another round input": "test_a_sealed_episode_from_another_round_input_refuses"
   },
-  "mutation": "this round: 18 checks mutated one at a time, each caught by a test (one only after adding the ambiguous-identity case); previous round: 13, 12 caught, 1 redundant (the one-round limit also held by each frozen cell's bound)",
+  "mutation": "final round: 7 checks mutated (grant block required, its fields, the identity's plan / protocol / implementation, the round input, the pilot identity used for sealing), each caught; earlier rounds: 18 and 13 (12 + 1 redundant)",
   "not_verified": [
    "any GPU execution: vLLM's metric names, nvidia-smi on the pod and the throughput are read on the first real run",
    "the shared runner's live create/teardown path (exercised by earlier paid sessions, not by this $0 round)"
@@ -437,7 +501,7 @@
  },
  "needed_from_the_maintainer": [
   "sign the pilot-only source admission (every signature field)",
-  "amend the grant with session_hard_caps_usd.tool_pilot (option B: $2.50)",
+  "write the pilot-only grant amendment (grant_amendment_proposal.json: the tool_pilot block with its decision and date, session_hard_caps_usd.tool_pilot $2.50, the scope, amendments and authorizes appends; nothing else changes)",
   "the final authorization"
  ],
  "not_verifiable_at_zero_cost": [
