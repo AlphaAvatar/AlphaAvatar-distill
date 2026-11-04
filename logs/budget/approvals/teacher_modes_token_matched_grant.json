@@ -38,7 +38,7 @@
    "created_utc": "2026-11-01T12:55:01Z"
   }
  },
- "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them || AMENDED 2026-11-04: the L40S tool pilot -- kind tool_pilot through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --pilot) on the frozen pilot plan 0a1c831fdfe4... and task file e67e8acb7050..., measurement only, one L40S on am5m373kuq, hard cap $2.50, inside this grant's remaining envelope",
+ "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them || AMENDED 2026-11-04: the L40S tool pilot -- kind tool_pilot through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --pilot) on the frozen pilot plan 0a1c831fdfe4... and task file e67e8acb7050..., measurement only, one L40S on am5m373kuq, hard cap $2.50, inside this grant's remaining envelope || AMENDED 2026-11-04: the tool pilot's placement -- any Secure Cloud datacenter offering one L40S at or below the grant's price, no network volume (the pod's container disk, sealed shards pulled to the dev box and resumed from them); its $2.50 kind cap cumulative over every attempt",
  "retries": "ordinary pre-generation engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); sealed records are never regenerated; a deterministic failure is never retried unchanged",
  "application": {
   "path": "logs/budget/applications/research_a_tm_2026-10-31/proposal.json"
@@ -49,7 +49,7 @@
   "Research A v1's frozen identity or grant as authority for any of this",
   "Research B"
  ],
- "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind; and one tool_pilot artifact, measurement only, capped by its kind",
+ "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind; and tool_pilot artifacts, one per attempt, measurement only, together capped by the kind's cumulative $2.50",
  "_session_hard_caps": "supplement 0: done, closed for new work. inputs: the calibration top-up and the state evaluation's generation ($2.65). search: the hybrid D4 full search ($41.41). train_a1: A1's two seeds trained and evaluated in turn ($7.05 each). A retry of a kind draws on the same envelope; the phase total never exceeds the ceiling.",
  "phase_a1": {
   "decided_utc": "2026-11-01",
@@ -105,6 +105,16 @@
    },
    "previous_scope_sha256": "ee8723d727c4580fa87f0dee9cb19ce2ffb4d3b625c52496aa03e7a6b4337d7a",
    "added": "kind tool_pilot and its block"
+  },
+  {
+   "utc": "2026-11-04",
+   "by": "maintainer decision 'GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正' (2026-11-04), section 1",
+   "previous_tool_pilot": {
+    "network_volume": "am5m373kuq"
+   },
+   "previous_scope_sha256": "eeeba2cd81a415109a9fde77c35ef4a4ce037e5eacbef83e38389a3640030eea",
+   "changed": "tool_pilot: placement (no network volume, any Secure Cloud L40S datacenter), the kind cap cumulative over attempts; nothing else",
+   "unchanged": "ceiling, per-session cap, project cap, cards and price, every other kind's cap"
   }
  ],
  "tool_pilot": {
@@ -118,13 +128,33 @@
   "hard_cap_usd": 2.5,
   "driver_minutes": 55.0,
   "gpu": "NVIDIA L40S",
-  "network_volume": "am5m373kuq",
+  "network_volume": null,
+  "placement": {
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "network_volume": null,
+   "data_centers": "any Secure Cloud datacenter offering the L40S at or below the grant's price",
+   "work_root": "/workspace",
+   "storage": "the pod's container disk; sealed shards pulled to the dev box on every poll and staged back to a replacement pod (--resume-from); no network volume"
+  },
+  "cap_is_cumulative": true,
+  "attempts": "each attempt is a new run with a new one-use artifact; its hard cap is at most the kind cap less the closeout all-in of every earlier tool_pilot run (token_matched_phase.kind_cap_problems)",
   "ceiling_usd_at_amendment": 79.5289,
   "draws_on": "this grant's remaining envelope; the ceiling, the per-session cap, the project cap and the card list unchanged",
   "kind": "tool_pilot (teacher_generation only; never formal, training or evaluation)",
   "requires": [
    "the pilot-only source admission signed (tool_pilot.admission_problems)",
    "issue, launch and pod checks as the application lists them"
-  ]
+  ],
+  "amended": {
+   "date": "2026-11-04",
+   "decision": "maintainer 2026-11-04 ('GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正', section 1): '本次 Pilot 的候选范围扩大为所有满足现有运行环境、价格、资源和数据持久化要求的 Secure Cloud L40S，不再固定 EUR-IS-2 ... 本轮 Pilot 所有 attempt 的累计新增费用上限仍为 $2.50 ... 不能把 $2.50 变成每个 attempt 都可重新使用的额度'",
+   "changed": [
+    "network_volume am5m373kuq -> none (placement)",
+    "cap_is_cumulative"
+   ],
+   "by": "the agent, on that explicit written instruction"
+  }
  }
 }

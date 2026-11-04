@@ -1183,6 +1183,21 @@ Short fixed-compute runs are **diagnostics** unless convergence evidence
 demonstrates sufficient data coverage and optimization. A short-run failure MUST
 NOT by itself reject the teacher-aligned route.
 
+### P17.1. One teacher lineage per student
+
+**MAINTAINER DECISION 2026-11-04.** A student is initialized directly from its
+own teacher, and everything that later trains it belongs to that same teacher
+lineage: offline SFT and KD targets, the online KD teacher, the tokenizer, the
+chat template and the model configuration. Initializing a student from
+teacher A and then distilling or training it with teacher B is forbidden.
+
+A lineage is one teacher checkpoint identity (repository and revision) and
+what is derived from it: calibration, search, initialization, generated data,
+online KD teacher and checkpoints. The same model family or the same
+architecture is NOT the same lineage. Each experiment records its lineage's
+identities and compatibility requirements in its configuration and manifests;
+`src/aadistill` names no teacher (P3).
+
 ### P18. Unrestricted generation during model measurement
 
 Formal model measurement MUST NOT impose an artificial reasoning-token or

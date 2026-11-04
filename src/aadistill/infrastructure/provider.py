@@ -17,7 +17,11 @@ Two transports, chosen for what this project has actually verified (P14):
   call every session in this project has actually made. The GraphQL
   `podTerminate` mutation is implemented as a fallback and is marked
   `verified=False` in the journal: it comes from RunPod's public schema and has
-  never been exercised against the live endpoint from this repo.
+  never been exercised against the live endpoint from this repo. runpodctl
+  3.x deletes over REST v2 (its legacy `remove pod` and `pod delete` share one
+  call); 2.x deleted over REST v1, which RunPod retires on 2026-11-15, so a 2.x
+  CLI after that date leaves only the GraphQL fallback. GraphQL itself retires
+  in early 2027.
 
 The ground truth for "did the pod stop" is neither of those. It is a subsequent
 **poll** showing the pod gone or exited. A termination call that returns 200 and

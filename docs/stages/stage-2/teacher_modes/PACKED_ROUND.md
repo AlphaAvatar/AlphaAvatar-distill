@@ -710,7 +710,7 @@ by `tool_pilot.py application --live-position`).
   evaluation engine and initialization are never read for the pilot. Every other kind keeps the whole-identity gate,
   which still refuses. The launch adds `the_pilot_runs_on_an_l40s` (one L40S; an A100 is
   never a fallback) to the runner's prechecks (unused artifact, the grant's price, all-in within the cap, the study
-  identity, the bound files, the live project position, the planned volume, the bound records, the bundle).
+  identity, the bound files, the live project position, the pilot's placement, the bound records, the bundle).
 - **Session** (`tool_session.py --pilot`): verifies the plan, the task file and the signed admission again, then one
   round per mode: first candidates of every frozen task, second candidates of the refused tasks only. Sealed shards
   make a replacement session (a new run) regenerate nothing; a generation failure ends RUN_FAILED with every finished
@@ -753,13 +753,29 @@ by `tool_pilot.py application --live-position`).
   record's writing and today, and the plan sha256, task file sha256 and task count it signs equal to the record's;
   the record's exact scope and exclusions, the plan, the task file, the count and the sources (datasets, revisions,
   counts) equal to the files. `signed_by` alone is no signature. The agent never fills these fields.
-- **Storage** ([`pilot_storage_precheck_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json),
-  read-only): the provider reports `am5m373kuq` at 55 GB in EUR-IS-2, `4rhubprswo` beside it, 0 pods, but no used
+- **Placement and storage since 2026-11-04T16Z** (maintainer, "GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正"):
+  any Secure Cloud datacenter offering one L40S at or below the grant's $1.19/h, and NO network volume
+  (`tool_pilot.PLACEMENT`). The pilot reads nothing a volume holds: its tasks are a local asset and the teacher comes
+  from the hub at its pinned revision. `am5m373kuq` locked every draw to EUR-IS-2, which had no L40S on 2026-11-04,
+  and it supports no new storage. The session writes to the container disk under `/workspace/teacher_modes`
+  (`token_matched_phase.durable`).
+  - The poll pulls every sealed shard by its sha256 into `<scr>/store/tool_pilot_hybrid` (`secure_pilot`).
+  - A replacement pod gets that copy through `--resume-from` (`tool_session.bring_sealed`, then `resumable` re-verifies
+    each shard).
+  - The launch refuses any volume (`the_pilot_placement_is_the_planned_one`); `4rhubprswo` and `am5m373kuq` are never
+    attached.
+  - The kind cap is cumulative: every attempt's hard cap plus the earlier tool_pilot runs' closeouts must fit $2.50
+    (`kind_cap_problems`).
+  - `tool_pilot placement` reads each datacenter's L40S stock (read-only) as a hint for `--data-center-ids`.
+  - The runner computes the provider deadline at each create, settles an answer without a pod id from the account,
+    and rotates datacenter groups (section 8 of [`aadistill-gpu-experiments`](../../../../.agents/skills/aadistill-gpu-experiments/SKILL.md)).
+- **Storage until 2026-11-04T16Z** ([`pilot_storage_precheck_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json),
+  read-only, superseded by the placement above): the provider reported `am5m373kuq` at 55 GB in EUR-IS-2, `4rhubprswo` beside it, 0 pods, but no used
   bytes; the records put at least 14.3 GB there (H1-PA's and the mixed calibration's checkpoints) plus Research A v1's
   `teacher_modes` entries, not re-listed since 2026-10-30. So the pod measures it: before generating,
   `storage_problems` requires 2 GB free (the size less the bytes on the mount; the pilot writes well under 0.5 GB) and a
   pilot directory that is new or holds only the pilot's own files; the teacher snapshot goes to the container disk. The
-  launch refuses any volume but `am5m373kuq` (`the_pilot_volume_is_the_planned_one`).
+  launch refused any volume but `am5m373kuq`.
 - **The grant's pilot-only scope** (review of `56381f55`). A kind cap alone no longer issues: `pilot_grant_problems`
   requires a `tool_pilot` block in the study grant -- approving exactly `tool_pilot measurement only`, granted by the
   maintainer with a decision and a date, naming the frozen plan and task file by sha256, the source admission, the

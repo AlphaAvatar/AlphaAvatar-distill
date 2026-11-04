@@ -364,7 +364,7 @@ def source_admission(doc: dict, plan_path: Path = PLAN, tasks_path: Path | None 
             "authorizes": "nothing by itself"}
 
 
-# --- the volume ------------------------------------------------------------------------------------------------------
+# --- storage and placement ---------------------------------------------------------------------------------------
 
 PILOT_DIR = "tool_pilot_hybrid"
 #: the free space the pod must find before generating: about four times what 794 episodes' shards, raw outputs,
@@ -373,70 +373,104 @@ MIN_FREE_BYTES = 2 * 10 ** 9
 #: what the pilot writes inside its own directory, and nothing else may be there
 OWN = re.compile(r"^(pilot_[A-Za-z0-9-]+_r1_pass\d+\..+|pilot_[A-Za-z0-9-]+_r1\.jsonl|inputs|telemetry\.jsonl|"
                  r"tool_session\.json)$")
+#: Where the pilot runs (maintainer 2026-11-04: every Secure Cloud L40S that meets the runtime, price, resource and
+#: persistence requirements, no longer EUR-IS-2 alone). One L40S and NO network volume: the pilot reads nothing a
+#: volume holds (its tasks are a local asset, the teacher comes from the hub at its pinned revision), so a volume would
+#: only lock the draw to its datacenter. The session writes to the pod's container disk under ``work_root``; every
+#: sealed shard is pulled to the dev box on each poll (`token_matched_phase.secure`) and a replacement pod receives
+#: the dev box's copies (`tool_session --resume-from`). am5m373kuq stays retained and untouched; 4rhubprswo, the v2
+#: Top-1's only copy, is never attached.
+PLACEMENT = {"gpu": "NVIDIA L40S", "gpu_count": 1, "cloud": "SECURE", "network_volume": None,
+             "data_centers": "any Secure Cloud datacenter offering the L40S at or below the grant's price",
+             "work_root": "/workspace",
+             "storage": "the pod's container disk; sealed shards pulled to the dev box on every poll and staged back "
+                        "to a replacement pod (--resume-from); no network volume"}
 
 
-def storage_problems(out: Path, mount: Path, volume_gb: float | None, *, used=None) -> tuple[list[str], dict]:
-    """The pod's volume check before the pilot generates: the provider's size less the bytes actually on the mount
-    (`h1pa_driver.used_bytes`: a network volume's df reports the host) leaves at least `MIN_FREE_BYTES`, and the
-    pilot's directory is new or holds only the pilot's own files -- so nothing of H1-PA, the mixed calibration or
-    Research A on the volume is written over. Returns (problems, the measurement)."""
-    from stages.reasoning_data.h1pa_driver import used_bytes
+def storage_problems(out: Path, mount: Path, volume_gb: float | None, *, used=None, free=None) -> tuple[list[str], dict]:
+    """The pod's storage check before the pilot generates: at least `MIN_FREE_BYTES` free where it writes, and the
+    pilot's directory new or holding only the pilot's own files -- nothing is written over. On a network volume
+    (``volume_gb``, the provider's size) the free space is that size less the bytes on the mount
+    (`h1pa_driver.used_bytes`: a network volume's df reports the host); on the container disk (no volume, the pilot's
+    placement) it is the filesystem's own free space. Returns (problems, the measurement)."""
+    import shutil
     out, mount = Path(out), Path(mount)
-    if volume_gb is None:
-        return ["the volume's provider size is unknown (--volume-gb)"], {}
     if mount not in out.resolve().parents and mount.resolve() not in out.resolve().parents:
-        return [f"{out} is not on the mount {mount}"], {}
-    used_b = (used or used_bytes)(mount)
-    free = int(float(volume_gb) * 10 ** 9) - used_b
+        return [f"{out} is not under {mount}"], {}
+    if volume_gb is None:
+        used_b, free_b = None, int((free or (lambda p: shutil.disk_usage(p).free))(mount))
+    else:
+        from stages.reasoning_data.h1pa_driver import used_bytes
+        used_b = (used or used_bytes)(mount)
+        free_b = int(float(volume_gb) * 10 ** 9) - used_b
     names = sorted(f.name for f in out.iterdir()) if out.is_dir() else []
     names += sorted(f"inputs/{f.name}" for f in (out / "inputs").iterdir()) if (out / "inputs").is_dir() else []
     foreign = [n for n in names if not OWN.match(n.split("/")[-1])]
     bad = []
-    if free < MIN_FREE_BYTES:
-        bad.append(f"{free / 1e9:.2f} GB free on the {volume_gb} GB volume, below the {MIN_FREE_BYTES / 1e9:g} GB the "
-                   "pilot requires")
+    if free_b < MIN_FREE_BYTES:
+        bad.append(f"{free_b / 1e9:.2f} GB free {'on the ' + str(volume_gb) + ' GB volume' if volume_gb else 'on the disk'}"
+                   f", below the {MIN_FREE_BYTES / 1e9:g} GB the pilot requires")
     if foreign:
         bad.append(f"{out.name} holds files the pilot did not write, e.g. {foreign[:3]}: nothing is written over")
-    return bad, {"mount": str(mount), "volume_gb": volume_gb, "used_bytes": used_b, "free_bytes": free,
+    return bad, {"mount": str(mount), "storage": "network_volume" if volume_gb else "container_disk",
+                 "volume_gb": volume_gb, "used_bytes": used_b, "free_bytes": free_b,
                  "required_free_bytes": MIN_FREE_BYTES, "pilot_dir": out.name, "pilot_dir_entries": len(names)}
 
 
-STORAGE_RECORD = REPO / "logs/stages/stage-2/reasoning_data/storage/h1pa_volume_am5m373kuq.json"
+def resume_problems(src: Path) -> tuple[list[str], dict]:
+    """A dev-box copy of an earlier pilot session (`token_matched_phase.secure` pulled it) offered to a replacement
+    pod: every ``.done`` marker's shard present and hashing to it, nothing but the pilot's own files. The pod checks
+    the rest -- the pilot identity, the round input, the protocol, the runner (`tool_session.resumable`)."""
+    src, bad = Path(src), []
+    if not src.is_dir():
+        return [f"no secured pilot session at {src}"], {}
+    dones = sorted(src.glob("pilot_*_r1_pass*.part*.done"))
+    for d in dones:
+        shard = d.with_suffix(".jsonl")
+        if not shard.is_file() or sha(shard) != d.read_text().strip():
+            bad.append(f"{shard.name} does not hash to its marker")
+    foreign = [f.name for f in src.iterdir() if not OWN.match(f.name)]
+    if foreign:
+        bad.append(f"{src} holds files the pilot did not write, e.g. {foreign[:3]}")
+    return bad, {"path": str(src), "sealed_shards": len(dones),
+                 "records": sum(len(d.with_suffix(".jsonl").read_text().splitlines()) for d in dones
+                                if d.with_suffix(".jsonl").is_file())}
 
 
-def storage_precheck(resources=None) -> dict:
-    """The $0, read-only look at the pilot's volume before any grant: what the provider reports now (the volume, its
-    size and datacenter, the pods), what the records say is on it, where the pilot would write, and why the free
-    space itself is measured on the pod (`storage_problems`): the provider reports no used bytes, and a network
-    volume's df reports the host."""
-    if resources is None:
+#: RunPod's per-datacenter availability, read-only (`placement`)
+DATACENTERS_QUERY = ("query { dataCenters { id name location storageSupport listed "
+                     "gpuAvailability { gpuTypeId stockStatus available } } }")
+
+
+def placement(provider=None, gpu: str = PLACEMENT["gpu"]) -> dict:
+    """The $0, read-only placement read before an attempt: every datacenter the provider lists with its stock of the
+    pilot's GPU (a HINT: a create can still find none), the account's resources (pods and volumes) and the GPU's
+    Secure Cloud price. ``candidates`` lists the datacenters that offer the GPU at all, by stock; a launch passes them
+    to ``--data-center-ids`` or passes none and lets the provider choose. No volume is involved (`PLACEMENT`)."""
+    if provider is None:
         from aadistill.infrastructure.provider import RunPodProvider, read_api_key
-        resources = RunPodProvider(read_api_key(str(Path("~/.runpod/config.toml").expanduser()))).account_resources()
-    rec = json.loads(STORAGE_RECORD.read_text())
-    known = {"h1pa (4 checkpoints, contents_after_pa2)": sum(m["bytes"] for m in rec["contents_after_pa2"]["members"]),
-             "mixed_v2 (2 checkpoints, contents_after_mc2)": sum(m["bytes"]
-                                                                 for m in rec["contents_after_mc2"]["members_added"])}
-    vol = next((v for v in resources.network_volumes if v.get("id") == VOLUME["id"]), None)
-    return {"schema": "aadistill.stage2.teacher_modes.pilot_storage_precheck/v1",
-            "read_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "provider": {"known": resources.known, "error": resources.error, "volume": vol,
-                         "other_volumes": [v.get("id") for v in resources.network_volumes if v.get("id") != VOLUME["id"]],
-                         "pods": list(getattr(resources, "pods", ()) or [])},
-            "matches_the_planned_volume": bool(vol) and int(vol.get("size") or 0) == VOLUME["size_gb"]
-            and vol.get("dataCenterId") == VOLUME["data_center"],
-            "recorded_contents_bytes": {**known, "teacher_modes (Research A v1: teacher shards, the common "
-                                        "initialization, the recovery units)": "not re-listed since 2026-10-30"},
-            "recorded_lower_bound_bytes": sum(known.values()),
-            "pilot_writes": {"path": f"{VOLUME['mount']}/teacher_modes/{PILOT_DIR}", "estimate_bytes": "< 5e8",
-                             "required_free_bytes": MIN_FREE_BYTES,
-                             "teacher_snapshot": "container disk (setup's HF_HOME=/root/.cache/huggingface), not the "
-                                                 "volume"},
-            "never_written": ["<mount>/h1pa", "<mount>/mixed_v2", "<mount>/teacher_modes/<every other entry>"],
-            "pod_side_rule": "tool_session.run_pilot refuses before generating unless the provider's size less the "
-                             "bytes on the mount (h1pa_driver.used_bytes) leaves MIN_FREE_BYTES and the pilot's directory "
-                             "is new or holds only the pilot's own files (tool_pilot.storage_problems)",
-            "4rhubprswo": "never attached: the launch refuses any volume but am5m373kuq "
-                          "(token_matched_phase.the_pilot_volume_is_the_planned_one)",
+        provider = RunPodProvider(read_api_key(str(Path("~/.runpod/config.toml").expanduser())))
+    obs = provider.observe(DATACENTERS_QUERY)
+    price = provider.observe('query { gpuTypes(input:{id:"%s"}) { id securePrice '
+                             'lowestPrice(input:{gpuCount:1}) { stockStatus } } }' % gpu)
+    rank = {"High": 0, "Medium": 1, "Low": 2}
+    rows = []
+    for dc in ((obs.data or {}).get("dataCenters") or []) if obs.ok else []:
+        for g in dc.get("gpuAvailability") or []:
+            if g.get("gpuTypeId") == gpu:
+                rows.append({"id": dc.get("id"), "name": dc.get("name"), "location": dc.get("location"),
+                             "listed": dc.get("listed"), "storage_support": dc.get("storageSupport"),
+                             "stock": g.get("stockStatus"), "available": g.get("available")})
+    rows.sort(key=lambda r: (rank.get(str(r["stock"]), 3), str(r["id"])))
+    res = provider.account_resources()
+    return {"schema": "aadistill.stage2.teacher_modes.pilot_placement/v1",
+            "read_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "gpu": gpu,
+            "placement": PLACEMENT, "datacenters_known": obs.ok, "error": None if obs.ok else obs.error,
+            "datacenters": rows, "candidates": [r["id"] for r in rows if r["stock"]],
+            "price": (price.data or {}).get("gpuTypes") if price.ok else None,
+            "account": {"known": res.known, "pods": list(res.pods),
+                        "network_volumes": [v.get("id") for v in res.network_volumes], "error": res.error},
+            "_": "stock is the provider's hint, not a reservation; the create's own answer decides",
             "authorizes": "nothing"}
 
 
@@ -609,7 +643,7 @@ def grant_amendment(plan_path: Path = PLAN) -> dict:
     block = {"approves": APPROVAL, "granted_by": "maintainer", "decision": None, "date": None,
              "pilot_plan_sha256": sha(plan_path), "tasks_sha256": doc["tasks_file"]["sha256"],
              "source_admission": _rel(ADMISSION), "hard_cap_usd": cap, "driver_minutes": minutes,
-             "gpu": TM.GPU, "network_volume": VOLUME["id"], "ceiling_usd_at_amendment": g["ceiling_usd"],
+             "gpu": TM.GPU, **PLACEMENT_AMENDMENT, "ceiling_usd_at_amendment": g["ceiling_usd"],
              "draws_on": "this grant's remaining envelope; the ceiling, the per-session cap, the project cap and the "
                          "card list unchanged",
              "kind": "tool_pilot (teacher_generation only; never formal, training or evaluation)",
@@ -622,8 +656,9 @@ def grant_amendment(plan_path: Path = PLAN) -> dict:
                       "scope (append)": " || AMENDED <date>: the L40S tool pilot -- kind tool_pilot through "
                                         "scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py "
                                         f"--pilot) on the frozen pilot plan {block['pilot_plan_sha256'][:12]}... and task "
-                                        f"file {block['tasks_sha256'][:12]}..., measurement only, one L40S on "
-                                        f"{VOLUME['id']}, hard cap ${cap:.2f}, inside this grant's remaining envelope",
+                                        f"file {block['tasks_sha256'][:12]}..., measurement only, one Secure Cloud "
+                                        f"L40S with no network volume, hard cap ${cap:.2f} over every attempt, inside "
+                                        "this grant's remaining envelope",
                       "amendments (append)": {"utc": "<date>", "by": "maintainer decision '<quote>'",
                                               "previous_session_hard_caps_usd": dict(g.get("session_hard_caps_usd") or {}),
                                               "previous_scope_sha256": hashlib.sha256(
@@ -641,9 +676,12 @@ def grant_amendment(plan_path: Path = PLAN) -> dict:
 # --- the application -------------------------------------------------------------------------------------------------
 
 APPLICATION = REPO / "logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json"
-#: the pilot's network volume: the retained Research A teacher volume (its storage is already committed in the
-#: project position); 4rhubprswo, the v2 Top-1's only copy, is never attached
-VOLUME = {"id": "am5m373kuq", "size_gb": 55, "data_center": "EUR-IS-2", "mount": "/runpod-volume"}
+#: the maintainer's 2026-11-04 amendment of the grant's tool_pilot block (`pilot_grant_problems` requires it): the
+#: placement above in place of am5m373kuq in EUR-IS-2, and the kind cap made cumulative over every attempt
+PLACEMENT_AMENDMENT = {
+    "network_volume": None, "placement": PLACEMENT, "cap_is_cumulative": True,
+    "attempts": "each attempt is a new run with a new one-use artifact; its hard cap is at most the kind cap less the "
+                "closeout all-in of every earlier tool_pilot run (token_matched_phase.kind_cap_problems)"}
 DISK_GB = 150
 #: hard-cap options for the maintainer: (cap, the driver's planned minutes); priced below at the provider rates
 CAP_OPTIONS = {"A": (1.80, 27.0), "B": (2.50, 55.0)}
@@ -723,9 +761,8 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                     "(study_engineering.all_in_within_cap); the hard deadline is the runner's plan: (setup 20 + "
                     "transfer 5 + the driver's minutes) x 1.25 contingency + the 12.5-min closeout-and-teardown "
                     "reserve + the 10-min artifact-recovery reserve",
-            "storage": f"the network volume {VOLUME['id']} ({VOLUME['size_gb']} GB, {VOLUME['data_center']}) is retained "
-                       "and its storage already committed in the project position; no volume is created; container "
-                       f"disk ({DISK_GB} GB) is inside the all-in; 4rhubprswo is never attached",
+            "storage": f"{PLACEMENT['storage']}; container disk ({DISK_GB} GB) is inside the all-in; no volume is "
+                       "created or attached (am5m373kuq retained untouched, 4rhubprswo never attached)",
             "options": caps,
             "finding": f"the plan-priced cap of $1.80 (1.1 x the plan's upper $1.64) does not include the runner's "
                        f"contingency and reserves: at the plan's upper driver time ({minutes_upper} min) the runner's "
@@ -757,14 +794,13 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                     f"{CAP_OPTIONS['B'][0]:.2f} --dry-run --out <scratch>/auth.json && {cmd} launch --kind tool_pilot "
                     f"--minutes {CAP_OPTIONS['B'][1]:g} "
                     "--run-id <run>_dry --scr <scratch> --session-commit <sha> --bundle <name> --max-price <live> "
-                    f"--gpu 'NVIDIA L40S' --disk-gb {DISK_GB} --network-volume-id {VOLUME['id']} --volume-mount-path "
-                    f"{VOLUME['mount']} --data-center-ids {VOLUME['data_center']} --volume-gb {VOLUME['size_gb']} "
-                    "--dry-run --authorization <scratch>/auth.json"},
+                    f"--gpu 'NVIDIA L40S' --disk-gb {DISK_GB} [--data-center-ids <placement candidates>] "
+                    "[--resume-from <a secured earlier attempt>] --dry-run --authorization <scratch>/auth.json"},
             {"step": "launch (only after the grant and the signature)",
              "how": f"{cmd} launch --kind tool_pilot --minutes {CAP_OPTIONS['B'][1]:g} --run-id <run> --scr <scratch> "
                     "--session-commit <sha> --bundle <name> --max-price <live> --gpu 'NVIDIA L40S' "
-                    f"--disk-gb {DISK_GB} --network-volume-id {VOLUME['id']} --volume-mount-path {VOLUME['mount']} "
-                    f"--data-center-ids {VOLUME['data_center']} --volume-gb {VOLUME['size_gb']}"},
+                    f"--disk-gb {DISK_GB} [--data-center-ids <placement candidates>] [--resume-from <a secured "
+                    "earlier attempt>] --create-attempts <n> --create-retry-seconds <s>"},
             {"step": "closeout (the launcher runs it on every terminal path) and the dev box's report",
              "how": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pilot report --session "
                     "<scratch>/store/tool_pilot_hybrid [--session <a resumed run's copy>] [--study-identity <the "
@@ -772,7 +808,7 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
         "gates": {"at_issue": ["the grant names a tool_pilot cap and the cap fits it (kind_cap_problems)",
                                "the grant carries the pilot-only tool_pilot block: approves exactly 'tool_pilot "
                                "measurement only', granted by the maintainer with a decision and a date, the plan and "
-                               "task file sha256, the source admission, the cap, the L40S, am5m373kuq and the unchanged "
+                               "task file sha256, the source admission, the cap, the L40S, the placement and the unchanged "
                                "ceiling (pilot_grant_problems)",
                                "the cap fits the study envelope, the project cap as the provider bills it now and the "
                                "account balance (funding_problems on a live, fail-closed position)",
@@ -789,18 +825,18 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                                 "the project cap holds now: committed spend, remaining cap, balance, pods and volumes "
                                 "re-read from the provider (the_project_cap_holds_now; an unreadable provider, a pod in "
                                 "the account or an unowned volume refuses)",
-                                "the network volume is the planned one as the provider reports it "
-                                "(the_volume_is_the_planned_one) and it is am5m373kuq at 55 GB in EUR-IS-2, never "
-                                "4rhubprswo (the_pilot_volume_is_the_planned_one)",
+                                "the placement is the pilot's: no network volume, any datacenter named offers the "
+                                "L40S, a resume source hashes to its markers (the_pilot_placement_is_the_planned_one)",
                                 "the kind's bound records are the committed ones",
                                 "the session bundle is on the relay"],
                   "on_the_pod": ["setup re-checks the artifact against the pod's files (require_on_pod)",
                                  "the session re-checks the pilot plan, the task file and the admission with the same "
                                  "admission_problems (tool_session.run_pilot)",
-                                 "before generating: at least 2 GB free on the volume (its size less the bytes on the "
-                                 "mount) and the pilot's directory new or only the pilot's own files "
-                                 "(tool_pilot.storage_problems)"]},
-        "storage_precheck": "logs/stages/stage-2/teacher_modes/validations/packed_round/pilot_storage_precheck_20261104.json",
+                                 "a resume source's shards copied in and re-verified under the pilot identity "
+                                 "(tool_session.resumable)",
+                                 "before generating: at least 2 GB free on the container disk and the pilot's "
+                                 "directory new or only the pilot's own files (tool_pilot.storage_problems)"]},
+        "placement": "tool_pilot placement --write <the attempt's run directory>/evidence/placement.json (read-only)",
         "grant": {"amendment_proposal": _rel(AMENDMENT),
                   "amendment_proposal_sha256": sha(AMENDMENT) if AMENDMENT.is_file() else None,
                   "envelope": envelope_reconciliation(),
@@ -835,8 +871,9 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                             "provider or billing state unknown: nothing created; reconcile and tear down",
                             "an L40S out-of-memory: the run fails; an A100 needs the measured OOM and a separate "
                             "authorization"],
-        "recovery": "identity-bound sealed shards on the volume (generation_driver.run_group, sealed every 50 records "
-                    "or 300 s); a replacement session -- a new run with a new one-use artifact -- regenerates nothing "
+        "recovery": "identity-bound sealed shards (generation_driver.run_group, sealed every 50 records or 300 s), "
+                    "pulled to the dev box on every poll; a replacement session -- a new run with a new one-use "
+                    "artifact, given the secured copies with --resume-from -- regenerates nothing "
                     "sealed and runs only each label's unsealed tasks; candidate k uses seed_base + k",
         "cleanup_and_reconciliation": "the launcher's terminal path deletes the pod and confirms it gone with the "
                                       "provider, secures tool_pilot_hybrid (shards, tool_session.json, "
@@ -860,8 +897,8 @@ def application(plan_path: Path = PLAN, admission_path: Path = ADMISSION, *, pos
                                         "and its log lines: read on the first run, UNMEASURED where absent",
                                         "nvidia-smi on the pod (peak VRAM): UNMEASURED if it gives no sample",
                                         "throughput, TTFT, model-load time and the real admission rates",
-                                        "the live L40S quote and stock in EUR-IS-2 at launch",
-                                        "the bytes actually on am5m373kuq (the provider reports none; the pod measures "
+                                        "the live L40S quote and stock at launch",
+                                        "the container disk's free space (the pod measures "
                                         "them before generating)",
                                         "the shared runner's create, watchdog, deadline, teardown and the provider's "
                                         "confirmation on a real pod (exercised by earlier paid sessions, not here)",
@@ -1220,7 +1257,7 @@ def main(argv=None) -> int:
     ap_.add_argument("--tests", default=None, help="a JSON file of the test evidence to record")
     ga = sub.add_parser("grant-amendment")
     ga.add_argument("--write", default=str(AMENDMENT))
-    sp = sub.add_parser("storage-precheck")
+    sp = sub.add_parser("placement")
     sp.add_argument("--write", required=True)
     r = sub.add_parser("report")
     r.add_argument("--session", action="append", required=True, help="a secured session directory (repeatable)")
@@ -1241,11 +1278,12 @@ def main(argv=None) -> int:
         doc = grant_amendment()
         Path(a.write).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
         print(json.dumps(doc["envelope"], indent=1))
-    elif a.cmd == "storage-precheck":
-        doc = storage_precheck()
+    elif a.cmd == "placement":
+        doc = placement()
+        Path(a.write).parent.mkdir(parents=True, exist_ok=True)
         Path(a.write).write_text(json.dumps(doc, indent=1) + "\n")
-        print(json.dumps({k: doc[k] for k in ("provider", "matches_the_planned_volume", "recorded_lower_bound_bytes")},
-                         indent=1, default=str))
+        print(json.dumps({k: doc[k] for k in ("datacenters", "candidates", "price", "account")}, indent=1,
+                         default=str))
     elif a.cmd == "application":
         pos = None
         if a.live_position:

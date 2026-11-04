@@ -639,10 +639,17 @@ def test_no_markdown_link_points_at_a_file_that_is_not_there():
     they were siblings, and the handoff kept `../logs/…` after being moved a
     directory deeper."""
     broken = []
+    #: a third-party skill vendored by the skills CLI (skills-lock.json) links within ITS source repository's layout
+    #: (runpod-plugins-official's sibling skills); its text is the provider's, never edited here
+    lock = REPO / "skills-lock.json"
+    vendored = tuple(f".agents/skills/{name}/" for name in
+                     (json.loads(lock.read_text()).get("skills") or {})) if lock.is_file() else ()
     for md in sorted(REPO.rglob("*.md")):
         if any(part in (".git", ".venv", "__pycache__") for part in md.parts):
             continue
         if _preserved(md.relative_to(REPO).as_posix()):
+            continue
+        if md.relative_to(REPO).as_posix().startswith(vendored):
             continue
         for m in re.finditer(r"\[[^\]]*\]\(([^)]+)\)", md.read_text(errors="ignore")):
             target = m.group(1).split("#")[0].strip()

@@ -77,7 +77,9 @@ def test_the_grant_must_carry_the_pilot_only_scope_not_just_a_cap(tmp_path):
     ({"decision": None}, "quotes no decision"), ({"date": "soon"}, "not an ISO date"),
     ({"pilot_plan_sha256": "0" * 64}, "pilot_plan_sha256"), ({"tasks_sha256": "0" * 64}, "tasks_sha256"),
     ({"hard_cap_usd": 5.0}, "hard_cap_usd"), ({"gpu": "NVIDIA A100 80GB PCIe"}, "tool_pilot.gpu"),
-    ({"network_volume": "4rhubprswo"}, "network_volume"), ({"ceiling_usd_at_amendment": 99.0}, "ceiling_usd_at_amendment")])
+    ({"network_volume": "4rhubprswo"}, "network_volume"), ({"network_volume": "am5m373kuq"}, "network_volume"),
+    ({"cap_is_cumulative": False}, "cap_is_cumulative"), ({"placement": {}}, "tool_pilot.placement"),
+    ({"ceiling_usd_at_amendment": 99.0}, "ceiling_usd_at_amendment")])
 def test_a_pilot_grant_block_that_is_not_exactly_the_pilots_refuses(tmp_path, over, match):
     assert any(match in p for p in TM.kind_cap_problems("tool_pilot", 2.50, root=_grant_root(tmp_path, **over)))
 
@@ -92,11 +94,14 @@ def test_the_envelope_covers_the_pilot_and_the_amendment_raises_nothing():
     a = TPL.grant_amendment()
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
     assert a["unchanged"]["ceiling_usd"] == g["ceiling_usd"] and a["unchanged"]["project_cumulative_cap_usd"] == 868.0
-    #: the maintainer's amendment (2026-11-04) applied exactly as proposed: the pilot's cap and block, nothing else
+    #: the maintainer's amendment (2026-11-04) applied as proposed, with the 2026-11-04 (16Z) placement amendment
+    #: (PLACEMENT_AMENDMENT: no network volume, the kind cap cumulative): the pilot's cap and block, nothing else
     assert g["session_hard_caps_usd"]["tool_pilot"] == a["edits"]["session_hard_caps_usd.tool_pilot"] == 2.5
-    assert {k: v for k, v in g["tool_pilot"].items() if k not in ("decision", "date")} == {
+    assert {k: v for k, v in g["tool_pilot"].items() if k not in ("decision", "date", "amended")} == {
         k: v for k, v in a["edits"]["tool_pilot"].items() if k not in ("decision", "date")}
     assert g["tool_pilot"]["decision"] and g["tool_pilot"]["date"] == "2026-11-04"
+    assert g["tool_pilot"]["amended"]["date"] == "2026-11-04" and g["tool_pilot"]["network_volume"] is None
+    assert g["amendments"][-1]["previous_tool_pilot"] == {"network_volume": "am5m373kuq"}
     assert (g["per_session_hard_cap_usd"], g["gpus"], g["gpu_count_max"]) == (
         a["unchanged"]["per_session_hard_cap_usd"], a["unchanged"]["gpus"], a["unchanged"]["gpu_count_max"])
     applied = json.loads(TPL.AMENDMENT.read_text())                  #: the proposal the maintainer approved
@@ -487,30 +492,152 @@ def test_issue_and_the_pod_apply_the_same_admission_check(frozen, tmp_path, monk
     assert any("source admission: the signature approves" in p for p in TM.pilot_problems(root))
 
 
-# --- the volume ------------------------------------------------------------------------------------------------------
+# --- storage and placement (maintainer 2026-11-04: any Secure Cloud L40S, no network volume) ---------------------
 
-def test_the_pod_refuses_a_full_volume_or_a_directory_it_did_not_write(frozen, monkeypatch):
+def test_the_pod_refuses_a_full_disk_or_a_directory_it_did_not_write(frozen, monkeypatch):
     signed(frozen, monkeypatch)
     out = frozen["tmp"] / "out"
     out.mkdir()
     with pytest.raises(TPL.PilotError, match="below the 2 GB the pilot requires"):
         pilot(frozen, out, volume_gb=1)
+    bad, got = TPL.storage_problems(out, frozen["tmp"], None, free=lambda p: 10 ** 9)     #: the container disk
+    assert bad == ["1.00 GB free on the disk, below the 2 GB the pilot requires"]
+    bad, got = TPL.storage_problems(out, frozen["tmp"], None, free=lambda p: 10 ** 11)
+    assert bad == [] and got["storage"] == "container_disk" and got["used_bytes"] is None
     (out / "checkpoint").mkdir()                                    #: someone else's work in the pilot's directory
     with pytest.raises(TPL.PilotError, match="files the pilot did not write"):
         pilot(frozen, out)
-    with pytest.raises(TPL.PilotError, match="provider size is unknown"):
-        pilot(frozen, frozen["tmp"] / "out2", volume_gb=None)
 
 
-def test_the_pilot_volume_is_am5m373kuq_and_never_4rhubprswo():
-    args = lambda **o: SimpleNamespace(args=SimpleNamespace(**{"network_volume_id": "am5m373kuq", "volume_gb": 55,  # noqa: E731
-                                                               "data_center_ids": "EUR-IS-2",
-                                                               "volume_mount_path": "/runpod-volume", **o}))
-    assert TM.the_pilot_volume_is_the_planned_one(args())[0]
-    for bad in ({"network_volume_id": "4rhubprswo", "volume_gb": 350, "data_center_ids": "US-TX-3"},
-                {"volume_gb": 30}, {"data_center_ids": "US-TX-3"}):
-        assert not TM.the_pilot_volume_is_the_planned_one(args(**bad))[0]
-    assert TM.the_pilot_volume_is_the_planned_one in TM.launch_spec("tool_pilot", 55).extra_prechecks
+def _placement_ctx(**o):
+    return SimpleNamespace(evidence={}, args=SimpleNamespace(**{"network_volume_id": "", "volume_gb": None,
+                                                                "data_center_ids": "", "volume_mount_path": "",
+                                                                "resume_from": None, **o}))
+
+
+def test_the_pilot_attaches_no_volume_and_may_be_drawn_in_any_datacenter(tmp_path):
+    ok, why = TM.the_pilot_placement_is_the_planned_one(_placement_ctx())
+    assert ok and "any Secure Cloud datacenter" in why
+    ok, why = TM.the_pilot_placement_is_the_planned_one(_placement_ctx(data_center_ids="EU-NL-1,US-TX-3;US-CA-2"))
+    assert ok and "EU-NL-1,US-TX-3 then US-CA-2" in why
+    for bad in ({"network_volume_id": "4rhubprswo", "volume_gb": 350, "volume_mount_path": "/runpod-volume"},
+                {"network_volume_id": "am5m373kuq", "volume_gb": 55, "volume_mount_path": "/runpod-volume"},
+                {"volume_gb": 55}, {"volume_mount_path": "/runpod-volume"}):
+        assert not TM.the_pilot_placement_is_the_planned_one(_placement_ctx(**bad))[0]
+    spec = TM.launch_spec("tool_pilot", 55)
+    assert TM.the_pilot_placement_is_the_planned_one in spec.extra_prechecks
+    from stages.teacher_modes import phase as P1
+    assert P1.the_volume_is_the_planned_one not in spec.extra_prechecks       #: the pilot reads nothing a volume holds
+    assert P1.the_volume_is_the_planned_one in TM.launch_spec("tool_generation", 55).extra_prechecks
+    assert (spec.on_poll, spec.products_secured) == (TM.secure_pilot, TM.pilot_secured)
+    a = SimpleNamespace(volume_mount_path="", volume_gb=None, run_id="r", resume_from=None)
+    assert TM.durable(a) == "/workspace/teacher_modes"
+    assert TM.durable(SimpleNamespace(volume_mount_path="/runpod-volume")) == "/runpod-volume/teacher_modes"
+    cmd = TM.tool_pilot_command(SimpleNamespace(args=a), None)
+    assert "--volume-gb" not in cmd and "--resume-from" not in cmd and "--durable-root /workspace/teacher_modes" in cmd
+    a.resume_from = str(tmp_path / "secured_a")
+    assert f"--resume-from {TM.SE.POD_REPO}/{TM.PILOT_RESUME_DIR}/secured_a" in TM.tool_pilot_command(
+        SimpleNamespace(args=a), None)
+    assert TM.SHARDS["tool_pilot"][0] == TPL.PILOT_DIR and TM.SHARDS["tool_pilot"][1].match("pilot_H-N_r1_pass0.part0000.done")
+
+
+def _pilot_run(root, run_id, usd, kind="tool_pilot"):
+    d = root / TM.STUDY.run_dir(run_id)
+    (d / "governance").mkdir(parents=True)
+    (d / "governance/authorization.json").write_text(json.dumps({"plan_id": TM.STUDY.plan_id,
+                                                                 "stage_conditions": {"kind": kind}}))
+    (d / "closeout").mkdir()
+    (d / "closeout/outcome.json").write_text(json.dumps({"money": {"all_in_usd": usd},
+                                                         "provider_resource_created": usd is None or usd > 0}))
+
+
+def test_the_pilot_cap_is_cumulative_over_every_attempt(tmp_path):
+    root = _grant_root(tmp_path / "g")
+    assert TM.kind_cap_problems("tool_pilot", 2.50, root=root) == []
+    _pilot_run(root, "a_tool_pilot_1", 0.0)                         #: a $0 no-stock abort spends nothing
+    _pilot_run(root, "a_tool_pilot_2", 1.10)
+    _pilot_run(root, "a_inputs_x", 2.00, kind="inputs")             #: another kind's spend is not the pilot's
+    assert TM.kind_spent("tool_pilot", root)["usd"] == 1.10
+    assert TM.kind_cap_problems("tool_pilot", 1.40, root=root) == []
+    bad = TM.kind_cap_problems("tool_pilot", 1.50, root=root)
+    assert len(bad) == 1 and "cumulative $2.5" in bad[0] and "at most $1.4 is left" in bad[0]
+    _pilot_run(root, "a_tool_pilot_3", None)                        #: created a resource, no closeout cost
+    assert any("reconcile them first" in b for b in TM.kind_cap_problems("tool_pilot", 0.10, root=root))
+
+
+def test_a_replacement_pod_resumes_from_the_dev_box_copy_without_regenerating(frozen, monkeypatch):
+    """The pilot on the container disk: pod A dies after three sealed episodes; the dev box holds what the poll pulled
+    (here, a copy of the sealed shards and markers only); pod B starts EMPTY, receives that copy (--resume-from) and
+    submits only the unsealed tasks. A copy holding anything else, or a shard that disagrees with the pod's own,
+    refuses."""
+    import shutil
+    runner = _interrupt_then_resume(frozen, monkeypatch)
+    pod_a = frozen["tmp"] / "pod_a"
+    pod_a.mkdir()
+    assert not pilot(frozen, pod_a, runner(3))
+    secured = frozen["tmp"] / "secured" / TPL.PILOT_DIR
+    secured.mkdir(parents=True)
+    for f in pod_a.glob("pilot_*.part*.*"):
+        shutil.copy2(f, secured / f.name)
+    assert TPL.resume_problems(secured)[0] == [] and TPL.resume_problems(secured)[1]["records"] == 3
+    submitted = []
+
+    def counting(stop):
+        inner = runner(stop)
+
+        def run(cmd, log, tick):
+            submitted.append(len(Path(cmd[cmd.index("--tasks") + 1]).read_text().splitlines()))
+            return inner(cmd, log, tick)
+        return run
+    pod_b, rec = frozen["tmp"] / "pod_b", {}
+    pod_b.mkdir()
+    assert TS.run_pilot(frozen["proto"], frozen["plan"], frozen["tasks"], pod_b, "id", counting(None), lambda m: None,
+                        rec, mount=frozen["tmp"], volume_gb=55, resume_from=secured)
+    total = sum(len(c["task_ids"]) for c in frozen["doc"]["modes"]["H-N"])
+    assert submitted[0] == total - 3 and rec["resumed_from"]["copied"] == 2 * len(list(secured.glob("*.done")))
+    (secured / "notes.txt").write_text("x")
+    with pytest.raises(TPL.PilotError, match="did not write"):
+        TS.bring_sealed(secured, frozen["tmp"] / "pod_c")
+    (secured / "notes.txt").unlink()
+    part = sorted(secured.glob("*.part*.jsonl"))[0]
+    part.write_text(part.read_text() + "\n")
+    with pytest.raises(TPL.PilotError, match="does not hash to its marker"):
+        TS.bring_sealed(secured, frozen["tmp"] / "pod_d")
+    part.with_suffix(".done").write_text(TPL.sha(part) + "\n")       #: re-marked, but not what pod B holds
+    with pytest.raises(TPL.PilotError, match="differs from the shard already"):
+        TS.bring_sealed(secured, pod_b)
+
+
+def test_the_poll_secures_every_sealed_pilot_shard(tmp_path, monkeypatch):
+    """`secure` on the tool pilot's kind: each marked shard pulled by its sha256 into the store's pilot directory, the
+    session record and the completion marks too; a shard already secured is not pulled again."""
+    from stages.teacher_modes import phase as P1
+    pulled = []
+    store = tmp_path / "store"
+    listing = ["pilot_H-N_r1_pass0.part0000.done " + "a" * 64, "pilot_H-N_r1_pass0.complete",
+               "s01t_x.part0000.done " + "b" * 64]
+
+    def pull(ctx, remote, dest, digest):
+        pulled.append((remote, digest))
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text("x")
+        return True
+    monkeypatch.setattr(P1, "_listing", lambda ctx, cmd: list(listing))
+    monkeypatch.setattr(P1, "_pull", pull)
+    monkeypatch.setattr(TM.SE, "store", lambda ctx: store)
+    monkeypatch.setattr(TM.SE, "_scp", lambda *a, **k: 0)
+    ctx = SimpleNamespace(target=object(), evidence={}, args=SimpleNamespace(volume_mount_path="", run_id="r"),
+                          auth=SimpleNamespace(stage_conditions={"kind": "tool_pilot"}))
+    TM.secure(ctx)
+    root = "/workspace/teacher_modes/tool_pilot_hybrid"
+    assert (f"{root}/pilot_H-N_r1_pass0.part0000.jsonl", "a" * 64) in pulled
+    assert (f"{root}/pilot_H-N_r1_pass0.complete", None) in pulled
+    assert ("/workspace/teacher_modes/tool_pilot_hybrid/tool_session.json", None) in pulled
+    assert not any("s01t_" in r for r, _ in pulled)                   #: another study's stage label is not the pilot's
+    assert ctx.evidence["secured"] == {"pilot_H-N_r1_pass0.part0000.jsonl": {"ok": True, "sha256": "a" * 64}}
+    pulled.clear()
+    TM.secure(ctx)
+    assert not any(r.endswith(".part0000.jsonl") for r, _ in pulled)
 
 
 # --- the report on partial, resumed and forcibly ended sessions --------------------------------------------------------

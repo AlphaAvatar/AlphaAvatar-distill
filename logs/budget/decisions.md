@@ -15603,3 +15603,57 @@ on a paid pod.
 - **Revisit when:** the maintainer authorizes another attempt. Its stock risk is EUR-IS-2's, because am5m373kuq locks
   the datacenter. The create window's provider `--terminate-after` is set once at the first attempt, so a longer
   window shortens a late pod's backstop. It never lengthens it, and the bill stays inside the cap.
+
+
+## 2026-11-04 (UTC) — Tool pilot placement, acquisition windows, REST v2 and the official RunPod skill (maintainer "GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正")
+
+- **Context.** The pilot's only artifact (`a_tool_pilot_20261104_140656`) ended at $0 because `am5m373kuq` locked the
+  draw to EUR-IS-2, which had no L40S. Read-only facts found this round:
+  - RunPod REST v1 retires 2026-11-15, and GraphQL retires in early 2027.
+  - runpodctl 2.7.1 used REST v1 for pod list, get and delete, volumes and billing. For GPU create it used GraphQL,
+    which takes only the first datacenter.
+  - The provider never enforced `--terminate-after` (runpodctl 2.12 removed the flag).
+  - `provider_billing.fetch`, which every issue and launch reads through the live project position, called v1.
+- **Decision (maintainer, this message).**
+  - The pilot may run on any Secure Cloud L40S datacenter.
+  - The $2.50 cap is cumulative over every attempt. Each attempt is a new run with a new one-use artifact.
+  - Card, protocol, tasks, teacher and verification are unchanged.
+- **Done.**
+  - **Placement and storage.** The pilot attaches no volume (`tool_pilot.PLACEMENT`). It writes to the container disk.
+    The poll pulls each sealed shard to the dev box (`secure_pilot`), and a replacement pod resumes from that copy
+    (`--resume-from`). `kind_cap_problems` makes the kind cap cumulative.
+  - **Grant.** The grant's `tool_pilot` block was amended: `network_volume` set to none, plus `placement`,
+    `cap_is_cumulative` and `amended`, with scope, authorizes and amendments appended.
+  - **Runner `create()`.**
+    - The deadline is computed at each create, from this session's first resource.
+    - Each answer is classified: id, capacity refusal, or unknown. An unknown answer is settled from the account
+      listing: a pod found is owned, an unreadable account stops everything.
+    - `--data-center-ids` groups rotate when no volume is attached.
+    - The CLI's version and its flag support are recorded, and `--terminate-after` is passed only to a CLI that has it.
+  - **CLI.** runpodctl was upgraded to 3.0.1, which uses REST v2 throughout. The binary's sha256 `b66d11ec…` equals
+    the release asset's, and 2.7.1 is kept as `~/.local/bin/runpodctl-2.7.1`. Legacy `remove pod` and `pod delete`
+    call the same v2 delete. Closed experiments' own launchers still pass `--terminate-after`; with 3.x they refuse
+    at create, at $0, and are not edited (frozen harnesses).
+  - **Billing.** Billing reads REST v2 (`/v2/billing/pods`, `/v2/billing/network-volumes`). Rows are normalized to
+    the names readers use (`amount`, `time`, `startDate`), and each answer's records are checked against its
+    totals. The v2 per-volume rows are netted against their own volume, capped at size × hours × $0.07/720
+    (`mixed_governance.netted_posted`).
+  - **Official skill.** The skill was updated from `runpod/runpod-plugins-official@bdfe4259`
+    (`plugins/runpod/skills/runpodctl`), replacing `runpod/skills@a743ab97`. The old copy was unmodified: its folder
+    hash reproduces the lock's `1a9b6033…`. The new lock hash is `26d4d94d…`. No plugin is installed beside it, so
+    there is one `runpodctl` entry. The project skill is `.agents/skills/aadistill-gpu-experiments`.
+  - **AGENTS.md.** P17.1 was added: one teacher lineage per student.
+- **Measured at the switch** (2026-11-04 ~16:20Z, read-only, same window):
+
+  | billing source | billed | committed | project remaining |
+  | --- | --- | --- | --- |
+  | v1 | $817.7704 | $838.2664 | $29.7336 |
+  | v2 | $817.4307 | $834.8803 | $33.1197 |
+
+  - Pods: v2 $811.73 against v1 $810.91. v2 includes CPU pods ($0.79).
+  - Volumes: v2 $5.70 against v1 $6.86. v1's rows have no volume id and overbilled.
+  - The rest of the difference is storage netting. v2 names each volume, so posted storage is subtracted from that
+    volume's reservation on days it shares (4rhubprswo $2.55, am5m373kuq $1.04), where v1 could not attribute it.
+  - No cap moved and nothing was rebooked.
+- **Revisit when:** GraphQL's retirement date is fixed. The provider's polling, terminate fallback and the placement
+  read are GraphQL.

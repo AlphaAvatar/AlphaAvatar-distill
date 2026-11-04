@@ -28,11 +28,18 @@ THE A1 PHASE (maintainer 2026-11-01, 'Research A v2: Execute A1 First'; the gran
 Each kind's hard cap is the grant's ``session_hard_caps_usd[kind]``, enforced at issue; all of them draw on one
 cumulative envelope. Sealed shards are pulled on every poll; the volume keeps everything.
 
-KIND ``tool_pilot`` (maintainer 2026-11-04, review of 2468c1aa; NOT authorized): `tool_session.py --pilot` -- the
-hybrid's tool pilot on its frozen cells (`tool_pilot.py`), one L40S. It claims teacher generation only (measurement,
-never formal). Issue refuses it until the grant names its cap, the pilot-only source admission is signed and names
+KIND ``tool_pilot`` (maintainer 2026-11-04, review of 2468c1aa): `tool_session.py --pilot` -- the hybrid's tool pilot
+on its frozen cells (`tool_pilot.py`), one L40S. It claims teacher generation only (measurement, never formal). Issue
+refuses it until the grant names its cap and its pilot-only block, the pilot-only source admission is signed and names
 the bound pilot plan, and the pilot's task file is the one that plan froze; the launch refuses any card but the L40S
-(an A100 needs a measured L40S OOM and a separate authorization, never an automatic fallback).
+(an A100 needs a measured L40S OOM and a separate authorization, never an automatic fallback). Since 2026-11-04 its
+placement is any Secure Cloud datacenter with no network volume (`tool_pilot.PLACEMENT`) and its kind cap is
+cumulative over every attempt:
+
+    PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_matched_phase.py launch \
+        --kind tool_pilot --minutes <M> --run-id <run> --scr <scratch> --session-commit <sha> --bundle <name> \
+        --max-price <live price> --disk-gb 150 [--data-center-ids <A,B;C>] [--resume-from <secured copy>] \
+        --create-attempts <n> --create-retry-seconds <s>
 """
 from __future__ import annotations
 
@@ -216,21 +223,54 @@ def the_pilot_runs_on_an_l40s(ctx) -> tuple[bool, str]:
     return True, f"one {GPU}"
 
 
-def the_pilot_volume_is_the_planned_one(ctx) -> tuple[bool, str]:
-    """The pilot's volume: the retained am5m373kuq at its recorded size and datacenter (the provider's own report is
-    `phase.the_volume_is_the_planned_one`); 4rhubprswo, the v2 Top-1's only copy, is never attached."""
+def the_pilot_placement_is_the_planned_one(ctx) -> tuple[bool, str]:
+    """The pilot's placement (`tool_pilot.PLACEMENT`): no network volume at all -- so neither 4rhubprswo, the v2
+    Top-1's only copy, nor any other volume is attached, and no datacenter is forced by one; the datacenters named, if
+    any, are a draw constraint only; a resume source (``--resume-from``) holds only sealed pilot shards that hash to
+    their markers (`tool_pilot.resume_problems`; the pod re-verifies their identity)."""
+    from aadistill.infrastructure.session_runner import data_center_groups
     from stages.teacher_modes import tool_pilot as TPL
-    a, v = ctx.args, TPL.VOLUME
-    if a.network_volume_id != v["id"] or int(a.volume_gb or 0) != v["size_gb"] or a.data_center_ids != v["data_center"] \
-            or a.volume_mount_path != v["mount"]:
-        return False, (f"the tool pilot runs on {v['id']} ({v['size_gb']} GB, {v['data_center']}, at {v['mount']}), not "
-                       f"{a.network_volume_id!r} ({a.volume_gb} GB, {a.data_center_ids!r}, {a.volume_mount_path!r})")
-    return True, f"volume {v['id']}, {v['size_gb']} GB in {v['data_center']}"
+    a = ctx.args
+    if a.network_volume_id or a.volume_mount_path or a.volume_gb is not None:
+        return False, (f"the tool pilot attaches no network volume (container disk: {TPL.PLACEMENT['storage']}), not "
+                       f"{a.network_volume_id!r} ({a.volume_gb} GB at {a.volume_mount_path!r})")
+    groups = data_center_groups(a.data_center_ids)
+    msg = f"no network volume; drawn in {' then '.join(groups) if groups else 'any Secure Cloud datacenter'}"
+    src = getattr(a, "resume_from", None)
+    if src:
+        bad, got = TPL.resume_problems(Path(src))
+        ctx.evidence["resume_source"] = got
+        if bad:
+            return False, "the resume source refuses: " + "; ".join(bad)
+        msg += f"; resuming from {got['sealed_shards']} sealed shard(s), {got['records']} episode(s)"
+    return True, msg
+
+
+def kind_spent(kind: str, root: Path = REPO_ROOT) -> dict:
+    """Every earlier run of this kind (its artifact's ``stage_conditions.kind``) with its closeout all-in, or unknown."""
+    import json
+    runs, unknown = [], []
+    s = SE.spent(STUDY, Path(root))
+    usd = {r["run_id"]: r["usd"] for r in s["runs"]}
+    for d in sorted((Path(root) / STUDY.logs / "runs").glob("*")):
+        a = d / "governance/authorization.json"
+        if not a.is_file():
+            continue
+        doc = json.loads(a.read_text())
+        if doc.get("plan_id") != STUDY.plan_id or (doc.get("stage_conditions") or {}).get("kind") != kind:
+            continue
+        if d.name in s["unknown"]:
+            unknown.append(d.name)
+        else:
+            runs.append({"run_id": d.name, "usd": usd.get(d.name, 0.0)})
+    return {"runs": runs, "unknown": unknown, "usd": round(sum(r["usd"] for r in runs), 4)}
 
 
 def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) -> list[str]:
     """The grant's cap for this kind (``session_hard_caps_usd``): a kind without one, or a cap above it, refuses. The
-    tool pilot needs its pilot-only scope in the grant as well (`pilot_grant_problems`): a cap alone is not one."""
+    tool pilot needs its pilot-only scope in the grant as well (`pilot_grant_problems`): a cap alone is not one, and
+    its cap is CUMULATIVE (maintainer 2026-11-04): this attempt's hard cap plus every earlier tool_pilot run's closeout
+    all-in must fit it, and a run whose cost is unknown refuses until it is reconciled."""
     import json
     g = json.loads((Path(root) / STUDY.grant).read_text())
     caps = g.get("session_hard_caps_usd") or {}
@@ -238,15 +278,26 @@ def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) ->
         return [f"the grant names no hard cap for kind {kind!r}"]
     if hard_cap_usd > float(caps[kind]) + 1e-9:
         return [f"${hard_cap_usd} exceeds the grant's ${caps[kind]} for kind {kind!r}"]
-    return pilot_grant_problems(g, root) if kind == TOOL_PILOT_KIND else []
+    if kind != TOOL_PILOT_KIND:
+        return []
+    bad = pilot_grant_problems(g, root)
+    if (g.get(TOOL_PILOT_KIND) or {}).get("cap_is_cumulative"):
+        k = kind_spent(kind, root)
+        if k["unknown"]:
+            bad.append(f"earlier {kind} runs {k['unknown']} record no closeout cost: reconcile them first")
+        elif hard_cap_usd + k["usd"] > float(caps[kind]) + 1e-9:
+            bad.append(f"${hard_cap_usd} with the ${k['usd']} earlier {kind} runs spent exceeds the grant's cumulative "
+                       f"${caps[kind]} for kind {kind!r}: at most ${round(float(caps[kind]) - k['usd'], 4)} is left")
+    return bad
 
 
 def pilot_grant_problems(g: dict, root: Path = REPO_ROOT) -> list[str]:
     """Why the grant does not authorize the tool pilot beyond its kind cap (empty when it does): its ``tool_pilot``
     block -- the maintainer's pilot-only amendment (`tool_pilot.grant_amendment` drafts it) -- must approve exactly
     the pilot's measurement, be granted by the maintainer with a decision and a date, name the frozen pilot plan and
-    task file by sha256, the source admission it requires, the kind cap, the L40S and am5m373kuq, and the ceiling it
-    was written under, which must still be the grant's (an amendment never raises it)."""
+    task file by sha256, the source admission it requires, the kind cap, the L40S, the placement and the cumulative cap
+    (`tool_pilot.PLACEMENT_AMENDMENT`, maintainer 2026-11-04), and the ceiling it was written under, which must still be
+    the grant's (an amendment never raises it)."""
     import datetime as dt
     import json
     from stages.teacher_modes import tool_pilot as TPL
@@ -260,7 +311,7 @@ def pilot_grant_problems(g: dict, root: Path = REPO_ROOT) -> list[str]:
     want = {"approves": TPL.APPROVAL, "granted_by": "maintainer", "pilot_plan_sha256": P1._sha(rec[2], root),
             "tasks_sha256": tasks, "source_admission": rec[3],
             "hard_cap_usd": float((g.get("session_hard_caps_usd") or {}).get(TOOL_PILOT_KIND, -1)), "gpu": GPU,
-            "network_volume": TPL.VOLUME["id"], "ceiling_usd_at_amendment": g.get("ceiling_usd")}
+            **TPL.PLACEMENT_AMENDMENT, "ceiling_usd_at_amendment": g.get("ceiling_usd")}
     for k, v in want.items():
         if b.get(k) != v:
             bad.append(f"the grant's tool_pilot.{k} is {b.get(k)!r}, not {v!r}")
@@ -291,11 +342,24 @@ V1_SMALL = tuple(f"units/H-T-C-s20260801/{n}" for n in ("checkpoint.descriptor.j
     "recovery_a_recovery_20261030_211948.json",)
 
 
+def durable(args) -> str:
+    """The session's durable root: on the network volume (`phase.durable`) when one is attached, else on the pod's
+    container disk under the placement's work root (the tool pilot: `tool_pilot.PLACEMENT`), whose finished work
+    leaves the pod on every poll (`secure`)."""
+    if args is None or str(getattr(args, "volume_mount_path", "") or "").strip() \
+            or str(getattr(args, "network_volume_id", "") or "").strip():
+        return P1.durable(args)
+    from stages.teacher_modes import tool_pilot as TPL
+    return f"{TPL.PLACEMENT['work_root']}/{P1.DURABLE}"
+
+
 #: this study's stage labels (supplement_session.py: s<round><t|n>_<mode>_pass<k>_...)
 OWN_SHARD = re.compile(r"^s\d\d[tn]_")
 #: per kind: (the generation directory under the durable root, its stage labels, the session record)
 SHARDS = {"supplement": ("generation", OWN_SHARD, "supplement_session.json"),
-          "inputs": ("inputs_generation", re.compile(r"^(c00|e\d\d)[tn]_"), "inputs_session.json")}
+          "inputs": ("inputs_generation", re.compile(r"^(c00|e\d\d)[tn]_"), "inputs_session.json"),
+          #: on the container disk: every sealed shard leaves the pod on the poll after it is sealed
+          "tool_pilot": ("tool_pilot_hybrid", re.compile(r"^pilot_"), "tool_pilot_hybrid/tool_session.json")}
 
 
 def _kind(ctx) -> str:
@@ -307,7 +371,7 @@ def secure(ctx) -> None:
     try:
         if ctx.target is None:
             return
-        root, st = P1.durable(ctx.args), SE.store(ctx)
+        root, st = durable(ctx.args), SE.store(ctx)
         kind = _kind(ctx)
         gdir, own, session_record = SHARDS[kind]
         got = ctx.evidence.setdefault("secured", {})
@@ -344,7 +408,7 @@ def runner_logs(ctx) -> None:
     try:
         if ctx.target is None:
             return
-        root, st = P1.durable(ctx.args), SE.store(ctx)
+        root, st = durable(ctx.args), SE.store(ctx)
         gdir, own, _ = SHARDS[_kind(ctx)]
         lines = P1._listing(ctx, f"cd {root}/{gdir} 2>/dev/null && ls *.log 2>/dev/null || true") or []
         ctx.evidence["runner_logs"] = {n: P1._pull(ctx, f"{root}/{gdir}/{n}", st / gdir / n, None)
@@ -376,8 +440,8 @@ def the_kind_records_are_the_bound_ones(ctx) -> tuple[bool, str]:
 def supplement_command(ctx, plan) -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
-    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/supplement_session.py "
-            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
+    return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/supplement_session.py "
+            f"--authorization {auth} --durable-root {durable(a)} --status {status}" + P1._tail(status))
 
 
 def search_command(ctx, plan, planned_minutes: float = SEARCH_DEADLINE_MINUTES) -> str:
@@ -385,31 +449,31 @@ def search_command(ctx, plan, planned_minutes: float = SEARCH_DEADLINE_MINUTES) 
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
     #: the driver stops itself 30 minutes before the session's planned minutes, leaving the commit and the copy time
     minutes = max(30.0, float(planned_minutes) - 30.0)
-    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/full_search.py "
-            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status} --deadline-minutes {minutes:.0f}"
+    return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/full_search.py "
+            f"--authorization {auth} --durable-root {durable(a)} --status {status} --deadline-minutes {minutes:.0f}"
             + P1._tail(status))
 
 
 def train_a1_command(ctx, plan) -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
-    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/a1_units.py "
-            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status} "
+    return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/a1_units.py "
+            f"--authorization {auth} --durable-root {durable(a)} --status {status} "
             f"--unit-deadline-hours {A1_UNIT_DEADLINE_HOURS}" + P1._tail(status))
 
 
 def inputs_command(ctx, plan) -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
-    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/inputs_session.py "
-            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
+    return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/inputs_session.py "
+            f"--authorization {auth} --durable-root {durable(a)} --status {status}" + P1._tail(status))
 
 
 def tool_generation_command(ctx, plan, lineage: str = "hybrid") -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
-    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
-            f"--authorization {auth} --lineage {lineage} --durable-root {P1.durable(a)} --status {status}"
+    return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
+            f"--authorization {auth} --lineage {lineage} --durable-root {durable(a)} --status {status}"
             + P1._tail(status))
 
 
@@ -419,25 +483,46 @@ def tool_pilot_command(ctx, plan) -> str:
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
     rec = KIND_RECORDS[TOOL_PILOT_KIND]
     tasks = json.loads((REPO_ROOT / rec[2]).read_text())["tasks_file"]["path"]
-    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
-            f"--authorization {auth} --lineage hybrid --pilot {rec[2]} --pilot-tasks {tasks} "
-            f"--volume-gb {a.volume_gb} --durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
+    resume = (f" --resume-from {SE.POD_REPO}/{PILOT_RESUME_DIR}/{Path(a.resume_from).name}"
+              if getattr(a, "resume_from", None) else "")
+    return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
+            f"--authorization {auth} --lineage hybrid --pilot {rec[2]} --pilot-tasks {tasks}"
+            + (f" --volume-gb {a.volume_gb}" if a.volume_gb is not None else "")
+            + f"{resume} --durable-root {durable(a)} --status {status}" + P1._tail(status))
+
+
+#: where a resume source (the dev box's secured copy of earlier pilot sessions) is installed on the pod
+PILOT_RESUME_DIR = "artifacts/stages/stage-2/teacher_modes/tool_pilot_resume"
+
+
+def secure_pilot(ctx) -> None:
+    """on_poll for the tool pilot: every sealed shard and its marker (`secure`), then the session record and the
+    telemetry (`secure_files`). Never raises."""
+    secure(ctx)
+    secure_files(ctx)
+
+
+def pilot_secured(ctx, *_a, **_k) -> tuple[bool, str]:
+    """Closeout for the tool pilot: every sealed shard secured by its sha256, and the whole directory tarred."""
+    ok1, m1 = products_secured(ctx)
+    ok2, m2 = files_secured(ctx)
+    return ok1 and ok2, f"{m1}; {m2}"
 
 
 def packed_search_command(ctx, plan, planned_minutes: float = SEARCH_DEADLINE_MINUTES) -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
     minutes = max(30.0, float(planned_minutes) - 30.0)
-    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/packed_full_search.py "
-            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status} --deadline-minutes {minutes:.0f}"
+    return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/packed_full_search.py "
+            f"--authorization {auth} --durable-root {durable(a)} --status {status} --deadline-minutes {minutes:.0f}"
             + P1._tail(status))
 
 
 def train_6cat_command(ctx, plan, kind: str) -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
-    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/a1_units.py "
-            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status} "
+    return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/a1_units.py "
+            f"--authorization {auth} --durable-root {durable(a)} --status {status} "
             f"--unit-deadline-hours {PACKED_UNIT_DEADLINE_HOURS[kind]} --kind {kind} "
             f"--plan {KIND_RECORDS[kind][0]} --arm {PACKED_TRAIN_ARMS[kind]} --units-dir packed_units"
             + P1._tail(status))
@@ -494,7 +579,7 @@ def secure_files(ctx) -> None:
     try:
         if ctx.target is None:
             return
-        root, st, kind = P1.durable(ctx.args), SE.store(ctx), _kind(ctx)
+        root, st, kind = durable(ctx.args), SE.store(ctx), _kind(ctx)
         for rel in POLLED.get(kind, ()):
             P1._pull(ctx, f"{root}/{rel}", st / rel, None)
         if kind == "train_a1":
@@ -526,7 +611,7 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     on the volume, by sha256 in the records), and the search's Top-1 verified by its sha256 on the volume."""
     import json
     secure_files(ctx)
-    root, st, kind = P1.durable(ctx.args), SE.store(ctx), _kind(ctx)
+    root, st, kind = durable(ctx.args), SE.store(ctx), _kind(ctx)
     got = {}
     if kind in ("search", "packed_search"):
         sub = "search_a1" if kind == "search" else "search_packed"
@@ -552,7 +637,9 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     return (not bad, "secured: " + ", ".join(sorted(got)) if not bad else f"not secured: {bad}")
 
 
-def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
+def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str | None = None) -> SE.Launch:
+    """``resume_from`` (the tool pilot only): the dev box's secured copy of earlier pilot sessions, staged on the pod
+    as a local asset under `PILOT_RESUME_DIR` (`tool_pilot_command` passes it to the driver)."""
     import json
     from aadistill.infrastructure.session import LocalAsset
     if kind not in DRIVERS:
@@ -584,7 +671,14 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
              "suite": LocalAsset(repo_path=suite, dest_name=Path(suite).name, install_to=str(Path(suite).parent)),
              "a1_pack": LocalAsset(repo_path=pack, dest_name=Path(pack).name, install_to=str(Path(pack).parent))}
     assets = (battery,) + tuple(named[x] for x in extra)
-    polls = (secure, products_secured) if kind in SHARDS else (secure_files, files_secured)
+    if resume_from:
+        if kind != TOOL_PILOT_KIND:
+            raise SE.AuthorizationError(f"--resume-from is the tool pilot's; kind {kind!r} resumes from its volume")
+        src = Path(resume_from).resolve()
+        rel = src.relative_to(REPO_ROOT) if REPO_ROOT in src.parents else src
+        assets += (LocalAsset(repo_path=str(rel), dest_name=src.name, install_to=PILOT_RESUME_DIR),)
+    polls = ((secure_pilot, pilot_secured) if kind == TOOL_PILOT_KIND else
+             (secure, products_secured) if kind in SHARDS else (secure_files, files_secured))
     relay = ()
     if kind == "train_a1" or kind in PACKED_TRAIN_ARMS:   #: the evaluation's relayed inputs (phase.py's recovery)
         from stages.phase_c1.autoinit_c1_launch import C1_EVAL_TOKENIZER
@@ -594,12 +688,15 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
         teacher_revision=t["revision"], kind=kind, local_assets=assets, disk_gb=150,
         contingency_fraction=CONTINGENCY.get(kind, 0.25),
         setup_env={"PHASE_KIND": kind},
-        extra_prechecks=(P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones,
-                         *((the_pilot_runs_on_an_l40s, the_pilot_volume_is_the_planned_one)
-                           if kind == TOOL_PILOT_KIND else ())),
+        #: every kind but the pilot runs on the phase's network volume; the pilot on the container disk (PLACEMENT)
+        extra_prechecks=((the_kind_records_are_the_bound_ones, the_pilot_runs_on_an_l40s,
+                          the_pilot_placement_is_the_planned_one) if kind == TOOL_PILOT_KIND else
+                         (P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones)),
         on_poll=polls[0], products_secured=polls[1],
         artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
-        teardown_note=("delete the pod, verify from the provider that it is gone, STOP; the network volume is KEPT: it "
+        teardown_note=("delete the pod, verify from the provider that it is gone, STOP; every sealed shard is already "
+                       "on the dev box (secure_pilot) and nothing stays on the provider" if kind == TOOL_PILOT_KIND else
+                       "delete the pod, verify from the provider that it is gone, STOP; the network volume is KEPT: it "
                        "holds every shard and the phase's states"),
         driver=driver, validation_minutes=minutes, setup_minutes=20.0, command=command, description=description,
         relay_inputs=relay)
@@ -643,8 +740,9 @@ def main(argv=None) -> int:
             print(path)
             return 0
         if argv[0] == "launch":
-            return SE.launch_main(STUDY, launch_spec(kind, minutes), rest[1:], description=__doc__.split("\n")[0],
-                                  gpu=GPU)
+            resume = rest[rest.index("--resume-from") + 1] if "--resume-from" in rest else None
+            return SE.launch_main(STUDY, launch_spec(kind, minutes, resume), rest[1:],
+                                  description=__doc__.split("\n")[0], gpu=GPU)
         return SE.cli(STUDY, lambda: launch_spec(kind, minutes), rest, gpu=GPU, description=__doc__.split("\n")[0])
     return SE.cli(STUDY, launch_spec, argv, gpu=GPU, description=__doc__.split("\n")[0])
 

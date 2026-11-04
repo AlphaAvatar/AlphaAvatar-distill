@@ -42,7 +42,7 @@ from pathlib import Path
 from aadistill.governance.authorization import AuthorizationError
 from .artifact_gate import ArtifactManifest, evaluate_teardown, verify_extracted
 from .log_relay import LogRelay, RelaySpec
-from .provider import RunPodProvider, read_api_key, reconcile_account
+from .provider import GONE_STATUSES, RunPodProvider, read_api_key, reconcile_account
 from .remote import JobSpec, SSHTarget, probe, start_detached
 from .session import (
     SessionContext, SessionSpec, SessionSpecError, missing_arguments,
@@ -60,6 +60,55 @@ PROBE_COMMAND = (
     "echo \"SETUP_RC=$(grep -o 'SETUP_RC=[0-9]*' {log} 2>/dev/null | tail -1 | cut -d= -f2)\"; "
     "echo \"TAIL=$(tail -1 {log} 2>/dev/null)\""
 )
+
+
+#: The provider's own answer that it has no machine for the request: retried on
+#: the acquisition window. Matched case-insensitively against the create's whole
+#: output; RunPod answers ``{"error":"There are no longer any instances available
+#: with the requested specifications. ..."}``.
+CAPACITY_REFUSAL = re.compile(
+    r"no longer any instances|\bno instances\b|no capacity|not enough capacity|"
+    r"insufficient capacity|out of stock", re.I)
+
+
+def answer_pod(stdout: str, text: str) -> tuple[str, object]:
+    """``(pod id, returned costPerHr)`` from a create's answer; ``("", None)`` when it names no pod."""
+    try:
+        body = json.loads(stdout)
+        if isinstance(body, dict) and body.get("id"):
+            #: `costPerHr` in the CLI's create output; `cost` on a REST v2 pod
+            return str(body["id"]), body.get("costPerHr", body.get("cost"))
+    except ValueError:
+        pass
+    m = re.search(r'"id"\s*:\s*"([^"]+)"', text)
+    return (m.group(1), None) if m else ("", None)
+
+
+def provider_cli_facts(cli: str) -> dict:
+    """The provider CLI's own version and whether its ``pod create`` takes
+    ``--terminate-after``, read from the binary at $0. RunPod never enforced that
+    deadline and runpodctl 2.12 removed the flag; a CLI that still has it gets
+    it, one that does not is not handed a flag it would refuse. Either way the
+    independent watchdog is the deadline that acts."""
+    facts = {"path": cli, "version": None, "pod_create_terminate_after": False}
+    try:
+        v = subprocess.run([cli, "version"], capture_output=True, text=True, timeout=60)
+        facts["version"] = (v.stdout or v.stderr).strip()[:120] or None
+        h = subprocess.run([cli, "pod", "create", "--help"], capture_output=True, text=True, timeout=60)
+        facts["pod_create_terminate_after"] = "--terminate-after" in (h.stdout + h.stderr)
+    except (OSError, subprocess.SubprocessError) as exc:
+        facts["error"] = f"{type(exc).__name__}: {exc}"
+    return facts
+
+
+def data_center_groups(value) -> list[str]:
+    """``"A,B;C"`` -> ``["A,B", "C"]``: the datacenter groups a launcher rotates through."""
+    groups = []
+    for g in str(value or "").split(";"):
+        ids = [d.strip() for d in g.split(",") if d.strip()]
+        if ids:
+            groups.append(",".join(ids))
+    return groups
 
 
 class ImageIdentityUnavailable(RuntimeError):
@@ -303,8 +352,12 @@ class SessionRunner:
                 "no provider CLI found among the candidates this session "
                 f"declared: {list(self.spec.commands.provider_cli_candidates)}")
 
+        #: what the resolved binary actually is (P4), and whether it takes the
+        #: provider-side deadline flag at all
+        self.cli_facts = provider_cli_facts(self.cli)
         self.ev: dict = {
             "schema": spec.schema,
+            "provider_cli": self.cli_facts,
             "session_id": spec.session_id,
             # The RESOLVED CLI, not just the candidates: which binary actually
             # existed on the launching machine is part of what a reader needs to
@@ -594,7 +647,7 @@ class SessionRunner:
         return True
 
     # -- 3. create ---------------------------------------------------------
-    def placement(self) -> tuple[str, ...]:
+    def placement(self, attempt: int = 1) -> tuple[str, ...]:
         """Provider flags constraining WHERE a pod is drawn, or nothing.
 
         OPTIONAL BY CONSTRUCTION, read with `getattr` like `attached_volume`:
@@ -604,9 +657,22 @@ class SessionRunner:
         to draw where such hosts are, instead of paying a startup per refused
         host elsewhere. It narrows the draw only: admission still decides what
         is accepted, so a wrong constraint costs capacity, never identity.
+
+        The datacenter is a separate constraint from the GPU model. Without an
+        attached volume, `--data-center-ids` is the set of datacenters the
+        session may be drawn in: ``A,B`` lets the provider choose among both in
+        one create, and ``A,B;C`` ROTATES the groups across create attempts
+        (attempt 1 asks A or B, attempt 2 C, attempt 3 A or B again). With a
+        volume, the volume's datacenter is the only one (`attached_volume`).
         """
         country = str(getattr(self.a, "country_code", "") or "").strip()
-        return ("--country-code", country) if country else ()
+        flags = ("--country-code", country) if country else ()
+        if str(getattr(self.a, "network_volume_id", "") or "").strip():
+            return flags
+        groups = data_center_groups(getattr(self.a, "data_center_ids", ""))
+        if groups:
+            flags += ("--data-center-ids", groups[(attempt - 1) % len(groups)])
+        return flags
 
     def attached_volume(self) -> tuple[str, ...]:
         """Provider flags for a pre-existing network volume, or nothing.
@@ -653,34 +719,112 @@ class SessionRunner:
                 "--volume-mount-path", mount,
                 *(("--data-center-ids", centre) if centre else ()))
 
+    def pod_name(self) -> str:
+        return f"aadistill-{self.spec.session_id}"
+
+    def reconcile_create(self) -> tuple[bool, dict | None]:
+        """After a create whose answer named no pod: does one exist anyway?
+
+        ``(known, pod)``. A timeout, a transport error or an unparseable answer
+        is not evidence that nothing was created. The account was shown to hold
+        nothing unaccounted before the first create (`check_account_resources`)
+        and an abandoned draw is released and confirmed before the next, so a
+        live pod with this session's name is the one this create made.
+        """
+        lister = getattr(getattr(self, "provider", None), "account_resources", None)
+        if lister is None:
+            return False, None
+        for _ in range(3):
+            res = lister()
+            if res.known:
+                mine = [p for p in res.pods if p.get("name") == self.pod_name()
+                        and str(p.get("desiredStatus") or "").upper() not in GONE_STATUSES]
+                return True, (mine[0] if mine else None)
+            time.sleep(10)
+        return False, None
+
     def create(self) -> bool:
-        deadline = (datetime.now(timezone.utc)
-                    + timedelta(minutes=self.plan.hard_terminate_minutes))
+        """One provider resource, or none, inside the acquisition window.
+
+        Three budgets, kept apart:
+
+        * the ACQUISITION window, at $0: ``create_attempts`` creates,
+          ``create_retry_seconds`` apart, waiting for capacity;
+        * the BILLED run window: from this session's first resource
+          (`start_epoch`) to the plan's hard deadline. The provider's
+          ``--terminate-after`` is computed at EACH create from it. It was
+          computed once before this loop, so every minute spent queueing for
+          capacity came off the backstop of a pod created at the end of the
+          queue;
+        * the cost cap, which neither window extends: the plan and the
+          independent watchdog bound it from the moment a resource exists.
+
+        Each answer is classified. An id is a resource. The provider's own
+        capacity refusal (`CAPACITY_REFUSAL`) is retried on the window, on the
+        next datacenter group when the launcher declared several
+        (`placement`). Anything else -- a timeout, a transport error, an answer
+        with no id that is not a capacity refusal -- leaves it UNKNOWN whether a
+        pod exists, so the account is read (`reconcile_create`): a pod found is
+        adopted like a returned one, an unreadable account stops the
+        acquisition, and the same non-capacity refusal twice in a row stops it
+        as deterministic.
+        """
+        if not hasattr(self, "ev"):          #: a hand-built runner; `__init__` always sets it
+            self.ev = {}
+        acq = self.ev.setdefault("acquisition", {
+            "create_attempts": self.a.create_attempts,
+            "create_retry_seconds": self.a.create_retry_seconds,
+            "attempts": []})
+        last_refusal = None
         for attempt in range(1, self.a.create_attempts + 1):
-            raw = subprocess.run(
-                [self.cli, "pod", "create", "--image", self.a.image,
-                 "--gpu-id", self.a.gpu, "--gpu-count", str(self.gpu_count()),
-                 "--container-disk-in-gb", str(self.a.disk_gb),
-                 *self.attached_volume(),
-                 *self.placement(),
-                 *(("--min-cuda-version", self.spec.commands.min_cuda_version)
-                   if self.spec.commands.min_cuda_version else ()),
-                 "--ports", "22/tcp",
-                 "--name", f"aadistill-{self.spec.session_id}",
-                 "--terminate-after", deadline.strftime("%Y-%m-%dT%H:%M:%SZ")],
-                capture_output=True, text=True, timeout=300)
+            deadline = (datetime.fromtimestamp(getattr(self, "start_epoch", 0.0) or time.time(), timezone.utc)
+                        + timedelta(minutes=self.plan.hard_terminate_minutes))
+            where = self.placement(attempt)
+            try:
+                raw = subprocess.run(
+                    [self.cli, "pod", "create", "--image", self.a.image,
+                     "--gpu-id", self.a.gpu, "--gpu-count", str(self.gpu_count()),
+                     "--container-disk-in-gb", str(self.a.disk_gb),
+                     *self.attached_volume(),
+                     *where,
+                     *(("--min-cuda-version", self.spec.commands.min_cuda_version)
+                       if self.spec.commands.min_cuda_version else ()),
+                     "--ports", "22/tcp",
+                     "--name", self.pod_name(),
+                     *(("--terminate-after", deadline.strftime("%Y-%m-%dT%H:%M:%SZ"))
+                       if getattr(self, "cli_facts", {}).get("pod_create_terminate_after", True) else ())],
+                    capture_output=True, text=True, timeout=300)
+                stdout, text = raw.stdout or "", (raw.stdout or "") + (raw.stderr or "")
+            except (subprocess.TimeoutExpired, OSError) as exc:
+                stdout, text = "", f"{type(exc).__name__}: {exc}"
             #: Named by DRAW and attempt. `attempt` restarts at 1 inside every
             #: draw, so a second draw's first create overwrote the first
             #: draw's raw provider response -- the only record of what the
             #: provider actually said, including the refusal text when no pod
             #: id came back at all.
-            (self.scr / f"create_raw_d{self.draw}_a{attempt}.txt").write_text(
-                raw.stdout + raw.stderr)
-            try:
-                pid = json.loads(raw.stdout).get("id", "")
-            except Exception:
-                m = re.search(r'"id"\s*:\s*"([^"]+)"', raw.stdout + raw.stderr)
-                pid = m.group(1) if m else ""
+            (self.scr / f"create_raw_d{self.draw}_a{attempt}.txt").write_text(text)
+            pid, returned = answer_pod(stdout, text)
+            outcome = ("created" if pid else
+                       "capacity" if CAPACITY_REFUSAL.search(text) else "unknown")
+            if outcome == "unknown":
+                known, pod = self.reconcile_create()
+                if not known:
+                    acq["attempts"].append({"draw": self.draw, "attempt": attempt,
+                                            "placement": list(where), "outcome": "unknown"})
+                    self.ev["provider_state_unknown"] = True
+                    self.say("ABORT: the create's answer named no pod and the account "
+                             "could not be read; nothing else is created until it is "
+                             f"reconciled — {text.strip()[:200]}")
+                    return False
+                if pod:
+                    pid, returned, outcome = str(pod["id"]), pod.get("costPerHr"), "adopted"
+                else:
+                    outcome = "refused"
+            acq["attempts"].append({
+                "draw": self.draw, "attempt": attempt, "placement": list(where),
+                "outcome": outcome,
+                "utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "terminate_after_utc": deadline.strftime("%Y-%m-%dT%H:%M:%SZ")})
             if pid:
                 #: THE PROVIDER BOUNDARY IS THE ID, NOT THE PRICE CHECK.
                 #:
@@ -696,10 +840,9 @@ class SessionRunner:
                 #: So registration comes first, unconditionally, and is SAVED
                 #: before anything can reject the resource.
                 try:
-                    actual = json.loads(raw.stdout).get("costPerHr")
-                    if actual is not None:
-                        self.price = float(actual)
-                except Exception:
+                    if returned is not None:
+                        self.price = float(returned)
+                except (TypeError, ValueError):
                     pass
                 if not self.start_epoch:
                     self.start_epoch = time.time()
@@ -708,7 +851,12 @@ class SessionRunner:
                 (self.scr / "pod_id").write_text(pid)
                 self.ev["pod_id"] = pid
                 self.ev["actual_price_per_hour"] = self.price
-                self.ev["terminate_after_utc"] = deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
+                #: the billed window's end, from the first resource: the watchdog's
+                #: deadline; `terminate_after_utc` only when the CLI passed it on
+                self.ev["billed_window_deadline_utc"] = deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
+                self.ev["terminate_after_utc"] = (
+                    deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
+                    if getattr(self, "cli_facts", {}).get("pod_create_terminate_after", True) else None)
                 self.ev["provider_resource_created"] = True
                 self.ev["one_use_grant_consumed"] = True
                 #: The independent backstop starts HERE, not after `create()`
@@ -745,10 +893,18 @@ class SessionRunner:
                         f"provisioned at ${self.price}/h above ${self.a.max_price}/h")
                     return False
 
-                self.say(f"created {pid} at ${self.price}/h")
+                self.say(f"{'created' if outcome == 'created' else 'found (the create named no id)'} "
+                         f"{pid} at ${self.price}/h")
                 return True
-            self.say(f"attempt {attempt}: create failed — "
-                     f"{(raw.stdout + raw.stderr).strip()[:200]}")
+            self.say(f"attempt {attempt} ({' '.join(where) or 'any datacenter'}): "
+                     f"{outcome} — {text.strip()[:200]}")
+            if outcome == "refused":
+                refusal = re.sub(r"\s+", " ", text.strip())[:300]
+                if refusal == last_refusal:
+                    self.say("ABORT: the same non-capacity refusal twice, with no pod on the "
+                             "account: deterministic, not retried unchanged")
+                    return False
+                last_refusal = refusal
             if attempt < self.a.create_attempts:
                 time.sleep(self.a.create_retry_seconds)
         self.say("ABORT: could not create a pod")
@@ -1069,10 +1225,15 @@ class SessionRunner:
                 #: nothing -- but it is still a draw that happened, and the
                 #: provider's refusal is the only evidence of why. Recorded with
                 #: no pod id rather than left out of `draws` entirely.
+                unknown = bool(self.ev.get("provider_state_unknown"))
+                if unknown:
+                    self.ev["abort_reason"] = "provider_state_unknown"
                 self.record_draw(draw, "create_failed", {
                     "pod_id": None, "why": "create_failed",
-                    "confirmed_not_billing": True,
-                    "provider_resource_created": False,
+                    #: unknown when a create named no pod and the account could
+                    #: not be read: never recorded as confirmed
+                    "confirmed_not_billing": not unknown,
+                    "provider_resource_created": None if unknown else False,
                     #: Every attempt this draw made, not a guessed name:
                     #: `create_attempts` may be more than one, and the refusal
                     #: worth reading is usually the LAST one.

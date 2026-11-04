@@ -202,17 +202,20 @@ class _Done(Exception):
 
 
 def run_pilot(proto: dict, plan_path: Path, tasks_path: Path, out: Path, identity: str, run, mark,
-              record: dict, *, mount: Path, volume_gb: float | None) -> bool:
+              record: dict, *, mount: Path, volume_gb: float | None, resume_from: Path | None = None) -> bool:
     """The tool pilot (`tool_pilot.py`): its frozen plan and task file verified (`tool_pilot.load`) and its signed,
     pilot-only source admission naming this plan; then each mode's frozen cells in ONE round -- first candidates,
     second candidates for the refused tasks only -- with GPU and engine telemetry beside the sealed shards. A
-    replacement session regenerates nothing sealed (`generation_driver.run_group`)."""
+    replacement session regenerates nothing sealed (`generation_driver.run_group`): on a new pod, ``resume_from`` is
+    the dev box's copy of the earlier sessions' sealed shards, copied in first and re-verified like the pod's own."""
     from stages.teacher_modes import tool_pilot as TPL
     doc, by_id = TPL.load(plan_path, tasks_path)
     adm = json.loads(TPL.ADMISSION.read_text())
     bad = TPL.admission_problems(adm, plan_path, tasks_path)
     if bad:
         raise TPL.PilotError("the pilot-only source admission refuses: " + "; ".join(bad))
+    if resume_from is not None:
+        record["resumed_from"] = bring_sealed(Path(resume_from), out)
     bad, record["storage"] = TPL.storage_problems(out, mount, volume_gb)
     if bad:
         raise TPL.PilotError("the volume refuses: " + "; ".join(bad))
@@ -233,6 +236,31 @@ def run_pilot(proto: dict, plan_path: Path, tasks_path: Path, out: Path, identit
         if not res["complete"]:
             return False
     return True
+
+
+def bring_sealed(src: Path, out: Path) -> dict:
+    """Copy an earlier session's sealed pilot shards and their markers into ``out``; a file already there must be
+    byte-identical (a shard is never overwritten). What they hold is checked by `resumable` and
+    `generation_driver.sealed` exactly as for shards this pod sealed itself."""
+    import shutil
+    from stages.teacher_modes import tool_pilot as TPL
+    bad, _ = TPL.resume_problems(src)
+    if bad:
+        raise TPL.PilotError("the resume source refuses: " + "; ".join(bad))
+    out.mkdir(parents=True, exist_ok=True)
+    copied = kept = 0
+    for f in sorted(src.glob("pilot_*_r1_pass*.part*.*")):
+        if f.suffix not in (".jsonl", ".done"):
+            continue
+        dest = out / f.name
+        if dest.exists():
+            if dest.read_bytes() != f.read_bytes():
+                raise TPL.PilotError(f"{f.name} differs from the shard already in {out}: nothing sealed is overwritten")
+            kept += 1
+            continue
+        shutil.copy2(f, dest)
+        copied += 1
+    return {"path": str(src), "copied": copied, "already_present": kept}
 
 
 def resumable(out: Path, mode: str, doc: dict, by_id: dict, identity: str) -> None:
@@ -261,8 +289,10 @@ def main(argv=None, *, run=None) -> int:
     ap.add_argument("--status", required=True)
     ap.add_argument("--pilot", default=None, help="the frozen pilot plan (tool_pilot.py): runs the tool_pilot kind")
     ap.add_argument("--pilot-tasks", default=None, help="the pilot's task file, by the plan's sha256")
-    ap.add_argument("--volume-gb", type=float, default=None, help="the pilot's network volume size, as the provider "
-                    "reports it (its free space is checked before generating)")
+    ap.add_argument("--volume-gb", type=float, default=None, help="a network volume's size, as the provider reports "
+                    "it (its free space is checked before generating); none: the container disk's own free space")
+    ap.add_argument("--resume-from", default=None, help="the pilot only: the dev box's copy of earlier sessions' sealed "
+                    "shards, staged on this pod")
     a = ap.parse_args(argv)
     if bool(a.pilot) != bool(a.pilot_tasks):
         ap.error("--pilot and --pilot-tasks go together")
@@ -290,7 +320,8 @@ def main(argv=None, *, run=None) -> int:
         proto = protocol()
         if a.pilot:
             ok = run_pilot(proto, Path(a.pilot), Path(a.pilot_tasks), out, bound["identity"], run or GD.run_battery,
-                           mark, record, mount=durable.parent, volume_gb=a.volume_gb)
+                           mark, record, mount=durable.parent, volume_gb=a.volume_gb,
+                           resume_from=Path(a.resume_from) if a.resume_from else None)
             raise _Done(ok)
         plan, man, by_id = checked_plan(proto, a.lineage)
         record.update(plan_pool_content_sha256=plan["pool"]["content_sha256"], tasks_readable=len(by_id))

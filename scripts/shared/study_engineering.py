@@ -665,7 +665,8 @@ def closeout(study: Study, launch: Launch, run_id: str, scr: Path, *, root: Path
     cost = sess.get("cost") or {}
     gpu, minutes = float(cost.get("actual_usd") or 0.0), float(cost.get("elapsed_minutes") or 0.0)
     disk = disk_gb * DISK_USD_PER_GB_MONTH * minutes / (60 * 24 * 30.4375)
-    created = bool(sess.get("provider_resource_created"))
+    #: a create whose answer named no pod on an unreadable account (SessionRunner.create) is an unknown resource, not $0
+    created = bool(sess.get("provider_resource_created") or sess.get("provider_state_unknown"))
     passed = bool(terminal == "ALL_DONE" and rederived and rederived["passed"] and rederived["agrees_with_the_pod"])
     # a kind that secures its products on every poll (no evidence archive, no verdict) is complete when
     # the launcher recorded them secured off-pod and the driver finished
@@ -726,6 +727,8 @@ def build_parser(description: str, *, gpu: str):
     ap.add_argument("--volume-mount-path", default="")
     ap.add_argument("--data-center-ids", default="")
     ap.add_argument("--volume-gb", type=int, default=None, help="the network volume's planned size (a formal phase)")
+    ap.add_argument("--resume-from", default=None,
+                    help="a driver that resumes from secured finished work: the dev box's copy, staged on the pod")
     ap.add_argument("--dry-run", action="store_true",
                     help="every $0 step (authorization, prechecks, the live provider read, the plan); no create")
     ap.add_argument("--authorization", default=None,

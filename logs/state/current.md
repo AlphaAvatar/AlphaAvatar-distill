@@ -9,24 +9,27 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A TOOL PILOT: NOT RUN -- NO L40S IN EUR-IS-2 (2026-11-04; maintainer "Research A Tool Pilot 正式授权（方案 B）", reaffirmed in "评估标准独立复核、L40S Generation Gate 修复及 Pilot 执行").**
-The one authorized session, `a_tool_pilot_20261104_140656`, passed every pre-provider gate. Its $0 create window
-(10 attempts, 14:08-14:26) found no L40S instance in EUR-IS-2, so the launch aborted with nothing created: $0.00, 0
-pods, and the balance unchanged. The one-use artifact is consumed and every pilot metric is UNMEASURED. Another
-attempt needs a new maintainer authorization (`logs/budget/decisions.md` 2026-11-04, last entry).
-The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)
-section 8. Decision record: `logs/budget/decisions.md` 2026-11-04 (metric review, generation-scoped gate).
-- **Authorized:**
-  - the pilot-only source admission signed and the grant amended exactly as proposed;
-  - the pilot admitted by the maintainer's generation-scoped L40S gate (`l40s_check.generation_scope_problems`,
-    `audit/l40s_generation_scope.json`).
-  - The whole-phase gate still refuses every other A-TM generation kind: forward baseline v2 changed
-    `selection.json`.
-- **Metric contract:** `docs/shared/METRIC_CONTRACT.md` (AGENTS.md P10.3). The tool-call verifier reports what it
-  checked (`recorded_execution` None without a call; `calls_tools` is `target_tools_called`, recall). The pilot
-  reports teacher data admission rates, never a benchmark score.
-- **Not authorized:** formal tool generation, packed full search, training, formal evaluation, a second paid
-  session or artifact, a SHORTFALL approval, a merge.
+**RESEARCH A TOOL PILOT: RE-AUTHORIZED ACROSS DATACENTERS (2026-11-04; maintainer "GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正").**
+The 2026-11-04 attempt `a_tool_pilot_20261104_140656` ended at $0 (no L40S in EUR-IS-2; artifact consumed). The pilot
+now runs on any Secure Cloud L40S datacenter.
+- **Storage and placement:** no network volume. The session writes to the pod's container disk, sealed shards are
+  pulled to the dev box on every poll, and a replacement pod resumes from that copy (`--resume-from`).
+- **Cap:** $2.50 cumulative over every attempt (`token_matched_phase.kind_cap_problems`); each attempt is a new run
+  with a new one-use artifact.
+- **Unchanged:** the frozen 397 tasks / 794 runs, both modes, the candidate rule, the teacher, the generation and
+  verification protocols, and the L40S card.
+- **Tooling, the same day:** runpodctl 3.0.1 (REST v2); billing read from REST v2 (v1 retires 2026-11-15); the
+  runner's per-attempt deadline, datacenter rotation and reconciliation of ambiguous creates; the official
+  `runpodctl` skill from `runpod-plugins-official`; the project skill `aadistill-gpu-experiments`; AGENTS.md P17.1.
+- **Owners:** [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)
+  section 8; the decision record is `logs/budget/decisions.md` 2026-11-04.
+- **Already in force (2026-11-04):**
+  - the generation-scoped L40S gate admits the pilot (`l40s_check.generation_scope_problems`), and the whole-phase gate
+    still refuses every other A-TM generation kind;
+  - the metric contract is `docs/shared/METRIC_CONTRACT.md` (AGENTS.md P10.3): the pilot reports teacher data
+    admission rates, never a benchmark score.
+- **Not authorized:** formal tool generation, packed full search, training, formal evaluation, a SHORTFALL approval,
+  a merge.
 
 **RESEARCH A PACKED ROUND: PREPARATION_BLOCKED (2026-11-04; maintainer brief "Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备"). Code, identities, tests, $0 audits, the new full-search chain, the training plans and the bounded tool-generation plan are done; nothing searched, trained, generated or evaluated (only candidate-source and decontamination-reference files downloaded, gitignored); no pod; no cap raised.**
 The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)

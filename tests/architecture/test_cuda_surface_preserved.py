@@ -2602,6 +2602,18 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "accuracy) in `LEVELS` / `FINAL_LEVELS`. Admission unchanged: a level is still admitted unless False. "
             "NO CUDA SURFACE.",
      }),
+    ("a5a20be854f8cb6343894c198e8755ee7259aa38",
+     "Acquisition and placement: per-attempt deadline, datacenter rotation, ambiguous creates reconciled (maintainer 2026-11-04)",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "`create()`: `--terminate-after` computed at each create from this session's first resource (it was "
+            "computed once before the retry loop, so queueing shortened a late pod's backstop); each answer "
+            "classified -- an id, the provider's capacity refusal (`CAPACITY_REFUSAL`, retried), or unknown "
+            "(timeout, transport, no id): the account is read (`reconcile_create`), a pod with this session's name "
+            "is adopted, an unreadable account stops (`provider_state_unknown`), the same non-capacity refusal twice "
+            "stops. `placement(attempt)`: without a volume, `--data-center-ids` groups (`A,B;C`) rotate per attempt; "
+            "a launcher that declares none gets the command it always got. NO CUDA SURFACE.",
+     }),
 )
 
 

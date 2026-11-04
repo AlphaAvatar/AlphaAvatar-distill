@@ -141,7 +141,9 @@ def test_fetch_keeps_the_resource_listings_own_known_state(monkeypatch):
         def account_balance(self): return P.AccountBalance(known=True, client_balance_usd=78.7, under_balance=False)
         def account_resources(self): return P.AccountResources(known=False, error="HTTP 502")
     monkeypatch.setattr(P, "RunPodProvider", Prov)
-    monkeypatch.setattr(PB.urllib.request, "urlopen", lambda *_a, **_k: io.BytesIO(b"[]"))
+    #: REST v2's billing shape (v1, a bare list, retires 2026-11-15)
+    monkeypatch.setattr(PB.urllib.request, "urlopen", lambda *_a, **_k: io.BytesIO(
+        b'{"records": [], "metadata": {"totals": {"totalAmount": 0}}}'))
     acct = PB.fetch("k", "2026-10-01", "2026-10-25")["account"]
     assert acct["resources_known"] is False and acct["balance_known"] is True and acct["known"] is False
     assert HG.snapshot_problems({"account": acct, "pods": [], "networkvolumes": []})
