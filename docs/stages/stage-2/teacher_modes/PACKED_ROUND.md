@@ -42,6 +42,10 @@
     admission reads the registered one (`audit/proportion_tolerance_audit.json`).
   - Option 1 (call-only gold episodes) and option 2 (WorkBench) for the non-thinking schema_arguments SHORTFALL are
     compared at $0 (`audit/schema_arguments_options.json`); neither is implemented.
+- **The pilot's one authorized launch (2026-11-04): NOT RUN.** `a_tool_pilot_20261104_140656` passed every gate, but
+  no L40S instance existed in EUR-IS-2 during its $0 create window (10 × 120 s). Nothing was created, $0.00 was
+  spent, the artifact is consumed and every measurement is UNMEASURED. Another attempt needs a new maintainer
+  authorization.
 - **The maintainer's metric review and pilot authorization (2026-11-04, after `0b96ed38`).** The pilot (option B) is
   authorized: the pilot-only source admission is signed and the grant amended exactly as proposed. The L40S check's
   whole-phase gate refused it (forward baseline v2 changed `selection.json`), so the pilot is admitted by the

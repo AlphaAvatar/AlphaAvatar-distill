@@ -15584,3 +15584,22 @@ on a paid pod.
 - **Not authorized.** Formal tool generation, packed full search, training, formal evaluation, a second paid session,
   a budget or cap increase, a SHORTFALL approval, a merge; the generation-scoped gate covers `tool_pilot` only.
 - **Revisit when:** the pilot's closeout, or a decision to give another generation-only kind the same gate.
+
+
+## 2026-11-04 (UTC) — Research A tool pilot `a_tool_pilot_20261104_140656`: no L40S in EUR-IS-2; launch aborted at $0, nothing created
+
+- **Run.** One-use artifact issued 14:06:56 (hard cap $2.50, expected $1.14). Session commit `1725ee48` (the
+  authorization) on code `1c9c2226`; bundle `aad_autoinit_1725ee48.bundle` staged and verified. Every pre-provider gate
+  passed: L40S $1.09/h; all-in $2.2905 over 123.75 min, inside $2.50; funds; account resources; study identity
+  `2a24101c2c92`; bound files; project cap ($29.8123 left); volume am5m373kuq; kind records; L40S only.
+- **Outcome.** The launcher's $0 create window -- 10 attempts, 120 s apart, 14:08:19-14:26:23 -- found no L40S instance
+  in EUR-IS-2 on any attempt ("There are no longer any instances available with the requested specifications").
+  ABORT: could not create a pod. `provider_resource_created: false`, $0.00 all-in
+  (`runs/a_tool_pilot_20261104_140656/closeout/outcome.json`). Provider after: 0 pods, only 4rhubprswo and am5m373kuq;
+  balance $92.6083, unchanged.
+- **Consequences.** The artifact is consumed by this launch, and nothing was generated, sealed or measured: every pilot
+  metric is UNMEASURED. Under the maintainer's terms, a second artifact is not issued: another attempt needs a new
+  maintainer authorization. Nothing else (cap, GPU, volume, datacenter, protocol) was changed.
+- **Revisit when:** the maintainer authorizes another attempt. Its stock risk is EUR-IS-2's, because am5m373kuq locks
+  the datacenter. The create window's provider `--terminate-after` is set once at the first attempt, so a longer
+  window shortens a late pod's backstop. It never lengthens it, and the bill stays inside the cap.

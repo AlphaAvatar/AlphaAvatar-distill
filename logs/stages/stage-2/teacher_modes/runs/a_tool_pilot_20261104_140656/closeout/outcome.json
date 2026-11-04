@@ -1,0 +1,56 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tm_authorization_outcome/v1",
+ "run_id": "a_tool_pilot_20261104_140656",
+ "study": "A-TM",
+ "recorded_utc": "2026-11-04T14:26:24+00:00",
+ "status": "INCOMPLETE",
+ "validation_passed": false,
+ "products_secured": null,
+ "terminal": null,
+ "runner_terminal": null,
+ "provider_resource_created": false,
+ "evidence": null,
+ "verdict_rederived": null,
+ "money": {
+  "all_in_usd": 0.0,
+  "gpu_usd": 0.0,
+  "disk_usd": 0.0,
+  "elapsed_minutes": 0.0,
+  "price_per_hour": null,
+  "authorized_usd": null,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": null,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "4rhubprswo",
+    "name": "aad-a1-phase",
+    "size": 350,
+    "dataCenterId": "US-TX-3"
+   },
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 55,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "4rhubprswo",
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 2 resource(s) the records account for"
+ },
+ "kind": "tool_pilot",
+ "scientific_use": false,
+ "authorizes": "nothing"
+}
