@@ -129,14 +129,19 @@ KIND_RECORDS = {
     #: since 2026-11-04 the plan binds the pool's content and pool.json (checked against the pool at issue,
     #: `kind_conditions`), the pilot's measured priors and import record, and each lineage's bound task file: the pod
     #: reads that file and the plan, never the pool (P8.4)
+    #: and (maintainer 2026-11-04, review of a143b7ed) the formal source admission; Thinking-2507 also its in-session
+    #: device admission's criteria (`tool_session.run_device_admission`)
     "tool_generation": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
                         "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json",
                         "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json",
-                        "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json"),
+                        "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json",
+                        "logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json"),
     "tool_generation_t2507": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
                               "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json",
                               "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json",
-                              "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json"),
+                              "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json",
+                              "logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json",
+                              "configs/stages/stage-2/teacher_modes/t2507_device_admission.json"),
     "packed_search": ("configs/stages/stage-2/teacher_modes/packed_round_design.json",
                       "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
                       "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
@@ -184,7 +189,8 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
         bad = LC.gate(LC.load_config(Path(root) / P1.CHECK_CONFIG)["gates"][gate], root)
         if bad:
             raise SE.AuthorizationError("the L40S check record does not admit generation: " + "; ".join(bad))
-    if kind in CONTAINER_KINDS:
+    scoped = kind in CONTAINER_KINDS and kind not in IN_SESSION_DEVICE_ADMISSION
+    if scoped:
         #: the generation-scoped gate, reused where the dependencies and the engine contract are the same (it admits
         #: compatibility, never a kind's execution: that is the grant's)
         from stages.teacher_modes import tool_pilot as TPL
@@ -192,23 +198,67 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
         bad = TPL.l40s_generation_problems(root, kind=kind, lineage=lineage)
         if bad:
             raise SE.AuthorizationError(f"the L40S check record does not admit the {kind} generation: " + "; ".join(bad))
+    if kind in IN_SESSION_DEVICE_ADMISSION:
+        bad = device_admission_config_problems(kind, root)
+        if bad:
+            raise SE.AuthorizationError(f"the {kind} device admission is not the protocol's: " + "; ".join(bad))
     if kind == TOOL_PILOT_KIND:
         bad = pilot_problems(root)
         if bad:
             raise SE.AuthorizationError("the tool pilot is not ready: " + "; ".join(bad))
     if kind in TOOL_GENERATION_KINDS.values():
+        import json
         from stages.teacher_modes import tool_generation_plan as TGP
         from stages.teacher_modes import tool_pool as TP
+        from stages.teacher_modes import tool_source_admission as TSA
+        lineage = next(li for li, k in TOOL_GENERATION_KINDS.items() if k == kind)
         try:
-            TGP.verified()                    #: the plan against the ADMITTED pool on the dev box (data/...)
-        except (TGP.PlanIdentityError, TP.PoolIdentityError, FileNotFoundError, OSError, KeyError) as exc:
-            raise SE.AuthorizationError(f"the bounded generation plan is not verified: {exc}") from exc
+            plan, man, by_id = TGP.verified()  #: the plan against the ADMITTED pool on the dev box (data/...)
+            tf = REPO_ROOT / plan["lineages"][lineage]["tasks_file"]["path"]
+            tasks = [json.loads(x) for x in tf.read_text().splitlines() if x.strip()]
+        except (TGP.PlanIdentityError, TP.PoolIdentityError, FileNotFoundError, OSError, KeyError, TypeError) as exc:
+            raise SE.AuthorizationError(f"the bounded generation plan is not verified: {exc!r}") from exc
+        bad = TSA.problems(TSA.load(Path(root) / TSA.RECORD.relative_to(REPO_ROOT)),
+                           pool_content_sha256=man["content_sha256"], tasks=tasks)
+        if bad:
+            raise SE.AuthorizationError("the formal source admission refuses: " + "; ".join(bad))
     out = {"l40s_check_record_sha256": P1._sha(P1.CHECK_RECORD, root)}
-    if kind in CONTAINER_KINDS:
+    if scoped:
         out["l40s_generation_scope_sha256"] = P1._sha(LC.GENERATION_SCOPE, root)
     for rel in KIND_RECORDS.get(kind, ()):
         out[f"record:{rel}"] = P1._sha(rel, root)
     return out
+
+
+#: kinds whose teacher no committed L40S record measured: their formal session admits the device first
+#: (`tool_session.run_device_admission`, maintainer 2026-11-04, review of a143b7ed, section 4)
+IN_SESSION_DEVICE_ADMISSION = {"tool_generation_t2507": "configs/stages/stage-2/teacher_modes/t2507_device_admission.json"}
+
+
+def device_admission_config_problems(kind: str, root: Path = REPO_ROOT) -> list[str]:
+    """Why the kind's device-admission record is not the one its session can apply (empty when it is): its kind and
+    lineage, the protocol lineage's teacher, the session limit, the engine's memory fraction and the vLLM pin."""
+    import json
+    from stages.teacher_modes import tool_session as TS
+    p = Path(root) / IN_SESSION_DEVICE_ADMISSION[kind]
+    if not p.is_file():
+        return [f"{IN_SESSION_DEVICE_ADMISSION[kind]} does not exist"]
+    cfg = json.loads(p.read_text())
+    proto = json.loads((Path(root) / KIND_RECORDS[kind][0]).read_text())
+    lineage = next(li for li, k in TOOL_GENERATION_KINDS.items() if k == kind)
+    li, e = proto["lineages"][lineage], cfg.get("engine") or {}
+    bad = []
+    if cfg.get("kind") != kind or cfg.get("lineage") != lineage:
+        bad.append(f"it is the record of {cfg.get('kind')!r} / {cfg.get('lineage')!r}")
+    if (cfg["teacher"].get("model"), cfg["teacher"].get("revision")) != (li["model"], li["revision"]):
+        bad.append("it names another teacher than the protocol's lineage")
+    if e.get("session_limit") != proto["execution"]["session_limit"]:
+        bad.append(f"its session limit {e.get('session_limit')} is not the protocol's")
+    if e.get("gpu_memory_utilization") != proto["execution"]["gpu_memory_utilization"]:
+        bad.append("its memory fraction is not the protocol's")
+    if e.get("vllm_version") != TS.pinned_vllm(Path(root) / "requirements-vllm.txt"):
+        bad.append(f"its vLLM {e.get('vllm_version')} is not requirements-vllm.txt's pin")
+    return bad
 
 
 def pilot_problems(root: Path = REPO_ROOT) -> list[str]:
@@ -297,10 +347,13 @@ def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) ->
         return [f"the grant names no hard cap for kind {kind!r}"]
     if hard_cap_usd > float(caps[kind]) + 1e-9:
         return [f"${hard_cap_usd} exceeds the grant's ${caps[kind]} for kind {kind!r}"]
-    if kind != TOOL_PILOT_KIND:
+    if kind == TOOL_PILOT_KIND:
+        bad = pilot_grant_problems(g, root)
+    elif kind in IN_SESSION_DEVICE_ADMISSION:
+        bad = t2507_grant_problems(g, kind, root)
+    else:
         return []
-    bad = pilot_grant_problems(g, root)
-    if (g.get(TOOL_PILOT_KIND) or {}).get("cap_is_cumulative"):
+    if (g.get(kind) or {}).get("cap_is_cumulative"):
         k = kind_spent(kind, root)
         if k["unknown"]:
             bad.append(f"earlier {kind} runs {k['unknown']} record no closeout cost: reconcile them first")
@@ -340,6 +393,36 @@ def pilot_grant_problems(g: dict, root: Path = REPO_ROOT) -> list[str]:
         dt.date.fromisoformat(str(b.get("date")))
     except ValueError:
         bad.append(f"the grant's tool_pilot.date {b.get('date')!r} is not an ISO date")
+    return bad
+
+
+#: the exact scope the grant's tool_generation_t2507 block approves (maintainer 2026-11-04, review of a143b7ed, §4)
+T2507_APPROVAL = "tool_generation_t2507 device admission and formal tool_generation"
+
+
+def t2507_grant_problems(g: dict, kind: str, root: Path = REPO_ROOT) -> list[str]:
+    """Why the grant does not authorize Thinking-2507's formal tool generation beyond its kind cap (empty when it
+    does): its ``tool_generation_t2507`` block must approve exactly `T2507_APPROVAL`, be granted by the maintainer with
+    a decision and a date, carry the kind cap as its hard cap, cumulative, the L40S on the container placement, the
+    formal source admission and the device admission it requires, and the ceiling it was written under (which must
+    still be the grant's: an amendment never raises it)."""
+    import datetime as dt
+    from stages.teacher_modes import tool_pilot as TPL
+    b = g.get(kind)
+    if not isinstance(b, dict):
+        return [f"the grant carries no {kind} scope: the maintainer's amendment is required"]
+    want = {"approves": T2507_APPROVAL, "granted_by": "maintainer",
+            "hard_cap_usd": float((g.get("session_hard_caps_usd") or {}).get(kind, -1)), "cap_is_cumulative": True,
+            "gpu": GPU, "placement": TPL.PLACEMENT,
+            "source_admission": KIND_RECORDS[kind][4], "device_admission": IN_SESSION_DEVICE_ADMISSION[kind],
+            "ceiling_usd_at_amendment": g.get("ceiling_usd")}
+    bad = [f"the grant's {kind}.{k} is {b.get(k)!r}, not {v!r}" for k, v in want.items() if b.get(k) != v]
+    if not isinstance(b.get("decision"), str) or not b["decision"].strip():
+        bad.append(f"the grant's {kind} block quotes no decision")
+    try:
+        dt.date.fromisoformat(str(b.get("date")))
+    except ValueError:
+        bad.append(f"the grant's {kind}.date {b.get('date')!r} is not an ISO date")
     return bad
 
 
@@ -612,8 +695,9 @@ POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation
                             "search_packed/search/states.jsonl", "search_packed/search/telemetry.jsonl",
                             "search_packed/products.json"),
           **{k: (f"{PACKED_TRAIN_ARMS[k]}_units.json",) for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
-          "tool_generation": ("tool_generation_hybrid/tool_session.json",),
-          "tool_generation_t2507": ("tool_generation_thinking_2507/tool_session.json",),
+          **{k: tuple(f"tool_generation_{li}/{f}" for f in ("tool_session.json", "telemetry.jsonl",
+                                                             "device_admission.json"))
+             for li, k in TOOL_GENERATION_KINDS.items()},
           "tool_pilot": ("tool_pilot_hybrid/tool_session.json", "tool_pilot_hybrid/telemetry.jsonl")}
 
 

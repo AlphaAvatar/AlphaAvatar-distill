@@ -56,12 +56,19 @@ def checked_plan(proto: dict, lineage: str):
     """``(plan, pool manifest or None, tasks by id)``. A plan that writes the lineage's bound task file (P8.4) is read
     with `tool_generation_plan.verified_bound` -- the pod holds that file, never the pool; the dev box checked the
     plan against the pool at issue. Otherwise `tool_generation_plan.verified`: its split files re-verified, the plan
-    bound to this pool's content, pool.json, protocol and design, its cells unchanged."""
+    bound to this pool's content, pool.json, protocol and design, its cells unchanged. Either way the formal source
+    admission (`tool_source_admission.problems`) must admit the plan's pool content and every task's source."""
     plan = json.loads((REPO / proto["pool"]["plan"]).read_text())
     if (plan.get("lineages", {}).get(lineage) or {}).get("tasks_file"):
         plan, by_id = TGP.verified_bound(proto, lineage)
-        return plan, None, by_id
-    return TGP.verified(proto, lineage=lineage)
+        man = None
+    else:
+        plan, man, by_id = TGP.verified(proto, lineage=lineage)
+    from stages.teacher_modes import tool_source_admission as TSA
+    bad = TSA.problems(TSA.load(), pool_content_sha256=plan["pool"]["content_sha256"], tasks=by_id.values())
+    if bad:
+        raise PlanError("the formal source admission refuses: " + "; ".join(bad))
+    return plan, man, by_id
 
 
 def round_body(tasks: list[dict]) -> str:
@@ -190,7 +197,7 @@ def _gpu(telemetry: Path | None):
     return TPL.GpuSampler() if telemetry is not None else contextlib.nullcontext()
 
 
-def _telemetry(path: Path, out: Path, label: str, g: dict, gpu, seconds: float, recs: dict) -> None:
+def _telemetry(path: Path, out: Path, label: str, g: dict, gpu, seconds: float, recs: dict) -> dict:
     """One engine invocation's line of ``telemetry.jsonl``: wall time, GPU peaks, each new segment's engine lines and
     summary, the per-turn timings of the records it sealed. Never raises: telemetry does not stop a session."""
     from stages.teacher_modes import tool_pilot as TPL
@@ -204,6 +211,7 @@ def _telemetry(path: Path, out: Path, label: str, g: dict, gpu, seconds: float, 
         row = {"label": label, "error": repr(exc)[:300]}
     with Path(path).open("a") as fh:
         fh.write(json.dumps(row, default=str) + "\n")
+    return row
 
 
 def _report(cells: list[dict], state: list[dict]) -> list[dict]:
@@ -213,6 +221,166 @@ def _report(cells: list[dict], state: list[dict]) -> list[dict]:
         out.append({k: cell[k] for k in ("split", "category", "unit", "target", "bound")} |
                    {**s, "status": "REACHED" if done else "SHORTFALL"})
     return out
+
+
+# --- the in-session device admission (a lineage no committed L40S record measured) ---------------------------------
+
+#: per lineage, the device admission its formal session runs first (`t2507_device_admission.json` names why)
+DEVICE_ADMISSION = {"thinking_2507": REPO / "configs/stages/stage-2/teacher_modes/t2507_device_admission.json"}
+L40S_CHECK_CONFIG = REPO / "configs/stages/stage-2/teacher_modes/l40s_check.json"
+VLLM_PINS = REPO / "requirements-vllm.txt"
+
+
+class DeviceAdmissionRefused(RuntimeError):
+    """The device admission measured a teacher, engine or memory margin that is not the admitted one."""
+
+
+def snapshot_dir(model: str, revision: str) -> Path | None:
+    """The pod's local snapshot of ``model`` at ``revision`` (setup downloaded it; offline lookup only)."""
+    import os
+    try:
+        from huggingface_hub import snapshot_download
+        return Path(snapshot_download(model, revision=revision, local_files_only=True))
+    except Exception:  # noqa: BLE001 -- fall back to the cache layout
+        home = Path(os.environ.get("HF_HUB_CACHE") or Path(os.environ.get("HF_HOME", Path.home() / ".cache/huggingface"))
+                    / "hub")
+        d = home / f"models--{model.replace('/', '--')}" / "snapshots" / revision
+        return d if d.is_dir() else None
+
+
+def teacher_files(teacher: dict, snap: Path | None) -> dict:
+    """Every registered file's and weight shard's sha256 (and each shard's size) in the snapshot, against the record."""
+    def sha(p: Path) -> str:
+        h = hashlib.sha256()
+        with p.open("rb") as fh:
+            for b in iter(lambda: fh.read(1 << 24), b""):
+                h.update(b)
+        return h.hexdigest()
+    if snap is None:
+        return {"snapshot": None, "differ": ["no local snapshot of the teacher at its revision"]}
+    want = {**teacher["files_sha256"], **teacher["weight_shards_sha256"]}
+    got, differ = {}, []
+    for f, w in sorted(want.items()):
+        p = snap / f
+        got[f] = sha(p) if p.is_file() else None
+        if got[f] != w:
+            differ.append(f)
+    for f, n in sorted((teacher.get("weight_shards_bytes") or {}).items()):
+        if (snap / f).is_file() and (snap / f).stat().st_size != n:
+            differ.append(f"{f} (size)")
+    return {"snapshot": str(snap), "sha256": got, "differ": differ}
+
+
+def pinned_vllm(path: Path = VLLM_PINS) -> str | None:
+    for line in Path(path).read_text().splitlines():
+        if line.strip().startswith("vllm=="):
+            return line.strip().split("==", 1)[1]
+    return None
+
+
+def device_verdict(cfg: dict, proto: dict, lineage: str, mode: str, *, identity: dict, engine: list[dict],
+                   gpu: dict | None, complete: bool, turns: int, log_text: str, files: dict, free_wanted_gib: float,
+                   vllm_pin: str | None) -> dict:
+    """Every admission criterion (`t2507_device_admission.json`) from the measured evidence alone; ``admitted`` is
+    their conjunction. ``identity`` is the runner's recorded run identity (its summary), ``engine`` the engine
+    telemetry rows (`tool_pilot.engine_telemetry`), ``gpu`` the GPU sampler's record."""
+    t, e, li = cfg["teacher"], cfg["engine"], proto["lineages"][lineage]
+    eng = identity.get("engine") or {}
+    checks = {}
+
+    def check(name, ok, measured, wanted):
+        checks[name] = {"ok": bool(ok), "measured": measured, "wanted": wanted}
+    check("teacher_model", identity.get("model") == t["model"] == li["model"], identity.get("model"), t["model"])
+    check("teacher_revision", identity.get("revision") == t["revision"] == li["revision"], identity.get("revision"),
+          t["revision"])
+    check("teacher_files", not files.get("differ"), files.get("differ"), "every registered file and shard by sha256")
+    check("chat_template", identity.get("chat_template_sha256") == t["chat_template_sha256"],
+          identity.get("chat_template_sha256"), t["chat_template_sha256"])
+    check("template_kwargs", (identity.get("chat_template_kwargs") or {}) == (li["modes"][mode]["template_kwargs"] or {}),
+          identity.get("chat_template_kwargs"), li["modes"][mode]["template_kwargs"])
+    check("sampling", identity.get("sampling") == li["modes"][mode]["sampling"], identity.get("sampling"),
+          li["modes"][mode]["sampling"])
+    check("stop_ids", sorted(identity.get("stop_ids") or []) == sorted(int(x) for x in proto["execution"]["stop_ids"]),
+          identity.get("stop_ids"), proto["execution"]["stop_ids"])
+    check("vllm_lock", eng.get("vllm_version") == vllm_pin == e["vllm_version"], eng.get("vllm_version"),
+          {"requirements-vllm.txt": vllm_pin, "record": e["vllm_version"]})
+    limit = int(proto["execution"]["session_limit"])
+    lens = [identity.get("session_limit"), identity.get("effective_limit"), eng.get("max_model_len")]
+    check("context", all(x == limit == e["session_limit"] for x in lens), lens, limit)
+    check("gpu_memory_utilization", eng.get("gpu_memory_utilization") == e["gpu_memory_utilization"]
+          == proto["execution"]["gpu_memory_utilization"], eng.get("gpu_memory_utilization"), e["gpu_memory_utilization"])
+    check("dtype", eng.get("dtype") == e["dtype"], eng.get("dtype"), e["dtype"])
+    started = [r for r in engine if r.get("engine_ready_seconds") and r.get("kv_cache_tokens")]
+    kv = min((r["kv_cache_tokens"][0] for r in started), default=None)
+    check("engine_started_with_a_kv_cache", bool(started) and kv is not None and kv >= limit, kv,
+          f"an engine that starts and reports a KV cache of at least {limit} tokens")
+    oom = "out of memory" in log_text.lower()
+    check("no_out_of_memory", not oom, "CUDA out-of-memory in the engine log" if oom else None, None)
+    check("generation_complete", bool(complete) and turns > 0, {"complete": complete, "turns": turns},
+          "the invocation completes with generated turns")
+    peaks = [(g.get("name"), g.get("memory_total_mib"), g.get("peak_memory_used_mib"))
+             for g in ((gpu or {}).get("gpus") or {}).values()]
+    free = [round((tot - peak) / 1024, 2) for _, tot, peak in peaks if tot and peak]
+    check("memory_margin", bool(free) and min(free) >= free_wanted_gib and int((gpu or {}).get("samples") or 0) > 0,
+          {"gpus": peaks, "free_gib": free, "samples": (gpu or {}).get("samples")}, f">= {free_wanted_gib} GiB free")
+    return {"checks": checks, "admitted": all(c["ok"] for c in checks.values()),
+            "failed": sorted(k for k, c in checks.items() if not c["ok"])}
+
+
+def run_device_admission(proto: dict, plan: dict, lineage: str, by_id: dict, out: Path, identity: str, run,
+                         mark) -> dict:
+    """The lineage's device admission, before any formal invocation: the teacher snapshot's files by sha256, then ONE
+    engine invocation (pass 0, the protocol's seed base) on the first task of every cell of the lineage's first mode,
+    with GPU and engine telemetry, under ``<out>/device_admission`` -- device evidence only, never a formal shard --
+    and `device_verdict` over what it measured. Writes ``<out>/device_admission.json``; raises
+    `DeviceAdmissionRefused` when any criterion fails."""
+    from stages.reasoning_data import generation_driver as GD
+    from stages.teacher_modes import tool_pilot as TPL
+    cfg = json.loads(DEVICE_ADMISSION[lineage].read_text())
+    li = proto["lineages"][lineage]
+    if cfg["lineage"] != lineage or (cfg["teacher"]["model"], cfg["teacher"]["revision"]) != (li["model"], li["revision"]):
+        raise DeviceAdmissionRefused(f"{DEVICE_ADMISSION[lineage].name} admits another teacher than the protocol's")
+    mode = sorted(li["modes"])[0]
+    adm = out / "device_admission"
+    adm.mkdir(parents=True, exist_ok=True)
+    t0 = time.time()
+    files = teacher_files(cfg["teacher"], snapshot_dir(li["model"], li["revision"]))
+    files_seconds = round(time.time() - t0, 1)
+    ids = [c["task_ids"][0] for c in plan["lineages"][lineage]["modes"][mode]["cells"] if c.get("task_ids")]
+    label = f"admission_{mode}"
+    f = write_round([by_id[t] for t in ids], adm, label, proto["execution"]["system_message_default"])
+    t1 = time.time()
+    with TPL.GpuSampler() as gpu:
+        try:
+            g = GD.run_group(context(proto, lineage, identity), adm, adm / "inputs", f, 0, None, run, mark,
+                             label=f"{label}_pass0", extra_args=mode_args(proto, lineage, mode) + ("--engine-metrics",))
+        except Exception as exc:  # noqa: BLE001 -- measured as a failed invocation, with what the sampler saw
+            g = {"complete": False, "records": {}, "segments": [{"segment": 0}], "error": repr(exc)[:2000]}
+    recs = g.pop("records")
+    row = _telemetry(out / "telemetry.jsonl", adm, f"{label}_pass0", g, gpu, time.time() - t1, recs)
+    segs = [x["segment"] for x in g.get("segments") or [] if "segment" in x]
+    summ = [adm / f"{label}_pass0.seg{n}.raw.summary.json" for n in segs]
+    ident = next((json.loads(p.read_text()).get("identity") or {} for p in summ if p.is_file()), {})
+    logs = "".join((adm / f"{label}_pass0.seg{n}.log").read_text(errors="ignore")
+                   for n in segs if (adm / f"{label}_pass0.seg{n}.log").is_file())
+    free_wanted = float(json.loads(L40S_CHECK_CONFIG.read_text())["free_memory_wanted_gib"])
+    v = device_verdict(cfg, proto, lineage, mode, identity=ident, engine=row.get("engine") or [],
+                       gpu=row.get("gpu"), complete=bool(g.get("complete")),
+                       turns=sum(len(r.get("turns") or []) for r in recs.values()), log_text=logs, files=files,
+                       free_wanted_gib=free_wanted, vllm_pin=pinned_vllm())
+    rec = {"schema": "aadistill.stage2.teacher_modes.device_admission_result/v1", "lineage": lineage, "mode": mode,
+           "config": {"path": str(DEVICE_ADMISSION[lineage].relative_to(REPO)), "sha256": GD.sha(DEVICE_ADMISSION[lineage])},
+           "tasks": ids, "teacher_files": files, "teacher_files_seconds": files_seconds,
+           "invocation": {"label": f"{label}_pass0", "complete": g.get("complete"), "error": g.get("error"),
+                          "wall_seconds": row.get("wall_seconds"),
+                          "engine": row.get("engine"), "gpu": row.get("gpu"), "turns": row.get("turns")},
+           "runner_identity": ident, **v,
+           "outputs": "device evidence only: never sealed under a formal label, imported, admitted, counted or packed"}
+    (out / "device_admission.json").write_text(json.dumps(rec, indent=1, default=str) + "\n")
+    mark("DEVICE_ADMISSION_OK" if v["admitted"] else "DEVICE_ADMISSION_FAILED")
+    if not v["admitted"]:
+        raise DeviceAdmissionRefused(f"the device admission failed: {v['failed']}")
+    return rec
 
 
 class _Done(Exception):
@@ -350,10 +518,15 @@ def main(argv=None, *, run=None) -> int:
         if plan.get("import"):                  #: the cells carry the imported outcomes (the plan binds the record)
             record["imported_from"] = plan["import"]
         mark("CONTRACT_OK")
+        if a.lineage in DEVICE_ADMISSION:      #: no committed L40S record measured this teacher: measure it first
+            adm = run_device_admission(proto, plan, a.lineage, by_id, out, bound["identity"], run or GD.run_battery,
+                                       mark)
+            record["device_admission"] = {k: adm[k] for k in ("admitted", "failed", "tasks")}
         record["modes"] = {}
         for mode in sorted(proto["lineages"][a.lineage]["modes"]):
             res = generate_mode(proto, plan, a.lineage, mode, by_id, man, out, bound["identity"],
-                                run or GD.run_battery, mark)
+                                run or GD.run_battery, mark, telemetry=out / "telemetry.jsonl",
+                                extra_args=("--engine-metrics",))
             record["modes"][mode] = res
             if not res["complete"]:
                 ok = False

@@ -15741,3 +15741,39 @@ on a paid pod.
   - the grant's caps for `tool_generation` ($8.47) and `tool_generation_t2507` ($2.77, unmeasured);
   - the schema_arguments design;
   - Thinking-2507's L40S evidence: the generation-scoped gate refuses it.
+
+## 2026-11-04 (UTC) — Formal tool sources admitted; Thinking-2507's tool generation authorized with an in-session L40S device admission; the A2 schema exception refused
+
+- **Context.** The maintainer reviewed `a143b7ed`:
+  - approves Toucan-1.5M SFT and Pivot Conversational as formal tool-calling task sources (section 1);
+  - refuses the non-thinking `schema_arguments` training SHORTFALL as an A2-6cat proportion exception (section 2);
+  - asks for a versioned limited-coverage plan for the non-thinking state evaluation's `schema_arguments` (section 3);
+  - authorizes Thinking-2507's device admission and formal `tool_generation` within a cumulative new $2.78 (section 4);
+  - defers the hybrid's generation grant (section 5).
+- **Decision.**
+  - **Source admission.** Signed in `audit/tool_source_admission.json` under the pilot admission's signature contract,
+    the fields filled on the written instruction to register it. It is bound to content `be4652d7` and the two
+    `dataset@revision`. Targets and online KD are teacher-native only. No other source is admitted. It authorizes no
+    stage and no spend.
+  - **Canonical pool.** Rebuilt with current code: split files identical, `pool.json` sha `4b75c1ed`. The plan was
+    rebuilt on it, unchanged.
+  - **Thinking-2507.** Its kind's gate is an in-session device admission (`t2507_device_admission.json`) instead of the
+    generation-scoped gate, which measured only the hybrid's engine. It checks:
+    - teacher files and shards by sha256 at `768f209d`;
+    - one invocation on the first task of each cell;
+    - template `3802169b`, the vLLM pin, the 8,184 context, the KV cache, no OOM, and at least 4 GiB free at peak.
+  - **Grant.** `tool_generation_t2507` gets $2.78 (the runner's $2.7742 rounded up), cumulative, L40S, no volume.
+- **Alternatives considered.**
+  - A separate L40S check run: rejected by the maintainer, no full pilot.
+  - Treating the first formal invocation as the admission: rejected, because a wrong teacher identity would then be
+    found only after most of the generation.
+  - Reusing corpus_v2's `tokenizer_sha256` `3ec3c124`: its convention is not reproducible from the files, so each
+    tokenizer file is checked instead.
+- **Risks.**
+  - The admission's one extra engine start, about 4 minutes, sits inside the plan's 66 driver minutes and the $2.78
+    cap.
+  - Thinking-2507's yields are protocol priors, not measured: cells may end SHORTFALL. Any real shortfall is reported,
+    never pre-approved.
+- **Revisit when:** the run closes. Its priors are then measured, and the hybrid grant is revisited after the A2 design
+  and the state-evaluation coverage plan.
+

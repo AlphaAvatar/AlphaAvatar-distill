@@ -38,6 +38,11 @@ data/stages/stage-2/stage2/calib/
 data/stages/stage-2/stage2_v1/train/
 data/stages/stage-2/stage2_v1/val/
 data/stages/stage-2/stage2_v1/calib/
+# Research A packed round: the canonical tool_pool@v1 (about 700 MB; rebuild with
+# scripts/stages/stage-2/teacher_modes/tool_pool.py from the two admitted sources; its identity --
+# content_sha256, pool.json and every split file by sha256 -- lives in
+# logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json)
+data/stages/stage-2/teacher_modes/tool_pool_v1/
 
 # Stage 3 teacher-target 2x2 arms (rebuild with scripts/shared/data/build_stage3_pilot.py
 # from the hashed generation corpus; the committed manifest.json pins both arms'

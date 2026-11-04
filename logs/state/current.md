@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-04 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-11-04 (UTC), after the review of `a143b7ed`. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,22 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**RESEARCH A FORMAL TOOL SOURCES ADMITTED; THINKING-2507 FORMAL TOOL GENERATION AUTHORIZED ($2.78 cumulative, kind `tool_generation_t2507`) AND BEING LAUNCHED; THE HYBRID'S GENERATION GRANT DEFERRED (maintainer review of `a143b7ed`, 2026-11-04).**
+- Done at $0:
+  - the formal source admission, signed (`logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json`);
+  - the canonical pool `data/stages/stage-2/teacher_modes/tool_pool_v1` (gitignored; content `be4652d7`, split files
+    byte-identical to the reviewed copy);
+  - the canonical plan `plans/tool_generation_plan.json` (the dry run's cells and prices);
+  - Thinking-2507's in-session L40S device admission (`configs/stages/stage-2/teacher_modes/t2507_device_admission.json`);
+  - the grant's `tool_generation_t2507` block.
+- Owner: `PACKED_ROUND.md` section 8, "Formal sources, the canonical pool and Thinking-2507"; the run's own record once
+  it is launched.
+- **Not approved:** the non-thinking `schema_arguments` training SHORTFALL (the A2-6cat proportion exception is
+  refused). A new comparable control design is being prepared, as is the state evaluation's limited-coverage plan.
+  Neither starts anything.
+- **Not authorized:** the hybrid's `tool_generation` (at least $8.48 later), packed full search, training, formal
+  evaluation, a merge.
 
 **RESEARCH A TOOL PILOT: COMPLETE AND ACCEPTED (`a_tool_pilot_20261104_164531`; $0.4328 estimated, $0.4286 posted by the provider). THE BOUNDED TOOL GENERATION: REVISED ON IT, READY FOR ONE REVIEW, NOT AUTHORIZED.**
 - Revised (2026-11-04, $0): measured priors, an explicit import of the pilot's 794 tasks, the plan's sealed /

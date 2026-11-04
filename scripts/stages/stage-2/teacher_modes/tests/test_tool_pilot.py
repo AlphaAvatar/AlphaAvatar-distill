@@ -104,11 +104,13 @@ def test_the_envelope_covers_the_pilot_and_the_amendment_raises_nothing():
         k: v for k, v in a["edits"]["tool_pilot"].items() if k not in ("decision", "date")}
     assert g["tool_pilot"]["decision"] and g["tool_pilot"]["date"] == "2026-11-04"
     assert g["tool_pilot"]["amended"]["date"] == "2026-11-04" and g["tool_pilot"]["network_volume"] is None
-    assert g["amendments"][-1]["previous_tool_pilot"] == {"network_volume": "am5m373kuq"}
+    assert next(x for x in g["amendments"] if "previous_tool_pilot" in x)["previous_tool_pilot"] == {
+        "network_volume": "am5m373kuq"}
     assert (g["per_session_hard_cap_usd"], g["gpus"], g["gpu_count_max"]) == (
         a["unchanged"]["per_session_hard_cap_usd"], a["unchanged"]["gpus"], a["unchanged"]["gpu_count_max"])
     applied = json.loads(TPL.AMENDMENT.read_text())                  #: the proposal the maintainer approved
-    assert {k: v for k, v in g["session_hard_caps_usd"].items() if k != "tool_pilot"} == \
+    later = {"tool_pilot", "tool_generation_t2507"}                  #: kinds later amendments added
+    assert {k: v for k, v in g["session_hard_caps_usd"].items() if k not in later} == \
         applied["unchanged"]["session_hard_caps_usd (the A1 kinds)"]
     assert a["edits"]["tool_pilot"]["decision"] is None and a["edits"]["tool_pilot"]["date"] is None
 
@@ -929,12 +931,17 @@ def test_the_committed_pilot_passes_the_generation_scope_and_the_whole_phase_gat
     assert whole == ["the check ran under another phase identity than the files hold now"]
     with pytest.raises(SE.AuthorizationError, match="another phase identity"):
         TM.kind_conditions("inputs")
-    #: the formal generation reuses the generation-scoped gate (maintainer 2026-11-04): the hybrid's engine passes and
-    #: issue then needs the plan verified against the ADMITTED pool; Thinking-2507 is another teacher and is refused
-    with pytest.raises(SE.AuthorizationError, match="plan is not verified"):
-        TM.kind_conditions("tool_generation")
-    with pytest.raises(SE.AuthorizationError, match="does not admit the tool_generation_t2507 generation"):
-        TM.kind_conditions("tool_generation_t2507")
+    #: the hybrid's formal generation reuses the generation-scoped gate (maintainer 2026-11-04) and then needs the plan
+    #: verified against the ADMITTED canonical pool (gitignored bytes under data/); Thinking-2507 is another teacher,
+    #: so its gate is the in-session device admission's record instead (review of a143b7ed, section 4)
+    pool = TM.REPO_ROOT / json.loads(TPL.TGP.PROTOCOL.read_text())["pool"]["dir"] / "pool.json"
+    if not pool.is_file():
+        with pytest.raises(SE.AuthorizationError, match="plan is not verified"):
+            TM.kind_conditions("tool_generation")
+        return
+    hybrid, t2507 = TM.kind_conditions("tool_generation"), TM.kind_conditions("tool_generation_t2507")
+    assert "l40s_generation_scope_sha256" in hybrid and "l40s_generation_scope_sha256" not in t2507
+    assert f"record:{TM.IN_SESSION_DEVICE_ADMISSION['tool_generation_t2507']}" in t2507
 
 
 # --- the revision on the accepted pilot (maintainer 2026-11-04): priors, import, diagnosis, projection by shape --------

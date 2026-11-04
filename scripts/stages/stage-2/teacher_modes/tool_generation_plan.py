@@ -643,7 +643,7 @@ def main(argv=None) -> int:
             bound_tasks_file(plan, by_id, li)
         Path(a.write).parent.mkdir(parents=True, exist_ok=True)
         Path(a.write).write_text(json.dumps(plan, indent=1) + "\n")
-    print(json.dumps({"price": plan["price"]["total_usd"], "cap": plan["price"]["proposed_hard_cap_usd"],
+    print(json.dumps({"price": plan["price"]["total_usd"], "caps": plan["price"].get("proposed_hard_caps_usd"),
                       "cells": summary}, indent=1)[:8000])
     return 0
 

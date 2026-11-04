@@ -274,21 +274,7 @@ class TestLineageKinds:
                             "--durable-root", str(tmp_path), "--status", str(tmp_path / "s")]) == 3
         assert seen == ["tool_generation", "tool_generation_t2507"]
 
-    def test_both_tool_kinds_pass_the_l40s_generation_scoped_gate(self, monkeypatch):
-        """Each lineage's tool generation is gated on the L40S check's generation measurement for ITS engine (maintainer
-        2026-11-04: the generation-scoped gate reused where the dependencies are the same); the whole-identity teacher
-        gate is no longer theirs, and a gate problem refuses."""
-        from stages.teacher_modes import l40s_check as LC
-        from stages.teacher_modes import token_matched_phase as TM
-        from stages.teacher_modes import tool_pilot as TPL
-        seen, whole = [], []
-        monkeypatch.setattr(LC, "gate", lambda ops, root: whole.append(ops) or [])
-        monkeypatch.setattr(TPL, "l40s_generation_problems",
-                            lambda root, kind, lineage: seen.append((kind, lineage)) or ["unmeasured"])
-        for k in TM.TOOL_GENERATION_KINDS.values():
-            with pytest.raises(TM.SE.AuthorizationError, match="unmeasured"):
-                TM.kind_conditions(k)
-        assert seen == [("tool_generation", "hybrid"), ("tool_generation_t2507", "thinking_2507")] and whole == []
+    #: which gate each lineage's kind takes: test_t2507_device_admission.py::test_only_the_hybrid_takes_the_generation_scoped_gate
 
 
 class TestSixTypePacks:

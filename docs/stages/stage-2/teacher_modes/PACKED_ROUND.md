@@ -887,6 +887,41 @@ by `tool_pilot.py application --live-position`).
   amendment, and the final authorization. The project position is re-read at issue and at launch.
 - **Separate:** the packed 8,192-token forward / DEPTH / training GPU validation is its own engineering request on
   existing frozen inputs (v1 items, A1's documents); it is not combined with the pilot.
+- **Formal sources, the canonical pool and Thinking-2507** (maintainer review of `a143b7ed`, 2026-11-04):
+  - **Formal source admission, signed**
+    ([`audit/tool_source_admission.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json),
+    `tool_source_admission.py`). Toucan-1.5M SFT `@0df3cf37` and Pivot Conversational `@bfc7a4dd` are admitted as
+    formal task sources for pool content `be4652d7` only. Training targets and online KD come only from the student's
+    own teacher; another model's output in a source record is task material or registered reference verification
+    only. Pivot Function-Calling, Nemotron-SFT-Agentic-v4 and every other source are not admitted. The record
+    authorizes no stage and no spend. The issue (against the pool) and the pod (against the plan and its bound task
+    file) apply the same check.
+  - **Canonical pool** `data/stages/stage-2/teacher_modes/tool_pool_v1` (gitignored, about 700 MB). It was rebuilt
+    with the current `tool_pool.py` from the two verified converted sources. All five split files are byte-identical to
+    the reviewed v4 copy and `content_sha256` is `be4652d7`. `pool.json` differs only in `written_utc` and in the
+    descriptive `verification_levels` census (the v2 level names of `1c9c2226`), so its sha256 is now `4b75c1ed`.
+  - **Canonical plan** (`plans/tool_generation_plan.json`): the dry run's cells, task files and prices exactly, on the
+    canonical pool. Thinking-2507 has 979 tasks (`c555322b`), staged to the relay at $0.
+  - **Thinking-2507's in-session L40S device admission**
+    ([`t2507_device_admission.json`](../../../../configs/stages/stage-2/teacher_modes/t2507_device_admission.json),
+    `tool_session.run_device_admission`). It replaces the generation-scoped gate, which measured only the hybrid's
+    engine, for this kind. Before any formal invocation the session checks:
+    - the teacher snapshot's files and three weight shards by sha256 against the hub's tree at `768f209d`;
+    - then one engine invocation, pass 0, on the first task of each of the 8 cells;
+    - the runner's recorded model, revision, chat template `3802169b`, template kwargs, sampling, stop ids, vLLM
+      against `requirements-vllm.txt`, the 8,184 context (session limit, effective limit, `max_model_len`), memory
+      fraction and dtype;
+    - an engine that starts with a KV cache of at least 8,184 tokens, no CUDA out-of-memory, a completed generation,
+      and at least 4 GiB free at the sampled peak (`l40s_check.json`).
+
+    Its outputs are device evidence under `device_admission/`, never a formal shard. A failure ends the session
+    `RUN_FAILED` before formal generation. An A100 is possible only after a measured out-of-memory. The registered
+    `tokenizer_sha256` `3ec3c124` (corpus_v2) uses a convention these files do not reproduce, so each tokenizer file
+    is checked instead. The hybrid keeps the generation-scoped gate.
+  - **Grant:** `tool_generation_t2507` gets $2.78, the plan's $2.7742 runner all-in rounded up, cumulative over
+    attempts, with its block (`t2507_grant_problems`). It covers the device admission and the formal generation only.
+    The hybrid's `tool_generation` grant (at least $8.48) is deferred until the A2 design and the state-evaluation
+    coverage plan are settled.
 
 ## 9. Decisions owed to the maintainer
 
@@ -894,9 +929,9 @@ The maintainer has settled two former items: fragments are accepted, and loss no
 packed search runs unless it is requested.
 
 1. **Tool-calling sources.**
-   - Toucan SFT and Pivot Conversational are being prepared as priority candidates (2026-11-03); their admission is
-     still the maintainer's. Pivot Function-Calling is not adopted; Nemotron-SFT-Agentic-v4 stays deferred; Glaive and
-     xLAM are isolation references only.
+   - Toucan SFT and Pivot Conversational are ADMITTED as formal sources (2026-11-04, review of `a143b7ed`;
+     `audit/tool_source_admission.json`). Pivot Function-Calling and Nemotron-SFT-Agentic-v4 are not admitted; Glaive
+     and xLAM are isolation references only.
    - Also owed: the category shares (used unchanged by the plan), the prompt bound and the non-thinking state-evaluation
      floor.
 2. **Expected SHORTFALLS.**
