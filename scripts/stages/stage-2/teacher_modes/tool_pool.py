@@ -38,7 +38,12 @@ context, the backend is a replay table or none); each source's converter is its 
   system text the session uses) is refused for every teacher (`length_checkers`); an admitted task records the
   longest of those lengths (``first_prompt_tokens``, the generation plan's prefill term);
 * orders -- every split's canonical order is a seeded shuffle (``ORDER_SEED``) of its task ids, frozen with its
-  sha256 before any generation; every teacher walks the same order (``training_order`` is the training split's);
+  sha256 before any generation; every teacher walks the same order (``training_order`` is the training split's).
+  Episode shapes are tiers of that order (``SHAPE_TIERS``, schema v4): every full episode first, in its shuffle,
+  then every single-step gold tool call in its own -- a cell reaches a decision sample only after the full
+  episodes of its category, so a cell its full episodes fill is selected exactly as before. The shuffle key is
+  per id, so a task keeps its place among the others when tasks are added;
+* shapes -- a T5 duplicate collapses to a full episode before a single-step task of the same prompt and family;
 * identity -- pool.json registers every split file's sha256, task count, sources and frozen order's sha256, every
   converted input's sha256, and ``content_sha256`` over files, orders and sources; `load_pool` re-verifies all of it
   before anything reads a task and refuses a missing file, a changed byte, a task in the wrong file, an unregistered
@@ -102,7 +107,9 @@ CONVERTERS: dict[str, Callable[[Path], Iterable[dict]]] = {
 
 class PoolIdentityError(RuntimeError):
     """A pool whose files are missing, changed, misplaced or from an unregistered source."""
-SCHEMA = "aadistill.stage2.teacher_modes.tool_pool/v3"
+SCHEMA = "aadistill.stage2.teacher_modes.tool_pool/v4"
+#: the order tier of each registered episode shape (`tool_episodes.EPISODE_SHAPES`): stronger verification first
+SHAPE_TIERS = {TE.FULL_EPISODE: 0, TE.SINGLE_STEP: 1}
 
 
 def canonical(obj) -> str:
@@ -275,9 +282,11 @@ def assemble(tasks: Iterable[dict], *, reference: Reference | None = None,
 
     def refuse(t, reason, split=None):
         excluded.append({"task_id": t["task_id"], "reason": reason, "source": str(t["source"].get("dataset")),
-                         "category": t.get("category"), "split": split or t.get("split") or "conflict"})
+                         "category": t.get("category"), "split": split or t.get("split") or "conflict",
+                         **({"episode_shape": TE.episode_shape(t)} if t.get("episode_shape") else {})})
 
-    for t in sorted(tasks, key=lambda t: (str(t["source"].get("dataset")), t["task_id"])):
+    for t in sorted(tasks, key=lambda t: (str(t["source"].get("dataset")), SHAPE_TIERS[TE.episode_shape(t)],
+                                          t["task_id"])):
         atoms = atoms_of(t)
         t = {**t, "atoms": atoms, "family": family_of(atoms), "split": task_split(atoms)}
         if t["split"] is None:
@@ -312,10 +321,11 @@ def assemble(tasks: Iterable[dict], *, reference: Reference | None = None,
                            "first_prompt_tokens": max(lengths) if lengths else None})
     admitted = isolate_between_splits(candidates, refuse)
     orders = frozen_orders(admitted)
-    census, verification = defaultdict(Counter), defaultdict(Counter)
+    census, verification, shapes = defaultdict(Counter), defaultdict(Counter), defaultdict(Counter)
     atom_splits, key_splits, tool_splits = defaultdict(set), defaultdict(set), defaultdict(set)
     for t in admitted:
         census[t["split"]][t["category"]] += 1
+        shapes[t["split"]][f"{TE.episode_shape(t)}|{t['category']}"] += 1
         verification[t["split"]]["+".join(TE.verification_levels(t))] += 1
         key_splits[t["content_keys"]["prompt"]].add(t["split"])
         for a in t["atoms"]:
@@ -331,6 +341,7 @@ def assemble(tasks: Iterable[dict], *, reference: Reference | None = None,
             "training_order": orders.get("training", []),
             "training_order_sha256": hashlib.sha256(canonical(orders.get("training", [])).encode()).hexdigest(),
             "census": {s: dict(c) for s, c in sorted(census.items())},
+            "episode_shapes": {s: dict(sorted(c.items())) for s, c in sorted(shapes.items())},
             "verification_levels": {s: dict(c) for s, c in sorted(verification.items())},
             "atoms": {"total": len(atom_splits),
                       "by_split": dict(Counter(next(iter(s)) for s in atom_splits.values())),
@@ -349,13 +360,15 @@ def _by_source(tasks) -> dict:
 
 
 def frozen_orders(tasks: list[dict]) -> dict[str, list[str]]:
-    """Every split's seeded shuffle of its task ids (training's namespace is the pool id, as in v1)."""
+    """Every split's seeded shuffle of its task ids (training's namespace is the pool id, as in v1), tiered by
+    episode shape (`SHAPE_TIERS`): the full episodes in their shuffle, then the single-step tasks in theirs."""
     from aadistill.data.sequence_packing import shuffled_order
+    tier = {t["task_id"]: SHAPE_TIERS[TE.episode_shape(t)] for t in tasks}
     out = {}
     for split in sorted({t["split"] for t in tasks}):
         ids = sorted(t["task_id"] for t in tasks if t["split"] == split)
         ns = POOL_ID if split == "training" else f"{POOL_ID}|{split}"
-        out[split] = [ids[i] for i in shuffled_order(ids, ORDER_SEED, namespace=ns)]
+        out[split] = sorted((ids[i] for i in shuffled_order(ids, ORDER_SEED, namespace=ns)), key=tier.get)
     return out
 
 
@@ -474,7 +487,8 @@ def write_pool(pool: dict, out: Path, *, sources: dict, extra: dict) -> dict:
            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "files": files, "sources": sources, "source_revisions": [list(x) for x in revisions],
            "content_sha256": content_sha256(files, sources),
-           "census": pool["census"], "verification_levels": pool["verification_levels"], "atoms": pool["atoms"],
+           "census": pool["census"], "episode_shapes": pool["episode_shapes"], "shape_tiers": SHAPE_TIERS,
+           "verification_levels": pool["verification_levels"], "atoms": pool["atoms"],
            "by_source": pool["by_source"], "excluded_by": pool["excluded_by"],
            "tool_name_only_matches_counted": pool["tool_name_only_matches_counted"], "excluded": pool["excluded"],
            **extra,

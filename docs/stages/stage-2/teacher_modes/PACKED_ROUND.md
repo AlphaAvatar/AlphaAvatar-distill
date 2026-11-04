@@ -42,6 +42,15 @@
     admission reads the registered one (`audit/proportion_tolerance_audit.json`).
   - Option 1 (call-only gold episodes) and option 2 (WorkBench) for the non-thinking schema_arguments SHORTFALL are
     compared at $0 (`audit/schema_arguments_options.json`); neither is implemented.
+- **The maintainer's fourth review, of `647eea0e` (2026-11-04),** accepted and froze the packing protocol, the
+  pre-packing accounting and the four-step decoupling, and asked for the following, done at $0 (sections 5, 7, 8, 10):
+  - the admission takes only the proportion report of the selection it admits (`selection_identity`);
+  - the training binding verifies the actual packed tokens and supervision (`packed_content_sha256`, the documents
+    against the manifest, the sequences re-derived);
+  - option 1 implemented as `single_step_gold_tool_call@v1`, with the dry pool and plan rebuilt; no SHORTFALL approved;
+  - the token identity audit's intermittent failure diagnosed and repaired; A2's missing task recovered from the
+    frozen records; the environment-blocked tests recorded;
+  - an L40S pilot application prepared, not authorized.
 
 | record | owns |
 | --- | --- |
@@ -58,6 +67,10 @@
 | [`plans/tool_generation_plan_dry_run.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_generation_plan_dry_run.json) | the bounded generation plan over the dry pool: every cell's target, supply, expected tasks and bound, and the price |
 | [`audit/schema_arguments_shortfall.json`](../../../../logs/stages/stage-2/teacher_modes/audit/schema_arguments_shortfall.json) | the non-thinking schema_arguments SHORTFALL: reach, impact, the verifiable options and the minimal preparation |
 | [`audit/schema_arguments_options.json`](../../../../logs/stages/stage-2/teacher_modes/audit/schema_arguments_options.json) | option 1 (call-only gold episodes) against option 2 (WorkBench): volume per split, reach, verification, protocol impact, cost (`schema_arguments_audit.py`) |
+| [`audit/single_step_supply_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/single_step_supply_audit.json) | the single-step implementation's dry pool (schema v4) against v3: every earlier task's admission, split and order; `schema_arguments` supply per split and shape; the plan's `schema_arguments` cells; reach at the priors (`schema_arguments_audit.py --supply-pool`) |
+| [`audit/a2_recovery_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/a2_recovery_audit.json) | A2-6cat's one selected task outside A2's pack, recovered from the frozen records, with the counts it completes (`packed_packs.py --recovery-audit`) |
+| [`budget/applications/research_a_tool_pilot_2026-11-04/application.json`](../../../../logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json) | the proposed L40S tool pilot: sample, measurements, price, hard cap, stop conditions; authorizes nothing (`tool_generation_plan.py --pilot-application`) |
+| [`validations/packed_round/environment_blocked_20261104.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/environment_blocked_20261104.json) | the 25 simulator-restore tests the core suite could not run (11 GiB free, 20 GiB gate unchanged): ENVIRONMENT_BLOCKED, not verified |
 | [`audit/proportion_tolerance_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/proportion_tolerance_audit.json) | the registered proportion tolerance on every arm's real data, beside the withdrawn share check (`packed_packs.py --proportion-audit`) |
 | [`audit/experiment_suite_baseline_20261103.json`](../../../../logs/stages/stage-2/teacher_modes/audit/experiment_suite_baseline_20261103.json) | the four experiment-suite failures run at `b7ee0c93` and `c861d704`: pre-existing, with their causes |
 
@@ -342,6 +355,38 @@ SHORTFALL and never filled from another):
   Option 1 is the stronger choice for this gap: it alone adds state-evaluation supply. Neither closes non-thinking
   state evaluation at the expected pass rate; with option 1 it would reach about 1,400 of 1,800 positions. The
   earlier estimate ("about the target") assumed 40–120 tokens per call turn and is corrected in the shortfall record.
+- **Option 1 implemented at $0: `single_step_gold_tool_call@v1`** (the maintainer's review of `647eea0e`, item 4;
+  [`six_category_design.json :: protocol.episode_shapes`](../../../../configs/stages/stage-2/teacher_modes/six_category_design.json),
+  [`audit/single_step_supply_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/single_step_supply_audit.json)).
+  - **What a sample is.** One assistant turn from the first real user input: the teacher's own tool call, ending the
+    sample at its natural termination. No tool response or final answer exists or is required. It is a tool-call
+    decision, never a completed task.
+  - **Verification.** Protocol (natural termination, the mode's think rule, every block parsed, the turn ends on its
+    call with nothing after it but the stop token, no response attached), schema validity, and the exact gold call
+    (name + arguments after canonicalization). Recorded execution, tool selection and task success stay `None` --
+    unverified, never passed (core `verify_episode(unexecuted_final_call=True)`). The gold only verifies; the
+    target is the teacher's generated ids.
+  - **Scope.** Pivot Conversational trajectories that the converter skipped only because their first gold call has
+    no recorded output, with structured arguments: `schema_arguments` only, one turn, no backend, task id variant
+    `turn1-step1`. 1,709 tasks converted; 7,034 unstructured first calls (tool_selection decisions) are counted and
+    not converted. The existing 9,051 converted tasks are byte-identical, environments included. Refused for any
+    other category (multi_turn, error_recovery, mcp_agent included) or shape rule.
+  - **Pool (dry, schema v4).** Episode shapes are tiers of each split's frozen order: every full episode first, then
+    the single steps; a T5 duplicate keeps the full episode. Every earlier task is admitted as before, in the same
+    split and relative order. Single steps admitted: 1,560 training, 72 calibration, 22 state evaluation,
+    19 validation, 1 reserve (35 refused by the screens).
+  - **Plan.** Every thinking-mode and Thinking-2507 cell is unchanged: their full episodes fill them before the
+    second tier. Non-thinking `schema_arguments`: training expects 891 tasks (bound 1,928, the whole supply), state
+    evaluation all 29 (7 full + 22 single), calibration unchanged (6 expected, full episodes). Price: $2.27 / $3.72 /
+    $11.01, cap $12.11 (was $3.62 / $10.31, $11.34).
+  - **Counting and measurement.** Unchanged: one turn = one token-in/token-out document; unique supervised tokens
+    before packing; the same packing and scored positions. An item carries `episode_shape`, which enters the
+    profile's and the suite's content identity; the evaluator's protocol id is unchanged.
+  - **Reach at the priors** (a prior, not a measurement). Non-thinking training: 85,126 of 74,013 supervised tokens at
+    the expected pass rate (42,136 pessimistic; the target needs a per-attempt pass rate of about 0.22). Non-thinking
+    state evaluation: 1,413 of 1,800 scored positions (696 pessimistic, 2,436 optimistic); 1,800 needs about 0.67. No SHORTFALL is approved, so the
+    A2-6cat admission refuses and `state_eval_hybrid@v2` stays PENDING. The pilot application (section 8) generates
+    every state-evaluation `schema_arguments` task to measure the real supply.
 - **Rejected: relabelling Toucan.** Toucan has no gold arguments, so it would fill the category with weaker
   verification.
 - **Approving the shortfall** is not granted (2026-11-04). It would also need acceptance of A2-6cat's proportion.
@@ -358,8 +403,9 @@ SHORTFALL and never filled from another):
 | --- | --- | --- |
 | task records from a source | `tool_sources_toucan.py`, `tool_sources_pivot.py` | no |
 | pinned, verified reference copies: T2 benchmarks, T3 xLAM / Glaive | `tool_benchmarks.py fetch` | no |
-| the pool: atoms, splits, T1–T5, schema, replay conflicts, length bound, frozen orders, content identity | `tool_pool.py` | no |
+| the pool: atoms, splits, T1–T5, schema, replay conflicts, length bound, frozen orders (episode shapes as order tiers, schema v4), content identity | `tool_pool.py` | no |
 | the bounded plan: cells, targets, frozen orders, rounds, bounds, price | `tool_generation_plan.py` | no |
+| single-step gold tool calls (`single_step_gold_tool_call@v1`): Pivot Conversational trajectories whose first gold call has no recorded output, schema_arguments only; verified for protocol, schema and the exact gold call, never executed | `tool_sources_pivot.py`, `tool_episodes.py` (`EPISODE_SHAPES`), `aadistill.data.tool_calls.verify_episode(unexecuted_final_call=True)` | no |
 | teacher-native episodes in rounds to each cell's target, one lineage per session under its own kind and the L40S teacher gate; the plan and the pool verified first | `tool_session.py` (hybrid `tool_generation`, Thinking-2507 `tool_generation_t2507`) over `run_battery --env-factory` (each task renders its own system text) | yes |
 | verification by level; documents and items | `tool_admission.py` (from the sealed shards), `aadistill.data.tool_calls`, `tool_episodes.py` | no |
 | types v2, profiles v2, `state_eval_hybrid@v2` (tool items selected by the plan, THIN categories listed), the packed freeze | `packed_inputs.py` | no |
@@ -474,11 +520,33 @@ and stops at the first refusal:
 | --- | --- | --- | --- |
 | data selection | `select` | the arm's documents token for token, whole examples and episodes, each with its data type, category, whole unit and source; the tool cells per the frozen plan, a short cell SHORTFALL | pack, judge, fill a cell from another |
 | proportion validation | `proportions` -> core `aadistill.data.mixture.validate_proportions` | unique supervised tokens before packing per type and fluid, against `registered_quotas`: every row's target, amount, deviation, bounds and status | read a packed sequence, an exposure or a loss weight; choose a tolerance |
-| admission / freeze | `admit` | admits only a passing selection whose tool cells all reached their targets, a failure covered only by the maintainer's recorded approval (`data_admission.approved_exceptions`, the plan's `approved_shortfalls`); writes `<pack>/data_manifest.json` (every document's id, split, data type, category, unit, supervised tokens and content sha256; counts, reasoning / answer / tool-calling tokens, proportions, sources, lineage), sealed by its `content_sha256` | admit an unapproved SHORTFALL; write anything when it refuses |
-| packing | `pack` | checks its input is exactly the manifest's documents and the manifest is intact, then random shuffle -> sequential packing -> truncation at `stage3_packing`; the ladder names the manifest | compute or correct a proportion, add or move data |
+| admission / freeze | `admit` | admits only the selection its report validated (`report_problems` recomputes `selection_identity` and compares; it never validates again), a passing one whose tool cells all reached their targets, a failure covered only by the maintainer's recorded approval (`data_admission.approved_exceptions`, the plan's `approved_shortfalls`); writes `<pack>/data_manifest.json` (every document's id, split, data type, category, unit, supervised tokens and content sha256; counts, reasoning / answer / tool-calling tokens, proportions, `selection_sha256`, sources, lineage), sealed by its `content_sha256` | admit an unapproved SHORTFALL or another selection's report; write anything when it refuses |
+| packing | `pack` | checks its input is exactly the manifest's documents and the manifest is intact, then random shuffle -> sequential packing -> truncation at `stage3_packing`; records `packed_content_sha256` of the sequences it produced before writing them; the ladder names the manifest | compute or correct a proportion, add or move data |
 
-`packed_training_plan.bind` reads a built pack only through `verify_pack`: the manifest unchanged and admitted, the
-pack holding exactly its documents, the design's packing spec. A pack without one is refused.
+**The report is bound to its selection** (the maintainer's review of `647eea0e`, P1). `proportions` returns its
+report with `selection_sha256` -- per split every document's id, data type, category, unit, supervised tokens and
+token content (ids and supervision mask), the tool cells with their targets and approvals, the sources read, and
+the quota designs (`token_matched_design.json`, `six_category_design.json`) -- and seals it (`report_sha256`).
+`admit` refuses an edited report, another arm's, and another selection's: a passing report of selection A submitted
+with a failing selection B is refused and nothing is frozen, and so is any change after the validation to a
+document's tokens, its supervision mask, its data type or category, its split or unit, a tool cell's target, a
+source or a quota design. The hash is recomputed; the proportions are not, and the packing still reads none.
+
+**The training binding verifies the actual packed content** (P1). `packed_training_plan.bind` reads a built pack
+only through `verify_pack`:
+1. the manifest unchanged and admitted, the pack holding exactly its documents, the design's packing spec, the rung;
+2. `packed_content_sha256` recomputed from `blocks.npz` -- token ids, supervision mask and content mask of every
+   sequence, each array named with its normalized dtype and shape, and the training-sequence count -- equal to the
+   one the packing recorded before writing;
+3. every document read back from its final placement (a fragment is a prefix and restarts from its first token) with
+   the content sha256 the manifest admitted, and those documents packed again at the design's spec reproducing every
+   sequence, mask and placement exactly. A document truncated at the sequence length could not be verified and
+   refuses (none exists by construction: isolated-pack documents, D4A sessions with their system block and tool turns within the 8,184-token session limit all fit 8,192).
+
+So one changed non-padding token, a changed mask bit or a replaced `blocks.npz` refuses at (2), and a forged pack
+whose recorded identity was rewritten to match refuses at (3): the identity alone never makes a pack correct. The
+bound lineage carries `packed_content_sha256` and the manifest's `content_sha256` beside the files' sha256. A pack
+without a manifest is refused.
 
 **The registered tolerance** (`registered_quotas`, read from its owners: `token_matched_design.json :: scale` and the
 whole-task selection rule `six_category_design.json :: base_category` keeps):
@@ -491,6 +559,22 @@ On real data every arm's five types and fluid pass (`audit/proportion_tolerance_
 withdrawn check had no floor (a type about 2% short, or all six short together, passed), allowed fluid ±1 point
 instead of ±0.5, did not bound the total, and was wider than one unit for most types. The tool type has not been
 generated, so its row and its seven cells are checked when the data are admitted.
+
+**A2-6cat's one selected task outside A2's pack** (the maintainer's review of `647eea0e`, item 6;
+[`audit/a2_recovery_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/a2_recovery_audit.json),
+`packed_packs.py --arm A2-6cat --recovery-audit`). The six-type re-selection took one task that the token-matched A2
+selection had not: `79c86b17e0b933ee3483`, an MBPP task (`supporting.code_algorithmic/mbpp_train`). `select` reads it
+from the frozen admission records. Replayed for that key with `token_admission.load`'s own functions:
+- the records: 84 non-thinking labels of the v1 store and 4 of the supplement store, every shard checked against its
+  `.complete` and its store identity; the task's one record is in v1 (candidate 0);
+- admitted; not flagged by the isolation recheck (which passes); unchanged by the code-stability recheck;
+- one document, `79c86b17e0b933ee3483|H-N|t0`: 113 prompt tokens, 14 supervised tokens, ending on the stop id, no
+  `</think>` generated, content sha256 `9e46361c…`;
+- with it, A2-6cat's five types and fluid equal the selection record exactly (competition math 493,404, GSM8K 493,495,
+  RAG 493,276, multi-hop 493,296, code 493,701, fluid 2,963,139). A1-6cat's pack holds every task it selected.
+
+The full `select` path re-derives every verdict, including the sandboxed stability recheck of every program and MBPP
+task; on the dev box that ran for over 40 minutes at ~11.5 GB and was stopped. The functions are the same.
 
 **C1-6cat** (Thinking-2507):
 - its own D4 Top-1 `fc28e0dd…` (a v1-context search; never called a packed-context initialization);
@@ -524,13 +608,14 @@ items and a suite without Glaive.
 
 ## 8. Budget and provider state
 
-**Position** (live 2026-11-03T09:06Z):
-- $836.73 committed of the $868.00 project cap; $31.27 left;
+**Position** (live 2026-11-04T08:06Z, read-only):
+- $837.95 committed of the $868.00 project cap; $30.05 left (volume storage accrued since 2026-11-03's $836.73);
 - 0 pods; volumes `4rhubprswo` (350 GB, US-TX-3, holds the v2 Top-1's only copy) and `am5m373kuq`.
 
 **Phases, lower / expected / upper:**
-- **Bounded tool generation: $2.27 / $3.62 / $10.31, cap $11.34.**
-  - hybrid session (both modes): $1.37 / $2.38 / $7.85;
+- **Bounded tool generation: $2.27 / $3.72 / $11.01, cap $12.11** (with the single-step tier; was $3.62 / $10.31,
+  cap $11.34).
+  - hybrid session (both modes): $1.37 / $2.48 / $8.55;
   - Thinking-2507: $0.90 / $1.24 / $2.46.
   - The basis is the plan's task counts × expected turns × each mode's tokens per turn × second candidates.
   - Decode uses the supplement's measured throughput (1,170 / 755 tokens/s). The tool-workload efficiency (0.5–1.0),
@@ -542,8 +627,27 @@ items and a suite without Glaive.
 - packed search: $23.72 / $32.43 / $42.14, cap $46.35;
 - six trainings: $37.82 / $50.38 / $85.18.
 
-The Full Search Authorization (generation plus search) needs $36.05 expected and $52.45 at the upper bounds, with caps
-of $57.69. That is more than the $31.27 left.
+The Full Search Authorization (generation plus search) needs $36.15 expected and $53.15 at the upper bounds, with caps
+of $58.46. That is more than the $30.05 left.
+
+**The L40S pilot application** (the maintainer's review of `647eea0e`, item 7;
+[`logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json`](../../../../logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json),
+`tool_generation_plan.py --pilot-application`). **Prepared only; no GPU, pod or spend is authorized.**
+- **Sample** (`tool_generation_plan.pilot_sample`): the hybrid, both modes, one round. Per mode: the first 24 full
+  episodes of every training category, the first 100 single-step `schema_arguments` training tasks, and EVERY
+  calibration (28 + 72) and state-evaluation (7 + 22) `schema_arguments` task; 794 tasks in all.
+- **Measures:** pass rates per mode, category and shape (first and second candidates apart, refusals by level), the
+  single-step pass rate, unique supervised tokens per admitted episode, `schema_arguments`' real supply per split,
+  prefill and decode tokens/s, time to first token, peak VRAM and model-load time.
+- **Price** by the plan's own terms, one round: $0.97 / $1.14 / $1.64 (1.49 h at the upper level, setup and teardown
+  included); **hard cap $1.80** (the plan's 1.1 x upper rule).
+- **State-evaluation rule:** every state-evaluation `schema_arguments` task is generated with both candidates under
+  the unchanged verifier, so the category is either met with measured evidence or its SHORTFALL is measured -- never
+  filled by a weaker verifier, another category, a lowered quota or floor, or an approval the agent gives itself.
+- **Owed before a launch, at $0:** the source admission (or a pilot-only approval), a pilot kind with its own grant
+  and cap, the session reading the pilot's cells, per-round GPU telemetry.
+- **Separate:** the packed 8,192-token forward / DEPTH / training GPU validation is its own engineering request on
+  existing frozen inputs (v1 items, A1's documents); it is not combined with the pilot.
 
 ## 9. Decisions owed to the maintainer
 
@@ -557,11 +661,10 @@ packed search runs unless it is requested.
    - Also owed: the category shares (used unchanged by the plan), the prompt bound and the non-thinking state-evaluation
      floor.
 2. **Expected SHORTFALLS.**
-   - `schema_arguments` in non-thinking mode, in training and in state evaluation. The data admission refuses the
-     A2-6cat selection and the suite cannot freeze. Option 1 vs option 2 is measured (section 5): option 1 fills
-     training at the expected pass rate and brings state evaluation to about 1,400 of 1,800; option 2 adds no
-     state-evaluation supply. The choice is owed, and after the pilot, any decision on the state-evaluation remainder.
-     Approving the shortfall is not granted.
+   - `schema_arguments` in non-thinking mode, in training and in state evaluation. Option 1 is implemented at $0
+     (`single_step_gold_tool_call@v1`, section 5): at the priors it fills training and leaves state evaluation about
+     1,400 of 1,800. No SHORTFALL is approved, so the A2-6cat admission refuses and the suite cannot freeze. Owed: the
+     pilot (section 8), then any decision on a measured state-evaluation remainder.
    - "Ask for the missing value" in every mode.
    - **Proportion exceptions:** none. `data_admission.approved_exceptions` is empty, and the registered tolerance stays
      (the withdrawn share check is not a decision to make).
@@ -573,9 +676,36 @@ packed search runs unless it is requested.
 4. **Validation coverage.** C1-6cat's validation has no fluid type, and A1-6cat's no `interactive_adaptation`. Both
    gaps are recorded.
 5. **eval-set-2** for closed-loop tool success.
-6. **Budget.** A raised project cap for the Full Search Authorization.
+6. **Budget.** The L40S pilot application ($1.14 expected, cap $1.80); a raised project cap for the Full Search
+   Authorization. The packed 8,192-token forward / DEPTH / training GPU validation is a separate request.
 7. **Storage.** Volume `4rhubprswo`. The v2 Top-1's only copy stays protected until a verified copy exists off the
    volume.
+
+## 10. The token identity audit's intermittent failure (diagnosed 2026-11-04)
+
+`test_the_token_identity_audit_regenerates_identically` failed in two of three full experiment-suite runs at
+`647eea0e` and passed alone. The differing field was `as_generated_documents.isolation_check`, a float64 measurement
+on a random 2-layer probe; every token-identity field (contexts, targets, their differences) regenerated identically.
+
+**Reproduction** (scratch probes, no test order involved). In a fresh process the audit's exact computation -- the
+probe's forward over the first 8,192-token isolated sequence, then each document alone -- was run with a second,
+identical packed forward after it:
+- the FIRST packed forward in the process differed from the identical second one, by 1.0e-5 to 1.2e-4 over a
+  contiguous block of positions (e.g. rows 1,020-1,550 of one document and all of the next); the same few values
+  recurred across processes;
+- the standalone forwards and every later packed forward in the same process never moved;
+- on the default eight intra-op threads it happened in 14 of 90 processes over three series (1 of 20, 7 of 40, 6 of
+  30, all beside one CPU-heavy job); on one thread in 0 of 30, run alternately with the last eight-thread series.
+
+**Cause.** A cold-path, thread-partition-dependent result of the CPU kernels on the first long forward in a process
+-- a test-environment effect, not token-identity drift and not an isolation failure (a real isolation failure moves
+whole documents by orders of magnitude more, from their first position). It turned the audit's correct 0.0 into a
+value above its own 1e-9 tolerance, so even the audit's `pass` was intermittent.
+
+**Repair.** `token_identity_audit.isolation_check` runs the probe on one intra-op thread (restoring the caller's
+count) and records `intra_op_threads: 1`; the regenerated audit differs from the committed one by that field only.
+The assertion, the identity comparison and the 1e-9 tolerance are unchanged. Regression:
+`test_the_isolation_check_runs_on_one_thread_and_restores_the_callers`.
 
 ## Reproduce ($0)
 
@@ -588,4 +718,20 @@ PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_arguments
     --workbench <WorkBench@49c7dfd0 task files> --write logs/stages/stage-2/teacher_modes/audit/schema_arguments_options.json
 PYTHONPATH=src:scripts:scripts/stages/stage-1:scripts/stages/stage-0/calibration_volume .venv/bin/python -m stages.teacher_modes.packed_full_search \
     --check-only --inputs v1_dry_run --device cuda --durable-root <scratch> --status <scratch>/status --deadline-minutes 1
+# the single-step tier (review of 647eea0e)
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_sources_pivot --which conversational \
+    --jsonl <Pivot Conversational train.jsonl> --out <scratch>/pivot_conversational_v2.jsonl
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pool --source toucan_sft=<scratch>/toucan_tasks_v2.jsonl \
+    --source pivot_conversational=<scratch>/pivot_conversational_v2.jsonl --out <scratch>/tool_pool_dry_v4
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_generation_plan --pool <scratch>/tool_pool_dry_v4 \
+    --write logs/stages/stage-2/teacher_modes/plans/tool_generation_plan_dry_run.json \
+    --pilot-application logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_arguments_audit --supply-pool <scratch>/tool_pool_dry_v4 \
+    --before-pool <scratch>/tool_pool_dry_v3 --write logs/stages/stage-2/teacher_modes/audit/single_step_supply_audit.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs --arm A2-6cat \
+    --recovery-audit logs/stages/stage-2/teacher_modes/audit/a2_recovery_audit.json
+PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_identity_audit.py \
+    --write logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json
 ```
+
+The plan and the application record the scratch pool as `<scratch>/tool_pool_dry_v4` (content `be4652d7…`).

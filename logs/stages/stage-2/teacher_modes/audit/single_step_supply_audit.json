@@ -1,0 +1,324 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.single_step_supply_audit/v1",
+ "question": "maintainer 2026-11-04 (review of 647eea0e), item 4: the single-step gold tool call's $0 implementation -- the candidate pool, the generation plan, every split's and category's supply rebuilt; nothing generated, no SHORTFALL approved",
+ "pool": {
+  "dir": "<scratch>/tool_pool_dry_v4",
+  "schema": "aadistill.stage2.teacher_modes.tool_pool/v4",
+  "content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+  "census": {
+   "calibration": {
+    "no_tool": 2479,
+    "tool_selection": 1050,
+    "multi_turn": 685,
+    "error_recovery": 40,
+    "multiple_parallel": 427,
+    "mcp_agent": 105,
+    "schema_arguments": 100
+   },
+   "reserve": {
+    "no_tool": 329,
+    "error_recovery": 5,
+    "multi_turn": 5,
+    "mcp_agent": 4,
+    "tool_selection": 10,
+    "multiple_parallel": 5,
+    "schema_arguments": 2
+   },
+   "state_eval": {
+    "no_tool": 1535,
+    "tool_selection": 333,
+    "multi_turn": 205,
+    "mcp_agent": 78,
+    "multiple_parallel": 125,
+    "error_recovery": 29,
+    "schema_arguments": 29
+   },
+   "training": {
+    "no_tool": 37880,
+    "multi_turn": 12224,
+    "multiple_parallel": 4581,
+    "tool_selection": 12499,
+    "error_recovery": 2668,
+    "mcp_agent": 4542,
+    "schema_arguments": 1928
+   },
+   "validation": {
+    "no_tool": 867,
+    "error_recovery": 50,
+    "mcp_agent": 133,
+    "multi_turn": 181,
+    "tool_selection": 230,
+    "multiple_parallel": 51,
+    "schema_arguments": 24
+   }
+  },
+  "episode_shapes": {
+   "calibration": {
+    "full_episode@v1|error_recovery": 40,
+    "full_episode@v1|mcp_agent": 105,
+    "full_episode@v1|multi_turn": 685,
+    "full_episode@v1|multiple_parallel": 427,
+    "full_episode@v1|no_tool": 2479,
+    "full_episode@v1|schema_arguments": 28,
+    "full_episode@v1|tool_selection": 1050,
+    "single_step_gold_tool_call@v1|schema_arguments": 72
+   },
+   "reserve": {
+    "full_episode@v1|error_recovery": 5,
+    "full_episode@v1|mcp_agent": 4,
+    "full_episode@v1|multi_turn": 5,
+    "full_episode@v1|multiple_parallel": 5,
+    "full_episode@v1|no_tool": 329,
+    "full_episode@v1|schema_arguments": 1,
+    "full_episode@v1|tool_selection": 10,
+    "single_step_gold_tool_call@v1|schema_arguments": 1
+   },
+   "state_eval": {
+    "full_episode@v1|error_recovery": 29,
+    "full_episode@v1|mcp_agent": 78,
+    "full_episode@v1|multi_turn": 205,
+    "full_episode@v1|multiple_parallel": 125,
+    "full_episode@v1|no_tool": 1535,
+    "full_episode@v1|schema_arguments": 7,
+    "full_episode@v1|tool_selection": 333,
+    "single_step_gold_tool_call@v1|schema_arguments": 22
+   },
+   "training": {
+    "full_episode@v1|error_recovery": 2668,
+    "full_episode@v1|mcp_agent": 4542,
+    "full_episode@v1|multi_turn": 12224,
+    "full_episode@v1|multiple_parallel": 4581,
+    "full_episode@v1|no_tool": 37880,
+    "full_episode@v1|schema_arguments": 368,
+    "full_episode@v1|tool_selection": 12499,
+    "single_step_gold_tool_call@v1|schema_arguments": 1560
+   },
+   "validation": {
+    "full_episode@v1|error_recovery": 50,
+    "full_episode@v1|mcp_agent": 133,
+    "full_episode@v1|multi_turn": 181,
+    "full_episode@v1|multiple_parallel": 51,
+    "full_episode@v1|no_tool": 867,
+    "full_episode@v1|schema_arguments": 5,
+    "full_episode@v1|tool_selection": 230,
+    "single_step_gold_tool_call@v1|schema_arguments": 19
+   }
+  }
+ },
+ "before": {
+  "dir": "<scratch>/tool_pool_dry_v3",
+  "content_sha256": "98fed03b52aa87a9563bef0dc9861f8983d635f3397f895384571129b56707c8"
+ },
+ "earlier_tasks": {
+  "earlier_tasks": 83764,
+  "still_admitted": 83764,
+  "no_longer_admitted": [],
+  "newly_admitted_full_episodes": [],
+  "split_moved": [],
+  "relative_order_unchanged": {
+   "calibration": true,
+   "reserve": true,
+   "state_eval": true,
+   "training": true,
+   "validation": true
+  },
+  "single_steps_after_every_full_episode": {
+   "calibration": true,
+   "reserve": true,
+   "state_eval": true,
+   "training": true,
+   "validation": true
+  }
+ },
+ "single_step_tasks_excluded_by_the_pool": {
+  "schema | training": 35
+ },
+ "schema_arguments_supply": {
+  "calibration": {
+   "full_episode@v1": 28,
+   "single_step_gold_tool_call@v1": 72
+  },
+  "reserve": {
+   "full_episode@v1": 1,
+   "single_step_gold_tool_call@v1": 1
+  },
+  "state_eval": {
+   "full_episode@v1": 7,
+   "single_step_gold_tool_call@v1": 22
+  },
+  "training": {
+   "full_episode@v1": 368,
+   "single_step_gold_tool_call@v1": 1560
+  },
+  "validation": {
+   "full_episode@v1": 5,
+   "single_step_gold_tool_call@v1": 19
+  }
+ },
+ "plan_cells": {
+  "hybrid/H-N/training": {
+   "target": 74012.6745,
+   "unit": "supervised_tokens",
+   "supply": 1928,
+   "full_episodes": 368,
+   "tasks": {
+    "lower": 322,
+    "expected": 891,
+    "upper": 1928
+   },
+   "bound": 1928,
+   "expected_prefix_reaches_single_steps": true,
+   "shortfall_at_pessimistic_yield": true
+  },
+  "hybrid/H-N/calibration": {
+   "target": 630.0,
+   "unit": "scored_positions",
+   "supply": 100,
+   "full_episodes": 28,
+   "tasks": {
+    "lower": 3,
+    "expected": 6,
+    "upper": 12
+   },
+   "bound": 12,
+   "expected_prefix_reaches_single_steps": false,
+   "shortfall_at_pessimistic_yield": false
+  },
+  "hybrid/H-N/state_eval": {
+   "target": 1800.0,
+   "unit": "scored_positions",
+   "supply": 29,
+   "full_episodes": 7,
+   "tasks": {
+    "lower": 9,
+    "expected": 24,
+    "upper": 29
+   },
+   "bound": 29,
+   "expected_prefix_reaches_single_steps": true,
+   "shortfall_at_pessimistic_yield": true
+  },
+  "hybrid/H-T/training": {
+   "target": 74012.6745,
+   "unit": "supervised_tokens",
+   "supply": 1928,
+   "full_episodes": 368,
+   "tasks": {
+    "lower": 86,
+    "expected": 126,
+    "upper": 213
+   },
+   "bound": 213,
+   "expected_prefix_reaches_single_steps": false,
+   "shortfall_at_pessimistic_yield": false
+  },
+  "hybrid/H-T/calibration": {
+   "target": 630.0,
+   "unit": "scored_positions",
+   "supply": 100,
+   "full_episodes": 28,
+   "tasks": {
+    "lower": 1,
+    "expected": 2,
+    "upper": 2
+   },
+   "bound": 2,
+   "expected_prefix_reaches_single_steps": false,
+   "shortfall_at_pessimistic_yield": false
+  },
+  "hybrid/H-T/state_eval": {
+   "target": 1800.0,
+   "unit": "scored_positions",
+   "supply": 29,
+   "full_episodes": 7,
+   "tasks": {
+    "lower": 3,
+    "expected": 4,
+    "upper": 6
+   },
+   "bound": 6,
+   "expected_prefix_reaches_single_steps": false,
+   "shortfall_at_pessimistic_yield": false
+  },
+  "thinking_2507/T2507/training": {
+   "target": 73888.05,
+   "unit": "supervised_tokens",
+   "supply": 1928,
+   "full_episodes": 368,
+   "tasks": {
+    "lower": 86,
+    "expected": 126,
+    "upper": 177
+   },
+   "bound": 177,
+   "expected_prefix_reaches_single_steps": false,
+   "shortfall_at_pessimistic_yield": false
+  }
+ },
+ "reach_non_thinking": {
+  "basis": "full episodes: schema_arguments_shortfall.json's plan priors; single steps: admitted tasks x (1 - (1 - p)^2) x 49.9 tokens (the gold call's mean non-thinking length in the hybrid's tokenizer); p a PRIOR",
+  "pass_rate_priors": {
+   "pessimistic": 0.15,
+   "expected": 0.32,
+   "optimistic": 0.5
+  },
+  "H-N/training": {
+   "target": 74013,
+   "full_episodes": {
+    "pessimistic": 20534,
+    "expected": 43277,
+    "optimistic": 84787
+   },
+   "single_steps_added": {
+    "pessimistic": 21602,
+    "expected": 41849,
+    "optimistic": 58383
+   },
+   "total": {
+    "pessimistic": 42136,
+    "expected": 85126,
+    "optimistic": 143170
+   },
+   "pass_rate_needed_for_the_target": 0.222
+  },
+  "H-N/calibration": {
+   "target": 630,
+   "full_episodes": {
+    "pessimistic": 1562,
+    "expected": 3293,
+    "optimistic": 6451
+   },
+   "single_steps_added": {
+    "pessimistic": 997,
+    "expected": 1931,
+    "optimistic": 2695
+   },
+   "total": {
+    "pessimistic": 2559,
+    "expected": 5224,
+    "optimistic": 9146
+   },
+   "pass_rate_needed_for_the_target": 0.0
+  },
+  "H-N/state_eval": {
+   "target": 1800,
+   "full_episodes": {
+    "pessimistic": 391,
+    "expected": 823,
+    "optimistic": 1613
+   },
+   "single_steps_added": {
+    "pessimistic": 305,
+    "expected": 590,
+    "optimistic": 823
+   },
+   "total": {
+    "pessimistic": 696,
+    "expected": 1413,
+    "optimistic": 2436
+   },
+   "pass_rate_needed_for_the_target": 0.668
+  }
+ },
+ "authorizes": "nothing"
+}

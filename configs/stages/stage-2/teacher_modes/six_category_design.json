@@ -223,6 +223,7 @@
   "task_record": {
    "task_id": "tc1- + sha256('<dataset>@<revision>|<upstream row key>|<variant>')[:20]: one id per task, the same for every teacher",
    "category": "one of tool_calling.categories",
+   "episode_shape": "one of protocol.episode_shapes (absent: full_episode@v1); a task carries exactly one, and the shape decides how its episode ends and which levels it can verify",
    "source": "dataset id, revision, split, upstream row key, the review's verdict",
    "family": "the task's environment: sha256 of its sorted atoms. Atoms are the atomic identities a split may not share -- every MCP server the converter declares (it owns the tools named '<slug>-<tool>') and every offered tool no declared server owns (sha256 of its bare name and canonical schema)",
    "tools": "the function schemas as JSON Schema, canonicalized (keys sorted); never edited beyond canonical serialization",
@@ -407,6 +408,47 @@
    "V4_execution": "the backend answered every call: recorded or executed response, or the step's scripted error; an off-script call ends the episode (refused, counted per teacher)",
    "V5_task_success": "the final turn makes no call and passes the task's final check (no_call; contains_all values from the tool results or the gold answer; number; asks_for the missing parameter)",
    "admission": "an episode enters training whole only if V1-V5 pass on every turn; otherwise the task's next candidate, then nothing"
+  },
+  "episode_shapes": {
+   "_contract": "How an episode ends and what it can verify, per registered shape (tool_episodes.EPISODE_SHAPES executes it; a test holds the two equal). A new shape is a protocol version, registered here before any task of it enters a pool.",
+   "full_episode@v1": {
+    "what": "the shape every task had before 2026-11-04: turns until one without a call (or max_turns); every call answered by the task's backend; the episode ends on an answer",
+    "categories": "all seven",
+    "levels": "protocol, schema_validity and recorded_execution always; step_gold, tool_selection and task_success where the task carries that verifier (V1-V5 above)"
+   },
+   "single_step_gold_tool_call@v1": {
+    "decided_by": "maintainer 2026-11-04 (review of 647eea0e, item 4): option 1 accepted in principle for the non-thinking schema_arguments gap; approved ONLY for this shape's $0 code, the conversion preparation, static audits and synthetic tests -- no paid teacher generation, no approved shortfall, no lowered share or quota",
+    "what": "ONE assistant turn from the first real user input: the teacher's own tool call, which ends the sample at its natural termination; the call decision is the training example. No tool response and no final answer exist or are required",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd only: a trajectory that tool_sources_pivot.py skipped ONLY because its first gold call has no recorded output (every other converter rule applied, the same context: system text and the first user message(s)); task id variant 'turn1-step1'. Pivot Function-Calling is not adopted",
+    "categories": [
+     "schema_arguments"
+    ],
+    "category_rule": "the first gold call's arguments are structured (tool_sources_pivot.structured, the existing rule); an unstructured first call would be a tool_selection decision: outside the approval, counted and not converted",
+    "max_turns": 1,
+    "backend": "none: nothing executes the call",
+    "gold": "the first step's expected_action (name + arguments), compared exactly after canonicalization (step_matches_gold); it only verifies -- the target is the teacher's own generated ids",
+    "verification": {
+     "protocol": "V1 on the turn (natural termination, no degeneration stop, the mode's think rule, every tool_call block parsed) and the turn ENDS on its call: it makes at least one call, nothing but whitespace and the stop token after the last </tool_call>, no response attached",
+     "schema_validity": "V2 unchanged",
+     "step_gold": "V3: the call set equals the gold set (one call)",
+     "recorded_execution": null,
+     "tool_selection": null,
+     "task_success": null,
+     "_": "None = unverified, never passed (aadistill.data.tool_calls.verify_episode, unexecuted_final_call); the verified levels are protocol+schema_validity+step_gold"
+    },
+    "verification_class": "G2 (an expert model's recorded call, compared deterministically)",
+    "is_not": [
+     "a recorded execution",
+     "a task success",
+     "a completed task",
+     "a rule for multi_turn, error_recovery, mcp_agent or any other category or source"
+    ],
+    "supervision": "unchanged: the turn's generated ids (kd_scope assistant); the prompt is context",
+    "counting": "unchanged: one turn = one token-in/token-out document; unique supervised tokens before packing; Stage-3 sequential packing with prefix restart, Stage-1 forwards and scored positions as for any turn",
+    "pool_order": "a second tier of every split's frozen order (tool_pool.SHAPE_TIERS, pool schema v4): a cell reaches a single-step task only after every full episode of its category; a T5 duplicate keeps the full episode",
+    "measurement_identity": "a calibration / state-evaluation item of this shape carries episode_shape and enters the profile's and state_eval_hybrid@v2's content identity like any item; the evaluator's measurement protocol id is unchanged",
+    "status": "IMPLEMENTED at $0 (code, conversion into scratch, dry pool and plan audit, synthetic tests); nothing generated; not admitted to data/"
+   }
   },
   "supervision": "only the teacher's own assistant output ids (kd_scope assistant: CE and KD positions); system text, tool schemas, user turns and tool responses are context with mask 0, never targets",
   "never": "another teacher's or mode's output ids, thinking traces, tool calls or reference logits; the upstream dataset's assistant turns; a re-rendered target",

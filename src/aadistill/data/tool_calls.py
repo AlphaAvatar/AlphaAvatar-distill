@@ -26,6 +26,9 @@ delimiters, the tools, the gold and the backend are all the caller's (P3).
   execution, step gold, tool selection, task success. A level the task carries
   no verifier for is reported ``None`` (not checked), never passed: a check
   that the target tools were called is tool selection, not task success.
+  A decision-step episode (``unexecuted_final_call``) ends on calls nothing
+  executes: they are verified for protocol, schema and gold, never reported
+  as executed.
 """
 from __future__ import annotations
 
@@ -366,7 +369,7 @@ def verify_episode(turns: Sequence[Mapping[str, Any]], *, tools: Sequence[Mappin
                    open_tag: str, close_tag: str, think_close: str | None,
                    expect_think: bool, gold_steps: Sequence[Sequence[Sequence[Mapping[str, Any]]]] | None = None,
                    final_checks: Mapping[str, Callable[[Sequence[Mapping[str, Any]]], bool]] | None = None,
-                   ) -> EpisodeVerdict:
+                   unexecuted_final_call: bool = False) -> EpisodeVerdict:
     """Every level of `LEVELS`, every turn.
 
     ``turns`` are the generated turns in order, each with ``raw`` (the generated
@@ -379,6 +382,12 @@ def verify_episode(turns: Sequence[Mapping[str, Any]], *, tools: Sequence[Mappin
     ``final_checks`` maps a level of `FINAL_LEVELS` to a check that sees every
     turn. An episode is admitted when no level fails; levels without a verifier
     stay ``None`` and are reported as such.
+
+    ``unexecuted_final_call``: a decision-step episode instead ENDS on its last
+    turn's calls, which nothing executes -- they must exist and carry no
+    response, and they are checked for protocol, schema validity and gold, never
+    for execution. ``recorded_execution`` then covers only earlier turns' calls
+    and is ``None`` (unverified, never passed) when there are none.
     """
     unknown = set(final_checks or {}) - set(FINAL_LEVELS)
     if unknown:
@@ -386,7 +395,11 @@ def verify_episode(turns: Sequence[Mapping[str, Any]], *, tools: Sequence[Mappin
     index = tool_index(tools)
     problems: list[str] = []
     has_gold = gold_steps is not None and any(g is not None for g in gold_steps)
-    checks: dict[str, bool | None] = {"protocol": True, "schema_validity": True, "recorded_execution": True,
+    executed = turns[:-1] if unexecuted_final_call else turns
+    any_executed = any(parse_tool_calls(str(t.get("raw") or ""), open_tag=open_tag, close_tag=close_tag)[0]
+                       for t in executed)
+    checks: dict[str, bool | None] = {"protocol": True, "schema_validity": True,
+                                      "recorded_execution": None if unexecuted_final_call and not any_executed else True,
                                       "step_gold": True if has_gold else None,
                                       **{k: (True if k in (final_checks or {}) else None) for k in FINAL_LEVELS}}
     if not turns:
@@ -419,13 +432,20 @@ def verify_episode(turns: Sequence[Mapping[str, Any]], *, tools: Sequence[Mappin
                 checks["step_gold"] = False
                 problems.append(f"turn {k}: the calls are not one of the step's allowed sets")
         responses = list(t.get("responses") or [])
-        if calls and (len(responses) != len(calls) or any(r is None for r in responses)):
+        if unexecuted_final_call and k == len(turns) - 1:
+            if responses:
+                checks["protocol"] = False
+                problems.append(f"turn {k}: a decision step's calls were answered; nothing may execute them")
+        elif calls and (len(responses) != len(calls) or any(r is None for r in responses)):
             checks["recorded_execution"] = False
             problems.append(f"turn {k}: the backend did not answer every call")
     last_calls, _ = parse_tool_calls(str(turns[-1].get("raw") or ""), open_tag=open_tag, close_tag=close_tag)
-    if last_calls:
+    if last_calls and not unexecuted_final_call:
         checks["protocol"] = False
         problems.append("the episode ends on a call, not on an answer")
+    if unexecuted_final_call and not last_calls:
+        checks["protocol"] = False
+        problems.append("a decision-step episode ends on its calls, and its last turn makes none")
     for level, check in (final_checks or {}).items():
         if not check(turns):
             checks[level] = False

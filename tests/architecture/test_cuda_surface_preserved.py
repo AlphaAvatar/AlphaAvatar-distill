@@ -2584,6 +2584,15 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "registered quotas and shares, before packing; pure, no default tolerance, no import. "
             "`interleave` and `order_blocks` unchanged. NO CUDA SURFACE.",
      }),
+    ("647eea0ee16686df68de0344b99d5df7b7b469c7",
+     "Packed round: single-step gold tool call, report and pack identity (maintainer 2026-11-04, review of 647eea0e)",
+     {
+        "src/aadistill/data/tool_calls.py":
+            "`verify_episode(..., unexecuted_final_call=False)`: an optional decision-step episode that ends on "
+            "calls nothing executes -- they must exist and carry no response, are checked for protocol, schema "
+            "and gold, and `recorded_execution` is None when no earlier turn executed a call. The default "
+            "(an episode ends on an answer) is unchanged. NO CUDA SURFACE.",
+     }),
 )
 
 

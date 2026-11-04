@@ -219,13 +219,17 @@ def test_binding_fills_a_built_packs_files_and_steps(tmp_path, monkeypatch):
            "missing_tasks_read_from_records": [], "sources": {}, "tool": {"quota": None, "approved_shortfalls": []}}
     monkeypatch.setattr(PP, "admission_verdict", lambda *a: {"admitted": True, "unapproved": [],
                                                              "approved_exceptions": []})  #: test_data_admission's
-    adm = PP.admit("C1-6cat", sel, {"toy": True}, tmp_path)
-    PP.pack(sel["train"], sel["validation"], adm["path"], tmp_path / "C1-6cat")      #: a built, admitted pack
+    rep = {"arm": "C1-6cat", "selection_sha256": PP.selection_identity("C1-6cat", sel)}   #: this selection's report
+    rep["report_sha256"] = PP.canonical_sha(rep)
+    adm = PP.admit("C1-6cat", sel, rep, tmp_path)
+    rec = PP.pack(sel["train"], sel["validation"], adm["path"], tmp_path / "C1-6cat")  #: a built, admitted pack
     plan = PTP.bind(PTP.packed_units(), tmp_path)
     c1 = [u for u in plan["units"] if u["arm"] == "C1-6cat"]
     a1 = [u for u in plan["units"] if u["arm"] == "A1-6cat"]
     assert all(isinstance(u["config"]["schedule"]["total_steps"], int) for u in c1)
     assert all(u["config"]["lineage"]["data"][0]["files_sha256"]["blocks.npz"] != PTP.TO_BUILD for u in c1)
+    assert all(u["config"]["lineage"]["data"][0]["packed_content_sha256"]
+               == rec["data_admission"]["packed_content_sha256"] for u in c1)
     assert all(u["config"]["schedule"]["total_steps"] == PTP.TO_BUILD for u in a1)    # its pack is not built
     assert plan["seed_order"] == [20260726, 20260801]
 
@@ -252,3 +256,123 @@ def test_a_toucan_row_becomes_task_material_only():
     assert env.step(CALL)["responses"] == ["sunny"]
     fc = TE.final_check(t)
     assert fc([{"raw": "x</think>" + CALL}]) and not fc([{"raw": "x</think>no call"}])
+
+
+# --- single_step_gold_tool_call@v1 (maintainer 2026-11-04, review of 647eea0e, item 4: a $0 implementation) ---------
+
+SA_TOOLS = [{"type": "function", "function": {"name": "book", "description": "b", "parameters": {
+    "type": "object", "properties": {"city": {"type": "string"}, "nights": {"type": "integer"},
+                                     "rooms": {"type": "array", "items": {"type": "string"}}},
+    "required": ["city", "nights"], "additionalProperties": False}}}]
+GOLD = {"name": "book", "arguments": {"city": "Paris", "nights": 2}}
+#: the teacher writes the arguments in ITS order: the gold matches after canonicalization, the target stays its own
+SCALL = '<tool_call>{"name": "book", "arguments": {"nights": 2, "city": "Paris"}}</tool_call>'
+
+
+def single(**over):
+    t = {"task_id": "tc1-single", "category": "schema_arguments", "episode_shape": TE.SINGLE_STEP,
+         "source": {"dataset": "toy"}, "family": "fam1", "split": "training", "tools": SA_TOOLS,
+         "messages": [{"role": "user", "content": "book Paris for two nights"}], "backend": {"kind": "none"},
+         "gold_steps": [[[GOLD]]], "final_check": {"kind": "none"}, "max_turns": 1}
+    t.update(over)
+    return t
+
+
+class TestSingleStepGoldToolCall:
+    def test_the_teachers_call_ends_the_sample_and_is_verified_against_the_gold_only(self):
+        eps, eng = run([single()], ["plan</think>\n" + SCALL, "never asked"])
+        e = eps["tc1-single"]
+        assert e["end"] == "episode_done" and len(e["turns"]) == 1 and len(eng.prompts) == 1
+        assert e["turns"][0]["responses"] == [] and e["turns"][0]["tool_calls"] == [GOLD]
+        v = TE.verify(e["task"], e["turns"], thinking=True)
+        assert v.admitted, v.problems
+        assert {k: v.checks[k] for k in ("protocol", "schema_validity", "step_gold")} == dict.fromkeys(
+            ("protocol", "schema_validity", "step_gold"), True)
+        assert v.checks["recorded_execution"] is v.checks["tool_selection"] is v.checks["task_success"] is None
+        assert v.verified_levels() == TE.verification_levels(e["task"]) == ["protocol", "schema_validity", "step_gold"]
+        (d,) = TE.documents(e["task"], e["turns"], mode="H-T", stop_ids=[EOS])
+        assert list(d.output_ids) == list(e["turns"][0]["output_token_ids"]) and d.output_ids[-1] == EOS
+        assert '"nights": 2, "city": "Paris"' in "".join(chr(i) for i in d.output_ids[:-1])  #: the teacher's, not the gold's
+        assert d.meta["episode_shape"] == TE.SINGLE_STEP and not any(d.target_mask[:len(d.prompt_ids)])
+
+    @pytest.mark.parametrize("reply,mode,level", [
+        ('x</think>\n<tool_call>{"name": "book", "arguments": {"city": "Rome", "nights": 2}}</tool_call>', True,
+         "step_gold"),
+        ('x</think>\n<tool_call>{"name": "book", "arguments": {"city": "Paris", "nights": "two"}}</tool_call>', True,
+         "schema_validity"),
+        ("x</think>\nI booked it.", True, "protocol"),                                  #: an answer, no call
+        ("x</think>\n" + SCALL + "\nDone, booked!", True, "protocol"),                   #: text after the call
+        ("x</think>\n" + SCALL + SCALL, True, "step_gold"),                              #: two calls, gold is one
+        ("x</think>\n" + SCALL, False, "protocol"),                                     #: </think> in non-thinking
+        (SCALL, True, "protocol")])                                                      #: think block never closed
+    def test_each_failure_refuses(self, reply, mode, level):
+        eps, _ = run([single()], [reply])
+        v = TE.verify(eps["tc1-single"]["task"], eps["tc1-single"]["turns"], thinking=mode)
+        assert not v.admitted and v.checks[level] is False, v.problems
+
+    def test_non_thinking_mode_admits_a_bare_call(self):
+        eps, _ = run([single()], [SCALL])
+        assert TE.verify(eps["tc1-single"]["task"], eps["tc1-single"]["turns"], thinking=False).admitted
+
+    def test_a_degeneration_stop_is_refused(self):
+        turn = {"raw": "x</think>\n" + SCALL, "stop_reason": "degeneration", "responses": []}
+        assert TE.verify(single(), [turn], thinking=True).checks["protocol"] is False
+
+    @pytest.mark.parametrize("over,why", [
+        ({"category": "multi_turn"}, "registered for"), ({"category": "error_recovery"}, "registered for"),
+        ({"category": "mcp_agent"}, "registered for"), ({"category": "tool_selection"}, "registered for"),
+        ({"max_turns": 2}, "max_turns"), ({"backend": {"kind": "replay", "table": {}}}, "never executed"),
+        ({"final_check": {"kind": "contains_all", "values": ["ok"]}}, "final check"),
+        ({"later_user_turns": ["and then?"]}, "later user"),
+        ({"gold_steps": [[[GOLD, GOLD]]]}, "exactly one call"), ({"gold_steps": [[[GOLD]], None]}, "one step"),
+        ({"gold_steps": [[[{"name": "pay", "arguments": {}}]]]}, "offered tool"),
+        ({"episode_shape": "multi_step_gold@v1"}, "not registered")])
+    def test_the_shape_is_refused_outside_its_registration(self, over, why):
+        assert TE.task_problems(single()) == []
+        bad = TE.task_problems(single(**over))
+        assert any(why in b for b in bad), bad
+
+    def test_the_registered_shape_is_the_executed_one(self):
+        from stages.teacher_modes import packed_packs as PP
+        shapes = json.loads(PP.SIX.read_text())["protocol"]["episode_shapes"]
+        assert set(shapes) - {"_contract"} == set(TE.EPISODE_SHAPES)
+        reg = shapes[TE.SINGLE_STEP]
+        assert reg["categories"] == list(TE.EPISODE_SHAPES[TE.SINGLE_STEP]["categories"]) == ["schema_arguments"]
+        assert reg["max_turns"] == TE.EPISODE_SHAPES[TE.SINGLE_STEP]["max_turns"] == 1
+        unverified = sorted(k for k, x in reg["verification"].items() if x is None)
+        assert unverified == ["recorded_execution", "task_success", "tool_selection"]
+        assert not set(unverified) & set(TE.verification_levels(single()))
+
+    def test_admission_counts_the_shape_and_its_verified_levels(self):
+        from stages.teacher_modes import tool_admission as TA
+        recs = []
+        for t in (single(), single(task_id="tc1-cal", split="calibration")):
+            eps, _ = run([t], [SCALL])                                             #: non-thinking: a bare call
+            recs += [{"task_id": tid, "turns": e["turns"]} for tid, e in eps.items()]
+        res = TA.admit([single(), single(task_id="tc1-cal", split="calibration")], recs, mode="H-N", stop_ids=[EOS])
+        c = res["census"]["training|schema_arguments"]
+        assert c["admitted"] == 1 and c["admitted_by_shape"] == {TE.SINGLE_STEP: 1}
+        assert c["admitted_by_verification"] == {"protocol+schema_validity+step_gold": 1}
+        (it,) = res["items"]
+        assert it["episode_shape"] == TE.SINGLE_STEP and it["split"] == "calibration"
+        assert it["tags"]["eos"] == [it["n_tokens"] - 2] and len(it["tags"]["assistant"]) == len(SCALL) + 1
+
+    def test_the_pool_tiers_single_steps_after_full_episodes(self):
+        from stages.teacher_modes import tool_pool as TP
+        full = [task(task_id=f"tc1-f{k}", category="schema_arguments", messages=[{"role": "user", "content": f"q {k}"}])
+                for k in range(30)]
+        ones = [single(task_id=f"tc1-s{k}", tools=TOOLS, gold_steps=[[[{"name": "get_weather",
+                                                                       "arguments": {"city": "Paris"}}]]],
+                       messages=[{"role": "user", "content": f"single {k}"}]) for k in range(30)]
+        dup = single(task_id="tc1-a-dup", tools=TOOLS, gold_steps=[[[{"name": "get_weather",
+                                                                       "arguments": {"city": "Paris"}}]]],
+                     messages=[{"role": "user", "content": "q 3"}])       #: sorts first, same prompt and family as f3
+        pool = TP.assemble(full + ones + [dup])
+        reasons = {e["task_id"]: e["reason"] for e in pool["excluded"]}
+        assert reasons["tc1-a-dup"] == "T5: duplicates tc1-f3"                  #: the full episode is kept
+        order = pool["training_order"]
+        shape = {t["task_id"]: TE.episode_shape(t) for t in pool["tasks"]}
+        tiers = [shape[t] for t in order]
+        assert tiers == sorted(tiers, key=TP.SHAPE_TIERS.get) and set(tiers) == set(TP.SHAPE_TIERS)
+        assert [t for t in order if shape[t] == TE.FULL_EPISODE] == TP.assemble(full)["training_order"]
+        assert pool["episode_shapes"]["training"][f"{TE.SINGLE_STEP}|schema_arguments"] == 30

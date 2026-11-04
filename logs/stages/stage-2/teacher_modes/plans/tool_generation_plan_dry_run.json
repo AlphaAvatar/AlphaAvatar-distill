@@ -1,13 +1,13 @@
 {
  "schema": "aadistill.stage2.teacher_modes.tool_generation_plan/v1",
- "written_utc": "2026-11-03T15:33:25Z",
+ "written_utc": "2026-11-04T07:43:02Z",
  "pool": {
-  "dir": "<scratch>/tool_pool_dry_v3",
-  "content_sha256": "98fed03b52aa87a9563bef0dc9861f8983d635f3397f895384571129b56707c8",
-  "pool_json_sha256": "49b9a4ac235a87b5dace58d6e698bc7553c11a84436988b6e35d8f0429048197"
+  "dir": "<scratch>/tool_pool_dry_v4",
+  "content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+  "pool_json_sha256": "b893e965bb6121643d0117ab18405af0811e20afef7a539a224f75c5cab05282"
  },
- "protocol_sha256": "d1f9f888c744676b93f83cdaf9bf64514e136536651b837fad849b38328fa264",
- "six_category_design_sha256": "b4d067f971f5699de460d1440f096d26b108d1f7e968a05aca8b578fda204f72",
+ "protocol_sha256": "f258e3923dab8f8bfcb0a6c2ac53244184f92b9bedccde5be5f9ea302248e4d8",
+ "six_category_design_sha256": "ceeccce8ef5b88add4670aa9b46a3ad0b42ec04bfa78bb67659f3d70f23fc124",
  "shares": {
   "tool_selection": 0.15,
   "schema_arguments": 0.15,
@@ -121,15 +121,15 @@
        "unit": "supervised_tokens",
        "target": 74012.6745,
        "min_tasks": 0,
-       "supply": 368,
+       "supply": 1928,
        "tasks": {
         "lower": 322,
-        "expected": 368,
-        "upper": 368
+        "expected": 891,
+        "upper": 1928
        },
-       "bound": 368,
+       "bound": 1928,
        "shortfall_at_pessimistic_yield": true,
-       "expected_turns_in_bound": 736
+       "expected_turns_in_bound": 2296
       },
       {
        "split": "training",
@@ -153,7 +153,7 @@
        "unit": "tasks",
        "target": 32.0,
        "min_tasks": 0,
-       "supply": 1517,
+       "supply": 1536,
        "tasks": {
         "lower": 34,
         "expected": 39,
@@ -249,7 +249,7 @@
        "unit": "scored_positions",
        "target": 630.0,
        "min_tasks": 0,
-       "supply": 28,
+       "supply": 100,
        "tasks": {
         "lower": 3,
         "expected": 6,
@@ -361,15 +361,15 @@
        "unit": "scored_positions",
        "target": 1800.0,
        "min_tasks": 5,
-       "supply": 7,
+       "supply": 29,
        "tasks": {
-        "lower": 7,
-        "expected": 7,
-        "upper": 7
+        "lower": 9,
+        "expected": 24,
+        "upper": 29
        },
-       "bound": 7,
+       "bound": 29,
        "shortfall_at_pessimistic_yield": true,
-       "expected_turns_in_bound": 14
+       "expected_turns_in_bound": 36
       },
       {
        "split": "state_eval",
@@ -477,7 +477,7 @@
        "unit": "supervised_tokens",
        "target": 74012.6745,
        "min_tasks": 0,
-       "supply": 368,
+       "supply": 1928,
        "tasks": {
         "lower": 86,
         "expected": 126,
@@ -509,7 +509,7 @@
        "unit": "tasks",
        "target": 32.0,
        "min_tasks": 0,
-       "supply": 1517,
+       "supply": 1536,
        "tasks": {
         "lower": 34,
         "expected": 39,
@@ -605,7 +605,7 @@
        "unit": "scored_positions",
        "target": 630.0,
        "min_tasks": 0,
-       "supply": 28,
+       "supply": 100,
        "tasks": {
         "lower": 1,
         "expected": 2,
@@ -717,7 +717,7 @@
        "unit": "scored_positions",
        "target": 1800.0,
        "min_tasks": 5,
-       "supply": 7,
+       "supply": 29,
        "tasks": {
         "lower": 3,
         "expected": 4,
@@ -843,7 +843,7 @@
        "unit": "supervised_tokens",
        "target": 73888.05,
        "min_tasks": 0,
-       "supply": 368,
+       "supply": 1928,
        "tasks": {
         "lower": 86,
         "expected": 126,
@@ -875,7 +875,7 @@
        "unit": "supervised_tokens",
        "target": 12624.0,
        "min_tasks": 0,
-       "supply": 1517,
+       "supply": 1536,
        "tasks": {
         "lower": 15,
         "expected": 18,
@@ -901,22 +901,22 @@
     "lower": {
      "usd": 1.37,
      "hours": 1.24,
-     "generated_tokens": 1359612,
-     "prefill_tokens": 10375264,
+     "generated_tokens": 1359900,
+     "prefill_tokens": 10382944,
      "engine_invocations": 4
     },
     "expected": {
-     "usd": 2.38,
-     "hours": 2.15,
-     "generated_tokens": 1719900,
-     "prefill_tokens": 19676101,
+     "usd": 2.48,
+     "hours": 2.24,
+     "generated_tokens": 1772820,
+     "prefill_tokens": 21974265,
      "engine_invocations": 8
     },
     "upper": {
-     "usd": 7.85,
-     "hours": 7.09,
-     "generated_tokens": 5228506,
-     "prefill_tokens": 38942759,
+     "usd": 8.55,
+     "hours": 7.73,
+     "generated_tokens": 5522758,
+     "prefill_tokens": 46399380,
      "engine_invocations": 16
     }
    },
@@ -946,10 +946,10 @@
   },
   "total_usd": {
    "lower": 2.27,
-   "expected": 3.62,
-   "upper": 10.31
+   "expected": 3.72,
+   "upper": 11.01
   },
-  "proposed_hard_cap_usd": 11.34,
+  "proposed_hard_cap_usd": 12.11,
   "rate_usd_per_hour": 1.1067,
   "levels": {
    "lower": [
@@ -974,8 +974,8 @@
   "basis": "plan task counts (expected / bound) x expected turns x the mode's tokens per turn x (1 + the second candidates' share); decode at the supplement's measured throughput x a tool-workload efficiency; prefill of each turn's prompt (first prompt x turns; prefix caching would lower it); a model load per engine invocation (rounds x candidates per mode); setup and teardown"
  },
  "dry_run": {
-  "pool": "the scratch candidate pool (Toucan-1.5M SFT + Pivot Conversational, audit/tool_pool_dry_run_v3.json); no source is admitted",
+  "pool": "the scratch candidate pool (Toucan-1.5M SFT + Pivot Conversational with the single_step_gold_tool_call@v1 tier, schema tool_pool/v4; audit/single_step_supply_audit.json); no source is admitted",
   "canonical": "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json is written by the same command over the ADMITTED pool under data/ before any authorization; the tool kinds bind that file, not this one",
-  "verified": "tool_generation_plan.verified passes on this plan and the dry pool (pool files, orders, content, pool.json bytes, protocol, design, cells; 10.8 s for 83,764 tasks)"
+  "supersedes": "the plan over <scratch>/tool_pool_dry_v3 (content 98fed03b...), recorded at fc6fa1d6 / 647eea0e"
  }
 }

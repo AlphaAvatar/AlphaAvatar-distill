@@ -20,6 +20,19 @@ half, shared by every lineage (the hybrid in either mode, Thinking-2507). Nothin
   with the tool-calling critical tags ``tool_call_open`` / ``tool_call_close`` beside ``eos``, ``final_answer`` and
   (thinking mode) ``think_close``.
 
+Episode shapes (six_category_design.json :: protocol.episode_shapes; a task names its own, ``full_episode@v1`` when
+it names none):
+
+* ``full_episode@v1`` -- the episode runs until a turn without a call (or its turn limit); every call is answered by
+  the backend, and the episode must end on an answer.
+* ``single_step_gold_tool_call@v1`` (maintainer 2026-11-04, review of 647eea0e: a $0 implementation only) -- ONE
+  turn from the first real user input: the teacher's own tool call, which ends the sample at its natural
+  termination. The upstream gold call (name + arguments) only verifies it -- exact match after canonicalization,
+  plus schema validity and the protocol -- and is never a target. No tool response or final answer exists or is
+  required; nothing executes the call, so recorded execution, tool selection and task success stay unverified
+  (``None``), never passed. A decision sample, not a completed task; registered for ``schema_arguments`` only, never
+  for multi-turn, error-recovery or MCP-agent tasks (`task_problems` refuses it there).
+
 The delimiters and token ids are the teacher family's, read from `TOOL_PROTOCOL` (both teachers share the Qwen3
 vocabulary); the core module takes them as arguments.
 """
@@ -40,7 +53,8 @@ from aadistill.data.tool_calls import (  # noqa: E402
 #: The Qwen3 family's tool-call protocol, as its chat template writes it (checked against the real template by the
 #: tests): calls are ``<tool_call>{"name": ..., "arguments": {...}}</tool_call>`` after the think block.
 TOOL_PROTOCOL = {"open_tag": "<tool_call>", "close_tag": "</tool_call>", "think_close": "</think>",
-                 "open_id": 151657, "close_id": 151658, "think_close_id": 151668}
+                 "open_id": 151657, "close_id": 151658, "think_close_id": 151668,
+                 "stop_texts": ("<|im_end|>", "<|endoftext|>")}
 TASK_FIELDS = ("task_id", "category", "source", "family", "split", "tools", "messages", "backend", "max_turns")
 CATEGORIES = ("tool_selection", "schema_arguments", "no_tool", "multiple_parallel", "multi_turn",
               "error_recovery", "mcp_agent")
@@ -48,6 +62,16 @@ CATEGORIES = ("tool_selection", "schema_arguments", "no_tool", "multiple_paralle
 #: only an answer check against the task's gold is task success
 FINAL_CHECK_LEVELS = {"no_call": "tool_selection", "calls_tools": "tool_selection", "contains_all": "task_success"}
 SPLITS = ("training", "validation", "state_eval", "calibration", "reserve")
+FULL_EPISODE = "full_episode@v1"
+SINGLE_STEP = "single_step_gold_tool_call@v1"
+#: the registered episode shapes (six_category_design.json :: protocol.episode_shapes) and the categories each may
+#: carry; a single-step decision is one turn
+EPISODE_SHAPES = {FULL_EPISODE: {"categories": CATEGORIES, "max_turns": None},
+                  SINGLE_STEP: {"categories": ("schema_arguments",), "max_turns": 1}}
+
+
+def episode_shape(task: Mapping[str, Any]) -> str:
+    return task.get("episode_shape") or FULL_EPISODE
 
 
 class ToolTaskError(ValueError):
@@ -76,6 +100,37 @@ def task_problems(task: Mapping[str, Any]) -> list[str]:
         bad.append("a replay backend without its table")
     if int(task["max_turns"]) < 1:
         bad.append("max_turns < 1")
+    shape = episode_shape(task)
+    if shape not in EPISODE_SHAPES:
+        bad.append(f"episode shape {shape!r} is not registered ({sorted(EPISODE_SHAPES)})")
+    elif shape == SINGLE_STEP:
+        bad += [f"{SINGLE_STEP}: {x}" for x in single_step_problems(task)]
+    return bad
+
+
+def single_step_problems(task: Mapping[str, Any]) -> list[str]:
+    """Why a task is not a registered single-step gold tool call: one turn, one gold call to an offered tool, no
+    backend, no final check, no later user turn, a registered category."""
+    bad = []
+    if task["category"] not in EPISODE_SHAPES[SINGLE_STEP]["categories"]:
+        bad.append(f"category {task['category']!r}: the shape is registered for "
+                   f"{EPISODE_SHAPES[SINGLE_STEP]['categories']} only")
+    if int(task["max_turns"]) != 1:
+        bad.append("max_turns must be 1")
+    if task["backend"].get("kind") != "none":
+        bad.append("its call is never executed: backend kind must be 'none'")
+    if (task.get("final_check") or {}).get("kind", "none") != "none":
+        bad.append("no final check: the sample ends on its call")
+    if task.get("later_user_turns"):
+        bad.append("no later user turn")
+    gold = task.get("gold_steps")
+    if not (isinstance(gold, list) and len(gold) == 1 and isinstance(gold[0], list) and len(gold[0]) == 1
+            and isinstance(gold[0][0], list) and len(gold[0][0]) == 1):
+        bad.append("gold_steps must be one step with one allowed set of exactly one call")
+    else:
+        offered = {str((t.get("function") or t).get("name")) for t in task["tools"]}
+        if str(gold[0][0][0].get("name")) not in offered:
+            bad.append("the gold call is not to an offered tool")
     return bad
 
 
@@ -107,6 +162,16 @@ class ToolEnv:
     def step(self, answer: str):
         p = TOOL_PROTOCOL
         calls, _ = parse_tool_calls(answer, open_tag=p["open_tag"], close_tag=p["close_tag"])
+        if episode_shape(self.task) == SINGLE_STEP:
+            #: the sample ends on this turn: its calls are recorded, never executed or answered
+            self.done = True
+            if not calls:
+                return None
+            return {"assistant": {"content": strip_tool_calls(answer, open_tag=p["open_tag"], close_tag=p["close_tag"]),
+                                  "tool_calls": [{"type": "function", "function": {"name": c.name,
+                                                                                   "arguments": dict(c.arguments)}}
+                                                 for c in calls]},
+                    "messages": [], "tool_calls": [c.as_dict() for c in calls], "responses": []}
         if not calls:
             if self.later_users:
                 nxt = self.later_users.pop(0)
@@ -141,7 +206,7 @@ def final_check_level(task: Mapping[str, Any]) -> str | None:
 def verification_levels(task: Mapping[str, Any]) -> list[str]:
     """The levels an episode of ``task`` can be verified at (`tool_calls.LEVELS` order)."""
     from aadistill.data.tool_calls import LEVELS
-    have = {"protocol", "schema_validity", "recorded_execution"}
+    have = {"protocol", "schema_validity"} | ({"recorded_execution"} if episode_shape(task) != SINGLE_STEP else set())
     if any(g is not None for g in task.get("gold_steps") or []):
         have.add("step_gold")
     if final_check_level(task):
@@ -180,12 +245,28 @@ def final_check(task: Mapping[str, Any]):
 
 
 def verify(task: Mapping[str, Any], episode_turns: Sequence[Mapping[str, Any]], *, thinking: bool):
-    """Every level on every turn of one episode (`EpisodeVerdict`)."""
+    """Every level on every turn of one episode (`EpisodeVerdict`). A single-step gold tool call is one turn that
+    ends on its call (`verify_episode`'s ``unexecuted_final_call``): protocol, schema validity and the exact gold
+    call are checked; recorded execution, tool selection and task success stay None."""
+    from aadistill.data.tool_calls import EpisodeVerdict
     p = TOOL_PROTOCOL
     fc, level = final_check(task), final_check_level(task)
-    return verify_episode(episode_turns, tools=task["tools"], open_tag=p["open_tag"], close_tag=p["close_tag"],
-                          think_close=p["think_close"], expect_think=thinking,
-                          gold_steps=task.get("gold_steps"), final_checks={level: fc} if fc else None)
+    single = episode_shape(task) == SINGLE_STEP
+    v = verify_episode(episode_turns, tools=task["tools"], open_tag=p["open_tag"], close_tag=p["close_tag"],
+                       think_close=p["think_close"], expect_think=thinking,
+                       gold_steps=task.get("gold_steps"), final_checks={level: fc} if fc else None,
+                       unexecuted_final_call=single)
+    if single:
+        bad = [] if len(episode_turns) == 1 else [f"{SINGLE_STEP} has exactly one turn, not {len(episode_turns)}"]
+        raw = str((episode_turns[-1] if episode_turns else {}).get("raw") or "")
+        tail = raw[raw.rfind(p["close_tag"]) + len(p["close_tag"]):] if p["close_tag"] in raw else ""
+        for stop in p["stop_texts"]:
+            tail = tail.replace(stop, "")
+        if tail.strip():                                     #: V1: nothing but whitespace after the last call
+            bad.append(f"{SINGLE_STEP}: text after its call ({tail.strip()[:40]!r}); the sample ends on the call")
+        if bad:
+            return EpisodeVerdict(False, {**v.checks, "protocol": False}, v.problems + bad)
+    return v
 
 
 def documents(task: Mapping[str, Any], episode_turns: Sequence[Mapping[str, Any]], *, mode: str, stop_ids):
@@ -193,7 +274,8 @@ def documents(task: Mapping[str, Any], episode_turns: Sequence[Mapping[str, Any]
     from aadistill.data.token_documents import document_from_turn
     return [document_from_turn(t, doc_id=f"{task['task_id']}|{mode}|t{k}", stop_ids=stop_ids,
                                meta={"task_id": task["task_id"], "category": task["category"],
-                                     "family": task["family"], "turn": k, "mode": mode})
+                                     "family": task["family"], "turn": k, "mode": mode,
+                                     "episode_shape": episode_shape(task)})
             for k, t in enumerate(episode_turns)]
 
 
@@ -223,7 +305,8 @@ def item_of_turn(task: Mapping[str, Any], turn: Mapping[str, Any], k: int, *, mo
     return {"item_id": f"{task['task_id']}|{mode}|t{k}", "task_id": task["task_id"], "turn": k, "ids": ids,
             "n_tokens": len(ids), "n_prediction_positions": len(ids) - 1, "tags": tags, "domain": domain,
             "subtype": f"{subtype}|{mode}", "type": subtype, "mode": mode, "critical_group": mode,
-            "source": task["source"], "family_id": task["family"], "category": task["category"]}
+            "source": task["source"], "family_id": task["family"], "category": task["category"],
+            "episode_shape": episode_shape(task)}
 
 
 def items(task: Mapping[str, Any], episode_turns: Sequence[Mapping[str, Any]], *, mode: str, thinking: bool,

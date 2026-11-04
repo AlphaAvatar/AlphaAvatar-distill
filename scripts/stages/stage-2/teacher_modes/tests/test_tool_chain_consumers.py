@@ -141,10 +141,12 @@ def test_the_c1_pack_takes_its_plan_quota_and_binds(chain, monkeypatch):
     train, dtype = [], {}
     for typ, n in (("openmath", 1), ("gsm8k", 1), ("code", 1), ("rag_evidence", 1), ("multihop_qa", 1),
                    ("primary.x", 6)):
-        for k in range(n):
-            d = TokenDocument(f"{typ}:{k}", (5, 6), tuple([7] * (per - 1) + [EOS]))
+        total, k = n * per, 0                        #: in documents that fit the sequence, as every admitted one does
+        while total:
+            size = min(total, 4000)
+            d = TokenDocument(f"{typ}:{k}", (5, 6), tuple([7] * (size - 1) + [EOS]))
             train.append(d)
-            dtype[d.doc_id] = typ
+            dtype[d.doc_id], total, k = typ, total - size, k + 1
     val = [TokenDocument("v:0", (5,), (7, EOS))]
     dtype["v:0"] = "openmath"
     monkeypatch.setattr(PP, "c1_documents", lambda: (train, val, dtype))

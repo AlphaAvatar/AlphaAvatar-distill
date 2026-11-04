@@ -85,3 +85,26 @@ def test_the_forecast_regenerates_identically():
     if not (REPO / forecast_cost.RECORDS).is_dir():
         pytest.skip("the generation records are out of tree and absent here")
     assert forecast_cost.build() == load(FORECAST)
+
+
+def test_the_isolation_check_runs_on_one_thread_and_restores_the_callers(monkeypatch):
+    """The audit's float64 isolation probe is a deterministic computation: on the default eight threads the first
+    8,192-token packed forward in a fresh process sometimes moved by ~1e-4 against an identical second forward
+    (2026-11-04 diagnosis), which flipped the recorded 0.0 and the 1e-9 verdict intermittently."""
+    import torch
+
+    from aadistill.data import token_documents as TD
+    from stages.teacher_modes import token_identity_audit as T
+
+    seen, real = [], TD.isolation_report
+    monkeypatch.setattr(TD, "isolation_report", lambda *a, **k: (seen.append(torch.get_num_threads()), real(*a, **k))[1])
+    docs = [TD.TokenDocument(f"d{k}", (1, 2, 3), (4 + k, 5, 6)) for k in range(6)]
+    packed = TD.pack_isolated(docs, 32, 0, order_seed=1)
+    before = torch.get_num_threads()
+    torch.set_num_threads(max(2, before))
+    try:
+        out = T.isolation_check(packed, {d.doc_id: d for d in docs}, 16)
+        assert seen == [T.ISOLATION_THREADS] == [1] and torch.get_num_threads() == max(2, before)
+    finally:
+        torch.set_num_threads(before)
+    assert out["intra_op_threads"] == 1 and out["max_abs_diff"] == 0.0

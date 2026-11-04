@@ -28,6 +28,15 @@ sequences (every packed document's final hidden states equal the document's
 own), and `pack_cross_context`, whose foreign-context exposure is set beside a
 length-only proxy for shorter non-thinking documents (``context_strategy_estimate``).
 
+The isolation check runs its float64 probe on ONE intra-op thread
+(`isolation_check`). With the default eight, the first 8,192-token packed
+forward in a fresh process sometimes differs from an identical second forward
+of the same input by up to ~1.2e-4 over a contiguous block of positions (the
+standalone forwards never move): a cold-path thread-partition effect of the
+CPU kernels, not a token or isolation property (2026-11-04 diagnosis, PACKED_ROUND.md
+section 10), which turned a correct 0.0 into an intermittent failure of the 1e-9
+tolerance. On one thread no partition exists to differ.
+
 These are measurements of the two serializations, not a verdict on H1-PA:
 nothing is trained, regenerated or rescored, no historical identity or result
 changes, and the fluid pack is read, not rebuilt.
@@ -232,12 +241,36 @@ def context_strategy_estimate(docs, tok, sep) -> dict:
     return out
 
 
-def build() -> dict:
-    import torch
-    from transformers import AutoTokenizer, Qwen3Config, Qwen3ForCausalLM
+ISOLATION_THREADS = 1
 
-    from aadistill.data.token_documents import (TokenDocument, generation_suffix, isolation_report,
-                                                message_terminator, pack_isolated, prompt_mode_problems)
+
+def isolation_check(packed, docs, vocab_size: int) -> dict:
+    """`isolation_report` of the random float64 probe over the first two sequences holding >= 3 documents, on
+    ``ISOLATION_THREADS`` intra-op threads (the caller's count restored after): a deterministic computation, so its
+    0.0 is reproducible and the 1e-9 tolerance tests isolation, not the CPU's thread partition."""
+    import torch
+    from transformers import Qwen3Config, Qwen3ForCausalLM
+
+    from aadistill.data.token_documents import isolation_report
+    before = torch.get_num_threads()
+    torch.set_num_threads(ISOLATION_THREADS)
+    try:
+        torch.manual_seed(0)
+        probe = Qwen3ForCausalLM(Qwen3Config(vocab_size=vocab_size, hidden_size=32, num_hidden_layers=2,
+                                             intermediate_size=64, num_attention_heads=4, num_key_value_heads=2,
+                                             head_dim=8, max_position_embeddings=SEQ_LEN)).double().eval()
+        multi = [b for b, ms in enumerate(packed.members) if len(ms) >= 3][:2] or [0]
+        return {**isolation_report(probe, packed, docs, sequences=multi, hidden=True),
+                "intra_op_threads": ISOLATION_THREADS}
+    finally:
+        torch.set_num_threads(before)
+
+
+def build() -> dict:
+    from transformers import AutoTokenizer
+
+    from aadistill.data.token_documents import (TokenDocument, generation_suffix, message_terminator, pack_isolated,
+                                                prompt_mode_problems)
 
     tok = AutoTokenizer.from_pretrained(TEACHER[0], revision=TEACHER[1], local_files_only=True)
     index = turns_by_output_sha()
@@ -272,12 +305,7 @@ def build() -> dict:
     strategy_estimate = context_strategy_estimate(docs, tok, sep)
     seq_stats = [json.loads(l) for l in PACK_AUDIT.read_text().split("\n") if l.strip()]
     old_pad = sum(b["padding_length"] for b in seq_stats)
-    torch.manual_seed(0)
-    probe = Qwen3ForCausalLM(Qwen3Config(vocab_size=len(tok), hidden_size=32, num_hidden_layers=2,
-                                         intermediate_size=64, num_attention_heads=4, num_key_value_heads=2,
-                                         head_dim=8, max_position_embeddings=SEQ_LEN)).double().eval()
-    multi = [b for b, ms in enumerate(packed.members) if len(ms) >= 3][:2] or [0]
-    iso = isolation_report(probe, packed, {d.doc_id: d for d in docs}, sequences=multi, hidden=True)
+    iso = isolation_check(packed, {d.doc_id: d for d in docs}, len(tok))
     return {
         "schema": "aadistill.stage2.teacher_modes.token_identity_audit/v1",
         "inputs": {"generation_runs": list(RUNS), "admitted_sessions": str(SESSIONS.relative_to(REPO)),

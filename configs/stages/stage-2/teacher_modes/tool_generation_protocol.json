@@ -6,7 +6,7 @@
   "id": "tool_pool@v1",
   "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1",
   "candidate_sources": "CANDIDATES under the maintainer's review, none approved (logs/stages/stage-2/teacher_modes/audit/tool_calling_source_review_v2.json): priority candidates Agent-Ark/Toucan-1.5M @0df3cf37 and the NeMo Gym Pivot pair @0ac34ec8/@bfc7a4dd, both still owing their admission review; nvidia/Nemotron-SFT-Agentic-v4 deferred until its licence, generator-output terms and upstream tool provenance are confirmed",
-  "rules": "tool_pool.py (schema tool_pool/v2): per-atom splits (MCP server or tool identity), eval-set-1 and public-benchmark decontamination (prompt keys, 13-gram containment, tool identities), T4 between splits, T5, replay conflicts refused, the 6,144-token first-prompt bound under every lineage and mode below",
+  "rules": "tool_pool.py (schema tool_pool/v4): per-atom splits (MCP server or tool identity), eval-set-1 and public-benchmark decontamination (prompt keys, 13-gram containment, tool identities), T4 between splits, T5, replay conflicts refused, the 6,144-token first-prompt bound under every lineage and mode below; episode shapes (six_category_design.json :: protocol.episode_shapes) are tiers of every split's frozen order -- the full episodes first, then the single_step_gold_tool_call@v1 tasks (schema_arguments, Pivot Conversational) -- and a T5 duplicate keeps the full episode",
   "plan": "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json"
  },
  "lineages": {

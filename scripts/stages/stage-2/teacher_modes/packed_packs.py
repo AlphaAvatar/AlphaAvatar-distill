@@ -17,8 +17,10 @@ first refusal:
 2. **Proportion validation** (`proportions`): unique supervised tokens before packing per six base-corpus type and
    fluid, against the arm's registered quotas and tolerances (`registered_quotas`: token_matched_design.json ::
    scale and its whole-task selection rule, as six_category_design.json :: base_category keeps it), through the
-   generic `aadistill.data.mixture.validate_proportions`. It reads no packed sequence and no loss weight.
-3. **Admission / freeze** (`admit`): admits only a selection whose proportion check passed and whose tool cells all
+   generic `aadistill.data.mixture.validate_proportions`. It reads no packed sequence and no loss weight. The
+   report carries the content identity of the selection it validated (`selection_identity`) and its own seal.
+3. **Admission / freeze** (`admit`): admits only the selection its proportion report validated (the identity is
+   recomputed and compared, never the proportions: `report_problems`), whose proportion check passed and whose tool cells all
    reached their targets, a failure otherwise covered only by the maintainer's recorded approval
    (packed_round_design.json :: data_admission.approved_exceptions; the plan's approved_shortfalls for a tool
    cell). It writes the frozen data manifest -- every document's id, split, data type, category, whole unit,
@@ -32,7 +34,9 @@ first refusal:
    truncated and padding tokens and the supervised-token exposure are packing / compute measures beside them.
 
 `verify_pack` is the formal consumer's check (`packed_training_plan.bind`): an admitted, unchanged manifest, the
-manifest's documents and the design's packing spec, or the pack is refused.
+manifest's documents and the design's packing spec, and the actual packed tokens and supervision mask -- the content
+identity the packing recorded (`packed_content_sha256`), every document's content against the manifest, and the
+sequences re-derived from them exactly -- or the pack is refused.
 
 * A1-6cat / A2-6cat: the mode's documents of the tasks `six_category_selection.json` selected. They are read from
   A1's / A2's packs (`packing_audit.documents_from_isolated_pack`, token for token); a selected task whose
@@ -348,17 +352,52 @@ def registered_quotas(arm: str, largest: dict, tool_cells: int) -> tuple[dict, l
     return quotas, shares, rule
 
 
+def selection_identity(arm: str, sel: dict) -> str:
+    """The content identity a proportion report is bound to (`proportions`, checked by `admit`): per split every
+    document's id, data type, category, whole unit, supervised tokens and token content (ids and supervision mask,
+    `doc_sha256`); the tool cells with their targets and the approvals the plan carries; the sources read (the
+    selection record, the source packs, the tool documents, the pool and the plan); and the frozen designs the
+    quotas come from (token_matched_design.json, six_category_design.json). A hash, not a validation: computing it
+    judges nothing."""
+    return canonical_sha({"arm": arm, "mode": sel["mode"], "teacher": sel["teacher"],
+                          "documents": {"training": _entries(sel["train"], sel),
+                                        "validation": _entries(sel["validation"], sel)},
+                          "tool": sel["tool"], "sources": sel["sources"],
+                          "missing_tasks_read_from_records": sel["missing_tasks_read_from_records"],
+                          "designs": {p.name: sha_file(p) for p in (TOKEN_MATCHED, SIX)}})
+
+
 def proportions(arm: str, sel: dict) -> dict:
     """Data proportion validation of a selection, before and without packing: its counts against the arm's
     registered quotas (`registered_quotas`) by `aadistill.data.mixture.validate_proportions`. Returns the report
-    (every row's target, amount, deviation, bounds and status, the share rows, ``passed``); deciding admission is
-    `admit`'s."""
+    (every row's target, amount, deviation, bounds and status, the share rows, ``passed``), bound to the selection
+    it validated (``selection_sha256``, `selection_identity`) and sealed (``report_sha256``); deciding admission
+    is `admit`'s."""
     from aadistill.data.mixture import validate_proportions
     counts, by_dtype, largest = type_counts(arm, sel["train"], sel["data_type"], sel["unit_of"])
     quota = (sel["tool"]["quota"] or {}).get("cells") or {}
     quotas, shares, rule = registered_quotas(arm, largest, sum(c["split"] == "training" for c in quota.values()))
-    return {"counted": "unique supervised tokens before packing", **validate_proportions(counts, quotas, shares),
-            "counts": counts, "by_data_type": by_dtype, "largest_whole_unit": largest, "registered": rule}
+    rep = {"counted": "unique supervised tokens before packing", **validate_proportions(counts, quotas, shares),
+           "counts": counts, "by_data_type": by_dtype, "largest_whole_unit": largest, "registered": rule,
+           "arm": arm, "selection_sha256": selection_identity(arm, sel)}
+    rep["report_sha256"] = canonical_sha(rep)
+    return rep
+
+
+def report_problems(arm: str, sel: dict, report: dict) -> list[str]:
+    """Why ``report`` is not the proportion report of this arm's ``sel``, as it was written (empty when it is): an
+    edited report, another arm's, or another selection's -- including this selection after a document's tokens,
+    supervision mask, data type, category, split or unit, a tool cell, a source or a quota design changed."""
+    body = {k: v for k, v in report.items() if k != "report_sha256"}
+    if report.get("report_sha256") != canonical_sha(body):
+        return ["the proportion report was edited after its validation (report_sha256)"]
+    if report.get("arm") != arm:
+        return [f"the proportion report is {report.get('arm')!r}'s, not {arm!r}'s"]
+    if report.get("selection_sha256") != selection_identity(arm, sel):
+        return ["the proportion report validated another selection: this one's documents (tokens, supervision "
+                "masks, data types, categories, splits or units), tool cells, sources or quota designs differ "
+                "(selection_sha256)"]
+    return []
 
 
 # --- 3. admission / freeze -----------------------------------------------------------------------------------------
@@ -426,11 +465,17 @@ def admission_verdict(arm: str, sel: dict, report: dict) -> dict:
 
 
 def admit(arm: str, sel: dict, report: dict, out: Path = OUT) -> dict:
-    """Admit and freeze a selection, or refuse it (`AdmissionError`, nothing written). The frozen manifest
+    """Admit and freeze a selection, or refuse it (`AdmissionError`, nothing written). ``report`` must be this
+    selection's own proportion report, unedited (`report_problems`: the selection's content identity is recomputed
+    and compared; the proportions are not validated again here). The frozen manifest
     (``<out>/<arm>/data_manifest.json``) holds every document (``COLUMNS``), the counts before packing, the
     proportion report, the tool cells, the approvals used, the sources and the lineage, sealed by its
     ``content_sha256``. It authorizes nothing."""
     from stages.teacher_modes import tool_generation_plan as TGP
+    bound = report_problems(arm, sel, report)
+    if bound:
+        raise AdmissionError(f"{arm}: data admission refused: " + "; ".join(bound),
+                             {"admitted": False, "unapproved": bound, "approved_exceptions": []})
     verdict = admission_verdict(arm, sel, report)
     if not verdict["admitted"]:
         raise AdmissionError(f"{arm}: data admission refused: " + "; ".join(verdict["unapproved"]), verdict)
@@ -439,6 +484,7 @@ def admit(arm: str, sel: dict, report: dict, out: Path = OUT) -> dict:
     man = {"schema": MANIFEST_SCHEMA, "arm": arm, "mode": sel["mode"],
            "teacher": {"lineage": sel["teacher"], "model": li["model"], "revision": li["revision"]},
            "admitted": True, "columns": COLUMNS, "documents": docs, "documents_sha256": canonical_sha(docs),
+           "selection_sha256": report["selection_sha256"],
            "before_packing": {"training": _composition(sel["train"], sel),
                               "validation": _composition(sel["validation"], sel)},
            "proportions": report, "tool_calling": sel["tool"], "approved_exceptions": verdict["approved_exceptions"],
@@ -465,6 +511,22 @@ def read_manifest(path: Path) -> dict:
 
 # --- 4. packing ----------------------------------------------------------------------------------------------------
 
+PACKED_CONTENT = "aadistill.stage2.teacher_modes.packed_content/v1"
+
+
+def packed_content_sha256(input_ids, ce_mask, content_mask, train_sequences: int) -> str:
+    """The packed training set's content identity: the token ids, the supervision mask and the content mask of every
+    sequence, training sequences first, each array named, with its normalized dtype and shape, and the number of
+    training sequences -- so no array, split boundary or layout can stand in for another."""
+    import numpy as np
+    h = hashlib.sha256(PACKED_CONTENT.encode())
+    for name, a, dt in (("input_ids", input_ids, "<i8"), ("ce_mask", ce_mask, "u1"), ("content_mask", content_mask, "u1")):
+        a = np.ascontiguousarray(np.asarray(a).astype(dt))
+        h.update(f"|{name}|{dt}|{list(a.shape)}|".encode())
+        h.update(a.tobytes())
+    h.update(f"|train_sequences|{int(train_sequences)}".encode())
+    return h.hexdigest()
+
 def pack(train, validation, manifest_path: Path, out_dir: Path) -> dict:
     """Pack FROZEN data: random shuffle -> sequential packing -> truncation at the design's sequence length and seed
     (``stage3_packing``), in the trainer's ladder contract. First checks that ``train`` / ``validation`` are exactly
@@ -480,20 +542,56 @@ def pack(train, validation, manifest_path: Path, out_dir: Path) -> dict:
                                  f"{len(want)} admitted, {len(set(got) ^ set(want))} differing)")
     d = json.loads(DESIGN.read_text())["stage3_packing"]
     seq, seed = int(d["sequence_length"]), int(d["shuffle_seed"])
+    import torch
     tr = pack_sequential(list(train), seq, PAD_ID, order_seed=seed)
     v = pack_sequential(list(validation), seq, PAD_ID, order_seed=seed)
+    cat = lambda name: torch.cat([getattr(tr, name), getattr(v, name)]).numpy()  # noqa: E731
+    content = packed_content_sha256(cat("input_ids"), cat("target_mask"), cat("content_mask"), len(tr.members))
     dtype = {r[0]: r[1] for rows in man["documents"].values() for r in rows}
     return write_pack(tr, v, Path(out_dir), data_type=dtype, extra={
         "arm": man["arm"], "mode": man["mode"], "teacher": man["teacher"], "context_strategy": "cross_context",
         "data_admission": {"manifest": os.path.relpath(manifest_path, out_dir), "manifest_sha256": sha_file(manifest_path),
-                           "content_sha256": man["content_sha256"]}})
+                           "content_sha256": man["content_sha256"], "packed_content_sha256": content,
+                           "packed_content": f"{PACKED_CONTENT}: `packed_content_sha256` of the packed sequences as "
+                                             "the packing produced them, before they were written"}})
+
+
+def documents_in_pack(input_ids, ce_mask, rows: list[dict]) -> list:
+    """Every document of one split read back from its sequences: its final placement holds it whole, from its first
+    token (a fragment is a prefix and is read again from the start in the next sequence). A document the packing
+    truncated at the sequence length is not whole anywhere and cannot be verified, so it refuses."""
+    from aadistill.data.token_documents import DocumentError, MaskedDocument
+    out = []
+    for row in rows:
+        b = row["block"]
+        for m in row["sessions"]:
+            if not m.get("final"):
+                continue
+            if m["length"] != m["document_length"]:
+                raise PackBuildError(f"{m['session_id']}: truncated at the sequence length ({m['length']} of "
+                                     f"{m['document_length']} tokens placed); its content cannot be verified")
+            s, k = m["start"], m["length"]
+            try:
+                out.append(MaskedDocument(m["session_id"], tuple(int(x) for x in input_ids[b, s:s + k]),
+                                          tuple(bool(x) for x in ce_mask[b, s:s + k])))
+            except DocumentError as exc:
+                raise PackBuildError(f"its placement of {m['session_id']} is not a document, not the manifest's: "
+                                     f"{exc}") from exc
+    return out
 
 
 def verify_pack(pack_dir: Path) -> dict:
     """A formal consumer's check of a built pack: it names an admitted manifest whose bytes are unchanged, holds
     exactly that manifest's documents (by id, per split; its rung = the manifest's unique supervised tokens) and was
-    packed with the design's packing spec. Returns the manifest, or PackBuildError."""
+    packed with the design's packing spec; and its ACTUAL sequences are the ones its packing produced and the
+    packing of the manifest's documents: (1) `packed_content_sha256` of ``blocks.npz``'s token ids, supervision mask
+    and content mask equals the identity the packing recorded before writing them; (2) every document read back from
+    its final placement (`documents_in_pack`) has the content sha256 the frozen manifest admitted, and packing those
+    documents again at the design's spec reproduces every sequence -- tokens, supervision, content and placements --
+    exactly. Returns the manifest, or PackBuildError."""
+    import numpy as np
     from aadistill.data.sequence_packing import SequencePackingSpec
+    from aadistill.data.token_documents import pack_sequential
     pack_dir = Path(pack_dir)
     lad = json.loads((pack_dir / "ladder.json").read_text())
     adm = lad.get("data_admission")
@@ -517,6 +615,29 @@ def verify_pack(pack_dir: Path) -> dict:
             raise PackBuildError(f"{pack_dir}: its {split} sequences do not hold exactly the manifest's documents")
     if lad["rungs"][0]["target_supervised_tokens"] != man["before_packing"]["training"]["unique_supervised_tokens"]:
         raise PackBuildError(f"{pack_dir}: its rung is not the manifest's unique supervised tokens")
+    with np.load(pack_dir / "blocks.npz") as arr:
+        tok, ce, content = arr["input_ids"], arr["ce_mask"], arr["content_mask"]
+    n_train = int(lad["n_blocks"])
+    if packed_content_sha256(tok, ce, content, n_train) != adm.get("packed_content_sha256"):
+        raise PackBuildError(f"{pack_dir}: its packed token ids, supervision mask or content mask are not the ones its "
+                             "packing produced (packed_content_sha256)")
+    rows = [json.loads(x) for x in (pack_dir / "audit.jsonl").read_text().splitlines() if x.strip()]
+    for split, key, lo, hi in (("training", "train", 0, n_train), ("validation", "val", n_train, len(tok))):
+        docs = documents_in_pack(tok, ce, [r for r in rows if r["split"] == key])
+        admitted = {r[0]: r[-1] for r in man["documents"][split]}
+        changed = [x.doc_id for x in docs if admitted.get(x.doc_id) != doc_sha256(x)]
+        if changed or len(docs) != len(admitted):
+            raise PackBuildError(f"{pack_dir}: its {split} sequences hold {len(changed)} document(s) whose tokens or "
+                                 f"supervision are not the manifest's (e.g. {changed[:2]}), {len(docs)} of "
+                                 f"{len(admitted)} whole")
+        again = pack_sequential(docs, int(d["sequence_length"]), PAD_ID, order_seed=int(d["shuffle_seed"]))
+        placed = [[(m["session_id"], m["start"], m["length"], m["final"]) for m in r["sessions"]]
+                  for r in rows if r["split"] == key]
+        if not (np.array_equal(again.input_ids.numpy(), tok[lo:hi]) and np.array_equal(again.target_mask.numpy(), ce[lo:hi])
+                and np.array_equal(again.content_mask.numpy(), content[lo:hi])
+                and placed == [[(m["doc_id"], m["start"], m["length"], m["final"]) for m in ms] for ms in again.members]):
+            raise PackBuildError(f"{pack_dir}: its {split} sequences are not the packing of the manifest's documents "
+                                 "at the design's spec")
     return man
 
 
@@ -582,6 +703,81 @@ def proportion_audit() -> dict:
             "authorizes": "nothing"}
 
 
+def recovery_audit(arm: str) -> dict:
+    """The arm's selected tasks that its source pack lacks, each recovered from the FROZEN sealed generation records
+    (six_category_selection.json :: records) by `token_admission.load`'s own functions for that (task, mode) only --
+    every label's shards checked against its .complete and the store identity, the admission, the code-stability
+    recheck and the isolation recheck -- with its documents and the arm's counts recomputed with them against the
+    selection record. The full path (`select` with the records) re-derives every verdict, including the sandboxed
+    stability recheck of every program and MBPP task, which runs far longer on the dev box; the functions are the same."""
+    from stages.reasoning_data import generation_driver as GD
+    from stages.teacher_modes import admission as ADM
+    from stages.teacher_modes import build_supplement_tasks as BST
+    from stages.teacher_modes import code_stability as CS
+    from stages.teacher_modes import token_admission as TA
+    spec, rec = ARMS[arm], json.loads(SELECTION.read_text())
+    mode = spec["mode"]
+    selected = {t for c in rec["selection"][mode].values() for t in c}
+    pairs = [(d, t) for d, t in PA.documents_from_isolated_pack(PA.PACKS / spec["source_pack"], "train")
+             if d.doc_id.split("|", 1)[0] in selected]
+    missing = sorted(selected - {d.doc_id.split("|", 1)[0] for d, _ in pairs})
+    proto = ADM.protocol()
+    tasks = ADM.tasks_and_stages(proto)[0]
+    tasks.update({t["task_id"]: t for t in BST.read_jsonl(TA.ORDER_V2)})
+    found, stores = {}, {}
+    for which in ("v1", "supplement"):                       #: load(): the supplement's records replace v1's
+        store, ident = REPO / rec["records"][which]["dir"], rec["records"][which]["identity"]
+        labels = 0
+        for done in sorted(store.glob("*.complete")):
+            label = done.name[:-len(".complete")]
+            if label.startswith(ADM.CALIBRATION_GROUPS) or label.split("_")[1] != mode:
+                continue
+            listed = {x["name"]: x["sha256"] for x in json.loads(done.read_text())["shards"]}
+            if {q.name: GD.sha(q) for q in store.glob(f"{label}.part*.jsonl")} != listed:
+                raise PackBuildError(f"{label}: the shards present are not the ones its .complete lists")
+            labels += 1
+            sealed = GD.sealed(store, label, ident)
+            for tid in missing:
+                if tid in sealed:
+                    found.setdefault(which, {}).setdefault(tid, []).append(sealed[tid])
+        stores[which] = {**rec["records"][which], "labels_verified": labels}
+    out, docs, dtype = [], [], {d.doc_id: t for d, t in pairs}
+    for tid in missing:
+        recs = sorted((found.get("supplement", {}).get(tid) or found.get("v1", {}).get(tid) or []),
+                      key=lambda r: r["candidate_index"])
+        key = (tid, mode)
+        verdicts = {key: ADM.admit(tasks[tid], mode, recs, proto)}
+        code = CS.recheck(verdicts, tasks, {key: recs}, proto, ADM.admit)
+        flagged, iso = ADM.isolation_recheck({k: v for k, v in verdicts.items() if v["admitted"]}, tasks,
+                                             sources=BST.catalogue())
+        v, stratum = verdicts[key], TA.cell_of(tasks[tid]).split("/", 1)[0]
+        ok = v["admitted"] and key not in flagged
+        docs += v["docs"] if ok else []
+        dtype.update({d.doc_id: stratum for d in v["docs"]})
+        out.append({"task_id": tid, "cell": TA.cell_of(tasks[tid]), "records_from": [w for w in ("v1", "supplement")
+                                                                                     if tid in found.get(w, {})],
+                    "candidates": [r["candidate_index"] for r in recs], "admitted": v["admitted"],
+                    "isolation_flagged": key in flagged, "isolation_recheck_pass": iso.get("pass"),
+                    "code_stability_changed": code.get("changed"),
+                    "documents": [{"doc_id": d.doc_id, "mode_suffix": d.doc_id.split("|")[1],
+                                   "prompt_tokens": len(d.prompt_ids), "supervised_tokens": len(d.output_ids),
+                                   "ends_on_a_stop_id": d.output_ids[-1] in (151645, 151643),
+                                   "content_sha256": doc_sha256(d)} for d in v["docs"]]})
+    train = [d for d, _ in pairs] + docs
+    counts, _, _ = type_counts(arm, train, dtype, {d.doc_id: d.doc_id.split("|", 1)[0] for d in train})
+    want = {k: int(x) for k, x in rec["per_type_supervised_tokens"][SELECTION_ARM[arm]].items() if k != "tool_calling"}
+    want["fluid"] = rec["arms"][arm]["by_category"]["fluid"]
+    return {"schema": "aadistill.stage2.teacher_modes.recovery_audit/v1",
+            "command": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs --arm "
+                       f"{arm} --recovery-audit <out>",
+            "question": "maintainer 2026-11-04 (review of 647eea0e), item 6: the selected task(s) the old source pack "
+                        "lacks, recovered through the frozen admission records, tokens and source identity verified",
+            "arm": arm, "mode": mode, "source_pack": _files(PA.PACKS / spec["source_pack"]),
+            "selection_record_sha256": sha_file(SELECTION), "records": stores, "missing_from_the_pack": out,
+            "counts_with_them": counts, "selection_record_counts": want,
+            "equal_to_the_selection_record": all(counts.get(k) == want[k] for k in want), "authorizes": "nothing"}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--arm", choices=sorted(ARMS))
@@ -591,6 +787,8 @@ def main(argv=None) -> int:
     ap.add_argument("--validate-only", action="store_true",
                     help="select and validate the proportions; admit and pack nothing")
     ap.add_argument("--proportion-audit", default=None, help="write the registered-tolerance audit here and stop")
+    ap.add_argument("--recovery-audit", default=None,
+                    help="with --arm A1-6cat|A2-6cat: write the recovery audit of the selected tasks its pack lacks")
     for k in ("v1-records", "v1-identity", "records", "identity"):
         ap.add_argument(f"--{k}", default=None)
     a = ap.parse_args(argv)
@@ -601,6 +799,11 @@ def main(argv=None) -> int:
         return 0
     if not a.arm:
         ap.error("--arm is required")
+    if a.recovery_audit:
+        doc = recovery_audit(a.arm)
+        Path(a.recovery_audit).write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({k: doc[k] for k in ("missing_from_the_pack", "equal_to_the_selection_record")}, indent=1))
+        return 0
     records = ({"v1_records": a.v1_records, "v1_identity": a.v1_identity, "records": a.records,
                 "identity": a.identity} if a.v1_records else None)
     tool_docs = Path(a.tool_documents) if a.tool_documents else None

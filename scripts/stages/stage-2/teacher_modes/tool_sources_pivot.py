@@ -30,7 +30,14 @@ function call or one message; no row carries parallel calls). A teacher may cont
   enum, a number or boolean, or an optional parameter supplied): schema_arguments; one other call step:
   tool_selection; two or more call steps: multi_turn (sequential calls reading tool results). No Pivot row has
   parallel calls or a recorded tool error;
-* verification -- protocol, schema validity, recorded execution and step gold; no task-success verifier.
+* verification -- protocol, schema validity, recorded execution and step gold; no task-success verifier;
+* single-step gold tool calls (Conversational only; maintainer 2026-11-04, a $0 implementation) -- a trajectory
+  skipped ONLY because its first gold call has no recorded output (every other rule above applied) becomes, when
+  that call's arguments are structured, a ``single_step_gold_tool_call@v1`` task (`tool_episodes.SINGLE_STEP`): the
+  same context, gold = that first call alone, no backend, one turn, category ``schema_arguments``; its own task id
+  (variant ``turn1-step1``). Recorded execution and task success are unverified (None). A first call that is not
+  structured would be a tool_selection decision: outside the approved scope, counted and not converted. A
+  trajectory whose first call is answered but a later one is not stays skipped.
 
 The audit records how many trajectories each rule kept or skipped, the categories, the environments, and the
 recorded Qwen3-235B per-step pass rates (Conversational only) as a difficulty reference.
@@ -188,12 +195,20 @@ def convert(path: Path, which: str) -> tuple[list[dict], dict]:
                 conflicts.append({"call": key, "responses": len(outs)})
             else:
                 table[key] = next(iter(outs))
-        if missing:
-            skipped["a gold call without a recorded output"] += 1
-            continue
         tools = [envelope(t) for t in first[tid]["tools"]]
         system = next((str(it.get("content") or "") for it in items if kind_of(it) == "system"), "")
         users = [str(it.get("content") or "") for it in items if kind_of(it) == "user"]
+        if missing:
+            first_unanswered = gold[0] is not None and not outputs[tid].get(canonical_call(gold[0]))
+            if which != "conversational" or not first_unanswered:
+                skipped["a gold call without a recorded output"] += 1
+            elif not structured(gold[0], tools):
+                skipped["first gold call without a recorded output, not structured (a tool_selection decision step: "
+                        "outside the approved single-step scope)"] += 1
+            else:
+                tasks.append(single_step(dataset, revision, which, tid, gold[0], n, rates[tid].get(base), system,
+                                         tools, users))
+            continue
         calls = [g for g in gold if g is not None]
         ends_on_call = gold[-1] is not None
         gold_steps = [[[g]] if g is not None else [[]] for g in gold] + ([None] if ends_on_call else [])
@@ -217,19 +232,49 @@ def convert(path: Path, which: str) -> tuple[list[dict], dict]:
     for t in tasks:
         t["environment"] = f"pivot-{which}:{env[t['task_id']]}"
     comp = Counter(env.values())
-    rated = [t["source"]["recorded"]["step_pass_rates"] for t in tasks if t["source"]["recorded"]["step_pass_rates"]]
+    full = [t for t in tasks if TE.episode_shape(t) == TE.FULL_EPISODE]
+    single = [t for t in tasks if TE.episode_shape(t) == TE.SINGLE_STEP]
+    rated = [t["source"]["recorded"]["step_pass_rates"] for t in full if t["source"]["recorded"]["step_pass_rates"]]
     prod = sorted(_prod(r) for r in rated if all(x is not None for x in r))
+    one = sorted(t["source"]["recorded"]["step_pass_rates"][0] for t in single
+                 if t["source"]["recorded"]["step_pass_rates"])
     audit = {"dataset": dataset, "revision": revision, "trajectories_with_turn1_rows": len(steps),
              "kept": len(tasks), "skipped": dict(skipped), "category": dict(Counter(t["category"] for t in tasks)),
-             "steps": dict(sorted(Counter(t["source"]["recorded"]["steps"] for t in tasks).items())),
-             "ends_on_call": sum(t["source"]["recorded"]["ends_on_call"] for t in tasks),
-             "tasks_with_conflicts": sum(bool(t["backend"]["conflicts"]) for t in tasks),
+             "episode_shapes": dict(Counter(TE.episode_shape(t) for t in tasks)),
+             "steps": dict(sorted(Counter(t["source"]["recorded"]["steps"] for t in full).items())),
+             "ends_on_call": sum(t["source"]["recorded"]["ends_on_call"] for t in full),
+             "tasks_with_conflicts": sum(bool(t["backend"]["conflicts"]) for t in full),
+             "single_step_qwen3_235b_first_step_pass_rate": (
+                 {"tasks": len(one), "median": one[len(one) // 2], "mean": round(sum(one) / len(one), 3)}
+                 if one else None),
              "environments": {"count": len(comp), "largest_tasks": comp.most_common(1)[0][1] if comp else 0,
                               "largest_share": round(comp.most_common(1)[0][1] / len(tasks), 4) if tasks else 0},
              "qwen3_235b_episode_pass_rate_product": (
                  {"tasks": len(prod), "median": prod[len(prod) // 2], "p25": prod[len(prod) // 4],
-                  "p75": prod[3 * len(prod) // 4]} if prod else None)}
+                  "p75": prod[3 * len(prod) // 4]} if prod else None),
+             "_": "steps, ends_on_call, conflicts and the episode pass-rate product count the full episodes"}
     return tasks, audit
+
+
+def single_step(dataset: str, revision: str, which: str, tid, call: dict, steps: int, rate, system: str,
+                tools: list[dict], users: list[str]) -> dict:
+    """A `tool_episodes.SINGLE_STEP` task: the first gold call alone, verified exactly, never executed."""
+    task = {"task_id": TE.task_id_of(dataset, revision, str(tid), "turn1-step1"), "category": "schema_arguments",
+            "category_detail": None, "episode_shape": TE.SINGLE_STEP,
+            "source": {"dataset": dataset, "revision": revision, "config": which, "row": str(tid),
+                       "subset": "turn1-step1", "verification_class": "G2",
+                       "recorded": {"steps": 1, "calls": 1, "ends_on_call": True, "trajectory_turn1_steps": steps,
+                                    "first_call_recorded_output": False,
+                                    "step_pass_rates": [rate] if rate is not None else None}},
+            "family": None, "split": None, "environment": None, "system": system or None,
+            "tools": tools, "messages": [{"role": "user", "content": u} for u in users], "later_user_turns": [],
+            "backend": {"kind": "none"}, "gold_steps": [[[call]]], "final_check": {"kind": "none"}, "max_turns": 1}
+    task["source"]["verification"] = {"levels": TE.verification_levels(task), "step_gold": True,
+                                      "recorded_execution": None, "task_success_verifier": None}
+    bad = TE.task_problems({**task, "split": "training"})
+    if bad:
+        raise AssertionError(f"{task['task_id']}: {bad}")
+    return task
 
 
 def _prod(xs) -> float:

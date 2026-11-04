@@ -167,6 +167,7 @@
    },
    "max_abs_diff": 0.0,
    "compared": "final_hidden",
+   "intra_op_threads": 1,
    "model": "random 2-layer Qwen3, float64, the real 151,669-token vocabulary",
    "tolerance": 1e-09,
    "pass": true

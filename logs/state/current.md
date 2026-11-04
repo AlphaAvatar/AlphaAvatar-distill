@@ -27,7 +27,8 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
   accepted, formal data is counted before packing, and loss normalization is kept. Both rounds of $0 repairs are done.
   - **Bounded generation.** Tool generation is bounded by a frozen plan (`tool_generation_plan.py`): per-category
     targets in the consumer's unit, frozen orders, rounds, a hard bound. Priced over the dry pool at
-    $2.27 / $3.62 / $10.31, cap $11.34; 4,698 tasks expected, 8,547 at the bound.
+    $2.27 / $3.72 / $11.01, cap $12.11 with the single-step tier (was $3.62 / $10.31, cap $11.34); 5,238 tasks
+    expected, 10,129 at the bound (`plans/tool_generation_plan_dry_run.json`).
   - **Pool identity.** Every split file is sha256-registered and re-verified at every read.
   - **Isolation.** Exact prompts and tool identities are isolated across splits.
   - **Fail closed.** Schema validation and the reference caches fail closed. T3 now checks xLAM-60k and Glaive-v2.
@@ -47,18 +48,30 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
   - the agent's `share_check` (2% per type, fluid 49-51%) is withdrawn: it was looser than the registered tolerance,
     which every arm's real data passes (`audit/proportion_tolerance_audit.json`);
   - option 1 vs option 2 for `schema_arguments` measured (`audit/schema_arguments_options.json`).
+- **Review of `647eea0e` (2026-11-04).** The packing core and the decoupling are accepted and frozen. Done at $0:
+  - the admission takes only the proportion report of the selection it admits (`packed_packs.selection_identity`:
+    tokens, masks, types, categories, splits, tool cells, sources, quota designs; the report sealed);
+  - the training binding verifies the actual packed tokens and supervision (`packed_content_sha256` recorded at
+    packing, every document against the manifest, the sequences re-derived exactly);
+  - `single_step_gold_tool_call@v1` implemented (`six_category_design.json :: protocol.episode_shapes`; Pivot
+    Conversational, schema_arguments only, a second tier of the pool's frozen order); dry pool v4 and plan
+    (`audit/single_step_supply_audit.json`): every earlier task unchanged;
+  - the token identity audit's intermittent failure: a cold first-forward CPU effect on eight threads, repaired by a
+    single-threaded probe (PACKED_ROUND.md section 10);
+  - the L40S pilot's application prepared, not authorized
+    (`logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json`).
 - **Blocked on tool calling.**
-  - The non-thinking `schema_arguments` SHORTFALL: the data admission refuses the A2-6cat selection, and the suite
-    cannot freeze, hence no search. Option 1 (call-only gold episodes) fills training at the expected pass rate and
-    brings state evaluation to ~1,400 of 1,800; option 2 (WorkBench) adds no state-evaluation supply. Owed: the
-    choice; no shortfall is approved.
-  - The generation is a paid session to authorize.
+  - The non-thinking `schema_arguments` SHORTFALL: option 1 is implemented; at the priors it fills training and leaves
+    state evaluation short (~1,400 of 1,800). No SHORTFALL is approved, so the A2-6cat admission refuses and the suite
+    cannot freeze, hence no search. The pilot would measure the real supply.
+  - The generation (and the pilot) are paid sessions to authorize.
   Calibration v2, `state_eval_hybrid@v2` and therefore the new search wait for it.
 - **Next: the maintainer's ruling** on:
   - source admission;
   - the expected SHORTFALLS: non-thinking `schema_arguments`, and "ask for the missing value";
   - the isolation costs and the validation-coverage gaps;
-  - a raised cap: generation plus search is $36.05 expected against $31.27 left;
+  - the L40S pilot application ($1.14 expected, cap $1.80; not authorized);
+  - a raised cap: generation plus search is $36.15 expected against $30.05 left (live 2026-11-04T08:06Z);
   - volume `4rhubprswo`.
 
   0 pods; the two volumes are retained.

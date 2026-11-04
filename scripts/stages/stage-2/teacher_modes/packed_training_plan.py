@@ -119,8 +119,9 @@ BOUND = REPO / "logs/stages/stage-2/teacher_modes/plans/packed_training_plan.jso
 def bind(units: list[dict], packs_dir: Path, top1_products: Path | None = None) -> dict:
     """The units bound to their BUILT packs (files, rung, steps and schedule from the pack) and, for A1-6cat and
     A2-6cat, to the packed search's committed Top-1 (`packed_full_search` products.json). A built pack must pass
-    `packed_packs.verify_pack` (an admitted, unchanged data manifest, its documents, the design's packing spec),
-    or the binding refuses. An arm whose pack is not built stays unbound and `training_plan.admit` refuses it."""
+    `packed_packs.verify_pack` (an admitted, unchanged data manifest, its documents, the design's packing spec, and
+    its actual packed tokens and supervision against the packing's recorded content identity and the manifest's
+    documents), or the binding refuses; the lineage then binds the files, that content identity and the manifest. An arm whose pack is not built stays unbound and `training_plan.admit` refuses it."""
     import copy
     from aadistill.infrastructure.manifest import sha256_file
     from stages.teacher_modes import packed_packs as PP
@@ -132,7 +133,7 @@ def bind(units: list[dict], packs_dir: Path, top1_products: Path | None = None) 
         arm = u["arm"]
         d = Path(packs_dir) / arm
         if (d / "ladder.json").is_file():
-            PP.verify_pack(d)
+            man = PP.verify_pack(d)
             lad = json.loads((d / "ladder.json").read_text())
             files = {n: sha256_file(d / n) for n in ("blocks.npz", "audit.jsonl", "ladder.json")}
             sch = TP.schedule(int(lad["n_blocks"]))
@@ -142,7 +143,9 @@ def bind(units: list[dict], packs_dir: Path, top1_products: Path | None = None) 
             cfg["schedule"] = {k: sch[k] for k in ("total_steps", "warmup_steps", "min_lr_frac")}
             cfg["intervals"] = {**cfg["intervals"], "eval_every": sch["eval_every"], "eval_blocks": cfg["val_blocks"]}
             cfg["checkpoint"] = {**cfg["checkpoint"], "save_every": sch["save_every"], "bind_identity": True}
-            cfg["lineage"]["data"][0]["files_sha256"] = files
+            cfg["lineage"]["data"][0].update(files_sha256=files,
+                                             packed_content_sha256=lad["data_admission"]["packed_content_sha256"],
+                                             data_manifest_content_sha256=man["content_sha256"])
         if arm in ("A1-6cat", "A2-6cat") and top1 is not None:
             t = top1["top1"]
             cfg["student_path"] = t["path"]

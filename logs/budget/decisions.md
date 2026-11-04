@@ -15403,3 +15403,54 @@ on a paid pod.
   merge. The $3.62 / $11.34 and $32.43 figures remain estimates.
 - **Revisit when:** the maintainer chooses the schema_arguments option. After the pilot measures the pass rate, the
   state-evaluation remainder.
+
+
+## 2026-11-04 (UTC) — Maintainer: fourth review of 647eea0e; report and pack identity, the single-step gold tool call at $0, the token identity audit's failure, the L40S pilot application
+
+- **Context.** The maintainer accepted and froze the packing protocol (seeded shuffle, sequential packing, truncation,
+  standard causal attention; `prefix_restart_v1`; Stage-5 unpacked), pre-packing accounting, the four-step decoupling,
+  the withdrawn tolerance, CE/KD, Top-200 + tail, loss normalization, the measurement identities, the pool / plan
+  identity and the seven-category gates. Two identity gaps (P1) and option 1's implementation remained.
+- **Decision (maintainer).**
+  1. The admission must bind the proportion report to the selection it validated, without validating again and
+     without coupling validation to packing.
+  2. The training binding must verify the actual packed tokens and supervision against an identity fixed at packing,
+     not document ids, the rung, the spec or a hash recomputed at binding.
+  3. Option 1 is accepted in principle as `single_step_gold_tool_call` for the non-thinking `schema_arguments` gap:
+     $0 code, conversion, static audits and synthetic tests only. No SHORTFALL is approved; no share, quota or 5-task
+     floor is lowered; calibration and state evaluation may not be COMPLETE while short; WorkBench is not the route.
+  4. Diagnose `test_the_token_identity_audit_regenerates_identically`; record the environment-blocked tests; recover
+     A2's missing task from the frozen records; prepare (not run) an L40S pilot application.
+- **Implemented.**
+  - `packed_packs.selection_identity` / `report_problems`: the report carries `selection_sha256` (every document's id,
+    data type, category, unit, supervised tokens and token content with its mask, per split; the tool cells; the
+    sources; the quota designs) and `report_sha256`; `admit` recomputes the identity and refuses another selection's
+    report, an edited report and any drift after the validation; the manifest records `selection_sha256`.
+  - `packed_packs.pack` records `packed_content_sha256` (ids, supervision mask, content mask, named, dtype- and
+    shape-normalized, with the training-sequence count) before writing; `verify_pack` recomputes it from `blocks.npz`,
+    reads every document back from its final placement, checks it against the manifest and re-packs them, which must
+    reproduce every sequence and placement; the bound lineage carries it. One changed token, a mask bit, a replaced
+    file and a forged pack with a re-sealed identity are refused.
+  - `single_step_gold_tool_call@v1` (`six_category_design.json :: protocol.episode_shapes`): core
+    `verify_episode(unexecuted_final_call=True)` (the calls must exist, carry no response, pass protocol, schema and
+    gold; `recorded_execution` None); `tool_episodes` (the shape's task rules, the environment ending after the call,
+    nothing after the call but the stop token, levels protocol + schema_validity + step_gold); `tool_sources_pivot`
+    (Conversational trajectories skipped only for an unanswered first gold call, structured -> 1,709 tasks;
+    unstructured first calls, 7,034, counted and not converted); `tool_pool` schema v4 (full episodes first in every
+    split's frozen order, then single steps; T5 keeps the full episode); `tool_admission` counts by shape.
+  - Dry pool v4: every earlier task admitted as before, in the same split and relative order; single steps admitted
+    1,560 training, 72 calibration, 22 state evaluation, 19 validation, 1 reserve (35 refused by the screens). Plan:
+    every thinking-mode and Thinking-2507 cell unchanged; non-thinking `schema_arguments` training expected 891 tasks
+    (bound 1,928) and state evaluation all 29; price $2.27 / $3.72 / $11.01, cap $12.11
+    (`audit/single_step_supply_audit.json`, `plans/tool_generation_plan_dry_run.json`).
+  - Token identity audit: the first 8,192-token packed forward in a fresh process moved by up to 1.2e-4 against an
+    identical second forward on eight threads (14 of 90 processes), never on one thread (0 of 30); the probe now runs
+    on one intra-op thread, recorded as `intra_op_threads: 1`. Assertion and 1e-9 tolerance unchanged.
+  - A2's missing task `79c86b17e0b933ee3483` (MBPP, 14 supervised tokens) recovered from the v1 store, admitted, not
+    isolation-flagged; with it the five types and fluid equal the selection record (`audit/a2_recovery_audit.json`).
+  - The L40S pilot application (`logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json`): 794
+    hybrid tasks, one round, $0.97 / $1.14 / $1.64, hard cap $1.80. Not authorized.
+- **Not authorized and not done.** Paid generation, the pilot, the packed search, training, formal evaluation, a pod,
+  a cap change, any SHORTFALL approval, deleting from `4rhubprswo`, a merge.
+- **Revisit when:** the maintainer rules on the pilot application and the source admission; after the pilot, on the
+  measured state-evaluation supply of non-thinking `schema_arguments`.

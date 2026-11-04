@@ -26,11 +26,13 @@
  },
  "data_admission": {
   "decided_by": "maintainer 2026-11-04 (review of fc6fa1d6): data selection, proportion validation, admission / freeze and sequential packing are separate functions; the packing judges no proportion, and a workflow refuses formal training material whose admission failed",
-  "steps": "packed_packs.select (whole examples and episodes, the tool cells per the frozen generation plan, a short cell SHORTFALL) -> packed_packs.proportions (unique supervised tokens before packing, aadistill.data.mixture.validate_proportions against packed_packs.registered_quotas) -> packed_packs.admit (the frozen <pack>/data_manifest.json, or AdmissionError and nothing written) -> packed_packs.pack (token_documents.pack_sequential at stage3_packing; its input must be the manifest's documents) -> packed_training_plan.bind (only a pack packed_packs.verify_pack accepts)",
+  "steps": "packed_packs.select (whole examples and episodes, the tool cells per the frozen generation plan, a short cell SHORTFALL) -> packed_packs.proportions (unique supervised tokens before packing, aadistill.data.mixture.validate_proportions against packed_packs.registered_quotas; the report carries the selection's content identity and its own seal) -> packed_packs.admit (only the selection its report validated: packed_packs.report_problems recomputes the identity, never the proportions; the frozen <pack>/data_manifest.json, or AdmissionError and nothing written) -> packed_packs.pack (token_documents.pack_sequential at stage3_packing; its input must be the manifest's documents; records the packed content identity before writing) -> packed_training_plan.bind (only a pack packed_packs.verify_pack accepts, its actual tokens and supervision included)",
   "tolerance": "the registered one, read from its owner and never restated here: token_matched_design.json :: scale.tolerance (total_over_target_max_fraction 0.005, category_share_deviation_max_points 0.5) with the whole-task selection rule six_category_design.json :: base_category keeps unchanged -- fluid and supporting each at least their targets, the per-mode total at most 0.5% over, fluid's share within 0.5 points, each type within one largest whole unit per selection cell; C1-6cat's five kept types and fluid exact",
   "approved_exceptions": [],
   "approved_exceptions_note": "the maintainer's recorded approval of one failing quota or share of one arm: {arm, quota, approved_by, date, reason}; with the generation plan's approved_shortfalls (a tool cell's SHORTFALL) the only way a failing selection is admitted. Empty: nothing is approved",
-  "superseded": "stage3_packing.share_check (per type within 2% of 1/6 of the supporting total, fluid 49-51% of the total), introduced by the agent at 77be6e13 without a maintainer decision, looser than the registered rule and blind to a shortfall: withdrawn 2026-11-04 (audit/proportion_tolerance_audit.json)"
+  "superseded": "stage3_packing.share_check (per type within 2% of 1/6 of the supporting total, fluid 49-51% of the total), introduced by the agent at 77be6e13 without a maintainer decision, looser than the registered rule and blind to a shortfall: withdrawn 2026-11-04 (audit/proportion_tolerance_audit.json)",
+  "report_binding": "maintainer 2026-11-04 (review of 647eea0e, P1): a proportion report is bound to the selection it validated -- packed_packs.selection_identity over every document's id, data type, category, unit, supervised tokens and token content (ids and supervision mask) per split, the tool cells with their targets and approvals, the sources read and the quota designs (token_matched_design.json, six_category_design.json) -- and sealed (report_sha256). admit refuses another selection's report, an edited report and any drift after the validation; the manifest records selection_sha256",
+  "pack_content": "maintainer 2026-11-04 (review of 647eea0e, P1): pack records packed_content_sha256 -- the token ids, supervision mask and content mask of every sequence, named, dtype- and shape-normalized, with the training-sequence count -- from the sequences the packing produced, before writing them. verify_pack (the training binding) recomputes it from blocks.npz and requires it, then reads every document back from its final placement, checks it against the manifest's content sha256 and re-packs them at the design's spec, which must reproduce every sequence and placement exactly; the bound lineage carries packed_content_sha256 and the manifest's content_sha256 beside the files' sha256"
  },
  "authorizes": "nothing",
  "full_search": {
@@ -91,7 +93,8 @@
   "forward_context": "stage1_forward_context above; teacher and candidate read in the same packed sequences",
   "identity": "its own items file, manifest, content sha256, type table and measurement protocol id (frozen by freeze_state_eval for v2 under the packed protocol); v1 and its protocol 1c830524... stay frozen and are never re-scored",
   "limit": "teacher-forced KL on tool turns is not tool-call success: closed-loop tool-execution success belongs to a registered tool-calling evaluation (eval-set-2, the maintainer's decision under P10.3)",
-  "cost_note": "a non-thinking tool turn supervises ~40-120 tokens behind a long tool catalog, so 12,000 scored positions in non-thinking mode take ~100-300 turns and ~0.2-0.45M context tokens -- the largest single growth of the suite (plans/packed_search_budget.json prices it)"
+  "cost_note": "a non-thinking tool turn supervises ~40-120 tokens behind a long tool catalog, so 12,000 scored positions in non-thinking mode take ~100-300 turns and ~0.2-0.45M context tokens -- the largest single growth of the suite (plans/packed_search_budget.json prices it)",
+  "episode_shapes": "tool items of full_episode@v1 and single_step_gold_tool_call@v1 (schema_arguments only; six_category_design.json :: protocol.episode_shapes): a single-step item is one decision turn ending on its call at natural termination, scored at its assistant positions like any turn; it carries episode_shape, which enters the suite's content identity; the measurement protocol id is unchanged. Its per-category requirement (share of 12,000 positions, >= 5 tasks) is unchanged and unmet categories keep the suite PENDING"
  },
  "tool_calling": {
   "role": "a supporting capability AlphaAvatar-distill must keep; the sixth base-corpus type at 1/6 of the base category's supervised tokens",
@@ -182,11 +185,12 @@
    "2026-11-03 review repairs: fragments and pre-packing accounting recorded (AGENTS.md P19, stage3_packing); tool_pool v2 (atoms, decontamination, the length bound in main); Toucan steps / errors / conflicts; verification levels; each lineage's tool-generation kind and L40S gate; packs with every validation document, the tool quota and the pre-packing share check (audit/tool_pool_dry_run_v2.json, audit/experiment_suite_baseline_20261103.json)",
    "2026-11-03 second review repairs: bounded generation plan (tool_generation_plan.py; plans/tool_generation_plan_dry_run.json), pool content identity verified at every read, T4 exact prompts and tool identities, fail-closed JSON Schema validation, verified reference caches incl. T3, the Pivot converter (audit/pivot_conversion_v1.json), audit/tool_pool_dry_run_v3.json, the position reconciliation of a_search's closeout, the consumer chain regression",
    "2026-11-03 third review repairs: per-category gates (packed_inputs.tool_cell: a calibration cell or a state evaluation mode is met only when every category meets its share; an unapproved SHORTFALL or THIN freezes nothing; bounded_plan.approved_shortfalls), the consumers' identity through tool_generation_plan.verified (pool files, orders, content, pool.json bytes, protocol, design, cells), the pool's content identity over its orders; audit/schema_arguments_shortfall.json",
-   "2026-11-04 review of fc6fa1d6: selection, proportion validation (core aadistill.data.mixture.validate_proportions), admission / freeze (data_manifest.json) and sequential packing separated in packed_packs.py; verify_pack for the training binding; the agent's share_check withdrawn for the registered tolerance (audit/proportion_tolerance_audit.json); schema_arguments option 1 vs option 2 measured (audit/schema_arguments_options.json)"
+   "2026-11-04 review of fc6fa1d6: selection, proportion validation (core aadistill.data.mixture.validate_proportions), admission / freeze (data_manifest.json) and sequential packing separated in packed_packs.py; verify_pack for the training binding; the agent's share_check withdrawn for the registered tolerance (audit/proportion_tolerance_audit.json); schema_arguments option 1 vs option 2 measured (audit/schema_arguments_options.json)",
+   "2026-11-04 review of 647eea0e: the admission binds the proportion report to the selection's content identity (packed_packs.selection_identity / report_problems); the training binding verifies the actual packed tokens and supervision (packed_content_sha256, documents against the manifest, exact re-packing); single_step_gold_tool_call@v1 implemented at $0 (aadistill.data.tool_calls unexecuted_final_call, tool_episodes, tool_sources_pivot, tool_pool schema v4 order tiers, tool_admission census; audit/single_step_supply_audit.json); the token identity audit's intermittent failure diagnosed and repaired; the L40S pilot's application prepared (not authorized)"
   ],
   "pending": [
    "the maintainer's source admission (Toucan, Pivot Conversational), then tool_pool@v1 under data/ and the canonical plan over it (plans/tool_generation_plan.json)",
-   "a pilot (about 1 h) measuring pass rates, turn lengths and throughput, replacing the plan's priors before the cap is final",
+   "the L40S pilot (logs/budget/applications/research_a_tool_pilot_2026-11-04: application only, not authorized) measuring pass rates per mode, category and episode shape, turn lengths, throughput, peak VRAM and model loads, replacing the plan's priors before the cap is final",
    "teacher-native tool generation (hybrid both modes; Thinking-2507): paid, unauthorized",
    "calibration v2 and state_eval_hybrid@v2 built and frozen (packed_inputs.py build)",
    "a GPU measurement of the packed path (first state evaluation / first DEPTH round)",
@@ -194,16 +198,25 @@
   ]
  },
  "budget": {
-  "position_read": "2026-11-03T09:06Z (scripts/shared/project_position.py --live): committed $836.73 of the $868.00 project cap, $31.27 left; 0 pods; volumes 4rhubprswo and am5m373kuq retained",
+  "position_read": "2026-11-04T08:06Z (scripts/shared/project_position.py --live, read-only): committed $837.95 of the $868.00 project cap, $30.05 left; 0 pods; volumes 4rhubprswo and am5m373kuq retained; the pilot's $1.80 cap fits the project cap and the account balance (the balance is never headroom or a grant)",
   "phases": {
+   "0_tool_pilot": {
+    "usd": {
+     "lower": 0.97,
+     "expected": 1.14,
+     "upper": 1.64
+    },
+    "proposed_hard_cap": 1.8,
+    "basis": "logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json: 794 hybrid tasks, one round, priced by the plan's own terms; NOT authorized"
+   },
    "1_pool_and_generation": {
     "usd": {
      "lower": 2.27,
-     "expected": 3.62,
-     "upper": 10.31
+     "expected": 3.72,
+     "upper": 11.01
     },
-    "proposed_hard_cap": 11.34,
-    "basis": "plans/tool_generation_plan_dry_run.json: the bounded plan's task counts (4,698 expected, 8,547 at the bound) x expected turns x the modes' tokens per turn x second candidates, decode at the supplement's measured throughput x an unmeasured tool-workload efficiency, first-prompt prefill, a model load per engine invocation, setup and teardown, $1.1067/h. Sessions: hybrid $1.37 / $2.38 / $7.85, Thinking-2507 $0.90 / $1.24 / $2.46. Replaces the unbounded $4.4 / $6.6, which priced a fraction of a pool the session would have generated whole (~238,790 first candidates)"
+    "proposed_hard_cap": 12.11,
+    "basis": "plans/tool_generation_plan_dry_run.json: the bounded plan's task counts (5,238 expected, 10,129 at the bound, over the dry pool v4 with the single-step tier; was 4,698 / 8,547, $3.62 / $10.31, cap $11.34) x expected turns x the modes' tokens per turn x second candidates, decode at the supplement's measured throughput x an unmeasured tool-workload efficiency, first-prompt prefill, a model load per engine invocation, setup and teardown, $1.1067/h. Sessions: hybrid $1.37 / $2.48 / $8.55, Thinking-2507 $0.90 / $1.24 / $2.46. Replaces the unbounded $4.4 / $6.6, which priced a fraction of a pool the session would have generated whole (~238,790 first candidates)"
    },
    "2_packed_hybrid_full_search": {
     "usd": {
@@ -232,16 +245,17 @@
    }
   },
   "storage": "4rhubprswo $0.82/day (350 GB) holds the v2 Top-1; the packed search needs a volume of similar size in the GPU's datacenter",
-  "conclusion": "phases 1 and 2 together: $36.05 expected, $52.45 upper, caps $57.69 -- more than the $31.27 left: the Full Search Authorization needs a raised project cap"
+  "conclusion": "phases 1 and 2 together: $36.15 expected, $53.15 upper, caps $58.46 -- more than the $30.05 left: the Full Search Authorization needs a raised project cap; the pilot ($1.14 expected, cap $1.80) is a separate application"
  },
  "decisions_owed_to_the_maintainer": [
   "tool-calling source admission: Toucan-1.5M SFT and Pivot Conversational are prepared as priority candidates (maintainer 2026-11-03; not admitted, not a generation authorization); Pivot Function-Calling not adopted; Nemotron-SFT-Agentic-v4 deferred; Glaive / xLAM isolation references only; the category shares (proposed, used unchanged by the plan), the 6,144-token prompt bound, the non-thinking state-evaluation floor",
-  "the non-thinking schema_arguments SHORTFALL: the data admission refuses the A2-6cat selection and state_eval_hybrid@v2 cannot freeze, so the packed search is blocked. Option 1 vs option 2 measured at $0 (audit/schema_arguments_options.json): call-only gold episodes fill training at the expected pass rate and bring state evaluation to ~1,400 of 1,800; WorkBench adds no state-evaluation supply under the frozen isolation. The choice is owed (neither implemented); approving the SHORTFALL is not granted (2026-11-04); Toucan re-labelling is not acceptable. 'Ask for the missing value' has no verified source in any mode",
+  "the non-thinking schema_arguments SHORTFALL: option 1 accepted in principle (2026-11-04) and IMPLEMENTED at $0 as six_category_design.json :: protocol.episode_shapes single_step_gold_tool_call@v1 (Pivot Conversational, schema_arguments only, the pool's second order tier; audit/single_step_supply_audit.json); at the priors it fills training and leaves non-thinking state evaluation short (~1,400 of 1,800 scored positions); approving any SHORTFALL, lowering a share or quota, or the 5-task floor is NOT granted, so the A2-6cat admission refuses and state_eval_hybrid@v2 cannot freeze until real supply meets them. The L40S pilot's application (logs/budget/applications/research_a_tool_pilot_2026-11-04) measures the pass rates and generates every state-evaluation schema_arguments task; the decision on any remainder follows its evidence. WorkBench is not the supply route (its $0 audit kept). 'Ask for the missing value' has no verified source in any mode",
   "the isolation costs: per-atom splits leave 17-20 atoms per evaluation split (mostly no_tool); eval-set-1 tool names refused (1,878 tasks); tool identities shared by several MCP servers kept to one split (6,825 refused); T3 signature matches counted, not refused",
   "validation coverage, diagnostic only: C1-6cat's validation has no fluid type; A1-6cat's has no interactive_adaptation and carries answerability, which the six-type training no longer uses (recorded; no training data moved to validation; eval-set-1's identity unchanged)",
   "a registered tool-calling evaluation (eval-set-2) for closed-loop success",
-  "a raised project cap for the Full Search Authorization (bounded generation $3.62 expected / $10.31 upper, cap $11.34; packed search $32.43 / $42.14, cap $46.35; $31.27 left)",
-  "the lifecycle of volume 4rhubprswo (the v2 Top-1's only copy stays protected until a verified copy off the volume exists)"
+  "a raised project cap for the Full Search Authorization (bounded generation $3.72 expected / $11.01 upper, cap $12.11; packed search $32.43 / $42.14, cap $46.35; $30.05 left)",
+  "the lifecycle of volume 4rhubprswo (the v2 Top-1's only copy stays protected until a verified copy off the volume exists)",
+  "the L40S tool pilot (logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json): GPU and spend not authorized; the packed 8,192-token forward / DEPTH / training GPU validation is a separate request"
  ],
  "gpu_execution_request": {
   "operation": "research_a_packed_hybrid_full_search (packed_full_search.py), after calibration v2 and state_eval_hybrid@v2 exist; its level-0 first state evaluation and first DEPTH round are the GPU measurement of the packed path (throughput, scored rows/s, peak VRAM, repeatability), not a separate session",

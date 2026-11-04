@@ -133,3 +133,44 @@ class TestTheLevels:
         import pytest
         with pytest.raises(ValueError):
             _verify([{"raw": f"x{T}d", "stop_reason": "eos"}], final=lambda ts: True, level="success")
+
+
+class TestDecisionStep:
+    """``unexecuted_final_call``: the episode ends on calls nothing executes -- checked for protocol, schema and gold,
+    never reported as executed; the default (an episode ends on an answer) is unchanged."""
+
+    GOLD = [[[{"name": "get_weather", "arguments": {"city": "Paris"}}]]]
+
+    def _decide(self, turns, gold=GOLD, thinking=True):
+        return verify_episode(turns, tools=TOOLS, open_tag=OPEN, close_tag=C, think_close=T, expect_think=thinking,
+                              gold_steps=gold, unexecuted_final_call=True)
+
+    def test_a_decision_step_is_admitted_without_claiming_execution(self):
+        v = self._decide([{"raw": f"x{T}\n" + call("get_weather", city="Paris"), "stop_reason": "eos"}])
+        assert v.admitted, v.problems
+        assert v.checks["recorded_execution"] is None and v.checks["task_success"] is None
+        assert v.checks["tool_selection"] is None
+        assert v.verified_levels() == ["protocol", "schema_validity", "step_gold"]
+
+    def test_each_check_still_refuses(self):
+        good = f"x{T}\n" + call("get_weather", city="Paris")
+        assert self._decide([{"raw": f"x{T}\n" + call("get_weather", city="Rome"), "stop_reason": "eos"}]
+                            ).checks["step_gold"] is False
+        assert self._decide([{"raw": f"x{T}\n" + call("get_weather", city="Paris", unit="k"), "stop_reason": "eos"}],
+                            gold=None).checks["schema_validity"] is False
+        assert self._decide([{"raw": good, "stop_reason": "degeneration"}]).checks["protocol"] is False
+        assert self._decide([{"raw": f"x{T}\nIt is sunny.", "stop_reason": "eos"}]).checks["protocol"] is False
+        assert self._decide([{"raw": good, "stop_reason": "eos", "responses": ["sun"]}]).checks["protocol"] is False
+        assert self._decide([{"raw": call("get_weather", city="Paris"), "stop_reason": "eos"}],
+                            thinking=False).admitted
+        assert not self._decide([{"raw": good, "stop_reason": "eos"}], thinking=False).admitted
+
+    def test_earlier_executed_turns_are_still_checked(self):
+        first = {"raw": f"x{T}\n" + call("get_weather", city="Rome"), "stop_reason": "eos", "responses": [None]}
+        last = {"raw": f"x{T}\n" + call("get_weather", city="Paris"), "stop_reason": "eos"}
+        v = self._decide([first, last], gold=None)
+        assert v.checks["recorded_execution"] is False
+
+    def test_the_default_still_ends_on_an_answer(self):
+        v = _verify([{"raw": f"x{T}\n" + call("get_weather", city="Paris"), "stop_reason": "eos", "responses": ["s"]}])
+        assert v.checks["protocol"] is False and v.checks["recorded_execution"] is True

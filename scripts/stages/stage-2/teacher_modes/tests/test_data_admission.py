@@ -5,7 +5,12 @@
 3. data outside its proportions can be packed but is never admitted, and the workflow refuses before packing;
 4. frozen data keeps its counted size and proportions through the packing, fragments and all;
 5. a changed document, an edited manifest or another packing spec is refused;
-6. the quotas are the registered owners' numbers, and the validation itself is the generic core function.
+6. the quotas are the registered owners' numbers, and the validation itself is the generic core function;
+7. the admission takes only the proportion report of the selection it admits (maintainer 2026-11-04, P1): another
+   selection's report, an edited report, or content, mask, category, split, tool-cell or quota-design drift after
+   the validation refuses -- without the admission validating anything again;
+8. the formal binding verifies the ACTUAL packed tokens and supervision (P1): one changed token, a changed mask, a
+   replaced file or a forged pack with a re-sealed identity refuses; an untouched pack binds.
 
 The designs are the real files with their numbers scaled down (`scaled`); the structure and the tolerance are kept."""
 from __future__ import annotations
@@ -133,7 +138,8 @@ class TestSeparation:
         with pytest.raises(PP.AdmissionError, match="tool cell training/c2: SHORTFALL"):
             PP.admit("A1-6cat", sel, rep, scaled / "out")
         appr = {"split": "training", "mode": "H-T", "category": "c2", "approved_by": "maintainer (test)"}
-        adm = PP.admit("A1-6cat", selection(sizes, tool, [appr]), rep, scaled / "out")
+        approved = selection(sizes, tool, [appr])
+        adm = PP.admit("A1-6cat", approved, PP.proportions("A1-6cat", approved), scaled / "out")
         assert adm["manifest"]["approved_exceptions"] == [{**appr, "cell": "training/c2"}]
 
     def test_a_proportion_failure_is_admitted_only_by_a_recorded_exception(self, scaled):
@@ -267,3 +273,169 @@ class TestRegisteredQuotas:
         assert rep["quotas"]["supporting"]["status"] == "SHORTFALL" and not rep["passed"]
         supporting = sum(v for k, v in counts.items() if k != "fluid")
         assert abs(counts["tool_calling"] / (supporting / 6) - 1) < 0.02          #: what share_check allowed
+
+
+def short_gsm8k():
+    return selection({**{t: [UNIT] * 4 for t in TYPES}, "supporting.math_gsm8k": [UNIT] * 2, "primary.x": [500] * 12})
+
+
+class TestReportBinding:
+    def test_a_passing_report_of_another_selection_is_refused(self, scaled):
+        a, b = selection(), short_gsm8k()
+        rep_a = PP.proportions("A1-6cat", a)
+        assert rep_a["passed"] and not PP.proportions("A1-6cat", b)["passed"]
+        with pytest.raises(PP.AdmissionError, match="validated another selection") as e:
+            PP.admit("A1-6cat", b, rep_a, scaled / "out")
+        assert not e.value.verdict["admitted"] and not (scaled / "out").exists()      #: no manifest frozen
+
+    @pytest.mark.parametrize("drift", ["tokens", "mask", "data type", "tool category", "split", "unit",
+                                       "tool target", "source", "quota design"])
+    def test_drift_after_the_validation_is_refused(self, scaled, drift):
+        from aadistill.data.token_documents import MaskedDocument
+        sel = selection()
+        rep = PP.proportions("A1-6cat", sel)
+        d = sel["train"][0]
+        if drift == "tokens":                                                   #: same length, one token changed
+            sel["train"][0] = TokenDocument(d.doc_id, d.prompt_ids, d.output_ids[:-2] + (8, EOS), d.meta)
+        elif drift == "mask":                         #: same ids, same supervised count, one target moved by one
+            m = list(d.target_mask)
+            m[len(d.prompt_ids) - 1], m[len(d.prompt_ids)] = True, False
+            sel["train"][0] = MaskedDocument(d.doc_id, d.ids, tuple(m))
+            assert sum(m) == sum(d.target_mask)
+        elif drift == "data type":
+            sel["data_type"][d.doc_id] = "supporting.math_gsm8k"
+        elif drift == "tool category":
+            t = next(i for i, x in enumerate(sel["train"]) if x.meta.get("category"))
+            x = sel["train"][t]
+            sel["train"][t] = TokenDocument(x.doc_id, x.prompt_ids, x.output_ids, {**x.meta, "category": "c2"})
+        elif drift == "split":
+            sel["train"].append(sel["validation"].pop())
+        elif drift == "unit":
+            sel["unit_of"][d.doc_id] = "another-task"
+        elif drift == "tool target":
+            sel["tool"]["quota"]["cells"]["training/c1"]["target"] += 1
+        elif drift == "source":
+            sel["sources"] = {"toy": 2}
+        else:
+            six = json.loads(PP.SIX.read_text())
+            six["base_category"]["per_type"] = PER + 1
+            PP.SIX.write_text(json.dumps(six))
+        with pytest.raises(PP.AdmissionError, match="validated another selection"):
+            PP.admit("A1-6cat", sel, rep, scaled / "out")
+        assert not (scaled / "out").exists()
+
+    def test_an_edited_report_or_another_arms_report_is_refused(self, scaled):
+        sel = short_gsm8k()
+        rep = PP.proportions("A1-6cat", sel)
+        forged = json.loads(json.dumps(rep))
+        forged["quotas"]["gsm8k"]["status"], forged["passed"], forged["failures"] = "OK", True, []
+        with pytest.raises(PP.AdmissionError, match="edited after its validation"):
+            PP.admit("A1-6cat", sel, forged, scaled / "out")
+        other = {**rep, "arm": "A2-6cat"}
+        other["report_sha256"] = PP.canonical_sha({k: v for k, v in other.items() if k != "report_sha256"})
+        with pytest.raises(PP.AdmissionError, match="'A2-6cat'"):
+            PP.admit("A1-6cat", sel, other, scaled / "out")
+
+    def test_the_admission_binds_without_validating_again(self, scaled, monkeypatch):
+        sel = selection()
+        rep = PP.proportions("A1-6cat", sel)
+        from aadistill.data import mixture
+        refuse(monkeypatch, (mixture, "validate_proportions"), (PP, "proportions"), (PP, "registered_quotas"),
+               (PP, "type_counts"))
+        adm = PP.admit("A1-6cat", sel, rep, scaled / "out")
+        assert adm["manifest"]["selection_sha256"] == rep["selection_sha256"] == PP.selection_identity("A1-6cat", sel)
+
+
+def built(scaled):
+    sel, adm = frozen(scaled)
+    out = scaled / "out" / "A1-6cat"
+    rec = PP.pack(sel["train"], sel["validation"], adm["path"], out)
+    return out, rec
+
+
+def rewrite_blocks(out, edit):
+    import numpy as np
+    with np.load(out / "blocks.npz") as z:
+        arr = {k: z[k].copy() for k in z.files}
+    edit(arr)
+    np.savez(out / "blocks.npz", **arr)
+    return arr
+
+
+def a1_units():
+    return [u for u in PTP.packed_units() if u["arm"] == "A1-6cat"]
+
+
+class TestPackContent:
+    def test_an_untouched_pack_binds_with_its_content_identity(self, scaled):
+        out, rec = built(scaled)
+        PP.verify_pack(out)
+        unit = PTP.bind(a1_units(), scaled / "out")["units"][0]
+        data = unit["config"]["lineage"]["data"][0]
+        assert data["packed_content_sha256"] == rec["data_admission"]["packed_content_sha256"]
+        assert data["data_manifest_content_sha256"] == rec["data_admission"]["content_sha256"]
+
+    @pytest.mark.parametrize("where", ["training", "validation"])
+    def test_one_changed_non_padding_token_refuses_the_binding(self, scaled, where):
+        out, rec = built(scaled)
+        files = {n: (out / n).read_bytes() for n in ("ladder.json", "audit.jsonl", PP.MANIFEST)}
+        n_train = rec["n_blocks"]
+
+        def edit(arr):
+            rows = range(n_train) if where == "training" else range(n_train, len(arr["input_ids"]))
+            b = next(r for r in rows if arr["content_mask"][r].any())
+            j = int(arr["content_mask"][b].nonzero()[0][-1])                   #: a non-padding position
+            arr["input_ids"][b, j] = arr["input_ids"][b, j] + 1
+        rewrite_blocks(out, edit)
+        assert all((out / n).read_bytes() == v for n, v in files.items())     #: every other file unchanged
+        with pytest.raises(PP.PackBuildError, match="packed_content_sha256"):
+            PP.verify_pack(out)
+        with pytest.raises(PP.PackBuildError, match="packed_content_sha256"):
+            PTP.bind(a1_units(), scaled / "out")
+
+    def test_a_changed_supervision_mask_or_a_replaced_file_refuses(self, scaled):
+        out, rec = built(scaled)
+        good = (out / "blocks.npz").read_bytes()
+        rewrite_blocks(out, lambda a: a["ce_mask"].__setitem__((0, int(a["ce_mask"][0].nonzero()[0][0])), False))
+        with pytest.raises(PP.PackBuildError, match="packed_content_sha256"):
+            PP.verify_pack(out)
+        (out / "blocks.npz").write_bytes(good)
+        PP.verify_pack(out)
+        sel = selection()                                                       #: another packing of the same data
+        from aadistill.data.token_documents import write_pack
+        tr = pack_sequential(sel["train"], 700, PP.PAD_ID, order_seed=12345)
+        v = pack_sequential(sel["validation"], 700, PP.PAD_ID, order_seed=12345)
+        write_pack(tr, v, scaled / "other", data_type=sel["data_type"])
+        (out / "blocks.npz").write_bytes((scaled / "other" / "blocks.npz").read_bytes())
+        with pytest.raises(PP.PackBuildError, match="packed_content_sha256"):
+            PP.verify_pack(out)
+
+    @pytest.mark.parametrize("forgery,why", [
+        ("token", "whose tokens or supervision are not the manifest's"),
+        ("swapped sequences", "not a document|not the manifest's"),
+        ("reordered sequences, audit rewritten to match", "not the packing of the manifest's documents")])
+    def test_a_forged_pack_with_a_resealed_identity_is_refused(self, scaled, forgery, why):
+        """The recorded identity rewritten to match the edit: the manifest's documents and their re-packing still
+        refuse it -- the identity alone never makes a pack correct. The last forgery keeps every document intact and
+        its placements consistent, so only the re-derivation of the sequences can see it."""
+        out, rec = built(scaled)
+        n_train = rec["n_blocks"]
+
+        def edit(arr):
+            if forgery == "token":
+                j = int(arr["ce_mask"][0].nonzero()[0][0])
+                arr["input_ids"][0, j] += 1
+            else:
+                for k in ("input_ids", "ce_mask", "content_mask"):
+                    arr[k][[0, 1]] = arr[k][[1, 0]]
+        arr = rewrite_blocks(out, edit)
+        if forgery.startswith("reordered"):
+            rows = [json.loads(x) for x in (out / "audit.jsonl").read_text().splitlines()]
+            rows[0]["sessions"], rows[1]["sessions"] = rows[1]["sessions"], rows[0]["sessions"]
+            (out / "audit.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+        lad = json.loads((out / "ladder.json").read_text())
+        lad["data_admission"]["packed_content_sha256"] = PP.packed_content_sha256(
+            arr["input_ids"], arr["ce_mask"], arr["content_mask"], n_train)
+        (out / "ladder.json").write_text(json.dumps(lad))
+        with pytest.raises(PP.PackBuildError, match=why):
+            PP.verify_pack(out)

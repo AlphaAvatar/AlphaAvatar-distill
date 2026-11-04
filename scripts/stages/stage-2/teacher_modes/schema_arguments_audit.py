@@ -16,6 +16,13 @@ option 2 (WorkBench generated instances), counted at $0. Nothing enters the pool
 
 Reach is a PRIOR, not a measurement: candidates x the pool screens' pass share x (1 - (1 - p)^2) (two candidates) x
 tokens per item, at three levels of the per-attempt pass rate p; the L40S pilot measures p.
+
+After option 1 was implemented (maintainer 2026-11-04, review of 647eea0e: ``single_step_gold_tool_call@v1``),
+``--supply-pool`` audits the dry pool that holds the single-step tasks against the dry pool before them (`supply`):
+
+    PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_arguments_audit \
+        --supply-pool <scratch>/tool_pool_dry_v4 --before-pool <scratch>/tool_pool_dry_v3 \
+        --write logs/stages/stage-2/teacher_modes/audit/single_step_supply_audit.json
 """
 from __future__ import annotations
 
@@ -34,6 +41,7 @@ for _p in ("src", "scripts", "scripts/stages/stage-1"):
         sys.path.insert(0, str(REPO / _p))
 
 SHORTFALL = REPO / "logs/stages/stage-2/teacher_modes/audit/schema_arguments_shortfall.json"
+OPTIONS = REPO / "logs/stages/stage-2/teacher_modes/audit/schema_arguments_options.json"
 POOL_AUDIT = REPO / "logs/stages/stage-2/teacher_modes/audit/tool_pool_dry_run_v3.json"
 TOKENIZER = REPO / "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72"
 WORKBENCH_COMMIT = "49c7dfd00c03d384ec59ea57374f50b766aa5613"
@@ -148,12 +156,96 @@ def build(pivot: Path, wb: Path) -> dict:
             "option_2_workbench": workbench(wb), "authorizes": "nothing"}
 
 
+def supply(pool: Path, before: Path, plan: dict) -> dict:
+    """The single-step implementation's $0 supply audit (maintainer 2026-11-04, review of 647eea0e, item 4): the dry
+    pool with the single-step tasks (schema v4) against the dry pool before them (v3) -- every earlier task's
+    admission, split and relative order -- the schema_arguments supply per split and shape, the plan's
+    schema_arguments cells, and the reach at the pass-rate priors (still priors: the pilot measures them)."""
+    from stages.teacher_modes import tool_episodes as TE
+    from stages.teacher_modes import tool_pool as TP
+    man, splits = TP.load_pool(Path(pool))
+    old = json.loads((Path(before) / "pool.json").read_text())
+    tasks = {t["task_id"]: t for rows in splits.values() for t in rows}
+    old_split = {t: s for s, order in old["orders"].items() for t in order}
+    full = {t for t, x in tasks.items() if TE.episode_shape(x) == TE.FULL_EPISODE}
+    stability = {"earlier_tasks": len(old_split), "still_admitted": len(set(old_split) & full),
+                 "no_longer_admitted": sorted(set(old_split) - full)[:20],
+                 "newly_admitted_full_episodes": sorted(full - set(old_split))[:20],
+                 "split_moved": sorted(t for t in set(old_split) & full if tasks[t]["split"] != old_split[t])[:20],
+                 "relative_order_unchanged": {s: [t for t in man["orders"][s] if t in full] == [
+                     t for t in old["orders"].get(s, []) if t in full] for s in man["orders"]},
+                 "single_steps_after_every_full_episode": {s: all(
+                     TE.episode_shape(tasks[a]) == TE.FULL_EPISODE or TE.episode_shape(tasks[b]) == TE.SINGLE_STEP
+                     for a, b in zip(o, o[1:])) for s, o in man["orders"].items()}}
+    single_ex = Counter(f"{TP.reason_class(e['reason'])} | {e['split']}" for e in man["excluded"]
+                        if e.get("episode_shape") == TE.SINGLE_STEP)
+    sup = {s: {sh: sum(1 for t in rows if t["category"] == "schema_arguments" and TE.episode_shape(t) == sh)
+               for sh in TE.EPISODE_SHAPES} for s, rows in sorted(splits.items())}
+    tokens = json.loads(OPTIONS.read_text())["option_1_call_only"]["call_turn_tokens_non_thinking"][
+        "schema_arguments"]["mean"]
+    today = json.loads(SHORTFALL.read_text())["reach_under_the_plan_priors"]
+    reach = {}
+    for s in ("training", "calibration", "state_eval"):
+        n = sup.get(s, {}).get(TE.SINGLE_STEP, 0)
+        add = {lvl: round(n * (1 - (1 - p) ** 2) * tokens) for lvl, p in PASS.items()}
+        base = today[f"H-N/{s}"]
+        reach[f"H-N/{s}"] = {"target": base["target"], "full_episodes": base["reachable"], "single_steps_added": add,
+                             "total": {lvl: base["reachable"][lvl] + add[lvl] for lvl in PASS},
+                             "pass_rate_needed_for_the_target": _needed(base["target"], base["reachable"], n, tokens)}
+    cells = {}
+    for li, v in plan["lineages"].items():
+        for mode, m in v["modes"].items():
+            for c in m["cells"]:
+                if c["category"] != "schema_arguments":
+                    continue
+                order = [t for t in man["orders"].get(c["split"], []) if tasks[t]["category"] == "schema_arguments"]
+                n_full = sum(TE.episode_shape(tasks[t]) == TE.FULL_EPISODE for t in order)
+                cells[f"{li}/{mode}/{c['split']}"] = {
+                    "target": c["target"], "unit": c["unit"], "supply": c["supply"], "full_episodes": n_full,
+                    "tasks": c["tasks"], "bound": c["bound"],
+                    "expected_prefix_reaches_single_steps": c["tasks"]["expected"] > n_full,
+                    "shortfall_at_pessimistic_yield": c["shortfall_at_pessimistic_yield"]}
+    return {"schema": "aadistill.stage2.teacher_modes.single_step_supply_audit/v1",
+            "question": "maintainer 2026-11-04 (review of 647eea0e), item 4: the single-step gold tool call's $0 "
+                        "implementation -- the candidate pool, the generation plan, every split's and category's "
+                        "supply rebuilt; nothing generated, no SHORTFALL approved",
+            "pool": {"dir": "<scratch>/tool_pool_dry_v4", "schema": man["schema"], "content_sha256": man["content_sha256"],
+                     "census": man["census"], "episode_shapes": man["episode_shapes"]},
+            "before": {"dir": "<scratch>/tool_pool_dry_v3", "content_sha256": old["content_sha256"]},
+            "earlier_tasks": stability, "single_step_tasks_excluded_by_the_pool": dict(single_ex.most_common()),
+            "schema_arguments_supply": sup, "plan_cells": cells,
+            "reach_non_thinking": {"basis": f"full episodes: schema_arguments_shortfall.json's plan priors; single "
+                                            f"steps: admitted tasks x (1 - (1 - p)^2) x {tokens} tokens (the gold "
+                                            "call's mean non-thinking length in the hybrid's tokenizer); p a PRIOR",
+                                   "pass_rate_priors": PASS, **reach},
+            "authorizes": "nothing"}
+
+
+def _needed(target: float, full: dict, n: int, tokens: float) -> float | None:
+    """The per-attempt pass rate at which the expected full-episode reach plus the single steps reach the target."""
+    rest = target - full["expected"]
+    if rest <= 0:
+        return 0.0
+    if not n:
+        return None
+    a = rest / (n * tokens)
+    return round(1 - (1 - a) ** 0.5, 3) if a < 1 else None
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--pivot", required=True)
-    ap.add_argument("--workbench", required=True)
+    ap.add_argument("--pivot", default=None)
+    ap.add_argument("--workbench", default=None)
     ap.add_argument("--write", required=True)
+    ap.add_argument("--supply-pool", default=None, help="the dry pool with single-step tasks (schema v4)")
+    ap.add_argument("--before-pool", default=None, help="the dry pool before them (schema v3)")
     a = ap.parse_args(argv)
+    if a.supply_pool:
+        from stages.teacher_modes import tool_generation_plan as TGP
+        doc = supply(Path(a.supply_pool), Path(a.before_pool), TGP.build(Path(a.supply_pool)))
+        Path(a.write).write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({k: doc[k] for k in ("schema_arguments_supply", "reach_non_thinking")}, indent=1))
+        return 0
     doc = build(Path(a.pivot), Path(a.workbench))
     old = json.loads(Path(a.write).read_text()) if Path(a.write).is_file() else {}
     doc["analysis"] = old.get("analysis")                    #: the written comparison, kept across regeneration

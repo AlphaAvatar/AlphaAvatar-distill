@@ -339,7 +339,7 @@ class TestSixTypePacks:
         monkeypatch.setattr(TGP, "for_consumers", lambda **k: (plan, {"training": order,
                                                                       "validation": ["tc1-v0", "tc1-v1"]}))
         design = json.loads(PP.DESIGN.read_text())
-        design["stage3_packing"]["sequence_length"] = 64
+        design["stage3_packing"]["sequence_length"] = 128      #: every document fits, as every admitted one does
         (tmp_path / "design.json").write_text(json.dumps(design))
         monkeypatch.setattr(PP, "DESIGN", tmp_path / "design.json")
         tm, six = json.loads(PP.TOKEN_MATCHED.read_text()), json.loads(PP.SIX.read_text())  #: C1's numbers, scaled
@@ -454,4 +454,39 @@ class TestPivot:
         assert t["source"]["verification"]["levels"] == ["protocol", "schema_validity", "recorded_execution",
                                                          "step_gold"]
         assert audit["skipped"] == {"no first-step row (system and user only) for turn 1": 1,
-                                    "a gold call without a recorded output": 1}
+                                    "first gold call without a recorded output, not structured (a tool_selection "
+                                    "decision step: outside the approved single-step scope)": 1}
+
+    def test_a_structured_unanswered_first_call_becomes_a_single_step_task_only(self, tmp_path):
+        """Conversational only, a structured first call only (schema_arguments), the same context, the first call
+        as the only gold, no backend; an answered first call with an unanswered later one stays skipped."""
+        from stages.teacher_modes import tool_episodes as TE
+        from stages.teacher_modes import tool_sources_pivot as PV
+        sys_, user = {"role": "system", "content": "policy"}, {"role": "user", "content": "find A1, two of them"}
+        structured = {"type": "function_call", "name": "lookup", "arguments": json.dumps({"id": "A1", "n": 2})}
+        plain = {"type": "function_call", "name": "lookup", "arguments": json.dumps({"id": "B2"})}
+        fc = {"type": "function_call", "name": "lookup", "arguments": json.dumps({"id": "B2"}), "call_id": "c1"}
+        out = {"type": "function_call_output", "call_id": "c1", "output": "found"}
+        rows = [self.row(7, 0, [sys_, user], structured, conv=True),                       # -> single step
+                self.row(7, 1, [sys_, user, {**structured, "call_id": "c7"}], {"type": "message", "content": "x"},
+                         conv=True),                                                       # its call never answered
+                self.row(8, 0, [sys_, user], plain, conv=True),                            # answered first call ...
+                self.row(8, 1, [sys_, user, fc, out], structured, conv=True)]              # ... later one is not
+        path = tmp_path / "train.jsonl"
+        path.write_text("".join(json.dumps(r) + "\n" for r in rows))
+        tasks, audit = PV.convert(path, "conversational")
+        (t,) = tasks
+        assert t["episode_shape"] == TE.SINGLE_STEP and t["category"] == "schema_arguments"
+        assert t["task_id"] == TE.task_id_of(*PV.DATASETS["conversational"], "7", "turn1-step1")
+        assert t["gold_steps"] == [[[{"name": "lookup", "arguments": {"id": "A1", "n": 2}}]]] and t["max_turns"] == 1
+        assert t["backend"] == {"kind": "none"} and t["messages"] == [{"role": "user", "content": user["content"]}]
+        assert t["source"]["verification"] == {"levels": ["protocol", "schema_validity", "step_gold"],
+                                               "step_gold": True, "recorded_execution": None,
+                                               "task_success_verifier": None}
+        assert TE.task_problems({**t, "split": "training"}) == []
+        assert audit["episode_shapes"] == {TE.SINGLE_STEP: 1}
+        assert audit["skipped"] == {"a gold call without a recorded output": 1}
+        fc_rows = [self.row(9, 1, [sys_, user], structured)]                                # Function-Calling
+        path.write_text("".join(json.dumps(r) + "\n" for r in fc_rows))
+        tasks, audit = PV.convert(path, "function_calling")
+        assert tasks == [] and audit["skipped"] == {"a gold call without a recorded output": 1}
