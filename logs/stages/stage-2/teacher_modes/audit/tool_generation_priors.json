@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.tool_generation_priors/v1",
- "written_utc": "2026-11-04T18:38:32Z",
+ "written_utc": "2026-11-05T06:24:04Z",
  "measured_by": {
   "run_id": "a_tool_pilot_20261104_164531",
   "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
@@ -490,6 +490,222 @@
    "generated_tokens_per_attempted_task": 1047.9,
    "prompt_tokens_per_turn": 1332.4,
    "turns_per_candidate": 1.429
+  },
+  "thinking_2507|T2507|training|error_recovery|full_episode@v1": {
+   "attempted": 39,
+   "admitted": 11,
+   "second_candidate_rate": 0.7949,
+   "units": 45631.0,
+   "units_per_admitted": 4148.27,
+   "admission_yield": 0.2821,
+   "admission_yield_wilson90": [
+    0.1807,
+    0.4117
+   ],
+   "units_per_attempted_task": [
+    749.61,
+    1170.026,
+    1707.751
+   ],
+   "generated_tokens_per_attempted_task": 5635.8,
+   "prompt_tokens_per_turn": 2101.9,
+   "turns_per_candidate": 1.914
+  },
+  "thinking_2507|T2507|training|mcp_agent|full_episode@v1": {
+   "attempted": 86,
+   "admitted": 16,
+   "second_candidate_rate": 0.8372,
+   "units": 48874.0,
+   "units_per_admitted": 3054.62,
+   "admission_yield": 0.186,
+   "admission_yield_wilson90": [
+    0.127,
+    0.2643
+   ],
+   "units_per_attempted_task": [
+    387.901,
+    568.302,
+    807.207
+   ],
+   "generated_tokens_per_attempted_task": 4778.7,
+   "prompt_tokens_per_turn": 1952.5,
+   "turns_per_candidate": 1.563
+  },
+  "thinking_2507|T2507|training|multi_turn|full_episode@v1": {
+   "attempted": 64,
+   "admitted": 20,
+   "second_candidate_rate": 0.7344,
+   "units": 113880.0,
+   "units_per_admitted": 5694.0,
+   "admission_yield": 0.3125,
+   "admission_yield_wilson90": [
+    0.2264,
+    0.4138
+   ],
+   "units_per_attempted_task": [
+    1289.377,
+    1779.375,
+    2355.982
+   ],
+   "generated_tokens_per_attempted_task": 5630.0,
+   "prompt_tokens_per_turn": 1656.3,
+   "turns_per_candidate": 2.523
+  },
+  "thinking_2507|T2507|training|multiple_parallel|full_episode@v1": {
+   "attempted": 116,
+   "admitted": 63,
+   "second_candidate_rate": 0.4828,
+   "units": 123617.0,
+   "units_per_admitted": 1962.17,
+   "admission_yield": 0.5431,
+   "admission_yield_wilson90": [
+    0.4669,
+    0.6173
+   ],
+   "units_per_attempted_task": [
+    916.156,
+    1065.664,
+    1211.316
+   ],
+   "generated_tokens_per_attempted_task": 3381.0,
+   "prompt_tokens_per_turn": 1788.3,
+   "turns_per_candidate": 1.581
+  },
+  "thinking_2507|T2507|training|no_tool|full_episode@v1": {
+   "attempted": 168,
+   "admitted": 151,
+   "second_candidate_rate": 0.125,
+   "units": 100510.0,
+   "units_per_admitted": 665.63,
+   "admission_yield": 0.8988,
+   "admission_yield_wilson90": [
+    0.854,
+    0.931
+   ],
+   "units_per_attempted_task": [
+    568.446,
+    598.274,
+    619.687
+   ],
+   "generated_tokens_per_attempted_task": 845.1,
+   "prompt_tokens_per_turn": 1512.2,
+   "turns_per_candidate": 1.0
+  },
+  "thinking_2507|T2507|training|schema_arguments|full_episode@v1": {
+   "attempted": 136,
+   "admitted": 39,
+   "second_candidate_rate": 0.8015,
+   "units": 75152.0,
+   "units_per_admitted": 1926.97,
+   "admission_yield": 0.2868,
+   "admission_yield_wilson90": [
+    0.2276,
+    0.3542
+   ],
+   "units_per_attempted_task": [
+    438.624,
+    552.588,
+    682.583
+   ],
+   "generated_tokens_per_attempted_task": 3063.7,
+   "prompt_tokens_per_turn": 3458.9,
+   "turns_per_candidate": 1.282
+  },
+  "thinking_2507|T2507|training|tool_selection|full_episode@v1": {
+   "attempted": 126,
+   "admitted": 76,
+   "second_candidate_rate": 0.4286,
+   "units": 106617.0,
+   "units_per_admitted": 1402.86,
+   "admission_yield": 0.6032,
+   "admission_yield_wilson90": [
+    0.53,
+    0.672
+   ],
+   "units_per_attempted_task": [
+    743.566,
+    846.167,
+    942.682
+   ],
+   "generated_tokens_per_attempted_task": 2390.3,
+   "prompt_tokens_per_turn": 1356.4,
+   "turns_per_candidate": 1.478
+  },
+  "thinking_2507|T2507|validation|error_recovery|full_episode@v1": {
+   "attempted": 1,
+   "admitted": 0,
+   "second_candidate_rate": 1.0,
+   "units": 0.0,
+   "units_per_admitted": "UNMEASURED",
+   "admission_yield": 0.0,
+   "admission_yield_wilson90": [
+    0.0,
+    0.7301
+   ],
+   "units_per_attempted_task": "UNMEASURED",
+   "generated_tokens_per_attempted_task": 4582.0,
+   "prompt_tokens_per_turn": 5450.0,
+   "turns_per_candidate": 1.0
+  },
+  "thinking_2507|T2507|validation|mcp_agent|full_episode@v1": {
+   "attempted": 3,
+   "admitted": 1,
+   "second_candidate_rate": 0.6667,
+   "units": 2186.0,
+   "units_per_admitted": 2186.0,
+   "admission_yield": 0.3333,
+   "admission_yield_wilson90": [
+    0.0783,
+    0.7465
+   ],
+   "units_per_attempted_task": [
+    171.083,
+    728.667,
+    1631.792
+   ],
+   "generated_tokens_per_attempted_task": 3795.0,
+   "prompt_tokens_per_turn": 2024.3,
+   "turns_per_candidate": 1.4
+  },
+  "thinking_2507|T2507|validation|no_tool|full_episode@v1": {
+   "attempted": 9,
+   "admitted": 8,
+   "second_candidate_rate": 0.1111,
+   "units": 4039.0,
+   "units_per_admitted": 504.88,
+   "admission_yield": 0.8889,
+   "admission_yield_wilson90": [
+    0.6232,
+    0.9748
+   ],
+   "units_per_attempted_task": [
+    314.633,
+    448.778,
+    492.157
+   ],
+   "generated_tokens_per_attempted_task": 720.1,
+   "prompt_tokens_per_turn": 2602.9,
+   "turns_per_candidate": 1.0
+  },
+  "thinking_2507|T2507|validation|tool_selection|full_episode@v1": {
+   "attempted": 5,
+   "admitted": 5,
+   "second_candidate_rate": 0.2,
+   "units": 10120.0,
+   "units_per_admitted": 2024.0,
+   "admission_yield": 1.0,
+   "admission_yield_wilson90": [
+    0.6489,
+    1.0
+   ],
+   "units_per_attempted_task": [
+    1313.314,
+    2024.0,
+    2024.0
+   ],
+   "generated_tokens_per_attempted_task": 2333.0,
+   "prompt_tokens_per_turn": 573.2,
+   "turns_per_candidate": 2.0
   }
  },
  "throughput": {
@@ -544,14 +760,74 @@
     "first": 14.7,
     "later": 14.6
    }
+  },
+  "T2507": {
+   "invocations": [
+    {
+     "label": "admission_T2507_pass0",
+     "wall_seconds": 241.7,
+     "engine_start_seconds": 157.9,
+     "output_tokens": 13272,
+     "generation_seconds": 64.9,
+     "output_tokens_per_second": 204.5
+    },
+    {
+     "label": "tool_T2507_r1_pass0",
+     "wall_seconds": 1223.3,
+     "engine_start_seconds": 21.7,
+     "output_tokens": 1239677,
+     "generation_seconds": 1184.9,
+     "output_tokens_per_second": 1046.2
+    },
+    {
+     "label": "tool_T2507_r1_pass1",
+     "wall_seconds": 899.2,
+     "engine_start_seconds": 20.3,
+     "output_tokens": 748132,
+     "generation_seconds": 863.4,
+     "output_tokens_per_second": 866.5
+    },
+    {
+     "label": "tool_T2507_r2_pass0",
+     "wall_seconds": 292.4,
+     "engine_start_seconds": 20.5,
+     "output_tokens": 156270,
+     "generation_seconds": 256.3,
+     "output_tokens_per_second": 609.7
+    },
+    {
+     "label": "tool_T2507_r2_pass1",
+     "wall_seconds": 263.0,
+     "engine_start_seconds": 20.9,
+     "output_tokens": 133118,
+     "generation_seconds": 226.7,
+     "output_tokens_per_second": 587.2
+    }
+   ],
+   "output_tokens_per_second": 882.2,
+   "slowest_invocation_tokens_per_second": 204.5,
+   "engine_start_seconds": {
+    "first": 157.9,
+    "later": 21.7
+   }
   }
  },
  "unmeasured": {
-  "lineages": [
-   "thinking_2507"
-  ],
-  "hybrid": "every stratum not listed: the validation split, and calibration / state evaluation in every category but schema_arguments"
+  "lineages": [],
+  "hybrid": "every stratum not listed: the validation split, and calibration / state evaluation in every category but schema_arguments",
+  "thinking_2507": "every stratum not listed (its session generated training and validation only)"
  },
  "interval": "Wilson 90% on the admission proportion x the measured units per admitted episode",
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "measured_by_lineage": {
+  "thinking_2507": {
+   "run_id": "a_tool_generation_t2507_20261104_195411",
+   "import_record_session_plan_sha256": "2e98393062814b205e90681882720a14036bd31da3d198ba38deb64615ca368f",
+   "pool_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+   "identity": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+   "verification_version": "tool_verification@v2",
+   "lineage": "thinking_2507",
+   "import_record": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json"
+  }
+ }
 }

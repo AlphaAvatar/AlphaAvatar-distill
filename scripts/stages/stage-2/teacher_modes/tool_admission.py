@@ -138,10 +138,10 @@ def episodes_from_store(store: Path, identity: str, mode: str) -> list[dict]:
 
 
 def episodes_from_import(record: dict, store: Path, mode: str) -> list[dict]:
-    """Every candidate the import record (`tool_generation_import`) lists for ``mode``, read from the pilot's own
-    secured shards: each shard must hash to the record's sha256, each record must be sealed under the record's pilot
-    identity (`generation_driver.sealed`) -- the same episodes the pilot sealed, with their candidate index, never
-    re-sealed under the formal identity."""
+    """Every candidate the import record (`tool_generation_import`) lists for ``mode``, read from the source's own
+    secured shards (the pilot's, or an earlier formal session's): each shard must hash to the record's sha256, each
+    record must be sealed under the record's identity (`generation_driver.sealed`) -- the same episodes the source
+    sealed, with their candidate index, never re-sealed under another identity."""
     from stages.reasoning_data import generation_driver as GD
     tasks = ((record.get("modes") or {}).get(mode) or {}).get("tasks") or {}
     want: dict[str, dict[int, dict]] = defaultdict(dict)
@@ -154,7 +154,7 @@ def episodes_from_import(record: dict, store: Path, mode: str) -> list[dict]:
     out = []
     for label in sorted(want):
         k = int(label.rsplit("_pass", 1)[1])
-        sealed = GD.sealed(Path(store), label, record["pilot_identity"])
+        sealed = GD.sealed(Path(store), label, record.get("identity") or record["pilot_identity"])
         for tid, t in tasks.items():
             if any(c["label"] == label for c in t["candidates"]):
                 if tid not in sealed:
@@ -171,9 +171,9 @@ def main(argv=None) -> int:
     ap.add_argument("--episodes", default=None, help="run_battery records (jsonl)")
     ap.add_argument("--store", default=None, help="a tool_session.py store (sealed shards), with --identity")
     ap.add_argument("--identity", default=None)
-    ap.add_argument("--import-record", default=None, help="tool_generation_import.py's record: its candidates are read "
-                    "from --import-store beside the formal store's")
-    ap.add_argument("--import-store", default=None, help="the pilot's secured shards the import record names")
+    ap.add_argument("--import-record", action="append", default=[], help="tool_generation_import.py's record: its "
+                    "candidates are read from the matching --import-store beside the formal store's (repeatable)")
+    ap.add_argument("--import-store", action="append", default=[], help="the secured shards the import record names")
     ap.add_argument("--mode", default=None, choices=sorted(MODES))
     ap.add_argument("--stop-ids", default="151645,151643")
     ap.add_argument("--out", default=None)
@@ -202,8 +202,10 @@ def main(argv=None) -> int:
         raise SystemExit("--episodes, --store or --import-record is required")
     else:
         eps = []
-    if a.import_record:
-        imp = episodes_from_import(json.loads(Path(a.import_record).read_text()), Path(a.import_store), a.mode)
+    if len(a.import_record) != len(a.import_store):
+        raise SystemExit("each --import-record needs its --import-store")
+    for rec_path, store in zip(a.import_record, a.import_store):
+        imp = episodes_from_import(json.loads(Path(rec_path).read_text()), Path(store), a.mode)
         both = {e["task_id"] for e in eps} & {e["task_id"] for e in imp}
         if both:
             raise SystemExit(f"{len(both)} task(s) generated again although imported, e.g. {sorted(both)[:3]}")

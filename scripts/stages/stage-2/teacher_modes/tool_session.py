@@ -21,6 +21,12 @@ and a cell short at either is recorded as SHORTFALL. `generation_driver.run_grou
 identity-bound shards, and a replacement session recomputes every round from them, so nothing finished is
 regenerated and the stopping state comes from the volume. Nothing here admits data: the dev box does
 (`tool_admission.py`) from the sealed shards.
+
+With ``--deadline-minutes`` (the launch's driver minutes: the budget boundary the hard cap pays for) a round starts
+only when the time left still holds the longest round so far, so a session stops at a ROUND boundary: every task it
+attempted is done (both candidates where the first was refused), and a later plan imports it whole
+(`tool_generation_import.build_session`). A cell short at its bound, its rounds or the deadline is reported as such
+(``shortfall``), never as an exhausted source unless its whole supply was attempted.
 """
 from __future__ import annotations
 
@@ -120,12 +126,17 @@ def units(task: dict, turns: list, unit: str, *, mode: str, thinking: bool, stop
 def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict, man: dict, out: Path,
                   identity: str, run, mark, *, cells: list[dict] | None = None, orders: list | None = None,
                   max_rounds: int | None = None, label_prefix: str = "tool", telemetry: Path | None = None,
-                  extra_args: tuple[str, ...] = (), imported: dict | None = None) -> dict:
+                  extra_args: tuple[str, ...] = (), imported: dict | None = None, deadline: float | None = None,
+                  first_round_free: bool = True, on_invocation=None) -> dict:
     """Every cell of one mode, round by round, to its target or its bound; returns the cells' final states. A pilot
     passes its frozen ``cells`` and ``orders`` (`tool_pilot.cells`), one round and its own label prefix; with
     ``telemetry`` every engine invocation appends its GPU and engine telemetry there (`tool_pilot`). ``imported``
     (`tool_generation_import.outcomes`): tasks already DONE in this mode -- each cell starts from their units and
-    admissions, and its rounds walk the frozen order without them, so none is attempted or re-sampled again."""
+    admissions, and its rounds walk the frozen order without them, so none is attempted or re-sampled again.
+    ``deadline`` (epoch seconds): a round after the first starts only if the time left holds the longest round so far;
+    a later mode's first round (``first_round_free`` False) only before the deadline.
+    ``on_invocation(label, group, telemetry_row, records)`` runs after every engine invocation (the device
+    confirmation); what it raises ends the session."""
     from stages.reasoning_data import generation_driver as GD
     bp, ex = proto["bounded_plan"], proto["execution"]
     cand, stop_ids = int(ex["candidates"]), [int(x) for x in ex["stop_ids"]]
@@ -147,12 +158,19 @@ def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict,
                       "imported": len(mine)})
         orders[i] = [t for t in orders[i] if t["task_id"] not in done]
     c, groups = context(proto, lineage, identity), []
+    longest, stopped = 0.0, None
     for r in range(1, int(max_rounds or bp["rounds"]["max_rounds"]) + 1):
         picks = [TGP.round_tasks(cell, orders[i], state[i], r, bp=bp, mode=mode, candidates=cand)
                  for i, cell in enumerate(cells)]
         ids = [t for p in picks for t in p]
         if not ids:
             break
+        if deadline is not None and (r > 1 or not first_round_free) and time.time() + longest > deadline:
+            stopped = {"round": r, "tasks_not_started": len(ids), "seconds_left": round(deadline - time.time(), 1),
+                       "longest_round_seconds": round(longest, 1)}
+            mark(f"DEADLINE_STOP:{label_prefix}_{mode}_r{r}")
+            break
+        r0 = time.time()
         if len(set(ids)) != len(ids):
             raise PlanError(f"round {r}: a task picked by two cells")
         label = f"{label_prefix}_{mode}_r{r}"
@@ -168,8 +186,10 @@ def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict,
                                  extra_args=mode_args(proto, lineage, mode) + tuple(extra_args))
             recs = g.pop("records")
             groups.append(g)
-            if telemetry is not None:
-                _telemetry(telemetry, out, f"{label}_pass{k}", g, gpu, time.time() - t0, recs)
+            row = _telemetry(telemetry, out, f"{label}_pass{k}", g, gpu, time.time() - t0, recs) \
+                if telemetry is not None else None
+            if on_invocation is not None:
+                on_invocation(f"{label}_pass{k}", g, row, recs)
             if not g["complete"]:
                 mark(f"{GD.UNIT_FAILED}:{label}_pass{k}")
                 return {"complete": False, "groups": groups, "cells": _report(cells, state)}
@@ -187,8 +207,10 @@ def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict,
             state[i]["attempted"] += len(p)              #: new tasks only; ``imported`` holds the rest
             state[i]["units"] += sum(admitted.get(t, 0.0) for t in p)
             state[i]["admitted"] += sum(t in admitted for t in p)
+        longest = max(longest, time.time() - r0)
         mark(f"ROUND_DONE:{label}")
-    return {"complete": True, "groups": groups, "cells": _report(cells, state)}
+    return {"complete": True, "groups": groups, "cells": _report(cells, state, orders, stopped),
+            **({"deadline_stop": stopped} if stopped else {})}
 
 
 def _gpu(telemetry: Path | None):
@@ -214,12 +236,22 @@ def _telemetry(path: Path, out: Path, label: str, g: dict, gpu, seconds: float, 
     return row
 
 
-def _report(cells: list[dict], state: list[dict]) -> list[dict]:
+def _report(cells: list[dict], state: list[dict], orders: list | None = None, stopped: dict | None = None) -> list[dict]:
+    """Each cell's final state; a SHORTFALL says what it is short of (``shortfall``): ``source_exhausted`` (every
+    remaining task of its supply attempted), ``bound`` (its bound attempted, supply left), ``deadline`` (the session
+    stopped at its budget boundary) or ``rounds`` (out of rounds below its bound)."""
     out = []
-    for cell, s in zip(cells, state):
+    for i, (cell, s) in enumerate(zip(cells, state)):
         done = s["units"] >= cell["target"] and s["admitted"] >= cell.get("min_tasks", 0)
-        out.append({k: cell[k] for k in ("split", "category", "unit", "target", "bound")} |
-                   {**s, "status": "REACHED" if done else "SHORTFALL"})
+        row = {k: cell[k] for k in ("split", "category", "unit", "target", "bound")} | \
+            {**s, "status": "REACHED" if done else "SHORTFALL"}
+        if not done:
+            left = len(orders[i]) - s["attempted"] if orders is not None else None
+            supply = cell.get("new_supply")
+            row["shortfall"] = ("source_exhausted" if supply is not None and s["attempted"] >= supply else
+                                "bound" if left is not None and s["attempted"] >= min(int(cell["bound"]), len(orders[i]))
+                                else "deadline" if stopped else "rounds")
+        out.append(row)
     return out
 
 
@@ -383,6 +415,70 @@ def run_device_admission(proto: dict, plan: dict, lineage: str, by_id: dict, out
     return rec
 
 
+def registered_device_admission(cfg: dict, proto: dict, lineage: str) -> dict | None:
+    """The device admission a session may REUSE instead of sampling its own (maintainer 2026-11-05, review of f06ccd4,
+    section 1): ``cfg["registered_result"]`` names a committed admitted result whose teacher, revision, vLLM pin, session
+    limit and memory fraction are this protocol's and this record's. None when there is none or it does not match."""
+    ref = cfg.get("registered_result")
+    if not ref:
+        return None
+    p = REPO / ref["path"]
+    if not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest() != ref["sha256"]:
+        return None
+    res = json.loads(p.read_text())
+    ident, li = res.get("runner_identity") or {}, proto["lineages"][lineage]
+    same = (res.get("admitted") is True and res.get("lineage") == lineage
+            and (ident.get("model"), ident.get("revision")) == (li["model"], li["revision"]) == (cfg["teacher"]["model"],
+                                                                                              cfg["teacher"]["revision"])
+            and (ident.get("engine") or {}).get("vllm_version") == pinned_vllm() == cfg["engine"]["vllm_version"]
+            and ident.get("session_limit") == proto["execution"]["session_limit"]
+            and ident.get("chat_template_sha256") == cfg["teacher"]["chat_template_sha256"])
+    return res if same else None
+
+
+def device_confirmation(proto: dict, lineage: str, out: Path, mark):
+    """``(record, on_invocation)``: the new pod's own confirmation that the registered admission holds on it, without
+    the admission's sampling -- the teacher snapshot's files by sha256 BEFORE any invocation (a mismatch refuses), then
+    `device_verdict` over the FIRST formal invocation's own evidence (runner identity, engine start and KV cache, no
+    out-of-memory, completion, memory margin). A failed verdict ends the session after that invocation; the record
+    says so, and its shards are not imported (`device_confirmation.json` :: admitted false)."""
+    cfg = json.loads(DEVICE_ADMISSION[lineage].read_text())
+    li = proto["lineages"][lineage]
+    mode = sorted(li["modes"])[0]
+    t0 = time.time()
+    files = teacher_files(cfg["teacher"], snapshot_dir(li["model"], li["revision"]))
+    rec = {"schema": "aadistill.stage2.teacher_modes.device_confirmation/v1", "lineage": lineage, "mode": mode,
+           "reuses": cfg["registered_result"], "teacher_files": files,
+           "teacher_files_seconds": round(time.time() - t0, 1), "admitted": None}
+    path = out / "device_confirmation.json"
+    if files.get("differ"):
+        rec.update(admitted=False, failed=["teacher_files"])
+        path.write_text(json.dumps(rec, indent=1, default=str) + "\n")
+        mark("DEVICE_CONFIRMATION_FAILED")
+        raise DeviceAdmissionRefused(f"the teacher snapshot is not the admitted one: {files['differ']}")
+    free_wanted = float(json.loads(L40S_CHECK_CONFIG.read_text())["free_memory_wanted_gib"])
+
+    def on_invocation(label, g, row, recs):
+        if rec["admitted"] is not None:
+            return
+        segs = [x["segment"] for x in g.get("segments") or [] if "segment" in x]
+        summ = [out / f"{label}.seg{n}.raw.summary.json" for n in segs]
+        ident = next((json.loads(q.read_text()).get("identity") or {} for q in summ if q.is_file()), {})
+        logs = "".join((out / f"{label}.seg{n}.log").read_text(errors="ignore")
+                       for n in segs if (out / f"{label}.seg{n}.log").is_file())
+        v = device_verdict(cfg, proto, lineage, mode, identity=ident, engine=(row or {}).get("engine") or [],
+                           gpu=(row or {}).get("gpu"), complete=bool(g.get("complete")),
+                           turns=sum(len(r.get("turns") or []) for r in recs.values()), log_text=logs, files=files,
+                           free_wanted_gib=free_wanted, vllm_pin=pinned_vllm())
+        rec.update(invocation=label, runner_identity=ident, **v)
+        path.write_text(json.dumps(rec, indent=1, default=str) + "\n")
+        mark("DEVICE_CONFIRMATION_OK" if v["admitted"] else "DEVICE_CONFIRMATION_FAILED")
+        if not v["admitted"]:
+            raise DeviceAdmissionRefused(f"the device confirmation failed on {label}: {v['failed']}")
+    path.write_text(json.dumps(rec, indent=1, default=str) + "\n")
+    return rec, on_invocation
+
+
 class _Done(Exception):
     def __init__(self, ok: bool):
         super().__init__(ok)
@@ -481,7 +577,10 @@ def main(argv=None, *, run=None) -> int:
                     "it (its free space is checked before generating); none: the container disk's own free space")
     ap.add_argument("--resume-from", default=None, help="the dev box's receipted copy of earlier sessions' sealed "
                     "shards, staged on this pod")
+    ap.add_argument("--deadline-minutes", type=float, default=None, help="the driver's budget boundary: no round "
+                    "starts that the time left cannot hold (generate_mode)")
     a = ap.parse_args(argv)
+    deadline = time.time() + 60 * a.deadline_minutes if a.deadline_minutes else None
     if bool(a.pilot) != bool(a.pilot_tasks):
         ap.error("--pilot and --pilot-tasks go together")
     if a.pilot and a.lineage != "hybrid":
@@ -496,7 +595,7 @@ def main(argv=None, *, run=None) -> int:
             fh.write(f"{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())} MARKER:{m}\n")
         print(f"MARKER:{m}", flush=True)
 
-    ok = True
+    ok, conf = True, None
     try:
         from stages.reasoning_data import generation_driver as GD
         from stages.teacher_modes import token_matched_phase as TM
@@ -515,18 +614,26 @@ def main(argv=None, *, run=None) -> int:
         record.update(plan_pool_content_sha256=plan["pool"]["content_sha256"], tasks_readable=len(by_id))
         if a.resume_from:
             record["resumed_from"] = bring_sealed(Path(a.resume_from), out, prefix="tool")
-        if plan.get("import"):                  #: the cells carry the imported outcomes (the plan binds the record)
-            record["imported_from"] = plan["import"]
+        if plan.get("imports"):                 #: the cells carry the imported outcomes (the plan binds the records)
+            record["imported_from"] = plan["imports"]
+        record["deadline_minutes"] = a.deadline_minutes
         mark("CONTRACT_OK")
-        if a.lineage in DEVICE_ADMISSION:      #: no committed L40S record measured this teacher: measure it first
-            adm = run_device_admission(proto, plan, a.lineage, by_id, out, bound["identity"], run or GD.run_battery,
-                                       mark)
-            record["device_admission"] = {k: adm[k] for k in ("admitted", "failed", "tasks")}
+        confirm = None
+        if a.lineage in DEVICE_ADMISSION and not a.pilot:      #: the lineage's teacher has no committed L40S check record
+            cfg = json.loads(DEVICE_ADMISSION[a.lineage].read_text())
+            if registered_device_admission(cfg, proto, a.lineage):       #: reuse it; this pod confirms it on its run
+                conf, confirm = device_confirmation(proto, a.lineage, out, mark)
+                record["device_confirmation"] = {"reuses": conf["reuses"], "teacher_files": not conf["teacher_files"].get("differ")}
+            else:                              #: measure it first
+                adm = run_device_admission(proto, plan, a.lineage, by_id, out, bound["identity"],
+                                           run or GD.run_battery, mark)
+                record["device_admission"] = {k: adm[k] for k in ("admitted", "failed", "tasks")}
         record["modes"] = {}
-        for mode in sorted(proto["lineages"][a.lineage]["modes"]):
+        for i, mode in enumerate(sorted(proto["lineages"][a.lineage]["modes"])):
             res = generate_mode(proto, plan, a.lineage, mode, by_id, man, out, bound["identity"],
                                 run or GD.run_battery, mark, telemetry=out / "telemetry.jsonl",
-                                extra_args=("--engine-metrics",))
+                                extra_args=("--engine-metrics",), deadline=deadline, first_round_free=i == 0,
+                                on_invocation=confirm)
             record["modes"][mode] = res
             if not res["complete"]:
                 ok = False
@@ -536,6 +643,9 @@ def main(argv=None, *, run=None) -> int:
     except BaseException as exc:  # noqa: BLE001
         ok = False
         record["error"] = {"error": repr(exc)[:2000], "traceback": traceback.format_exc()[-6000:]}
+    if conf is not None:                       #: the confirmation's verdict as the first formal invocation left it
+        record["device_confirmation"].update(admitted=conf.get("admitted"), failed=conf.get("failed"),
+                                             invocation=conf.get("invocation"))
     record.update(finished_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                   terminal="ALL_DONE" if ok else "RUN_FAILED")
     (out / "tool_session.json").write_text(json.dumps(record, indent=1, default=str) + "\n")

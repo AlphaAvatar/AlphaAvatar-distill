@@ -15,7 +15,8 @@
   "search": 41.41,
   "train_a1": 14.1,
   "tool_pilot": 2.5,
-  "tool_generation_t2507": 2.78
+  "tool_generation_t2507": 2.78,
+  "tool_generation": 9.13
  },
  "project_cumulative_cap_usd": 868.0,
  "gpus": {
@@ -39,7 +40,7 @@
    "created_utc": "2026-11-01T12:55:01Z"
   }
  },
- "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them || AMENDED 2026-11-04: the L40S tool pilot -- kind tool_pilot through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --pilot) on the frozen pilot plan 0a1c831fdfe4... and task file e67e8acb7050..., measurement only, one L40S on am5m373kuq, hard cap $2.50, inside this grant's remaining envelope || AMENDED 2026-11-04: the tool pilot's placement -- any Secure Cloud datacenter offering one L40S at or below the grant's price, no network volume (the pod's container disk, sealed shards pulled to the dev box and resumed from them); its $2.50 kind cap cumulative over every attempt || AMENDED 2026-11-04 (maintainer review of a143b7ed, section 4): Thinking-2507's formal tool generation -- kind tool_generation_t2507 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --lineage thinking_2507) on the canonical bounded plan, its in-session L40S device admission first, one L40S on the container disk with no network volume, cumulative hard cap $2.78",
+ "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them || AMENDED 2026-11-04: the L40S tool pilot -- kind tool_pilot through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --pilot) on the frozen pilot plan 0a1c831fdfe4... and task file e67e8acb7050..., measurement only, one L40S on am5m373kuq, hard cap $2.50, inside this grant's remaining envelope || AMENDED 2026-11-04: the tool pilot's placement -- any Secure Cloud datacenter offering one L40S at or below the grant's price, no network volume (the pod's container disk, sealed shards pulled to the dev box and resumed from them); its $2.50 kind cap cumulative over every attempt || AMENDED 2026-11-04 (maintainer review of a143b7ed, section 4): Thinking-2507's formal tool generation -- kind tool_generation_t2507 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --lineage thinking_2507) on the canonical bounded plan, its in-session L40S device admission first, one L40S on the container disk with no network volume, cumulative hard cap $2.78 || AMENDED 2026-11-05 (maintainer review of f06ccd4, sections 1, 3 and 4): Thinking-2507's top-up to the common-support targets inside the same cumulative $2.78, its registered device admission reused with the pod's own confirmation; and the hybrid's formal tool generation -- kind tool_generation through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --lineage hybrid) on the plan rebuilt at six_category_common_support@v1, one L40S on the container disk with no network volume, cumulative hard cap $9.13",
  "retries": "ordinary pre-generation engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); sealed records are never regenerated; a deterministic failure is never retried unchanged",
  "application": {
   "path": "logs/budget/applications/research_a_tm_2026-10-31/proposal.json"
@@ -50,8 +51,8 @@
   "Research A v1's frozen identity or grant as authority for any of this",
   "Research B"
  ],
- "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind; and tool_pilot artifacts, one per attempt, measurement only, together capped by the kind's cumulative $2.50; and tool_generation_t2507 artifacts, one per attempt, together capped by the kind's cumulative $2.78 (its device admission and formal generation only)",
- "_session_hard_caps": "supplement 0: done, closed for new work. inputs: the calibration top-up and the state evaluation's generation ($2.65). search: the hybrid D4 full search ($41.41). train_a1: A1's two seeds trained and evaluated in turn ($7.05 each). A retry of a kind draws on the same envelope; the phase total never exceeds the ceiling.",
+ "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind; and tool_pilot artifacts, one per attempt, measurement only, together capped by the kind's cumulative $2.50; and tool_generation_t2507 artifacts, one per attempt, together capped by the kind's cumulative $2.78 (its device admission and formal generation only); and tool_generation artifacts, one per attempt, together capped by the kind's cumulative $9.13 (the hybrid's formal generation only)",
+ "_session_hard_caps": "supplement 0: done, closed for new work. inputs: the calibration top-up and the state evaluation's generation ($2.65). search: the hybrid D4 full search ($41.41). train_a1: A1's two seeds trained and evaluated in turn ($7.05 each). A retry of a kind draws on the same envelope; the phase total never exceeds the ceiling. tool_pilot: the pilot ($2.50 cumulative). tool_generation_t2507: Thinking-2507's device admission, formal generation and top-up ($2.78 cumulative). tool_generation: the hybrid's formal generation at the common-support composition ($9.13 cumulative).",
  "phase_a1": {
   "decided_utc": "2026-11-01",
   "hard_cap_usd": 77.0,
@@ -130,6 +131,21 @@
    "previous_scope_sha256": "63574c1e5035eeba58e7ab4819170d9beb7b53229954ced9445aa3ac2b7d4f73",
    "added": "kind tool_generation_t2507 ($2.78 cumulative) and its block",
    "unchanged": "ceiling, per-session cap, project cap, cards and price, every other kind's cap; the hybrid's tool_generation is NOT authorized"
+  },
+  {
+   "utc": "2026-11-05",
+   "by": "maintainer independent review of f06ccd4 (2026-11-05), sections 1, 3 and 4",
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1,
+    "tool_pilot": 2.5,
+    "tool_generation_t2507": 2.78
+   },
+   "previous_scope_sha256": "69d7250b52d5d193113cfbeab45fa0433c76c3a98c825ef09318cb6f3380267c",
+   "added": "kind tool_generation ($9.13 cumulative) and its block; tool_generation_t2507.top_up (inside the unchanged cumulative $2.78)",
+   "unchanged": "ceiling, per-session cap, project cap, cards and price, every other kind's cap"
   }
  ],
  "tool_pilot": {
@@ -198,7 +214,7 @@
   "requires": [
    "the formal source admission signed and naming the plan's pool content (tool_source_admission.problems)",
    "the bounded plan verified against the canonical pool at issue (tool_generation_plan.verified) and its bound task file on the pod (verified_bound)",
-   "the in-session device admission passing before any formal invocation (tool_session.run_device_admission)",
+   "the in-session device admission passing before any formal invocation (tool_session.run_device_admission), or -- from 2026-11-05 -- its registered result reused with the pod's own confirmation (tool_session.device_confirmation)",
    "issue, launch and pod checks as for every container kind"
   ],
   "card_rule": "the L40S only; an A100 needs a measured CUDA out-of-memory on the L40S and a separate authorization -- stock or environment problems are never a reason",
@@ -207,6 +223,58 @@
    "the hybrid's tool_generation (its grant is deferred until the A2 design and the state-evaluation coverage plan are settled; at least $8.48 then)",
    "C1-6cat's training or any search",
    "an A100 without a measured OOM"
+  ],
+  "top_up": {
+   "decision": "maintainer 2026-11-05 (independent review of f06ccd4), rulings 1-2 and sections 1 and 3: the completed device admission and formal generation accepted; the two SHORTFALLs not approved; '授权继续在原 tool_generation_t2507 累计 $2.78 硬上限内完成补数。先核对两次历史 attempt 的全部已发生费用和未入账部分，并使用真实剩余额度，不重置累计上限' and '相同 Teacher、revision、引擎依赖和合规 GPU 环境下，可以复用已登记的设备适配证据；新 Pod 仍须实际确认能加载和运行，不必无意义地重复完整的八任务准入采样'",
+   "date": "2026-11-05",
+   "targets": "the common-support training targets (six_category_common_support.json): error_recovery 56,565.5 and mcp_agent 84,848.3 supervised tokens; every other cell already reached",
+   "spent_before_usd": {
+    "a_tool_generation_t2507_20261104_194048": 0.1459,
+    "a_tool_generation_t2507_20261104_195411": 1.097,
+    "provider_posted_2026_11_05": {
+     "t9mu5mwk20uchj": 0.1417,
+     "0lbf43rtt6yn2a": 1.0943
+    },
+    "ledger_rule": "the closeout all-in estimates (higher than the posted amounts) stay the booked spend"
+   },
+   "remaining_usd": 1.5371,
+   "device_admission": "reused from configs/stages/stage-2/teacher_modes/t2507_device_admission.json :: registered_result; the new pod hashes the teacher snapshot first and confirms on its first formal invocation (tool_session.device_confirmation)"
+  }
+ },
+ "tool_generation": {
+  "approves": "tool_generation formal hybrid generation, six_category_common_support@v1",
+  "granted_by": "maintainer",
+  "decision": "maintainer 2026-11-05 (independent review of f06ccd4), ruling 5 and section 4, 'Hybrid 正式生成': '批准按 common-support 新设计完成 Hybrid 的正式数据生成，预计 $2.65。runner 的实际 all-in 硬上限为 $9.127，Grant 取向上取整的 $9.13。此金额是本次 kind 所有 attempt 的累计新增上限，不是每次失败后可以重置的额度。... 全部通过后在累计 $9.13 内直接完成正式生成；库存拒绝、普通工程故障和中断按既有自主恢复原则处理。不得每个小问题都停下等待新的授权。' -- generation only; not Full Search, Stage 3 training, formal benchmark evaluation or a merge into main",
+  "date": "2026-11-05",
+  "hard_cap_usd": 9.13,
+  "cap_is_cumulative": true,
+  "_hard_cap": "the runner's all-in for the hybrid session at the common-support targets ($9.127 at $1.19/h in the design record six_category_common_support.json :: price) rounded UP to the cent; cumulative over every attempt of the kind (token_matched_phase.kind_cap_problems); the session's driver deadline is its launch minutes, so it stops at a round boundary inside that cap",
+  "gpu": "NVIDIA L40S",
+  "placement": {
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "network_volume": null,
+   "data_centers": "any Secure Cloud datacenter offering the L40S at or below the grant's price",
+   "work_root": "/workspace",
+   "storage": "the pod's container disk; sealed shards pulled to the dev box on every poll and staged back to a replacement pod (--resume-from); no network volume"
+  },
+  "network_volume": null,
+  "source_admission": "logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json",
+  "ceiling_usd_at_amendment": 79.5289,
+  "kind": "tool_generation (teacher_generation only: the hybrid's bounded tool-calling episodes in both modes for A1-6cat-cs and A2-6cat-cs, and its calibration, state-evaluation and validation tool items; never training, search or formal evaluation)",
+  "requires": [
+   "the formal source admission signed and naming the plan's pool content (tool_source_admission.problems)",
+   "the plan rebuilt at the registered common-support training composition (six_category_common_support.json), bound to the pilot's and Thinking-2507's import records, verified against the canonical pool at issue (tool_generation_plan.verified) and its bound task file on the pod (verified_bound)",
+   "the generation-scoped L40S gate (the committed L40S measurement of the hybrid's engine)",
+   "issue, launch and pod checks as for every container kind"
+  ],
+  "card_rule": "the L40S only; an A100 needs a measured CUDA out-of-memory on the L40S and a separate authorization -- stock or environment problems are never a reason",
+  "attempts": "each attempt a new run and a new one-use artifact, all inside the cumulative $9.13; an ordinary pre-science failure is repaired and retried without a new decision; sealed episodes are never regenerated (resume or import)",
+  "never": [
+   "Packed Full Search, Stage 3 training, formal benchmark evaluation, a merge into main",
+   "an A100 without a measured L40S out-of-memory and a separate authorization",
+   "a reset or increase of the cumulative cap"
   ]
  }
 }

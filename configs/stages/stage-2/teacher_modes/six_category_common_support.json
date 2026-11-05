@@ -1,0 +1,145 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.six_category_common_support_config/v1",
+ "id": "six_category_common_support@v1",
+ "status": "REGISTERED",
+ "registered_by": "maintainer 2026-11-05 (independent review of f06ccd4), ruling 3 and section 2: '原则批准 six_category_common_support@v1，作为独立的新研究设计，不替代注册的 A1/A2/C1-6cat' ... '接受 six_category_common_support@v1 作为新的实验身份，三个 arm 为 A1-6cat-cs、A2-6cat-cs、C1-6cat-cs'",
+ "registered_utc": "2026-11-05",
+ "design_record": {
+  "path": "logs/stages/stage-2/teacher_modes/audit/six_category_common_support.json",
+  "sha256": "ed764a1ad7744349ee3187fa315291e3962910ecb51f206e13dfa827b4f86769"
+ },
+ "registered_identity_kept": "configs/stages/stage-2/teacher_modes/six_category_design.json (A1-6cat / A2-6cat / C1-6cat) is unchanged and is not replaced; no result of this identity is a result of that one, and the two are never pooled",
+ "research_question": "A teacher-mode distillation comparison matched on unique supervised-token budget and category composition: with one hybrid teacher (Qwen/Qwen3-4B), does its thinking mode (A1-6cat-cs) or its non-thinking mode (A2-6cat-cs) give the better student when both arms train on the same unique supervised tokens with the same category composition -- the composition both modes can supply (common support)? It is NOT a compute-matched comparison.",
+ "secondary_comparison": "A1-6cat-cs vs C1-6cat-cs (hybrid thinking vs Thinking-2507, the same composition), each lineage end to end (P17.1); a secondary comparison only, with a stated confounder: C1's initialization search protocol differs from A1's",
+ "arms": {
+  "A1-6cat-cs": {
+   "lineage": "hybrid",
+   "mode": "H-T",
+   "teacher": "hybrid thinking mode"
+  },
+  "A2-6cat-cs": {
+   "lineage": "hybrid",
+   "mode": "H-N",
+   "teacher": "hybrid non-thinking mode"
+  },
+  "C1-6cat-cs": {
+   "lineage": "thinking_2507",
+   "mode": "T2507",
+   "teacher": "Thinking-2507"
+  }
+ },
+ "seeds": [
+  20260726,
+  20260801
+ ],
+ "matched": [
+  "each arm's total unique supervised tokens before packing (A arms 5,923,021; C1 its registered total)",
+  "the six supporting types at 1/6 each and the fluid category, cells and shares as registered",
+  "the tool type's internal category composition, identical in every arm (tool_calling below)"
+ ],
+ "controls_unchanged": [
+  "one teacher lineage per arm end to end (P17.1); each teacher's official template and preset",
+  "the pool tool_pool@v1 (content be4652d7...), its splits and frozen orders, tool_verification@v2 and every admission rule",
+  "selection: each arm's own admitted episodes, whole, in the pool's frozen order up to each category's target (tool_generation_plan.select); never by observed quality",
+  "Stage 3: random shuffle, sequential packing with truncation, standard causal attention (P19); counted before packing; the registered recipe, loss and schedule rule",
+  "validation, calibration and state-evaluation splits, their targets and verification as registered (the composition below applies to the TRAINING split only)"
+ ],
+ "tool_calling": {
+  "applies_to": "the training split of every arm; calibration and state evaluation keep six_category_design.json's registered shares",
+  "categories": {
+   "error_recovery": {
+    "share": 0.114834,
+    "registered_share": 0.1
+   },
+   "mcp_agent": {
+    "share": 0.17225,
+    "registered_share": 0.15
+   },
+   "multi_turn": {
+    "share": 0.229667,
+    "registered_share": 0.2
+   },
+   "multiple_parallel": {
+    "share": 0.17225,
+    "registered_share": 0.15
+   },
+   "no_tool": {
+    "share": 0.114834,
+    "registered_share": 0.1
+   },
+   "schema_arguments": {
+    "share": 0.023915,
+    "registered_share": 0.15
+   },
+   "tool_selection": {
+    "share": 0.17225,
+    "registered_share": 0.15
+   }
+  },
+  "schema_arguments_quota_tokens": 11800.0,
+  "quota_rule": "the non-thinking training schema_arguments cell's projected LOWER bound (Wilson 90% x measured units per admitted episode over its whole supply) rounded DOWN to a hundred: 11,800 of the A arms' 493,417.83 tool-type tokens (share 0.023915); C1 the same share of its 492,587 (11,780.1); the six other categories keep their registered proportions and share the rest",
+  "quota_is_not_a_supply_guarantee": "11,800 is the low end of a statistical projection, not a guaranteed supply; when the verified supply is short, the fallback below -- registered before this generation -- applies"
+ },
+ "fallback": {
+  "registered_before": "the hybrid formal tool_generation and the Thinking-2507 top-up of 2026-11-05 (this file is bound by both sessions' plan)",
+  "reads_only": "verified teacher data supply: admitted episodes and their unique supervised tokens under tool_verification@v2 (the dev box's tool_admission census). Never a student, search, training or evaluation result",
+  "rules": [
+   {
+    "case": "the non-thinking training schema_arguments cell's whole remaining compliant supply attempted (two candidates per task) and its admitted supervised tokens S below 11,800",
+    "then": "the common-support quota becomes Q = S rounded DOWN to a hundred; its share Q / 493,417.83 in every arm (C1: the same share of 492,587); the six other categories rescaled to the remainder in their registered proportions"
+   },
+   {
+    "case": "any other training cell of any arm short of its target after its whole compliant supply was attempted",
+    "then": "that category's share becomes the smallest over the three arms of (its verified admitted tokens / that arm's tool-type total), rounded down to a hundred A-arm tokens; the others rescaled in their registered proportions; the same composition in every arm"
+   },
+   {
+    "case": "a cell short with compliant supply remaining (its bound, its rounds or the budget boundary reached)",
+    "then": "NOT a fallback case: a SHORTFALL reported to the maintainer; a top-up continues from the frozen order (new tasks only) inside the cumulative budget, or the maintainer decides"
+   }
+  ],
+  "never": "duplication, relabelling, another split, a loss weight, regeneration of a sealed task, or any rule chosen after seeing a student result"
+ },
+ "whole_supply_cells": [
+  {
+   "lineage": "hybrid",
+   "mode": "H-N",
+   "split": "training",
+   "category": "schema_arguments",
+   "why": "its target is the lower projection of its whole supply: its bound is its whole remaining compliant supply, so a shortfall there is a measured exhaustion, never a bound artefact"
+  }
+ ],
+ "freeze": {
+  "when": "after the generation ends and before any search or training reads the data",
+  "frozen": [
+   "each arm's final unique supervised tokens before packing, in total and per category",
+   "the realized proportions and each category's deviation from its target",
+   "the selected documents and episode identities (task id, candidate, shard sha256, content sha256)",
+   "the training input (the admitted documents in their frozen order) and its content identity"
+  ],
+  "reported_per_arm": [
+   "selected examples and turns",
+   "whole-episode overshoot per category (selected minus target)",
+   "unique supervised tokens before packing",
+   "per-category deviation from the target"
+  ],
+  "kept_unselected": "every admitted episode beyond a category's target stays in the records, unused: never regenerated, never borrowed across splits",
+  "matched_means": "the category targets and the token budget, not identical tasks: each arm selects its own teacher's admitted episodes"
+ },
+ "recorded_beside_every_result": [
+  "packed sequences",
+  "optimizer steps",
+  "non-padding tokens",
+  "supervised-token exposure (unique supervised tokens x epochs, plus repeated fragments)",
+  "training FLOPs"
+ ],
+ "why_recorded": "equal supervised tokens are not equal compute: the non-thinking arm's turns carry far more context per supervised token",
+ "no_new_student_controls": "maintainer 2026-11-05: no additional Student training control is required in this round",
+ "interpretation_limits": [
+  "a result of six_category_common_support@v1, never of the registered six-category identity, never pooled with it, and never described as the registered equal-proportion, equal-token A1/A2 comparison",
+  "argument construction (schema_arguments) carries about 2.4% of the tool type instead of 15% in every arm: the contrast says less about schema-heavy tool use, and nothing about the registered composition",
+  "the composition is supply-conditioned: it was chosen because the non-thinking teacher's verified output on this pool is short -- a property of the data, fixed before generation, not of any training or evaluation outcome",
+  "tool-calling and every other capability reported separately (P10.2, P10.3); eval-set-1 unchanged",
+  "two seeds per arm: differences below the seed-to-seed variance are not findings"
+ ],
+ "authorizes": "nothing by itself: generation runs under the grant's tool_generation and tool_generation_t2507 scopes; search, training and evaluation need their own decisions"
+}

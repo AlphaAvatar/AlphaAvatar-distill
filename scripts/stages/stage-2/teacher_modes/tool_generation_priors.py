@@ -20,8 +20,13 @@ measured over its SEALED episodes (their v2 verdicts re-derived by `tool_pilot._
   included, which is what the price pays for.
 
 ``throughput`` is per mode and engine invocation: output tokens over generation seconds and the engine's start time.
-Nothing here is a benchmark score, and nothing measured here stands for another lineage: Thinking-2507 has no
-measured stratum.
+Nothing here is a benchmark score, and nothing measured here stands for another lineage.
+
+Thinking-2507's strata (``--add-import``; maintainer 2026-11-05, review of f06ccd4, section 3) are measured the same
+way from its completed formal session through that session's import record (`tool_generation_import.build_session`):
+every task it attempted, its candidates' outcomes as the record re-derived them, and the turns of the sealed shards
+the record names. They are added beside the pilot's strata, which stay as they are, so the plan's bounds for that
+lineage rest on what that teacher measured instead of the protocol priors that overestimated its per-task yield.
 """
 from __future__ import annotations
 
@@ -96,6 +101,21 @@ def measure(session_dirs, *, plan_path: Path = TPL.PLAN, tasks_path: Path = TPL.
                         a["turns"] += 1
                         a["generated_tokens"] += int(t.get("generated_tokens") or 0)
                         a["prompt_tokens"] += int(t.get("prompt_tokens") or 0)
+    strata = _strata(acc)
+    return {"schema": SCHEMA, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "measured_by": {"run_id": "a_tool_pilot_20261104_164531", "pilot_plan_sha256": TPL.sha(plan_path),
+                            "pool_content_sha256": doc["source"]["pool_content_sha256"],
+                            "tasks_sha256": doc["tasks_file"]["sha256"], "pilot_identity": identity,
+                            "verification_version": TE.VERIFICATION_VERSION, "lineage": lineage},
+            "strata": strata, "throughput": throughput(dirs),
+            "unmeasured": {"lineages": ["thinking_2507"],
+                           "hybrid": "every stratum not listed: the validation split, and calibration / state "
+                                     "evaluation in every category but schema_arguments"},
+            "interval": "Wilson 90% on the admission proportion x the measured units per admitted episode",
+            "authorizes": "nothing"}
+
+
+def _strata(acc: dict) -> dict:
     strata = {}
     for key, a in sorted(acc.items()):
         n, k = a["attempted"], a["admitted"]
@@ -110,17 +130,59 @@ def measure(session_dirs, *, plan_path: Path = TPL.PLAN, tasks_path: Path = TPL.
             "generated_tokens_per_attempted_task": round(a["generated_tokens"] / n, 1) if n else None,
             "prompt_tokens_per_turn": round(a["prompt_tokens"] / a["turns"], 1) if a["turns"] else None,
             "turns_per_candidate": round(a["turns"] / a["candidates"], 3) if a["candidates"] else None}
-    return {"schema": SCHEMA, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "measured_by": {"run_id": "a_tool_pilot_20261104_164531", "pilot_plan_sha256": TPL.sha(plan_path),
-                            "pool_content_sha256": doc["source"]["pool_content_sha256"],
-                            "tasks_sha256": doc["tasks_file"]["sha256"], "pilot_identity": identity,
-                            "verification_version": TE.VERIFICATION_VERSION, "lineage": lineage},
-            "strata": strata, "throughput": throughput(dirs),
-            "unmeasured": {"lineages": ["thinking_2507"],
-                           "hybrid": "every stratum not listed: the validation split, and calibration / state "
-                                     "evaluation in every category but schema_arguments"},
-            "interval": "Wilson 90% on the admission proportion x the measured units per admitted episode",
-            "authorizes": "nothing"}
+    return strata
+
+
+def measure_import(record: dict, store: Path) -> dict:
+    """``{"strata", "throughput", "measured_by"}`` of one formal session from its import record: per stratum of the
+    record's lineage, the tasks it lists (attempted), their final outcomes and units, and every listed candidate's
+    turns read from the sealed shard the record names (verified by sha256 and the session's identity)."""
+    from stages.reasoning_data import generation_driver as GD
+    lineage, identity, store = record["lineage"], record["identity"], Path(store)
+    acc = defaultdict(lambda: {"attempted": 0, "admitted": 0, "second": 0, "units": 0.0, "generated_tokens": 0,
+                               "prompt_tokens": 0, "turns": 0, "candidates": 0})
+    for mode, m in sorted(record["modes"].items()):
+        labels = sorted({c["label"] for t in m["tasks"].values() for c in t["candidates"]})
+        sealed = {lb: GD.sealed(store, lb, identity) for lb in labels}
+        for tid, t in m["tasks"].items():
+            a = acc[stratum_key(lineage, mode, t["split"], t["category"], t["shape"])]
+            a["attempted"] += 1
+            a["second"] += int(len(t["candidates"]) > 1)
+            if t["final"]["outcome"] == "admitted":
+                a["admitted"] += 1
+                a["units"] += float(t["final"]["units"])
+            for c in t["candidates"]:
+                if GD.sha(store / c["shard"]) != c["shard_sha256"]:
+                    raise SystemExit(f"{c['shard']}: not the shard the import record names")
+                a["candidates"] += 1
+                for turn in sealed[c["label"]][tid].get("turns") or []:
+                    a["turns"] += 1
+                    a["generated_tokens"] += int(turn.get("generated_tokens") or 0)
+                    a["prompt_tokens"] += int(turn.get("prompt_tokens") or 0)
+    return {"strata": _strata(acc), "throughput": throughput([store]),
+            "measured_by": {"run_id": record["run_id"], "import_record_session_plan_sha256": record["session_plan_sha256"],
+                            "pool_content_sha256": record["pool_content_sha256"], "identity": identity,
+                            "verification_version": record["verification_version"], "lineage": lineage}}
+
+
+def add_import(priors: dict, record: dict, store: Path, record_path: str) -> dict:
+    """``priors`` with one formal session's strata and throughput added (a lineage the priors do not measure yet);
+    every existing stratum and mode is kept as it is."""
+    got = measure_import(record, store)
+    clash = sorted(set(got["strata"]) & set(priors["strata"])) + sorted(set(got["throughput"]) & set(priors["throughput"]))
+    if clash:
+        raise SystemExit(f"already measured: {clash[:3]}")
+    out = dict(priors)
+    out["strata"] = {**priors["strata"], **got["strata"]}
+    out["throughput"] = {**priors["throughput"], **got["throughput"]}
+    out["measured_by_lineage"] = {**(priors.get("measured_by_lineage") or {}),
+                                  record["lineage"]: {**got["measured_by"], "import_record": record_path}}
+    un = dict(priors.get("unmeasured") or {})
+    un["lineages"] = [x for x in un.get("lineages") or [] if x != record["lineage"]]
+    un[record["lineage"]] = "every stratum not listed (its session generated training and validation only)"
+    out["unmeasured"] = un
+    out["written_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return out
 
 
 def throughput(dirs) -> dict:
@@ -155,10 +217,21 @@ def load(path: Path = PRIORS) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--session", action="append", required=True)
+    ap.add_argument("--session", action="append", default=[])
+    ap.add_argument("--add-import", default=None, help="a formal session's import record: its strata are added to "
+                    "--priors (with --import-store)")
+    ap.add_argument("--import-store", default=None)
+    ap.add_argument("--priors", default=str(PRIORS))
     ap.add_argument("--write", default=str(PRIORS))
     a = ap.parse_args(argv)
-    doc = measure([Path(x) for x in a.session])
+    if a.add_import:
+        rec = json.loads(Path(a.add_import).read_text())
+        rel = Path(a.add_import).resolve().relative_to(REPO).as_posix()
+        doc = add_import(load(Path(a.priors)), rec, Path(a.import_store), rel)
+    elif a.session:
+        doc = measure([Path(x) for x in a.session])
+    else:
+        ap.error("--session or --add-import is required")
     Path(a.write).write_text(json.dumps(doc, indent=1) + "\n")
     print(json.dumps({k: {x: v[x] for x in ("attempted", "admitted", "units_per_attempted_task")}
                       for k, v in doc["strata"].items()}, indent=1)[:6000])

@@ -41,7 +41,7 @@ def _priors(full=(5.0, 10.0, 20.0), single=(1.0, 2.0, 3.0)):
 
 
 def _imported(done):
-    return {"modes": {"H-N": {"tasks": {tid: {"split": "training", "category": "schema_arguments", "shape": TE.FULL_EPISODE,
+    return {"lineage": "hybrid", "modes": {"H-N": {"tasks": {tid: {"split": "training", "category": "schema_arguments", "shape": TE.FULL_EPISODE,
                                               "final": {"outcome": "admitted" if u else "rejected", "units": u}}
                                         for tid, u in done.items()}}}}
 

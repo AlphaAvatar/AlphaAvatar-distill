@@ -231,8 +231,12 @@ def test_the_packed_kinds_are_registered_and_refuse_without_a_grant_cap():
     from stages.teacher_modes import token_matched_phase as TM
     new = ("tool_generation", "tool_generation_t2507", "packed_search", "train_6cat_a1", "train_6cat_a2", "train_6cat_c1")
     assert set(new) <= set(TM.STUDY.kinds) and set(new) <= set(TM.DRIVERS) and set(new) <= set(TM.KIND_RECORDS)
+    granted = {"tool_generation": 9.13, "tool_generation_t2507": 2.78}  #: maintainer 2026-11-04 / 2026-11-05
     for k in new:
-        assert TM.kind_cap_problems(k, 1.0), k                      # the grant names no cap for any of them
+        if k in granted:
+            assert TM.kind_cap_problems(k, granted[k] + 0.01), k     # above the kind's cumulative cap
+        else:
+            assert TM.kind_cap_problems(k, 1.0), k                  # the grant names no cap for the others
         assert all(isinstance(r, str) for r in TM.KIND_RECORDS[k])
     assert TM.main(["issue", "--kind", "packed_search", "--run-id", "x", "--expected-usd", "1",
                     "--hard-cap-usd", "1", "--dry-run"]) == 11

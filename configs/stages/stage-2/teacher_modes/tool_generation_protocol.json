@@ -96,7 +96,7 @@
      "H-N": 493417.83,
      "T2507": 492587
     },
-    "by_category": "six_category_design.json :: tool_calling.categories[*].share (proposed, unchanged)",
+    "by_category": "six_category_common_support.json :: tool_calling.categories[*].share (the registered common-support composition, maintainer 2026-11-05; six_category_design.json's shares stay the registered identity's and split calibration and state evaluation)",
     "_": "each arm's sixth base-corpus type: 1/6 of A1-6cat's / A2-6cat's 2,960,507 base-category supervised tokens; C1-6cat's registered 492,587"
    },
    "validation": {
@@ -159,15 +159,19 @@
   },
   "rounds": {
    "first": "per cell the frozen-order prefix whose expected yield reaches the target",
-   "top_up": "ceil(remaining units / observed units per attempted task x top_up_margin); with nothing admitted yet, the pessimistic prefix of what is left",
+   "top_up": "ceil(remaining units / observed units per attempted task x top_up_margin); with nothing admitted yet, the pessimistic prefix of what is left; the LAST round (max_rounds) takes every task left within the bound",
    "top_up_margin": 1.1,
    "max_rounds": 4,
    "expected_rounds": {
     "lower": 1,
     "expected": 2
    },
-   "bound": "a cell never attempts more than the frozen-order prefix whose pessimistic yield (low tokens per turn, low pass rate) reaches its target, nor more than its supply; a cell still short at its bound or after max_rounds is a SHORTFALL",
-   "invocations": "one engine invocation per mode and round for the first candidates, one for the second candidates of the round's refused tasks"
+   "bound": "a cell never attempts more than the frozen-order prefix whose pessimistic yield (the lower end of its measured stratum, else the low tokens per turn and pass rate) reaches its target, nor more than its supply; a whole-supply cell (six_category_common_support.json :: whole_supply_cells) is bound by its whole remaining supply; a cell still short at its bound or after max_rounds is a SHORTFALL -- of its bound when supply remains (a top-up continues from the frozen order), of its source only when its whole supply was attempted",
+   "invocations": "one engine invocation per mode and round for the first candidates, one for the second candidates of the round's refused tasks",
+   "first_round_bound_lineages": [
+    "thinking_2507"
+   ],
+   "_first_round_bound_lineages": "a lineage whose remaining cumulative budget holds about ONE round takes its cells' bound in round 1 instead of the expected prefix (maintainer 2026-11-05, review of f06ccd4, section 3: Thinking-2507's top-up inside the real remainder of its $2.78, $1.5371 = about 22 driver minutes at $1.09/h; one round with its tail, rarely two). The bound is the prefix whose measured LOWER yield reaches the target, which the upper price already pays for; every task is a new one in the frozen order, and admitted episodes beyond a target stay unused (six_category_common_support.json :: freeze)"
   },
   "throughput": {
    "decode_tokens_per_s": {

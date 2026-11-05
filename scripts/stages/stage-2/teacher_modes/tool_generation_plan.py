@@ -8,17 +8,24 @@ Generation is bounded by what the arms consume, never by the pool's size. The te
 tool_generation_protocol.json :: bounded_plan:
 
 * cells -- per lineage, mode and split, one target in the unit its consumer counts BEFORE packing: training in unique
-  supervised tokens, split over the seven categories by six_category_design.json's shares (unchanged); calibration
-  and state evaluation in unique scored positions, by the same shares (state evaluation also >= 5 tasks per
-  category the split holds); validation as registered (the hybrid's 32 tasks, Thinking-2507's 12,624 supervised
-  tokens). A category that cannot reach its target is a SHORTFALL, never filled from another;
+  supervised tokens, split over the seven categories by the registered common-support composition
+  (six_category_common_support.json, maintainer 2026-11-05); calibration and state evaluation in unique scored
+  positions, by six_category_design.json's registered shares (state evaluation also >= 5 tasks per category the
+  split holds); validation as registered (the hybrid's 32 tasks, Thinking-2507's 12,624 supervised tokens). A
+  category that cannot reach its target is a SHORTFALL, never filled from another;
 * order -- each cell walks its split's frozen order (pool.json :: orders, verified by `tool_pool.load_pool`) filtered
   to its category, whole tasks only; every teacher walks the same order and stops at its own target;
 * rounds -- round 1 takes, per cell, the prefix whose EXPECTED yield reaches the target; each later round takes
-  ``ceil(remaining / observed yield per attempted task x 1.1)`` more; at most ``max_rounds``. Each round is one
-  engine invocation per mode for its first candidates and one for the second candidates of its refused tasks;
-* bound -- a cell never attempts more than the prefix whose PESSIMISTIC yield (the lower tokens per turn and pass
-  rate) reaches its target, nor more than its supply: that prefix is what the price's upper bound buys;
+  ``ceil(remaining / observed yield per attempted task x 1.1)`` more; the LAST round (``max_rounds``) takes every
+  task left within the bound, which the price's upper level already pays for. Each round is one engine invocation
+  per mode for its first candidates and one for the second candidates of its refused tasks;
+* bound -- a cell never attempts more than the prefix whose PESSIMISTIC yield (the lower end of its measured
+  stratum, else the lower protocol priors) reaches its target, nor more than its supply: that prefix is what the
+  price's upper bound buys. A whole-supply cell (six_category_common_support.json :: whole_supply_cells) is bound by
+  its whole remaining supply. A cell short at its bound with supply left is short of its BOUND, not of its source;
+* imports -- every sealed episode of an earlier session is reused through an import record
+  (`tool_generation_import`: the tool pilot's, and completed formal sessions'); a cell starts from their units and
+  its rounds walk the frozen order without the imported tasks;
 * yield -- a task's expected turns are its recorded steps plus one answer per user turn (a gold task: its gold
   steps); expected units per task = turns x tokens per turn (the mode's prior) x the probability that one of two
   candidates is admitted, ``1 - (1 - p)^2``;
@@ -52,6 +59,11 @@ PLAN = REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json
 #: measurement; its episodes are reused, never regenerated); a plan binds both by sha256
 PRIORS = REPO / "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json"
 IMPORT = REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json"
+#: every import record a plan binds, in order (maintainer 2026-11-05, review of f06ccd4, section 1): the pilot's, and
+#: Thinking-2507's completed formal session a_tool_generation_t2507_20261104_195411
+IMPORTS = (IMPORT, REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json")
+#: the registered training composition (six_category_common_support@v1, maintainer 2026-11-05)
+COMMON_SUPPORT = REPO / "configs/stages/stage-2/teacher_modes/six_category_common_support.json"
 #: the measured rate and the grant's per-GPU ceiling the price's upper level pays (USD per hour, one L40S)
 RATE_EXPECTED, RATE_UPPER = 1.09, 1.19
 
@@ -91,8 +103,10 @@ def prefix_reaching(tasks: Sequence[Mapping], target: float, unit: str, tpt: flo
     return len(tasks)
 
 
-def cell_targets(bp: Mapping, shares: Mapping[str, float], lineage: str, mode: str, splits: Sequence[str]) -> list[dict]:
-    """The lineage-mode's cells: ``{split, category, unit, target, min_tasks}``."""
+def cell_targets(bp: Mapping, shares: Mapping[str, float], lineage: str, mode: str, splits: Sequence[str],
+                 training_shares: Mapping[str, float] | None = None) -> list[dict]:
+    """The lineage-mode's cells: ``{split, category, unit, target, min_tasks}``; the training split is split by
+    ``training_shares`` when given (the registered common-support composition), every other split by ``shares``."""
     out = []
     tg = bp["targets"]
     for split in splits:
@@ -103,7 +117,7 @@ def cell_targets(bp: Mapping, shares: Mapping[str, float], lineage: str, mode: s
                         "min_tasks": 0})
             continue
         total = float(spec["per_mode"][mode])
-        for cat, share in sorted(shares.items()):
+        for cat, share in sorted((training_shares if split == "training" and training_shares else shares).items()):
             out.append({"split": split, "category": cat, "unit": spec["unit"], "target": total * share,
                         "min_tasks": int(spec.get("min_tasks_per_category", 0))})
     return out
@@ -163,20 +177,25 @@ STATUSES = ("REACHED", "REACHABLE", "SHORTFALL_EXHAUSTED", "SHORTFALL_PROJECTED"
 
 
 def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man: Mapping, by_id: Mapping,
-                  priors: Mapping | None = None, imported: Mapping | None = None) -> dict:
-    """One lineage's ``{mode: {"cells": [...]}}``. Per cell, apart: what is SEALED (the import record's episodes of
-    this cell, `tool_generation_import`), the WHOLE SUPPLY's projection (sealed + every remaining task at the
+                  priors: Mapping | None = None, imported: Sequence[Mapping] | Mapping | None = None, *,
+                  training_shares: Mapping[str, float] | None = None, whole_supply: Sequence[Mapping] = ()) -> dict:
+    """One lineage's ``{mode: {"cells": [...]}}``. Per cell, apart: what is SEALED (the import records' episodes of
+    this cell, `tool_generation_import.merged`), the WHOLE SUPPLY's projection (sealed + every remaining task at the
     measured, proxy or prior yield), what the BOUND buys (the remaining tasks the plan may attempt), and the share
     of that resting on UNMEASURED strata (a proxy or a prior); the round-1 prefix and the bound count NEW tasks only,
-    walked in the frozen order with the imported ones skipped."""
+    walked in the frozen order with the imported ones skipped. A ``whole_supply`` cell's bound is its whole remaining
+    supply."""
     from stages.teacher_modes import tool_episodes as TE
     from stages.teacher_modes import tool_generation_import as TGI
     li = proto["lineages"][lineage]
+    records = [imported] if isinstance(imported, Mapping) else list(imported or [])
+    wide = {(w["lineage"], w["mode"], w["split"], w["category"]) for w in whole_supply}
+    first_bound = lineage in (proto["bounded_plan"]["rounds"].get("first_round_bound_lineages") or [])
     modes = {}
     for mode in sorted(li["modes"]):
-        done = TGI.outcomes(imported, mode) if imported else {}
+        done = TGI.merged(records, lineage, mode)
         cells = []
-        for c in cell_targets(proto["bounded_plan"], shares, lineage, mode, li["splits"]):
+        for c in cell_targets(proto["bounded_plan"], shares, lineage, mode, li["splits"], training_shares):
             tasks = cell_order(man["orders"].get(c["split"], []), by_id, c["category"])
             mine = {t["task_id"]: done[t["task_id"]] for t in tasks if t["task_id"] in done}
             new = [t for t in tasks if t["task_id"] not in mine]
@@ -187,7 +206,8 @@ def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man
             tasks_at = {lvl: prefix_reaching_units([u[0][i] for u in per], rest)
                         for lvl, i in (("lower", 2), ("expected", 1), ("upper", 0))}
             admitted = sum(o["admitted"] for o in mine.values())
-            bound = min(len(new), max(tasks_at["upper"], max(0, c["min_tasks"] - admitted)))
+            whole_cell = (lineage, mode, c["split"], c["category"]) in wide
+            bound = len(new) if whole_cell else min(len(new), max(tasks_at["upper"], max(0, c["min_tasks"] - admitted)))
             whole = [round(sealed + sum(u[0][i] for u in per), 1) for i in (0, 1, 2)]
             in_bound = [round(sealed + sum(u[0][i] for u in per[:bound]), 1) for i in (0, 1, 2)]
             unmeasured = round(sum(u[0][1] for u in per[:bound] if u[1] != "measured"), 1)
@@ -205,7 +225,8 @@ def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man
             for t, u in zip(new, per):
                 basis.setdefault(f"{TE.episode_shape(t)}:{u[1]}", 0)
                 basis[f"{TE.episode_shape(t)}:{u[1]}"] += 1
-            cells.append({**c, "supply": len(tasks),
+            cells.append({**c, **({"whole_supply": True} if whole_cell else {}),
+                          **({"first_round": "bound"} if first_bound else {}), "supply": len(tasks),
                           "supply_by_shape": {sh: sum(TE.episode_shape(t) == sh for t in tasks)
                                               for sh in TE.EPISODE_SHAPES if any(TE.episode_shape(t) == sh for t in tasks)},
                           "sealed": {"tasks": len(mine), "admitted": admitted, "units": round(sealed, 1)},
@@ -227,6 +248,27 @@ def design_shares() -> dict[str, float]:
     return {k: float(v["share"]) for k, v in json.loads(SIX.read_text())["tool_calling"]["categories"].items()}
 
 
+def training_shares(path: Path = COMMON_SUPPORT) -> dict[str, float]:
+    """The registered training composition: six_category_common_support.json :: tool_calling.categories."""
+    return {k: float(v["share"]) for k, v in json.loads(Path(path).read_text())["tool_calling"]["categories"].items()}
+
+
+def whole_supply_cells(path: Path = COMMON_SUPPORT) -> list[dict]:
+    return [{k: w[k] for k in ("lineage", "mode", "split", "category")}
+            for w in json.loads(Path(path).read_text()).get("whole_supply_cells") or []]
+
+
+def import_records(pool_content_sha256: str, paths: Sequence[Path] = IMPORTS) -> list[tuple[Path, dict]]:
+    """``[(path, record)]`` of every import record that exists and belongs to this pool's content."""
+    out = []
+    for p in paths:
+        if Path(p).is_file():
+            r = json.loads(Path(p).read_text())
+            if r.get("pool_content_sha256") == pool_content_sha256:
+                out.append((Path(p), r))
+    return out
+
+
 def build(pool_dir: Path, *, protocol: Mapping | None = None) -> dict:
     from stages.teacher_modes import tool_pool as TP
     proto = protocol or json.loads(PROTOCOL.read_text())
@@ -236,21 +278,25 @@ def build(pool_dir: Path, *, protocol: Mapping | None = None) -> dict:
     by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
     #: the pilot's priors and import apply to the pool the pilot ran on, and to no other (a test pool, a rebuilt one)
     priors = json.loads(PRIORS.read_text()) if PRIORS.is_file() else None
-    imported = json.loads(IMPORT.read_text()) if IMPORT.is_file() else None
     if priors and (priors.get("measured_by") or {}).get("pool_content_sha256") != man["content_sha256"]:
         priors = None
-    if imported and imported.get("pool_content_sha256") != man["content_sha256"]:
-        imported = None
-    lineages = {li: {"modes": lineage_cells(proto, shares, li, man, by_id, priors, imported),
+    imports = import_records(man["content_sha256"])
+    tshares = training_shares() if COMMON_SUPPORT.is_file() else None
+    wide = whole_supply_cells() if COMMON_SUPPORT.is_file() else []
+    lineages = {li: {"modes": lineage_cells(proto, shares, li, man, by_id, priors, [r for _, r in imports],
+                                            training_shares=tshares, whole_supply=wide),
                      "splits": proto["lineages"][li]["splits"]} for li in sorted(proto["lineages"])}
     plan = {"schema": SCHEMA, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "pool": {"dir": str(Path(pool_dir)), "content_sha256": man["content_sha256"],
                      "pool_json_sha256": sha_file(Path(pool_dir) / "pool.json")},
             "protocol_sha256": sha_file(PROTOCOL), "six_category_design_sha256": sha_file(SIX),
             "shares": shares, "rules": bp["rounds"],
+            "common_support": ({"path": COMMON_SUPPORT.relative_to(REPO).as_posix(), "sha256": sha_file(COMMON_SUPPORT),
+                                "training_shares": tshares, "whole_supply_cells": wide} if tshares else None),
             "approved_shortfalls": list(bp.get("approved_shortfalls") or []),
             "priors": {"path": PRIORS.relative_to(REPO).as_posix(), "sha256": sha_file(PRIORS)} if priors else None,
-            "import": {"path": IMPORT.relative_to(REPO).as_posix(), "sha256": sha_file(IMPORT)} if imported else None,
+            "imports": [{"path": p.relative_to(REPO).as_posix(), "sha256": sha_file(p), "lineage": r["lineage"],
+                         "run_id": r["run_id"]} for p, r in imports],
             "lineages": lineages, "authorizes": "nothing"}
     plan["price"] = price_measured(plan, by_id, man, proto, priors) if priors else price(plan, by_id, man, proto)
     return plan
@@ -284,20 +330,27 @@ def verified(protocol: Mapping | None = None, pool_dir: Path | None = None, line
         bad.append("built under other category shares")
     if plan.get("approved_shortfalls") != list(proto["bounded_plan"].get("approved_shortfalls") or []):
         bad.append("its approved shortfalls are not the protocol's")
+    cs = plan.get("common_support")
+    if cs and (not (REPO / cs["path"]).is_file() or sha_file(REPO / cs["path"]) != cs["sha256"]
+               or cs["training_shares"] != training_shares(REPO / cs["path"])
+               or cs["whole_supply_cells"] != whole_supply_cells(REPO / cs["path"])):
+        bad.append("built under another common-support composition")
     bound_records = {}
-    for key in ("priors", "import"):
-        ref = plan.get(key)
+    refs = [("priors", plan.get("priors"))] + [("import", r) for r in plan.get("imports") or []]
+    for key, ref in refs:
         if ref:
             path = REPO / ref["path"]
             if not path.is_file() or sha_file(path) != ref["sha256"]:
                 bad.append(f"its {key} record {ref['path']} is not the one it was built with")
             else:
-                bound_records[key] = json.loads(path.read_text())
+                bound_records.setdefault(key, []).append(json.loads(path.read_text()))
     if not bad:
         by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
         for li in ([lineage] if lineage else sorted(proto["lineages"])):
-            now = lineage_cells(proto, plan["shares"], li, man, by_id, bound_records.get("priors"),
-                                bound_records.get("import"))
+            now = lineage_cells(proto, plan["shares"], li, man, by_id, (bound_records.get("priors") or [None])[0],
+                                bound_records.get("import") or [],
+                                training_shares=(cs or {}).get("training_shares"),
+                                whole_supply=(cs or {}).get("whole_supply_cells") or ())
             if json.dumps(now, sort_keys=True) != json.dumps((plan.get("lineages") or {}).get(li, {}).get("modes"),
                                                              sort_keys=True):
                 bad.append(f"its {li} cells are not the cells this pool, protocol and design produce")
@@ -347,6 +400,9 @@ def verified_bound(protocol: Mapping | None = None, lineage: str = "hybrid", pla
         bad.append("built under another protocol")
     if plan.get("six_category_design_sha256") != sha_file(SIX):
         bad.append("built under other category shares")
+    cs = plan.get("common_support")
+    if cs and (not (REPO / cs["path"]).is_file() or sha_file(REPO / cs["path"]) != cs["sha256"]):
+        bad.append("built under another common-support composition")
     tf = (plan.get("lineages", {}).get(lineage) or {}).get("tasks_file")
     if not tf:
         raise PlanIdentityError(f"the plan writes no task file for {lineage}")
@@ -486,13 +542,12 @@ def price_measured(plan: Mapping, by_id: Mapping, man: Mapping, proto: Mapping, 
             starts = 0.0
             for mode, m in li["modes"].items():
                 mode_tokens = 0.0
-                imported = set()
-                imp = plan.get("import")
-                if imp:
-                    from stages.teacher_modes import tool_generation_import as TGI
-                    imported = set(TGI.outcomes(json.loads((REPO / imp["path"]).read_text()), mode))
+                from stages.teacher_modes import tool_generation_import as TGI
+                imported = set(TGI.merged([json.loads((REPO / r["path"]).read_text()) for r in plan.get("imports") or []],
+                                          lineage, mode))
                 for c in m["cells"]:
-                    n = c["bound"] if count == "bound" else c["tasks"][count]
+                    n = c["bound"] if count == "bound" or (c.get("first_round") == "bound" and count != "lower") \
+                        else c["tasks"][count]
                     new = [t for t in cell_order(man["orders"].get(c["split"], []), by_id, c["category"])
                            if t["task_id"] not in imported][:n]
                     for t in new:
@@ -504,7 +559,8 @@ def price_measured(plan: Mapping, by_id: Mapping, man: Mapping, proto: Mapping, 
                     tps = float(t_m["slowest_invocation_tokens_per_second"] if lvl == "upper" else t_m["output_tokens_per_second"])
                     first = float(t_m["engine_start_seconds"]["first"] or 0)
                     later = float(t_m["engine_start_seconds"]["later"] or first)
-                    starts += (first if lvl == "upper" else later) * rounds * cand / 60
+                    #: a pod's first engine start compiles; its later starts reuse that cache (measured on one pod)
+                    starts += ((first + later * (rounds * cand - 1)) if lvl == "upper" else later * rounds * cand) / 60
                 else:
                     kind = "thinking" if mode in tp["thinking_modes"] else "non_thinking"
                     eff = tp["tool_workload_efficiency"][{"lower": 2, "expected": 1, "upper": 0}[lvl]]
@@ -580,8 +636,10 @@ def round_tasks(cell: Mapping, order_tasks: Sequence[Mapping], state: Mapping, r
     room = min(int(cell["bound"]), len(order_tasks)) - attempted
     if done or room <= 0:
         return []
+    if round_no == int(bp["rounds"]["max_rounds"]) and round_no > 1:
+        return [t["task_id"] for t in order_tasks[attempted:attempted + room]]   #: the last round: the whole bound
     if round_no == 1:
-        n = int(cell["tasks"]["expected"])
+        n = int(cell["bound"]) if cell.get("first_round") == "bound" else int(cell["tasks"]["expected"])
     else:
         rest = order_tasks[attempted:]
         if units > 0 and seen:

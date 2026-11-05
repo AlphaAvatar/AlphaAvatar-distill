@@ -97,6 +97,8 @@ def test_teacher_files_hashes_every_registered_file(tmp_path):
 def _plan_and_tasks():
     plan = json.loads((TM.REPO_ROOT / "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json").read_text())
     cells = plan["lineages"]["thinking_2507"]["modes"][MODE]["cells"]
+    for i, c in enumerate(cells):            #: a cell the imports already reached holds no new task: give it one
+        c["task_ids"] = c["task_ids"] or [f"t2507-admission-{i}"]
     by_id = {c["task_ids"][0]: {"task_id": c["task_ids"][0], "split": c["split"], "category": c["category"],
                                 "source": {"dataset": "d", "revision": "r"}} for c in cells}
     return plan, by_id, [c["task_ids"][0] for c in cells]
@@ -170,6 +172,7 @@ def test_the_formal_session_admits_the_device_before_any_formal_invocation(tmp_p
     order = []
     monkeypatch.setattr(TM, "require_on_pod", lambda p, kind, root: {"identity": "id", "authorization_id": "a"})
     monkeypatch.setattr(TS, "checked_plan", lambda proto, li: ({"pool": {"content_sha256": "c"}}, None, {}))
+    monkeypatch.setattr(TS, "registered_device_admission", lambda cfg, proto, li: None)   #: none registered
 
     def admission(*a, **k):
         order.append("admission")
@@ -268,6 +271,58 @@ def test_the_pod_refuses_a_plan_whose_content_the_admission_does_not_admit(monke
 
 # --- the grant ----------------------------------------------------------------------------------------------------
 
+def test_a_registered_admission_is_reused_and_confirmed_on_the_first_formal_invocation(tmp_path, monkeypatch):
+    """Maintainer 2026-11-05 (review of f06ccd4), section 1: the committed admitted result is reused -- no admission
+    sampling -- and the pod confirms it: the teacher files first, then the verdict on its first formal invocation."""
+    assert TS.registered_device_admission(CFG, PROTO, "thinking_2507")["admitted"] is True
+    assert TS.registered_device_admission({**CFG, "registered_result": {**CFG["registered_result"], "sha256": "0" * 64}},
+                                          PROTO, "thinking_2507") is None
+    other = json.loads(json.dumps(PROTO))
+    other["execution"]["session_limit"] = 4096
+    assert TS.registered_device_admission(CFG, other, "thinking_2507") is None
+    order = []
+    monkeypatch.setattr(TM, "require_on_pod", lambda p, kind, root: {"identity": "id", "authorization_id": "a"})
+    monkeypatch.setattr(TS, "checked_plan", lambda proto, li: ({"pool": {"content_sha256": "c"}}, None, {}))
+    monkeypatch.setattr(TS, "run_device_admission", lambda *a, **k: order.append("admission"))
+    monkeypatch.setattr(TS, "snapshot_dir", lambda m, r: tmp_path)
+    monkeypatch.setattr(TS, "teacher_files", lambda t, s: {"snapshot": str(s), "differ": []})
+
+    def generate(proto, plan, li, mode, by_id, man, out, *a, on_invocation=None, **k):
+        order.append("generate")
+        ev = _evidence()
+        (out / "tool_T2507_r1_pass0.seg0.raw.summary.json").write_text(json.dumps({"identity": ev["identity"]}))
+        on_invocation("tool_T2507_r1_pass0", {"complete": True, "segments": [{"segment": 0}]},
+                      {"engine": ev["engine"], "gpu": ev["gpu"]}, {"t": {"turns": [{}]}})
+        return {"complete": True, "groups": [], "cells": []}
+    monkeypatch.setattr(TS, "generate_mode", generate)
+    code = TS.main(["--authorization", str(tmp_path / "a.json"), "--lineage", "thinking_2507", "--durable-root",
+                    str(tmp_path), "--status", str(tmp_path / "s")], run=lambda *a, **k: None)
+    out = tmp_path / "tool_generation_thinking_2507"
+    rec = json.loads((out / "tool_session.json").read_text())
+    assert code == 0 and order == ["generate"] and rec["device_confirmation"]["admitted"] is True
+    assert json.loads((out / "device_confirmation.json").read_text())["invocation"] == "tool_T2507_r1_pass0"
+
+
+@pytest.mark.parametrize("how", ["teacher files", "verdict"])
+def test_a_failed_confirmation_ends_the_session(tmp_path, monkeypatch, how):
+    monkeypatch.setattr(TS, "snapshot_dir", lambda m, r: tmp_path)
+    monkeypatch.setattr(TS, "teacher_files", lambda t, s: {"snapshot": str(s),
+                                                           "differ": ["model.safetensors"] if how == "teacher files" else []})
+    marks = []
+    if how == "teacher files":
+        with pytest.raises(TS.DeviceAdmissionRefused, match="snapshot"):
+            TS.device_confirmation(PROTO, "thinking_2507", tmp_path, marks.append)
+    else:
+        _, on = TS.device_confirmation(PROTO, "thinking_2507", tmp_path, marks.append)
+        ev = _evidence()
+        (tmp_path / "x.seg0.raw.summary.json").write_text(json.dumps({"identity": {**ev["identity"], "revision": "0" * 40}}))
+        with pytest.raises(TS.DeviceAdmissionRefused, match="teacher_revision"):
+            on("x", {"complete": True, "segments": [{"segment": 0}]}, {"engine": ev["engine"], "gpu": ev["gpu"]},
+               {"t": {"turns": [{}]}})
+    assert marks[-1] == "DEVICE_CONFIRMATION_FAILED"
+    assert json.loads((tmp_path / "device_confirmation.json").read_text())["admitted"] is False
+
+
 def test_the_t2507_cap_is_cumulative_and_its_block_required(tmp_path, monkeypatch):
     kind = "tool_generation_t2507"
     monkeypatch.setattr(TM, "kind_spent", lambda k, root: {"runs": [], "unknown": [], "usd": 0.0})
@@ -278,4 +333,10 @@ def test_the_t2507_cap_is_cumulative_and_its_block_required(tmp_path, monkeypatc
     monkeypatch.setattr(TM, "kind_spent", lambda k, root: {"runs": [{"run_id": "x", "usd": 1.5}], "unknown": [], "usd": 1.5})
     assert any("cumulative" in b for b in TM.kind_cap_problems(kind, 1.5))
     assert TM.kind_cap_problems(kind, 1.28) == []
-    assert TM.kind_cap_problems("tool_generation", 1.0)          #: the hybrid is not authorized
+    #: the hybrid's kind (maintainer 2026-11-05): its own block, cumulative $9.13
+    monkeypatch.setattr(TM, "kind_spent", lambda k, root: {"runs": [], "unknown": [], "usd": 0.0})
+    assert TM.kind_cap_problems("tool_generation", 9.13) == [] and TM.kind_cap_problems("tool_generation", 9.14)
+    assert TM.t2507_grant_problems(g, "tool_generation") == []
+    assert TM.t2507_grant_problems({k: v for k, v in g.items() if k != "tool_generation"}, "tool_generation")
+    monkeypatch.setattr(TM, "kind_spent", lambda k, root: {"runs": [{"run_id": "y", "usd": 9.0}], "unknown": [], "usd": 9.0})
+    assert any("cumulative" in b for b in TM.kind_cap_problems("tool_generation", 0.2))

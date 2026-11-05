@@ -109,7 +109,7 @@ def test_the_envelope_covers_the_pilot_and_the_amendment_raises_nothing():
     assert (g["per_session_hard_cap_usd"], g["gpus"], g["gpu_count_max"]) == (
         a["unchanged"]["per_session_hard_cap_usd"], a["unchanged"]["gpus"], a["unchanged"]["gpu_count_max"])
     applied = json.loads(TPL.AMENDMENT.read_text())                  #: the proposal the maintainer approved
-    later = {"tool_pilot", "tool_generation_t2507"}                  #: kinds later amendments added
+    later = {"tool_pilot", "tool_generation_t2507", "tool_generation"}   #: kinds later amendments added
     assert {k: v for k, v in g["session_hard_caps_usd"].items() if k not in later} == \
         applied["unchanged"]["session_hard_caps_usd (the A1 kinds)"]
     assert a["edits"]["tool_pilot"]["decision"] is None and a["edits"]["tool_pilot"]["date"] is None
@@ -417,7 +417,7 @@ def test_the_runner_records_engine_metrics_only_when_asked():
 
 
 def test_the_committed_pilot_records_hold_together():
-    doc, by_id = TPL.load(TPL.PLAN, TPL.TASKS) if TPL.TASKS.is_file() else (None, None)
+    doc, by_id = TPL.load(TPL.PLAN, TPL.TASKS, protocol_path=TPL.frozen_protocol()) if TPL.TASKS.is_file() else (None, None)
     if doc is None:
         pytest.skip("the pilot's task file is an artifact outside git")
     adm = json.loads(TPL.ADMISSION.read_text())
@@ -1046,7 +1046,7 @@ def test_an_import_refuses_when_a_generation_term_differs(monkeypatch):
             return json.dumps(d).encode()
         return b
     monkeypatch.setattr(TGI, "_at", other)
-    doc, by_id = TPL.load(TPL.PLAN, TPL.TASKS) if TPL.TASKS.is_file() else (None, None)
+    doc, by_id = TPL.load(TPL.PLAN, TPL.TASKS, protocol_path=TPL.frozen_protocol()) if TPL.TASKS.is_file() else (None, None)
     if doc is None:
         pytest.skip("the pilot's task file is an artifact outside git")
     session = {"identity_parts": {"implementation_sha256": {f: TPL.sha(TGI.REPO / f) for f in TGI.GENERATION_CODE},

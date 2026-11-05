@@ -130,18 +130,23 @@ KIND_RECORDS = {
     #: `kind_conditions`), the pilot's measured priors and import record, and each lineage's bound task file: the pod
     #: reads that file and the plan, never the pool (P8.4)
     #: and (maintainer 2026-11-04, review of a143b7ed) the formal source admission; Thinking-2507 also its in-session
-    #: device admission's criteria (`tool_session.run_device_admission`)
+    #: device admission's criteria (`tool_session.run_device_admission`); and (maintainer 2026-11-05, review of
+    #: f06ccd4) the registered common-support composition and Thinking-2507's session import record
     "tool_generation": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
                         "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json",
                         "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json",
                         "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json",
-                        "logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json"),
+                        "logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json",
+                        "configs/stages/stage-2/teacher_modes/six_category_common_support.json",
+                        "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json"),
     "tool_generation_t2507": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
                               "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json",
                               "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json",
                               "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json",
                               "logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json",
-                              "configs/stages/stage-2/teacher_modes/t2507_device_admission.json"),
+                              "configs/stages/stage-2/teacher_modes/t2507_device_admission.json",
+                              "configs/stages/stage-2/teacher_modes/six_category_common_support.json",
+                              "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json"),
     "packed_search": ("configs/stages/stage-2/teacher_modes/packed_round_design.json",
                       "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
                       "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
@@ -292,7 +297,7 @@ def pilot_problems(root: Path = REPO_ROOT) -> list[str]:
     doc = json.loads(plan.read_text())
     tasks = root / str((doc.get("tasks_file") or {}).get("path"))
     try:
-        TPL.load(plan, tasks, protocol_path=root / KIND_RECORDS[TOOL_PILOT_KIND][0],
+        TPL.load(plan, tasks, protocol_path=TPL.frozen_protocol(plan, root),
                  six_path=root / KIND_RECORDS[TOOL_PILOT_KIND][1])
     except (TPL.PilotError, OSError) as exc:
         bad.append(str(exc))
@@ -367,7 +372,7 @@ def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) ->
         return [f"${hard_cap_usd} exceeds the grant's ${caps[kind]} for kind {kind!r}"]
     if kind == TOOL_PILOT_KIND:
         bad = pilot_grant_problems(g, root)
-    elif kind in IN_SESSION_DEVICE_ADMISSION:
+    elif kind in TOOL_GENERATION_KINDS.values():
         bad = t2507_grant_problems(g, kind, root)
     else:
         return []
@@ -416,23 +421,27 @@ def pilot_grant_problems(g: dict, root: Path = REPO_ROOT) -> list[str]:
 
 #: the exact scope the grant's tool_generation_t2507 block approves (maintainer 2026-11-04, review of a143b7ed, §4)
 T2507_APPROVAL = "tool_generation_t2507 device admission and formal tool_generation"
+#: ... and the hybrid's tool_generation block (maintainer 2026-11-05, review of f06ccd4, section 4)
+TOOL_GENERATION_APPROVALS = {"tool_generation_t2507": T2507_APPROVAL,
+                             "tool_generation": "tool_generation formal hybrid generation, six_category_common_support@v1"}
 
 
 def t2507_grant_problems(g: dict, kind: str, root: Path = REPO_ROOT) -> list[str]:
-    """Why the grant does not authorize Thinking-2507's formal tool generation beyond its kind cap (empty when it
-    does): its ``tool_generation_t2507`` block must approve exactly `T2507_APPROVAL`, be granted by the maintainer with
-    a decision and a date, carry the kind cap as its hard cap, cumulative, the L40S on the container placement, the
-    formal source admission and the device admission it requires, and the ceiling it was written under (which must
-    still be the grant's: an amendment never raises it)."""
+    """Why the grant does not authorize a lineage's formal tool generation beyond its kind cap (empty when it does):
+    its block (``tool_generation_t2507`` or ``tool_generation``) must approve exactly that kind's
+    `TOOL_GENERATION_APPROVALS` entry, be granted by the maintainer with a decision and a date, carry the kind cap as
+    its hard cap, cumulative, the L40S on the container placement, the formal source admission (and Thinking-2507 the
+    device admission) it requires, and the ceiling it was written under (which must still be the grant's: an
+    amendment never raises it)."""
     import datetime as dt
     from stages.teacher_modes import tool_pilot as TPL
     b = g.get(kind)
     if not isinstance(b, dict):
         return [f"the grant carries no {kind} scope: the maintainer's amendment is required"]
-    want = {"approves": T2507_APPROVAL, "granted_by": "maintainer",
+    want = {"approves": TOOL_GENERATION_APPROVALS[kind], "granted_by": "maintainer",
             "hard_cap_usd": float((g.get("session_hard_caps_usd") or {}).get(kind, -1)), "cap_is_cumulative": True,
-            "gpu": GPU, "placement": TPL.PLACEMENT,
-            "source_admission": KIND_RECORDS[kind][4], "device_admission": IN_SESSION_DEVICE_ADMISSION[kind],
+            "gpu": GPU, "placement": TPL.PLACEMENT, "source_admission": KIND_RECORDS[kind][4],
+            **({"device_admission": IN_SESSION_DEVICE_ADMISSION[kind]} if kind in IN_SESSION_DEVICE_ADMISSION else {}),
             "ceiling_usd_at_amendment": g.get("ceiling_usd")}
     bad = [f"the grant's {kind}.{k} is {b.get(k)!r}, not {v!r}" for k, v in want.items() if b.get(k) != v]
     if not isinstance(b.get("decision"), str) or not b["decision"].strip():
@@ -611,13 +620,16 @@ def inputs_command(ctx, plan) -> str:
             f"--authorization {auth} --durable-root {durable(a)} --status {status}" + P1._tail(status))
 
 
-def tool_generation_command(ctx, plan, lineage: str = "hybrid") -> str:
+def tool_generation_command(ctx, plan, lineage: str = "hybrid", planned_minutes: float | None = None) -> str:
+    """The bounded generation's driver; ``planned_minutes`` (the launch's driver minutes, which the hard cap pays
+    for) is its deadline: no round starts that the time left cannot hold (`tool_session.generate_mode`)."""
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
     resume = (f" --resume-from {SE.POD_REPO}/{PILOT_RESUME_DIR}/{Path(a.resume_from).name}"
               if getattr(a, "resume_from", None) else "")
+    deadline = f" --deadline-minutes {float(planned_minutes):.1f}" if planned_minutes else ""
     return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
-            f"--authorization {auth} --lineage {lineage}{resume} --durable-root {durable(a)} --status {status}"
+            f"--authorization {auth} --lineage {lineage}{resume}{deadline} --durable-root {durable(a)} --status {status}"
             + P1._tail(status))
 
 
@@ -688,7 +700,7 @@ DRIVERS = {
     "tool_generation": ("scripts/stages/stage-2/teacher_modes/tool_session.py", tool_generation_command,
                         (), "Research A packed round: the hybrid's tool-calling episodes, both modes"),
     "tool_generation_t2507": ("scripts/stages/stage-2/teacher_modes/tool_session.py",
-                              lambda ctx, plan: tool_generation_command(ctx, plan, "thinking_2507"), (),
+                              functools.partial(tool_generation_command, lineage="thinking_2507"), (),
                               "Research A packed round: Thinking-2507's tool-calling episodes"),
     "tool_pilot": ("scripts/stages/stage-2/teacher_modes/tool_session.py", tool_pilot_command, ("pilot_tasks",),
                    "Research A packed round: the hybrid's L40S tool pilot on its frozen cells (measurement only)"),
@@ -714,7 +726,7 @@ POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation
                             "search_packed/products.json"),
           **{k: (f"{PACKED_TRAIN_ARMS[k]}_units.json",) for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
           **{k: tuple(f"tool_generation_{li}/{f}" for f in ("tool_session.json", "telemetry.jsonl",
-                                                             "device_admission.json"))
+                                                             "device_admission.json", "device_confirmation.json"))
              for li, k in TOOL_GENERATION_KINDS.items()},
           "tool_pilot": ("tool_pilot_hybrid/tool_session.json", "tool_pilot_hybrid/telemetry.jsonl")}
 
@@ -832,7 +844,7 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
     if kind not in DRIVERS:
         raise SE.AuthorizationError(f"kind {kind!r} has no session driver yet")
     driver, command, extra, description = DRIVERS[kind]
-    if kind in ("search", "packed_search") and minutes:
+    if (kind in ("search", "packed_search") or kind in TOOL_GENERATION_KINDS.values()) and minutes:
         command = functools.partial(command, planned_minutes=float(minutes))
     t = json.loads((REPO_ROOT / P1.PROTOCOL).read_text())["teacher"]
     if kind in THINKING_2507_KINDS:          #: C1-6cat's lineage: Thinking-2507 generates and teaches

@@ -48,5 +48,13 @@
   "outputs": "device evidence only, under <out>/device_admission/: never sealed under a formal label, never imported, admitted, counted or packed; the formal rounds generate every task of the plan, these included"
  },
  "on_failure": "the session ends RUN_FAILED before any formal invocation, with the measured evidence; an ordinary failure of the mechanism is repaired inside the same cumulative $2.78; an A100 only after a measured CUDA out-of-memory on the L40S and a separate authorization",
- "authorizes": "nothing by itself: the grant's tool_generation_t2507 block authorizes the session"
+ "authorizes": "nothing by itself: the grant's tool_generation_t2507 block authorizes the session",
+ "registered_result": {
+  "path": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_t2507_20261104_195411/evidence/device_admission.json",
+  "sha256": "82e43ca1e79cbf64b1776f90bcad75f93f2e3f31bb75a8b16920728ac0bf5769",
+  "run_id": "a_tool_generation_t2507_20261104_195411",
+  "admitted": true,
+  "measured": "all 15 criteria passed on an L40S (US-TX-4): engine ready 157.9 s, KV cache 195,009 tokens at the 8,184 session limit, peak 37,611 of 46,068 MiB (8.26 GiB free), vLLM 0.27.1",
+  "reuse": "maintainer 2026-11-05 (review of f06ccd4), section 1: '相同 Teacher、revision、引擎依赖和合规 GPU 环境下，可以复用已登记的设备适配证据；新 Pod 仍须实际确认能加载和运行，不必无意义地重复完整的八任务准入采样'. A later session with the same teacher, revision, chat template, vLLM pin and session limit (tool_session.registered_device_admission) does not sample the admission's tasks: it hashes the teacher snapshot before any invocation and applies device_verdict to its first formal invocation (tool_session.device_confirmation); a failed verdict ends the session and that invocation's shards are not imported"
+ }
 }

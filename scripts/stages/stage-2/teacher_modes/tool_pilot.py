@@ -123,6 +123,27 @@ def _rel(p: Path) -> str:
     return str(p.relative_to(REPO)) if p.is_relative_to(REPO) else str(p)
 
 
+def frozen_protocol(plan_path: Path = PLAN, root: Path = REPO) -> Path:
+    """The tool generation protocol AS THE PILOT PLAN FROZE IT: today's file when its sha256 is the plan's, else the
+    committed version of that file whose sha256 is (``git log`` of the file, newest first), written beside the
+    gitignored pilot artifacts. The protocol has moved on since (maintainer 2026-11-05: the common-support composition
+    and the last round's rule); the closed pilot's plan is still verified against what it was frozen under."""
+    import subprocess
+    want = (json.loads(Path(plan_path).read_text()).get("source") or {}).get("protocol_sha256")
+    rel = TGP.PROTOCOL.relative_to(REPO).as_posix()
+    if sha(root / rel) == want:
+        return root / rel
+    log = subprocess.run(["git", "log", "--format=%H", "--", rel], cwd=root, capture_output=True, text=True).stdout
+    for commit in log.split():
+        b = subprocess.run(["git", "show", f"{commit}:{rel}"], cwd=root, capture_output=True).stdout
+        if hashlib.sha256(b).hexdigest() == want:
+            out = root / "artifacts/stages/stage-2/teacher_modes/tool_pilot" / f"tool_generation_protocol.{want[:12]}.json"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(b)
+            return out
+    raise PilotError(f"no committed {rel} has the sha256 {str(want)[:12]}... the pilot plan was frozen under")
+
+
 def load(plan_path: Path, tasks_path: Path, *, protocol_path: Path = TGP.PROTOCOL,
          six_path: Path = TGP.SIX) -> tuple[dict, dict[str, dict]]:
     """``(pilot plan, tasks by id)`` after every check, or `PilotError`: the task file is the one the plan names (its
