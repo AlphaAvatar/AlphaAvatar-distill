@@ -21,6 +21,7 @@ Everything this experiment produced, in one place.
 * [`a_inputs_20261101_125520`](runs/a_inputs_20261101_125520/)
 * [`a_inputs_20261101_125709`](runs/a_inputs_20261101_125709/)
 * [`a_inputs_20261101_125916`](runs/a_inputs_20261101_125916/)
+* [`a_packed_search_20261105_195011`](runs/a_packed_search_20261105_195011/)
 * [`a_recovery_20261030_211948`](runs/a_recovery_20261030_211948/)
 * [`a_search_20261101_142659`](runs/a_search_20261101_142659/)
 * [`a_search_20261101_153803`](runs/a_search_20261101_153803/)

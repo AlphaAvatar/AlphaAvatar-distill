@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 183,
+  "runs_unrecorded": 184,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -871,8 +871,8 @@
    },
    "teacher_modes": {
     "recorded": 0,
-    "unrecorded": 30,
-    "total": 30
+    "unrecorded": 31,
+    "total": 31
    }
   },
   "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
@@ -4051,6 +4051,14 @@
    "n_files": 4,
    "digest": "8c93f191de47d56a5be69dc2bceaef28b5e94a30c3e55a66594d61d24067032b",
    "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_packed_search_20261105_195011",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011",
+   "n_files": 1,
+   "digest": "c168ded466065ec28abfa59e115c06aba0c18c713b2fa01ae5f565a57d3f53ce",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   },
   {
    "experiment_id": "teacher_modes",
