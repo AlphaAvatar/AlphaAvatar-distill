@@ -61,11 +61,12 @@ PRIORS = REPO / "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.
 IMPORT = REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json"
 #: every import record a plan binds, in order (maintainer 2026-11-05, review of f06ccd4, section 1): the pilot's, and
 #: Thinking-2507's completed formal sessions a_tool_generation_t2507_20261104_195411, _20261105_064829 and
-#: _20261105_072112, and the hybrid's a_tool_generation_20261105_074146
+#: _20261105_072112, and the hybrid's a_tool_generation_20261105_074146 and _20261105_105512
 IMPORTS = (IMPORT, REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json",
            REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a3.json",
            REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a4.json",
-           REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_hybrid_a1.json")
+           REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_hybrid_a1.json",
+           REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_hybrid_a2.json")
 #: the probability a first-round-bound lineage's single round must reach its target with (`reach_bound`)
 REACH_PROBABILITY = 0.95
 #: the registered training composition (six_category_common_support@v1, maintainer 2026-11-05)

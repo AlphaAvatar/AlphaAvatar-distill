@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 868.0,
-  "cumulative_spend_usd": 782.639,
+  "cumulative_spend_usd": 786.9412,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 85.361,
+  "remaining_usd": 81.0588,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer's ruling (PACKED_ROUND.md section 9): fragments under truncate=True, tool sources/shares/eval-set-2, a raised cap for generation + the packed search, a Thinking-2507 search, volume 4rhubprswo.",
+ "next": "The maintainer (PACKED_ROUND.md section 9): bind the packed search to state_eval_hybrid@v2-lc1 (identity change), a raised project cap and the search's authorization; Stage 3 of the -cs arms; eval-set-2; volume 4rhubprswo.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -200,7 +200,7 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 2,
-  "run": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122",
+  "run": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_20261105_105512",
   "volume": "4rhubprswo (350 GB, US-TX-3): search states, Top-1, A1's checkpoints; am5m373kuq (55 GB): the archive"
  },
  "schema": "aadistill.current_state/v2",

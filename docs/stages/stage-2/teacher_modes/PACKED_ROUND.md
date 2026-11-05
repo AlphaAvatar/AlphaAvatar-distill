@@ -492,7 +492,10 @@ Driver: [`packed_full_search.py`](../../../../scripts/stages/stage-2/teacher_mod
 - **Target:** C3's 596M geometry and search seed.
 - **Forward context:** 8,192 tokens, seed 20261105.
 - **Execution:** one packed sequence per forward, DEPTH prefix reuse, `prune_weights` false.
-- **Inputs:** calibration v2 and `state_eval_hybrid@v2`, both `PENDING_TOOL_ITEMS`.
+- **Inputs:** calibration v2 COMPLETE (2026-11-05). `state_eval_hybrid@v2` is not realizable (non-thinking
+  schema_arguments 1,063 / 1,800, source exhausted) and stays PENDING; `state_eval_hybrid@v2-lc1` is FROZEN
+  (measurement protocol `d09a4849`). Binding the search to `@v2-lc1` is an identity change the maintainer owes
+  (section 9).
 - **Run id:** `research_a_packed_hybrid_full_search`.
 
 **Calibration v2 and `state_eval_hybrid@v2`** (the design's sections):
@@ -1014,71 +1017,76 @@ by `tool_pilot.py application --live-position`).
     after the hybrid generation (`packed_inputs.py build`, which writes the lc1 suite and freezes it only when every
     other cell meets the v2 rule).
 
+  - **Hybrid formal tool generation: COMPLETE** (cumulative $9.13; spent $3.5885).
+    - **Attempt 1** (`a_tool_generation_20261105_074146`, US-NC-1, $1.09/h): ALL_DONE in 156 driver minutes, 8.05M output
+      tokens. The non-thinking training schema_arguments cell attempted its whole remaining supply (1,804 tasks) and
+      REACHED 17,290 of 11,800, so the registered fallback was not needed. The non-thinking state-evaluation
+      multi_turn cell (AT_RISK) REACHED 33,512 of 2,400. Short at their bounds with supply left: non-thinking training
+      mcp_agent, thinking training error_recovery, and calibration / state-evaluation cells whose bounds were
+      training-split proxies. **Teardown:** the gate refused only because one poll's failed listing stayed in
+      `listing_unknown`; all 193 shards were secured and the archive re-hashed equal. The products were re-verified
+      on the dev box, and the pod was released by hand 2.1 minutes after the gate. The provider confirmed it gone and
+      the watchdog ended `pod_gone` (`closeout/teardown.json`). Repair: `phase.listing_outcome` (the latest listing
+      decides) and a one-retry `phase._listing`. Cost: pod life 169.85 minutes, $3.1438 booked (provider $3.1244).
+    - **Attempt 2** (`a_tool_generation_20261105_105512`, $0.4447): the plan imports the pilot and attempt 1 and bounds
+      each short cell at its 95% reach prefix at the measured lower yield. A split's own stratum decides from 5
+      attempted tasks; a measured split that admitted none takes its whole remaining supply; a cell's minimum tasks
+      count as admissions. One round per mode: every short cell REACHED.
+    - **End state** (`plans/tool_generation_plan.json`, binding all six import records): 51 cells REACHED; one
+      SHORTFALL_EXHAUSTED, the non-thinking state-evaluation schema_arguments (1,063 / 1,800, the registered
+      `@v2-lc1` cell). Dev-box admission over the pilot and both sessions reproduces every cell in both modes.
+    - **Admitted, before packing:**
+      - thinking mode: training 713,551 supervised tokens (583 episodes), validation 47,557, calibration 43,480
+        scored positions, state evaluation 90,348;
+      - non-thinking mode: training 1,772,801 (3,281 episodes), validation 14,061, calibration 23,702, state evaluation
+        49,368;
+      - Thinking-2507: training 694,201 (402 episodes), validation 16,345.
+  - **The common-support freeze** (`audit/six_category_common_support_freeze.json`; packs `artifacts/.../packs_6cat/<arm>`,
+    each verified by `packed_packs.verify_pack`):
+
+    | arm | manifest | examples / turns | unique supervised tokens | tool calling | packed sequences | optimizer steps | non-padding tokens / epoch |
+    | --- | --- | --- | --- | --- | --- | --- | --- |
+    | A1-6cat-cs (thinking) | `ee6937d2` | 5,594 / 6,230 | 5,939,049 | 502,137 | 1,437 | 2,156 | 11,766,017 |
+    | A2-6cat-cs (non-thinking) | `89fa58a0` | 44,447 / 49,784 | 5,928,313 | 498,002 | 4,988 | 7,482 | 40,861,497 |
+    | C1-6cat-cs (Thinking-2507) | `e2b5a4e1` | 3,940 / 4,211 | 5,931,091 | 500,657 | 1,264 | 1,896 | 10,346,968 |
+
+    - Every arm passes the registered proportion check, and every tool category reaches its common-support target.
+    - Whole-episode overshoot per tool category is +0.07% to +6.2%, except C1's schema_arguments: 15,276 against
+      11,780, +29.7%.
+    - A2 / A1: 3.47x the packed sequences, optimizer steps and training FLOPs for one shared student, and 0.87x the
+      supervised-token exposure. Equal unique supervised tokens are not equal compute.
+    - Admitted episodes beyond a target stay in the records, unused.
+  - **State-evaluation suite check after generation** (`packed_inputs.py build`):
+    - the calibration v2 profiles are COMPLETE (`configs/.../hybrid_profiles_v2.json`, items in
+      `artifacts/.../calibration_v3`);
+    - `state_eval_hybrid@v2`: thinking mode reached, non-thinking not (schema_arguments only), so NOT frozen and still
+      PENDING;
+    - `state_eval_hybrid@v2-lc1`: every other cell meets the v2 rule, and the registered cell is LIMITED_COVERAGE with
+      exactly the registered 1,063 positions and 11 episodes. FROZEN: `audit/state_eval_hybrid_v2_lc1_freeze.json`,
+      measurement protocol `d09a4849`.
+
 ## 9. Decisions owed to the maintainer
 
 The maintainer has settled two former items: fragments are accepted, and loss normalization is kept. No Thinking-2507
-packed search runs unless it is requested.
+packed search runs unless it is requested. The review of `f06ccd4` (2026-11-05) settled the A2 design
+(`six_category_common_support@v1`, registered), the limited-coverage identity (`state_eval_hybrid@v2-lc1`, registered
+conditionally), the Thinking-2507 top-up and the hybrid generation; all four are done (section 8).
 
-1. **Tool-calling sources.**
-   - Toucan SFT and Pivot Conversational are ADMITTED as formal sources (2026-11-04, review of `a143b7ed`;
-     `audit/tool_source_admission.json`). Pivot Function-Calling and Nemotron-SFT-Agentic-v4 are not admitted; Glaive
-     and xLAM are isolation references only.
-   - Also owed: the category shares (used unchanged by the plan), the prompt bound and the non-thinking state-evaluation
-     floor.
-2. **Non-thinking `schema_arguments` (review of `a143b7ed`, 2026-11-04).**
-   - **Training: the SHORTFALL is refused (NO-GO).** No `approved_exceptions` entry is allowed, so A2-6cat is not
-     realizable as registered. That identity stays as written, and no data is deleted or regenerated.
-   - **The new comparable design, for review** (`six_category_common_support@v1`;
-     [`audit/six_category_common_support.json`](../../../../logs/stages/stage-2/teacher_modes/audit/six_category_common_support.json),
-     `six_category_common_support.py`):
-     - **What changes, and only this:** one tool-type composition for A1-6cat-cs, A2-6cat-cs and C1-6cat-cs.
-       `schema_arguments` is fixed BEFORE further generation at the non-thinking cell's projected lower bound, rounded
-       down: 11,800 supervised tokens, 2.39% of the tool type instead of 15%. The six other tool categories are each
-       x1.148 in their registered proportions.
-     - **Size of the change:** 62,213 supervised tokens move between tool categories, 1.05% of an A arm's 5,923,021.
-     - **Unchanged:** each arm's total supervised tokens, the six supporting types at 1/6 each, the fluid category,
-       lineage, protocols, verifier, selection rule, packing and loss.
-     - **Supply:** every cell of every lineage is REACHABLE at the lower projection.
-     - **Cost:** the hybrid session would be priced $2.65 expected, runner all-in $9.127 (registered plan: $8.4738).
-       The training cost is the registered matrix's (three arms x two seeds).
-     - **Interpretation limits:** a result of this identity is never pooled with, or described as, the registered
-       equal-proportion A1/A2. Schema-heavy tool use is under-weighted in every arm. The composition is
-       supply-conditioned, fixed before generation, and never set by an outcome.
-     - **Alternatives priced and not recommended:** keeping the registered A1 and C1 as well (+$10.98 to $17.72 for a
-       contrast two seeds cannot resolve); a quota set from the realized supply; a matched-task schema cell
-       (incompatible with token matching); dropping the category.
-     - **Arithmetic correction:** the refused v2 record's "14.29% of six types" double-counted the tool type. The
-       registered share is 1/6, and its -1.56% whole-set change is -0.91% of an A arm.
-   - **State evaluation: 1,063 / 1,800 accepted as measured; a limited-coverage plan, for review**
-     ([`audit/state_eval_hn_schema_limited_coverage.json`](../../../../logs/stages/stage-2/teacher_modes/audit/state_eval_hn_schema_limited_coverage.json),
-     `state_eval_limited_coverage.py`):
-     - **What the cell holds:** 29 Pivot Conversational tasks, all attempted; 11 episodes admitted (4 full, 7
-       single-step). Four episodes carry 78.7% of the positions, so the Kish effective count is 5.0 episodes.
-     - **Weight in the objectives:** 0.157% of the equal-domain mean (0.25% at the registered 1,800). Moving that
-       objective by its epsilon (1e-4) needs a 0.064-nat difference in this cell; moving the worst domain when
-       supporting is worst needs 0.013 nats.
-     - **Uncertainty:** an episode jackknife with t at 10 degrees of freedom.
-     - **Reporting rule beside every ranking:** the objectives with the cell left out, and a
-       SENSITIVE_TO_THE_LIMITED_CELL flag. The ranking itself is unchanged.
-     - **Proposed identity:** `state_eval_hybrid@v2-lc1`. It has its own content and a coverage declaration marked
-       LIMITED_COVERAGE, never REACHED. The 1,800-target v2 stays PENDING. Its registration is bound separately.
-     - **AT_RISK:** non-thinking state-evaluation `multi_turn` (2,400 target; projection 1,944 to 10,463 over 205
-       tasks) is monitored in the hybrid session. Nothing is pre-approved.
-   - "Ask for the missing value" in every mode.
-   - **Proportion exceptions:** none. `data_admission.approved_exceptions` is empty, and the registered tolerance
-     stays.
-3. **Isolation costs.**
-   - Each evaluation split holds only 17–20 atoms.
-   - eval-set-1's tool names are refused.
-   - A tool identity served by several servers is kept to one split (6,825 tasks).
-   - T3 signatures are counted, not refused.
-4. **Validation coverage.** C1-6cat's validation has no fluid type, and A1-6cat's no `interactive_adaptation`. Both
-   gaps are recorded.
-5. **eval-set-2** for closed-loop tool success.
-6. **Budget.** The hybrid's `tool_generation` grant is deferred until the A2 design and the state-evaluation coverage
-   plan are settled. It is at least $8.48 on the registered plan, or $9.13 on the common-support plan. A raised
-   project cap is still needed for the Full Search Authorization. The packed 8,192-token forward / DEPTH / training
-   GPU validation is a separate request.
+1. **Before the packed full search** (not authorized):
+   - its inputs are now the calibration v2 profiles (COMPLETE) and `state_eval_hybrid@v2-lc1` (FROZEN with one
+     LIMITED_COVERAGE cell); `packed_search`'s bound records still name `state_eval_hybrid_v2_freeze.json`, which
+     does not exist because `@v2` is not realizable -- binding the search to `@v2-lc1` instead is the maintainer's
+     decision (an identity change);
+   - the project cap: the search's registered $41.41 needs a raised project cap (project remaining $27.18 on
+     2026-11-05).
+2. **Stage 3 training of the three -cs arms** (not authorized): the frozen packs exist; their training plan is not
+   built (`packed_training_plan` binds the registered arms).
+3. **Tool-calling sources.** Toucan SFT and Pivot Conversational are ADMITTED (2026-11-04). Pivot Function-Calling and
+   Nemotron-SFT-Agentic-v4 are not; Glaive and xLAM are isolation references only.
+4. **Isolation costs.** Each evaluation split holds only 17-20 atoms; eval-set-1's tool names are refused; a tool
+   identity served by several servers is kept to one split (6,825 tasks); T3 signatures are counted, not refused.
+5. **Validation coverage.** C1-6cat(-cs)'s validation has no fluid type, and A1-6cat(-cs)'s no `interactive_adaptation`.
+6. **eval-set-2** for closed-loop tool success.
 7. **Storage.** Volume `4rhubprswo`. The v2 Top-1's only copy stays protected until a verified copy exists off the
    volume.
 

@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-04 (UTC), after the review of `a143b7ed`. The human view. Every number here has an owner
+**Updated:** 2026-11-05 (UTC), after the review of `f06ccd4`. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,25 +9,27 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A: FORMAL TOOL SOURCES ADMITTED; THINKING-2507 TOOL GENERATION COMPLETE (`a_tool_generation_t2507_20261104_195411`, $1.097; with attempt 1's $0.1459, $1.2429 of the kind's cumulative $2.78); THE A2 COMMON-SUPPORT DESIGN AND THE STATE-EVALUATION LIMITED-COVERAGE PLAN READY FOR REVIEW; THE HYBRID'S GENERATION GRANT DEFERRED (maintainer review of `a143b7ed`, 2026-11-04).**
-- Done:
-  - the formal source admission, signed (`audit/tool_source_admission.json`);
-  - the canonical pool `data/stages/stage-2/teacher_modes/tool_pool_v1` (gitignored; content `be4652d7`);
-  - the canonical plan;
-  - Thinking-2507's in-session device admission: PASSED, 8.26 GiB free at peak on the L40S;
-  - its generation: six of eight cells REACHED, error_recovery and mcp_agent SHORTFALL at the plan's prior-derived
-    bound. That shortfall is not approved; a top-up of about $0.42 to $0.46 is left to the maintainer's choice of
-    composition.
-- No pod and no watcher is left; the provider holds only the two accounted volumes.
-- **For review:**
-  - `audit/six_category_common_support.json` (A1/A2/C1-6cat-cs: one composition, schema_arguments at 11,800 tokens,
-    2.39% of the tool type);
-  - `audit/state_eval_hn_schema_limited_coverage.json` (`state_eval_hybrid@v2-lc1`).
-  - Both are $0 designs that start nothing.
-- **Not approved:** the A2-6cat schema exception (refused), any SHORTFALL.
-- **Not authorized:** the hybrid's `tool_generation` (at least $8.48 registered, $9.13 under the common-support
-  plan), packed full search, training, formal evaluation, a merge.
-- Owner: `PACKED_ROUND.md` sections 8 and 9.
+**RESEARCH A: TOOL GENERATION COMPLETE FOR ALL THREE ARMS; `six_category_common_support@v1` FROZEN (A1/A2/C1-6cat-cs); `state_eval_hybrid@v2-lc1` FROZEN; `@v2` PENDING (maintainer review of `f06ccd4`, 2026-11-05).**
+- Done (2026-11-05 UTC):
+  - cross-plan import of completed tool sessions (`tool_generation_import.build_session`); every import reconciles
+    exactly with its session's own record;
+  - `six_category_common_support@v1` registered (`configs/.../six_category_common_support.json`) and the plan rebuilt
+    on it (training split only);
+  - Thinking-2507's top-up: attempts 3 and 4, $0.7137; every cell REACHED; the kind $1.9566 of its cumulative $2.78;
+  - the hybrid's formal generation: attempts 1 and 2, $3.5885 of the cumulative $9.13; 51 of 52 cells REACHED, the
+    remaining one the registered limited-coverage cell (non-thinking state-eval schema_arguments, 1,063 / 1,800,
+    source exhausted);
+  - the three -cs arms frozen and packed (`audit/six_category_common_support_freeze.json`): A2/A1 3.47x the packed
+    sequences, optimizer steps and training FLOPs for the same unique supervised tokens;
+  - calibration v2 profiles COMPLETE; `state_eval_hybrid@v2-lc1` FROZEN (protocol `d09a4849`).
+- Repaired: the teardown gate's sticky `listing_unknown` retained hybrid attempt 1's pod for 2.1 minutes after every
+  product was secured. The pod was released by hand after re-verification (`closeout/teardown.json`), and the
+  listing now lets its latest answer decide.
+- No pod and no watcher is left; the provider holds only the two accounted volumes. The envelope has $23.94 left; the
+  project cap has $27.18 left.
+- **Not authorized:** the packed full search (its binding to `@v2-lc1` and a raised project cap are owed), Stage 3
+  training, formal benchmark evaluation, a merge.
+- Owner: `PACKED_ROUND.md` sections 8 and 9; the decision record is `logs/budget/decisions.md` 2026-11-05.
 
 **RESEARCH A TOOL PILOT: COMPLETE AND ACCEPTED (`a_tool_pilot_20261104_164531`; $0.4328 estimated, $0.4286 posted by the provider). THE BOUNDED TOOL GENERATION: REVISED ON IT, READY FOR ONE REVIEW, NOT AUTHORIZED.**
 - Revised (2026-11-04, $0): measured priors, an explicit import of the pilot's 794 tasks, the plan's sealed /
@@ -4525,7 +4527,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$782.6390` spent of `$868.0000`, leaving `$85.3610` |
+| project cap | `$786.9412` spent of `$868.0000`, leaving `$81.0588` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

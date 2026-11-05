@@ -15837,3 +15837,16 @@ on a paid pod.
   $1.0943), so attempt 3 is capped at $1.53. tool_generation: cumulative $9.13 (the runner's $9.127 rounded up).
 - **Revisit when:** both sessions close; then the selection freeze per arm and the state-evaluation suite's
   identity, coverage and freeze check.
+- **Outcome (2026-11-05, same day).**
+  - **Thinking-2507:** attempt 3 ($0.3752) reached mcp_agent; attempt 4 ($0.3385), on the 95% reach bound,
+    reached error_recovery. Every cell REACHED; the kind spent $1.9566 of $2.78.
+  - **Hybrid:** attempt 1 ($3.1438, 156 driver minutes) reached the non-thinking schema_arguments training cell on
+    its whole supply (17,290 / 11,800; no fallback) and the AT_RISK multi_turn state cell. Attempt 2 ($0.4447)
+    reached every cell attempt 1 left short at a bound. 51 of 52 cells REACHED; the one left is the registered
+    `@v2-lc1` cell. The kind spent $3.5885 of $9.13.
+  - **Teardown gate:** it retained attempt 1's pod because of a stale listing failure. The pod was released by hand
+    after re-verification, and the defect was repaired (`phase.listing_outcome`, a one-retry `_listing`).
+  - **Freeze:** A1/A2/C1-6cat-cs admitted, frozen and packed; calibration v2 COMPLETE; `state_eval_hybrid@v2-lc1`
+    FROZEN; `@v2` PENDING.
+  - **Remaining before the packed full search:** the maintainer's binding of the search to `@v2-lc1` (an identity
+    change), a raised project cap, and the search's own authorization.

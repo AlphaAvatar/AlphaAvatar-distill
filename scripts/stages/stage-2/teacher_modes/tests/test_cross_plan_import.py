@@ -208,7 +208,7 @@ def test_the_committed_plan_binds_both_imports_and_the_common_support_compositio
     if not plan.get("imports"):
         pytest.skip("no rebuilt plan committed")
     assert [r["lineage"] for r in plan["imports"]] == ["hybrid", "thinking_2507", "thinking_2507", "thinking_2507",
-                                                      "hybrid"]
+                                                      "hybrid", "hybrid"]
     assert plan["common_support"]["training_shares"] == TGP.training_shares()
     t = {c["category"]: c for c in plan["lineages"]["thinking_2507"]["modes"]["T2507"]["cells"] if c["split"] == "training"}
     done = TGI.merged([json.loads((REPO / r["path"]).read_text()) for r in plan["imports"]], "thinking_2507", "T2507")

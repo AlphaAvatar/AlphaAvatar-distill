@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 176,
+  "runs_unrecorded": 180,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -871,8 +871,8 @@
    },
    "teacher_modes": {
     "recorded": 0,
-    "unrecorded": 23,
-    "total": 23
+    "unrecorded": 27,
+    "total": 27
    }
   },
   "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
@@ -4118,6 +4118,22 @@
   },
   {
    "experiment_id": "teacher_modes",
+   "run_id": "a_tool_generation_20261105_074146",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_20261105_074146",
+   "n_files": 5,
+   "digest": "22e0ef4983b4c4026ebc724a47e3980d2b87762d3ba32b665f8c3ca3d4b23db7",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_tool_generation_20261105_105512",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_20261105_105512",
+   "n_files": 4,
+   "digest": "f4a5a0dd81249a8957a5dbf3bfa77e2f8331c672b5d5cdd8168b41ba2a57096b",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
    "run_id": "a_tool_generation_t2507_20261104_194048",
    "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_t2507_20261104_194048",
    "n_files": 4,
@@ -4128,8 +4144,24 @@
    "experiment_id": "teacher_modes",
    "run_id": "a_tool_generation_t2507_20261104_195411",
    "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_t2507_20261104_195411",
+   "n_files": 5,
+   "digest": "f877be1f5b5dc6277ac720f01dada115e1706035b8f19823c395a3a998559688",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_tool_generation_t2507_20261105_064829",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_t2507_20261105_064829",
    "n_files": 4,
-   "digest": "4f2b8f024b28b2bde223af24bfc949a42f87d28b9c7d8f3e39f158ade4100880",
+   "digest": "e2505c6585e6fd503a9710bac6028ebdc4fad0f00b381dc9ed8acfe941313d7f",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_tool_generation_t2507_20261105_072112",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_t2507_20261105_072112",
+   "n_files": 4,
+   "digest": "ba69b88817f863318b5bfd74f856390796d438f99eb69cbdc3dd4138479aa970",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {

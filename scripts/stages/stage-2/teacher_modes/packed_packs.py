@@ -272,7 +272,12 @@ def select(arm: str, *, tool_docs: Path | None, records: dict | None = None, poo
         unit_of = {d.doc_id: d.doc_id.split("|", 1)[0] for d in train + val}
         pack = PA.PACKS / spec["source_pack"]
         sources = {"selection_record_sha256": sha_file(SELECTION), "source_pack": _files(pack),
-                   "admission_records": ({k: records[k] for k in ("v1_identity", "identity")} if missing else None)}
+                   "admission_records": (({k: records[k] for k in ("v1_identity", "identity")} if records else
+                                          {"recovered_per_task": "packed_packs.recover (token_admission's functions "
+                                                                 "for each (task, mode) alone)",
+                                           "records": {w: {k: v[k] for k in ("dir", "identity")} for w, v in
+                                                       json.loads(SELECTION.read_text())["records"].items()}})
+                                         if missing else None)}
     else:
         train, val, dtype = c1_documents()
         missing = []
