@@ -161,8 +161,11 @@
    },
    "bound": "a cell never attempts more than the frozen-order prefix whose pessimistic yield (the lower end of its measured stratum, else the low tokens per turn and pass rate) reaches its target, nor more than its supply; a whole-supply cell (six_category_common_support.json :: whole_supply_cells) is bound by its whole remaining supply; a cell still short at its bound or after max_rounds is a SHORTFALL -- of its bound when supply remains (a top-up continues from the frozen order), of its source only when its whole supply was attempted",
    "invocations": "one engine invocation per mode and round for the first candidates, one for the second candidates of the round's refused tasks",
-   "first_round_bound_lineages": [],
-   "_first_round_bound_lineages": "none under this design (maintainer 2026-11-05, R1 approval, section IV.5-6): round 1 of each cell is the frozen-order prefix whose expected yield reaches the target -- for schema_synth cells priced by the labelled proxy:other_source stratum -- and every later round is sized from what this session measured on that cell (its own admitted units per attempted task, top_up_margin), inside the bound and the kind's cumulative cap; the cumulative caps ($6.16 hybrid, $2.31 Thinking-2507) hold several rounds"
+   "first_round_bound_lineages": [
+    "thinking_2507",
+    "hybrid"
+   ],
+   "_first_round_bound_lineages": "first session (a_tool_generation_sr_20261105_153741): none -- round 1 the expected prefix at the labelled proxy:other_source stratum, later rounds sized from the session's own measurement. It measured schema_synth (non-thinking training 1,108 / 2,593 admitted, thinking 173 / 225) and left one cell short at its bound (non-thinking state evaluation, 686 / 800 scored positions, 14 of 110 tasks attempted). From then on each lineage needs about ONE more session, and each session costs a ~20-minute setup: round 1 takes the cell's bound, at least the shortest prefix that reaches the remaining target with probability >= 0.95 at its measured stratum's lower Wilson yield (tool_generation_plan.reach_bound; Thinking-2507 at its labelled proxy), inside the kind's cumulative cap (maintainer 2026-11-05, R1 approval, section IV.5-6: later rounds adjust the task count from measurement)"
   },
   "throughput": {
    "decode_tokens_per_s": {

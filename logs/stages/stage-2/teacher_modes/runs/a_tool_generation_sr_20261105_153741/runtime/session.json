@@ -180,9 +180,109 @@
       "utc": "2026-11-05T15:40:15+00:00",
       "elapsed_min": 0.03,
       "msg": "created s89wmhz9yz8ub2 at $1.09/h in OC-AU-1"
+    },
+    {
+      "utc": "2026-11-05T15:41:10+00:00",
+      "elapsed_min": 0.95,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-11-05T15:41:32+00:00",
+      "elapsed_min": 1.31,
+      "msg": "TCP 22 at 160.250.71.206:17480 after 1.3 min"
+    },
+    {
+      "utc": "2026-11-05T15:41:33+00:00",
+      "elapsed_min": 1.34,
+      "msg": "draw 1: ssh reachable \u2014 $0.02"
+    },
+    {
+      "utc": "2026-11-05T15:41:45+00:00",
+      "elapsed_min": 1.54,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-11-05T15:41:45+00:00",
+      "elapsed_min": 1.54,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-11-05T16:02:20+00:00",
+      "elapsed_min": 22.12,
+      "msg": "draw 1: setup complete \u2014 $0.40"
+    },
+    {
+      "utc": "2026-11-05T16:02:23+00:00",
+      "elapsed_min": 22.17,
+      "msg": "driver detached, pid 2742, confirmed by descriptor_probe \u2014 $0.40"
+    },
+    {
+      "utc": "2026-11-05T16:03:28+00:00",
+      "elapsed_min": 23.26,
+      "msg": "  2026-11-05T16:02:22Z MARKER:CONTRACT_OK \u2014 $0.42"
+    },
+    {
+      "utc": "2026-11-05T16:11:42+00:00",
+      "elapsed_min": 31.49,
+      "msg": "  2026-11-05T16:10:52Z MARKER:UNIT_OK:tool_H-N_r1_pass0 \u2014 $0.57"
+    },
+    {
+      "utc": "2026-11-05T16:15:51+00:00",
+      "elapsed_min": 35.64,
+      "msg": "  2026-11-05T16:15:35Z MARKER:UNIT_OK:tool_H-N_r2_pass0 \u2014 $0.65"
+    },
+    {
+      "utc": "2026-11-05T16:17:18+00:00",
+      "elapsed_min": 37.08,
+      "msg": "  2026-11-05T16:16:04Z MARKER:ROUND_DONE:tool_H-N_r2 \u2014 $0.67"
+    },
+    {
+      "utc": "2026-11-05T16:20:14+00:00",
+      "elapsed_min": 40.02,
+      "msg": "  2026-11-05T16:20:02Z MARKER:ROUND_DONE:tool_H-T_r1 \u2014 $0.73"
+    },
+    {
+      "utc": "2026-11-05T16:21:48+00:00",
+      "elapsed_min": 41.58,
+      "msg": "  2026-11-05T16:21:11Z MARKER:ALL_DONE \u2014 $0.76"
+    },
+    {
+      "utc": "2026-11-05T16:21:48+00:00",
+      "elapsed_min": 41.58,
+      "msg": "polling ended: ALL_DONE \u2014 $0.76"
+    },
+    {
+      "utc": "2026-11-05T16:21:54+00:00",
+      "elapsed_min": 41.69,
+      "msg": "  manifest rc=0\n0 file(s) across 0 class(es) -> /workspace/manifest.json\n  final_required: 0 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-11-05T16:22:48+00:00",
+      "elapsed_min": 42.59,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-11-05T16:22:48+00:00",
+      "elapsed_min": 42.59,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-11-05T16:23:00+00:00",
+      "elapsed_min": 42.78,
+      "msg": "pod deleted \u2014 42.8 min, $0.78; provider confirms gone: True"
     }
   ],
-  "stages": {},
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
   "authorization": {
     "schema": "aadistill.stage2.teacher_modes.tm_authorization/v1",
     "authorization_id": "stage2.teacher_modes.token_matched.a_tool_generation_sr_20261105_153741",
@@ -971,5 +1071,203 @@
   ],
   "watchdog_owns_pod": "s89wmhz9yz8ub2",
   "billed_window_deadline_utc": "2026-11-05T20:43:58Z",
-  "terminate_after_utc": null
+  "terminate_after_utc": null,
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_fbae4636.bundle",
+    "PHASE_KIND": "tool_generation_sr",
+    "SESSION_ASSETS": "battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_sr_20261105_153741/governance/authorization.json",
+    "SESSION_COMMIT": "fbae463608ee13c6c9f1904a6700d0bdb8af1dc1",
+    "SESSION_KIND": "stage2_teacher_modes_tm",
+    "SESSION_PLAN_HASH": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/tool_generation_sr/hybrid\",\"path\":\"transfer/tool_generation/hybrid/3c764775617cc581/tasks.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3c764775617cc581e39b5959b553adc1d08bf2aa3b60a7199188594f801e9812\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage2_teacher_modes_tm.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_MODEL": "Qwen/Qwen3-4B",
+    "TEACHER_REVISION": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage2_teacher_modes_tm_driver",
+    "pid": 2742,
+    "workdir": "/workspace/aad",
+    "command": "mkdir -p /workspace/teacher_modes && cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts:/workspace/aad/scripts/stages/stage-1 /opt/train/bin/python scripts/stages/stage-2/teacher_modes/tool_session.py --authorization /workspace/aad/logs/stages/stage-2/teacher_modes/runs/a_tool_generation_sr_20261105_153741/governance/authorization.json --lineage hybrid --kind tool_generation_sr --deadline-minutes 200.0 --durable-root /workspace/teacher_modes --status /workspace/stage2_teacher_modes_tm.status; grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' /workspace/stage2_teacher_modes_tm.status || echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> /workspace/stage2_teacher_modes_tm.status",
+    "log_path": "/workspace/stage2_teacher_modes_tm_run.log",
+    "status_path": "/workspace/stage2_teacher_modes_tm.status",
+    "pid_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.job.json",
+    "exit_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.exit",
+    "started_utc": "2026-11-05T16:02:21Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "secured": {
+    "tool_H-N_r1_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "067d1eb37e3734e6fdc42e81c8ebc1934ecf3de26d0e4359266886fa93854a3b"
+    },
+    "tool_H-N_r1_pass0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "96d5ec418df929547062261e9442bbb6a10796b95bc95a4c3496e36ea3d56ec4"
+    },
+    "tool_H-N_r1_pass0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "5384ec093b3409276761dd38a97b56687090384b0f5ab60c6f84fcc5d4e47026"
+    },
+    "tool_H-N_r1_pass0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "5ec4a1a0766373acb0a3e0e41e79d79699cb99eb9fb934b2e7be721dd592825e"
+    },
+    "tool_H-N_r1_pass0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "08e33dda89dcb5c4e80d033123c88fafd982197920ed8d7d77d85a3e37a5433d"
+    },
+    "tool_H-N_r1_pass0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "f38d6a6c6467de40b24d6ee752f373eaf3033a1db59ebf118922cae152f74a5f"
+    },
+    "tool_H-N_r1_pass0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "ac378f4eb5377fe0d48780a44ee4784fa8c29fea032c6cbe3d648a6da9a3ef77"
+    },
+    "tool_H-N_r1_pass0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "2b7b0b1ae0512a4c52d021c751f43253d1ab1a843ffc1d74837ef6aa53562eab"
+    },
+    "tool_H-N_r1_pass0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "1600d7b9fe05c387c40eb348c801ead414bcbade2fa9134c0f11032ae25c572f"
+    },
+    "tool_H-N_r1_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "2e07803c0cfccf1e2c875f77cff2891e7f4a9ec9bc61521dc735a1c3a2d66b8b"
+    },
+    "tool_H-N_r1_pass1.part0001.jsonl": {
+      "ok": true,
+      "sha256": "9a9842031ad47aa00336b89cd2045df6162c1e723d1bfbd200238fe49d84df71"
+    },
+    "tool_H-N_r1_pass1.part0002.jsonl": {
+      "ok": true,
+      "sha256": "ca3262e045d69401d151fd8a7f3b1f8df1f35cce8c6d83f99fdb213a2805baf5"
+    },
+    "tool_H-N_r1_pass1.part0003.jsonl": {
+      "ok": true,
+      "sha256": "ad827af4df0fda015e0d6c927839a5a8373e41d0b0444679df775acf75d30bcc"
+    },
+    "tool_H-N_r1_pass1.part0004.jsonl": {
+      "ok": true,
+      "sha256": "e5a2b70a9ef8400974f3570cb2c3bbb66e251b8c9a3c015ffeaf319727c549a2"
+    },
+    "tool_H-N_r2_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "a1b2ad73d052d74eba489d6482e1605ac04c62255d8c335469d0c8c5bdd34342"
+    },
+    "tool_H-N_r2_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "e66f70144eaf937d8c1bd6cd7c8fe4be0526e2c3861ea93544bd28f1b1654aaa"
+    },
+    "tool_H-T_r1_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "b83efbdb5be2581733aa836dd6efc45b4c6bf2f421e0ecad983506b8e94b5a14"
+    },
+    "tool_H-T_r1_pass0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "fb5654d35a2999147b0707aced9c735663e876fad106c3a230497918122ec604"
+    },
+    "tool_H-T_r1_pass0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "3e237aa973ebc52276e0d84fbd06be4844f237db490c30f68c3004faa36a5d4f"
+    },
+    "tool_H-T_r1_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "5df3d9ddbd9c9b52e7e26abdda7710d8d4fa752feea42008a15a7da050a2987f"
+    },
+    "tool_H-T_r1_pass1.part0001.jsonl": {
+      "ok": true,
+      "sha256": "8426a85a5dd48810d366b6c94a0739243ad739402899e880667e6f5ace9e999b"
+    },
+    "tool_H-T_r2_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "fe9175b3d2c2b899298809078111fd46e95227c130632d7b565a03c771a445b8"
+    },
+    "tool_H-T_r2_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "b9c588d040dab5a93acff814921890f68dee7b2c5ca1bdb64c9dc64cf4f3e639"
+    }
+  },
+  "listing_unknown": [],
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "runner_logs": {
+    "tool_H-N_r1_pass0.seg0.log": true,
+    "tool_H-N_r1_pass1.seg0.log": true,
+    "tool_H-N_r2_pass0.seg0.log": true,
+    "tool_H-N_r2_pass1.seg0.log": true,
+    "tool_H-T_r1_pass0.seg0.log": true,
+    "tool_H-T_r1_pass1.seg0.log": true,
+    "tool_H-T_r2_pass0.seg0.log": true,
+    "tool_H-T_r2_pass1.seg0.log": true
+  },
+  "files_secured": {
+    "tool_generation": true
+  },
+  "required_products_secured": {
+    "ok": true,
+    "why": "23 sealed shard(s) secured off-pod; the pod's disk goes with it; secured: tool_generation"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 0,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 42.78,
+    "actual_usd": 0.7772,
+    "extra_resources_usd": 0,
+    "authorized_usd": 6.16,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-11-05T16:23:00+00:00"
 }
