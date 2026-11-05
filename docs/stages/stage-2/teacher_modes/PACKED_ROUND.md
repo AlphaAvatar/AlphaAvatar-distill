@@ -1224,6 +1224,36 @@ FROZEN (`audit/state_eval_hybrid_v3_freeze.json`: 1,366 items, every category an
 Pivot 1,038 + schema_synth 847); `@v2-lc1` unchanged. The Full Search's application:
 `logs/budget/applications/research_a_packed_full_search_2026-11-05/`.
 
+## 13. The packed Full Search authorized (2026-11-05)
+
+The maintainer's "Packed Full Search 正式授权" (decision record: `logs/budget/decisions.md` 2026-11-05, "Packed Full
+Search authorized").
+
+**Inputs.** `packed_round_design.json :: full_search.formal_inputs` is `v3`: the frozen calibration v2 profiles and
+`state_eval_hybrid@v3` (content `c39d0ec9...`, protocol `b760ab7e...`), v2's critical groups and type table, the
+forward baseline v2. `packed_full_search.input_problems` refuses a missing freeze record and any content, protocol or
+calibration-items identity that differs from it; a formal run reads no other input set. `@v2-lc1` is kept for a later
+sensitivity re-evaluation of the final candidates, never a ranking input. The Top-1 serves A1-6cat-sr and A2-6cat-sr
+only (the hybrid lineage); C1-6cat-sr keeps its Thinking-2507 initialization.
+
+**$0 binding.** The check-only reproduces protocol `b760ab7e...` (config hash `80f93491...`; packing identities: base
+`f134fa8c...` 79 packed sequences, rh `20a2d0c1...` 59, v3 `f0738b75...` 217). v3 shares no prompt context, unit or
+tool family with the calibration items.
+
+**Budget and hardware.** Kind `packed_search`, $55.72 cumulative over every attempt (`kind_cap_problems`); one Secure
+Cloud L40S; the new volume `thprcgh7s9` (350 GB, US-TX-3, reserve $13.34,
+`logs/stages/stage-2/teacher_modes/storage/packed_search_volume_thprcgh7s9.json`), the only volume the launch accepts
+(`the_search_volume_is_the_granted_one`; 4rhubprswo and am5m373kuq are protected). Project cap $930, Research A's
+cumulative cap $211.25. The first attempt's driver minutes are 2,584 (hard terminate 2,760, all-in $55.71 at $1.19/h):
+the upper estimate plus two extra DEPTH expansion pairs. A deadline ends the attempt INCOMPLETE with the journal on the
+volume; a replacement attempt of the same search identity resumes from it, inside what the cap leaves.
+
+**What the search records beyond the beam.** `evaluation_cache.jsonl` (each state evaluation's seconds, teacher forwards
+and sketch hits, peak allocated memory), the expansion telemetry, `gpu_samples.json` (nvidia-smi peak memory and
+utilization), and on completion the Top-1 on the volume plus one off-volume copy on the private relay
+(`copy_off_volume`: uploaded, downloaded again, re-hashed; the closeout reads the relay's own sha256 before the pod is
+deleted). The $35.61 / $38.98 figures stay estimates until these measure the packed forward.
+
 ## Reproduce ($0)
 
 ```
@@ -1300,6 +1330,9 @@ PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_forward_compute \
     --suite artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3/items.jsonl \
     --write logs/stages/stage-2/teacher_modes/audit/packed_forward_compute_v3.json
+# the packed Full Search's binding (section 13): the formal input set v3, nothing loaded
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.packed_full_search --check-only \
+    --device cpu --durable-root <scratch> --status <scratch>/status --deadline-minutes 1
 ```
 
 The plan and the application record the scratch pool as `<scratch>/tool_pool_dry_v4` (content `be4652d7…`).

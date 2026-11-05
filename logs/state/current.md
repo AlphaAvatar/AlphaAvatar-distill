@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-05 (UTC), after the brief "原始数据配比恢复、Packed Forward 效率审查与 Full Search 前置准备". The human view. Every number here has an owner
+**Updated:** 2026-11-05 (UTC), after the maintainer's "Packed Full Search 正式授权". The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,14 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**RESEARCH A: THE PACKED FULL SEARCH IS AUTHORIZED AND BOUND AT $0 (2026-11-05); ATTEMPT 1 LAUNCHING.**
+- Inputs: the frozen calibration v2 profiles + `state_eval_hybrid@v3` (`c39d0ec9...`, protocol `b760ab7e...`,
+  reproduced by the check-only); `@v2-lc1` kept for sensitivity only. The Top-1 is for A1-6cat-sr / A2-6cat-sr.
+- Grant: kind `packed_search`, $55.72 cumulative over every attempt; ceiling $135.2489, project cap $930, Research A
+  $211.25. Volume `thprcgh7s9` (350 GB, US-TX-3, reserve $13.34) is the only one the search may attach.
+- Not authorized: Stage 3's six units, any formal benchmark, Stage 5 rollout, a merge into main.
+- Owner: `logs/budget/decisions.md` 2026-11-05 ("Packed Full Search authorized"); `PACKED_ROUND.md` section 13.
 
 **RESEARCH A: R1 GENERATION COMPLETE -- A1/A2/C1-6cat-sr FROZEN AT THE REGISTERED COMPOSITION (schema_arguments ~15%), state_eval_hybrid@v3 FROZEN; STOPPED AT THE FULL SEARCH'S AUTHORIZATION BOUNDARY (2026-11-05).**
 - Source: `schema_synth@v1` admitted in the extension `e771393a...` (220 training instances per domain; the independent
@@ -18,9 +26,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 - Frozen: `audit/six_category_schema_restored_freeze.json` (schema_arguments 14.98% / 14.94% / 15.24% of the tool type;
   A2/A1 3.53x the packed sequences); `audit/state_eval_hybrid_v3_freeze.json` (`c39d0ec9...`, protocol `b760ab7e...`);
   `@v2-lc1`, the -cs packs and the calibration v2 profiles unchanged.
-- Next, owed to the maintainer: the packed Full Search
-  (`logs/budget/applications/research_a_packed_full_search_2026-11-05/`: bind to `@v3`, a new ~350 GB volume, cap
-  $55.72 + $13.34 reserve, project cap >= $912). Nothing is running or billing; volumes `4rhubprswo` and `am5m373kuq` only.
+- The packed Full Search's application was approved 2026-11-05 (above).
 - Owner: `logs/budget/decisions.md` 2026-11-05 (R1 approved; R1 generation complete); `PACKED_ROUND.md` section 12.
 
 **RESEARCH A: THE REGISTERED TOOL COMPOSITION CAN BE RESTORED -- DESIGN R1 READY FOR ONE DECISION; THE PACKED FORWARD RE-PRICED ON THE FROZEN INPUTS (2026-11-05, $0, nothing generated, searched, trained or evaluated).**

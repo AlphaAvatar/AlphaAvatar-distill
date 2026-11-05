@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.packed_round_design/v1",
- "status": "PREPARATION (2026-11-03): designed and partly prepared at $0; no search, no training, no generation, no pod",
+ "status": "SEARCH AUTHORIZED (maintainer 2026-11-05, 'Packed Full Search 正式授权'): kind packed_search over input set v3, cumulative $55.72 over every attempt, one new ~350 GB network volume ($13.34 reserve), the project cap $930; Stage 3 and every other stage not authorized. Earlier: PREPARATION (2026-11-03): designed and partly prepared at $0; no search, no training, no generation, no pod",
  "decided_by": "maintainer brief 2026-11-03 'Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备'; revised by the maintainer's independent review of 649d25dd (2026-11-03): fragments accepted, formal data counted before packing, the tool pool / Toucan / verification / lineage-kind / validation repairs; the maintainer's review of 77be6e13 (2026-11-03): bounded generation, pool content identity, cross-split exact-prompt isolation, fail-closed schema validation and reference caches, the Pivot converter; loss normalization kept, no further ruling owed; the maintainer's third review of acbbbbfb (2026-11-03): per-category gates on calibration / state evaluation, the consumers' full pool / plan identity; Toucan SFT and Pivot Conversational may be PREPARED as priority candidate task sources (licence, revision, attribution, provenance and verification level kept), Pivot Function-Calling not adopted, Nemotron-SFT-Agentic-v4 deferred -- not a generation authorization",
  "_contract": "The registered terms of Research A's packed round: the new hybrid full search under the packed forward context (Stage 1), and the packed training of A1-6cat, A2-6cat and C1-6cat (Stage 3). It supersedes the packing terms of six_category_design.json (document_isolated and E1's packer) and nothing else in it; its tool-calling pool, protocol, verification and quotas stay that record's. Sequence lengths and seeds are instance values of this experiment and live here, never in src/aadistill. AUTHORIZES NOTHING.",
  "stage1_forward_context": {
@@ -49,13 +49,28 @@
   },
   "driver": "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
   "inputs": {
+   "v3": {
+    "status": "READY",
+    "why": "the maintainer's binding for the formal search (2026-11-05, 'Packed Full Search 正式授权', section I): the frozen calibration v2 profiles and state_eval_hybrid@v3, whose every category and source group meets its quota in both modes; v3 is its own identity, never written as v2",
+    "profiles_doc": "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
+    "suite_dir": "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3",
+    "suite_types": "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
+    "suite_freeze_record": "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v3_freeze.json",
+    "critical_groups": "v2",
+    "suite_id": "state_eval_hybrid@v3",
+    "suite_content_sha256": "c39d0ec9a38175a8ec0b279afd54094299b9ce83260196fcbb6ae25a8c303c99",
+    "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+    "_identity": "packed_full_search.input_problems: the freeze record must exist and name this content and protocol, the suite's manifest this content, and the evaluator built from it this protocol; any mismatch or a missing record refuses before anything loads",
+    "kept": "state_eval_hybrid@v2-lc1 (0d53efd3..., protocol d09a4849...) stays frozen and is never a ranking input of this search; only a later sensitivity re-evaluation of its final candidates"
+   },
    "v2": {
-    "status": "PENDING_TOOL_ITEMS",
-    "why": "the tool_calling@v1 items of the calibration profiles and of state_eval_hybrid@v2 are teacher-native verified episodes of the hybrid root, from the canonical pool's calibration and state_eval splits; the pool is built from the three named sources (paused by the maintainer until the code is ready), and the episodes need a paid generation session (six_category_design.json :: task_pool, protocol; this record's preparation_status)",
+    "status": "NOT_BUILT",
+    "why": "superseded before it was built: the formal search reads v3 (maintainer 2026-11-05, 'Packed Full Search 正式授权', section I); state_eval_hybrid@v2 was never frozen (its non-thinking schema_arguments cell short: v2-lc1, LIMITED_COVERAGE, is a separate frozen identity kept for sensitivity checks). Before: the tool_calling@v1 items of the calibration profiles and of state_eval_hybrid@v2 are teacher-native verified episodes of the hybrid root, from the canonical pool's calibration and state_eval splits; the pool is built from the three named sources (paused by the maintainer until the code is ready), and the episodes need a paid generation session (six_category_design.json :: task_pool, protocol; this record's preparation_status)",
     "profiles_doc": "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
     "suite_dir": "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v2",
     "suite_types": "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
-    "suite_freeze_record": "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v2_freeze.json"
+    "suite_freeze_record": "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v2_freeze.json",
+    "critical_groups": "v2"
    },
    "v1_dry_run": {
     "status": "READY",
@@ -69,7 +84,9 @@
   "checkpoint_resume": "BeamSearch's journal (search/states.jsonl) and per-state checkpoints under <durable>/search_packed on the network volume; a replacement session of the same search_run_id, config_hash and measurement_protocol_id restores every journaled state and expands only what is missing (measurement_is_comparable); a deadline ends INCOMPLETE with the journal intact; a partial ranking is never a Top-1",
   "top1_persistence": "on completion the Top-1's model.safetensors, config.json and generation_config.json are copied to <durable>/search_packed/top1 with their sha256 (must equal the commit's single_shard_sha256), products.json written; the session's closeout relays the evidence; a second copy of the Top-1 off the volume is owed before the volume's reserve ends (the v2 Top-1 has one copy only)",
   "first_evaluation_check": "full_search.FirstEvaluationCheck: both modes' critical groups present and their 50:50 mean; the frozen epsilon rule measured on the device (the level-0 children are the real search and the device admission at once, as in v2)",
-  "never_reused_from_v2": "no state, statistic, reference or checkpoint of research_a_v2_hybrid_d4_full_search: the forward context is in every calibrated operator's hashed config and in the measurement protocol id, so no v2 identity can match; the v2 Top-1 159e73be... (model.safetensors 3459b9c9...) and its journal stay untouched as history"
+  "never_reused_from_v2": "no state, statistic, reference or checkpoint of research_a_v2_hybrid_d4_full_search: the forward context is in every calibrated operator's hashed config and in the measurement protocol id, so no v2 identity can match; the v2 Top-1 159e73be... (model.safetensors 3459b9c9...) and its journal stay untouched as history",
+  "formal_inputs": "v3",
+  "_formal_inputs": "the input set a formal search reads (packed_full_search refuses any other without --check-only): v3, the maintainer's 2026-11-05 binding; the Top-1 initializes A1-6cat-sr and A2-6cat-sr (hybrid lineage); C1-6cat-sr keeps its own Thinking-2507 initialization and never reads it"
  },
  "calibration_v2": {
   "profiles": [

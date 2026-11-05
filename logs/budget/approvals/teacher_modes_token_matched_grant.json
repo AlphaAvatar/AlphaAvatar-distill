@@ -5,10 +5,10 @@
  "proposed_utc": "2026-10-31",
  "granted_by": "maintainer",
  "decision": "Maintainer 2026-10-31 'Research A Immediate STOP and Token-Matched Data Completion': 「本次指令允许在现有 Research A 和项目累计硬上限内开展补数，但旧的冻结科学身份不能被当成新版授权使用。必须先完成合法的设计变更、预算核算及新的适用授权，所有既有实际支出必须计入累计账本，不得重置额度。」 and 2026-10-31 'Research A STOP、Token-Matched 数据补齐及 D4 Full Search 方案审查': 「可以在适用的合法授权范围内继续补充 Teacher 数据；如果旧冻结授权不能覆盖新设计，必须先处理新的授权身份，不能直接沿用旧的科学执行权限。不得自动提高预算或改用 A100。」 || AMENDED by the maintainer's 2026-11-01 'Research A v2: Execute A1 First': 「现在优先完成 A1：Hybrid Teacher Thinking Mode Distillation 的完整实验，包括新 Full Search 初始化、两个 Seed 的 Recovery Training 和正式评估。」「A1 本次新增费用的总硬上限建议为 $77.00，包含工程波动以及全部本次新增的持续性资源费用，不得超过剩余 Research A、项目和 Provider 的有效上限。」「不提高原有 Research A 累计 $142.19、项目累计 $868 上限，不自动更改 Provider 的消费限制。」「不允许创建 A100 Pod。」",
- "ceiling_usd": 79.5289,
- "_ceiling": "sessions only: the supplement's $15.8689 (closed) + $63.66 for the A1 phase's sessions; the A1 phase's $77.00 hard cap = $63.66 sessions + $13.34 for the new 350 GB volume (14 days at the bills' +17%), so all new spend stays <= $77.00 and Research A's cumulative $142.19 is not exceeded ($62.17 spent before the phase)",
- "per_session_hard_cap_usd": 41.41,
- "_per_session": "the largest phase cap (the full search's deadline cost); each kind's own cap is session_hard_caps_usd[kind], enforced at issue",
+ "ceiling_usd": 135.2489,
+ "_ceiling": "sessions only: the supplement's $15.8689 (closed) + $63.66 for the A1 phase's sessions; the A1 phase's $77.00 hard cap = $63.66 sessions + $13.34 for the new 350 GB volume (14 days at the bills' +17%), so all new spend stays <= $77.00 and Research A's cumulative $142.19 is not exceeded ($62.17 spent before the phase) || AMENDED 2026-11-05 (Packed Full Search 正式授权): + $55.72 for kind packed_search, cumulative over its attempts -> $135.2489 (sessions only; the search's volume reserve $13.34 is booked by its storage record, outside the ceiling). Research A's cumulative cap $142.19 + $69.06 = $211.25 (research_a_cumulative): v1 $46.3017 + this ceiling + the two 350 GB volumes' reserves $26.68 = $208.23, inside it",
+ "per_session_hard_cap_usd": 55.72,
+ "_per_session": "the largest kind cap (packed_search's cumulative $55.72, 2026-11-05); each kind's own cap is session_hard_caps_usd[kind], enforced at issue",
  "session_hard_caps_usd": {
   "supplement": 0.0,
   "inputs": 2.65,
@@ -18,9 +18,10 @@
   "tool_generation_t2507": 2.78,
   "tool_generation": 9.13,
   "tool_generation_sr": 6.16,
-  "tool_generation_sr_t2507": 2.31
+  "tool_generation_sr_t2507": 2.31,
+  "packed_search": 55.72
  },
- "project_cumulative_cap_usd": 868.0,
+ "project_cumulative_cap_usd": 930.0,
  "gpus": {
   "NVIDIA L40S": 1.19
  },
@@ -40,9 +41,18 @@
    "role": "the full search's states and journal (prune_weights false), the inputs' shards, A1's checkpoints; lifecycle decided by the maintainer after the evidence audit",
    "id": "4rhubprswo",
    "created_utc": "2026-11-01T12:55:01Z"
+  },
+  "packed_search": {
+   "id": "thprcgh7s9",
+   "size_gb": 350,
+   "datacenter": "US-TX-3",
+   "created_utc": "2026-11-05T19:40:35Z",
+   "reserve_usd": 13.34,
+   "storage_record": "logs/stages/stage-2/teacher_modes/storage/packed_search_volume_thprcgh7s9.json",
+   "role": "the packed search's journal, states (prune_weights false), statistics caches and Top-1; its storage is booked by the storage record, outside the ceiling"
   }
  },
- "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them || AMENDED 2026-11-04: the L40S tool pilot -- kind tool_pilot through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --pilot) on the frozen pilot plan 0a1c831fdfe4... and task file e67e8acb7050..., measurement only, one L40S on am5m373kuq, hard cap $2.50, inside this grant's remaining envelope || AMENDED 2026-11-04: the tool pilot's placement -- any Secure Cloud datacenter offering one L40S at or below the grant's price, no network volume (the pod's container disk, sealed shards pulled to the dev box and resumed from them); its $2.50 kind cap cumulative over every attempt || AMENDED 2026-11-04 (maintainer review of a143b7ed, section 4): Thinking-2507's formal tool generation -- kind tool_generation_t2507 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --lineage thinking_2507) on the canonical bounded plan, its in-session L40S device admission first, one L40S on the container disk with no network volume, cumulative hard cap $2.78 || AMENDED 2026-11-05 (maintainer review of f06ccd4, sections 1, 3 and 4): Thinking-2507's top-up to the common-support targets inside the same cumulative $2.78, its registered device admission reused with the pod's own confirmation; and the hybrid's formal tool generation -- kind tool_generation through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --lineage hybrid) on the plan rebuilt at six_category_common_support@v1, one L40S on the container disk with no network volume, cumulative hard cap $9.13",
+ "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them || AMENDED 2026-11-04: the L40S tool pilot -- kind tool_pilot through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --pilot) on the frozen pilot plan 0a1c831fdfe4... and task file e67e8acb7050..., measurement only, one L40S on am5m373kuq, hard cap $2.50, inside this grant's remaining envelope || AMENDED 2026-11-04: the tool pilot's placement -- any Secure Cloud datacenter offering one L40S at or below the grant's price, no network volume (the pod's container disk, sealed shards pulled to the dev box and resumed from them); its $2.50 kind cap cumulative over every attempt || AMENDED 2026-11-04 (maintainer review of a143b7ed, section 4): Thinking-2507's formal tool generation -- kind tool_generation_t2507 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --lineage thinking_2507) on the canonical bounded plan, its in-session L40S device admission first, one L40S on the container disk with no network volume, cumulative hard cap $2.78 || AMENDED 2026-11-05 (maintainer review of f06ccd4, sections 1, 3 and 4): Thinking-2507's top-up to the common-support targets inside the same cumulative $2.78, its registered device admission reused with the pod's own confirmation; and the hybrid's formal tool generation -- kind tool_generation through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --lineage hybrid) on the plan rebuilt at six_category_common_support@v1, one L40S on the container disk with no network volume, cumulative hard cap $9.13 || AMENDED 2026-11-05 (maintainer 'Packed Full Search 正式授权'): the hybrid's packed Full Search -- kind packed_search through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (packed_full_search.py) over the frozen calibration v2 profiles and state_eval_hybrid@v3, one Secure Cloud L40S on the network volume thprcgh7s9 (US-TX-3, 350 GB), cumulative hard cap $55.72 over every attempt, resumed from its journal after an ordinary failure",
  "retries": "ordinary pre-generation engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); sealed records are never regenerated; a deterministic failure is never retried unchanged",
  "application": {
   "path": "logs/budget/applications/research_a_tm_2026-10-31/proposal.json"
@@ -53,8 +63,8 @@
   "Research A v1's frozen identity or grant as authority for any of this",
   "Research B"
  ],
- "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind; and tool_pilot artifacts, one per attempt, measurement only, together capped by the kind's cumulative $2.50; and tool_generation_t2507 artifacts, one per attempt, together capped by the kind's cumulative $2.78 (its device admission and formal generation only); and tool_generation artifacts, one per attempt, together capped by the kind's cumulative $9.13 (the hybrid's formal generation only); and tool_generation_sr artifacts, one per attempt, together capped by the kind's cumulative $6.16, and tool_generation_sr_t2507 artifacts, together capped by the kind's cumulative $2.31 (six_category_schema_restored@v1's formal generation only)",
- "_session_hard_caps": "supplement 0: done, closed for new work. inputs: the calibration top-up and the state evaluation's generation ($2.65). search: the hybrid D4 full search ($41.41). train_a1: A1's two seeds trained and evaluated in turn ($7.05 each). A retry of a kind draws on the same envelope; the phase total never exceeds the ceiling. tool_pilot: the pilot ($2.50 cumulative). tool_generation_t2507: Thinking-2507's device admission, formal generation and top-up ($2.78 cumulative). tool_generation: the hybrid's formal generation at the common-support composition ($9.13 cumulative).",
+ "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind; and tool_pilot artifacts, one per attempt, measurement only, together capped by the kind's cumulative $2.50; and tool_generation_t2507 artifacts, one per attempt, together capped by the kind's cumulative $2.78 (its device admission and formal generation only); and tool_generation artifacts, one per attempt, together capped by the kind's cumulative $9.13 (the hybrid's formal generation only); and tool_generation_sr artifacts, one per attempt, together capped by the kind's cumulative $6.16, and tool_generation_sr_t2507 artifacts, together capped by the kind's cumulative $2.31 (six_category_schema_restored@v1's formal generation only); and packed_search artifacts, one per attempt, together capped by the kind's cumulative $55.72 (the hybrid's packed Full Search only, on its own volume thprcgh7s9)",
+ "_session_hard_caps": "supplement 0: done, closed for new work. inputs: the calibration top-up and the state evaluation's generation ($2.65). search: the hybrid D4 full search ($41.41). train_a1: A1's two seeds trained and evaluated in turn ($7.05 each). A retry of a kind draws on the same envelope; the phase total never exceeds the ceiling. tool_pilot: the pilot ($2.50 cumulative). tool_generation_t2507: Thinking-2507's device admission, formal generation and top-up ($2.78 cumulative). tool_generation: the hybrid's formal generation at the common-support composition ($9.13 cumulative). packed_search: the hybrid's packed Full Search ($55.72 cumulative over its attempts; maintainer 2026-11-05).",
  "phase_a1": {
   "decided_utc": "2026-11-01",
   "hard_cap_usd": 77.0,
@@ -164,6 +174,45 @@
    "previous_scope_sha256": "545b585f3b6ea74f850c572208a11dc25e75fec50ce8ca22dc3887840316fcb4",
    "added": "kinds tool_generation_sr ($6.16 cumulative) and tool_generation_sr_t2507 ($2.31 cumulative) and their blocks; $8.47 together, inside the unchanged ceiling",
    "unchanged": "ceiling, per-session cap, project cap ($868), cards and price, every other kind's cap"
+  },
+  {
+   "utc": "2026-11-05",
+   "by": "maintainer 'AlphaAvatar-distill — Packed Full Search 正式授权' (2026-11-05), sections II-IV",
+   "ceiling_usd": 79.5289,
+   "per_session_hard_cap_usd": 41.41,
+   "project_cumulative_cap_usd": 868.0,
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1,
+    "tool_pilot": 2.5,
+    "tool_generation_t2507": 2.78,
+    "tool_generation": 9.13,
+    "tool_generation_sr": 6.16,
+    "tool_generation_sr_t2507": 2.31
+   },
+   "previous_scope_sha256": "d7c022035ad1c8b3f1ffeebd1e8997b49e5a65ee015d0fc631473b995955783f",
+   "added": "kind packed_search ($55.72 cumulative) and its block; the volume thprcgh7s9 ($13.34 reserve, booked by its storage record); research_a_cumulative",
+   "raised": {
+    "ceiling_usd": [
+     79.5289,
+     135.2489
+    ],
+    "per_session_hard_cap_usd": [
+     41.41,
+     55.72
+    ],
+    "project_cumulative_cap_usd": [
+     868.0,
+     930.0
+    ],
+    "research_a_cumulative_cap_usd": [
+     142.19,
+     211.25
+    ]
+   },
+   "unchanged": "cards and price (one L40S at <= $1.19/h), every other kind's cap, the scope of every earlier kind"
   }
  ],
  "tool_pilot": {
@@ -369,5 +418,62 @@
    "an A100 without a measured OOM",
    "a new network volume"
   ]
+ },
+ "granted_utc": "2026-11-05",
+ "_granted_utc": "the date of the latest amendment that states the project cap ($868 -> $930, maintainer 2026-11-05): derive_budget.latest_project_cap reads the newest dated grant that states one; the grant itself dates from 2026-10-31 (proposed_utc)",
+ "research_a_cumulative": {
+  "cap_usd": 211.25,
+  "previous_cap_usd": 142.19,
+  "raised_by_usd": 69.06,
+  "decided_by": "maintainer 2026-11-05, 'Packed Full Search 正式授权', section II (the search $55.72 + its volume reserve $13.34)",
+  "ledger_2026_11_05T19_40Z": {
+   "research_a_v1_usd": 46.3017,
+   "a_tm_sessions_usd": 56.9685,
+   "a_tm_volume_4rhubprswo_reserve_usd": 13.34,
+   "packed_search_volume_thprcgh7s9_reserve_usd": 13.34,
+   "spent_and_booked_usd": 129.9502
+  },
+  "obligations_at_this_ceiling_usd": 208.2306,
+  "_": "v1 = $142.19 less the first ceiling $95.8883 plus the supplement's $15.8689 = $62.1706 spent before the phase, of which the supplement ($15.8689) is inside this grant's ceiling; every later session of this study draws on the ceiling (study_engineering.envelope)"
+ },
+ "packed_search": {
+  "approves": "packed_search: the hybrid's packed Full Search research_a_packed_hybrid_full_search over input set v3 (packed_round_design.json :: full_search.formal_inputs)",
+  "granted_by": "maintainer",
+  "decision": "maintainer 2026-11-05, 'AlphaAvatar-distill — Packed Full Search 正式授权', section II '完整预算授权': '批准本次 Packed Full Search：新搜索 kind：packed_search。正式搜索所有 attempt 累计 GPU/runner all-in 硬上限：$55.72。为一块约 350 GB Network Volume 预留最多 $13.34。本轮搜索和存储的新增预算合计：$69.06。项目累计硬上限从 $868 提高到 $930，为已有资源持续费用和账单延迟预留合理空间。注意：提高项目总上限不代表扩大本次搜索 $55.72 的执行额度，也不代表自动批准 Stage 3 或其他阶段。现有 A-TM grant 的 ceiling、per-session cap、Research A 累计上限、阶段范围和历史支出不得被忽略。请在发射前一次性建立相互一致的正式搜索 Grant，按实际最新账本核算 Research A 和项目累计费用。本次 search kind 的所有新 attempt 使用同一个累计 $55.72 硬上限，不允许失败后重置额度。' and section III: '完成后，在本消息的授权额度内直接启动正式 Hybrid Packed Full Search，不要再次停下来要求同样的发射批准。'",
+  "date": "2026-11-05",
+  "hard_cap_usd": 55.72,
+  "cap_is_cumulative": true,
+  "_hard_cap": "every attempt of this kind together: an attempt's hard cap is at most $55.72 less the closeout all-in of every earlier packed_search run (token_matched_phase.kind_cap_problems); a failure never resets it",
+  "gpu": "NVIDIA L40S",
+  "gpu_count": 1,
+  "cloud": "SECURE",
+  "network_volume": {
+   "id": "thprcgh7s9",
+   "datacenter": "US-TX-3",
+   "size_gb": 350
+  },
+  "protected_volumes": [
+   "4rhubprswo",
+   "am5m373kuq"
+  ],
+  "_volumes": "the search attaches only its own volume (the_search_volume_is_the_granted_one): 4rhubprswo holds the v2 Top-1's only copy and am5m373kuq the H1-PA archive; neither is mounted, written or deleted",
+  "inputs": {
+   "calibration": "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json (frozen profiles v2)",
+   "state_evaluation": "state_eval_hybrid@v3, content c39d0ec9a38175a8ec0b279afd54094299b9ce83260196fcbb6ae25a8c303c99, measurement protocol b760ab7ec7ab4b557dc4eb971801835d",
+   "forward_baseline": "stage1_init.d1_target_aware.scored_v1@v2 (configs/shared/baselines/initialization_forward_baseline_v2.json)",
+   "kept_frozen": "state_eval_hybrid@v2-lc1: sensitivity re-evaluation only, never a ranking input"
+  },
+  "lineage": "the hybrid Qwen/Qwen3-4B@1cfa9a72 only; its Top-1 initializes A1-6cat-sr and A2-6cat-sr; C1-6cat-sr keeps its Thinking-2507 initialization",
+  "resume": "an ordinary engineering failure (pod, network, driver) is repaired and the search resumed from the volume's journal under the same search identity in a new attempt with a new one-use artifact, inside what the cumulative cap leaves; no completed expansion is re-run and the search is never restarted",
+  "a100": "never automatic: only a measured L40S CUDA out-of-memory supports a new request; this grant's card authorization is not widened",
+  "top1": "a Top-1 only from a complete search whose decision protocol and identities verify; its volume copy and one verified off-volume copy (the project's private relay)",
+  "never": [
+   "Stage 3 (the six recovery training units)",
+   "a formal benchmark",
+   "Stage 5 rollout",
+   "a merge into main",
+   "a performance optimization of the forward (logits_to_keep, skipping the last DEPTH candidate's rerun, fewer host syncs)"
+  ],
+  "ceiling_usd_at_amendment": 135.2489
  }
 }

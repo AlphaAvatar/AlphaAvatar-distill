@@ -15966,3 +15966,40 @@ on a paid pod.
 - Risks: the training overshoot (admitted episodes beyond each target) stays unused; schema_synth is compositional
   language and its held-out domains share the generator.
 - Revisit when: the maintainer decides the Full Search application.
+
+## 2026-11-05 — Packed Full Search authorized: bound to calibration v2 + state_eval_hybrid@v3, cap $55.72 cumulative, volume thprcgh7s9, project cap $930
+
+- Context: the maintainer's "AlphaAvatar-distill — Packed Full Search 正式授权" (2026-11-05), after an independent
+  review of `3a81ea53`: the three -sr arms accepted; the search's inputs, budget, hardware and stop boundary decided;
+  launch authorized once the $0 binding passes, without a second approval.
+- Decision (executed at $0 unless stated):
+  - **Inputs** (`packed_round_design.json :: full_search.formal_inputs = v3`): the frozen calibration v2 profiles and
+    `state_eval_hybrid@v3` (content `c39d0ec9...`, protocol `b760ab7e...`, v2's critical groups and type table), the
+    forward baseline v2 (`stage1_init.d1_target_aware.scored_v1@v2`). `packed_full_search.input_problems` refuses a
+    missing freeze record and any content, protocol or calibration-items identity that differs from it.
+    `@v2-lc1` stays frozen, for a sensitivity re-evaluation only. The never-built v2 input set is marked NOT_BUILT.
+  - **Check-only** (dev box, nothing loaded): the session reproduces protocol `b760ab7e...`, config hash
+    `80f93491...`; packing identities calibration base `f134fa8c...` (79 packed sequences), rh `20a2d0c1...` (59),
+    v3 `f0738b75...` (217). v3's items share no prompt context, unit or tool family with the calibration items.
+  - **Grant** (`teacher_modes_token_matched_grant.json`, amendment 2026-11-05): kind `packed_search` $55.72
+    cumulative over every attempt (`kind_cap_problems`), its block naming the volume and the protected ones; ceiling
+    $79.5289 -> $135.2489 (sessions only); per-session cap $41.41 -> $55.72; Research A's cumulative cap $142.19 ->
+    $211.25 (obligations at the new ceiling $208.23: v1 $46.30 + ceiling + two volume reserves $26.68); project cap
+    $868 -> $930 (the grant now carries `granted_utc`, which `derive_budget.latest_project_cap` reads).
+  - **Volume** (paid, ~$0.82/day): `thprcgh7s9`, 350 GB, US-TX-3, created 2026-11-05T19:40:35Z
+    (`logs/stages/stage-2/teacher_modes/storage/packed_search_volume_thprcgh7s9.json`, reserve $13.34). L40S stock
+    moved between four datacenters within minutes; of those only US-TX-3 and EU-NL-1 support network storage, and the
+    v2 search ran 21.7 h on US-TX-3's L40S hosts. 4rhubprswo is in the same datacenter: the launch refuses any volume
+    but the granted one and every protected one (`the_search_volume_is_the_granted_one`).
+  - **Evidence the search adds**: nvidia-smi peaks throughout (`search_packed/gpu_samples.json`), and the Top-1's
+    off-volume copy (`packed_full_search.copy_off_volume`: uploaded to the private relay, downloaded again and
+    re-hashed); the closeout reads the relay's own LFS sha256 before the copy counts (`top1_off_volume`). The relay
+    accepts objects of this size now (LFS batch endpoint, 2026-11-05T19:3xZ: 2 x 1.3 GB and 1 x 3 GB granted).
+- Position before launch (2026-11-05T19:33Z): provider-billed $825.81, committed $842.20, balance $84.15; no pods.
+- Alternatives considered: EU-NL-1 for the volume (no record of the image's driver there); a ceiling of spent +
+  $55.72 (equivalent for the search, since every kind is capped; the chosen ceiling keeps Research A's accounting
+  continuous with the A1 phase's).
+- Risks: the estimate ($35.61 expected, $38.98 runner all-in) is unvalidated until the first state evaluation and
+  DEPTH round measure the packed forward; L40S stock in US-TX-3 is intermittent, so a resume may wait for capacity.
+- Revisit when: the search completes, or a hard boundary (the cumulative cap, the balance, a measured OOM, a science
+  or identity mismatch) stops it.

@@ -17,26 +17,33 @@ experiment supplies (`packed_round_design.json`):
 
 * the root -- the hybrid ``Qwen/Qwen3-4B@1cfa9a72``, every shard hashed before anything expands (`full_search`);
 * the forward context's instance values -- sequence length 8,192 and its shuffle seed;
-* the calibration -- the hybrid profiles v2 (v1's thirteen types in both modes plus ``tool_calling@v1``);
-* the state evaluation -- ``state_eval_hybrid@v2`` (the same types, its own items, both modes' critical groups);
+* the calibration -- the frozen hybrid profiles v2 (v1's thirteen types in both modes plus ``tool_calling@v1``);
+* the state evaluation -- ``state_eval_hybrid@v3`` (the maintainer's 2026-11-05 binding, the design's
+  ``formal_inputs``: v2's types and both modes' critical groups, its own items, content c39d0ec9... and measurement
+  protocol b760ab7e...; `input_problems` refuses a missing freeze record or any identity that differs from it);
 * the execution -- one packed sequence per forward, DEPTH prefix reuse, ``prune_weights`` false;
 * the geometry and seed -- C3's 596M target and search seed, read from their owner, as in v2.
 
-``--inputs v1_dry_run`` builds the same session over v1's profiles and suite, which exist, so the chain and every
-identity can be checked at $0 before v2's tool-calling items exist. It is a structural check and never a search input.
+``--inputs v1_dry_run`` builds the same session over v1's profiles and suite: a structural check, never a search input.
+A formal search reads only the design's ``formal_inputs``.
 
 The first state evaluation is the device admission, as in v2 (`full_search.FirstEvaluationCheck`): both modes'
 critical groups present and the frozen epsilon rule measured on the device. A deadline stops the search with its
 journal intact (INCOMPLETE) and a replacement session of the same search identity resumes it from the journal; a
 partial ranking is never a Top-1. On completion: the commit, the full ranking, the Top-1 copied to
-``<durable>/search_packed/top1`` with its sha256, and ``products.json``.
+``<durable>/search_packed/top1`` with its sha256, ``products.json``, and a second copy OFF the volume
+(`copy_off_volume`: the project's private relay, downloaded again and re-hashed; maintainer 2026-11-05, section VI).
+nvidia-smi's peak memory and utilization are sampled throughout (``gpu_samples.json``).
 """
 from __future__ import annotations
 
 import argparse
 import dataclasses
 import json
+import os
+import subprocess
 import sys
+import tempfile
 import time
 import traceback
 from pathlib import Path
@@ -51,6 +58,9 @@ from stages.teacher_modes import full_search as FS  # noqa: E402
 DESIGN = REPO / "configs/stages/stage-2/teacher_modes/packed_round_design.json"
 SCHEMA = "aadistill.stage2.teacher_modes.packed_full_search_record/v1"
 FINALISTS_K = 1
+#: where the Top-1's off-volume copy lives in the project's private relay (`copy_off_volume`), and the pod's token
+RELAY_PREFIX = "durable/packed_full_search"
+POD_TOKEN = Path("/workspace/hf/token")
 
 
 class PackedSearchError(RuntimeError):
@@ -59,6 +69,10 @@ class PackedSearchError(RuntimeError):
 
 def design() -> dict:
     return json.loads(DESIGN.read_text())
+
+
+def formal_inputs(d: dict | None = None) -> str:
+    return (d or design())["full_search"]["formal_inputs"]
 
 
 def inputs(which: str, d: dict | None = None) -> dict:
@@ -80,7 +94,7 @@ def forward_context(baseline, d: dict | None = None):
     return ctx
 
 
-def build_session(*, workdir: Path, device: str = "cuda", which: str = "v2", repo_root: Path = REPO):
+def build_session(*, workdir: Path, device: str = "cuda", which: str | None = None, repo_root: Path = REPO):
     from aadistill.initialization.planning.metrics import StateEvaluator
     from aadistill.initialization.planning.search import SearchConfig
     from aadistill.initialization.specs.metrics import ReferenceStrategy
@@ -89,6 +103,7 @@ def build_session(*, workdir: Path, device: str = "cuda", which: str = "v2", rep
     from stages.phase_d1 import d1_session as D1S
     from stages.teacher_modes import hybrid_state_eval as HSE
     d = design()
+    which = which or formal_inputs(d)
     src = inputs(which, d)
     if src.get("status") != "READY":
         raise PackedSearchError(f"input set {which!r} is {src.get('status')!r}: {src.get('why', '')}")
@@ -102,7 +117,8 @@ def build_session(*, workdir: Path, device: str = "cuda", which: str = "v2", rep
     fc = forward_context(baseline, d)
     from stages.teacher_modes import packed_inputs as PI
     suite, items, manifest = HSE.load(src["suite_dir"], ident, src["suite_types"],
-                                      critical_groups=(PI.CRITICAL_GROUPS_V2 if which == "v2" else None))
+                                      critical_groups=(PI.CRITICAL_GROUPS_V2 if src.get("critical_groups") == "v2"
+                                                       else None))
     execution = terms["execution"]
     evaluator = StateEvaluator(
         suite, items, device=device, vocab_size=int(ident["architecture"]["vocab_size"]),
@@ -119,6 +135,39 @@ def build_session(*, workdir: Path, device: str = "cuda", which: str = "v2", rep
     return FS.Session(evaluator=evaluator, config=config,
                       execution=dataclasses.replace(execution, depth_prefix_reuse=True),
                       numerics=terms["numerics"], suite_manifest=manifest, baseline=terms["baseline"])
+
+
+def input_problems(session, which: str, d: dict | None = None) -> list[str]:
+    """Why the session is not the input set's frozen identity (empty when it is). A formal input set declares its
+    suite's content and measurement protocol; its freeze record must exist and name both, the suite's manifest the
+    same content, and the evaluator built here the same protocol. Every profile's items file must hash to what its
+    frozen profiles document records. A missing record refuses: nothing is skipped."""
+    d = d or design()
+    src = inputs(which, d)
+    bad = []
+    rec = src.get("suite_freeze_record")
+    if not rec or not Path(rec).is_file():
+        return [f"input set {which!r}: no freeze record at {rec}"]
+    ident = json.loads(Path(rec).read_text())["suite_identity"]
+    want = {"content_sha256": src.get("suite_content_sha256"), "measurement_protocol_id": src.get("measurement_protocol_id")}
+    for k, v in want.items():
+        if not v:
+            bad.append(f"input set {which!r} declares no {k}")
+        elif ident.get(k) != v:
+            bad.append(f"the freeze record's {k} {ident.get(k)} is not the design's {v}")
+    if session.suite_manifest.get("content_sha256") != want["content_sha256"]:
+        bad.append(f"the suite manifest's content {session.suite_manifest.get('content_sha256')} is not "
+                   f"{want['content_sha256']}")
+    if session.evaluator.measurement_protocol_id != want["measurement_protocol_id"]:
+        bad.append(f"the evaluator's protocol id {session.evaluator.measurement_protocol_id} is not the frozen "
+                   f"{want['measurement_protocol_id']}")
+    doc = json.loads(Path(src["profiles_doc"]).read_text())
+    for p in doc["profiles"]:
+        f = REPO / p["items_path"]
+        got = FS.sha(f) if f.is_file() else None
+        if got != p.get("items_file_sha256"):
+            bad.append(f"{p['profile_id']}@v{p['version']}: items file {got} is not the frozen {p.get('items_file_sha256')}")
+    return bad
 
 
 def packing_record(session) -> dict:
@@ -158,20 +207,82 @@ def persist_top1(row: dict, durable: Path) -> dict:
             "source_checkpoint_path": str(src)}
 
 
+def copy_off_volume(products_path: Path, *, token_file: Path = POD_TOKEN, relay: str | None = None) -> dict:
+    """The Top-1's second copy, off the network volume (maintainer 2026-11-05, section VI): each file uploaded to the
+    project's private relay under ``RELAY_PREFIX/<search_run_id>/<state_id>/``, then downloaded again into an
+    independent directory and re-hashed against the commit's sha256. Runs in its own process (`main`'s ``copy-top1``):
+    the driver's ``HF_HUB_OFFLINE=1`` is read when huggingface_hub is imported."""
+    from huggingface_hub import HfApi, hf_hub_download
+    from shared.deployment import MAIN_RELAY
+    relay = relay or MAIN_RELAY
+    prod = json.loads(Path(products_path).read_text())
+    top1 = prod["top1"]
+    src, token = Path(top1["path"]), Path(token_file).read_text().strip()
+    prefix = f"{RELAY_PREFIX}/{prod['search_run_id']}/{top1['state_id']}"
+    api, t0 = HfApi(token=token), time.time()
+    for n in sorted(top1["files_sha256"]):
+        api.upload_file(path_or_fileobj=str(src / n), path_in_repo=f"{prefix}/{n}", repo_id=relay, repo_type="model",
+                        commit_message=f"packed full search Top-1 {top1['state_id'][:12]}: {n}")
+    t1, got = time.time(), {}
+    with tempfile.TemporaryDirectory() as tmp:
+        for n in sorted(top1["files_sha256"]):
+            got[n] = FS.sha(Path(hf_hub_download(relay, f"{prefix}/{n}", repo_type="model", token=token,
+                                                 cache_dir=f"{tmp}/hf", force_download=True)))
+    return {"relay": relay, "prefix": prefix, "files_sha256": got, "verified": got == top1["files_sha256"],
+            "upload_seconds": round(t1 - t0, 1), "verify_seconds": round(time.time() - t1, 1),
+            "rule": "uploaded from the volume's copy, downloaded again into a fresh cache and re-hashed"}
+
+
+class GpuSamples:
+    """`tool_pilot.GpuSampler` (nvidia-smi: peak memory.used and utilization) with its peaks written to ``path`` on
+    every sample, so a run that dies keeps what it measured."""
+
+    def __init__(self, path: Path, every: float = 30.0):
+        from stages.teacher_modes import tool_pilot as TPL
+        outer = self
+
+        class _S(TPL.GpuSampler):
+            def sample(self):
+                super().sample()
+                try:
+                    Path(outer.path).write_text(json.dumps(
+                        {**self.as_dict(), "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}) + "\n")
+                except OSError:
+                    pass
+        self.path, self.sampler = Path(path), _S(every=every)
+
+    def __enter__(self):
+        self.sampler.__enter__()
+        return self.sampler
+
+    def __exit__(self, *exc):
+        return self.sampler.__exit__(*exc)
+
+
 def main(argv=None, *, teacher_loader=None, repo: Path | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv[:1] == ["copy-top1"]:            #: `copy_off_volume` in its own process (online), one JSON line out
+        try:
+            out = copy_off_volume(Path(argv[1]))
+        except Exception as exc:  # noqa: BLE001 -- the caller records a failed copy; the volume's copy stands
+            out = {"verified": False, "error": f"{type(exc).__name__}: {str(exc)[:1000]}"}
+        print(json.dumps(out))
+        return 0 if out.get("verified") else 1
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--authorization", default=None)
     ap.add_argument("--durable-root", required=True)
     ap.add_argument("--status", required=True)
     ap.add_argument("--deadline-minutes", type=float, required=True)
     ap.add_argument("--device", default="cuda")
-    ap.add_argument("--inputs", default="v2", choices=("v2", "v1_dry_run"))
+    ap.add_argument("--inputs", default=None, choices=tuple(design()["full_search"]["inputs"]),
+                    help="the input set (default: the design's formal_inputs)")
     ap.add_argument("--check-only", action="store_true", help="$0: the contract and the session, nothing loaded")
     a = ap.parse_args(argv)
     repo = Path(repo or REPO)
-    if a.inputs != "v2" and not a.check_only:
-        raise SystemExit("v1_dry_run is a structural check: it never feeds a search")
     d = design()
+    a.inputs = a.inputs or formal_inputs(d)
+    if a.inputs != formal_inputs(d) and not a.check_only:
+        raise SystemExit(f"a search reads only the formal input set {formal_inputs(d)!r}; {a.inputs!r} is a check")
     durable, status = Path(a.durable_root), Path(a.status)
     work = durable / "search_packed"
     work.mkdir(parents=True, exist_ok=True)
@@ -197,12 +308,13 @@ def main(argv=None, *, teacher_loader=None, repo: Path | None = None) -> int:
             record["authorization_id"] = bound.get("authorization_id")
         session = build_session(workdir=work / "search", device=a.device, which=a.inputs)
         record["session"] = session_record(session)
-        frozen_path = inputs(a.inputs, d).get("suite_freeze_record")
-        if frozen_path and Path(frozen_path).is_file() and a.inputs == "v2":
-            frozen = json.loads(Path(frozen_path).read_text())["suite_identity"]["measurement_protocol_id"]
-            if session.evaluator.measurement_protocol_id != frozen:
-                raise PackedSearchError(f"the evaluator's protocol id {session.evaluator.measurement_protocol_id} is "
-                                        f"not the frozen suite record's {frozen}")
+        if a.inputs != "v1_dry_run":
+            bad = input_problems(session, a.inputs, d)
+            if bad:
+                raise PackedSearchError("the inputs are not their frozen identity: " + "; ".join(bad))
+            record["input_identity"] = {k: v for k, v in d["full_search"]["inputs"][a.inputs].items()
+                                        if k in ("suite_id", "suite_content_sha256", "measurement_protocol_id",
+                                                 "suite_freeze_record", "profiles_doc")}
         record["stages"]["A_contract"] = {"seconds": round(time.time() - t0, 2), "status": "ok"}
         save()
         mark("CONTRACT_OK")
@@ -227,7 +339,11 @@ def main(argv=None, *, teacher_loader=None, repo: Path | None = None) -> int:
             calibration_loader=lambda prof: prepare_calibration_items(prof.resolve(str(repo)), profile_id=prof.qualified_id),
             measurer=measurer, execution=session.execution, numerics=session.numerics,
             deadline=Deadline(seconds=float(a.deadline_minutes) * 60.0), validate_on_search_device=True)
-        result = search.run()
+        with GpuSamples(work / "gpu_samples.json") as gpu:
+            try:
+                result = search.run()
+            finally:
+                record["gpu"] = gpu.as_dict()
         record["first_evaluation_check"] = measurer.record
         record["stages"]["C_beam_search"] = {"n_states": len(result.states),
                                              "n_complete_leaves": len(result.complete_leaves),
@@ -256,6 +372,17 @@ def main(argv=None, *, teacher_loader=None, repo: Path | None = None) -> int:
                     "forward_context": session.config.forward_context.as_dict(),
                     "top1": top1, "selection": str(path), "journal": str(work / "search" / "states.jsonl")}
         (work / "products.json").write_text(json.dumps(products, indent=1) + "\n")
+        save()
+        mark("TOP1_ON_VOLUME")
+        #: the second copy, off the volume; a failed copy leaves the search COMPLETE and is recorded (the closeout's
+        #: `files_secured` refuses to tear down until the relay holds the copy)
+        res = subprocess.run([sys.executable, str(Path(__file__).resolve()), "copy-top1", str(work / "products.json")],
+                             env={**os.environ, "HF_HUB_OFFLINE": "0"}, capture_output=True, text=True, timeout=5400)
+        lines = [x for x in (res.stdout or "").splitlines() if x.startswith("{")]
+        copy = json.loads(lines[-1]) if lines else {"verified": False, "error": (res.stderr or "")[-1000:]}
+        products["off_volume_copy"] = record["top1_off_volume"] = copy
+        (work / "products.json").write_text(json.dumps(products, indent=1) + "\n")
+        mark("TOP1_OFF_VOLUME_OK" if copy.get("verified") else "TOP1_OFF_VOLUME_FAILED")
         record["status"] = "COMPLETE"
     except BaseException as exc:  # noqa: BLE001
         from aadistill.initialization.planning.search import SearchDeadlineExceeded

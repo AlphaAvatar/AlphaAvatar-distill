@@ -96,12 +96,17 @@ def test_the_envelope_covers_the_pilot_and_the_amendment_raises_nothing():
     assert rc["headroom_after_usd"] > 0
     a = TPL.grant_amendment()
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
-    assert a["unchanged"]["ceiling_usd"] == g["ceiling_usd"] and a["unchanged"]["project_cumulative_cap_usd"] == 868.0
+    #: the draft raises nothing against the grant it reads; the block was written under the ceiling of its day, which a
+    #: later recorded maintainer raise (packed_search, 2026-11-05) leaves valid
+    assert a["unchanged"]["ceiling_usd"] == g["ceiling_usd"] and \
+        a["unchanged"]["project_cumulative_cap_usd"] == g["project_cumulative_cap_usd"]
+    assert g["tool_pilot"]["ceiling_usd_at_amendment"] in TM.ceilings_written_under(g)
     #: the maintainer's amendment (2026-11-04) applied as proposed, with the 2026-11-04 (16Z) placement amendment
     #: (PLACEMENT_AMENDMENT: no network volume, the kind cap cumulative): the pilot's cap and block, nothing else
     assert g["session_hard_caps_usd"]["tool_pilot"] == a["edits"]["session_hard_caps_usd.tool_pilot"] == 2.5
-    assert {k: v for k, v in g["tool_pilot"].items() if k not in ("decision", "date", "amended")} == {
-        k: v for k, v in a["edits"]["tool_pilot"].items() if k not in ("decision", "date")}
+    skip = ("decision", "date", "amended", "ceiling_usd_at_amendment")
+    assert {k: v for k, v in g["tool_pilot"].items() if k not in skip} == {
+        k: v for k, v in a["edits"]["tool_pilot"].items() if k not in skip}
     assert g["tool_pilot"]["decision"] and g["tool_pilot"]["date"] == "2026-11-04"
     assert g["tool_pilot"]["amended"]["date"] == "2026-11-04" and g["tool_pilot"]["network_volume"] is None
     assert next(x for x in g["amendments"] if "previous_tool_pilot" in x)["previous_tool_pilot"] == {
@@ -110,7 +115,7 @@ def test_the_envelope_covers_the_pilot_and_the_amendment_raises_nothing():
         a["unchanged"]["per_session_hard_cap_usd"], a["unchanged"]["gpus"], a["unchanged"]["gpu_count_max"])
     applied = json.loads(TPL.AMENDMENT.read_text())                  #: the proposal the maintainer approved
     later = {"tool_pilot", "tool_generation_t2507", "tool_generation",    #: kinds later amendments added
-             "tool_generation_sr", "tool_generation_sr_t2507"}
+             "tool_generation_sr", "tool_generation_sr_t2507", "packed_search"}
     assert {k: v for k, v in g["session_hard_caps_usd"].items() if k not in later} == \
         applied["unchanged"]["session_hard_caps_usd (the A1 kinds)"]
     assert a["edits"]["tool_pilot"]["decision"] is None and a["edits"]["tool_pilot"]["date"] is None

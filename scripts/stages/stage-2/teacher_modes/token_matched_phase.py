@@ -159,10 +159,12 @@ KIND_RECORDS = {
                               "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json"),
     "tool_generation_sr": SR_RECORDS,
     "tool_generation_sr_t2507": SR_RECORDS + ("configs/stages/stage-2/teacher_modes/t2507_device_admission.json",),
+    #: the design (its formal_inputs v3, maintainer 2026-11-05), the frozen calibration v2 profiles, the type table and
+    #: state_eval_hybrid@v3's freeze record; the selected forward baseline
     "packed_search": ("configs/stages/stage-2/teacher_modes/packed_round_design.json",
                       "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
                       "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
-                      "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v2_freeze.json",
+                      "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v3_freeze.json",
                       "configs/shared/baselines/selection.json",
                       "configs/shared/baselines/initialization_forward_baseline_v2.json"),
     **{k: ("logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json",)
@@ -396,6 +398,8 @@ def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) ->
         bad = pilot_grant_problems(g, root)
     elif kind in GENERATION_LINEAGE:
         bad = t2507_grant_problems(g, kind, root)
+    elif kind == PACKED_SEARCH_KIND:
+        bad = packed_search_grant_problems(g)
     else:
         return []
     if (g.get(kind) or {}).get("cap_is_cumulative"):
@@ -413,8 +417,8 @@ def pilot_grant_problems(g: dict, root: Path = REPO_ROOT) -> list[str]:
     block -- the maintainer's pilot-only amendment (`tool_pilot.grant_amendment` drafts it) -- must approve exactly
     the pilot's measurement, be granted by the maintainer with a decision and a date, name the frozen pilot plan and
     task file by sha256, the source admission it requires, the kind cap, the L40S, the placement and the cumulative cap
-    (`tool_pilot.PLACEMENT_AMENDMENT`, maintainer 2026-11-04), and the ceiling it was written under, which must still be
-    the grant's (an amendment never raises it)."""
+    (`tool_pilot.PLACEMENT_AMENDMENT`, maintainer 2026-11-04), and the ceiling it was written under (`ceiling_problems`:
+    the grant's, or one a recorded maintainer amendment raised it from; a block never raises it)."""
     import datetime as dt
     import json
     from stages.teacher_modes import tool_pilot as TPL
@@ -428,10 +432,11 @@ def pilot_grant_problems(g: dict, root: Path = REPO_ROOT) -> list[str]:
     want = {"approves": TPL.APPROVAL, "granted_by": "maintainer", "pilot_plan_sha256": P1._sha(rec[2], root),
             "tasks_sha256": tasks, "source_admission": rec[3],
             "hard_cap_usd": float((g.get("session_hard_caps_usd") or {}).get(TOOL_PILOT_KIND, -1)), "gpu": GPU,
-            **TPL.PLACEMENT_AMENDMENT, "ceiling_usd_at_amendment": g.get("ceiling_usd")}
+            **TPL.PLACEMENT_AMENDMENT}
     for k, v in want.items():
         if b.get(k) != v:
             bad.append(f"the grant's tool_pilot.{k} is {b.get(k)!r}, not {v!r}")
+    bad += ceiling_problems(g, TOOL_PILOT_KIND)
     if not isinstance(b.get("decision"), str) or not b["decision"].strip():
         bad.append("the grant's tool_pilot block quotes no decision")
     try:
@@ -453,13 +458,36 @@ TOOL_GENERATION_APPROVALS = {"tool_generation_t2507": T2507_APPROVAL,
                                                          "six_category_schema_restored@v1"}
 
 
+def ceilings_written_under(g: dict) -> set[float]:
+    """The ceilings a kind block may name as the one it was written under: the grant's ceiling now, and each ceiling a
+    recorded maintainer amendment raised it FROM (``amendments[].raised.ceiling_usd`` = [from, to]), chained back from
+    the current one. A block never raises the ceiling itself; a recorded raise for another kind (packed_search,
+    2026-11-05) leaves it valid, since every kind keeps its own cumulative cap."""
+    cur = float(g.get("ceiling_usd"))
+    out = {cur}
+    for a in reversed(g.get("amendments") or []):
+        r = (a.get("raised") or {}).get("ceiling_usd")
+        if r and abs(float(r[1]) - cur) < 1e-9:
+            cur = float(r[0])
+            out.add(cur)
+    return out
+
+
+def ceiling_problems(g: dict, kind: str) -> list[str]:
+    v = (g.get(kind) or {}).get("ceiling_usd_at_amendment")
+    if not isinstance(v, (int, float)) or not any(abs(float(v) - c) < 1e-9 for c in ceilings_written_under(g)):
+        return [f"the grant's {kind}.ceiling_usd_at_amendment is {v!r}, not the ceiling ${g.get('ceiling_usd')} or one a "
+                "recorded maintainer amendment raised it from"]
+    return []
+
+
 def t2507_grant_problems(g: dict, kind: str, root: Path = REPO_ROOT) -> list[str]:
     """Why the grant does not authorize a lineage's formal tool generation beyond its kind cap (empty when it does):
     its block (``tool_generation_t2507`` or ``tool_generation``) must approve exactly that kind's
     `TOOL_GENERATION_APPROVALS` entry, be granted by the maintainer with a decision and a date, carry the kind cap as
     its hard cap, cumulative, the L40S on the container placement, the formal source admission (and Thinking-2507 the
-    device admission) it requires, and the ceiling it was written under (which must still be the grant's: an
-    amendment never raises it)."""
+    device admission) it requires, and the ceiling it was written under (the grant's, or one a recorded maintainer
+    amendment raised it from: `ceiling_problems`; a block never raises it)."""
     import datetime as dt
     from stages.teacher_modes import tool_pilot as TPL
     b = g.get(kind)
@@ -468,9 +496,9 @@ def t2507_grant_problems(g: dict, kind: str, root: Path = REPO_ROOT) -> list[str
     want = {"approves": TOOL_GENERATION_APPROVALS[kind], "granted_by": "maintainer",
             "hard_cap_usd": float((g.get("session_hard_caps_usd") or {}).get(kind, -1)), "cap_is_cumulative": True,
             "gpu": GPU, "placement": TPL.PLACEMENT, "source_admission": KIND_RECORDS[kind][4],
-            **({"device_admission": IN_SESSION_DEVICE_ADMISSION[kind]} if kind in IN_SESSION_DEVICE_ADMISSION else {}),
-            "ceiling_usd_at_amendment": g.get("ceiling_usd")}
+            **({"device_admission": IN_SESSION_DEVICE_ADMISSION[kind]} if kind in IN_SESSION_DEVICE_ADMISSION else {})}
     bad = [f"the grant's {kind}.{k} is {b.get(k)!r}, not {v!r}" for k, v in want.items() if b.get(k) != v]
+    bad += ceiling_problems(g, kind)
     if not isinstance(b.get("decision"), str) or not b["decision"].strip():
         bad.append(f"the grant's {kind} block quotes no decision")
     try:
@@ -478,6 +506,41 @@ def t2507_grant_problems(g: dict, kind: str, root: Path = REPO_ROOT) -> list[str
     except ValueError:
         bad.append(f"the grant's {kind}.date {b.get('date')!r} is not an ISO date")
     return bad
+
+
+PACKED_SEARCH_KIND = "packed_search"
+
+
+def packed_search_grant_problems(g: dict) -> list[str]:
+    """Why the grant does not authorize the packed full search beyond its kind cap (empty when it does): its
+    ``packed_search`` block (maintainer 2026-11-05, 'Packed Full Search 正式授权') must be the maintainer's, quote the
+    decision, carry the kind cap as its hard cap, cumulative over every attempt, the L40S, and name the network volume
+    the search runs on -- which `the_search_volume_is_the_granted_one` then requires at launch."""
+    b = g.get(PACKED_SEARCH_KIND)
+    if not isinstance(b, dict):
+        return ["the grant carries no packed_search scope: the maintainer's amendment is required"]
+    want = {"granted_by": "maintainer", "cap_is_cumulative": True, "gpu": GPU,
+            "hard_cap_usd": float((g.get("session_hard_caps_usd") or {}).get(PACKED_SEARCH_KIND, -1))}
+    bad = [f"the grant's packed_search.{k} is {b.get(k)!r}, not {v!r}" for k, v in want.items() if b.get(k) != v]
+    if not isinstance(b.get("decision"), str) or not b["decision"].strip():
+        bad.append("the grant's packed_search block quotes no decision")
+    if not (b.get("network_volume") or {}).get("id"):
+        bad.append("the grant's packed_search block names no network volume")
+    return bad
+
+
+def the_search_volume_is_the_granted_one(ctx) -> tuple[bool, str]:
+    """The packed search attaches only the volume its grant block names, never a volume the grant protects
+    (``packed_search.protected_volumes``: 4rhubprswo holds the v2 Top-1's only copy)."""
+    import json
+    g = json.loads((REPO_ROOT / STUDY.grant).read_text())
+    b = g.get(PACKED_SEARCH_KIND) or {}
+    want, vid = (b.get("network_volume") or {}).get("id"), ctx.args.network_volume_id
+    if vid in set(b.get("protected_volumes") or ()):
+        return False, f"{vid} is a protected volume: the packed search never attaches it"
+    if not want or vid != want:
+        return False, f"the packed search runs on its granted volume {want!r}, not {vid!r}"
+    return True, f"the granted search volume {vid}"
 
 
 def require_on_pod(path: Path, kind: str, root: Path = REPO_ROOT) -> dict:
@@ -739,7 +802,7 @@ DRIVERS = {
     "tool_pilot": ("scripts/stages/stage-2/teacher_modes/tool_session.py", tool_pilot_command, ("pilot_tasks",),
                    "Research A packed round: the hybrid's L40S tool pilot on its frozen cells (measurement only)"),
     "packed_search": ("scripts/stages/stage-2/teacher_modes/packed_full_search.py", packed_search_command,
-                      ("profiles_v2", "suite_v2"),
+                      ("profiles_v2", "suite_v3"),
                       "Research A packed round: the hybrid full search in the packed forward context (one L40S)"),
     **{k: ("scripts/stages/stage-2/teacher_modes/a1_units.py",
            (lambda ctx, plan, _k=k: train_6cat_command(ctx, plan, _k)), (f"pack_{k}",),
@@ -757,7 +820,8 @@ POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation
           "train_a1": ("a1_units.json",),
           "packed_search": ("search_packed/search_record.json", "search_packed/first_evaluation_check.json",
                             "search_packed/search/states.jsonl", "search_packed/search/telemetry.jsonl",
-                            "search_packed/evaluation_cache.jsonl", "search_packed/products.json"),
+                            "search_packed/evaluation_cache.jsonl", "search_packed/products.json",
+                            "search_packed/gpu_samples.json"),
           **{k: (f"{PACKED_TRAIN_ARMS[k]}_units.json",) for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
           **{k: tuple(f"tool_generation_{li}/{f}" for f in ("tool_session.json", "telemetry.jsonl",
                                                              "device_admission.json", "device_confirmation.json"))
@@ -797,6 +861,35 @@ def top1_on_volume(ctx, top_dir: str, files_sha256: dict[str, str]) -> dict[str,
     return {f"top1_on_volume/{n}": seen.get(n) == files_sha256[n] for n in names}
 
 
+def top1_off_volume(ctx, products: dict) -> dict[str, bool]:
+    """The packed search's second Top-1 copy, read from the relay itself rather than from the pod's claim: each file at
+    the copy's prefix, its LFS sha256 (or, for a small non-LFS file, its downloaded bytes) against the commit's."""
+    import hashlib
+    copy, want = products.get("off_volume_copy") or {}, products["top1"]["files_sha256"]
+    if not copy.get("prefix"):
+        ctx.evidence["top1_off_volume"] = {"error": copy.get("error") or "no off-volume copy recorded"}
+        return {f"top1_off_volume/{n}": False for n in want}
+    seen: dict[str, str | None] = {}
+    try:
+        from huggingface_hub import HfApi, hf_hub_download
+        api = HfApi()
+        info = {i.path: i for i in api.get_paths_info(copy["relay"], [f"{copy['prefix']}/{n}" for n in want],
+                                                      repo_type="model", expand=True)}
+        for n in want:
+            i = info.get(f"{copy['prefix']}/{n}")
+            lfs = getattr(i, "lfs", None)
+            if lfs is not None:
+                seen[n] = getattr(lfs, "sha256", None) or (lfs.get("sha256") if isinstance(lfs, dict) else None)
+            elif i is not None:
+                seen[n] = hashlib.sha256(Path(hf_hub_download(copy["relay"], f"{copy['prefix']}/{n}",
+                                                              repo_type="model")).read_bytes()).hexdigest()
+    except Exception as exc:  # noqa: BLE001 -- an unreadable relay secures nothing
+        ctx.evidence["top1_off_volume"] = {"error": repr(exc)[:300]}
+        return {f"top1_off_volume/{n}": False for n in want}
+    ctx.evidence["top1_off_volume"] = {"relay": copy["relay"], "prefix": copy["prefix"], "sha256": seen}
+    return {f"top1_off_volume/{n}": seen.get(n) == want[n] for n in want}
+
+
 def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     """Closeout for the search and A1 kinds: the evidence directories tarred and pulled (weights excluded: they stay
     on the volume, by sha256 in the records), and the search's Top-1 verified by its sha256 on the volume."""
@@ -810,7 +903,10 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
                                          excludes=("./search/states", "./top1", "./repeatability"))[0]
         prod = st / f"{sub}/products.json"
         if prod.is_file():
-            got.update(top1_on_volume(ctx, f"{root}/{sub}/top1", json.loads(prod.read_text())["top1"]["files_sha256"]))
+            doc = json.loads(prod.read_text())
+            got.update(top1_on_volume(ctx, f"{root}/{sub}/top1", doc["top1"]["files_sha256"]))
+            if kind == PACKED_SEARCH_KIND:
+                got.update(top1_off_volume(ctx, doc))
     elif kind in GENERATION_LINEAGE or kind == TOOL_PILOT_KIND:
         sub = "tool_pilot_hybrid" if kind == TOOL_PILOT_KIND else f"tool_generation_{GENERATION_LINEAGE[kind]}"
         got[kind if kind == TOOL_PILOT_KIND else "tool_generation"] = P1._tar(ctx, f"{root}/{sub}", sub)[0]
@@ -895,7 +991,7 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
     packed = {
               "pilot_tasks": asset("artifacts/stages/stage-2/teacher_modes/tool_pilot"),
               "profiles_v2": asset("artifacts/stages/stage-2/teacher_modes/calibration_v3"),
-              "suite_v2": asset("artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v2"),
+              "suite_v3": asset("artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3"),
               **{f"pack_{k}": asset(f"artifacts/stages/stage-2/teacher_modes/packs_6cat/{a}")
                  for k, a in PACKED_TRAIN_ARMS.items()}}
     named = {**packed, "order": order,
@@ -930,7 +1026,8 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
                           the_pilot_placement_is_the_planned_one,
                           *((the_bound_task_file_is_relayed,) if kind in GENERATION_LINEAGE else ()))
                          if kind in CONTAINER_KINDS else
-                         (P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones)),
+                         (P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones,
+                          *((the_search_volume_is_the_granted_one,) if kind == PACKED_SEARCH_KIND else ()))),
         on_poll=polls[0], products_secured=polls[1],
         artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; every sealed shard is already "

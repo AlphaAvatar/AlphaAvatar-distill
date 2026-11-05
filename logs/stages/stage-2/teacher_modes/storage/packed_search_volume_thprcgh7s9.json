@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.storage_record/v1",
+ "volume_id": "thprcgh7s9",
+ "name": "aad-packed-search",
+ "data_center_id": "US-TX-3",
+ "size_gb": 350,
+ "created_utc": "2026-11-05T19:40:35Z",
+ "reserved_usd": 13.34,
+ "actual_usd": null,
+ "decided_by": "maintainer 2026-11-05 'AlphaAvatar-distill — Packed Full Search 正式授权', sections II and IV: '为一块约 350 GB Network Volume 预留最多 $13.34' ... '先根据实际 L40S 可用区域选择数据中心，再创建对应的新 Network Volume。不固定 EUR-IS-2'",
+ "purpose": "research_a_packed_hybrid_full_search (kind packed_search): BeamSearch's journal (search_packed/search/states.jsonl), every state's checkpoint (prune_weights false), the statistics caches, the search record and evidence, and the Top-1 (search_packed/top1) -- everything a replacement session resumes from",
+ "price": "$0.07 per GB-month: $0.82/day (the bills have run up to 17% over the rate); the reserve is 14 days, as booked for 4rhubprswo",
+ "lifecycle": "kept while the search runs and until its Top-1 has a verified off-volume copy and the maintainer decides what stays (the Top-1 for A1-6cat-sr / A2-6cat-sr, the search state as evidence); nothing on it is deleted automatically",
+ "datacenter_choice": "read 2026-11-05T19:34-19:40Z: L40S Secure stock moved between OC-AU-1, US-TX-3, US-MO-1 and EU-NL-1 within minutes (runpodctl datacenter list; GraphQL dataCenters.gpuAvailability); of those only US-TX-3 and EU-NL-1 support network storage (storageSupport). US-TX-3 chosen: the v2 search ran there for 21.7 h on L40S hosts at $1.1067/h with the image's 595.91.07 driver, and the A1 phase's sessions all drew L40S there; EU-NL-1 hosts carried that driver 0/3 times in this project's history",
+ "protected_neighbour": "4rhubprswo (the v2 Top-1's only copy) is in the same datacenter: the packed search attaches only this volume (token_matched_phase.the_search_volume_is_the_granted_one refuses any other and every protected volume)",
+ "authorizes": "nothing"
+}
