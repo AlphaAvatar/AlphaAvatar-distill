@@ -1,0 +1,374 @@
+{
+ "schema": "aadistill.budget.application/schema_restoration_v1",
+ "written_utc": "2026-11-05T13:50:00Z",
+ "status": "AUTHORIZATION REQUEST for the maintainer's decision; AUTHORIZES NOTHING: no source admission, no registration, no grant, no launch, no pod, no spend",
+ "decided_by": [
+  "maintainer 2026-11-05, '原始数据配比恢复、Packed Forward 效率审查与 Full Search 前置准备': restore the registered seven-category proportions (schema_arguments 15% of the tool type, counted before packing); a new source is an independent scientific design; apply for the next paid authorization only once legality, cost and identity are settled"
+ ],
+ "the_one_decision": "approve design R1 as one package: (1) admit schema_synth@v1 as a formal tool-calling task source of the pool extension tool_pool@v1+schema_synth@v1; (2) register six_category_schema_restored@v1 (A1-6cat-sr / A2-6cat-sr / C1-6cat-sr); (3) grant two generation sessions with cumulative hard caps of $6.16 (hybrid, both modes) and $2.31 (Thinking-2507)",
+ "why_this_design": {
+  "supply": "audit/schema_arguments_supply_v3.json: H-N attempted all 1,928 Pivot schema_arguments training tasks (17,290 / 74,013 supervised tokens; 29 / 29 state-evaluation tasks, 1,063 / 1,800 scored positions): exhausted. H-T attempted only 124 (27,837 tokens) and T2507 136 full episodes (75,152, above target): neither is exhausted",
+  "public_sources": "no public source closes the gap legally and robustly (scratch survey of 27 candidates; prior reviews v1/v2): argilla/Synth-APIGen-v0.1 is the only usable_with_conditions candidate (xLAM few-shot lineage, Llama/Qwen attribution terms, code utilities with no enums, units or dates) and is not proposed",
+  "generator": "scripts/stages/stage-2/teacher_modes/schema_synth.py: 30 domains, 3,750 tasks, gold computed by the program from a sampled ground truth (never a model), verified by the unchanged tool_verification@v2; audit/schema_synth_v1_audit.json: every task admits its gold episode in both modes and refuses a changed leaf, a dropped required field, an unrequested optional field and a reordered array; deterministic; 0 tool names or signatures shared with eval-set-1, the benchmarks or the excluded lineage sources",
+  "source_matching": "R1 gives every arm the same supervised tokens from each source inside schema_arguments (Pivot 17,200 / 17,171 for C1, schema_synth the rest of the 15%); R2 (priced below) fills only H-N from the new source, making 77% of A2's schema tokens synthetic against 0% of A1's -- a source difference confounded with the mode"
+ },
+ "identity": {
+  "design": {
+   "path": "configs/stages/stage-2/teacher_modes/six_category_schema_restored.json",
+   "sha256": "26ffb62efc2c76bc2441394ddfe1903bdfff39f2a28c748d94a5401d836d55be",
+   "status": "DESIGN"
+  },
+  "pool_extension": {
+   "dir": "artifacts/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth",
+   "content_sha256": "6139e6478c107d8a594c718baf697475568b2a87d8a7d4a3e7a03a20aedfd567",
+   "base_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+   "pool_json_sha256": "3ac256f45e68f23755a7aade30c4cb203041d61d48e41ab6e8ef2f16f8a2f452",
+   "addition": "3,750 schema_arguments tasks: training 3,520 (22 domains), state_eval 120 (3), calibration 60 (2), validation 40 (2), reserve 10 (1)"
+  },
+  "tasks": {
+   "path": "artifacts/stages/stage-2/teacher_modes/schema_synth_v1/tasks.jsonl",
+   "sha256": "7e62ab584cbd812076464803228aa73afd568e61c58c939512a966a66f8f05a5",
+   "generator_sha256": "d8b2a0d3ddd0e6012a2ee77c06bda33779415dcd646ca0c1bd97c3690eb05a34"
+  },
+  "dry_plan": {
+   "path": "logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan_dry.json",
+   "sha256": "fcf2082816f84b0733fcc19a0413687455f9adf7cbf0bdbcc8f5378dfb9e3d4b"
+  },
+  "reused_import_records": [
+   "a_tool_pilot_20261104_164531",
+   "a_tool_generation_t2507_20261104_195411",
+   "a_tool_generation_t2507_20261105_064829",
+   "a_tool_generation_t2507_20261105_072112",
+   "a_tool_generation_20261105_074146",
+   "a_tool_generation_20261105_105512"
+  ],
+  "reuse_rule": "every task those six sessions attempted is DONE in its mode by task identity (tool_generation_plan.import_records: task sha256 against the extension, whose base is tool_pool@v1 byte for byte); no sealed shard, task or identity is regenerated or edited"
+ },
+ "cells_R1": [
+  {
+   "lineage": "hybrid",
+   "mode": "H-N",
+   "split": "training",
+   "group": "pivot_conversational",
+   "target": 17200.0,
+   "status": "REACHED",
+   "sealed": {
+    "tasks": 1928,
+    "admitted": 303,
+    "units": 17290.0
+   },
+   "new_tasks_expected": 0,
+   "bound": 0,
+   "within_bound_low_expected_high": [
+    17290.0,
+    17290.0,
+    17290.0
+   ],
+   "basis": {}
+  },
+  {
+   "lineage": "hybrid",
+   "mode": "H-N",
+   "split": "training",
+   "group": "schema_synth",
+   "target": 56812.7,
+   "status": "REACHABLE",
+   "sealed": {
+    "tasks": 0,
+    "admitted": 0,
+    "units": 0
+   },
+   "new_tasks_expected": 2593,
+   "bound": 3451,
+   "within_bound_low_expected_high": [
+    61448.5,
+    75621.8,
+    92383.3
+   ],
+   "basis": {
+    "full_episode@v1:proxy:other_source": 3520
+   }
+  },
+  {
+   "lineage": "hybrid",
+   "mode": "H-N",
+   "split": "state_eval",
+   "group": "pivot_conversational",
+   "target": 1000.0,
+   "status": "REACHED",
+   "sealed": {
+    "tasks": 29,
+    "admitted": 11,
+    "units": 1063.0
+   },
+   "new_tasks_expected": 0,
+   "bound": 0,
+   "within_bound_low_expected_high": [
+    1063.0,
+    1063.0,
+    1063.0
+   ],
+   "basis": {}
+  },
+  {
+   "lineage": "hybrid",
+   "mode": "H-N",
+   "split": "state_eval",
+   "group": "schema_synth",
+   "target": 800.0,
+   "status": "REACHABLE",
+   "sealed": {
+    "tasks": 0,
+    "admitted": 0,
+    "units": 0
+   },
+   "new_tasks_expected": 7,
+   "bound": 29,
+   "within_bound_low_expected_high": [
+    1756.6,
+    3467.6,
+    4936.9
+   ],
+   "basis": {
+    "full_episode@v1:proxy:other_source": 120
+   }
+  },
+  {
+   "lineage": "hybrid",
+   "mode": "H-T",
+   "split": "training",
+   "group": "pivot_conversational",
+   "target": 17200.0,
+   "status": "REACHED",
+   "sealed": {
+    "tasks": 124,
+    "admitted": 37,
+    "units": 27837.0
+   },
+   "new_tasks_expected": 0,
+   "bound": 0,
+   "within_bound_low_expected_high": [
+    27837.0,
+    27837.0,
+    27837.0
+   ],
+   "basis": {
+    "full_episode@v1:measured": 344,
+    "single_step_gold_tool_call@v1:measured": 1460
+   }
+  },
+  {
+   "lineage": "hybrid",
+   "mode": "H-T",
+   "split": "training",
+   "group": "schema_synth",
+   "target": 56812.7,
+   "status": "REACHABLE",
+   "sealed": {
+    "tasks": 0,
+    "admitted": 0,
+    "units": 0
+   },
+   "new_tasks_expected": 225,
+   "bound": 511,
+   "within_bound_low_expected_high": [
+    69797.5,
+    129069.9,
+    214496.3
+   ],
+   "basis": {
+    "full_episode@v1:proxy:other_source": 3520
+   }
+  },
+  {
+   "lineage": "hybrid",
+   "mode": "H-T",
+   "split": "state_eval",
+   "group": "pivot_conversational",
+   "target": 1000.0,
+   "status": "REACHED",
+   "sealed": {
+    "tasks": 29,
+    "admitted": 11,
+    "units": 4236.0
+   },
+   "new_tasks_expected": 0,
+   "bound": 0,
+   "within_bound_low_expected_high": [
+    4236.0,
+    4236.0,
+    4236.0
+   ],
+   "basis": {}
+  },
+  {
+   "lineage": "hybrid",
+   "mode": "H-T",
+   "split": "state_eval",
+   "group": "schema_synth",
+   "target": 800.0,
+   "status": "REACHABLE",
+   "sealed": {
+    "tasks": 0,
+    "admitted": 0,
+    "units": 0
+   },
+   "new_tasks_expected": 4,
+   "bound": 90,
+   "within_bound_low_expected_high": [
+    6483.1,
+    18604.3,
+    38505.2
+   ],
+   "basis": {
+    "full_episode@v1:proxy:other_source": 120
+   }
+  },
+  {
+   "lineage": "thinking_2507",
+   "mode": "T2507",
+   "split": "training",
+   "group": "pivot_conversational",
+   "target": 17171.0,
+   "status": "REACHED",
+   "sealed": {
+    "tasks": 136,
+    "admitted": 39,
+    "units": 75152.0
+   },
+   "new_tasks_expected": 0,
+   "bound": 0,
+   "within_bound_low_expected_high": [
+    75152.0,
+    75152.0,
+    75152.0
+   ],
+   "basis": {
+    "full_episode@v1:measured": 232,
+    "single_step_gold_tool_call@v1:prior": 1560
+   }
+  },
+  {
+   "lineage": "thinking_2507",
+   "mode": "T2507",
+   "split": "training",
+   "group": "schema_synth",
+   "target": 56717.1,
+   "status": "REACHABLE",
+   "sealed": {
+    "tasks": 0,
+    "admitted": 0,
+    "units": 0
+   },
+   "new_tasks_expected": 103,
+   "bound": 169,
+   "within_bound_low_expected_high": [
+    74127.5,
+    93387.4,
+    115356.5
+   ],
+   "basis": {
+    "full_episode@v1:proxy:other_source": 3520
+   }
+  }
+ ],
+ "price": {
+  "R1": {
+   "by_level_usd": {
+    "lower": 0.66,
+    "expected": 1.12,
+    "upper": 6.29
+   },
+   "sessions": {
+    "hybrid": {
+     "lower": {
+      "usd": 0.38,
+      "minutes": 21.1,
+      "generated_tokens": 561004,
+      "rounds": 1,
+      "rate_usd_per_hour": 1.09
+     },
+     "expected": {
+      "usd": 0.74,
+      "minutes": 40.9,
+      "generated_tokens": 1717428,
+      "rounds": 2,
+      "rate_usd_per_hour": 1.09
+     },
+     "upper": {
+      "usd": 4.66,
+      "minutes": 235.2,
+      "generated_tokens": 1717428,
+      "rounds": 4,
+      "rate_usd_per_hour": 1.19
+     }
+    },
+    "thinking_2507": {
+     "lower": {
+      "usd": 0.28,
+      "minutes": 15.5,
+      "generated_tokens": 257350,
+      "rounds": 1,
+      "rate_usd_per_hour": 1.09
+     },
+     "expected": {
+      "usd": 0.38,
+      "minutes": 21.0,
+      "generated_tokens": 517765,
+      "rounds": 2,
+      "rate_usd_per_hour": 1.09
+     },
+     "upper": {
+      "usd": 1.63,
+      "minutes": 82.4,
+      "generated_tokens": 517765,
+      "rounds": 4,
+      "rate_usd_per_hour": 1.19
+     }
+    }
+   },
+   "proposed_hard_caps_usd": {
+    "hybrid": 6.1586,
+    "thinking_2507": 2.3051
+   },
+   "hard_cap_total_usd": 8.4637
+  },
+  "R2": {
+   "by_level_usd_hybrid_only": {
+    "lower": 0.37,
+    "expected": 0.64,
+    "upper": 3.72
+   },
+   "proposed_hard_cap_usd": 4.9582,
+   "thinking_2507": "no session: its Pivot cell is REACHED (75,152 of 73,888)"
+  },
+  "basis": "tool_generation_plan.price_measured over the extension: the six sessions' measured throughput, engine starts and session overhead; schema_synth tasks have no measurement yet and are priced by the same lineage, mode, category and shape measured on Pivot (basis proxy:other_source: H-N 15% admission, 147 tokens per admitted episode -- conservative: the bound buys the target even at Pivot's yield); USD figures include each session's fixed minutes; the cap is the shared runner's own all-in at $1.19/h to its hard deadline",
+  "levels": "lower: one round at the lower task counts; expected: two rounds; upper: the whole bound over four rounds at the slowest measured throughput and $1.19/h"
+ },
+ "execution": {
+  "hardware": "one Secure Cloud L40S per session, any datacenter, no network volume (as the six imported sessions)",
+  "sessions": "hybrid first (both modes), then Thinking-2507, one billing resource at a time; Thinking-2507's registered device admission reused, the new pod confirming it (device_confirmation)",
+  "rounds": "multi-round with a deadline at a round boundary; round 1 measures schema_synth's yield and later rounds plan from it",
+  "resume": "a failed attempt's COMPLETE store is imported by task identity; an interrupted one resumes under its own identity (cross-plan-import contract)"
+ },
+ "position": {
+  "read_utc": "2026-11-05T13:46:05Z",
+  "project_cap_usd": 868.0,
+  "committed_usd": 840.8325,
+  "project_remaining_usd": 27.1675,
+  "fits": "R1's caps $8.4637 leave $18.70 of the project cap; the Full Search (below) does not fit without a raised project cap"
+ },
+ "after_approval_zero_cost_steps": [
+  "a source admission record for the extension's content signed by the maintainer (tool_source_admission binds the reviewed content be4652d7 today and refuses an unadmitted source)",
+  "the design's status REGISTERED; the extension moved to data/stages/stage-2/teacher_modes/ beside tool_pool_v1 (no byte changes; its pool.json names its base by path)",
+  "the generation protocol bound to the extension and this design's plan (a per-design plan path, so the frozen common-support plan keeps verifying)",
+  "the kinds' grants and approvals for the two sessions; the launch-bound sweep on the clean tree"
+ ],
+ "not_requested": [
+  "the packed Full Search (re-priced in audit/packed_forward_compute.json: $26-41 pod at the corrected model, plus a ~350 GB network volume; needs the search's binding to state_eval_hybrid@v2-lc1 or a v3 suite and a raised project cap)",
+  "Stage 3 training of any arm",
+  "formal benchmark evaluation",
+  "a merge into main"
+ ],
+ "authorizes": "nothing"
+}

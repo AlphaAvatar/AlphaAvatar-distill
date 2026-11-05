@@ -145,7 +145,8 @@ def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict,
     if cells is None:
         cells = plan["lineages"][lineage]["modes"][mode]["cells"]
         orders = [([by_id[t] for t in c["task_ids"]] if "task_ids" in c else
-                   TGP.cell_order(man["orders"].get(c["split"], []), by_id, c["category"])) for c in cells]
+                   TGP.cell_order(man["orders"].get(c["split"], []), by_id, c["category"], c.get("datasets")))
+                  for c in cells]
     state = []
     for i, c in enumerate(cells):
         if "sealed" in c and "task_ids" in c:       #: a plan that bound the import record: its cells carry the outcomes
@@ -244,7 +245,7 @@ def _report(cells: list[dict], state: list[dict], orders: list | None = None, st
     for i, (cell, s) in enumerate(zip(cells, state)):
         done = s["units"] >= cell["target"] and s["admitted"] >= cell.get("min_tasks", 0)
         row = {k: cell[k] for k in ("split", "category", "unit", "target", "bound")} | \
-            {**s, "status": "REACHED" if done else "SHORTFALL"}
+            ({"group": cell["group"]} if cell.get("group") else {}) | {**s, "status": "REACHED" if done else "SHORTFALL"}
         if not done:
             left = len(orders[i]) - s["attempted"] if orders is not None else None
             supply = cell.get("new_supply")

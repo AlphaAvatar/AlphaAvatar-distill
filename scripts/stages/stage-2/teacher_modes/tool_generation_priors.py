@@ -57,8 +57,16 @@ def wilson(k: int, n: int, z: float = Z90) -> tuple[float, float]:
     return max(0.0, c - h), min(1.0, c + h)
 
 
-def stratum_key(lineage: str, mode: str, split: str, category: str | None, shape: str) -> str:
-    return f"{lineage}|{mode}|{split}|{category}|{shape}"
+#: tool_pool@v1's two sources keep the unsuffixed stratum key every recorded prior and plan uses; a task of any other
+#: source (a pool extension, `tool_pool.extend`) has strata of its own (``|<dataset>``), so it is never priced at
+#: another source's measured yield and stays UNMEASURED until a session of its own measures it
+POOL_V1_SOURCES = ("Agent-Ark/Toucan-1.5M", "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1")
+
+
+def stratum_key(lineage: str, mode: str, split: str, category: str | None, shape: str,
+                dataset: str | None = None) -> str:
+    key = f"{lineage}|{mode}|{split}|{category}|{shape}"
+    return key if dataset is None or dataset in POOL_V1_SOURCES else f"{key}|{dataset}"
 
 
 def measure(session_dirs, *, plan_path: Path = TPL.PLAN, tasks_path: Path = TPL.TASKS,
@@ -82,7 +90,8 @@ def measure(session_dirs, *, plan_path: Path = TPL.PLAN, tasks_path: Path = TPL.
                 r0 = sealed[0].get(tid)
                 if r0 is None:
                     continue
-                a = acc[stratum_key(lineage, mode, task["split"], task["category"], TE.episode_shape(task))]
+                a = acc[stratum_key(lineage, mode, task["split"], task["category"], TE.episode_shape(task),
+                                    (task.get("source") or {}).get("dataset"))]
                 a["attempted"] += 1
                 out, units, _ = TPL._outcome(task, r0, set(), mode=mode, thinking=thinking, stop_ids=stop_ids)
                 recs = [r0]
@@ -148,7 +157,7 @@ def measure_import(record: dict, store: Path, acc=None) -> dict:
         labels = sorted({c["label"] for t in m["tasks"].values() for c in t["candidates"]})
         sealed = {lb: GD.sealed(store, lb, identity) for lb in labels}
         for tid, t in m["tasks"].items():
-            a = acc[stratum_key(lineage, mode, t["split"], t["category"], t["shape"])]
+            a = acc[stratum_key(lineage, mode, t["split"], t["category"], t["shape"], t.get("dataset"))]
             a["attempted"] += 1
             a["second"] += int(len(t["candidates"]) > 1)
             if t["final"]["outcome"] == "admitted":

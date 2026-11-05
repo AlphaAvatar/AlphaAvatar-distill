@@ -722,7 +722,7 @@ POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation
           "train_a1": ("a1_units.json",),
           "packed_search": ("search_packed/search_record.json", "search_packed/first_evaluation_check.json",
                             "search_packed/search/states.jsonl", "search_packed/search/telemetry.jsonl",
-                            "search_packed/products.json"),
+                            "search_packed/evaluation_cache.jsonl", "search_packed/products.json"),
           **{k: (f"{PACKED_TRAIN_ARMS[k]}_units.json",) for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
           **{k: tuple(f"tool_generation_{li}/{f}" for f in ("tool_session.json", "telemetry.jsonl",
                                                              "device_admission.json", "device_confirmation.json"))

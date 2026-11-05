@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer (PACKED_ROUND.md section 9): bind the packed search to state_eval_hybrid@v2-lc1 (identity change), a raised project cap and the search's authorization; Stage 3 of the -cs arms; eval-set-2; volume 4rhubprswo.",
+ "next": "The maintainer: design R1 (schema_synth@v1 admission, six_category_schema_restored@v1, caps $6.16 + $2.31; PACKED_ROUND.md 9-11); then the search's suite binding, a ~350 GB volume and a raised project cap.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",

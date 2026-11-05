@@ -135,7 +135,8 @@ def doc_sha256(d) -> str:
     return canonical_sha([list(d.ids), [int(x) for x in d.target_mask]])
 
 
-def tool_documents(path: Path | None, mode: str, *, cells: dict | None = None, orders: dict | None = None):
+def tool_documents(path: Path | None, mode: str, *, cells: dict | None = None, orders: dict | None = None,
+                   dataset_of: dict | None = None):
     """``(train, validation, quota record)``: one lineage's admitted tool episodes as TokenDocuments. With the plan's
     ``cells`` (``{"training": [...], "validation": [...]}``) and the pool's frozen ``orders``, whole episodes are
     selected per cell by `tool_generation_plan.select`; without them, every admitted episode."""
@@ -167,13 +168,18 @@ def tool_documents(path: Path | None, mode: str, *, cells: dict | None = None, o
         if stray:
             raise PackBuildError(f"{len(stray)} {split} tool episode(s) not in the pool's frozen order, e.g. {stray[:3]}")
         for c in cells[split]:
-            order = [t for t in orders[split] if c["category"] is None or cat_of.get(t) == c["category"]]
+            if c.get("datasets") and dataset_of is None:
+                raise PackBuildError(f"{split}/{c['category']}/{c.get('group')}: a source-group cell needs each "
+                                     "task's source (the pool's tasks)")
+            order = [t for t in orders[split] if (c["category"] is None or cat_of.get(t) == c["category"])
+                     and (not c.get("datasets") or dataset_of.get(t) in c["datasets"])]
             u = units[split] if c["unit"] == "supervised_tokens" else {t: 1.0 for t in units[split]}
             ids, got = TGP.select(order, u, c["target"], c.get("min_tasks", 0))
             out[split] += [d for t in ids for d in docs[split][t]]
-            quota[f"{split}/{c['category']}"] = {"split": split, "category": c["category"], "unit": c["unit"],
-                                                 "target": c["target"], "selected": got, "episodes": len(ids),
-                                                 "status": "REACHED" if got >= c["target"] else "SHORTFALL"}
+            key = f"{split}/{c['category']}" + (f"/{c['group']}" if c.get("group") else "")
+            quota[key] = {"split": split, "category": c["category"], **({"group": c["group"]} if c.get("group") else {}),
+                          "unit": c["unit"], "target": c["target"], "selected": got, "episodes": len(ids),
+                          "status": "REACHED" if got >= c["target"] else "SHORTFALL"}
     return out["training"], out["validation"], {"cells": quota, "rule": "whole episodes per cell in the pool's "
                                                 "frozen order, until the plan's target (tool_generation_plan.select)"}
 

@@ -1,0 +1,1291 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.schema_synth_audit/v1",
+ "written_utc": "2026-11-05T13:27:44Z",
+ "tasks": {
+  "path": "artifacts/stages/stage-2/teacher_modes/schema_synth_v1/tasks.jsonl",
+  "sha256": "7e62ab584cbd812076464803228aa73afd568e61c58c939512a966a66f8f05a5",
+  "count": 3750
+ },
+ "generator_sha256": "d8b2a0d3ddd0e6012a2ee77c06bda33779415dcd646ca0c1bd97c3690eb05a34",
+ "deterministic": true,
+ "tasks_with_problems": 0,
+ "problems": [],
+ "mutations": {
+  "add_unrequested_optional:refused": 664,
+  "drop_required:refused": 3750,
+  "leaf_value:refused": 3750,
+  "reorder_array:refused": 2058
+ },
+ "gold_strings": {
+  "number_or_bool": 9938,
+  "derived_by_stated_rule": 6174,
+  "verbatim_in_request": 8394,
+  "enum": 6896
+ },
+ "unexplained_strings": 0,
+ "unexplained_examples": [],
+ "gold_call_tokens_by_split": {
+  "calibration": {
+   "mean": 105.0,
+   "median": 97,
+   "min": 75,
+   "max": 151
+  },
+  "reserve": {
+   "mean": 75.7,
+   "median": 76,
+   "min": 67,
+   "max": 96
+  },
+  "state_eval": {
+   "mean": 83.1,
+   "median": 78,
+   "min": 62,
+   "max": 121
+  },
+  "training": {
+   "mean": 99.1,
+   "median": 89,
+   "min": 52,
+   "max": 243
+  },
+  "validation": {
+   "mean": 76.9,
+   "median": 79,
+   "min": 65,
+   "max": 95
+  }
+ },
+ "operators": {
+  "enum:described": 1910,
+  "nested:array": 1230,
+  "array:ordered": 1150,
+  "array:sorted": 680,
+  "duration:minutes": 490,
+  "unit:kg_to_g": 480,
+  "enum:by_rule": 480,
+  "nested:object": 480,
+  "time:clock12": 479,
+  "date:back_offset": 429,
+  "time:clock24": 412,
+  "phone:us": 395,
+  "unit:money_cents": 350,
+  "date:absolute": 349,
+  "rule:threshold": 320,
+  "date:tomorrow": 272,
+  "date:weeks": 269,
+  "date:in_days": 256,
+  "phone:uk": 245,
+  "arithmetic:date_offset": 245,
+  "count:plain": 219,
+  "optional:object": 185,
+  "count:dozen": 160,
+  "lookup:catalog": 160,
+  "arithmetic:schedule": 160,
+  "arithmetic:sum": 160,
+  "unit:gb_to_mib": 160,
+  "arithmetic:scale": 160,
+  "arithmetic:age_months": 160,
+  "date:first_of_next_month": 160,
+  "date:week_start": 160,
+  "date:today": 160,
+  "unit:ml_to_ul": 160,
+  "lookup:language_codes": 160,
+  "normalize:plate": 160,
+  "arithmetic:multiply": 160,
+  "rule:prefix": 160,
+  "normalize:digits": 160,
+  "date:compare": 160,
+  "date:weekday_after_next": 156,
+  "date:coming_weekday": 156,
+  "optional:present": 156,
+  "date:first_weekday_next_month": 152,
+  "date:last_of_month": 141,
+  "time:words": 139,
+  "correction": 77,
+  "arithmetic:subtract": 69,
+  "arithmetic:halve": 58,
+  "optional:array": 54,
+  "enum:expand_days": 40,
+  "unit:tenths": 40,
+  "arithmetic:sum_product": 40,
+  "enum:currency_symbol": 30,
+  "normalize:isbn": 20,
+  "lookup:timezone": 20,
+  "rule:age_bands": 4
+ },
+ "domains": {
+  "bug_tracker": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "1": 56,
+    "2": 63,
+    "3": 41
+   },
+   "gold_call_tokens": {
+    "mean": 59.3,
+    "median": 60,
+    "min": 52,
+    "max": 65
+   },
+   "leaves": {
+    "mean": 6.0,
+    "median": 6,
+    "min": 5,
+    "max": 7
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 166.6,
+    "median": 166,
+    "min": 123,
+    "max": 212
+   }
+  },
+  "calendar_event": {
+   "split": "reserve",
+   "tasks": 10,
+   "levels": {
+    "1": 4,
+    "3": 3,
+    "2": 3
+   },
+   "gold_call_tokens": {
+    "mean": 75.7,
+    "median": 76,
+    "min": 67,
+    "max": 96
+   },
+   "leaves": {
+    "mean": 5.8,
+    "median": 6,
+    "min": 5,
+    "max": 8
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.1,
+    "median": 0,
+    "min": 0,
+    "max": 1
+   },
+   "user_chars": {
+    "mean": 230.5,
+    "median": 257,
+    "min": 161,
+    "max": 295
+   }
+  },
+  "car_rental": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "1": 48,
+    "3": 46,
+    "2": 66
+   },
+   "gold_call_tokens": {
+    "mean": 122.8,
+    "median": 118,
+    "min": 115,
+    "max": 137
+   },
+   "leaves": {
+    "mean": 9.7,
+    "median": 9,
+    "min": 9,
+    "max": 11
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 198.6,
+    "median": 197,
+    "min": 164,
+    "max": 251
+   }
+  },
+  "conference_registration": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "1": 53,
+    "2": 64,
+    "3": 43
+   },
+   "gold_call_tokens": {
+    "mean": 69.8,
+    "median": 69,
+    "min": 60,
+    "max": 83
+   },
+   "leaves": {
+    "mean": 5.0,
+    "median": 5,
+    "min": 4,
+    "max": 6
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 235.3,
+    "median": 235,
+    "min": 216,
+    "max": 271
+   }
+  },
+  "crm_update": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "3": 47,
+    "1": 51,
+    "2": 62
+   },
+   "gold_call_tokens": {
+    "mean": 66.9,
+    "median": 55,
+    "min": 54,
+    "max": 83
+   },
+   "leaves": {
+    "mean": 4.4,
+    "median": 3,
+    "min": 3,
+    "max": 6
+   },
+   "depth": {
+    "mean": 2.5,
+    "median": 2,
+    "min": 2,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 137.2,
+    "median": 137,
+    "min": 80,
+    "max": 200
+   }
+  },
+  "email_campaign": {
+   "split": "validation",
+   "tasks": 20,
+   "levels": {
+    "1": 6,
+    "2": 9,
+    "3": 5
+   },
+   "gold_call_tokens": {
+    "mean": 71.3,
+    "median": 68,
+    "min": 65,
+    "max": 86
+   },
+   "leaves": {
+    "mean": 5.8,
+    "median": 6,
+    "min": 5,
+    "max": 8
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.2,
+    "median": 0,
+    "min": 0,
+    "max": 1
+   },
+   "user_chars": {
+    "mean": 162.3,
+    "median": 164,
+    "min": 116,
+    "max": 244
+   }
+  },
+  "expense_report": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 55,
+    "1": 54,
+    "3": 51
+   },
+   "gold_call_tokens": {
+    "mean": 140.9,
+    "median": 146,
+    "min": 110,
+    "max": 185
+   },
+   "leaves": {
+    "mean": 10.4,
+    "median": 11,
+    "min": 8,
+    "max": 14
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 247.9,
+    "median": 248,
+    "min": 154,
+    "max": 371
+   }
+  },
+  "flight_search": {
+   "split": "calibration",
+   "tasks": 30,
+   "levels": {
+    "1": 11,
+    "3": 10,
+    "2": 9
+   },
+   "gold_call_tokens": {
+    "mean": 87.2,
+    "median": 91,
+    "min": 75,
+    "max": 105
+   },
+   "leaves": {
+    "mean": 7.7,
+    "median": 8,
+    "min": 7,
+    "max": 9
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.7,
+    "median": 1,
+    "min": 0,
+    "max": 2
+   },
+   "user_chars": {
+    "mean": 183.9,
+    "median": 189,
+    "min": 127,
+    "max": 255
+   }
+  },
+  "grocery_order": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "3": 56,
+    "1": 49,
+    "2": 55
+   },
+   "gold_call_tokens": {
+    "mean": 81.4,
+    "median": 83,
+    "min": 67,
+    "max": 101
+   },
+   "leaves": {
+    "mean": 6.7,
+    "median": 7,
+    "min": 5,
+    "max": 9
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 325.1,
+    "median": 324,
+    "min": 271,
+    "max": 386
+   }
+  },
+  "hotel_booking": {
+   "split": "state_eval",
+   "tasks": 40,
+   "levels": {
+    "3": 12,
+    "1": 13,
+    "2": 15
+   },
+   "gold_call_tokens": {
+    "mean": 82.5,
+    "median": 78,
+    "min": 77,
+    "max": 98
+   },
+   "leaves": {
+    "mean": 5.7,
+    "median": 5,
+    "min": 5,
+    "max": 8
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.3,
+    "median": 0,
+    "min": 0,
+    "max": 1
+   },
+   "user_chars": {
+    "mean": 163.9,
+    "median": 159,
+    "min": 113,
+    "max": 248
+   }
+  },
+  "insurance_claim": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 65,
+    "1": 46,
+    "3": 49
+   },
+   "gold_call_tokens": {
+    "mean": 107.0,
+    "median": 105,
+    "min": 82,
+    "max": 139
+   },
+   "leaves": {
+    "mean": 8.3,
+    "median": 8,
+    "min": 6,
+    "max": 11
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.2,
+    "median": 0,
+    "min": 0,
+    "max": 1
+   },
+   "user_chars": {
+    "mean": 187.6,
+    "median": 186,
+    "min": 146,
+    "max": 256
+   }
+  },
+  "invoicing": {
+   "split": "calibration",
+   "tasks": 30,
+   "levels": {
+    "1": 7,
+    "2": 13,
+    "3": 10
+   },
+   "gold_call_tokens": {
+    "mean": 122.7,
+    "median": 119,
+    "min": 90,
+    "max": 151
+   },
+   "leaves": {
+    "mean": 10.7,
+    "median": 10,
+    "min": 7,
+    "max": 14
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.4,
+    "median": 0,
+    "min": 0,
+    "max": 1
+   },
+   "user_chars": {
+    "mean": 184.3,
+    "median": 180,
+    "min": 129,
+    "max": 239
+   }
+  },
+  "lab_samples": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "3": 51,
+    "1": 52,
+    "2": 57
+   },
+   "gold_call_tokens": {
+    "mean": 109.5,
+    "median": 109,
+    "min": 90,
+    "max": 129
+   },
+   "leaves": {
+    "mean": 9.1,
+    "median": 9,
+    "min": 7,
+    "max": 11
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 180.3,
+    "median": 180,
+    "min": 146,
+    "max": 229
+   }
+  },
+  "library_holds": {
+   "split": "validation",
+   "tasks": 20,
+   "levels": {
+    "1": 6,
+    "2": 7,
+    "3": 7
+   },
+   "gold_call_tokens": {
+    "mean": 82.5,
+    "median": 80,
+    "min": 65,
+    "max": 95
+   },
+   "leaves": {
+    "mean": 5.2,
+    "median": 5,
+    "min": 4,
+    "max": 6
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 173.9,
+    "median": 171,
+    "min": 148,
+    "max": 214
+   }
+  },
+  "medication_reminders": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "1": 50,
+    "3": 56,
+    "2": 54
+   },
+   "gold_call_tokens": {
+    "mean": 90.1,
+    "median": 89,
+    "min": 81,
+    "max": 98
+   },
+   "leaves": {
+    "mean": 8.2,
+    "median": 8,
+    "min": 7,
+    "max": 9
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 206.5,
+    "median": 206,
+    "min": 172,
+    "max": 237
+   }
+  },
+  "orders_report": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 62,
+    "3": 47,
+    "1": 51
+   },
+   "gold_call_tokens": {
+    "mean": 89.0,
+    "median": 88,
+    "min": 75,
+    "max": 108
+   },
+   "leaves": {
+    "mean": 9.2,
+    "median": 9,
+    "min": 7,
+    "max": 12
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 215.0,
+    "median": 213,
+    "min": 150,
+    "max": 288
+   }
+  },
+  "parcel_shipment": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 67,
+    "3": 48,
+    "1": 45
+   },
+   "gold_call_tokens": {
+    "mean": 190.6,
+    "median": 174,
+    "min": 168,
+    "max": 243
+   },
+   "leaves": {
+    "mean": 17.1,
+    "median": 15,
+    "min": 15,
+    "max": 23
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 384.5,
+    "median": 393,
+    "min": 301,
+    "max": 513
+   }
+  },
+  "parking_reservation": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "1": 68,
+    "2": 46,
+    "3": 46
+   },
+   "gold_call_tokens": {
+    "mean": 86.2,
+    "median": 86,
+    "min": 84,
+    "max": 89
+   },
+   "leaves": {
+    "mean": 7.0,
+    "median": 7,
+    "min": 7,
+    "max": 7
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 157.0,
+    "median": 153,
+    "min": 122,
+    "max": 229
+   }
+  },
+  "pet_grooming": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 66,
+    "3": 49,
+    "1": 45
+   },
+   "gold_call_tokens": {
+    "mean": 103.8,
+    "median": 104,
+    "min": 97,
+    "max": 112
+   },
+   "leaves": {
+    "mean": 8.9,
+    "median": 9,
+    "min": 8,
+    "max": 10
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 186.9,
+    "median": 186,
+    "min": 151,
+    "max": 238
+   }
+  },
+  "recipe_scaling": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 76,
+    "3": 45,
+    "1": 39
+   },
+   "gold_call_tokens": {
+    "mean": 93.9,
+    "median": 94,
+    "min": 70,
+    "max": 119
+   },
+   "leaves": {
+    "mean": 11.0,
+    "median": 11,
+    "min": 8,
+    "max": 14
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 184.1,
+    "median": 186,
+    "min": 156,
+    "max": 223
+   }
+  },
+  "restaurant_booking": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 73,
+    "3": 38,
+    "1": 49
+   },
+   "gold_call_tokens": {
+    "mean": 85.5,
+    "median": 82,
+    "min": 80,
+    "max": 99
+   },
+   "leaves": {
+    "mean": 6.4,
+    "median": 6,
+    "min": 6,
+    "max": 8
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.3,
+    "median": 0,
+    "min": 0,
+    "max": 1
+   },
+   "user_chars": {
+    "mean": 213.2,
+    "median": 214,
+    "min": 125,
+    "max": 330
+   }
+  },
+  "subscription_change": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 62,
+    "1": 53,
+    "3": 45
+   },
+   "gold_call_tokens": {
+    "mean": 66.2,
+    "median": 66,
+    "min": 64,
+    "max": 69
+   },
+   "leaves": {
+    "mean": 5.0,
+    "median": 5,
+    "min": 5,
+    "max": 5
+   },
+   "depth": {
+    "mean": 1.0,
+    "median": 1,
+    "min": 1,
+    "max": 1
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 232.3,
+    "median": 231,
+    "min": 217,
+    "max": 255
+   }
+  },
+  "thermostat_program": {
+   "split": "state_eval",
+   "tasks": 40,
+   "levels": {
+    "2": 20,
+    "1": 12,
+    "3": 8
+   },
+   "gold_call_tokens": {
+    "mean": 99.2,
+    "median": 99,
+    "min": 80,
+    "max": 121
+   },
+   "leaves": {
+    "mean": 10.4,
+    "median": 10,
+    "min": 7,
+    "max": 14
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 122.0,
+    "median": 122,
+    "min": 106,
+    "max": 147
+   }
+  },
+  "ticket_purchase": {
+   "split": "state_eval",
+   "tasks": 40,
+   "levels": {
+    "1": 13,
+    "3": 12,
+    "2": 15
+   },
+   "gold_call_tokens": {
+    "mean": 67.4,
+    "median": 64,
+    "min": 62,
+    "max": 77
+   },
+   "leaves": {
+    "mean": 5.5,
+    "median": 5,
+    "min": 5,
+    "max": 7
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 163.4,
+    "median": 162,
+    "min": 134,
+    "max": 201
+   }
+  },
+  "timesheet": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 68,
+    "3": 41,
+    "1": 51
+   },
+   "gold_call_tokens": {
+    "mean": 173.0,
+    "median": 172,
+    "min": 139,
+    "max": 205
+   },
+   "leaves": {
+    "mean": 14.1,
+    "median": 14,
+    "min": 11,
+    "max": 17
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 189.7,
+    "median": 190,
+    "min": 131,
+    "max": 252
+   }
+  },
+  "translation_job": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "3": 42,
+    "2": 72,
+    "1": 46
+   },
+   "gold_call_tokens": {
+    "mean": 65.7,
+    "median": 66,
+    "min": 59,
+    "max": 75
+   },
+   "leaves": {
+    "mean": 6.3,
+    "median": 6,
+    "min": 5,
+    "max": 8
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.3,
+    "median": 0,
+    "min": 0,
+    "max": 1
+   },
+   "user_chars": {
+    "mean": 167.3,
+    "median": 166,
+    "min": 117,
+    "max": 235
+   }
+  },
+  "utility_payment": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "3": 48,
+    "1": 44,
+    "2": 68
+   },
+   "gold_call_tokens": {
+    "mean": 79.6,
+    "median": 77,
+    "min": 75,
+    "max": 90
+   },
+   "leaves": {
+    "mean": 5.3,
+    "median": 5,
+    "min": 5,
+    "max": 6
+   },
+   "depth": {
+    "mean": 2.0,
+    "median": 2,
+    "min": 2,
+    "max": 2
+   },
+   "optional_present": {
+    "mean": 0.3,
+    "median": 0,
+    "min": 0,
+    "max": 1
+   },
+   "user_chars": {
+    "mean": 193.8,
+    "median": 191,
+    "min": 115,
+    "max": 309
+   }
+  },
+  "vm_provisioning": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "2": 61,
+    "3": 44,
+    "1": 55
+   },
+   "gold_call_tokens": {
+    "mean": 82.1,
+    "median": 85,
+    "min": 68,
+    "max": 106
+   },
+   "leaves": {
+    "mean": 7.4,
+    "median": 8,
+    "min": 6,
+    "max": 10
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.4,
+    "median": 0,
+    "min": 0,
+    "max": 1
+   },
+   "user_chars": {
+    "mean": 167.9,
+    "median": 164,
+    "min": 132,
+    "max": 224
+   }
+  },
+  "warehouse_transfer": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "1": 44,
+    "2": 65,
+    "3": 51
+   },
+   "gold_call_tokens": {
+    "mean": 94.5,
+    "median": 94,
+    "min": 75,
+    "max": 114
+   },
+   "leaves": {
+    "mean": 8.1,
+    "median": 8,
+    "min": 6,
+    "max": 10
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 176.6,
+    "median": 174,
+    "min": 109,
+    "max": 274
+   }
+  },
+  "workout_log": {
+   "split": "training",
+   "tasks": 160,
+   "levels": {
+    "1": 51,
+    "2": 69,
+    "3": 40
+   },
+   "gold_call_tokens": {
+    "mean": 122.7,
+    "median": 110,
+    "min": 104,
+    "max": 142
+   },
+   "leaves": {
+    "mean": 11.9,
+    "median": 10,
+    "min": 10,
+    "max": 14
+   },
+   "depth": {
+    "mean": 3.0,
+    "median": 3,
+    "min": 3,
+    "max": 3
+   },
+   "optional_present": {
+    "mean": 0.0,
+    "median": 0,
+    "min": 0,
+    "max": 0
+   },
+   "user_chars": {
+    "mean": 133.5,
+    "median": 133,
+    "min": 93,
+    "max": 176
+   }
+  }
+ },
+ "measures_no_teacher": "pass rates and supervised tokens per admitted episode are priors until a generation round measures them",
+ "authorizes": "nothing"
+}

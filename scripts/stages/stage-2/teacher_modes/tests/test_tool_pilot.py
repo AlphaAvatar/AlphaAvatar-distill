@@ -999,10 +999,12 @@ def test_the_priors_are_the_reports_own_counts_by_stratum(frozen, monkeypatch):
     out = _complete_pilot(frozen, monkeypatch)
     doc = TGPR.measure(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
     rep = TPL.report(out, plan_path=frozen["plan"], tasks_path=frozen["tasks"])
+    _, by_id = TPL.load(frozen["plan"], frozen["tasks"])
+    (ds,) = {t["source"]["dataset"] for t in by_id.values()}       #: strata are per source (stratum_key)
     for mode, m in rep["modes"].items():
         for key, row in m["cells"].items():
             split, cat, shape = key.split("|")
-            st = doc["strata"][f"hybrid|{mode}|{split}|{cat}|{shape}"]
+            st = doc["strata"][TGPR.stratum_key("hybrid", mode, split, cat, shape, ds)]
             assert st["attempted"] == row["c0"].get("admitted", 0) + row["c0"].get("rejected", 0)
             assert st["admitted"] == row["final"]["admitted"]
             assert st["units"] == row["supervised_tokens"] + row["scored_positions"]

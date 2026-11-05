@@ -203,7 +203,28 @@ class FirstEvaluationCheck:
         self.record: dict = {}
 
     def __call__(self, model, digest):
+        import torch
+        evaluator, cuda = self.session.evaluator, torch.cuda.is_available()
+        counts = lambda: (getattr(evaluator, "packed_teacher_forwards", 0),  # noqa: E731
+                          getattr(evaluator, "packed_teacher_forwards_skipped", 0))
+        before = counts()
+        if cuda:
+            torch.cuda.reset_peak_memory_stats()
+        t0 = time.perf_counter()
         ev = self.session.evaluator.evaluate(model, digest)
+        if cuda:
+            torch.cuda.synchronize()
+        #: one evidence line per state evaluation: what the packed cost model assumes (the teacher read once, then
+        #: served from its sketches) measured instead of assumed -- a silent sketch-cache miss shows up as teacher
+        #: forwards after the first evaluation
+        after = counts()
+        line = {"artifact_digest": digest, "seconds": round(time.perf_counter() - t0, 3),
+                "packed_teacher_forwards": after[0] - before[0], "packed_teacher_forwards_skipped": after[1] - before[1],
+                "sketch_cache_bytes": getattr(evaluator, "_sketch_cache_bytes", None),
+                "packed_sketches": len(getattr(evaluator, "_packed_sketches", {}) or {}),
+                "peak_allocated_gib": round(torch.cuda.max_memory_allocated() / 2 ** 30, 3) if cuda else None}
+        with (self.scratch / "evaluation_cache.jsonl").open("a") as f:
+            f.write(json.dumps(line) + "\n")
         if not self.record:
             self.record = self.check(model, digest, ev)
         return ev

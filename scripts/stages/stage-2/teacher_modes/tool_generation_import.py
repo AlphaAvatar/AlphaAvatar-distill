@@ -230,6 +230,7 @@ def build_session(run_id: str, store: Path, pool_tasks: dict[str, dict], *, at=N
     round input do not verify, a task sealed in two rounds, a refused first candidate without its second, a seed or
     runner that is not the protocol's, and cells that do not reconcile with the session's own record."""
     from stages.reasoning_data import generation_driver as GD
+    from stages.teacher_modes.tool_generation_priors import POOL_V1_SOURCES
     store = Path(store)
     sess = json.loads((store / "tool_session.json").read_text())
     if sess.get("terminal") != "ALL_DONE":
@@ -273,8 +274,10 @@ def build_session(run_id: str, store: Path, pool_tasks: dict[str, dict], *, at=N
                 if round_of.setdefault(tid, r) != r:
                     raise ImportRefused(f"{tid}: sealed in rounds {round_of[tid]} and {r}")
                 out, units, _ = TPL._outcome(task, rec, set(), mode=mode, thinking=thinking, stop_ids=stop_ids)
+                ds = (task.get("source") or {}).get("dataset")
                 t = tasks.setdefault(tid, {"split": task["split"], "category": task["category"],
                                            "shape": TE.episode_shape(task), "task_sha256": TPL.task_sha256(task),
+                                           **({"dataset": ds} if ds not in POOL_V1_SOURCES else {}),
                                            "round": r, "candidates": []})
                 t["candidates"].append({"candidate": k, "label": label, "shard": shard_of[tid][0],
                                         "shard_sha256": shard_of[tid][1], "outcome": out, "units": units})
@@ -322,7 +325,7 @@ def reconcile(plan: dict, lineage: str, mode: str, tasks: dict, recorded: dict) 
     counts its new tasks only); ``differ`` lists every disagreement -- an import reconciles EXACTLY."""
     rows, differ = [], []
     cells = plan["lineages"][lineage]["modes"][mode]["cells"]
-    rec_cells = {(c["split"], c["category"]): c for c in recorded.get("cells") or []}
+    rec_cells = {(c["split"], c["category"], c.get("group")): c for c in recorded.get("cells") or []}
     seen = set()
     for c in cells:
         mine = [tasks[t] for t in c["task_ids"] if t in tasks]
@@ -330,8 +333,9 @@ def reconcile(plan: dict, lineage: str, mode: str, tasks: dict, recorded: dict) 
         base = c.get("sealed") or {"tasks": 0, "admitted": 0, "units": 0.0}
         adm = sum(t["final"]["outcome"] == "admitted" for t in mine)
         units = float(adm) if c["unit"] == "tasks" else float(sum(t["final"]["units"] for t in mine))
-        got = rec_cells.get((c["split"], c["category"])) or {}
-        row = {"split": c["split"], "category": c["category"], "unit": c["unit"],
+        got = rec_cells.get((c["split"], c["category"], c.get("group"))) or {}
+        row = {"split": c["split"], "category": c["category"], **({"group": c["group"]} if c.get("group") else {}),
+               "unit": c["unit"],
                "imported": {"tasks": len(mine), "admitted": adm, "units": units},
                "already_imported_by_that_plan": base,
                "session": {"attempted": got.get("attempted"), "admitted": got.get("admitted"),

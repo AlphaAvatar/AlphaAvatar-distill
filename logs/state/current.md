@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-05 (UTC), after the review of `f06ccd4`. The human view. Every number here has an owner
+**Updated:** 2026-11-05 (UTC), after the brief "原始数据配比恢复、Packed Forward 效率审查与 Full Search 前置准备". The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,23 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**RESEARCH A: THE REGISTERED TOOL COMPOSITION CAN BE RESTORED -- DESIGN R1 READY FOR ONE DECISION; THE PACKED FORWARD RE-PRICED ON THE FROZEN INPUTS (2026-11-05, $0, nothing generated, searched, trained or evaluated).**
+- schema_arguments supply recounted (`audit/schema_arguments_supply_v3.json`): non-thinking EXHAUSTED (all 1,928
+  Pivot tasks tried, 17,290 / 74,013); thinking UNTRIED beyond the pilot (124 tried, 27,837); Thinking-2507 above
+  target (75,152 / 73,888).
+- New source prepared, not admitted: `schema_synth@v1` (3,750 programmatically verified tasks,
+  `audit/schema_synth_v1_audit.json`) as the pool extension `tool_pool@v1+schema_synth@v1` (`6139e647...`, base
+  byte for byte); sealed sessions reused by task identity; per-source strata and cells.
+- The one decision owed: design R1 (`configs/.../six_category_schema_restored.json`), caps hybrid $6.16 + Thinking-2507
+  $2.31 (expected $1.12); application `logs/budget/applications/research_a_schema_restoration_2026-11-05/`.
+- Packed forward (`audit/packed_forward_compute.json`): 84-86% fewer forwards, about 1.4x the FLOPs per pass on the
+  same items; the search re-priced at $34.12 expected ($26.46-$39.09) vs $25.58 for the same inputs read alone;
+  unmeasured on a GPU. The search still needs its suite binding (`@v2-lc1` or a v3), a ~350 GB volume and a raised
+  project cap ($27.17 left).
+- Unchanged: the -cs packs, `@v2-lc1`, the calibration v2 profiles, every sealed shard. No pod, no watcher; volumes
+  `4rhubprswo` and `am5m373kuq` untouched.
+- Owner: `PACKED_ROUND.md` sections 9 and 11; the decision record is `logs/budget/decisions.md` 2026-11-05.
 
 **RESEARCH A: TOOL GENERATION COMPLETE FOR ALL THREE ARMS; `six_category_common_support@v1` FROZEN (A1/A2/C1-6cat-cs); `state_eval_hybrid@v2-lc1` FROZEN; `@v2` PENDING (maintainer review of `f06ccd4`, 2026-11-05).**
 - Done (2026-11-05 UTC):

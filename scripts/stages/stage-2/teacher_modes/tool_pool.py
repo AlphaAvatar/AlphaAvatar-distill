@@ -272,8 +272,11 @@ def screen(t: Mapping, key: str, grams: set, reference: Reference, name_hits: Co
 
 
 def assemble(tasks: Iterable[dict], *, reference: Reference | None = None,
-             prompt_lengths: Sequence[Callable[[Mapping], int]] = ()) -> dict:
-    """The pool: admitted tasks with atoms, family and split set, every split's frozen order, every exclusion."""
+             prompt_lengths: Sequence[Callable[[Mapping], int]] = (),
+             split_rule: Callable[[Mapping, Sequence[str]], str | None] | None = None, pool_id: str = POOL_ID) -> dict:
+    """The pool: admitted tasks with atoms, family and split set, every split's frozen order, every exclusion.
+    ``split_rule(task, atoms)`` replaces the per-atom hash (`task_split`) for a source that registers its own
+    whole-environment split (`extend`); every screen and the isolation between splits apply unchanged."""
     from aadistill.data.tool_calls import unchecked_keywords
     from aadistill.evaluation.isolation import ngrams
     reference = reference or Reference()
@@ -288,7 +291,8 @@ def assemble(tasks: Iterable[dict], *, reference: Reference | None = None,
     for t in sorted(tasks, key=lambda t: (str(t["source"].get("dataset")), SHAPE_TIERS[TE.episode_shape(t)],
                                           t["task_id"])):
         atoms = atoms_of(t)
-        t = {**t, "atoms": atoms, "family": family_of(atoms), "split": task_split(atoms)}
+        t = {**t, "atoms": atoms, "family": family_of(atoms),
+             "split": split_rule(t, atoms) if split_rule else task_split(atoms)}
         if t["split"] is None:
             refuse(t, "T4: its atoms fall in different splits")
             continue
@@ -320,7 +324,7 @@ def assemble(tasks: Iterable[dict], *, reference: Reference | None = None,
         candidates.append({**t, "content_keys": {"prompt": key, "tools": t["family"]},
                            "first_prompt_tokens": max(lengths) if lengths else None})
     admitted = isolate_between_splits(candidates, refuse)
-    orders = frozen_orders(admitted)
+    orders = frozen_orders(admitted, pool_id)
     census, verification, shapes = defaultdict(Counter), defaultdict(Counter), defaultdict(Counter)
     atom_splits, key_splits, tool_splits = defaultdict(set), defaultdict(set), defaultdict(set)
     for t in admitted:
@@ -359,7 +363,7 @@ def _by_source(tasks) -> dict:
     return out
 
 
-def frozen_orders(tasks: list[dict]) -> dict[str, list[str]]:
+def frozen_orders(tasks: list[dict], pool_id: str = POOL_ID) -> dict[str, list[str]]:
     """Every split's seeded shuffle of its task ids (training's namespace is the pool id, as in v1), tiered by
     episode shape (`SHAPE_TIERS`): the full episodes in their shuffle, then the single-step tasks in theirs."""
     from aadistill.data.sequence_packing import shuffled_order
@@ -367,7 +371,7 @@ def frozen_orders(tasks: list[dict]) -> dict[str, list[str]]:
     out = {}
     for split in sorted({t["split"] for t in tasks}):
         ids = sorted(t["task_id"] for t in tasks if t["split"] == split)
-        ns = POOL_ID if split == "training" else f"{POOL_ID}|{split}"
+        ns = pool_id if split == "training" else f"{pool_id}|{split}"
         out[split] = sorted((ids[i] for i in shuffled_order(ids, ORDER_SEED, namespace=ns)), key=tier.get)
     return out
 
@@ -500,6 +504,101 @@ def write_pool(pool: dict, out: Path, *, sources: dict, extra: dict) -> dict:
     return doc
 
 
+#: a pool that is an existing pool plus new tasks (`extend`): the base's files, identity and frozen orders untouched
+EXTENSION_SCHEMA = "aadistill.stage2.teacher_modes.tool_pool_extension/v1"
+
+
+def extension_content_sha256(base_content: str, files: Mapping, sources: Mapping) -> str:
+    """An extension's content identity: the base pool's content sha256, every addition file's sha256, every split's
+    FULL order (base then addition) and the addition's sources."""
+    return hashlib.sha256(canonical({"base": base_content, "files": {k: v["sha256"] for k, v in files.items()},
+                                     "orders": {k: v["order_sha256"] for k, v in files.items()},
+                                     "sources": sources}).encode()).hexdigest()
+
+
+def _rel(p: Path) -> str:
+    p = Path(p).resolve()
+    return p.relative_to(REPO).as_posix() if p.is_relative_to(REPO) else str(p)
+
+
+def extend(base_dir: Path, addition: Sequence[dict], out: Path, *, pool_id: str, sources: dict,
+           reference: Reference | None = None, prompt_lengths: Sequence[Callable[[Mapping], int]] = (),
+           extra: Mapping | None = None) -> dict:
+    """Write ``out`` = the verified pool at ``base_dir`` plus ``addition``, without copying or re-ordering the base.
+
+    The addition keeps the split each task declares (a whole environment per split, the source's registered rule)
+    and passes every screen of `assemble` (record, schema keywords, replay conflicts, T1-T3, T5, the length bound);
+    T4 then runs over the base and the addition together in `SPLIT_PRIORITY`, and must refuse nothing of the base --
+    no base task changes split, order or identity. Each split's frozen order is the base's order followed by the
+    addition's own seeded shuffle (namespace ``pool_id``), so every base task keeps its place and every import
+    record bound to the base's content keeps describing the same tasks (`tool_generation_plan.import_records`)."""
+    base_man, base_splits = load_pool(base_dir)
+    base = [t for rows in base_splits.values() for t in rows]
+    pool = assemble(addition, reference=reference, prompt_lengths=prompt_lengths,
+                    split_rule=lambda t, atoms: t.get("split"), pool_id=pool_id)
+    refused = []
+    kept = isolate_between_splits(base + pool["tasks"], lambda t, why, split=None: refused.append(
+        {"task_id": t["task_id"], "reason": why, "source": str(t["source"].get("dataset")),
+         "category": t.get("category"), "split": split or t.get("split")}))
+    base_ids = {t["task_id"] for t in base}
+    lost = [r for r in refused if r["task_id"] in base_ids]
+    if lost:
+        raise AssertionError(f"T4 over base + addition would refuse {len(lost)} base task(s), e.g. {lost[:2]}")
+    crossing = defaultdict(set)
+    for t in base + pool["tasks"]:
+        for a in t.get("atoms") or atoms_of(t):
+            crossing[a].add(t["split"])
+    shared = sorted(a for a, sp in crossing.items() if len(sp) > 1)
+    if shared:
+        raise AssertionError(f"atoms in more than one split across base + addition: {shared[:3]}")
+    keep = {t["task_id"] for t in kept} - base_ids
+    added = [t for t in pool["tasks"] if t["task_id"] in keep]
+    excluded = pool["excluded"] + refused
+    own = frozen_orders(added, pool_id)
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    files, orders = {}, {}
+    for split in sorted(set(base_man["orders"]) | set(own)):
+        orders[split] = list(base_man["orders"].get(split, [])) + own.get(split, [])
+        rows = [t for t in added if t["split"] == split]
+        path = out / f"{split}.tasks.jsonl"
+        with path.open("w") as f:
+            for t in rows:
+                f.write(json.dumps(t, ensure_ascii=False) + "\n")
+        files[split] = {"file": path.name, "sha256": _sha_file(path), "tasks": len(rows),
+                        "by_source": dict(Counter(str(t["source"].get("dataset")) for t in rows)),
+                        "order_sha256": hashlib.sha256(canonical(orders[split]).encode()).hexdigest()}
+    revisions = sorted({tuple(x) for x in base_man.get("source_revisions") or []} |
+                       {(str(t["source"].get("dataset")), str(t["source"].get("revision"))) for t in added})
+    census = defaultdict(Counter)
+    for split, rows in base_splits.items():
+        for t in rows:
+            census[split][t["category"]] += 1
+    for t in added:
+        census[t["split"]][t["category"]] += 1
+    doc = {"schema": EXTENSION_SCHEMA, "pool_id": pool_id,
+           "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+           "base": {"dir": _rel(base_dir), "pool_id": base_man["pool_id"], "content_sha256": base_man["content_sha256"],
+                    "pool_json_sha256": _sha_file(Path(base_dir) / "pool.json")},
+           "files": files, "sources": sources, "source_revisions": [list(x) for x in revisions],
+           "content_sha256": extension_content_sha256(base_man["content_sha256"], files, sources),
+           "census": {sp: dict(c) for sp, c in sorted(census.items())},
+           "addition": {"census": pool["census"], "episode_shapes": pool["episode_shapes"],
+                        "verification_levels": pool["verification_levels"], "atoms": pool["atoms"],
+                        "by_source": pool["by_source"], "admitted": len(added),
+                        "excluded_by": [{"reason": r, "tasks": n} for r, n in
+                                        sorted(Counter(reason_class(e["reason"]) for e in excluded).items())],
+                        "excluded": excluded,
+                        "tool_name_only_matches_counted": pool["tool_name_only_matches_counted"]},
+           **dict(extra or {}),
+           "near_duplicate_protocol": {"n": NGRAM, "containment": CONTAINMENT, "max_document_frequency": MAX_DF},
+           "orders": orders, "training_order": orders.get("training", []),
+           "training_order_sha256": hashlib.sha256(canonical(orders.get("training", [])).encode()).hexdigest(),
+           "order_seed": ORDER_SEED, "prompt_bound": PROMPT_BOUND, "authorizes": "nothing"}
+    (out / "pool.json").write_text(json.dumps(doc, indent=1) + "\n")
+    return doc
+
+
 def load_pool(pool_dir: Path, splits: Sequence[str] | None = None) -> tuple[dict, dict[str, list[dict]]]:
     """``(pool.json, {split: tasks})`` after verifying every file the caller reads against pool.json: present,
     byte-identical (sha256), its task count, every task in its own split and from a registered source revision, the
@@ -509,6 +608,8 @@ def load_pool(pool_dir: Path, splits: Sequence[str] | None = None) -> tuple[dict
     if not man_path.is_file():
         raise PoolIdentityError(f"{man_path} does not exist")
     man = json.loads(man_path.read_text())
+    if man.get("schema") == EXTENSION_SCHEMA:
+        return _load_extension(pool_dir, man, splits)
     if man.get("schema") != SCHEMA or not isinstance(man.get("files"), dict):
         raise PoolIdentityError(f"{man_path} is not a {SCHEMA} manifest with registered files")
     if man.get("content_sha256") != content_sha256(man["files"], man.get("sources") or {}):
@@ -537,6 +638,49 @@ def load_pool(pool_dir: Path, splits: Sequence[str] | None = None) -> tuple[dict
                 hashlib.sha256(canonical(order).encode()).hexdigest() != rec["order_sha256"]:
             raise PoolIdentityError(f"the {split} order is not the split's task ids as registered")
         out[split] = rows
+    return man, out
+
+
+def _load_extension(pool_dir: Path, man: dict, splits: Sequence[str] | None) -> tuple[dict, dict[str, list[dict]]]:
+    """An extension read as one pool: the base verified first (`load_pool`, recursively) and bound by its content
+    sha256 and pool.json bytes; then each addition file as `load_pool` checks a file; each split's rows are the base's
+    then the addition's, and its order must be the base's order followed by the addition's ids."""
+    if not isinstance(man.get("files"), dict) or not isinstance(man.get("base"), dict):
+        raise PoolIdentityError(f"{pool_dir}/pool.json is not an extension manifest with a base and files")
+    if man.get("content_sha256") != extension_content_sha256(man["base"].get("content_sha256"), man["files"],
+                                                             man.get("sources") or {}):
+        raise PoolIdentityError("the extension's content_sha256 is not its base, files, orders and sources")
+    bdir = Path(man["base"]["dir"])
+    bdir = bdir if bdir.is_absolute() else REPO / bdir
+    if _sha_file(bdir / "pool.json") != man["base"].get("pool_json_sha256"):
+        raise PoolIdentityError(f"the base pool.json at {bdir} is not the one the extension registers")
+    want = sorted(man["files"]) if splits is None else list(splits)
+    base_man, base_rows = load_pool(bdir, [s for s in want if s in json.loads((bdir / "pool.json").read_text())["files"]])
+    if base_man["content_sha256"] != man["base"]["content_sha256"]:
+        raise PoolIdentityError("the base pool's content is not the one the extension registers")
+    revisions = {tuple(x) for x in man.get("source_revisions") or []}
+    out = {}
+    for split in want:
+        rec = man["files"].get(split)
+        if rec is None:
+            raise PoolIdentityError(f"the extension registers no {split!r} file")
+        path = Path(pool_dir) / rec["file"]
+        if not path.is_file() or _sha_file(path) != rec["sha256"]:
+            raise PoolIdentityError(f"{path.name} is missing or differs from its registered sha256")
+        rows = TE.read_tasks(path)
+        if len(rows) != rec["tasks"]:
+            raise PoolIdentityError(f"{path.name} holds {len(rows)} tasks, the extension registers {rec['tasks']}")
+        stray = [t["task_id"] for t in rows if t.get("split") != split
+                 or (str(t["source"].get("dataset")), str(t["source"].get("revision"))) not in revisions]
+        if stray:
+            raise PoolIdentityError(f"{path.name}: {len(stray)} task(s) of another split or source, e.g. {stray[:3]}")
+        base_order = base_man["orders"].get(split) or []
+        order = man["orders"].get(split) or []
+        tail = order[len(base_order):]
+        if order[:len(base_order)] != base_order or sorted(tail) != sorted(t["task_id"] for t in rows) or \
+                hashlib.sha256(canonical(order).encode()).hexdigest() != rec["order_sha256"]:
+            raise PoolIdentityError(f"the {split} order is not the base's order followed by the addition's tasks")
+        out[split] = list(base_rows.get(split, [])) + rows
     return man, out
 
 

@@ -15850,3 +15850,49 @@ on a paid pod.
     FROZEN; `@v2` PENDING.
   - **Remaining before the packed full search:** the maintainer's binding of the search to `@v2-lc1` (an identity
     change), a raised project cap, and the search's own authorization.
+
+## 2026-11-05 (UTC) — Restoring the registered tool composition (schema_synth@v1, design R1) and the packed forward's real cost
+
+- **Context.** The maintainer's brief "原始数据配比恢复、Packed Forward 效率审查与 Full Search 前置准备" (2026-11-05)
+  replaces the pending request to prepare the Full Search on `@v2-lc1`: restore the registered seven-category
+  proportions (schema_arguments 15% of the tool type, counted before packing); a new source is an independent
+  scientific design; keep every legal product and identity; re-examine the packed forward's cost against the v2
+  search's one-item forwards; launch nothing paid.
+- **Supply, recounted** (`audit/schema_arguments_supply_v3.json`). Three different situations, not one SHORTFALL:
+  the non-thinking mode attempted all 1,928 Pivot schema_arguments training tasks (17,290 of 74,013 supervised
+  tokens) and all 29 state-evaluation ones (1,063 of 1,800 scored positions): exhausted. The thinking mode attempted
+  only the pilot's 124 (27,837 tokens): 1,804 untried, about 46,176 tokens short at the registered share. Thinking-2507
+  attempted 136 full episodes and holds 75,152 (above its 73,888). Equal supervised tokens are very unequal decisions:
+  per admitted training episode the non-thinking mode writes 37 (single step) to 147 (full) tokens, 62% of them tool
+  call, against 702-1,010 (thinking, 92% reasoning) and 1,927 (Thinking-2507, 92% reasoning).
+- **Public sources.** A survey of 27 candidates (beyond reviews v1/v2) finds none that closes the gap legally and
+  robustly; argilla/Synth-APIGen-v0.1 is the only conditional candidate (xLAM few-shot lineage, Llama/Qwen attribution
+  terms, no enums, units or dates) and is not proposed.
+- **Decision (prepared, not taken): a programmatic source and a source-matched design.**
+  `schema_synth@v1` (`scripts/.../schema_synth.py`): 30 domains, 3,750 tasks whose gold call is computed by the
+  program from a sampled ground truth, verified by the unchanged tool_verification@v2 (`audit/schema_synth_v1_audit.json`:
+  gold admitted in both modes; a changed leaf, a dropped field, an unrequested optional field and a reordered array
+  refused; deterministic; no tool name or signature shared with eval-set-1, the benchmarks or the excluded lineage
+  sources -- eleven matching names were renamed before anything ran). It enters as `tool_pool.extend`: tool_pool@v1
+  byte for byte plus an addition (content `6139e647...`); sealed records are reused by TASK identity
+  (`tool_generation_plan.import_records`), so no task is attempted twice. Design R1
+  (`configs/.../six_category_schema_restored.json`, DESIGN): the registered shares, and within schema_arguments every
+  arm holds Pivot 17,200 (C1 17,171) plus schema_synth for the rest (`source_groups`), so the source composition does
+  not move with the mode. R2 (only the non-thinking cell from the new source) is priced and not recommended: 77% of
+  A2's schema tokens would be synthetic against 0% of A1's.
+- **Price** (`plans/schema_restoration_plan_dry.json`; application `logs/budget/applications/research_a_schema_restoration_2026-11-05/`):
+  R1 $0.66 / $1.12 / $6.29, hard caps hybrid $6.16 and Thinking-2507 $2.31 (schema_synth priced at Pivot's measured
+  yield, a labelled proxy); R2 $0.37 / $0.64 / $3.72, cap $4.96. Project remaining $27.17 (2026-11-05T13:46Z).
+- **Packed forward** (`audit/packed_forward_compute.json`, code review in the round's notes). The v2 search read each
+  item alone at micro-batch 1 with no padding (8,192 was a data limit). On the same frozen v2 items, packing cuts
+  forward calls 84-86%, adds 13-17% computed positions (repeated fragment prefixes; neither execution pads), multiplies
+  the causal-attention term 4.0-4.6x and the scored rows 1.09-1.12x, so FLOPs per pass rise about 1.4x (DEPTH
+  1.27-1.68x by parent geometry). Re-priced from v2's measured seconds with the frozen inputs: $34.12 expected
+  ($26.46-$39.09) against $25.58 for the same inputs read one item at a time -- packing is not expected to be faster
+  unless the GPU does about a third more work per second on 8,192-token sequences, which is unmeasured. The old
+  $32.43 / $46.35 used v1 inputs plus assumed tool items. The first packed state evaluation now writes
+  `evaluation_cache.jsonl` (teacher forwards run and skipped, sketch bytes, peak memory).
+- **Alternatives considered.** Keep common support only (rejected by the brief as the sole path; kept intact); R2;
+  Synth-APIGen as a bridge (conditions unresolved); WorkBench (one tool, no state-evaluation supply).
+- **Revisit when:** the maintainer decides R1 (or R2); then the source admission record, registration and grants, and
+  after generation the selection freeze and the state-evaluation choice (`@v2-lc1` or a v3 with the synthetic cell).

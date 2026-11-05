@@ -1072,6 +1072,11 @@ packed search runs unless it is requested. The review of `f06ccd4` (2026-11-05) 
 (`six_category_common_support@v1`, registered), the limited-coverage identity (`state_eval_hybrid@v2-lc1`, registered
 conditionally), the Thinking-2507 top-up and the hybrid generation; all four are done (section 8).
 
+0. **The registered composition restored: design R1** (section 11; application
+   `logs/budget/applications/research_a_schema_restoration_2026-11-05/application.json`). One package: admit
+   `schema_synth@v1` as a task source of the extension `tool_pool@v1+schema_synth@v1`, register
+   `six_category_schema_restored@v1` (A1/A2/C1-6cat-sr), and two generation caps (hybrid $6.16, Thinking-2507 $2.31).
+   R2 (the non-thinking cell only, cap $4.96) is priced and not recommended.
 1. **Before the packed full search** (not authorized):
    - its inputs are now the calibration v2 profiles (COMPLETE) and `state_eval_hybrid@v2-lc1` (FROZEN with one
      LIMITED_COVERAGE cell); `packed_search`'s bound records still name `state_eval_hybrid_v2_freeze.json`, which
@@ -1116,6 +1121,66 @@ count) and records `intra_op_threads: 1`; the regenerated audit differs from the
 The assertion, the identity comparison and the 1e-9 tolerance are unchanged. Regression:
 `test_the_isolation_check_runs_on_one_thread_and_restores_the_callers`.
 
+## 11. The registered composition restored, and what packing really costs (2026-11-05)
+
+The maintainer's brief "原始数据配比恢复、Packed Forward 效率审查与 Full Search 前置准备". Nothing was generated,
+searched, trained or evaluated; no pod. The decision record is `logs/budget/decisions.md` 2026-11-05.
+
+**schema_arguments supply, per teacher** (`audit/schema_arguments_supply_v3.json`, from the six import records and the
+admitted documents):
+
+| teacher mode | training tasks attempted / supply | admitted (full / single step) | supervised tokens / registered 74,013 | per admitted episode | state evaluation |
+| --- | --- | --- | --- | --- | --- |
+| hybrid thinking | 124 / 1,928 (1,804 untried) | 6 / 31 | 27,837 (reasoning 92%) | 1,010 / 702 | 4,236 / 1,800 positions |
+| hybrid non-thinking | 1,928 / 1,928 (exhausted) | 55 / 248 | 17,290 (tool call 62%) | 147 / 37 | 1,063 / 1,800 (29 / 29 tried) |
+| Thinking-2507 | 136 / 1,928 (full episodes only) | 39 / 0 | 75,152 of 73,888 (reasoning 92%) | 1,927 | none in its plan |
+
+Admission per attempted task (two candidates): thinking 25% / 31%, non-thinking 15% / 16%, Thinking-2507 29%. Every
+task is Pivot Conversational; the gold calls carry about two arguments, 21-29% of them nested. The thinking teachers'
+token targets fill on ~40 episodes because their reasoning is long, which is not evidence of better tool calling.
+
+**New source.** No public dataset closes the gap legally and robustly (27 candidates surveyed beyond reviews v1/v2;
+Synth-APIGen is conditional and not proposed). `schema_synth@v1` (`scripts/.../schema_synth.py`) writes tasks whose
+gold call a program computes from a sampled ground truth: relative dates and times from the stated current date, unit
+and count conversions, totals and scaled quantities, rules stated in the tool description, enum meanings, corrections
+and distractors, nested objects and ordered arrays (4.3 top-level arguments per call, 96% nested). Every assistant turn
+is still the teacher's own. `audit/schema_synth_v1_audit.json`: all 3,750 tasks admit their gold episode in both modes
+and refuse a changed leaf, a dropped required field, an unrequested optional field and a reordered array; the bytes
+are deterministic; no tool name or signature is shared with eval-set-1, the benchmarks or the excluded lineage
+sources. Whole domains are assigned to splits (22 training, 3 state evaluation, 2 calibration, 2 validation, 1
+reserve).
+
+**Pool and reuse.** `tool_pool.extend` writes tool_pool@v1 plus the addition (content `6139e647...`, base
+`be4652d7...` byte for byte, every frozen order a prefix). `tool_generation_plan.import_records` reuses a record by
+task identity, so the six sealed sessions stay DONE and no task is attempted twice. Strata are per source
+(`tool_generation_priors.stratum_key`): a new source is priced from Pivot's measured strata only under the label
+`proxy:other_source`. `source_groups` splits a category into per-source cells for generation and selection.
+
+**Design R1** (`configs/.../six_category_schema_restored.json`, DESIGN): the registered shares; inside schema_arguments
+every arm holds Pivot 17,200 (C1 17,171) and schema_synth the rest; state evaluation Pivot 1,000 + schema_synth 800 per
+hybrid mode. Price (`plans/schema_restoration_plan_dry.json`): $0.66 / $1.12 / $6.29, caps hybrid $6.16 and
+Thinking-2507 $2.31. R2 fills only the non-thinking cell ($0.37 / $0.64 / $3.72, cap $4.96) but makes 77% of A2's
+schema tokens synthetic against 0% of A1's.
+
+**What packing computes** (`audit/packed_forward_compute.json`). The v2 search read each item alone (micro-batch 1, no
+padding). For the same frozen v2 items:
+
+| set | forwards alone -> packed | computed positions | attention sum of T^2 | scored rows | FLOPs per pass (root) |
+| --- | --- | --- | --- | --- | --- |
+| base profile | 558 -> 79 | +13.2% (75,223 repeated) | x4.63 | +9.5% | 4.64 -> 6.42 PF |
+| reasoning-heavy profile | 388 -> 59 | +14.0% (58,394) | x4.44 | +11.1% | 3.46 -> 4.80 PF |
+| state evaluation | 1,345 -> 216 | +17.3% (260,683) | x4.05 | +12.2% | 12.31 -> 17.45 PF |
+
+Attention rises from 8-9% to 25% of the root's backbone FLOPs (21-24% to 52% for the 596M target). A DEPTH expansion
+does 1.27-1.68x the FLOPs (by parent geometry) in 7x fewer forwards. Re-priced from v2's measured seconds: $34.12
+expected ($26.46-$39.09), against $25.58 for the same inputs read alone. Packing is the protocol (P19), not a speed-up:
+it wins only if 8,192-token sequences run about a third more FLOPs per second, which no GPU has measured. The first
+state evaluation and first DEPTH round of the next authorized search are that measurement; the evaluator now writes
+`evaluation_cache.jsonl`. Safe, unimplemented optimizations: skipping the last DEPTH candidate's whole-model rerun
+(about 1.1-1.4 h packed; needs the prefix-reuse CUDA bit-identity check) and `logits_to_keep` in the statistics passes
+(a 2.49 GB transient per 8,192-token forward). Storage: the search needs about 350 GB; `4rhubprswo` is not to be
+mounted and `am5m373kuq` holds 55 GB, so a new volume belongs to the search's budget.
+
 ## Reproduce ($0)
 
 ```
@@ -1150,6 +1215,21 @@ PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs --a
     --recovery-audit logs/stages/stage-2/teacher_modes/audit/a2_recovery_audit.json
 PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_identity_audit.py \
     --write logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json
+# the registered composition restored (section 11)
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_supply_audit \
+    --write logs/stages/stage-2/teacher_modes/audit/schema_arguments_supply_v3.json
+HF_HUB_OFFLINE=1 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_synth \
+    --out artifacts/stages/stage-2/teacher_modes/schema_synth_v1 --extend data/stages/stage-2/teacher_modes/tool_pool_v1 \
+    --pool-out artifacts/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_synth_audit \
+    --tasks artifacts/stages/stage-2/teacher_modes/schema_synth_v1/tasks.jsonl \
+    --write logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_audit.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_generation_plan \
+    --pool artifacts/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth \
+    --composition configs/stages/stage-2/teacher_modes/six_category_schema_restored.json --no-task-files \
+    --write logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan_dry.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_forward_compute \
+    --write logs/stages/stage-2/teacher_modes/audit/packed_forward_compute.json
 ```
 
 The plan and the application record the scratch pool as `<scratch>/tool_pool_dry_v4` (content `be4652d7…`).

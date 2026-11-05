@@ -111,9 +111,15 @@ def prefix_reaching(tasks: Sequence[Mapping], target: float, unit: str, tpt: flo
 
 
 def cell_targets(bp: Mapping, shares: Mapping[str, float], lineage: str, mode: str, splits: Sequence[str],
-                 training_shares: Mapping[str, float] | None = None) -> list[dict]:
+                 training_shares: Mapping[str, float] | None = None,
+                 source_groups: Mapping | None = None) -> list[dict]:
     """The lineage-mode's cells: ``{split, category, unit, target, min_tasks}``; the training split is split by
-    ``training_shares`` when given (the registered common-support composition), every other split by ``shares``."""
+    ``training_shares`` when given (the registered common-support composition), every other split by ``shares``.
+
+    ``source_groups`` (a design's ``{split: {category: [group, ...]}}``) splits a category's cell into one cell per
+    source group, each ``{group, datasets}`` with its own target: a fixed ``per_mode`` value, or ``rest`` -- the
+    category's target minus the fixed groups'. Every arm then holds the same units of each source in that category
+    (a source-composition match); each group keeps the category's min_tasks. Without it, nothing changes."""
     out = []
     tg = bp["targets"]
     for split in splits:
@@ -125,17 +131,47 @@ def cell_targets(bp: Mapping, shares: Mapping[str, float], lineage: str, mode: s
             continue
         total = float(spec["per_mode"][mode])
         for cat, share in sorted((training_shares if split == "training" and training_shares else shares).items()):
-            out.append({"split": split, "category": cat, "unit": spec["unit"], "target": total * share,
-                        "min_tasks": int(spec.get("min_tasks_per_category", 0))})
+            cell = {"split": split, "category": cat, "unit": spec["unit"], "target": total * share,
+                    "min_tasks": int(spec.get("min_tasks_per_category", 0))}
+            groups = ((source_groups or {}).get(split) or {}).get(cat)
+            if not groups:
+                out.append(cell)
+                continue
+            fixed = sum(float(g["per_mode"][mode]) for g in groups if not g.get("rest"))
+            if fixed > cell["target"] or sum(bool(g.get("rest")) for g in groups) != 1:
+                raise ValueError(f"{split}/{cat}: source groups need exactly one 'rest' group and fixed groups within "
+                                 f"the category's {cell['target']:.1f}")
+            for g in groups:
+                out.append({**cell, "group": g["group"], "datasets": list(g["datasets"]),
+                            "target": cell["target"] - fixed if g.get("rest") else float(g["per_mode"][mode])})
     return out
 
 
-def cell_order(order: Sequence[str], by_id: Mapping[str, Mapping], category: str | None) -> list[Mapping]:
-    return [by_id[t] for t in order if category is None or by_id[t]["category"] == category]
+def cell_order(order: Sequence[str], by_id: Mapping[str, Mapping], category: str | None,
+               datasets: Sequence[str] | None = None) -> list[Mapping]:
+    return [by_id[t] for t in order if (category is None or by_id[t]["category"] == category)
+            and (datasets is None or (by_id[t].get("source") or {}).get("dataset") in datasets)]
 
 
 class PlanIdentityError(RuntimeError):
     """A plan that does not belong to the pool, protocol or design it is read with, or whose cells drifted."""
+
+
+def stratum_candidates(lineage: str, mode: str, task: Mapping) -> list[tuple[str, str]]:
+    """``[(stratum key, basis)]`` a task is priced from, in order: its own source's stratum on its split
+    (``measured``) and on training (``proxy:training``); for a source no session has measured yet (a pool extension:
+    `tool_generation_priors.stratum_key`), the same lineage, mode, category and shape measured on tool_pool@v1's
+    sources (``proxy:other_source`` / ``proxy:other_source_training``) -- labelled, never reported as measured."""
+    from stages.teacher_modes import tool_episodes as TE
+    from stages.teacher_modes.tool_generation_priors import stratum_key
+    shape, ds = TE.episode_shape(task), (task.get("source") or {}).get("dataset")
+    out = [(stratum_key(lineage, mode, task["split"], task["category"], shape, ds), "measured"),
+           (stratum_key(lineage, mode, "training", task["category"], shape, ds), "proxy:training")]
+    if stratum_key(lineage, mode, "training", task["category"], shape, ds) != \
+            stratum_key(lineage, mode, "training", task["category"], shape):
+        out += [(stratum_key(lineage, mode, task["split"], task["category"], shape), "proxy:other_source"),
+                (stratum_key(lineage, mode, "training", task["category"], shape), "proxy:other_source_training")]
+    return out
 
 
 def task_units(task: Mapping, unit: str, *, lineage: str, mode: str, proto: Mapping,
@@ -157,8 +193,7 @@ def task_units(task: Mapping, unit: str, *, lineage: str, mode: str, proto: Mapp
             lo, hi = wilson(a, n)
             return (lo, a / n, hi), "proxy:mode"
     else:
-        for key, basis in ((f"{lineage}|{mode}|{task['split']}|{task['category']}|{shape}", "measured"),
-                           (f"{lineage}|{mode}|training|{task['category']}|{shape}", "proxy:training")):
+        for key, basis in stratum_candidates(lineage, mode, task):
             v = strata.get(key)
             if v and isinstance(v.get("units_per_attempted_task"), list):
                 return tuple(float(x) for x in v["units_per_attempted_task"]), basis
@@ -176,10 +211,10 @@ def reach_stratum(strata: Mapping, lineage: str, mode: str, task: Mapping) -> tu
     stratum once it holds >= `OWN_STRATUM_MIN_ATTEMPTS` attempted tasks -- a stratum with none admitted then counts at
     yield 0 (its units from the training stratum) -- else the training stratum of the same lineage, mode, category and
     shape. None when neither is measured."""
-    from stages.teacher_modes import tool_episodes as TE
-    shape = TE.episode_shape(task)
-    own = strata.get(f"{lineage}|{mode}|{task['split']}|{task['category']}|{shape}")
-    train = strata.get(f"{lineage}|{mode}|training|{task['category']}|{shape}")
+    cands = dict((b, strata.get(k)) for k, b in stratum_candidates(lineage, mode, task))
+    own, train = cands.get("measured"), cands.get("proxy:training")
+    if not own and not train:                       #: an unmeasured source: tool_pool@v1's strata stand in
+        own, train = cands.get("proxy:other_source"), cands.get("proxy:other_source_training")
     units = lambda v: v["units_per_admitted"] if v and isinstance(v.get("units_per_admitted"), (int, float)) else None  # noqa: E731
     if own and int(own.get("attempted") or 0) >= OWN_STRATUM_MIN_ATTEMPTS:
         u = units(own) or units(train)
@@ -232,7 +267,8 @@ STATUSES = ("REACHED", "REACHABLE", "SHORTFALL_EXHAUSTED", "SHORTFALL_PROJECTED"
 
 def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man: Mapping, by_id: Mapping,
                   priors: Mapping | None = None, imported: Sequence[Mapping] | Mapping | None = None, *,
-                  training_shares: Mapping[str, float] | None = None, whole_supply: Sequence[Mapping] = ()) -> dict:
+                  training_shares: Mapping[str, float] | None = None, whole_supply: Sequence[Mapping] = (),
+                  source_groups: Mapping | None = None) -> dict:
     """One lineage's ``{mode: {"cells": [...]}}``. Per cell, apart: what is SEALED (the import records' episodes of
     this cell, `tool_generation_import.merged`), the WHOLE SUPPLY's projection (sealed + every remaining task at the
     measured, proxy or prior yield), what the BOUND buys (the remaining tasks the plan may attempt), and the share
@@ -249,8 +285,9 @@ def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man
     for mode in sorted(li["modes"]):
         done = TGI.merged(records, lineage, mode)
         cells = []
-        for c in cell_targets(proto["bounded_plan"], shares, lineage, mode, li["splits"], training_shares):
-            tasks = cell_order(man["orders"].get(c["split"], []), by_id, c["category"])
+        for c in cell_targets(proto["bounded_plan"], shares, lineage, mode, li["splits"], training_shares,
+                              source_groups):
+            tasks = cell_order(man["orders"].get(c["split"], []), by_id, c["category"], c.get("datasets"))
             mine = {t["task_id"]: done[t["task_id"]] for t in tasks if t["task_id"] in done}
             new = [t for t in tasks if t["task_id"] not in mine]
             sealed = sum(o["units"] for o in mine.values() if o["admitted"]) if c["unit"] != "tasks" else \
@@ -313,23 +350,56 @@ def training_shares(path: Path = COMMON_SUPPORT) -> dict[str, float]:
     return {k: float(v["share"]) for k, v in json.loads(Path(path).read_text())["tool_calling"]["categories"].items()}
 
 
+def source_groups(path: Path = COMMON_SUPPORT) -> dict | None:
+    """A composition file's ``source_groups`` (`cell_targets`), or None when it registers none."""
+    return json.loads(Path(path).read_text()).get("source_groups") or None
+
+
 def whole_supply_cells(path: Path = COMMON_SUPPORT) -> list[dict]:
     return [{k: w[k] for k in ("lineage", "mode", "split", "category")}
             for w in json.loads(Path(path).read_text()).get("whole_supply_cells") or []]
 
 
-def import_records(pool_content_sha256: str, paths: Sequence[Path] = IMPORTS) -> list[tuple[Path, dict]]:
-    """``[(path, record)]`` of every import record that exists and belongs to this pool's content."""
+def pool_contents(man: Mapping) -> tuple[str, ...]:
+    """The content identities a pool's tasks were sealed under: its own and, for an extension (`tool_pool.extend`),
+    its base's -- every base task is in the extension byte for byte, in its place."""
+    return (man["content_sha256"],) + ((man["base"]["content_sha256"],) if isinstance(man.get("base"), Mapping) else ())
+
+
+def import_records(pool_content_sha256: str | Sequence[str], paths: Sequence[Path] = IMPORTS, *,
+                   by_id: Mapping[str, Mapping] | None = None) -> list[tuple[Path, dict]]:
+    """``[(path, record)]`` of every import record that exists and applies to this pool. A record sealed under this
+    pool's content applies whole. One sealed under another content (a base pool, an earlier extension) applies by
+    TASK identity: when every task it lists is in ``by_id`` with the task sha256 it was sealed with -- so a pool that
+    only adds tasks keeps every sealed outcome, and no task is attempted twice. A record sealed under a content this
+    pool names as its base (`pool_contents`) whose tasks do not all match refuses the plan (`PlanIdentityError`); any
+    other non-matching record belongs to another pool and is skipped."""
+    contents = (pool_content_sha256,) if isinstance(pool_content_sha256, str) else tuple(pool_content_sha256)
+    from stages.teacher_modes import tool_pilot as TPL
     out = []
     for p in paths:
-        if Path(p).is_file():
-            r = json.loads(Path(p).read_text())
-            if r.get("pool_content_sha256") == pool_content_sha256:
-                out.append((Path(p), r))
+        if not Path(p).is_file():
+            continue
+        r = json.loads(Path(p).read_text())
+        if r.get("pool_content_sha256") == contents[0]:
+            out.append((Path(p), r))
+            continue
+        if by_id is None:
+            continue
+        bad = sorted(tid for m in r["modes"].values() for tid, t in m["tasks"].items()
+                     if tid not in by_id or TPL.task_sha256(by_id[tid]) != t["task_sha256"])
+        if not bad:
+            out.append((Path(p), r))
+        elif r.get("pool_content_sha256") in contents:
+            raise PlanIdentityError(f"{Path(p).name}: sealed under this pool's base, but {len(bad)} of its task(s) are "
+                                    f"absent or changed, e.g. {bad[:3]}")
     return out
 
 
-def build(pool_dir: Path, *, protocol: Mapping | None = None) -> dict:
+def build(pool_dir: Path, *, protocol: Mapping | None = None, composition: Path | None = COMMON_SUPPORT) -> dict:
+    """The plan over a verified pool. ``composition`` names the training composition file the plan binds -- the
+    registered common-support design by default, or a design that registers its own shares and ``source_groups``
+    (cells per source within a category: `cell_targets`); None plans the registered six-category shares."""
     from stages.teacher_modes import tool_pool as TP
     proto = protocol or json.loads(PROTOCOL.read_text())
     bp = proto["bounded_plan"]
@@ -338,21 +408,24 @@ def build(pool_dir: Path, *, protocol: Mapping | None = None) -> dict:
     by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
     #: the pilot's priors and import apply to the pool the pilot ran on, and to no other (a test pool, a rebuilt one)
     priors = json.loads(PRIORS.read_text()) if PRIORS.is_file() else None
-    if priors and (priors.get("measured_by") or {}).get("pool_content_sha256") != man["content_sha256"]:
+    if priors and (priors.get("measured_by") or {}).get("pool_content_sha256") not in pool_contents(man):
         priors = None
-    imports = import_records(man["content_sha256"])
-    tshares = training_shares() if COMMON_SUPPORT.is_file() else None
-    wide = whole_supply_cells() if COMMON_SUPPORT.is_file() else []
+    imports = import_records(pool_contents(man), by_id=by_id)
+    comp = Path(composition) if composition is not None and Path(composition).is_file() else None
+    tshares = training_shares(comp) if comp else None
+    wide = whole_supply_cells(comp) if comp else []
+    groups = source_groups(comp) if comp else None
     lineages = {li: {"modes": lineage_cells(proto, shares, li, man, by_id, priors, [r for _, r in imports],
-                                            training_shares=tshares, whole_supply=wide),
+                                            training_shares=tshares, whole_supply=wide, source_groups=groups),
                      "splits": proto["lineages"][li]["splits"]} for li in sorted(proto["lineages"])}
     plan = {"schema": SCHEMA, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "pool": {"dir": str(Path(pool_dir)), "content_sha256": man["content_sha256"],
                      "pool_json_sha256": sha_file(Path(pool_dir) / "pool.json")},
             "protocol_sha256": sha_file(PROTOCOL), "six_category_design_sha256": sha_file(SIX),
             "shares": shares, "rules": bp["rounds"],
-            "common_support": ({"path": COMMON_SUPPORT.relative_to(REPO).as_posix(), "sha256": sha_file(COMMON_SUPPORT),
-                                "training_shares": tshares, "whole_supply_cells": wide} if tshares else None),
+            "common_support": ({"path": comp.resolve().relative_to(REPO).as_posix(), "sha256": sha_file(comp),
+                                "training_shares": tshares, "whole_supply_cells": wide,
+                                **({"source_groups": groups} if groups else {})} if tshares else None),
             "approved_shortfalls": list(bp.get("approved_shortfalls") or []),
             "priors": {"path": PRIORS.relative_to(REPO).as_posix(), "sha256": sha_file(PRIORS)} if priors else None,
             "imports": [{"path": p.relative_to(REPO).as_posix(), "sha256": sha_file(p), "lineage": r["lineage"],
@@ -393,6 +466,7 @@ def verified(protocol: Mapping | None = None, pool_dir: Path | None = None, line
     cs = plan.get("common_support")
     if cs and (not (REPO / cs["path"]).is_file() or sha_file(REPO / cs["path"]) != cs["sha256"]
                or cs["training_shares"] != training_shares(REPO / cs["path"])
+               or cs.get("source_groups") != source_groups(REPO / cs["path"])
                or cs["whole_supply_cells"] != whole_supply_cells(REPO / cs["path"])):
         bad.append("built under another common-support composition")
     bound_records = {}
@@ -410,7 +484,8 @@ def verified(protocol: Mapping | None = None, pool_dir: Path | None = None, line
             now = lineage_cells(proto, plan["shares"], li, man, by_id, (bound_records.get("priors") or [None])[0],
                                 bound_records.get("import") or [],
                                 training_shares=(cs or {}).get("training_shares"),
-                                whole_supply=(cs or {}).get("whole_supply_cells") or ())
+                                whole_supply=(cs or {}).get("whole_supply_cells") or (),
+                                source_groups=(cs or {}).get("source_groups"))
             if json.dumps(now, sort_keys=True) != json.dumps((plan.get("lineages") or {}).get(li, {}).get("modes"),
                                                              sort_keys=True):
                 bad.append(f"its {li} cells are not the cells this pool, protocol and design produce")
@@ -510,7 +585,7 @@ def price(plan: Mapping, by_id: Mapping, man: Mapping, proto: Mapping, *, rounds
                 for c in m["cells"]:
                     n = c["bound"] if count == "bound" else c["tasks"][count]
                     tasks = ([by_id[t] for t in c["task_ids"]] if "task_ids" in c else
-                             cell_order(man["orders"].get(c["split"], []), by_id, c["category"])[:n])
+                             cell_order(man["orders"].get(c["split"], []), by_id, c["category"], c.get("datasets"))[:n])
                     mode_tokens += sum(expected_turns(t) for t in tasks) * tpt * retry
                     mode_prefill += sum((t.get("first_prompt_tokens") or tp["prompt_tokens_default"])
                                         * expected_turns(t) for t in tasks) * retry
@@ -547,8 +622,7 @@ def task_generated_tokens(task: Mapping, *, lineage: str, mode: str, proto: Mapp
     from stages.teacher_modes import tool_episodes as TE
     strata = (priors or {}).get("strata") or {}
     shape = TE.episode_shape(task)
-    for key, basis in ((f"{lineage}|{mode}|{task['split']}|{task['category']}|{shape}", "measured"),
-                       (f"{lineage}|{mode}|training|{task['category']}|{shape}", "proxy:training")):
+    for key, basis in stratum_candidates(lineage, mode, task):
         v = strata.get(key)
         if v and v.get("generated_tokens_per_attempted_task"):
             return float(v["generated_tokens_per_attempted_task"]), basis
@@ -608,7 +682,8 @@ def price_measured(plan: Mapping, by_id: Mapping, man: Mapping, proto: Mapping, 
                 for c in m["cells"]:
                     n = c["bound"] if count == "bound" or (c.get("first_round") == "bound" and count != "lower") \
                         else c["tasks"][count]
-                    new = [t for t in cell_order(man["orders"].get(c["split"], []), by_id, c["category"])
+                    new = [t for t in cell_order(man["orders"].get(c["split"], []), by_id, c["category"],
+                                                 c.get("datasets"))
                            if t["task_id"] not in imported][:n]
                     for t in new:
                         g, basis = task_generated_tokens(t, lineage=lineage, mode=mode, proto=proto, priors=priors)
@@ -665,7 +740,7 @@ def pilot_sample(plan: Mapping, by_id: Mapping, man: Mapping, spec: Mapping = PI
     for mode, m in plan["lineages"][spec["lineage"]]["modes"].items():
         cells = []
         for c in m["cells"]:
-            order = cell_order(man["orders"].get(c["split"], []), by_id, c["category"])
+            order = cell_order(man["orders"].get(c["split"], []), by_id, c["category"], c.get("datasets"))
             if (c["split"], c["category"]) in {tuple(x) for x in spec["whole_cells"]}:
                 ids = [t["task_id"] for t in order]
             elif c["split"] == "training":
@@ -749,16 +824,21 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--pool", required=True)
     ap.add_argument("--write", default=None)
+    ap.add_argument("--composition", default=str(COMMON_SUPPORT),
+                    help="the training composition file the plan binds ('none': the registered shares)")
+    ap.add_argument("--no-task-files", action="store_true",
+                    help="a dry plan: write no bound task file (the frozen plan's task files stay untouched)")
     a = ap.parse_args(argv)
-    plan = build(Path(a.pool))
+    plan = build(Path(a.pool), composition=None if a.composition == "none" else Path(a.composition))
     summary = {li: {m: {f"{c['split']}/{c['category']}": (c["supply"], c["tasks"]["expected"], c["bound"], c.get("status"))
                         for c in mm["cells"]} for m, mm in v["modes"].items()} for li, v in plan["lineages"].items()}
     if a.write:
         from stages.teacher_modes import tool_pool as TP
-        _, splits = TP.load_pool(Path(a.pool))
-        by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
-        for li in plan["lineages"]:
-            bound_tasks_file(plan, by_id, li)
+        if not a.no_task_files:
+            _, splits = TP.load_pool(Path(a.pool))
+            by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
+            for li in plan["lineages"]:
+                bound_tasks_file(plan, by_id, li)
         Path(a.write).parent.mkdir(parents=True, exist_ok=True)
         Path(a.write).write_text(json.dumps(plan, indent=1) + "\n")
     print(json.dumps({"price": plan["price"]["total_usd"], "caps": plan["price"].get("proposed_hard_caps_usd"),
