@@ -75,9 +75,20 @@ SELECTION = REPO / "logs/stages/stage-2/teacher_modes/data/six_category_selectio
 OUT = REPO / "artifacts/stages/stage-2/teacher_modes/packs_6cat"
 #: ``base``: how the arm's five existing base-corpus types and its fluid part were obtained -- re-selected under the
 #: whole-task rule (A1/A2) or kept byte for byte from D4A_merged_whole (C1); `registered_quotas` reads them so.
-ARMS = {"A1-6cat": {"mode": "H-T", "source_pack": "A1", "teacher": "hybrid", "base": "selected"},
-        "A2-6cat": {"mode": "H-N", "source_pack": "A2", "teacher": "hybrid", "base": "selected"},
-        "C1-6cat": {"mode": "T2507", "source_pack": None, "teacher": "thinking_2507", "base": "kept"}}
+#: ``composition``: the tool type's internal composition the arm's identity registers -- six_category_design.json's
+#: (A1/A2/C1-6cat) or six_category_common_support@v1's (the -cs arms, maintainer 2026-11-05); the generation plan's
+#: training cells must carry the same one, or the selection refuses (`select`)
+ARMS = {"A1-6cat": {"mode": "H-T", "source_pack": "A1", "teacher": "hybrid", "base": "selected", "composition": "registered"},
+        "A2-6cat": {"mode": "H-N", "source_pack": "A2", "teacher": "hybrid", "base": "selected", "composition": "registered"},
+        "C1-6cat": {"mode": "T2507", "source_pack": None, "teacher": "thinking_2507", "base": "kept",
+                    "composition": "registered"},
+        "A1-6cat-cs": {"mode": "H-T", "source_pack": "A1", "teacher": "hybrid", "base": "selected",
+                       "composition": "common_support"},
+        "A2-6cat-cs": {"mode": "H-N", "source_pack": "A2", "teacher": "hybrid", "base": "selected",
+                       "composition": "common_support"},
+        "C1-6cat-cs": {"mode": "T2507", "source_pack": None, "teacher": "thinking_2507", "base": "kept",
+                       "composition": "common_support"}}
+COMMON_SUPPORT = REPO / "configs/stages/stage-2/teacher_modes/six_category_common_support.json"
 TOOL_TYPE = "supporting.tool_calling"
 PAD_ID = 151643
 THINK_CLOSE = 151668
@@ -90,7 +101,7 @@ SIX_TYPES = {"supporting.math_new": "competition_math", "openmath": "competition
              "rag_evidence": "rag_reading", "multihop_qa": "multihop_reading",
              "supporting.reading_verified": None, TOOL_TYPE: "tool_calling"}
 SIX_NAMES = ("competition_math", "gsm8k", "rag_reading", "multihop_reading", "code", "tool_calling")
-SELECTION_ARM = {"A1-6cat": "A1", "A2-6cat": "A2"}
+SELECTION_ARM = {"A1-6cat": "A1", "A2-6cat": "A2", "A1-6cat-cs": "A1", "A2-6cat-cs": "A2"}
 MANIFEST = "data_manifest.json"
 MANIFEST_SCHEMA = "aadistill.stage2.teacher_modes.data_manifest/v2"
 #: the frozen documents themselves, beside the manifest that holds their sha256 (`write_documents`)
@@ -187,10 +198,13 @@ def a_arm_documents(arm: str, *, records: dict | None = None):
     have = {task_of(d) for d, _ in train_pairs}
     train = [(d, t) for d, t in train_pairs if task_of(d) in selected]
     missing = sorted(selected - have)
-    if missing:
-        if records is None:
-            raise PackBuildError(f"{arm}: {len(missing)} selected task(s) have no document in {pack} (e.g. "
-                                 f"{missing[:3]}); pass the admission records (--v1-records/--records)")
+    if missing and records is None:            #: each task replayed alone through the frozen records (`recover`)
+        rows, docs, dt = recover(mode, missing)
+        bad = [r["task_id"] for r in rows if not (r["admitted"] and not r["isolation_flagged"])]
+        if bad:
+            raise PackBuildError(f"{arm}: selected task(s) {bad} are not admitted in the frozen records")
+        train += [(d, dt[d.doc_id]) for d in docs]
+    elif missing:
         from stages.teacher_modes import token_admission as TA
         got = TA.load(Path(records["v1_records"]), records["v1_identity"], Path(records["records"]),
                       records["identity"])
@@ -248,6 +262,10 @@ def select(arm: str, *, tool_docs: Path | None, records: dict | None = None, poo
     plan = cells = orders = None
     if tool_docs is not None:                       #: the plan's identity first: a drifted plan refuses before any read
         plan, orders = TGP.for_consumers(pool_dir=pool_dir)
+        has = "common_support" if plan.get("common_support") else "registered"
+        if has != spec["composition"]:
+            raise PackBuildError(f"{arm} registers the {spec['composition']} tool composition; the generation plan's "
+                                 f"training cells carry the {has} one")
         cells = {s: TGP.cells_for(plan, spec["teacher"], spec["mode"], s) for s in ("training", "validation")}
     if spec["source_pack"]:
         train, val, dtype, missing = a_arm_documents(arm, records=records)
@@ -345,7 +363,7 @@ def registered_quotas(arm: str, largest: dict, tool_cells: int) -> tuple[dict, l
     shares = [{"name": "fluid_of_total", "part": ["fluid"], "whole": [*SIX_NAMES, "fluid"],
                "target": float(cats["fluid"]) / total,
                "max_deviation_points": float(tol["category_share_deviation_max_points"])}]
-    rule = {"owners": {"token_matched_design.json": sha_file(TOKEN_MATCHED), "six_category_design.json": sha_file(SIX)},
+    rule = {"owners": {p.name: sha_file(p) for p in _designs(arm)},
             "tolerance": tol, "cells_per_type": cells, "base": ARMS[arm]["base"],
             "rule": "whole tasks; fluid and supporting each at least their targets, the per-mode total at most "
                     f"{tol['total_over_target_max_fraction']:.1%} over; fluid's share within "
@@ -367,7 +385,11 @@ def selection_identity(arm: str, sel: dict) -> str:
                                         "validation": _entries(sel["validation"], sel)},
                           "tool": sel["tool"], "sources": sel["sources"],
                           "missing_tasks_read_from_records": sel["missing_tasks_read_from_records"],
-                          "designs": {p.name: sha_file(p) for p in (TOKEN_MATCHED, SIX)}})
+                          "designs": {p.name: sha_file(p) for p in _designs(arm)}})
+
+
+def _designs(arm: str) -> tuple[Path, ...]:
+    return (TOKEN_MATCHED, SIX) + ((COMMON_SUPPORT,) if ARMS[arm]["composition"] == "common_support" else ())
 
 
 def proportions(arm: str, sel: dict) -> dict:
@@ -723,24 +745,17 @@ def proportion_audit() -> dict:
             "authorizes": "nothing"}
 
 
-def recovery_audit(arm: str) -> dict:
-    """The arm's selected tasks that its source pack lacks, each recovered from the FROZEN sealed generation records
+def recover(mode: str, missing: list[str]) -> tuple[list[dict], list, dict]:
+    """``(rows, documents, data_type)``: each ``missing`` task recovered from the FROZEN sealed generation records
     (six_category_selection.json :: records) by `token_admission.load`'s own functions for that (task, mode) only --
     every label's shards checked against its .complete and the store identity, the admission, the code-stability
-    recheck and the isolation recheck -- with its documents and the arm's counts recomputed with them against the
-    selection record. The full path (`select` with the records) re-derives every verdict, including the sandboxed
-    stability recheck of every program and MBPP task, which runs far longer on the dev box; the functions are the same."""
+    recheck and the isolation recheck. Documents only for a task admitted and not flagged."""
     from stages.reasoning_data import generation_driver as GD
     from stages.teacher_modes import admission as ADM
     from stages.teacher_modes import build_supplement_tasks as BST
     from stages.teacher_modes import code_stability as CS
     from stages.teacher_modes import token_admission as TA
-    spec, rec = ARMS[arm], json.loads(SELECTION.read_text())
-    mode = spec["mode"]
-    selected = {t for c in rec["selection"][mode].values() for t in c}
-    pairs = [(d, t) for d, t in PA.documents_from_isolated_pack(PA.PACKS / spec["source_pack"], "train")
-             if d.doc_id.split("|", 1)[0] in selected]
-    missing = sorted(selected - {d.doc_id.split("|", 1)[0] for d, _ in pairs})
+    rec = json.loads(SELECTION.read_text())
     proto = ADM.protocol()
     tasks = ADM.tasks_and_stages(proto)[0]
     tasks.update({t["task_id"]: t for t in BST.read_jsonl(TA.ORDER_V2)})
@@ -761,7 +776,7 @@ def recovery_audit(arm: str) -> dict:
                 if tid in sealed:
                     found.setdefault(which, {}).setdefault(tid, []).append(sealed[tid])
         stores[which] = {**rec["records"][which], "labels_verified": labels}
-    out, docs, dtype = [], [], {d.doc_id: t for d, t in pairs}
+    rows, docs, dtype = [], [], {}
     for tid in missing:
         recs = sorted((found.get("supplement", {}).get(tid) or found.get("v1", {}).get(tid) or []),
                       key=lambda r: r["candidate_index"])
@@ -771,22 +786,42 @@ def recovery_audit(arm: str) -> dict:
         flagged, iso = ADM.isolation_recheck({k: v for k, v in verdicts.items() if v["admitted"]}, tasks,
                                              sources=BST.catalogue())
         v, stratum = verdicts[key], TA.cell_of(tasks[tid]).split("/", 1)[0]
-        ok = v["admitted"] and key not in flagged
-        docs += v["docs"] if ok else []
+        docs += v["docs"] if v["admitted"] and key not in flagged else []
         dtype.update({d.doc_id: stratum for d in v["docs"]})
-        out.append({"task_id": tid, "cell": TA.cell_of(tasks[tid]), "records_from": [w for w in ("v1", "supplement")
-                                                                                     if tid in found.get(w, {})],
-                    "candidates": [r["candidate_index"] for r in recs], "admitted": v["admitted"],
-                    "isolation_flagged": key in flagged, "isolation_recheck_pass": iso.get("pass"),
-                    "code_stability_changed": code.get("changed"),
-                    "documents": [{"doc_id": d.doc_id, "mode_suffix": d.doc_id.split("|")[1],
-                                   "prompt_tokens": len(d.prompt_ids), "supervised_tokens": len(d.output_ids),
-                                   "ends_on_a_stop_id": d.output_ids[-1] in (151645, 151643),
-                                   "content_sha256": doc_sha256(d)} for d in v["docs"]]})
+        rows.append({"task_id": tid, "cell": TA.cell_of(tasks[tid]), "records_from": [w for w in ("v1", "supplement")
+                                                                                      if tid in found.get(w, {})],
+                     "candidates": [r["candidate_index"] for r in recs], "admitted": v["admitted"],
+                     "isolation_flagged": key in flagged, "isolation_recheck_pass": iso.get("pass"),
+                     "code_stability_changed": code.get("changed"),
+                     "documents": [{"doc_id": d.doc_id, "mode_suffix": d.doc_id.split("|")[1],
+                                    "prompt_tokens": len(d.prompt_ids), "supervised_tokens": len(d.output_ids),
+                                    "ends_on_a_stop_id": d.output_ids[-1] in (151645, 151643),
+                                    "content_sha256": doc_sha256(d)} for d in v["docs"]],
+                     "stores": stores})
+    return rows, docs, dtype
+
+
+def recovery_audit(arm: str) -> dict:
+    """The arm's selected tasks that its source pack lacks, each recovered from the FROZEN sealed generation records
+    (six_category_selection.json :: records) by `token_admission.load`'s own functions for that (task, mode) only --
+    every label's shards checked against its .complete and the store identity, the admission, the code-stability
+    recheck and the isolation recheck -- with its documents and the arm's counts recomputed with them against the
+    selection record. The full path (`select` with the records) re-derives every verdict, including the sandboxed
+    stability recheck of every program and MBPP task, which runs far longer on the dev box; the functions are the same."""
+    spec, rec = ARMS[arm], json.loads(SELECTION.read_text())
+    mode = spec["mode"]
+    selected = {t for c in rec["selection"][mode].values() for t in c}
+    pairs = [(d, t) for d, t in PA.documents_from_isolated_pack(PA.PACKS / spec["source_pack"], "train")
+             if d.doc_id.split("|", 1)[0] in selected]
+    missing = sorted(selected - {d.doc_id.split("|", 1)[0] for d, _ in pairs})
+    rows, docs, dt = recover(mode, missing)
+    stores = rows[0]["stores"] if rows else {}
+    out = [{k: v for k, v in r.items() if k != "stores"} for r in rows]
+    dtype = {**{d.doc_id: t for d, t in pairs}, **dt}
     train = [d for d, _ in pairs] + docs
     counts, _, _ = type_counts(arm, train, dtype, {d.doc_id: d.doc_id.split("|", 1)[0] for d in train})
     want = {k: int(x) for k, x in rec["per_type_supervised_tokens"][SELECTION_ARM[arm]].items() if k != "tool_calling"}
-    want["fluid"] = rec["arms"][arm]["by_category"]["fluid"]
+    want["fluid"] = rec["arms"][arm.removesuffix("-cs")]["by_category"]["fluid"]   #: one base selection per mode
     return {"schema": "aadistill.stage2.teacher_modes.recovery_audit/v1",
             "command": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs --arm "
                        f"{arm} --recovery-audit <out>",

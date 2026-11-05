@@ -206,13 +206,39 @@ def test_the_committed_plan_binds_both_imports_and_the_common_support_compositio
     plan = json.loads(TGP.PLAN.read_text())
     if not plan.get("imports"):
         pytest.skip("no rebuilt plan committed")
-    assert [r["lineage"] for r in plan["imports"]] == ["hybrid", "thinking_2507"]
+    assert [r["lineage"] for r in plan["imports"]] == ["hybrid", "thinking_2507", "thinking_2507"]
     assert plan["common_support"]["training_shares"] == TGP.training_shares()
     t = {c["category"]: c for c in plan["lineages"]["thinking_2507"]["modes"]["T2507"]["cells"] if c["split"] == "training"}
-    rec = json.loads((REPO / plan["imports"][1]["path"]).read_text())
+    done = TGI.merged([json.loads((REPO / r["path"]).read_text()) for r in plan["imports"]], "thinking_2507", "T2507")
     for cat, c in t.items():
-        mine = [x for x in rec["modes"]["T2507"]["tasks"].values() if x["split"] == "training" and x["category"] == cat]
-        assert c["sealed"]["tasks"] == len(mine) and not set(c["task_ids"]) & set(rec["modes"]["T2507"]["tasks"])
+        mine = [x for x in done.values() if x["split"] == "training" and x["category"] == cat]
+        assert c["sealed"]["tasks"] == len(mine) and not set(c["task_ids"]) & set(done)
     hn = next(c for c in plan["lineages"]["hybrid"]["modes"]["H-N"]["cells"]
               if (c["split"], c["category"]) == ("training", "schema_arguments"))
     assert hn["whole_supply"] and hn["bound"] == hn["new_supply"] and hn["target"] == pytest.approx(11800, abs=1)
+
+
+def test_the_reach_bound_gives_a_small_gap_a_95_percent_round():
+    """A budget-limited lineage's one round (maintainer 2026-11-05): 1,133 tokens missing, admitted episodes of about
+    4,264 tokens, a lower admission yield of 0.159 -- the mean-yield prefix is 2 tasks; P(>= 1 admission) >= 0.95 needs
+    ceil(ln 0.05 / ln 0.841) = 18."""
+    from stages.teacher_modes import tool_episodes as TE
+    key = f"thinking_2507|T2507|training|error_recovery|{TE.FULL_EPISODE}"
+    priors = {"strata": {key: {"admission_yield_wilson90": [0.1589, 0.3473], "units_per_admitted": 4264.08}}}
+    tasks_ = [{"task_id": f"e{i}", "split": "training", "category": "error_recovery"} for i in range(40)]
+    n = TGP.reach_bound(tasks_, 1132.7, lineage="thinking_2507", mode="T2507", priors=priors)
+    assert n == 18
+    assert TGP.reach_bound(tasks_, 9 * 4264.08, lineage="thinking_2507", mode="T2507", priors=priors) == 40  #: supply
+    assert TGP.reach_bound(tasks_, 0.0, lineage="thinking_2507", mode="T2507", priors=priors) == 0
+    assert TGP.reach_bound(tasks_, 100.0, lineage="thinking_2507", mode="T2507", priors={"strata": {}}) is None
+
+
+def test_a_pack_arm_refuses_a_plan_of_the_other_composition(monkeypatch):
+    from stages.teacher_modes import packed_packs as PP
+    plan = {"common_support": {"training_shares": {}}}
+    monkeypatch.setattr(TGP, "for_consumers", lambda pool_dir=None: (plan, {}))
+    with pytest.raises(PP.PackBuildError, match="registered tool composition"):
+        PP.select("A1-6cat", tool_docs=Path("x"))
+    plan.pop("common_support")
+    with pytest.raises(PP.PackBuildError, match="common_support tool composition"):
+        PP.select("A1-6cat-cs", tool_docs=Path("x"))

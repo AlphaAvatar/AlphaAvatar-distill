@@ -133,14 +133,16 @@ def _strata(acc: dict) -> dict:
     return strata
 
 
-def measure_import(record: dict, store: Path) -> dict:
+def measure_import(record: dict, store: Path, acc=None) -> dict:
     """``{"strata", "throughput", "measured_by"}`` of one formal session from its import record: per stratum of the
     record's lineage, the tasks it lists (attempted), their final outcomes and units, and every listed candidate's
-    turns read from the sealed shard the record names (verified by sha256 and the session's identity)."""
+    turns read from the sealed shard the record names (verified by sha256 and the session's identity). ``acc``
+    accumulates several sessions of one lineage (`measure_imports`)."""
     from stages.reasoning_data import generation_driver as GD
     lineage, identity, store = record["lineage"], record["identity"], Path(store)
-    acc = defaultdict(lambda: {"attempted": 0, "admitted": 0, "second": 0, "units": 0.0, "generated_tokens": 0,
-                               "prompt_tokens": 0, "turns": 0, "candidates": 0})
+    acc = acc if acc is not None else defaultdict(lambda: {"attempted": 0, "admitted": 0, "second": 0, "units": 0.0,
+                                                           "generated_tokens": 0, "prompt_tokens": 0, "turns": 0,
+                                                           "candidates": 0})
     for mode, m in sorted(record["modes"].items()):
         labels = sorted({c["label"] for t in m["tasks"].values() for c in t["candidates"]})
         sealed = {lb: GD.sealed(store, lb, identity) for lb in labels}
@@ -165,6 +167,46 @@ def measure_import(record: dict, store: Path) -> dict:
                             "verification_version": record["verification_version"], "lineage": lineage}}
 
 
+def measure_imports(pairs) -> dict:
+    """`measure_import` over several sessions of ONE lineage, ``[(record, store)]``: their tasks are disjoint (each
+    later plan imported the earlier sessions), so the strata pool them; the throughput rows are every session's."""
+    if len({r["lineage"] for r, _ in pairs}) != 1:
+        raise SystemExit("measure_imports pools the sessions of one lineage")
+    seen: set = set()
+    for r, _ in pairs:
+        ids = {(m, t) for m, x in r["modes"].items() for t in x["tasks"]}
+        if ids & seen:
+            raise SystemExit(f"{r['run_id']}: a task another pooled session already lists")
+        seen |= ids
+    acc = defaultdict(lambda: {"attempted": 0, "admitted": 0, "second": 0, "units": 0.0, "generated_tokens": 0,
+                               "prompt_tokens": 0, "turns": 0, "candidates": 0})
+    for r, store in pairs:
+        last = measure_import(r, store, acc)
+    return {"strata": last["strata"], "throughput": throughput([s for _, s in pairs]),
+            "measured_by": [{"run_id": r["run_id"], "identity": r["identity"],
+                             "import_record_session_plan_sha256": r["session_plan_sha256"],
+                             "pool_content_sha256": r["pool_content_sha256"],
+                             "verification_version": r["verification_version"]} for r, _ in pairs]}
+
+
+def replace_lineage(priors: dict, lineage: str, pairs, record_paths: list[str]) -> dict:
+    """``priors`` with ``lineage``'s strata and throughput re-measured over every session in ``pairs``
+    (`measure_imports`); every other lineage's strata are kept as they are."""
+    got = measure_imports(pairs)
+    modes = {m for r, _ in pairs for m in r["modes"]}
+    out = dict(priors)
+    out["strata"] = {**{k: v for k, v in priors["strata"].items() if not k.startswith(f"{lineage}|")}, **got["strata"]}
+    out["throughput"] = {**{k: v for k, v in priors["throughput"].items() if k not in modes}, **got["throughput"]}
+    out["measured_by_lineage"] = {**(priors.get("measured_by_lineage") or {}),
+                                  lineage: {"sessions": got["measured_by"], "import_records": record_paths}}
+    un = dict(priors.get("unmeasured") or {})
+    un["lineages"] = [x for x in un.get("lineages") or [] if x != lineage]
+    un[lineage] = "every stratum not listed (its sessions generated training and validation only)"
+    out["unmeasured"] = un
+    out["written_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return out
+
+
 def add_import(priors: dict, record: dict, store: Path, record_path: str) -> dict:
     """``priors`` with one formal session's strata and throughput added (a lineage the priors do not measure yet);
     every existing stratum and mode is kept as it is."""
@@ -186,28 +228,32 @@ def add_import(priors: dict, record: dict, store: Path, record_path: str) -> dic
 
 
 def throughput(dirs) -> dict:
-    rows = []
-    for d in dirs:
-        p = Path(d) / "telemetry.jsonl"
-        if p.is_file():
-            rows += [json.loads(x) for x in p.read_text().splitlines() if x.strip()]
     by = defaultdict(list)
-    for r in rows:
-        mode = r["label"].split("_")[1]
-        for e in r.get("engine") or []:
-            by[mode].append({"label": r["label"], "wall_seconds": r.get("wall_seconds"),
-                             "engine_start_seconds": (e.get("engine_ready_seconds") or [None])[0],
-                             "output_tokens": e.get("output_tokens"), "generation_seconds": e.get("generation_seconds"),
-                             "output_tokens_per_second": e.get("output_tokens_per_second")})
+    for n, d in enumerate(dirs):              #: one directory per session (pod): its first engine start compiles
+        p = Path(d) / "telemetry.jsonl"
+        rows = [json.loads(x) for x in p.read_text().splitlines() if x.strip()] if p.is_file() else []
+        for r in rows:
+            mode = r["label"].split("_")[1]
+            for e in r.get("engine") or []:
+                by[mode].append({"label": r["label"], "session": n, "wall_seconds": r.get("wall_seconds"),
+                                 "engine_start_seconds": (e.get("engine_ready_seconds") or [None])[0],
+                                 "output_tokens": e.get("output_tokens"),
+                                 "generation_seconds": e.get("generation_seconds"),
+                                 "output_tokens_per_second": e.get("output_tokens_per_second")})
     out = {}
     for mode, xs in sorted(by.items()):
         tok = sum(float(x["output_tokens"] or 0) for x in xs)
         sec = sum(float(x["generation_seconds"] or 0) for x in xs)
+        firsts, laters = {}, []
+        for x in xs:
+            if x["session"] in firsts:
+                laters.append(float(x["engine_start_seconds"] or 0))
+            else:
+                firsts[x["session"]] = x["engine_start_seconds"]
         out[mode] = {"invocations": xs, "output_tokens_per_second": round(tok / sec, 1) if sec else TPL.UNMEASURED,
                      "slowest_invocation_tokens_per_second": min(float(x["output_tokens_per_second"] or 0) for x in xs),
-                     "engine_start_seconds": {"first": xs[0]["engine_start_seconds"],
-                                              "later": max(float(x["engine_start_seconds"] or 0) for x in xs[1:])
-                                              if len(xs) > 1 else None}}
+                     "engine_start_seconds": {"first": max(float(v or 0) for v in firsts.values()),
+                                              "later": max(laters) if laters else None}}
     return out
 
 
@@ -221,10 +267,19 @@ def main(argv=None) -> int:
     ap.add_argument("--add-import", default=None, help="a formal session's import record: its strata are added to "
                     "--priors (with --import-store)")
     ap.add_argument("--import-store", default=None)
+    ap.add_argument("--lineage-imports", nargs="+", default=None, metavar="RECORD=STORE",
+                    help="re-measure one lineage's strata over every listed session (record=store pairs)")
     ap.add_argument("--priors", default=str(PRIORS))
     ap.add_argument("--write", default=str(PRIORS))
     a = ap.parse_args(argv)
-    if a.add_import:
+    if a.lineage_imports:
+        pairs, paths = [], []
+        for x in a.lineage_imports:
+            rp, st = x.split("=", 1)
+            pairs.append((json.loads(Path(rp).read_text()), Path(st)))
+            paths.append(Path(rp).resolve().relative_to(REPO).as_posix())
+        doc = replace_lineage(load(Path(a.priors)), pairs[0][0]["lineage"], pairs, paths)
+    elif a.add_import:
         rec = json.loads(Path(a.add_import).read_text())
         rel = Path(a.add_import).resolve().relative_to(REPO).as_posix()
         doc = add_import(load(Path(a.priors)), rec, Path(a.import_store), rel)

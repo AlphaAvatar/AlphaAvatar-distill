@@ -156,10 +156,10 @@ def test_the_c1_pack_takes_its_plan_quota_and_binds(chain, monkeypatch):
         (t / name).write_text(json.dumps(d))
     monkeypatch.setattr(PP, "TOKEN_MATCHED", t / "tm.json")
     monkeypatch.setattr(PP, "SIX", t / "six.json")
-    rec = PP.build("C1-6cat", tool_docs=docs_path, out=t / "packs", pool_dir=chain["pool"])
+    #: a plan built today carries the registered common-support composition (2026-11-05): its C1 arm is C1-6cat-cs
+    rec = PP.build("C1-6cat-cs", tool_docs=docs_path, out=t / "packs", pool_dir=chain["pool"])
     quota = rec["manifest"]["tool_calling"]["quota"]["cells"]
     assert all(v["status"] == "REACHED" for v in quota.values()), quota
     assert rec["manifest"]["proportions"]["counts"]["tool_calling"] >= tool_total
-    plan = PTP.bind(PTP.packed_units(), t / "packs")
-    c1 = [u for u in plan["units"] if u["arm"] == "C1-6cat"]
-    assert c1 and all(isinstance(u["config"]["schedule"]["total_steps"], int) for u in c1)
+    #: the -cs arms' training plan is not built this round (no training authorized); the formal consumer's pack check
+    assert PP.verify_pack(t / "packs" / "C1-6cat-cs")["content_sha256"] == rec["manifest"]["content_sha256"]

@@ -60,8 +60,11 @@ PLAN = REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json
 PRIORS = REPO / "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json"
 IMPORT = REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json"
 #: every import record a plan binds, in order (maintainer 2026-11-05, review of f06ccd4, section 1): the pilot's, and
-#: Thinking-2507's completed formal session a_tool_generation_t2507_20261104_195411
-IMPORTS = (IMPORT, REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json")
+#: Thinking-2507's completed formal sessions a_tool_generation_t2507_20261104_195411 and _20261105_064829
+IMPORTS = (IMPORT, REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json",
+           REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a3.json")
+#: the probability a first-round-bound lineage's single round must reach its target with (`reach_bound`)
+REACH_PROBABILITY = 0.95
 #: the registered training composition (six_category_common_support@v1, maintainer 2026-11-05)
 COMMON_SUPPORT = REPO / "configs/stages/stage-2/teacher_modes/six_category_common_support.json"
 #: the measured rate and the grant's per-GPU ceiling the price's upper level pays (USD per hour, one L40S)
@@ -160,6 +163,32 @@ def task_units(task: Mapping, unit: str, *, lineage: str, mode: str, proto: Mapp
     return tuple(per_task_units(task, unit, tpt[i], pr[i], cand) for i in (0, 1, 2)), "prior"
 
 
+def reach_bound(tasks: Sequence[Mapping], rest: float, *, lineage: str, mode: str, priors: Mapping | None,
+                q: float = REACH_PROBABILITY) -> int | None:
+    """The shortest prefix of ``tasks`` whose admitted episodes reach ``rest`` units with probability >= ``q``, each
+    task admitted independently at its measured stratum's LOWER Wilson admission yield and every admitted episode
+    counted at the smallest measured units per admitted episode among the prefix's strata (k = ceil(rest / that)
+    admissions needed). None when a task's stratum is unmeasured. For a lineage whose budget holds about one round,
+    where the mean-yield prefix of a small gap is a coin flip (`lineage_cells`)."""
+    from stages.teacher_modes import tool_episodes as TE
+    strata = (priors or {}).get("strata") or {}
+    if rest <= 0:
+        return 0
+    dist, upa = [1.0], None                         #: P(j admissions so far)
+    for i, t in enumerate(tasks):
+        v = strata.get(f"{lineage}|{mode}|{t['split']}|{t['category']}|{TE.episode_shape(t)}")
+        if not v or not isinstance(v.get("units_per_admitted"), (int, float)):
+            return None
+        p = float(v["admission_yield_wilson90"][0])
+        upa = min(upa, float(v["units_per_admitted"])) if upa else float(v["units_per_admitted"])
+        dist = [(dist[j] if j < len(dist) else 0.0) * (1 - p) + (dist[j - 1] * p if j else 0.0)
+                for j in range(len(dist) + 1)]
+        k = math.ceil(rest / upa)
+        if sum(dist[k:]) >= q:
+            return i + 1
+    return len(tasks)
+
+
 def prefix_reaching_units(units: Sequence[float], target: float) -> int:
     """The shortest prefix of per-task ``units`` whose sum reaches ``target`` (all of them when none does)."""
     got = 0.0
@@ -207,7 +236,10 @@ def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man
                         for lvl, i in (("lower", 2), ("expected", 1), ("upper", 0))}
             admitted = sum(o["admitted"] for o in mine.values())
             whole_cell = (lineage, mode, c["split"], c["category"]) in wide
-            bound = len(new) if whole_cell else min(len(new), max(tasks_at["upper"], max(0, c["min_tasks"] - admitted)))
+            reach = (reach_bound(new, rest, lineage=lineage, mode=mode, priors=priors)
+                     if first_bound and c["unit"] != "tasks" else None)
+            bound = len(new) if whole_cell else min(len(new), max(tasks_at["upper"], reach or 0,
+                                                                  max(0, c["min_tasks"] - admitted)))
             whole = [round(sealed + sum(u[0][i] for u in per), 1) for i in (0, 1, 2)]
             in_bound = [round(sealed + sum(u[0][i] for u in per[:bound]), 1) for i in (0, 1, 2)]
             unmeasured = round(sum(u[0][1] for u in per[:bound] if u[1] != "measured"), 1)
@@ -226,7 +258,8 @@ def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man
                 basis.setdefault(f"{TE.episode_shape(t)}:{u[1]}", 0)
                 basis[f"{TE.episode_shape(t)}:{u[1]}"] += 1
             cells.append({**c, **({"whole_supply": True} if whole_cell else {}),
-                          **({"first_round": "bound"} if first_bound else {}), "supply": len(tasks),
+                          **({"first_round": "bound", "reach_bound": reach} if first_bound else {}),
+                          "supply": len(tasks),
                           "supply_by_shape": {sh: sum(TE.episode_shape(t) == sh for t in tasks)
                                               for sh in TE.EPISODE_SHAPES if any(TE.episode_shape(t) == sh for t in tasks)},
                           "sealed": {"tasks": len(mine), "admitted": admitted, "units": round(sealed, 1)},

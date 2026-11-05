@@ -1,12 +1,12 @@
 {
  "schema": "aadistill.stage2.teacher_modes.tool_generation_plan/v1",
- "written_utc": "2026-11-05T06:46:54Z",
+ "written_utc": "2026-11-05T07:15:17Z",
  "pool": {
   "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1",
   "content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
   "pool_json_sha256": "4b75c1edc47769e5dca33687c0f2db08837d7da1cabff4cf278e3a00705de181"
  },
- "protocol_sha256": "a1f74b8a9f7247054cbe4514ec74d12a8f8bba67afba6e9217ae8567b1660354",
+ "protocol_sha256": "73b6f8a997522029d33fabddfe67e8263f6d0d43b9e01494f6f09c4bb6e9ec5d",
  "six_category_design_sha256": "d41cc3b0fe6b90db64622aaec9dcd5917c18a9dbee335771e5e718dd25b44ce2",
  "shares": {
   "tool_selection": 0.15,
@@ -31,7 +31,7 @@
   "first_round_bound_lineages": [
    "thinking_2507"
   ],
-  "_first_round_bound_lineages": "a lineage whose remaining cumulative budget holds about ONE round takes its cells' bound in round 1 instead of the expected prefix (maintainer 2026-11-05, review of f06ccd4, section 3: Thinking-2507's top-up inside the real remainder of its $2.78, $1.5371 = about 22 driver minutes at $1.09/h; one round with its tail, rarely two). The bound is the prefix whose measured LOWER yield reaches the target, which the upper price already pays for; every task is a new one in the frozen order, and admitted episodes beyond a target stay unused (six_category_common_support.json :: freeze)"
+  "_first_round_bound_lineages": "a lineage whose remaining cumulative budget holds about ONE round takes its cells' bound in round 1 instead of the expected prefix (maintainer 2026-11-05, review of f06ccd4, section 3: Thinking-2507's top-up inside the real remainder of its $2.78, $1.5371 = about 22 driver minutes at $1.09/h; one round with its tail, rarely two). The bound is the prefix whose measured LOWER yield reaches the target, which the upper price already pays for; every task is a new one in the frozen order, and admitted episodes beyond a target stay unused (six_category_common_support.json :: freeze); for such a lineage a cell's bound is also at least the shortest prefix whose admitted episodes reach the remaining target with probability >= 0.95 at its measured stratum's lower Wilson admission yield (tool_generation_plan.reach_bound): a small gap's mean-yield prefix is a coin flip, and one round must reach it (maintainer 2026-11-05: the top-up continues until the quota is reached, the supply is exhausted or the budget boundary is hit)"
  },
  "common_support": {
   "path": "configs/stages/stage-2/teacher_modes/six_category_common_support.json",
@@ -57,7 +57,7 @@
  "approved_shortfalls": [],
  "priors": {
   "path": "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json",
-  "sha256": "775c9aa5554e215ea42aab6be90ed987e81772b3cb971c5f8cc6036c900aafa6"
+  "sha256": "437715c1262cb1a03b614390a2ee1ea6618ad5d8a4e213a9e6e2fb6323680ae9"
  },
  "imports": [
   {
@@ -71,6 +71,12 @@
    "sha256": "a04733474d3e6beb14f0652a072684556146c57724c5b00938db6cefb0c4cecb",
    "lineage": "thinking_2507",
    "run_id": "a_tool_generation_t2507_20261104_195411"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a3.json",
+   "sha256": "ba6718359baba32a7e7276cbbe0404b7a91a3845a3c888f217bb17b09bc7be32",
+   "lineage": "thinking_2507",
+   "run_id": "a_tool_generation_t2507_20261105_064829"
   }
  ],
  "lineages": {
@@ -24443,59 +24449,63 @@
        "target": 56565.735558,
        "min_tasks": 0,
        "first_round": "bound",
+       "reach_bound": 18,
        "supply": 2668,
        "supply_by_shape": {
         "full_episode@v1": 2668
        },
        "sealed": {
-        "tasks": 39,
-        "admitted": 11,
-        "units": 45631.0
+        "tasks": 54,
+        "admitted": 13,
+        "units": 55433.0
        },
-       "new_supply": 2629,
+       "new_supply": 2614,
        "tasks": {
-        "lower": 7,
-        "expected": 10,
-        "upper": 15
+        "lower": 1,
+        "expected": 2,
+        "upper": 2
        },
-       "bound": 15,
+       "bound": 18,
        "projection": {
         "whole_supply_units": [
-         2016355.7,
-         3121629.4,
-         4535308.4
+         1826650.6,
+         2738800.7,
+         3926719.9
         ],
         "within_bound_units": [
-         56875.2,
-         63181.4,
-         71247.3
+         67629.6,
+         73910.7,
+         82090.7
         ],
         "unmeasured_units_within_bound": 0,
         "_": "[low, expected, high]; sealed units included"
        },
        "basis_of_new_tasks": {
-        "full_episode@v1:measured": 2629
+        "full_episode@v1:measured": 2614
        },
        "status": "REACHABLE",
        "task_ids": [
-        "tc1-dd72c1a541ac0cb2f419",
-        "tc1-361fdb27a085fbfb733c",
-        "tc1-b1624b2f76b64318773f",
-        "tc1-de14d12203b006c19f66",
-        "tc1-0747d81adb5009ef60cc",
-        "tc1-ca2dee7a9be768381a12",
-        "tc1-bd0fd6a71d6fe1d543a0",
-        "tc1-77be498faa72a705ad7c",
-        "tc1-26f1a2802dcdc6e4bcad",
-        "tc1-ea19b7c6b18ec496e75c",
-        "tc1-87a478c31757012d07ca",
-        "tc1-1a78b8d9f49adcf0ad17",
-        "tc1-4d4da7c7a3f6d9bdb94d",
-        "tc1-0dc85e5837c8145d4af4",
-        "tc1-3f8d87945e293efede93"
+        "tc1-a767546515aa96aaee84",
+        "tc1-941d45aa09c16a2bcf83",
+        "tc1-2766378a4a8e34697fb6",
+        "tc1-896d94cb6fc5b57a5e47",
+        "tc1-5c46491741f9014f149c",
+        "tc1-a71827dd77d7068455a2",
+        "tc1-319cf57667536b59febb",
+        "tc1-c865f0ed982577898acc",
+        "tc1-79fe689ad07a777def02",
+        "tc1-167e861f28d6fde724ff",
+        "tc1-aceccbc734a540fba8aa",
+        "tc1-1392c770019dea70e905",
+        "tc1-2edc08ff0e3aaacfd401",
+        "tc1-1043f0b6df1f5187e0e2",
+        "tc1-648b3a4dc5d5199bcecb",
+        "tc1-7d87ebce831066696c4c",
+        "tc1-99f507bc4d0f1a0f6d78",
+        "tc1-de9ec24b0ba5a8e72657"
        ],
        "shortfall_at_pessimistic_yield": false,
-       "expected_turns_in_bound": 99
+       "expected_turns_in_bound": 92
       },
       {
        "split": "training",
@@ -24504,137 +24514,44 @@
        "target": 84848.11074999999,
        "min_tasks": 0,
        "first_round": "bound",
+       "reach_bound": 0,
        "supply": 4542,
        "supply_by_shape": {
         "full_episode@v1": 4542
        },
        "sealed": {
-        "tasks": 86,
-        "admitted": 16,
-        "units": 48874.0
+        "tasks": 179,
+        "admitted": 36,
+        "units": 101551.0
        },
-       "new_supply": 4456,
+       "new_supply": 4363,
        "tasks": {
-        "lower": 45,
-        "expected": 64,
-        "upper": 93
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
        },
-       "bound": 93,
+       "bound": 0,
        "projection": {
         "whole_supply_units": [
-         1777360.9,
-         2581227.7,
-         3645788.4
+         2027082.5,
+         2576785.6,
+         3236034.9
         ],
         "within_bound_units": [
-         84948.8,
-         101726.1,
-         123944.3
+         101551.0,
+         101551.0,
+         101551.0
         ],
         "unmeasured_units_within_bound": 0,
         "_": "[low, expected, high]; sealed units included"
        },
        "basis_of_new_tasks": {
-        "full_episode@v1:measured": 4456
+        "full_episode@v1:measured": 4363
        },
-       "status": "REACHABLE",
-       "task_ids": [
-        "tc1-1815e3d9c13b3c79715d",
-        "tc1-d46b5634030ed8787b6e",
-        "tc1-0b642406a4954b3fe1bc",
-        "tc1-b23f3da9867c38ce416c",
-        "tc1-7f33c5158276eed6d965",
-        "tc1-23c760436a7a1289bda5",
-        "tc1-97268ab3f4d18b05af71",
-        "tc1-60fbb1e06d57e8e3ff79",
-        "tc1-37eb77c30575ec9ffa6f",
-        "tc1-19e2ab7e32dd750fcc0c",
-        "tc1-b6c76cf4cab332067b1a",
-        "tc1-76f2cb420e8a62dc0a0d",
-        "tc1-008a8771fa98b754e8bb",
-        "tc1-175c5cbf9f40f1d49d1a",
-        "tc1-624779ac561c9d6d2c46",
-        "tc1-120d3900baa68faacaf0",
-        "tc1-703975b9b970dac2a642",
-        "tc1-b020e937bc56a50daa74",
-        "tc1-75832cdd3a5ae643bb9e",
-        "tc1-013e6498d166b0311d41",
-        "tc1-4a148354121c94dfc61a",
-        "tc1-1012c1d220019295e52e",
-        "tc1-400946e701fd677cd516",
-        "tc1-1fcede460410a76782d3",
-        "tc1-78cc3153968a540fd227",
-        "tc1-6b9b9fcf807206ca8e27",
-        "tc1-8e778b29edda8e5999c2",
-        "tc1-087d91cf9428abcbe7ca",
-        "tc1-6edcca757be779830e78",
-        "tc1-4436e4d20dea59d16cf6",
-        "tc1-232869d23c01e0bfe532",
-        "tc1-0fa58385d5e490488ce3",
-        "tc1-5a1f0b925c889070f4fc",
-        "tc1-93645c6547169e6edb45",
-        "tc1-1ac1d9ba045fdc3e8481",
-        "tc1-23c8b2faea11e2840775",
-        "tc1-ec945d68c0ff2f97b8ae",
-        "tc1-045d221cf95a3212cf75",
-        "tc1-900b278008abc632a1a0",
-        "tc1-126f07d2c5e2b67548fa",
-        "tc1-860fb604331de4989565",
-        "tc1-752085a09fc201d1199e",
-        "tc1-2adecc2167a64a76eac8",
-        "tc1-93e779adbe3bb37b41dd",
-        "tc1-38ec9f8e4c6a72b3513f",
-        "tc1-143fdd35e42ace7d523c",
-        "tc1-d02aeddfd8da59254aa4",
-        "tc1-5221526f00a500458c88",
-        "tc1-0377ac7f55494277748c",
-        "tc1-912f29e6e81d49ad2de3",
-        "tc1-1ce538de49b6eef30f08",
-        "tc1-1475f8fac64e542695a6",
-        "tc1-437a13fde065196b6518",
-        "tc1-14fc4c4daf4fa50fea3d",
-        "tc1-2f90c76ab6384c29d777",
-        "tc1-a662e29537791f00a414",
-        "tc1-317d3603b4b5360d6d32",
-        "tc1-d6dea5fcf842a067da19",
-        "tc1-6fe56bc4a0ff7e35978d",
-        "tc1-670d73b3e0ef09a62e32",
-        "tc1-292e9818146eccfcbf53",
-        "tc1-b4245d8f7f0585588a1b",
-        "tc1-53564372dfe6d1e5b80d",
-        "tc1-53bd28d6b8b677cafaa5",
-        "tc1-286b50a8c9816e9d3cd6",
-        "tc1-b835e251af2e1048bc30",
-        "tc1-24c9a7187b00965f1660",
-        "tc1-33b7970ef806663bd72f",
-        "tc1-9a0a030d3dffe289d660",
-        "tc1-14a4d36a4b2af277ca69",
-        "tc1-982637530974924469dc",
-        "tc1-c6619b06c35ff6c06cb1",
-        "tc1-133c2844d43162eea7b4",
-        "tc1-3bcb8d0612e8dc05b1e1",
-        "tc1-94252356cbbb81d3506f",
-        "tc1-b9af041abdc989d9bde0",
-        "tc1-e0e3fed415b9fd694d27",
-        "tc1-62b765075a2fc2f162f7",
-        "tc1-63f54002a2e2781a8ddb",
-        "tc1-714662d9d85868de0105",
-        "tc1-3f853dbb5f4d9bcf4892",
-        "tc1-1ddee01c9172684bea28",
-        "tc1-ce5416d5b03b9f04a1b2",
-        "tc1-d34381eb2aada1056251",
-        "tc1-818f77978faf1748a69f",
-        "tc1-3633214754e2f312030a",
-        "tc1-9a2156eb012c2058348d",
-        "tc1-2fa93a3aa18e925cd8fb",
-        "tc1-f9e8d84a3f2c1e67c2b3",
-        "tc1-312176344144e8987ac0",
-        "tc1-6c4cea72d195a6884379",
-        "tc1-94a7353da330aa2f7f58",
-        "tc1-e697a23d8ea62efc7b04"
-       ],
+       "status": "REACHED",
+       "task_ids": [],
        "shortfall_at_pessimistic_yield": false,
-       "expected_turns_in_bound": 396
+       "expected_turns_in_bound": 0
       },
       {
        "split": "training",
@@ -24643,6 +24560,7 @@
        "target": 113130.978529,
        "min_tasks": 0,
        "first_round": "bound",
+       "reach_bound": 0,
        "supply": 12224,
        "supply_by_shape": {
         "full_episode@v1": 12224
@@ -24688,6 +24606,7 @@
        "target": 84848.11074999999,
        "min_tasks": 0,
        "first_round": "bound",
+       "reach_bound": 0,
        "supply": 4581,
        "supply_by_shape": {
         "full_episode@v1": 4581
@@ -24733,6 +24652,7 @@
        "target": 56565.735558,
        "min_tasks": 0,
        "first_round": "bound",
+       "reach_bound": 0,
        "supply": 37880,
        "supply_by_shape": {
         "full_episode@v1": 37880
@@ -24778,6 +24698,7 @@
        "target": 11780.218105,
        "min_tasks": 0,
        "first_round": "bound",
+       "reach_bound": 0,
        "supply": 1928,
        "supply_by_shape": {
         "full_episode@v1": 368,
@@ -24825,6 +24746,7 @@
        "target": 84848.11074999999,
        "min_tasks": 0,
        "first_round": "bound",
+       "reach_bound": 0,
        "supply": 12499,
        "supply_by_shape": {
         "full_episode@v1": 12499
@@ -24870,6 +24792,7 @@
        "target": 12624.0,
        "min_tasks": 0,
        "first_round": "bound",
+       "reach_bound": 0,
        "supply": 1536,
        "supply_by_shape": {
         "full_episode@v1": 1517,
@@ -24889,9 +24812,9 @@
        "bound": 0,
        "projection": {
         "whole_supply_units": [
-         927037.5,
-         1393619.2,
-         1689659.2
+         923508.5,
+         1386588.2,
+         1678547.6
         ],
         "within_bound_units": [
          16345.0,
@@ -24920,9 +24843,9 @@
    ],
    "tasks_file": {
     "path": "artifacts/stages/stage-2/teacher_modes/tool_generation/thinking_2507/tasks.jsonl",
-    "sha256": "ab446e1962b8bbddb40c22a3090cf7a417fbc9d7c6673944523f4beb0b59e060",
-    "tasks": 108,
-    "bytes": 1362087
+    "sha256": "55c509c16e94358e705a9ea07c15bf97d4a811600716bbb06e2ba494a3e6b2d8",
+    "tasks": 18,
+    "bytes": 219573
    }
   }
  },
@@ -24972,51 +24895,51 @@
    },
    "thinking_2507": {
     "lower": {
-     "usd": 0.28,
-     "minutes": 15.5,
-     "generated_tokens": 254492,
+     "usd": 0.2,
+     "minutes": 10.8,
+     "generated_tokens": 5614,
      "generated_tokens_by_basis": {
-      "measured": 254492
+      "measured": 5614
      },
      "rounds": 1,
      "rate_usd_per_hour": 1.09
     },
     "expected": {
-     "usd": 0.39,
-     "minutes": 21.4,
-     "generated_tokens": 528956,
+     "usd": 0.24,
+     "minutes": 13.3,
+     "generated_tokens": 101068,
      "generated_tokens_by_basis": {
-      "measured": 528956
+      "measured": 101068
      },
      "rounds": 2,
      "rate_usd_per_hour": 1.09
     },
     "upper": {
-     "usd": 1.65,
-     "minutes": 83.3,
-     "generated_tokens": 528956,
+     "usd": 0.96,
+     "minutes": 48.4,
+     "generated_tokens": 101068,
      "generated_tokens_by_basis": {
-      "measured": 528956
+      "measured": 101068
      },
      "rounds": 4,
      "rate_usd_per_hour": 1.19
     },
     "runner_cap": {
-     "driver_minutes": 48.3,
-     "hard_terminate_minutes": 114.1,
+     "driver_minutes": 13.4,
+     "hard_terminate_minutes": 70.5,
      "rate_usd_per_hour": 1.19,
-     "all_in_usd": 2.3278
+     "all_in_usd": 1.4476
     }
    }
   },
   "total_usd": {
-   "lower": 1.81,
-   "expected": 3.04,
-   "upper": 8.44
+   "lower": 1.73,
+   "expected": 2.89,
+   "upper": 7.75
   },
   "proposed_hard_caps_usd": {
    "hybrid": 8.8622,
-   "thinking_2507": 2.3278
+   "thinking_2507": 1.4476
   },
   "levels": {
    "lower": {

@@ -1,0 +1,66 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.state_eval_limited_coverage_registration/v1",
+ "id": "state_eval_hybrid@v2-lc1",
+ "status": "REGISTERED (conditional): an independent LIMITED_COVERAGE evaluation identity; NOT frozen, built or scored yet",
+ "registered_by": "maintainer 2026-11-05 (independent review of f06ccd4), ruling 4 and section 5: '接受 state_eval_hybrid@v2-lc1 的独立版本化设计，但保留 state_eval_hybrid@v2 原身份的 PENDING 状态'",
+ "registered_utc": "2026-11-05",
+ "plan_record": {
+  "path": "logs/stages/stage-2/teacher_modes/audit/state_eval_hn_schema_limited_coverage.json",
+  "sha256": "9b12a30c48a96ca38549c5ae54fcbd7fe0fd771f6788ea630039ede1e9218a5e"
+ },
+ "registered_identity_kept": "state_eval_hybrid@v2 stays PENDING: its 1,800-position non-thinking schema_arguments requirement is not realizable on this pool; it is never relabelled, and no result of @v2-lc1 is reported as a result of @v2",
+ "unchanged_from_v2": [
+  "teacher-forced KL against the root teacher",
+  "scored positions (positions.supervised_target_v1)",
+  "the domain aggregation (equal-domain mean of sub-type means; worst domain)",
+  "the critical-token definition and groups (tool_call_open / tool_call_close in both modes, 50:50)",
+  "the frozen inputs every candidate shares: v1's 1,135 items byte for byte, the type table full_search_types_v2.json, the forward context and measurement protocol"
+ ],
+ "limited_cell": {
+  "mode": "H-N (non-thinking)",
+  "category": "schema_arguments",
+  "target_scored_positions": 1800,
+  "realized_scored_positions": 1063,
+  "admitted_episodes": 11,
+  "tasks_attempted": 29,
+  "kish_effective_episodes": 4.98,
+  "sources": {
+   "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 29
+  },
+  "verification_levels": {
+   "protocol+schema_validity+step_gold": 22,
+   "protocol+schema_validity+recorded_execution+step_gold": 7
+  },
+  "status": "LIMITED_COVERAGE (never REACHED)"
+ },
+ "every_report_states": [
+  "the registered target (1,800 scored positions)",
+  "the realized 1,063 scored positions",
+  "the 11 admitted episodes and the Kish effective episode count (4.98)",
+  "the sources and the verification levels the episodes were admitted at"
+ ],
+ "uncertainty": {
+  "method": "a delete-one-episode jackknife of the cell's position-weighted KL (and of its contribution to each objective), t with n - 1 = 10 degrees of freedom; the Kish effective count is reported beside it; no normal approximation over positions",
+  "interpretation": "a FINITE-SAMPLE SENSITIVITY ANALYSIS over 11 clusters, four of which carry 78.7% of the positions; its interval is never read as a confidence interval with adequate coverage, and 1,063 positions are never treated as independent observations"
+ },
+ "decision_boundary": {
+  "ranking": "the candidate ranking rule is unchanged",
+  "registered_before": "any search reads the suite",
+  "report_beside_every_ranking": [
+   "each objective as defined (equal-domain mean, worst domain, critical-token KL)",
+   "each objective with this cell left out (the tool sub-type pooled over the other six categories' positions; nothing else reweighted)",
+   "for the Top-1 against each state it is compared with (the Pareto front and the runner-up), the cell's contribution to their difference with its jackknife 90% interval"
+  ],
+  "flag": "SENSITIVE_TO_THE_LIMITED_CELL when leaving the cell out changes the Top-1 or the Pareto front, OR when a key margin (the Top-1's margin over the runner-up or a front member on any objective) falls inside the uncertainty range of the cell's contribution to that difference",
+  "consequence": "a flagged Top-1 is NOT promoted as a reliable Top-1 without further independent validation (follow_up_validation)",
+  "retention": "every candidate checkpoint and every raw result is kept; no unfavourable candidate is deleted after the fact and no metric is redefined"
+ },
+ "follow_up_validation": [
+  "re-score the retained Pareto front on a later suite version with full coverage when a compliant, admitted source supplies it (the search keeps the front's states; re-scoring is a forward pass, not a new search)",
+  "the trained students' formal measurement reads eval-set-1 (P10.3), where tool calling is reported as its own unit; it never selects a state",
+  "closed-loop tool success belongs to a registered tool evaluation (eval-set-2), not to teacher-forced KL"
+ ],
+ "multi_turn_h_n": "the non-thinking multi_turn state-evaluation cell (target 2,400, supply 205, AT_RISK) is monitored in the hybrid session; its SHORTFALL is NOT approved",
+ "suite_check_after_generation": "once the hybrid generation ends, the WHOLE state_eval suite gets one identity, coverage and freeze check: every other cell must meet its v2 requirement (positions and >= 5 tasks), or the suite does not freeze; the conditional registration of this one cell admits nothing else",
+ "authorizes": "nothing by itself: no search, no evaluation"
+}

@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.tool_generation_priors/v1",
- "written_utc": "2026-11-05T06:24:04Z",
+ "written_utc": "2026-11-05T07:15:06Z",
  "measured_by": {
   "run_id": "a_tool_pilot_20261104_164531",
   "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
@@ -492,44 +492,44 @@
    "turns_per_candidate": 1.429
   },
   "thinking_2507|T2507|training|error_recovery|full_episode@v1": {
-   "attempted": 39,
-   "admitted": 11,
-   "second_candidate_rate": 0.7949,
-   "units": 45631.0,
-   "units_per_admitted": 4148.27,
-   "admission_yield": 0.2821,
+   "attempted": 54,
+   "admitted": 13,
+   "second_candidate_rate": 0.8148,
+   "units": 55433.0,
+   "units_per_admitted": 4264.08,
+   "admission_yield": 0.2407,
    "admission_yield_wilson90": [
-    0.1807,
-    0.4117
+    0.1589,
+    0.3473
    ],
    "units_per_attempted_task": [
-    749.61,
-    1170.026,
-    1707.751
+    677.589,
+    1026.537,
+    1480.982
    ],
-   "generated_tokens_per_attempted_task": 5635.8,
-   "prompt_tokens_per_turn": 2101.9,
-   "turns_per_candidate": 1.914
+   "generated_tokens_per_attempted_task": 5614.9,
+   "prompt_tokens_per_turn": 2101.5,
+   "turns_per_candidate": 1.816
   },
   "thinking_2507|T2507|training|mcp_agent|full_episode@v1": {
-   "attempted": 86,
-   "admitted": 16,
-   "second_candidate_rate": 0.8372,
-   "units": 48874.0,
-   "units_per_admitted": 3054.62,
-   "admission_yield": 0.186,
+   "attempted": 179,
+   "admitted": 36,
+   "second_candidate_rate": 0.8436,
+   "units": 101551.0,
+   "units_per_admitted": 2820.86,
+   "admission_yield": 0.2011,
    "admission_yield_wilson90": [
-    0.127,
-    0.2643
+    0.1565,
+    0.2547
    ],
    "units_per_attempted_task": [
-    387.901,
-    568.302,
-    807.207
+    441.332,
+    567.324,
+    718.424
    ],
-   "generated_tokens_per_attempted_task": 4778.7,
-   "prompt_tokens_per_turn": 1952.5,
-   "turns_per_candidate": 1.563
+   "generated_tokens_per_attempted_task": 4732.4,
+   "prompt_tokens_per_turn": 1987.9,
+   "turns_per_candidate": 1.518
   },
   "thinking_2507|T2507|training|multi_turn|full_episode@v1": {
    "attempted": 64,
@@ -765,6 +765,7 @@
    "invocations": [
     {
      "label": "admission_T2507_pass0",
+     "session": 0,
      "wall_seconds": 241.7,
      "engine_start_seconds": 157.9,
      "output_tokens": 13272,
@@ -773,6 +774,7 @@
     },
     {
      "label": "tool_T2507_r1_pass0",
+     "session": 0,
      "wall_seconds": 1223.3,
      "engine_start_seconds": 21.7,
      "output_tokens": 1239677,
@@ -781,6 +783,7 @@
     },
     {
      "label": "tool_T2507_r1_pass1",
+     "session": 0,
      "wall_seconds": 899.2,
      "engine_start_seconds": 20.3,
      "output_tokens": 748132,
@@ -789,6 +792,7 @@
     },
     {
      "label": "tool_T2507_r2_pass0",
+     "session": 0,
      "wall_seconds": 292.4,
      "engine_start_seconds": 20.5,
      "output_tokens": 156270,
@@ -797,14 +801,33 @@
     },
     {
      "label": "tool_T2507_r2_pass1",
+     "session": 0,
      "wall_seconds": 263.0,
      "engine_start_seconds": 20.9,
      "output_tokens": 133118,
      "generation_seconds": 226.7,
      "output_tokens_per_second": 587.2
+    },
+    {
+     "label": "tool_T2507_r1_pass0",
+     "session": 1,
+     "wall_seconds": 472.1,
+     "engine_start_seconds": 156.9,
+     "output_tokens": 281220,
+     "generation_seconds": 295.4,
+     "output_tokens_per_second": 952.0
+    },
+    {
+     "label": "tool_T2507_r1_pass1",
+     "session": 1,
+     "wall_seconds": 268.5,
+     "engine_start_seconds": 20.7,
+     "output_tokens": 238314,
+     "generation_seconds": 232.6,
+     "output_tokens_per_second": 1024.6
     }
    ],
-   "output_tokens_per_second": 882.2,
+   "output_tokens_per_second": 899.4,
    "slowest_invocation_tokens_per_second": 204.5,
    "engine_start_seconds": {
     "first": 157.9,
@@ -815,19 +838,32 @@
  "unmeasured": {
   "lineages": [],
   "hybrid": "every stratum not listed: the validation split, and calibration / state evaluation in every category but schema_arguments",
-  "thinking_2507": "every stratum not listed (its session generated training and validation only)"
+  "thinking_2507": "every stratum not listed (its sessions generated training and validation only)"
  },
  "interval": "Wilson 90% on the admission proportion x the measured units per admitted episode",
  "authorizes": "nothing",
  "measured_by_lineage": {
   "thinking_2507": {
-   "run_id": "a_tool_generation_t2507_20261104_195411",
-   "import_record_session_plan_sha256": "2e98393062814b205e90681882720a14036bd31da3d198ba38deb64615ca368f",
-   "pool_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
-   "identity": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
-   "verification_version": "tool_verification@v2",
-   "lineage": "thinking_2507",
-   "import_record": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json"
+   "sessions": [
+    {
+     "run_id": "a_tool_generation_t2507_20261104_195411",
+     "identity": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+     "import_record_session_plan_sha256": "2e98393062814b205e90681882720a14036bd31da3d198ba38deb64615ca368f",
+     "pool_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+     "verification_version": "tool_verification@v2"
+    },
+    {
+     "run_id": "a_tool_generation_t2507_20261105_064829",
+     "identity": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+     "import_record_session_plan_sha256": "a1a1a48edb3ddda08fc58e2cacf68f6422b83fb329df96be32a796f8e3aa440d",
+     "pool_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+     "verification_version": "tool_verification@v2"
+    }
+   ],
+   "import_records": [
+    "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json",
+    "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a3.json"
+   ]
   }
  }
 }

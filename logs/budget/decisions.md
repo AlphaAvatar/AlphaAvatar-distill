@@ -15807,3 +15807,33 @@ on a paid pod.
 - **Revisit when:** the maintainer decides the design, the coverage identity and the top-up. The hybrid grant follows
   those decisions.
 
+
+## 2026-11-05 (UTC) — Cross-plan reuse, six_category_common_support@v1 registered, the Thinking-2507 top-up and the hybrid's formal generation
+
+- **Context.** The maintainer's independent review of `f06ccd4` (2026-11-05): T2507's admission and generation
+  accepted; its two SHORTFALLs not approved; `six_category_common_support@v1` approved in principle as a new identity;
+  `state_eval_hybrid@v2-lc1` approved conditionally as an independent LIMITED_COVERAGE evaluation; the T2507 top-up
+  and the hybrid's formal tool_generation authorized; no Full Search, Stage 3 training, formal benchmark evaluation
+  or merge.
+- **Cross-plan reuse.** A rebuilt plan's session cannot resume an earlier plan's shards (they are bound to the earlier
+  launch identity). `tool_generation_import.build_session` imports a COMPLETED formal store under its own identity:
+  its 22 shards untouched, each candidate re-derived under today's verifier, and every cell reconciled exactly with
+  the session's own record (753 tasks, 390 admitted, 1,148 candidates). A rebuilt plan binds every import record, so
+  its cells start from the imported units and attempt only new tasks; the dev box admits old and new shards side by
+  side, each under its own identity.
+- **Common support registered** (`configs/.../six_category_common_support.json`): the training split's tool
+  composition (schema_arguments 11,800 tokens of the A arms' 493,417.83; C1 the same share), the fallback registered
+  before generation and reading only verified teacher supply, the freeze before any search or training, and the
+  limits (a supervised-token-budget and composition-matched comparison, not a compute-matched one; C1 vs A1
+  secondary, confounded by its initialization search protocol). Calibration and state evaluation keep the
+  registered shares.
+- **The plan.** Thinking-2507's bounds come from its own measured strata (error_recovery 15, mcp_agent 93 new tasks);
+  its round 1 takes the bound because its real remainder ($1.5371) holds about one round. The non-thinking training
+  schema_arguments cell is bound by its whole remaining supply (1,804 tasks). The last round takes the whole bound;
+  a session stops at a round boundary at its driver deadline.
+- **Device admission reuse.** Thinking-2507's admitted result is registered and reused; the new pod hashes the teacher
+  snapshot first and confirms on its first formal invocation.
+- **Budget.** tool_generation_t2507: cumulative $2.78, spent $1.2429 (closeout estimates; provider posted $0.1417 and
+  $1.0943), so attempt 3 is capped at $1.53. tool_generation: cumulative $9.13 (the runner's $9.127 rounded up).
+- **Revisit when:** both sessions close; then the selection freeze per arm and the state-evaluation suite's
+  identity, coverage and freeze check.
