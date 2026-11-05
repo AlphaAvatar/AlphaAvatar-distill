@@ -9,6 +9,12 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
+**RESEARCH A: R1 APPROVED AND REGISTERED -- schema_synth@v1 ADMITTED, six_category_schema_restored@v1 (A1/A2/C1-6cat-sr), GENERATION UNDER `tool_generation_sr` / `tool_generation_sr_t2507` (2026-11-05).**
+- Source: training instances 160 -> 220 per domain; the independent semantic review left out 226 ambiguous requests
+  (exactly its set); 4,843 tasks admitted in the extension `e771393a...` (`audit/tool_source_admission_schema_synth.json`).
+- Plan `plans/schema_restoration_plan.json` ($0.66 / $0.79 / $5.08); caps cumulative $6.16 hybrid, $2.31 Thinking-2507.
+- Owner: `logs/budget/decisions.md` 2026-11-05 (R1 approved); `PACKED_ROUND.md` section 12.
+
 **RESEARCH A: THE REGISTERED TOOL COMPOSITION CAN BE RESTORED -- DESIGN R1 READY FOR ONE DECISION; THE PACKED FORWARD RE-PRICED ON THE FROZEN INPUTS (2026-11-05, $0, nothing generated, searched, trained or evaluated).**
 - schema_arguments supply recounted (`audit/schema_arguments_supply_v3.json`): non-thinking EXHAUSTED (all 1,928
   Pivot tasks tried, 17,290 / 74,013); thinking UNTRIED beyond the pilot (124 tried, 27,837); Thinking-2507 above

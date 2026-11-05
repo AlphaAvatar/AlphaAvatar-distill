@@ -1,32 +1,32 @@
 {
  "schema": "aadistill.stage2.teacher_modes.schema_synth_audit/v1",
- "written_utc": "2026-11-05T13:27:44Z",
+ "written_utc": "2026-11-05T15:27:11Z",
  "tasks": {
   "path": "artifacts/stages/stage-2/teacher_modes/schema_synth_v1/tasks.jsonl",
-  "sha256": "7e62ab584cbd812076464803228aa73afd568e61c58c939512a966a66f8f05a5",
-  "count": 3750
+  "sha256": "705e7b4f9549d564ea63aa4e018245d607e43cff172cbdf27fd231d18bd0a726",
+  "count": 4844
  },
- "generator_sha256": "d8b2a0d3ddd0e6012a2ee77c06bda33779415dcd646ca0c1bd97c3690eb05a34",
+ "generator_sha256": "c3678de2c535cc7befdb11814c8c3249a16577b14e3ceab4075ef534c13860fb",
  "deterministic": true,
  "tasks_with_problems": 0,
  "problems": [],
  "mutations": {
-  "add_unrequested_optional:refused": 664,
-  "drop_required:refused": 3750,
-  "leaf_value:refused": 3750,
-  "reorder_array:refused": 2058
+  "add_unrequested_optional:refused": 827,
+  "drop_required:refused": 4844,
+  "leaf_value:refused": 4844,
+  "reorder_array:refused": 2695
  },
  "gold_strings": {
-  "number_or_bool": 9938,
-  "derived_by_stated_rule": 6174,
-  "verbatim_in_request": 8394,
-  "enum": 6896
+  "number_or_bool": 12818,
+  "derived_by_stated_rule": 7744,
+  "verbatim_in_request": 10902,
+  "enum": 9016
  },
  "unexplained_strings": 0,
  "unexplained_examples": [],
  "gold_call_tokens_by_split": {
   "calibration": {
-   "mean": 105.0,
+   "mean": 105.5,
    "median": 97,
    "min": 75,
    "max": 151
@@ -38,13 +38,13 @@
    "max": 96
   },
   "state_eval": {
-   "mean": 83.1,
+   "mean": 82.9,
    "median": 78,
    "min": 62,
    "max": 121
   },
   "training": {
-   "mean": 99.1,
+   "mean": 98.5,
    "median": 89,
    "min": 52,
    "max": 243
@@ -57,75 +57,75 @@
   }
  },
  "operators": {
-  "enum:described": 1910,
-  "nested:array": 1230,
-  "array:ordered": 1150,
-  "array:sorted": 680,
-  "duration:minutes": 490,
-  "unit:kg_to_g": 480,
-  "enum:by_rule": 480,
-  "nested:object": 480,
-  "time:clock12": 479,
-  "date:back_offset": 429,
-  "time:clock24": 412,
-  "phone:us": 395,
-  "unit:money_cents": 350,
-  "date:absolute": 349,
-  "rule:threshold": 320,
-  "date:tomorrow": 272,
-  "date:weeks": 269,
-  "date:in_days": 256,
-  "phone:uk": 245,
-  "arithmetic:date_offset": 245,
-  "count:plain": 219,
-  "optional:object": 185,
-  "count:dozen": 160,
-  "lookup:catalog": 160,
-  "arithmetic:schedule": 160,
-  "arithmetic:sum": 160,
-  "unit:gb_to_mib": 160,
-  "arithmetic:scale": 160,
-  "arithmetic:age_months": 160,
-  "date:first_of_next_month": 160,
-  "date:week_start": 160,
-  "date:today": 160,
-  "unit:ml_to_ul": 160,
-  "lookup:language_codes": 160,
-  "normalize:plate": 160,
-  "arithmetic:multiply": 160,
-  "rule:prefix": 160,
-  "normalize:digits": 160,
-  "date:compare": 160,
-  "date:weekday_after_next": 156,
-  "date:coming_weekday": 156,
-  "optional:present": 156,
-  "date:first_weekday_next_month": 152,
-  "date:last_of_month": 141,
-  "time:words": 139,
-  "correction": 77,
-  "arithmetic:subtract": 69,
-  "arithmetic:halve": 58,
-  "optional:array": 54,
+  "enum:described": 2504,
+  "nested:array": 1603,
+  "array:ordered": 1521,
+  "array:sorted": 877,
+  "enum:by_rule": 644,
+  "unit:kg_to_g": 634,
+  "date:back_offset": 596,
+  "time:clock12": 586,
+  "nested:object": 586,
+  "duration:minutes": 566,
+  "time:clock24": 522,
+  "phone:us": 503,
+  "unit:money_cents": 461,
+  "date:absolute": 446,
+  "rule:threshold": 391,
+  "date:weeks": 358,
+  "date:in_days": 342,
+  "phone:uk": 340,
+  "date:tomorrow": 339,
+  "count:plain": 285,
+  "arithmetic:date_offset": 278,
+  "optional:object": 254,
+  "arithmetic:sum": 220,
+  "unit:gb_to_mib": 220,
+  "arithmetic:scale": 220,
+  "date:first_of_next_month": 220,
+  "date:today": 220,
+  "unit:ml_to_ul": 220,
+  "date:compare": 220,
+  "arithmetic:schedule": 216,
+  "date:first_weekday_next_month": 213,
+  "normalize:digits": 211,
+  "arithmetic:multiply": 209,
+  "rule:prefix": 209,
+  "optional:present": 208,
+  "date:coming_weekday": 205,
+  "count:dozen": 205,
+  "lookup:catalog": 205,
+  "arithmetic:age_months": 204,
+  "lookup:language_codes": 202,
+  "date:last_of_month": 188,
+  "date:week_start": 181,
+  "time:words": 174,
+  "normalize:plate": 155,
+  "correction": 100,
+  "arithmetic:subtract": 88,
+  "date:weekday_after_next": 86,
+  "arithmetic:halve": 77,
+  "optional:array": 75,
   "enum:expand_days": 40,
   "unit:tenths": 40,
   "arithmetic:sum_product": 40,
   "enum:currency_symbol": 30,
   "normalize:isbn": 20,
   "lookup:timezone": 20,
-  "rule:age_bands": 4
+  "rule:age_bands": 3
  },
  "domains": {
   "bug_tracker": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "1": 56,
-    "2": 63,
-    "3": 41
+    "1": 76,
+    "2": 90,
+    "3": 54
    },
    "gold_call_tokens": {
-    "mean": 59.3,
-    "median": 60,
+    "mean": 58.9,
+    "median": 59,
     "min": 52,
     "max": 65
    },
@@ -148,7 +148,7 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 166.6,
+    "mean": 166.4,
     "median": 166,
     "min": 123,
     "max": 212
@@ -195,14 +195,14 @@
   },
   "car_rental": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 204,
    "levels": {
-    "1": 48,
-    "3": 46,
-    "2": 66
+    "1": 64,
+    "3": 58,
+    "2": 82
    },
    "gold_call_tokens": {
-    "mean": 122.8,
+    "mean": 123.1,
     "median": 118,
     "min": 115,
     "max": 137
@@ -226,24 +226,24 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 198.6,
+    "mean": 198.9,
     "median": 197,
     "min": 164,
-    "max": 251
+    "max": 250
    }
   },
   "conference_registration": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "1": 53,
-    "2": 64,
-    "3": 43
+    "1": 68,
+    "2": 87,
+    "3": 65
    },
    "gold_call_tokens": {
-    "mean": 69.8,
+    "mean": 69.5,
     "median": 69,
-    "min": 60,
+    "min": 59,
     "max": 83
    },
    "leaves": {
@@ -265,22 +265,22 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 235.3,
-    "median": 235,
-    "min": 216,
+    "mean": 235.5,
+    "median": 234,
+    "min": 212,
     "max": 271
    }
   },
   "crm_update": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "3": 47,
-    "1": 51,
-    "2": 62
+    "3": 69,
+    "1": 65,
+    "2": 86
    },
    "gold_call_tokens": {
-    "mean": 66.9,
+    "mean": 67.1,
     "median": 55,
     "min": 54,
     "max": 83
@@ -304,9 +304,9 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 137.2,
+    "mean": 136.9,
     "median": 137,
-    "min": 80,
+    "min": 79,
     "max": 200
    }
   },
@@ -351,14 +351,14 @@
   },
   "expense_report": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "2": 55,
-    "1": 54,
-    "3": 51
+    "2": 79,
+    "1": 69,
+    "3": 72
    },
    "gold_call_tokens": {
-    "mean": 140.9,
+    "mean": 140.5,
     "median": 146,
     "min": 110,
     "max": 185
@@ -382,22 +382,22 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 247.9,
-    "median": 248,
+    "mean": 250.5,
+    "median": 249,
     "min": 154,
-    "max": 371
+    "max": 438
    }
   },
   "flight_search": {
    "split": "calibration",
-   "tasks": 30,
+   "tasks": 28,
    "levels": {
     "1": 11,
-    "3": 10,
+    "3": 8,
     "2": 9
    },
    "gold_call_tokens": {
-    "mean": 87.2,
+    "mean": 87.1,
     "median": 91,
     "min": 75,
     "max": 105
@@ -421,22 +421,22 @@
     "max": 2
    },
    "user_chars": {
-    "mean": 183.9,
-    "median": 189,
+    "mean": 183.1,
+    "median": 185,
     "min": 127,
     "max": 255
    }
   },
   "grocery_order": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 205,
    "levels": {
-    "3": 56,
-    "1": 49,
-    "2": 55
+    "3": 70,
+    "1": 66,
+    "2": 69
    },
    "gold_call_tokens": {
-    "mean": 81.4,
+    "mean": 81.3,
     "median": 83,
     "min": 67,
     "max": 101
@@ -460,28 +460,28 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 325.1,
-    "median": 324,
+    "mean": 324.5,
+    "median": 323,
     "min": 271,
-    "max": 386
+    "max": 378
    }
   },
   "hotel_booking": {
    "split": "state_eval",
-   "tasks": 40,
+   "tasks": 30,
    "levels": {
-    "3": 12,
-    "1": 13,
-    "2": 15
+    "3": 10,
+    "1": 10,
+    "2": 10
    },
    "gold_call_tokens": {
-    "mean": 82.5,
+    "mean": 81.9,
     "median": 78,
-    "min": 77,
+    "min": 78,
     "max": 98
    },
    "leaves": {
-    "mean": 5.7,
+    "mean": 5.6,
     "median": 5,
     "min": 5,
     "max": 8
@@ -499,28 +499,28 @@
     "max": 1
    },
    "user_chars": {
-    "mean": 163.9,
-    "median": 159,
+    "mean": 156.9,
+    "median": 156,
     "min": 113,
-    "max": 248
+    "max": 187
    }
   },
   "insurance_claim": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "2": 65,
-    "1": 46,
-    "3": 49
+    "2": 93,
+    "1": 58,
+    "3": 69
    },
    "gold_call_tokens": {
-    "mean": 107.0,
-    "median": 105,
-    "min": 82,
+    "mean": 106.5,
+    "median": 104,
+    "min": 81,
     "max": 139
    },
    "leaves": {
-    "mean": 8.3,
+    "mean": 8.2,
     "median": 8,
     "min": 6,
     "max": 11
@@ -538,9 +538,9 @@
     "max": 1
    },
    "user_chars": {
-    "mean": 187.6,
+    "mean": 187.0,
     "median": 186,
-    "min": 146,
+    "min": 143,
     "max": 256
    }
   },
@@ -585,20 +585,20 @@
   },
   "lab_samples": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "3": 51,
-    "1": 52,
-    "2": 57
+    "3": 66,
+    "1": 73,
+    "2": 81
    },
    "gold_call_tokens": {
-    "mean": 109.5,
+    "mean": 108.2,
     "median": 109,
     "min": 90,
     "max": 129
    },
    "leaves": {
-    "mean": 9.1,
+    "mean": 8.9,
     "median": 9,
     "min": 7,
     "max": 11
@@ -616,8 +616,8 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 180.3,
-    "median": 180,
+    "mean": 178.3,
+    "median": 178,
     "min": 146,
     "max": 229
    }
@@ -663,20 +663,20 @@
   },
   "medication_reminders": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 216,
    "levels": {
-    "1": 50,
-    "3": 56,
-    "2": 54
+    "1": 70,
+    "3": 69,
+    "2": 77
    },
    "gold_call_tokens": {
-    "mean": 90.1,
+    "mean": 89.8,
     "median": 89,
     "min": 81,
     "max": 98
    },
    "leaves": {
-    "mean": 8.2,
+    "mean": 8.1,
     "median": 8,
     "min": 7,
     "max": 9
@@ -694,28 +694,28 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 206.5,
+    "mean": 206.0,
     "median": 206,
     "min": 172,
-    "max": 237
+    "max": 238
    }
   },
   "orders_report": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "2": 62,
-    "3": 47,
-    "1": 51
+    "2": 91,
+    "3": 65,
+    "1": 64
    },
    "gold_call_tokens": {
-    "mean": 89.0,
-    "median": 88,
+    "mean": 89.5,
+    "median": 89,
     "min": 75,
-    "max": 108
+    "max": 109
    },
    "leaves": {
-    "mean": 9.2,
+    "mean": 9.3,
     "median": 9,
     "min": 7,
     "max": 12
@@ -733,24 +733,24 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 215.0,
-    "median": 213,
+    "mean": 216.4,
+    "median": 215,
     "min": 150,
     "max": 288
    }
   },
   "parcel_shipment": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 210,
    "levels": {
-    "2": 67,
-    "3": 48,
-    "1": 45
+    "2": 84,
+    "3": 58,
+    "1": 68
    },
    "gold_call_tokens": {
-    "mean": 190.6,
+    "mean": 190.5,
     "median": 174,
-    "min": 168,
+    "min": 166,
     "max": 243
    },
    "leaves": {
@@ -772,22 +772,22 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 384.5,
-    "median": 393,
+    "mean": 385.4,
+    "median": 391,
     "min": 301,
     "max": 513
    }
   },
   "parking_reservation": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 155,
    "levels": {
-    "1": 68,
-    "2": 46,
-    "3": 46
+    "1": 63,
+    "2": 52,
+    "3": 40
    },
    "gold_call_tokens": {
-    "mean": 86.2,
+    "mean": 85.9,
     "median": 86,
     "min": 84,
     "max": 89
@@ -811,28 +811,28 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 157.0,
-    "median": 153,
-    "min": 122,
+    "mean": 153.9,
+    "median": 148,
+    "min": 115,
     "max": 229
    }
   },
   "pet_grooming": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 204,
    "levels": {
-    "2": 66,
-    "3": 49,
-    "1": 45
+    "2": 79,
+    "3": 61,
+    "1": 64
    },
    "gold_call_tokens": {
-    "mean": 103.8,
+    "mean": 104.1,
     "median": 104,
     "min": 97,
     "max": 112
    },
    "leaves": {
-    "mean": 8.9,
+    "mean": 9.0,
     "median": 9,
     "min": 8,
     "max": 10
@@ -850,28 +850,28 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 186.9,
-    "median": 186,
+    "mean": 188.8,
+    "median": 189,
     "min": 151,
-    "max": 238
+    "max": 242
    }
   },
   "recipe_scaling": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "2": 76,
-    "3": 45,
-    "1": 39
+    "2": 98,
+    "3": 66,
+    "1": 56
    },
    "gold_call_tokens": {
-    "mean": 93.9,
+    "mean": 93.1,
     "median": 94,
     "min": 70,
     "max": 119
    },
    "leaves": {
-    "mean": 11.0,
+    "mean": 10.8,
     "median": 11,
     "min": 8,
     "max": 14
@@ -889,28 +889,28 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 184.1,
-    "median": 186,
+    "mean": 183.8,
+    "median": 184,
     "min": 156,
     "max": 223
    }
   },
   "restaurant_booking": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 209,
    "levels": {
-    "2": 73,
-    "3": 38,
-    "1": 49
+    "2": 93,
+    "3": 51,
+    "1": 65
    },
    "gold_call_tokens": {
-    "mean": 85.5,
+    "mean": 85.8,
     "median": 82,
     "min": 80,
     "max": 99
    },
    "leaves": {
-    "mean": 6.4,
+    "mean": 6.5,
     "median": 6,
     "min": 6,
     "max": 8
@@ -922,28 +922,28 @@
     "max": 2
    },
    "optional_present": {
-    "mean": 0.3,
+    "mean": 0.4,
     "median": 0,
     "min": 0,
     "max": 1
    },
    "user_chars": {
-    "mean": 213.2,
-    "median": 214,
-    "min": 125,
+    "mean": 212.1,
+    "median": 211,
+    "min": 124,
     "max": 330
    }
   },
   "subscription_change": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "2": 62,
-    "1": 53,
-    "3": 45
+    "2": 86,
+    "1": 71,
+    "3": 63
    },
    "gold_call_tokens": {
-    "mean": 66.2,
+    "mean": 66.1,
     "median": 66,
     "min": 64,
     "max": 69
@@ -967,10 +967,10 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 232.3,
-    "median": 231,
-    "min": 217,
-    "max": 255
+    "mean": 233.3,
+    "median": 233,
+    "min": 216,
+    "max": 261
    }
   },
   "thermostat_program": {
@@ -1053,14 +1053,14 @@
   },
   "timesheet": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 181,
    "levels": {
-    "2": 68,
-    "3": 41,
-    "1": 51
+    "2": 70,
+    "3": 51,
+    "1": 60
    },
    "gold_call_tokens": {
-    "mean": 173.0,
+    "mean": 172.9,
     "median": 172,
     "min": 139,
     "max": 205
@@ -1084,28 +1084,28 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 189.7,
-    "median": 190,
+    "mean": 189.2,
+    "median": 188,
     "min": 131,
     "max": 252
    }
   },
   "translation_job": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 202,
    "levels": {
-    "3": 42,
-    "2": 72,
-    "1": 46
+    "3": 63,
+    "2": 82,
+    "1": 57
    },
    "gold_call_tokens": {
-    "mean": 65.7,
+    "mean": 66.1,
     "median": 66,
     "min": 59,
     "max": 75
    },
    "leaves": {
-    "mean": 6.3,
+    "mean": 6.4,
     "median": 6,
     "min": 5,
     "max": 8
@@ -1123,28 +1123,28 @@
     "max": 1
    },
    "user_chars": {
-    "mean": 167.3,
-    "median": 166,
+    "mean": 168.7,
+    "median": 167,
     "min": 117,
-    "max": 235
+    "max": 238
    }
   },
   "utility_payment": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 211,
    "levels": {
-    "3": 48,
-    "1": 44,
-    "2": 68
+    "1": 57,
+    "2": 90,
+    "3": 64
    },
    "gold_call_tokens": {
-    "mean": 79.6,
+    "mean": 79.3,
     "median": 77,
     "min": 75,
     "max": 90
    },
    "leaves": {
-    "mean": 5.3,
+    "mean": 5.2,
     "median": 5,
     "min": 5,
     "max": 6
@@ -1156,34 +1156,34 @@
     "max": 2
    },
    "optional_present": {
-    "mean": 0.3,
+    "mean": 0.2,
     "median": 0,
     "min": 0,
     "max": 1
    },
    "user_chars": {
-    "mean": 193.8,
-    "median": 191,
+    "mean": 190.6,
+    "median": 186,
     "min": 115,
     "max": 309
    }
   },
   "vm_provisioning": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "2": 61,
-    "3": 44,
-    "1": 55
+    "2": 91,
+    "3": 60,
+    "1": 69
    },
    "gold_call_tokens": {
-    "mean": 82.1,
+    "mean": 82.8,
     "median": 85,
     "min": 68,
     "max": 106
    },
    "leaves": {
-    "mean": 7.4,
+    "mean": 7.5,
     "median": 8,
     "min": 6,
     "max": 10
@@ -1201,28 +1201,28 @@
     "max": 1
    },
    "user_chars": {
-    "mean": 167.9,
-    "median": 164,
+    "mean": 168.8,
+    "median": 165,
     "min": 132,
-    "max": 224
+    "max": 227
    }
   },
   "warehouse_transfer": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 209,
    "levels": {
-    "1": 44,
-    "2": 65,
-    "3": 51
+    "1": 67,
+    "2": 79,
+    "3": 63
    },
    "gold_call_tokens": {
-    "mean": 94.5,
+    "mean": 94.0,
     "median": 94,
     "min": 75,
     "max": 114
    },
    "leaves": {
-    "mean": 8.1,
+    "mean": 8.0,
     "median": 8,
     "min": 6,
     "max": 10
@@ -1240,7 +1240,7 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 176.6,
+    "mean": 174.9,
     "median": 174,
     "min": 109,
     "max": 274
@@ -1248,11 +1248,11 @@
   },
   "workout_log": {
    "split": "training",
-   "tasks": 160,
+   "tasks": 220,
    "levels": {
-    "1": 51,
-    "2": 69,
-    "3": 40
+    "1": 70,
+    "2": 94,
+    "3": 56
    },
    "gold_call_tokens": {
     "mean": 122.7,
@@ -1279,12 +1279,41 @@
     "max": 0
    },
    "user_chars": {
-    "mean": 133.5,
+    "mean": 133.2,
     "median": 133,
     "min": 93,
     "max": 176
    }
   }
+ },
+ "renderer": {
+  "tasks": 4844,
+  "modes": {
+   "thinking": {
+    "rendered": 4844,
+    "differ_when_reference_replaced": 0,
+    "differ_examples": [],
+    "contain_the_gold_call": 0,
+    "leak_examples": []
+   },
+   "non_thinking": {
+    "rendered": 4844,
+    "differ_when_reference_replaced": 0,
+    "differ_examples": [],
+    "contain_the_gold_call": 0,
+    "leak_examples": []
+   }
+  },
+  "ok": true
+ },
+ "verification_strength": {
+  "gold": "computed by the generator from a sampled ground truth; no model output",
+  "schema_validity": "a structural check of the call against its JSON schema (types, required fields, enums, patterns, bounds); it says nothing about whether the values are the requested ones",
+  "step_gold": "an exact comparison of the teacher's call with the program's reference call (canonical form)",
+  "recorded_execution": "a hit in a replay table keyed by that same reference call: not an independent business backend, and not closed-loop task success",
+  "independence": "step_gold and the replay hit depend on each other (the table's only key is the reference call) and count as ONE piece of correctness evidence, never two",
+  "class": "G2 (programmatic reference, matched exactly); nothing here is a G1 environment-success verification",
+  "held_out_domains": "the three state-evaluation domains are disjoint from the training domains, but share the generator and its derivation patterns: they test domain hold-out, not generalization to real unseen tool-calling tasks, which needs an independent real tool-calling evaluation"
  },
  "measures_no_teacher": "pass rates and supervised tokens per admitted episode are priors until a generation round measures them",
  "authorizes": "nothing"

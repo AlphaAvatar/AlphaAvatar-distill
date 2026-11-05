@@ -144,3 +144,68 @@ def test_schema_synth_is_deterministic_and_admits_exactly_its_gold_call():
     splits = SS.assign_splits()
     assert {s for s in splits.values()} == {"training", "state_eval", "validation", "calibration", "reserve"}
     assert len({t["family"] for t in a}) == len(SS.DOMAINS)                 #: one environment per domain
+
+
+# --- the R1 approval's generation kinds (maintainer 2026-11-05, sections I-IV) --------------------------------------
+
+def test_the_restored_designs_kinds_have_their_own_records_and_keep_their_lineage():
+    from types import SimpleNamespace
+    from stages.teacher_modes import token_matched_phase as TM
+    assert {k: TM.GENERATION_LINEAGE[k] for k in ("tool_generation_sr", "tool_generation_sr_t2507")} == {
+        "tool_generation_sr": "hybrid", "tool_generation_sr_t2507": "thinking_2507"}
+    for new, old in (("tool_generation_sr", "tool_generation"), ("tool_generation_sr_t2507", "tool_generation_t2507")):
+        assert new in TM.STUDY.kinds and new in TM.CONTAINER_KINDS
+        assert TM.KIND_RECORDS[new][0] != TM.KIND_RECORDS[old][0]        #: its own protocol, plan and admission
+        assert TM.KIND_RECORDS[new][1] != TM.KIND_RECORDS[old][1]
+        assert TM.KIND_RECORDS[new][4].endswith("tool_source_admission_schema_synth.json")
+        assert TM.SHARDS[new][0] == TM.SHARDS[old][0]
+        spec = TM.launch_spec(new, 60)
+        assert TM.the_pilot_placement_is_the_planned_one in spec.extra_prechecks
+        assert TM.the_bound_task_file_is_relayed in spec.extra_prechecks
+    assert "tool_generation_sr_t2507" in TM.IN_SESSION_DEVICE_ADMISSION and "tool_generation_sr_t2507" in \
+        TM.THINKING_2507_KINDS
+    a = SimpleNamespace(volume_mount_path="", volume_gb=None, run_id="r", resume_from=None)
+    cmd = TM.DRIVERS["tool_generation_sr_t2507"][1](SimpleNamespace(args=a), None)
+    assert "--lineage thinking_2507 --kind tool_generation_sr_t2507" in cmd
+    #: the two designs' protocols differ only off the engine: same teachers, template switches, sampling and execution
+    old, new = (json.loads((TM.REPO_ROOT / TM.KIND_RECORDS[k][0]).read_text())
+                for k in ("tool_generation", "tool_generation_sr"))
+    assert old["execution"] == new["execution"]
+    for li in old["lineages"]:
+        for m, v in old["lineages"][li]["modes"].items():
+            w = new["lineages"][li]["modes"][m]
+            assert (v["template_kwargs"], v["sampling"]) == (w["template_kwargs"], w["sampling"])
+
+
+def test_the_session_runs_only_its_own_kind_for_its_lineage(tmp_path, monkeypatch):
+    from stages.teacher_modes import token_matched_phase as TM
+    from stages.teacher_modes import tool_session as TS
+    seen = []
+
+    def refuse(path, kind, root):
+        seen.append(kind)
+        raise RuntimeError("stop here")
+    monkeypatch.setattr(TM, "require_on_pod", refuse)
+    args = ["--authorization", str(tmp_path / "a.json"), "--durable-root", str(tmp_path), "--status", str(tmp_path / "s")]
+    assert TS.main(args + ["--lineage", "hybrid", "--kind", "tool_generation_sr"]) == 3
+    assert TS.main(args + ["--lineage", "thinking_2507", "--kind", "tool_generation_sr"]) == 3   #: refused before binding
+    assert seen == ["tool_generation_sr"]
+    rec = json.loads((tmp_path / "tool_generation_thinking_2507" / "tool_session.json").read_text())
+    assert "not a generation kind of the thinking_2507 lineage" in rec["error"]["error"]
+
+
+def test_the_extensions_admission_admits_its_content_and_the_base_record_does_not():
+    from stages.teacher_modes import tool_source_admission as TSA
+    base = TSA.load()
+    synth = [{"source": {"dataset": SS.SOURCE, "revision": SS.VERSION}}]
+    assert TSA.problems(base, pool_content_sha256=TSA.REVIEWED_CONTENT) == []
+    assert any("sources it does not admit" in b for b in TSA.problems(base, pool_content_sha256=TSA.REVIEWED_CONTENT,
+                                                                       tasks=synth))
+    man = {"pool_id": TSA.EXTENSION_POOL_ID, "content_sha256": TSA.EXTENSION_CONTENT,
+           "source_revisions": [["Agent-Ark/Toucan-1.5M", "x"], [SS.SOURCE, SS.VERSION]], "sources": {}, "files": {}}
+    import datetime as dt
+    rec = TSA.record(man, "0" * 64, decision="quoted", date=dt.datetime.now(dt.timezone.utc).date().isoformat())
+    assert TSA.problems(rec, pool_content_sha256=TSA.EXTENSION_CONTENT, tasks=synth) == []
+    assert TSA.problems(rec, pool_content_sha256=TSA.REVIEWED_CONTENT)                    #: another content refuses
+    assert TSA.problems(dict(rec, conditions=TSA.CONDITIONS), pool_content_sha256=TSA.EXTENSION_CONTENT)
+    assert TSA.problems(dict(rec, pool_id="tool_pool@v2"), pool_content_sha256=TSA.EXTENSION_CONTENT)

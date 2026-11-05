@@ -1,0 +1,201 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_generation_protocol/v1",
+ "status": "REGISTERED (maintainer 2026-11-05, R1 approval '原则批准方案一 R1', sections I-IV): the generation of six_category_schema_restored@v1 over the pool extension tool_pool@v1+schema_synth@v1, bounded by its own plan (logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan.json); each session needs its own one-use authorization under the kinds tool_generation_sr / tool_generation_sr_t2507",
+ "_contract": "The teacher-native tool-calling generation of six_category_schema_restored@v1: which teacher, which modes, which pool splits, the runner's execution terms -- the common-support protocol's (tool_generation_protocol.json) unchanged in every term that reaches the engine (teachers, revisions, template switches, sampling, seeds, session limit, candidates, stop ids, the verifier), over the pool extension and the design's own plan, task files and arm names. The task protocol (task_record, verification, supervision) is six_category_design.json :: task_pool / protocol, executed by tool_episodes.py and tool_admission.py. AUTHORIZES NOTHING.",
+ "pool": {
+  "id": "tool_pool@v1+schema_synth@v1",
+  "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth",
+  "base": "data/stages/stage-2/teacher_modes/tool_pool_v1 (content be4652d7..., byte for byte; every split's frozen order a prefix of the extension's)",
+  "sources": "tool_pool@v1's two (logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json) and aadistill/schema_synth@v1 (logs/stages/stage-2/teacher_modes/audit/tool_source_admission_schema_synth.json)",
+  "rules": "tool_pool.py (schema tool_pool/v4): per-atom splits (MCP server or tool identity), eval-set-1 and public-benchmark decontamination (prompt keys, 13-gram containment, tool identities), T4 between splits, T5, replay conflicts refused, the 6,144-token first-prompt bound under every lineage and mode below; episode shapes (six_category_design.json :: protocol.episode_shapes) are tiers of every split's frozen order -- the full episodes first, then the single_step_gold_tool_call@v1 tasks (schema_arguments, Pivot Conversational) -- and a T5 duplicate keeps the full episode; the extension adds schema_synth@v1's tasks under the same screens (tool_pool.extend), whole domains per split",
+  "plan": "logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan.json",
+  "tasks_dir": "artifacts/stages/stage-2/teacher_modes/tool_generation_sr"
+ },
+ "lineages": {
+  "hybrid": {
+   "model": "Qwen/Qwen3-4B",
+   "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+   "modes": {
+    "H-T": {
+     "arm": "A1-6cat-sr",
+     "template_kwargs": {
+      "enable_thinking": true
+     },
+     "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0.0
+     }
+    },
+    "H-N": {
+     "arm": "A2-6cat-sr",
+     "template_kwargs": {
+      "enable_thinking": false
+     },
+     "sampling": {
+      "temperature": 0.7,
+      "top_p": 0.8,
+      "top_k": 20,
+      "min_p": 0.0
+     }
+    }
+   },
+   "splits": [
+    "training",
+    "validation",
+    "state_eval"
+   ]
+  },
+  "thinking_2507": {
+   "model": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "modes": {
+    "T2507": {
+     "arm": "C1-6cat-sr",
+     "template_kwargs": {},
+     "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0.0
+     }
+    }
+   },
+   "splits": [
+    "training",
+    "validation"
+   ]
+  }
+ },
+ "execution": {
+  "seed_base": 2026110300,
+  "session_limit": 8184,
+  "candidates": 2,
+  "action_protocol": "v1",
+  "completion_shards": {
+   "seal_every_records": 50,
+   "seal_every_seconds": 300
+  },
+  "system_message_default": "You are a helpful Assistant.",
+  "env_factory": "stages.teacher_modes.tool_episodes:ToolEnv.factory",
+  "gpu_memory_utilization": 0.8,
+  "_": "request_seed(seed_base, task_id, turn), candidate pass k at seed_base + k, the same rule for every teacher, so a (task, candidate, turn) has one seed whatever the model; 2: pass 1 only for a task whose first candidate fails verification (the current protocol)",
+  "stop_ids": [
+   151645,
+   151643
+  ]
+ },
+ "authorizes": "nothing",
+ "bounded_plan": {
+  "_contract": "The bounded generation of six_category_schema_restored@v1: what each lineage, mode and split generates, counted in its consumer's unit BEFORE packing, walked in the extension's frozen orders, stopped at the target, bounded. tool_generation_plan.py turns these terms into the plan the session runs (logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan.json).",
+  "targets": {
+   "training": {
+    "unit": "supervised_tokens",
+    "per_mode": {
+     "H-T": 493417.83,
+     "H-N": 493417.83,
+     "T2507": 492587
+    },
+    "by_category": "six_category_schema_restored.json :: tool_calling.categories[*].share (the registered six-category shares, schema_arguments 0.15) and its source_groups (schema_arguments: Pivot Conversational fixed, schema_synth the rest)",
+    "_": "each arm's sixth base-corpus type: 1/6 of A1-6cat's / A2-6cat's 2,960,507 base-category supervised tokens; C1-6cat's registered 492,587"
+   },
+   "validation": {
+    "H-T": {
+     "unit": "tasks",
+     "value": 32
+    },
+    "H-N": {
+     "unit": "tasks",
+     "value": 32
+    },
+    "T2507": {
+     "unit": "supervised_tokens",
+     "value": 12624
+    },
+    "_": "six_category_design.json :: validation (the hybrid's 32 validation-split tasks per mode; C1-6cat's historical 12,624 supervised tokens)"
+   },
+   "state_eval": {
+    "unit": "scored_positions",
+    "per_mode": {
+     "H-T": 12000,
+     "H-N": 12000
+    },
+    "min_tasks_per_category": 5,
+    "_": "state_eval_hybrid@v2's floor and shares (six_category_design.json); schema_arguments split by six_category_schema_restored.json :: source_groups.state_eval (Pivot 1,000 + schema_synth 800 per mode); every category with >= 5 tasks per group"
+   }
+  },
+  "priors": {
+   "supervised_tokens_per_turn": {
+    "H-T": [
+     250,
+     350,
+     450
+    ],
+    "H-N": [
+     40,
+     70,
+     120
+    ],
+    "T2507": [
+     300,
+     350,
+     450
+    ]
+   },
+   "episode_pass_rate": [
+    0.45,
+    0.6,
+    0.8
+   ],
+   "_": "[low, expected, high]; six_category_design.json :: tool_calling.expected_per_arm (A1's teacher evaluation and Thinking-2507's historical tool turns). A pilot's measured values replace them before the cap is final"
+  },
+  "rounds": {
+   "first": "per cell the frozen-order prefix whose expected yield reaches the target",
+   "top_up": "ceil(remaining units / observed units per attempted task x top_up_margin); with nothing admitted yet, the pessimistic prefix of what is left; the LAST round (max_rounds) takes every task left within the bound",
+   "top_up_margin": 1.1,
+   "max_rounds": 4,
+   "expected_rounds": {
+    "lower": 1,
+    "expected": 2
+   },
+   "bound": "a cell never attempts more than the frozen-order prefix whose pessimistic yield (the lower end of its measured stratum, else the low tokens per turn and pass rate) reaches its target, nor more than its supply; a whole-supply cell (six_category_common_support.json :: whole_supply_cells) is bound by its whole remaining supply; a cell still short at its bound or after max_rounds is a SHORTFALL -- of its bound when supply remains (a top-up continues from the frozen order), of its source only when its whole supply was attempted",
+   "invocations": "one engine invocation per mode and round for the first candidates, one for the second candidates of the round's refused tasks",
+   "first_round_bound_lineages": [],
+   "_first_round_bound_lineages": "none under this design (maintainer 2026-11-05, R1 approval, section IV.5-6): round 1 of each cell is the frozen-order prefix whose expected yield reaches the target -- for schema_synth cells priced by the labelled proxy:other_source stratum -- and every later round is sized from what this session measured on that cell (its own admitted units per attempted task, top_up_margin), inside the bound and the kind's cumulative cap; the cumulative caps ($6.16 hybrid, $2.31 Thinking-2507) hold several rounds"
+  },
+  "throughput": {
+   "decode_tokens_per_s": {
+    "thinking": 1170,
+    "non_thinking": 755
+   },
+   "thinking_modes": [
+    "H-T",
+    "T2507"
+   ],
+   "tool_workload_efficiency": [
+    0.5,
+    0.75,
+    1.0
+   ],
+   "prefill_tokens_per_s": [
+    5000,
+    10000,
+    20000
+   ],
+   "model_load_minutes": [
+    4.0,
+    2.5,
+    1.5
+   ],
+   "setup_minutes": 20,
+   "teardown_minutes": 15,
+   "prompt_tokens_default": 690,
+   "_": "decode: the supplement's measured batched throughput on one L40S (SIX_CATEGORY.md); the tool-workload efficiency, prefill rate and model load are UNMEASURED ranges [slow, expected, fast] until the pilot; prompt_tokens_default only where a task has no first_prompt_tokens"
+  },
+  "rate_usd_per_hour": 1.1067,
+  "approved_shortfalls": [],
+  "_approved_shortfalls": "the maintainer's approvals of a cell's SHORTFALL, each {split, mode, category, approved_by}; empty: no category may fall short. The plan carries them (tool_generation_plan.verified checks the copy); packed_inputs counts an unapproved short or thin category as unmet, so calibration v2 and state_eval_hybrid@v2 stay SHORT and nothing is frozen"
+ },
+ "_splits": "calibration is not generated under this design: the calibration v2 profiles stay frozen (maintainer 2026-11-05, R1 approval, section V); state evaluation is generated for state_eval_hybrid@v3, a new suite identity beside the frozen @v2-lc1"
+}

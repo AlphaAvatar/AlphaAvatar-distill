@@ -177,11 +177,13 @@ def session_commit(run_id: str) -> str:
     return json.loads((rd / "runtime/session.json").read_text())["setup_environment"]["SESSION_COMMIT"]
 
 
-def _session_compatibility(at, commit: str, lineage: str, pool_tasks: dict[str, dict], tasks: dict[str, dict]) -> dict:
+def _session_compatibility(at, commit: str, lineage: str, pool_tasks: dict[str, dict], tasks: dict[str, dict],
+                           protocol_rel: str = PROTOCOL_REL) -> dict:
     """`compatibility` for a formal session: every term read at its session commit (``at(rel)``) against today's (the
-    generation code by the files' sha256 at that commit), and every imported task's input against the pool's."""
-    then = json.loads(at(PROTOCOL_REL))
-    now = json.loads((REPO / PROTOCOL_REL).read_text())
+    generation code by the files' sha256 at that commit), and every imported task's input against the pool's;
+    ``protocol_rel`` is the session kind's protocol (`token_matched_phase.KIND_RECORDS`)."""
+    then = json.loads(at(protocol_rel))
+    now = json.loads((REPO / protocol_rel).read_text())
     checks = {}
 
     def check(name, a, b):
@@ -239,8 +241,12 @@ def build_session(run_id: str, store: Path, pool_tasks: dict[str, dict], *, at=N
     identity, lineage = sess["identity"], sess["lineage"]
     commit = session_commit(run_id) if at is None else "given"
     at = at or (lambda rel: _at(commit, rel))
-    plan_then = json.loads(at(PLAN_REL))
-    proto = json.loads((REPO / PROTOCOL_REL).read_text())
+    #: the session kind's own protocol and plan (a later design's kind reads its own: tool_generation_sr)
+    from stages.teacher_modes import token_matched_phase as TM
+    protocol_rel, plan_rel = (TM.KIND_RECORDS[sess["kind"]][:2] if sess.get("kind") in TM.GENERATION_LINEAGE
+                              else (PROTOCOL_REL, PLAN_REL))
+    plan_then = json.loads(at(plan_rel))
+    proto = json.loads((REPO / protocol_rel).read_text())
     stop_ids = [int(x) for x in proto["execution"]["stop_ids"]]
     seed_base, cand = int(proto["execution"]["seed_base"]), int(proto["execution"]["candidates"])
     runner = TPL.sha(REPO / GD.RUNNER)
@@ -298,7 +304,7 @@ def build_session(run_id: str, store: Path, pool_tasks: dict[str, dict], *, at=N
             "reconciliation": reconcile(plan_then, lineage, mode, tasks, (sess.get("modes") or {}).get(mode) or {})}
     every = {tid: inputs_task for inp in inputs.values() for tid, inputs_task in inp.items()}
     comp = _session_compatibility(at, commit, lineage, pool_tasks,
-                                  {t: every[t] for m in modes.values() for t in m["tasks"]})
+                                  {t: every[t] for m in modes.values() for t in m["tasks"]}, protocol_rel)
     if not comp["ok"]:
         raise ImportRefused(f"the session's episodes are not the formal generation's: "
                             f"{[k for k, v in comp['checks'].items() if not v['equal']]}")
@@ -308,7 +314,7 @@ def build_session(run_id: str, store: Path, pool_tasks: dict[str, dict], *, at=N
     return {"schema": SCHEMA, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "source": "tool_session", "run_id": run_id, "kind": sess.get("kind"),
             "store": str(store.relative_to(REPO)) if REPO in store.resolve().parents else str(store),
-            "identity": identity, "session_plan_sha256": _sha(at(PLAN_REL)),
+            "identity": identity, "session_plan_sha256": _sha(at(plan_rel)),
             "lineage": lineage, "pool_content_sha256": plan_then["pool"]["content_sha256"],
             "verification_version": TE.VERIFICATION_VERSION, "compatibility": comp,
             "shards": {"count": len(shards_all), "sha256": {n: GD.sha(store / n) for n in sorted(shards_all)}},

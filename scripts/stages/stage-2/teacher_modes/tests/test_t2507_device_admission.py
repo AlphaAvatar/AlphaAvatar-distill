@@ -171,7 +171,7 @@ def test_a_failed_admission_raises_with_its_evidence_written(tmp_path, monkeypat
 def test_the_formal_session_admits_the_device_before_any_formal_invocation(tmp_path, monkeypatch, lineage, admits):
     order = []
     monkeypatch.setattr(TM, "require_on_pod", lambda p, kind, root: {"identity": "id", "authorization_id": "a"})
-    monkeypatch.setattr(TS, "checked_plan", lambda proto, li: ({"pool": {"content_sha256": "c"}}, None, {}))
+    monkeypatch.setattr(TS, "checked_plan", lambda proto, li, *a: ({"pool": {"content_sha256": "c"}}, None, {}))
     monkeypatch.setattr(TS, "registered_device_admission", lambda cfg, proto, li: None)   #: none registered
 
     def admission(*a, **k):
@@ -264,7 +264,7 @@ def test_a_task_from_an_unadmitted_source_refuses():
 
 
 def test_the_pod_refuses_a_plan_whose_content_the_admission_does_not_admit(monkeypatch):
-    monkeypatch.setattr(TGP, "verified_bound", lambda proto, li: ({"pool": {"content_sha256": "0" * 64}}, {}))
+    monkeypatch.setattr(TGP, "verified_bound", lambda proto, li, **k: ({"pool": {"content_sha256": "0" * 64}}, {}))
     with pytest.raises(TS.PlanError, match="formal source admission"):
         TS.checked_plan(PROTO, "thinking_2507")
 
@@ -282,7 +282,7 @@ def test_a_registered_admission_is_reused_and_confirmed_on_the_first_formal_invo
     assert TS.registered_device_admission(CFG, other, "thinking_2507") is None
     order = []
     monkeypatch.setattr(TM, "require_on_pod", lambda p, kind, root: {"identity": "id", "authorization_id": "a"})
-    monkeypatch.setattr(TS, "checked_plan", lambda proto, li: ({"pool": {"content_sha256": "c"}}, None, {}))
+    monkeypatch.setattr(TS, "checked_plan", lambda proto, li, *a: ({"pool": {"content_sha256": "c"}}, None, {}))
     monkeypatch.setattr(TS, "run_device_admission", lambda *a, **k: order.append("admission"))
     monkeypatch.setattr(TS, "snapshot_dir", lambda m, r: tmp_path)
     monkeypatch.setattr(TS, "teacher_files", lambda t, s: {"snapshot": str(s), "differ": []})

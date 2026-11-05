@@ -227,13 +227,16 @@ SESSION_MODULES = ("scripts/stages/stage-2/teacher_modes/tool_session.py",
                    "scripts/stages/stage-2/teacher_modes/tool_generation_plan.py")
 
 
-def generation_engine(root: Path = REPO, lineage: str = LINEAGE) -> dict:
+def generation_engine(root: Path = REPO, lineage: str = LINEAGE, kind: str | None = None) -> dict:
     """The engine a tool generation of ``lineage`` runs (`l40s_check.generation_engine`): the lineage of the tool
     generation protocol -- its teacher, per-mode template switch and sampling -- through `tool_session.mode_args`'
-    memory fraction and `generation_driver.run_group`'s session limit, in this tree's runner and vLLM pins."""
+    memory fraction and `generation_driver.run_group`'s session limit, in this tree's runner and vLLM pins. A formal
+    generation ``kind`` reads its own protocol (`token_matched_phase.KIND_RECORDS`)."""
     from stages.teacher_modes import l40s_check as LC
+    from stages.teacher_modes import token_matched_phase as TM
     root = Path(root)
-    proto = json.loads((root / TGP.PROTOCOL.relative_to(REPO)).read_text())
+    rel = TM.KIND_RECORDS[kind][0] if kind in TM.GENERATION_LINEAGE else TGP.PROTOCOL.relative_to(REPO)
+    proto = json.loads((root / rel).read_text())
     li, ex = proto["lineages"][lineage], proto["execution"]
     return LC.generation_engine(model=li["model"], revision=li["revision"], modes=li["modes"],
                                 session_limit=ex["session_limit"], gpu_memory_utilization=ex["gpu_memory_utilization"],
@@ -277,7 +280,7 @@ def l40s_generation_problems(root: Path = REPO, *, kind: str = "tool_pilot", lin
     check measured -- the same engine, teacher, template and runner (Thinking-2507 is another teacher: refused). It
     is a compatibility check: whether the kind may run is the grant's."""
     from stages.teacher_modes import l40s_check as LC
-    return LC.generation_scope_problems(generation_engine(root, lineage), generation_inputs(root, kind, lineage),
+    return LC.generation_scope_problems(generation_engine(root, lineage, kind), generation_inputs(root, kind, lineage),
                                         generation_path(root), root)
 
 

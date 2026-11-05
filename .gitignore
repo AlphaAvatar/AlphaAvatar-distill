@@ -43,6 +43,10 @@ data/stages/stage-2/stage2_v1/calib/
 # content_sha256, pool.json and every split file by sha256 -- lives in
 # logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json)
 data/stages/stage-2/teacher_modes/tool_pool_v1/
+# ... and its extension tool_pool@v1+schema_synth@v1 (about 19 MB: schema_synth@v1's tasks and the extended orders;
+# rebuild with scripts/stages/stage-2/teacher_modes/schema_synth.py --extend; its identity lives in
+# logs/stages/stage-2/teacher_modes/audit/tool_source_admission_schema_synth.json)
+data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth/
 
 # Stage 3 teacher-target 2x2 arms (rebuild with scripts/shared/data/build_stage3_pilot.py
 # from the hashed generation corpus; the committed manifest.json pins both arms'

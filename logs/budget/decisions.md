@@ -15896,3 +15896,43 @@ on a paid pod.
   Synth-APIGen as a bridge (conditions unresolved); WorkBench (one tool, no state-evaluation supply).
 - **Revisit when:** the maintainer decides R1 (or R2); then the source admission record, registration and grants, and
   after generation the selection freeze and the state-evaluation choice (`@v2-lc1` or a v3 with the synthetic cell).
+
+## 2026-11-05 — R1 approved: schema_synth@v1 admitted, six_category_schema_restored@v1 registered, two generation kinds
+
+- Context: the maintainer's R1 approval ("原则批准方案一 R1", 2026-11-05): restore schema_arguments = 15% of the tool
+  type instead of common support's 2.39%; extend the new source's training instances before signing; describe its
+  verification honestly; run an independent semantic review; then launch the two generation sessions inside
+  cumulative caps of $6.16 (hybrid) and $2.31 (Thinking-2507), $8.47 together, and stop at the Full Search boundary.
+- Decision:
+  - **Supply extended before signing.** `schema_synth.PER_DOMAIN` training 160 -> 220 along the same deterministic
+    instance indices (5,070 instances); every earlier instance keeps its bytes.
+  - **Independent semantic review** (`audit/schema_synth_v1_semantic_review.json` and `.md`): every gold re-derived
+    from the request and the stated date alone, 5,070 / 5,070 equal, no leakage, 0 computation defects; 226 requests
+    with a second reasonable call (parking vehicle contradiction 59, "the X after next" 123, "last week" on a Sunday
+    39, DOUBLE for one guest 7). They are LEFT OUT by `schema_synth.ambiguity`, whose set equals the reviewer's
+    exactly; every kept task byte for byte unchanged (3,581 of the first 3,750 kept), nothing edited. Exact-match
+    admission on them would only reject a teacher's other reasonable reading and lean admission toward the
+    generator's convention.
+  - **Verification described as it is** (`schema_synth_audit.VERIFICATION_STRENGTH`): schema validity structural;
+    step_gold an exact match with the program's reference call; recorded execution a replay hit keyed by that same
+    call -- with step_gold ONE piece of correctness evidence; G2, never G1 environment success. The renderer check:
+    the generation's own episode loop and template render identical prompts with the reference replaced, and no
+    prompt holds the gold call (4,844 tasks, both modes).
+  - **Admitted:** the extension `tool_pool@v1+schema_synth@v1` (content `e771393a...`, 4,843 schema_synth tasks
+    admitted: training 4,625, state evaluation 110, calibration 58, validation 40, reserve 10), signed in
+    `audit/tool_source_admission_schema_synth.json`; the base record unchanged. The unsigned drafts `6139e647...` and
+    `5e17f3c9...` were never admitted.
+  - **Registered:** `six_category_schema_restored@v1` (A1-6cat-sr / A2-6cat-sr / C1-6cat-sr), its protocol
+    `tool_generation_protocol_sr.json` (the common-support protocol's engine terms unchanged; its own pool, plan, task
+    files and arm names; round 1 the expected prefix and later rounds sized from the session's own measurement) and
+    plan `plans/schema_restoration_plan.json` (the six import records reused by task identity; price $0.66 / $0.79 /
+    $5.08, runner caps $4.85 hybrid and $2.06 Thinking-2507, inside the granted $6.16 and $2.31).
+  - **Kinds** `tool_generation_sr` and `tool_generation_sr_t2507` (token_matched_phase.GENERATION_LINEAGE): their own
+    records, grant blocks and cumulative caps; the common-support kinds' spend never counts toward them.
+- Alternatives considered: signing `6139e647...` first (refused by the brief); keeping the ambiguous tasks (biases
+  admission); rewriting the generator's phrasing (changes admitted bytes; a later version if ever needed).
+- Expected upside: the registered composition restored with the same per-source tokens in every arm.
+- Risks: schema_synth's language is compositional, not organic; its held-out domains test domain hold-out under a
+  shared generator, not real unseen tool tasks; its admission rate is a proxy until round 1 measures it.
+- Revisit when: the two sessions close (freeze of the -sr arms, state_eval_hybrid@v3), or a cap or source boundary
+  stops them.

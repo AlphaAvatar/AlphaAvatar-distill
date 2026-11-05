@@ -1181,6 +1181,24 @@ state evaluation and first DEPTH round of the next authorized search are that me
 (a 2.49 GB transient per 8,192-token forward). Storage: the search needs about 350 GB; `4rhubprswo` is not to be
 mounted and `am5m373kuq` holds 55 GB, so a new volume belongs to the search's budget.
 
+## 12. R1 approved: the registered composition's generation (2026-11-05)
+
+The maintainer's R1 approval. The decision record is `logs/budget/decisions.md` 2026-11-05 ("R1 approved").
+
+**The source, final.** Training instances 160 -> 220 per domain (5,070 instances, every earlier one byte for byte).
+An independent semantic review (`audit/schema_synth_v1_semantic_review.json`) re-derived every gold from the request
+and the stated date alone (5,070 / 5,070 equal, no leakage) and found 226 requests with a second reasonable call; they
+are left out by `schema_synth.ambiguity` (its set is exactly the reviewer's). The final audit
+(`audit/schema_synth_v1_audit.json`, 4,844 tasks): 0 problems, every mutation refused, the renderer unchanged by the
+reference in both modes. What the levels mean: schema validity is structural, step_gold an exact match with the
+program's call, recorded execution a replay hit keyed by that call -- one piece of correctness evidence, G2, never G1.
+The extension `e771393a...` (4,843 schema_synth tasks admitted) is signed in `audit/tool_source_admission_schema_synth.json`.
+
+**The generation.** Protocol `tool_generation_protocol_sr.json` (the common-support engine terms unchanged), plan
+`plans/schema_restoration_plan.json` (six import records reused by task identity; schema_synth cells priced at the
+labelled `proxy:other_source` stratum; $0.66 / $0.79 / $5.08), kinds `tool_generation_sr` (cumulative $6.16) and
+`tool_generation_sr_t2507` ($2.31): round 1 the expected prefix, later rounds from the session's own measurement.
+
 ## Reproduce ($0)
 
 ```
@@ -1230,6 +1248,22 @@ PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_generation_
     --write logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan_dry.json
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_forward_compute \
     --write logs/stages/stage-2/teacher_modes/audit/packed_forward_compute.json
+# R1 approved (section 12): the final source, its extension, admission and plan
+HF_HUB_OFFLINE=1 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_synth \
+    --out artifacts/stages/stage-2/teacher_modes/schema_synth_v1 --extend data/stages/stage-2/teacher_modes/tool_pool_v1 \
+    --pool-out data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_synth_audit \
+    --tasks artifacts/stages/stage-2/teacher_modes/schema_synth_v1/tasks.jsonl \
+    --write logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_audit.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_source_admission \
+    --pool data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth \
+    --audit logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_audit.json \
+    --review logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_semantic_review.json
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_generation_plan \
+    --pool data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth \
+    --composition configs/stages/stage-2/teacher_modes/six_category_schema_restored.json \
+    --protocol configs/stages/stage-2/teacher_modes/tool_generation_protocol_sr.json \
+    --write logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan.json
 ```
 
 The plan and the application record the scratch pool as `<scratch>/tool_pool_dry_v4` (content `be4652d7…`).

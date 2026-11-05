@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer: design R1 (schema_synth@v1 admission, six_category_schema_restored@v1, caps $6.16 + $2.31; PACKED_ROUND.md 9-11); then the search's suite binding, a ~350 GB volume and a raised project cap.",
+ "next": "R1 approved (2026-11-05): tool_generation_sr then tool_generation_sr_t2507 (cumulative $6.16 / $2.31), then the -sr freeze and state_eval_hybrid@v3; the Full Search needs its own authorization.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",

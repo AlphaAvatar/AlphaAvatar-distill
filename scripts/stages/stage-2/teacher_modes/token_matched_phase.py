@@ -104,7 +104,9 @@ STUDY = SE.Study(
     kinds=("supplement", "inputs", "search", "train_a1",
            #: the packed round: none runs before the grant names its hard cap (kind_cap_problems)
            "tool_generation", "tool_generation_t2507", "packed_search",
-           "train_6cat_a1", "train_6cat_a2", "train_6cat_c1", "tool_pilot"),
+           "train_6cat_a1", "train_6cat_a2", "train_6cat_c1", "tool_pilot",
+           #: six_category_schema_restored@v1's generation (maintainer 2026-11-05, R1 approval)
+           "tool_generation_sr", "tool_generation_sr_t2507"),
     kind_claims=(("search", frozenset({"formal"})), ("train_a1", frozenset({"formal", "training", "evaluation"})),
                  ("tool_pilot", frozenset({"teacher_generation"})),
                  ("packed_search", frozenset({"formal"})),
@@ -117,6 +119,14 @@ class TMAuthorization(SE.EngineeringAuthorization):
     STUDY = STUDY
 
 
+#: six_category_schema_restored@v1's generation kinds (maintainer 2026-11-05, R1 approval): their own protocol (0) and
+#: plan (1) -- which binds its priors, import records and task files by sha256 -- the design, the new source's audit
+#: and its formal admission (4), signed for the pool extension's content
+SR_RECORDS = ("configs/stages/stage-2/teacher_modes/tool_generation_protocol_sr.json",
+              "logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan.json",
+              "configs/stages/stage-2/teacher_modes/six_category_schema_restored.json",
+              "logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_audit.json",
+              "logs/stages/stage-2/teacher_modes/audit/tool_source_admission_schema_synth.json")
 #: what each kind's artifact binds, beyond the study identity (the records its driver reads, by sha256)
 KIND_RECORDS = {
     "supplement": (),
@@ -147,6 +157,8 @@ KIND_RECORDS = {
                               "configs/stages/stage-2/teacher_modes/t2507_device_admission.json",
                               "configs/stages/stage-2/teacher_modes/six_category_common_support.json",
                               "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json"),
+    "tool_generation_sr": SR_RECORDS,
+    "tool_generation_sr_t2507": SR_RECORDS + ("configs/stages/stage-2/teacher_modes/t2507_device_admission.json",),
     "packed_search": ("configs/stages/stage-2/teacher_modes/packed_round_design.json",
                       "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
                       "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
@@ -164,14 +176,18 @@ KIND_RECORDS = {
 }
 #: the packed training kinds' arms, and the arms trained with Thinking-2507 rather than the hybrid
 PACKED_TRAIN_ARMS = {"train_6cat_a1": "A1-6cat", "train_6cat_a2": "A2-6cat", "train_6cat_c1": "C1-6cat"}
-THINKING_2507_KINDS = frozenset({"tool_generation_t2507", "train_6cat_c1"})
-#: each teacher lineage's tool-generation kind: a lineage's session runs only under an artifact of its own kind, so
-#: the two lineages' authorizations, identities and caps (`kind_cap_problems`) never stand in for each other
+THINKING_2507_KINDS = frozenset({"tool_generation_t2507", "tool_generation_sr_t2507", "train_6cat_c1"})
+#: each teacher lineage's first tool-generation kind: a lineage's session runs only under an artifact of its own kind,
+#: so the two lineages' authorizations, identities and caps (`kind_cap_problems`) never stand in for each other
 TOOL_GENERATION_KINDS = {"hybrid": "tool_generation", "thinking_2507": "tool_generation_t2507"}
+#: every formal tool-generation kind and its lineage: one kind per lineage and registered design, each with its own
+#: protocol, plan, source admission and cumulative cap (`KIND_RECORDS`, `kind_cap_problems`)
+GENERATION_LINEAGE = {"tool_generation": "hybrid", "tool_generation_t2507": "thinking_2507",
+                      "tool_generation_sr": "hybrid", "tool_generation_sr_t2507": "thinking_2507"}
 TOOL_PILOT_KIND = "tool_pilot"
 #: the kinds that run on the pod's container disk with no network volume (`tool_pilot.PLACEMENT`): every sealed shard
 #: pulled and receipted on the dev box on each poll, a replacement pod resumed from that copy
-CONTAINER_KINDS = frozenset({TOOL_PILOT_KIND, *TOOL_GENERATION_KINDS.values()})
+CONTAINER_KINDS = frozenset({TOOL_PILOT_KIND, *GENERATION_LINEAGE})
 #: the full search's planned minutes and A1's per-unit deadline (budget_v2.json: the search's deadline-bounded
 #: 37.3 h; A1's 6.35 h per seed)
 SEARCH_DEADLINE_MINUTES = 37.29 * 60
@@ -199,7 +215,7 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
         #: the generation-scoped gate, reused where the dependencies and the engine contract are the same (it admits
         #: compatibility, never a kind's execution: that is the grant's)
         from stages.teacher_modes import tool_pilot as TPL
-        lineage = next((li for li, k in TOOL_GENERATION_KINDS.items() if k == kind), "hybrid")
+        lineage = GENERATION_LINEAGE.get(kind, "hybrid")
         bad = TPL.l40s_generation_problems(root, kind=kind, lineage=lineage)
         if bad:
             raise SE.AuthorizationError(f"the L40S check record does not admit the {kind} generation: " + "; ".join(bad))
@@ -211,17 +227,20 @@ def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
         bad = pilot_problems(root)
         if bad:
             raise SE.AuthorizationError("the tool pilot is not ready: " + "; ".join(bad))
-    if kind in TOOL_GENERATION_KINDS.values():
+    if kind in GENERATION_LINEAGE:
         #: what BOTH sides hold: the plan and its lineage's bound task file (the pod never holds the pool, P8.4; the
-        #: dev box checks the plan against the pool at issue, `issue_problems`)
+        #: dev box checks the plan against the pool at issue, `issue_problems`), under the kind's own protocol and
+        #: source admission
+        import json
         from stages.teacher_modes import tool_generation_plan as TGP
         from stages.teacher_modes import tool_source_admission as TSA
-        lineage = next(li for li, k in TOOL_GENERATION_KINDS.items() if k == kind)
+        lineage, proto_path = GENERATION_LINEAGE[kind], Path(root) / KIND_RECORDS[kind][0]
         try:
-            plan, by_id = TGP.verified_bound(lineage=lineage)
+            plan, by_id = TGP.verified_bound(json.loads(proto_path.read_text()), lineage=lineage,
+                                             protocol_path=proto_path)
         except (TGP.PlanIdentityError, FileNotFoundError, OSError, KeyError, TypeError) as exc:
             raise SE.AuthorizationError(f"the bounded generation plan is not verified: {exc!r}") from exc
-        bad = TSA.problems(TSA.load(Path(root) / TSA.RECORD.relative_to(REPO_ROOT)),
+        bad = TSA.problems(TSA.load(Path(root) / KIND_RECORDS[kind][4]),
                            pool_content_sha256=plan["pool"]["content_sha256"], tasks=by_id.values())
         if bad:
             raise SE.AuthorizationError("the formal source admission refuses: " + "; ".join(bad))
@@ -239,23 +258,25 @@ def issue_problems(kind: str, root: Path = REPO_ROOT) -> list[str]:
     the formal source admission must name. Not part of `kind_conditions`, which the pod recomputes from its own files
     and which therefore reads only the plan and the lineage's bound task file (attempt 1 of tool_generation_t2507,
     2026-11-04: the pod's setup refused on the pool it never holds)."""
-    if kind not in TOOL_GENERATION_KINDS.values():
+    if kind not in GENERATION_LINEAGE:
         return []
+    import json
     from stages.teacher_modes import tool_generation_plan as TGP
     from stages.teacher_modes import tool_pool as TP
     from stages.teacher_modes import tool_source_admission as TSA
+    proto_path = Path(root) / KIND_RECORDS[kind][0]
     try:
-        _, man, _ = TGP.verified()
+        _, man, _ = TGP.verified(json.loads(proto_path.read_text()), protocol_path=proto_path)
     except (TGP.PlanIdentityError, TP.PoolIdentityError, FileNotFoundError, OSError, KeyError) as exc:
         return [f"the bounded generation plan is not verified against the admitted pool: {exc!r}"]
     return [f"the formal source admission: {b}" for b in
-            TSA.problems(TSA.load(Path(root) / TSA.RECORD.relative_to(REPO_ROOT)),
-                         pool_content_sha256=man["content_sha256"])]
+            TSA.problems(TSA.load(Path(root) / KIND_RECORDS[kind][4]), pool_content_sha256=man["content_sha256"])]
 
 
 #: kinds whose teacher no committed L40S record measured: their formal session admits the device first
 #: (`tool_session.run_device_admission`, maintainer 2026-11-04, review of a143b7ed, section 4)
-IN_SESSION_DEVICE_ADMISSION = {"tool_generation_t2507": "configs/stages/stage-2/teacher_modes/t2507_device_admission.json"}
+IN_SESSION_DEVICE_ADMISSION = {k: "configs/stages/stage-2/teacher_modes/t2507_device_admission.json"
+                               for k in ("tool_generation_t2507", "tool_generation_sr_t2507")}
 
 
 def device_admission_config_problems(kind: str, root: Path = REPO_ROOT) -> list[str]:
@@ -268,10 +289,11 @@ def device_admission_config_problems(kind: str, root: Path = REPO_ROOT) -> list[
         return [f"{IN_SESSION_DEVICE_ADMISSION[kind]} does not exist"]
     cfg = json.loads(p.read_text())
     proto = json.loads((Path(root) / KIND_RECORDS[kind][0]).read_text())
-    lineage = next(li for li, k in TOOL_GENERATION_KINDS.items() if k == kind)
+    lineage = GENERATION_LINEAGE[kind]
     li, e = proto["lineages"][lineage], cfg.get("engine") or {}
     bad = []
-    if cfg.get("kind") != kind or cfg.get("lineage") != lineage:
+    #: one record per teacher lineage, written for its first kind and reused by its later designs' kinds
+    if GENERATION_LINEAGE.get(cfg.get("kind")) != lineage or cfg.get("lineage") != lineage:
         bad.append(f"it is the record of {cfg.get('kind')!r} / {cfg.get('lineage')!r}")
     if (cfg["teacher"].get("model"), cfg["teacher"].get("revision")) != (li["model"], li["revision"]):
         bad.append("it names another teacher than the protocol's lineage")
@@ -372,7 +394,7 @@ def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) ->
         return [f"${hard_cap_usd} exceeds the grant's ${caps[kind]} for kind {kind!r}"]
     if kind == TOOL_PILOT_KIND:
         bad = pilot_grant_problems(g, root)
-    elif kind in TOOL_GENERATION_KINDS.values():
+    elif kind in GENERATION_LINEAGE:
         bad = t2507_grant_problems(g, kind, root)
     else:
         return []
@@ -423,7 +445,12 @@ def pilot_grant_problems(g: dict, root: Path = REPO_ROOT) -> list[str]:
 T2507_APPROVAL = "tool_generation_t2507 device admission and formal tool_generation"
 #: ... and the hybrid's tool_generation block (maintainer 2026-11-05, review of f06ccd4, section 4)
 TOOL_GENERATION_APPROVALS = {"tool_generation_t2507": T2507_APPROVAL,
-                             "tool_generation": "tool_generation formal hybrid generation, six_category_common_support@v1"}
+                             "tool_generation": "tool_generation formal hybrid generation, six_category_common_support@v1",
+                             #: maintainer 2026-11-05, R1 approval, section IV
+                             "tool_generation_sr": "tool_generation_sr formal hybrid generation, "
+                                                   "six_category_schema_restored@v1",
+                             "tool_generation_sr_t2507": "tool_generation_sr_t2507 formal Thinking-2507 generation, "
+                                                         "six_category_schema_restored@v1"}
 
 
 def t2507_grant_problems(g: dict, kind: str, root: Path = REPO_ROOT) -> list[str]:
@@ -489,9 +516,8 @@ SHARDS = {"supplement": ("generation", OWN_SHARD, "supplement_session.json"),
           "inputs": ("inputs_generation", re.compile(r"^(c00|e\d\d)[tn]_"), "inputs_session.json"),
           #: on the container disk: every sealed shard leaves the pod on the poll after it is sealed
           "tool_pilot": ("tool_pilot_hybrid", re.compile(r"^pilot_"), "tool_pilot_hybrid/tool_session.json"),
-          "tool_generation": ("tool_generation_hybrid", re.compile(r"^tool_"), "tool_generation_hybrid/tool_session.json"),
-          "tool_generation_t2507": ("tool_generation_thinking_2507", re.compile(r"^tool_"),
-                                    "tool_generation_thinking_2507/tool_session.json")}
+          **{k: (f"tool_generation_{li}", re.compile(r"^tool_"), f"tool_generation_{li}/tool_session.json")
+             for k, li in GENERATION_LINEAGE.items()}}
 
 
 def _kind(ctx) -> str:
@@ -619,17 +645,19 @@ def inputs_command(ctx, plan) -> str:
             f"--authorization {auth} --durable-root {durable(a)} --status {status}" + P1._tail(status))
 
 
-def tool_generation_command(ctx, plan, lineage: str = "hybrid", planned_minutes: float | None = None) -> str:
+def tool_generation_command(ctx, plan, lineage: str = "hybrid", planned_minutes: float | None = None,
+                            kind: str | None = None) -> str:
     """The bounded generation's driver; ``planned_minutes`` (the launch's driver minutes, which the hard cap pays
-    for) is its deadline: no round starts that the time left cannot hold (`tool_session.generate_mode`)."""
+    for) is its deadline: no round starts that the time left cannot hold (`tool_session.generate_mode`); ``kind``
+    the session kind whose protocol, plan and source admission it reads (a lineage's later design)."""
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
     resume = (f" --resume-from {SE.POD_REPO}/{PILOT_RESUME_DIR}/{Path(a.resume_from).name}"
               if getattr(a, "resume_from", None) else "")
     deadline = f" --deadline-minutes {float(planned_minutes):.1f}" if planned_minutes else ""
     return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/tool_session.py "
-            f"--authorization {auth} --lineage {lineage}{resume}{deadline} --durable-root {durable(a)} --status {status}"
-            + P1._tail(status))
+            f"--authorization {auth} --lineage {lineage}{f' --kind {kind}' if kind else ''}{resume}{deadline} "
+            f"--durable-root {durable(a)} --status {status}" + P1._tail(status))
 
 
 def tool_pilot_command(ctx, plan) -> str:
@@ -701,6 +729,13 @@ DRIVERS = {
     "tool_generation_t2507": ("scripts/stages/stage-2/teacher_modes/tool_session.py",
                               functools.partial(tool_generation_command, lineage="thinking_2507"), (),
                               "Research A packed round: Thinking-2507's tool-calling episodes"),
+    "tool_generation_sr": ("scripts/stages/stage-2/teacher_modes/tool_session.py",
+                           functools.partial(tool_generation_command, kind="tool_generation_sr"), (),
+                           "Research A, six_category_schema_restored@v1: the hybrid's tool-calling episodes, both modes"),
+    "tool_generation_sr_t2507": ("scripts/stages/stage-2/teacher_modes/tool_session.py",
+                                 functools.partial(tool_generation_command, lineage="thinking_2507",
+                                                   kind="tool_generation_sr_t2507"), (),
+                                 "Research A, six_category_schema_restored@v1: Thinking-2507's tool-calling episodes"),
     "tool_pilot": ("scripts/stages/stage-2/teacher_modes/tool_session.py", tool_pilot_command, ("pilot_tasks",),
                    "Research A packed round: the hybrid's L40S tool pilot on its frozen cells (measurement only)"),
     "packed_search": ("scripts/stages/stage-2/teacher_modes/packed_full_search.py", packed_search_command,
@@ -726,7 +761,7 @@ POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation
           **{k: (f"{PACKED_TRAIN_ARMS[k]}_units.json",) for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
           **{k: tuple(f"tool_generation_{li}/{f}" for f in ("tool_session.json", "telemetry.jsonl",
                                                              "device_admission.json", "device_confirmation.json"))
-             for li, k in TOOL_GENERATION_KINDS.items()},
+             for k, li in GENERATION_LINEAGE.items()},
           "tool_pilot": ("tool_pilot_hybrid/tool_session.json", "tool_pilot_hybrid/telemetry.jsonl")}
 
 
@@ -776,9 +811,8 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
         prod = st / f"{sub}/products.json"
         if prod.is_file():
             got.update(top1_on_volume(ctx, f"{root}/{sub}/top1", json.loads(prod.read_text())["top1"]["files_sha256"]))
-    elif kind in ("tool_generation", "tool_generation_t2507", TOOL_PILOT_KIND):
-        sub = {"tool_generation": "tool_generation_hybrid", "tool_generation_t2507": "tool_generation_thinking_2507",
-               TOOL_PILOT_KIND: "tool_pilot_hybrid"}[kind]
+    elif kind in GENERATION_LINEAGE or kind == TOOL_PILOT_KIND:
+        sub = "tool_pilot_hybrid" if kind == TOOL_PILOT_KIND else f"tool_generation_{GENERATION_LINEAGE[kind]}"
         got[kind if kind == TOOL_PILOT_KIND else "tool_generation"] = P1._tar(ctx, f"{root}/{sub}", sub)[0]
     elif kind in PACKED_TRAIN_ARMS:
         got["packed_units_evidence"] = P1._tar(ctx, f"{root}/packed_units", "packed_units_evidence",
@@ -801,7 +835,7 @@ def tasks_relay_input(kind: str):
     import json
     from aadistill.infrastructure.session import RelayInput
     from shared.deployment import MAIN_RELAY
-    lineage = next(li for li, k in TOOL_GENERATION_KINDS.items() if k == kind)
+    lineage = GENERATION_LINEAGE[kind]
     plan = json.loads((REPO_ROOT / KIND_RECORDS[kind][1]).read_text()) if (REPO_ROOT / KIND_RECORDS[kind][1]).is_file() else {}
     tf = ((plan.get("lineages") or {}).get(lineage) or {}).get("tasks_file")
     if not tf:
@@ -826,7 +860,7 @@ def stage_tasks(kind: str) -> dict:
     from huggingface_hub import HfApi
     ri = tasks_relay_input(kind)
     plan = __import__("json").loads((REPO_ROOT / KIND_RECORDS[kind][1]).read_text())
-    lineage = next(li for li, k in TOOL_GENERATION_KINDS.items() if k == kind)
+    lineage = GENERATION_LINEAGE[kind]
     local = REPO_ROOT / plan["lineages"][lineage]["tasks_file"]["path"]
     api = HfApi()
     if ri.path in set(api.list_repo_files(ri.repo, repo_type="model")):
@@ -843,7 +877,7 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
     if kind not in DRIVERS:
         raise SE.AuthorizationError(f"kind {kind!r} has no session driver yet")
     driver, command, extra, description = DRIVERS[kind]
-    if (kind in ("search", "packed_search") or kind in TOOL_GENERATION_KINDS.values()) and minutes:
+    if (kind in ("search", "packed_search") or kind in GENERATION_LINEAGE) and minutes:
         command = functools.partial(command, planned_minutes=float(minutes))
     t = json.loads((REPO_ROOT / P1.PROTOCOL).read_text())["teacher"]
     if kind in THINKING_2507_KINDS:          #: C1-6cat's lineage: Thinking-2507 generates and teaches
@@ -878,7 +912,7 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
     polls = ((secure_pilot, pilot_secured) if kind in CONTAINER_KINDS else
              (secure, products_secured) if kind in SHARDS else (secure_files, files_secured))
     relay = ()
-    if kind in TOOL_GENERATION_KINDS.values():           #: the bound task file, pulled at hub speed (P8.4)
+    if kind in GENERATION_LINEAGE:                       #: the bound task file, pulled at hub speed (P8.4)
         try:
             relay = (tasks_relay_input(kind),)
         except SE.AuthorizationError:
@@ -894,7 +928,7 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
         #: every kind but the pilot runs on the phase's network volume; the pilot on the container disk (PLACEMENT)
         extra_prechecks=((the_kind_records_are_the_bound_ones, the_pilot_runs_on_an_l40s,
                           the_pilot_placement_is_the_planned_one,
-                          *((the_bound_task_file_is_relayed,) if kind in TOOL_GENERATION_KINDS.values() else ()))
+                          *((the_bound_task_file_is_relayed,) if kind in GENERATION_LINEAGE else ()))
                          if kind in CONTAINER_KINDS else
                          (P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones)),
         on_poll=polls[0], products_secured=polls[1],

@@ -396,21 +396,28 @@ def import_records(pool_content_sha256: str | Sequence[str], paths: Sequence[Pat
     return out
 
 
-def build(pool_dir: Path, *, protocol: Mapping | None = None, composition: Path | None = COMMON_SUPPORT) -> dict:
+def build(pool_dir: Path, *, protocol: Mapping | None = None, composition: Path | None = COMMON_SUPPORT,
+          protocol_path: Path | None = None, priors_path: Path | None = None,
+          import_paths: Sequence[Path] | None = None) -> dict:
     """The plan over a verified pool. ``composition`` names the training composition file the plan binds -- the
     registered common-support design by default, or a design that registers its own shares and ``source_groups``
-    (cells per source within a category: `cell_targets`); None plans the registered six-category shares."""
+    (cells per source within a category: `cell_targets`); None plans the registered six-category shares.
+    ``protocol_path`` is the generation protocol the plan is built under (a design's own file), ``priors_path`` and
+    ``import_paths`` the measured priors and the import records it binds -- each design's own, so one design's later
+    records never move another design's plan."""
     from stages.teacher_modes import tool_pool as TP
-    proto = protocol or json.loads(PROTOCOL.read_text())
+    protocol_path, priors_path = Path(protocol_path or PROTOCOL), Path(priors_path or PRIORS)
+    import_paths = IMPORTS if import_paths is None else import_paths
+    proto = protocol or json.loads(protocol_path.read_text())
     bp = proto["bounded_plan"]
     shares = design_shares()
     man, splits = TP.load_pool(Path(pool_dir))
     by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
     #: the pilot's priors and import apply to the pool the pilot ran on, and to no other (a test pool, a rebuilt one)
-    priors = json.loads(PRIORS.read_text()) if PRIORS.is_file() else None
+    priors = json.loads(priors_path.read_text()) if priors_path.is_file() else None
     if priors and (priors.get("measured_by") or {}).get("pool_content_sha256") not in pool_contents(man):
         priors = None
-    imports = import_records(pool_contents(man), by_id=by_id)
+    imports = import_records(pool_contents(man), tuple(Path(x) for x in import_paths), by_id=by_id)
     comp = Path(composition) if composition is not None and Path(composition).is_file() else None
     tshares = training_shares(comp) if comp else None
     wide = whole_supply_cells(comp) if comp else []
@@ -421,30 +428,36 @@ def build(pool_dir: Path, *, protocol: Mapping | None = None, composition: Path 
     plan = {"schema": SCHEMA, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "pool": {"dir": str(Path(pool_dir)), "content_sha256": man["content_sha256"],
                      "pool_json_sha256": sha_file(Path(pool_dir) / "pool.json")},
-            "protocol_sha256": sha_file(PROTOCOL), "six_category_design_sha256": sha_file(SIX),
+            "protocol_sha256": sha_file(protocol_path),
+            **({"protocol_path": Path(protocol_path).resolve().relative_to(REPO).as_posix()}
+               if Path(protocol_path).resolve() != PROTOCOL.resolve() else {}),
+            "six_category_design_sha256": sha_file(SIX),
             "shares": shares, "rules": bp["rounds"],
             "common_support": ({"path": comp.resolve().relative_to(REPO).as_posix(), "sha256": sha_file(comp),
                                 "training_shares": tshares, "whole_supply_cells": wide,
                                 **({"source_groups": groups} if groups else {})} if tshares else None),
             "approved_shortfalls": list(bp.get("approved_shortfalls") or []),
-            "priors": {"path": PRIORS.relative_to(REPO).as_posix(), "sha256": sha_file(PRIORS)} if priors else None,
-            "imports": [{"path": p.relative_to(REPO).as_posix(), "sha256": sha_file(p), "lineage": r["lineage"],
+            "priors": ({"path": priors_path.resolve().relative_to(REPO).as_posix(), "sha256": sha_file(priors_path)}
+                       if priors else None),
+            "imports": [{"path": p.resolve().relative_to(REPO).as_posix(), "sha256": sha_file(p), "lineage": r["lineage"],
                          "run_id": r["run_id"]} for p, r in imports],
             "lineages": lineages, "authorizes": "nothing"}
     plan["price"] = price_measured(plan, by_id, man, proto, priors) if priors else price(plan, by_id, man, proto)
     return plan
 
 
-def verified(protocol: Mapping | None = None, pool_dir: Path | None = None, lineage: str | None = None
-             ) -> tuple[dict, dict, dict]:
+def verified(protocol: Mapping | None = None, pool_dir: Path | None = None, lineage: str | None = None,
+             protocol_path: Path | None = None) -> tuple[dict, dict, dict]:
     """``(plan, pool manifest, tasks by id)`` after checking every identity the plan binds, for the session and for
     every dev-box consumer alike: `tool_pool.load_pool` re-verifies the split files, their task counts, sources,
     frozen orders and the pool's content sha256; the plan must name that content, the exact bytes of pool.json, the
     protocol file and the design (the shares) it is read with; and its cells must be the cells this pool, protocol
     and design produce now -- an edited target, bound, order or binding refuses (`PlanIdentityError`). ``lineage``
-    restricts the reading and the cell check to that lineage's splits."""
+    restricts the reading and the cell check to that lineage's splits; ``protocol_path`` is the protocol file the
+    plan must name (a design's own: its ``pool.dir`` and ``pool.plan`` are read)."""
     from stages.teacher_modes import tool_pool as TP
-    proto = protocol or json.loads(PROTOCOL.read_text())
+    protocol_path = Path(protocol_path or PROTOCOL)
+    proto = protocol or json.loads(protocol_path.read_text())
     pool_dir = Path(pool_dir) if pool_dir else REPO / proto["pool"]["dir"]
     splits_wanted = proto["lineages"][lineage]["splits"] if lineage else None
     man, splits = TP.load_pool(pool_dir, splits_wanted)
@@ -457,7 +470,7 @@ def verified(protocol: Mapping | None = None, pool_dir: Path | None = None, line
         bad.append("built from another pool content")
     if pool.get("pool_json_sha256") != sha_file(pool_dir / "pool.json"):
         bad.append("built from another pool.json (its orders, files or sources differ)")
-    if plan.get("protocol_sha256") != sha_file(PROTOCOL):
+    if plan.get("protocol_sha256") != sha_file(protocol_path):
         bad.append("built under another protocol")
     if plan.get("six_category_design_sha256") != sha_file(SIX) or plan.get("shares") != design_shares():
         bad.append("built under other category shares")
@@ -521,17 +534,18 @@ def bound_tasks_file(plan: dict, by_id: Mapping, lineage: str, out_dir: Path = T
     return ref
 
 
-def verified_bound(protocol: Mapping | None = None, lineage: str = "hybrid", plan_path: Path | None = None
-                   ) -> tuple[dict, dict]:
+def verified_bound(protocol: Mapping | None = None, lineage: str = "hybrid", plan_path: Path | None = None,
+                   protocol_path: Path | None = None) -> tuple[dict, dict]:
     """``(plan, tasks by id)`` on the pod, which holds the lineage's bound task file and not the pool: the plan (bound
     by the session's artifact) must be this schema, name this protocol and design, and the task file must hash to the
     plan's sha256 and hold exactly its cells' ``task_ids``. The dev box ran `verified` against the pool at issue."""
-    proto = protocol or json.loads(PROTOCOL.read_text())
+    protocol_path = Path(protocol_path or PROTOCOL)
+    proto = protocol or json.loads(protocol_path.read_text())
     plan = json.loads(Path(plan_path or REPO / proto["pool"]["plan"]).read_text())
     bad = []
     if plan.get("schema") != SCHEMA:
         bad.append("not a tool generation plan")
-    if plan.get("protocol_sha256") != sha_file(PROTOCOL):
+    if plan.get("protocol_sha256") != sha_file(protocol_path):
         bad.append("built under another protocol")
     if plan.get("six_category_design_sha256") != sha_file(SIX):
         bad.append("built under other category shares")
@@ -807,10 +821,11 @@ def cells_for(plan: Mapping, lineage: str, mode: str, split: str) -> list[dict]:
     return [c for c in plan["lineages"][lineage]["modes"][mode]["cells"] if c["split"] == split]
 
 
-def for_consumers(protocol: Mapping | None = None, pool_dir: Path | None = None) -> tuple[dict, dict]:
+def for_consumers(protocol: Mapping | None = None, pool_dir: Path | None = None, protocol_path: Path | None = None
+                  ) -> tuple[dict, dict]:
     """``(plan, pool orders)`` for a dev-box consumer (admission's packs, packed inputs), through `verified`: the
     same identity checks the session runs before it generates."""
-    plan, man, _ = verified(protocol, pool_dir)
+    plan, man, _ = verified(protocol, pool_dir, protocol_path=protocol_path)
     return plan, man["orders"]
 
 
@@ -828,8 +843,17 @@ def main(argv=None) -> int:
                     help="the training composition file the plan binds ('none': the registered shares)")
     ap.add_argument("--no-task-files", action="store_true",
                     help="a dry plan: write no bound task file (the frozen plan's task files stay untouched)")
+    ap.add_argument("--protocol", default=str(PROTOCOL), help="the generation protocol (a design's own file)")
+    ap.add_argument("--priors", default=str(PRIORS), help="the measured priors the plan binds")
+    ap.add_argument("--import-record", action="append", default=None,
+                    help="an import record the plan binds (repeatable; default: IMPORTS)")
     a = ap.parse_args(argv)
-    plan = build(Path(a.pool), composition=None if a.composition == "none" else Path(a.composition))
+    proto_path = Path(a.protocol).resolve()
+    plan = build(Path(a.pool), composition=None if a.composition == "none" else Path(a.composition),
+                 protocol_path=proto_path, priors_path=Path(a.priors).resolve(),
+                 import_paths=[Path(x).resolve() for x in a.import_record] if a.import_record else IMPORTS)
+    #: a design's protocol names its own task-file directory, so its plan never overwrites another plan's files
+    tasks_dir = REPO / (json.loads(proto_path.read_text())["pool"].get("tasks_dir") or TASKS_DIR.relative_to(REPO))
     summary = {li: {m: {f"{c['split']}/{c['category']}": (c["supply"], c["tasks"]["expected"], c["bound"], c.get("status"))
                         for c in mm["cells"]} for m, mm in v["modes"].items()} for li, v in plan["lineages"].items()}
     if a.write:
@@ -838,7 +862,7 @@ def main(argv=None) -> int:
             _, splits = TP.load_pool(Path(a.pool))
             by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
             for li in plan["lineages"]:
-                bound_tasks_file(plan, by_id, li)
+                bound_tasks_file(plan, by_id, li, tasks_dir)
         Path(a.write).parent.mkdir(parents=True, exist_ok=True)
         Path(a.write).write_text(json.dumps(plan, indent=1) + "\n")
     print(json.dumps({"price": plan["price"]["total_usd"], "caps": plan["price"].get("proposed_hard_caps_usd"),

@@ -19,6 +19,11 @@ Per task, with the code every admission uses (`tool_episodes`, `aadistill.data.t
 It also regenerates the tasks and requires the same bytes (determinism), and records the size of what a teacher
 would read and write: the gold call's tokens in the hybrid's tokenizer, argument counts, nesting depth, arrays,
 optional fields present, the operators and the difficulty levels. It measures no teacher: pass rates are priors.
+
+The renderer (`renderer_check`): every task's first prompt is rendered by the generation's own episode loop
+(`run_battery.run_episodes`, the hybrid's chat template, both modes) with a recording engine; it must be the same
+bytes when the task's gold call and replay table are replaced, and must not contain the gold call -- the teacher sees
+the system line, the tools and the request, never the reference (maintainer 2026-11-05, R1 approval, section III).
 """
 from __future__ import annotations
 
@@ -190,6 +195,94 @@ def check(task: dict, tok) -> dict:
     return out
 
 
+class _Recorder:
+    """An engine for `run_episodes` that records each first prompt and answers once, without a call."""
+
+    def __init__(self, reply_ids):
+        self.reply_ids, self.queue, self.prompts = list(reply_ids), [], {}
+
+    def add_request(self, rid, prompt, params):
+        from types import SimpleNamespace
+        self.prompts[rid.split("::")[0]] = list(prompt["prompt_token_ids"])
+        self.queue.append(SimpleNamespace(request_id=rid, finished=True, outputs=[
+            SimpleNamespace(token_ids=list(self.reply_ids), finish_reason="stop")]))
+
+    def has_unfinished_requests(self):
+        return bool(self.queue)
+
+    def step(self):
+        out, self.queue = self.queue, []
+        return out
+
+    def abort_request(self, rid):
+        pass
+
+
+#: what replaces the reference in the renderer check: another call and another replay table
+DECOY = {"name": "decoy_tool", "arguments": {"decoy": "value"}}
+
+
+def renderer_check(tasks: list[dict], tok) -> dict:
+    """The first prompt the generation renders for each task (`run_battery.run_episodes` with the protocol's stop ids
+    and the hybrid template in both modes), against the same task with its gold call and replay table replaced:
+    every prompt must be identical, and none may contain the gold call's arguments as the reference serializes them."""
+    from aadistill.evaluation.behavior import split_generation, template_opens_think
+    from stages.calibration_volume.run_battery import run_episodes
+    from stages.teacher_modes import tool_episodes as TE
+    from aadistill.data.tool_calls import canonical_call
+    eos = 151645
+    reply = tok("Done.", add_special_tokens=False).input_ids + [eos]
+
+    def prompts(rows, thinking):
+        eng = _Recorder(reply)
+        run_episodes(rows, tok=tok, eng=eng, make_sampling=lambda n, seed: n, limit=10 ** 6, ctx=10 ** 6,
+                     stop_ids=[eos, 151643], mode="generate", seed_base=1, system="You are a helpful Assistant.",
+                     check_every=10 ** 9, degeneration_check=lambda ids: None, split_generation=split_generation,
+                     template_opens_think=template_opens_think, label="renderer", log=lambda *a, **k: None,
+                     template_kwargs={"enable_thinking": thinking}, env_factory=TE.ToolEnv.factory)
+        return eng.prompts
+    decoys = []
+    for t in tasks:
+        d = copy.deepcopy(t)
+        d["gold_steps"] = [[[DECOY]], [[]]]
+        d["backend"] = {"kind": "replay", "table": {canonical_call(DECOY): "{}"}, "conflicts": []}
+        decoys.append(d)
+    out = {"tasks": len(tasks), "modes": {}}
+    for thinking in (True, False):
+        a, b = prompts(tasks, thinking), prompts(decoys, thinking)
+        differ = sorted(k for k in a if a[k] != b.get(k))
+        leaks = []
+        for t in tasks:
+            text = tok.decode(a[t["task_id"]])
+            args = t["gold_steps"][0][0][0]["arguments"]
+            if any(s in text for s in (json.dumps(args, ensure_ascii=False), json.dumps(args, sort_keys=True),
+                                       canonical_call(t["gold_steps"][0][0][0]), "gold_steps")):
+                leaks.append(t["task_id"])
+        out["modes"]["thinking" if thinking else "non_thinking"] = {
+            "rendered": len(a), "differ_when_reference_replaced": len(differ), "differ_examples": differ[:5],
+            "contain_the_gold_call": len(leaks), "leak_examples": leaks[:5]}
+    out["ok"] = all(m["rendered"] == len(tasks) and not m["differ_when_reference_replaced"]
+                    and not m["contain_the_gold_call"] for m in out["modes"].values())
+    return out
+
+
+#: what each verification level of these tasks establishes (maintainer 2026-11-05, R1 approval, section III)
+VERIFICATION_STRENGTH = {
+    "gold": "computed by the generator from a sampled ground truth; no model output",
+    "schema_validity": "a structural check of the call against its JSON schema (types, required fields, enums, "
+                       "patterns, bounds); it says nothing about whether the values are the requested ones",
+    "step_gold": "an exact comparison of the teacher's call with the program's reference call (canonical form)",
+    "recorded_execution": "a hit in a replay table keyed by that same reference call: not an independent business "
+                          "backend, and not closed-loop task success",
+    "independence": "step_gold and the replay hit depend on each other (the table's only key is the reference call) "
+                    "and count as ONE piece of correctness evidence, never two",
+    "class": "G2 (programmatic reference, matched exactly); nothing here is a G1 environment-success verification",
+    "held_out_domains": "the three state-evaluation domains are disjoint from the training domains, but share the "
+                        "generator and its derivation patterns: they test domain hold-out, not generalization to real "
+                        "unseen tool-calling tasks, which needs an independent real tool-calling evaluation",
+}
+
+
 def audit(tasks_path: Path) -> dict:
     from transformers import AutoTokenizer
     from stages.teacher_modes import schema_synth as SS
@@ -240,6 +333,7 @@ def audit(tasks_path: Path) -> dict:
             "unexplained_examples": unexplained[:20],
             "gold_call_tokens_by_split": {s: stats(v) for s, v in sorted(by_split.items())},
             "operators": dict(ops.most_common()), "domains": domains,
+            "renderer": renderer_check(tasks, tok), "verification_strength": VERIFICATION_STRENGTH,
             "measures_no_teacher": "pass rates and supervised tokens per admitted episode are priors until a "
                                    "generation round measures them",
             "authorizes": "nothing"}
@@ -255,9 +349,9 @@ def main(argv=None) -> int:
     if args.write:
         args.write.write_text(text)
     print(json.dumps({k: rep[k] for k in ("tasks", "deterministic", "tasks_with_problems", "mutations",
-                                          "gold_strings", "unexplained_strings", "gold_call_tokens_by_split")},
-                     indent=1))
-    return 0 if rep["deterministic"] and not rep["tasks_with_problems"] else 1
+                                          "gold_strings", "unexplained_strings", "gold_call_tokens_by_split",
+                                          "renderer")}, indent=1))
+    return 0 if rep["deterministic"] and not rep["tasks_with_problems"] and rep["renderer"]["ok"] else 1
 
 
 if __name__ == "__main__":

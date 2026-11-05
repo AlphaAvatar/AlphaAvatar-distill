@@ -1,0 +1,124 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_source_admission/v1",
+ "written_utc": "2026-11-05T15:28:33Z",
+ "status": "SIGNED by the maintainer's written decision of 2026-11-05 (signature below)",
+ "scope": "the pool extension tool_pool@v1+schema_synth@v1: tool_pool@v1's two sources on their 2026-11-04 terms, byte for byte, and aadistill/schema_synth@v1 as a FORMAL tool-calling task source -- every split the extension assigns it (training, validation, calibration, state evaluation, reserve, whole domains per split), for each lineage's teacher-native generation and the episodes admitted from it under the pool's verification (tool_verification@v2, unchanged)",
+ "pool_id": "tool_pool@v1+schema_synth@v1",
+ "pool_content_sha256": "e771393a98a6fd844c7d0ed3fa2d3327eb6c2b1c77a29033de707a5c4906649e",
+ "pool_json_sha256": "85c995a52c3062bb727e8205cfecfa01e5873357e80fc9ee695e1d4562f3a99e",
+ "reviewed_content_sha256": "e771393a98a6fd844c7d0ed3fa2d3327eb6c2b1c77a29033de707a5c4906649e",
+ "provenance": {
+  "builder": "scripts/stages/stage-2/teacher_modes/tool_pool.py",
+  "builder_sha256": "266b86b29fe277cce9a419b99d0f91d0927ec5da9e8a1a755ac06d9f9ac44e5f",
+  "converted_sources_sha256": {
+   "schema_synth": "705e7b4f9549d564ea63aa4e018245d607e43cff172cbdf27fd231d18bd0a726"
+  },
+  "base": {
+   "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1",
+   "pool_id": "tool_pool@v1",
+   "content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+   "pool_json_sha256": "4b75c1edc47769e5dca33687c0f2db08837d7da1cabff4cf278e3a00705de181"
+  },
+  "generators_sha256": {
+   "schema_synth": "c3678de2c535cc7befdb11814c8c3249a16577b14e3ceab4075ef534c13860fb"
+  },
+  "audit": {
+   "path": "logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_audit.json",
+   "sha256": "df5130ef05f377dd8f40d86098cb93b1f938a7d65d54fa2a5b9500a1ef91b8b0"
+  },
+  "semantic_review": {
+   "path": "logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_semantic_review.json",
+   "sha256": "b80b2b362b140c49c04efe0aff7b10965872afff5fa10e5eb003c016c086cbf4"
+  }
+ },
+ "sources": [
+  "Agent-Ark/Toucan-1.5M@0df3cf37f2abefb380370cfb02eabea2a35ae782",
+  "aadistill/schema_synth@schema_synth@v1",
+  "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd55ec1424cc3761ceacdd85a5743b4f4e"
+ ],
+ "per_source": {
+  "schema_synth": {
+   "datasets": [
+    "aadistill/schema_synth@schema_synth@v1"
+   ],
+   "converted_sha256": "705e7b4f9549d564ea63aa4e018245d607e43cff172cbdf27fd231d18bd0a726",
+   "tasks": 4844,
+   "licence": [
+    "Apache-2.0 (this repository's own generator)"
+   ]
+  }
+ },
+ "tasks_by_split": {
+  "calibration": {
+   "tasks": 58,
+   "by_source": {
+    "aadistill/schema_synth": 58
+   },
+   "sha256": "83a20c534e73006e81e8ae578179f162503505778b4240b7ac6e5794b7f9481d"
+  },
+  "reserve": {
+   "tasks": 10,
+   "by_source": {
+    "aadistill/schema_synth": 10
+   },
+   "sha256": "a94326dcd213cdf4302c524981405a00683fe27325675cfa0d517c597f7a2215"
+  },
+  "state_eval": {
+   "tasks": 110,
+   "by_source": {
+    "aadistill/schema_synth": 110
+   },
+   "sha256": "bc2930dfc26092f5c2f81dab6e2855a8fd648bfe462b3d14221dbe2265391141"
+  },
+  "training": {
+   "tasks": 4625,
+   "by_source": {
+    "aadistill/schema_synth": 4625
+   },
+   "sha256": "faca523d7f128240053b446f1844a02712531279fd703eb7232a87ba7014e6e2"
+  },
+  "validation": {
+   "tasks": 40,
+   "by_source": {
+    "aadistill/schema_synth": 40
+   },
+   "sha256": "335343f9b878900206af5dec2b44653263b4c318d2fb25e3c0e275afe7ea158e"
+  }
+ },
+ "conditions": [
+  "every training target and every online KD signal comes natively from the student's own teacher (P17, P17.1); another model's output in a source record -- its assistant turns, gold calls, recorded tool responses -- is task material (the prompt, the tool schema, the replay environment) or registered reference verification only, never a student target",
+  "the pool's audit, licence, revision, attribution, per-atom isolation, decontamination (T1-T5) and verification levels unchanged; the pilot's import record is reused only while the pool's content is REVIEWED_CONTENT",
+  "each source's licence and attribution kept with every derived record (Apache-2.0 notice for Toucan; CC-BY-4.0 attribution for Pivot Conversational)",
+  "third-party MCP and tool content may carry residual PII: generations stay outside git (P15); only counts, hashes and measurements enter the repository",
+  "schema_synth's gold call is computed by its program from a sampled ground truth, never by a model, and is task material and reference verification only: every assistant turn a student trains on is its own teacher's",
+  "what its levels establish (schema_synth_audit.VERIFICATION_STRENGTH): schema validity is a structural check; step_gold an exact comparison with the program's reference call; recorded execution a hit in a replay table keyed by that same call -- not an independent backend and not closed-loop task success; step_gold and the replay hit are ONE piece of correctness evidence; the tasks are G2, never reported as G1 environment success",
+  "the generator's instances are a pure function of (version, domain, index): no admitted task is edited; more material is a later instance range under a new extension content and a new signed admission",
+  "its three state-evaluation domains test domain hold-out under a shared generator, not generalization to real unseen tool-calling tasks, which needs an independent real tool-calling evaluation"
+ ],
+ "not_admitted": [
+  "nvidia/Nemotron-RL-Agentic-Function-Calling-Pivot-v1",
+  "nvidia/Nemotron-SFT-Agentic-v4",
+  "any dataset or revision not listed under sources",
+  "any schema_synth version, instance range or extension content other than the one signed here"
+ ],
+ "does_not": [
+  "authorize a GPU, a pod or any spend",
+  "authorize any experiment stage: a search, a training, a calibration, a state evaluation or a formal evaluation",
+  "approve any SHORTFALL, proportion exception or approved_exceptions entry",
+  "admit any source or revision not listed under sources"
+ ],
+ "signature": {
+  "signed_by": "maintainer",
+  "approves": "formal tool-calling task source schema_synth@v1",
+  "decision": "maintainer 2026-11-05, R1 approval ('原则批准方案一 R1'), sections I-III: '批准将程序生成、独立计算 gold 的 schema_synth 作为新工具调用任务来源，前提是通过下面的最终审计并绑定新的内容哈希。' -- training instances extended 160 -> 220 per domain before signing (section II); the final audit passed and the independent semantic review's 226 ambiguous requests left out by schema_synth.ambiguity (section III); the signature fields filled by the agent on that explicit written instruction",
+  "date": "2026-11-05",
+  "pool_content_sha256": "e771393a98a6fd844c7d0ed3fa2d3327eb6c2b1c77a29033de707a5c4906649e",
+  "sources": [
+   "Agent-Ark/Toucan-1.5M@0df3cf37f2abefb380370cfb02eabea2a35ae782",
+   "aadistill/schema_synth@schema_synth@v1",
+   "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd55ec1424cc3761ceacdd85a5743b4f4e"
+  ]
+ },
+ "_signature": "the maintainer's fields: signed_by 'maintainer', approves exactly 'formal tool-calling task source schema_synth@v1', the decision quoted, the date (YYYY-MM-DD), and the pool content and sources copied from this record (problems checks all of them); filled by the agent only on the maintainer's explicit written instruction to register the decision",
+ "authorizes": "nothing by itself: each kind's grant authorizes its sessions"
+}

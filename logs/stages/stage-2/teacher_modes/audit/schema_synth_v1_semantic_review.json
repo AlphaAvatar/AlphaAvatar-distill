@@ -1,0 +1,87 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.schema_synth_semantic_review/v1",
+ "written_utc": "2026-11-05T15:55:00Z",
+ "requested_by": "maintainer 2026-11-05, R1 approval, section III: '在发射前进行一次简短的独立语义审查：覆盖全部 30 个领域，重点检查用户请求、工具描述、参数推导、可选字段与计算出的 gold 一致；同时验证 prompt renderer 不向 Teacher 暴露 gold_steps、答案或参考调用。'",
+ "reviewer": "an independent agent that did not write the generator; read-only on the repository; report: schema_synth_v1_semantic_review.md",
+ "report": {
+  "path": "logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_semantic_review.md",
+  "sha256": "81d6d46858ce723f5848834a1c9b20f9a855f0076d972d01776f9eb27a29732b"
+ },
+ "reviewed": {
+  "generator_sha256": "00c6eaad11241d2346d6f8150bb1665d118f703f524c2cc9cc2bdffc0402b5b2",
+  "tasks_sha256": "c7934e17c7d6df4ea1d69ce0d0e87a5dfe01eed7d0a43cdeb06bb8b07e8737d9",
+  "tasks": 5070,
+  "domains": 30
+ },
+ "method": [
+  "every sampler and tool schema read",
+  "every gold call re-derived independently (own parsers, nothing imported from the generator) from the system date and the request alone: 5,070 / 5,070 equal",
+  "every gold call through aadistill.data.tool_calls.call_problems; every replay table holds exactly canonical_call(gold)",
+  "leakage: nothing visible to the teacher holds the gold call, 'gold', 'arguments', 'step_gold' or a derived value",
+  "4-6 tasks per domain read by hand (every level; a row >= 160 in every training domain)",
+  "every phrase class with two readings counted where the readings give different calls"
+ ],
+ "verdicts": {
+  "OK": 17,
+  "AMBIGUOUS_RISK": 12,
+  "DEFECT": 1
+ },
+ "computation_or_consistency_defects": 0,
+ "renderer": "independently confirmed by audit/schema_synth_v1_audit.json :: renderer (the generation's episode loop and chat template, both modes: identical prompts with the reference replaced, no gold call in any prompt)",
+ "ambiguous": {
+  "tasks": 226,
+  "of": 5070,
+  "by_class": {
+   "vehicle_contradiction (D1, defect)": 59,
+   "weekday_after_next (R1)": 123,
+   "last_week_on_sunday (D3)": 39,
+   "double_for_one (D2)": 7
+  },
+  "overlap": 2,
+  "by_split": {
+   "training": 214,
+   "calibration": 2,
+   "state_eval": 10
+  }
+ },
+ "action": "left out of the source by schema_synth.ambiguity (a rule over the request, the stated current date and the gold call); its 226 tasks are EXACTLY the reviewer's flagged set (cross-check, 2026-11-05: equal sets, every class equal, R1's 2 overlaps classed first by D1/D2/D3); every kept task byte for byte as generated, so no admitted identity changes and nothing is edited",
+ "why_left_out": "exact-match admission against a gold that takes one of two reasonable readings never admits a wrong call, but rejects a teacher that takes the other reading: admission yield falls and leans toward the generator's own convention; in state evaluation (10 tasks) that shifts a measurement",
+ "after": {
+  "tasks": 4844,
+  "census": {
+   "training": 4626,
+   "reserve": 10,
+   "calibration": 58,
+   "state_eval": 110,
+   "validation": 40
+  },
+  "tasks_sha256": "705e7b4f9549d564ea63aa4e018245d607e43cff172cbdf27fd231d18bd0a726",
+  "generator_sha256": "c3678de2c535cc7befdb11814c8c3249a16577b14e3ceab4075ef534c13860fb",
+  "original_3750": {
+   "kept": 3581,
+   "byte_identical": 3581,
+   "left_out": 169
+  },
+  "added_1320": {
+   "kept": 1263,
+   "left_out": 57
+  }
+ },
+ "kept_low_risks": [
+  "box dimensions read as length/width/height",
+  "US numbers without a country code read as +1",
+  "'HH:MM.' fields without '24-hour' in six domains (329 afternoon times)",
+  "grocery 'N packs of g' read as N x g units (70)",
+  "'this coming X' said on day X read as a week away (28)",
+  "thermostat repeated setpoints kept literally (6)",
+  "'12:xx pm' as the noon hour (36)"
+ ],
+ "cosmetic": [
+  "ungrammatical date phrasing such as 'On in nineteen days' (~145)",
+  "5 restaurant corrections restating the same time",
+  "20 parking 'or rather ... to be safe' with a shorter value",
+  "notes-style closings run into the last bullet",
+  "grocery's source.generator.operators always lists count:dozen (not visible to the teacher; operator statistics for grocery overcount it)"
+ ],
+ "authorizes": "nothing"
+}

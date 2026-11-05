@@ -109,7 +109,8 @@ def test_the_envelope_covers_the_pilot_and_the_amendment_raises_nothing():
     assert (g["per_session_hard_cap_usd"], g["gpus"], g["gpu_count_max"]) == (
         a["unchanged"]["per_session_hard_cap_usd"], a["unchanged"]["gpus"], a["unchanged"]["gpu_count_max"])
     applied = json.loads(TPL.AMENDMENT.read_text())                  #: the proposal the maintainer approved
-    later = {"tool_pilot", "tool_generation_t2507", "tool_generation"}   #: kinds later amendments added
+    later = {"tool_pilot", "tool_generation_t2507", "tool_generation",    #: kinds later amendments added
+             "tool_generation_sr", "tool_generation_sr_t2507"}
     assert {k: v for k, v in g["session_hard_caps_usd"].items() if k not in later} == \
         applied["unchanged"]["session_hard_caps_usd (the A1 kinds)"]
     assert a["edits"]["tool_pilot"]["decision"] is None and a["edits"]["tool_pilot"]["date"] is None

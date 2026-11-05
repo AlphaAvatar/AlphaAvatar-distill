@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Programmatically verifiable schema_arguments tasks (`schema_synth@v1`): a DESIGN for the maintainer's review. $0.
+"""Programmatically verifiable schema_arguments tasks (`schema_synth@v1`), a formal tool-calling task source. $0.
 
     PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_synth \\
         --out artifacts/stages/stage-2/teacher_modes/schema_synth_v1 [--audit <json>]
@@ -17,6 +17,13 @@ verifies at the pool's existing levels with no change to the verifier (`tool_epi
   rule, so exactly one call is correct;
 * the replay table answers that call and nothing else, so an off-gold call ends the episode (recorded execution);
 * the schema uses only `tool_calls.CHECKED_KEYWORDS`, so schema validity is a real check.
+
+What the levels are, and are not (maintainer 2026-11-05, R1 approval, section III): the gold is a program's, never a
+model's; ``schema_validity`` is a structural check of the call against its JSON schema; ``step_gold`` is an exact
+comparison with the program's reference call; ``recorded_execution`` is a hit in a replay table KEYED BY that same
+reference call -- not an independent business backend, and not closed-loop task success. The replay hit and step_gold
+therefore depend on one another and count as ONE piece of correctness evidence, not two; nothing here is a G1
+(environment-success) verification. The tasks are G2: the program-computed call, matched exactly.
 
 What the tasks exercise, beyond filling a template: reading a free-form request for the facts a call needs among
 distractors (an old order number, a retracted value), turning relative dates and times into calendar values from the
@@ -38,6 +45,7 @@ import calendar
 import hashlib
 import json
 import random
+import re
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -54,7 +62,9 @@ SOURCE = "aadistill/schema_synth"
 VERSION = "schema_synth@v1"
 #: instances per domain by split, and how domains are assigned to splits (whole domains, `assign_splits`)
 SPLIT_DOMAINS = (("state_eval", 3), ("validation", 2), ("calibration", 2), ("reserve", 1))
-PER_DOMAIN = {"training": 160, "state_eval": 40, "validation": 20, "calibration": 30, "reserve": 10}
+#: training 220 per domain (maintainer 2026-11-05, R1 approval, section II: 160 -> 220 along the same deterministic
+#: instance indices, so every earlier task keeps its bytes and identity; the held-out splits unchanged)
+PER_DOMAIN = {"training": 220, "state_eval": 40, "validation": 20, "calibration": 30, "reserve": 10}
 #: the current dates instances are set on (the system prompt states it), and the difficulty mix
 DATE_RANGE = (date(2026, 1, 5), date(2026, 12, 18))
 LEVELS = ((1, 0.3), (2, 0.4), (3, 0.3))
@@ -1440,17 +1450,56 @@ def task(domain: Domain, index: int, split: str) -> dict:
     }
 
 
-def generate(per_domain: dict = PER_DOMAIN, domains=DOMAINS) -> list[dict]:
+#: requests with more than one reasonable call, found by the independent semantic review of all 30 domains
+#: (2026-11-05, before the source was signed; audit/schema_synth_v1_audit.json :: semantic_review). Exact-match
+#: admission against such a task rejects a teacher that takes the other reasonable reading, so admission would lean
+#: toward the generator's own convention: they are left out of the source, and every other task keeps its bytes.
+AMBIGUITY = {
+    "vehicle_contradiction": "parking: a motorcycle or van to park, but 'I need a charger for my electric car'",
+    "double_for_one": "hotel: 'a room with one big bed for one' fits SINGLE (1 bed, 1 guest) as well as DOUBLE",
+    "last_week_on_sunday": "timesheet: 'last week' said on a Sunday is a different week under Sunday-start weeks",
+    "weekday_after_next": "'the <weekday> after next' when the coming <weekday> is still in the current week (Monday- "
+                          "or Sunday-start): 'next <weekday>' read as next week's gives a date 7 days later",
+}
+AFTER_NEXT = re.compile(r"\bthe (" + "|".join(WEEKDAYS) + r") after next\b", re.IGNORECASE)
+
+
+def ambiguity(t: dict) -> str | None:
+    """The `AMBIGUITY` class of a task, or None: read from the request, the stated current date and the gold call."""
+    dom, a = t["source"]["config"], t["gold_steps"][0][0][0]["arguments"]
+    today = date.fromisoformat(t["source"]["generator"]["current_date"])
+    if dom == "parking_reservation" and a["ev_charging"] and a["vehicle"]["type"] != "CAR":
+        return "vehicle_contradiction"
+    if dom == "hotel_booking" and any(x["type"] == "DOUBLE" and x["guests"] == 1 for x in a["rooms"]):
+        return "double_for_one"
+    if dom == "timesheet" and today.weekday() == 6:
+        return "last_week_on_sunday"
+    week_start = (lambda d: d - timedelta(days=d.weekday()), lambda d: d - timedelta(days=(d.weekday() + 1) % 7))
+    for m in AFTER_NEXT.finditer(t["messages"][0]["content"]):
+        first = coming(today, [w.lower() for w in WEEKDAYS].index(m.group(1).lower()))
+        if any(f(first) == f(today) for f in week_start):
+            return "weekday_after_next"
+    return None
+
+
+def generate(per_domain: dict = PER_DOMAIN, domains=DOMAINS, *, excluded: list | None = None) -> list[dict]:
+    """Every instance of every domain in its split, without the `ambiguity` ones (appended to ``excluded``, with
+    their class, when a list is given)."""
     splits = assign_splits(domains)
     out = []
     for d in domains:
         split = splits[d.name]
         for i in range(per_domain[split]):
-            out.append(task(d, i, split))
+            t = task(d, i, split)
+            why = ambiguity(t)
+            if why is None:
+                out.append(t)
+            elif excluded is not None:
+                excluded.append({"task_id": t["task_id"], "domain": d.name, "row": i, "split": split, "class": why})
     return out
 
 
-def write(tasks: list[dict], out: Path) -> dict:
+def write(tasks: list[dict], out: Path, excluded: list | None = None) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     text = "".join(json.dumps(t, ensure_ascii=False, sort_keys=True) + "\n" for t in tasks)
     (out / "tasks.jsonl").write_text(text, encoding="utf-8")
@@ -1461,13 +1510,18 @@ def write(tasks: list[dict], out: Path) -> dict:
            "domains_by_split": {s: sorted(n for n, x in assign_splits().items() if x == s)
                                 for s in sorted(set(assign_splits().values()))},
            "per_domain": PER_DOMAIN, "census": dict(Counter(t["split"] for t in tasks)),
-           "authorizes": "nothing: a design for the maintainer's review; no task enters the canonical pool"}
+           "left_out_as_ambiguous": {"classes": AMBIGUITY,
+                                     "count": dict(Counter(x["class"] for x in excluded or [])),
+                                     "by_split": dict(Counter(x["split"] for x in excluded or [])),
+                                     "tasks": excluded or []},
+           "authorizes": "nothing: the source's formal admission is the signed record bound to its pool extension's "
+                         "content (tool_source_admission)"}
     (out / "manifest.json").write_text(json.dumps(man, indent=1) + "\n")
     return man
 
 
-#: the extension's pool id: tool_pool@v1 plus this source (`tool_pool.extend`), a DESIGN until the maintainer admits
-#: the source; the canonical pool directory is never written
+#: the extension's pool id: tool_pool@v1 plus this source (`tool_pool.extend`); its content is what the source's
+#: formal admission signs (tool_source_admission), and the canonical pool directory is never written
 EXTENSION_POOL_ID = "tool_pool@v1+schema_synth@v1"
 
 
@@ -1493,7 +1547,8 @@ def main(argv=None) -> int:
     ap.add_argument("--extend", type=Path, help="a base pool directory: also write the extension to --pool-out")
     ap.add_argument("--pool-out", type=Path)
     args = ap.parse_args(argv)
-    man = write(generate(), args.out)
+    excluded: list = []
+    man = write(generate(excluded=excluded), args.out, excluded)
     print(json.dumps({k: man[k] for k in ("tasks", "tasks_sha256", "census", "domains_by_split")}, indent=1))
     if args.extend:
         doc = build_extension(args.extend, args.out / "tasks.jsonl", args.pool_out)

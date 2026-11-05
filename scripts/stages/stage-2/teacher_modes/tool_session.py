@@ -54,24 +54,26 @@ class PlanError(RuntimeError):
     """A plan that cannot be run (an unknown unit, a task picked by two cells)."""
 
 
-def protocol() -> dict:
-    return json.loads(PROTOCOL.read_text())
+def protocol(path: Path | None = None) -> dict:
+    return json.loads(Path(path or PROTOCOL).read_text())
 
 
-def checked_plan(proto: dict, lineage: str):
+def checked_plan(proto: dict, lineage: str, protocol_path: Path | None = None, admission: Path | None = None):
     """``(plan, pool manifest or None, tasks by id)``. A plan that writes the lineage's bound task file (P8.4) is read
     with `tool_generation_plan.verified_bound` -- the pod holds that file, never the pool; the dev box checked the
     plan against the pool at issue. Otherwise `tool_generation_plan.verified`: its split files re-verified, the plan
     bound to this pool's content, pool.json, protocol and design, its cells unchanged. Either way the formal source
-    admission (`tool_source_admission.problems`) must admit the plan's pool content and every task's source."""
+    admission (`tool_source_admission.problems`) must admit the plan's pool content and every task's source.
+    ``protocol_path`` and ``admission`` are the session kind's own records (`token_matched_phase.KIND_RECORDS`)."""
     plan = json.loads((REPO / proto["pool"]["plan"]).read_text())
     if (plan.get("lineages", {}).get(lineage) or {}).get("tasks_file"):
-        plan, by_id = TGP.verified_bound(proto, lineage)
+        plan, by_id = TGP.verified_bound(proto, lineage, protocol_path=protocol_path)
         man = None
     else:
-        plan, man, by_id = TGP.verified(proto, lineage=lineage)
+        plan, man, by_id = TGP.verified(proto, lineage=lineage, protocol_path=protocol_path)
     from stages.teacher_modes import tool_source_admission as TSA
-    bad = TSA.problems(TSA.load(), pool_content_sha256=plan["pool"]["content_sha256"], tasks=by_id.values())
+    bad = TSA.problems(TSA.load(admission or TSA.RECORD), pool_content_sha256=plan["pool"]["content_sha256"],
+                       tasks=by_id.values())
     if bad:
         raise PlanError("the formal source admission refuses: " + "; ".join(bad))
     return plan, man, by_id
@@ -94,11 +96,11 @@ def write_round(tasks: list[dict], out: Path, label: str, default_system: str) -
             "sha256": hashlib.sha256(body.encode()).hexdigest()}
 
 
-def context(proto: dict, lineage: str, identity: str) -> dict:
-    """The `generation_driver.run_group` context for one lineage."""
+def context(proto: dict, lineage: str, identity: str, protocol_path: Path | None = None) -> dict:
+    """The `generation_driver.run_group` context for one lineage; every shard records ``protocol_path``'s sha256."""
     li = proto["lineages"][lineage]
     return {"protocol": {"execution": proto["execution"], "teacher": {"model": li["model"], "revision": li["revision"]}},
-            "launch_identity_sha256": identity, "protocol_path": str(PROTOCOL.relative_to(REPO))}
+            "launch_identity_sha256": identity, "protocol_path": str(Path(protocol_path or PROTOCOL).relative_to(REPO))}
 
 
 def mode_args(proto: dict, lineage: str, mode: str) -> tuple[str, ...]:
@@ -127,7 +129,7 @@ def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict,
                   identity: str, run, mark, *, cells: list[dict] | None = None, orders: list | None = None,
                   max_rounds: int | None = None, label_prefix: str = "tool", telemetry: Path | None = None,
                   extra_args: tuple[str, ...] = (), imported: dict | None = None, deadline: float | None = None,
-                  first_round_free: bool = True, on_invocation=None) -> dict:
+                  first_round_free: bool = True, on_invocation=None, protocol_path: Path | None = None) -> dict:
     """Every cell of one mode, round by round, to its target or its bound; returns the cells' final states. A pilot
     passes its frozen ``cells`` and ``orders`` (`tool_pilot.cells`), one round and its own label prefix; with
     ``telemetry`` every engine invocation appends its GPU and engine telemetry there (`tool_pilot`). ``imported``
@@ -158,7 +160,7 @@ def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict,
         state.append({"attempted": 0, "units": sum(units_of(o) for o in mine), "admitted": sum(o["admitted"] for o in mine),
                       "imported": len(mine)})
         orders[i] = [t for t in orders[i] if t["task_id"] not in done]
-    c, groups = context(proto, lineage, identity), []
+    c, groups = context(proto, lineage, identity, protocol_path), []
     longest, stopped = 0.0, None
     for r in range(1, int(max_rounds or bp["rounds"]["max_rounds"]) + 1):
         picks = [TGP.round_tasks(cell, orders[i], state[i], r, bp=bp, mode=mode, candidates=cand)
@@ -580,6 +582,8 @@ def main(argv=None, *, run=None) -> int:
                     "shards, staged on this pod")
     ap.add_argument("--deadline-minutes", type=float, default=None, help="the driver's budget boundary: no round "
                     "starts that the time left cannot hold (generate_mode)")
+    ap.add_argument("--kind", default=None, help="the session kind (token_matched_phase.GENERATION_LINEAGE): its "
+                    "bound protocol, plan and source admission; default the lineage's first kind")
     a = ap.parse_args(argv)
     deadline = time.time() + 60 * a.deadline_minutes if a.deadline_minutes else None
     if bool(a.pilot) != bool(a.pilot_tasks):
@@ -602,16 +606,21 @@ def main(argv=None, *, run=None) -> int:
         from stages.teacher_modes import token_matched_phase as TM
         #: the lineage's own kind: a hybrid artifact never runs Thinking-2507, nor the reverse; a pilot's never runs
         #: the bounded generation, nor the reverse
-        kind = TM.TOOL_PILOT_KIND if a.pilot else TM.TOOL_GENERATION_KINDS[a.lineage]
+        kind = TM.TOOL_PILOT_KIND if a.pilot else (a.kind or TM.TOOL_GENERATION_KINDS[a.lineage])
+        if not a.pilot and TM.GENERATION_LINEAGE.get(kind) != a.lineage:
+            raise PlanError(f"kind {kind!r} is not a generation kind of the {a.lineage} lineage")
         bound = TM.require_on_pod(Path(a.authorization), kind, REPO)
         record.update(kind=kind, authorization=bound.get("authorization_id"), identity=bound["identity"])
-        proto = protocol()
+        proto_path = PROTOCOL if a.pilot else REPO / TM.KIND_RECORDS[kind][0]
+        admission = None if a.pilot else REPO / TM.KIND_RECORDS[kind][4]
+        proto = protocol(proto_path)
+        record["protocol"] = {"path": str(proto_path.relative_to(REPO)), "sha256": GD.sha(proto_path)}
         if a.pilot:
             ok = run_pilot(proto, Path(a.pilot), Path(a.pilot_tasks), out, bound["identity"], run or GD.run_battery,
                            mark, record, mount=durable.parent, volume_gb=a.volume_gb,
                            resume_from=Path(a.resume_from) if a.resume_from else None)
             raise _Done(ok)
-        plan, man, by_id = checked_plan(proto, a.lineage)
+        plan, man, by_id = checked_plan(proto, a.lineage, proto_path, admission)
         record.update(plan_pool_content_sha256=plan["pool"]["content_sha256"], tasks_readable=len(by_id))
         if a.resume_from:
             record["resumed_from"] = bring_sealed(Path(a.resume_from), out, prefix="tool")
@@ -634,7 +643,7 @@ def main(argv=None, *, run=None) -> int:
             res = generate_mode(proto, plan, a.lineage, mode, by_id, man, out, bound["identity"],
                                 run or GD.run_battery, mark, telemetry=out / "telemetry.jsonl",
                                 extra_args=("--engine-metrics",), deadline=deadline, first_round_free=i == 0,
-                                on_invocation=confirm)
+                                on_invocation=confirm, protocol_path=proto_path)
             record["modes"][mode] = res
             if not res["complete"]:
                 ok = False
