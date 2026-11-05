@@ -53,6 +53,10 @@ SUITE_V1 = REPO / "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v1"
 SUITE_V2 = REPO / "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v2"
 ITEMS_V2 = REPO / "artifacts/stages/stage-2/teacher_modes/calibration_v3"
 FREEZE_V2 = REPO / "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v2_freeze.json"
+#: state_eval_hybrid@v2-lc1 (maintainer 2026-11-05, conditional): the registration names its one LIMITED_COVERAGE cell
+LC1 = CONF / "state_eval_hybrid_v2_lc1.json"
+SUITE_V2_LC1 = REPO / "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v2_lc1"
+FREEZE_V2_LC1 = REPO / "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v2_lc1_freeze.json"
 DESIGN = CONF / "packed_round_design.json"
 TEACHER = CONF / "teacher_identity.json"
 MODES = ("H-T", "H-N")
@@ -260,17 +264,47 @@ def profiles_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = ITEMS_V2) 
     return doc
 
 
-def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2) -> dict:
-    """state_eval_hybrid@v2's items and manifest under ``out_dir``; returns the manifest."""
+def limited_cells(path: Path = LC1) -> dict[str, dict]:
+    """``{mode: {category: registered realized values}}`` of the @v2-lc1 registration's LIMITED_COVERAGE cell."""
+    reg = json.loads(Path(path).read_text())
+    c = reg["limited_cell"]
+    mode = "H-N" if c["mode"].startswith("H-N") else "H-T"
+    return {mode: {c["category"]: {"target_scored_positions": c["target_scored_positions"],
+                                   "realized_scored_positions": c["realized_scored_positions"],
+                                   "admitted_episodes": c["admitted_episodes"],
+                                   "kish_effective_episodes": c["kish_effective_episodes"]}}}
+
+
+def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2, limited: dict | None = None) -> dict:
+    """state_eval_hybrid@v2's items and manifest under ``out_dir``; returns the manifest. With ``limited``
+    (`limited_cells`: @v2-lc1), each named category counts as LIMITED_COVERAGE -- never REACHED -- when every admitted
+    episode of its split is selected and its realized positions and episodes are exactly the registered ones; every
+    other category must meet the v2 rule as before, or the mode is not reached."""
     from aadistill.initialization.calibration.profiles import mixture_content_sha256
     v1m = json.loads((SUITE_V1 / "manifest.json").read_text())
     items = jsonl(SUITE_V1 / "items.jsonl")
     counts = dict(v1m["counts"])
     reached = {}
     thin, short = {}, {}
+    coverage = {}
     for m in MODES:
         got_items, got, census = tool_cell(tool_items.get(m, []), "state_eval", m, SE_POSITIONS)
         tasks = len({x["task_id"] for x in got_items})
+        for cat, reg in ((limited or {}).get(m) or {}).items():
+            if cat not in census:
+                continue
+            c = census[cat]
+            mine = [x for x in got_items if x["category"] == cat]
+            exhausted = c["tasks"] == c["admitted_supply"]
+            exact = (c["scored"] == reg["realized_scored_positions"] and c["tasks"] == reg["admitted_episodes"])
+            coverage[f"{TOOL_SUBTYPE}|{m}|{cat}"] = {
+                **reg, "measured_scored_positions": c["scored"], "measured_episodes": c["tasks"],
+                "items": len(mine), "every_admitted_episode_selected": exhausted, "equal_to_the_registration": exact,
+                "status": "LIMITED_COVERAGE" if (c["short"] and exhausted and exact) else
+                ("REACHED" if not c["short"] else "SHORT")}
+            if coverage[f"{TOOL_SUBTYPE}|{m}|{cat}"]["status"] == "LIMITED_COVERAGE":
+                c["short"] = False                    #: declared below, never counted as reached
+                c["limited_coverage"] = True
         thin[m] = sorted(k for k, v in census.items() if v["thin"] and not v["approved_shortfall"])
         short[m] = sorted(k for k, v in census.items() if v["short"] and not v["approved_shortfall"])
         #: every category's own share and minimum (their sum is SE_POSITIONS); only an approved SHORTFALL may be short
@@ -291,6 +325,12 @@ def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2) -> 
                                    f"{SE_MIN_TASKS} tasks); a mode is reached only when its total, its tasks and "
                                    f"EVERY category meet them, a category's SHORTFALL counting only where the "
                                    f"maintainer approved it"}
+    if limited is not None:
+        man["version"] = "2-lc1"
+        man["coverage"] = {"cells": coverage, "registration": {"path": str(LC1.relative_to(REPO)), "sha256": sha(LC1)},
+                           "rule": "a LIMITED_COVERAGE cell is the registered one, its whole admitted supply selected "
+                                   "and its realized positions and episodes the registered ones; it is never REACHED, "
+                                   "and every other cell meets the v2 rule"}
     man["content_sha256"] = mixture_content_sha256(items)
     man["n_items"] = len(items)
     man["supersedes"] = {"suite": f"{v1m['suite_id']}@v{v1m['version']}", "content_sha256": v1m["content_sha256"]}
@@ -318,6 +358,7 @@ def freeze_record(suite_dir: Path = SUITE_V2, types_path: Path = TYPES_V2) -> di
                         numerics=terms["numerics"], reference_strategy=ReferenceStrategy.RECOMPUTE,
                         forward_context=fc)
     return {"schema": "aadistill.stage2.teacher_modes.state_eval_hybrid_freeze/v2",
+            **({"coverage": man["coverage"]} if man.get("coverage") else {}),
             "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "suite_identity": {"suite_id": f"{man['suite_id']}@v{man['version']}",
                                "content_sha256": man["content_sha256"], "items_sha256": man["items_sha256"],
@@ -344,6 +385,21 @@ def build(tool_items: dict[str, list[dict]], *, profiles_out: Path = PROFILES_V2
         out["measurement_protocol_id"] = rec["suite_identity"]["measurement_protocol_id"]
     else:
         out["frozen"] = False
+        #: @v2-lc1 (conditional registration): the same suite with the registered LIMITED_COVERAGE cell declared; it
+        #: freezes only when the profiles are complete and every OTHER cell meets the v2 rule
+        if LC1.is_file():
+            lc_out = SUITE_V2_LC1 if Path(suite_out) == SUITE_V2 else Path(f"{suite_out}_lc1")
+            lc_freeze = FREEZE_V2_LC1 if Path(freeze_out) == FREEZE_V2 else Path(freeze_out).with_suffix(".lc1.json")
+            lc = suite_v2(tool_items, out_dir=lc_out, limited=limited_cells())
+            lc["types_sha256"] = sha(types_out)
+            (lc_out / "manifest.json").write_text(json.dumps(lc, indent=1) + "\n")
+            out["lc1"] = {"suite_tool_calling": lc["tool_calling"], "coverage": lc["coverage"]["cells"]}
+            if doc["status"].startswith("COMPLETE") and all(lc["tool_calling"]["reached"].values()):
+                rec = freeze_record(lc_out, types_out)
+                lc_freeze.write_text(json.dumps(rec, indent=1) + "\n")
+                out["lc1"]["measurement_protocol_id"] = rec["suite_identity"]["measurement_protocol_id"]
+            else:
+                out["lc1"]["frozen"] = False
     return out
 
 

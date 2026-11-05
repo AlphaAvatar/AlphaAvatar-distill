@@ -139,7 +139,8 @@ def measure_import(record: dict, store: Path, acc=None) -> dict:
     turns read from the sealed shard the record names (verified by sha256 and the session's identity). ``acc``
     accumulates several sessions of one lineage (`measure_imports`)."""
     from stages.reasoning_data import generation_driver as GD
-    lineage, identity, store = record["lineage"], record["identity"], Path(store)
+    lineage, store = record["lineage"], Path(store)
+    identity = record.get("identity") or record["pilot_identity"]           #: a formal session's, or the pilot's
     acc = acc if acc is not None else defaultdict(lambda: {"attempted": 0, "admitted": 0, "second": 0, "units": 0.0,
                                                            "generated_tokens": 0, "prompt_tokens": 0, "turns": 0,
                                                            "candidates": 0})
@@ -162,7 +163,9 @@ def measure_import(record: dict, store: Path, acc=None) -> dict:
                     a["generated_tokens"] += int(turn.get("generated_tokens") or 0)
                     a["prompt_tokens"] += int(turn.get("prompt_tokens") or 0)
     return {"strata": _strata(acc), "throughput": throughput([store]),
-            "measured_by": {"run_id": record["run_id"], "import_record_session_plan_sha256": record["session_plan_sha256"],
+            "measured_by": {"run_id": record["run_id"],
+                            "import_record_session_plan_sha256": (record.get("session_plan_sha256")
+                                                                  or record.get("pilot_plan_sha256")),
                             "pool_content_sha256": record["pool_content_sha256"], "identity": identity,
                             "verification_version": record["verification_version"], "lineage": lineage}}
 
@@ -183,8 +186,8 @@ def measure_imports(pairs) -> dict:
     for r, store in pairs:
         last = measure_import(r, store, acc)
     return {"strata": last["strata"], "throughput": throughput([s for _, s in pairs]),
-            "measured_by": [{"run_id": r["run_id"], "identity": r["identity"],
-                             "import_record_session_plan_sha256": r["session_plan_sha256"],
+            "measured_by": [{"run_id": r["run_id"], "identity": r.get("identity") or r["pilot_identity"],
+                             "import_record_session_plan_sha256": r.get("session_plan_sha256") or r.get("pilot_plan_sha256"),
                              "pool_content_sha256": r["pool_content_sha256"],
                              "verification_version": r["verification_version"]} for r, _ in pairs]}
 
@@ -201,7 +204,7 @@ def replace_lineage(priors: dict, lineage: str, pairs, record_paths: list[str]) 
                                   lineage: {"sessions": got["measured_by"], "import_records": record_paths}}
     un = dict(priors.get("unmeasured") or {})
     un["lineages"] = [x for x in un.get("lineages") or [] if x != lineage]
-    un[lineage] = "every stratum not listed (its sessions generated training and validation only)"
+    un[lineage] = "every stratum not listed (no task of it attempted in these sessions)"
     out["unmeasured"] = un
     out["written_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     return out

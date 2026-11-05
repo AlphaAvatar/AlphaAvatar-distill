@@ -29,6 +29,7 @@ def toy(tmp_path):
     proto = json.loads(TS.PROTOCOL.read_text())
     proto["lineages"]["hybrid"]["splits"] = ["training"]
     proto["lineages"]["hybrid"]["modes"] = {"H-T": proto["lineages"]["hybrid"]["modes"]["H-T"]}
+    proto["bounded_plan"]["rounds"]["first_round_bound_lineages"] = []      #: the generic round rule
     man, splits = TP.load_pool(tmp_path / "pool")
     by_id = {t["task_id"]: t for rows in splits.values() for t in rows}
     return {"tmp": tmp_path, "proto": proto, "man": man, "by_id": by_id, "submitted": []}
@@ -206,7 +207,8 @@ def test_the_committed_plan_binds_both_imports_and_the_common_support_compositio
     plan = json.loads(TGP.PLAN.read_text())
     if not plan.get("imports"):
         pytest.skip("no rebuilt plan committed")
-    assert [r["lineage"] for r in plan["imports"]] == ["hybrid", "thinking_2507", "thinking_2507"]
+    assert [r["lineage"] for r in plan["imports"]] == ["hybrid", "thinking_2507", "thinking_2507", "thinking_2507",
+                                                      "hybrid"]
     assert plan["common_support"]["training_shares"] == TGP.training_shares()
     t = {c["category"]: c for c in plan["lineages"]["thinking_2507"]["modes"]["T2507"]["cells"] if c["split"] == "training"}
     done = TGI.merged([json.loads((REPO / r["path"]).read_text()) for r in plan["imports"]], "thinking_2507", "T2507")

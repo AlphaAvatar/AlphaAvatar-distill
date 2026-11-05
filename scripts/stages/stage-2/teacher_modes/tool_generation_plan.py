@@ -60,9 +60,12 @@ PLAN = REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json
 PRIORS = REPO / "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json"
 IMPORT = REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json"
 #: every import record a plan binds, in order (maintainer 2026-11-05, review of f06ccd4, section 1): the pilot's, and
-#: Thinking-2507's completed formal sessions a_tool_generation_t2507_20261104_195411 and _20261105_064829
+#: Thinking-2507's completed formal sessions a_tool_generation_t2507_20261104_195411, _20261105_064829 and
+#: _20261105_072112, and the hybrid's a_tool_generation_20261105_074146
 IMPORTS = (IMPORT, REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json",
-           REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a3.json")
+           REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a3.json",
+           REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a4.json",
+           REPO / "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_hybrid_a1.json")
 #: the probability a first-round-bound lineage's single round must reach its target with (`reach_bound`)
 REACH_PROBABILITY = 0.95
 #: the registered training composition (six_category_common_support@v1, maintainer 2026-11-05)
@@ -163,27 +166,48 @@ def task_units(task: Mapping, unit: str, *, lineage: str, mode: str, proto: Mapp
     return tuple(per_task_units(task, unit, tpt[i], pr[i], cand) for i in (0, 1, 2)), "prior"
 
 
-def reach_bound(tasks: Sequence[Mapping], rest: float, *, lineage: str, mode: str, priors: Mapping | None,
-                q: float = REACH_PROBABILITY) -> int | None:
-    """The shortest prefix of ``tasks`` whose admitted episodes reach ``rest`` units with probability >= ``q``, each
-    task admitted independently at its measured stratum's LOWER Wilson admission yield and every admitted episode
-    counted at the smallest measured units per admitted episode among the prefix's strata (k = ceil(rest / that)
-    admissions needed). None when a task's stratum is unmeasured. For a lineage whose budget holds about one round,
-    where the mean-yield prefix of a small gap is a coin flip (`lineage_cells`)."""
+#: attempted tasks from which a split's own stratum decides a reach bound; below it the training stratum stands in
+OWN_STRATUM_MIN_ATTEMPTS = 5
+
+
+def reach_stratum(strata: Mapping, lineage: str, mode: str, task: Mapping) -> tuple[float, float | None] | None:
+    """``(lower Wilson admission yield, units per admitted episode)`` a reach bound uses for ``task``: its own split's
+    stratum once it holds >= `OWN_STRATUM_MIN_ATTEMPTS` attempted tasks -- a stratum with none admitted then counts at
+    yield 0 (its units from the training stratum) -- else the training stratum of the same lineage, mode, category and
+    shape. None when neither is measured."""
     from stages.teacher_modes import tool_episodes as TE
+    shape = TE.episode_shape(task)
+    own = strata.get(f"{lineage}|{mode}|{task['split']}|{task['category']}|{shape}")
+    train = strata.get(f"{lineage}|{mode}|training|{task['category']}|{shape}")
+    units = lambda v: v["units_per_admitted"] if v and isinstance(v.get("units_per_admitted"), (int, float)) else None  # noqa: E731
+    if own and int(own.get("attempted") or 0) >= OWN_STRATUM_MIN_ATTEMPTS:
+        u = units(own) or units(train)
+        return (float(own["admission_yield_wilson90"][0]) if units(own) else 0.0, u) if u else None
+    v = own if units(own) else train
+    return (float(v["admission_yield_wilson90"][0]), float(units(v))) if units(v) else None
+
+
+def reach_bound(tasks: Sequence[Mapping], rest: float, *, lineage: str, mode: str, priors: Mapping | None,
+                q: float = REACH_PROBABILITY, admissions: int = 0) -> int | None:
+    """The shortest prefix of ``tasks`` whose admitted episodes reach ``rest`` units -- and at least ``admissions``
+    admitted episodes (a cell's remaining minimum tasks) -- with probability >= ``q``, each task admitted
+    independently at its `reach_stratum` lower Wilson yield and every admitted episode counted at the smallest units
+    per admitted episode among the prefix's strata. None when a task has no measured stratum; the whole list when
+    even all of it does not reach (a stratum measured at yield 0 among them). For a lineage whose budget holds about
+    one round, where the mean-yield prefix of a small gap is a coin flip (`lineage_cells`)."""
     strata = (priors or {}).get("strata") or {}
-    if rest <= 0:
+    if rest <= 0 and admissions <= 0:
         return 0
     dist, upa = [1.0], None                         #: P(j admissions so far)
     for i, t in enumerate(tasks):
-        v = strata.get(f"{lineage}|{mode}|{t['split']}|{t['category']}|{TE.episode_shape(t)}")
-        if not v or not isinstance(v.get("units_per_admitted"), (int, float)):
+        got = reach_stratum(strata, lineage, mode, t)
+        if got is None:
             return None
-        p = float(v["admission_yield_wilson90"][0])
-        upa = min(upa, float(v["units_per_admitted"])) if upa else float(v["units_per_admitted"])
+        p, u = got
+        upa = min(upa, u) if upa else u
         dist = [(dist[j] if j < len(dist) else 0.0) * (1 - p) + (dist[j - 1] * p if j else 0.0)
                 for j in range(len(dist) + 1)]
-        k = math.ceil(rest / upa)
+        k = max(math.ceil(rest / upa) if rest > 0 else 0, admissions)
         if sum(dist[k:]) >= q:
             return i + 1
     return len(tasks)
@@ -236,14 +260,16 @@ def lineage_cells(proto: Mapping, shares: Mapping[str, float], lineage: str, man
                         for lvl, i in (("lower", 2), ("expected", 1), ("upper", 0))}
             admitted = sum(o["admitted"] for o in mine.values())
             whole_cell = (lineage, mode, c["split"], c["category"]) in wide
-            reach = (reach_bound(new, rest, lineage=lineage, mode=mode, priors=priors)
-                     if first_bound and c["unit"] != "tasks" else None)
+            reach = (reach_bound(new, rest, lineage=lineage, mode=mode, priors=priors,
+                                 admissions=max(0, c["min_tasks"] - admitted))
+                     if first_bound and c["unit"] != "tasks" and not (sealed >= c["target"]
+                                                                      and admitted >= c["min_tasks"]) else None)
             bound = len(new) if whole_cell else min(len(new), max(tasks_at["upper"], reach or 0,
                                                                   max(0, c["min_tasks"] - admitted)))
             whole = [round(sealed + sum(u[0][i] for u in per), 1) for i in (0, 1, 2)]
             in_bound = [round(sealed + sum(u[0][i] for u in per[:bound]), 1) for i in (0, 1, 2)]
             unmeasured = round(sum(u[0][1] for u in per[:bound] if u[1] != "measured"), 1)
-            if sealed >= c["target"]:
+            if sealed >= c["target"] and admitted >= c["min_tasks"]:
                 status = "REACHED"
             elif not new:
                 status = "SHORTFALL_EXHAUSTED"

@@ -657,6 +657,43 @@ def test_the_poll_secures_every_sealed_pilot_shard(tmp_path, monkeypatch):
     assert not any(r.endswith(".part0000.jsonl") for r, _ in pulled)
 
 
+def test_a_transient_listing_failure_does_not_block_the_teardown_of_secured_products(tmp_path, monkeypatch):
+    """a_tool_generation_20261105_074146: one poll's listing failed, ``listing_unknown`` stayed set although every later
+    listing answered and all 193 shards were secured, and the gate retained a billing pod. The latest listing decides
+    (`phase.listing_outcome`); a failure is retried once (`phase._listing`); one that persists still refuses."""
+    from stages.teacher_modes import phase as P1
+    store = tmp_path / "store"
+    listing = ["tool_H-N_r1_pass0.part0000.done " + "a" * 64, "tool_H-N_r1_pass0.complete"]
+    answers = iter([None, list(listing)])                       #: one failed poll, then a good one
+
+    def pull(ctx, remote, dest, digest):
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text("x")
+        return True
+    monkeypatch.setattr(P1, "_listing", lambda ctx, cmd: next(answers))
+    monkeypatch.setattr(P1, "_pull", pull)
+    monkeypatch.setattr(TM.SE, "store", lambda ctx: store)
+    monkeypatch.setattr(TM.SE, "_scp", lambda *a, **k: 0)
+    monkeypatch.setattr(TM, "runner_logs", lambda ctx: None)
+    ctx = SimpleNamespace(target=object(), evidence={}, args=SimpleNamespace(volume_mount_path="", run_id="r"),
+                          auth=SimpleNamespace(stage_conditions={"kind": "tool_generation"}))
+    TM.secure(ctx)
+    assert ctx.evidence["listing_unknown"] == ["tool_generation_hybrid"]
+    ok, why = TM.products_secured(ctx)                          #: the gate's own fresh listing answers
+    assert ok and ctx.evidence["listing_unknown"] == [] and ctx.evidence["listing_failures"] == {"tool_generation_hybrid": 1}
+    monkeypatch.setattr(P1, "_listing", lambda ctx, cmd: None)
+    assert not TM.products_secured(ctx)[0]                      #: a listing that fails at the gate still refuses
+
+    class Flaky:                                                 #: `_listing` itself retries one transient failure
+        calls = 0
+
+        def run(self, cmd, timeout):
+            Flaky.calls += 1
+            return SimpleNamespace(returncode=255 if Flaky.calls == 1 else 0, stdout=f"a\n{P1.LISTED}\n")
+    monkeypatch.undo()
+    assert P1._listing(SimpleNamespace(target=Flaky()), "ls") == ["a"] and Flaky.calls == 2
+
+
 # --- the report on partial, resumed and forcibly ended sessions --------------------------------------------------------
 
 def _interrupt_then_resume(frozen, monkeypatch, stop_after=3):

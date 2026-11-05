@@ -1,0 +1,193 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_generation_session_summary/v1",
+ "run_id": "a_tool_generation_t2507_20261105_072112",
+ "kind": "tool_generation_t2507",
+ "lineage": "thinking_2507",
+ "terminal": "ALL_DONE",
+ "session_utc": [
+  "2026-11-05T07:29:34Z",
+  "2026-11-05T07:39:22Z"
+ ],
+ "identity": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+ "imported_from": [
+  "a_tool_pilot_20261104_164531",
+  "a_tool_generation_t2507_20261104_195411",
+  "a_tool_generation_t2507_20261105_064829"
+ ],
+ "deadline_minutes": 6.0,
+ "device_confirmation": {
+  "admitted": true,
+  "failed": [],
+  "invocation": "tool_T2507_r1_pass0",
+  "reuses": "a_tool_generation_t2507_20261104_195411",
+  "teacher_files_seconds": 6.8,
+  "checks": {
+   "teacher_model": true,
+   "teacher_revision": true,
+   "teacher_files": true,
+   "chat_template": true,
+   "template_kwargs": true,
+   "sampling": true,
+   "stop_ids": true,
+   "vllm_lock": true,
+   "context": true,
+   "gpu_memory_utilization": true,
+   "dtype": true,
+   "engine_started_with_a_kv_cache": true,
+   "no_out_of_memory": true,
+   "generation_complete": true,
+   "memory_margin": true
+  },
+  "memory": {
+   "gpus": [
+    [
+     "NVIDIA L40S",
+     46068,
+     37763
+    ]
+   ],
+   "free_gib": [
+    8.11
+   ],
+   "samples": 77
+  },
+  "kv_cache_tokens": 195009.0
+ },
+ "invocations": [
+  {
+   "label": "tool_T2507_r1_pass0",
+   "wall_seconds": 380.5,
+   "output_tokens": 49653,
+   "output_tokens_per_second": 262.4,
+   "engine_ready_seconds": [
+    170.2
+   ],
+   "peak_memory_used_mib": 37763
+  },
+  {
+   "label": "tool_T2507_r1_pass1",
+   "wall_seconds": 198.8,
+   "output_tokens": 41234,
+   "output_tokens_per_second": 256.4,
+   "engine_ready_seconds": [
+    22.1
+   ],
+   "peak_memory_used_mib": 37827
+  }
+ ],
+ "output_tokens": 90887,
+ "modes": {
+  "T2507": {
+   "cells": [
+    {
+     "split": "training",
+     "category": "error_recovery",
+     "unit": "supervised_tokens",
+     "target": 56565.735558,
+     "bound": 18,
+     "attempted": 18,
+     "units": 72874.0,
+     "admitted": 17,
+     "imported": 54,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "mcp_agent",
+     "unit": "supervised_tokens",
+     "target": 84848.11074999999,
+     "bound": 0,
+     "attempted": 0,
+     "units": 101551.0,
+     "admitted": 36,
+     "imported": 179,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "multi_turn",
+     "unit": "supervised_tokens",
+     "target": 113130.978529,
+     "bound": 0,
+     "attempted": 0,
+     "units": 113880.0,
+     "admitted": 20,
+     "imported": 64,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "multiple_parallel",
+     "unit": "supervised_tokens",
+     "target": 84848.11074999999,
+     "bound": 0,
+     "attempted": 0,
+     "units": 123617.0,
+     "admitted": 63,
+     "imported": 116,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "no_tool",
+     "unit": "supervised_tokens",
+     "target": 56565.735558,
+     "bound": 0,
+     "attempted": 0,
+     "units": 100510.0,
+     "admitted": 151,
+     "imported": 168,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "schema_arguments",
+     "unit": "supervised_tokens",
+     "target": 11780.218105,
+     "bound": 0,
+     "attempted": 0,
+     "units": 75152.0,
+     "admitted": 39,
+     "imported": 136,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "tool_selection",
+     "unit": "supervised_tokens",
+     "target": 84848.11074999999,
+     "bound": 0,
+     "attempted": 0,
+     "units": 106617.0,
+     "admitted": 76,
+     "imported": 126,
+     "status": "REACHED"
+    },
+    {
+     "split": "validation",
+     "category": null,
+     "unit": "supervised_tokens",
+     "target": 12624.0,
+     "bound": 0,
+     "attempted": 0,
+     "units": 16345.0,
+     "admitted": 14,
+     "imported": 18,
+     "status": "REACHED"
+    }
+   ],
+   "deadline_stop": null
+  }
+ },
+ "cost": {
+  "all_in_usd": 0.3385,
+  "gpu_usd": 0.3322,
+  "disk_usd": 0.0063,
+  "elapsed_minutes": 18.28,
+  "price_per_hour": 1.09,
+  "authorized_usd": 1.16,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": true,
+ "authorizes": "nothing"
+}

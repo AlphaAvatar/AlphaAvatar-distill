@@ -64,6 +64,7 @@ def setup(tmp_path, monkeypatch):
     proto = json.loads(TS.PROTOCOL.read_text())
     proto["bounded_plan"]["targets"]["training"]["per_mode"] = {"H-T": 40_000, "H-N": 40_000, "T2507": 40_000}
     proto["lineages"]["hybrid"]["splits"] = ["training"]
+    proto["bounded_plan"]["rounds"]["first_round_bound_lineages"] = []      #: the generic round rule under test
     plan = TGP.build(tmp_path / "pool", protocol=proto)
     man, splits = TP.load_pool(tmp_path / "pool")
     by_id = {t["task_id"]: t for rows in splits.values() for t in rows}

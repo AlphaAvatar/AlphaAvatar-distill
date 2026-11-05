@@ -279,13 +279,97 @@ def design(rec: dict, price: dict | None, realized_t2507: dict | None = None) ->
         "authorizes": "nothing: no generation, pack or training; the hybrid's grant stays deferred"}
 
 
+FREEZE = REPO / "logs/stages/stage-2/teacher_modes/audit/six_category_common_support_freeze.json"
+PACKS = REPO / "artifacts/stages/stage-2/teacher_modes/packs_6cat"
+CONFIG = REPO / "configs/stages/stage-2/teacher_modes/six_category_common_support.json"
+EPOCHS = 3
+
+
+def arm_freeze(arm: str, packs: Path = PACKS) -> dict:
+    """One arm's frozen data, read from its admitted manifest and its pack (`packed_packs.build`, verified by
+    `packed_packs.verify_pack`): the identities, the counts before packing, each tool category's target, selection,
+    whole-episode overshoot and deviation, the base types against their quotas, and the packing / compute measures
+    beside them (never a data size: P19)."""
+    from stages.teacher_modes import packed_packs as PP
+    from stages.teacher_modes import packed_training_plan as PTP
+    d = Path(packs) / arm
+    man = PP.verify_pack(d)
+    lad = json.loads((d / "ladder.json").read_text())
+    tr = lad["train"]
+    cells = {}
+    for key, c in man["tool_calling"]["quota"]["cells"].items():
+        cells[key] = {"target": round(c["target"], 1), "selected": c["selected"], "episodes": c["episodes"],
+                      "overshoot": round(c["selected"] - c["target"], 1),
+                      "deviation_pct": round(100 * (c["selected"] - c["target"]) / c["target"], 2) if c["target"] else None,
+                      "status": c["status"]}
+    rows = {k: {"target": round(v["target"], 1), "amount": v["amount"], "deviation": round(v["amount"] - v["target"], 1),
+                "status": v["status"]} for k, v in man["proportions"]["quotas"].items()}
+    sched = PTP.schedule(int(lad["n_blocks"]))
+    return {"arm": arm, "mode": man["mode"], "teacher": man["teacher"], "status": "FROZEN",
+            "identity": {"data_manifest_sha256": PP.sha_file(d / PP.MANIFEST), "content_sha256": man["content_sha256"],
+                         "documents_sha256": man["documents_sha256"], "selection_sha256": man["selection_sha256"],
+                         "documents_file": man["documents_file"],
+                         "packed_content_sha256": lad["data_admission"]["packed_content_sha256"],
+                         "pack_files_sha256": {n: PP.sha_file(d / n) for n in ("blocks.npz", "ladder.json", "audit.jsonl")}},
+            "before_packing": man["before_packing"], "types": rows, "tool_cells": cells,
+            "tool_episode_sources": man["sources"].get("tool_documents"),
+            "packing": {"packed_sequences": lad["n_blocks"], "validation_sequences": lad["n_val_blocks"],
+                        "sequence_length": lad["block_len"], "non_padding_tokens": tr["non_padding_tokens"],
+                        "context_tokens": tr["context_tokens"], "supervised_tokens_in_sequences": tr["supervised_tokens"],
+                        "repeated_supervised_tokens": tr["repeated_supervised_tokens"], "fragments": tr["fragments"],
+                        "padding_fraction": tr["padding_fraction"], "spec": lad["packing_spec"]},
+            "compute": {"epochs": EPOCHS, **sched,
+                        "supervised_token_exposure": EPOCHS * tr["supervised_tokens"],
+                        "non_padding_tokens_trained": EPOCHS * tr["non_padding_tokens"],
+                        "training_flops": "6 x N x tokens per sequence position, N the student's parameter count from the "
+                                          "packed search's Top-1 (not run: UNMEASURED); every sequence is 8,192 positions "
+                                          "with causal attention, so for one shared student the FLOPs ratio between arms "
+                                          "is their packed-sequence ratio"}}
+
+
+def freeze(arms=("A1-6cat-cs", "A2-6cat-cs", "C1-6cat-cs"), packs: Path = PACKS) -> dict:
+    """The common-support identity's freeze record (six_category_common_support.json :: freeze): every arm whose pack
+    exists, FROZEN, the others PENDING, and the A1 / A2 compute contrasts. Written before any search or training
+    reads the data."""
+    out = {}
+    for arm in arms:
+        out[arm] = arm_freeze(arm, packs) if (Path(packs) / arm / "ladder.json").is_file() else {"arm": arm,
+                                                                                                "status": "PENDING"}
+    a1, a2 = out.get("A1-6cat-cs", {}), out.get("A2-6cat-cs", {})
+    contrast = None
+    if a1.get("status") == a2.get("status") == "FROZEN":
+        contrast = {k: {"A1-6cat-cs": a1[s][k], "A2-6cat-cs": a2[s][k], "A2_over_A1": round(a2[s][k] / a1[s][k], 4)}
+                    for s, k in (("packing", "packed_sequences"), ("packing", "non_padding_tokens"),
+                                 ("compute", "optimizer_steps"), ("compute", "supervised_token_exposure"))}
+        contrast["unique_supervised_tokens"] = {a: out[a]["before_packing"]["training"]["unique_supervised_tokens"]
+                                                for a in ("A1-6cat-cs", "A2-6cat-cs")}
+        contrast["training_flops_ratio_A2_over_A1"] = contrast["packed_sequences"]["A2_over_A1"]
+    return {"schema": "aadistill.stage2.teacher_modes.six_category_common_support_freeze/v1",
+            "study_id": STUDY_ID, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "config": {"path": CONFIG.relative_to(REPO).as_posix(), "sha256": _sha(CONFIG)},
+            "rule": "each arm's own teacher's admitted episodes, whole, in the pool's frozen order up to each category's "
+                    "target (tool_generation_plan.select); the base types and fluid as registered; admitted episodes "
+                    "beyond a target stay unused in the records; matched: the category targets and the token budget, "
+                    "not identical tasks",
+            "arms": out, "a1_a2_compute": contrast,
+            "comparison": "a supervised-token-budget and category-composition matched comparison, NOT compute matched",
+            "authorizes": "nothing: search and training need their own decisions"}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--write", default=str(OUT))
+    ap.add_argument("--freeze", default=None, help="write the per-arm freeze record here (after packed_packs built "
+                    "the -cs packs) and stop")
     ap.add_argument("--price-pool", default=None)
     ap.add_argument("--keep-price", action="store_true", help="reuse the price already in --write")
     ap.add_argument("--t2507-summary", default=None, help="the Thinking-2507 session's evidence/generation_summary.json")
     a = ap.parse_args(argv)
+    if a.freeze:
+        doc = freeze()
+        Path(a.freeze).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
+        print(json.dumps({k: v.get("status") for k, v in doc["arms"].items()}), json.dumps(doc["a1_a2_compute"]))
+        return 0
     rec = recompute()
     if a.keep_price:
         price = json.loads(Path(a.write).read_text()).get("price")

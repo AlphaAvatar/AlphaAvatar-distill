@@ -40,3 +40,16 @@ def test_the_cell_weight_follows_the_two_level_unweighted_mean():
     w = LC.weights(1800.0, 1063.0, quotas, n_supporting_types=6, n_domains=5)
     assert w["registered"]["in_equal_domain_mean"] == pytest.approx(0.15 / 12 / 5)
     assert w["limited"]["within_tool_subtype"] == pytest.approx(1063 / (1063 + 10200), abs=1e-4)
+
+
+def test_the_limited_coverage_registration_names_one_cell_with_its_measured_values():
+    """state_eval_hybrid@v2-lc1 (maintainer 2026-11-05, conditional): one LIMITED_COVERAGE cell, the measured 1,063
+    positions and 11 episodes, never REACHED; @v2 stays PENDING."""
+    import json
+    from stages.teacher_modes import packed_inputs as PI
+    cells = PI.limited_cells()
+    assert cells == {"H-N": {"schema_arguments": {"target_scored_positions": 1800, "realized_scored_positions": 1063,
+                                                  "admitted_episodes": 11, "kish_effective_episodes": 4.98}}}
+    reg = json.loads(PI.LC1.read_text())
+    assert "PENDING" in reg["registered_identity_kept"] and "never REACHED" in reg["limited_cell"]["status"]
+    assert "NOT promoted" in reg["decision_boundary"]["consequence"]

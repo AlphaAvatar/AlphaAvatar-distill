@@ -183,12 +183,31 @@ def durable(args) -> str:
     return f"{args.volume_mount_path.rstrip('/')}/{DURABLE}"
 
 
-def _listing(ctx, cmd: str) -> list[str] | None:
-    res = ctx.target.run(f"{cmd}; echo {LISTED}", timeout=180)
-    lines = (getattr(res, "stdout", "") or "").splitlines()
-    if getattr(res, "returncode", 1) != 0 or not lines or lines[-1].strip() != LISTED:
-        return None
-    return lines[:-1]
+def _listing(ctx, cmd: str, attempts: int = 2) -> list[str] | None:
+    """The pod's answer to ``cmd`` (ended by the ``LISTED`` sentinel), or None when no attempt answered whole; a
+    transient SSH failure is retried once before the listing counts as unknown."""
+    for _ in range(attempts):
+        res = ctx.target.run(f"{cmd}; echo {LISTED}", timeout=180)
+        lines = (getattr(res, "stdout", "") or "").splitlines()
+        if getattr(res, "returncode", 1) == 0 and lines and lines[-1].strip() == LISTED:
+            return lines[:-1]
+    return None
+
+
+def listing_outcome(ctx, where: str, lines: list[str] | None) -> bool:
+    """Record one poll's listing of ``where``; True when it failed (the caller stops for this poll). The LATEST
+    listing decides whether the products are known: a later successful listing clears an earlier transient failure
+    (a_tool_generation_20261105_074146: one failed poll left ``listing_unknown`` set and blocked the teardown of a
+    session whose every shard was secured); each failure stays counted in ``listing_failures``."""
+    unknown = ctx.evidence.setdefault("listing_unknown", [])
+    if lines is None:
+        ctx.evidence.setdefault("listing_failures", {}).setdefault(where, 0)
+        ctx.evidence["listing_failures"][where] += 1
+        if where not in unknown:
+            unknown.append(where)
+        return True
+    ctx.evidence["listing_unknown"] = [x for x in unknown if x != where]
+    return False
 
 
 def _pull(ctx, remote: str, dest: Path, digest: str | None) -> bool:
@@ -224,8 +243,7 @@ def secure(kind: str):
             if kind == "teacher":
                 lines = _listing(ctx, f"cd {root}/generation 2>/dev/null && for f in *.done; do [ -e \"$f\" ] && "
                                       f"echo \"$f $(cat \"$f\")\"; done; ls *.complete 2>/dev/null || true")
-                if lines is None:
-                    ctx.evidence.setdefault("listing_unknown", []).append("generation")
+                if listing_outcome(ctx, "generation", lines):
                     return
                 for line in lines:
                     parts = line.split()

@@ -951,6 +951,69 @@ by `tool_pilot.py application --live-position`).
     - Provider posting (`logs/budget/provider/runpod_posting_t2507_2026-11-04T2100Z.json`): attempt 1 is posted at
       $0.1417. Attempt 2 was only partly posted at fetch time; the ledger keeps the estimates.
 
+- **The review of `f06ccd4` (2026-11-05): cross-plan reuse, common support registered, the Thinking-2507 top-up
+  and the hybrid's formal generation.**
+  - **Cross-plan import** (`tool_generation_import.build_session`). A rebuilt plan's session cannot resume an earlier
+    plan's shards: its round inputs differ, and every shard is bound to the session that sealed it. A COMPLETED
+    formal store is imported instead: its shards, hashes and identity stay untouched; each label's `.complete` and
+    round input are verified; today's verifier re-derives every candidate; the generation code, teacher, template,
+    execution terms and inputs are compared at the session commit; and the imported cells must reconcile EXACTLY
+    with the session's own record (including what that session's plan had itself imported). A refused task with
+    both candidates spent is done. A rebuilt plan binds every import record (`plans/tool_generation_import*.json`),
+    so its cells start from the imported units and walk the frozen order without the imported tasks. The dev box
+    admits old and new shards side by side (`tool_admission.py --import-record ... --import-store ...`, repeatable),
+    and refuses a task generated again although imported. Interrupted sessions resume under their own identity
+    (`--resume-from`); a cross-plan import of one is refused.
+  - **`six_category_common_support@v1` registered**
+    ([`configs/.../six_category_common_support.json`](../../../../configs/stages/stage-2/teacher_modes/six_category_common_support.json)).
+    The training split's tool composition: schema_arguments 11,800 of the A arms' 493,417.83 tool-type tokens (C1
+    the same share of 492,587), the six other categories in their registered proportions. 11,800 is the low end of
+    a projection, not a supply guarantee. The fallback was registered before generation and reads only verified
+    teacher supply. The freeze comes before any search or training. Calibration, state evaluation and validation
+    keep the registered shares. It is a supervised-token-budget and composition-matched comparison, not a
+    compute-matched one; C1 against A1 is secondary, confounded by its initialization search protocol. The
+    registered `six_category_design.json` identity is unchanged.
+  - **The plan** (`plans/tool_generation_plan.json`, rebuilt):
+    - the training cells at the common-support targets;
+    - Thinking-2507's bounds from its own measured strata (`tool_generation_priors --add-import` / `--lineage-imports`);
+    - the non-thinking training schema_arguments cell bound by its whole remaining supply (1,804 tasks);
+    - the last round takes the whole bound;
+    - a driver deadline (`--deadline-minutes`, the launch's driver minutes) under which a session stops at a ROUND
+      boundary, so it is importable whole;
+    - for a lineage whose remainder holds about one round (Thinking-2507), round 1 takes the bound, and the bound is
+      at least the prefix reaching the remaining target with 95% probability at the stratum's lower Wilson
+      admission yield (`reach_bound`).
+  - **Device admission reuse.** Thinking-2507's admitted result
+    (`runs/a_tool_generation_t2507_20261104_195411/evidence/device_admission.json`) is registered in
+    `t2507_device_admission.json`. A later pod hashes the teacher snapshot first and applies the same verdict to
+    its first formal invocation (`tool_session.device_confirmation`), without re-sampling the eight admission tasks.
+  - **Thinking-2507 top-up: COMPLETE**, inside the cumulative $2.78. Before it, both earlier attempts' charges were
+    checked against the provider: $0.1417 and $1.0943 posted, against $0.1459 and $1.097 booked, so the booked
+    estimates stand.
+    - **Attempt 3** (`a_tool_generation_t2507_20261105_064829`, US-NC-1, $0.3752): device confirmation 15/15 (KV cache
+      195,009 tokens, 8.11 GiB free); one round at the bounds (15 + 93 new tasks). mcp_agent REACHED (101,551 /
+      84,848). error_recovery 55,433 / 56,566 at its bound: 2 of 15 new tasks admitted, against a measured 28%.
+    - **Attempt 4** (`a_tool_generation_t2507_20261105_072112`, EUR-IS-2, $0.3385): the plan imports attempts 2 and
+      3; 18 new tasks (the 95% reach bound); 4 admitted; error_recovery REACHED (72,874).
+    - **Every Thinking-2507 cell reaches its common-support target.** Dev-box admission over the three stores
+      (`tool_admission/thinking_2507_cs_final`) reproduces every cell. Training supervised tokens before packing:
+      error_recovery 72,874, mcp_agent 101,551, multi_turn 113,880, multiple_parallel 123,617, no_tool 100,510,
+      schema_arguments 75,152, tool_selection 106,617; validation 16,345. The kind spent $1.9566 of $2.78.
+  - **C1-6cat-cs frozen** (`packed_packs.py --arm C1-6cat-cs`; `audit/six_category_common_support_freeze.json`):
+    - data manifest `e2b5a4e1`;
+    - 3,940 examples, 4,211 turns, 5,931,091 unique supervised tokens;
+    - tool calling 500,657 against 492,587 (whole-episode overshoot: schema_arguments 15,276 against 11,780, the other
+      categories +0.2% to +1.5%); the five kept types and fluid exact;
+    - 1,264 packed sequences, 1,896 optimizer steps (3 epochs), 10,346,968 non-padding tokens per epoch.
+  - **`state_eval_hybrid@v2-lc1` registered conditionally**
+    ([`configs/.../state_eval_hybrid_v2_lc1.json`](../../../../configs/stages/stage-2/teacher_modes/state_eval_hybrid_v2_lc1.json)).
+    The same KL, scored positions, aggregation, critical tokens and frozen shared inputs; the cell's 1,063 of 1,800
+    positions, 11 episodes and Kish 4.98 reported every time. The jackknife is a finite-sample sensitivity analysis.
+    A Top-1 flagged SENSITIVE_TO_THE_LIMITED_CELL is not promoted without further independent validation; no
+    candidate or result is deleted. `@v2` stays PENDING. The whole suite gets one identity, coverage and freeze check
+    after the hybrid generation (`packed_inputs.py build`, which writes the lc1 suite and freezes it only when every
+    other cell meets the v2 rule).
+
 ## 9. Decisions owed to the maintainer
 
 The maintainer has settled two former items: fragments are accepted, and loss normalization is kept. No Thinking-2507

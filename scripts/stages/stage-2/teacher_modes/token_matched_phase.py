@@ -524,8 +524,7 @@ def secure(ctx) -> None:
         got = ctx.evidence.setdefault("secured", {})
         lines = P1._listing(ctx, f"cd {root}/{gdir} 2>/dev/null && for f in *.done; do [ -e \"$f\" ] && "
                                  f"echo \"$f $(cat \"$f\")\"; done; ls *.complete 2>/dev/null || true")
-        if lines is None:
-            ctx.evidence.setdefault("listing_unknown", []).append(gdir)
+        if P1.listing_outcome(ctx, gdir, lines):
             return
         for line in lines:
             parts = line.split()
