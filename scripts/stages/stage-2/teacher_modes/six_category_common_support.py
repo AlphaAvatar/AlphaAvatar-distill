@@ -327,26 +327,37 @@ def arm_freeze(arm: str, packs: Path = PACKS) -> dict:
                                           "is their packed-sequence ratio"}}
 
 
-def freeze(arms=("A1-6cat-cs", "A2-6cat-cs", "C1-6cat-cs"), packs: Path = PACKS) -> dict:
-    """The common-support identity's freeze record (six_category_common_support.json :: freeze): every arm whose pack
-    exists, FROZEN, the others PENDING, and the A1 / A2 compute contrasts. Written before any search or training
-    reads the data."""
+#: per registered design: its arms (A1, A2, C1), configuration and study id (six_category_schema_restored@v1: the
+#: maintainer's 2026-11-05 R1 approval, its own freeze record beside the common-support one)
+DESIGNS = {"common_support": (("A1-6cat-cs", "A2-6cat-cs", "C1-6cat-cs"), CONFIG, STUDY_ID, FREEZE),
+           "schema_restored": (("A1-6cat-sr", "A2-6cat-sr", "C1-6cat-sr"),
+                               REPO / "configs/stages/stage-2/teacher_modes/six_category_schema_restored.json",
+                               "six_category_schema_restored@v1",
+                               REPO / "logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json")}
+
+
+def freeze(arms=DESIGNS["common_support"][0], packs: Path = PACKS, config: Path = CONFIG,
+           study_id: str = STUDY_ID) -> dict:
+    """A design's freeze record (six_category_common_support.json :: freeze; the same for another registered design,
+    `DESIGNS`): every arm whose pack exists, FROZEN, the others PENDING, and the A1 / A2 compute contrasts (the first
+    two arms). Written before any search or training reads the data."""
     out = {}
     for arm in arms:
         out[arm] = arm_freeze(arm, packs) if (Path(packs) / arm / "ladder.json").is_file() else {"arm": arm,
                                                                                                 "status": "PENDING"}
-    a1, a2 = out.get("A1-6cat-cs", {}), out.get("A2-6cat-cs", {})
+    n1, n2 = arms[0], arms[1]
+    a1, a2 = out.get(n1, {}), out.get(n2, {})
     contrast = None
     if a1.get("status") == a2.get("status") == "FROZEN":
-        contrast = {k: {"A1-6cat-cs": a1[s][k], "A2-6cat-cs": a2[s][k], "A2_over_A1": round(a2[s][k] / a1[s][k], 4)}
+        contrast = {k: {n1: a1[s][k], n2: a2[s][k], "A2_over_A1": round(a2[s][k] / a1[s][k], 4)}
                     for s, k in (("packing", "packed_sequences"), ("packing", "non_padding_tokens"),
                                  ("compute", "optimizer_steps"), ("compute", "supervised_token_exposure"))}
         contrast["unique_supervised_tokens"] = {a: out[a]["before_packing"]["training"]["unique_supervised_tokens"]
-                                                for a in ("A1-6cat-cs", "A2-6cat-cs")}
+                                                for a in (n1, n2)}
         contrast["training_flops_ratio_A2_over_A1"] = contrast["packed_sequences"]["A2_over_A1"]
     return {"schema": "aadistill.stage2.teacher_modes.six_category_common_support_freeze/v1",
-            "study_id": STUDY_ID, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "config": {"path": CONFIG.relative_to(REPO).as_posix(), "sha256": _sha(CONFIG)},
+            "study_id": study_id, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "config": {"path": Path(config).relative_to(REPO).as_posix(), "sha256": _sha(Path(config))},
             "rule": "each arm's own teacher's admitted episodes, whole, in the pool's frozen order up to each category's "
                     "target (tool_generation_plan.select); the base types and fluid as registered; admitted episodes "
                     "beyond a target stay unused in the records; matched: the category targets and the token budget, "
@@ -361,12 +372,15 @@ def main(argv=None) -> int:
     ap.add_argument("--write", default=str(OUT))
     ap.add_argument("--freeze", default=None, help="write the per-arm freeze record here (after packed_packs built "
                     "the -cs packs) and stop")
+    ap.add_argument("--design", default="common_support", choices=sorted(DESIGNS),
+                    help="with --freeze: whose arms (default the common-support design)")
     ap.add_argument("--price-pool", default=None)
     ap.add_argument("--keep-price", action="store_true", help="reuse the price already in --write")
     ap.add_argument("--t2507-summary", default=None, help="the Thinking-2507 session's evidence/generation_summary.json")
     a = ap.parse_args(argv)
     if a.freeze:
-        doc = freeze()
+        arms, config, study_id, _ = DESIGNS[a.design]
+        doc = freeze(arms, config=config, study_id=study_id)
         Path(a.freeze).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
         print(json.dumps({k: v.get("status") for k, v in doc["arms"].items()}), json.dumps(doc["a1_a2_compute"]))
         return 0

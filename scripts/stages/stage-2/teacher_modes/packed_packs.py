@@ -87,8 +87,22 @@ ARMS = {"A1-6cat": {"mode": "H-T", "source_pack": "A1", "teacher": "hybrid", "ba
         "A2-6cat-cs": {"mode": "H-N", "source_pack": "A2", "teacher": "hybrid", "base": "selected",
                        "composition": "common_support"},
         "C1-6cat-cs": {"mode": "T2507", "source_pack": None, "teacher": "thinking_2507", "base": "kept",
-                       "composition": "common_support"}}
+                       "composition": "common_support"},
+        #: six_category_schema_restored@v1 (maintainer 2026-11-05, R1 approval): the registered shares, schema_arguments
+        #: split per source (`source_groups`), read through the design's own generation protocol (`COMPOSITIONS`)
+        "A1-6cat-sr": {"mode": "H-T", "source_pack": "A1", "teacher": "hybrid", "base": "selected",
+                       "composition": "schema_restored"},
+        "A2-6cat-sr": {"mode": "H-N", "source_pack": "A2", "teacher": "hybrid", "base": "selected",
+                       "composition": "schema_restored"},
+        "C1-6cat-sr": {"mode": "T2507", "source_pack": None, "teacher": "thinking_2507", "base": "kept",
+                       "composition": "schema_restored"}}
 COMMON_SUPPORT = REPO / "configs/stages/stage-2/teacher_modes/six_category_common_support.json"
+SCHEMA_RESTORED = REPO / "configs/stages/stage-2/teacher_modes/six_category_schema_restored.json"
+#: per registered composition: its design file (bound by the plan's ``common_support`` entry) and the generation
+#: protocol whose plan its arms read (None: tool_generation_protocol.json)
+COMPOSITIONS = {"registered": (None, None), "common_support": (COMMON_SUPPORT, None),
+                "schema_restored": (SCHEMA_RESTORED,
+                                    REPO / "configs/stages/stage-2/teacher_modes/tool_generation_protocol_sr.json")}
 TOOL_TYPE = "supporting.tool_calling"
 PAD_ID = 151643
 THINK_CLOSE = 151668
@@ -101,7 +115,8 @@ SIX_TYPES = {"supporting.math_new": "competition_math", "openmath": "competition
              "rag_evidence": "rag_reading", "multihop_qa": "multihop_reading",
              "supporting.reading_verified": None, TOOL_TYPE: "tool_calling"}
 SIX_NAMES = ("competition_math", "gsm8k", "rag_reading", "multihop_reading", "code", "tool_calling")
-SELECTION_ARM = {"A1-6cat": "A1", "A2-6cat": "A2", "A1-6cat-cs": "A1", "A2-6cat-cs": "A2"}
+SELECTION_ARM = {"A1-6cat": "A1", "A2-6cat": "A2", "A1-6cat-cs": "A1", "A2-6cat-cs": "A2", "A1-6cat-sr": "A1",
+                 "A2-6cat-sr": "A2"}
 MANIFEST = "data_manifest.json"
 MANIFEST_SCHEMA = "aadistill.stage2.teacher_modes.data_manifest/v2"
 #: the frozen documents themselves, beside the manifest that holds their sha256 (`write_documents`)
@@ -265,10 +280,17 @@ def select(arm: str, *, tool_docs: Path | None, records: dict | None = None, poo
     tool cell is SHORTFALL in the quota record, for the admission to refuse."""
     from stages.teacher_modes import tool_generation_plan as TGP
     spec = ARMS[arm]
-    plan = cells = orders = None
+    plan = cells = orders = dataset_of = None
     if tool_docs is not None:                       #: the plan's identity first: a drifted plan refuses before any read
-        plan, orders = TGP.for_consumers(pool_dir=pool_dir)
-        has = "common_support" if plan.get("common_support") else "registered"
+        design, proto_path = COMPOSITIONS[spec["composition"]]
+        if proto_path is None:
+            plan, orders = TGP.for_consumers(pool_dir=pool_dir)
+        else:                                       #: a design's own protocol; its source groups need each task's source
+            plan, orders, by_id = TGP.for_consumers_with_tasks(pool_dir=pool_dir, protocol_path=proto_path)
+            dataset_of = {t: x["source"]["dataset"] for t, x in by_id.items()}
+        cs = plan.get("common_support")
+        has = ("registered" if not cs else "schema_restored" if cs.get("path") == SCHEMA_RESTORED.relative_to(REPO)
+               .as_posix() else "common_support")
         if has != spec["composition"]:
             raise PackBuildError(f"{arm} registers the {spec['composition']} tool composition; the generation plan's "
                                  f"training cells carry the {has} one")
@@ -289,7 +311,7 @@ def select(arm: str, *, tool_docs: Path | None, records: dict | None = None, poo
         missing = []
         unit_of = {d.doc_id: d.doc_id for d in train + val}
         sources = {"d4a": _files(PA.D4A)}
-    t_train, t_val, quota = tool_documents(tool_docs, spec["mode"], cells=cells, orders=orders)
+    t_train, t_val, quota = tool_documents(tool_docs, spec["mode"], cells=cells, orders=orders, dataset_of=dataset_of)
     for x in t_train + t_val:
         dtype[x.doc_id] = TOOL_TYPE
         unit_of[x.doc_id] = x.meta["task_id"]
@@ -400,7 +422,8 @@ def selection_identity(arm: str, sel: dict) -> str:
 
 
 def _designs(arm: str) -> tuple[Path, ...]:
-    return (TOKEN_MATCHED, SIX) + ((COMMON_SUPPORT,) if ARMS[arm]["composition"] == "common_support" else ())
+    design = COMPOSITIONS[ARMS[arm]["composition"]][0]
+    return (TOKEN_MATCHED, SIX) + ((design,) if design else ())
 
 
 def proportions(arm: str, sel: dict) -> dict:

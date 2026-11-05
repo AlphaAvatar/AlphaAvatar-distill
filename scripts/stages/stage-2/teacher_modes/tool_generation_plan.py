@@ -829,6 +829,14 @@ def for_consumers(protocol: Mapping | None = None, pool_dir: Path | None = None,
     return plan, man["orders"]
 
 
+def for_consumers_with_tasks(protocol: Mapping | None = None, pool_dir: Path | None = None,
+                             protocol_path: Path | None = None) -> tuple[dict, dict, dict]:
+    """`for_consumers` and the pool's tasks by id: a design whose cells select per source (``source_groups``) needs
+    each task's source, from the same single verified read."""
+    plan, man, by_id = verified(protocol, pool_dir, protocol_path=protocol_path)
+    return plan, man["orders"], by_id
+
+
 def approved(plan: Mapping, split: str, mode: str, category: str | None) -> dict | None:
     """The maintainer's recorded approval of a cell's SHORTFALL (``bounded_plan.approved_shortfalls``), or None."""
     return next((a for a in plan.get("approved_shortfalls") or []

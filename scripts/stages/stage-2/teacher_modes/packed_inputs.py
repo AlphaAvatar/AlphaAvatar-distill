@@ -58,6 +58,12 @@ LC1 = CONF / "state_eval_hybrid_v2_lc1.json"
 SUITE_V2_LC1 = REPO / "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v2_lc1"
 FREEZE_V2_LC1 = REPO / "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v2_lc1_freeze.json"
 DESIGN = CONF / "packed_round_design.json"
+#: state_eval_hybrid@v3 (maintainer 2026-11-05, R1 approval, section V): v2's rule over six_category_schema_restored@v1's
+#: state-evaluation cells -- schema_arguments split per source (Pivot 1,000 + schema_synth 800 per mode) -- read through
+#: that design's generation protocol; a NEW identity beside the frozen @v2-lc1, never a rewrite of it
+SR_PROTOCOL = CONF / "tool_generation_protocol_sr.json"
+SUITE_V3 = REPO / "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3"
+FREEZE_V3 = REPO / "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v3_freeze.json"
 TEACHER = CONF / "teacher_identity.json"
 MODES = ("H-T", "H-N")
 TOOL_SUBTYPE = "tool_calling@v1"
@@ -150,12 +156,14 @@ def take_whole(items: list[dict], quota: float, key=None) -> tuple[list[dict], i
 
 
 def tool_cell(items: list[dict], split: str, mode: str, quota: float, *, plan: dict | None = None,
-              orders: dict | None = None) -> tuple[list[dict], float, dict]:
+              orders: dict | None = None, dataset_of: dict | None = None) -> tuple[list[dict], float, dict]:
     """``(items, scored, census)``: the mode's admitted ``split`` tool items selected per category -- each category's
     target its share (the plan's cells, unchanged) of ``quota``, with the cell's minimum tasks -- as whole episodes in
     the pool's frozen order (`tool_generation_plan.select`), returned in that order. ``census[category]`` says
     whether the category reached its own target (``short``) and task minimum (``thin``) and whether a SHORTFALL there
-    is the maintainer's approved one; a category with no admitted episode at all is short too."""
+    is the maintainer's approved one; a category with no admitted episode at all is short too. A source-group cell
+    (``datasets``, ``group``: six_category_schema_restored@v1) selects only its sources' episodes, by ``dataset_of``,
+    and is censused as ``category/group``."""
     from stages.teacher_modes import tool_generation_plan as TGP
     if plan is None:
         plan, orders = TGP.for_consumers()
@@ -174,15 +182,18 @@ def tool_cell(items: list[dict], split: str, mode: str, quota: float, *, plan: d
     chosen, census = set(), {}
     for c in cells:
         target = quota * c["target"] / total if total else 0.0
-        ids, got = TGP.select([t for t in order if cat_of.get(t) == c["category"]], units, target,
-                              c.get("min_tasks", 0))
+        if c.get("datasets") and dataset_of is None:
+            raise InputsError(f"{split}/{c['category']}/{c.get('group')}: a source-group cell needs each task's source")
+        mine = (lambda t: cat_of.get(t) == c["category"]
+                and (not c.get("datasets") or dataset_of.get(t) in c["datasets"]))
+        ids, got = TGP.select([t for t in order if mine(t)], units, target, c.get("min_tasks", 0))
         chosen |= set(ids)
         ok = TGP.approved(plan, split, mode, c["category"])
-        census[c["category"]] = {"target": target, "scored": got, "tasks": len(ids),
-                                 "min_tasks": c.get("min_tasks", 0),
-                                 "admitted_supply": sum(1 for t in by_task if cat_of[t] == c["category"]),
-                                 "short": got < target - QUOTA_EPS, "thin": len(ids) < c.get("min_tasks", 0),
-                                 "approved_shortfall": ok}
+        key = c["category"] + (f"/{c['group']}" if c.get("group") else "")
+        census[key] = {"target": target, "scored": got, "tasks": len(ids), "min_tasks": c.get("min_tasks", 0),
+                       "admitted_supply": sum(1 for t in by_task if mine(t)),
+                       "short": got < target - QUOTA_EPS, "thin": len(ids) < c.get("min_tasks", 0),
+                       "approved_shortfall": ok}
     picked = [x for t in order if t in chosen for x in by_task[t]]
     return picked, float(sum(scored(x) for x in picked)), census
 
@@ -275,11 +286,14 @@ def limited_cells(path: Path = LC1) -> dict[str, dict]:
                                    "kish_effective_episodes": c["kish_effective_episodes"]}}}
 
 
-def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2, limited: dict | None = None) -> dict:
+def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2, limited: dict | None = None,
+             plan: dict | None = None, orders: dict | None = None, dataset_of: dict | None = None,
+             version: int | None = None) -> dict:
     """state_eval_hybrid@v2's items and manifest under ``out_dir``; returns the manifest. With ``limited``
     (`limited_cells`: @v2-lc1), each named category counts as LIMITED_COVERAGE -- never REACHED -- when every admitted
     episode of its split is selected and its realized positions and episodes are exactly the registered ones; every
-    other category must meet the v2 rule as before, or the mode is not reached."""
+    other category must meet the v2 rule as before, or the mode is not reached. ``plan``, ``orders`` and
+    ``dataset_of`` read another design's cells (`suite_v3`), written as ``version``."""
     from aadistill.initialization.calibration.profiles import mixture_content_sha256
     v1m = json.loads((SUITE_V1 / "manifest.json").read_text())
     items = jsonl(SUITE_V1 / "items.jsonl")
@@ -288,7 +302,8 @@ def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2, lim
     thin, short = {}, {}
     coverage = {}
     for m in MODES:
-        got_items, got, census = tool_cell(tool_items.get(m, []), "state_eval", m, SE_POSITIONS)
+        got_items, got, census = tool_cell(tool_items.get(m, []), "state_eval", m, SE_POSITIONS, plan=plan,
+                                           orders=orders, dataset_of=dataset_of)
         tasks = len({x["task_id"] for x in got_items})
         for cat, reg in ((limited or {}).get(m) or {}).items():
             if cat not in census:
@@ -312,7 +327,7 @@ def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2, lim
         items += got_items
         counts[f"{TOOL_SUBTYPE}|{m}"] = {"tasks": tasks, "scored_positions": got, "by_category": census}
     man = copy.deepcopy(v1m)
-    man["version"] = 2
+    man["version"] = version or 2
     man["domains"] = {d: list(s) for d, s in v1m["domains"].items()}
     man["domains"][SUPPORTING] = man["domains"][SUPPORTING] + [f"{TOOL_SUBTYPE}|{m}" for m in MODES]
     man["critical_tags"] = sorted({c for g in CRITICAL_GROUPS_V2.values() for c in g})
@@ -338,6 +353,34 @@ def suite_v2(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V2, lim
     write_jsonl(out_dir / "items.jsonl", items)
     man["items_sha256"] = sha(out_dir / "items.jsonl")
     return man
+
+
+def suite_v3(tool_items: dict[str, list[dict]], *, out_dir: Path = SUITE_V3, types_path: Path = TYPES_V2,
+             freeze_out: Path = FREEZE_V3) -> dict:
+    """state_eval_hybrid@v3: v2's rule (v1's items byte for byte, then each mode's state_eval tool episodes per cell)
+    over six_category_schema_restored@v1's plan, read through its protocol with each task's source; the type table
+    is v2's. Frozen only when every cell of both modes meets the rule -- no LIMITED_COVERAGE, no approved shortfall
+    is registered for it -- and never written over @v2 or @v2-lc1. Returns the manifest's tool record."""
+    from stages.teacher_modes import tool_generation_plan as TGP
+    plan, orders, by_id = TGP.for_consumers_with_tasks(protocol_path=SR_PROTOCOL)
+    man = suite_v2(tool_items, out_dir=out_dir, plan=plan, orders=orders,
+                   dataset_of={t: x["source"]["dataset"] for t, x in by_id.items()}, version=3)
+    man["types_sha256"] = sha(types_path)
+    plan_path = REPO / json.loads(SR_PROTOCOL.read_text())["pool"]["plan"]
+    man["design"] = {"plan": {"path": str(plan_path.relative_to(REPO)), "sha256": sha(plan_path),
+                              "pool_content_sha256": plan["pool"]["content_sha256"],
+                              "protocol_sha256": plan["protocol_sha256"]},
+                     "registration": "configs/stages/stage-2/teacher_modes/six_category_schema_restored.json",
+                     "relation_to_v2": "a new identity: v2-lc1 stays frozen for sensitivity checks"}
+    (Path(out_dir) / "manifest.json").write_text(json.dumps(man, indent=1) + "\n")
+    out = {"suite_tool_calling": man["tool_calling"], "content_sha256": man["content_sha256"]}
+    if all(man["tool_calling"]["reached"].values()):
+        rec = freeze_record(out_dir, types_path)
+        Path(freeze_out).write_text(json.dumps(rec, indent=1) + "\n")
+        out["measurement_protocol_id"] = rec["suite_identity"]["measurement_protocol_id"]
+    else:
+        out["frozen"] = False
+    return out
 
 
 def freeze_record(suite_dir: Path = SUITE_V2, types_path: Path = TYPES_V2) -> dict:
@@ -410,7 +453,14 @@ def main(argv=None) -> int:
     b = sub.add_parser("build")
     b.add_argument("--tool-items-ht", required=True)
     b.add_argument("--tool-items-hn", required=True)
+    v3 = sub.add_parser("v3", help="state_eval_hybrid@v3 from six_category_schema_restored@v1's admitted items")
+    v3.add_argument("--tool-items-ht", required=True)
+    v3.add_argument("--tool-items-hn", required=True)
     a = ap.parse_args(argv)
+    if a.cmd == "v3":
+        res = suite_v3({"H-T": jsonl(Path(a.tool_items_ht)), "H-N": jsonl(Path(a.tool_items_hn))})
+        print(json.dumps(res, indent=1))
+        return 0
     if a.cmd == "types":
         TYPES_V2.write_text(json.dumps(types_v2(), indent=1) + "\n")
         print(TYPES_V2)

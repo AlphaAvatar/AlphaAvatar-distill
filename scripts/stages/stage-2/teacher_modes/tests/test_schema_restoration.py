@@ -209,3 +209,22 @@ def test_the_extensions_admission_admits_its_content_and_the_base_record_does_no
     assert TSA.problems(rec, pool_content_sha256=TSA.REVIEWED_CONTENT)                    #: another content refuses
     assert TSA.problems(dict(rec, conditions=TSA.CONDITIONS), pool_content_sha256=TSA.EXTENSION_CONTENT)
     assert TSA.problems(dict(rec, pool_id="tool_pool@v2"), pool_content_sha256=TSA.EXTENSION_CONTENT)
+
+
+def test_the_v3_suite_selects_each_source_group_apart():
+    from stages.teacher_modes import packed_inputs as PI
+    items = [{"task_id": t, "split": "state_eval", "category": "schema_arguments", "tags": {"assistant": [0] * n}}
+             for t, n in (("p1", 6), ("s1", 5), ("p2", 6), ("s2", 5))]
+    cells = [{"split": "state_eval", "category": "schema_arguments", "group": "pivot", "datasets": [PIVOT],
+              "unit": "scored_positions", "target": 6.0, "min_tasks": 1},
+             {"split": "state_eval", "category": "schema_arguments", "group": "synth", "datasets": [SS.SOURCE],
+              "unit": "scored_positions", "target": 9.0, "min_tasks": 1}]
+    plan = {"lineages": {"hybrid": {"modes": {"H-N": {"cells": cells}}}}, "approved_shortfalls": []}
+    orders = {"state_eval": ["s1", "p1", "s2", "p2"]}
+    with pytest.raises(PI.InputsError, match="source-group cell"):
+        PI.tool_cell(items, "state_eval", "H-N", 15.0, plan=plan, orders=orders)
+    ds = {"p1": PIVOT, "p2": PIVOT, "s1": SS.SOURCE, "s2": SS.SOURCE}
+    picked, got, census = PI.tool_cell(items, "state_eval", "H-N", 15.0, plan=plan, orders=orders, dataset_of=ds)
+    assert [x["task_id"] for x in picked] == ["s1", "p1", "s2"] and got == 16.0
+    assert census["schema_arguments/pivot"]["tasks"] == 1 and census["schema_arguments/synth"]["scored"] == 10
+    assert not PI.unmet(census)
