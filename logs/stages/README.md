@@ -11,7 +11,7 @@ and 6 will appear the same way, and are not pre-created.
 | --- | --- | --- | --- | --- |
 | [`stage-0/`](stage-0/) | Initialization warm-up data collection | 1 pipeline activity · 3 configs · 1 data manifest | 1, all with logs | 43 |
 | [`stage-1/`](stage-1/) | Projection and structural initialization | 4 pipeline activities · 19 configs · 1 data manifest | 16, all with logs | 233 |
-| [`stage-2/`](stage-2/) | Offline warm-up data collection | 1 pipeline activity · 3 configs · 3 data manifests | 2, all with logs | 42 |
+| [`stage-2/`](stage-2/) | Offline warm-up data collection | 1 pipeline activity · 3 configs · 3 data manifests | 2, all with logs | 45 |
 | [`stage-3/`](stage-3/) | Student recovery | 3 pipeline activities · 13 configs · 1 data manifest | 15, of which 5 produced no logs of their own | 0 |
 
 **34 experiments — 34 in one stage, 0 genuinely cross-stage, 0 unresolved.** 2 stage-neutral infrastructure entries are counted separately, in [`shared/`](../shared/).

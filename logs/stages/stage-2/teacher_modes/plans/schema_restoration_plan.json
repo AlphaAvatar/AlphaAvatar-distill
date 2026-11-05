@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.tool_generation_plan/v1",
- "written_utc": "2026-11-05T16:27:35Z",
+ "written_utc": "2026-11-05T17:10:28Z",
  "pool": {
   "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth",
   "content_sha256": "e771393a98a6fd844c7d0ed3fa2d3327eb6c2b1c77a29033de707a5c4906649e",
@@ -141,6 +141,18 @@
    "sha256": "d56192ae280075a6acac41f2067f5c34199b561a9e198f592108eff5625ce5f6",
    "lineage": "hybrid",
    "run_id": "a_tool_generation_sr_20261105_153741"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_sr_hybrid_a2.json",
+   "sha256": "7da32cf9a3a894b96fec1c236ba185ee461023b3acaadc6fce12dd715294984b",
+   "lineage": "hybrid",
+   "run_id": "a_tool_generation_sr_20261105_162909"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_sr_t2507_a1.json",
+   "sha256": "7024afc20a88ab9a0071b1a8555aaaeaa4025927e55a1226d88a701e17876372",
+   "lineage": "thinking_2507",
+   "run_id": "a_tool_generation_sr_t2507_20261105_164515"
   }
  ],
  "lineages": {
@@ -859,60 +871,44 @@
         "aadistill/schema_synth"
        ],
        "first_round": "bound",
-       "reach_bound": 15,
+       "reach_bound": null,
        "supply": 110,
        "supply_by_shape": {
         "full_episode@v1": 110
        },
        "sealed": {
-        "tasks": 14,
-        "admitted": 5,
-        "units": 686.0
+        "tasks": 29,
+        "admitted": 9,
+        "units": 1367.0
        },
-       "new_supply": 96,
+       "new_supply": 81,
        "tasks": {
-        "lower": 2,
-        "expected": 3,
-        "upper": 5
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
        },
-       "bound": 15,
+       "bound": 0,
        "projection": {
         "whole_supply_units": [
-         3136.7,
-         5390.0,
-         8252.8
+         3434.8,
+         5336.0,
+         7751.5
         ],
         "within_bound_units": [
-         1068.9,
-         1421.0,
-         1868.3
+         1367.0,
+         1367.0,
+         1367.0
         ],
         "unmeasured_units_within_bound": 0,
         "_": "[low, expected, high]; sealed units included"
        },
        "basis_of_new_tasks": {
-        "full_episode@v1:measured": 96
+        "full_episode@v1:measured": 81
        },
-       "status": "REACHABLE",
-       "task_ids": [
-        "tc1-3e8dec74b9e55b1b2e8c",
-        "tc1-848946f12c94bf3607ed",
-        "tc1-0b4b1e7da9bd3eee83ee",
-        "tc1-da146e60e4c1b634f24c",
-        "tc1-76ccc55a9fcddb05a369",
-        "tc1-ba908096019166cb3a65",
-        "tc1-3e060a8478d5fb1d3ed3",
-        "tc1-06897f0df3612ecdf729",
-        "tc1-b7f079645297a36844e1",
-        "tc1-8b9741a6f6b6cf097d07",
-        "tc1-b6ea22da8f6747b22205",
-        "tc1-aa7debf9ea11f5710875",
-        "tc1-b7f24c8ff94141c970ca",
-        "tc1-6a59195539641933a04f",
-        "tc1-0da40fd16027e9316362"
-       ],
+       "status": "REACHED",
+       "task_ids": [],
        "shortfall_at_pessimistic_yield": false,
-       "expected_turns_in_bound": 30
+       "expected_turns_in_bound": 0
       },
       {
        "split": "state_eval",
@@ -1773,9 +1769,9 @@
    ],
    "tasks_file": {
     "path": "artifacts/stages/stage-2/teacher_modes/tool_generation_sr/hybrid/tasks.jsonl",
-    "sha256": "7f4644fadea9045ab1b5766e8cfa1723b22b224bf3bfdb8b05baa60da89caeeb",
-    "tasks": 15,
-    "bytes": 53090
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks": 0,
+    "bytes": 0
    }
   },
   "thinking_2507": {
@@ -2075,214 +2071,44 @@
         "aadistill/schema_synth"
        ],
        "first_round": "bound",
-       "reach_bound": 169,
+       "reach_bound": null,
        "supply": 4625,
        "supply_by_shape": {
         "full_episode@v1": 4625
        },
        "sealed": {
-        "tasks": 0,
-        "admitted": 0,
-        "units": 0
+        "tasks": 169,
+        "admitted": 153,
+        "units": 314834.0
        },
-       "new_supply": 4625,
+       "new_supply": 4456,
        "tasks": {
-        "lower": 84,
-        "expected": 103,
-        "upper": 130
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
        },
-       "bound": 169,
+       "bound": 0,
        "projection": {
         "whole_supply_units": [
-         2028636.0,
-         2555719.5,
-         3156946.4
+         2269342.5,
+         2777166.1,
+         3356423.8
         ],
         "within_bound_units": [
-         74127.5,
-         93387.4,
-         115356.5
+         314834.0,
+         314834.0,
+         314834.0
         ],
-        "unmeasured_units_within_bound": 93387.4,
+        "unmeasured_units_within_bound": 0,
         "_": "[low, expected, high]; sealed units included"
        },
        "basis_of_new_tasks": {
-        "full_episode@v1:proxy:other_source": 4625
+        "full_episode@v1:proxy:other_source": 4456
        },
-       "status": "REACHABLE",
-       "task_ids": [
-        "tc1-a6a37b9d5c8bb5f85211",
-        "tc1-c0aa487ff6209185a74f",
-        "tc1-d196f2d81eb069fdc962",
-        "tc1-b23a817fea9da307b3c0",
-        "tc1-4d54eba818b09e70a18b",
-        "tc1-e609624c0d5d8e0b1cfb",
-        "tc1-4d92637f7fb607a1571b",
-        "tc1-5bbc3d641f19a90eef2d",
-        "tc1-26bc4af36536f0626e83",
-        "tc1-2f349e37ef281d3d4a5d",
-        "tc1-375a742b692b483b64a2",
-        "tc1-2bdb2b2739a7669079cc",
-        "tc1-9119dc90b4c8e1976510",
-        "tc1-6ff208ac20ccd4b4a901",
-        "tc1-dc6bedfa30df0ef4b76e",
-        "tc1-4a1691f727e79c64d715",
-        "tc1-09f8197c5f6e86b2d1a1",
-        "tc1-3eaa779f4e3e4e814096",
-        "tc1-5195f61ecb461c47d332",
-        "tc1-32fcfc0f635957ae5f2f",
-        "tc1-dd26d56cbd493cb865ed",
-        "tc1-4640aa86268251d6ce20",
-        "tc1-43ca2858681ca5205914",
-        "tc1-fe3105283c99a93c55fd",
-        "tc1-192aef280e2b27a0adda",
-        "tc1-5493e9ce54721a853529",
-        "tc1-6234469f636d9a976e70",
-        "tc1-c9073788c4c9ef995b89",
-        "tc1-a7cddfcbf488f184dca8",
-        "tc1-550d8ec09140713f6005",
-        "tc1-ac798e769add54f4b342",
-        "tc1-107494c36521e65f9d06",
-        "tc1-62103670304a18db804c",
-        "tc1-62089e7a377fc5b63a58",
-        "tc1-9c08372d63475f64258f",
-        "tc1-ad18b37960cc8264c829",
-        "tc1-c04bf55bebdf39b1ab43",
-        "tc1-c21172922c31c64ab428",
-        "tc1-17b0b62f811194588ffd",
-        "tc1-08bdf9a482c1bd99b895",
-        "tc1-1b4a79b13df9427ec07b",
-        "tc1-911be66479ac86254909",
-        "tc1-4fc3fbcbf7afcb40145b",
-        "tc1-042edb06adb581d417b3",
-        "tc1-145c3221007b22209728",
-        "tc1-fd30914378141304a9c5",
-        "tc1-4b82e762bc844e83fade",
-        "tc1-34b8a2db31c6a2b01a2d",
-        "tc1-c37e335f1bcd048a7e17",
-        "tc1-251265ab59d4bc29d469",
-        "tc1-f0defc04006ce2b86f42",
-        "tc1-d12643ee4ff78c6de019",
-        "tc1-5d547f29ee6c1dc88064",
-        "tc1-9f91bfe5caf5cc9b8056",
-        "tc1-e9767a15a689354cf5de",
-        "tc1-65da75ba54779b2222f5",
-        "tc1-5749e794dcc6b166a3ff",
-        "tc1-829cddc5beed8b78d503",
-        "tc1-47f5d79d8f1417cad182",
-        "tc1-a4f5431e75701eba113f",
-        "tc1-fc094208a693670366df",
-        "tc1-11c5d3da4e8a0781ac10",
-        "tc1-1874c9eb5448a829c40d",
-        "tc1-0ae215891a06f18c5760",
-        "tc1-11cbd1753824abc04d77",
-        "tc1-580c02926c81653fc756",
-        "tc1-7cd49d9c3de3c5b1d667",
-        "tc1-ab036e133c3a94fa5201",
-        "tc1-b2bc0fb589ea6ec4b485",
-        "tc1-fd887bc8d08d1fddeff0",
-        "tc1-2a53e8ce7f82226b14cb",
-        "tc1-8fc4c0566d88dda5b055",
-        "tc1-1e72db99c65422d29ba1",
-        "tc1-80e49d80d3e7d4e9c8c0",
-        "tc1-9487543700b2124ab9d4",
-        "tc1-03054fb5f66866bac4e4",
-        "tc1-c69dfef17c1e8d7bd2be",
-        "tc1-224d413c88554f862c95",
-        "tc1-147bbdb1d629ede2b2e1",
-        "tc1-39015eef8c43e17bb733",
-        "tc1-9223d75dd57a2fafa0e9",
-        "tc1-1792b33f35aa4b8a66eb",
-        "tc1-2fe5ba306a6548aeaa91",
-        "tc1-5db9fcb728b373401ffd",
-        "tc1-d4614467a60c82daf327",
-        "tc1-d76df886b3624f64ba10",
-        "tc1-1ee3f81144086129a874",
-        "tc1-f17e6fb2fe9e97e94b5a",
-        "tc1-ea56f1c1ed7312b5020b",
-        "tc1-1b7a0f7e0162a611d4b8",
-        "tc1-444db6f1c181344c1c5a",
-        "tc1-b99bff4ea0b55b03b04f",
-        "tc1-16fcf447994689f174a2",
-        "tc1-946d99e7080f0a191825",
-        "tc1-06afb851888f8a243805",
-        "tc1-39c8feabd3b752038d0a",
-        "tc1-783590233808e891dee2",
-        "tc1-2e55d425de0269b8fd55",
-        "tc1-4f9183c3cdcbd4109aca",
-        "tc1-c49fae413ae1f8d05a36",
-        "tc1-a2019606102c9601e4aa",
-        "tc1-8faa75ba9dad47b564e6",
-        "tc1-057998b8645e6259a529",
-        "tc1-76b318beda3531b766b0",
-        "tc1-d371879477edf7564013",
-        "tc1-7ae6a57edb123b31bc5d",
-        "tc1-60c276d821a4f8d04ccd",
-        "tc1-19fa0ca22a7ae157efcd",
-        "tc1-33558921d11cef15e912",
-        "tc1-e4293e464b43e1846e88",
-        "tc1-f6773c4d0886ae269a19",
-        "tc1-b30c8e3f42961630fe96",
-        "tc1-e98aa6d03387bb1c6ac7",
-        "tc1-005712bda31e7e954cc2",
-        "tc1-f0d6eb2c28ea349eb254",
-        "tc1-9952609cf367523f70ee",
-        "tc1-b86ba61528c7e2ad18d4",
-        "tc1-c9ac59400374bbfaf146",
-        "tc1-e2fe21d3390f56fb68ee",
-        "tc1-439ce453b42b3a4d4b3e",
-        "tc1-a5a26549cb636d3e2c5b",
-        "tc1-648ba91e2b4706532b02",
-        "tc1-4da97d35c91ae621cfc4",
-        "tc1-5e4285f3d3f3aaaefede",
-        "tc1-260f053d6802fb86f7e7",
-        "tc1-d37023536bb642457ea6",
-        "tc1-2b7f88d927cf7f4a7808",
-        "tc1-4c9bcc081554128bc0e4",
-        "tc1-b5ca258fcd079a471350",
-        "tc1-819be5205f7d77c37204",
-        "tc1-0b4cef130c59c942459f",
-        "tc1-9a9eb7a604922cb81258",
-        "tc1-60c018eabf7fcb9acc47",
-        "tc1-26c249c5e985c9aa9cd3",
-        "tc1-6122c19863228be12b5b",
-        "tc1-16a7bcc1a88924dde40d",
-        "tc1-46a7eb863ebbc6414fd7",
-        "tc1-be8d5eb8fa2af4be0d0e",
-        "tc1-637bda8779237a759598",
-        "tc1-e3d1a2d089b2eec0adb2",
-        "tc1-a906716065094dca6ecf",
-        "tc1-a767a87b614ed429e8af",
-        "tc1-8100ac21358dad9327d8",
-        "tc1-5cb40b03c98ae7170f95",
-        "tc1-346f10058492eab7069d",
-        "tc1-6814fe2d364d03bb3671",
-        "tc1-4c07e636269a3a84e186",
-        "tc1-ce83735a42b38ee04757",
-        "tc1-ac2eec61558b3ea58dd6",
-        "tc1-73f42647ad3f0a0fda6f",
-        "tc1-a62a35158c2cb15bd7c7",
-        "tc1-9a133e28001caa861d29",
-        "tc1-a189444322b18147ef19",
-        "tc1-9e8f07e4715f901d8fb3",
-        "tc1-dbac4d821f4a61448f05",
-        "tc1-002d6db5f8132b679312",
-        "tc1-122e67fce9d8b0504caa",
-        "tc1-f8079d4d48933314d19b",
-        "tc1-42f0ef8734cde1fc5008",
-        "tc1-4b9330abbae7045d6461",
-        "tc1-cba9125d49a51deff1fd",
-        "tc1-2ccb9d501ec34d17f184",
-        "tc1-cf4e8e078e370f8cd264",
-        "tc1-f8557e256d2a1b0ff833",
-        "tc1-c685927faaabd5f08188",
-        "tc1-91682c612cffe166c0e1",
-        "tc1-1fde7921bcd91e2708d1",
-        "tc1-438aa9cfa699d4487cf4",
-        "tc1-93cf80d250955eff517d"
-       ],
+       "status": "REACHED",
+       "task_ids": [],
        "shortfall_at_pessimistic_yield": false,
-       "expected_turns_in_bound": 338
+       "expected_turns_in_bound": 0
       },
       {
        "split": "training",
@@ -2389,9 +2215,9 @@
    ],
    "tasks_file": {
     "path": "artifacts/stages/stage-2/teacher_modes/tool_generation_sr/thinking_2507/tasks.jsonl",
-    "sha256": "f517b4d25baa2cb03cd2500d0c2da181e18f01fda6a6026fa3181df3c4572521",
-    "tasks": 169,
-    "bytes": 640241
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks": 0,
+    "bytes": 0
    }
   }
  },
@@ -2402,87 +2228,75 @@
     "lower": {
      "usd": 0.21,
      "minutes": 11.4,
-     "generated_tokens": 286,
-     "generated_tokens_by_basis": {
-      "measured": 286
-     },
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
      "rounds": 1,
      "rate_usd_per_hour": 1.09
     },
     "expected": {
      "usd": 0.23,
      "minutes": 12.9,
-     "generated_tokens": 2151,
-     "generated_tokens_by_basis": {
-      "measured": 2151
-     },
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
      "rounds": 2,
      "rate_usd_per_hour": 1.09
     },
     "upper": {
-     "usd": 0.86,
-     "minutes": 43.2,
-     "generated_tokens": 2151,
-     "generated_tokens_by_basis": {
-      "measured": 2151
-     },
+     "usd": 0.85,
+     "minutes": 43.0,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
      "rounds": 4,
      "rate_usd_per_hour": 1.19
     },
     "runner_cap": {
-     "driver_minutes": 8.2,
-     "hard_terminate_minutes": 64.0,
+     "driver_minutes": 8.0,
+     "hard_terminate_minutes": 63.8,
      "rate_usd_per_hour": 1.19,
-     "all_in_usd": 1.3165
+     "all_in_usd": 1.3115
     }
    },
    "thinking_2507": {
     "lower": {
-     "usd": 0.28,
-     "minutes": 15.5,
-     "generated_tokens": 257350,
-     "generated_tokens_by_basis": {
-      "proxy:other_source": 257350
-     },
+     "usd": 0.19,
+     "minutes": 10.7,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
      "rounds": 1,
      "rate_usd_per_hour": 1.09
     },
     "expected": {
-     "usd": 0.38,
-     "minutes": 21.0,
-     "generated_tokens": 517765,
-     "generated_tokens_by_basis": {
-      "proxy:other_source": 517765
-     },
+     "usd": 0.21,
+     "minutes": 11.4,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
      "rounds": 2,
      "rate_usd_per_hour": 1.09
     },
     "upper": {
-     "usd": 1.63,
-     "minutes": 82.4,
-     "generated_tokens": 517765,
-     "generated_tokens_by_basis": {
-      "proxy:other_source": 517765
-     },
+     "usd": 0.8,
+     "minutes": 40.2,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
      "rounds": 4,
      "rate_usd_per_hour": 1.19
     },
     "runner_cap": {
-     "driver_minutes": 47.4,
-     "hard_terminate_minutes": 113.0,
+     "driver_minutes": 5.2,
+     "hard_terminate_minutes": 60.2,
      "rate_usd_per_hour": 1.19,
-     "all_in_usd": 2.3051
+     "all_in_usd": 1.2408
     }
    }
   },
   "total_usd": {
-   "lower": 0.49,
-   "expected": 0.61,
-   "upper": 2.49
+   "lower": 0.4,
+   "expected": 0.44,
+   "upper": 1.65
   },
   "proposed_hard_caps_usd": {
-   "hybrid": 1.3165,
-   "thinking_2507": 2.3051
+   "hybrid": 1.3115,
+   "thinking_2507": 1.2408
   },
   "levels": {
    "lower": {

@@ -15936,3 +15936,33 @@ on a paid pod.
   shared generator, not real unseen tool tasks; its admission rate is a proxy until round 1 measures it.
 - Revisit when: the two sessions close (freeze of the -sr arms, state_eval_hybrid@v3), or a cap or source boundary
   stops them.
+
+## 2026-11-05 — R1 generation complete: the three -sr arms and state_eval_hybrid@v3 frozen; stop at the Full Search boundary
+
+- Context: the R1 approval's two generation kinds, then the freeze (sections IV-V).
+- Decision (executed):
+  - **Generation** (Secure Cloud L40S, no network volume, one pod at a time): hybrid attempt 1
+    `a_tool_generation_sr_20261105_153741` ($0.7919, 42.8 min), attempt 2 `a_tool_generation_sr_20261105_162909`
+    ($0.2561: the non-thinking state-evaluation schema_synth cell, short at its first bound at 686 / 800), Thinking-2507
+    `a_tool_generation_sr_t2507_20261105_164515` ($0.3296; the registered device admission reused and confirmed).
+    $1.3776 in all, against caps of $6.16 and $2.31. After attempt 1 measured the source, each lineage's round 1 took
+    its 95% reach bound (tool_generation_protocol_sr.json), so no third session was needed.
+  - **Measured on schema_synth** (two candidates, tool_verification@v2): non-thinking training 1,108 / 2,593 tasks
+    admitted (42.7%), state evaluation 9 / 29; thinking training 173 / 225 (76.9%), state evaluation 5 / 5;
+    Thinking-2507 153 / 169 (90.5%). Refusals are teacher errors (date arithmetic, phone format, an empty array against
+    minItems); yield varies by domain, so admitted data leans toward the domains a teacher computes correctly.
+  - **Frozen** (`audit/six_category_schema_restored_freeze.json`): A1-6cat-sr / A2-6cat-sr / C1-6cat-sr, each within
+    its registered proportions. schema_arguments of the tool type before packing: 14.98% / 14.94% / 15.24% (Pivot
+    17,779 / 17,241 / 17,900 + schema_synth 56,940 / 56,908 / 59,411 supervised tokens; whole-episode overshoot).
+    A2/A1 3.53x the packed sequences, optimizer steps and training FLOPs for the same unique supervised tokens.
+  - **state_eval_hybrid@v3 FROZEN** (`audit/state_eval_hybrid_v3_freeze.json`, content `c39d0ec9...`, protocol
+    `b760ab7e...`): every category and source group met in both modes; `@v2-lc1` unchanged.
+  - **Durable copies** of the three session archives on the private relay (`storage/schema_restored_session_archives.json`).
+  - **Next** (not authorized): the packed Full Search, application
+    `logs/budget/applications/research_a_packed_full_search_2026-11-05/` (bind to calibration v2 + `@v3`, a new ~350 GB
+    volume, cap $55.72 + $13.34 reserve, project cap >= $912).
+- Alternatives considered: a third hybrid attempt sized at the mean yield (another setup at a coin-flip reach);
+  leaving the non-thinking state-evaluation cell short (v3 could not freeze).
+- Risks: the training overshoot (admitted episodes beyond each target) stays unused; schema_synth is compositional
+  language and its held-out domains share the generator.
+- Revisit when: the maintainer decides the Full Search application.

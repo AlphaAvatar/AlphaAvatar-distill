@@ -327,6 +327,47 @@ def arm_freeze(arm: str, packs: Path = PACKS) -> dict:
                                           "is their packed-sequence ratio"}}
 
 
+def tool_composition(arm: str, packs: Path = PACKS) -> dict:
+    """Per training tool cell (category, and source group where the design splits one) of the arm's FROZEN selection,
+    re-derived by `packed_packs.select` from the tool documents its manifest names (and checked against the
+    manifest's quota record): episodes, turns -- each an assistant turn that decides to call or not, the tool-calling
+    decisions -- tool calls, and the unique supervised tokens split into reasoning (through ``</think>``), tool-call
+    and answer tokens (`schema_supply_audit.split_output`), all before packing."""
+    from collections import Counter, defaultdict
+
+    from stages.teacher_modes import packed_packs as PP
+    from stages.teacher_modes import schema_supply_audit as SSA
+    from stages.teacher_modes import tool_generation_plan as TGP
+    man = PP.verify_pack(Path(packs) / arm)
+    tool_docs = Path(man["sources"]["tool_documents"]["path"])
+    sel = PP.select(arm, tool_docs=tool_docs)
+    proto = PP.COMPOSITIONS[PP.ARMS[arm]["composition"]][1]
+    plan, _, by_id = TGP.for_consumers_with_tasks(protocol_path=proto) if proto else (None, None, None)
+    cells = {c["category"] + (f"/{c['group']}" if c.get("group") else ""): c
+             for c in TGP.cells_for(plan, PP.ARMS[arm]["teacher"], PP.ARMS[arm]["mode"], "training")} if plan else {}
+    out, episodes = defaultdict(Counter), defaultdict(set)
+    for d in sel["train"]:
+        if sel["data_type"][d.doc_id] != PP.TOOL_TYPE:
+            continue
+        cat, tid = d.meta["category"], d.meta["task_id"]
+        key = next((k for k, c in cells.items() if c["category"] == cat and (not c.get("datasets") or
+                                                                           by_id[tid]["source"]["dataset"] in c["datasets"])), cat)
+        out[key].update(SSA.split_output(list(d.output_ids)))
+        out[key]["turns"] += 1
+        episodes[key].add(tid)
+    rows = {k: {"episodes": len(episodes[k]), "turns": v["turns"], "tool_calls": v["calls"],
+                "supervised_tokens": v["supervised"], "reasoning_tokens": v["reasoning"],
+                "tool_call_tokens": v["tool_call"], "answer_tokens": v["answer"]} for k, v in sorted(out.items())}
+    quota = {k.split("/", 1)[1]: c for k, c in man["tool_calling"]["quota"]["cells"].items() if k.startswith("training/")}
+    bad = {k: (r["supervised_tokens"], quota.get(k, {}).get("selected")) for k, r in rows.items()
+           if quota.get(k, {}).get("selected") != r["supervised_tokens"]}
+    if bad:
+        raise RuntimeError(f"{arm}: the re-derived tool cells are not the frozen manifest's: {bad}")
+    total = {f: sum(r[f] for r in rows.values()) for f in next(iter(rows.values()))}
+    return {"cells": rows, "total": total, "rule": "the frozen selection re-derived and equal to the manifest's quota "
+            "record; decisions = assistant turns (each decides to call or not), counted before packing"}
+
+
 #: per registered design: its arms (A1, A2, C1), configuration and study id (six_category_schema_restored@v1: the
 #: maintainer's 2026-11-05 R1 approval, its own freeze record beside the common-support one)
 DESIGNS = {"common_support": (("A1-6cat-cs", "A2-6cat-cs", "C1-6cat-cs"), CONFIG, STUDY_ID, FREEZE),
@@ -337,7 +378,7 @@ DESIGNS = {"common_support": (("A1-6cat-cs", "A2-6cat-cs", "C1-6cat-cs"), CONFIG
 
 
 def freeze(arms=DESIGNS["common_support"][0], packs: Path = PACKS, config: Path = CONFIG,
-           study_id: str = STUDY_ID) -> dict:
+           study_id: str = STUDY_ID, composition: bool = False) -> dict:
     """A design's freeze record (six_category_common_support.json :: freeze; the same for another registered design,
     `DESIGNS`): every arm whose pack exists, FROZEN, the others PENDING, and the A1 / A2 compute contrasts (the first
     two arms). Written before any search or training reads the data."""
@@ -345,6 +386,8 @@ def freeze(arms=DESIGNS["common_support"][0], packs: Path = PACKS, config: Path 
     for arm in arms:
         out[arm] = arm_freeze(arm, packs) if (Path(packs) / arm / "ladder.json").is_file() else {"arm": arm,
                                                                                                 "status": "PENDING"}
+        if composition and out[arm]["status"] == "FROZEN":
+            out[arm]["tool_composition"] = tool_composition(arm, packs)
     n1, n2 = arms[0], arms[1]
     a1, a2 = out.get(n1, {}), out.get(n2, {})
     contrast = None
@@ -380,7 +423,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if a.freeze:
         arms, config, study_id, _ = DESIGNS[a.design]
-        doc = freeze(arms, config=config, study_id=study_id)
+        doc = freeze(arms, config=config, study_id=study_id, composition=a.design == "schema_restored")
         Path(a.freeze).write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
         print(json.dumps({k: v.get("status") for k, v in doc["arms"].items()}), json.dumps(doc["a1_a2_compute"]))
         return 0

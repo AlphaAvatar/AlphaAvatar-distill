@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 180,
+  "runs_unrecorded": 183,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -871,8 +871,8 @@
    },
    "teacher_modes": {
     "recorded": 0,
-    "unrecorded": 27,
-    "total": 27
+    "unrecorded": 30,
+    "total": 30
    }
   },
   "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
@@ -4130,6 +4130,30 @@
    "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_20261105_105512",
    "n_files": 4,
    "digest": "f4a5a0dd81249a8957a5dbf3bfa77e2f8331c672b5d5cdd8168b41ba2a57096b",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_tool_generation_sr_20261105_153741",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_sr_20261105_153741",
+   "n_files": 4,
+   "digest": "b02ec40f0142dc472c1466d64ef190a5854d005b603d70480ac4737f667fd0c2",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_tool_generation_sr_20261105_162909",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_sr_20261105_162909",
+   "n_files": 4,
+   "digest": "ddf90b6eb68dc4c0a0aa2cc373d47ec9b8d7db4f0738fec45be8f4710a6d6ae9",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_tool_generation_sr_t2507_20261105_164515",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_sr_t2507_20261105_164515",
+   "n_files": 4,
+   "digest": "c9d1fce9279f55a78b9890dccbb70280ccd7505363c20a81672d2db5a1160f01",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {

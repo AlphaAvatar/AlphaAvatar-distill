@@ -1199,6 +1199,31 @@ The extension `e771393a...` (4,843 schema_synth tasks admitted) is signed in `au
 labelled `proxy:other_source` stratum; $0.66 / $0.79 / $5.08), kinds `tool_generation_sr` (cumulative $6.16) and
 `tool_generation_sr_t2507` ($2.31): round 1 the expected prefix, later rounds from the session's own measurement.
 
+**What it measured and cost** (three sessions, $1.3776 of the $8.47; Secure Cloud L40S, no volume, one pod at a time):
+
+| session | cost | schema_synth tasks attempted / admitted | supervised tokens or scored positions |
+| --- | --- | --- | --- |
+| hybrid 1 (`..._153741`) | $0.7919 | non-thinking training 2,593 / 1,108; thinking training 225 / 173; state evaluation 14 / 5 and 5 / 5 | 168,435 and 156,551 tokens (targets 56,813); 686 (short) and 2,902 positions (targets 800) |
+| hybrid 2 (`..._162909`) | $0.2561 | non-thinking state evaluation 15 / 4 (95% reach bound) | 1,367 positions, REACHED |
+| Thinking-2507 (`..._t2507_..._164515`) | $0.3296 | training 169 / 153 | 314,834 tokens (target 56,717) |
+
+Refusals are teacher errors (date arithmetic, the E.164 phone format, an empty array against `minItems`); admission
+varies by domain (`audit/schema_synth_v1_generation.json`). After the first session the protocol's round 1 takes each
+lineage's 95% reach bound, since each needed about one more session.
+
+**Frozen** (`audit/six_category_schema_restored_freeze.json`), counted before packing:
+
+| arm | schema_arguments: Pivot + schema_synth | share of the tool type | tool episodes / decisions / calls | packed sequences |
+| --- | --- | --- | --- | --- |
+| A1-6cat-sr (thinking) | 17,779 + 56,940 | 14.98% | 449 / 932 / 611 | 1,430 |
+| A2-6cat-sr (non-thinking) | 17,241 + 56,908 | 14.94% | 2,125 / 4,253 / 2,681 | 5,047 |
+| C1-6cat-sr (Thinking-2507) | 17,900 + 59,411 | 15.24% | 250 / 516 / 296 | 1,261 |
+
+Every arm passes its registered proportions; the whole-episode overshoot is in the record. `state_eval_hybrid@v3` is
+FROZEN (`audit/state_eval_hybrid_v3_freeze.json`: 1,366 items, every category and source group met; H-N schema_arguments
+Pivot 1,038 + schema_synth 847); `@v2-lc1` unchanged. The Full Search's application:
+`logs/budget/applications/research_a_packed_full_search_2026-11-05/`.
+
 ## Reproduce ($0)
 
 ```
@@ -1264,6 +1289,17 @@ PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_generation_
     --composition configs/stages/stage-2/teacher_modes/six_category_schema_restored.json \
     --protocol configs/stages/stage-2/teacher_modes/tool_generation_protocol_sr.json \
     --write logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan.json
+# after the sessions: tool_generation_import --session (per run), tool_admission per mode (the -sr store + the imports),
+# then the -sr packs, @v3 and the freeze
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.packed_packs --arm A2-6cat-sr \
+    --tool-documents artifacts/stages/stage-2/teacher_modes/tool_admission/hybrid_H-N_sr_final/tool_documents.jsonl
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.packed_inputs v3 \
+    --tool-items-ht <hybrid_H-T_sr_final>/tool_items.jsonl --tool-items-hn <hybrid_H-N_sr_final>/tool_items.jsonl
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.six_category_common_support \
+    --freeze logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json --design schema_restored
+PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_forward_compute \
+    --suite artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3/items.jsonl \
+    --write logs/stages/stage-2/teacher_modes/audit/packed_forward_compute_v3.json
 ```
 
 The plan and the application record the scratch pool as `<scratch>/tool_pool_dry_v4` (content `be4652d7…`).

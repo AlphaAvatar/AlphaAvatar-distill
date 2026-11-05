@@ -245,8 +245,13 @@ def build() -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--write", type=Path)
+    ap.add_argument("--suite", type=Path, default=None, help="the state-evaluation items the packed search would read "
+                    "(default @v2-lc1's; e.g. state_eval_hybrid_v3/items.jsonl)")
     args = ap.parse_args(argv)
+    if args.suite:
+        SETS["v2"]["suite"] = args.suite.resolve()
     rep = build()
+    rep["suite_read"] = {"path": str(SETS["v2"]["suite"].relative_to(REPO)), "sha256": sha(SETS["v2"]["suite"])}
     text = json.dumps(rep, indent=1) + "\n"
     if args.write:
         args.write.write_text(text)

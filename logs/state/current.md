@@ -9,11 +9,19 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A: R1 APPROVED AND REGISTERED -- schema_synth@v1 ADMITTED, six_category_schema_restored@v1 (A1/A2/C1-6cat-sr), GENERATION UNDER `tool_generation_sr` / `tool_generation_sr_t2507` (2026-11-05).**
-- Source: training instances 160 -> 220 per domain; the independent semantic review left out 226 ambiguous requests
-  (exactly its set); 4,843 tasks admitted in the extension `e771393a...` (`audit/tool_source_admission_schema_synth.json`).
-- Plan `plans/schema_restoration_plan.json` ($0.66 / $0.79 / $5.08); caps cumulative $6.16 hybrid, $2.31 Thinking-2507.
-- Owner: `logs/budget/decisions.md` 2026-11-05 (R1 approved); `PACKED_ROUND.md` section 12.
+**RESEARCH A: R1 GENERATION COMPLETE -- A1/A2/C1-6cat-sr FROZEN AT THE REGISTERED COMPOSITION (schema_arguments ~15%), state_eval_hybrid@v3 FROZEN; STOPPED AT THE FULL SEARCH'S AUTHORIZATION BOUNDARY (2026-11-05).**
+- Source: `schema_synth@v1` admitted in the extension `e771393a...` (220 training instances per domain; the independent
+  semantic review's 226 ambiguous requests left out; `audit/tool_source_admission_schema_synth.json`).
+- Generation: three sessions, $1.3776 of the caps $6.16 + $2.31 (hybrid $1.0480, Thinking-2507 $0.3296); every cell
+  of `plans/schema_restoration_plan.json` REACHED. Measured schema_synth admission: non-thinking 42.7%, thinking 76.9%,
+  Thinking-2507 90.5% of attempted tasks.
+- Frozen: `audit/six_category_schema_restored_freeze.json` (schema_arguments 14.98% / 14.94% / 15.24% of the tool type;
+  A2/A1 3.53x the packed sequences); `audit/state_eval_hybrid_v3_freeze.json` (`c39d0ec9...`, protocol `b760ab7e...`);
+  `@v2-lc1`, the -cs packs and the calibration v2 profiles unchanged.
+- Next, owed to the maintainer: the packed Full Search
+  (`logs/budget/applications/research_a_packed_full_search_2026-11-05/`: bind to `@v3`, a new ~350 GB volume, cap
+  $55.72 + $13.34 reserve, project cap >= $912). Nothing is running or billing; volumes `4rhubprswo` and `am5m373kuq` only.
+- Owner: `logs/budget/decisions.md` 2026-11-05 (R1 approved; R1 generation complete); `PACKED_ROUND.md` section 12.
 
 **RESEARCH A: THE REGISTERED TOOL COMPOSITION CAN BE RESTORED -- DESIGN R1 READY FOR ONE DECISION; THE PACKED FORWARD RE-PRICED ON THE FROZEN INPUTS (2026-11-05, $0, nothing generated, searched, trained or evaluated).**
 - schema_arguments supply recounted (`audit/schema_arguments_supply_v3.json`): non-thinking EXHAUSTED (all 1,928
@@ -4550,7 +4558,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$786.9412` spent of `$868.0000`, leaving `$81.0588` |
+| project cap | `$788.3188` spent of `$868.0000`, leaving `$79.6812` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 
