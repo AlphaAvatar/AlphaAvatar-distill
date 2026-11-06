@@ -1,0 +1,1 @@
+{"every_seconds": 30.0, "samples": 3018, "gpus": {"0": {"name": "NVIDIA L40S", "memory_total_mib": 46068, "peak_memory_used_mib": 36169, "peak_utilization_pct": 100}}, "errors": [], "utc": "2026-11-06T22:27:44Z"}

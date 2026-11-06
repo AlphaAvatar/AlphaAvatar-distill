@@ -1254,6 +1254,21 @@ utilization), and on completion the Top-1 on the volume plus one off-volume copy
 (`copy_off_volume`: uploaded, downloaded again, re-hashed; the closeout reads the relay's own sha256 before the pod is
 deleted). The $35.61 / $38.98 figures stay estimates until these measure the packed forward.
 
+**Result (2026-11-06): COMPLETE in one attempt** (`a_packed_search_20261105_195011`, $28.1677 of the cumulative
+$55.72; decision record 2026-11-06). 92 expansions (16 DEPTH), 12 complete leaves; the device check passed.
+
+| | value |
+| --- | --- |
+| Top-1 | `1f5e4b420125a345f1d190f0b8f87cad`: FFN(base) -> DEPTH(base) -> WIDTH(rh) -> ATTENTION(rh), 596,049,920 parameters |
+| objectives on `@v3` | equal-domain mean KL 6.777, worst-domain 7.912, critical-token 12.567 |
+| copies | `thprcgh7s9:search_packed/top1` and the private relay, both `b74dede8...` (`evidence/products.json`) |
+| pod minutes | 1,521.8 (estimate 1,496.9 / 1,930.4 / 2,212.2) |
+| state evaluation | 70.6 s median, 25.1k tokens/s, 6,651 scored positions/s; teacher read once, then its sketch cache |
+| DEPTH | 4,699 s per expansion (v2 3,711 s) |
+| peak VRAM | 36.2 GB of 46 GB (nvidia-smi) |
+
+Measurements and their comparison with v2 and the estimate: `audit/packed_search_measurement.json`.
+
 ## Reproduce ($0)
 
 ```

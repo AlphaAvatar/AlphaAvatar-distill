@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.packed_round_design/v1",
- "status": "SEARCH AUTHORIZED (maintainer 2026-11-05, 'Packed Full Search 正式授权'): kind packed_search over input set v3, cumulative $55.72 over every attempt, one new ~350 GB network volume ($13.34 reserve), the project cap $930; Stage 3 and every other stage not authorized. Earlier: PREPARATION (2026-11-03): designed and partly prepared at $0; no search, no training, no generation, no pod",
+ "status": "SEARCH COMPLETE 2026-11-06 (maintainer 2026-11-05 'Packed Full Search 正式授权'): Top-1 1f5e4b42... (full_search.result); Stage 3 and every other stage not authorized. authorized (maintainer 2026-11-05, 'Packed Full Search 正式授权'): kind packed_search over input set v3, cumulative $55.72 over every attempt, one new ~350 GB network volume ($13.34 reserve), the project cap $930; Stage 3 and every other stage not authorized. Earlier: PREPARATION (2026-11-03): designed and partly prepared at $0; no search, no training, no generation, no pod",
  "decided_by": "maintainer brief 2026-11-03 'Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备'; revised by the maintainer's independent review of 649d25dd (2026-11-03): fragments accepted, formal data counted before packing, the tool pool / Toucan / verification / lineage-kind / validation repairs; the maintainer's review of 77be6e13 (2026-11-03): bounded generation, pool content identity, cross-split exact-prompt isolation, fail-closed schema validation and reference caches, the Pivot converter; loss normalization kept, no further ruling owed; the maintainer's third review of acbbbbfb (2026-11-03): per-category gates on calibration / state evaluation, the consumers' full pool / plan identity; Toucan SFT and Pivot Conversational may be PREPARED as priority candidate task sources (licence, revision, attribution, provenance and verification level kept), Pivot Function-Calling not adopted, Nemotron-SFT-Agentic-v4 deferred -- not a generation authorization",
  "_contract": "The registered terms of Research A's packed round: the new hybrid full search under the packed forward context (Stage 1), and the packed training of A1-6cat, A2-6cat and C1-6cat (Stage 3). It supersedes the packing terms of six_category_design.json (document_isolated and E1's packer) and nothing else in it; its tool-calling pool, protocol, verification and quotas stay that record's. Sequence lengths and seeds are instance values of this experiment and live here, never in src/aadistill. AUTHORIZES NOTHING.",
  "stage1_forward_context": {
@@ -86,7 +86,15 @@
   "first_evaluation_check": "full_search.FirstEvaluationCheck: both modes' critical groups present and their 50:50 mean; the frozen epsilon rule measured on the device (the level-0 children are the real search and the device admission at once, as in v2)",
   "never_reused_from_v2": "no state, statistic, reference or checkpoint of research_a_v2_hybrid_d4_full_search: the forward context is in every calibrated operator's hashed config and in the measurement protocol id, so no v2 identity can match; the v2 Top-1 159e73be... (model.safetensors 3459b9c9...) and its journal stay untouched as history",
   "formal_inputs": "v3",
-  "_formal_inputs": "the input set a formal search reads (packed_full_search refuses any other without --check-only): v3, the maintainer's 2026-11-05 binding; the Top-1 initializes A1-6cat-sr and A2-6cat-sr (hybrid lineage); C1-6cat-sr keeps its own Thinking-2507 initialization and never reads it"
+  "_formal_inputs": "the input set a formal search reads (packed_full_search refuses any other without --check-only): v3, the maintainer's 2026-11-05 binding; the Top-1 initializes A1-6cat-sr and A2-6cat-sr (hybrid lineage); C1-6cat-sr keeps its own Thinking-2507 initialization and never reads it",
+  "result": {
+   "status": "COMPLETE 2026-11-06T22:28:38Z (a_packed_search_20261105_195011, one attempt, $28.1677 of the cumulative $55.72)",
+   "products": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011/evidence/products.json (owner of the Top-1's identity and both copies)",
+   "measurement": "logs/stages/stage-2/teacher_modes/audit/packed_search_measurement.json",
+   "top1_state_id": "1f5e4b420125a345f1d190f0b8f87cad",
+   "top1_single_shard_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+   "consumers": "A1-6cat-sr and A2-6cat-sr (Stage 3, not authorized); never C1-6cat-sr (Thinking-2507 lineage)"
+  }
  },
  "calibration_v2": {
   "profiles": [

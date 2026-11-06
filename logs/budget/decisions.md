@@ -16003,3 +16003,38 @@ on a paid pod.
   DEPTH round measure the packed forward; L40S stock in US-TX-3 is intermittent, so a resume may wait for capacity.
 - Revisit when: the search completes, or a hard boundary (the cumulative cap, the balance, a measured OOM, a science
   or identity mismatch) stops it.
+
+## 2026-11-06 — Packed Full Search COMPLETE: Top-1 1f5e4b42..., one attempt, $28.17 of $55.72
+
+- Context: the maintainer's 2026-11-05 authorization (entry above); attempt 1 `a_packed_search_20261105_195011`.
+- Decision (executed):
+  - **Run**: one Secure Cloud L40S in US-TX-3 ($1.09/h) on `thprcgh7s9`, created 2026-11-05T21:09Z after a $0
+    capacity wait of 68 min; driver 21:16:51Z -> `ALL_DONE` 2026-11-06T22:28:38Z; pod deleted 22:31Z, the provider
+    confirms it gone. No failure, no resume, no second attempt. All-in $28.1677 (GPU $27.6468 + container disk $0.5208;
+    the provider had posted $27.0853 by 22:33Z); the kind has $27.5523 of its cumulative $55.72 left.
+  - **Search**: 92 expansions (attention 30, FFN 16, width 30, DEPTH 16), 93 states, 12 complete leaves; the first
+    state evaluation's device check passed (both modes' critical groups; 10 repeats, range 0.0 < epsilon 1e-4).
+  - **Top-1** (`stage1_selection.json`, selection `728a1119...`, beam.pareto_multi_objective@v2 on state_eval_hybrid@v3):
+    `1f5e4b420125a345f1d190f0b8f87cad`, FFN(base) -> DEPTH(base) -> WIDTH(rh) -> ATTENTION(rh), 596,049,920 parameters;
+    equal-domain mean KL 6.777, worst-domain KL 7.912, critical-token KL 12.567 against the root on v3 (not comparable
+    with v2's numbers: another suite and protocol). artifact `536742c5...`, weights `4640af77...`, single shard
+    `b74dede8...`. Copies: the volume (`search_packed/top1`) and the private relay
+    (`durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b42.../`), uploaded from the pod,
+    re-downloaded and re-hashed there, and its LFS sha256 re-read from the dev box.
+  - **Measured** (`audit/packed_search_measurement.json`): 1,521.8 pod minutes against the estimate's 1,496.9 / 1,930.4 /
+    2,212.2 (lower / expected / upper); DEPTH 4,699 s per expansion (v2 3,711 s, x1.27) and two more DEPTH expansions
+    than v2; state evaluation 70.6 s median (25.1k tokens/s, 6,651 scored positions/s), 0.66x v2's total, the teacher
+    read once (217 packed forwards) and served from its 1.06 GiB sketch cache thereafter; peak VRAM 36.2 GB by
+    nvidia-smi of 46 GB (torch 24.7 GiB in state evaluation). These measure this run; packing is the protocol, not a
+    claimed speed-up.
+  - **Evidence**: the run's `evidence/` (selection, record, products, telemetry, evaluation cache, GPU peaks); the
+    archive `d781ab9a...` (journal included) under `artifacts/.../search_sessions/` and on the relay.
+  - **Dev-box disk** (maintainer 2026-11-06, '删除一些无用的checkpoint'): the two byte-identical `relay_retired`
+    second copies retired (2.92 GiB, tombstoned, protected copies kept) and this session's redundant scratch copies
+    removed; the registry's two `retire` rows refused by `retire_eligible_checkpoints` and kept.
+  - **Found, not acted on**: `converge_before_sweep.py` reports NOT READY on drift outside this experiment (two
+    generators exit non-zero; regeneration would rewrite closed experiments' C1/C3 executable closures and D1's
+    current.json; the "unreachable" 49c7dfd0 is WorkBench's upstream revision). Restored; owed as a maintenance item.
+- Not done (not authorized): Stage 3's six units, formal benchmarks, Stage 5, a merge.
+- Revisit when: the maintainer authorizes A1-6cat-sr / A2-6cat-sr training from this Top-1, or decides the volume's
+  lifecycle (reserve to 2026-11-19T19:40Z).

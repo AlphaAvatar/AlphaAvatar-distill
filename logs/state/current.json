@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO (no open blocker record). Research A: the packed Full Search authorized 2026-11-05 (inputs calibration v2 + state_eval_hybrid@v3); Stage 3, formal benchmarks and Stage 5 NOT authorized. Owner: PACKED_ROUND.md section 13.",
+ "blocker": "BLOCKED NO (no open blocker record). Research A: the packed Full Search COMPLETE 2026-11-06 (Top-1 1f5e4b42...); Stage 3, formal benchmarks and Stage 5 NOT authorized. Owner: PACKED_ROUND.md section 13.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 930.0,
-  "cumulative_spend_usd": 788.3188,
+  "cumulative_spend_usd": 816.4865,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 141.6812,
+  "remaining_usd": 113.5135,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Attempt 1 of the packed Full Search (a_packed_search_20261105_195011, kind packed_search, $55.72 cumulative, volume thprcgh7s9). Owner: logs/budget/decisions.md 2026-11-05 ('Packed Full Search authorized').",
+ "next": "The maintainer: Stage 3 for A1-6cat-sr / A2-6cat-sr from the packed Top-1 1f5e4b42... (not authorized) and thprcgh7s9's lifecycle. Owner: logs/budget/decisions.md 2026-11-06.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -200,8 +200,8 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 3,
-  "run": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011 (issued; launching)",
-  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search; 4rhubprswo (350 GB, US-TX-3): the v2 Top-1, protected; am5m373kuq (55 GB): the archive"
+  "run": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011 (COMPLETE, $28.1677)",
+  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search + Top-1; 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

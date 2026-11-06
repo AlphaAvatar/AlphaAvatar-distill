@@ -1,0 +1,44 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.packed_full_search_products/v1",
+ "search_run_id": "research_a_packed_hybrid_full_search",
+ "root_teacher": {
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192"
+ },
+ "forward_context": {
+  "packing": "sequential_truncate_v1",
+  "truncate": true,
+  "materialization": "prefix_restart_v1",
+  "shuffle": "sha256_keyed_v1",
+  "attention": "causal_continuous_positions_v1",
+  "sequence_length": 8192,
+  "shuffle_seed": 20261105
+ },
+ "top1": {
+  "path": "/runpod-volume/teacher_modes/search_packed/top1",
+  "files_sha256": {
+   "model.safetensors": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+   "config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+   "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+  },
+  "state_id": "1f5e4b420125a345f1d190f0b8f87cad",
+  "artifact_digest": "536742c54f5bdb19e436d2a7026d843684cdc1e5bfa34e2b02a0514d83fe98b6",
+  "weights_digest": "4640af774e8c296178489861d459cdc6594a1d52cf56d9b8c738c5f799ff9ea0",
+  "source_checkpoint_path": "/runpod-volume/teacher_modes/search_packed/search/states/1f5e4b420125a345f1d190f0b8f87cad/f7d0b1c86f41085dc4f2c5ffe708b6db"
+ },
+ "selection": "/runpod-volume/teacher_modes/search_packed/stage1_selection.json",
+ "journal": "/runpod-volume/teacher_modes/search_packed/search/states.jsonl",
+ "off_volume_copy": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad",
+  "files_sha256": {
+   "config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+   "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "model.safetensors": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d"
+  },
+  "verified": true,
+  "upload_seconds": 10.8,
+  "verify_seconds": 35.0,
+  "rule": "uploaded from the volume's copy, downloaded again into a fresh cache and re-hashed"
+ }
+}

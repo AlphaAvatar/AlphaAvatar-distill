@@ -4056,9 +4056,9 @@
    "experiment_id": "teacher_modes",
    "run_id": "a_packed_search_20261105_195011",
    "root": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011",
-   "n_files": 1,
-   "digest": "c168ded466065ec28abfa59e115c06aba0c18c713b2fa01ae5f565a57d3f53ce",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "n_files": 11,
+   "digest": "a6595543feca1e9a20c14fa21e2dc4c0d2b60099492986904b84695eecb408d6",
+   "why": "no run manifest; its closeout states: COMPLETE"
   },
   {
    "experiment_id": "teacher_modes",

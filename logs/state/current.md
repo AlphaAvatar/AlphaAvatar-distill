@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-05 (UTC), after the maintainer's "Packed Full Search 正式授权". The human view. Every number here has an owner
+**Updated:** 2026-11-06 (UTC), after the packed Full Search completed. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,15 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A: THE PACKED FULL SEARCH IS AUTHORIZED AND BOUND AT $0 (2026-11-05); ATTEMPT 1 LAUNCHING.**
+**RESEARCH A: THE PACKED FULL SEARCH IS COMPLETE (2026-11-06) -- TOP-1 `1f5e4b42...`, ONE ATTEMPT, $28.17 OF $55.72.**
+- Top-1: FFN(base) -> DEPTH(base) -> WIDTH(rh) -> ATTENTION(rh), 596,049,920 parameters, single shard `b74dede8...`; on
+  the volume `thprcgh7s9` and on the private relay (`runs/a_packed_search_20261105_195011/evidence/products.json`).
+- Measured: 1,521.8 pod minutes, state evaluation 70.6 s median, peak VRAM 36.2 of 46 GB
+  (`audit/packed_search_measurement.json`). Nothing is running or billing; volumes `thprcgh7s9`, `4rhubprswo`, `am5m373kuq`.
+- Next, owed to the maintainer: Stage 3 for A1-6cat-sr / A2-6cat-sr from this Top-1 (not authorized), and the
+  volume's lifecycle (reserve to 2026-11-19T19:40Z).
+
+Earlier the same round:
 - Inputs: the frozen calibration v2 profiles + `state_eval_hybrid@v3` (`c39d0ec9...`, protocol `b760ab7e...`,
   reproduced by the check-only); `@v2-lc1` kept for sensitivity only. The Top-1 is for A1-6cat-sr / A2-6cat-sr.
 - Grant: kind `packed_search`, $55.72 cumulative over every attempt; ceiling $135.2489, project cap $930, Research A
@@ -4564,7 +4572,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$788.3188` spent of `$930.0000`, leaving `$141.6812` |
+| project cap | `$816.4865` spent of `$930.0000`, leaving `$113.5135` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 
