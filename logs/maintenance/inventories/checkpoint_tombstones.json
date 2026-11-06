@@ -34,10 +34,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 59,
-  "active": 57,
-  "active_retired_bytes": 456478244151,
-  "active_retired_human": "425.128 GiB",
+  "tombstones_total": 61,
+  "active": 59,
+  "active_retired_bytes": 459617821927,
+  "active_retired_human": "428.052 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -4509,6 +4509,90 @@
    "expected_reconstruction_cost": "$0 from the relay",
    "frozen_results_location": "logs/stages/stage-1/phase_d2",
    "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "relay_retired_e8_inputs_20260810_duplicate",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/relay_retired/e8_inputs_20260810/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "stage0",
+   "seed": null,
+   "scientific_role": "the hybrid-era Stage-0 activation cache (qwen3_4b_thinking_v1), a second local copy kept when its relay copy was retired 2026-08-10",
+   "weights_sha256": "aaeb2e4c1ec67e6f6dd21ca40eceb0c193a9da5b010e8d12fcd5d24376cc47c1",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1947442680,
+   "size_human": "1.814 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/relay_retired/e8_inputs_20260810/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+     "size_bytes": 1947442680,
+     "sha256": "aaeb2e4c1ec67e6f6dd21ca40eceb0c193a9da5b010e8d12fcd5d24376cc47c1"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json (registry row: diagnostic, review: 'not matched by the classification table')",
+    "logs/state/current.json :: deferred (duplicate_checkpoints 2.92 GiB KEEP/unresolved)"
+   ],
+   "deletion_criterion": "duplicate_copy",
+   "deletion_criterion_meaning": "a byte-identical second copy on the same disk; the protected copy stays where every reader finds it",
+   "reason_physical_weights_deleted": "the dev-box disk at 100% (1.5 GB free) while the packed Full Search runs; the maintainer 2026-11-06: '\u5220\u9664\u4e00\u4e9b\u65e0\u7528\u7684checkpoint'. Re-hashed before deletion: both copies aaeb2e4c1ec6...; the kept copy is artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors (registry: protected); no file under src/, configs/ or scripts/ names relay_retired, and no current session launcher declares either file",
+   "canonical_surviving_evidence": "artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors (byte-identical, protected) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "cp artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+   "expected_reconstruction_cost": "$0, a local copy",
+   "frozen_results_location": "artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+   "deleted_utc": "2026-11-06T14:19:04+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "relay_retired_e8_init_20260810_duplicate",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/relay_retired/e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "stage3_e8",
+   "seed": null,
+   "scientific_role": "E8a's treatment initialization (e8_contribution_init_v1), a second local copy kept when its relay copy was retired 2026-08-10",
+   "weights_sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/relay_retired/e8_init_20260810/e8_contribution_init_v1/checkpoint/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json (registry row: diagnostic, review: 'not matched by the classification table')",
+    "logs/state/current.json :: deferred (duplicate_checkpoints 2.92 GiB KEEP/unresolved)"
+   ],
+   "deletion_criterion": "duplicate_copy",
+   "deletion_criterion_meaning": "a byte-identical second copy on the same disk; the protected copy stays where every reader finds it",
+   "reason_physical_weights_deleted": "the dev-box disk at 100% (1.5 GB free) while the packed Full Search runs; the maintainer 2026-11-06: '\u5220\u9664\u4e00\u4e9b\u65e0\u7528\u7684checkpoint'. Re-hashed before deletion: both copies 7a0694a5d5c5...; the kept copy is artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors (registry: protected); no file under src/, configs/ or scripts/ names relay_retired, and no current session launcher declares either file",
+   "canonical_surviving_evidence": "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors (byte-identical, protected) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "cp artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors",
+   "expected_reconstruction_cost": "$0, a local copy",
+   "frozen_results_location": "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors",
+   "deleted_utc": "2026-11-06T14:19:04+00:00",
    "withdrawn": false,
    "withdrawn_reason": null,
    "withdrawn_utc": null

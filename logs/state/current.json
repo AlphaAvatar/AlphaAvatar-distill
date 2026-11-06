@@ -81,7 +81,7 @@
   "scoring_protocol": "reference_topk_tail_v1, K=200. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
  },
- "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
+ "deferred": "duplicate_checkpoints RETIRED 2026-11-06 (2.92 GiB; logs/maintenance/inventories/checkpoint_tombstones.json). historical_probe_reuse REFUSED by scoring_contract_matches_live.",
  "dirty": false,
  "frozen": {
   "equivalence_interval": 0.011695296982299022,
