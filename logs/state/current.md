@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-07 (UTC), after Stage 3 of the restored composition was prepared. The human view. Every number here has an owner
+**Updated:** 2026-11-07 (UTC), after Stage 3 of the restored composition was authorized. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,14 +9,16 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 PREPARED (2026-11-07) -- SIX UNITS, ONE AUTHORIZATION REQUESTED; NOTHING TRAINED, NO POD.**
+**RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 AUTHORIZED (2026-11-07) -- SIX UNITS RUNNING A1 -> A2 -> C1, ONE L40S AT A TIME ON `thprcgh7s9`.**
 - Units: A1-6cat-sr / A2-6cat-sr / C1-6cat-sr x seeds 20260726, 20260801 (`plans/packed_training_plan.json`), kinds
-  `train_sr_a1/_a2/_c1`; each bound to its frozen pack and its own lineage (A1/A2 the packed Top-1 `b74dede8...` on
-  `thprcgh7s9`, C1 Thinking-2507's D4 Top-1 `fc28e0dd...`); recipe unchanged; a save point about every hour.
-- Cost: $31.19 / $35.60 / $59.15 with the formal evaluations (`plans/packed_training_budget.json`); caps $73.24.
-- Owed to the maintainer: the request in `logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json`
-  (caps; ceiling $158.38, project cap $989, Research A $258.04; volume reserve +$13.34; top-up >= $35).
-- Owner: `logs/budget/decisions.md` 2026-11-07; `PACKED_ROUND.md` section 14.
+  `train_sr_a1/_a2/_c1`; each bound to its frozen pack and its own lineage; `batch.context_strategy = cross_context`
+  declared and asserted at launch admission; a save point about every hour; each unit evaluated on eval-set-1 on its pod.
+- Grant: caps $18.33 / $37.54 / $17.37 cumulative ($73.24); ceiling $158.3762; project cap $1,000; Research A $262.04;
+  `packed_search` closed; `thprcgh7s9` / `4rhubprswo` reserves +$13.34 each.
+- Open result-persistence item: the relay's quota (1.73 GiB left of 100 GB) admits no trained weights' off-volume copy;
+  the volume `thprcgh7s9` is the weights' store and is protected until storage is added or a retirement is decided.
+- Owner: `logs/budget/decisions.md` 2026-11-07 (authorized); `PACKED_ROUND.md` section 15; the runs under
+  `logs/stages/stage-2/teacher_modes/runs/a_train_sr_*`.
 
 **RESEARCH A: THE PACKED FULL SEARCH IS COMPLETE (2026-11-06) -- TOP-1 `1f5e4b42...`, ONE ATTEMPT, $28.17 OF $55.72.**
 - Top-1: FFN(base) -> DEPTH(base) -> WIDTH(rh) -> ATTENTION(rh), 596,049,920 parameters, single shard `b74dede8...`; on

@@ -537,6 +537,8 @@ def packed_search_grant_problems(g: dict) -> list[str]:
     b = g.get(PACKED_SEARCH_KIND)
     if not isinstance(b, dict):
         return ["the grant carries no packed_search scope: the maintainer's amendment is required"]
+    if b.get("closed"):                 #: COMPLETE; closed for new attempts (maintainer 2026-11-07), its record kept
+        return [f"the packed search is closed for new attempts ({b['closed'].get('by', 'the maintainer')})"]
     want = {"granted_by": "maintainer", "cap_is_cumulative": True, "gpu": GPU,
             "hard_cap_usd": float((g.get("session_hard_caps_usd") or {}).get(PACKED_SEARCH_KIND, -1))}
     bad = [f"the grant's packed_search.{k} is {b.get(k)!r}, not {v!r}" for k, v in want.items() if b.get(k) != v]
@@ -985,6 +987,32 @@ def final_weights_on_volume(ctx, units_record: dict) -> dict[str, bool]:
     return out
 
 
+def final_weights_off_volume(ctx, units_record: dict) -> dict[str, bool]:
+    """Each trained unit's off-volume copy read from the relay itself rather than from the pod's claim: the LFS sha256
+    at the copy's prefix against the weights' sha256 the driver recorded. Evidence only -- a unit the relay's quota
+    refused has no copy, and that never holds a billing pod (its weights stay on the volume)."""
+    out = {}
+    try:
+        from huggingface_hub import HfApi
+        api = HfApi()
+        for name, row in (units_record.get("units") or {}).items():
+            copy, want = row.get("off_volume_copy") or {}, row.get("final_model_safetensors_sha256")
+            if not want:
+                continue
+            seen = None
+            if copy.get("prefix"):
+                info = next(iter(api.get_paths_info(copy["relay"], [f"{copy['prefix']}/model.safetensors"],
+                                                    repo_type="model", expand=True)), None)
+                lfs = getattr(info, "lfs", None)
+                seen = getattr(lfs, "sha256", None) or (lfs.get("sha256") if isinstance(lfs, dict) else None)
+            ctx.evidence.setdefault("final_weights_off_volume", {})[name] = {
+                "prefix": copy.get("prefix"), "sha256": seen, "refused": copy.get("refused"), "error": copy.get("error")}
+            out[name] = seen == want
+    except Exception as exc:  # noqa: BLE001 -- evidence only
+        ctx.evidence["final_weights_off_volume_error"] = repr(exc)[:300]
+    return out
+
+
 def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     """Closeout for the search and A1 kinds: the evidence directories tarred and pulled (weights excluded: they stay
     on the volume, by sha256 in the records), and the search's Top-1 verified by its sha256 on the volume."""
@@ -1011,6 +1039,7 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
         rec = st / f"{PACKED_TRAIN_ARMS[kind]}_units.json"
         if rec.is_file():
             got.update(final_weights_on_volume(ctx, json.loads(rec.read_text())))
+            ctx.evidence["off_volume_verified"] = final_weights_off_volume(ctx, json.loads(rec.read_text()))
     else:
         #: the evaluation's model package is the checkpoint's weights again (a_train_a1_20261102_184122 carried two
         #: 2.38 GB copies home that no analysis reads; their sha256 is in a1_units.json) -- they stay on the volume

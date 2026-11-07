@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.budget.application/stage3_sr_v1",
  "written_utc": "2026-11-07T16:40:00Z",
- "status": "AUTHORIZATION REQUEST for the maintainer's one decision over the whole of Stage 3; AUTHORIZES NOTHING: no grant, no issue, no relay upload, no pod, no spend",
+ "status": "approved",
  "decided_by": [
   "maintainer 2026-11-07: accept research_a_packed_hybrid_full_search COMPLETE and its Top-1 1f5e4b42 (b74dede8...); prepare six_category_schema_restored@v1's Stage 3 (six units, their formal evaluation) for one authorization; no paid pod this round"
  ],
@@ -515,5 +515,16 @@
   "an A100",
   "deleting anything on thprcgh7s9 or 4rhubprswo"
  ],
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "approved": {
+  "utc": "2026-11-07",
+  "by": "maintainer, 'AlphaAvatar-distill — Stage 3 六单元正式授权' (review of 1b9052cd)",
+  "as_requested": "the three kind caps, the ceiling, the volume reserve extension",
+  "changed": {
+   "project_cumulative_cap_usd": "1000 (requested 989)",
+   "research_a_cumulative_cap_usd": "262.04 (requested 258.04: + the <= $4 expansion reserve)",
+   "plan": "batch.context_strategy declared cross_context (the plan's and budget's sha256 in the grant)"
+  },
+  "grant": "logs/budget/approvals/teacher_modes_token_matched_grant.json :: stage3_sr"
+ }
 }

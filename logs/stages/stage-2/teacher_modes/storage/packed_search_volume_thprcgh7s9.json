@@ -5,7 +5,7 @@
  "data_center_id": "US-TX-3",
  "size_gb": 350,
  "created_utc": "2026-11-05T19:40:35Z",
- "reserved_usd": 13.34,
+ "reserved_usd": 26.68,
  "actual_usd": null,
  "decided_by": "maintainer 2026-11-05 'AlphaAvatar-distill — Packed Full Search 正式授权', sections II and IV: '为一块约 350 GB Network Volume 预留最多 $13.34' ... '先根据实际 L40S 可用区域选择数据中心，再创建对应的新 Network Volume。不固定 EUR-IS-2'",
  "purpose": "research_a_packed_hybrid_full_search (kind packed_search): BeamSearch's journal (search_packed/search/states.jsonl), every state's checkpoint (prune_weights false), the statistics caches, the search record and evidence, and the Top-1 (search_packed/top1) -- everything a replacement session resumes from",
@@ -61,5 +61,14 @@
    "to": "2026-12-03T19:40Z",
    "application": "logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json"
   }
- }
+ },
+ "reserve_history": [
+  {
+   "utc": "2026-11-07",
+   "from_usd": 13.34,
+   "to_usd": 26.68,
+   "by": "maintainer 2026-11-07, Stage 3 authorization, section IV",
+   "covers": "14 more days at $0.07 per GB-month for 350 GB"
+  }
+ ]
 }

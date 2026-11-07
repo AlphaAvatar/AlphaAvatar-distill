@@ -231,15 +231,17 @@ def test_the_packed_kinds_are_registered_and_refuse_without_a_grant_cap():
     from stages.teacher_modes import token_matched_phase as TM
     new = ("tool_generation", "tool_generation_t2507", "packed_search", "train_sr_a1", "train_sr_a2", "train_sr_c1")
     assert set(new) <= set(TM.STUDY.kinds) and set(new) <= set(TM.DRIVERS) and set(new) <= set(TM.KIND_RECORDS)
-    #: maintainer 2026-11-04 / 2026-11-05 (packed_search: 'Packed Full Search 正式授权')
-    granted = {"tool_generation": 9.13, "tool_generation_t2507": 2.78, "packed_search": 55.72}
+    #: maintainer 2026-11-04 / 2026-11-05 (packed_search: 'Packed Full Search 正式授权', closed 2026-11-07) /
+    #: 2026-11-07 (the Stage-3 kinds: 'Stage 3 六单元正式授权')
+    granted = {"tool_generation": 9.13, "tool_generation_t2507": 2.78, "packed_search": 55.72,
+               "train_sr_a1": 18.33, "train_sr_a2": 37.54, "train_sr_c1": 17.37}
     for k in new:
         if k in granted:
             assert TM.kind_cap_problems(k, granted[k] + 0.01), k     # above the kind's cumulative cap
         else:
             assert TM.kind_cap_problems(k, 1.0), k                  # the grant names no cap for the others
         assert all(isinstance(r, str) for r in TM.KIND_RECORDS[k])
-    assert TM.main(["issue", "--kind", "train_sr_a1", "--run-id", "x", "--expected-usd", "1",
+    assert TM.main(["issue", "--kind", "packed_search", "--run-id", "x", "--expected-usd", "1",
                     "--hard-cap-usd", "1", "--dry-run"]) == 11
     for s in TM.STUDY.scripts:
         assert (TM.REPO_ROOT / s).is_file(), s

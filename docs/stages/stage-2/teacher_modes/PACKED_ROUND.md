@@ -1318,6 +1318,34 @@ not six copies of the trained weights.
 the three kinds' caps, the A-TM ceiling $135.25 -> $158.38, the project cap $930 -> $989, Research A's cumulative cap
 $211.25 -> $258.04, the volume's reserve extended by $13.34, and a provider top-up of at least $35 ($50 recommended).
 
+## 15. Stage 3 authorized and launched (2026-11-07)
+
+The maintainer approved all six units and their formal eval-set-1 evaluations ("Stage 3 六单元正式授权", review of
+`1b9052cd`), the kind caps as requested ($18.33 / $37.54 / $17.37 = $73.24, each cumulative over its attempts), the
+A-TM ceiling $158.3762, the project cap **$1,000**, Research A's cumulative cap re-derived to **$262.04** (v1 + the
+ceiling + the volumes' reserves + a controlled expansion reserve of at most $4), 14 more days for `thprcgh7s9` and
+for `4rhubprswo` (+$13.34 each, booked by their storage records), and closed `packed_search` for new attempts (its
+unspent $27.55 is not carried). The grant's `stage3_sr` block binds the plan and budget as amended below.
+
+**The one pre-launch correction: attention is declared.** Each unit's config now states
+`batch.context_strategy = "cross_context"` instead of leaving the trainer's default to supply it (the plan's six
+configs changed by that field alone; the packs, their tokens and every frozen identity are unchanged). Launch
+admission on the pod asserts it together with the pack's own `context_strategy` and sequential causal packing spec,
+the absence of per-document position ids in `blocks.npz`, and the trainer's reader handing over sequences without
+position ids (`packed_training_plan.attention_problems`); after training, the trainer's own step log must name
+`cross_context` (`a1_units.py`), or the unit fails before it is evaluated.
+
+**Off-volume copy of the final weights.** Each unit's final fp32 weights and config are uploaded unchanged to the
+project's private relay as soon as the unit is trained, before its evaluation, downloaded again and re-hashed
+(`a1_units.persist_off_volume`, the packed search's Top-1 mechanism) -- but only when the relay's quota admits their
+exact size (`hub_capacity.would_accept`, which moves no bytes). On 2026-11-07 it does not: the account's private
+storage is 91.40 GiB of its 100 GB (93.13 GiB), 1.73 GiB left, against 2.22 GiB per unit and 13.3 GiB for six.
+The relay objects that could be retired are either the only copy of their experiment's result or are still declared
+by a launcher (the 2026-10-11 consumer audit; the transport repo's five Phase-A leaves are read by the recovery
+continuation's launcher), so none was deleted. Until private storage is added or a retirement is decided, the
+network volume is the trained weights' only store and is kept and protected; a later session copies every unit
+whose copy is still owed, and the closeout reads each copy back from the relay (`final_weights_off_volume`).
+
 ## Reproduce ($0)
 
 ```

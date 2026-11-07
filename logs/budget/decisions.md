@@ -16070,3 +16070,30 @@ on a paid pod.
 - Risks: the Top-200 + tail support under cross-context attention is unmeasured on the L40S (priced x1.05 / x1.44);
   the search's own footprint on the volume after its last level is estimated, not measured.
 - Revisit when: the maintainer decides the request; or the first A1 unit measures a step outside the priced range.
+
+## 2026-11-07 — Stage 3 of six_category_schema_restored@v1 authorized; launched A1 -> A2 -> C1
+
+- Context: the maintainer reviewed `1b9052cd` and approved the six units and their eval-set-1 evaluations ("Stage 3
+  六单元正式授权"), asking for one pre-launch correction (declare the attention) and for the trained weights to get a
+  verified off-volume copy.
+- Decision:
+  - **Grant** (`teacher_modes_token_matched_grant.json`): kinds `train_sr_a1` / `train_sr_a2` / `train_sr_c1` at
+    $18.33 / $37.54 / $17.37, cumulative over attempts ($73.24); the `stage3_sr` block binds the amended plan and
+    budget by sha256; ceiling $135.2489 -> $158.3762 (spent $85.1362 + $73.24); project cap $930 -> **$1,000**;
+    Research A cumulative cap $211.25 -> **$262.04** (v1 $46.30 + ceiling + four 14-day volume reserves $53.36 +
+    the <= 50 GB / <= $4 expansion reserve of `thprcgh7s9`); `packed_search` closed for new attempts. The project
+    cap's extra room funds no Stage 3 GPU beyond $73.24 and no other experiment.
+  - **Storage records**: `thprcgh7s9` and `4rhubprswo` reserves +$13.34 each (14 days); committed $883.71 -> $910.39.
+  - **Plan**: `batch.context_strategy = "cross_context"` declared in all six configs; asserted at launch admission
+    (`packed_training_plan.attention_problems`) and against the trainer's own step log after training.
+  - **Off-volume copy**: `a1_units.persist_off_volume` uploads a unit's final fp32 weights to the relay when its quota
+    admits them, re-downloads and re-hashes them; refused today (1.73 GiB left of the account's 100 GB private storage,
+    2.22 GiB per unit). No relay object was retired: every candidate is either its experiment's only copy or still
+    declared by a launcher. The network volume stays protected as the weights' store until storage is added or a
+    retirement is decided -- an open result-persistence item, not a reason to delete anything.
+- Alternatives considered: retiring the transport repo's five Phase-A leaves (5.55 GiB, local copies verified by the
+  registry) -- refused because the recovery continuation's launcher still declares them; a bf16 copy (not the trained
+  checkpoint); a second network volume (not authorized).
+- Risks: until storage is added, the volume is a single point of loss for the six trained models (their evaluations
+  and evidence leave the pod at each closeout).
+- Revisit when: private relay storage is added (the next session copies every owed unit), or Stage 3 completes.

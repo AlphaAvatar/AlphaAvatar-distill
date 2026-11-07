@@ -199,6 +199,44 @@ def bind_pack(arm: str, pack_dir: Path, fr: dict | None = None) -> dict:
             "packing_spec": lad["packing_spec"], "context_strategy": lad["context_strategy"]}
 
 
+#: the attention every -sr unit trains with (P19): standard causal attention over the whole packed sequence with
+#: continuous positions -- the trainer's ``batch.context_strategy`` value for a sequential pack
+CONTEXT_STRATEGY = "cross_context"
+#: the packing spec's attention term of a sequential causal pack (packed_packs)
+PACK_ATTENTION = "causal_continuous_positions_v1"
+
+
+def attention_problems(cfg: dict, root: Path = REPO) -> list[str]:
+    """Why a unit would not train with standard causal attention and continuous positions (empty when it would): the
+    config declares `CONTEXT_STRATEGY`; the pack's ladder.json declares the same and a sequential causal packing;
+    blocks.npz stores no per-document position ids; and the trainer's own reader (`ladder_blocks`) hands it sequences
+    without position ids -- which the trainer accepts only under ``cross_context`` and then forwards with none, so
+    the model builds its ordinary causal mask over the whole sequence (`aadistill.training.train.Trainer`). Run on
+    the dev box when the plan is written and on the pod at launch admission (`a1_units.py`)."""
+    import numpy as np
+    from aadistill.data.ladder import ladder_blocks
+    bad = []
+    got = (cfg.get("batch") or {}).get("context_strategy")
+    if got != CONTEXT_STRATEGY:
+        bad.append(f"the config's batch.context_strategy is {got!r}, not {CONTEXT_STRATEGY!r}")
+    dd = Path(root) / cfg["data_dir"]
+    lad = json.loads((dd / "ladder.json").read_text())
+    if lad.get("context_strategy") != CONTEXT_STRATEGY:
+        bad.append(f"the pack's context_strategy is {lad.get('context_strategy')!r}")
+    for key in ("packing_spec", "val_packing_spec"):
+        spec = lad.get(key) or {}
+        if spec.get("attention") != PACK_ATTENTION or spec.get("packing") != "sequential_truncate_v1":
+            bad.append(f"the pack's {key} is {spec.get('packing')!r} / {spec.get('attention')!r}, not a sequential "
+                       f"causal pack")
+    with np.load(dd / "blocks.npz") as z:
+        if "position_ids" in z.files:
+            bad.append("blocks.npz stores per-document position ids")
+    train, val, _ = ladder_blocks(dd, int(cfg["rung"]), int(cfg["val_blocks"]))
+    if len(train) != 3 or len(val) != 3:
+        bad.append(f"the trainer's reader gives {len(train)}- / {len(val)}-tuples: position ids reach the trainer")
+    return bad
+
+
 def kd_per_step(data: dict, batch: int = 2) -> float:
     """KD (and CE) positions per optimizer step: the assistant positions the sequences hold, per sequence x batch."""
     return data["supervised_tokens_in_sequences"] / data["packed_sequences"] * batch
@@ -221,8 +259,8 @@ def unit_config(arm: str, seed: int, data: dict, init: dict) -> dict:
     cfg["schedule"] = {k: sch[k] for k in ("total_steps", "warmup_steps", "min_lr_frac")}
     cfg["intervals"] = {**cfg["intervals"], "eval_every": sch["eval_every"], "eval_blocks": data["validation_sequences"]}
     cfg["checkpoint"] = {"save_every": save_every(kd_per_step(data)), "keep_last": 1, "bind_identity": True}
-    #: the packs are cross-context sequential packs: standard causal attention, the trainer's default
-    cfg["batch"] = {k: v for k, v in cfg["batch"].items() if k != "context_strategy"}
+    #: declared, not left to the trainer's default (maintainer 2026-11-07, Stage 3 authorization, section II)
+    cfg["batch"] = {**cfg["batch"], "context_strategy": CONTEXT_STRATEGY}
     cfg["lineage"] = {"teacher": t, "mode": mode, "tokenizer": {"files_sha256": TP.tokenizer_files()[lineage]},
                       "initialization": {"root_teacher": {k: t[k] for k in ("model_id", "revision")},
                                          "model_safetensors_sha256": init["model_safetensors_sha256"],
@@ -286,6 +324,7 @@ def config_problems(us: list[dict]) -> dict:
             bad.append(f"trainer config: {exc}")
         if TP.UNSET in json.dumps(u["config"]) or "TO_BE_SET" in json.dumps(u["config"]):
             bad.append("an unset field remains")
+        bad += [f"attention: {x}" for x in attention_problems(u["config"])]
         res[u["unit"]] = {"problems": bad}
     return res
 

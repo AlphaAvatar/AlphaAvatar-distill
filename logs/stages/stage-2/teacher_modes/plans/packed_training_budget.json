@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.teacher_modes.packed_training_budget/v2",
  "study_id": "six_category_schema_restored@v1",
- "written_utc": "2026-11-07T08:21:42Z",
+ "written_utc": "2026-11-07T10:33:22Z",
  "is_an_estimate": true,
  "step_model": {
   "fit": {

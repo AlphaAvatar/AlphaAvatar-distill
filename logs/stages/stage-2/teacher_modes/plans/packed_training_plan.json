@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.teacher_modes.packed_training_plan/v2",
  "study_id": "six_category_schema_restored@v1",
- "written_utc": "2026-11-07T08:21:42Z",
+ "written_utc": "2026-11-07T10:33:22Z",
  "decided_by": "maintainer 2026-11-07 (Stage 3 preparation of six_category_schema_restored@v1): six units A1-6cat-sr / A2-6cat-sr / C1-6cat-sr x seeds 20260726, 20260801",
  "freeze_record": {
   "path": "logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json",
@@ -84,7 +84,8 @@
     },
     "batch": {
      "blocks_per_step": 2,
-     "micro_blocks": 1
+     "micro_blocks": 1,
+     "context_strategy": "cross_context"
     },
     "checkpoint": {
      "save_every": 890,
@@ -309,7 +310,8 @@
     },
     "batch": {
      "blocks_per_step": 2,
-     "micro_blocks": 1
+     "micro_blocks": 1,
+     "context_strategy": "cross_context"
     },
     "checkpoint": {
      "save_every": 890,
@@ -534,7 +536,8 @@
     },
     "batch": {
      "blocks_per_step": 2,
-     "micro_blocks": 1
+     "micro_blocks": 1,
+     "context_strategy": "cross_context"
     },
     "checkpoint": {
      "save_every": 1064,
@@ -764,7 +767,8 @@
     },
     "batch": {
      "blocks_per_step": 2,
-     "micro_blocks": 1
+     "micro_blocks": 1,
+     "context_strategy": "cross_context"
     },
     "checkpoint": {
      "save_every": 1064,
@@ -994,7 +998,8 @@
     },
     "batch": {
      "blocks_per_step": 2,
-     "micro_blocks": 1
+     "micro_blocks": 1,
+     "context_strategy": "cross_context"
     },
     "checkpoint": {
      "save_every": 858,
@@ -1219,7 +1224,8 @@
     },
     "batch": {
      "blocks_per_step": 2,
-     "micro_blocks": 1
+     "micro_blocks": 1,
+     "context_strategy": "cross_context"
     },
     "checkpoint": {
      "save_every": 858,

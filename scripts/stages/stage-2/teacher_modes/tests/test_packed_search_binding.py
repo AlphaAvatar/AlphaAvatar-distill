@@ -64,6 +64,7 @@ def test_the_design_binds_the_formal_search_to_v3():
 
 def grant_root(tmp_path, spent_usd: float | None):
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
+    g["packed_search"].pop("closed", None)      #: the mechanism as it ran; the committed grant has closed the kind
     (tmp_path / TM.STUDY.grant).parent.mkdir(parents=True)
     (tmp_path / TM.STUDY.grant).write_text(json.dumps(g))
     if spent_usd is not None:
@@ -82,6 +83,12 @@ def test_the_search_cap_is_cumulative_over_attempts(tmp_path):
     assert TM.kind_cap_problems("packed_search", 35.72, root) == []
     bad = TM.kind_cap_problems("packed_search", 35.73, root)
     assert bad and "cumulative" in bad[0] and "35.72" in bad[0]
+
+
+def test_the_completed_search_is_closed_for_new_attempts():
+    """maintainer 2026-11-07, Stage 3 authorization, section IV: its unspent $27.55 is not carried"""
+    bad = TM.kind_cap_problems("packed_search", 1.0)
+    assert bad and "closed" in bad[0]
 
 
 def test_the_search_attaches_only_its_granted_volume():

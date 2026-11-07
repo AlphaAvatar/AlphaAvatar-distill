@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO (no open blocker record). Research A: Stage 3 of six_category_schema_restored@v1 prepared 2026-11-07, one authorization requested; nothing trained. Owner: PACKED_ROUND.md section 14.",
+ "blocker": "BLOCKED NO. Research A: Stage 3 of six_category_schema_restored@v1 authorized 2026-11-07, running A1 -> A2 -> C1. Open: the trained weights' off-volume copy (relay quota). Owner: PACKED_ROUND.md section 15.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer: the Stage-3 request (six units, caps $73.24; ceiling, project and Research A caps; top-up). Owner: logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json.",
+ "next": "Stage 3: the train_sr_a1 session, then train_sr_a2, then train_sr_c1; the six units' comparison. Owner: logs/budget/decisions.md 2026-11-07.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -222,7 +222,7 @@
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",
-  "hf_private_headroom_gib": "accepts 2 GB (would_accept 2026-10-22T15:53Z); owner logs/stages/stage-2/reasoning_data/plans/durability_plan.json",
+  "hf_private_headroom_gib": "1.73 of the account's 100 GB (bisected 2026-11-07); owner PACKED_ROUND.md section 15",
   "roots": {
    "artifacts": "/home/ecs-user/aad-artifacts",
    "git": "/home/ecs-user/AlphaAvatar-distill"

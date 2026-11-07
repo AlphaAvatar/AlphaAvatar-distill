@@ -47,7 +47,8 @@ def test_the_six_units_are_bound_to_their_frozen_packs_and_their_own_lineage():
                 == "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d"
             assert init["provenance"]["record"].endswith("a_packed_search_20261105_195011/evidence/search_record.json")
         #: the frozen recipe: the objective, 3 epochs of batch 2 x micro-batch 1, E1's optimizer and schedule rule
-        assert cfg["loss"] == TP.OBJECTIVE and cfg["batch"] == {"blocks_per_step": 2, "micro_blocks": 1}
+        assert cfg["loss"] == TP.OBJECTIVE
+        assert cfg["batch"] == {"blocks_per_step": 2, "micro_blocks": 1, "context_strategy": "cross_context"}
         sch = TP.schedule(f["packing"]["packed_sequences"])
         assert cfg["schedule"] == {k: sch[k] for k in ("total_steps", "warmup_steps", "min_lr_frac")}
         assert cfg["optim"] == json.loads(TP.E1.read_text())["optim"] and cfg["intervals"]["eval_every"] == sch["eval_every"]
@@ -113,8 +114,23 @@ def grant_root(tmp_path, block: bool, spent_usd: float | None = None, kind: str 
     return tmp_path, g
 
 
+def test_the_committed_grant_admits_each_kind_up_to_its_cumulative_cap_only():
+    """maintainer 2026-11-07, 'Stage 3 六单元正式授权', section IV"""
+    for kind, arm in TM.PACKED_TRAIN_ARMS.items():
+        a = BUDGET["arms"][arm]
+        assert TM.kind_cap_problems(kind, a["session_hard_cap"]["hard_cap_usd"]) == []
+        assert TM.kind_cap_problems(kind, round(a["kind_cumulative_cap_usd"] + 0.01, 2))
+    g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
+    assert g["ceiling_usd"] == 158.3762 and g["project_cumulative_cap_usd"] == 1000.0
+    assert g["research_a_cumulative"]["cap_usd"] <= 263 and g[TM.STAGE3_BLOCK]["stage_cumulative_cap_usd"] == 73.24
+    assert TM.kind_cap_problems("packed_search", 1.0)                                 #: closed for new attempts
+
+
 def test_the_stage3_kinds_need_the_grants_block_for_the_plan_as_it_is(tmp_path):
-    assert TM.kind_cap_problems("train_sr_a1", 1.0)                                   #: not granted today
+    root, g = grant_root(tmp_path / "z", block=False)
+    del g[TM.STAGE3_BLOCK]
+    (root / TM.STUDY.grant).write_text(json.dumps(g))
+    assert TM.kind_cap_problems("train_sr_a1", 1.0, root)                             #: no block, no Stage 3
     root, g = grant_root(tmp_path / "a", block=True)
     cap = g["session_hard_caps_usd"]["train_sr_a1"]
     assert TM.kind_cap_problems("train_sr_a1", cap, root) == []
@@ -161,7 +177,7 @@ def driver_fixture(tmp_path, monkeypatch, states: dict[str, str]):
     from aadistill.infrastructure import manifest as M
     durable = tmp_path / "vol" / "teacher_modes"
     us = [json.loads(json.dumps(u)) for u in PLAN["units"] if u["arm"] == "C1-6cat-sr"]
-    calls = {"train": [], "evaluate": []}
+    calls = {"train": [], "evaluate": [], "attention": [], "copy": []}
     for u in us:
         out = durable / "stage3_sr" / u["unit"] / "train"
         u["config"]["out_dir"] = str(out)
@@ -181,12 +197,17 @@ def driver_fixture(tmp_path, monkeypatch, states: dict[str, str]):
     plan = tmp_path / "plan.json"
     plan.write_text(json.dumps({**PLAN, "units": us}))
 
+    strategy = ["cross_context"]
+
     def train(cfg_path, *, resume, deadline_s, log):
         cfg = json.loads(Path(cfg_path).read_text())
         calls["train"].append((cfg["run_name"], resume))
         d = Path(cfg["out_dir"]) / "checkpoints" / f"step_{cfg['schedule']['total_steps']:06d}" / "model"
         d.mkdir(parents=True, exist_ok=True)
         (d / "model.safetensors").write_bytes(b"w")
+        with (Path(cfg["out_dir"]) / "train_log.jsonl").open("a") as fh:     #: what the trainer logs per step
+            fh.write(json.dumps({"event": "train_step", "step": 1, "seconds": 3.2, "kd_positions": 8000,
+                                 "context_strategy": strategy[0]}) + "\n")
         return 0
 
     def evaluate(job):
@@ -202,6 +223,15 @@ def driver_fixture(tmp_path, monkeypatch, states: dict[str, str]):
     monkeypatch.setattr(AU, "train", train)
     monkeypatch.setattr(HD, "evaluate", evaluate)
     monkeypatch.setattr(M, "sha256_file", lambda p: "0" * 64)
+    monkeypatch.setattr(PTP, "attention_problems", lambda cfg, root=None: calls["attention"].append(cfg["run_name"]) or [])
+
+    def persist(unit_dir, unit, model_dir, sha256):
+        calls["copy"].append(unit)
+        out = {"verified": False, "refused": "quota"}
+        (Path(unit_dir) / AU.OFF_VOLUME).write_text(json.dumps(out))
+        return out
+    monkeypatch.setattr(AU, "persist_off_volume", persist)
+    calls["strategy"] = strategy
     argv = ["--authorization", "x", "--durable-root", str(durable), "--status", str(tmp_path / "status"),
             "--unit-deadline-hours", "1", "--kind", "train_sr_c1", "--plan", str(plan), "--arm", "C1-6cat-sr",
             "--units-dir", "stage3_sr"]
@@ -236,3 +266,79 @@ def test_a_session_whose_volume_cannot_hold_its_units_trains_nothing(tmp_path, m
     assert AU.main(argv + ["--volume-gb", "10"]) == 0                 #: one evaluation package left to write
     rec = json.loads((durable / "C1-6cat-sr_units.json").read_text())
     assert rec["volume"]["need_bytes"] == PTP.MODEL_BYTES
+
+
+def test_a_trained_unit_is_copied_off_the_volume_before_its_evaluation_and_a_refusal_never_fails(tmp_path,
+                                                                                                 monkeypatch):
+    names = [u["unit"] for u in PLAN["units"] if u["arm"] == "C1-6cat-sr"]
+    argv, calls, durable, _ = driver_fixture(tmp_path, monkeypatch, {names[0]: "done", names[1]: "fresh"})
+    assert AU.main(argv) == 0
+    #: the scored unit's copy is still owed (retried at the start), the fresh one is copied once it is trained
+    assert calls["copy"] == names and calls["attention"] == [f"research_a_stage3_C1-6cat-sr_s{PTP.SEEDS[1]}"]
+    rec = json.loads((durable / "C1-6cat-sr_units.json").read_text())
+    assert rec["units"][names[1]]["off_volume_copy"]["refused"] == "quota" and rec["terminal"] == "ALL_DONE"
+    status = (tmp_path / "status").read_text()
+    assert status.index(f"OFF_VOLUME_NOT_COPIED:{names[1]}") < status.index(f"EVAL_START:{names[1]}")
+
+
+def test_a_unit_the_trainer_ran_under_another_attention_fails(tmp_path, monkeypatch):
+    names = [u["unit"] for u in PLAN["units"] if u["arm"] == "C1-6cat-sr"]
+    argv, calls, durable, _ = driver_fixture(tmp_path, monkeypatch, {names[0]: "fresh", names[1]: "fresh"})
+    calls["strategy"][0] = "document_isolated"
+    assert AU.main(argv) == 3
+    rec = json.loads((durable / "C1-6cat-sr_units.json").read_text())
+    assert "document_isolated" in rec["error"]["error"] and calls["evaluate"] == []
+
+
+def test_the_attention_check_reads_the_config_the_pack_and_the_trainers_reader(tmp_path):
+    u = PLAN["units"][-1]                       #: C1-6cat-sr, the smallest pack
+    assert PTP.attention_problems(u["config"]) == []
+    cfg = json.loads(json.dumps(u["config"]))
+    del cfg["batch"]["context_strategy"]        #: the trainer's default is not a declaration
+    assert any("context_strategy" in b for b in PTP.attention_problems(cfg))
+    import numpy as np
+    src = TP.REPO / cfg["data_dir"]
+    dst = tmp_path / "pack"
+    dst.mkdir()
+    for n in ("ladder.json", "audit.jsonl"):
+        (dst / n).write_bytes((src / n).read_bytes())
+    with np.load(src / "blocks.npz") as z:
+        arrays = {k: z[k] for k in z.files}
+    np.savez(dst / "blocks.npz", **arrays, position_ids=np.zeros_like(arrays["input_ids"]))
+    cfg = {**u["config"], "data_dir": str(dst)}
+    bad = PTP.attention_problems(cfg, root=Path("/"))
+    assert any("position ids" in b for b in bad) and any("reader" in b for b in bad)
+
+
+def test_the_copy_uploads_nothing_the_relays_quota_refuses(tmp_path, monkeypatch):
+    import huggingface_hub
+    from aadistill.runtime import hub_capacity
+    from aadistill.infrastructure.manifest import sha256_file
+    d = tmp_path / "model"
+    d.mkdir()
+    (d / "model.safetensors").write_bytes(b"weights")
+    (d / "config.json").write_text("{}")
+    (tmp_path / "token").write_text("t")
+    sha, uploads = sha256_file(d / "model.safetensors"), []
+
+    class Api:
+        def __init__(self, token=None):
+            pass
+
+        def get_paths_info(self, *a, **k):
+            return []
+
+        def upload_file(self, *, path_or_fileobj, path_in_repo, **k):
+            uploads.append(path_in_repo)
+    verdict = {"ok": False}
+    monkeypatch.setattr(huggingface_hub, "HfApi", Api)
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda repo, path, **k: str(d / Path(path).name))
+    monkeypatch.setattr(hub_capacity, "would_accept", lambda repo, sizes, token: SimpleNamespace(
+        accepted=verdict["ok"], __str__=lambda self: "probe"))
+    out = AU.copy_final_off_volume(d, "C1-6cat-sr-s20260726", sha, token_file=tmp_path / "token", relay="r/x")
+    assert out["verified"] is False and "quota" in out["refused"] and uploads == []
+    verdict["ok"] = True
+    out = AU.copy_final_off_volume(d, "C1-6cat-sr-s20260726", sha, token_file=tmp_path / "token", relay="r/x")
+    assert out["verified"] and sorted(uploads) == [f"durable/stage3_sr/C1-6cat-sr-s20260726/{sha[:16]}/{n}"
+                                                    for n in ("config.json", "model.safetensors")]
+    assert AU.copy_final_off_volume(d, "u", "0" * 64, token_file=tmp_path / "token")["verified"] is False
