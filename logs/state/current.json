@@ -197,11 +197,11 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": false,
-  "pods": 0,
+  "paid_compute": true,
+  "pods": "at most 1 (train_sr_a2, US-TX-3)",
   "network_volumes": 3,
-  "run": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011 (COMPLETE, $28.1677)",
-  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search + Top-1; 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
+  "run": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531 (launched 2026-11-07T17:46Z); a_train_sr_a1_20261107_104149 COMPLETE $7.7554",
+  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1 and Stage 3's units; 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

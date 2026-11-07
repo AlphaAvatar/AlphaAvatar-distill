@@ -15,6 +15,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   declared and asserted at launch admission; a save point about every hour; each unit evaluated on eval-set-1 on its pod.
 - Grant: caps $18.33 / $37.54 / $17.37 cumulative ($73.24); ceiling $158.3762; project cap $1,000; Research A $262.04;
   `packed_search` closed; `thprcgh7s9` / `4rhubprswo` reserves +$13.34 each.
+- Progress: A1-6cat-sr COMPLETE (`runs/a_train_sr_a1_20261107_104149`, $7.7554 of $18.33; 3.76 s/step; static fluid 7.72% / 6.67%); A2-6cat-sr session launched 2026-11-07T17:46Z (`runs/a_train_sr_a2_20261107_174531`); C1 next.
 - Open result-persistence item: the relay's quota (1.73 GiB left of 100 GB) admits no trained weights' off-volume copy;
   the volume `thprcgh7s9` is the weights' store and is protected until storage is added or a retirement is decided.
 - Owner: `logs/budget/decisions.md` 2026-11-07 (authorized); `PACKED_ROUND.md` section 15; the runs under
