@@ -16038,3 +16038,35 @@ on a paid pod.
 - Not done (not authorized): Stage 3's six units, formal benchmarks, Stage 5, a merge.
 - Revisit when: the maintainer authorizes A1-6cat-sr / A2-6cat-sr training from this Top-1, or decides the volume's
   lifecycle (reserve to 2026-11-19T19:40Z).
+
+## 2026-11-07 — Stage 3 of six_category_schema_restored@v1 prepared; one authorization requested
+
+- Context: the maintainer accepted the packed Full Search COMPLETE and its Top-1 (`1f5e4b42...`, `b74dede8...`,
+  Qwen/Qwen3-4B@1cfa9a72, state_eval_hybrid@v3, protocol `b760ab7e...`) and asked for the whole of Stage 3 -- six units
+  and their formal evaluation -- to be prepared for one review: no paid pod, no training, no re-search, no new data.
+- Decision (prepared, NOT authorized):
+  - **Units** (`plans/packed_training_plan.json`): A1-6cat-sr / A2-6cat-sr / C1-6cat-sr x seeds 20260726, 20260801,
+    kinds `train_sr_a1`, `train_sr_a2`, `train_sr_c1` (replacing the never-run `train_6cat_*`). Each binds its arm's
+    frozen pack (verified by re-derivation and against the freeze record, never copied or rebuilt), its unique
+    supervised tokens before packing, and its own lineage: A1/A2 the packed Top-1 in place on `thprcgh7s9` (provenance:
+    the search's committed record), C1 Thinking-2507's D4 Top-1 `fc28e0dd...` (relayed). The frozen recipe unchanged.
+  - **Save points**: about one per hour of expected step time (A1 890, A2 1,064, C1 858 steps), keep_last 1; a later
+    attempt resumes from the latest one, evaluates a trained unit without retraining it, and skips a scored one.
+  - **Cost** (`plans/packed_training_budget.json`): $31.19 / $35.60 / $59.15 for the six units with their evaluations
+    (28.1 / 32.1 / 48.9 GPU hours), priced on D4-Augmented's measured cross-context L40S steps; cumulative kind caps
+    $18.33 / $37.54 / $17.37 = $73.24 (one resumed attempt reserved for A1 and C1, two for A2).
+  - **Request** (`logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json`): the three caps; A-TM
+    ceiling $135.2489 -> $158.3762 (the packed search closed, its unspent $27.55 not carried); project cap $930 -> $989
+    (committed $883.71 + Stage 3 + thprcgh7s9's and 4rhubprswo's next 14 days + $5 billing lag); Research A cap
+    $211.25 -> $258.04; a provider top-up of at least $35 (balance $53.33; $50 recommended).
+  - **Storage**: reuse `thprcgh7s9` as is (55.7 GB high water against ~65-76 GB of room; each session measures the room
+    first); nothing deleted; the relay holds the packs but not six trained-weight copies (1.68 GiB headroom).
+  - **Maintenance**: `converge_before_sweep.py` now identifies WorkBench's 49c7dfd0 as an upstream revision; its two
+    other historical problems are registered open (`logs/maintenance/inventories/convergence_findings.json`), not
+    Stage 3 dependencies.
+- Alternatives considered: one kind for all six units (one cap, but one teacher reload per arm either way and no
+  lineage separation of the caps); T // 2 save points (loses up to half a unit); copying the packs by scp while a GPU
+  bills (A2's 262 MB at the dev box's 0.72 MB/s).
+- Risks: the Top-200 + tail support under cross-context attention is unmeasured on the L40S (priced x1.05 / x1.44);
+  the search's own footprint on the volume after its last level is estimated, not measured.
+- Revisit when: the maintainer decides the request; or the first A1 unit measures a step outside the priced range.

@@ -253,6 +253,16 @@ CITED_COMMIT_FIELDS: tuple[str, ...] = (
     "base_commit", "git_commit", "commit",
 )
 
+#: Hashes a record cites that are ANOTHER repository's revision -- an upstream data source's identity, never a commit
+#: of this repository (maintainer 2026-11-07: "WorkBench 的 revision 必须按照真实上游数据身份识别，不能误当作本仓库
+#: commit"). Each names the upstream repository and the one record allowed to cite it under a commit field; the same
+#: hash cited by any other record is still checked.
+UPSTREAM_REVISIONS: dict[str, tuple[str, str]] = {
+    "49c7dfd00c03d384ec59ea57374f50b766aa5613": (
+        "olly-styles/WorkBench (MIT), the schema_arguments source option's task files",
+        "logs/stages/stage-2/teacher_modes/audit/schema_arguments_options.json"),
+}
+
 _CITED_COMMIT = re.compile(
     r'"(' + "|".join(CITED_COMMIT_FIELDS) + r')"\s*:\s*"([0-9a-f]{7,40})"')
 
@@ -295,6 +305,9 @@ def cited_commits_are_reachable(root: Path = REPO) -> list[str]:
     if shallow or int(git("rev-list", "--count", "HEAD").strip() or 0) <= 1:
         return []
     cited = cited_commits(root)
+    for sha, (_, record) in UPSTREAM_REVISIONS.items():
+        if {c.rsplit(":", 1)[0] for c in cited.get(sha, ())} == {record}:
+            cited.pop(sha)                  #: an upstream source's revision: its identity is that repository's
     if not cited:
         return []
     check = subprocess.run(["git", "cat-file", "--batch-check"], cwd=root,

@@ -1,928 +1,275 @@
 {
- "schema": "aadistill.stage2.teacher_modes.packed_training_budget/v1",
- "written_utc": "2026-11-03T09:33:25Z",
- "units": [
-  {
-   "unit": "A1-6cat-s20260726",
-   "config": {
-    "stage": "stage3_recovery",
-    "run_name": "research_a_packed_A1-6cat_s20260726",
-    "student_path": "TO_BE_SET_BY_THE_FULL_SEARCH",
-    "teacher": {
-     "model_id": "Qwen/Qwen3-4B",
-     "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
-     "dtype": "bfloat16"
-    },
-    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A1-6cat",
-    "groups": null,
-    "packing": "ladder",
-    "block_len": 8192,
-    "dtype": "float32",
-    "autocast_bf16": true,
-    "gradient_checkpointing": true,
-    "device": "auto",
-    "seed": 20260726,
-    "trainable_patterns": [
-     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
-     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
-     "input_layernorm",
-     "post_attention_layernorm",
-     "model\\.norm\\."
-    ],
-    "loss": {
-     "ce_weight": 0.25,
-     "kd_weight": 1.0,
-     "kd_temperature": 1.0,
-     "kd_scope": "assistant",
-     "kd_support": {
-      "support_id": "reference_topk_tail_v1",
-      "top_k": 200
-     }
-    },
-    "optim": {
-     "lr": 5e-05,
-     "weight_decay": 0.01,
-     "betas": [
-      0.9,
-      0.95
-     ],
-     "eps": 1e-08,
-     "grad_clip": 1.0
-    },
-    "schedule": {
-     "total_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "warmup_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "min_lr_frac": 0.1,
-     "_rule": "training_plan.schedule(packed sequences of the built pack)"
-    },
-    "batch": {
-     "blocks_per_step": 2,
-     "micro_blocks": 1
-    },
-    "checkpoint": {
-     "save_every": 1458,
-     "keep_last": 1,
-     "bind_identity": true
-    },
-    "intervals": {
-     "log_every": 10,
-     "eval_every": 364,
-     "eval_blocks": 16
-    },
-    "out_dir": "/runpod-volume/teacher_modes/packed_units/A1-6cat-s20260726/train",
-    "rung": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-    "val_blocks": 16,
-    "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
-    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-    "lineage": {
-     "teacher": {
-      "model_id": "Qwen/Qwen3-4B",
-      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
-      "weights_sha256": {
-       "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
-       "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
-       "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
-      },
-      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
-      "rope_theta": 1000000.0,
-      "max_position_embeddings": 40960,
-      "vocab_size": 151936
-     },
-     "mode": "thinking",
-     "tokenizer": {
-      "files_sha256": {
-       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
-       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
-       "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
-       "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
-      }
-     },
-     "initialization": {
-      "root_teacher": {
-       "model_id": "Qwen/Qwen3-4B",
-       "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
-      },
-      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH",
-      "provenance": {
-       "record": "TO_BE_SET_BY_THE_FULL_SEARCH",
-       "record_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
-      }
-     },
-     "data": [
-      {
-       "files_sha256": {
-        "blocks.npz": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "audit.jsonl": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "ladder.json": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT"
-       },
-       "mode": "thinking",
-       "teacher": {
-        "model_id": "Qwen/Qwen3-4B",
-        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
-       }
-      }
-     ]
-    }
-   }
-  },
-  {
-   "unit": "A1-6cat-s20260801",
-   "config": {
-    "stage": "stage3_recovery",
-    "run_name": "research_a_packed_A1-6cat_s20260801",
-    "student_path": "TO_BE_SET_BY_THE_FULL_SEARCH",
-    "teacher": {
-     "model_id": "Qwen/Qwen3-4B",
-     "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
-     "dtype": "bfloat16"
-    },
-    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A1-6cat",
-    "groups": null,
-    "packing": "ladder",
-    "block_len": 8192,
-    "dtype": "float32",
-    "autocast_bf16": true,
-    "gradient_checkpointing": true,
-    "device": "auto",
-    "seed": 20260801,
-    "trainable_patterns": [
-     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
-     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
-     "input_layernorm",
-     "post_attention_layernorm",
-     "model\\.norm\\."
-    ],
-    "loss": {
-     "ce_weight": 0.25,
-     "kd_weight": 1.0,
-     "kd_temperature": 1.0,
-     "kd_scope": "assistant",
-     "kd_support": {
-      "support_id": "reference_topk_tail_v1",
-      "top_k": 200
-     }
-    },
-    "optim": {
-     "lr": 5e-05,
-     "weight_decay": 0.01,
-     "betas": [
-      0.9,
-      0.95
-     ],
-     "eps": 1e-08,
-     "grad_clip": 1.0
-    },
-    "schedule": {
-     "total_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "warmup_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "min_lr_frac": 0.1,
-     "_rule": "training_plan.schedule(packed sequences of the built pack)"
-    },
-    "batch": {
-     "blocks_per_step": 2,
-     "micro_blocks": 1
-    },
-    "checkpoint": {
-     "save_every": 1458,
-     "keep_last": 1,
-     "bind_identity": true
-    },
-    "intervals": {
-     "log_every": 10,
-     "eval_every": 364,
-     "eval_blocks": 16
-    },
-    "out_dir": "/runpod-volume/teacher_modes/packed_units/A1-6cat-s20260801/train",
-    "rung": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-    "val_blocks": 16,
-    "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
-    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-    "lineage": {
-     "teacher": {
-      "model_id": "Qwen/Qwen3-4B",
-      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
-      "weights_sha256": {
-       "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
-       "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
-       "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
-      },
-      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
-      "rope_theta": 1000000.0,
-      "max_position_embeddings": 40960,
-      "vocab_size": 151936
-     },
-     "mode": "thinking",
-     "tokenizer": {
-      "files_sha256": {
-       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
-       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
-       "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
-       "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
-      }
-     },
-     "initialization": {
-      "root_teacher": {
-       "model_id": "Qwen/Qwen3-4B",
-       "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
-      },
-      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH",
-      "provenance": {
-       "record": "TO_BE_SET_BY_THE_FULL_SEARCH",
-       "record_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
-      }
-     },
-     "data": [
-      {
-       "files_sha256": {
-        "blocks.npz": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "audit.jsonl": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "ladder.json": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT"
-       },
-       "mode": "thinking",
-       "teacher": {
-        "model_id": "Qwen/Qwen3-4B",
-        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
-       }
-      }
-     ]
-    }
-   }
-  },
-  {
-   "unit": "A2-6cat-s20260726",
-   "config": {
-    "stage": "stage3_recovery",
-    "run_name": "research_a_packed_A2-6cat_s20260726",
-    "student_path": "TO_BE_SET_BY_THE_FULL_SEARCH",
-    "teacher": {
-     "model_id": "Qwen/Qwen3-4B",
-     "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
-     "dtype": "bfloat16"
-    },
-    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A2-6cat",
-    "groups": null,
-    "packing": "ladder",
-    "block_len": 8192,
-    "dtype": "float32",
-    "autocast_bf16": true,
-    "gradient_checkpointing": true,
-    "device": "auto",
-    "seed": 20260726,
-    "trainable_patterns": [
-     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
-     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
-     "input_layernorm",
-     "post_attention_layernorm",
-     "model\\.norm\\."
-    ],
-    "loss": {
-     "ce_weight": 0.25,
-     "kd_weight": 1.0,
-     "kd_temperature": 1.0,
-     "kd_scope": "assistant",
-     "kd_support": {
-      "support_id": "reference_topk_tail_v1",
-      "top_k": 200
-     }
-    },
-    "optim": {
-     "lr": 5e-05,
-     "weight_decay": 0.01,
-     "betas": [
-      0.9,
-      0.95
-     ],
-     "eps": 1e-08,
-     "grad_clip": 1.0
-    },
-    "schedule": {
-     "total_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "warmup_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "min_lr_frac": 0.1,
-     "_rule": "training_plan.schedule(packed sequences of the built pack)"
-    },
-    "batch": {
-     "blocks_per_step": 2,
-     "micro_blocks": 1
-    },
-    "checkpoint": {
-     "save_every": 1458,
-     "keep_last": 1,
-     "bind_identity": true
-    },
-    "intervals": {
-     "log_every": 10,
-     "eval_every": 364,
-     "eval_blocks": 16
-    },
-    "out_dir": "/runpod-volume/teacher_modes/packed_units/A2-6cat-s20260726/train",
-    "rung": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-    "val_blocks": 16,
-    "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
-    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-    "lineage": {
-     "teacher": {
-      "model_id": "Qwen/Qwen3-4B",
-      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
-      "weights_sha256": {
-       "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
-       "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
-       "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
-      },
-      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
-      "rope_theta": 1000000.0,
-      "max_position_embeddings": 40960,
-      "vocab_size": 151936
-     },
-     "mode": "non_thinking",
-     "tokenizer": {
-      "files_sha256": {
-       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
-       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
-       "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
-       "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
-      }
-     },
-     "initialization": {
-      "root_teacher": {
-       "model_id": "Qwen/Qwen3-4B",
-       "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
-      },
-      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH",
-      "provenance": {
-       "record": "TO_BE_SET_BY_THE_FULL_SEARCH",
-       "record_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
-      }
-     },
-     "data": [
-      {
-       "files_sha256": {
-        "blocks.npz": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "audit.jsonl": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "ladder.json": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT"
-       },
-       "mode": "non_thinking",
-       "teacher": {
-        "model_id": "Qwen/Qwen3-4B",
-        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
-       }
-      }
-     ]
-    }
-   }
-  },
-  {
-   "unit": "A2-6cat-s20260801",
-   "config": {
-    "stage": "stage3_recovery",
-    "run_name": "research_a_packed_A2-6cat_s20260801",
-    "student_path": "TO_BE_SET_BY_THE_FULL_SEARCH",
-    "teacher": {
-     "model_id": "Qwen/Qwen3-4B",
-     "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
-     "dtype": "bfloat16"
-    },
-    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A2-6cat",
-    "groups": null,
-    "packing": "ladder",
-    "block_len": 8192,
-    "dtype": "float32",
-    "autocast_bf16": true,
-    "gradient_checkpointing": true,
-    "device": "auto",
-    "seed": 20260801,
-    "trainable_patterns": [
-     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
-     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
-     "input_layernorm",
-     "post_attention_layernorm",
-     "model\\.norm\\."
-    ],
-    "loss": {
-     "ce_weight": 0.25,
-     "kd_weight": 1.0,
-     "kd_temperature": 1.0,
-     "kd_scope": "assistant",
-     "kd_support": {
-      "support_id": "reference_topk_tail_v1",
-      "top_k": 200
-     }
-    },
-    "optim": {
-     "lr": 5e-05,
-     "weight_decay": 0.01,
-     "betas": [
-      0.9,
-      0.95
-     ],
-     "eps": 1e-08,
-     "grad_clip": 1.0
-    },
-    "schedule": {
-     "total_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "warmup_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "min_lr_frac": 0.1,
-     "_rule": "training_plan.schedule(packed sequences of the built pack)"
-    },
-    "batch": {
-     "blocks_per_step": 2,
-     "micro_blocks": 1
-    },
-    "checkpoint": {
-     "save_every": 1458,
-     "keep_last": 1,
-     "bind_identity": true
-    },
-    "intervals": {
-     "log_every": 10,
-     "eval_every": 364,
-     "eval_blocks": 16
-    },
-    "out_dir": "/runpod-volume/teacher_modes/packed_units/A2-6cat-s20260801/train",
-    "rung": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-    "val_blocks": 16,
-    "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
-    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-    "lineage": {
-     "teacher": {
-      "model_id": "Qwen/Qwen3-4B",
-      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
-      "weights_sha256": {
-       "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
-       "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
-       "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
-      },
-      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
-      "rope_theta": 1000000.0,
-      "max_position_embeddings": 40960,
-      "vocab_size": 151936
-     },
-     "mode": "non_thinking",
-     "tokenizer": {
-      "files_sha256": {
-       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
-       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
-       "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
-       "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
-      }
-     },
-     "initialization": {
-      "root_teacher": {
-       "model_id": "Qwen/Qwen3-4B",
-       "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
-      },
-      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH",
-      "provenance": {
-       "record": "TO_BE_SET_BY_THE_FULL_SEARCH",
-       "record_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
-      }
-     },
-     "data": [
-      {
-       "files_sha256": {
-        "blocks.npz": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "audit.jsonl": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "ladder.json": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT"
-       },
-       "mode": "non_thinking",
-       "teacher": {
-        "model_id": "Qwen/Qwen3-4B",
-        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
-       }
-      }
-     ]
-    }
-   }
-  },
-  {
-   "unit": "C1-6cat-s20260726",
-   "config": {
-    "stage": "stage3_recovery",
-    "run_name": "research_a_packed_C1-6cat_s20260726",
-    "student_path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
-    "teacher": {
-     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
-     "dtype": "bfloat16"
-    },
-    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_6cat/C1-6cat",
-    "groups": null,
-    "packing": "ladder",
-    "block_len": 8192,
-    "dtype": "float32",
-    "autocast_bf16": true,
-    "gradient_checkpointing": true,
-    "device": "auto",
-    "seed": 20260726,
-    "trainable_patterns": [
-     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
-     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
-     "input_layernorm",
-     "post_attention_layernorm",
-     "model\\.norm\\."
-    ],
-    "loss": {
-     "ce_weight": 0.25,
-     "kd_weight": 1.0,
-     "kd_temperature": 1.0,
-     "kd_scope": "assistant",
-     "kd_support": {
-      "support_id": "reference_topk_tail_v1",
-      "top_k": 200
-     }
-    },
-    "optim": {
-     "lr": 5e-05,
-     "weight_decay": 0.01,
-     "betas": [
-      0.9,
-      0.95
-     ],
-     "eps": 1e-08,
-     "grad_clip": 1.0
-    },
-    "schedule": {
-     "total_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "warmup_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "min_lr_frac": 0.1,
-     "_rule": "training_plan.schedule(packed sequences of the built pack)"
-    },
-    "batch": {
-     "blocks_per_step": 2,
-     "micro_blocks": 1
-    },
-    "checkpoint": {
-     "save_every": 1458,
-     "keep_last": 1,
-     "bind_identity": true
-    },
-    "intervals": {
-     "log_every": 10,
-     "eval_every": 364,
-     "eval_blocks": 16
-    },
-    "out_dir": "/runpod-volume/teacher_modes/packed_units/C1-6cat-s20260726/train",
-    "rung": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-    "val_blocks": 16,
-    "tokenizer_source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
-    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-    "lineage": {
-     "teacher": {
-      "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-      "revision": "768f209d9ea81521153ed38c47d515654e938aea",
-      "weights_sha256": {
-       "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
-       "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
-       "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
-      },
-      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-      "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
-      "rope_theta": 5000000.0,
-      "max_position_embeddings": 262144,
-      "vocab_size": 151936
-     },
-     "mode": "thinking",
-     "tokenizer": {
-      "files_sha256": {
-       "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
-       "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
-       "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
-      }
-     },
-     "initialization": {
-      "root_teacher": {
-       "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-       "revision": "768f209d9ea81521153ed38c47d515654e938aea"
-      },
-      "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
-      "provenance": {
-       "record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
-       "record_sha256": "81a0e2dda20c81f6bf1d8a2294bfc7f53c417b5fb294cdd3bb52232001922473"
-      }
-     },
-     "data": [
-      {
-       "files_sha256": {
-        "blocks.npz": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "audit.jsonl": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "ladder.json": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT"
-       },
-       "mode": "thinking",
-       "teacher": {
-        "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-        "revision": "768f209d9ea81521153ed38c47d515654e938aea"
-       }
-      }
-     ]
-    }
-   }
-  },
-  {
-   "unit": "C1-6cat-s20260801",
-   "config": {
-    "stage": "stage3_recovery",
-    "run_name": "research_a_packed_C1-6cat_s20260801",
-    "student_path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
-    "teacher": {
-     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
-     "dtype": "bfloat16"
-    },
-    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_6cat/C1-6cat",
-    "groups": null,
-    "packing": "ladder",
-    "block_len": 8192,
-    "dtype": "float32",
-    "autocast_bf16": true,
-    "gradient_checkpointing": true,
-    "device": "auto",
-    "seed": 20260801,
-    "trainable_patterns": [
-     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
-     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
-     "input_layernorm",
-     "post_attention_layernorm",
-     "model\\.norm\\."
-    ],
-    "loss": {
-     "ce_weight": 0.25,
-     "kd_weight": 1.0,
-     "kd_temperature": 1.0,
-     "kd_scope": "assistant",
-     "kd_support": {
-      "support_id": "reference_topk_tail_v1",
-      "top_k": 200
-     }
-    },
-    "optim": {
-     "lr": 5e-05,
-     "weight_decay": 0.01,
-     "betas": [
-      0.9,
-      0.95
-     ],
-     "eps": 1e-08,
-     "grad_clip": 1.0
-    },
-    "schedule": {
-     "total_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "warmup_steps": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-     "min_lr_frac": 0.1,
-     "_rule": "training_plan.schedule(packed sequences of the built pack)"
-    },
-    "batch": {
-     "blocks_per_step": 2,
-     "micro_blocks": 1
-    },
-    "checkpoint": {
-     "save_every": 1458,
-     "keep_last": 1,
-     "bind_identity": true
-    },
-    "intervals": {
-     "log_every": 10,
-     "eval_every": 364,
-     "eval_blocks": 16
-    },
-    "out_dir": "/runpod-volume/teacher_modes/packed_units/C1-6cat-s20260801/train",
-    "rung": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-    "val_blocks": 16,
-    "tokenizer_source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
-    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-    "lineage": {
-     "teacher": {
-      "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-      "revision": "768f209d9ea81521153ed38c47d515654e938aea",
-      "weights_sha256": {
-       "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
-       "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
-       "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
-      },
-      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
-      "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
-      "rope_theta": 5000000.0,
-      "max_position_embeddings": 262144,
-      "vocab_size": 151936
-     },
-     "mode": "thinking",
-     "tokenizer": {
-      "files_sha256": {
-       "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
-       "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
-       "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
-      }
-     },
-     "initialization": {
-      "root_teacher": {
-       "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-       "revision": "768f209d9ea81521153ed38c47d515654e938aea"
-      },
-      "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
-      "provenance": {
-       "record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
-       "record_sha256": "81a0e2dda20c81f6bf1d8a2294bfc7f53c417b5fb294cdd3bb52232001922473"
-      }
-     },
-     "data": [
-      {
-       "files_sha256": {
-        "blocks.npz": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "audit.jsonl": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT",
-        "ladder.json": "TO_BE_SET_WHEN_THE_PACK_IS_BUILT"
-       },
-       "mode": "thinking",
-       "teacher": {
-        "model_id": "Qwen/Qwen3-4B-Thinking-2507",
-        "revision": "768f209d9ea81521153ed38c47d515654e938aea"
-       }
-      }
-     ]
-    }
-   }
-  }
- ],
- "lineage_validation": {
-  "A1-6cat-s20260726": {
-   "problems": [],
-   "pending_full_search": true
-  },
-  "A1-6cat-s20260801": {
-   "problems": [],
-   "pending_full_search": true
-  },
-  "A2-6cat-s20260726": {
-   "problems": [],
-   "pending_full_search": true
-  },
-  "A2-6cat-s20260801": {
-   "problems": [],
-   "pending_full_search": true
-  },
-  "C1-6cat-s20260726": {
-   "problems": [],
-   "pending_full_search": false
-  },
-  "C1-6cat-s20260801": {
-   "problems": [],
-   "pending_full_search": false
-  }
- },
+ "schema": "aadistill.stage2.teacher_modes.packed_training_budget/v2",
+ "study_id": "six_category_schema_restored@v1",
+ "written_utc": "2026-11-07T08:21:42Z",
  "is_an_estimate": true,
- "measured_packing_factors": {
-  "A1-6cat": 1.1688,
-  "A2-6cat": 1.0782
+ "step_model": {
+  "fit": {
+   "a": 3.0134,
+   "b": 8.554e-05,
+   "residual_sd": 0.043,
+   "steps": 368,
+   "mean": 3.539,
+   "max": 4.55,
+   "source": "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261025_055042/store/D4-Augmented-s20260801.evidence.tgz (sha256 680a598a...) :: training/trainer/train_log.jsonl, train_step rows after step 20"
+  },
+  "factors": {
+   "lower": 1.0,
+   "expected": 1.05,
+   "upper": 1.4375
+  }
  },
- "c1_kept_sequences_measured": 1042,
- "repeated_share_used_for_c1_tool_part": 0.2733,
- "arms": {
-  "A1-6cat": {
-   "per_seed": [
-    {
-     "case": "lower",
-     "packed_sequences": 1293,
-     "optimizer_steps": 1940,
-     "warmup_steps": 97,
-     "eval_every": 242,
-     "save_every": 970,
-     "seconds_per_step": 5.261,
-     "hours_per_seed": 3.68,
-     "usd_per_seed": 4.09
-    },
-    {
-     "case": "expected",
-     "packed_sequences": 1436,
-     "optimizer_steps": 2154,
-     "warmup_steps": 108,
-     "eval_every": 269,
-     "save_every": 1077,
-     "seconds_per_step": 6.19,
-     "hours_per_seed": 4.95,
-     "usd_per_seed": 5.49
-    },
-    {
-     "case": "upper",
-     "packed_sequences": 1578,
-     "optimizer_steps": 2367,
-     "warmup_steps": 118,
-     "eval_every": 295,
-     "save_every": 1183,
-     "seconds_per_step": 8.047,
-     "hours_per_seed": 7.98,
-     "usd_per_seed": 8.86
-    }
-   ],
-   "seeds": [
-    20260726,
-    20260801
-   ],
-   "usd_both_seeds": {
-    "lower": 8.18,
-    "expected": 10.98,
-    "upper": 17.72
+ "per_unit": {
+  "A1-6cat-sr-s20260726": {
+   "lower": {
+    "seconds_per_step": 3.852,
+    "train_s": 8633,
+    "evaluation_s": 2653.1,
+    "unit_s": 11286
+   },
+   "expected": {
+    "seconds_per_step": 4.045,
+    "train_s": 9317,
+    "evaluation_s": 3917.1,
+    "unit_s": 13234
+   },
+   "upper": {
+    "seconds_per_step": 5.537,
+    "train_s": 12937,
+    "evaluation_s": 7834.2,
+    "unit_s": 20771
    }
   },
-  "A2-6cat": {
-   "per_seed": [
-    {
-     "case": "lower",
-     "packed_sequences": 4540,
-     "optimizer_steps": 6810,
-     "warmup_steps": 340,
-     "eval_every": 851,
-     "save_every": 3405,
-     "seconds_per_step": 4.811,
-     "hours_per_seed": 9.95,
-     "usd_per_seed": 11.04
-    },
-    {
-     "case": "expected",
-     "packed_sequences": 5161,
-     "optimizer_steps": 7742,
-     "warmup_steps": 387,
-     "eval_every": 967,
-     "save_every": 3871,
-     "seconds_per_step": 5.66,
-     "hours_per_seed": 13.42,
-     "usd_per_seed": 14.89
-    },
-    {
-     "case": "upper",
-     "packed_sequences": 6768,
-     "optimizer_steps": 10152,
-     "warmup_steps": 508,
-     "eval_every": 1269,
-     "save_every": 5076,
-     "seconds_per_step": 7.358,
-     "hours_per_seed": 23.44,
-     "usd_per_seed": 26.01
-    }
-   ],
-   "seeds": [
-    20260726,
-    20260801
-   ],
-   "usd_both_seeds": {
-    "lower": 22.08,
-    "expected": 29.78,
-    "upper": 52.02
+  "A1-6cat-sr-s20260801": {
+   "lower": {
+    "seconds_per_step": 3.852,
+    "train_s": 8633,
+    "evaluation_s": 2653.1,
+    "unit_s": 11286
+   },
+   "expected": {
+    "seconds_per_step": 4.045,
+    "train_s": 9317,
+    "evaluation_s": 3917.1,
+    "unit_s": 13234
+   },
+   "upper": {
+    "seconds_per_step": 5.537,
+    "train_s": 12937,
+    "evaluation_s": 7834.2,
+    "unit_s": 20771
    }
   },
-  "C1-6cat": {
-   "per_seed": [
-    {
-     "case": "lower",
-     "packed_sequences": 1165,
-     "optimizer_steps": 1748,
-     "warmup_steps": 87,
-     "eval_every": 218,
-     "save_every": 874,
-     "seconds_per_step": 5.261,
-     "hours_per_seed": 3.4,
-     "usd_per_seed": 3.78
-    },
-    {
-     "case": "expected",
-     "packed_sequences": 1198,
-     "optimizer_steps": 1797,
-     "warmup_steps": 90,
-     "eval_every": 224,
-     "save_every": 898,
-     "seconds_per_step": 6.19,
-     "hours_per_seed": 4.33,
-     "usd_per_seed": 4.81
-    },
-    {
-     "case": "upper",
-     "packed_sequences": 1272,
-     "optimizer_steps": 1908,
-     "warmup_steps": 95,
-     "eval_every": 238,
-     "save_every": 954,
-     "seconds_per_step": 8.047,
-     "hours_per_seed": 6.95,
-     "usd_per_seed": 7.72
-    }
-   ],
-   "seeds": [
-    20260726,
-    20260801
-   ],
-   "usd_both_seeds": {
-    "lower": 7.56,
-    "expected": 9.62,
-    "upper": 15.44
+  "A2-6cat-sr-s20260726": {
+   "lower": {
+    "seconds_per_step": 3.222,
+    "train_s": 24824,
+    "evaluation_s": 2653.1,
+    "unit_s": 27477
+   },
+   "expected": {
+    "seconds_per_step": 3.383,
+    "train_s": 26333,
+    "evaluation_s": 3917.1,
+    "unit_s": 30250
+   },
+   "upper": {
+    "seconds_per_step": 4.632,
+    "train_s": 36329,
+    "evaluation_s": 7834.2,
+    "unit_s": 44163
+   }
+  },
+  "A2-6cat-sr-s20260801": {
+   "lower": {
+    "seconds_per_step": 3.222,
+    "train_s": 24824,
+    "evaluation_s": 2653.1,
+    "unit_s": 27477
+   },
+   "expected": {
+    "seconds_per_step": 3.383,
+    "train_s": 26333,
+    "evaluation_s": 3917.1,
+    "unit_s": 30250
+   },
+   "upper": {
+    "seconds_per_step": 4.632,
+    "train_s": 36329,
+    "evaluation_s": 7834.2,
+    "unit_s": 44163
+   }
+  },
+  "C1-6cat-sr-s20260726": {
+   "lower": {
+    "seconds_per_step": 3.998,
+    "train_s": 7790,
+    "evaluation_s": 2653.1,
+    "unit_s": 10443
+   },
+   "expected": {
+    "seconds_per_step": 4.198,
+    "train_s": 8331,
+    "evaluation_s": 3917.1,
+    "unit_s": 12248
+   },
+   "upper": {
+    "seconds_per_step": 5.747,
+    "train_s": 11573,
+    "evaluation_s": 7834.2,
+    "unit_s": 19408
+   }
+  },
+  "C1-6cat-sr-s20260801": {
+   "lower": {
+    "seconds_per_step": 3.998,
+    "train_s": 7790,
+    "evaluation_s": 2653.1,
+    "unit_s": 10443
+   },
+   "expected": {
+    "seconds_per_step": 4.198,
+    "train_s": 8331,
+    "evaluation_s": 3917.1,
+    "unit_s": 12248
+   },
+   "upper": {
+    "seconds_per_step": 5.747,
+    "train_s": 11573,
+    "evaluation_s": 7834.2,
+    "unit_s": 19408
    }
   }
  },
- "six_trainings_usd": {
-  "lower": 37.82,
-  "expected": 50.38,
-  "upper": 85.18
+ "arms": {
+  "A1-6cat-sr": {
+   "kind": "train_sr_a1",
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "session": {
+    "lower": {
+     "gpu_hours": 6.52,
+     "usd": 7.24
+    },
+    "expected": {
+     "gpu_hours": 7.72,
+     "usd": 8.57
+    },
+    "upper": {
+     "gpu_hours": 12.21,
+     "usd": 14.78
+    }
+   },
+   "unit_deadline_hours": 3.75,
+   "session_hard_cap": {
+    "driver_minutes": 692,
+    "billable_minutes": 775.0,
+    "hard_cap_usd": 15.64
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 133.1,
+    "usd_each": 2.69,
+    "attempts_reserved": 1,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored one"
+   },
+   "kind_cumulative_cap_usd": 18.33
+  },
+  "A2-6cat-sr": {
+   "kind": "train_sr_a2",
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "session": {
+    "lower": {
+     "gpu_hours": 15.52,
+     "usd": 17.23
+    },
+    "expected": {
+     "gpu_hours": 17.17,
+     "usd": 19.07
+    },
+    "upper": {
+     "gpu_hours": 25.2,
+     "usd": 30.51
+    }
+   },
+   "unit_deadline_hours": 10.25,
+   "session_hard_cap": {
+    "driver_minutes": 1472,
+    "billable_minutes": 1593.7,
+    "hard_cap_usd": 32.16
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 133.1,
+    "usd_each": 2.69,
+    "attempts_reserved": 2,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored one"
+   },
+   "kind_cumulative_cap_usd": 37.54
+  },
+  "C1-6cat-sr": {
+   "kind": "train_sr_c1",
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "session": {
+    "lower": {
+     "gpu_hours": 6.05,
+     "usd": 6.72
+    },
+    "expected": {
+     "gpu_hours": 7.17,
+     "usd": 7.96
+    },
+    "upper": {
+     "gpu_hours": 11.45,
+     "usd": 13.86
+    }
+   },
+   "unit_deadline_hours": 3.25,
+   "session_hard_cap": {
+    "driver_minutes": 647,
+    "billable_minutes": 727.3,
+    "hard_cap_usd": 14.68
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 133.2,
+    "usd_each": 2.69,
+    "attempts_reserved": 1,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored one"
+   },
+   "kind_cumulative_cap_usd": 17.37
+  }
  },
- "not_included": "pod setup/teardown per session (0.6-1.8 h), storage, the teacher-native tool generation",
+ "six_units_usd": {
+  "lower": 31.19,
+  "expected": 35.6,
+  "upper": 59.15
+ },
+ "six_units_gpu_hours": {
+  "lower": 28.09,
+  "expected": 32.06,
+  "upper": 48.86
+ },
+ "stage3_cumulative_cap_usd": 73.24,
+ "evaluation": "each unit's formal eval-set-1 evaluation runs on the same pod right after its training (a1_units.py): its seconds are inside the unit's row and its cost inside the arm's session cap; no separate evaluation session is priced",
+ "rates": {
+  "gpu_expected_usd_per_hour": 1.09,
+  "gpu_cap_usd_per_hour": 1.19,
+  "container_disk_usd_per_hour": 0.0205
+ },
+ "capacity": {
+  "save_point_bytes": 5908258491,
+  "unit_after_evaluation_bytes": 8292493459,
+  "while_saving_bytes": 11816516982,
+  "stage3_high_water_bytes": 55663219245,
+  "stage3_after_bytes": 49754960754,
+  "rule": "keep_last 1: while a save point is written the previous one stays (2 x 5.91 GB), then is removed; after a unit, its final save point (weights + AdamW state) and the evaluation package remain",
+  "unmeasured": "the search's own footprint on the volume after its last level (221 GB by du before it); the journal's checkpoints sum to 270.6 GB (decimal) -- the first session measures it (a1_units.volume_room) and refuses a unit that would not fit"
+ },
  "authorizes": "nothing"
 }

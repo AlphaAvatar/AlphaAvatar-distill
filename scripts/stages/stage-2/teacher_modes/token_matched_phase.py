@@ -40,6 +40,14 @@ cumulative over every attempt:
         --kind tool_pilot --minutes <M> --run-id <run> --scr <scratch> --session-commit <sha> --bundle <name> \
         --max-price <live price> --disk-gb 150 [--data-center-ids <A,B;C>] [--resume-from <secured copy>] \
         --create-attempts <n> --create-retry-seconds <s>
+
+STAGE 3 of six_category_schema_restored@v1 (maintainer 2026-11-07): kinds ``train_sr_a1``, ``train_sr_a2``,
+``train_sr_c1`` -- one per arm, its two seeds in turn (`a1_units.py`), each unit trained from its lineage's
+initialization and formally evaluated on eval-set-1 on the same pod. Each binds `packed_training_plan.json`, its
+budget and the packs' freeze record; the arm's pack (and C1's initialization) arrive as relay inputs
+(`stage3_relay_inputs`, staged at $0 by `stage_packs`); the session attaches only the volume the grant's
+``stage3_sr`` block names, never a protected one; the cap is cumulative over every attempt of the kind. A later
+attempt resumes each unit from the volume (latest save point; a trained unit is only evaluated).
 """
 from __future__ import annotations
 
@@ -104,14 +112,16 @@ STUDY = SE.Study(
     kinds=("supplement", "inputs", "search", "train_a1",
            #: the packed round: none runs before the grant names its hard cap (kind_cap_problems)
            "tool_generation", "tool_generation_t2507", "packed_search",
-           "train_6cat_a1", "train_6cat_a2", "train_6cat_c1", "tool_pilot",
+           "tool_pilot",
            #: six_category_schema_restored@v1's generation (maintainer 2026-11-05, R1 approval)
-           "tool_generation_sr", "tool_generation_sr_t2507"),
+           "tool_generation_sr", "tool_generation_sr_t2507",
+           #: six_category_schema_restored@v1's Stage 3 (maintainer 2026-11-07): one kind per arm, two seeds each
+           "train_sr_a1", "train_sr_a2", "train_sr_c1"),
     kind_claims=(("search", frozenset({"formal"})), ("train_a1", frozenset({"formal", "training", "evaluation"})),
                  ("tool_pilot", frozenset({"teacher_generation"})),
                  ("packed_search", frozenset({"formal"})),
                  *((k, frozenset({"formal", "training", "evaluation"}))
-                   for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1"))))
+                   for k in ("train_sr_a1", "train_sr_a2", "train_sr_c1"))))
 
 
 class TMAuthorization(SE.EngineeringAuthorization):
@@ -167,8 +177,11 @@ KIND_RECORDS = {
                       "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v3_freeze.json",
                       "configs/shared/baselines/selection.json",
                       "configs/shared/baselines/initialization_forward_baseline_v2.json"),
-    **{k: ("logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json",)
-       for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
+    #: the six units' bound plan, its budget (unit deadlines, caps) and the packs' freeze record
+    **{k: ("logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json",
+           "logs/stages/stage-2/teacher_modes/plans/packed_training_budget.json",
+           "logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json")
+       for k in ("train_sr_a1", "train_sr_a2", "train_sr_c1")},
     #: the protocol, the task protocol (the verification version), the frozen pilot plan (which names its task file's
     #: sha256, the pool content and the plan cells it came from) and the pilot-only source admission
     "tool_pilot": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
@@ -176,9 +189,11 @@ KIND_RECORDS = {
                    "logs/stages/stage-2/teacher_modes/plans/tool_pilot_plan.json",
                    "logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json"),
 }
-#: the packed training kinds' arms, and the arms trained with Thinking-2507 rather than the hybrid
-PACKED_TRAIN_ARMS = {"train_6cat_a1": "A1-6cat", "train_6cat_a2": "A2-6cat", "train_6cat_c1": "C1-6cat"}
-THINKING_2507_KINDS = frozenset({"tool_generation_t2507", "tool_generation_sr_t2507", "train_6cat_c1"})
+#: the Stage-3 kinds' arms (six_category_schema_restored@v1), and the kinds whose teacher is Thinking-2507
+PACKED_TRAIN_ARMS = {"train_sr_a1": "A1-6cat-sr", "train_sr_a2": "A2-6cat-sr", "train_sr_c1": "C1-6cat-sr"}
+THINKING_2507_KINDS = frozenset({"tool_generation_t2507", "tool_generation_sr_t2507", "train_sr_c1"})
+#: the grant's block for the Stage-3 kinds: per-kind cumulative caps, the volume, the plan it approves
+STAGE3_BLOCK = "stage3_sr"
 #: each teacher lineage's first tool-generation kind: a lineage's session runs only under an artifact of its own kind,
 #: so the two lineages' authorizations, identities and caps (`kind_cap_problems`) never stand in for each other
 TOOL_GENERATION_KINDS = {"hybrid": "tool_generation", "thinking_2507": "tool_generation_t2507"}
@@ -400,9 +415,12 @@ def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) ->
         bad = t2507_grant_problems(g, kind, root)
     elif kind == PACKED_SEARCH_KIND:
         bad = packed_search_grant_problems(g)
+    elif kind in PACKED_TRAIN_ARMS:
+        bad = stage3_grant_problems(g, kind, root)
     else:
         return []
-    if (g.get(kind) or {}).get("cap_is_cumulative"):
+    if (g.get(kind) or {}).get("cap_is_cumulative") or (
+            kind in PACKED_TRAIN_ARMS and (g.get(STAGE3_BLOCK) or {}).get("cap_is_cumulative")):
         k = kind_spent(kind, root)
         if k["unknown"]:
             bad.append(f"earlier {kind} runs {k['unknown']} record no closeout cost: reconcile them first")
@@ -541,6 +559,55 @@ def the_search_volume_is_the_granted_one(ctx) -> tuple[bool, str]:
     if not want or vid != want:
         return False, f"the packed search runs on its granted volume {want!r}, not {vid!r}"
     return True, f"the granted search volume {vid}"
+
+
+#: the scope the grant's Stage-3 block approves (the maintainer's decision names it when it is granted)
+STAGE3_APPROVAL = ("Stage 3 of six_category_schema_restored@v1: A1-6cat-sr, A2-6cat-sr, C1-6cat-sr x seeds 20260726, "
+                   "20260801, trained and formally evaluated on eval-set-1")
+
+
+def stage3_grant_problems(g: dict, kind: str, root: Path = REPO_ROOT) -> list[str]:
+    """Why the grant does not authorize a Stage-3 kind beyond its cap (empty when it does): the ``stage3_sr`` block must
+    be the maintainer's, quote the decision with a date, approve `STAGE3_APPROVAL`, name this kind with its arm and
+    the kind cap as its hard cap, cumulative over every attempt, the L40S, the volume the units run on, and the plan
+    and budget by the sha256 they have now -- a changed plan is not the approved one."""
+    import datetime as dt
+    b = g.get(STAGE3_BLOCK)
+    if not isinstance(b, dict):
+        return [f"the grant carries no {STAGE3_BLOCK} scope: Stage 3 needs the maintainer's authorization"]
+    k = (b.get("kinds") or {}).get(kind) or {}
+    want = {"approves": STAGE3_APPROVAL, "granted_by": "maintainer", "cap_is_cumulative": True, "gpu": GPU}
+    bad = [f"the grant's {STAGE3_BLOCK}.{x} is {b.get(x)!r}, not {v!r}" for x, v in want.items() if b.get(x) != v]
+    if k.get("arm") != PACKED_TRAIN_ARMS[kind]:
+        bad.append(f"the grant's {STAGE3_BLOCK} names no {kind} for {PACKED_TRAIN_ARMS[kind]}")
+    if float(k.get("hard_cap_usd", -1)) != float((g.get("session_hard_caps_usd") or {}).get(kind, -2)):
+        bad.append(f"the grant's {STAGE3_BLOCK}.kinds.{kind}.hard_cap_usd is not its session_hard_caps_usd")
+    for rel, key in ((KIND_RECORDS[kind][0], "plan_sha256"), (KIND_RECORDS[kind][1], "budget_sha256")):
+        if b.get(key) != P1._sha(rel, root):
+            bad.append(f"the grant's {STAGE3_BLOCK}.{key} is not {rel} as it is now")
+    if not (b.get("network_volume") or {}).get("id"):
+        bad.append(f"the grant's {STAGE3_BLOCK} block names no network volume")
+    if not isinstance(b.get("decision"), str) or not b["decision"].strip():
+        bad.append(f"the grant's {STAGE3_BLOCK} block quotes no decision")
+    try:
+        dt.date.fromisoformat(str(b.get("date")))
+    except ValueError:
+        bad.append(f"the grant's {STAGE3_BLOCK}.date {b.get('date')!r} is not an ISO date")
+    return bad
+
+
+def the_training_volume_is_the_granted_one(ctx) -> tuple[bool, str]:
+    """A Stage-3 session attaches only the volume the grant's Stage-3 block names (the search volume, which holds
+    A1/A2's initialization), never a protected one (4rhubprswo: the v2 Top-1's only copy)."""
+    import json
+    g = json.loads((REPO_ROOT / STUDY.grant).read_text())
+    b = g.get(STAGE3_BLOCK) or {}
+    want, vid = (b.get("network_volume") or {}).get("id"), ctx.args.network_volume_id
+    if vid in set(b.get("protected_volumes") or ()) | set((g.get(PACKED_SEARCH_KIND) or {}).get("protected_volumes") or ()):
+        return False, f"{vid} is a protected volume: a Stage-3 session never attaches it"
+    if not want or vid != want:
+        return False, f"a Stage-3 session runs on its granted volume {want!r}, not {vid!r}"
+    return True, f"the granted Stage-3 volume {vid}"
 
 
 def require_on_pod(path: Path, kind: str, root: Path = REPO_ROOT) -> dict:
@@ -764,18 +831,28 @@ def packed_search_command(ctx, plan, planned_minutes: float = SEARCH_DEADLINE_MI
             + P1._tail(status))
 
 
-def train_6cat_command(ctx, plan, kind: str) -> str:
+def train_sr_command(ctx, plan, kind: str) -> str:
+    """A Stage-3 arm's two seeds in turn (`a1_units.py`): each unit's training stops at the budget's upper training
+    hours for one seed, and the volume's room is checked against what the session's units still write."""
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    vol = f" --volume-gb {a.volume_gb}" if getattr(a, "volume_gb", None) is not None else ""
     return (f"mkdir -p {durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/a1_units.py "
             f"--authorization {auth} --durable-root {durable(a)} --status {status} "
-            f"--unit-deadline-hours {PACKED_UNIT_DEADLINE_HOURS[kind]} --kind {kind} "
-            f"--plan {KIND_RECORDS[kind][0]} --arm {PACKED_TRAIN_ARMS[kind]} --units-dir packed_units"
+            f"--unit-deadline-hours {unit_deadline_hours(kind)} --kind {kind} "
+            f"--plan {KIND_RECORDS[kind][0]} --arm {PACKED_TRAIN_ARMS[kind]} --units-dir {STAGE3_UNITS_DIR}{vol}"
             + P1._tail(status))
 
 
-#: per-unit deadlines of the packed trainings (plans/packed_training_budget.json, upper case per seed, rounded up)
-PACKED_UNIT_DEADLINE_HOURS = {"train_6cat_a1": 8.5, "train_6cat_a2": 24.0, "train_6cat_c1": 7.5}
+#: the Stage-3 units' directory under the durable root (packed_training_plan.UNITS_DIR)
+STAGE3_UNITS_DIR = "stage3_sr"
+
+
+def unit_deadline_hours(kind: str, root: Path = REPO_ROOT) -> float:
+    """A Stage-3 unit's training deadline: the bound budget's upper training hours for one seed of the kind's arm."""
+    import json
+    b = json.loads((Path(root) / KIND_RECORDS[kind][1]).read_text())
+    return float(b["arms"][PACKED_TRAIN_ARMS[kind]]["unit_deadline_hours"])
 
 #: per kind: (driver, command, local assets beyond the battery, description)
 DRIVERS = {
@@ -805,15 +882,16 @@ DRIVERS = {
                       ("profiles_v2", "suite_v3"),
                       "Research A packed round: the hybrid full search in the packed forward context (one L40S)"),
     **{k: ("scripts/stages/stage-2/teacher_modes/a1_units.py",
-           (lambda ctx, plan, _k=k: train_6cat_command(ctx, plan, _k)), (f"pack_{k}",),
-           f"Research A packed round: {PACKED_TRAIN_ARMS[k]}'s two seeds trained and formally evaluated")
+           (lambda ctx, plan, _k=k: train_sr_command(ctx, plan, _k)), (),
+           f"Research A Stage 3 (six_category_schema_restored@v1): {PACKED_TRAIN_ARMS[k]}'s two seeds trained and "
+           "formally evaluated on eval-set-1")
        for k in PACKED_TRAIN_ARMS},
 }
 #: the plan's time contingency per kind: the search and A1's units stop themselves at their own deadlines with their
 #: state saved (full_search --deadline-minutes, a1_units --unit-deadline-hours), so 5% covers the closeout; the
 #: generation kinds keep the runner's 25%
 CONTINGENCY = {"search": 0.05, "train_a1": 0.05, "packed_search": 0.05,
-               **{k: 0.05 for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")}}
+               **{k: 0.05 for k in ("train_sr_a1", "train_sr_a2", "train_sr_c1")}}
 #: small evidence pulled on every poll, per kind (relative to the durable root)
 POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation_check.json",
                      "search_a1/search/states.jsonl", "search_a1/search/telemetry.jsonl", "search_a1/products.json"),
@@ -822,7 +900,7 @@ POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation
                             "search_packed/search/states.jsonl", "search_packed/search/telemetry.jsonl",
                             "search_packed/evaluation_cache.jsonl", "search_packed/products.json",
                             "search_packed/gpu_samples.json"),
-          **{k: (f"{PACKED_TRAIN_ARMS[k]}_units.json",) for k in ("train_6cat_a1", "train_6cat_a2", "train_6cat_c1")},
+          **{k: (f"{PACKED_TRAIN_ARMS[k]}_units.json",) for k in ("train_sr_a1", "train_sr_a2", "train_sr_c1")},
           **{k: tuple(f"tool_generation_{li}/{f}" for f in ("tool_session.json", "telemetry.jsonl",
                                                              "device_admission.json", "device_confirmation.json"))
              for k, li in GENERATION_LINEAGE.items()},
@@ -837,10 +915,12 @@ def secure_files(ctx) -> None:
         root, st, kind = durable(ctx.args), SE.store(ctx), _kind(ctx)
         for rel in POLLED.get(kind, ()):
             P1._pull(ctx, f"{root}/{rel}", st / rel, None)
-        if kind == "train_a1":
-            lines = P1._listing(ctx, f"cd {root}/v2_units 2>/dev/null && ls -d A1-s*/train/train_log.jsonl 2>/dev/null || true") or []
+        if kind == "train_a1" or kind in PACKED_TRAIN_ARMS:
+            sub, pat = (("v2_units", "A1-s*") if kind == "train_a1"
+                        else (STAGE3_UNITS_DIR, f"{PACKED_TRAIN_ARMS[kind]}-s*"))
+            lines = P1._listing(ctx, f"cd {root}/{sub} 2>/dev/null && ls -d {pat}/train/train_log.jsonl 2>/dev/null || true") or []
             for rel in (l.strip() for l in lines if l.strip()):
-                P1._pull(ctx, f"{root}/v2_units/{rel}", st / "v2_units" / rel, None)
+                P1._pull(ctx, f"{root}/{sub}/{rel}", st / sub / rel, None)
         SE._scp(ctx, f"/workspace/{SESSION_KIND}.status", st / "driver.status", limit_s=120)
     except Exception as exc:  # noqa: BLE001
         ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
@@ -890,6 +970,21 @@ def top1_off_volume(ctx, products: dict) -> dict[str, bool]:
     return {f"top1_off_volume/{n}": seen.get(n) == want[n] for n in want}
 
 
+def final_weights_on_volume(ctx, units_record: dict) -> dict[str, bool]:
+    """Each trained unit's final weights hashed on the volume, where they stay (P8.4: no consumer reads them on the dev
+    box), against the sha256 the driver recorded when training ended."""
+    out = {}
+    for name, row in (units_record.get("units") or {}).items():
+        want, path = row.get("final_model_safetensors_sha256"), row.get("final_model_path")
+        if not want or not path:
+            continue
+        lines = P1._listing(ctx, f"sha256sum {path}/model.safetensors") or []
+        got = next((l.split()[0] for l in lines if l.strip().endswith("model.safetensors")), None)
+        ctx.evidence.setdefault("final_weights_on_volume", {})[name] = {"path": path, "sha256": got}
+        out[f"final_weights_on_volume/{name}"] = got == want
+    return out
+
+
 def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     """Closeout for the search and A1 kinds: the evidence directories tarred and pulled (weights excluded: they stay
     on the volume, by sha256 in the records), and the search's Top-1 verified by its sha256 on the volume."""
@@ -911,8 +1006,11 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
         sub = "tool_pilot_hybrid" if kind == TOOL_PILOT_KIND else f"tool_generation_{GENERATION_LINEAGE[kind]}"
         got[kind if kind == TOOL_PILOT_KIND else "tool_generation"] = P1._tar(ctx, f"{root}/{sub}", sub)[0]
     elif kind in PACKED_TRAIN_ARMS:
-        got["packed_units_evidence"] = P1._tar(ctx, f"{root}/packed_units", "packed_units_evidence",
+        got["stage3_units_evidence"] = P1._tar(ctx, f"{root}/{STAGE3_UNITS_DIR}", "stage3_units_evidence",
                                                excludes=("./*/train/checkpoints", "./*/evaluation/package/*.safetensors"))[0]
+        rec = st / f"{PACKED_TRAIN_ARMS[kind]}_units.json"
+        if rec.is_file():
+            got.update(final_weights_on_volume(ctx, json.loads(rec.read_text())))
     else:
         #: the evaluation's model package is the checkpoint's weights again (a_train_a1_20261102_184122 carried two
         #: 2.38 GB copies home that no analysis reads; their sha256 is in a1_units.json) -- they stay on the volume
@@ -965,6 +1063,65 @@ def stage_tasks(kind: str) -> dict:
     return {"relay": f"{ri.repo}:{ri.path}", "uploaded": True, "sha256": ri.sha256}
 
 
+#: the pack files a Stage-3 unit reads (the trainer's ladder contract; the manifest and the frozen documents are the
+#: dev box's verification inputs, read by `packed_training_plan.bind_pack`, never by the pod: P8.4)
+STAGE3_PACK_FILES = ("blocks.npz", "ladder.json", "audit.jsonl")
+
+
+def stage3_relay_inputs(kind: str, root: Path = REPO_ROOT) -> tuple:
+    """A Stage-3 kind's relayed inputs, each verified by its sha256 where setup installs it: the arm's three pack files
+    (staged at $0 by `stage_packs`), and for C1-6cat-sr its initialization -- Thinking-2507's D4 Top-1, already on
+    the relay where its materialization record names it. A1/A2's initialization is read on the search volume."""
+    import json
+    from aadistill.infrastructure.session import RelayInput
+    from shared.deployment import MAIN_RELAY
+    arm = PACKED_TRAIN_ARMS[kind]
+    plan = json.loads((Path(root) / KIND_RECORDS[kind][0]).read_text())
+    u = next(x for x in plan["units"] if x["arm"] == arm)
+    dest = u["config"]["data_dir"]
+    out = tuple(RelayInput(path=f"transfer/stage3_sr/{arm}/{sha[:16]}/{n}", repo=MAIN_RELAY, dest=dest, sha256=sha)
+                for n, sha in u["data"]["files_sha256"].items() if n in STAGE3_PACK_FILES)
+    init = u["initialization"]
+    if init.get("relay_prefix"):
+        out += tuple(RelayInput(path=f"{init['relay_prefix']}/{n}", repo=MAIN_RELAY, dest=u["config"]["student_path"],
+                                sha256=sha) for n, sha in sorted(init["files_sha256"].items()))
+    return out
+
+
+def stage_packs(kind: str, root: Path = REPO_ROOT) -> dict:
+    """Upload the arm's pack files to the relay paths `stage3_relay_inputs` names ($0, before the launch); a path
+    already there must hold these bytes (its LFS sha256)."""
+    import hashlib
+    from huggingface_hub import HfApi
+    api = HfApi()
+    out = {}
+    for ri in stage3_relay_inputs(kind, root):
+        if not ri.path.startswith("transfer/stage3_sr/"):
+            continue                                         #: the initialization is on the relay already
+        local = Path(root) / ri.dest / Path(ri.path).name
+        if hashlib.sha256(local.read_bytes()).hexdigest() != ri.sha256:
+            raise SE.AuthorizationError(f"{local} is not the bound {ri.sha256[:12]}")
+        info = next(iter(api.get_paths_info(ri.repo, [ri.path], repo_type="model", expand=True)), None)
+        if info is not None:
+            lfs = getattr(info, "lfs", None)
+            there = getattr(lfs, "sha256", None) if lfs is not None else None
+            out[ri.path] = {"already_there": True, "sha256_matches": there in (None, ri.sha256)}
+            continue
+        api.upload_file(path_or_fileobj=str(local), path_in_repo=ri.path, repo_id=ri.repo, repo_type="model")
+        out[ri.path] = {"uploaded": True, "sha256": ri.sha256}
+    return out
+
+
+def the_stage3_inputs_are_relayed(ctx) -> tuple[bool, str]:
+    """A Stage-3 session declares its pack (and C1's initialization) as relay inputs; the runner's precheck then lists
+    the relay for each ($0), so an unstaged pack refuses before anything is created."""
+    try:
+        ri = stage3_relay_inputs(_kind(ctx))
+    except (OSError, KeyError, StopIteration, ValueError) as exc:
+        return False, f"the Stage-3 relay inputs cannot be named: {exc!r}"
+    return True, f"{len(ri)} Stage-3 input(s) relayed: " + ", ".join(Path(r.path).name for r in ri)
+
+
 def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str | None = None) -> SE.Launch:
     """``resume_from`` (the tool pilot only): the dev box's secured copy of earlier pilot sessions, staged on the pod
     as a local asset under `PILOT_RESUME_DIR` (`tool_pilot_command` passes it to the driver)."""
@@ -991,9 +1148,7 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
     packed = {
               "pilot_tasks": asset("artifacts/stages/stage-2/teacher_modes/tool_pilot"),
               "profiles_v2": asset("artifacts/stages/stage-2/teacher_modes/calibration_v3"),
-              "suite_v3": asset("artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3"),
-              **{f"pack_{k}": asset(f"artifacts/stages/stage-2/teacher_modes/packs_6cat/{a}")
-                 for k, a in PACKED_TRAIN_ARMS.items()}}
+              "suite_v3": asset("artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3")}
     named = {**packed, "order": order,
              "profiles": LocalAsset(repo_path=cal, dest_name=Path(cal).name, install_to=str(Path(cal).parent)),
              "suite": LocalAsset(repo_path=suite, dest_name=Path(suite).name, install_to=str(Path(suite).parent)),
@@ -1016,6 +1171,8 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
     if kind == "train_a1" or kind in PACKED_TRAIN_ARMS:   #: the evaluation's relayed inputs (phase.py's recovery)
         from stages.phase_c1.autoinit_c1_launch import C1_EVAL_TOKENIZER
         relay = tuple(C1_EVAL_TOKENIZER)
+    if kind in PACKED_TRAIN_ARMS:                        #: the arm's pack, and C1's initialization, at hub speed
+        relay += stage3_relay_inputs(kind)
     return SE.Launch(
         session_kind=SESSION_KIND, authorization=TMAuthorization, teacher_model=t["model"],
         teacher_revision=t["revision"], kind=kind, local_assets=assets, disk_gb=150,
@@ -1027,7 +1184,9 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0, resume_from: str
                           *((the_bound_task_file_is_relayed,) if kind in GENERATION_LINEAGE else ()))
                          if kind in CONTAINER_KINDS else
                          (P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones,
-                          *((the_search_volume_is_the_granted_one,) if kind == PACKED_SEARCH_KIND else ()))),
+                          *((the_search_volume_is_the_granted_one,) if kind == PACKED_SEARCH_KIND else ()),
+                          *((the_training_volume_is_the_granted_one, the_stage3_inputs_are_relayed)
+                            if kind in PACKED_TRAIN_ARMS else ()))),
         on_poll=polls[0], products_secured=polls[1],
         artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; every sealed shard is already "

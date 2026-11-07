@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO (no open blocker record). Research A: the packed Full Search COMPLETE 2026-11-06 (Top-1 1f5e4b42...); Stage 3, formal benchmarks and Stage 5 NOT authorized. Owner: PACKED_ROUND.md section 13.",
+ "blocker": "BLOCKED NO (no open blocker record). Research A: Stage 3 of six_category_schema_restored@v1 prepared 2026-11-07, one authorization requested; nothing trained. Owner: PACKED_ROUND.md section 14.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer: Stage 3 for A1-6cat-sr / A2-6cat-sr from the packed Top-1 1f5e4b42... (not authorized) and thprcgh7s9's lifecycle. Owner: logs/budget/decisions.md 2026-11-06.",
+ "next": "The maintainer: the Stage-3 request (six units, caps $73.24; ceiling, project and Research A caps; top-up). Owner: logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",

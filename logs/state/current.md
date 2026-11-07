@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-06 (UTC), after the packed Full Search completed. The human view. Every number here has an owner
+**Updated:** 2026-11-07 (UTC), after Stage 3 of the restored composition was prepared. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,13 +9,21 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
+**RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 PREPARED (2026-11-07) -- SIX UNITS, ONE AUTHORIZATION REQUESTED; NOTHING TRAINED, NO POD.**
+- Units: A1-6cat-sr / A2-6cat-sr / C1-6cat-sr x seeds 20260726, 20260801 (`plans/packed_training_plan.json`), kinds
+  `train_sr_a1/_a2/_c1`; each bound to its frozen pack and its own lineage (A1/A2 the packed Top-1 `b74dede8...` on
+  `thprcgh7s9`, C1 Thinking-2507's D4 Top-1 `fc28e0dd...`); recipe unchanged; a save point about every hour.
+- Cost: $31.19 / $35.60 / $59.15 with the formal evaluations (`plans/packed_training_budget.json`); caps $73.24.
+- Owed to the maintainer: the request in `logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json`
+  (caps; ceiling $158.38, project cap $989, Research A $258.04; volume reserve +$13.34; top-up >= $35).
+- Owner: `logs/budget/decisions.md` 2026-11-07; `PACKED_ROUND.md` section 14.
+
 **RESEARCH A: THE PACKED FULL SEARCH IS COMPLETE (2026-11-06) -- TOP-1 `1f5e4b42...`, ONE ATTEMPT, $28.17 OF $55.72.**
 - Top-1: FFN(base) -> DEPTH(base) -> WIDTH(rh) -> ATTENTION(rh), 596,049,920 parameters, single shard `b74dede8...`; on
   the volume `thprcgh7s9` and on the private relay (`runs/a_packed_search_20261105_195011/evidence/products.json`).
 - Measured: 1,521.8 pod minutes, state evaluation 70.6 s median, peak VRAM 36.2 of 46 GB
   (`audit/packed_search_measurement.json`). Nothing is running or billing; volumes `thprcgh7s9`, `4rhubprswo`, `am5m373kuq`.
-- Next, owed to the maintainer: Stage 3 for A1-6cat-sr / A2-6cat-sr from this Top-1 (not authorized), and the
-  volume's lifecycle (reserve to 2026-11-19T19:40Z).
+- Accepted by the maintainer 2026-11-07; Stage 3 prepared from it (above).
 
 Earlier the same round:
 - Inputs: the frozen calibration v2 profiles + `state_eval_hybrid@v3` (`c39d0ec9...`, protocol `b760ab7e...`,

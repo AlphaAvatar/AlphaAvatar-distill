@@ -639,6 +639,9 @@ def envelope_reconciliation() -> dict:
     phase_sessions = round(spent["sessions_usd"] - by_kind.get("supplement", 0.0), 4)
     cum = round(before + phase_sessions + storage, 4) if before is not None else None
     pilot = CAP_OPTIONS["B"][0]
+    #: a later maintainer raise of Research A's cap (``research_a_cumulative``, 2026-11-05) is the cap headroom is read
+    #: against; the cross-check below stays on the cap the grant's own statement named
+    cap_now = float((g.get("research_a_cumulative") or {}).get("cap_usd") or cap_a or 0) or None
     return {"read_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "grant": str(TM.STUDY.grant),
             "grant_sha256": sha(REPO / TM.STUDY.grant),
             "envelope": {"ceiling_usd": env["ceiling_usd"], "spent_usd": env["spent_usd"],
@@ -650,9 +653,9 @@ def envelope_reconciliation() -> dict:
                          "storage_booked_usd": storage, "new_spend_usd": round(phase_sessions + storage, 4),
                          "headroom_usd": round(g["phase_a1"]["hard_cap_usd"] - phase_sessions - storage, 4),
                          "_": "the pilot is not in the A1 phase's scope: drawing on this grant needs the amendment"},
-            "research_a_cumulative": {"cap_usd": cap_a, "before_the_a1_phase_usd": before,
+            "research_a_cumulative": {"cap_usd": cap_a, "cap_now_usd": cap_now, "before_the_a1_phase_usd": before,
                                       "now_usd": cum, "with_the_pilot_cap_usd": round(cum + pilot, 4) if cum else None,
-                                      "headroom_after_usd": round(cap_a - cum - pilot, 4) if cum else None,
+                                      "headroom_after_usd": round(cap_now - cum - pilot, 4) if cum else None,
                                       "cross_check": {
                                           "cap_less_the_first_ceiling_plus_the_supplement_usd": round(
                                               cap_a - float(g["amendments"][0]["previous_ceiling_usd"])

@@ -1,0 +1,34 @@
+{
+ "schema": "aadistill.maintenance.convergence_findings/v1",
+ "tool": "scripts/maintenance/consolidation/converge_before_sweep.py",
+ "observed": {
+  "commit": "c29bae2c",
+  "utc": "2026-11-05T19:55Z",
+  "how": "the tool's run before the packed Full Search launch; every file it rewrote was restored with git restore and nothing was committed"
+ },
+ "decided_by": "maintainer 2026-11-07 (Stage 3 preparation, section VI): register the three historical problems independently; never rewrite a closed C1/C3 experiment's executable closure; identify WorkBench's revision by its real upstream data identity; not a launch blocker unless one is a real dependency of this round's Stage 3",
+ "findings": [
+  {
+   "id": "generators_exit_nonzero",
+   "status": "OPEN",
+   "what": "two of the tool's generators exit non-zero on the research tree: the skip-predicate audit (scripts/stages/stage-1/phase_c1/audit_skip_predicates.py --write) and the migration record v2 (scripts/maintenance/migration/write_relocation_record_v2.py --write)",
+   "stage3_dependency": "none: the Stage-3 kinds bind packed_training_plan.json, its budget and the -sr freeze record; the training driver and the trainer read none of these generators' outputs"
+  },
+  {
+   "id": "regeneration_rewrites_closed_closures",
+   "status": "OPEN",
+   "what": "regenerating would rewrite closed experiments' frozen records: C1/C3 executable_closure.json (n_files 114 -> 130, last committed 2026-10-18), D1's current.json copying the global `next`, log_inventory.json (+10k lines)",
+   "rule": "a closed experiment's executable closure is evidence of what ran and is never regenerated (maintainer 2026-11-07); the fix is for the tool to leave closed experiments' closures out of its regeneration, not to accept the rewrite",
+   "stage3_dependency": "none"
+  },
+  {
+   "id": "upstream_revision_misread_as_commit",
+   "status": "FIXED 2026-11-07",
+   "what": "49c7dfd00c03d384ec59ea57374f50b766aa5613 was reported as an unreachable repository commit; it is olly-styles/WorkBench's upstream revision (MIT), cited by logs/stages/stage-2/teacher_modes/audit/schema_arguments_options.json :: option_2_workbench.commit as the source option's data identity",
+   "fix": "converge_before_sweep.UPSTREAM_REVISIONS names it with its upstream repository and its one citing record; the same hash cited by any other record is still checked",
+   "verified": "cited_commits_are_reachable() at 2026-11-07: 761 cited hashes, every repository commit reachable, the WorkBench revision classified as upstream",
+   "stage3_dependency": "none"
+  }
+ ],
+ "authorizes": "nothing"
+}

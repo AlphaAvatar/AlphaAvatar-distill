@@ -229,7 +229,7 @@ def test_the_pool_splits_by_atom_dedupes_isolates_and_freezes_its_order():
 
 def test_the_packed_kinds_are_registered_and_refuse_without_a_grant_cap():
     from stages.teacher_modes import token_matched_phase as TM
-    new = ("tool_generation", "tool_generation_t2507", "packed_search", "train_6cat_a1", "train_6cat_a2", "train_6cat_c1")
+    new = ("tool_generation", "tool_generation_t2507", "packed_search", "train_sr_a1", "train_sr_a2", "train_sr_c1")
     assert set(new) <= set(TM.STUDY.kinds) and set(new) <= set(TM.DRIVERS) and set(new) <= set(TM.KIND_RECORDS)
     #: maintainer 2026-11-04 / 2026-11-05 (packed_search: 'Packed Full Search 正式授权')
     granted = {"tool_generation": 9.13, "tool_generation_t2507": 2.78, "packed_search": 55.72}
@@ -239,13 +239,15 @@ def test_the_packed_kinds_are_registered_and_refuse_without_a_grant_cap():
         else:
             assert TM.kind_cap_problems(k, 1.0), k                  # the grant names no cap for the others
         assert all(isinstance(r, str) for r in TM.KIND_RECORDS[k])
-    assert TM.main(["issue", "--kind", "train_6cat_a1", "--run-id", "x", "--expected-usd", "1",
+    assert TM.main(["issue", "--kind", "train_sr_a1", "--run-id", "x", "--expected-usd", "1",
                     "--hard-cap-usd", "1", "--dry-run"]) == 11
     for s in TM.STUDY.scripts:
         assert (TM.REPO_ROOT / s).is_file(), s
 
 
-def test_binding_fills_a_built_packs_files_and_steps(tmp_path, monkeypatch):
+def test_a_built_admitted_pack_that_is_not_the_frozen_one_refuses_the_binding(tmp_path, monkeypatch):
+    """The formal binding (`packed_training_plan.bind_pack`) reads only the pack the freeze record froze: an admitted,
+    intact pack of other data passes `verify_pack` and is still refused, file by file."""
     from aadistill.data.token_documents import TokenDocument
     from stages.teacher_modes import packed_packs as PP
     from stages.teacher_modes import packed_training_plan as PTP
@@ -258,16 +260,10 @@ def test_binding_fills_a_built_packs_files_and_steps(tmp_path, monkeypatch):
     rep = {"arm": "C1-6cat", "selection_sha256": PP.selection_identity("C1-6cat", sel)}   #: this selection's report
     rep["report_sha256"] = PP.canonical_sha(rep)
     adm = PP.admit("C1-6cat", sel, rep, tmp_path)
-    rec = PP.pack(sel["train"], sel["validation"], adm["path"], tmp_path / "C1-6cat")  #: a built, admitted pack
-    plan = PTP.bind(PTP.packed_units(), tmp_path)
-    c1 = [u for u in plan["units"] if u["arm"] == "C1-6cat"]
-    a1 = [u for u in plan["units"] if u["arm"] == "A1-6cat"]
-    assert all(isinstance(u["config"]["schedule"]["total_steps"], int) for u in c1)
-    assert all(u["config"]["lineage"]["data"][0]["files_sha256"]["blocks.npz"] != PTP.TO_BUILD for u in c1)
-    assert all(u["config"]["lineage"]["data"][0]["packed_content_sha256"]
-               == rec["data_admission"]["packed_content_sha256"] for u in c1)
-    assert all(u["config"]["schedule"]["total_steps"] == PTP.TO_BUILD for u in a1)    # its pack is not built
-    assert plan["seed_order"] == [20260726, 20260801]
+    PP.pack(sel["train"], sel["validation"], adm["path"], tmp_path / "C1-6cat")  #: a built, admitted pack
+    PP.verify_pack(tmp_path / "C1-6cat")
+    with pytest.raises(SystemExit, match="not the frozen one"):
+        PTP.bind_pack("C1-6cat-sr", tmp_path / "C1-6cat")
 
 
 def test_a_toucan_row_becomes_task_material_only():

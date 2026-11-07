@@ -1,0 +1,519 @@
+{
+ "schema": "aadistill.budget.application/stage3_sr_v1",
+ "written_utc": "2026-11-07T16:40:00Z",
+ "status": "AUTHORIZATION REQUEST for the maintainer's one decision over the whole of Stage 3; AUTHORIZES NOTHING: no grant, no issue, no relay upload, no pod, no spend",
+ "decided_by": [
+  "maintainer 2026-11-07: accept research_a_packed_hybrid_full_search COMPLETE and its Top-1 1f5e4b42 (b74dede8...); prepare six_category_schema_restored@v1's Stage 3 (six units, their formal evaluation) for one authorization; no paid pod this round"
+ ],
+ "the_one_decision": "authorize Stage 3 as one package: kinds train_sr_a1 / train_sr_a2 / train_sr_c1 with cumulative hard caps $18.33 / $37.54 / $17.37 ($73.24 together, each with its arm's formal eval-set-1 evaluation), the thprcgh7s9 reserve extended by $13.34, and the budget revisions below",
+ "identity": {
+  "plan": {
+   "path": "logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json",
+   "sha256": "16dedb85ecda85b3dbea69da1bbd7930143798f5bdca2bafa031525bf4c5388d"
+  },
+  "budget": {
+   "path": "logs/stages/stage-2/teacher_modes/plans/packed_training_budget.json",
+   "sha256": "1c904500d9d3df2df923125a75f739de093f601c2c7152005961f63734c1fe1a"
+  },
+  "freeze_record": {
+   "path": "logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json",
+   "sha256": "9e6262b78832b0c75d2a4c0032d1a5f411b23154c1faf9572e96ddd19cd1187b"
+  },
+  "a1_a2_initialization": {
+   "state_id": "1f5e4b420125a345f1d190f0b8f87cad",
+   "model_safetensors_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011/evidence/search_record.json",
+   "on_pod": "thprcgh7s9:/teacher_modes/search_packed/top1, read in place",
+   "verified_2026_11_07": "the relay copy downloaded to the dev box (93 s) and re-hashed: all three files equal; A1/A2's launch admission on those bytes: 0 problems"
+  },
+  "c1_initialization": {
+   "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
+   "on_pod": "relayed (stage0_calvol/finalists/formal_v1/d4/1301deb7.../, LFS sha256 read 2026-11-07) into its repository path",
+   "admission_2026_11_07": "C1's launch admission on the dev box: 0 problems"
+  },
+  "teachers": {
+   "A1/A2": "Qwen/Qwen3-4B@1cfa9a72 (thinking / non-thinking)",
+   "C1": "Qwen/Qwen3-4B-Thinking-2507@768f209d"
+  }
+ },
+ "units": [
+  {
+   "unit": "A1-6cat-sr-s20260726",
+   "kind": "train_sr_a1",
+   "seed": 20260726,
+   "initialization": "b74dede833fb... (1f5e4b42)",
+   "teacher": "Qwen/Qwen3-4B@1cfa9a72",
+   "packed_sequences": 1430,
+   "optimizer_steps": 2145,
+   "save_every": 890,
+   "save_points": [
+    890,
+    1780,
+    2145
+   ],
+   "unique_supervised_tokens_before_packing": 5935809,
+   "supervised_token_exposure": 21031455,
+   "hours": {
+    "lower": 3.13,
+    "expected": 3.68,
+    "upper": 5.77
+   },
+   "seconds_per_step": {
+    "lower": 3.852,
+    "expected": 4.045,
+    "upper": 5.537
+   }
+  },
+  {
+   "unit": "A1-6cat-sr-s20260801",
+   "kind": "train_sr_a1",
+   "seed": 20260801,
+   "initialization": "b74dede833fb... (1f5e4b42)",
+   "teacher": "Qwen/Qwen3-4B@1cfa9a72",
+   "packed_sequences": 1430,
+   "optimizer_steps": 2145,
+   "save_every": 890,
+   "save_points": [
+    890,
+    1780,
+    2145
+   ],
+   "unique_supervised_tokens_before_packing": 5935809,
+   "supervised_token_exposure": 21031455,
+   "hours": {
+    "lower": 3.13,
+    "expected": 3.68,
+    "upper": 5.77
+   },
+   "seconds_per_step": {
+    "lower": 3.852,
+    "expected": 4.045,
+    "upper": 5.537
+   }
+  },
+  {
+   "unit": "A2-6cat-sr-s20260726",
+   "kind": "train_sr_a2",
+   "seed": 20260726,
+   "initialization": "b74dede833fb... (1f5e4b42)",
+   "teacher": "Qwen/Qwen3-4B@1cfa9a72",
+   "packed_sequences": 5047,
+   "optimizer_steps": 7571,
+   "save_every": 1064,
+   "save_points": [
+    1064,
+    2128,
+    3192,
+    4256,
+    5320,
+    6384,
+    7448,
+    7571
+   ],
+   "unique_supervised_tokens_before_packing": 5926755,
+   "supervised_token_exposure": 18484038,
+   "hours": {
+    "lower": 7.63,
+    "expected": 8.4,
+    "upper": 12.27
+   },
+   "seconds_per_step": {
+    "lower": 3.222,
+    "expected": 3.383,
+    "upper": 4.632
+   }
+  },
+  {
+   "unit": "A2-6cat-sr-s20260801",
+   "kind": "train_sr_a2",
+   "seed": 20260801,
+   "initialization": "b74dede833fb... (1f5e4b42)",
+   "teacher": "Qwen/Qwen3-4B@1cfa9a72",
+   "packed_sequences": 5047,
+   "optimizer_steps": 7571,
+   "save_every": 1064,
+   "save_points": [
+    1064,
+    2128,
+    3192,
+    4256,
+    5320,
+    6384,
+    7448,
+    7571
+   ],
+   "unique_supervised_tokens_before_packing": 5926755,
+   "supervised_token_exposure": 18484038,
+   "hours": {
+    "lower": 7.63,
+    "expected": 8.4,
+    "upper": 12.27
+   },
+   "seconds_per_step": {
+    "lower": 3.222,
+    "expected": 3.383,
+    "upper": 4.632
+   }
+  },
+  {
+   "unit": "C1-6cat-sr-s20260726",
+   "kind": "train_sr_c1",
+   "seed": 20260726,
+   "initialization": "fc28e0dd916d... (1301deb7)",
+   "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d",
+   "packed_sequences": 1261,
+   "optimizer_steps": 1892,
+   "save_every": 858,
+   "save_points": [
+    858,
+    1716,
+    1892
+   ],
+   "unique_supervised_tokens_before_packing": 5937691,
+   "supervised_token_exposure": 21774603,
+   "hours": {
+    "lower": 2.9,
+    "expected": 3.4,
+    "upper": 5.39
+   },
+   "seconds_per_step": {
+    "lower": 3.998,
+    "expected": 4.198,
+    "upper": 5.747
+   }
+  },
+  {
+   "unit": "C1-6cat-sr-s20260801",
+   "kind": "train_sr_c1",
+   "seed": 20260801,
+   "initialization": "fc28e0dd916d... (1301deb7)",
+   "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d",
+   "packed_sequences": 1261,
+   "optimizer_steps": 1892,
+   "save_every": 858,
+   "save_points": [
+    858,
+    1716,
+    1892
+   ],
+   "unique_supervised_tokens_before_packing": 5937691,
+   "supervised_token_exposure": 21774603,
+   "hours": {
+    "lower": 2.9,
+    "expected": 3.4,
+    "upper": 5.39
+   },
+   "seconds_per_step": {
+    "lower": 3.998,
+    "expected": 4.198,
+    "upper": 5.747
+   }
+  }
+ ],
+ "price": {
+  "six_units_usd": {
+   "lower": 31.19,
+   "expected": 35.6,
+   "upper": 59.15
+  },
+  "six_units_gpu_hours": {
+   "lower": 28.09,
+   "expected": 32.06,
+   "upper": 48.86
+  },
+  "sessions": {
+   "A1-6cat-sr": {
+    "lower": {
+     "gpu_hours": 6.52,
+     "usd": 7.24
+    },
+    "expected": {
+     "gpu_hours": 7.72,
+     "usd": 8.57
+    },
+    "upper": {
+     "gpu_hours": 12.21,
+     "usd": 14.78
+    }
+   },
+   "A2-6cat-sr": {
+    "lower": {
+     "gpu_hours": 15.52,
+     "usd": 17.23
+    },
+    "expected": {
+     "gpu_hours": 17.17,
+     "usd": 19.07
+    },
+    "upper": {
+     "gpu_hours": 25.2,
+     "usd": 30.51
+    }
+   },
+   "C1-6cat-sr": {
+    "lower": {
+     "gpu_hours": 6.05,
+     "usd": 6.72
+    },
+    "expected": {
+     "gpu_hours": 7.17,
+     "usd": 7.96
+    },
+    "upper": {
+     "gpu_hours": 11.45,
+     "usd": 13.86
+    }
+   }
+  },
+  "basis": "plans/packed_training_budget.json: seconds per step from D4-Augmented's measured cross-context L40S steps (fit 3.0134 + 8.554e-5 x KD positions, sd 0.043 s), x1.05 expected / x1.44 upper; formal evaluation 2,653 / 3,917 / 7,834 s per unit; setup and closeout as A1 v2 measured; $1.09/h expected, the $1.19/h ceiling for upper and caps, + container disk",
+  "vs_old_estimate": "the old six-unit $50.38 / $85.18 priced document-isolated steps (6.2-6.7 s) on the superseded A1/A2/C1-6cat estimates and left out setup, teardown and storage; the -sr packs train cross-context (D4-Augmented's 3.0-4.6 s regime) and are built"
+ },
+ "caps": {
+  "train_sr_a1": {
+   "first_attempt": {
+    "driver_minutes": 692,
+    "billable_minutes": 775.0,
+    "hard_cap_usd": 15.64
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 133.1,
+    "usd_each": 2.69,
+    "attempts_reserved": 1,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored one"
+   },
+   "cumulative_usd": 18.33
+  },
+  "train_sr_a2": {
+   "first_attempt": {
+    "driver_minutes": 1472,
+    "billable_minutes": 1593.7,
+    "hard_cap_usd": 32.16
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 133.1,
+    "usd_each": 2.69,
+    "attempts_reserved": 2,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored one"
+   },
+   "cumulative_usd": 37.54
+  },
+  "train_sr_c1": {
+   "first_attempt": {
+    "driver_minutes": 647,
+    "billable_minutes": 727.3,
+    "hard_cap_usd": 14.68
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 133.2,
+    "usd_each": 2.69,
+    "attempts_reserved": 1,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored one"
+   },
+   "cumulative_usd": 17.37
+  }
+ },
+ "evaluation": "each unit's formal eval-set-1 evaluation runs on the same pod right after its training (a1_units.py): its seconds are inside the unit's row and its cost inside the arm's session cap; no separate evaluation session is priced",
+ "execution": {
+  "hardware": "Secure Cloud, one NVIDIA L40S, at most one billing pod; an A100 only after a measured L40S OOM and its own authorization",
+  "sessions": "three, in order A1 -> A2 -> C1, each one arm's two seeds in turn (seed 20260726 first): one teacher and one initialization loaded per session",
+  "first_session": "A1-6cat-sr's first unit is the training-path admission and the L40S measurement (step seconds, peak memory, save time: a1_units.train_telemetry); no separate pilot",
+  "volume": "thprcgh7s9 (US-TX-3) attached to every session: A1/A2's Top-1 is read there and every unit's save points and evaluation stay there; the datacenter follows the volume",
+  "transfers": "packs relayed at $0 before each launch (stage_packs: 3 files per arm, 0.37 GiB in all; the relay accepts them, 1.31 GiB headroom left after); C1's initialization already relayed; nothing pushed from the dev box while a GPU bills",
+  "deadlines": {
+   "A1-6cat-sr": 3.75,
+   "A2-6cat-sr": 10.25,
+   "C1-6cat-sr": 3.25
+  },
+  "checkpoints": {
+   "target_seconds_between_save_points": 3600.0,
+   "save_every": {
+    "A1-6cat-sr": 890,
+    "A2-6cat-sr": 1064,
+    "C1-6cat-sr": 858
+   },
+   "keep_last": 1,
+   "contents": [
+    "model/ (fp32 weights, config)",
+    "trainer_state.pt: AdamW state, step, consumed sequences, torch + CUDA RNG, config sha256, bound identity",
+    "resume_identity.json: data, initialization, lineage stamp"
+   ]
+  },
+  "resume": "a recoverable failure resumes the same units from the volume in a new attempt of the same kind (new one-use artifact, inside the kind's cumulative cap): the latest save point; a trained unit is only evaluated; a scored unit is never re-run"
+ },
+ "storage": {
+  "capacity": {
+   "save_point_bytes": 5908258491,
+   "unit_after_evaluation_bytes": 8292493459,
+   "while_saving_bytes": 11816516982,
+   "stage3_high_water_bytes": 55663219245,
+   "stage3_after_bytes": 49754960754,
+   "rule": "keep_last 1: while a save point is written the previous one stays (2 x 5.91 GB), then is removed; after a unit, its final save point (weights + AdamW state) and the evaluation package remain",
+   "unmeasured": "the search's own footprint on the volume after its last level (221 GB by du before it); the journal's checkpoints sum to 270.6 GB (decimal) -- the first session measures it (a1_units.volume_room) and refuses a unit that would not fit"
+  },
+  "volume_room": "350 GB provisioned (taken as 350e9 bytes); the search's checkpoints sum to 270.6 GB by its journal, plus its caches and the Top-1 copy: about 65-76 GB left; Stage 3's high water is 55.7 GB (49.8 GB after) -- it fits, with 9-20 GB to spare. The first session measures the room (du -sb) and every session refuses a unit that would not fit before training it",
+  "if_short": "enlarge thprcgh7s9 by 50 GB ($3.50/month), a maintainer decision; nothing on the volume is deleted to make room",
+  "relay": "the relay's private quota leaves 1.68 GiB (bisected 2026-11-07): the packs fit; six final-weight copies (7.0 GiB bf16 / 13.7 GiB fp32) do not, so the trained weights' durable store is the volume (not a second copy) unless storage is bought or relay objects retired"
+ },
+ "position": {
+  "fetched_utc": "2026-11-07T08:03:12Z",
+  "provider_billed_usd": 856.6677,
+  "committed_usd": 883.7122,
+  "project_cap_usd": 930.0,
+  "project_remaining_usd": 46.2878,
+  "balance_usd": 53.3319,
+  "spend_per_hour_usd": 0.073,
+  "pods": 0,
+  "volumes": {
+   "4rhubprswo": "350 GB US-TX-3 (the v2 Top-1's only copy; protected)",
+   "am5m373kuq": "55 GB EUR-IS-2 (H1-PA archive)",
+   "thprcgh7s9": "350 GB US-TX-3 (the packed search; A1/A2's initialization)"
+  },
+  "a_tm_study": {
+   "ceiling_usd": 135.2489,
+   "spent_usd": 85.1362,
+   "remaining_usd": 50.1127
+  },
+  "research_a_cumulative_cap_usd": 211.25
+ },
+ "budget_revisions": {
+  "a_tm_ceiling": {
+   "from": 135.2489,
+   "to": 158.3762,
+   "rule": "spent $85.1362 + Stage 3's cumulative caps; the packed search's unspent $27.55 and the closed kinds' remainders are not carried"
+  },
+  "per_session_hard_cap": {
+   "keep": 55.72,
+   "largest_stage3_kind_cap": 37.54
+  },
+  "project_cap": {
+   "from": 930.0,
+   "to": 989.0,
+   "items": {
+    "committed_now": 883.7122,
+    "stage3_caps": 73.24,
+    "thprcgh7s9_reserve_extension": 13.34,
+    "4rhubprswo_after_its_reserve_14_days": 13.34,
+    "billing_lag_margin": 5.0
+   },
+   "_": "4rhubprswo holds the v2 Top-1's only copy and stays: its reserve runs out ~2026-11-15 and it keeps billing $0.82-0.96/day"
+  },
+  "research_a_cumulative_cap": {
+   "from": 211.25,
+   "to": 258.0379,
+   "items": {
+    "v1": 46.3017,
+    "a_tm_ceiling": 158.3762,
+    "volume_reserves": 53.36
+   },
+   "_": "the same rule as 2026-11-05 (v1 + the A-TM ceiling + the volumes' reserves): obligations equal the cap"
+  },
+  "provider_top_up": {
+   "balance_now": 53.3319,
+   "stage3_caps": 73.24,
+   "storage_7_days": 14.35,
+   "minimum_usd": 35,
+   "recommended_usd": 50,
+   "_": "every issue checks the balance against the session's hard cap: without a top-up C1's session (the third) would be refused after A1's and A2's spend; $50 covers every cap at its upper case plus a week of the three volumes"
+  }
+ },
+ "proposed_grant_amendment": {
+  "session_hard_caps_usd": {
+   "train_sr_a1": 18.33,
+   "train_sr_a2": 37.54,
+   "train_sr_c1": 17.37
+  },
+  "ceiling_usd": {
+   "from": 135.2489,
+   "to": 158.3762
+  },
+  "project_cumulative_cap_usd": {
+   "from": 930.0,
+   "to": 989.0
+  },
+  "research_a_cumulative.cap_usd": {
+   "from": 211.25,
+   "to": 258.0379
+  },
+  "packed_search": "closed for new attempts (COMPLETE 2026-11-06; its unspent $27.55 is not carried)",
+  "stage3_sr": {
+   "approves": "Stage 3 of six_category_schema_restored@v1: A1-6cat-sr, A2-6cat-sr, C1-6cat-sr x seeds 20260726, 20260801, trained and formally evaluated on eval-set-1",
+   "granted_by": "maintainer",
+   "decision": "<the maintainer's words>",
+   "date": "<YYYY-MM-DD>",
+   "plan_sha256": "16dedb85ecda85b3dbea69da1bbd7930143798f5bdca2bafa031525bf4c5388d",
+   "budget_sha256": "1c904500d9d3df2df923125a75f739de093f601c2c7152005961f63734c1fe1a",
+   "freeze_record_sha256": "9e6262b78832b0c75d2a4c0032d1a5f411b23154c1faf9572e96ddd19cd1187b",
+   "kinds": {
+    "train_sr_a1": {
+     "arm": "A1-6cat-sr",
+     "hard_cap_usd": 18.33,
+     "first_attempt_hard_cap_usd": 15.64,
+     "driver_minutes": 692,
+     "unit_deadline_hours": 3.75
+    },
+    "train_sr_a2": {
+     "arm": "A2-6cat-sr",
+     "hard_cap_usd": 37.54,
+     "first_attempt_hard_cap_usd": 32.16,
+     "driver_minutes": 1472,
+     "unit_deadline_hours": 10.25
+    },
+    "train_sr_c1": {
+     "arm": "C1-6cat-sr",
+     "hard_cap_usd": 17.37,
+     "first_attempt_hard_cap_usd": 14.68,
+     "driver_minutes": 647,
+     "unit_deadline_hours": 3.25
+    }
+   },
+   "stage_cumulative_cap_usd": 73.24,
+   "cap_is_cumulative": true,
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "max_price_usd_per_hour": 1.19,
+   "network_volume": {
+    "id": "thprcgh7s9",
+    "datacenter": "US-TX-3",
+    "size_gb": 350
+   },
+   "protected_volumes": [
+    "4rhubprswo",
+    "am5m373kuq"
+   ],
+   "storage": {
+    "thprcgh7s9_reserve_extension_usd": 13.34,
+    "_": "14 more days (to 2026-12-03T19:40Z), booked by its storage record"
+   },
+   "order": [
+    "train_sr_a1",
+    "train_sr_a2",
+    "train_sr_c1"
+   ],
+   "resume": "a recoverable failure resumes the same units from the volume in a new attempt of the same kind (new one-use artifact, inside the kind's cumulative cap): the latest save point; a trained unit is only evaluated; a scored unit is never re-run",
+   "never": [
+    "an A100 without a measured L40S out-of-memory and its own authorization",
+    "more than one billing pod",
+    "attaching 4rhubprswo or am5m373kuq",
+    "re-searching, re-packing or regenerating any data",
+    "a second measurement of a scored unit",
+    "Stage 4/5, a release or a merge into main"
+   ]
+  }
+ },
+ "after_approval_zero_cost_steps": [
+  "write the grant amendment exactly as above, citing the decision (and update the storage record's reserve)",
+  "stage_packs for each kind ($0, the dev box's uplink, ~10 min in all)",
+  "the session commit carrying the authorization; push; the pod-like worktree check (setup binding, require_on_pod)",
+  "issue train_sr_a1 at its first-attempt hard cap, launch on thprcgh7s9; then train_sr_a2, then train_sr_c1, each after the previous one's closeout"
+ ],
+ "not_requested": [
+  "any re-search, re-packing or data regeneration",
+  "a separate GPU pilot",
+  "Stage 4/5, formal external benchmarks, a release or a merge into main",
+  "an A100",
+  "deleting anything on thprcgh7s9 or 4rhubprswo"
+ ],
+ "authorizes": "nothing"
+}

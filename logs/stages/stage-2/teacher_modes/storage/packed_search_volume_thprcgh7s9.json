@@ -26,5 +26,40 @@
    "the search evidence archive d781ab9a... on the relay and under artifacts/stages/stage-2/teacher_modes/search_sessions/"
   ],
   "consumers": "A1-6cat-sr and A2-6cat-sr's Stage-3 initialization (the Top-1; not authorized yet); the states are evidence of the search"
+ },
+ "stage3_plan_2026_11_07": {
+  "decided_by": "maintainer 2026-11-07 (Stage 3 preparation, section V): reuse this volume for Stage 3's save points if it holds them without disturbing the search's states, its Top-1 or any candidate; delete nothing automatically",
+  "role": "the three Stage-3 kinds attach it (token_matched_phase.the_training_volume_is_the_granted_one): A1/A2 read the Top-1 at teacher_modes/search_packed/top1 in place; every unit writes teacher_modes/stage3_sr/<unit>/ (save points, its final weights, its evaluation)",
+  "consumers_of_what_is_here": {
+   "search_packed/top1": "A1-6cat-sr and A2-6cat-sr's initialization (4 units); second copy on the relay, re-downloaded and re-hashed on the dev box 2026-11-07 (all three files equal)",
+   "search_packed/search/states (92 checkpoints, 270.6 GB by the journal)": "no execution consumer; the search's evidence, kept as the search brief required (every state's checkpoint, the full journal, the Pareto front)",
+   "the 12 complete leaves (14.3 GB, the Pareto front)": "no execution consumer; the ranking's evidence (their scores are in stage1_selection.json, committed)",
+   "search_packed/search/states.jsonl, the selection, statistics caches": "off-volume in search_evidence.tgz d781ab9a... (artifacts/ and the relay) and states.jsonl 617d1512...",
+   "stage3_sr/ (after Stage 3)": "each unit's final weights: the formal evaluation's input, and the candidates for any later stage; no second copy (the relay cannot hold six)"
+  },
+  "capacity": {
+   "provisioned_gb": 350,
+   "taken_as_bytes": 350000000000.0,
+   "search_footprint_estimate_gb": "272-285 (the journal's 270.6 GB of checkpoints, the Top-1 copy, caches)",
+   "stage3_high_water_gb": 55.7,
+   "stage3_after_gb": 49.8,
+   "headroom_gb": "9-20",
+   "measured_by": "a1_units.volume_room at each Stage-3 session's start (du -sb of the mount); a unit that would not fit is refused before it trains"
+  },
+  "retention_plan": {
+   "during_stage3": "keep everything: the Top-1 is consumed, the states are evidence, nothing is moved or deleted",
+   "after_stage3_options_for_the_maintainer": [
+    "keep the volume as is (~$0.82-0.96/day)",
+    "retire the 80 non-leaf intermediate states' weights under AGENTS.md 2.5 (terminal, scores and identities committed, no consumer), keeping the journal, the 12 leaves, the Top-1 and stage3_sr/: frees ~256 GB, after which the volume could be shrunk only by a new one",
+    "after the final weights are copied elsewhere, retire the volume: a maintainer decision with a tombstone"
+   ],
+   "never": "deleting the Top-1 or a unit's final weights while they are the only copy; attaching or touching 4rhubprswo"
+  },
+  "reserve": {
+   "booked_until": "2026-11-19T19:40Z",
+   "requested_extension_usd": 13.34,
+   "to": "2026-12-03T19:40Z",
+   "application": "logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json"
+  }
  }
 }

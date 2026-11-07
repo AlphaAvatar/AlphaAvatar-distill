@@ -453,8 +453,8 @@ SHORTFALL and never filled from another):
 | types v2, profiles v2, `state_eval_hybrid@v2` (tool items selected by the plan, THIN categories listed), the packed freeze | `packed_inputs.py` | no |
 | the packed hybrid full search | `packed_full_search.py` (kind `packed_search`) | yes |
 | the A1-6cat / A2-6cat / C1-6cat data: selection (the plan's per-category tool selection), proportion validation, admission / freeze, then packing with every validation document | `packed_packs.py` (`select`, `proportions`, `admit`, `pack`; `verify_pack` for the binding) | no |
-| the units bound to packs and Top-1 | `packed_training_plan.py --bind-packs` | no |
-| training and formal evaluation per arm | `a1_units.py --arm` (kinds `train_6cat_a1`, `_a2`, `_c1`) | yes |
+| the six -sr units bound to their frozen packs and initializations, with their budget | `packed_training_plan.py --write` (`bind_pack`, `units`, `budget`) | no |
+| training and formal evaluation per arm | `a1_units.py --arm` (kinds `train_sr_a1`, `_a2`, `_c1`) | yes |
 
 Every paid kind refuses at issue until the grant names its hard cap.
 
@@ -1269,12 +1269,61 @@ $55.72; decision record 2026-11-06). 92 expansions (16 DEPTH), 12 complete leave
 
 Measurements and their comparison with v2 and the estimate: `audit/packed_search_measurement.json`.
 
+## 14. Stage 3 of the restored composition: six units, one authorization requested (2026-11-07)
+
+The maintainer accepted the packed Full Search's COMPLETE result and its Top-1 (`1f5e4b42...`, `b74dede8...`) and asked
+for Stage 3 of `six_category_schema_restored@v1` to be prepared for one authorization. Nothing has trained; no pod was
+created.
+
+**Units** ([`plans/packed_training_plan.json`](../../../../logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json),
+`packed_training_plan.py`). A1-6cat-sr, A2-6cat-sr and C1-6cat-sr, seeds 20260726 and 20260801. Each unit reads its
+arm's pack as the freeze record froze it (`bind_pack`: `packed_packs.verify_pack` re-derives the packed sequences, then
+every file, the manifest, its content and the packed-content identity are compared with the freeze record) and binds
+the unique supervised tokens before packing as its rung. A1/A2 start from the packed search's Top-1, read in place on
+`thprcgh7s9`, with the search's committed `search_record.json` as provenance; C1 from Thinking-2507's own D4 Top-1
+(`fc28e0dd...`), relayed. Teacher, tokenizer files, chat template, RoPE and the online KD teacher are each arm's own
+lineage; the trainer's config validation and the lineage validation pass for all six, and the launch admission on
+the real initialization bytes (C1 locally, A1/A2 on a re-hashed download of the relay copy) reports no problem. The
+recipe is unchanged; the comparison is matched in unique supervised tokens and categories, not in compute (A2 /
+A1: 3.53x the optimizer steps, 0.88x the supervised-token exposure); C1 against A1 is a cross-teacher secondary
+comparison whose initializations came from different searches.
+
+| arm | packed sequences | optimizer steps | save every (steps) | expected s/step | session hours (lower / expected / upper) | kind cap |
+| --- | --- | --- | --- | --- | --- | --- |
+| A1-6cat-sr | 1,430 | 2,145 | 890 | 4.05 | 6.52 / 7.72 / 12.21 | $18.33 |
+| A2-6cat-sr | 5,047 | 7,571 | 1,064 | 3.38 | 15.52 / 17.17 / 25.20 | $37.54 |
+| C1-6cat-sr | 1,261 | 1,892 | 858 | 4.20 | 6.05 / 7.17 / 11.45 | $17.37 |
+
+**Save points.** One about every hour of expected step time instead of T // 2 (which lost up to half a run on a
+failure), `keep_last` 1, each holding the weights, the AdamW state, the step and consumed-sequence position (epoch
+and permutation follow from it), torch and CUDA RNG, the config hash and the bound data / initialization / lineage
+identity; `latest.txt` moves only after a save point is complete. A later attempt of the same kind resumes every
+unit from the volume: the latest save point, only the evaluation of a trained unit, nothing for a scored one
+(`a1_units.state`; tested across attempts in `tests/test_stage3_sr_plan.py`; the trainer's bitwise-exact resume is a
+core test). Each session first checks the volume's room against what its remaining units write (`volume_room`).
+
+**Cost** ([`plans/packed_training_budget.json`](../../../../logs/stages/stage-2/teacher_modes/plans/packed_training_budget.json)).
+Steps priced on D4-Augmented's measured cross-context L40S steps (same student geometry, a 4B Qwen3 teacher):
+3.0134 s + 8.554e-5 s per KD position, x1.05 expected, x1.44 upper; each unit's formal eval-set-1 evaluation runs on
+the same pod and is inside its arm's session. Six units $31.19 / $35.60 / $59.15 (28.1 / 32.1 / 48.9 GPU hours);
+cumulative caps $73.24 with one resumed attempt reserved for A1 and C1 and two for A2. The first A1 unit measures the
+real step.
+
+**Storage.** `thprcgh7s9` stays as it is: its Top-1 is consumed in place, its 92 states, leaves and journal are the
+search's evidence (off-volume: the evidence archive, the Top-1's relay copy). Stage 3 adds 55.7 GB at its high water
+against an estimated 65-76 GB of room; no deletion is needed or proposed. The relay takes the packs (0.37 GiB) but
+not six copies of the trained weights.
+
+**The request** ([`application.json`](../../../../logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json)):
+the three kinds' caps, the A-TM ceiling $135.25 -> $158.38, the project cap $930 -> $989, Research A's cumulative cap
+$211.25 -> $258.04, the volume's reserve extended by $13.34, and a provider top-up of at least $35 ($50 recommended).
+
 ## Reproduce ($0)
 
 ```
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packing_audit --write logs/stages/stage-2/teacher_modes/audit/packing_audit.json
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_search_forecast --write logs/stages/stage-2/teacher_modes/plans/packed_search_budget.json
-PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_training_plan --write logs/stages/stage-2/teacher_modes/plans/packed_training_budget.json
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.packed_training_plan --write
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs --proportion-audit logs/stages/stage-2/teacher_modes/audit/proportion_tolerance_audit.json
 PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.schema_arguments_audit --pivot <Pivot Conversational train.jsonl> \
     --workbench <WorkBench@49c7dfd0 task files> --write logs/stages/stage-2/teacher_modes/audit/schema_arguments_options.json

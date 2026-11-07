@@ -224,7 +224,7 @@ class TestRefusals:
         with pytest.raises(PP.PackBuildError, match="packing_spec"):
             PP.verify_pack(out)
         with pytest.raises(PP.PackBuildError, match="packing_spec"):
-            PTP.bind([u for u in PTP.packed_units() if u["arm"] == "A1-6cat"], scaled / "out")
+            PTP.bind_pack("A1-6cat-sr", out)
         design["stage3_packing"]["shuffle_seed"] -= 1
         PP.DESIGN.write_text(json.dumps(design))
         man = json.loads((out / PP.MANIFEST).read_text())                   #: re-sealed, but not the packed manifest
@@ -241,7 +241,7 @@ class TestRefusals:
         v = pack_sequential(sel["validation"], 700, PP.PAD_ID, order_seed=1)
         write_pack(tr, v, scaled / "old" / "A1-6cat", data_type=sel["data_type"])
         with pytest.raises(PP.PackBuildError, match="no admitted data manifest"):
-            PTP.bind([u for u in PTP.packed_units() if u["arm"] == "A1-6cat"], scaled / "old")
+            PTP.bind_pack("A1-6cat-sr", scaled / "old" / "A1-6cat")
 
 
 class TestRegisteredQuotas:
@@ -365,18 +365,32 @@ def rewrite_blocks(out, edit):
     return arr
 
 
-def a1_units():
-    return [u for u in PTP.packed_units() if u["arm"] == "A1-6cat"]
+def freeze_of(out):
+    """A freeze record holding this pack's own identities, as the freeze tool writes them (the formal binding checks a
+    pack against the freeze record of its arm: `packed_training_plan.bind_pack`)."""
+    lad = json.loads((out / "ladder.json").read_text())
+    man = json.loads((out / PP.MANIFEST).read_text())
+    return {"arms": {"A1-6cat-sr": {"status": "FROZEN", "before_packing": man["before_packing"], "identity": {
+        "data_manifest_sha256": PP.sha_file(out / PP.MANIFEST), "content_sha256": man["content_sha256"],
+        "documents_file": man["documents_file"], "packed_content_sha256": lad["data_admission"]["packed_content_sha256"],
+        "pack_files_sha256": {n: PP.sha_file(out / n) for n in ("blocks.npz", "ladder.json", "audit.jsonl")}}}}}
+
+
+def bound(out, fr=None):
+    return PTP.bind_pack("A1-6cat-sr", out, fr or freeze_of(out))
 
 
 class TestPackContent:
     def test_an_untouched_pack_binds_with_its_content_identity(self, scaled):
         out, rec = built(scaled)
         PP.verify_pack(out)
-        unit = PTP.bind(a1_units(), scaled / "out")["units"][0]
-        data = unit["config"]["lineage"]["data"][0]
+        fr = freeze_of(out)
+        data = bound(out, fr)
         assert data["packed_content_sha256"] == rec["data_admission"]["packed_content_sha256"]
         assert data["data_manifest_content_sha256"] == rec["data_admission"]["content_sha256"]
+        fr["arms"]["A1-6cat-sr"]["identity"]["pack_files_sha256"]["audit.jsonl"] = "0" * 64   #: not the frozen pack
+        with pytest.raises(SystemExit, match="not the frozen one"):
+            bound(out, fr)
 
     @pytest.mark.parametrize("where", ["training", "validation"])
     def test_one_changed_non_padding_token_refuses_the_binding(self, scaled, where):
@@ -394,7 +408,7 @@ class TestPackContent:
         with pytest.raises(PP.PackBuildError, match="packed_content_sha256"):
             PP.verify_pack(out)
         with pytest.raises(PP.PackBuildError, match="packed_content_sha256"):
-            PTP.bind(a1_units(), scaled / "out")
+            bound(out, {"arms": {}})
 
     def test_a_changed_supervision_mask_or_a_replaced_file_refuses(self, scaled):
         out, rec = built(scaled)
@@ -463,8 +477,7 @@ class TestTruncation:
         final = [m for r in rows for m in r["sessions"] if m["session_id"] == big.doc_id and m["final"]]
         assert [(m["length"], m["document_length"]) for m in final] == [(700, len(big))]          #: placed truncated
         assert PP.verify_pack(out)["documents_file"]["name"] == PP.DOCUMENTS
-        unit = PTP.bind(a1_units(), scaled / "out")["units"][0]
-        assert unit["config"]["lineage"]["data"][0]["packed_content_sha256"] == rec["data_admission"]["packed_content_sha256"]
+        assert bound(out)["packed_content_sha256"] == rec["data_admission"]["packed_content_sha256"]
 
     def test_tampering_with_the_truncated_placement_is_refused(self, scaled):
         sel = overlong()

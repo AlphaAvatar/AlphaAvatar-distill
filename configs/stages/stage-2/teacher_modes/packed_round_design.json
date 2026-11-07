@@ -21,7 +21,10 @@
   "applies_to": [
    "A1-6cat",
    "A2-6cat",
-   "C1-6cat"
+   "C1-6cat",
+   "A1-6cat-sr",
+   "A2-6cat-sr",
+   "C1-6cat-sr"
   ]
  },
  "data_admission": {
@@ -162,7 +165,28 @@
   },
   "lineage_invariant": "for every arm: root teacher -> calibration -> search -> initialization -> teacher-native targets -> online KD teacher -> tokenizer -> chat template -> config are ONE teacher; no arm reads another teacher's or mode's assistant tokens or reference logits; the canonical tool task pool is shared, its generated outputs are not",
   "checkpoint_resume": "the trainer's checkpoints (student, optimizer state, step, RNG, config hash, lineage identity bound by checkpoint.bind_identity) saved every save_every steps to the network volume; a replacement session resumes the same unit from its latest checkpoint; every completed unit's final checkpoint persisted with its sha256 at completion (AGENTS.md P8.2.1)",
-  "evaluation": "eval-set-1 v2 formal measurement, every item generated, nucleus_v1, each arm in its own mode and template, unrestricted generation (P18), as A1; tool calling itself is barely measured by eval-set-1 (5 formal-core prompts) -- a registered tool-calling set is owed to the maintainer"
+  "evaluation": "eval-set-1 v2 formal measurement, every item generated, nucleus_v1, each arm in its own mode and template, unrestricted generation (P18), as A1; tool calling itself is barely measured by eval-set-1 (5 formal-core prompts) -- a registered tool-calling set is owed to the maintainer",
+  "stage3_sr": {
+   "status": "PLANNED 2026-11-07, authorization requested (logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json); nothing trains before the maintainer's decision",
+   "arms": {
+    "A1-6cat-sr": "the packed search's Top-1 1f5e4b42 (b74dede8...) + the hybrid, thinking",
+    "A2-6cat-sr": "the same Top-1 + the hybrid, non-thinking",
+    "C1-6cat-sr": "Thinking-2507's D4 Top-1 fc28e0dd... + Thinking-2507"
+   },
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "plan": "logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json",
+   "budget": "logs/stages/stage-2/teacher_modes/plans/packed_training_budget.json",
+   "kinds": {
+    "train_sr_a1": "A1-6cat-sr",
+    "train_sr_a2": "A2-6cat-sr",
+    "train_sr_c1": "C1-6cat-sr"
+   },
+   "objective_and_schedule": "unchanged (objective, steps, warmup, evaluation interval above)",
+   "save_cadence": "maintainer 2026-11-07: one save point about every hour of the arm's expected step time (save_every = 3,600 s / expected seconds per step: A1 890, A2 1,064, C1 858 steps) replaces 'saves every max(200, T // 2)'; keep_last 1; an engineering interval (saving reads no RNG and changes no step)"
+  }
  },
  "thinking_2507_search_review": {
   "question": "does C1-6cat need a new Thinking-2507 full search under the packed forward context for a strict comparison?",
