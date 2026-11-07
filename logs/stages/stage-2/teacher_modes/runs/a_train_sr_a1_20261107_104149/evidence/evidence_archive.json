@@ -1,0 +1,31 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.stage3_evidence_archive/v1",
+ "run_id": "a_train_sr_a1_20261107_104149",
+ "arm": "A1-6cat-sr",
+ "archive": {
+  "name": "stage3_units_evidence.tgz",
+  "sha256": "27582d13261514df3734a95397e71927451bc18d2ba4dba621b9cbf943f55ea4",
+  "bytes": 23489262,
+  "dev_box_copy": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_a1_20261107_104149/stage3_units_evidence.tgz",
+  "bytes_by_unit_dir": {
+   "A1-6cat-sr-s20260801": 92216742,
+   "A1-6cat-sr-s20260726": 93656407
+  },
+  "contents": "the volume's stage3_sr tree without save points and evaluation-package weights: train logs and configs, every evaluation's generations, rows and formal report"
+ },
+ "committed_here": {
+  "A1-6cat-sr-s20260726/train/train_log.jsonl": "0608431faa90db4ff0287d3dd4b278911079e79c54555ae146f0bf410ccf0dad",
+  "A1-6cat-sr-s20260726/train/config.json": "e0447281f97e5691d3a035df905c4353bcd2e67169424b05c4f7362813022b15",
+  "A1-6cat-sr-s20260726/train/run_completion.json": "687dcbf98b925a1e8e4247795085f05bbffc4dc395d7dcb8f9dec78ff4de61cf",
+  "A1-6cat-sr-s20260726/train/run_manifest.json": "ae4898a206425da7b788db12f8ae34fb767567c446ca808833be88480ce6e002",
+  "A1-6cat-sr-s20260726/evaluation/formal_report.json": "aaa07b2163a454d23109864baf13921f7f6f44afd286847d9c3a118c687a5df5",
+  "A1-6cat-sr-s20260726/off_volume_copy.json": "cd0f68705587f3d9d8fdbe6f48c2b4edf1536fea7e0a90d05550318c5941bd68",
+  "A1-6cat-sr-s20260801/train/train_log.jsonl": "9b553febbba4054089b5df156b594c1aa1636c9068316e4b494d7c7c26032a79",
+  "A1-6cat-sr-s20260801/train/config.json": "db1e77dc4062a8221a667b65ff9f78378b7000c9153b752e585f52ae421b9fb9",
+  "A1-6cat-sr-s20260801/train/run_completion.json": "0138d328089adb3236b60c64e7b213afe8f63aabb3dca1b29cba4500ac38aa74",
+  "A1-6cat-sr-s20260801/train/run_manifest.json": "714322889164ceedbc5614cb1c1ee6085602405ee871f6a3ee2a44ec3796058b",
+  "A1-6cat-sr-s20260801/evaluation/formal_report.json": "1c76cc6faf72f1253823d92612c52ab9ace103aa294eb6503d2f261ab5073844",
+  "A1-6cat-sr-s20260801/off_volume_copy.json": "1037fa6664fb8d0dccf8c2449253cb65d0810bdc2e37fdffb569aab995b701e0"
+ },
+ "weights": "stay on the network volume thprcgh7s9 (their sha256 in the units record); no off-volume copy while the relay's quota refuses them"
+}
