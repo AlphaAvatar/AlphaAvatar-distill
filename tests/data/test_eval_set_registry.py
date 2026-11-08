@@ -112,6 +112,31 @@ def test_the_report_scores_exactly_the_formal_rows(tmp_path):
     assert rep["units"]["stage3_capability_846/gsm8k"]["status"] == "not_run"
 
 
+@pytest.mark.parametrize("think_state,raw", [
+    ("preclosed", "An answer.<|im_end|>"),
+    ("self_opening", "<think>\nsome reasoning\n</think>\n\nAn answer.<|im_end|>")])
+def test_the_behaviour_aggregates_score_each_record_under_its_think_state(tmp_path, think_state, raw):
+    """The behaviour unit's metrics and its group slices aggregate the record's OWN think state, as its rows do.
+    Both aggregates once re-scored without it, so a hybrid template's non-thinking answers all read empty and its
+    thinking ones unclosed (A2-6cat-sr, 2026-11-09) while the rows beside them were right."""
+    import json
+    import shared.evaluation.eval_set_scoring as S
+
+    items = ES.items("eval-set-1", "stage3_capability_846", "eval_behavior_v0")
+    (tmp_path / "stage3_capability_846__eval_behavior_v0.jsonl").write_text("".join(
+        json.dumps({"id": it["id"], "think_state": think_state, "stop_reason": "eos", "raw": raw}) + "\n"
+        for it in items))
+    rep = S.report(tmp_path, think_state, {}, "eval-set-1", rows_out=tmp_path / "rows")
+    overall = rep["units"]["stage3_capability_846/eval_behavior_v0"]["metrics"]["overall"]
+    rows = [json.loads(l) for l in (tmp_path / "rows/stage3_capability_846__eval_behavior_v0.rows.jsonl")
+            .read_text().splitlines()]
+    assert all(r["think_closed"] and not r["empty_answer"] for r in rows)
+    assert (overall["think_closed"], overall["format_ok"], overall["empty_answer"]) == (1.0, 1.0, 0.0)
+    tool = rep["capabilities"]["tool_use.function_calling"]["units"][
+        "stage3_capability_846/eval_behavior_v0[group=tool_calling]"]["metrics"]["overall"]
+    assert (tool["think_closed"], tool["empty_answer"]) == (1.0, 0.0)
+
+
 def test_the_report_reads_generations_whose_text_holds_unicode_line_separators(tmp_path):
     """`json.dumps(ensure_ascii=False)` writes U+2028/U+2029/U+0085 raw inside a
     generation, and `str.splitlines()` breaks a JSONL record at each of them:

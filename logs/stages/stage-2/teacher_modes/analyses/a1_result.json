@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.a1_result/v1",
- "written_utc": "2026-11-03T03:22:07Z",
+ "written_utc": "2026-11-08T18:07:13Z",
  "set": "eval-set-1 v2 (frozen), scoring protocol v2, validity mask v1: 570 static + 144 interactive formal",
  "decoding": {
   "protocol_id": "nucleus_v1",
@@ -214,8 +214,8 @@
       "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
        "terminated": 0.2,
        "truncated_at_cap": 0.8,
-       "think_closed": 0.0,
-       "format_ok": 0.0,
+       "think_closed": 0.2,
+       "format_ok": 0.2,
        "empty_answer": 0.8,
        "rep_3gram": 0.0733
       }
@@ -227,16 +227,16 @@
       "stage3_capability_846/eval_behavior_v0[group=instruction]": {
        "terminated": 0.5,
        "truncated_at_cap": 0.5,
-       "think_closed": 0.0,
-       "format_ok": 0.0,
+       "think_closed": 0.5833,
+       "format_ok": 0.5,
        "empty_answer": 0.4167,
        "rep_3gram": 0.1778
       },
       "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
        "terminated": 0.4,
        "truncated_at_cap": 0.6,
-       "think_closed": 0.0,
-       "format_ok": 0.0,
+       "think_closed": 0.4,
+       "format_ok": 0.4,
        "empty_answer": 0.6,
        "rep_3gram": 0.0571
       }
@@ -248,8 +248,8 @@
       "stage3_capability_846/eval_behavior_v0": {
        "terminated": 0.6923,
        "truncated_at_cap": 0.3077,
-       "think_closed": 0.0,
-       "format_ok": 0.0,
+       "think_closed": 0.7077,
+       "format_ok": 0.6923,
        "empty_answer": 0.2923,
        "rep_3gram": 0.0654
       }
@@ -554,16 +554,16 @@
       "stage3_capability_846/eval_behavior_v0[group=instruction]": {
        "terminated": 0.4167,
        "truncated_at_cap": 0.5833,
-       "think_closed": 0.0,
-       "format_ok": 0.0,
+       "think_closed": 0.4167,
+       "format_ok": 0.4167,
        "empty_answer": 0.5833,
        "rep_3gram": 0.0701
       },
       "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
        "terminated": 0.8,
        "truncated_at_cap": 0.2,
-       "think_closed": 0.0,
-       "format_ok": 0.0,
+       "think_closed": 0.8,
+       "format_ok": 0.8,
        "empty_answer": 0.2,
        "rep_3gram": 0.1504
       }
@@ -575,8 +575,8 @@
       "stage3_capability_846/eval_behavior_v0": {
        "terminated": 0.7385,
        "truncated_at_cap": 0.2615,
-       "think_closed": 0.0,
-       "format_ok": 0.0,
+       "think_closed": 0.7538,
+       "format_ok": 0.7385,
        "empty_answer": 0.2462,
        "rep_3gram": 0.0603
       }
@@ -927,8 +927,8 @@
      "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
       "terminated": 1.0,
       "truncated_at_cap": 0.0,
-      "think_closed": 0.0,
-      "format_ok": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
       "empty_answer": 0.0,
       "rep_3gram": 0.0
      }
@@ -940,16 +940,16 @@
      "stage3_capability_846/eval_behavior_v0[group=instruction]": {
       "terminated": 1.0,
       "truncated_at_cap": 0.0,
-      "think_closed": 0.0,
-      "format_ok": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
       "empty_answer": 0.0,
       "rep_3gram": 0.0727
      },
      "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
       "terminated": 1.0,
       "truncated_at_cap": 0.0,
-      "think_closed": 0.0,
-      "format_ok": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
       "empty_answer": 0.0,
       "rep_3gram": 0.0103
      }
@@ -961,8 +961,8 @@
      "stage3_capability_846/eval_behavior_v0": {
       "terminated": 1.0,
       "truncated_at_cap": 0.0,
-      "think_closed": 0.0,
-      "format_ok": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
       "empty_answer": 0.0,
       "rep_3gram": 0.0356
      }

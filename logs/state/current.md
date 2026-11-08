@@ -17,7 +17,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   the provider's confirmation. Project cap $1,000, Research A $262.04, ceiling $158.3762.
 - Open result-persistence item: the six trained weights are only on `thprcgh7s9` (the relay's quota, 100 GB
   account-wide, refused all six); the volume is kept and protected until a verified off-volume copy exists.
-- Owner: `logs/budget/decisions.md` 2026-11-08; `PACKED_ROUND.md` sections 15-16; runs `a_train_sr_*`.
+- Corrected 2026-11-09: the behaviour unit's aggregates in every hybrid-template report were rescored under each
+  record's think state (`audit/behaviour_aggregate_rescoring.json`); no correctness number or comparison changed.
+- Owner: `logs/budget/decisions.md` 2026-11-08 / 2026-11-09; `PACKED_ROUND.md` sections 15-16; runs `a_train_sr_*`.
 
 **RESEARCH A: THE PACKED FULL SEARCH IS COMPLETE (2026-11-06) -- TOP-1 `1f5e4b42...`, ONE ATTEMPT, $28.17 OF $55.72.**
 - Top-1: FFN(base) -> DEPTH(base) -> WIDTH(rh) -> ATTENTION(rh), 596,049,920 parameters, single shard `b74dede8...`; on

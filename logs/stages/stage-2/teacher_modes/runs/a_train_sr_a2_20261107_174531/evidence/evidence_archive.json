@@ -36,5 +36,6 @@
   "A2-6cat-sr-s20260801/evaluation/formal_report.json": "387fb1d2491a6f4db231192a731d3b4d94c27f11f6220b469461e3abd05fdab2",
   "A2-6cat-sr-s20260801/off_volume_copy.json": "a53ace1d5a244ee8eef3d8beee4a088b3e7f7f03211e51cd682ea6e9bf1714ac"
  },
- "weights": "stay on the network volume thprcgh7s9 (their sha256 in the units record); no off-volume copy while the relay's quota refuses them"
+ "weights": "stay on the network volume thprcgh7s9 (their sha256 in the units record); no off-volume copy while the relay's quota refuses them",
+ "rescored_2026_11_09": "committed_here's formal_report.json hashes are the archive's originals; the committed reports were replaced by their rescored renderings (behaviour unit only): logs/stages/stage-2/teacher_modes/audit/behaviour_aggregate_rescoring.json"
 }

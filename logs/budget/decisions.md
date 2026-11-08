@@ -16132,3 +16132,27 @@ on a paid pod.
 - Open: the six trained weights' off-volume copy (relay quota); `thprcgh7s9` must be kept until it exists. Its
   reserve (extended to 2026-12-03) and `4rhubprswo`'s (to ~2026-11-29) are booked.
 - Revisit when: the maintainer reads the result, or private storage is added.
+
+## 2026-11-09 — Behaviour-unit aggregates rescored under each record's think state (hybrid-template reports)
+
+- Context: reading A2-6cat-sr's full eval-set-1 result, its formal reports said every `eval_behavior_v0` answer was
+  empty, while the unit's own rows (`rows/*.rows.jsonl`) said none was. `scripts/shared/evaluation/eval_set_scoring.py`
+  re-scored that unit for its aggregates (the unit's metrics and each `[group=...]` capability slice) without the
+  record's `think_state`, so `behavior.split_generation` read every reply as a preopened think block. The per-row
+  scorer (`score_behavior`, the manifest's registered adapter) always passed it.
+- Decision (maintainer 2026-11-09, "修复已发现问题"): an ordinary defect in the harness, not a protocol change.
+  `eval_set_scoring.behavior_scored` now feeds both aggregates each record's think state, as the row scorer does, with
+  a core regression (`tests/data/test_eval_set_registry.py::test_the_behaviour_aggregates_score_each_record_under_its_think_state`).
+  `configs/stages/stage-2/teacher_modes/evaluation_identity.json` was regenerated for the changed scorer source.
+- Rescoring ($0, from saved generations): every eval-set-1 evaluation under the hybrid template: the teacher in both
+  modes, A1 (2026-11-02), A1-6cat-sr and A2-6cat-sr. Before the fix the same rendering reproduced all eight original
+  reports exactly; after it only the behaviour unit and its three capability slices differ. The six committed reports
+  were replaced (each carries a `rescored` pointer with its original sha256; the originals stay in the evidence
+  archives and in git), and `a1_result.json` and `stage3_sr_result.json` were regenerated. They reproduced exactly from
+  the original reports first, and afterwards only behaviour cells changed. Owner:
+  `logs/stages/stage-2/teacher_modes/audit/behaviour_aggregate_rescoring.json`.
+- Effect: A2-6cat-sr empty answers 100% -> 0%, valid format 0 -> 93.8 / 90.8%; A1-6cat-sr and A1 `think_closed` /
+  `format_ok` 0 -> 0.60-0.75 (their empty-answer rate was already right); the teacher's non-thinking mode empty 100% -> 0%.
+- Unaffected: every correctness unit, fluid reasoning, the registered A1 - A2 and A1 - C1 comparisons, and every
+  Thinking-2507-lineage report (its preopened template is the default).
+- Revisit when: never, for these records. A future scorer change re-renders the reports it touches the same way.

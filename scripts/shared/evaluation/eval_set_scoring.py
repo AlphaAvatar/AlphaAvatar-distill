@@ -237,6 +237,16 @@ def unit_masks(eval_set_id: str, cname: str, comp: Mapping) -> dict[str, dict]:
     return out
 
 
+def behavior_scored(items: dict, recs: list[dict], id_field: str = "id") -> list[dict]:
+    """The behaviour set's per-sample scores for `behavior.aggregate`: each record under its own think state, exactly
+    as `score_behavior` scores its row. Without it a hybrid template's reply was read as an unclosed think block
+    (found 2026-11-09: every non-thinking answer counted empty, every thinking one unclosed)."""
+    from aadistill.evaluation.behavior import score_sample
+    return [score_sample(items[r.get(id_field, r.get("id"))], r.get("raw", ""),
+                         hit_cap=r.get("stop_reason") not in (None, "eos"), think_state=r.get("think_state"))
+            for r in recs]
+
+
 def unit_metrics(cname: str, uname: str, items: dict, recs: list[dict], id_field: str,
                  groups: list[list[str]], protocol: str = "v1",
                  keep: set[str] | None = None) -> tuple[dict, list[dict]]:
@@ -255,10 +265,9 @@ def unit_metrics(cname: str, uname: str, items: dict, recs: list[dict], id_field
         rid = rec.get(id_field, rec.get("id"))
         rows.append({"id": rid, **ADAPTERS[cname](uname, items[rid], rec, protocol)})
     if cname == "stage3_capability_846" and uname == "eval_behavior_v0":
-        from aadistill.evaluation.behavior import aggregate, score_sample
-        scored = [score_sample(items[r.get(id_field, r.get("id"))], r.get("raw", ""),
-                               hit_cap=r.get("stop_reason") not in (None, "eos")) for r in recs]
-        return {"headline": None, "n_items": len(keep), "metrics": aggregate(scored)}, rows
+        from aadistill.evaluation.behavior import aggregate
+        return {"headline": None, "n_items": len(keep),
+                "metrics": aggregate(behavior_scored(items, recs, id_field))}, rows
     if cname == "stage3_capability_846":
         from aadistill.evaluation.capability import PAIRED_SETS, SCORERS
         from aadistill.evaluation.strict_answer import score_numeric
@@ -361,11 +370,9 @@ def report(generations: Path, label: str, unsupported: dict[str, str],
                    if str(r.get(sel[0])) == sel[1] and i in formal_ids[base]}
             flags = {k: outcomes[base][k] for k in ("in_formal_core", "protocol")}
             if outcomes[base].get("headline") is None:      # behaviour groups
-                from aadistill.evaluation.behavior import aggregate, score_sample
+                from aadistill.evaluation.behavior import aggregate
                 recs = read_jsonl(generations / f"{comp}__{unit}.jsonl")
-                scored = [score_sample(items[r["id"]], r.get("raw", ""),
-                                       hit_cap=r.get("stop_reason") not in (None, "eos"))
-                          for r in recs if r["id"] in ids]
+                scored = behavior_scored(items, [r for r in recs if r["id"] in ids])
                 cap_outcomes[u] = {"status": "measured", **flags, "n": len(ids),
                                    "metrics": aggregate(scored) if scored else None}
                 continue

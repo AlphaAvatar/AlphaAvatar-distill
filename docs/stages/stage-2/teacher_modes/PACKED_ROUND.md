@@ -1387,6 +1387,18 @@ closed-book knowledge 2-3%; evidence-conditioned abstention and safety pairs 0-7
 (`stage3_legacy_150`, training prompts) is not generalization and stays apart. eval-set-1 measures tool calling only
 indirectly: nothing here is a closed-loop tool-task success rate.
 
+**Behaviour unit** (`eval_behavior_v0`, 65 formal prompts; rescored 2026-11-09, see below): natural termination and
+valid format 61.5 / 70.8% (A1), 93.8 / 90.8% (A2), 75.4 / 80.0% (C1); empty answers 40.0 / 27.7%, 0 / 0%,
+23.1 / 20.0%. Tool-call exact match on its 5 tool prompts 40 / 20%, 40 / 20%, 20 / 0% (too few to read). A2's
+think block is closed by the template, so its `think_closed` of 1.0 is by construction.
+
+**Rescored behaviour aggregates (2026-11-09).** The formal reports' behaviour aggregates first ignored each record's
+think state, so A2's answers all read empty and A1's replies unclosed, while the rows beside them were right. The
+defect and its fix (`eval_set_scoring.behavior_scored`), the method and every before/after are in
+[`audit/behaviour_aggregate_rescoring.json`](../../../../logs/stages/stage-2/teacher_modes/audit/behaviour_aggregate_rescoring.json):
+the four hybrid units' reports were re-rendered from their saved generations, and only the behaviour unit and its three
+capability slices changed. No correctness number and neither registered comparison changed.
+
 **Measured training** (L40S, $1.09/h): 3.76 / 3.09 / 3.99 s per optimizer step (priced expected 4.05 / 3.38 / 4.20),
 peak reserved memory 18.5-19.7 GB of 48, every unit's trainer logged `cross_context`; save points about hourly as
 planned. Cost: A1 $7.7554 of $18.33, A2 $15.6086 of $37.54, C1 $7.4321 of $17.37 (two attempts) -- **$30.7961 of

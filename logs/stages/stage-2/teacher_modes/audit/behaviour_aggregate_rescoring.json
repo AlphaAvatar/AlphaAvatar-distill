@@ -1,0 +1,385 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.behaviour_aggregate_rescoring/v1",
+ "recorded_utc": "2026-11-08T18:06:57Z",
+ "decided_by": "maintainer 2026-11-09 ('\u597d\u7684\uff0c\u4fee\u590d\u5df2\u53d1\u73b0\u95ee\u9898\uff0c\u7136\u540e\u7ed9\u6211\u5b8c\u6574\u62a5\u544a')",
+ "defect": "scripts/shared/evaluation/eval_set_scoring.py re-scored eval_behavior_v0 for its aggregates (the unit's metrics and each [group=...] capability slice) WITHOUT the record's think_state, so behavior.split_generation read every record as a preopened think block. The per-row scores (`score_behavior`, the manifest's registered adapter, rows/*.rows.jsonl) always passed it. Under a hybrid template: preclosed (non-thinking) answers all read empty; self_opening (thinking) replies read with think_closed / format_ok 0 and their answers misparsed in some groups. Thinking-2507's preopened template is the default and was never affected.",
+ "fix": "eval_set_scoring.behavior_scored: both aggregates score each record under its own think_state; regression tests/data/test_eval_set_registry.py::test_the_behaviour_aggregates_score_each_record_under_its_think_state",
+ "method": "each report re-rendered at $0 from its run's saved generations: `PYTHONPATH=src:scripts python scripts/shared/evaluation/eval_set_scoring.py report --eval-set eval-set-1 --generations <evaluation/generations> --label <label> --out <json>`, then the `rescored` pointer added. Before the fix the same rendering reproduced all eight original reports exactly (created_utc aside); after it only the behaviour unit and its three capability slices differ. No generation, item, gold answer, scoring protocol, validity mask or correctness number changes.",
+ "scope": "every eval-set-1 evaluation under the hybrid teacher's template: the teacher itself in both modes (Research A v1) and the students A1 (2026-11-02), A1-6cat-sr and A2-6cat-sr. Thinking-2507-lineage reports (C1-6cat-sr, D4, PCA, Stage-0 units) are untouched.",
+ "derived": [
+  "logs/stages/stage-2/teacher_modes/analyses/a1_result.json",
+  "logs/stages/stage-2/teacher_modes/analyses/stage3_sr_result.json"
+ ],
+ "unaffected": "every correctness unit, fluid reasoning (static and interactive), the registered comparisons A1 - A2 and A1 - C1",
+ "reports": {
+  "teacher_H-T": {
+   "run": "a_teacher_20261030_012648",
+   "think_state": "self_opening",
+   "label": "teacher_H-T",
+   "original": {
+    "sha256": "5d02af251d9376eee4ab3a668cfdec40531a671a86fde62bc2db3650bebac22b",
+    "archive": ".scratch/research_a/a_teacher_20261030_012648/store/teacher_eval__teacher_H-T.tgz"
+   },
+   "corrected": {
+    "sha256": "e02eac0b483cb96392152665f31830504abb3c5b82364e735efd1f2ea9369029",
+    "committed": null,
+    "out_of_tree": [
+     "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/40abda2f-efac-4413-af84-45085d7650d4/scratchpad/bfix/teacher_H-T/evaluation/formal_report.json"
+    ]
+   },
+   "behaviour_overall_formal": {
+    "before": {
+     "terminated": 1.0,
+     "think_closed": 0.0,
+     "format_ok": 0.0,
+     "empty_answer": 0.0,
+     "answer_is_echo": 0.0923,
+     "answer_words": 111.1077
+    },
+    "after": {
+     "terminated": 1.0,
+     "think_closed": 1.0,
+     "format_ok": 1.0,
+     "empty_answer": 0.0,
+     "answer_is_echo": 0.0923,
+     "answer_words": 111.1077
+    }
+   },
+   "tool_calling_slice": {
+    "before": {
+     "n": 5,
+     "tool_call_emitted": 1.0,
+     "tool_call_exact_match": 0.8
+    },
+    "after": {
+     "n": 5,
+     "tool_call_emitted": 1.0,
+     "tool_call_exact_match": 0.8
+    }
+   }
+  },
+  "teacher_H-N": {
+   "run": "a_teacher_20261030_012648",
+   "think_state": "preclosed",
+   "label": "teacher_H-N",
+   "original": {
+    "sha256": "64a7e2d550f10c8e3a8deac56b26532315ffc5177b61b5916e4599fdf7a2a6c9",
+    "archive": ".scratch/research_a/a_teacher_20261030_012648/store/teacher_eval__teacher_H-N.tgz"
+   },
+   "corrected": {
+    "sha256": "6f737b08f6e8ce827e33c6a37e35ffba2849dd9684f690f5558acacaa640bdc4",
+    "committed": null,
+    "out_of_tree": [
+     "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/40abda2f-efac-4413-af84-45085d7650d4/scratchpad/bfix/teacher_H-N/evaluation/formal_report.json"
+    ]
+   },
+   "behaviour_overall_formal": {
+    "before": {
+     "terminated": 1.0,
+     "think_closed": 0.0,
+     "format_ok": 0.0,
+     "empty_answer": 1.0,
+     "answer_is_echo": 0.0,
+     "answer_words": 0.0
+    },
+    "after": {
+     "terminated": 1.0,
+     "think_closed": 1.0,
+     "format_ok": 1.0,
+     "empty_answer": 0.0,
+     "answer_is_echo": 0.1231,
+     "answer_words": 108.5231
+    }
+   },
+   "tool_calling_slice": {
+    "before": {
+     "n": 5,
+     "tool_call_emitted": 0.0,
+     "tool_call_exact_match": 0.0
+    },
+    "after": {
+     "n": 5,
+     "tool_call_emitted": 1.0,
+     "tool_call_exact_match": 0.8
+    }
+   }
+  },
+  "A1-s20260726": {
+   "run": "a_train_a1_20261102_184122",
+   "think_state": "self_opening",
+   "label": "A1-s20260726",
+   "original": {
+    "sha256": "1edc792765353e3becf8b9f1101178265db3356e3bb9d52ebc9e4c69f1f6702a",
+    "archive": ".scratch/research_a/a_train_a1_20261102_184122/store/a1_evidence.tgz"
+   },
+   "corrected": {
+    "sha256": "f50af5a3b7fa07b6fe9b88caf0edc58f80d5b6daec28353566daac248311cd8a",
+    "committed": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/evidence/units/A1-s20260726/evaluation/formal_report.json",
+    "out_of_tree": [
+     "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/40abda2f-efac-4413-af84-45085d7650d4/scratchpad/bfix/a1_1102/A1-s20260726/evaluation/formal_report.json"
+    ]
+   },
+   "behaviour_overall_formal": {
+    "before": {
+     "terminated": 0.6923,
+     "think_closed": 0.0,
+     "format_ok": 0.0,
+     "empty_answer": 0.2923,
+     "answer_is_echo": 0.0923,
+     "answer_words": 37.2923
+    },
+    "after": {
+     "terminated": 0.6923,
+     "think_closed": 0.7077,
+     "format_ok": 0.6923,
+     "empty_answer": 0.2923,
+     "answer_is_echo": 0.0923,
+     "answer_words": 37.2923
+    }
+   },
+   "tool_calling_slice": {
+    "before": {
+     "n": 5,
+     "tool_call_emitted": 0.0,
+     "tool_call_exact_match": 0.0
+    },
+    "after": {
+     "n": 5,
+     "tool_call_emitted": 0.0,
+     "tool_call_exact_match": 0.0
+    }
+   }
+  },
+  "A1-s20260801": {
+   "run": "a_train_a1_20261102_184122",
+   "think_state": "self_opening",
+   "label": "A1-s20260801",
+   "original": {
+    "sha256": "d8ce3a72927fef6cb3b402f01366c135da8dd6b911134183f628ae5d6f8dee7d",
+    "archive": ".scratch/research_a/a_train_a1_20261102_184122/store/a1_evidence.tgz"
+   },
+   "corrected": {
+    "sha256": "1ea4f8a0aa4030f2fd311c297b55174a4af46d58c510165b3f43088f1d94351a",
+    "committed": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/evidence/units/A1-s20260801/evaluation/formal_report.json",
+    "out_of_tree": [
+     "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/40abda2f-efac-4413-af84-45085d7650d4/scratchpad/bfix/a1_1102/A1-s20260801/evaluation/formal_report.json"
+    ]
+   },
+   "behaviour_overall_formal": {
+    "before": {
+     "terminated": 0.7385,
+     "think_closed": 0.0,
+     "format_ok": 0.0,
+     "empty_answer": 0.2462,
+     "answer_is_echo": 0.0769,
+     "answer_words": 33.6769
+    },
+    "after": {
+     "terminated": 0.7385,
+     "think_closed": 0.7538,
+     "format_ok": 0.7385,
+     "empty_answer": 0.2462,
+     "answer_is_echo": 0.0769,
+     "answer_words": 33.6769
+    }
+   },
+   "tool_calling_slice": {
+    "before": {
+     "n": 5,
+     "tool_call_emitted": 0.0,
+     "tool_call_exact_match": 0.0
+    },
+    "after": {
+     "n": 5,
+     "tool_call_emitted": 0.0,
+     "tool_call_exact_match": 0.0
+    }
+   }
+  },
+  "A1-6cat-sr-s20260726": {
+   "run": "a_train_sr_a1_20261107_104149",
+   "think_state": "self_opening",
+   "label": "A1-6cat-sr-s20260726",
+   "original": {
+    "sha256": "aaa07b2163a454d23109864baf13921f7f6f44afd286847d9c3a118c687a5df5",
+    "archive": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_a1_20261107_104149/stage3_units_evidence.tgz (and a_train_sr_c1_20261108_104542's, which holds all six units)"
+   },
+   "corrected": {
+    "sha256": "925ea5bc5d4917a6c03410d154118156a35f9173931cb3aa602397ab7c640509",
+    "committed": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a1_20261107_104149/evidence/units/A1-6cat-sr-s20260726/evaluation/formal_report.json",
+    "out_of_tree": [
+     "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/extracted/A1-6cat-sr-s20260726/evaluation/formal_report.json"
+    ]
+   },
+   "behaviour_overall_formal": {
+    "before": {
+     "terminated": 0.6154,
+     "think_closed": 0.0,
+     "format_ok": 0.0,
+     "empty_answer": 0.4,
+     "answer_is_echo": 0.1231,
+     "answer_words": 20.7077
+    },
+    "after": {
+     "terminated": 0.6154,
+     "think_closed": 0.6,
+     "format_ok": 0.6,
+     "empty_answer": 0.4,
+     "answer_is_echo": 0.1231,
+     "answer_words": 20.7077
+    }
+   },
+   "tool_calling_slice": {
+    "before": {
+     "n": 5,
+     "tool_call_emitted": 1.0,
+     "tool_call_exact_match": 0.4
+    },
+    "after": {
+     "n": 5,
+     "tool_call_emitted": 1.0,
+     "tool_call_exact_match": 0.4
+    }
+   }
+  },
+  "A1-6cat-sr-s20260801": {
+   "run": "a_train_sr_a1_20261107_104149",
+   "think_state": "self_opening",
+   "label": "A1-6cat-sr-s20260801",
+   "original": {
+    "sha256": "1c76cc6faf72f1253823d92612c52ab9ace103aa294eb6503d2f261ab5073844",
+    "archive": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_a1_20261107_104149/stage3_units_evidence.tgz (and a_train_sr_c1_20261108_104542's, which holds all six units)"
+   },
+   "corrected": {
+    "sha256": "cbc900eb8e82a25976a215e956a05c0074a150550da5a574999ad45c657a0819",
+    "committed": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a1_20261107_104149/evidence/units/A1-6cat-sr-s20260801/evaluation/formal_report.json",
+    "out_of_tree": [
+     "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/extracted/A1-6cat-sr-s20260801/evaluation/formal_report.json"
+    ]
+   },
+   "behaviour_overall_formal": {
+    "before": {
+     "terminated": 0.7077,
+     "think_closed": 0.0,
+     "format_ok": 0.0,
+     "empty_answer": 0.2769,
+     "answer_is_echo": 0.1231,
+     "answer_words": 32.8154
+    },
+    "after": {
+     "terminated": 0.7077,
+     "think_closed": 0.7231,
+     "format_ok": 0.7077,
+     "empty_answer": 0.2769,
+     "answer_is_echo": 0.1231,
+     "answer_words": 32.8154
+    }
+   },
+   "tool_calling_slice": {
+    "before": {
+     "n": 5,
+     "tool_call_emitted": 0.8,
+     "tool_call_exact_match": 0.2
+    },
+    "after": {
+     "n": 5,
+     "tool_call_emitted": 0.8,
+     "tool_call_exact_match": 0.2
+    }
+   }
+  },
+  "A2-6cat-sr-s20260726": {
+   "run": "a_train_sr_a2_20261107_174531",
+   "think_state": "preclosed",
+   "label": "A2-6cat-sr-s20260726",
+   "original": {
+    "sha256": "e31a25a337979e65cdeb81c2a1632fe74363d71dfc5d5644794cc50dae6d06ee",
+    "archive": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_a2_20261107_174531/stage3_units_evidence.tgz (and a_train_sr_c1_20261108_104542's, which holds all six units)"
+   },
+   "corrected": {
+    "sha256": "48002965c427e9abfc030894bc51e9b1a1361ed79b987f054a9e3f0a5d91e95f",
+    "committed": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/evidence/units/A2-6cat-sr-s20260726/evaluation/formal_report.json",
+    "out_of_tree": [
+     "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/extracted/A2-6cat-sr-s20260726/evaluation/formal_report.json"
+    ]
+   },
+   "behaviour_overall_formal": {
+    "before": {
+     "terminated": 0.9385,
+     "think_closed": 0.0,
+     "format_ok": 0.0,
+     "empty_answer": 1.0,
+     "answer_is_echo": 0.0,
+     "answer_words": 0.0
+    },
+    "after": {
+     "terminated": 0.9385,
+     "think_closed": 1.0,
+     "format_ok": 0.9385,
+     "empty_answer": 0.0,
+     "answer_is_echo": 0.2769,
+     "answer_words": 102.8923
+    }
+   },
+   "tool_calling_slice": {
+    "before": {
+     "n": 5,
+     "tool_call_emitted": 0.0,
+     "tool_call_exact_match": 0.0
+    },
+    "after": {
+     "n": 5,
+     "tool_call_emitted": 0.6,
+     "tool_call_exact_match": 0.4
+    }
+   }
+  },
+  "A2-6cat-sr-s20260801": {
+   "run": "a_train_sr_a2_20261107_174531",
+   "think_state": "preclosed",
+   "label": "A2-6cat-sr-s20260801",
+   "original": {
+    "sha256": "387fb1d2491a6f4db231192a731d3b4d94c27f11f6220b469461e3abd05fdab2",
+    "archive": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_a2_20261107_174531/stage3_units_evidence.tgz (and a_train_sr_c1_20261108_104542's, which holds all six units)"
+   },
+   "corrected": {
+    "sha256": "b9fbe7d69939b7d9da317c33a068b19f84c82acf0f15413743d0d1a14d902ac8",
+    "committed": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/evidence/units/A2-6cat-sr-s20260801/evaluation/formal_report.json",
+    "out_of_tree": [
+     "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/extracted/A2-6cat-sr-s20260801/evaluation/formal_report.json"
+    ]
+   },
+   "behaviour_overall_formal": {
+    "before": {
+     "terminated": 0.9077,
+     "think_closed": 0.0,
+     "format_ok": 0.0,
+     "empty_answer": 1.0,
+     "answer_is_echo": 0.0,
+     "answer_words": 0.0
+    },
+    "after": {
+     "terminated": 0.9077,
+     "think_closed": 1.0,
+     "format_ok": 0.9077,
+     "empty_answer": 0.0,
+     "answer_is_echo": 0.2462,
+     "answer_words": 143.1077
+    }
+   },
+   "tool_calling_slice": {
+    "before": {
+     "n": 5,
+     "tool_call_emitted": 0.0,
+     "tool_call_exact_match": 0.0
+    },
+    "after": {
+     "n": 5,
+     "tool_call_emitted": 0.8,
+     "tool_call_exact_match": 0.2
+    }
+   }
+  }
+ },
+ "authorizes": "nothing"
+}
