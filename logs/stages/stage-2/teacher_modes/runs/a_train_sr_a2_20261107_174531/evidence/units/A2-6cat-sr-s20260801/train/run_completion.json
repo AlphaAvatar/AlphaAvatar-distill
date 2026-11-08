@@ -1,0 +1,87 @@
+{
+  "finished_utc": "2026-11-08T08:06:27.852795+00:00",
+  "config_sha256": "5c6a988512a78280bb53a908ecd061f0b39ad0f253019f7b3b373587ee116bce",
+  "summary": {
+    "steps": 7571,
+    "final_eval": {
+      "val_blocks": 30,
+      "val_ce": 0.554639,
+      "val_ppl": 1.7413,
+      "val_kd": 0.458145
+    },
+    "checkpoint": "/runpod-volume/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/train/checkpoints/step_007571"
+  },
+  "final_step": 7571,
+  "planned_total_steps": 7571,
+  "completed_all_steps": true,
+  "consumed_blocks": 15142,
+  "execution": {
+    "record_version": 1,
+    "optimizer": "AdamW",
+    "optimizer_defaults": {
+      "lr": 5e-05,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.01
+    },
+    "optimizer_param_groups": 1,
+    "grad_clip": 1.0,
+    "lr_schedule": "cosine to min_lr_frac",
+    "total_steps": 7571,
+    "warmup_steps": 379,
+    "min_lr_frac": 0.1,
+    "block_ordering": "per-epoch torch.randperm(n_blocks, seed*1000003 + epoch) over the rung's blocks, walked by the global consumed-block counter",
+    "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "assistant",
+    "kd_chunk": 512,
+    "kd_chunk_source": "trainer default KD_CHUNK_DEFAULT",
+    "kd_objective": {
+      "objective": "target_rows_reference_topk_tail_forward_kl/v1",
+      "support": {
+        "support_id": "reference_topk_tail_v1",
+        "top_k": 200
+      },
+      "support_selection": "torch.topk of the teacher's float32-widened logits / T",
+      "tail": "complement_logsumexp/v1",
+      "rows": "final hidden states at the loss's prediction positions, before the output head",
+      "position_policy": "kd_scope 'assistant'",
+      "temperature": 1.0,
+      "reduction": "sum over the step's KD positions of tau^2 * KL, divided by that step's KD position count (the trainer's normalizer); CE likewise over its own positions",
+      "is_full_vocabulary_kl": false
+    },
+    "resume_identity": {
+      "data": "7bbaba0977fafff88e580090013aee82d3da3a48c5a6d70999d6e9ab8c5aef59",
+      "initialization": "7685d8edab8e6c043a236e47ca4c52d3e3dd1d4c82bd25bdd24827caf0c10958",
+      "lineage": {
+        "lineage_sha256": "23731f571e3200be1c55080cf5b62395fa55e1d138fee954a8673af89febc57e",
+        "teacher": {
+          "model_id": "Qwen/Qwen3-4B",
+          "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+        },
+        "mode": "non_thinking",
+        "initialization_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d"
+      }
+    },
+    "blocks_per_step": 2,
+    "micro_blocks": 1,
+    "train_blocks_available": 5047,
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "gradient_checkpointing_applied": true,
+    "device": "cuda",
+    "student_attn_implementation": "sdpa",
+    "teacher_attn_implementation": "sdpa",
+    "seed": 20260801,
+    "step_at_record": 7571,
+    "consumed_blocks_at_record": 15142,
+    "trainable_params": 440467456
+  }
+}

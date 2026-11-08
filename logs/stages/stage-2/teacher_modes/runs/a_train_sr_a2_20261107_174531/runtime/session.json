@@ -1,0 +1,1465 @@
+{
+  "schema": "aadistill.stage2.teacher_modes.tm_authorization_session/v1",
+  "provider_cli": {
+    "path": "/home/ecs-user/.local/bin/runpodctl",
+    "version": "runpodctl 3.0.1-551d6a4",
+    "pod_create_terminate_after": false
+  },
+  "session_id": "stage2_teacher_modes_tm-train_sr_a2",
+  "session_spec": {
+    "session_id": "stage2_teacher_modes_tm-train_sr_a2",
+    "schema": "aadistill.stage2.teacher_modes.tm_authorization_session/v1",
+    "description": "Research A Stage 3 (six_category_schema_restored@v1): A2-6cat-sr's two seeds trained and formally evaluated on eval-set-1",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/governance/authorization.json",
+    "authorization_type": "EngineeringAuthorization.load",
+    "plan_id": "stage2.teacher_modes.token_matched",
+    "plan_hash": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+    "status_path": "/workspace/stage2_teacher_modes_tm.status",
+    "run_log_path": "/workspace/stage2_teacher_modes_tm_run.log",
+    "driver_job_id": "stage2_teacher_modes_tm_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage2_teacher_modes_tm",
+      "evidence_filename": "report.json",
+      "archive_basename": "stage2_teacher_modes_tm",
+      "spec_success": "configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
+      "spec_failed": "configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage2_teacher_modes_tm",
+        "TEACHER_MODEL": "Qwen/Qwen3-4B",
+        "PHASE_KIND": "train_sr_a2"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION",
+        "TEACHER_MODEL"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage3_sr/A2-6cat-sr/88246ecc330df9b7/blocks.npz",
+          "dest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A2-6cat-sr",
+          "sha256": "88246ecc330df9b7773d7902890c81c228bf858206d88451f1de6c85612d613f",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage3_sr/A2-6cat-sr/4f9177e27e0a488c/ladder.json",
+          "dest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A2-6cat-sr",
+          "sha256": "4f9177e27e0a488c76307cf8007b704d330471bfe6d90bebe6f8dbd15c024713",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage3_sr/A2-6cat-sr/ad3b78fdf04818bf/audit.jsonl",
+          "dest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A2-6cat-sr",
+          "sha256": "ad3b78fdf04818bf95148e99212da4488d9ea601f74756dea31c5fa834780c4d",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "battery_v2:artifacts/stages/stage-3/eval"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 10,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-11-07T17:46:30+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 1497 min $29.69 \u00b7 soft $31.38 \u00b7 hard $31.58 (authorized $32.16)"
+    },
+    {
+      "utc": "2026-11-07T17:46:31+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-11-07T17:46:31+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $44.8860 against the $31.5816 this session must be able to fund"
+    },
+    {
+      "utc": "2026-11-07T17:46:32+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account resources OK: the provider account holds only the 3 resource(s) the records account for"
+    },
+    {
+      "utc": "2026-11-07T17:46:32+00:00",
+      "elapsed_min": 0.0,
+      "msg": "a A-TM train_sr_a2 artifact, unused"
+    },
+    {
+      "utc": "2026-11-07T17:46:32+00:00",
+      "elapsed_min": 0.0,
+      "msg": "1 x NVIDIA L40S at no more than $1.19/h for the pod, as granted"
+    },
+    {
+      "utc": "2026-11-07T17:46:32+00:00",
+      "elapsed_min": 0.0,
+      "msg": "all-in $32.1518 over 1593.6 min, inside $32.16"
+    },
+    {
+      "utc": "2026-11-07T17:46:32+00:00",
+      "elapsed_min": 0.0,
+      "msg": "study identity 2a24101c2c92 is the authorized one"
+    },
+    {
+      "utc": "2026-11-07T17:46:32+00:00",
+      "elapsed_min": 0.0,
+      "msg": "every bound file is in the session commit"
+    },
+    {
+      "utc": "2026-11-07T17:46:36+00:00",
+      "elapsed_min": 0.0,
+      "msg": "$32.16 inside the envelope ($65.4846) and the $82.9159 the project cap leaves now"
+    },
+    {
+      "utc": "2026-11-07T17:46:36+00:00",
+      "elapsed_min": 0.0,
+      "msg": "volume thprcgh7s9: 350 GB in US-TX-3"
+    },
+    {
+      "utc": "2026-11-07T17:46:36+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the kind's bound records are the committed ones"
+    },
+    {
+      "utc": "2026-11-07T17:46:36+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the granted Stage-3 volume thprcgh7s9"
+    },
+    {
+      "utc": "2026-11-07T17:46:36+00:00",
+      "elapsed_min": 0.0,
+      "msg": "3 Stage-3 input(s) relayed: blocks.npz, ladder.json, audit.jsonl"
+    },
+    {
+      "utc": "2026-11-07T17:46:37+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 6 relay inputs (6 from AlphaAvatar/aadistill-artifacts), 1 local assets"
+    },
+    {
+      "utc": "2026-11-07T17:46:38+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 1 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T17:49:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 2 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T17:51:39+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 3 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T17:54:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 4 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T17:56:41+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 5 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T17:59:11+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 6 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T18:01:42+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 7 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T18:04:13+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 8 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T18:06:44+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 9 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T18:09:14+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 10 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T18:11:45+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 11 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T18:14:16+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 12 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T18:16:47+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 13 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T18:19:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 14 (any datacenter): capacity \u2014 {\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\",\"code\":\"bad_request\",\"status\":400}"
+    },
+    {
+      "utc": "2026-11-07T18:21:50+00:00",
+      "elapsed_min": 0.02,
+      "msg": "watchdog detached \u2014 hard 1592 min = $31.58"
+    },
+    {
+      "utc": "2026-11-07T18:21:51+00:00",
+      "elapsed_min": 0.03,
+      "msg": "created eew4ty3adl1nyc at $1.09/h in US-TX-3"
+    },
+    {
+      "utc": "2026-11-07T18:22:44+00:00",
+      "elapsed_min": 0.92,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-11-07T18:23:47+00:00",
+      "elapsed_min": 1.97,
+      "msg": "  starting (120s) \u2014 $0.04"
+    },
+    {
+      "utc": "2026-11-07T18:24:50+00:00",
+      "elapsed_min": 3.02,
+      "msg": "TCP 22 at 209.170.80.132:19667 after 3.0 min"
+    },
+    {
+      "utc": "2026-11-07T18:24:53+00:00",
+      "elapsed_min": 3.06,
+      "msg": "draw 1: ssh reachable \u2014 $0.06"
+    },
+    {
+      "utc": "2026-11-07T18:25:17+00:00",
+      "elapsed_min": 3.46,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-11-07T18:25:17+00:00",
+      "elapsed_min": 3.46,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-11-07T18:28:59+00:00",
+      "elapsed_min": 7.17,
+      "msg": "draw 1: setup complete \u2014 $0.13"
+    },
+    {
+      "utc": "2026-11-07T18:29:05+00:00",
+      "elapsed_min": 7.26,
+      "msg": "driver detached, pid 2398, confirmed by descriptor_probe \u2014 $0.13"
+    },
+    {
+      "utc": "2026-11-07T18:30:16+00:00",
+      "elapsed_min": 8.45,
+      "msg": "  2026-11-07T18:29:12Z MARKER:TRAIN_START:A2-6cat-sr-s20260726 \u2014 $0.15"
+    },
+    {
+      "utc": "2026-11-08T01:08:51+00:00",
+      "elapsed_min": 407.04,
+      "msg": "  2026-11-08T01:08:41Z MARKER:EVAL_START:A2-6cat-sr-s20260726 \u2014 $7.39"
+    },
+    {
+      "utc": "2026-11-08T01:27:57+00:00",
+      "elapsed_min": 426.14,
+      "msg": "  2026-11-08T01:26:47Z MARKER:TRAIN_START:A2-6cat-sr-s20260801 \u2014 $7.74"
+    },
+    {
+      "utc": "2026-11-08T08:06:38+00:00",
+      "elapsed_min": 824.82,
+      "msg": "  2026-11-08T08:06:33Z MARKER:EVAL_START:A2-6cat-sr-s20260801 \u2014 $14.98"
+    },
+    {
+      "utc": "2026-11-08T08:23:36+00:00",
+      "elapsed_min": 841.78,
+      "msg": "  2026-11-08T08:22:34Z MARKER:ALL_DONE \u2014 $15.29"
+    },
+    {
+      "utc": "2026-11-08T08:23:36+00:00",
+      "elapsed_min": 841.78,
+      "msg": "polling ended: ALL_DONE \u2014 $15.29"
+    },
+    {
+      "utc": "2026-11-08T08:23:49+00:00",
+      "elapsed_min": 842.01,
+      "msg": "  manifest rc=0\n0 file(s) across 0 class(es) -> /workspace/manifest.json\n  final_required: 0 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-11-08T08:24:55+00:00",
+      "elapsed_min": 843.11,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-11-08T08:24:55+00:00",
+      "elapsed_min": 843.11,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-11-08T08:25:07+00:00",
+      "elapsed_min": 843.3,
+      "msg": "pod deleted \u2014 843.3 min, $15.32; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage2.teacher_modes.tm_authorization/v1",
+    "authorization_id": "stage2.teacher_modes.token_matched.a_train_sr_a2_20261107_174531",
+    "version": 1,
+    "granted_utc": "2026-11-07T17:45:34+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "stage2.teacher_modes.token_matched",
+    "study_identity_sha256": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+    "expected_usd": 19.07,
+    "hard_cap_usd": 32.16,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "l40s_check_record_sha256": "a98174e35acef9a9eefc1e75a5a748238761a8a0bbc5312b7cfd1a4d1c10b784",
+      "record:logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json": "477a08ea9d49cf56388854ee49c4212f39076717b42194b578dce7e7930631ce",
+      "record:logs/stages/stage-2/teacher_modes/plans/packed_training_budget.json": "3b4792dfbadc45a4907d72c34f3ac7439592adbeaa066359692be36af9dcd836",
+      "record:logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json": "9e6262b78832b0c75d2a4c0032d1a5f411b23154c1faf9572e96ddd19cd1187b",
+      "kind": "train_sr_a2",
+      "study": "A-TM",
+      "dry_run": "false",
+      "grant": "logs/budget/approvals/teacher_modes_token_matched_grant.json",
+      "grant_sha256": "97b37fc638162f7884d2527e3e74a56d8cbb5da4c8c977facd378a2ea856252b",
+      "gpus": "{\"NVIDIA L40S\": 1.19}",
+      "gpu_count_max": "1",
+      "envelope": "{\"ceiling_usd\": 158.3762, \"spent_usd\": 92.8916, \"remaining_usd\": 65.4846, \"runs\": [{\"run_id\": \"a_inputs_20261101_125520\", \"usd\": 0.0}, {\"run_id\": \"a_inputs_20261101_125709\", \"usd\": 0.0}, {\"run_id\": \"a_inputs_20261101_125916\", \"usd\": 0.5713}, {\"run_id\": \"a_packed_search_20261105_195011\", \"usd\": 28.1677}, {\"run_id\": \"a_search_20261101_142659\", \"usd\": 0.1973}, {\"run_id\": \"a_search_20261101_153803\", \"usd\": 23.9553}, {\"run_id\": \"a_supplement_20261031_091618\", \"usd\": 0.0}, {\"run_id\": \"a_supplement_20261031_092108\", \"usd\": 5.7873}, {\"run_id\": \"a_supplement_20261031_144618\", \"usd\": 10.0816}, {\"run_id\": \"a_tool_generation_20261105_074146\", \"usd\": 3.1438}, {\"run_id\": \"a_tool_generation_20261105_105512\", \"usd\": 0.4447}, {\"run_id\": \"a_tool_generation_sr_20261105_153741\", \"usd\": 0.7919}, {\"run_id\": \"a_tool_generation_sr_20261105_162909\", \"usd\": 0.2561}, {\"run_id\": \"a_tool_generation_sr_t2507_20261105_164515\", \"usd\": 0.3296}, {\"run_id\": \"a_tool_generation_t2507_20261104_194048\", \"usd\": 0.1459}, {\"run_id\": \"a_tool_generation_t2507_20261104_195411\", \"usd\": 1.097}, {\"run_id\": \"a_tool_generation_t2507_20261105_064829\", \"usd\": 0.3752}, {\"run_id\": \"a_tool_generation_t2507_20261105_072112\", \"usd\": 0.3385}, {\"run_id\": \"a_tool_pilot_20261104_140656\", \"usd\": 0.0}, {\"run_id\": \"a_tool_pilot_20261104_164531\", \"usd\": 0.4328}, {\"run_id\": \"a_train_a1_20261102_165858\", \"usd\": 0.2436}, {\"run_id\": \"a_train_a1_20261102_183510\", \"usd\": 0.0}, {\"run_id\": \"a_train_a1_20261102_184122\", \"usd\": 8.7766}, {\"run_id\": \"a_train_sr_a1_20261107_104149\", \"usd\": 7.7554}]}",
+      "live_position": "{\"fetched_utc\": \"2026-11-07T17:45:32+00:00\", \"provider_billed_usd\": 864.0202, \"committed_usd\": 917.0841, \"project_cap_usd\": 1000.0, \"project_remaining_usd\": 82.9159, \"account_pods\": [], \"account_volumes\": [\"4rhubprswo\", \"am5m373kuq\", \"thprcgh7s9\"], \"balance_usd\": 44.8860403248, \"spend_per_hour\": 0.073, \"rule\": \"shared.project_position: mixed_governance.position + engineering-campaign subruns\", \"unposted_sessions\": 0, \"campaign_unposted\": 0, \"campaign_teardown_confirmed_by\": {\"subrun record\": 25, \"reconciliation\": 30}}"
+    },
+    "scope_note": "Stage 3 A2-6cat-sr, attempt 1 (maintainer 2026-11-07, 'Stage 3 \u516d\u5355\u5143\u6b63\u5f0f\u6388\u6743')",
+    "authorizes_engineering_validation": false,
+    "authorizes_formal": true,
+    "authorizes_training": true,
+    "authorizes_evaluation": true,
+    "authorizes_teacher_generation": false,
+    "authorizes_paid_storage": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "726dc1dab25adbfb9d6ccf1c5f9e9aa9ea265e9f75d01622fa29833c809bb393",
+    "harness_source_files": [
+      "src/aadistill/__init__.py",
+      "src/aadistill/data/__init__.py",
+      "src/aadistill/data/cleaning.py",
+      "src/aadistill/data/code_exec.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/diversity.py",
+      "src/aadistill/data/e5_pack.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/mixture.py",
+      "src/aadistill/data/nested_ladder.py",
+      "src/aadistill/data/paired_corpus.py",
+      "src/aadistill/data/prefix_split.py",
+      "src/aadistill/data/recovery.py",
+      "src/aadistill/data/sequence_packing.py",
+      "src/aadistill/data/sessions.py",
+      "src/aadistill/data/target_policy.py",
+      "src/aadistill/data/target_quality.py",
+      "src/aadistill/data/token_documents.py",
+      "src/aadistill/data/tool_calls.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/eval_registry.py",
+      "src/aadistill/evaluation/function_error.py",
+      "src/aadistill/evaluation/general_text.py",
+      "src/aadistill/evaluation/init_nll.py",
+      "src/aadistill/evaluation/isolation.py",
+      "src/aadistill/evaluation/oracle_reasoning.py",
+      "src/aadistill/evaluation/paired_stats.py",
+      "src/aadistill/evaluation/protocol_field.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/__init__.py",
+      "src/aadistill/governance/artifact_manifest.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/governance/post_freeze.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/source_identity.py",
+      "src/aadistill/infrastructure/transfer.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/__init__.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/families.py",
+      "src/aadistill/initialization/adapters/projected_residual.py",
+      "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/calibration/__init__.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/__init__.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_import.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/__init__.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/kl_reference.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/__init__.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/identity_collapse.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/__init__.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/reweight.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/__init__.py",
+      "src/aadistill/initialization/transforms/nll_gate.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/projected_residual.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/__init__.py",
+      "src/aadistill/models/cost_model.py",
+      "src/aadistill/models/quant.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/rollout/__init__.py",
+      "src/aadistill/rollout/engines.py",
+      "src/aadistill/rollout/generate.py",
+      "src/aadistill/rollout/snapshots.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/durable_store.py",
+      "src/aadistill/runtime/hub_capacity.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/setup_steps.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/__init__.py",
+      "src/aadistill/training/accounting.py",
+      "src/aadistill/training/lineage.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/topk_kd.py",
+      "src/aadistill/training/train.py",
+      "scripts/stages/stage-2/teacher_modes/token_matched_phase.py",
+      "scripts/stages/stage-2/teacher_modes/phase.py",
+      "scripts/stages/stage-2/teacher_modes/supplement_session.py",
+      "scripts/stages/stage-2/teacher_modes/teacher_session.py",
+      "scripts/stages/stage-2/teacher_modes/admission.py",
+      "scripts/stages/stage-2/teacher_modes/supply_audit.py",
+      "scripts/stages/stage-2/teacher_modes/build_supplement_tasks.py",
+      "scripts/stages/stage-2/teacher_modes/build_tasks.py",
+      "scripts/stages/stage-2/teacher_modes/build_calibration_supplement.py",
+      "scripts/stages/stage-2/teacher_modes/hybrid_calibration.py",
+      "scripts/stages/stage-2/teacher_modes/inputs_session.py",
+      "scripts/stages/stage-2/teacher_modes/full_search.py",
+      "scripts/stages/stage-2/teacher_modes/hybrid_state_eval.py",
+      "scripts/stages/stage-2/teacher_modes/freeze_state_eval.py",
+      "scripts/stages/stage-2/teacher_modes/a1_units.py",
+      "scripts/stages/stage-2/teacher_modes/training_plan.py",
+      "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+      "scripts/stages/stage-2/teacher_modes/packed_inputs.py",
+      "scripts/stages/stage-2/teacher_modes/packed_packs.py",
+      "scripts/stages/stage-2/teacher_modes/packed_training_plan.py",
+      "scripts/stages/stage-2/teacher_modes/packing_audit.py",
+      "scripts/stages/stage-2/teacher_modes/tool_episodes.py",
+      "scripts/stages/stage-2/teacher_modes/tool_admission.py",
+      "scripts/stages/stage-2/teacher_modes/tool_pool.py",
+      "scripts/stages/stage-2/teacher_modes/tool_session.py",
+      "scripts/stages/stage-2/teacher_modes/six_category_selection.py",
+      "scripts/stages/stage-2/teacher_modes/tool_generation_plan.py",
+      "scripts/stages/stage-2/teacher_modes/tool_benchmarks.py",
+      "scripts/stages/stage-2/teacher_modes/tool_sources_toucan.py",
+      "scripts/stages/stage-2/teacher_modes/tool_sources_pivot.py",
+      "scripts/stages/stage-2/teacher_modes/tool_pilot.py",
+      "scripts/shared/study_engineering.py",
+      "scripts/shared/project_position.py",
+      "scripts/shared/eval_sets.py",
+      "scripts/shared/pod/teacher_cache.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/mixed_governance.py",
+      "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+      "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+      "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+      "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+      "scripts/maintenance/consolidation/derive_budget.py",
+      "scripts/maintenance/consolidation/provider_billing.py",
+      "scripts/shared/deployment.py",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/collect_artifacts.py"
+    ],
+    "per_launch_hard_usd": 32.16,
+    "provenance_commit": "e08937b1527cb11753c658d07f4cc2f9784cb5c9",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the study identity and the harness on disk, is not a dry run, has not been used, and its hard cap covers the planned all-in bound and fits the project cap as the provider bills it at launch; setup re-checks the binding on the pod; one artifact funds one run inside the grant's envelope",
+    "authorization_sha256": "1dd7df1902c4e5440ae1b7ee1165bd797da43e24767d192b99ca04db14da5841"
+  },
+  "session_plan_hash": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+  "harness_source_digest": "726dc1dab25adbfb9d6ccf1c5f9e9aa9ea265e9f75d01622fa29833c809bb393",
+  "harness_source_files": [
+    "scripts/maintenance/consolidation/derive_budget.py",
+    "scripts/maintenance/consolidation/provider_billing.py",
+    "scripts/shared/deployment.py",
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/teacher_cache.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/project_position.py",
+    "scripts/shared/study_engineering.py",
+    "scripts/stages/stage-0/calibration_volume/mixed_governance.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+    "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+    "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+    "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+    "scripts/stages/stage-2/teacher_modes/a1_units.py",
+    "scripts/stages/stage-2/teacher_modes/admission.py",
+    "scripts/stages/stage-2/teacher_modes/build_calibration_supplement.py",
+    "scripts/stages/stage-2/teacher_modes/build_supplement_tasks.py",
+    "scripts/stages/stage-2/teacher_modes/build_tasks.py",
+    "scripts/stages/stage-2/teacher_modes/freeze_state_eval.py",
+    "scripts/stages/stage-2/teacher_modes/full_search.py",
+    "scripts/stages/stage-2/teacher_modes/hybrid_calibration.py",
+    "scripts/stages/stage-2/teacher_modes/hybrid_state_eval.py",
+    "scripts/stages/stage-2/teacher_modes/inputs_session.py",
+    "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+    "scripts/stages/stage-2/teacher_modes/packed_inputs.py",
+    "scripts/stages/stage-2/teacher_modes/packed_packs.py",
+    "scripts/stages/stage-2/teacher_modes/packed_training_plan.py",
+    "scripts/stages/stage-2/teacher_modes/packing_audit.py",
+    "scripts/stages/stage-2/teacher_modes/phase.py",
+    "scripts/stages/stage-2/teacher_modes/six_category_selection.py",
+    "scripts/stages/stage-2/teacher_modes/supplement_session.py",
+    "scripts/stages/stage-2/teacher_modes/supply_audit.py",
+    "scripts/stages/stage-2/teacher_modes/teacher_session.py",
+    "scripts/stages/stage-2/teacher_modes/token_matched_phase.py",
+    "scripts/stages/stage-2/teacher_modes/tool_admission.py",
+    "scripts/stages/stage-2/teacher_modes/tool_benchmarks.py",
+    "scripts/stages/stage-2/teacher_modes/tool_episodes.py",
+    "scripts/stages/stage-2/teacher_modes/tool_generation_plan.py",
+    "scripts/stages/stage-2/teacher_modes/tool_pilot.py",
+    "scripts/stages/stage-2/teacher_modes/tool_pool.py",
+    "scripts/stages/stage-2/teacher_modes/tool_session.py",
+    "scripts/stages/stage-2/teacher_modes/tool_sources_pivot.py",
+    "scripts/stages/stage-2/teacher_modes/tool_sources_toucan.py",
+    "scripts/stages/stage-2/teacher_modes/training_plan.py",
+    "src/aadistill/__init__.py",
+    "src/aadistill/data/__init__.py",
+    "src/aadistill/data/cleaning.py",
+    "src/aadistill/data/code_exec.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/diversity.py",
+    "src/aadistill/data/e5_pack.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/mixture.py",
+    "src/aadistill/data/nested_ladder.py",
+    "src/aadistill/data/paired_corpus.py",
+    "src/aadistill/data/prefix_split.py",
+    "src/aadistill/data/recovery.py",
+    "src/aadistill/data/sequence_packing.py",
+    "src/aadistill/data/sessions.py",
+    "src/aadistill/data/target_policy.py",
+    "src/aadistill/data/target_quality.py",
+    "src/aadistill/data/token_documents.py",
+    "src/aadistill/data/tool_calls.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/function_error.py",
+    "src/aadistill/evaluation/general_text.py",
+    "src/aadistill/evaluation/init_nll.py",
+    "src/aadistill/evaluation/isolation.py",
+    "src/aadistill/evaluation/oracle_reasoning.py",
+    "src/aadistill/evaluation/paired_stats.py",
+    "src/aadistill/evaluation/protocol_field.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/__init__.py",
+    "src/aadistill/governance/artifact_manifest.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/governance/post_freeze.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/source_identity.py",
+    "src/aadistill/infrastructure/transfer.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/__init__.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/families.py",
+    "src/aadistill/initialization/adapters/projected_residual.py",
+    "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/calibration/__init__.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/__init__.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_import.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/__init__.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/kl_reference.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/__init__.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/identity_collapse.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/__init__.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/reweight.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/__init__.py",
+    "src/aadistill/initialization/transforms/nll_gate.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/projected_residual.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/__init__.py",
+    "src/aadistill/models/cost_model.py",
+    "src/aadistill/models/quant.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/rollout/__init__.py",
+    "src/aadistill/rollout/engines.py",
+    "src/aadistill/rollout/generate.py",
+    "src/aadistill/rollout/snapshots.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/durable_store.py",
+    "src/aadistill/runtime/hub_capacity.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/setup_steps.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/__init__.py",
+    "src/aadistill/training/accounting.py",
+    "src/aadistill/training/lineage.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/topk_kd.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.19,
+    "authorized_usd": 32.16,
+    "expected_minutes": 1497.0,
+    "soft_stop_minutes": 1582.3500000000001,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 1592.3500000000001,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: the validation is one phase (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 20.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 5.0
+      },
+      {
+        "name": "A-TM_train_sr_a2",
+        "minutes": 1472.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "closeout_and_teardown",
+        "minutes": 10.5
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 10.5,
+    "expected_usd": 29.6905,
+    "soft_stop_usd": 31.3833,
+    "artifact_recovery_reserve_usd": 0.1983,
+    "hard_terminate_usd": 31.5816
+  },
+  "quoted_price_per_hour": 1.09,
+  "gpu_count": 1,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 44.8860403248,
+    "current_spend_per_hr": 0.073,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 31.5816,
+    "ok": true,
+    "why": "the provider account holds $44.8860 against the $31.5816 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "account_resources": {
+    "checked": true,
+    "known": true,
+    "pods": [],
+    "network_volumes": [
+      {
+        "kind": "network_volume",
+        "id": "4rhubprswo",
+        "name": "aad-a1-phase",
+        "size": 350,
+        "dataCenterId": "US-TX-3"
+      },
+      {
+        "kind": "network_volume",
+        "id": "am5m373kuq",
+        "name": "aad-h1pa",
+        "size": 55,
+        "dataCenterId": "EUR-IS-2"
+      },
+      {
+        "kind": "network_volume",
+        "id": "thprcgh7s9",
+        "name": "aad-packed-search",
+        "size": 350,
+        "dataCenterId": "US-TX-3"
+      }
+    ],
+    "error": null,
+    "accounted": [
+      "4rhubprswo",
+      "am5m373kuq",
+      "thprcgh7s9"
+    ],
+    "unaccounted": [],
+    "ok": true,
+    "why": "the provider account holds only the 3 resource(s) the records account for"
+  },
+  "prechecks": [
+    {
+      "check": "the_artifact_is_this_studys_and_unused",
+      "ok": true,
+      "message": "a A-TM train_sr_a2 artifact, unused"
+    },
+    {
+      "check": "the_gpu_and_price_are_the_grants",
+      "ok": true,
+      "message": "1 x NVIDIA L40S at no more than $1.19/h for the pod, as granted"
+    },
+    {
+      "check": "all_in_within_cap",
+      "ok": true,
+      "message": "all-in $32.1518 over 1593.6 min, inside $32.16"
+    },
+    {
+      "check": "the_study_identity_is_the_authorized_one",
+      "ok": true,
+      "message": "study identity 2a24101c2c92 is the authorized one"
+    },
+    {
+      "check": "bound_files_are_in_the_session_commit",
+      "ok": true,
+      "message": "every bound file is in the session commit"
+    },
+    {
+      "check": "the_project_cap_holds_now",
+      "ok": true,
+      "message": "$32.16 inside the envelope ($65.4846) and the $82.9159 the project cap leaves now"
+    },
+    {
+      "check": "the_volume_is_the_planned_one",
+      "ok": true,
+      "message": "volume thprcgh7s9: 350 GB in US-TX-3"
+    },
+    {
+      "check": "the_kind_records_are_the_bound_ones",
+      "ok": true,
+      "message": "the kind's bound records are the committed ones"
+    },
+    {
+      "check": "the_training_volume_is_the_granted_one",
+      "ok": true,
+      "message": "the granted Stage-3 volume thprcgh7s9"
+    },
+    {
+      "check": "the_stage3_inputs_are_relayed",
+      "ok": true,
+      "message": "3 Stage-3 input(s) relayed: blocks.npz, ladder.json, audit.jsonl"
+    }
+  ],
+  "all_in_bound": {
+    "billable_minutes": 1593.6,
+    "price_per_hour": 1.19,
+    "container_disk_gb": 150,
+    "gpu_usd": 31.6064,
+    "disk_usd": 0.5454,
+    "all_in_usd": 32.1518,
+    "highest_price_inside_cap": 1.19
+  },
+  "live_position": {
+    "fetched_utc": "2026-11-07T17:46:32+00:00",
+    "provider_billed_usd": 864.0202,
+    "committed_usd": 917.0841,
+    "project_cap_usd": 1000.0,
+    "project_remaining_usd": 82.9159,
+    "account_pods": [],
+    "account_volumes": [
+      "4rhubprswo",
+      "am5m373kuq",
+      "thprcgh7s9"
+    ],
+    "balance_usd": 44.8860403248,
+    "spend_per_hour": 0.073,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 0,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+      "subrun record": 25,
+      "reconciliation": 30
+    }
+  },
+  "envelope": {
+    "ceiling_usd": 158.3762,
+    "spent_usd": 92.8916,
+    "remaining_usd": 65.4846,
+    "runs": [
+      {
+        "run_id": "a_inputs_20261101_125520",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_inputs_20261101_125709",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_inputs_20261101_125916",
+        "usd": 0.5713
+      },
+      {
+        "run_id": "a_packed_search_20261105_195011",
+        "usd": 28.1677
+      },
+      {
+        "run_id": "a_search_20261101_142659",
+        "usd": 0.1973
+      },
+      {
+        "run_id": "a_search_20261101_153803",
+        "usd": 23.9553
+      },
+      {
+        "run_id": "a_supplement_20261031_091618",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_supplement_20261031_092108",
+        "usd": 5.7873
+      },
+      {
+        "run_id": "a_supplement_20261031_144618",
+        "usd": 10.0816
+      },
+      {
+        "run_id": "a_tool_generation_20261105_074146",
+        "usd": 3.1438
+      },
+      {
+        "run_id": "a_tool_generation_20261105_105512",
+        "usd": 0.4447
+      },
+      {
+        "run_id": "a_tool_generation_sr_20261105_153741",
+        "usd": 0.7919
+      },
+      {
+        "run_id": "a_tool_generation_sr_20261105_162909",
+        "usd": 0.2561
+      },
+      {
+        "run_id": "a_tool_generation_sr_t2507_20261105_164515",
+        "usd": 0.3296
+      },
+      {
+        "run_id": "a_tool_generation_t2507_20261104_194048",
+        "usd": 0.1459
+      },
+      {
+        "run_id": "a_tool_generation_t2507_20261104_195411",
+        "usd": 1.097
+      },
+      {
+        "run_id": "a_tool_generation_t2507_20261105_064829",
+        "usd": 0.3752
+      },
+      {
+        "run_id": "a_tool_generation_t2507_20261105_072112",
+        "usd": 0.3385
+      },
+      {
+        "run_id": "a_tool_pilot_20261104_140656",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_tool_pilot_20261104_164531",
+        "usd": 0.4328
+      },
+      {
+        "run_id": "a_train_a1_20261102_165858",
+        "usd": 0.2436
+      },
+      {
+        "run_id": "a_train_a1_20261102_183510",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_train_a1_20261102_184122",
+        "usd": 8.7766
+      },
+      {
+        "run_id": "a_train_sr_a1_20261107_104149",
+        "usd": 7.7554
+      },
+      {
+        "run_id": "a_train_sr_a2_20261107_174531",
+        "usd": 0.0
+      }
+    ]
+  },
+  "volume": {
+    "id": "thprcgh7s9",
+    "size_gb": 350,
+    "data_center_id": "US-TX-3"
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "transfer/stage3_sr/A2-6cat-sr/88246ecc330df9b7/blocks.npz",
+      "transfer/stage3_sr/A2-6cat-sr/4f9177e27e0a488c/ladder.json",
+      "transfer/stage3_sr/A2-6cat-sr/ad3b78fdf04818bf/audit.jsonl"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 6
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1674
+    },
+    "local_assets": [
+      "artifacts/stages/stage-3/eval/battery_v2"
+    ],
+    "local_missing": []
+  },
+  "acquisition": {
+    "create_attempts": 288,
+    "create_retry_seconds": 150.0,
+    "attempts": [
+      {
+        "draw": 1,
+        "attempt": 1,
+        "request": "d1a1fb6b6e",
+        "placement": [],
+        "request_utc": "2026-11-07T17:46:37+00:00",
+        "terminate_after_utc": "2026-11-08T20:18:58Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 2,
+        "request": "d1a2dd57ba",
+        "placement": [],
+        "request_utc": "2026-11-07T17:49:08+00:00",
+        "terminate_after_utc": "2026-11-08T20:21:29Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 3,
+        "request": "d1a35d22a2",
+        "placement": [],
+        "request_utc": "2026-11-07T17:51:38+00:00",
+        "terminate_after_utc": "2026-11-08T20:23:59Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 4,
+        "request": "d1a485da10",
+        "placement": [],
+        "request_utc": "2026-11-07T17:54:09+00:00",
+        "terminate_after_utc": "2026-11-08T20:26:30Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 5,
+        "request": "d1a5d2bc17",
+        "placement": [],
+        "request_utc": "2026-11-07T17:56:39+00:00",
+        "terminate_after_utc": "2026-11-08T20:29:00Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 6,
+        "request": "d1a65337bd",
+        "placement": [],
+        "request_utc": "2026-11-07T17:59:11+00:00",
+        "terminate_after_utc": "2026-11-08T20:31:32Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 7,
+        "request": "d1a733362b",
+        "placement": [],
+        "request_utc": "2026-11-07T18:01:41+00:00",
+        "terminate_after_utc": "2026-11-08T20:34:02Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 8,
+        "request": "d1a87691fe",
+        "placement": [],
+        "request_utc": "2026-11-07T18:04:12+00:00",
+        "terminate_after_utc": "2026-11-08T20:36:33Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 9,
+        "request": "d1a9ca3265",
+        "placement": [],
+        "request_utc": "2026-11-07T18:06:43+00:00",
+        "terminate_after_utc": "2026-11-08T20:39:04Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 10,
+        "request": "d1a10b4d1d7",
+        "placement": [],
+        "request_utc": "2026-11-07T18:09:14+00:00",
+        "terminate_after_utc": "2026-11-08T20:41:35Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 11,
+        "request": "d1a11a8398e",
+        "placement": [],
+        "request_utc": "2026-11-07T18:11:44+00:00",
+        "terminate_after_utc": "2026-11-08T20:44:05Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 12,
+        "request": "d1a12a47c21",
+        "placement": [],
+        "request_utc": "2026-11-07T18:14:15+00:00",
+        "terminate_after_utc": "2026-11-08T20:46:36Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 13,
+        "request": "d1a13779348",
+        "placement": [],
+        "request_utc": "2026-11-07T18:16:46+00:00",
+        "terminate_after_utc": "2026-11-08T20:49:07Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 14,
+        "request": "d1a14d7e6fa",
+        "placement": [],
+        "request_utc": "2026-11-07T18:19:17+00:00",
+        "terminate_after_utc": "2026-11-08T20:51:38Z",
+        "outcome": "capacity"
+      },
+      {
+        "draw": 1,
+        "attempt": 15,
+        "request": "d1a15f53ff6",
+        "placement": [],
+        "request_utc": "2026-11-07T18:21:48+00:00",
+        "terminate_after_utc": "2026-11-08T20:54:09Z",
+        "outcome": "created",
+        "pod_id": "eew4ty3adl1nyc"
+      }
+    ]
+  },
+  "pod_id": "eew4ty3adl1nyc",
+  "actual_price_per_hour": 1.09,
+  "pod_record": {
+    "dataCenterId": "US-TX-3",
+    "createdAt": "2026-11-07T18:21:49.371Z",
+    "costPerHr": null,
+    "cost": 1.09,
+    "machineId": null,
+    "name": "aadistill-stage2_teacher_modes_tm-train_sr_a2-d1a15f53ff6"
+  },
+  "start": {
+    "basis": "provider createdAt",
+    "request_utc": "2026-11-07T18:21:48+00:00",
+    "provider_created_utc": "2026-11-07T18:21:49.371Z",
+    "start_epoch": 1794075709.371
+  },
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/40abda2f-efac-4413-af84-45085d7650d4/scratchpad/s3/scr_a_train_sr_a2_20261107_174531/watchdog_eew4ty3adl1nyc.jsonl"
+  ],
+  "watchdog_owns_pod": "eew4ty3adl1nyc",
+  "billed_window_deadline_utc": "2026-11-08T20:54:10Z",
+  "terminate_after_utc": null,
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_69938926.bundle",
+    "PHASE_KIND": "train_sr_a2",
+    "SESSION_ASSETS": "battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/governance/authorization.json",
+    "SESSION_COMMIT": "69938926d2bf707eed1e10c6efabbb551b361429",
+    "SESSION_KIND": "stage2_teacher_modes_tm",
+    "SESSION_PLAN_HASH": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/packs_6cat/A2-6cat-sr\",\"path\":\"transfer/stage3_sr/A2-6cat-sr/88246ecc330df9b7/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"88246ecc330df9b7773d7902890c81c228bf858206d88451f1de6c85612d613f\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/packs_6cat/A2-6cat-sr\",\"path\":\"transfer/stage3_sr/A2-6cat-sr/4f9177e27e0a488c/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"4f9177e27e0a488c76307cf8007b704d330471bfe6d90bebe6f8dbd15c024713\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/packs_6cat/A2-6cat-sr\",\"path\":\"transfer/stage3_sr/A2-6cat-sr/ad3b78fdf04818bf/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"ad3b78fdf04818bf95148e99212da4488d9ea601f74756dea31c5fa834780c4d\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage2_teacher_modes_tm.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_MODEL": "Qwen/Qwen3-4B",
+    "TEACHER_REVISION": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage2_teacher_modes_tm_driver",
+    "pid": 2398,
+    "workdir": "/workspace/aad",
+    "command": "mkdir -p /runpod-volume/teacher_modes && cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts:/workspace/aad/scripts/stages/stage-1 /opt/train/bin/python scripts/stages/stage-2/teacher_modes/a1_units.py --authorization /workspace/aad/logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/governance/authorization.json --durable-root /runpod-volume/teacher_modes --status /workspace/stage2_teacher_modes_tm.status --unit-deadline-hours 10.25 --kind train_sr_a2 --plan logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json --arm A2-6cat-sr --units-dir stage3_sr --volume-gb 350; grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' /workspace/stage2_teacher_modes_tm.status || echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> /workspace/stage2_teacher_modes_tm.status",
+    "log_path": "/workspace/stage2_teacher_modes_tm_run.log",
+    "status_path": "/workspace/stage2_teacher_modes_tm.status",
+    "pid_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.job.json",
+    "exit_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.exit",
+    "started_utc": "2026-11-07T18:29:02Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "final_weights_on_volume": {
+    "A2-6cat-sr-s20260726": {
+      "path": "/runpod-volume/teacher_modes/stage3_sr/A2-6cat-sr-s20260726/train/checkpoints/step_007571/model",
+      "sha256": "5e26ab61fab82ee988d042a98b8e467a284fd5682fa7de9dabc54623ed2606d4"
+    },
+    "A2-6cat-sr-s20260801": {
+      "path": "/runpod-volume/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/train/checkpoints/step_007571/model",
+      "sha256": "236425e5739bc71ba3661cda9e0ef9f1e02cb7c155eeb714a3c4f8686f2a2df6"
+    }
+  },
+  "final_weights_off_volume": {
+    "A2-6cat-sr-s20260726": {
+      "prefix": "durable/stage3_sr/A2-6cat-sr-s20260726/5e26ab61fab82ee9",
+      "sha256": null,
+      "refused": "the relay's private storage quota does not admit the weights",
+      "error": null
+    },
+    "A2-6cat-sr-s20260801": {
+      "prefix": "durable/stage3_sr/A2-6cat-sr-s20260801/236425e5739bc71b",
+      "sha256": null,
+      "refused": "the relay's private storage quota does not admit the weights",
+      "error": null
+    }
+  },
+  "off_volume_verified": {
+    "A2-6cat-sr-s20260726": false,
+    "A2-6cat-sr-s20260801": false
+  },
+  "files_secured": {
+    "stage3_units_evidence": true,
+    "final_weights_on_volume/A2-6cat-sr-s20260726": true,
+    "final_weights_on_volume/A2-6cat-sr-s20260801": true
+  },
+  "required_products_secured": {
+    "ok": true,
+    "why": "secured: final_weights_on_volume/A2-6cat-sr-s20260726, final_weights_on_volume/A2-6cat-sr-s20260801, stage3_units_evidence"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 0,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 843.3,
+    "actual_usd": 15.3199,
+    "extra_resources_usd": 0,
+    "authorized_usd": 32.16,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-11-08T08:25:07+00:00"
+}
