@@ -342,10 +342,11 @@ def main(argv=None) -> int:
             if a.arm in HYBRID_ARMS:
                 pkg = {"tokenizer_source": str(REPO / TP.TOKENIZERS["hybrid"]),
                        "sidecar_sha256": {n: ident["files_sha256"][n] for n in ("tokenizer.json", "tokenizer_config.json")}}
-            else:                       #: Thinking-2507's tokenizer, the one its lineage trained with
-                src = REPO / TP.TOKENIZERS["thinking_2507"]
-                pkg = {"tokenizer_source": str(src),
-                       "sidecar_sha256": {n: sha256_file(src / n) for n in ("tokenizer.json", "tokenizer_config.json")}}
+            else:                       #: Thinking-2507's tokenizer, the one its lineage trained with, by its pinned
+                #: files -- its chat template is chat_template.jinja, not inside tokenizer_config.json (attempt 1 of
+                #: train_sr_c1, 2026-11-08: a package without it gave the engine no template)
+                pkg = {"tokenizer_source": str(REPO / TP.TOKENIZERS["thinking_2507"]),
+                       "sidecar_sha256": dict(TP.T2507_TOKENIZER_FILES)}
             t0 = time.time()
             rep, _files = HD.evaluate({"evaluation": evaluation_spec(), "out": eval_dir, "progress": eval_dir / "progress",
                                        "label": name, "model_dir": model_dir, "package": pkg,

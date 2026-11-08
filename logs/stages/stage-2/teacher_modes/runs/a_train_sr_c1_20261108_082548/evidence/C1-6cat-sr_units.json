@@ -1,0 +1,65 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.a1_units/v1",
+ "started_utc": "2026-11-08T08:30:46Z",
+ "units": {
+  "C1-6cat-sr-s20260726": {
+   "state_at_start": "fresh",
+   "attention": {
+    "context_strategy": "cross_context",
+    "checked": "config, ladder.json, blocks.npz, the trainer's reader"
+   },
+   "admitted_utc": "2026-11-08T08:30:53Z",
+   "train_rc": 0,
+   "train_seconds": 7702.7,
+   "telemetry": {
+    "logged_steps": 189,
+    "median_seconds_per_step": 3.98,
+    "p95_seconds_per_step": 4.28,
+    "kd_positions_per_step_median": 11773,
+    "peak_gpu_mem_gb": 17.47,
+    "peak_gpu_mem_reserved_gb": 18.62,
+    "save_points": [
+     858,
+     1716,
+     1892
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+   "final_model_path": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/model",
+   "off_volume_copy": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage3_sr/C1-6cat-sr-s20260726/ed98d6e677421573",
+    "source": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/model",
+    "files_sha256_on_volume": {
+     "model.safetensors": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+     "config.json": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+     "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+    "verified": false,
+    "refused": "the relay's private storage quota does not admit the weights",
+    "attempted_utc": "2026-11-08T10:39:20Z"
+   }
+  }
+ },
+ "arm": "C1-6cat-sr",
+ "kind": "train_sr_c1",
+ "authorization": "stage2.teacher_modes.token_matched.a_train_sr_c1_20261108_082548",
+ "volume": {
+  "mount": "/runpod-volume",
+  "volume_gb": 350.0,
+  "used_bytes": 295737184430,
+  "room_bytes": 54262815570,
+  "need_bytes": 22493245409
+ },
+ "error": {
+  "error": "RuntimeError('run_battery exited 1; see eval_fluid.log')",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-2/teacher_modes/a1_units.py\", line 350, in main\n    rep, _files = HD.evaluate({\"evaluation\": evaluation_spec(), \"out\": eval_dir, \"progress\": eval_dir / \"progress\",\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-2/reasoning_data/h1pa_driver.py\", line 343, in evaluate\n    rep, _ = evaluate_all(job[\"model_dir\"], out, progress, job[\"label\"], prereg, job[\"env\"], **extra)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-0/calibration_volume/dose_driver.py\", line 389, in evaluate_all\n    raise RuntimeError(f\"run_battery exited {rc}; see eval_fluid.log\")\nRuntimeError: run_battery exited 1; see eval_fluid.log\n"
+ },
+ "finished_utc": "2026-11-08T10:41:42Z",
+ "terminal": "RUN_FAILED"
+}

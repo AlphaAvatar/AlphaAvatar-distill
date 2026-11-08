@@ -117,9 +117,9 @@ def grant_root(tmp_path, block: bool, spent_usd: float | None = None, kind: str 
 def test_the_committed_grant_admits_each_kind_up_to_its_cumulative_cap_only():
     """maintainer 2026-11-07, 'Stage 3 六单元正式授权', section IV"""
     for kind, arm in TM.PACKED_TRAIN_ARMS.items():
-        a = BUDGET["arms"][arm]
-        assert TM.kind_cap_problems(kind, a["session_hard_cap"]["hard_cap_usd"]) == []
-        assert TM.kind_cap_problems(kind, round(a["kind_cumulative_cap_usd"] + 0.01, 2))
+        left = round(BUDGET["arms"][arm]["kind_cumulative_cap_usd"] - TM.kind_spent(kind)["usd"], 4)
+        assert TM.kind_cap_problems(kind, left) == []                     #: what every earlier attempt left
+        assert TM.kind_cap_problems(kind, round(left + 0.01, 4))
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
     assert g["ceiling_usd"] == 158.3762 and g["project_cumulative_cap_usd"] == 1000.0
     assert g["research_a_cumulative"]["cap_usd"] <= 263 and g[TM.STAGE3_BLOCK]["stage_cumulative_cap_usd"] == 73.24
@@ -212,6 +212,7 @@ def driver_fixture(tmp_path, monkeypatch, states: dict[str, str]):
 
     def evaluate(job):
         calls["evaluate"].append(job["label"])
+        calls.setdefault("package", []).append(job.get("package"))
         (job["out"]).mkdir(parents=True, exist_ok=True)
         (job["out"] / "formal_report.json").write_text("{}")
         return {}, {}
@@ -342,3 +343,23 @@ def test_the_copy_uploads_nothing_the_relays_quota_refuses(tmp_path, monkeypatch
     assert out["verified"] and sorted(uploads) == [f"durable/stage3_sr/C1-6cat-sr-s20260726/{sha[:16]}/{n}"
                                                     for n in ("config.json", "model.safetensors")]
     assert AU.copy_final_off_volume(d, "u", "0" * 64, token_file=tmp_path / "token")["verified"] is False
+
+
+def test_c1_is_evaluated_with_its_lineages_pinned_tokenizer_and_template(tmp_path, monkeypatch):
+    """train_sr_c1 attempt 1 (2026-11-08): the package carried tokenizer.json and tokenizer_config.json only, and
+    Thinking-2507's template lives in chat_template.jinja -- the engine started with no template and the first
+    prompt raised. The package now names the lineage's pinned files, the ones the historical C1 package used."""
+    from stages.phase_c1.autoinit_c1_driver import TOKENIZER_SIDECAR_SHA256
+    from transformers import AutoTokenizer
+    names = [u["unit"] for u in PLAN["units"] if u["arm"] == "C1-6cat-sr"]
+    argv, calls, durable, _ = driver_fixture(tmp_path, monkeypatch, {names[0]: "trained", names[1]: "done"})
+    assert AU.main(argv) == 0 and len(calls["package"]) == 1
+    pkg = calls["package"][0]
+    assert pkg["sidecar_sha256"] == TP.T2507_TOKENIZER_FILES == TOKENIZER_SIDECAR_SHA256
+    src = Path(pkg["tokenizer_source"])
+    for keep, has_template in ((("tokenizer.json", "tokenizer_config.json"), False), (tuple(pkg["sidecar_sha256"]), True)):
+        d = tmp_path / f"tok{len(keep)}"
+        d.mkdir()
+        for n in keep:
+            (d / n).write_bytes((src / n).read_bytes())
+        assert bool(AutoTokenizer.from_pretrained(str(d)).chat_template) is has_template

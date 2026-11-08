@@ -16097,3 +16097,18 @@ on a paid pod.
 - Risks: until storage is added, the volume is a single point of loss for the six trained models (their evaluations
   and evidence leave the pod at each closeout).
 - Revisit when: private relay storage is added (the next session copies every owed unit), or Stage 3 completes.
+
+## 2026-11-08 — train_sr_c1 attempt 1 failed at its first evaluation (no template); repaired, attempt 2
+
+- Context: `a_train_sr_c1_20261108_082548` trained C1-6cat-sr-s20260726 completely (1,892 steps, 3.98 s/step, final weights
+  `ed98d6e6...` on `thprcgh7s9`) and failed 2 minutes into its formal evaluation: the engine started, the first
+  `apply_chat_template` raised "tokenizer.chat_template is not set". The evaluation package carried Thinking-2507's
+  `tokenizer.json` and `tokenizer_config.json` only; its template is `chat_template.jinja`. No generation, row or
+  score was written (the evaluation directory is empty). $2.5133 of the cumulative $17.37; pod deleted.
+- Decision: an ordinary engineering failure in the harness (P12.1), not a measurement: `a1_units.py` now packages
+  C1 with the lineage's pinned files (`training_plan.T2507_TOKENIZER_FILES`, the historical C1 package's three
+  sidecars, verified by sha256), with a regression that loads the package's tokenizer and requires its template.
+  Attempt 2 (a fresh one-use artifact) resumes from the volume: unit 1 is evaluated only, unit 2 trained and
+  evaluated; its cap $10.59 (454 driver minutes) fits the $14.86 the kind has left.
+- Risks: none to the science: unit 1's training is complete and unchanged; its evaluation runs once, as registered.
+- Revisit when: attempt 2 closes.

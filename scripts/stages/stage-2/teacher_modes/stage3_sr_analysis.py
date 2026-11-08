@@ -69,8 +69,18 @@ def decision_rows(name: str, arm: str, seed: int, f: dict, items: dict) -> list[
              "correct": bool(c), "decoding_sha256": AA.DECODING_SHA} for i, c in sorted(f["item_correct"].items())]
 
 
+def headline(v) -> float | None:
+    """A unit's correctness-type headline as the formal report states it (a rate, ``correct`` or ``pair_correct``);
+    rollout-integrity cells have none and are never ranked."""
+    for k in ("rate", "correct", "pair_correct"):
+        if isinstance(v, dict) and isinstance(v.get(k), (int, float)) and not isinstance(v.get(k), bool) \
+                and 0.0 <= float(v[k]) <= 1.0:
+            return float(v[k])
+    return None
+
+
 def worst(cells: dict) -> dict | None:
-    rated = {k: v["rate"] for k, v in cells.items() if isinstance(v, dict) and v.get("rate") is not None}
+    rated = {k: headline(v) for k, v in cells.items() if headline(v) is not None}
     if not rated:
         return None
     k = min(rated, key=lambda x: (rated[x], x))
