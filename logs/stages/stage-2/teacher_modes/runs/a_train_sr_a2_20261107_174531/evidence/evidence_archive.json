@@ -13,7 +13,14 @@
    "A1-6cat-sr-s20260801": 92216742,
    "A1-6cat-sr-s20260726": 93656407
   },
-  "contents": "the volume's stage3_sr tree without save points and evaluation-package weights: train logs and configs, every evaluation's generations, rows and formal report"
+  "contents": "the volume's stage3_sr tree without save points and evaluation-package weights: train logs and configs, every evaluation's generations, rows and formal report",
+  "relay_copy": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "path": "durable/stage3_sr/evidence/a_train_sr_a2_20261107_174531/stage3_units_evidence.tgz",
+   "sha256": "d4af3eb73ab4e2c5486dc6d627c6b9d921840a53601279614090263a7a7768d1",
+   "verified": true,
+   "rule": "uploaded from the dev box's copy, downloaded again into a fresh cache and re-hashed"
+  }
  },
  "committed_here": {
   "A2-6cat-sr-s20260726/train/train_log.jsonl": "a6b6b0b0e6322eb8bf62b37d09768832f54d945d6b358d638c814720467581dd",
