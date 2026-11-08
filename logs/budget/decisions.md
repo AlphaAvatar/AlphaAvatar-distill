@@ -16112,3 +16112,23 @@ on a paid pod.
   evaluated; its cap $10.59 (454 driver minutes) fits the $14.86 the kind has left.
 - Risks: none to the science: unit 1's training is complete and unchanged; its evaluation runs once, as registered.
 - Revisit when: attempt 2 closes.
+
+## 2026-11-08 — Stage 3 of six_category_schema_restored@v1 COMPLETE: six units trained and evaluated
+
+- Context: the maintainer's 2026-11-07 authorization ("Stage 3 六单元正式授权"); sessions A1 -> A2 -> C1 on one
+  Secure L40S at a time on `thprcgh7s9` (US-TX-3, $1.09/h).
+- Decision / result (owner: `logs/stages/stage-2/teacher_modes/analyses/stage3_sr_result.json`; PACKED_ROUND.md
+  section 16):
+  - all six units trained to their final step from their own lineage's initialization (every trainer logged
+    `cross_context`) and were formally evaluated on eval-set-1 v2 under nucleus_v1; static fluid correctness, two-seed
+    means: A1-6cat-sr 7.19%, A2-6cat-sr 10.96%, C1-6cat-sr 4.47%;
+  - registered rule: A1 - A2 INCONCLUSIVE (-3.77 pp, 97.5% [-7.21, -1.03]; excludes zero, not the 5 pp SESOI);
+    A1 - C1 (descriptive) NO_GO (+2.72 pp [+0.85, +4.83]);
+  - cost $30.7961 of the $73.24 cumulative caps (A1 $7.7554, A2 $15.6086, C1 $7.4321 over two attempts); every pod
+    deleted with the provider's confirmation; nothing billing but the three volumes.
+- Not decided here: A2's advantage is not compute-matched (3.53x steps and FLOPs, 4.6x tool-calling turns, 0.88x
+  exposure); C1 - A1 is not a pure teacher difference; eval-set-1 is not a closed-loop tool-task evaluation; no
+  release, Stage 4/5 or merge follows.
+- Open: the six trained weights' off-volume copy (relay quota); `thprcgh7s9` must be kept until it exists. Its
+  reserve (extended to 2026-12-03) and `4rhubprswo`'s (to ~2026-11-29) are booked.
+- Revisit when: the maintainer reads the result, or private storage is added.

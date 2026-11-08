@@ -149,9 +149,13 @@ def analyse(units_dir: Path, records: list[Path]) -> dict:
     for p in records:
         rec = json.loads(Path(p).read_text())
         for name, row in (rec.get("units") or {}).items():
-            measured[name] = {k: row.get(k) for k in ("train_seconds", "eval_seconds", "telemetry", "resume_from",
-                                                       "final_model_safetensors_sha256", "final_model_path",
-                                                       "off_volume_copy") if row.get(k) is not None}
+            #: merged over the attempts' records: a resumed attempt that only evaluated keeps the training fields
+            #: the earlier attempt recorded
+            measured.setdefault(name, {}).update({k: row.get(k) for k in ("train_seconds", "eval_seconds", "telemetry",
+                                                                           "resume_from",
+                                                                           "final_model_safetensors_sha256",
+                                                                           "final_model_path", "off_volume_copy")
+                                              if row.get(k) is not None})
     return {"schema": "aadistill.stage2.teacher_modes.stage3_sr_result/v1",
             "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "study_id": PTP.STUDY_ID, "plan_sha256": __import__("hashlib").sha256(PTP.BOUND.read_bytes()).hexdigest(),

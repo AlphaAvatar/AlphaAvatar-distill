@@ -1,0 +1,14 @@
+{
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "prefix": "durable/stage3_sr/C1-6cat-sr-s20260726/ed98d6e677421573",
+ "source": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/model",
+ "files_sha256_on_volume": {
+  "model.safetensors": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+  "config.json": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+  "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+ },
+ "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+ "verified": false,
+ "refused": "the relay's private storage quota does not admit the weights",
+ "attempted_utc": "2026-11-08T10:52:08Z"
+}

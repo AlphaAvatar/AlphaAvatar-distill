@@ -1,0 +1,3461 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.stage3_sr_result/v1",
+ "written_utc": "2026-11-08T15:15:41Z",
+ "study_id": "six_category_schema_restored@v1",
+ "plan_sha256": "477a08ea9d49cf56388854ee49c4212f39076717b42194b578dce7e7930631ce",
+ "set": "eval-set-1 v2 (frozen), scoring protocol v2, validity mask v1: 570 static + 144 interactive formal",
+ "decoding": {
+  "protocol_id": "nucleus_v1",
+  "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+ },
+ "rule": {
+  "id": "stage2.teacher_modes.statistics/v1",
+  "bound_sha256": {
+   "scripts/stages/stage-2/teacher_modes/mode_statistics.py": "5220e8d581ba20942a8d134b11eb1f3d3c7c3f7df4dbc0c9a457d700f37a42bb",
+   "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
+   "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
+  },
+  "constants": {
+   "sesoi": 0.05,
+   "sesoi_axis": 0.08,
+   "level": 0.975,
+   "iterations": 10000,
+   "bootstrap_seed": 20261029,
+   "floor_rate": 0.02,
+   "min_discordant": 10,
+   "min_informative_clusters": 5,
+   "alpha_axes": 0.05
+  }
+ },
+ "units": {
+  "A1-6cat-sr-s20260726": {
+   "arm": "A1-6cat-sr",
+   "seed": 20260726,
+   "fluid": {
+    "static_all": {
+     "n": 570,
+     "correct": 44,
+     "rate": 0.0772,
+     "wilson95": [
+      0.058,
+      0.102
+     ]
+    },
+    "by_axis": {
+     "task_contained_deduction": {
+      "n": 189,
+      "correct": 35,
+      "rate": 0.1852,
+      "wilson95": [
+       0.1363,
+       0.2466
+      ]
+     },
+     "inductive_rule_discovery": {
+      "n": 142,
+      "correct": 4,
+      "rate": 0.0282,
+      "wilson95": [
+       0.011,
+       0.0702
+      ]
+     },
+     "compositional_generalization": {
+      "n": 144,
+      "correct": 5,
+      "rate": 0.0347,
+      "wilson95": [
+       0.0149,
+       0.0787
+      ]
+     },
+     "abstract_analogical": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0389
+      ]
+     }
+    },
+    "interactive_exploratory": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.026
+     ]
+    },
+    "rollout_static": {
+     "n": 570,
+     "usable_rate": 0.6351,
+     "natural_termination_rate": 0.6351,
+     "degeneration_stop_rate": 0.3579,
+     "context_limit_rate": 0.007,
+     "reasoning_tokens": {
+      "mean": 1961.1,
+      "median": 1529.0
+     },
+     "answer_tokens": {
+      "mean": 1350.4,
+      "median": 509.5
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "rollout_interactive": {
+     "n": 144,
+     "usable_rate": 1.0,
+     "natural_termination_rate": 0.0347,
+     "degeneration_stop_rate": 0.9306,
+     "context_limit_rate": 0.0347,
+     "reasoning_tokens": {
+      "mean": 3592.4,
+      "median": 3395.0
+     },
+     "answer_tokens": {
+      "mean": 2922.0,
+      "median": 2816.0
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    }
+   },
+   "worst_static_axis": {
+    "group": "abstract_analogical",
+    "rate": 0.0
+   },
+   "usable": {
+    "n": 570,
+    "usable": 362,
+    "usable_rate": 0.6351,
+    "correct_among_usable": {
+     "n": 362,
+     "correct": 44,
+     "rate": 0.1215,
+     "wilson95": [
+      0.0918,
+      0.1592
+     ]
+    }
+   },
+   "capabilities": {
+    "fluid.abstract_analogical": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+       "n": 95,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.compositional_generalization": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+       "n": 144,
+       "correct": 5,
+       "rate": 0.0347
+      }
+     }
+    },
+    "fluid.inductive_rule_discovery": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+       "n": 142,
+       "correct": 4,
+       "rate": 0.0282
+      }
+     }
+    },
+    "fluid.interactive_adaptation": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+       "n": 144,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.task_contained_deduction": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+       "n": 189,
+       "correct": 35,
+       "rate": 0.1852
+      }
+     }
+    },
+    "supporting.closed_book_knowledge": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/knowledge": {
+       "n": 150,
+       "correct": 0.02
+      }
+     }
+    },
+    "supporting.math_mixed": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/math_verified": {
+       "n": 100,
+       "correct": 0
+      },
+      "stage3_capability_846/gsm8k": {
+       "n": 100,
+       "correct": 0.05
+      }
+     }
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/multihop": {
+       "n": 100,
+       "correct": 0.14
+      }
+     }
+    },
+    "grounded.rag_reading": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/rag": {
+       "n": 100,
+       "correct": 0.27
+      }
+     }
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/answerability_paired": {
+       "n": 120,
+       "pair_correct": 0
+      }
+     }
+    },
+    "safety.refusal": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/safety_paired": {
+       "n": 100,
+       "pair_correct": 0
+      }
+     }
+    },
+    "tool_use.function_calling": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+       "terminated": 1.0,
+       "truncated_at_cap": 0.0,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.0,
+       "rep_3gram": 0.0
+      }
+     }
+    },
+    "interaction.instruction_and_realtime": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+       "terminated": 0.0833,
+       "truncated_at_cap": 0.9167,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.9167,
+       "rep_3gram": 0.0019
+      },
+      "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+       "terminated": 0.4,
+       "truncated_at_cap": 0.6,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.7,
+       "rep_3gram": 0.0772
+      }
+     }
+    },
+    "rollout.protocol_integrity": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0": {
+       "terminated": 0.6154,
+       "truncated_at_cap": 0.3846,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.4,
+       "rep_3gram": 0.0299
+      }
+     }
+    },
+    "in_sample.recall_regression": {
+     "status": "measured",
+     "units": {
+      "stage3_legacy_150/items": {
+       "n": 150,
+       "correct": 35,
+       "rate": 0.2333
+      }
+     }
+    }
+   },
+   "worst_unit_per_capability": {
+    "fluid.abstract_analogical": {
+     "group": "fluid_reasoning_720/dev_v1[axis=abstract_analogical]",
+     "rate": 0.0
+    },
+    "fluid.compositional_generalization": {
+     "group": "fluid_reasoning_720/dev_v1[axis=compositional_generalization]",
+     "rate": 0.0347
+    },
+    "fluid.inductive_rule_discovery": {
+     "group": "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]",
+     "rate": 0.0282
+    },
+    "fluid.interactive_adaptation": {
+     "group": "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]",
+     "rate": 0.0
+    },
+    "fluid.task_contained_deduction": {
+     "group": "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]",
+     "rate": 0.1852
+    },
+    "supporting.closed_book_knowledge": {
+     "group": "stage3_capability_846/knowledge",
+     "rate": 0.02
+    },
+    "supporting.math_mixed": {
+     "group": "stage3_capability_846/math_verified",
+     "rate": 0.0
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "group": "stage3_capability_846/multihop",
+     "rate": 0.14
+    },
+    "grounded.rag_reading": {
+     "group": "stage3_capability_846/rag",
+     "rate": 0.27
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "group": "stage3_capability_846/answerability_paired",
+     "rate": 0.0
+    },
+    "safety.refusal": {
+     "group": "stage3_capability_846/safety_paired",
+     "rate": 0.0
+    },
+    "tool_use.function_calling": null,
+    "interaction.instruction_and_realtime": null,
+    "rollout.protocol_integrity": null,
+    "in_sample.recall_regression": {
+     "group": "stage3_legacy_150/items",
+     "rate": 0.2333
+    }
+   },
+   "training": {
+    "optimizer_steps": 2140,
+    "final_50_steps_mean": {
+     "loss": 0.48976,
+     "ce": 0.49127,
+     "kd": 0.36694
+    },
+    "seconds_per_step_median": 3.77,
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 6.801517,
+      "val_kd": 6.652527
+     },
+     {
+      "step": 268,
+      "val_ce": 1.35894,
+      "val_kd": 1.22072
+     },
+     {
+      "step": 536,
+      "val_ce": 1.149367,
+      "val_kd": 1.00776
+     },
+     {
+      "step": 804,
+      "val_ce": 1.04834,
+      "val_kd": 0.907915
+     },
+     {
+      "step": 1072,
+      "val_ce": 0.990567,
+      "val_kd": 0.853017
+     },
+     {
+      "step": 1340,
+      "val_ce": 0.946479,
+      "val_kd": 0.808984
+     },
+     {
+      "step": 1608,
+      "val_ce": 0.949243,
+      "val_kd": 0.812847
+     },
+     {
+      "step": 1876,
+      "val_ce": 0.941091,
+      "val_kd": 0.803672
+     },
+     {
+      "step": 2144,
+      "val_ce": 0.928241,
+      "val_kd": 0.790173
+     },
+     {
+      "step": 2145,
+      "val_ce": 0.92804,
+      "val_kd": 0.789708
+     }
+    ],
+    "run_end": {
+     "time": "2026-11-07T13:12:33+00:00",
+     "event": "run_end",
+     "steps": 2145,
+     "seconds": 8444.1
+    }
+   }
+  },
+  "A1-6cat-sr-s20260801": {
+   "arm": "A1-6cat-sr",
+   "seed": 20260801,
+   "fluid": {
+    "static_all": {
+     "n": 570,
+     "correct": 38,
+     "rate": 0.0667,
+     "wilson95": [
+      0.049,
+      0.0902
+     ]
+    },
+    "by_axis": {
+     "task_contained_deduction": {
+      "n": 189,
+      "correct": 31,
+      "rate": 0.164,
+      "wilson95": [
+       0.118,
+       0.2234
+      ]
+     },
+     "inductive_rule_discovery": {
+      "n": 142,
+      "correct": 1,
+      "rate": 0.007,
+      "wilson95": [
+       0.0012,
+       0.0388
+      ]
+     },
+     "compositional_generalization": {
+      "n": 144,
+      "correct": 6,
+      "rate": 0.0417,
+      "wilson95": [
+       0.0192,
+       0.0879
+      ]
+     },
+     "abstract_analogical": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0389
+      ]
+     }
+    },
+    "interactive_exploratory": {
+     "n": 144,
+     "correct": 1,
+     "rate": 0.0069,
+     "wilson95": [
+      0.0012,
+      0.0383
+     ]
+    },
+    "rollout_static": {
+     "n": 570,
+     "usable_rate": 0.686,
+     "natural_termination_rate": 0.686,
+     "degeneration_stop_rate": 0.3123,
+     "context_limit_rate": 0.0018,
+     "reasoning_tokens": {
+      "mean": 1901.6,
+      "median": 1494.0
+     },
+     "answer_tokens": {
+      "mean": 1208.9,
+      "median": 478.5
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "rollout_interactive": {
+     "n": 144,
+     "usable_rate": 1.0,
+     "natural_termination_rate": 0.0625,
+     "degeneration_stop_rate": 0.9167,
+     "context_limit_rate": 0.0208,
+     "reasoning_tokens": {
+      "mean": 2696.4,
+      "median": 2274
+     },
+     "answer_tokens": {
+      "mean": 2274.4,
+      "median": 2048.0
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    }
+   },
+   "worst_static_axis": {
+    "group": "abstract_analogical",
+    "rate": 0.0
+   },
+   "usable": {
+    "n": 570,
+    "usable": 391,
+    "usable_rate": 0.686,
+    "correct_among_usable": {
+     "n": 391,
+     "correct": 38,
+     "rate": 0.0972,
+     "wilson95": [
+      0.0716,
+      0.1306
+     ]
+    }
+   },
+   "capabilities": {
+    "fluid.abstract_analogical": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+       "n": 95,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.compositional_generalization": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+       "n": 144,
+       "correct": 6,
+       "rate": 0.0417
+      }
+     }
+    },
+    "fluid.inductive_rule_discovery": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+       "n": 142,
+       "correct": 1,
+       "rate": 0.007
+      }
+     }
+    },
+    "fluid.interactive_adaptation": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+       "n": 144,
+       "correct": 1,
+       "rate": 0.0069
+      }
+     }
+    },
+    "fluid.task_contained_deduction": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+       "n": 189,
+       "correct": 31,
+       "rate": 0.164
+      }
+     }
+    },
+    "supporting.closed_book_knowledge": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/knowledge": {
+       "n": 150,
+       "correct": 0.02
+      }
+     }
+    },
+    "supporting.math_mixed": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/math_verified": {
+       "n": 100,
+       "correct": 0.01
+      },
+      "stage3_capability_846/gsm8k": {
+       "n": 100,
+       "correct": 0.01
+      }
+     }
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/multihop": {
+       "n": 100,
+       "correct": 0.15
+      }
+     }
+    },
+    "grounded.rag_reading": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/rag": {
+       "n": 100,
+       "correct": 0.24
+      }
+     }
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/answerability_paired": {
+       "n": 120,
+       "pair_correct": 0
+      }
+     }
+    },
+    "safety.refusal": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/safety_paired": {
+       "n": 100,
+       "pair_correct": 0
+      }
+     }
+    },
+    "tool_use.function_calling": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+       "terminated": 0.8,
+       "truncated_at_cap": 0.2,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.2,
+       "rep_3gram": 0.0
+      }
+     }
+    },
+    "interaction.instruction_and_realtime": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+       "terminated": 0.1667,
+       "truncated_at_cap": 0.8333,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.8333,
+       "rep_3gram": 0.011
+      },
+      "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+       "terminated": 0.5,
+       "truncated_at_cap": 0.5,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.4,
+       "rep_3gram": 0.1359
+      }
+     }
+    },
+    "rollout.protocol_integrity": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0": {
+       "terminated": 0.7077,
+       "truncated_at_cap": 0.2923,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 0.2769,
+       "rep_3gram": 0.0437
+      }
+     }
+    },
+    "in_sample.recall_regression": {
+     "status": "measured",
+     "units": {
+      "stage3_legacy_150/items": {
+       "n": 150,
+       "correct": 40,
+       "rate": 0.2667
+      }
+     }
+    }
+   },
+   "worst_unit_per_capability": {
+    "fluid.abstract_analogical": {
+     "group": "fluid_reasoning_720/dev_v1[axis=abstract_analogical]",
+     "rate": 0.0
+    },
+    "fluid.compositional_generalization": {
+     "group": "fluid_reasoning_720/dev_v1[axis=compositional_generalization]",
+     "rate": 0.0417
+    },
+    "fluid.inductive_rule_discovery": {
+     "group": "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]",
+     "rate": 0.007
+    },
+    "fluid.interactive_adaptation": {
+     "group": "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]",
+     "rate": 0.0069
+    },
+    "fluid.task_contained_deduction": {
+     "group": "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]",
+     "rate": 0.164
+    },
+    "supporting.closed_book_knowledge": {
+     "group": "stage3_capability_846/knowledge",
+     "rate": 0.02
+    },
+    "supporting.math_mixed": {
+     "group": "stage3_capability_846/gsm8k",
+     "rate": 0.01
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "group": "stage3_capability_846/multihop",
+     "rate": 0.15
+    },
+    "grounded.rag_reading": {
+     "group": "stage3_capability_846/rag",
+     "rate": 0.24
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "group": "stage3_capability_846/answerability_paired",
+     "rate": 0.0
+    },
+    "safety.refusal": {
+     "group": "stage3_capability_846/safety_paired",
+     "rate": 0.0
+    },
+    "tool_use.function_calling": null,
+    "interaction.instruction_and_realtime": null,
+    "rollout.protocol_integrity": null,
+    "in_sample.recall_regression": {
+     "group": "stage3_legacy_150/items",
+     "rate": 0.2667
+    }
+   },
+   "training": {
+    "optimizer_steps": 2140,
+    "final_50_steps_mean": {
+     "loss": 0.50506,
+     "ce": 0.5016,
+     "kd": 0.37967
+    },
+    "seconds_per_step_median": 3.755,
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 6.801517,
+      "val_kd": 6.652527
+     },
+     {
+      "step": 268,
+      "val_ce": 1.406548,
+      "val_kd": 1.268646
+     },
+     {
+      "step": 536,
+      "val_ce": 1.16614,
+      "val_kd": 1.026872
+     },
+     {
+      "step": 804,
+      "val_ce": 1.062445,
+      "val_kd": 0.922139
+     },
+     {
+      "step": 1072,
+      "val_ce": 1.000574,
+      "val_kd": 0.862452
+     },
+     {
+      "step": 1340,
+      "val_ce": 0.953093,
+      "val_kd": 0.813534
+     },
+     {
+      "step": 1608,
+      "val_ce": 0.952838,
+      "val_kd": 0.813929
+     },
+     {
+      "step": 1876,
+      "val_ce": 0.940459,
+      "val_kd": 0.801605
+     },
+     {
+      "step": 2144,
+      "val_ce": 0.936681,
+      "val_kd": 0.798721
+     },
+     {
+      "step": 2145,
+      "val_ce": 0.937174,
+      "val_kd": 0.799144
+     }
+    ],
+    "run_end": {
+     "time": "2026-11-07T16:42:17+00:00",
+     "event": "run_end",
+     "steps": 2145,
+     "seconds": 8455.7
+    }
+   }
+  },
+  "A2-6cat-sr-s20260726": {
+   "arm": "A2-6cat-sr",
+   "seed": 20260726,
+   "fluid": {
+    "static_all": {
+     "n": 570,
+     "correct": 62,
+     "rate": 0.1088,
+     "wilson95": [
+      0.0858,
+      0.137
+     ]
+    },
+    "by_axis": {
+     "task_contained_deduction": {
+      "n": 189,
+      "correct": 41,
+      "rate": 0.2169,
+      "wilson95": [
+       0.1641,
+       0.281
+      ]
+     },
+     "inductive_rule_discovery": {
+      "n": 142,
+      "correct": 5,
+      "rate": 0.0352,
+      "wilson95": [
+       0.0151,
+       0.0798
+      ]
+     },
+     "compositional_generalization": {
+      "n": 144,
+      "correct": 13,
+      "rate": 0.0903,
+      "wilson95": [
+       0.0535,
+       0.1483
+      ]
+     },
+     "abstract_analogical": {
+      "n": 95,
+      "correct": 3,
+      "rate": 0.0316,
+      "wilson95": [
+       0.0108,
+       0.0888
+      ]
+     }
+    },
+    "interactive_exploratory": {
+     "n": 144,
+     "correct": 6,
+     "rate": 0.0417,
+     "wilson95": [
+      0.0192,
+      0.0879
+     ]
+    },
+    "rollout_static": {
+     "n": 570,
+     "usable_rate": 0.8789,
+     "natural_termination_rate": 0.8789,
+     "degeneration_stop_rate": 0.1211,
+     "context_limit_rate": 0.0,
+     "reasoning_tokens": null,
+     "answer_tokens": {
+      "mean": 673.6,
+      "median": 537.0
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "rollout_interactive": {
+     "n": 144,
+     "usable_rate": 1.0,
+     "natural_termination_rate": 0.7361,
+     "degeneration_stop_rate": 0.2639,
+     "context_limit_rate": 0.0,
+     "reasoning_tokens": null,
+     "answer_tokens": {
+      "mean": 169.0,
+      "median": 62
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    }
+   },
+   "worst_static_axis": {
+    "group": "abstract_analogical",
+    "rate": 0.0316
+   },
+   "usable": {
+    "n": 570,
+    "usable": 501,
+    "usable_rate": 0.8789,
+    "correct_among_usable": {
+     "n": 501,
+     "correct": 62,
+     "rate": 0.1238,
+     "wilson95": [
+      0.0977,
+      0.1555
+     ]
+    }
+   },
+   "capabilities": {
+    "fluid.abstract_analogical": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+       "n": 95,
+       "correct": 3,
+       "rate": 0.0316
+      }
+     }
+    },
+    "fluid.compositional_generalization": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+       "n": 144,
+       "correct": 13,
+       "rate": 0.0903
+      }
+     }
+    },
+    "fluid.inductive_rule_discovery": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+       "n": 142,
+       "correct": 5,
+       "rate": 0.0352
+      }
+     }
+    },
+    "fluid.interactive_adaptation": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+       "n": 144,
+       "correct": 6,
+       "rate": 0.0417
+      }
+     }
+    },
+    "fluid.task_contained_deduction": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+       "n": 189,
+       "correct": 41,
+       "rate": 0.2169
+      }
+     }
+    },
+    "supporting.closed_book_knowledge": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/knowledge": {
+       "n": 150,
+       "correct": 0.0267
+      }
+     }
+    },
+    "supporting.math_mixed": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/math_verified": {
+       "n": 100,
+       "correct": 0.04
+      },
+      "stage3_capability_846/gsm8k": {
+       "n": 100,
+       "correct": 0.07
+      }
+     }
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/multihop": {
+       "n": 100,
+       "correct": 0.46
+      }
+     }
+    },
+    "grounded.rag_reading": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/rag": {
+       "n": 100,
+       "correct": 0.6
+      }
+     }
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/answerability_paired": {
+       "n": 120,
+       "pair_correct": 0.0667
+      }
+     }
+    },
+    "safety.refusal": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/safety_paired": {
+       "n": 100,
+       "pair_correct": 0
+      }
+     }
+    },
+    "tool_use.function_calling": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+       "terminated": 1.0,
+       "truncated_at_cap": 0.0,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 1.0,
+       "rep_3gram": 0.0
+      }
+     }
+    },
+    "interaction.instruction_and_realtime": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+       "terminated": 0.75,
+       "truncated_at_cap": 0.25,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 1.0,
+       "rep_3gram": 0.0
+      },
+      "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+       "terminated": 1.0,
+       "truncated_at_cap": 0.0,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 1.0,
+       "rep_3gram": 0.0
+      }
+     }
+    },
+    "rollout.protocol_integrity": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0": {
+       "terminated": 0.9385,
+       "truncated_at_cap": 0.0615,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 1.0,
+       "rep_3gram": 0.0
+      }
+     }
+    },
+    "in_sample.recall_regression": {
+     "status": "measured",
+     "units": {
+      "stage3_legacy_150/items": {
+       "n": 150,
+       "correct": 71,
+       "rate": 0.4733
+      }
+     }
+    }
+   },
+   "worst_unit_per_capability": {
+    "fluid.abstract_analogical": {
+     "group": "fluid_reasoning_720/dev_v1[axis=abstract_analogical]",
+     "rate": 0.0316
+    },
+    "fluid.compositional_generalization": {
+     "group": "fluid_reasoning_720/dev_v1[axis=compositional_generalization]",
+     "rate": 0.0903
+    },
+    "fluid.inductive_rule_discovery": {
+     "group": "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]",
+     "rate": 0.0352
+    },
+    "fluid.interactive_adaptation": {
+     "group": "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]",
+     "rate": 0.0417
+    },
+    "fluid.task_contained_deduction": {
+     "group": "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]",
+     "rate": 0.2169
+    },
+    "supporting.closed_book_knowledge": {
+     "group": "stage3_capability_846/knowledge",
+     "rate": 0.0267
+    },
+    "supporting.math_mixed": {
+     "group": "stage3_capability_846/math_verified",
+     "rate": 0.04
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "group": "stage3_capability_846/multihop",
+     "rate": 0.46
+    },
+    "grounded.rag_reading": {
+     "group": "stage3_capability_846/rag",
+     "rate": 0.6
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "group": "stage3_capability_846/answerability_paired",
+     "rate": 0.0667
+    },
+    "safety.refusal": {
+     "group": "stage3_capability_846/safety_paired",
+     "rate": 0.0
+    },
+    "tool_use.function_calling": null,
+    "interaction.instruction_and_realtime": null,
+    "rollout.protocol_integrity": null,
+    "in_sample.recall_regression": {
+     "group": "stage3_legacy_150/items",
+     "rate": 0.4733
+    }
+   },
+   "training": {
+    "optimizer_steps": 7570,
+    "final_50_steps_mean": {
+     "loss": 0.27519,
+     "ce": 0.28952,
+     "kd": 0.20281
+    },
+    "seconds_per_step_median": 3.09,
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.472379,
+      "val_kd": 7.349008
+     },
+     {
+      "step": 946,
+      "val_ce": 0.888336,
+      "val_kd": 0.789249
+     },
+     {
+      "step": 1892,
+      "val_ce": 0.73406,
+      "val_kd": 0.635597
+     },
+     {
+      "step": 2838,
+      "val_ce": 0.661215,
+      "val_kd": 0.564337
+     },
+     {
+      "step": 3784,
+      "val_ce": 0.61571,
+      "val_kd": 0.518756
+     },
+     {
+      "step": 4730,
+      "val_ce": 0.580464,
+      "val_kd": 0.482322
+     },
+     {
+      "step": 5676,
+      "val_ce": 0.572264,
+      "val_kd": 0.4751
+     },
+     {
+      "step": 6622,
+      "val_ce": 0.562789,
+      "val_kd": 0.46558
+     },
+     {
+      "step": 7568,
+      "val_ce": 0.556163,
+      "val_kd": 0.460621
+     },
+     {
+      "step": 7571,
+      "val_ce": 0.556322,
+      "val_kd": 0.460786
+     }
+    ],
+    "run_end": {
+     "time": "2026-11-08T01:08:36+00:00",
+     "event": "run_end",
+     "steps": 7571,
+     "seconds": 23952.1
+    }
+   }
+  },
+  "A2-6cat-sr-s20260801": {
+   "arm": "A2-6cat-sr",
+   "seed": 20260801,
+   "fluid": {
+    "static_all": {
+     "n": 570,
+     "correct": 63,
+     "rate": 0.1105,
+     "wilson95": [
+      0.0873,
+      0.1389
+     ]
+    },
+    "by_axis": {
+     "task_contained_deduction": {
+      "n": 189,
+      "correct": 48,
+      "rate": 0.254,
+      "wilson95": [
+       0.1972,
+       0.3205
+      ]
+     },
+     "inductive_rule_discovery": {
+      "n": 142,
+      "correct": 6,
+      "rate": 0.0423,
+      "wilson95": [
+       0.0195,
+       0.0891
+      ]
+     },
+     "compositional_generalization": {
+      "n": 144,
+      "correct": 9,
+      "rate": 0.0625,
+      "wilson95": [
+       0.0332,
+       0.1145
+      ]
+     },
+     "abstract_analogical": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0389
+      ]
+     }
+    },
+    "interactive_exploratory": {
+     "n": 144,
+     "correct": 5,
+     "rate": 0.0347,
+     "wilson95": [
+      0.0149,
+      0.0787
+     ]
+    },
+    "rollout_static": {
+     "n": 570,
+     "usable_rate": 0.9053,
+     "natural_termination_rate": 0.9053,
+     "degeneration_stop_rate": 0.0947,
+     "context_limit_rate": 0.0,
+     "reasoning_tokens": null,
+     "answer_tokens": {
+      "mean": 606.8,
+      "median": 511.0
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "rollout_interactive": {
+     "n": 144,
+     "usable_rate": 1.0,
+     "natural_termination_rate": 0.7083,
+     "degeneration_stop_rate": 0.2917,
+     "context_limit_rate": 0.0,
+     "reasoning_tokens": null,
+     "answer_tokens": {
+      "mean": 165.0,
+      "median": 67.0
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    }
+   },
+   "worst_static_axis": {
+    "group": "abstract_analogical",
+    "rate": 0.0
+   },
+   "usable": {
+    "n": 570,
+    "usable": 516,
+    "usable_rate": 0.9053,
+    "correct_among_usable": {
+     "n": 516,
+     "correct": 63,
+     "rate": 0.1221,
+     "wilson95": [
+      0.0966,
+      0.1532
+     ]
+    }
+   },
+   "capabilities": {
+    "fluid.abstract_analogical": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+       "n": 95,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.compositional_generalization": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+       "n": 144,
+       "correct": 9,
+       "rate": 0.0625
+      }
+     }
+    },
+    "fluid.inductive_rule_discovery": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+       "n": 142,
+       "correct": 6,
+       "rate": 0.0423
+      }
+     }
+    },
+    "fluid.interactive_adaptation": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+       "n": 144,
+       "correct": 5,
+       "rate": 0.0347
+      }
+     }
+    },
+    "fluid.task_contained_deduction": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+       "n": 189,
+       "correct": 48,
+       "rate": 0.254
+      }
+     }
+    },
+    "supporting.closed_book_knowledge": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/knowledge": {
+       "n": 150,
+       "correct": 0.0333
+      }
+     }
+    },
+    "supporting.math_mixed": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/math_verified": {
+       "n": 100,
+       "correct": 0
+      },
+      "stage3_capability_846/gsm8k": {
+       "n": 100,
+       "correct": 0.03
+      }
+     }
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/multihop": {
+       "n": 100,
+       "correct": 0.46
+      }
+     }
+    },
+    "grounded.rag_reading": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/rag": {
+       "n": 100,
+       "correct": 0.57
+      }
+     }
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/answerability_paired": {
+       "n": 120,
+       "pair_correct": 0.0167
+      }
+     }
+    },
+    "safety.refusal": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/safety_paired": {
+       "n": 100,
+       "pair_correct": 0
+      }
+     }
+    },
+    "tool_use.function_calling": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+       "terminated": 1.0,
+       "truncated_at_cap": 0.0,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 1.0,
+       "rep_3gram": 0.0
+      }
+     }
+    },
+    "interaction.instruction_and_realtime": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+       "terminated": 0.9167,
+       "truncated_at_cap": 0.0833,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 1.0,
+       "rep_3gram": 0.0
+      },
+      "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+       "terminated": 0.7,
+       "truncated_at_cap": 0.3,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 1.0,
+       "rep_3gram": 0.0
+      }
+     }
+    },
+    "rollout.protocol_integrity": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0": {
+       "terminated": 0.9077,
+       "truncated_at_cap": 0.0923,
+       "think_closed": 0.0,
+       "format_ok": 0.0,
+       "empty_answer": 1.0,
+       "rep_3gram": 0.0
+      }
+     }
+    },
+    "in_sample.recall_regression": {
+     "status": "measured",
+     "units": {
+      "stage3_legacy_150/items": {
+       "n": 150,
+       "correct": 68,
+       "rate": 0.4533
+      }
+     }
+    }
+   },
+   "worst_unit_per_capability": {
+    "fluid.abstract_analogical": {
+     "group": "fluid_reasoning_720/dev_v1[axis=abstract_analogical]",
+     "rate": 0.0
+    },
+    "fluid.compositional_generalization": {
+     "group": "fluid_reasoning_720/dev_v1[axis=compositional_generalization]",
+     "rate": 0.0625
+    },
+    "fluid.inductive_rule_discovery": {
+     "group": "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]",
+     "rate": 0.0423
+    },
+    "fluid.interactive_adaptation": {
+     "group": "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]",
+     "rate": 0.0347
+    },
+    "fluid.task_contained_deduction": {
+     "group": "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]",
+     "rate": 0.254
+    },
+    "supporting.closed_book_knowledge": {
+     "group": "stage3_capability_846/knowledge",
+     "rate": 0.0333
+    },
+    "supporting.math_mixed": {
+     "group": "stage3_capability_846/math_verified",
+     "rate": 0.0
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "group": "stage3_capability_846/multihop",
+     "rate": 0.46
+    },
+    "grounded.rag_reading": {
+     "group": "stage3_capability_846/rag",
+     "rate": 0.57
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "group": "stage3_capability_846/answerability_paired",
+     "rate": 0.0167
+    },
+    "safety.refusal": {
+     "group": "stage3_capability_846/safety_paired",
+     "rate": 0.0
+    },
+    "tool_use.function_calling": null,
+    "interaction.instruction_and_realtime": null,
+    "rollout.protocol_integrity": null,
+    "in_sample.recall_regression": {
+     "group": "stage3_legacy_150/items",
+     "rate": 0.4533
+    }
+   },
+   "training": {
+    "optimizer_steps": 7570,
+    "final_50_steps_mean": {
+     "loss": 0.28937,
+     "ce": 0.29563,
+     "kd": 0.21546
+    },
+    "seconds_per_step_median": 3.1,
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.472379,
+      "val_kd": 7.349008
+     },
+     {
+      "step": 946,
+      "val_ce": 0.894895,
+      "val_kd": 0.790353
+     },
+     {
+      "step": 1892,
+      "val_ce": 0.732941,
+      "val_kd": 0.63031
+     },
+     {
+      "step": 2838,
+      "val_ce": 0.662554,
+      "val_kd": 0.564725
+     },
+     {
+      "step": 3784,
+      "val_ce": 0.620547,
+      "val_kd": 0.522921
+     },
+     {
+      "step": 4730,
+      "val_ce": 0.577256,
+      "val_kd": 0.479604
+     },
+     {
+      "step": 5676,
+      "val_ce": 0.569135,
+      "val_kd": 0.473464
+     },
+     {
+      "step": 6622,
+      "val_ce": 0.559174,
+      "val_kd": 0.462933
+     },
+     {
+      "step": 7568,
+      "val_ce": 0.554679,
+      "val_kd": 0.458191
+     },
+     {
+      "step": 7571,
+      "val_ce": 0.554639,
+      "val_kd": 0.458145
+     }
+    ],
+    "run_end": {
+     "time": "2026-11-08T08:06:27+00:00",
+     "event": "run_end",
+     "steps": 7571,
+     "seconds": 23968.2
+    }
+   }
+  },
+  "C1-6cat-sr-s20260726": {
+   "arm": "C1-6cat-sr",
+   "seed": 20260726,
+   "fluid": {
+    "static_all": {
+     "n": 570,
+     "correct": 28,
+     "rate": 0.0491,
+     "wilson95": [
+      0.0342,
+      0.0701
+     ]
+    },
+    "by_axis": {
+     "task_contained_deduction": {
+      "n": 189,
+      "correct": 26,
+      "rate": 0.1376,
+      "wilson95": [
+       0.0956,
+       0.1939
+      ]
+     },
+     "inductive_rule_discovery": {
+      "n": 142,
+      "correct": 2,
+      "rate": 0.0141,
+      "wilson95": [
+       0.0039,
+       0.0499
+      ]
+     },
+     "compositional_generalization": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.026
+      ]
+     },
+     "abstract_analogical": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0389
+      ]
+     }
+    },
+    "interactive_exploratory": {
+     "n": 144,
+     "correct": 2,
+     "rate": 0.0139,
+     "wilson95": [
+      0.0038,
+      0.0492
+     ]
+    },
+    "rollout_static": {
+     "n": 570,
+     "usable_rate": 0.7895,
+     "natural_termination_rate": 0.8035,
+     "degeneration_stop_rate": 0.1632,
+     "context_limit_rate": 0.0333,
+     "reasoning_tokens": {
+      "mean": 2798.0,
+      "median": 2352.5
+     },
+     "answer_tokens": {
+      "mean": 1037.9,
+      "median": 451.5
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "rollout_interactive": {
+     "n": 144,
+     "usable_rate": 1.0,
+     "natural_termination_rate": 0.0972,
+     "degeneration_stop_rate": 0.6736,
+     "context_limit_rate": 0.2292,
+     "reasoning_tokens": {
+      "mean": 3712.7,
+      "median": 3430
+     },
+     "answer_tokens": {
+      "mean": 1499.1,
+      "median": 8.0
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    }
+   },
+   "worst_static_axis": {
+    "group": "abstract_analogical",
+    "rate": 0.0
+   },
+   "usable": {
+    "n": 570,
+    "usable": 450,
+    "usable_rate": 0.7895,
+    "correct_among_usable": {
+     "n": 450,
+     "correct": 28,
+     "rate": 0.0622,
+     "wilson95": [
+      0.0434,
+      0.0885
+     ]
+    }
+   },
+   "capabilities": {
+    "fluid.abstract_analogical": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+       "n": 95,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.compositional_generalization": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+       "n": 144,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.inductive_rule_discovery": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+       "n": 142,
+       "correct": 2,
+       "rate": 0.0141
+      }
+     }
+    },
+    "fluid.interactive_adaptation": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+       "n": 144,
+       "correct": 2,
+       "rate": 0.0139
+      }
+     }
+    },
+    "fluid.task_contained_deduction": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+       "n": 189,
+       "correct": 26,
+       "rate": 0.1376
+      }
+     }
+    },
+    "supporting.closed_book_knowledge": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/knowledge": {
+       "n": 150,
+       "correct": 0.0267
+      }
+     }
+    },
+    "supporting.math_mixed": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/math_verified": {
+       "n": 100,
+       "correct": 0
+      },
+      "stage3_capability_846/gsm8k": {
+       "n": 100,
+       "correct": 0.03
+      }
+     }
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/multihop": {
+       "n": 100,
+       "correct": 0.17
+      }
+     }
+    },
+    "grounded.rag_reading": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/rag": {
+       "n": 100,
+       "correct": 0.07
+      }
+     }
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/answerability_paired": {
+       "n": 120,
+       "pair_correct": 0.0333
+      }
+     }
+    },
+    "safety.refusal": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/safety_paired": {
+       "n": 100,
+       "pair_correct": 0
+      }
+     }
+    },
+    "tool_use.function_calling": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+       "terminated": 0.8,
+       "truncated_at_cap": 0.2,
+       "think_closed": 0.8,
+       "format_ok": 0.8,
+       "empty_answer": 0.2,
+       "rep_3gram": 0.0212
+      }
+     }
+    },
+    "interaction.instruction_and_realtime": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+       "terminated": 0.4167,
+       "truncated_at_cap": 0.5833,
+       "think_closed": 0.4167,
+       "format_ok": 0.3333,
+       "empty_answer": 0.5,
+       "rep_3gram": 0.2138
+      },
+      "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+       "terminated": 0.5,
+       "truncated_at_cap": 0.5,
+       "think_closed": 0.4,
+       "format_ok": 0.4,
+       "empty_answer": 0.5,
+       "rep_3gram": 0.1061
+      }
+     }
+    },
+    "rollout.protocol_integrity": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0": {
+       "terminated": 0.7538,
+       "truncated_at_cap": 0.2462,
+       "think_closed": 0.7231,
+       "format_ok": 0.7077,
+       "empty_answer": 0.2308,
+       "rep_3gram": 0.1224
+      }
+     }
+    },
+    "in_sample.recall_regression": {
+     "status": "measured",
+     "units": {
+      "stage3_legacy_150/items": {
+       "n": 150,
+       "correct": 36,
+       "rate": 0.24
+      }
+     }
+    }
+   },
+   "worst_unit_per_capability": {
+    "fluid.abstract_analogical": {
+     "group": "fluid_reasoning_720/dev_v1[axis=abstract_analogical]",
+     "rate": 0.0
+    },
+    "fluid.compositional_generalization": {
+     "group": "fluid_reasoning_720/dev_v1[axis=compositional_generalization]",
+     "rate": 0.0
+    },
+    "fluid.inductive_rule_discovery": {
+     "group": "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]",
+     "rate": 0.0141
+    },
+    "fluid.interactive_adaptation": {
+     "group": "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]",
+     "rate": 0.0139
+    },
+    "fluid.task_contained_deduction": {
+     "group": "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]",
+     "rate": 0.1376
+    },
+    "supporting.closed_book_knowledge": {
+     "group": "stage3_capability_846/knowledge",
+     "rate": 0.0267
+    },
+    "supporting.math_mixed": {
+     "group": "stage3_capability_846/math_verified",
+     "rate": 0.0
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "group": "stage3_capability_846/multihop",
+     "rate": 0.17
+    },
+    "grounded.rag_reading": {
+     "group": "stage3_capability_846/rag",
+     "rate": 0.07
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "group": "stage3_capability_846/answerability_paired",
+     "rate": 0.0333
+    },
+    "safety.refusal": {
+     "group": "stage3_capability_846/safety_paired",
+     "rate": 0.0
+    },
+    "tool_use.function_calling": null,
+    "interaction.instruction_and_realtime": null,
+    "rollout.protocol_integrity": null,
+    "in_sample.recall_regression": {
+     "group": "stage3_legacy_150/items",
+     "rate": 0.24
+    }
+   },
+   "training": {
+    "optimizer_steps": 1890,
+    "final_50_steps_mean": {
+     "loss": 0.61801,
+     "ce": 0.66198,
+     "kd": 0.45252
+    },
+    "seconds_per_step_median": 3.98,
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.605238,
+      "val_kd": 7.300234
+     },
+     {
+      "step": 236,
+      "val_ce": 1.630817,
+      "val_kd": 1.386191
+     },
+     {
+      "step": 472,
+      "val_ce": 1.393238,
+      "val_kd": 1.150089
+     },
+     {
+      "step": 708,
+      "val_ce": 1.283611,
+      "val_kd": 1.041625
+     },
+     {
+      "step": 944,
+      "val_ce": 1.217573,
+      "val_kd": 0.978177
+     },
+     {
+      "step": 1180,
+      "val_ce": 1.171783,
+      "val_kd": 0.931644
+     },
+     {
+      "step": 1416,
+      "val_ce": 1.163463,
+      "val_kd": 0.926528
+     },
+     {
+      "step": 1652,
+      "val_ce": 1.152094,
+      "val_kd": 0.914903
+     },
+     {
+      "step": 1888,
+      "val_ce": 1.14152,
+      "val_kd": 0.905589
+     },
+     {
+      "step": 1892,
+      "val_ce": 1.140193,
+      "val_kd": 0.904254
+     }
+    ],
+    "run_end": {
+     "time": "2026-11-08T10:39:15+00:00",
+     "event": "run_end",
+     "steps": 1892,
+     "seconds": 7691.4
+    }
+   }
+  },
+  "C1-6cat-sr-s20260801": {
+   "arm": "C1-6cat-sr",
+   "seed": 20260801,
+   "fluid": {
+    "static_all": {
+     "n": 570,
+     "correct": 23,
+     "rate": 0.0404,
+     "wilson95": [
+      0.027,
+      0.0598
+     ]
+    },
+    "by_axis": {
+     "task_contained_deduction": {
+      "n": 189,
+      "correct": 23,
+      "rate": 0.1217,
+      "wilson95": [
+       0.0825,
+       0.176
+      ]
+     },
+     "inductive_rule_discovery": {
+      "n": 142,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0263
+      ]
+     },
+     "compositional_generalization": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.026
+      ]
+     },
+     "abstract_analogical": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0389
+      ]
+     }
+    },
+    "interactive_exploratory": {
+     "n": 144,
+     "correct": 4,
+     "rate": 0.0278,
+     "wilson95": [
+      0.0109,
+      0.0692
+     ]
+    },
+    "rollout_static": {
+     "n": 570,
+     "usable_rate": 0.7842,
+     "natural_termination_rate": 0.7877,
+     "degeneration_stop_rate": 0.1649,
+     "context_limit_rate": 0.0474,
+     "reasoning_tokens": {
+      "mean": 2984.0,
+      "median": 2423
+     },
+     "answer_tokens": {
+      "mean": 1096.4,
+      "median": 445.0
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    },
+    "rollout_interactive": {
+     "n": 144,
+     "usable_rate": 1.0,
+     "natural_termination_rate": 0.0903,
+     "degeneration_stop_rate": 0.4306,
+     "context_limit_rate": 0.4792,
+     "reasoning_tokens": {
+      "mean": 4559.8,
+      "median": 4715.5
+     },
+     "answer_tokens": {
+      "mean": 2333.6,
+      "median": 340.5
+     },
+     "_": "context-limit hits are right-censored observations; a degeneration stop is the decoder's repetition stop"
+    }
+   },
+   "worst_static_axis": {
+    "group": "abstract_analogical",
+    "rate": 0.0
+   },
+   "usable": {
+    "n": 570,
+    "usable": 447,
+    "usable_rate": 0.7842,
+    "correct_among_usable": {
+     "n": 447,
+     "correct": 23,
+     "rate": 0.0515,
+     "wilson95": [
+      0.0345,
+      0.076
+     ]
+    }
+   },
+   "capabilities": {
+    "fluid.abstract_analogical": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+       "n": 95,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.compositional_generalization": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+       "n": 144,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.inductive_rule_discovery": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+       "n": 142,
+       "correct": 0,
+       "rate": 0.0
+      }
+     }
+    },
+    "fluid.interactive_adaptation": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+       "n": 144,
+       "correct": 4,
+       "rate": 0.0278
+      }
+     }
+    },
+    "fluid.task_contained_deduction": {
+     "status": "measured",
+     "units": {
+      "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+       "n": 189,
+       "correct": 23,
+       "rate": 0.1217
+      }
+     }
+    },
+    "supporting.closed_book_knowledge": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/knowledge": {
+       "n": 150,
+       "correct": 0.02
+      }
+     }
+    },
+    "supporting.math_mixed": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/math_verified": {
+       "n": 100,
+       "correct": 0
+      },
+      "stage3_capability_846/gsm8k": {
+       "n": 100,
+       "correct": 0.01
+      }
+     }
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/multihop": {
+       "n": 100,
+       "correct": 0.15
+      }
+     }
+    },
+    "grounded.rag_reading": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/rag": {
+       "n": 100,
+       "correct": 0.09
+      }
+     }
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/answerability_paired": {
+       "n": 120,
+       "pair_correct": 0.0167
+      }
+     }
+    },
+    "safety.refusal": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/safety_paired": {
+       "n": 100,
+       "pair_correct": 0.02
+      }
+     }
+    },
+    "tool_use.function_calling": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+       "terminated": 0.8,
+       "truncated_at_cap": 0.2,
+       "think_closed": 0.8,
+       "format_ok": 0.8,
+       "empty_answer": 0.2,
+       "rep_3gram": 0.0569
+      }
+     }
+    },
+    "interaction.instruction_and_realtime": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+       "terminated": 0.5,
+       "truncated_at_cap": 0.5,
+       "think_closed": 0.5,
+       "format_ok": 0.5,
+       "empty_answer": 0.5,
+       "rep_3gram": 0.1415
+      },
+      "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+       "terminated": 0.5,
+       "truncated_at_cap": 0.5,
+       "think_closed": 0.5,
+       "format_ok": 0.5,
+       "empty_answer": 0.5,
+       "rep_3gram": 0.1784
+      }
+     }
+    },
+    "rollout.protocol_integrity": {
+     "status": "measured",
+     "units": {
+      "stage3_capability_846/eval_behavior_v0": {
+       "terminated": 0.8,
+       "truncated_at_cap": 0.2,
+       "think_closed": 0.8,
+       "format_ok": 0.8,
+       "empty_answer": 0.2,
+       "rep_3gram": 0.1218
+      }
+     }
+    },
+    "in_sample.recall_regression": {
+     "status": "measured",
+     "units": {
+      "stage3_legacy_150/items": {
+       "n": 150,
+       "correct": 34,
+       "rate": 0.2267
+      }
+     }
+    }
+   },
+   "worst_unit_per_capability": {
+    "fluid.abstract_analogical": {
+     "group": "fluid_reasoning_720/dev_v1[axis=abstract_analogical]",
+     "rate": 0.0
+    },
+    "fluid.compositional_generalization": {
+     "group": "fluid_reasoning_720/dev_v1[axis=compositional_generalization]",
+     "rate": 0.0
+    },
+    "fluid.inductive_rule_discovery": {
+     "group": "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]",
+     "rate": 0.0
+    },
+    "fluid.interactive_adaptation": {
+     "group": "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]",
+     "rate": 0.0278
+    },
+    "fluid.task_contained_deduction": {
+     "group": "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]",
+     "rate": 0.1217
+    },
+    "supporting.closed_book_knowledge": {
+     "group": "stage3_capability_846/knowledge",
+     "rate": 0.02
+    },
+    "supporting.math_mixed": {
+     "group": "stage3_capability_846/math_verified",
+     "rate": 0.0
+    },
+    "grounded.multihop_evidence_reasoning": {
+     "group": "stage3_capability_846/multihop",
+     "rate": 0.15
+    },
+    "grounded.rag_reading": {
+     "group": "stage3_capability_846/rag",
+     "rate": 0.09
+    },
+    "uncertainty.evidence_conditioned_abstention": {
+     "group": "stage3_capability_846/answerability_paired",
+     "rate": 0.0167
+    },
+    "safety.refusal": {
+     "group": "stage3_capability_846/safety_paired",
+     "rate": 0.02
+    },
+    "tool_use.function_calling": null,
+    "interaction.instruction_and_realtime": null,
+    "rollout.protocol_integrity": null,
+    "in_sample.recall_regression": {
+     "group": "stage3_legacy_150/items",
+     "rate": 0.2267
+    }
+   },
+   "training": {
+    "optimizer_steps": 1890,
+    "final_50_steps_mean": {
+     "loss": 0.58916,
+     "ce": 0.6321,
+     "kd": 0.43113
+    },
+    "seconds_per_step_median": 4.01,
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.605238,
+      "val_kd": 7.300234
+     },
+     {
+      "step": 236,
+      "val_ce": 1.617409,
+      "val_kd": 1.371703
+     },
+     {
+      "step": 472,
+      "val_ce": 1.390013,
+      "val_kd": 1.150274
+     },
+     {
+      "step": 708,
+      "val_ce": 1.293727,
+      "val_kd": 1.054267
+     },
+     {
+      "step": 944,
+      "val_ce": 1.213332,
+      "val_kd": 0.976212
+     },
+     {
+      "step": 1180,
+      "val_ce": 1.17347,
+      "val_kd": 0.932352
+     },
+     {
+      "step": 1416,
+      "val_ce": 1.162234,
+      "val_kd": 0.928374
+     },
+     {
+      "step": 1652,
+      "val_ce": 1.151661,
+      "val_kd": 0.916585
+     },
+     {
+      "step": 1888,
+      "val_ce": 1.143716,
+      "val_kd": 0.908929
+     },
+     {
+      "step": 1892,
+      "val_ce": 1.144533,
+      "val_kd": 0.909509
+     }
+    ],
+    "run_end": {
+     "time": "2026-11-08T14:06:07+00:00",
+     "event": "run_end",
+     "steps": 1892,
+     "seconds": 7696.0
+    }
+   }
+  }
+ },
+ "arms": {
+  "A1-6cat-sr": {
+   "seeds": 2,
+   "static_all": {
+    "n_items": 570,
+    "mean": 0.0719,
+    "bootstrap95": [
+     0.0553,
+     0.0904
+    ],
+    "seed_difference": 0.0105,
+    "items_correct_in_every_seed": 17,
+    "items_correct_in_any_seed": 65
+   },
+   "by_axis": {
+    "task_contained_deduction": {
+     "n_items": 189,
+     "mean": 0.1746,
+     "bootstrap95": [
+      0.1323,
+      0.2196
+     ],
+     "seed_difference": 0.0212,
+     "items_correct_in_every_seed": 16,
+     "items_correct_in_any_seed": 50
+    },
+    "inductive_rule_discovery": {
+     "n_items": 142,
+     "mean": 0.0176,
+     "bootstrap95": [
+      0.0035,
+      0.0352
+     ],
+     "seed_difference": 0.0211,
+     "items_correct_in_every_seed": 0,
+     "items_correct_in_any_seed": 5
+    },
+    "compositional_generalization": {
+     "n_items": 144,
+     "mean": 0.0382,
+     "bootstrap95": [
+      0.0174,
+      0.0625
+     ],
+     "seed_difference": 0.0069,
+     "items_correct_in_every_seed": 1,
+     "items_correct_in_any_seed": 10
+    },
+    "abstract_analogical": {
+     "n_items": 95,
+     "mean": 0.0,
+     "bootstrap95": [
+      0.0,
+      0.0
+     ],
+     "seed_difference": 0.0,
+     "items_correct_in_every_seed": 0,
+     "items_correct_in_any_seed": 0
+    }
+   }
+  },
+  "A2-6cat-sr": {
+   "seeds": 2,
+   "static_all": {
+    "n_items": 570,
+    "mean": 0.1096,
+    "bootstrap95": [
+     0.0886,
+     0.1316
+    ],
+    "seed_difference": 0.0018,
+    "items_correct_in_every_seed": 32,
+    "items_correct_in_any_seed": 93
+   },
+   "by_axis": {
+    "task_contained_deduction": {
+     "n_items": 189,
+     "mean": 0.2354,
+     "bootstrap95": [
+      0.1852,
+      0.2884
+     ],
+     "seed_difference": 0.037,
+     "items_correct_in_every_seed": 27,
+     "items_correct_in_any_seed": 62
+    },
+    "inductive_rule_discovery": {
+     "n_items": 142,
+     "mean": 0.0387,
+     "bootstrap95": [
+      0.0176,
+      0.0634
+     ],
+     "seed_difference": 0.007,
+     "items_correct_in_every_seed": 1,
+     "items_correct_in_any_seed": 10
+    },
+    "compositional_generalization": {
+     "n_items": 144,
+     "mean": 0.0764,
+     "bootstrap95": [
+      0.0451,
+      0.1146
+     ],
+     "seed_difference": 0.0278,
+     "items_correct_in_every_seed": 4,
+     "items_correct_in_any_seed": 18
+    },
+    "abstract_analogical": {
+     "n_items": 95,
+     "mean": 0.0158,
+     "bootstrap95": [
+      0.0,
+      0.0368
+     ],
+     "seed_difference": 0.0316,
+     "items_correct_in_every_seed": 0,
+     "items_correct_in_any_seed": 3
+    }
+   }
+  },
+  "C1-6cat-sr": {
+   "seeds": 2,
+   "static_all": {
+    "n_items": 570,
+    "mean": 0.0447,
+    "bootstrap95": [
+     0.0307,
+     0.0596
+    ],
+    "seed_difference": 0.0088,
+    "items_correct_in_every_seed": 12,
+    "items_correct_in_any_seed": 39
+   },
+   "by_axis": {
+    "task_contained_deduction": {
+     "n_items": 189,
+     "mean": 0.1296,
+     "bootstrap95": [
+      0.0899,
+      0.172
+     ],
+     "seed_difference": 0.0159,
+     "items_correct_in_every_seed": 12,
+     "items_correct_in_any_seed": 37
+    },
+    "inductive_rule_discovery": {
+     "n_items": 142,
+     "mean": 0.007,
+     "bootstrap95": [
+      0.0,
+      0.0176
+     ],
+     "seed_difference": 0.0141,
+     "items_correct_in_every_seed": 0,
+     "items_correct_in_any_seed": 2
+    },
+    "compositional_generalization": {
+     "n_items": 144,
+     "mean": 0.0,
+     "bootstrap95": [
+      0.0,
+      0.0
+     ],
+     "seed_difference": 0.0,
+     "items_correct_in_every_seed": 0,
+     "items_correct_in_any_seed": 0
+    },
+    "abstract_analogical": {
+     "n_items": 95,
+     "mean": 0.0,
+     "bootstrap95": [
+      0.0,
+      0.0
+     ],
+     "seed_difference": 0.0,
+     "items_correct_in_every_seed": 0,
+     "items_correct_in_any_seed": 0
+    }
+   }
+  }
+ },
+ "comparisons": {
+  "A1_minus_A2": {
+   "role": "decided (the study's primary comparison)",
+   "contrast": "A1-6cat-sr - A2-6cat-sr",
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "n_items": 570,
+   "primary": {
+    "label": "INCONCLUSIVE",
+    "flags": [],
+    "sesoi": 0.05,
+    "delta": -0.037719,
+    "ci": [
+     -0.07208,
+     -0.010274
+    ],
+    "level": 0.975,
+    "per_seed_delta": {
+     "20260726": -0.031579,
+     "20260801": -0.04386
+    },
+    "rates": {
+     "X": 0.109649,
+     "Y": 0.07193
+    },
+    "resolution": {
+     "resolved": true,
+     "discordant_item_seed_pairs": 121,
+     "informative_clusters": 34,
+     "degenerate_bootstrap": false
+    },
+    "bootstrap": {
+     "point": -0.037719,
+     "ci_low": -0.07208,
+     "ci_high": -0.010274,
+     "level": 0.975,
+     "iterations": 10000,
+     "seed": 20261029,
+     "n_items": 570,
+     "n_clusters": 76,
+     "n_strata": 4,
+     "informative_clusters": 34,
+     "distinct_resampled_values": 3891,
+     "degenerate": false,
+     "tail_shares": {
+      "0.05": {
+       "at_or_below": 1.0,
+       "at_or_above": 0.0
+      },
+      "-0.05": {
+       "at_or_below": 0.1856,
+       "at_or_above": 0.8157
+      }
+     },
+     "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "label": "NOT_RESOLVED",
+     "flags": [
+      "FLOOR"
+     ],
+     "sesoi": 0.08,
+     "delta": -0.015789,
+     "ci": [
+      -0.035354,
+      0.0
+     ],
+     "level": 0.975,
+     "per_seed_delta": {
+      "20260726": -0.031579,
+      "20260801": 0.0
+     },
+     "rates": {
+      "X": 0.015789,
+      "Y": 0.0
+     },
+     "resolution": {
+      "resolved": false,
+      "discordant_item_seed_pairs": 3,
+      "informative_clusters": 3,
+      "degenerate_bootstrap": false
+     },
+     "bootstrap": {
+      "point": -0.015789,
+      "ci_low": -0.035354,
+      "ci_high": 0.0,
+      "level": 0.975,
+      "iterations": 10000,
+      "seed": 20261029,
+      "n_items": 95,
+      "n_clusters": 17,
+      "n_strata": 1,
+      "informative_clusters": 3,
+      "distinct_resampled_values": 277,
+      "degenerate": false,
+      "tail_shares": {
+       "0.08": {
+        "at_or_below": 1.0,
+        "at_or_above": 0.0
+       },
+       "-0.08": {
+        "at_or_below": 0.0,
+        "at_or_above": 1.0
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "holm_gain_survives": false,
+     "holm_loss_survives": false
+    },
+    "compositional_generalization": {
+     "label": "INCONCLUSIVE",
+     "flags": [],
+     "sesoi": 0.08,
+     "delta": -0.038194,
+     "ci": [
+      -0.11859,
+      0.014815
+     ],
+     "level": 0.975,
+     "per_seed_delta": {
+      "20260726": -0.055556,
+      "20260801": -0.020833
+     },
+     "rates": {
+      "X": 0.076389,
+      "Y": 0.038194
+     },
+     "resolution": {
+      "resolved": true,
+      "discordant_item_seed_pairs": 29,
+      "informative_clusters": 8,
+      "degenerate_bootstrap": false
+     },
+     "bootstrap": {
+      "point": -0.038194,
+      "ci_low": -0.11859,
+      "ci_high": 0.014815,
+      "level": 0.975,
+      "iterations": 10000,
+      "seed": 20261029,
+      "n_items": 144,
+      "n_clusters": 16,
+      "n_strata": 1,
+      "informative_clusters": 8,
+      "distinct_resampled_values": 675,
+      "degenerate": false,
+      "tail_shares": {
+       "0.08": {
+        "at_or_below": 1.0,
+        "at_or_above": 0.0
+       },
+       "-0.08": {
+        "at_or_below": 0.0994,
+        "at_or_above": 0.9031
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "holm_gain_survives": false,
+     "holm_loss_survives": false
+    },
+    "inductive_rule_discovery": {
+     "label": "INCONCLUSIVE",
+     "flags": [
+      "FLOOR_Y"
+     ],
+     "sesoi": 0.08,
+     "delta": -0.021127,
+     "ci": [
+      -0.046099,
+      0.003846
+     ],
+     "level": 0.975,
+     "per_seed_delta": {
+      "20260726": -0.007042,
+      "20260801": -0.035211
+     },
+     "rates": {
+      "X": 0.038732,
+      "Y": 0.017606
+     },
+     "resolution": {
+      "resolved": true,
+      "discordant_item_seed_pairs": 14,
+      "informative_clusters": 11,
+      "degenerate_bootstrap": false
+     },
+     "bootstrap": {
+      "point": -0.021127,
+      "ci_low": -0.046099,
+      "ci_high": 0.003846,
+      "level": 0.975,
+      "iterations": 10000,
+      "seed": 20261029,
+      "n_items": 142,
+      "n_clusters": 30,
+      "n_strata": 1,
+      "informative_clusters": 11,
+      "distinct_resampled_values": 749,
+      "degenerate": false,
+      "tail_shares": {
+       "0.08": {
+        "at_or_below": 1.0,
+        "at_or_above": 0.0
+       },
+       "-0.08": {
+        "at_or_below": 0.0,
+        "at_or_above": 1.0
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "holm_gain_survives": false,
+     "holm_loss_survives": false
+    },
+    "task_contained_deduction": {
+     "label": "INCONCLUSIVE",
+     "flags": [],
+     "sesoi": 0.08,
+     "delta": -0.060847,
+     "ci": [
+      -0.148045,
+      0.002475
+     ],
+     "level": 0.975,
+     "per_seed_delta": {
+      "20260726": -0.031746,
+      "20260801": -0.089947
+     },
+     "rates": {
+      "X": 0.23545,
+      "Y": 0.174603
+     },
+     "resolution": {
+      "resolved": true,
+      "discordant_item_seed_pairs": 75,
+      "informative_clusters": 12,
+      "degenerate_bootstrap": false
+     },
+     "bootstrap": {
+      "point": -0.060847,
+      "ci_low": -0.148045,
+      "ci_high": 0.002475,
+      "level": 0.975,
+      "iterations": 10000,
+      "seed": 20261029,
+      "n_items": 189,
+      "n_clusters": 13,
+      "n_strata": 1,
+      "informative_clusters": 12,
+      "distinct_resampled_values": 1735,
+      "degenerate": false,
+      "tail_shares": {
+       "0.08": {
+        "at_or_below": 1.0,
+        "at_or_above": 0.0
+       },
+       "-0.08": {
+        "at_or_below": 0.2695,
+        "at_or_above": 0.731
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "holm_gain_survives": false,
+     "holm_loss_survives": false
+    }
+   },
+   "reading": "neither excluded nor shown"
+  },
+  "A1_minus_C1": {
+   "role": "descriptive, end to end: another teacher lineage and another initialization search, not a single variable",
+   "contrast": "A1-6cat-sr - C1-6cat-sr",
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "n_items": 570,
+   "primary": {
+    "label": "NO_GO",
+    "flags": [],
+    "sesoi": 0.05,
+    "delta": 0.027193,
+    "ci": [
+     0.008459,
+     0.04833
+    ],
+    "level": 0.975,
+    "per_seed_delta": {
+     "20260726": 0.02807,
+     "20260801": 0.026316
+    },
+    "rates": {
+     "X": 0.044737,
+     "Y": 0.07193
+    },
+    "resolution": {
+     "resolved": true,
+     "discordant_item_seed_pairs": 89,
+     "informative_clusters": 23,
+     "degenerate_bootstrap": false
+    },
+    "bootstrap": {
+     "point": 0.027193,
+     "ci_low": 0.008459,
+     "ci_high": 0.04833,
+     "level": 0.975,
+     "iterations": 10000,
+     "seed": 20261029,
+     "n_items": 570,
+     "n_clusters": 76,
+     "n_strata": 4,
+     "informative_clusters": 23,
+     "distinct_resampled_values": 2947,
+     "degenerate": false,
+     "tail_shares": {
+      "0.05": {
+       "at_or_below": 0.9921,
+       "at_or_above": 0.0079
+      },
+      "-0.05": {
+       "at_or_below": 0.0,
+       "at_or_above": 1.0
+      }
+     },
+     "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "label": "NOT_RESOLVED",
+     "flags": [
+      "FLOOR"
+     ],
+     "sesoi": 0.08,
+     "delta": 0.0,
+     "ci": [
+      0.0,
+      0.0
+     ],
+     "level": 0.975,
+     "per_seed_delta": {
+      "20260726": 0.0,
+      "20260801": 0.0
+     },
+     "rates": {
+      "X": 0.0,
+      "Y": 0.0
+     },
+     "resolution": {
+      "resolved": false,
+      "discordant_item_seed_pairs": 0,
+      "informative_clusters": 0,
+      "degenerate_bootstrap": true
+     },
+     "bootstrap": {
+      "point": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "level": 0.975,
+      "iterations": 10000,
+      "seed": 20261029,
+      "n_items": 95,
+      "n_clusters": 17,
+      "n_strata": 1,
+      "informative_clusters": 0,
+      "distinct_resampled_values": 1,
+      "degenerate": true,
+      "tail_shares": {
+       "0.08": {
+        "at_or_below": 1.0,
+        "at_or_above": 0.0
+       },
+       "-0.08": {
+        "at_or_below": 0.0,
+        "at_or_above": 1.0
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "holm_gain_survives": false,
+     "holm_loss_survives": false
+    },
+    "compositional_generalization": {
+     "label": "INCONCLUSIVE",
+     "flags": [
+      "FLOOR_X"
+     ],
+     "sesoi": 0.08,
+     "delta": 0.038194,
+     "ci": [
+      0.007752,
+      0.072464
+     ],
+     "level": 0.975,
+     "per_seed_delta": {
+      "20260726": 0.034722,
+      "20260801": 0.041667
+     },
+     "rates": {
+      "X": 0.0,
+      "Y": 0.038194
+     },
+     "resolution": {
+      "resolved": true,
+      "discordant_item_seed_pairs": 11,
+      "informative_clusters": 5,
+      "degenerate_bootstrap": false
+     },
+     "bootstrap": {
+      "point": 0.038194,
+      "ci_low": 0.007752,
+      "ci_high": 0.072464,
+      "level": 0.975,
+      "iterations": 10000,
+      "seed": 20261029,
+      "n_items": 144,
+      "n_clusters": 16,
+      "n_strata": 1,
+      "informative_clusters": 5,
+      "distinct_resampled_values": 335,
+      "degenerate": false,
+      "tail_shares": {
+       "0.08": {
+        "at_or_below": 0.9966,
+        "at_or_above": 0.0034
+       },
+       "-0.08": {
+        "at_or_below": 0.0,
+        "at_or_above": 1.0
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "holm_gain_survives": false,
+     "holm_loss_survives": false
+    },
+    "inductive_rule_discovery": {
+     "label": "NOT_RESOLVED",
+     "flags": [
+      "FLOOR"
+     ],
+     "sesoi": 0.08,
+     "delta": 0.010563,
+     "ci": [
+      -0.010417,
+      0.038168
+     ],
+     "level": 0.975,
+     "per_seed_delta": {
+      "20260726": 0.014085,
+      "20260801": 0.007042
+     },
+     "rates": {
+      "X": 0.007042,
+      "Y": 0.017606
+     },
+     "resolution": {
+      "resolved": false,
+      "discordant_item_seed_pairs": 7,
+      "informative_clusters": 6,
+      "degenerate_bootstrap": false
+     },
+     "bootstrap": {
+      "point": 0.010563,
+      "ci_low": -0.010417,
+      "ci_high": 0.038168,
+      "level": 0.975,
+      "iterations": 10000,
+      "seed": 20261029,
+      "n_items": 142,
+      "n_clusters": 30,
+      "n_strata": 1,
+      "informative_clusters": 6,
+      "distinct_resampled_values": 719,
+      "degenerate": false,
+      "tail_shares": {
+       "0.08": {
+        "at_or_below": 1.0,
+        "at_or_above": 0.0
+       },
+       "-0.08": {
+        "at_or_below": 0.0,
+        "at_or_above": 1.0
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "holm_gain_survives": false,
+     "holm_loss_survives": false
+    },
+    "task_contained_deduction": {
+     "label": "INCONCLUSIVE",
+     "flags": [],
+     "sesoi": 0.08,
+     "delta": 0.044974,
+     "ci": [
+      -0.002577,
+      0.1
+     ],
+     "level": 0.975,
+     "per_seed_delta": {
+      "20260726": 0.047619,
+      "20260801": 0.042328
+     },
+     "rates": {
+      "X": 0.12963,
+      "Y": 0.174603
+     },
+     "resolution": {
+      "resolved": true,
+      "discordant_item_seed_pairs": 71,
+      "informative_clusters": 12,
+      "degenerate_bootstrap": false
+     },
+     "bootstrap": {
+      "point": 0.044974,
+      "ci_low": -0.002577,
+      "ci_high": 0.1,
+      "level": 0.975,
+      "iterations": 10000,
+      "seed": 20261029,
+      "n_items": 189,
+      "n_clusters": 13,
+      "n_strata": 1,
+      "informative_clusters": 12,
+      "distinct_resampled_values": 1432,
+      "degenerate": false,
+      "tail_shares": {
+       "0.08": {
+        "at_or_below": 0.9265,
+        "at_or_above": 0.0742
+       },
+       "-0.08": {
+        "at_or_below": 0.0,
+        "at_or_above": 1.0
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "holm_gain_survives": false,
+     "holm_loss_survives": false
+    }
+   },
+   "reading": "a difference beyond the SESOI excluded"
+  }
+ },
+ "data_and_compute": {
+  "arms": {
+   "A1-6cat-sr": {
+    "before_packing": {
+     "examples": 5612,
+     "documents": 6243,
+     "unique_supervised_tokens": 5935809,
+     "reasoning_tokens": 4945744,
+     "answer_tokens": 990065,
+     "tool_calling_tokens": 498897
+    },
+    "packed_sequences": 1430,
+    "optimizer_steps": 2145,
+    "supervised_token_exposure": 21031455,
+    "non_padding_tokens_trained": 35126019,
+    "tool_calling": {
+     "turns": 932,
+     "tool_calls": 611,
+     "episodes": 449,
+     "_": "turns are the tool-calling decisions (call, answer or refuse to call)"
+    }
+   },
+   "A2-6cat-sr": {
+    "before_packing": {
+     "examples": 44731,
+     "documents": 50165,
+     "unique_supervised_tokens": 5926755,
+     "reasoning_tokens": 0,
+     "answer_tokens": 5926755,
+     "tool_calling_tokens": 496444
+    },
+    "packed_sequences": 5047,
+    "optimizer_steps": 7571,
+    "supervised_token_exposure": 18484038,
+    "non_padding_tokens_trained": 124017855,
+    "tool_calling": {
+     "turns": 4253,
+     "tool_calls": 2681,
+     "episodes": 2125,
+     "_": "turns are the tool-calling decisions (call, answer or refuse to call)"
+    }
+   },
+   "C1-6cat-sr": {
+    "before_packing": {
+     "examples": 3931,
+     "documents": 4197,
+     "unique_supervised_tokens": 5937691,
+     "reasoning_tokens": 4831223,
+     "answer_tokens": 1106468,
+     "tool_calling_tokens": 507257
+    },
+    "packed_sequences": 1261,
+    "optimizer_steps": 1892,
+    "supervised_token_exposure": 21774603,
+    "non_padding_tokens_trained": 30972177,
+    "tool_calling": {
+     "turns": 516,
+     "tool_calls": 296,
+     "episodes": 250,
+     "_": "turns are the tool-calling decisions (call, answer or refuse to call)"
+    }
+   }
+  },
+  "A2_over_A1": {
+   "packed_sequences": 3.5294,
+   "optimizer_steps": 3.5296,
+   "supervised_token_exposure": 0.8789,
+   "non_padding_tokens_trained": 3.5307,
+   "tool_calling_turns": 4.5633
+  },
+  "_": "training FLOPs for one shared student geometry follow the packed-sequence ratio (every sequence is 8,192 positions under causal attention); the teacher's forward cost follows it too"
+ },
+ "measured_runs": {
+  "A1-6cat-sr-s20260726": {
+   "train_seconds": 8456.1,
+   "eval_seconds": 4105.6,
+   "telemetry": {
+    "logged_steps": 214,
+    "median_seconds_per_step": 3.77,
+    "p95_seconds_per_step": 4.21,
+    "kd_positions_per_step_median": 9913.0,
+    "peak_gpu_mem_gb": 17.47,
+    "peak_gpu_mem_reserved_gb": 19.14,
+    "save_points": [
+     890,
+     1780,
+     2145
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
+   "final_model_path": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/train/checkpoints/step_002145/model",
+   "off_volume_copy": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage3_sr/A1-6cat-sr-s20260726/e0745469c9fbb53a",
+    "source": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/train/checkpoints/step_002145/model",
+    "files_sha256_on_volume": {
+     "model.safetensors": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
+     "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+     "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+    "verified": false,
+    "refused": "the relay's private storage quota does not admit the weights",
+    "attempted_utc": "2026-11-07T13:12:39Z"
+   }
+  },
+  "A1-6cat-sr-s20260801": {
+   "train_seconds": 8467.3,
+   "eval_seconds": 3628.3,
+   "telemetry": {
+    "logged_steps": 214,
+    "median_seconds_per_step": 3.755,
+    "p95_seconds_per_step": 4.11,
+    "kd_positions_per_step_median": 9696.0,
+    "peak_gpu_mem_gb": 17.47,
+    "peak_gpu_mem_reserved_gb": 19.08,
+    "save_points": [
+     890,
+     1780,
+     2145
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
+   "final_model_path": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/train/checkpoints/step_002145/model",
+   "off_volume_copy": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage3_sr/A1-6cat-sr-s20260801/06595d35abcca7c7",
+    "source": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/train/checkpoints/step_002145/model",
+    "files_sha256_on_volume": {
+     "model.safetensors": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
+     "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+     "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+    "verified": false,
+    "refused": "the relay's private storage quota does not admit the weights",
+    "attempted_utc": "2026-11-07T16:42:22Z"
+   }
+  },
+  "A2-6cat-sr-s20260726": {
+   "train_seconds": 23965.0,
+   "eval_seconds": 1080.7,
+   "telemetry": {
+    "logged_steps": 757,
+    "median_seconds_per_step": 3.09,
+    "p95_seconds_per_step": 3.29,
+    "kd_positions_per_step_median": 2256,
+    "peak_gpu_mem_gb": 17.45,
+    "peak_gpu_mem_reserved_gb": 18.66,
+    "save_points": [
+     1064,
+     2128,
+     3192,
+     4256,
+     5320,
+     6384,
+     7448,
+     7571
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "5e26ab61fab82ee988d042a98b8e467a284fd5682fa7de9dabc54623ed2606d4",
+   "final_model_path": "/runpod-volume/teacher_modes/stage3_sr/A2-6cat-sr-s20260726/train/checkpoints/step_007571/model",
+   "off_volume_copy": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage3_sr/A2-6cat-sr-s20260726/5e26ab61fab82ee9",
+    "source": "/runpod-volume/teacher_modes/stage3_sr/A2-6cat-sr-s20260726/train/checkpoints/step_007571/model",
+    "files_sha256_on_volume": {
+     "model.safetensors": "5e26ab61fab82ee988d042a98b8e467a284fd5682fa7de9dabc54623ed2606d4",
+     "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+     "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+    "verified": false,
+    "refused": "the relay's private storage quota does not admit the weights",
+    "attempted_utc": "2026-11-08T01:08:41Z"
+   }
+  },
+  "A2-6cat-sr-s20260801": {
+   "train_seconds": 23981.3,
+   "eval_seconds": 961.7,
+   "telemetry": {
+    "logged_steps": 757,
+    "median_seconds_per_step": 3.1,
+    "p95_seconds_per_step": 3.33,
+    "kd_positions_per_step_median": 2294,
+    "peak_gpu_mem_gb": 17.45,
+    "peak_gpu_mem_reserved_gb": 19.7,
+    "save_points": [
+     1064,
+     2128,
+     3192,
+     4256,
+     5320,
+     6384,
+     7448,
+     7571
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "236425e5739bc71ba3661cda9e0ef9f1e02cb7c155eeb714a3c4f8686f2a2df6",
+   "final_model_path": "/runpod-volume/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/train/checkpoints/step_007571/model",
+   "off_volume_copy": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage3_sr/A2-6cat-sr-s20260801/236425e5739bc71b",
+    "source": "/runpod-volume/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/train/checkpoints/step_007571/model",
+    "files_sha256_on_volume": {
+     "model.safetensors": "236425e5739bc71ba3661cda9e0ef9f1e02cb7c155eeb714a3c4f8686f2a2df6",
+     "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+     "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+    "verified": false,
+    "refused": "the relay's private storage quota does not admit the weights",
+    "attempted_utc": "2026-11-08T08:06:33Z"
+   }
+  },
+  "C1-6cat-sr-s20260726": {
+   "train_seconds": 7702.7,
+   "telemetry": {
+    "logged_steps": 189,
+    "median_seconds_per_step": 3.98,
+    "p95_seconds_per_step": 4.28,
+    "kd_positions_per_step_median": 11773,
+    "peak_gpu_mem_gb": 17.47,
+    "peak_gpu_mem_reserved_gb": 18.62,
+    "save_points": [
+     858,
+     1716,
+     1892
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+   "final_model_path": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/model",
+   "off_volume_copy": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage3_sr/C1-6cat-sr-s20260726/ed98d6e677421573",
+    "source": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/model",
+    "files_sha256_on_volume": {
+     "model.safetensors": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+     "config.json": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+     "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+    "verified": false,
+    "refused": "the relay's private storage quota does not admit the weights",
+    "attempted_utc": "2026-11-08T10:52:08Z"
+   },
+   "eval_seconds": 3925.7
+  },
+  "C1-6cat-sr-s20260801": {
+   "train_seconds": 7708.8,
+   "eval_seconds": 3809.5,
+   "telemetry": {
+    "logged_steps": 189,
+    "median_seconds_per_step": 4.01,
+    "p95_seconds_per_step": 4.3,
+    "kd_positions_per_step_median": 12103,
+    "peak_gpu_mem_gb": 17.47,
+    "peak_gpu_mem_reserved_gb": 18.51,
+    "save_points": [
+     858,
+     1716,
+     1892
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "a24f887370c62bde491576174128b6a2438051b9cba148c836d4709688c3d057",
+   "final_model_path": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train/checkpoints/step_001892/model",
+   "off_volume_copy": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage3_sr/C1-6cat-sr-s20260801/a24f887370c62bde",
+    "source": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train/checkpoints/step_001892/model",
+    "files_sha256_on_volume": {
+     "model.safetensors": "a24f887370c62bde491576174128b6a2438051b9cba148c836d4709688c3d057",
+     "config.json": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+     "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+    "verified": false,
+    "refused": "the relay's private storage quota does not admit the weights",
+    "attempted_utc": "2026-11-08T14:06:12Z"
+   }
+  }
+ },
+ "limits": [
+  "A1 - A2 is matched in unique supervised tokens before packing and in category composition, not in compute, optimizer steps, supervised-token exposure or tool-calling decisions",
+  "A1 - C1 compares two lineages end to end: C1's initialization came from its own root's D4 search under forward baseline v1, A1's from the packed search; not a pure teacher difference",
+  "eval-set-1 covers tool calling only indirectly: no number here is a closed-loop tool-task success rate; that needs a separately authorized real tool-calling evaluation",
+  "interactive episodes are exploratory and outside the decision"
+ ],
+ "authorizes": "nothing"
+}

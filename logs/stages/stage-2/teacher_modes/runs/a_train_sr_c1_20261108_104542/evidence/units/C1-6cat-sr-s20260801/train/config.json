@@ -1,0 +1,122 @@
+{
+ "stage": "stage3_recovery",
+ "run_name": "research_a_stage3_C1-6cat-sr_s20260801",
+ "student_path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+ "teacher": {
+  "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "dtype": "bfloat16"
+ },
+ "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_6cat/C1-6cat-sr",
+ "groups": null,
+ "packing": "ladder",
+ "block_len": 8192,
+ "dtype": "float32",
+ "autocast_bf16": true,
+ "gradient_checkpointing": true,
+ "device": "auto",
+ "seed": 20260801,
+ "trainable_patterns": [
+  "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+  "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+  "input_layernorm",
+  "post_attention_layernorm",
+  "model\\.norm\\."
+ ],
+ "loss": {
+  "ce_weight": 0.25,
+  "kd_weight": 1.0,
+  "kd_temperature": 1.0,
+  "kd_scope": "assistant",
+  "kd_support": {
+   "support_id": "reference_topk_tail_v1",
+   "top_k": 200
+  }
+ },
+ "optim": {
+  "lr": 5e-05,
+  "weight_decay": 0.01,
+  "betas": [
+   0.9,
+   0.95
+  ],
+  "eps": 1e-08,
+  "grad_clip": 1.0
+ },
+ "schedule": {
+  "total_steps": 1892,
+  "warmup_steps": 95,
+  "min_lr_frac": 0.1
+ },
+ "batch": {
+  "blocks_per_step": 2,
+  "micro_blocks": 1,
+  "context_strategy": "cross_context"
+ },
+ "checkpoint": {
+  "save_every": 858,
+  "keep_last": 1,
+  "bind_identity": true
+ },
+ "intervals": {
+  "log_every": 10,
+  "eval_every": 236,
+  "eval_blocks": 17
+ },
+ "out_dir": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train",
+ "rung": 5937691,
+ "val_blocks": 17,
+ "tokenizer_source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+ "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+ "lineage": {
+  "teacher": {
+   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "weights_sha256": {
+    "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+    "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+    "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+   },
+   "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+   "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+   "rope_theta": 5000000.0,
+   "max_position_embeddings": 262144,
+   "vocab_size": 151936
+  },
+  "mode": "thinking",
+  "tokenizer": {
+   "files_sha256": {
+    "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+    "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+   }
+  },
+  "initialization": {
+   "root_teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+   },
+   "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "provenance": {
+    "record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
+    "record_sha256": "81a0e2dda20c81f6bf1d8a2294bfc7f53c417b5fb294cdd3bb52232001922473"
+   }
+  },
+  "data": [
+   {
+    "files_sha256": {
+     "blocks.npz": "cd438b50261a52d417f1b57b99c1aefcb8f64533f84d357dcbf7bd9f07131133",
+     "ladder.json": "fae376522b592bd46d8cd242c27a16649106be655cc570cc0347df599b8dabe2",
+     "audit.jsonl": "55eee5bf53bee442ac1fd395d9a79e9a26c2e53782e6242e521b89cb16cc4a02"
+    },
+    "mode": "thinking",
+    "teacher": {
+     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+     "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+    },
+    "packed_content_sha256": "e627ce975d30fb9e3874370cf34d258116cf042a310a9e695878c3beba0a07c9",
+    "data_manifest_content_sha256": "76b04c0a03c61ef34fea3900fb668a7f9c1350da66b089290d30287749d90763"
+   }
+  ]
+ }
+}

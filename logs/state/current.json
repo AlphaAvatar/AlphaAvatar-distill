@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Research A: Stage 3 of six_category_schema_restored@v1 authorized 2026-11-07, running A1 -> A2 -> C1. Open: the trained weights' off-volume copy (relay quota). Owner: PACKED_ROUND.md section 15.",
+ "blocker": "BLOCKED NO. Research A: Stage 3 of six_category_schema_restored@v1 COMPLETE 2026-11-08 (six units). Open: the trained weights' off-volume copy (relay quota); thprcgh7s9 kept. Owner: PACKED_ROUND.md section 16.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -31,8 +31,8 @@
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
-  "authorized_cap_usd": 930.0,
-  "cumulative_spend_usd": 816.4865,
+  "authorized_cap_usd": 1000.0,
+  "cumulative_spend_usd": 847.2826,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 113.5135,
+  "remaining_usd": 152.7174,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Stage 3: the train_sr_a1 session, then train_sr_a2, then train_sr_c1; the six units' comparison. Owner: logs/budget/decisions.md 2026-11-07.",
+ "next": "The maintainer: read the Stage-3 result (analyses/stage3_sr_result.json); decide the trained weights' off-volume storage. Owner: logs/budget/decisions.md 2026-11-08.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -197,11 +197,11 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": true,
-  "pods": "at most 1 (train_sr_a2, US-TX-3)",
+  "paid_compute": false,
+  "pods": 0,
   "network_volumes": 3,
-  "run": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531 (launched 2026-11-07T17:46Z); a_train_sr_a1_20261107_104149 COMPLETE $7.7554",
-  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1 and Stage 3's units; 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
+  "run": "Stage 3 COMPLETE: a_train_sr_a1_20261107_104149, a_train_sr_a2_20261107_174531, a_train_sr_c1_20261108_082548 + _104542 ($30.7961)",
+  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1 and the six Stage-3 units (only copy of their weights); 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

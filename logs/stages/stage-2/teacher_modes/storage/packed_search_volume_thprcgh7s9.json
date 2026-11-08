@@ -70,5 +70,11 @@
    "by": "maintainer 2026-11-07, Stage 3 authorization, section IV",
    "covers": "14 more days at $0.07 per GB-month for 350 GB"
   }
- ]
+ ],
+ "contents_2026_11_08": {
+  "stage3_sr": "the six Stage-3 units (teacher_modes/stage3_sr/<unit>/): each unit's final save point (fp32 weights + AdamW state + trainer_state, keep_last 1), its evaluation package (the weights again) and its evaluation's generations, rows and formal report; ~49.8 GB (6 x 8.3 GB)",
+  "measured": "du -sb 301,657,035,552 B at the start of C1's attempt 2 (2026-11-08T10:52Z), before its second unit's ~8.3 GB",
+  "only_copy": "the six units' final weights and save points have NO off-volume copy: the relay's private quota refused them (a1_units.persist_off_volume); their evaluations' evidence is on the dev box and the relay",
+  "lifecycle": "KEEP: nothing on this volume is deleted until the trained weights have a verified off-volume copy or the maintainer decides otherwise; reserve booked to 2026-12-03T19:40Z"
+ }
 }

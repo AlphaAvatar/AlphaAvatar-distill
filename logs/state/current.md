@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-07 (UTC), after Stage 3 of the restored composition was authorized. The human view. Every number here has an owner
+**Updated:** 2026-11-08 (UTC), after Stage 3 of the restored composition completed. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,17 +9,15 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 AUTHORIZED (2026-11-07) -- SIX UNITS RUNNING A1 -> A2 -> C1, ONE L40S AT A TIME ON `thprcgh7s9`.**
-- Units: A1-6cat-sr / A2-6cat-sr / C1-6cat-sr x seeds 20260726, 20260801 (`plans/packed_training_plan.json`), kinds
-  `train_sr_a1/_a2/_c1`; each bound to its frozen pack and its own lineage; `batch.context_strategy = cross_context`
-  declared and asserted at launch admission; a save point about every hour; each unit evaluated on eval-set-1 on its pod.
-- Grant: caps $18.33 / $37.54 / $17.37 cumulative ($73.24); ceiling $158.3762; project cap $1,000; Research A $262.04;
-  `packed_search` closed; `thprcgh7s9` / `4rhubprswo` reserves +$13.34 each.
-- Progress: A1-6cat-sr COMPLETE (`runs/a_train_sr_a1_20261107_104149`, $7.7554 of $18.33; 3.76 s/step; static fluid 7.72% / 6.67%); A2-6cat-sr session launched 2026-11-07T17:46Z (`runs/a_train_sr_a2_20261107_174531`); C1 next.
-- Open result-persistence item: the relay's quota (1.73 GiB left of 100 GB) admits no trained weights' off-volume copy;
-  the volume `thprcgh7s9` is the weights' store and is protected until storage is added or a retirement is decided.
-- Owner: `logs/budget/decisions.md` 2026-11-07 (authorized); `PACKED_ROUND.md` section 15; the runs under
-  `logs/stages/stage-2/teacher_modes/runs/a_train_sr_*`.
+**RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 COMPLETE (2026-11-08) -- SIX UNITS TRAINED AND EVALUATED; NOTHING RUNNING, NOTHING BILLING BUT THE THREE VOLUMES.**
+- Result (`analyses/stage3_sr_result.json`): static fluid correctness on eval-set-1, two-seed means A1-6cat-sr 7.19%,
+  A2-6cat-sr 10.96%, C1-6cat-sr 4.47%; registered A1 - A2 INCONCLUSIVE (-3.77 pp, 97.5% [-7.21, -1.03], not
+  compute-matched); A1 - C1 (descriptive) NO_GO (+2.72 pp [+0.85, +4.83]).
+- Cost: $30.7961 of the $73.24 caps (A1 $7.7554, A2 $15.6086, C1 $7.4321 over two attempts); all pods deleted with
+  the provider's confirmation. Project cap $1,000, Research A $262.04, ceiling $158.3762.
+- Open result-persistence item: the six trained weights are only on `thprcgh7s9` (the relay's quota, 100 GB
+  account-wide, refused all six); the volume is kept and protected until a verified off-volume copy exists.
+- Owner: `logs/budget/decisions.md` 2026-11-08; `PACKED_ROUND.md` sections 15-16; runs `a_train_sr_*`.
 
 **RESEARCH A: THE PACKED FULL SEARCH IS COMPLETE (2026-11-06) -- TOP-1 `1f5e4b42...`, ONE ATTEMPT, $28.17 OF $55.72.**
 - Top-1: FFN(base) -> DEPTH(base) -> WIDTH(rh) -> ATTENTION(rh), 596,049,920 parameters, single shard `b74dede8...`; on
@@ -4583,7 +4581,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$816.4865` spent of `$930.0000`, leaving `$113.5135` |
+| project cap | `$847.2826` spent of `$1000.0000`, leaving `$152.7174` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

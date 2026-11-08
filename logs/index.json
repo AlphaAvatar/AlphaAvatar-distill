@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 184,
+  "runs_unrecorded": 188,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -871,8 +871,8 @@
    },
    "teacher_modes": {
     "recorded": 0,
-    "unrecorded": 31,
-    "total": 31
+    "unrecorded": 35,
+    "total": 35
    }
   },
   "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
@@ -4234,6 +4234,38 @@
    "root": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122",
    "n_files": 38,
    "digest": "32ac2db93bb8867d928a37b346c0c1d1d2fdfca4602878dfbcdbdc7480f5e1be",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_train_sr_a1_20261107_104149",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a1_20261107_104149",
+   "n_files": 18,
+   "digest": "91d54d2ee8d56b9818325986523a117b811972e9d79a0768755c1c89c4f1f13f",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_train_sr_a2_20261107_174531",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531",
+   "n_files": 18,
+   "digest": "fe3f7a2c6b5d1cb137efb0d6522d48355186e76a4b6447ce6f0ed692dc470a50",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_train_sr_c1_20261108_082548",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_082548",
+   "n_files": 11,
+   "digest": "1d9f0463599a4e37024521ac1746ce95905d5d1d25cebbc811628c8b65c76000",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "a_train_sr_c1_20261108_104542",
+   "root": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_104542",
+   "n_files": 18,
+   "digest": "ff051a7aeaebb83fab1be81145528df926838f73336532b04ecfb6195deab72c",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {

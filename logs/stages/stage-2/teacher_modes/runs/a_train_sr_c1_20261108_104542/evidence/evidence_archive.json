@@ -1,0 +1,42 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.stage3_evidence_archive/v1",
+ "run_id": "a_train_sr_c1_20261108_104542",
+ "arm": "C1-6cat-sr",
+ "archive": {
+  "name": "stage3_units_evidence.tgz",
+  "sha256": "c0901fbb629d6e7f55d52c5fc905a49292b4b11dfef2a05c32703e1129217ec8",
+  "bytes": 72910107,
+  "dev_box_copy": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/stage3_units_evidence.tgz",
+  "bytes_by_unit_dir": {
+   "C1-6cat-sr-s20260801": 138882493,
+   "C1-6cat-sr-s20260726": 136353006,
+   "A2-6cat-sr-s20260801": 39025459,
+   "A2-6cat-sr-s20260726": 40446978,
+   "A1-6cat-sr-s20260801": 92216742,
+   "A1-6cat-sr-s20260726": 93656407
+  },
+  "contents": "the volume's stage3_sr tree without save points and evaluation-package weights: train logs and configs, every evaluation's generations, rows and formal report",
+  "relay_copy": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "path": "durable/stage3_sr/evidence/a_train_sr_c1_20261108_104542/stage3_units_evidence.tgz",
+   "sha256": "c0901fbb629d6e7f55d52c5fc905a49292b4b11dfef2a05c32703e1129217ec8",
+   "verified": true,
+   "rule": "uploaded from the dev box's copy, downloaded again into a fresh cache and re-hashed"
+  }
+ },
+ "committed_here": {
+  "C1-6cat-sr-s20260726/train/train_log.jsonl": "b3e538f924943ae946b692fc1c78e1059dca04917f2c7c30ff43f099ea7657b0",
+  "C1-6cat-sr-s20260726/train/config.json": "05c4401b0d36d89352f8ee1a24d689bda9ab5427d633239e3f3bbf1f9ebbf589",
+  "C1-6cat-sr-s20260726/train/run_completion.json": "dbd47f8f0f2fa015ad187f5df15d21d5d5352e2f53a703994f127af99aa5c3f8",
+  "C1-6cat-sr-s20260726/train/run_manifest.json": "e592443cb1e4a7f62ed63e7cf4dee2553b67ed373b05134054919c7bf43245f5",
+  "C1-6cat-sr-s20260726/evaluation/formal_report.json": "ea1d31781b83b4fa0a10ff881cdeeb12cb90b58010d1878b2ebdb68f65d7f646",
+  "C1-6cat-sr-s20260726/off_volume_copy.json": "e9cd9f1eb5d71fc8d9e839056730364d0a163fff6fb694dd2a87eb97a9eee6fd",
+  "C1-6cat-sr-s20260801/train/train_log.jsonl": "30f6ffaedf9484028ecbfc2c3358267e55d06dc41faba555da6175e0d0809832",
+  "C1-6cat-sr-s20260801/train/config.json": "f3febf38fc08122c3c321166038f8f588d5a79e66a14e8cdd2e26719695afbe8",
+  "C1-6cat-sr-s20260801/train/run_completion.json": "497f40a83ed2ff0cfcc491d343a3f3f7af4182a05d59ca7ab8abd30053539e39",
+  "C1-6cat-sr-s20260801/train/run_manifest.json": "8c597117ef51c9c27bbbb80faf7f51208e5206dee44273113f1288deaea10a63",
+  "C1-6cat-sr-s20260801/evaluation/formal_report.json": "18be11d949b2ab579701c7f1d170c651b0c838136ee91fd2dd9dcac025021733",
+  "C1-6cat-sr-s20260801/off_volume_copy.json": "9aac055a975409e50990ed4aff9fc41161f04b56831157864038a1c2c5941c4d"
+ },
+ "weights": "stay on the network volume thprcgh7s9 (their sha256 in the units record); no off-volume copy while the relay's quota refuses them"
+}

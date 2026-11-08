@@ -1346,6 +1346,57 @@ continuation's launcher), so none was deleted. Until private storage is added or
 network volume is the trained weights' only store and is kept and protected; a later session copies every unit
 whose copy is still owed, and the closeout reads each copy back from the relay (`final_weights_off_volume`).
 
+## 16. Stage 3 COMPLETE: six units trained and evaluated (2026-11-08)
+
+All six units trained on the L40S from their own lineage's initialization and were evaluated on the frozen
+eval-set-1 v2 under nucleus_v1, each in its own mode, on the same pod. Result record:
+[`analyses/stage3_sr_result.json`](../../../../logs/stages/stage-2/teacher_modes/analyses/stage3_sr_result.json)
+(`stage3_sr_analysis.py`); runs `a_train_sr_a1_20261107_104149`, `a_train_sr_a2_20261107_174531`,
+`a_train_sr_c1_20261108_082548` (attempt 1: unit 1 trained, its evaluation failed at the first prompt on a missing
+chat template, nothing measured; repaired) and `a_train_sr_c1_20261108_104542` (attempt 2: unit 1 evaluated only,
+unit 2 trained and evaluated).
+
+**Static fluid correctness, 570 formal items** (two seeds' item-paired mean, bootstrap 95% over items):
+
+| arm | static | deduction (189) | induction (142) | composition (144) | abstract/analogical (95) | interactive (144, exploratory) |
+| --- | --- | --- | --- | --- | --- | --- |
+| A1-6cat-sr (hybrid, thinking) | 7.19% [5.53, 9.04] (7.72 / 6.67) | 17.46% | 1.76% | 3.82% | 0.00% | 0 / 1 |
+| A2-6cat-sr (hybrid, non-thinking) | 10.96% [8.86, 13.16] (10.88 / 11.05) | 23.54% | 3.87% | 7.64% | 1.58% | 6 / 5 |
+| C1-6cat-sr (Thinking-2507) | 4.47% [3.07, 5.96] (4.91 / 4.04) | 12.96% | 0.70% | 0.00% | 0.00% | 2 / 4 |
+
+**The registered comparison** (`token_matched_preregistration.json :: decision_rule`, `mode_statistics.compare`;
+item-paired over both seeds, rule-family cluster bootstrap stratified by axis, 97.5% interval, SESOI 5 pp):
+
+* **A1 - A2 (decided): INCONCLUSIVE**, -3.77 pp [-7.21, -1.03] (seeds -3.16, -4.39); 121 discordant item-seed pairs
+  over 34 informative rule families. The interval excludes zero but not the -5 pp SESOI; no axis survives Holm at
+  8 pp. Read: at matched unique supervised tokens the non-thinking arm scored higher, by a margin this design
+  cannot place beyond 5 pp -- and A2 also had 3.53x the optimizer steps and training compute, 0.88x the
+  supervised-token exposure and 4.6x the tool-calling turns, so it is not a compute-matched mode effect.
+* **A1 - C1 (descriptive, end to end): NO_GO**, +2.72 pp [+0.85, +4.83] (seeds +2.81, +2.63): a difference beyond
+  5 pp is excluded; the hybrid route scored higher. Not a pure teacher difference: C1's initialization came from its
+  own root's D4 search under forward baseline v1.
+
+**Rollout integrity** (static formal items; a context-limit hit is right-censored): usable 63.5 / 68.6% (A1),
+87.9 / 90.5% (A2), 79.0 / 78.4% (C1); degeneration stops 35.8 / 31.2%, 12.1 / 9.5%, 16.3 / 16.5%; context-limit hits
+0.7 / 0.2%, 0 / 0%, 3.3 / 4.7%. Correctness among usable rollouts is about equal for A1 and A2 (12.2 / 9.7% vs
+12.4 / 12.2%) and lower for C1 (6.2 / 5.2%): much of A1's deficit is rollouts that never terminate.
+
+**Supporting and other units** (each as the formal report measured it, never pooled): RAG reading 27 / 24% (A1),
+60 / 57% (A2), 7 / 9% (C1); multi-hop evidence reading 14 / 15%, 46 / 46%, 17 / 15%; GSM8K and verified math 0-7%;
+closed-book knowledge 2-3%; evidence-conditioned abstention and safety pairs 0-7%. The in-sample regression set
+(`stage3_legacy_150`, training prompts) is not generalization and stays apart. eval-set-1 measures tool calling only
+indirectly: nothing here is a closed-loop tool-task success rate.
+
+**Measured training** (L40S, $1.09/h): 3.76 / 3.09 / 3.99 s per optimizer step (priced expected 4.05 / 3.38 / 4.20),
+peak reserved memory 18.5-19.7 GB of 48, every unit's trainer logged `cross_context`; save points about hourly as
+planned. Cost: A1 $7.7554 of $18.33, A2 $15.6086 of $37.54, C1 $7.4321 of $17.37 (two attempts) -- **$30.7961 of
+$73.24**, 1,664 pod minutes, below the lower estimate ($31.19).
+
+**Where the results live.** Final weights and the last save point (weights, AdamW state, step, RNG) of every unit on
+`thprcgh7s9` (sha256 in each run's units record, re-hashed at closeout); every generation, row and formal report in
+the evidence archives, on the dev box and on the relay (re-downloaded and re-hashed). The weights have no off-volume
+copy: the relay's quota refused all six (`off_volume_copy.json` per unit); `thprcgh7s9` is kept and protected.
+
 ## Reproduce ($0)
 
 ```
