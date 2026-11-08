@@ -118,7 +118,7 @@ def test_the_report_scores_exactly_the_formal_rows(tmp_path):
 def test_the_behaviour_aggregates_score_each_record_under_its_think_state(tmp_path, think_state, raw):
     """The behaviour unit's metrics and its group slices aggregate the record's OWN think state, as its rows do.
     Both aggregates once re-scored without it, so a hybrid template's non-thinking answers all read empty and its
-    thinking ones unclosed (A2-6cat-sr, 2026-11-09) while the rows beside them were right."""
+    thinking ones unclosed (A2-6cat-sr, 2026-11-08) while the rows beside them were right."""
     import json
     import shared.evaluation.eval_set_scoring as S
 

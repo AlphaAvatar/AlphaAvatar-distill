@@ -15,11 +15,15 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   compute-matched); A1 - C1 (descriptive) NO_GO (+2.72 pp [+0.85, +4.83]).
 - Cost: $30.7961 of the $73.24 caps (A1 $7.7554, A2 $15.6086, C1 $7.4321 over two attempts); all pods deleted with
   the provider's confirmation. Project cap $1,000, Research A $262.04, ceiling $158.3762.
-- Open result-persistence item: the six trained weights are only on `thprcgh7s9` (the relay's quota, 100 GB
-  account-wide, refused all six); the volume is kept and protected until a verified off-volume copy exists.
-- Corrected 2026-11-09: the behaviour unit's aggregates in every hybrid-template report were rescored under each
+- Open result-persistence item: the six trained weights are only on `thprcgh7s9`; the relay (92.11 of 93.13 GiB)
+  refuses them. The provider balance ($19.97, 2026-11-08T18:35Z) funds the three volumes ($1.76/day) for ~11 days;
+  an unfunded account's volumes may be terminated. Application owed (decisions.md 2026-11-08 closeout): top-up,
+  HF PRO, one $2 `persist_sr` session (`storage/stage3_storage_audit.json`).
+- Closeout 2026-11-08: verdicts kept; the $0 failure analysis (`analyses/stage3_failure_analysis.json`) finds the
+  thinking students fail inside the reasoning, and no training-side defect; PACKED_ROUND.md section 17.
+- Corrected 2026-11-08: the behaviour unit's aggregates in every hybrid-template report were rescored under each
   record's think state (`audit/behaviour_aggregate_rescoring.json`); no correctness number or comparison changed.
-- Owner: `logs/budget/decisions.md` 2026-11-08 / 2026-11-09; `PACKED_ROUND.md` sections 15-16; runs `a_train_sr_*`.
+- Owner: `logs/budget/decisions.md` 2026-11-08 (two entries); `PACKED_ROUND.md` sections 15-17; runs `a_train_sr_*`.
 
 **RESEARCH A: THE PACKED FULL SEARCH IS COMPLETE (2026-11-06) -- TOP-1 `1f5e4b42...`, ONE ATTEMPT, $28.17 OF $55.72.**
 - Top-1: FFN(base) -> DEPTH(base) -> WIDTH(rh) -> ATTENTION(rh), 596,049,920 parameters, single shard `b74dede8...`; on

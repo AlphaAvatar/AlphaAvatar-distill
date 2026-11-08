@@ -715,7 +715,7 @@ B stays pending.
   30% / 73%; answerability pairs 1.7% / 0% / 55%; safety pairs 0% / 0% / 44%; the in-sample regression set
   (training prompts, never generalization) 26.7% / 21.3% / 95.3%. The behaviour unit's `think_closed` and
   `format_ok` first read 0 for the teacher too: an aggregation defect that ignored the hybrid template's think
-  state, rescored 2026-11-09 from the saved generations
+  state, rescored 2026-11-08 from the saved generations
   ([`audit/behaviour_aggregate_rescoring.json`](../../../../logs/stages/stage-2/teacher_modes/audit/behaviour_aggregate_rescoring.json)).
   Corrected, they read 0.71 / 0.69, 0.75 / 0.74 and 1.0 / 1.0 for the teacher; no correctness number changed.
 - What this does not say: nothing about non-thinking mode (A2 is not run), no thinking-vs-non-thinking comparison,

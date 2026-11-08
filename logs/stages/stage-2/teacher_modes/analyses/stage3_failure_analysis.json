@@ -1,0 +1,2826 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.stage3_failure_analysis/v1",
+ "written_utc": "2026-11-08T18:49:15Z",
+ "inputs": {
+  "units": "each unit's saved generations and rows (the evidence archives)",
+  "teachers": "the hybrid teacher's eval-set-1 evaluation in both modes (Research A v1), context 40,960; the students ran at their trained context 8,192",
+  "packs": "artifacts/stages/stage-2/teacher_modes/packs_6cat",
+  "template_token_ids": {
+   "hybrid": [
+    151644,
+    151645,
+    151667,
+    151668
+   ],
+   "thinking_2507": [
+    151644,
+    151645,
+    151667,
+    151668
+   ]
+  }
+ },
+ "units": {
+  "A1-6cat-sr-s20260726": {
+   "static": {
+    "n": 570,
+    "stops": {
+     "eos": 362,
+     "degeneration": 204,
+     "context_limit": 4
+    },
+    "stops_pct": {
+     "eos": 63.5,
+     "degeneration": 35.8,
+     "context_limit": 0.7
+    },
+    "non_eos_by_kind": {
+     "degeneration:rambling": 149,
+     "degeneration:cycle": 30,
+     "context_limit:-": 4,
+     "degeneration:low_novelty": 25
+    },
+    "non_eos_where": {
+     "degeneration in reasoning": 198,
+     "context_limit in reasoning": 4,
+     "degeneration in answer": 6
+    },
+    "non_eos_tail_cycle": {
+     "no exact cycle": 178,
+     "period 31-200": 4,
+     "period 5-30": 20,
+     "period 1-4": 6
+    },
+    "non_eos_answer_present": {
+     "reasoning: no boxed answer yet": 197,
+     "reasoning: boxed, wrong": 5,
+     "answer: no boxed answer yet": 6
+    },
+    "generated_tokens_at_stop": {
+     "degeneration": {
+      "n": 204,
+      "mean": 2966.6,
+      "median": 2816,
+      "p90": 4864,
+      "max": 6912
+     },
+     "context_limit": {
+      "n": 4,
+      "mean": 7983.2,
+      "median": 7953,
+      "p90": 7953,
+      "max": 8107
+     }
+    },
+    "reasoning_tokens_when_closed": {
+     "eos": {
+      "n": 362,
+      "mean": 1955.4,
+      "median": 1532,
+      "p90": 3737,
+      "max": 7270
+     },
+     "degeneration": {
+      "n": 6,
+      "mean": 2248.7,
+      "median": 2041,
+      "p90": 2641,
+      "max": 4297
+     }
+    },
+    "formal": {
+     "correct": 44,
+     "rate": 0.0772,
+     "usable": 362,
+     "usable_rate": 0.6351,
+     "correct_among_usable": 0.1215
+    },
+    "usable_outcomes": {
+     "wrong_answer": 317,
+     "ok": 44,
+     "no_boxed": 1
+    },
+    "descriptive_answer_correct_ignoring_termination": {
+     "correct": 44,
+     "rate": 0.0772,
+     "_": "an answer after </think> (or the whole reply when the think block is pre-closed) that the registered scorer accepts, whether or not the rollout terminated; never a formal number"
+    },
+    "examples": {
+     "degeneration:rambling:reasoning": [
+      {
+       "task_id": "bccd2fe6afbe3134500d",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.drop_first",
+       "generated_tokens": 2048,
+       "cycle": null,
+       "tail": "ybe the output is the sum of the elements multiplied by 3. Let me check the first input again. 9*3=27, 5*3=15, 5*3=10, 1*3=3. But the output is [5,1,2]. Not matching.\n\nAlternatively, maybe the output is the sum of the elements multiplied by 3. For the first input, 9*3=27, 5*3=15, 5*3=10, 1*3=3. But the output is [5,1,2]. Not matching.\n\nWait maybe the output is the sum of the elements multiplied by 3. For example, the"
+      },
+      {
+       "task_id": "94f3ac56667fd59c0b8a",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.max",
+       "generated_tokens": 2048,
+       "cycle": null,
+       "tail": ",8], which is 5 elements. The output is 8, which is the first element. So that's the same as before. So maybe the rule is to keep the first element, but if the list is longer than one element, then the rest is the same. Wait, but in the third example, the list is [7,3,8,2,8], which is 5 elements. The output is 8, which is the first element. So that's the same as before. So maybe the rule is to keep the first element,"
+      }
+     ],
+     "degeneration:cycle:reasoning": [
+      {
+       "task_id": "dedede03bd1a9d3f5662",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.count_even",
+       "generated_tokens": 1792,
+       "cycle": {
+        "period": 43,
+        "repeats": 9
+       },
+       "tail": "e the output is the number of times the number is less than the sum of the digits. For 10 elements, sum is 10, but output is 3. Not matching. Maybe not. Maybe the output is the number of times the number is less than the sum of the digits. For 10 elements, sum is 10, but output is 3. Not matching. Maybe not. Maybe the output is the number of times the number is less than the sum of the digits. For 10 elements, sum is"
+      },
+      {
+       "task_id": "4a458bed68d694f3c9d4",
+       "axis": "inductive_rule_discovery",
+       "family_id": "seq.affine_recurrence",
+       "generated_tokens": 768,
+       "cycle": {
+        "period": 10,
+        "repeats": 53
+       },
+       "tail": "Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then 3 - 3 = 0. Then"
+      }
+     ],
+     "context_limit:-:reasoning": [
+      {
+       "task_id": "fb5466bfc25660f8203f",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.first_k",
+       "generated_tokens": 8107,
+       "cycle": null,
+       "tail": " d x x → \"lxd\".\n\nBut maybe the problem is designed to have a different rule. Let me think of another approach. Maybe the rule is to take the letters at the letters at the positions where the letters are in the same position. But that's not clear.\n\nAlternatively, maybe the rule is to take the letters at the letters at positions 1, 3, and 5, but for some reason, it's not swapping first and third. Wait, but the examples"
+      },
+      {
+       "task_id": "7bc3632319fd041e9cc5",
+       "axis": "compositional_generalization",
+       "family_id": "scan.seq_sur",
+       "generated_tokens": 7945,
+       "cycle": null,
+       "tail": "r (modifier after \"bibi\")\n- \"lezi\" is a connective (A lezi B means A then B)\n- \"bibi sizi\" is a connective (A lezi B where A is \"bibi sizi\" and B is \"bibi sizi\")\n- \"keke\" is a connective (A keke B means A, then B, then A again)\n\nSo the \"lezi\" is applied to the previous result (A) and the next part (B), which is \"bibi sizi\" (A lezi B → A then B). Then, the \"keke\" is applied to the previous result (A) and the next part"
+      }
+     ],
+     "degeneration:low_novelty:reasoning": [
+      {
+       "task_id": "eddaea9b9d47439e0418",
+       "axis": "inductive_rule_discovery",
+       "family_id": "seq.interleaved",
+       "generated_tokens": 3072,
+       "cycle": null,
+       "tail": " problem is not about the order. But that can't be. Wait, but maybe the rule is that numbers are ordered by some order, but the problem is not about the order. But that's not possible. Wait, but maybe the rule is that numbers are ordered by some order, but the problem is not about the order. But that's not possible. Wait, maybe the rule is that numbers are ordered by some order, but the problem is not about the order"
+      },
+      {
+       "task_id": "aab7024f7cd9963c37a5",
+       "axis": "inductive_rule_discovery",
+       "family_id": "seq.affine_recurrence",
+       "generated_tokens": 1280,
+       "cycle": null,
+       "tail": "st, but the rule is that the numbers are the ones that come from the list, but if the list has a certain number of elements, then the rule is different. But the problem doesn't say that. Maybe the problem is that the numbers are the ones that come from the list, but the rule is that the numbers are the ones that come from the list, but if the list has some elements, then the rule is different. But the problem doesn't"
+      }
+     ],
+     "degeneration:cycle:answer": [
+      {
+       "task_id": "4f02fd1067d9588cb521",
+       "axis": "compositional_generalization",
+       "family_id": "cf.affine",
+       "generated_tokens": 3584,
+       "cycle": {
+        "period": 31,
+        "repeats": 7
+       },
+       "tail": " must be non-negative, $ a = 4a - 2b $ must be true.\n\nSubstitute $ a = 4a - 2b $:\n\n$$\n4a - 2b = 4a - 2b - 2b = 4a - 2b - 2b = 4a - 2b\n$$\n\n$$\n4a - 2b = 4a - 2b - 2b = 4a - 2b\n$$\n\n$$\n4a - 2b = 4a - 2b - 2b = 4a - 2b\n$$\n\n$$\n4a - 2b = 4a - 2b - 2b = 4a - 2b\n$$\n\n$$\n4a - 2b = 4a - 2b - 2b = 4a - 2b\n$$\n\n$$\n4a - 2b = 4a - 2b - 2b = 4a - 2b\n$$\n\n$$\n4a - 2b = 4a - 2b - 2b = 4a - 2b\n$$\n\n$$\n4a - 2b = 4a - 2b - 2b = 4a - 2b\n$$\n\n$$"
+      },
+      {
+       "task_id": "22fc4f47da67b4ef6792",
+       "axis": "task_contained_deduction",
+       "family_id": "graph.reach_count",
+       "generated_tokens": 2048,
+       "cycle": {
+        "period": 72,
+        "repeats": 6
+       },
+       "tail": "st)\n- **Breeze** (2nd)\n- **Buis** (3rd)\n- **Ben** (4th)\n- **Elm** (5th)\n- **Juniper** (6th)\n- **Glen** (7th)\n- **Linden** (8th)\n- **Bainu** (1st)\n- **Breeze** (2nd)\n- **Buis** (3rd)\n- **Ben** (4th)\n- **Elm** (5th)\n- **Juniper** (6th)\n- **Glen** (7th)\n- **Linden** (8th)\n- **Bainu** (1st)\n- **Breeze** (2nd)\n- **Buis** (3rd)\n- **Ben** (4th)\n- **Elm** (5th)\n- **Juniper** (6th)\n- **Glen** (7th)\n- **Linden** (8th)\n- **Bain"
+      }
+     ],
+     "degeneration:rambling:answer": [
+      {
+       "task_id": "06efcdef4e3c0cb1e05e",
+       "axis": "task_contained_deduction",
+       "family_id": "kk.same_type",
+       "generated_tokens": 5376,
+       "cycle": null,
+       "tail": "*.\n- **I** is a knight → his statement is **true**.\n- **Sami** is a knight → his statement is **true**.\n- This is consistent with **Cara and I** being knights.\n\nNow, we check the implications of **Sami**:\n- If **Sami is a knight**, then his statement is **true**, meaning **Cara and I are both knaves**.\n- **Cara** is a knave → her statement is **false**.\n- Her statement is \"Kai and I are different kinds\" → **true** (C"
+      }
+     ],
+     "degeneration:low_novelty:answer": [
+      {
+       "task_id": "e031b1de00fb11cbb81a",
+       "axis": "task_contained_deduction",
+       "family_id": "graph.shortest",
+       "generated_tokens": 2560,
+       "cycle": null,
+       "tail": " Juniper**  \n6. **Fern to Elm**  \n7. **Hatt to Dune**  \n8. **Hatt to Elean**  \n9. **Elean to Juniper**  \n10. **Elena to Juniper**  \n11. **Elena to Juniper**  \n12. **Elena to Juniper**  \n13. **Elena to Juniper**  \n14. **Elena to Juniper**  \n15. **Elena to Juniper**  \n16. **Elena to Juniper**  \n17. **Elena to Juniper**  \n18. **Elena to Juniper**  \n19. **Elena to Juniper**  \n18. **Elena to Juniper**  \n17. **Elena to Jun"
+      }
+     ]
+    }
+   },
+   "episodes": {
+    "n": 144,
+    "ends": {
+     "degeneration": 134,
+     "episode_done": 5,
+     "context_limit": 5
+    },
+    "first_non_eos_turn": {
+     "turn 0": 119,
+     "turn 1": 12,
+     "none": 5,
+     "turn 2+": 8
+    },
+    "first_non_eos_where": {
+     "degeneration:rambling in reasoning": 109,
+     "degeneration:low_novelty in reasoning": 16,
+     "context_limit:- in reasoning": 5,
+     "degeneration:cycle in reasoning": 9
+    },
+    "turns_per_episode": {
+     "n": 144,
+     "mean": 1.3,
+     "median": 1,
+     "p90": 2,
+     "max": 6
+    },
+    "correct_by_family_group": {
+     "probe": [
+      48,
+      0
+     ],
+     "act": [
+      48,
+      0
+     ],
+     "code": [
+      48,
+      0
+     ]
+    },
+    "examples": [
+     {
+      "task_id": "a357e74a3f67c26b5b8a",
+      "family_id": "probe.affine",
+      "generated_tokens": 4096,
+      "tail": "e the function is f(n) = n. \n\nBut that's a guess. \n\nBut since I have to make a decision, maybe I should ask for f(0) and f(1) to see if there's a linear relationship. \n\nBut I'm not sure. \n\nAlternatively, maybe the function is f(n) = n mod 101. \n\nBut since I can't do that, I need to ask for f(0) and f(1). \n\nBut I'm not sure. \n\nAlternatively, maybe the function is a simple function. For example, f(n) = n. \n\nBut since I"
+     },
+     {
+      "task_id": "5b6f86e1ba7da159e8cb",
+      "family_id": "probe.mod_scale",
+      "generated_tokens": 2048,
+      "tail": "en f(811) is 871. But how to know?\n\nBut since I can only ask 7 questions, maybe I need to ask for f(0), f(1), f(2), and then maybe the slope. But maybe the function is not linear. However, the problem says that the function is hidden, so I can't assume that.\n\nAlternatively, maybe the function is f(n) = 100. Then f(811) is 871. But how to confirm?\n\nAlternatively, maybe the function is f(n) = 100 for all n. Then f(811)"
+     },
+     {
+      "task_id": "9174f48a171a52e37bbd",
+      "family_id": "probe.quadratic",
+      "generated_tokens": 4096,
+      "tail": "\nBut maybe the function is f(x) = x mod 101. So f(184) is 1. But I need to confirm.\n\nAlternatively, maybe the function is f(x) = x. Then f(184) is 1. But I can't be sure.\n\nBut given that the problem is designed, and the function is hidden, maybe the answer is 1. But I'm not certain.\n\nAlternatively, maybe the function is f(x) = x mod 101. Then f(184) is 1. But how to check.\n\nBut given that the problem allows me to ask"
+     }
+    ]
+   },
+   "training": {
+    "train_steps_logged": 214,
+    "first_step": {
+     "step": 10,
+     "ce": 6.658498,
+     "kd": 6.532883,
+     "loss": 8.197508
+    },
+    "last_step": {
+     "step": 2140,
+     "ce": 0.558773,
+     "kd": 0.439941,
+     "loss": 0.579635
+    },
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 6.801517,
+      "val_kd": 6.652527
+     },
+     {
+      "step": 2145,
+      "val_ce": 0.92804,
+      "val_kd": 0.789708
+     }
+    ]
+   }
+  },
+  "A1-6cat-sr-s20260801": {
+   "static": {
+    "n": 570,
+    "stops": {
+     "eos": 391,
+     "degeneration": 178,
+     "context_limit": 1
+    },
+    "stops_pct": {
+     "eos": 68.6,
+     "degeneration": 31.2,
+     "context_limit": 0.2
+    },
+    "non_eos_by_kind": {
+     "degeneration:low_novelty": 26,
+     "degeneration:rambling": 116,
+     "degeneration:cycle": 36,
+     "context_limit:-": 1
+    },
+    "non_eos_where": {
+     "degeneration in reasoning": 171,
+     "degeneration in answer": 7,
+     "context_limit in reasoning": 1
+    },
+    "non_eos_tail_cycle": {
+     "no exact cycle": 143,
+     "period 31-200": 20,
+     "period 5-30": 11,
+     "period 1-4": 5
+    },
+    "non_eos_answer_present": {
+     "reasoning: no boxed answer yet": 169,
+     "answer: no boxed answer yet": 7,
+     "reasoning: boxed, wrong": 3
+    },
+    "generated_tokens_at_stop": {
+     "degeneration": {
+      "n": 178,
+      "mean": 3008.7,
+      "median": 2816,
+      "p90": 4864,
+      "max": 7424
+     },
+     "context_limit": {
+      "n": 1,
+      "mean": 7839,
+      "median": 7839,
+      "p90": 7839,
+      "max": 7839
+     }
+    },
+    "reasoning_tokens_when_closed": {
+     "eos": {
+      "n": 391,
+      "mean": 1896.1,
+      "median": 1480,
+      "p90": 3818,
+      "max": 6925
+     },
+     "degeneration": {
+      "n": 7,
+      "mean": 2150.1,
+      "median": 1684,
+      "p90": 2698,
+      "max": 4238
+     }
+    },
+    "formal": {
+     "correct": 38,
+     "rate": 0.0667,
+     "usable": 391,
+     "usable_rate": 0.686,
+     "correct_among_usable": 0.0972
+    },
+    "usable_outcomes": {
+     "wrong_answer": 351,
+     "ok": 38,
+     "no_boxed": 2
+    },
+    "descriptive_answer_correct_ignoring_termination": {
+     "correct": 38,
+     "rate": 0.0667,
+     "_": "an answer after </think> (or the whole reply when the think block is pre-closed) that the registered scorer accepts, whether or not the rollout terminated; never a formal number"
+    },
+    "examples": {
+     "degeneration:low_novelty:reasoning": [
+      {
+       "task_id": "67c9d1913ead8d37c41b",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.keep_odd",
+       "generated_tokens": 2304,
+       "cycle": null,
+       "tail": "with the first element (2) moved to the end. So the output would be [2, 5, 16, 5, 17] but with the first element 2 moved to the end. Wait, but the original input is [2, 5, 16, 5, 17]. So the output would be [2, 5, 16, 5, 17] but with the first element (2) moved to the end. So the output would be [2, 5, 16, 5, 17] but with the first element 2 moved to the end. So the output would be [2, 5, 16, 5, 17]. But the original"
+      },
+      {
+       "task_id": "23b520a949337db833ff",
+       "axis": "inductive_rule_discovery",
+       "family_id": "seq.fibonacci_like",
+       "generated_tokens": 1536,
+       "cycle": null,
+       "tail": "irst input's last number is 14, and the output is 22. So that's adding the last number again. So perhaps the rule is adding the next number again. So maybe the rule is adding the next number again. But then, the first input's last number is 14, and the output is 22. So that's adding the last number. So maybe the rule is adding the next number again. But then, the fourth input's last number is 14, and the output is 22"
+      }
+     ],
+     "degeneration:rambling:reasoning": [
+      {
+       "task_id": "59047be04f650b850e56",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.prepend_length",
+       "generated_tokens": 3072,
+       "cycle": null,
+       "tail": "the rule is that each element is duplicated once. So the output is each element repeated twice. Then, in the first input, the output is [13, 13, 17, 17, 9, 9]. But the actual output is [6, 13, 13, 17, 9, 7, 9]. So that's different. So maybe the rule is that each element is duplicated once, so the output is each element repeated twice. So for example, if the input is [13, 13, 17, 9, 7, 9], then the output is [13, 13, "
+      },
+      {
+       "task_id": "2cf2c27dae7a74e0f879",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.rotate_left",
+       "generated_tokens": 2048,
+       "cycle": null,
+       "tail": "ut how does that work for the first example? The input is [11, 12, 10, 12]. The output is [12, 10, 12, 11]. So the last element (12) is moved to the front, and the rest of the elements are shifted right. So perhaps the rule is to take the last element and put it at the front, and then the rest of the elements are shifted right. But how does that apply to the other examples? Let's check.\n\nLooking at the second example"
+      }
+     ],
+     "degeneration:cycle:reasoning": [
+      {
+       "task_id": "6a1f0c502e5603853e6a",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.add_k",
+       "generated_tokens": 2048,
+       "cycle": {
+        "period": 65,
+        "repeats": 6
+       },
+       "tail": "\n\n993 + 48 = 982\n\n982 + 25 = 933\n\n933 + 48 = 985\n\n985 + 48 = 984\n\n984 + 25 = 993\n\n993 + 48 = 982\n\n982 + 25 = 933\n\n933 + 48 = 985\n\n985 + 48 = 984\n\n984 + 25 = 993\n\n993 + 48 = 982\n\n982 + 25 = 933\n\n933 + 48 = 985\n\n985 + 48 = 984\n\n984 + 25 = 993\n\n993 + 48 = 982\n\n982 + 25 = 933\n\n933 + 48 = 985\n\n985 + 48 = 984\n\n984 + 25 = 993\n\n993 + 48 = 982\n\n982 + 25 = 933\n\n933 + 48 = 985\n\n985 + 48 = 984\n\n984 + 25 = 993\n\n993 + 48 = 982\n\n98"
+      },
+      {
+       "task_id": "4a458bed68d694f3c9d4",
+       "axis": "inductive_rule_discovery",
+       "family_id": "seq.affine_recurrence",
+       "generated_tokens": 1280,
+       "cycle": {
+        "period": 54,
+        "repeats": 6
+       },
+       "tail": "3*10=30, 3*11=36, 3*12=38, 3*13=60, 3*14=84, 3*15=62, 3*16=56, 3*17=85, 3*18=83, 3*19=94, 3*20=30, 3*15=62, 3*16=56, 3*17=85, 3*18=83, 3*19=94, 3*20=30, 3*15=62, 3*16=56, 3*17=85, 3*18=83, 3*19=94, 3*20=30, 3*15=62, 3*16=56, 3*17=85, 3*18=83, 3*19=94, 3*20=30, 3*15=62, 3*16=56, 3*17=85, 3*18=83, 3*19=94, 3*20=30, 3*15=62, 3*16=56, 3*17=85, 3*18=83, 3*19=94, 3*20=30, 3*15=62, 3*16=56, 3*17=85, 3*18=83, 3*19=94, 3*20=3"
+      }
+     ],
+     "degeneration:cycle:answer": [
+      {
+       "task_id": "286c8119251200340008",
+       "axis": "inductive_rule_discovery",
+       "family_id": "seq.fibonacci_like",
+       "generated_tokens": 2304,
+       "cycle": {
+        "period": 73,
+        "repeats": 6
+       },
+       "tail": "40$ → **40 + 15 = 50**  \n- $1 + 7 = 8$ → **8 + 7 = 16**  \n- $7 + 8 = 16$ → **16 + 8 = 23**  \n- $15 + 23 = 40$ → **40 + 15 = 50**  \n- $1 + 7 = 8$ → **8 + 7 = 16**  \n- $7 + 8 = 16$ → **16 + 8 = 23**  \n- $15 + 23 = 40$ → **40 + 15 = 50**  \n- $1 + 7 = 8$ → **8 + 7 = 16**  \n- $7 + 8 = 16$ → **16 + 8 = 23**  \n- $15 + 23 = 40$ → **40 + 15 = 50**  \n- $1 + 7 = 8$ → **8 + 7 = 16**  \n- $7 + 8 = 16$ → **16 + 8 = 23**  \n- $15 + 2"
+      },
+      {
+       "task_id": "4064c19d54d71a263bc7",
+       "axis": "compositional_generalization",
+       "family_id": "scan.seq_sur",
+       "generated_tokens": 4608,
+       "cycle": {
+        "period": 12,
+        "repeats": 22
+       },
+       "tail": "tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke tuke` → `tuke` → `tuke t"
+      }
+     ],
+     "degeneration:low_novelty:answer": [
+      {
+       "task_id": "f37fa78e8fb1d3fbec91",
+       "axis": "compositional_generalization",
+       "family_id": "cf.affine_minus",
+       "generated_tokens": 3584,
+       "cycle": null,
+       "tail": "a \\cdot b = a \\neq b - a \\Rightarrow b - a = a \\Rightarrow b = a - 2a\n$$\n\n---\n\n### Step 7: Substitute $ b = a - 2a $ and $ a = -2b - a $ into Equation 2\n\nNow substitute $ a = -2b - a $ and $ b = a - 2a $:\n$$\na \\cdot b = -2b - a - a = -2b\n$$\n$$\na \\cdot b = a \\neq b - a \\Rightarrow b - a = a \\Rightarrow b = a - 2a\n$$\n\n---\n\n### Step 8: Substitute $ b = a - 2a $ and $ a = -2b - a $ into Equation 2\n\nNow substitute $ a = -"
+      },
+      {
+       "task_id": "dfc0b05e5bd02b77854b",
+       "axis": "task_contained_deduction",
+       "family_id": "graph.unreachable",
+       "generated_tokens": 2560,
+       "cycle": null,
+       "tail": " is on 1, 2, 3, 4, 5**  \n   - Kai is on Kai, 1, 2, 3, 4, 5  \n   - Kai is on Kai, 1, 2, 3, 4, 5  \n   - Kai is on Kai, 1, 2, 3, 4, 5  \n   - So Kai is in Kai, 1, 2, 3, 4, 5  \n   - Kai is in Kai, 1, 2, 3, 4, 5  \n\n7. **Bennyis is on 6, 7, 8**  \n   - Kai is on Kai, 1, 2, 3, 4, 5  \n   - Kai is on Kai, 1, 2, 3, 4, 5  \n   - Kai is on Kai, 1, 2, 3, 4, 5  \n   - So Kai is in Kai, 1, 2, 3, 4, 5  \n   - Kai is in Kai, 1, 2, 3, 4, 5"
+      }
+     ],
+     "context_limit:-:reasoning": [
+      {
+       "task_id": "78ca1e2ff542333bc01b",
+       "axis": "abstract_analogical",
+       "family_id": "grid.count_cells",
+       "generated_tokens": 7839,
+       "cycle": null,
+       "tail": "d → [0, 4, 0, 0, 0] → [0, 0, 0, 4, 0]\nRow 1: original column 3 reversed → [0, 0, 0, 4, 1] → [0, 4, 0, 0, 1]\nRow 2: original column 2 reversed → [0, 0, 0, 0, 0] → [0, 0, 0, 0, 0]\nRow 3: original column 1 reversed → [0, 2, 4, 0, 0] → [0, 0, 0, 0, 0]\nRow 4: original column 0 reversed → [0, 0, 0, 4, 0] → [0, 0, 0, 4, 0]\n\nSo the rotated matrix is:\n\nRow 0: 0 0 0 4 0\nRow 1: 0 4 0 0 1\nRow 2: 0 0 0 0 0\nRow 3: 4 1 0 4 4\nRow 4:"
+      }
+     ]
+    }
+   },
+   "episodes": {
+    "n": 144,
+    "ends": {
+     "degeneration": 132,
+     "episode_done": 9,
+     "context_limit": 3
+    },
+    "first_non_eos_turn": {
+     "turn 0": 106,
+     "turn 2+": 19,
+     "none": 9,
+     "turn 1": 10
+    },
+    "first_non_eos_where": {
+     "degeneration:rambling in reasoning": 110,
+     "degeneration:low_novelty in reasoning": 13,
+     "degeneration:cycle in reasoning": 9,
+     "context_limit:- in reasoning": 3
+    },
+    "turns_per_episode": {
+     "n": 144,
+     "mean": 1.6,
+     "median": 1,
+     "p90": 3,
+     "max": 9
+    },
+    "correct_by_family_group": {
+     "probe": [
+      48,
+      0
+     ],
+     "act": [
+      48,
+      1
+     ],
+     "code": [
+      48,
+      0
+     ]
+    },
+    "examples": [
+     {
+      "task_id": "a357e74a3f67c26b5b8a",
+      "family_id": "probe.affine",
+      "generated_tokens": 5120,
+      "tail": "ion. So, perhaps the answer is 191. But I need to be cautious.\n\nAlternatively, maybe the function is f(n) = n. Then f(191) is 191. But I need to confirm.\n\nBut since I can only ask 7 questions, I should ask for f(0), f(1), f(2), f(100), and then see if the pattern holds. But since I can't ask for those, I need to make an assumption.\n\nBut given that the problem is designed for a solution, perhaps the answer is 191. But"
+     },
+     {
+      "task_id": "5b6f86e1ba7da159e8cb",
+      "family_id": "probe.mod_scale",
+      "generated_tokens": 4096,
+      "tail": "ly ask 7 questions, maybe I should ask for f(0), f(100), f(101), f(102), and then see if there's a pattern. But I need to make sure that the function is linear.\n\nAlternatively, maybe the function is f(n) = 100 + n. So I can ask for f(0) and f(100). If I get 101, then that's the answer. If I ask for f(0) and get 0, then I can ask for f(100) and see. But since I can only ask 7 questions, maybe I should ask for f(0), f("
+     },
+     {
+      "task_id": "9174f48a171a52e37bbd",
+      "family_id": "probe.quadratic",
+      "generated_tokens": 4608,
+      "tail": "d f(36) = 0, then it's linear. If I get f(0) = 0 and f(38) = 0, then it's linear. If I get f(0) = 0 and f(36) = 0, then it's linear. If I get f(0) = 0 and f(38) = 0, then it's linear. If I get f(0) = 0 and f(36) = 0, then it's linear. If I get f(0) = 0 and f(36) = 0, then it's linear. If I get f(0) = 0 and f(38) = 0, then it's linear. If I get f(0) = 0 and f(36) = 0, then it's linear. If I get f(0) = 0 and f(38) = 0,"
+     }
+    ]
+   },
+   "training": {
+    "train_steps_logged": 214,
+    "first_step": {
+     "step": 10,
+     "ce": 5.683849,
+     "kd": 5.409601,
+     "loss": 6.830564
+    },
+    "last_step": {
+     "step": 2140,
+     "ce": 0.915355,
+     "kd": 0.783934,
+     "loss": 1.012773
+    },
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 6.801517,
+      "val_kd": 6.652527
+     },
+     {
+      "step": 2145,
+      "val_ce": 0.937174,
+      "val_kd": 0.799144
+     }
+    ]
+   }
+  },
+  "A2-6cat-sr-s20260726": {
+   "static": {
+    "n": 570,
+    "stops": {
+     "degeneration": 69,
+     "eos": 501
+    },
+    "stops_pct": {
+     "degeneration": 12.1,
+     "eos": 87.9
+    },
+    "non_eos_by_kind": {
+     "degeneration:rambling": 9,
+     "degeneration:low_novelty": 21,
+     "degeneration:cycle": 39
+    },
+    "non_eos_where": {
+     "degeneration in answer": 69
+    },
+    "non_eos_tail_cycle": {
+     "no exact cycle": 30,
+     "period 31-200": 26,
+     "period 5-30": 11,
+     "period 1-4": 2
+    },
+    "non_eos_answer_present": {
+     "answer: no boxed answer yet": 69
+    },
+    "generated_tokens_at_stop": {
+     "degeneration": {
+      "n": 69,
+      "mean": 1461.8,
+      "median": 1280,
+      "p90": 2048,
+      "max": 2816
+     }
+    },
+    "reasoning_tokens_when_closed": {},
+    "formal": {
+     "correct": 62,
+     "rate": 0.1088,
+     "usable": 501,
+     "usable_rate": 0.8789,
+     "correct_among_usable": 0.1238
+    },
+    "usable_outcomes": {
+     "ok": 62,
+     "wrong_answer": 439
+    },
+    "descriptive_answer_correct_ignoring_termination": {
+     "correct": 62,
+     "rate": 0.1088,
+     "_": "an answer after </think> (or the whole reply when the think block is pre-closed) that the registered scorer accepts, whether or not the rollout terminated; never a formal number"
+    },
+    "examples": {
+     "degeneration:rambling:answer": [
+      {
+       "task_id": "424bd847a714f66694d7",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.add_k",
+       "generated_tokens": 2048,
+       "cycle": null,
+       "tail": " → sum = 0 + 4 + 4 + 5 = 11 → output is 13 → not 13\n\nStill not matching.\n\n---\n\n### Step 6: Try **sum of digits of the input number in some cases**\n\n- [0, 8, 9] → sum = 0 + 8 + 9 = 17 → output is 4 → not 17\n- [6, 3, 1, 4, 6] → sum = 6 + 3 + 1 + 4 + 6 = 23 → output is 10 → not 23\n- [9, 3, 0, 0, 9] → sum = 9 + 3 + 0 + 0 + 9 = 22 → output is 13 → not 22\n- [3, 8, 4] → sum = 3 + 8 + 4 = 17 → output is 7 → not 17\n- [0, 4, 4"
+      },
+      {
+       "task_id": "2929447b4092c7626993",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.max",
+       "generated_tokens": 2304,
+       "cycle": null,
+       "tail": "= **16**  \nOutput: **16** ✅\n\n#### Example 3:\nInput: [3, 10, 2, 7]  \nSum: 3 + 10 + 2 + 7 = **10**  \nOutput: **10** ✅\n\n#### Example 4:\nInput: [5, 7, 0, 19]  \nSum: 5 + 7 + 0 + 19 = **19**  \nOutput: **19** ✅\n\n---\n\n### ✅ Conclusion:\n\nThe **hidden rule** is:  \n**The output is the sum of the input list.**\n\n---\n\n### Step 11: Apply the rule to the new input\n\n**Input:** [17, 10, 5, 13, 9, 15, 4]  \nSum = 17 + 10 + 5 + 13 + 9 + "
+      }
+     ],
+     "degeneration:low_novelty:answer": [
+      {
+       "task_id": "dedede03bd1a9d3f5662",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.count_even",
+       "generated_tokens": 1280,
+       "cycle": null,
+       "tail": "     |\n| 2     | 3      | 2 + 3 = 5           |\n| 2     | 2      | 2 + 2 = 4           |\n| 8     | 2      | 8 + 2 = 10           |\n| 7     | 2      | 7 + 2 = 9           |\n| 0     | 2      | 0 + 2 = 2           |\n| 1     | 2      | 1 + 2 = 3           |\n| 2     | 2      | 2 + 2 = 4           |\n| 3     | 2      | 3 + 2 = 5           |\n| 4     | 2      | 4 + 2 = 6           |\n| 5     | 2      | 5 + 2 = 7           |\n| "
+      },
+      {
+       "task_id": "36b8c47417563740ce56",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.sum",
+       "generated_tokens": 1280,
+       "cycle": null,
+       "tail": " 3 letters → 14 → Not helpful\n- \"seven\" → 7 letters → 45 → Not helpful\n- \"eight\" → 4 letters → 96 → Not helpful\n\nTry **adding the number of letters in the word to the next letter**?\n\n- \"eight\" → 5 letters → 56 → Not helpful\n- \"nine\" → 4 letters → 72 → Not helpful\n- \"six\" → 3 letters → 14 → Not helpful\n- \"seven\" → 7 letters → 45 → Not helpful\n- \"eight\" → 4 letters → 96 → Not helpful\n\nTry **adding the number of letters"
+      }
+     ],
+     "degeneration:cycle:answer": [
+      {
+       "task_id": "ea28f68367384860f91f",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.vowel_to_x",
+       "generated_tokens": 1792,
+       "cycle": {
+        "period": 92,
+        "repeats": 4
+       },
+       "tail": "hing.\n\nLet’s try **removing the second letter** and **replacing the first letter with the last letter**.\n\n- **jsi** → Remove **s** → `j j s` → Keep → `j j s` ✅  \n- **aqgb** → Remove **g** → `a q g` → Keep → `a x g b` ❌ (but result is `x q g b`)  \nStill not matching.\n\nLet’s try **removing the second letter** and **replacing the first letter with the last letter**.\n\n- **jsi** → Remove **s** → `j j s` → Keep → `j j s` ✅"
+      },
+      {
+       "task_id": "d6d5e3162a31ade97c3c",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.first_k",
+       "generated_tokens": 768,
+       "cycle": {
+        "period": 37,
+        "repeats": 6
+       },
+       "tail": "ing**:\n\n- \"wzir\" → remove \"w\" → \"zir\" → not \"wrs\"\n\nTry **removing the second letter** and **reversing**:\n\n- \"wzir\" → remove \"w\" → \"zir\" → not \"wrs\"\n\nTry **removing the second letter** and **reversing**:\n\n- \"wzir\" → remove \"w\" → \"zir\" → not \"wrs\"\n\nTry **removing the second letter** and **reversing**:\n\n- \"wzir\" → remove \"w\" → \"zir\" → not \"wrs\"\n\nTry **removing the second letter** and **reversing**:\n\n- \"wzir\" → remove \"w"
+      }
+     ]
+    }
+   },
+   "episodes": {
+    "n": 144,
+    "ends": {
+     "episode_done": 87,
+     "degeneration": 38,
+     "turn_limit": 19
+    },
+    "first_non_eos_turn": {
+     "none": 106,
+     "turn 0": 22,
+     "turn 2+": 8,
+     "turn 1": 8
+    },
+    "first_non_eos_where": {
+     "degeneration:rambling in answer": 6,
+     "degeneration:cycle in answer": 19,
+     "degeneration:low_novelty in answer": 13
+    },
+    "turns_per_episode": {
+     "n": 144,
+     "mean": 6.7,
+     "median": 6,
+     "p90": 12,
+     "max": 12
+    },
+    "correct_by_family_group": {
+     "probe": [
+      48,
+      0
+     ],
+     "act": [
+      48,
+      6
+     ],
+     "code": [
+      48,
+      0
+     ]
+    },
+    "examples": [
+     {
+      "task_id": "b69c319d37580dd5f441",
+      "family_id": "act.additive",
+      "generated_tokens": 2048,
+      "tail": "how a new value. Let's say it shows **N**.\n\n**Step 19: Press Button C again**  \n**PRESS: C**\n\nAfter pressing C again, the counter will show a new value. Let's say it shows **O**.\n\nNow we can compare **O** to **30** to see the effect of C.\n\nOnce we have the effects of all buttons, we can calculate how many times to press each to reach 23.\n\nLet’s continue with the next step.\n\n**Step 10: Press Button A again**  \n**PRESS"
+     },
+     {
+      "task_id": "3663b2128fe00b9aadb1",
+      "family_id": "act.modular",
+      "generated_tokens": 2304,
+      "tail": "Press A**  \n**Result: 52**\n\n---\n\n**Press A**  \n**Result: 51**\n\n---\n\n**Press A**  \n**Result: 50**\n\n---\n\n**Press A**  \n**Result: 52**\n\n---\n\n**Press A**  \n**Result: 51**\n\n---\n\n**Press A**  \n**Result: 50**\n\n---\n\n**Press A**  \n**Result: 52**\n\n---\n\n**Press A**  \n**Result: 51**\n\n---\n\n**Press A**  \n**Result: 50**\n\n---\n\n**Press A**  \n**Result: 52**\n\n---\n\n**Press A**  \n**Result: 51**\n\n---\n\n**Press A**  \n**Result: 50**\n\n---\n\n**"
+     },
+     {
+      "task_id": "e362fce136693d936b14",
+      "family_id": "act.additive",
+      "generated_tokens": 768,
+      "tail": "We can try pressing A 6 times (30) and B 6 times (54) for a total of 30 presses.\n\nWe can try pressing A 6 times (30) and B 6 times (54) for a total of 30 presses.\n\nWe can try pressing A 6 times (30) and B 6 times (54) for a total of 30 presses.\n\nWe can try pressing A 6 times (30) and B 6 times (54) for a total of 30 presses.\n\nWe can try pressing A 6 times (30) and B 6 times (54) for a total of 30 presses.\n\nWe can try"
+     }
+    ]
+   },
+   "training": {
+    "train_steps_logged": 757,
+    "first_step": {
+     "step": 10,
+     "ce": 7.081642,
+     "kd": 6.926695,
+     "loss": 8.697105
+    },
+    "last_step": {
+     "step": 7570,
+     "ce": 0.234811,
+     "kd": 0.140829,
+     "loss": 0.199532
+    },
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.472379,
+      "val_kd": 7.349008
+     },
+     {
+      "step": 7571,
+      "val_ce": 0.556322,
+      "val_kd": 0.460786
+     }
+    ]
+   }
+  },
+  "A2-6cat-sr-s20260801": {
+   "static": {
+    "n": 570,
+    "stops": {
+     "eos": 516,
+     "degeneration": 54
+    },
+    "stops_pct": {
+     "eos": 90.5,
+     "degeneration": 9.5
+    },
+    "non_eos_by_kind": {
+     "degeneration:cycle": 28,
+     "degeneration:rambling": 10,
+     "degeneration:low_novelty": 16
+    },
+    "non_eos_where": {
+     "degeneration in answer": 54
+    },
+    "non_eos_tail_cycle": {
+     "period 31-200": 10,
+     "no exact cycle": 26,
+     "period 5-30": 12,
+     "period 1-4": 6
+    },
+    "non_eos_answer_present": {
+     "answer: no boxed answer yet": 54
+    },
+    "generated_tokens_at_stop": {
+     "degeneration": {
+      "n": 54,
+      "mean": 1317.9,
+      "median": 1280,
+      "p90": 2048,
+      "max": 3072
+     }
+    },
+    "reasoning_tokens_when_closed": {},
+    "formal": {
+     "correct": 63,
+     "rate": 0.1105,
+     "usable": 516,
+     "usable_rate": 0.9053,
+     "correct_among_usable": 0.1221
+    },
+    "usable_outcomes": {
+     "wrong_answer": 453,
+     "ok": 63
+    },
+    "descriptive_answer_correct_ignoring_termination": {
+     "correct": 63,
+     "rate": 0.1105,
+     "_": "an answer after </think> (or the whole reply when the think block is pre-closed) that the registered scorer accepts, whether or not the rollout terminated; never a formal number"
+    },
+    "examples": {
+     "degeneration:cycle:answer": [
+      {
+       "task_id": "14cb58c77383537c240f",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.take_first",
+       "generated_tokens": 768,
+       "cycle": {
+        "period": 54,
+        "repeats": 6
+       },
+       "tail": "3] → But output is [1, 0] → this doesn't match.\n\nLet’s try removing the **second element** again:\n- [1, 0, 9, 3] → Remove 0 → [1, 9, 3] → But output is [1, 0] → this doesn't match.\n\nLet’s try removing the **second element** again:\n- [1, 0, 9, 3] → Remove 0 → [1, 9, 3] → But output is [1, 0] → this doesn't match.\n\nLet’s try removing the **second element** again:\n- [1, 0, 9, 3] → Remove 0 → [1, 9, 3] → But output is [1"
+      },
+      {
+       "task_id": "9abbc2185de68d70fbc6",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.keep_gt",
+       "generated_tokens": 768,
+       "cycle": {
+        "period": 8,
+        "repeats": 46
+       },
+       "tail": "0 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20, 20 → 20"
+      }
+     ],
+     "degeneration:rambling:answer": [
+      {
+       "task_id": "aeed386f63b208f6c615",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.add_k",
+       "generated_tokens": 3072,
+       "cycle": null,
+       "tail": "on the **sum of the input elements**\n\nLet’s try:\n\n- For [0, 2, 5, 7, 0]: sum = 0 + 2 + 5 + 7 + 0 = **11** → Not matching.\n\n- For [3, 0, 3]: sum = 3 + 0 + 3 = **6** → Not matching.\n\n- For [5, 7, 4]: sum = 5 + 7 + 4 = **15** → Not matching.\n\n- For [8, 3, 0, 0, 7]: sum = 8 + 3 + 0 + 0 + 7 = **19** → Not matching.\n\n---\n\n### Step 14: Try to find a pattern in the **output elements**\n\nLet’s look at the output for [0, 2, 5, "
+      },
+      {
+       "task_id": "989910e178aafc70c4a3",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.reverse",
+       "generated_tokens": 2048,
+       "cycle": null,
+       "tail": " and last elements.\n\nLet’s try this: the **first element** is moved to the end.\n\n### Input: [13, 18, 16, 13, 10, 13, 8] → Output: [13, 18, 16, 13, 10, 13, 8, 18]\n\n- First element: 13 → last element: 8 → not matching\n- Last element: 8 → first element: 13 → not matching\n\nStill not matching.\n\nAfter testing, the **first element** is moved to the end.\n\n### Input: [18, 18, 10, 10, 20, 9] → Output: [9, 20, 10, 10, 18, 18]\n\n"
+      }
+     ],
+     "degeneration:low_novelty:answer": [
+      {
+       "task_id": "52eb92c0e109998fd2b0",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.caesar_back",
+       "generated_tokens": 1280,
+       "cycle": null,
+       "tail": "t fit.\n\nLet’s try **removing the 2nd and 4th letters**:\n\n- **nlgu** → remove 2nd (l) and 4th (g) → **lje** ❌  \n  But result is **ljes**. So that doesn’t fit.\n\nLet’s try **removing the 3rd letter** and **removing the 4th letter**:\n\n- **nlgu** → remove 3rd (g) and 4th (g) → **lje** ❌  \n  But result is **ljes**. So that doesn’t fit.\n\nLet’s try **removing the 2nd and 4th letters**:\n\n- **nlgu** → remove 2nd (l) and 4th (g"
+      },
+      {
+       "task_id": "a61f3ddf80f84b71da51",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.drop_last",
+       "generated_tokens": 1280,
+       "cycle": null,
+       "tail": " first 6 letters) → **pasddr** → not matching.\n\nTry removing the **first and fourth letters**:\n\n- p a s p d r n → p a s p d r (keep first 6 letters) → **pasddr** → not matching.\n\nTry removing the **first and fifth letters**:\n\n- p a s p d r n → p a s p d r (keep first 6 letters) → **pasddr** → not matching.\n\nTry removing the **first and fourth letters**:\n\n- p a s p d r n → p a s p d r (keep first 6 letters) → **pasddr"
+      }
+     ]
+    }
+   },
+   "episodes": {
+    "n": 144,
+    "ends": {
+     "episode_done": 82,
+     "turn_limit": 20,
+     "degeneration": 42
+    },
+    "first_non_eos_turn": {
+     "none": 102,
+     "turn 2+": 10,
+     "turn 0": 29,
+     "turn 1": 3
+    },
+    "first_non_eos_where": {
+     "degeneration:cycle in answer": 27,
+     "degeneration:low_novelty in answer": 10,
+     "degeneration:rambling in answer": 5
+    },
+    "turns_per_episode": {
+     "n": 144,
+     "mean": 6.5,
+     "median": 6,
+     "p90": 12,
+     "max": 12
+    },
+    "correct_by_family_group": {
+     "probe": [
+      48,
+      0
+     ],
+     "act": [
+      48,
+      5
+     ],
+     "code": [
+      48,
+      0
+     ]
+    },
+    "examples": [
+     {
+      "task_id": "97078b1675935b5d6092",
+      "family_id": "act.modular",
+      "generated_tokens": 1280,
+      "tail": "en times: +11a  \nThen we need +1 more.\n\nTry pressing A eighth times: +10a  \nThen we need +1 more.\n\nTry pressing A nine times: +11a  \nThen we need +1 more.\n\nTry pressing A tenth times: +10a  \nThen we need +1 more.\n\nTry pressing A tenth times: +11a  \nThen we need +1 more.\n\nTry pressing A twelve times: +12a  \nThen we need +1 more.\n\nTry pressing A thirteen times: +11a  \nThen we need +1 more.\n\nTry pressing A four times: +"
+     },
+     {
+      "task_id": "bf44b78b6853bba80dfe",
+      "family_id": "act.modular",
+      "generated_tokens": 1280,
+      "tail": "try pressing **A**.\n\n**Press A**  \nCounter: 150 → ?  \nLet’s assume it's 153.\n\nNow we are at 153. Let’s try pressing **A**.\n\n**Press A**  \nCounter: 153 → ?  \nLet’s assume it's 170.\n\nNow we are at 70. Let’s try pressing **B**.\n\n**Press B**  \nCounter: 70 → ?  \nLet’s assume it's 85.\n\nNow we are at 85. Let’s try pressing **B**.\n\n**Press B**  \nCounter: 85 → ?  \nLet’s assume it's 90.\n\nNow we are at 90. Let’s try pressing **"
+     },
+     {
+      "task_id": "4954bbf24b9fd539390b",
+      "family_id": "act.modular",
+      "generated_tokens": 1536,
+      "tail": " + 8 (C) = +36\n- 36 (B) + 8 (C) = +44\n- 44 (B) + 8 (C) = +52\n- 52 (B) + 8 (C) = +54\n- 54 (B) + 8 (C) = +62\n- 62 (B) + 8 (C) = +70\n- 70 (B) + 8 (C) = +88\n- 88 (B) + 8 (C) = +168\n- 168 (B) + 8 (C) = +236\n- 236 (B) + 8 (C) = +402\n- 402 (B) + 8 (C) = +484\n\nNow we are at 484. We need to get to 0. That’s a decrease of 48.\n\nTry pressing B (adds 4) and C (adds 8):\n\n- 4 (B) + 8 (C) = +12\n- 12 (B) + 8 (C) = +20\n- 20 (B) + 8 (C"
+     }
+    ]
+   },
+   "training": {
+    "train_steps_logged": 757,
+    "first_step": {
+     "step": 10,
+     "ce": 7.579727,
+     "kd": 7.505026,
+     "loss": 9.399957
+    },
+    "last_step": {
+     "step": 7570,
+     "ce": 0.234493,
+     "kd": 0.164005,
+     "loss": 0.222628
+    },
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.472379,
+      "val_kd": 7.349008
+     },
+     {
+      "step": 7571,
+      "val_ce": 0.554639,
+      "val_kd": 0.458145
+     }
+    ]
+   }
+  },
+  "C1-6cat-sr-s20260726": {
+   "static": {
+    "n": 570,
+    "stops": {
+     "eos": 458,
+     "context_limit": 19,
+     "degeneration": 93
+    },
+    "stops_pct": {
+     "eos": 80.4,
+     "context_limit": 3.3,
+     "degeneration": 16.3
+    },
+    "non_eos_by_kind": {
+     "context_limit:-": 19,
+     "degeneration:cycle": 57,
+     "degeneration:rambling": 21,
+     "degeneration:low_novelty": 15
+    },
+    "non_eos_where": {
+     "context_limit in reasoning": 14,
+     "degeneration in reasoning": 87,
+     "degeneration in answer": 6,
+     "context_limit in answer": 5
+    },
+    "non_eos_tail_cycle": {
+     "no exact cycle": 55,
+     "period 1-4": 15,
+     "period 5-30": 25,
+     "period 31-200": 17
+    },
+    "non_eos_answer_present": {
+     "reasoning: no boxed answer yet": 92,
+     "answer: no boxed answer yet": 11,
+     "reasoning: boxed, wrong": 9
+    },
+    "generated_tokens_at_stop": {
+     "context_limit": {
+      "n": 19,
+      "mean": 7998.3,
+      "median": 7949,
+      "p90": 8128,
+      "max": 8140
+     },
+     "degeneration": {
+      "n": 93,
+      "mean": 2865.5,
+      "median": 2560,
+      "p90": 5632,
+      "max": 7936
+     }
+    },
+    "reasoning_tokens_when_closed": {
+     "eos": {
+      "n": 451,
+      "mean": 2759.3,
+      "median": 2349,
+      "p90": 5159,
+      "max": 7371
+     },
+     "degeneration": {
+      "n": 6,
+      "mean": 1541.5,
+      "median": 1653,
+      "p90": 2091,
+      "max": 2897
+     },
+     "context_limit": {
+      "n": 5,
+      "mean": 7701.4,
+      "median": 7767,
+      "p90": 7785,
+      "max": 7901
+     }
+    },
+    "formal": {
+     "correct": 28,
+     "rate": 0.0491,
+     "usable": 450,
+     "usable_rate": 0.7895,
+     "correct_among_usable": 0.0622
+    },
+    "usable_outcomes": {
+     "wrong_answer": 420,
+     "ok": 28,
+     "no_boxed": 2
+    },
+    "descriptive_answer_correct_ignoring_termination": {
+     "correct": 28,
+     "rate": 0.0491,
+     "_": "an answer after </think> (or the whole reply when the think block is pre-closed) that the registered scorer accepts, whether or not the rollout terminated; never a formal number"
+    },
+    "examples": {
+     "context_limit:-:reasoning": [
+      {
+       "task_id": "04f3387e9b0fc9353e99",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.cumsum",
+       "generated_tokens": 7957,
+       "cycle": null,
+       "tail": "he ones with the smallest number less than 9, and the numbers that are greater than 9, and the numbers that are not the smallest.\n\nIn the first input, 8,9,3,6,9, the numbers with smallest number less than 9 are 8,9,3,6,9. So the smallest number less than 9 is 8,9.\n\nThe numbers with smallest number less than 9 are 9,9.\n\nThe numbers with smallest number less than 9 are 8,8.\n\nSo the numbers that are smaller than 9 are 8"
+      },
+      {
+       "task_id": "c007b04c0d7fa3cecf4f",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.drop_first",
+       "generated_tokens": 7982,
+       "cycle": null,
+       "tail": "nput is [1,25,31,47,43,38,1], so the last element is 1. So the output is the last element.\n\nBut according to this rule, the output is [31,47,43,38,1], which is the input's last element.\n\nBut the problem states that the rule is the same for all. So unless there's a rule that fits all examples, it's hard to say.\n\nWait, another idea: the output is the element that is the minimum of the input list.\n\nFirst input: [4,35,9,"
+      }
+     ],
+     "degeneration:cycle:reasoning": [
+      {
+       "task_id": "a1b795cd5017c804773a",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.length",
+       "generated_tokens": 3328,
+       "cycle": {
+        "period": 1,
+        "repeats": 120
+       },
+       "tail": "t number.\n\nTherefore, the answer should be 7.\n\nBut wait, I just want to make sure I didn't miss anything. Let's think if there's another possible rule.\n\nAlternative idea: The output is the number that is the most frequent in the list. For example, in the first example, the list has a frequency of 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+       "task_id": "36b8c47417563740ce56",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.sum",
+       "generated_tokens": 1024,
+       "cycle": {
+        "period": 25,
+        "repeats": 12
+       },
+       "tail": "1, so 19-1=1, 19*3=19, 1-1=2, so 19-2=2, 19*3-2=1, so 19-1=2, 19*3=2, 19-2=1, so 19-2=1, 19*3-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1=2, so 19-2=1, 19*3=2, 19-1="
+      }
+     ],
+     "degeneration:rambling:reasoning": [
+      {
+       "task_id": "a8ad87f001fc08a2905c",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.take_first",
+       "generated_tokens": 3584,
+       "cycle": null,
+       "tail": "utput list = input list with first and third elements duplicated.\n\nBut in the problem statement, the output for the second example is [7,7,13], which would be three elements. So the rule is: output list = input list with first and third elements duplicated.\n\nWait, but in the second example, the input has four elements, so output has four. So the rule is: output list is the input list with the first and third elements"
+      },
+      {
+       "task_id": "6f8593b1d6a072db1330",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.rotate_left",
+       "generated_tokens": 7936,
+       "cycle": null,
+       "tail": "licated. Let's think again.\n\nWait, another approach: Maybe the numbers are the digits of the input multiplied by their digits in the input.\n\nFor example, in the second input, the output has 32,1,23,33,26,5,8. Let's see:\n\n5+8+32+1+23+33+26 = 17.\n\nSum of digits: 17.\n\nOutput: 32+1+23+33+26+5+8 = 17. So the output is the sum of digits of the input multiplied by their digits.\n\nBut in the second example, the output has 32,"
+      }
+     ],
+     "degeneration:rambling:answer": [
+      {
+       "task_id": "66472fb3e664f0d77751",
+       "axis": "inductive_rule_discovery",
+       "family_id": "seq.geometric",
+       "generated_tokens": 3072,
+       "cycle": null,
+       "tail": "dd `64` → `64`)\n- `64` → `64` (add `4` → `64`)\n- `128` → `128` (add `25` → `184`)\n- `32` → `32` (add `70` → `70`)\n- `64` → `64` (add `52` → `52`)\n- `128` → `128` (add `25` → `184`)\n- `32` → `32` (add `60` → `60`)\n- `64` → `64` (add `4` → `64`)\n- `128` → `128` (add `25` → `184`)\n- `32` → `32` (add `60` → `60`)\n- `64` → `64` (add `4` → `64`)\n- `128` → `128` (add `25` → `184`)\n- `32` → `32` (add `60` → `60`)\n- `64` → `6"
+      }
+     ],
+     "degeneration:cycle:answer": [
+      {
+       "task_id": "a13067bdd50ba1110cef",
+       "axis": "inductive_rule_discovery",
+       "family_id": "seq.interleaved",
+       "generated_tokens": 1792,
+       "cycle": {
+        "period": 53,
+        "repeats": 6
+       },
+       "tail": " - 9)} = 2 \\text{ (9 - 18)} = 8 \\text{ (9 - 18)} = 9 \\text{ (9 - 11)} = 11 \\text{ (11 - 9)} = 2 \\text{ (9 - 18)} = 8 \\text{ (9 - 18)} = 9 \\text{ (9 - 11)} = 11 \\text{ (11 - 9)} = 2 \\text{ (9 - 18)} = 8 \\text{ (9 - 18)} = 9 \\text{ (9 - 11)} = 11 \\text{ (11 - 9)} = 2 \\text{ (9 - 18)} = 8 \\text{ (9 - 18)} = 9 \\text{ (9 - 11)} = 11 \\text{ (11 - 9)} = 2 \\text{ (9 - 18)} = 8 \\text{ (9 - 18)} = 9 \\text{ (9 - 11)} = 11 \\text"
+      },
+      {
+       "task_id": "4f02fd1067d9588cb521",
+       "axis": "compositional_generalization",
+       "family_id": "cf.affine",
+       "generated_tokens": 1024,
+       "cycle": {
+        "period": 13,
+        "repeats": 4
+       },
+       "tail": "are given:\n- $ 4 \\% 7 = 1 $\n- $ a \\approx b = 1 $\n\n---\n\n### Step 2: Solve for $ 1 $\n\n$$\n4 \\% 7 = 1 \\Rightarrow \\quad 1 \\quad \\text{and} \\quad 4 \\% 7 = 1 \\Rightarrow \\quad \\quad 1 \\quad \\text{and} \\quad 0.1 \\quad \\text{and} \\quad 4 \\% 7 = 1 \\Rightarrow \\quad \\quad \\quad \\text{and} \\quad 1 \\quad \\text{and} \\quad 0.1 \\quad \\text{and} \\quad 0.1 \\quad \\text{and} \\quad 0.1 \\quad \\text{and} \\quad 0.1 \\quad \\text{and} \\quad "
+      }
+     ],
+     "context_limit:-:answer": [
+      {
+       "task_id": "2e8ace01f489ec808028",
+       "axis": "compositional_generalization",
+       "family_id": "scan.seq_sur",
+       "generated_tokens": 7947,
+       "cycle": null,
+       "tail": "\n\nTo determine the action sequence for the command string **`nuda tuzi binu ziki tulo`**, we must carefully apply the rules of the command language as defined.\n\n---\n\n### Step 1: Understand"
+      },
+      {
+       "task_id": "671d946fd28048911faa",
+       "axis": "compositional_generalization",
+       "family_id": "scan.rev_rev",
+       "generated_tokens": 7949,
+       "cycle": null,
+       "tail": "d**.\n\nLet’s apply the rule to the command string:\n\n- The first command is **`fesi`** → SWIM.\n- The next command is **`mimo`** → a connective that means: **do the left part, then the right part**.\n- The next command is **`fesi`** → SWIM.\n\nSo the rule is:\n\n> **`A jozi B` means: do the left part, then the right part.**\n> **`A sike B` means: do the right part, then the left part.**\n> **`A gupo B` means: do the left part,"
+      }
+     ],
+     "degeneration:low_novelty:reasoning": [
+      {
+       "task_id": "5ee85f63cad92a6999c3",
+       "axis": "compositional_generalization",
+       "family_id": "scan.sur_seq",
+       "generated_tokens": 4864,
+       "cycle": null,
+       "tail": "uve (command)\n\n   - Next command: guda (command)\n\n   - Next command: feda (RUN)\n\n   - Next command: nuve (command)\n\n   - Next command: guda (command)\n\n   - Next command: rafe (connective)\n\n   - Next command: guda (command)\n\n   - Next command: nuve (command)\n\n   - Next command: feda (RUN)\n\n   - Next command: nuve (command)\n\n   - Next command: guda (command)\n\n   - Next command: guda (command)\n\n   - Next command: nuve ("
+      },
+      {
+       "task_id": "4064c19d54d71a263bc7",
+       "axis": "compositional_generalization",
+       "family_id": "scan.seq_sur",
+       "generated_tokens": 2816,
+       "cycle": null,
+       "tail": "2. A → TURN\n\n13. A → TURN\n\n14. A → TURN\n\n15. A → TURN\n\n16. A → TURN\n\n17. A → TURN\n\n18. A → TURN\n\n19. A → TURN\n\n20. A → TURN\n\n21. A → TURN\n\n22. A → TURN\n\n23. A → TURN\n\n24. A → TURN\n\n25. A → TURN\n\n26. A → TURN\n\n27. A → TURN\n\n28. A → TURN\n\n29. A → TURN\n\n30. A → TURN\n\n33. A → TURN\n\n34. A → TURN\n\n35. A → TURN\n\n36. A → TURN\n\n37. A → TURN\n\n38. A → TURN\n\n39. A → TURN\n\n40. A → TURN\n\n45. A → TURN\n\n46. A → TURN\n\n44. A → TURN\n\n4"
+      }
+     ]
+    }
+   },
+   "episodes": {
+    "n": 144,
+    "ends": {
+     "degeneration": 97,
+     "context_limit": 33,
+     "turn_limit": 3,
+     "episode_done": 11
+    },
+    "first_non_eos_turn": {
+     "turn 0": 74,
+     "turn 2+": 35,
+     "none": 14,
+     "turn 1": 21
+    },
+    "first_non_eos_where": {
+     "degeneration:rambling in reasoning": 41,
+     "context_limit:- in reasoning": 32,
+     "degeneration:cycle in reasoning": 39,
+     "degeneration:low_novelty in reasoning": 15,
+     "degeneration:cycle in answer": 2,
+     "context_limit:- in answer": 1
+    },
+    "turns_per_episode": {
+     "n": 144,
+     "mean": 2.9,
+     "median": 1,
+     "p90": 8,
+     "max": 12
+    },
+    "correct_by_family_group": {
+     "probe": [
+      48,
+      0
+     ],
+     "act": [
+      48,
+      2
+     ],
+     "code": [
+      48,
+      0
+     ]
+    },
+    "examples": [
+     {
+      "task_id": "a357e74a3f67c26b5b8a",
+      "family_id": "probe.affine",
+      "generated_tokens": 6912,
+      "tail": "answer.\n\nHowever, the user might be expecting that the answer is 100, but the problem says \"You can ask at most 7 questions\", so the assistant's first reply is a query.\n\nBut given the problem's context, I think the intended answer is to query f(100) and see if it's 0 or 100 mod 100.\n\nSo the assistant's reply is QUERY: 100.\n\nBut the user might want the answer to be 100.\n\nAlternatively, the problem might be designed so"
+     },
+     {
+      "task_id": "ad50ba6f5b47d8de3339",
+      "family_id": "probe.floor_div",
+      "generated_tokens": 8068,
+      "tail": " context where the answer is 496, and the user might not have the function, I think the answer is 496.\n\nSo the assistant's first reply is QUERY: 48.\n\nBut the user wants the answer. However, the problem says \"Your first ANSWER ends the game.\" So the assistant's reply is a query.\n\nBut the user is asking the assistant to write the answer. So the answer is a query.\n\nBut the problem says \"You may ask for the value of f at"
+     },
+     {
+      "task_id": "5b6f86e1ba7da159e8cb",
+      "family_id": "probe.mod_scale",
+      "generated_tokens": 2816,
+      "tail": "25,27,30,31,32,33,34,35,36,40,41,42,44,45,60,70,100,110,120,130,140,150,160,170,200,220,210,230,300,340,350,360,40,41,42,44,45,60,70,100,110,120,130,140,150,160,170,200,220,230,300,340,350,360,40,41,42,44,45,60,70,100,110,120,130,140,150,160,170,200,220,230,300,340,350,360,40,41,42,44,45,60,70,100,110,120,130,140,150,160,170,200,220,230,300,340,350,360,40,41,42,44,45,60,70,100,110,120,130,140,150,160,170,200,220,230,"
+     }
+    ]
+   },
+   "training": {
+    "train_steps_logged": 189,
+    "first_step": {
+     "step": 10,
+     "ce": 5.397755,
+     "kd": 5.047679,
+     "loss": 6.397118
+    },
+    "last_step": {
+     "step": 1890,
+     "ce": 0.721402,
+     "kd": 0.492801,
+     "loss": 0.673151
+    },
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.605238,
+      "val_kd": 7.300234
+     },
+     {
+      "step": 1892,
+      "val_ce": 1.140193,
+      "val_kd": 0.904254
+     }
+    ]
+   }
+  },
+  "C1-6cat-sr-s20260801": {
+   "static": {
+    "n": 570,
+    "stops": {
+     "eos": 449,
+     "context_limit": 27,
+     "degeneration": 94
+    },
+    "stops_pct": {
+     "eos": 78.8,
+     "context_limit": 4.7,
+     "degeneration": 16.5
+    },
+    "non_eos_by_kind": {
+     "context_limit:-": 27,
+     "degeneration:cycle": 62,
+     "degeneration:low_novelty": 22,
+     "degeneration:rambling": 10
+    },
+    "non_eos_where": {
+     "context_limit in reasoning": 23,
+     "degeneration in reasoning": 81,
+     "degeneration in answer": 13,
+     "context_limit in answer": 4
+    },
+    "non_eos_tail_cycle": {
+     "no exact cycle": 59,
+     "period 5-30": 34,
+     "period 31-200": 10,
+     "period 1-4": 18
+    },
+    "non_eos_answer_present": {
+     "reasoning: no boxed answer yet": 92,
+     "answer: no boxed answer yet": 16,
+     "reasoning: boxed, wrong": 12,
+     "answer: boxed, wrong": 1
+    },
+    "generated_tokens_at_stop": {
+     "context_limit": {
+      "n": 27,
+      "mean": 7982.9,
+      "median": 7943,
+      "p90": 8113,
+      "max": 8134
+     },
+     "degeneration": {
+      "n": 94,
+      "mean": 3091.1,
+      "median": 2304,
+      "p90": 5632,
+      "max": 7424
+     }
+    },
+    "reasoning_tokens_when_closed": {
+     "eos": {
+      "n": 448,
+      "mean": 2929.0,
+      "median": 2414,
+      "p90": 5431,
+      "max": 7748
+     },
+     "degeneration": {
+      "n": 13,
+      "mean": 3388.4,
+      "median": 3430,
+      "p90": 5788,
+      "max": 6525
+     },
+     "context_limit": {
+      "n": 4,
+      "mean": 7714.2,
+      "median": 7799,
+      "p90": 7799,
+      "max": 7897
+     }
+    },
+    "formal": {
+     "correct": 23,
+     "rate": 0.0404,
+     "usable": 447,
+     "usable_rate": 0.7842,
+     "correct_among_usable": 0.0515
+    },
+    "usable_outcomes": {
+     "wrong_answer": 423,
+     "no_boxed": 1,
+     "ok": 23
+    },
+    "descriptive_answer_correct_ignoring_termination": {
+     "correct": 23,
+     "rate": 0.0404,
+     "_": "an answer after </think> (or the whole reply when the think block is pre-closed) that the registered scorer accepts, whether or not the rollout terminated; never a formal number"
+    },
+    "examples": {
+     "context_limit:-:reasoning": [
+      {
+       "task_id": "aa204641fe094a8a5d87",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.count_even",
+       "generated_tokens": 8018,
+       "cycle": null,
+       "tail": "xample 3: Input [18,43,18,3,24,42,20]\n\nOutput: 5\n\nIf we add the last element of the input list to the list:\n\nInput: [18,43,18,3,24,42,20]\n\nLast element is 24. Add 24 → [24,18,43,18,3,24,5]\n\nWhich matches the output exactly.\n\nYes! That seems to fit.\n\nSo the rule is: take the last element of the input list, and append it to the list.\n\nBut wait, in Example 1: input ends with 9 and 18. Last element is 0. Append 0 → [6,35"
+      },
+      {
+       "task_id": "ea28f68367384860f91f",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.vowel_to_x",
+       "generated_tokens": 8101,
+       "cycle": null,
+       "tail": " but example 3: biusv -> bxxsv.\n\nOriginal: b i u s v\n\nResult: b x x s v\n\nFirst 5 letters: b, i, u, s, v\n\nNext 5 letters: v, x, x, s, v\n\nHmm, not obvious.\n\nWait, let's see if there's a pattern in the letters.\n\nWait, maybe it's a shift of some pattern.\n\nWait, another angle: The transformed word is the original word followed by its reverse.\n\nWait, in example 1: jsi -> jsx\n\nOriginal: j s i\n\nReverse: i s j\n\nBut the result"
+      }
+     ],
+     "degeneration:cycle:reasoning": [
+      {
+       "task_id": "fb5466bfc25660f8203f",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.first_k",
+       "generated_tokens": 7168,
+       "cycle": {
+        "period": 28,
+        "repeats": 10
+       },
+       "tail": " 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' + 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' + 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' + 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' + 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' + 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' + 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' + 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' + 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' + 'u' + 'n' + 'l' + 'a' + 'p' + 'u' + 's' +"
+      },
+      {
+       "task_id": "6c5d302320696e819cb9",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.remove_vowels",
+       "generated_tokens": 2304,
+       "cycle": {
+        "period": 6,
+        "repeats": 29
+       },
+       "tail": "wox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + u = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uvwox + x = uv"
+      }
+     ],
+     "degeneration:cycle:answer": [
+      {
+       "task_id": "348cc4ab80da123e1ed0",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.drop_last",
+       "generated_tokens": 6400,
+       "cycle": {
+        "period": 10,
+        "repeats": 10
+       },
+       "tail": " `dnkt` + `dkrd` → **dnkt** + **dkrd** → `dnkt` + `dkrd` → **dnkt** + **dkrd** → `dnkt` + `dkrd` → **dnkt** + **dkrd** → **dnkt** + **dkrd** → `dnkt` + `dkrd` → **dnkt** + **dkrd** → `dnkt` + `dkrd` → **dnkt** + **dkrd** → **dnkt** + **dkrd** → **dnkt** + **dkrd** → **dnkt** + **dkrd** → **dnkt** + **dkrd** → **dnkt** + **dkrd** → **dnkt** + **dkrd** → **dnkt** + **dkrd** → **dnkt** + **dkrd** → **dnkt** + **dkrd** →"
+      },
+      {
+       "task_id": "513290ce76ce9e433e38",
+       "axis": "compositional_generalization",
+       "family_id": "scan.rev_rev",
+       "generated_tokens": 6912,
+       "cycle": {
+        "period": 20,
+        "repeats": 14
+       },
+       "tail": "*`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** (bizi) then **`mogu`** → **`mogu`** ("
+      }
+     ],
+     "degeneration:low_novelty:reasoning": [
+      {
+       "task_id": "a2b84a0ed955677b582c",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.vowel_to_x",
+       "generated_tokens": 3584,
+       "cycle": null,
+       "tail": "x (24), d (35), h (25), r (19), h (16), e (17), x (23), d (24), h (25), r (19), h (22), e (23), x (24), d (35), h (25), r (19), h (16), e (17), x (23), d (24), h (25), r (19), h (22), e (23), x (24), d (35), h (25), r (19), h (16), e (17), x (23), d (24), h (25), r (19), h (16), e (17), x (23), d (24), h (25), r (19), h (22), e (23), x (24), d (35), h (25), r (19), h (16), e (17), x (23), d (24), h (25), r (19), h (1"
+      },
+      {
+       "task_id": "b0ab148e4653b4d6a322",
+       "axis": "compositional_generalization",
+       "family_id": "cf.absdiff",
+       "generated_tokens": 2048,
+       "cycle": null,
+       "tail": "7 pairs of 1s.\n\nCompute 9 * 1 = 8.\n\nCompute 7 * 1 = 1.\n\nCompute 1 * 1 = 7.\n\nCompute 7 * 1 = 7.\n\nSo step 14 gives us 7.\n\nStep 16: Compute 9 - 7 = 1.\n\nStep 17: Compute 1 pair of 1s.\n\nCompute 1 * 1 = 1.\n\nCompute 1 * 1 = 7.\n\nCompute 7 * 1 = 1.\n\nCompute 7 * 1 = 7.\n\nSo step 17 gives us 1.\n\nStep 18: Compute 9 - 1 = 7.\n\nStep 19: Compute 7 pairs of 1s.\n\nCompute 9 * 1 = 8.\n\nCompute 7 * 1 = 1.\n\nCompute 1 * 1 = 7.\n\nCompute 7 * 1"
+      }
+     ],
+     "degeneration:low_novelty:answer": [
+      {
+       "task_id": "eddaea9b9d47439e0418",
+       "axis": "inductive_rule_discovery",
+       "family_id": "seq.interleaved",
+       "generated_tokens": 4608,
+       "cycle": null,
+       "tail": "✅ Example: 0 → 1 (no shift), 0 → 0 (no shift), 0 → 0 (no shift), 0 → 6 (no shift)  \n  - ✅ Example: 0 → 0 (no shift), 0 → 0 (no shift), 9 → 3 (no shift), 12 → -6 (no shift)  \n  - ✅ Example: 6 → 0 (no shift), 0 → 6 (no shift), 9 → 0 (no shift), 12 → -6 (no shift)  \n  - ✅ Example: 6 → 0 (no shift), 0 → 0 (no shift), 0 → 0 (no shift), 0 → 6 (no shift)  \n  - ✅ Example: 6 → 0 (no shift), 0 → 6 (no shift), 9 → 0 (no shift),"
+      },
+      {
+       "task_id": "003d1670021954700cf4",
+       "axis": "task_contained_deduction",
+       "family_id": "order.taller",
+       "generated_tokens": 3328,
+       "cycle": null,
+       "tail": "→ \\text{Fay} \\→ \\text{Gus} \\→ \\text{Fay} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Fay} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Fay} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Fay} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Fay} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Fay} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Fay} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Fay} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Gus} \\→ \\text{Fay} \\"
+      }
+     ],
+     "context_limit:-:answer": [
+      {
+       "task_id": "b947c53d4c91f204fb29",
+       "axis": "compositional_generalization",
+       "family_id": "scan.sur_seq",
+       "generated_tokens": 7948,
+       "cycle": null,
+       "tail": "rocess \"mora\" → **vepo** (command)\n\n- The **\"mora\"** means: **do the right part, then the left part**\n- So:\n  - **\"vepo\"** → **RUN**\n  - **\"mora\"** → **[RUN] + [TURN] + [RUN]**\n\nSo now we have:\n- **RUN** + **TURN** + **RUN** = **[RUN] + [TURN] + [RUN]**\n\nThis becomes:\n- **RUN** + **TURN** + **RUN** = **[RUN] + [TURN] + [RUN]**\n\n---\n\n### Step 4: Final Action Sequence\n\nThe sequence of actions is:\n\n- **RUN**\n- **TURN**\n"
+      },
+      {
+       "task_id": "80eb633ee99eba19c54b",
+       "axis": "compositional_generalization",
+       "family_id": "scan.sur_seq",
+       "generated_tokens": 7948,
+       "cycle": null,
+       "tail": "\n\nTo determine the action sequence for the command string **`vegu moki pojo womi vet`**, we need to carefully parse and apply the rules of the command language as described.\n\n---\n\n### Step-by-Step Parsing\n\nWe are given"
+      }
+     ],
+     "degeneration:rambling:reasoning": [
+      {
+       "task_id": "e3ef2af11c49cf8fc91a",
+       "axis": "compositional_generalization",
+       "family_id": "cf.absdiff",
+       "generated_tokens": 2304,
+       "cycle": null,
+       "tail": "- (a % b) = (a - b) - (a % b). So the difference between the first and second operation is (a - b) - (a % b). So (a - b) - (a % b) = (a - b) - (a % b). So the difference is (a - b) - (a % b). Which is (a - b) - (a % b). So yes, that's correct.\n\nSo, the calculation is correct.\n\nNow, let's compute (a % b) - (a - b).\n\nFirst, (a % b) = a, b, minus a.\n\n(0% b) = (a - b) - (a % b) = (a - b) - (a % b) = a - b - (a % b) = a -"
+      },
+      {
+       "task_id": "23020e2a9339963ac90d",
+       "axis": "task_contained_deduction",
+       "family_id": "track.add_remove",
+       "generated_tokens": 3584,
+       "cycle": null,
+       "tail": "pe is removed, so Box 3's contents are rope, rope, and pen. But Box 3 had apple, rope, pen. After removing the rope, Box 3 would have pen, rope, and pen. But the problem says \"the rope is taken out of box 3 and thrown away\", which is a bit of a bit unclear.\n\nLet me try to interpret the problem as: the rope is removed, so Box 3's contents are rope, rope, and pen. But Box 3 had apple, rope, pen. After removing the rope"
+      }
+     ]
+    }
+   },
+   "episodes": {
+    "n": 144,
+    "ends": {
+     "context_limit": 69,
+     "episode_done": 10,
+     "degeneration": 62,
+     "turn_limit": 3
+    },
+    "first_non_eos_turn": {
+     "turn 2+": 33,
+     "turn 1": 19,
+     "none": 13,
+     "turn 0": 79
+    },
+    "first_non_eos_where": {
+     "context_limit:- in reasoning": 64,
+     "degeneration:rambling in reasoning": 33,
+     "degeneration:cycle in reasoning": 16,
+     "degeneration:low_novelty in reasoning": 11,
+     "context_limit:- in answer": 5,
+     "degeneration:low_novelty in answer": 1,
+     "degeneration:cycle in answer": 1
+    },
+    "turns_per_episode": {
+     "n": 144,
+     "mean": 2.3,
+     "median": 1,
+     "p90": 5,
+     "max": 12
+    },
+    "correct_by_family_group": {
+     "probe": [
+      48,
+      0
+     ],
+     "act": [
+      48,
+      4
+     ],
+     "code": [
+      48,
+      0
+     ]
+    },
+    "examples": [
+     {
+      "task_id": "ad2c2a9b0a50de653920",
+      "family_id": "probe.affine",
+      "generated_tokens": 8068,
+      "tail": "answer is to assume that the function is linear, so the answer is 589 + 1.\n\nBut to confirm, let's think: If the function is linear, then the answer is 589 + 1.\n\nSo the assistant can answer immediately.\n\nBut the problem says \"you may ask for the value of f at any integer from 0 to 100\". So the assistant can ask up to 7 queries, then answer.\n\nBut the problem is that the assistant has to make queries first. However, the"
+     },
+     {
+      "task_id": "b363dd8a49963f939a83",
+      "family_id": "probe.mod_scale",
+      "generated_tokens": 2816,
+      "tail": "et's see.\n\nIf the assistant queries 0,1,2,3,4,5,6,7,8,9,10,11,12,11,13,14,15,16,17,18,20,21,22,23,24,25,26,27,29,10,11,12,11,13,14,15,16,17,20,21,22,23,24,25,26,27,10,11,12,11,13,14,15,16,17,20,21,22,23,24,25,26,27,10,11,12,11,13,14,15,16,17,20,21,22,23,24,25,26,27,10,11,12,11,13,14,15,16,17,20,21,22,23,24,25,26,27,10,11,12,11,13,14,15,16,17,20,21,22,23,24,25,26,27,10,11,12,11,13,14,15,16,17,20,21,22,23,24,25,26,27,1"
+     },
+     {
+      "task_id": "6edc878dabe37a0421d2",
+      "family_id": "probe.floor_div",
+      "generated_tokens": 8068,
+      "tail": "ly is QUERY: 751.\n\nBut the problem might expect the assistant to get the answer directly.\n\nWait, the problem says \"Your first ANSWER ends the game.\" So the assistant's first reply must be an answer.\n\nGiven that, I think the answer expected here is QUERY: 751.\n\nBut I'm not sure.\n\nWait, another angle: the problem says \"You can ask at most 5 questions, one per reply.\" So the assistant's first reply must be a query.\n\nThe"
+     }
+    ]
+   },
+   "training": {
+    "train_steps_logged": 189,
+    "first_step": {
+     "step": 10,
+     "ce": 5.563149,
+     "kd": 5.272192,
+     "loss": 6.662979
+    },
+    "last_step": {
+     "step": 1890,
+     "ce": 0.53632,
+     "kd": 0.345495,
+     "loss": 0.479575
+    },
+    "validation": [
+     {
+      "step": 0,
+      "val_ce": 7.605238,
+      "val_kd": 7.300234
+     },
+     {
+      "step": 1892,
+      "val_ce": 1.144533,
+      "val_kd": 0.909509
+     }
+    ]
+   }
+  }
+ },
+ "teachers": {
+  "teacher_H-T": {
+   "static": {
+    "n": 570,
+    "stops": {
+     "eos": 562,
+     "degeneration": 8
+    },
+    "stops_pct": {
+     "eos": 98.6,
+     "degeneration": 1.4
+    },
+    "non_eos_by_kind": {
+     "degeneration:cycle": 4,
+     "degeneration:rambling": 4
+    },
+    "non_eos_where": {
+     "degeneration in reasoning": 8
+    },
+    "non_eos_tail_cycle": {
+     "period 1-4": 4,
+     "no exact cycle": 4
+    },
+    "non_eos_answer_present": {
+     "reasoning: no boxed answer yet": 8
+    },
+    "generated_tokens_at_stop": {
+     "degeneration": {
+      "n": 8,
+      "mean": 9888,
+      "median": 11776,
+      "p90": 12288,
+      "max": 15872
+     }
+    },
+    "reasoning_tokens_when_closed": {
+     "eos": {
+      "n": 562,
+      "mean": 2817.6,
+      "median": 1534,
+      "p90": 6884,
+      "max": 16920
+     }
+    },
+    "formal": {
+     "correct": 511,
+     "rate": 0.8965,
+     "usable": 562,
+     "usable_rate": 0.986,
+     "correct_among_usable": 0.9093
+    },
+    "usable_outcomes": {
+     "ok": 511,
+     "wrong_answer": 51
+    },
+    "descriptive_answer_correct_ignoring_termination": {
+     "correct": 511,
+     "rate": 0.8965,
+     "_": "an answer after </think> (or the whole reply when the think block is pre-closed) that the registered scorer accepts, whether or not the rollout terminated; never a formal number"
+    },
+    "examples": {
+     "degeneration:cycle:reasoning": [
+      {
+       "task_id": "5eb5f630deee02e29ce0",
+       "axis": "compositional_generalization",
+       "family_id": "scan.seq_sur",
+       "generated_tokens": 6400,
+       "cycle": {
+        "period": 2,
+        "repeats": 4
+       },
+       "tail": " the sequence would be:\n\nA, B, A, B rajo.\n\nWait, no. Because the sife is processed first, then the rajo is applied to the nusi. So the sife is between the previous sequence and nusi. Then, the rajo is applied to the nusi. So the entire sequence would be:\n\nA sife B (A, B, A) followed by B rajo (LOOK three times).\n\nBut that would be:\n\nA, B, A, B rajo → which is WALK, LOOK, LOOK, LOOK, LOOK, WALK, LOOK, LOOK, LOOK, LOOK"
+      },
+      {
+       "task_id": "c285aeaa29e4c1dd49c1",
+       "axis": "compositional_generalization",
+       "family_id": "scan.rev_rev",
+       "generated_tokens": 4096,
+       "cycle": {
+        "period": 2,
+        "repeats": 4
+       },
+       "tail": " So the entire command is:\n\nnule tunu zisi nule zisi nule tunu.\n\nBreaking it into parts:\n\n- The first part is nule tunu → [TURN, TURN]\n- Then zisi nule → zisi between previous and nule → [nule] followed by previous → [TURN, TURN, TURN, TURN]\n- Then zisi nule tunu → zisi between previous and nule tunu → [nule tunu] followed by previous → [TURN, TURN] followed by [TURN, TURN, TURN, TURN] → [TURN, TURN, TURN, TURN, TURN"
+      }
+     ],
+     "degeneration:rambling:reasoning": [
+      {
+       "task_id": "31045550a2083a27eff7",
+       "axis": "abstract_analogical",
+       "family_id": "grid.recolor",
+       "generated_tokens": 6400,
+       "cycle": null,
+       "tail": "ke sense.\n\nAlternatively, maybe the rule is that each cell is increased by 1 if there's a 7 in the same row or column, but only if the cell is not 7 and the cell is not in the same row or column as a 7. That seems contradictory.\n\nAlternatively, maybe the rule is that each cell is increased by 1 if there's a 7 in the same row or column, but only if the cell is not 7 and the cell is not in the same row or column as a 7"
+      },
+      {
+       "task_id": "de964b73a9abe6fd2540",
+       "axis": "abstract_analogical",
+       "family_id": "grid.mirror_lr",
+       "generated_tokens": 12288,
+       "cycle": null,
+       "tail": "is 3 → replaced with 0. Fourth element is 0 → replaced with first element (3). So row becomes 3 0 0 3. Which matches.\n\nExample 2's third row: third element is 0 → replaced with 4. Fourth element is 4 → replaced with 0. So row becomes 0 0 4 0. But the output is 0 0 0 0. So this doesn't fit.\n\nBut in example 2's third row, the input is 0 0 0 4. Output is 0 0 0 0. So the third element is 0, which should be replaced with "
+      }
+     ]
+    }
+   },
+   "episodes": {
+    "n": 144,
+    "ends": {
+     "episode_done": 125,
+     "degeneration": 19
+    },
+    "first_non_eos_turn": {
+     "none": 125,
+     "turn 0": 9,
+     "turn 2+": 6,
+     "turn 1": 4
+    },
+    "first_non_eos_where": {
+     "degeneration:cycle in reasoning": 5,
+     "degeneration:low_novelty in reasoning": 4,
+     "degeneration:rambling in reasoning": 8,
+     "degeneration:cycle in answer": 2
+    },
+    "turns_per_episode": {
+     "n": 144,
+     "mean": 4.8,
+     "median": 4,
+     "p90": 9,
+     "max": 12
+    },
+    "correct_by_family_group": {
+     "probe": [
+      48,
+      11
+     ],
+     "act": [
+      48,
+      17
+     ],
+     "code": [
+      48,
+      34
+     ]
+    },
+    "examples": [
+     {
+      "task_id": "dfd105d9014c2749d623",
+      "family_id": "probe.mod_scale",
+      "generated_tokens": 7168,
+      "tail": "t the assistant is to write the queries and then the answer. Therefore, the assistant would write the 7 queries and then the answer.\n\nBut the assistant is to write the queries and then the answer. Therefore, the assistant would proceed to ask the 7 queries, then compute the answer.\n\nBut the assistant is to write the queries and then the answer. Therefore, the assistant would write the 7 queries and then the answer.\n\n"
+     },
+     {
+      "task_id": "0662f9bdffad4598a7d3",
+      "family_id": "act.multiply",
+      "generated_tokens": 11776,
+      "tail": "he assistant is not given the actual values, they have to proceed with this plan.\n\nThus, the assistant's answer would be to press the buttons in the combination that adds up to 44, based on the calculated x, y, z.\n\nBut since the assistant is allowed up to 12 moves, they can do this.\n\nBut since the assistant is simulating, they would have to make the moves.\n\nBut since the assistant is not given the actual values, they"
+     },
+     {
+      "task_id": "3d4a4bfb40abb4949ecb",
+      "family_id": "act.additive",
+      "generated_tokens": 16640,
+      "tail": " Press **A**  \n2. Press **B**  \n3. Press **C**  \n4. Press **C** (6 times)  \n5. Press **B** (4 times)\n\nThis totals **13 presses**, which exceeds the allowed limit. However, the **correct sequence** that reaches **67** in **12 presses** is:\n\n- Press **C** 6 times → 42  \n- Press **B** 4 times → 20  \n- Total: 42 + 20 = 62 → 5 + 62 = 67\n\nThus, the final answer is:\n\n```\nPRESS: A\nPRESS: B\nPRESS: C\nPRESS: C\nPRESS: C\nPRESS: C"
+     }
+    ]
+   }
+  },
+  "teacher_H-N": {
+   "static": {
+    "n": 570,
+    "stops": {
+     "eos": 563,
+     "degeneration": 7
+    },
+    "stops_pct": {
+     "eos": 98.8,
+     "degeneration": 1.2
+    },
+    "non_eos_by_kind": {
+     "degeneration:low_novelty": 2,
+     "degeneration:cycle": 4,
+     "degeneration:rambling": 1
+    },
+    "non_eos_where": {
+     "degeneration in answer": 7
+    },
+    "non_eos_tail_cycle": {
+     "no exact cycle": 3,
+     "period 31-200": 2,
+     "period 1-4": 1,
+     "period 5-30": 1
+    },
+    "non_eos_answer_present": {
+     "answer: no boxed answer yet": 7
+    },
+    "generated_tokens_at_stop": {
+     "degeneration": {
+      "n": 7,
+      "mean": 2011.4,
+      "median": 2048,
+      "p90": 3584,
+      "max": 3584
+     }
+    },
+    "reasoning_tokens_when_closed": {},
+    "formal": {
+     "correct": 393,
+     "rate": 0.6895,
+     "usable": 563,
+     "usable_rate": 0.9877,
+     "correct_among_usable": 0.698
+    },
+    "usable_outcomes": {
+     "ok": 393,
+     "wrong_answer": 170
+    },
+    "descriptive_answer_correct_ignoring_termination": {
+     "correct": 393,
+     "rate": 0.6895,
+     "_": "an answer after </think> (or the whole reply when the think block is pre-closed) that the registered scorer accepts, whether or not the rollout terminated; never a formal number"
+    },
+    "examples": {
+     "degeneration:low_novelty:answer": [
+      {
+       "task_id": "0c9cf6f6b1318622bdda",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.length",
+       "generated_tokens": 3584,
+       "cycle": null,
+       "tail": "*number of elements that are even**\n\n1. [0, 0, 5, 4] → 3 → Output: 4 ❌  \n2. [6, 3, 1, 7, 1] → 1 → Output: 5 ❌  \n3. [0, 6, 6, 1, 5] → 3 → Output: 5 ❌  \n4. [2, 2, 7, 9, 0] → 3 → Output: 5 ❌  \n5. [0, 5, 4, 3, 5] → 2 → Output: 5 ❌\n\nNo match.\n\n---\n\n### Step 18: Try the **number of elements that are odd**\n\n1. [0, 0, 5, 4] → 1 → Output: 4 ❌  \n2. [6, 3, 1, 7, 1] → 4 → Output: 5 ❌  \n3. [0, 6, 6, 1, 5] → 2 → Output: 5 ❌  \n4. ["
+      },
+      {
+       "task_id": "4d40d0e5ff7aa8a6a315",
+       "axis": "inductive_rule_discovery",
+       "family_id": "list.length",
+       "generated_tokens": 2304,
+       "cycle": null,
+       "tail": " is 5** ❌\n\n---\n\n### **Try: Count the number of **elements that are divisible by 2 or 3 or 5 or 7 or 11**.**\n\nExample 1:\n- 18 → divisible by 2 and 3 → yes  \n- 19 → no  \n- 8 → divisible by 2 → yes  \n- 2 → divisible by 2 → yes  \n- 3 → divisible by 3 → yes  \n\nTotal: 4 → **Output is 5** ❌\n\n---\n\n### **Try: Count the number of **elements that are divisible by 2 or 3 or 5 or 7 or 11 or 13**.**\n\nExample 1:\n- 18 → divisible by"
+      }
+     ],
+     "degeneration:cycle:answer": [
+      {
+       "task_id": "967655f9425f0af3c4ca",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.rotate_left",
+       "generated_tokens": 2048,
+       "cycle": {
+        "period": 95,
+        "repeats": 4
+       },
+       "tail": "→ not pnen.\n\nNo.\n\nLet’s try **shift each letter by +1, then swap first two and last two letters**:\n\nnpne → oqof → swap first two: qo → of → qoof → swap last two: of → fo → qoff → not pnen.\n\nNo.\n\nLet’s try **shift each letter by +1, then reverse the word**:\n\nnpne → oqof → reverse: f o q o → not pnen.\n\nNo.\n\nLet’s try **shift each letter by +1, then swap first two and last two letters**:\n\nnpne → oqof → swap first two: q"
+      },
+      {
+       "task_id": "7a2e3ce79d65e21708ec",
+       "axis": "compositional_generalization",
+       "family_id": "scan.seq_sur",
+       "generated_tokens": 768,
+       "cycle": {
+        "period": 2,
+        "repeats": 145
+       },
+       "tail": " WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK WALK"
+      }
+     ],
+     "degeneration:rambling:answer": [
+      {
+       "task_id": "d395583ab5463016aba4",
+       "axis": "inductive_rule_discovery",
+       "family_id": "str.swap_ends",
+       "generated_tokens": 3584,
+       "cycle": null,
+       "tail": "kwrdj` → not matching\n\nThis is not working.\n\nLet’s try **shifting each letter by +1**, then **rotate right by 1**, then **reverse**:\n\n- `giqcvjh` → `hjrdwki` → rotate right by 1: `ikwrdjh` → reverse: `hjwrdki` → not matching\n\nThis is not working.\n\nLet’s try **shifting each letter by +1**, then **rotate right by 1**, then **swap first and last**:\n\n- `giqcvjh` → `hjrdwki` → rotate right by 1: `ikwrdjh` → swap first and"
+      }
+     ]
+    }
+   },
+   "episodes": {
+    "n": 144,
+    "ends": {
+     "episode_done": 131,
+     "degeneration": 12,
+     "turn_limit": 1
+    },
+    "first_non_eos_turn": {
+     "none": 132,
+     "turn 2+": 8,
+     "turn 0": 3,
+     "turn 1": 1
+    },
+    "first_non_eos_where": {
+     "degeneration:low_novelty in answer": 2,
+     "degeneration:rambling in answer": 2,
+     "degeneration:cycle in answer": 8
+    },
+    "turns_per_episode": {
+     "n": 144,
+     "mean": 7.1,
+     "median": 7,
+     "p90": 10,
+     "max": 13
+    },
+    "correct_by_family_group": {
+     "probe": [
+      48,
+      15
+     ],
+     "act": [
+      48,
+      15
+     ],
+     "code": [
+      48,
+      19
+     ]
+    },
+    "examples": [
+     {
+      "task_id": "cd89966fa3cdf6f49237",
+      "family_id": "act.multiply",
+      "generated_tokens": 1280,
+      "tail": "ed on Deduction):\n\nLet’s assume the buttons add 5, 10, and 15 respectively.\n\nFrom 3, to reach 58:\n\n- 58 - 3 = 55\n\nWe need to add 55.\n\nLet’s try:\n\n- Press A 11 times → 55 → 3 + 55 = 58\n\nSo the sequence would be:\n\n**PRESS: A** (11 times)\n\nBut we are limited to 12 presses.\n\n---\n\n### Final Strategy:\n\nLet’s try pressing A 11 times.\n\n**PRESS: A**  \n**PRESS: A**  \n**PRESS: A**  \n**PRESS: A**  \n**PRESS: A**  \n**PRESS: A**  \n"
+     },
+     {
+      "task_id": "f5c97ae4e1a22403a1b2",
+      "family_id": "act.multiply",
+      "generated_tokens": 2304,
+      "tail": "Counter becomes 71.\n\n**6. Press C**  \nCounter becomes 80.\n\nStill too high.\n\nLet’s try pressing **A** again.\n\n**7. Press A**  \nCounter becomes 89.\n\nToo high.\n\nLet’s try pressing **B** again.\n\n**7. Press B**  \nCounter becomes 80 + 9 = 89.\n\nStill too high.\n\nLet’s try pressing **C** again.\n\n**7. Press C**  \nCounter becomes 80 + 9 = 89.\n\nStill too high.\n\nLet’s try pressing **A** again.\n\n**8. Press A**  \nCounter becomes 89"
+     },
+     {
+      "task_id": "d3cac7d76a57440a6500",
+      "family_id": "act.modular",
+      "generated_tokens": 1536,
+      "tail": " helpful.\n\nLet’s try pressing B again: 14 → 10.\n\nStill not helpful.\n\nLet’s try pressing C again: 14 → 23 → 3.\n\nStill not helpful.\n\nLet’s try pressing A once more: 14 → 19 → 19 - 20 = -1 → 19.\n\nStill not helpful.\n\nLet’s try pressing B again: 14 → 10.\n\nStill not helpful.\n\nLet’s try pressing C again: 14 → 23 → 3.\n\nStill not helpful.\n\nLet’s try pressing A once more: 14 → 19 → 19 - 20 = -1 → 19.\n\nStill not helpful.\n\nLet’s"
+     }
+    ]
+   }
+  }
+ },
+ "teacher_correct_items": {
+  "A1-6cat-sr-s20260726": {
+   "teacher_correct": 511,
+   "teacher_correct_student_correct": 44,
+   "teacher_correct_student_wrong_by_reason": {
+    "wrong_answer": 283,
+    "unusable": 183,
+    "no_boxed": 1
+   },
+   "teacher_wrong_student_correct": 0,
+   "retained_on_teacher_correct_by_axis": {
+    "inductive_rule_discovery": {
+     "teacher_correct": 130,
+     "student_correct": 4,
+     "retained_pct": 3.1
+    },
+    "compositional_generalization": {
+     "teacher_correct": 129,
+     "student_correct": 5,
+     "retained_pct": 3.9
+    },
+    "task_contained_deduction": {
+     "teacher_correct": 189,
+     "student_correct": 35,
+     "retained_pct": 18.5
+    },
+    "abstract_analogical": {
+     "teacher_correct": 63,
+     "student_correct": 0,
+     "retained_pct": 0.0
+    }
+   }
+  },
+  "A1-6cat-sr-s20260801": {
+   "teacher_correct": 511,
+   "teacher_correct_student_correct": 38,
+   "teacher_correct_student_wrong_by_reason": {
+    "wrong_answer": 318,
+    "unusable": 153,
+    "no_boxed": 2
+   },
+   "teacher_wrong_student_correct": 0,
+   "retained_on_teacher_correct_by_axis": {
+    "inductive_rule_discovery": {
+     "teacher_correct": 130,
+     "student_correct": 1,
+     "retained_pct": 0.8
+    },
+    "compositional_generalization": {
+     "teacher_correct": 129,
+     "student_correct": 6,
+     "retained_pct": 4.7
+    },
+    "task_contained_deduction": {
+     "teacher_correct": 189,
+     "student_correct": 31,
+     "retained_pct": 16.4
+    },
+    "abstract_analogical": {
+     "teacher_correct": 63,
+     "student_correct": 0,
+     "retained_pct": 0.0
+    }
+   }
+  },
+  "A2-6cat-sr-s20260726": {
+   "teacher_correct": 393,
+   "teacher_correct_student_correct": 53,
+   "teacher_correct_student_wrong_by_reason": {
+    "unusable": 58,
+    "wrong_answer": 282
+   },
+   "teacher_wrong_student_correct": 9,
+   "retained_on_teacher_correct_by_axis": {
+    "inductive_rule_discovery": {
+     "teacher_correct": 90,
+     "student_correct": 3,
+     "retained_pct": 3.3
+    },
+    "compositional_generalization": {
+     "teacher_correct": 103,
+     "student_correct": 10,
+     "retained_pct": 9.7
+    },
+    "task_contained_deduction": {
+     "teacher_correct": 161,
+     "student_correct": 39,
+     "retained_pct": 24.2
+    },
+    "abstract_analogical": {
+     "teacher_correct": 39,
+     "student_correct": 1,
+     "retained_pct": 2.6
+    }
+   }
+  },
+  "A2-6cat-sr-s20260801": {
+   "teacher_correct": 393,
+   "teacher_correct_student_correct": 55,
+   "teacher_correct_student_wrong_by_reason": {
+    "wrong_answer": 309,
+    "unusable": 29
+   },
+   "teacher_wrong_student_correct": 8,
+   "retained_on_teacher_correct_by_axis": {
+    "inductive_rule_discovery": {
+     "teacher_correct": 90,
+     "student_correct": 6,
+     "retained_pct": 6.7
+    },
+    "compositional_generalization": {
+     "teacher_correct": 103,
+     "student_correct": 6,
+     "retained_pct": 5.8
+    },
+    "task_contained_deduction": {
+     "teacher_correct": 161,
+     "student_correct": 43,
+     "retained_pct": 26.7
+    },
+    "abstract_analogical": {
+     "teacher_correct": 39,
+     "student_correct": 0,
+     "retained_pct": 0.0
+    }
+   }
+  }
+ },
+ "by_teacher_reasoning_length": {
+  "A1-6cat-sr-s20260726": {
+   "0-1024": {
+    "n": 151,
+    "degeneration": 45,
+    "correct": 22,
+    "eos": 106,
+    "non_eos_pct": 29.8,
+    "correct_pct": 14.6
+   },
+   "1024-2048": {
+    "n": 193,
+    "eos": 124,
+    "correct": 13,
+    "degeneration": 68,
+    "context_limit": 1,
+    "non_eos_pct": 35.8,
+    "correct_pct": 6.7
+   },
+   "2048-4096": {
+    "n": 117,
+    "eos": 74,
+    "correct": 7,
+    "degeneration": 43,
+    "non_eos_pct": 36.8,
+    "correct_pct": 6.0
+   },
+   ">=4096": {
+    "n": 109,
+    "degeneration": 48,
+    "correct": 2,
+    "eos": 58,
+    "context_limit": 3,
+    "non_eos_pct": 46.8,
+    "correct_pct": 1.8
+   }
+  },
+  "A1-6cat-sr-s20260801": {
+   "0-1024": {
+    "n": 151,
+    "eos": 109,
+    "correct": 18,
+    "degeneration": 42,
+    "non_eos_pct": 27.8,
+    "correct_pct": 11.9
+   },
+   "1024-2048": {
+    "n": 193,
+    "eos": 147,
+    "correct": 13,
+    "degeneration": 46,
+    "non_eos_pct": 23.8,
+    "correct_pct": 6.7
+   },
+   "2048-4096": {
+    "n": 117,
+    "eos": 76,
+    "correct": 6,
+    "degeneration": 41,
+    "non_eos_pct": 35.0,
+    "correct_pct": 5.1
+   },
+   ">=4096": {
+    "n": 109,
+    "eos": 59,
+    "correct": 1,
+    "degeneration": 49,
+    "context_limit": 1,
+    "non_eos_pct": 45.9,
+    "correct_pct": 0.9
+   }
+  },
+  "A2-6cat-sr-s20260726": {
+   "0-1024": {
+    "n": 151,
+    "degeneration": 14,
+    "correct": 30,
+    "eos": 137,
+    "non_eos_pct": 9.3,
+    "correct_pct": 19.9
+   },
+   "1024-2048": {
+    "n": 193,
+    "eos": 164,
+    "correct": 17,
+    "degeneration": 29,
+    "non_eos_pct": 15.0,
+    "correct_pct": 8.8
+   },
+   "2048-4096": {
+    "n": 117,
+    "degeneration": 19,
+    "correct": 10,
+    "eos": 98,
+    "non_eos_pct": 16.2,
+    "correct_pct": 8.5
+   },
+   ">=4096": {
+    "n": 109,
+    "eos": 102,
+    "correct": 5,
+    "degeneration": 7,
+    "non_eos_pct": 6.4,
+    "correct_pct": 4.6
+   }
+  },
+  "A2-6cat-sr-s20260801": {
+   "0-1024": {
+    "n": 151,
+    "eos": 149,
+    "correct": 32,
+    "degeneration": 2,
+    "non_eos_pct": 1.3,
+    "correct_pct": 21.2
+   },
+   "1024-2048": {
+    "n": 193,
+    "eos": 176,
+    "correct": 23,
+    "degeneration": 17,
+    "non_eos_pct": 8.8,
+    "correct_pct": 11.9
+   },
+   "2048-4096": {
+    "n": 117,
+    "eos": 94,
+    "correct": 6,
+    "degeneration": 23,
+    "non_eos_pct": 19.7,
+    "correct_pct": 5.1
+   },
+   ">=4096": {
+    "n": 109,
+    "eos": 97,
+    "correct": 2,
+    "degeneration": 12,
+    "non_eos_pct": 11.0,
+    "correct_pct": 1.8
+   }
+  },
+  "C1-6cat-sr-s20260726": {
+   "0-1024": {
+    "n": 151,
+    "eos": 128,
+    "correct": 14,
+    "context_limit": 3,
+    "degeneration": 20,
+    "non_eos_pct": 15.2,
+    "correct_pct": 9.3
+   },
+   "1024-2048": {
+    "n": 193,
+    "eos": 163,
+    "correct": 6,
+    "context_limit": 3,
+    "degeneration": 27,
+    "non_eos_pct": 15.5,
+    "correct_pct": 3.1
+   },
+   "2048-4096": {
+    "n": 117,
+    "eos": 91,
+    "correct": 7,
+    "degeneration": 21,
+    "context_limit": 5,
+    "non_eos_pct": 22.2,
+    "correct_pct": 6.0
+   },
+   ">=4096": {
+    "n": 109,
+    "eos": 76,
+    "correct": 1,
+    "degeneration": 25,
+    "context_limit": 8,
+    "non_eos_pct": 30.3,
+    "correct_pct": 0.9
+   }
+  },
+  "C1-6cat-sr-s20260801": {
+   "0-1024": {
+    "n": 151,
+    "eos": 132,
+    "correct": 13,
+    "degeneration": 17,
+    "context_limit": 2,
+    "non_eos_pct": 12.6,
+    "correct_pct": 8.6
+   },
+   "1024-2048": {
+    "n": 193,
+    "eos": 157,
+    "correct": 7,
+    "context_limit": 6,
+    "degeneration": 30,
+    "non_eos_pct": 18.7,
+    "correct_pct": 3.6
+   },
+   "2048-4096": {
+    "n": 117,
+    "eos": 92,
+    "correct": 3,
+    "degeneration": 22,
+    "context_limit": 3,
+    "non_eos_pct": 21.4,
+    "correct_pct": 2.6
+   },
+   ">=4096": {
+    "n": 109,
+    "eos": 68,
+    "correct": 0,
+    "context_limit": 16,
+    "degeneration": 25,
+    "non_eos_pct": 37.6,
+    "correct_pct": 0.0
+   }
+  }
+ },
+ "decomposition_A2_minus_A1": {
+  "20260726": {
+   "A2_minus_A1_pp": 3.16,
+   "from_usable_rate_pp": 2.99,
+   "from_correct_among_usable_pp": 0.17
+  },
+  "20260801": {
+   "A2_minus_A1_pp": 4.38,
+   "from_usable_rate_pp": 2.4,
+   "from_correct_among_usable_pp": 1.98
+  },
+  "_": "descriptive, per seed, unpaired: d(u*c) = du*mean(c) + dc*mean(u) is exact; the registered A1 - A2 comparison (stage3_sr_result.json) is the only inferential statement"
+ },
+ "packs": {
+  "A1-6cat-sr": {
+   "documents": 6243,
+   "assistant_segments": 6243,
+   "system_message": {
+    "system message": 6243
+   },
+   "segment_end": {
+    "ends with <|im_end|>": 6243
+   },
+   "segment_open": {
+    "opens with <think>": 6243
+   },
+   "segment_think_close": {
+    "holds </think>": 6243
+   },
+   "prompt_before_segment": {
+    "prompt ends at the assistant tag": 6243
+   },
+   "supervised_tokens_per_segment": {
+    "n": 6243,
+    "mean": "950",
+    "median": "339",
+    "p90": "2544",
+    "max": "7971"
+   },
+   "reasoning_tokens_per_segment": {
+    "n": 6243,
+    "mean": 791.2,
+    "median": 275,
+    "p90": 2097,
+    "max": 7919
+   },
+   "teacher_targets_flagged_by_the_detector": {
+    "n": 0,
+    "pct": 0.0,
+    "kinds": {},
+    "_": "the registered detector on each complete target"
+   },
+   "packed": {
+    "sequences": 1430,
+    "supervised_tokens": 7010485,
+    "supervised_im_end": 6243,
+    "im_end_in_sequences": 24048,
+    "assistant_runs_ending_in_supervised_im_end": 6243,
+    "assistant_runs_followed_by_unsupervised_im_end": 0,
+    "fragments_at_sequence_end": 857,
+    "fragment_supervised_tokens": "1074676",
+    "fragment_share_of_supervised_pct": 15.3,
+    "supervised_im_end_per_1k_supervised": 0.891,
+    "supervised_im_end_over_training": 18729,
+    "epochs": 3
+   },
+   "reasoning_length_coverage": {
+    "supporting": {
+     "targets": 4148,
+     "with_reasoning": 4148,
+     "mean": 492.8,
+     "median": 217,
+     "p90": 1190,
+     "max": 7623,
+     "reach_2048": 4.0,
+     "reach_2816": 2.1,
+     "reach_4096": 1.1
+    },
+    "primary (fluid)": {
+     "targets": 1163,
+     "with_reasoning": 1163,
+     "mean": 2174.1,
+     "median": 1719,
+     "p90": 4407,
+     "max": 7919,
+     "reach_2048": 41.0,
+     "reach_2816": 26.5,
+     "reach_4096": 12.6
+    },
+    "tool calling": {
+     "targets": 932,
+     "with_reasoning": 932,
+     "mean": 393.6,
+     "median": 273,
+     "p90": 721,
+     "max": 4364,
+     "reach_2048": 1.0,
+     "reach_2816": 0.4,
+     "reach_4096": 0.1
+    }
+   }
+  },
+  "A2-6cat-sr": {
+   "documents": 50165,
+   "assistant_segments": 50165,
+   "system_message": {
+    "system message": 50165
+   },
+   "segment_end": {
+    "ends with <|im_end|>": 50165
+   },
+   "segment_open": {
+    "opens with text": 50165
+   },
+   "segment_think_close": {
+    "no </think>": 50165
+   },
+   "prompt_before_segment": {
+    "prompt ends with an empty closed think block": 50165
+   },
+   "supervised_tokens_per_segment": {
+    "n": 50165,
+    "mean": "118",
+    "median": "33",
+    "p90": "346",
+    "max": "5018"
+   },
+   "reasoning_tokens_per_segment": {
+    "n": 0
+   },
+   "teacher_targets_flagged_by_the_detector": {
+    "n": 4,
+    "pct": 0.0,
+    "kinds": {
+     "cycle": 4
+    },
+    "_": "the registered detector on each complete target"
+   },
+   "packed": {
+    "sequences": 5047,
+    "supervised_tokens": 6161346,
+    "supervised_im_end": 50165,
+    "im_end_in_sequences": 190200,
+    "assistant_runs_ending_in_supervised_im_end": 50165,
+    "assistant_runs_followed_by_unsupervised_im_end": 0,
+    "fragments_at_sequence_end": 788,
+    "fragment_supervised_tokens": "234591",
+    "fragment_share_of_supervised_pct": 3.8,
+    "supervised_im_end_per_1k_supervised": 8.142,
+    "supervised_im_end_over_training": 150495,
+    "epochs": 3
+   },
+   "reasoning_length_coverage": {
+    "supporting": {
+     "targets": 37560,
+     "with_reasoning": 0,
+     "reach_2048": null,
+     "reach_2816": null,
+     "reach_4096": null
+    },
+    "primary (fluid)": {
+     "targets": 8352,
+     "with_reasoning": 0,
+     "reach_2048": null,
+     "reach_2816": null,
+     "reach_4096": null
+    },
+    "tool calling": {
+     "targets": 4253,
+     "with_reasoning": 0,
+     "reach_2048": null,
+     "reach_2816": null,
+     "reach_4096": null
+    }
+   }
+  },
+  "C1-6cat-sr": {
+   "documents": 4197,
+   "assistant_segments": 4197,
+   "system_message": {
+    "system message": 4197
+   },
+   "segment_end": {
+    "ends with <|im_end|>": 3847,
+    "ends with 13824": 1,
+    "ends with 1083": 1,
+    "ends with 11": 16,
+    "ends with 2055": 2,
+    "ends with 279": 11,
+    "ends with 752": 2,
+    "ends with 4416": 1,
+    "ends with 17": 10,
+    "ends with 576": 1,
+    "ends with 304": 2,
+    "ends with 25": 5,
+    "ends with 284": 4,
+    "ends with 16": 19,
+    "ends with 2326": 1,
+    "ends with 220": 10,
+    "ends with 481": 4,
+    "ends with 6290": 1,
+    "ends with 6974": 1,
+    "ends with 30": 1,
+    "ends with 2855": 1,
+    "ends with 1124": 2,
+    "ends with 856": 1,
+    "ends with 387": 2,
+    "ends with 15": 4,
+    "ends with 1946": 1,
+    "ends with 13837": 1,
+    "ends with 488": 6,
+    "ends with 2661": 2,
+    "ends with 2783": 1,
+    "ends with 308": 1,
+    "ends with 1221": 1,
+    "ends with 10322": 1,
+    "ends with 14311": 1,
+    "ends with 12564": 1,
+    "ends with 330": 3,
+    "ends with 323": 6,
+    "ends with 611": 1,
+    "ends with 383": 1,
+    "ends with 21": 3,
+    "ends with 315": 5,
+    "ends with 1779": 1,
+    "ends with 3151": 1,
+    "ends with 362": 1,
+    "ends with 4396": 1,
+    "ends with 1": 2,
+    "ends with 1932": 1,
+    "ends with 3410": 1,
+    "ends with 3182": 1,
+    "ends with 1140": 1,
+    "ends with 3278": 1,
+    "ends with 574": 1,
+    "ends with 38154": 1,
+    "ends with 944": 1,
+    "ends with 760": 1,
+    "ends with 715": 1,
+    "ends with 20972": 1,
+    "ends with 1457": 1,
+    "ends with 29456": 2,
+    "ends with 320": 2,
+    "ends with 911": 1,
+    "ends with 3403": 1,
+    "ends with 18": 3,
+    "ends with 80163": 1,
+    "ends with 77": 1,
+    "ends with 1988": 2,
+    "ends with 88154": 1,
+    "ends with 286": 1,
+    "ends with 1268": 1,
+    "ends with 943": 1,
+    "ends with 374": 6,
+    "ends with 1648": 1,
+    "ends with 11284": 1,
+    "ends with 24": 5,
+    "ends with 2664": 1,
+    "ends with 1091": 1,
+    "ends with 1059": 1,
+    "ends with 1447": 1,
+    "ends with 264": 3,
+    "ends with 2727": 1,
+    "ends with 4180": 1,
+    "ends with 29812": 1,
+    "ends with 1809": 1,
+    "ends with 13": 3,
+    "ends with 389": 1,
+    "ends with 2790": 1,
+    "ends with 364": 1,
+    "ends with 476": 1,
+    "ends with 311": 4,
+    "ends with 6335": 1,
+    "ends with 20": 3,
+    "ends with 34299": 1,
+    "ends with 13293": 1,
+    "ends with 608": 1,
+    "ends with 11390": 1,
+    "ends with 525": 3,
+    "ends with 2814": 1,
+    "ends with 2435": 1,
+    "ends with 419": 1,
+    "ends with 3984": 1,
+    "ends with 1195": 1,
+    "ends with 13268": 1,
+    "ends with 5185": 1,
+    "ends with 1184": 1,
+    "ends with 3899": 1,
+    "ends with 1459": 1,
+    "ends with 80486": 1,
+    "ends with 19": 3,
+    "ends with 12699": 1,
+    "ends with 1042": 1,
+    "ends with 6769": 1,
+    "ends with 26777": 1,
+    "ends with 614": 1,
+    "ends with 271": 1,
+    "ends with 1265": 1,
+    "ends with 10161": 1,
+    "ends with 23": 1,
+    "ends with 707": 1,
+    "ends with 773": 2,
+    "ends with 13035": 1,
+    "ends with 1283": 2,
+    "ends with 13451": 1,
+    "ends with 40": 1,
+    "ends with 9223": 1,
+    "ends with 7289": 1,
+    "ends with 21100": 1,
+    "ends with 84": 1,
+    "ends with 1490": 1,
+    "ends with 332": 1,
+    "ends with 1052": 1,
+    "ends with 1477": 2,
+    "ends with 10542": 1,
+    "ends with 25904": 1,
+    "ends with 3311": 1,
+    "ends with 30487": 1,
+    "ends with 11067": 1,
+    "ends with 508": 2,
+    "ends with 27275": 1,
+    "ends with 3983": 1,
+    "ends with 382": 2,
+    "ends with 24812": 1,
+    "ends with 2938": 1,
+    "ends with 2878": 1,
+    "ends with 568": 2,
+    "ends with 256": 2,
+    "ends with 5669": 1,
+    "ends with 19444": 1,
+    "ends with 2629": 1,
+    "ends with 19955": 1,
+    "ends with 1205": 1,
+    "ends with 40680": 1,
+    "ends with 8482": 1,
+    "ends with 879": 1,
+    "ends with 12713": 1,
+    "ends with 429": 5,
+    "ends with 1744": 1,
+    "ends with 12": 1,
+    "ends with 11968": 1,
+    "ends with 366": 1,
+    "ends with 35270": 1,
+    "ends with 4319": 1,
+    "ends with 8930": 1,
+    "ends with 22761": 1,
+    "ends with 1986": 1,
+    "ends with 5248": 1,
+    "ends with 1196": 1,
+    "ends with 3405": 2,
+    "ends with 2706": 1,
+    "ends with 61": 1,
+    "ends with 369": 2,
+    "ends with 537": 1,
+    "ends with 2033": 1,
+    "ends with 1667": 1,
+    "ends with 88139": 1,
+    "ends with 1874": 1,
+    "ends with 825": 1,
+    "ends with 50379": 1,
+    "ends with 421": 1,
+    "ends with 19180": 1,
+    "ends with 36678": 1,
+    "ends with 678": 2,
+    "ends with 6685": 1,
+    "ends with 4050": 1,
+    "ends with 10061": 1,
+    "ends with 470": 1,
+    "ends with 1464": 2,
+    "ends with 402": 1,
+    "ends with 12938": 1,
+    "ends with 7521": 1,
+    "ends with 10146": 1,
+    "ends with 11253": 1,
+    "ends with 28": 1,
+    "ends with 2968": 1,
+    "ends with 2266": 1,
+    "ends with 198": 1,
+    "ends with 4675": 1,
+    "ends with 714": 1,
+    "ends with 6672": 1,
+    "ends with 1246": 1,
+    "ends with 2217": 1,
+    "ends with 4134": 1,
+    "ends with 34171": 1,
+    "ends with 11289": 1,
+    "ends with 46028": 1,
+    "ends with 510": 1,
+    "ends with 42776": 1,
+    "ends with 3245": 1,
+    "ends with 59": 1,
+    "ends with 31807": 1,
+    "ends with 79151": 1
+   },
+   "segment_open": {
+    "opens with <think>": 3681,
+    "opens with text": 516
+   },
+   "segment_think_close": {
+    "holds </think>": 3890,
+    "no </think>": 307
+   },
+   "prompt_before_segment": {
+    "prompt ends at the assistant tag": 3681,
+    "prompt ends with <think>": 516
+   },
+   "supervised_tokens_per_segment": {
+    "n": 4197,
+    "mean": "1414",
+    "median": "699",
+    "p90": "3663",
+    "max": "8056"
+   },
+   "reasoning_tokens_per_segment": {
+    "n": 3890,
+    "mean": 1241.0,
+    "median": 570,
+    "p90": 3302,
+    "max": 8050
+   },
+   "teacher_targets_flagged_by_the_detector": {
+    "n": 0,
+    "pct": 0.0,
+    "kinds": {},
+    "_": "the registered detector on each complete target"
+   },
+   "packed": {
+    "sequences": 1261,
+    "supervised_tokens": 7258201,
+    "supervised_im_end": 3847,
+    "im_end_in_sequences": 16756,
+    "assistant_runs_ending_in_supervised_im_end": 3847,
+    "assistant_runs_followed_by_unsupervised_im_end": 0,
+    "fragments_at_sequence_end": 926,
+    "fragment_supervised_tokens": "1353515",
+    "fragment_share_of_supervised_pct": 18.6,
+    "supervised_im_end_per_1k_supervised": 0.53,
+    "supervised_im_end_over_training": 11541,
+    "epochs": 3
+   },
+   "reasoning_length_coverage": {
+    "supporting": {
+     "targets": 2914,
+     "with_reasoning": 2607,
+     "mean": 658.3,
+     "median": 433,
+     "p90": 1501,
+     "max": 3966,
+     "reach_2048": 5.4,
+     "reach_2816": 2.0,
+     "reach_4096": 0.0
+    },
+    "primary (fluid)": {
+     "targets": 767,
+     "with_reasoning": 767,
+     "mean": 3489.3,
+     "median": 3108,
+     "p90": 6332,
+     "max": 8050,
+     "reach_2048": 72.4,
+     "reach_2816": 56.2,
+     "reach_4096": 34.7
+    },
+    "tool calling": {
+     "targets": 516,
+     "with_reasoning": 516,
+     "mean": 842.7,
+     "median": 564,
+     "p90": 1709,
+     "max": 5896,
+     "reach_2048": 7.6,
+     "reach_2816": 3.3,
+     "reach_4096": 1.2
+    }
+   }
+  }
+ },
+ "formal_scoring": "correct = usable_rollout AND answer_correct over all 570 static formal items: a degeneration stop or a context-limit hit is unusable and scores 0; context-limit hits are recorded as right-censored for the length statistics, not excluded from the rate",
+ "authorizes": "nothing"
+}

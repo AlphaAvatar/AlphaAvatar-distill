@@ -1387,12 +1387,12 @@ closed-book knowledge 2-3%; evidence-conditioned abstention and safety pairs 0-7
 (`stage3_legacy_150`, training prompts) is not generalization and stays apart. eval-set-1 measures tool calling only
 indirectly: nothing here is a closed-loop tool-task success rate.
 
-**Behaviour unit** (`eval_behavior_v0`, 65 formal prompts; rescored 2026-11-09, see below): natural termination and
+**Behaviour unit** (`eval_behavior_v0`, 65 formal prompts; rescored 2026-11-08, see below): natural termination and
 valid format 61.5 / 70.8% (A1), 93.8 / 90.8% (A2), 75.4 / 80.0% (C1); empty answers 40.0 / 27.7%, 0 / 0%,
 23.1 / 20.0%. Tool-call exact match on its 5 tool prompts 40 / 20%, 40 / 20%, 20 / 0% (too few to read). A2's
 think block is closed by the template, so its `think_closed` of 1.0 is by construction.
 
-**Rescored behaviour aggregates (2026-11-09).** The formal reports' behaviour aggregates first ignored each record's
+**Rescored behaviour aggregates (2026-11-08).** The formal reports' behaviour aggregates first ignored each record's
 think state, so A2's answers all read empty and A1's replies unclosed, while the rows beside them were right. The
 defect and its fix (`eval_set_scoring.behavior_scored`), the method and every before/after are in
 [`audit/behaviour_aggregate_rescoring.json`](../../../../logs/stages/stage-2/teacher_modes/audit/behaviour_aggregate_rescoring.json):
@@ -1408,6 +1408,108 @@ $73.24**, 1,664 pod minutes, below the lower estimate ($31.19).
 `thprcgh7s9` (sha256 in each run's units record, re-hashed at closeout); every generation, row and formal report in
 the evidence archives, on the dev box and on the relay (re-downloaded and re-hashed). The weights have no off-volume
 copy: the relay's quota refused all six (`off_volume_copy.json` per unit); `thprcgh7s9` is kept and protected.
+
+## 17. Stage 3 scientific closeout: verdicts kept, failure analysis, persistence (2026-11-08)
+
+The maintainer accepted the six units and the behaviour-aggregate fix ("Stage 3 科学收尾、模型备份与失败原因分析",
+review of `fefa7dfd`). Nothing was trained, searched or generated; every number below was read from saved evidence at
+$0. Records: [`analyses/stage3_failure_analysis.json`](../../../../logs/stages/stage-2/teacher_modes/analyses/stage3_failure_analysis.json)
+(`stage3_failure_analysis.py`) and
+[`storage/stage3_storage_audit.json`](../../../../logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json).
+
+**The verdicts stand as registered.** A1 - A2 is INCONCLUSIVE (-3.77 pp, 97.5% [-7.21, -1.03]): an interval that
+excludes zero is not an advantage beyond the SESOI. A2 trained with 3.53x A1's compute, so the difference is not
+attributable to the teacher's thinking / non-thinking mode. The intervals resample items and rule families over two
+training seeds; they are not a sample of independent training seeds. A1 - C1 is NO_GO (+2.72 pp [+0.85, +4.83]). Core
+correctness is low everywhere, worst on abstract/analogical and interactive tasks; no student is a generalization GO.
+
+**What the formal rate counts.** Static correctness is `usable_rollout AND verified answer` over all 570 formal
+items. A degeneration stop and a context-limit hit are both unusable and both score 0. "Right-censored" describes
+the length statistics only; no item leaves the denominator. Descriptive correctness among usable (naturally
+terminated) rollouts, which never replaces the formal rate, is:
+
+| arm | among usable rollouts |
+| --- | --- |
+| A1 | 12.2 / 9.7% |
+| A2 | 12.4 / 12.2% |
+| C1 | 6.2 / 5.2% |
+
+The registered answer check applied regardless of termination gives exactly the formal rate in every unit: no
+rollout that stopped without terminating held a correct answer.
+
+**Thinking minus non-thinking, split** (descriptive, per seed; formal rate = usable rate x correctness among usable):
+
+| seed | A2 - A1 | from the usable rate | from correctness among usable |
+| --- | --- | --- | --- |
+| 20260726 | +3.16 pp | +2.99 pp | +0.17 pp |
+| 20260801 | +4.38 pp | +2.40 pp | +1.98 pp |
+
+About seven tenths of the gap is rollouts that A1 never finished.
+
+**How the rollouts fail** (static formal items; seeds 20260726 / 20260801):
+
+- **A1:** 36.5 / 31.4% stop without EOS.
+  - 96-97% of those stops fall inside the reasoning, before `</think>`.
+  - Most are the detector's *rambling* stop (149 / 116) with no exact cycle, at a median of 2,816 generated tokens.
+  - About 98% hold no boxed answer yet, and none holds a correct one.
+  - The tails show the same rule hypothesis proposed, mis-computed ("5*3=10") and rejected again.
+  - The stop rate rises with the reasoning the teacher's thinking mode spent on the same item: 30 / 28% under 1,024
+    tokens, 47 / 46% at 4,096 or more. It is high even where the teacher needed little.
+  - On the 144 episodes, 119 / 106 stop in the first turn's reasoning, so the student never acts. The teacher
+    completes 125.
+- **C1:** about 16% degeneration stops, mostly exact cycles in the reasoning (one-token loops among them), and 3.3 /
+  4.7% context-limit hits, 14 / 23 of them before `</think>`. Its own completed reasoning is long: median ~2,400
+  tokens, p90 ~5,300 at an 8,192 context.
+- **A2:** 12.1 / 9.5% degeneration stops, all in the answer, mostly cycles at a median of 1,280 tokens. Of its
+  usable rollouts 439 / 453 are wrong answers, all boxed. It keeps 13.5 / 14.0% of the items the non-thinking teacher
+  solves (the teacher scores 69.0%): 24-27% on deduction, 3-7% on induction, 6-10% on composition, 0-3% on
+  abstract/analogical.
+
+**Training-side checks** (the frozen packs; no defect found):
+
+- Every A1 and A2 assistant target (6,243 / 50,165) ends in a supervised `<|im_end|>`. KD reads the same positions:
+  `ce_targets == kd_positions` in every logged step.
+- The template states match the evaluation:
+  - A1's targets open with `<think>` and close it.
+  - A2's prompts carry the empty closed block.
+  - 88% of C1's targets open with `<think>` after the assistant tag and 12% start inside a pre-opened block. Both give
+    the same token sequence.
+- The system message is the evaluation's.
+- The registered degeneration detector flags 0 / 4 / 0 of the teachers' complete targets.
+- Termination exposure differs ninefold. Supervised `<|im_end|>` per 1,000 supervised tokens is 0.89 (A1), 8.14 (A2)
+  and 0.53 (C1); over three epochs that is 18,729 / 150,495 / 11,541 end-of-turn targets. A2's targets are short
+  (median 33 supervised tokens).
+- Packing ends each sequence in a fragment, a supervised prefix with no `<|im_end|>`: 15.3 / 3.8 / 18.6% of
+  supervised tokens, as specified (P19). The full example is trained again from its first token.
+- C1 inherits 350 of 4,197 targets cut at 8,192 without `<|im_end|>` (disclosed, TOKEN_MATCHED.md).
+- Fluid targets' reasoning: A1 median 1,719 tokens, 26.5% reaching 2,816. C1 median 3,108, 34.7% reaching 4,096.
+- Validation CE still falls at the last step but flattens in the third epoch while training CE keeps dropping (A1
+  0.95 -> 0.93 against 0.73 -> 0.51).
+
+**Hypotheses, not established.**
+
+- **(H1)** The thinking students' failure to terminate is a symptom of failed reasoning: no hypothesis verified, so
+  nothing to commit. Consistent with the difficulty gradient, the absence of answers before the stop and the equal
+  conditional correctness.
+- **(H2)** Ninefold less termination supervision in the thinking arms.
+- **(H3)** The 596M student's capacity for long reasoning after compression.
+- **(H4)** The third epoch mostly memorizes.
+- **(H5)** C1's cut traces.
+- **(H6)** nucleus_v1's T 0.6 / top-p 0.95 is applied to every mode. Qwen recommends 0.7 / 0.8 for non-thinking; the
+  protocol is registered and identical for all arms.
+- **(H7)** The 8,192 trained context against the teacher's 40,960.
+
+Each needs its own controlled experiment; none is run.
+
+**Persistence.**
+
+- The six final weights (6 x 2,384,234,968 B, 13.32 GiB) and save points (+19.69 GiB of trainer state) exist only on
+  `thprcgh7s9`.
+- The relay holds 92.11 of 93.13 GiB and refuses even one weight.
+- The provider balance ($19.97 at 2026-11-08T18:35Z) covers the three volumes ($1.76/day) for ~11 days. RunPod may
+  terminate the volumes of an account that cannot pay their storage.
+- The audit's backup plan (HF PRO plus one bounded pod session running `a1_units.py copy-final`) is a maintainer
+  decision (decisions.md 2026-11-08).
 
 ## Reproduce ($0)
 

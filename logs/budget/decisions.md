@@ -16133,14 +16133,14 @@ on a paid pod.
   reserve (extended to 2026-12-03) and `4rhubprswo`'s (to ~2026-11-29) are booked.
 - Revisit when: the maintainer reads the result, or private storage is added.
 
-## 2026-11-09 — Behaviour-unit aggregates rescored under each record's think state (hybrid-template reports)
+## 2026-11-08 (UTC) — Behaviour-unit aggregates rescored under each record's think state (hybrid-template reports)
 
 - Context: reading A2-6cat-sr's full eval-set-1 result, its formal reports said every `eval_behavior_v0` answer was
   empty, while the unit's own rows (`rows/*.rows.jsonl`) said none was. `scripts/shared/evaluation/eval_set_scoring.py`
   re-scored that unit for its aggregates (the unit's metrics and each `[group=...]` capability slice) without the
   record's `think_state`, so `behavior.split_generation` read every reply as a preopened think block. The per-row
   scorer (`score_behavior`, the manifest's registered adapter) always passed it.
-- Decision (maintainer 2026-11-09, "修复已发现问题"): an ordinary defect in the harness, not a protocol change.
+- Decision (maintainer 2026-11-08 (UTC), "修复已发现问题"): an ordinary defect in the harness, not a protocol change.
   `eval_set_scoring.behavior_scored` now feeds both aggregates each record's think state, as the row scorer does, with
   a core regression (`tests/data/test_eval_set_registry.py::test_the_behaviour_aggregates_score_each_record_under_its_think_state`).
   `configs/stages/stage-2/teacher_modes/evaluation_identity.json` was regenerated for the changed scorer source.
@@ -16156,3 +16156,41 @@ on a paid pod.
 - Unaffected: every correctness unit, fluid reasoning, the registered A1 - A2 and A1 - C1 comparisons, and every
   Thinking-2507-lineage report (its preopened template is the default).
 - Revisit when: never, for these records. A future scorer change re-renders the reports it touches the same way.
+
+## 2026-11-08 (UTC) — Stage 3 scientific closeout: verdicts kept, $0 failure analysis, storage audit and one backup application
+
+- Context: the maintainer's "Stage 3 科学收尾、模型备份与失败原因分析" (review of `fefa7dfd`) accepted the six units and
+  the behaviour-aggregate fix, and asked for a read-only storage audit, a $0 root-cause analysis and a corrected
+  scoring statement. No training, search, generation, pod or storage purchase was authorized.
+- Decision (science): the registered verdicts stand. A1 - A2 is INCONCLUSIVE and A1 - C1 NO_GO. The difference is not
+  attributed to the thinking mode (3.53x compute). Two training seeds are not a seed sample, and no student is a
+  generalization GO. The formal rate is `usable AND verified answer` over all 570 static items: degeneration and
+  context-limit stops score 0, and "right-censored" applies to length statistics only.
+- Result (owners: `analyses/stage3_failure_analysis.json`, `stage3_failure_analysis.py`; PACKED_ROUND.md section 17):
+  - About 70% of A2 - A1 comes from usability: per seed +2.99 / +2.40 pp, against +0.17 / +1.98 pp from correctness
+    among usable rollouts.
+  - The thinking students fail inside the reasoning: hypothesis loops that the detector stops as rambling or cycles,
+    rising with item difficulty, with no correct answer cut off.
+  - A2 terminates but is wrong on 88% of its usable rollouts.
+  - No training-side defect was found: every A1/A2 target ends in a supervised `<|im_end|>` and KD reads the same
+    positions. Templates, think states and system message match the evaluation, and the detector flags 0 / 4 / 0
+    teacher targets.
+  - Termination supervision is 9x denser for A2.
+  - C1's 350 cut targets are an inherited, disclosed property.
+- Storage audit (owner: `logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json`):
+  - The six final weights (13.32 GiB) and their trainer state (+19.69 GiB) exist only on `thprcgh7s9`. US-TX-3 has
+    no S3 API, so a pod is the only reader.
+  - The relay (free-tier user account) holds 92.11 of 93.13 GiB and refused one 2.38 GB object today.
+  - The provider balance is $19.97 against $1.7617/day of volumes: about 11 days, to around 2026-11-20. RunPod may
+    terminate an unfunded account's network volumes, and each of the three holds a unique artifact.
+  - Nothing was deleted.
+- Application (owed to the maintainer; nothing is done before it):
+  1. Top up the provider balance, at least $30.
+  2. Subscribe the AlphaAvatar HF account to PRO ($9/month, 1 TB private).
+  3. Grant one bounded persistence session, kind `persist_sr`, $2.00 cumulative:
+     - one Secure L40S in US-TX-3 attaching `thprcgh7s9` only;
+     - `a1_units.py copy-final` for each unit, then `resume_identity.json`, plus `trainer_state.pt` if kept;
+     - every file re-downloaded and re-hashed.
+     - Expected $0.6-0.9.
+  4. Only after verified copies exist, decide whether `thprcgh7s9` (about $24.5/month) is retired.
+- Revisit when: the maintainer answers the application, or the balance falls below one week of storage.

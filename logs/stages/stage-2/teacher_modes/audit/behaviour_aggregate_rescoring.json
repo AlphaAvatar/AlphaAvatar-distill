@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.teacher_modes.behaviour_aggregate_rescoring/v1",
  "recorded_utc": "2026-11-08T18:06:57Z",
- "decided_by": "maintainer 2026-11-09 ('\u597d\u7684\uff0c\u4fee\u590d\u5df2\u53d1\u73b0\u95ee\u9898\uff0c\u7136\u540e\u7ed9\u6211\u5b8c\u6574\u62a5\u544a')",
+ "decided_by": "maintainer 2026-11-08 ('\u597d\u7684\uff0c\u4fee\u590d\u5df2\u53d1\u73b0\u95ee\u9898\uff0c\u7136\u540e\u7ed9\u6211\u5b8c\u6574\u62a5\u544a')",
  "defect": "scripts/shared/evaluation/eval_set_scoring.py re-scored eval_behavior_v0 for its aggregates (the unit's metrics and each [group=...] capability slice) WITHOUT the record's think_state, so behavior.split_generation read every record as a preopened think block. The per-row scores (`score_behavior`, the manifest's registered adapter, rows/*.rows.jsonl) always passed it. Under a hybrid template: preclosed (non-thinking) answers all read empty; self_opening (thinking) replies read with think_closed / format_ok 0 and their answers misparsed in some groups. Thinking-2507's preopened template is the default and was never affected.",
  "fix": "eval_set_scoring.behavior_scored: both aggregates score each record under its own think_state; regression tests/data/test_eval_set_registry.py::test_the_behaviour_aggregates_score_each_record_under_its_think_state",
  "method": "each report re-rendered at $0 from its run's saved generations: `PYTHONPATH=src:scripts python scripts/shared/evaluation/eval_set_scoring.py report --eval-set eval-set-1 --generations <evaluation/generations> --label <label> --out <json>`, then the `rescored` pointer added. Before the fix the same rendering reproduced all eight original reports exactly (created_utc aside); after it only the behaviour unit and its three capability slices differ. No generation, item, gold answer, scoring protocol, validity mask or correctness number changes.",
@@ -381,5 +381,18 @@
    }
   }
  },
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "scorer": {
+  "original": {
+   "sha256": "a80ed0fdad31b4d4498f2fb11d88ec7e2324ad4dbe590d1ca800d40037c3be12",
+   "first_commit": "2b395dae",
+   "used_by": "every affected run: the teacher evaluation (session f93d83a7), A1 (571e4a72), A1-6cat-sr (93589a00), A2-6cat-sr (69938926)"
+  },
+  "corrected": {
+   "sha256": "09f714c841f9f86b18af24bdd4eb8f7f7cfb4743b088b67298242db3140cdafc",
+   "commit": "fefa7dfd"
+  },
+  "reproduce_the_original": "git show 2b395dae:scripts/shared/evaluation/eval_set_scoring.py (or any session commit above): the historical runs keep the scorer they ran; the corrected one is never presented as theirs",
+  "unchanged_for": "records whose think_state is preopened or absent: the corrected aggregates take the same split_generation branch as before (C1-6cat-sr's two reports re-render identically, 2026-11-08)"
+ }
 }
