@@ -1,0 +1,621 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.mixed_isolation_audit/v1",
+ "arm": "A-MIX-6cat-sr",
+ "written_utc": "2026-11-09T10:13:07Z",
+ "crossing": {
+  "units": {
+   "n": 0,
+   "examples": []
+  },
+  "task_content": {
+   "n": 0,
+   "examples": []
+  },
+  "first_user_message": {
+   "n": 0,
+   "examples": []
+  }
+ },
+ "passed": true,
+ "units": {
+  "training": 45363,
+  "validation": 234
+ },
+ "units_in_both_modes": {
+  "training": 4980,
+  "validation": 93
+ },
+ "units_without_catalogue_row": {
+  "training": 2231,
+  "validation": 37
+ },
+ "families": {
+  "A1-6cat-sr": {
+   "validation_families": 29,
+   "trained_in_own_mode": 25,
+   "trained_only_in_the_other_mode": [],
+   "not_trained": 4
+  },
+  "A2-6cat-sr": {
+   "validation_families": 41,
+   "trained_in_own_mode": 35,
+   "trained_only_in_the_other_mode": [],
+   "not_trained": 6
+  }
+ },
+ "rule": "no training task, task content (catalogue content_sha256) or first user message (token ids) of either mode is a validation one of either mode; a task trained in both modes is two legitimate trajectories; a tool episode's family is its category",
+ "eval_set_1_held_out": {
+  "candidate_tasks": 43329,
+  "checked": [
+   {
+    "a": "candidate",
+    "b": "fluid_reasoning_720/dev_v1",
+    "key": "prompt",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "fluid_reasoning_720/dev_v1",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/math_verified",
+    "key": "prompt",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/math_verified",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/gsm8k",
+    "key": "prompt",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/gsm8k",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/multihop",
+    "key": "prompt",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/multihop",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/rag",
+    "key": "prompt",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/rag",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/answerability_paired",
+    "key": "prompt",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/answerability_paired",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/safety_paired",
+    "key": "prompt",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/safety_paired",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/knowledge",
+    "key": "prompt",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/knowledge",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/eval_behavior_v0",
+    "key": "prompt",
+    "overlap": 0
+   },
+   {
+    "a": "candidate",
+    "b": "stage3_capability_846/eval_behavior_v0",
+    "key": "content",
+    "overlap": 0
+   }
+  ],
+  "overlaps": {
+   "roles": {
+    "candidate": {
+     "prompt": 42722,
+     "content": 43329
+    },
+    "fluid_reasoning_720/dev_v1": {
+     "prompt": 576,
+     "content": 720
+    },
+    "stage3_capability_846/math_verified": {
+     "prompt": 100,
+     "content": 0
+    },
+    "stage3_capability_846/gsm8k": {
+     "prompt": 100,
+     "content": 0
+    },
+    "stage3_capability_846/multihop": {
+     "prompt": 100,
+     "content": 0
+    },
+    "stage3_capability_846/rag": {
+     "prompt": 100,
+     "content": 0
+    },
+    "stage3_capability_846/answerability_paired": {
+     "prompt": 120,
+     "content": 0
+    },
+    "stage3_capability_846/safety_paired": {
+     "prompt": 100,
+     "content": 0
+    },
+    "stage3_capability_846/knowledge": {
+     "prompt": 150,
+     "content": 0
+    },
+    "stage3_capability_846/eval_behavior_v0": {
+     "prompt": 74,
+     "content": 0
+    }
+   },
+   "keys": [
+    "prompt",
+    "content"
+   ],
+   "pairs": [
+    {
+     "a": "candidate",
+     "b": "fluid_reasoning_720/dev_v1",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "candidate",
+     "b": "stage3_capability_846/answerability_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "candidate",
+     "b": "stage3_capability_846/eval_behavior_v0",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "candidate",
+     "b": "stage3_capability_846/gsm8k",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "candidate",
+     "b": "stage3_capability_846/knowledge",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "candidate",
+     "b": "stage3_capability_846/math_verified",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "candidate",
+     "b": "stage3_capability_846/multihop",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "candidate",
+     "b": "stage3_capability_846/rag",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "candidate",
+     "b": "stage3_capability_846/safety_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "fluid_reasoning_720/dev_v1",
+     "b": "stage3_capability_846/answerability_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "fluid_reasoning_720/dev_v1",
+     "b": "stage3_capability_846/eval_behavior_v0",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "fluid_reasoning_720/dev_v1",
+     "b": "stage3_capability_846/gsm8k",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "fluid_reasoning_720/dev_v1",
+     "b": "stage3_capability_846/knowledge",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "fluid_reasoning_720/dev_v1",
+     "b": "stage3_capability_846/math_verified",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "fluid_reasoning_720/dev_v1",
+     "b": "stage3_capability_846/multihop",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "fluid_reasoning_720/dev_v1",
+     "b": "stage3_capability_846/rag",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "fluid_reasoning_720/dev_v1",
+     "b": "stage3_capability_846/safety_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/answerability_paired",
+     "b": "stage3_capability_846/eval_behavior_v0",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/answerability_paired",
+     "b": "stage3_capability_846/gsm8k",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/answerability_paired",
+     "b": "stage3_capability_846/knowledge",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/answerability_paired",
+     "b": "stage3_capability_846/math_verified",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/answerability_paired",
+     "b": "stage3_capability_846/multihop",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/answerability_paired",
+     "b": "stage3_capability_846/rag",
+     "overlap": {
+      "prompt": 1,
+      "content": 0
+     },
+     "examples": {
+      "prompt": [
+       "bf893f397083e494141382a0a1df8e40eca8432a1c807d1cb077af65a21787cc"
+      ]
+     }
+    },
+    {
+     "a": "stage3_capability_846/answerability_paired",
+     "b": "stage3_capability_846/safety_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/eval_behavior_v0",
+     "b": "stage3_capability_846/gsm8k",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/eval_behavior_v0",
+     "b": "stage3_capability_846/knowledge",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/eval_behavior_v0",
+     "b": "stage3_capability_846/math_verified",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/eval_behavior_v0",
+     "b": "stage3_capability_846/multihop",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/eval_behavior_v0",
+     "b": "stage3_capability_846/rag",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/eval_behavior_v0",
+     "b": "stage3_capability_846/safety_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/gsm8k",
+     "b": "stage3_capability_846/knowledge",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/gsm8k",
+     "b": "stage3_capability_846/math_verified",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/gsm8k",
+     "b": "stage3_capability_846/multihop",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/gsm8k",
+     "b": "stage3_capability_846/rag",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/gsm8k",
+     "b": "stage3_capability_846/safety_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/knowledge",
+     "b": "stage3_capability_846/math_verified",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/knowledge",
+     "b": "stage3_capability_846/multihop",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/knowledge",
+     "b": "stage3_capability_846/rag",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/knowledge",
+     "b": "stage3_capability_846/safety_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/math_verified",
+     "b": "stage3_capability_846/multihop",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/math_verified",
+     "b": "stage3_capability_846/rag",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/math_verified",
+     "b": "stage3_capability_846/safety_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/multihop",
+     "b": "stage3_capability_846/rag",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/multihop",
+     "b": "stage3_capability_846/safety_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    },
+    {
+     "a": "stage3_capability_846/rag",
+     "b": "stage3_capability_846/safety_paired",
+     "overlap": {
+      "prompt": 0,
+      "content": 0
+     },
+     "examples": {}
+    }
+   ]
+  },
+  "tool_episodes": "isolated by the tool sources' formal admission, which both modes share (same pool, same admitted tasks)"
+ },
+ "authorizes": "nothing"
+}

@@ -18,6 +18,8 @@ from stages.teacher_modes import training_plan as TP
 
 PLAN = json.loads(PTP.BOUND.read_text())
 BUDGET = json.loads(PTP.BUDGET.read_text())
+#: the six units' kinds (the mixed arm's kind has its own plan and grant block: test_mixed_arm.py)
+SR_ARMS = {k: a for k, a in TM.PACKED_TRAIN_ARMS.items() if TM.STAGE3_BLOCKS[k] == TM.STAGE3_BLOCK}
 
 
 def test_the_six_units_are_bound_to_their_frozen_packs_and_their_own_lineage():
@@ -76,7 +78,7 @@ def test_the_budget_prices_the_plans_steps_and_the_kinds_read_their_deadlines():
         row = BUDGET["per_unit"][u["unit"]]
         assert row["lower"]["unit_s"] < row["expected"]["unit_s"] < row["upper"]["unit_s"]
         assert row["upper"]["evaluation_s"] == PTP.EVAL_S["upper"]
-    for kind, arm in TM.PACKED_TRAIN_ARMS.items():
+    for kind, arm in SR_ARMS.items():
         a = BUDGET["arms"][arm]
         assert a["kind"] == kind and a["kind_cumulative_cap_usd"] > a["session_hard_cap"]["hard_cap_usd"]
         assert TM.unit_deadline_hours(kind) == a["unit_deadline_hours"]
@@ -91,13 +93,13 @@ def test_the_budget_prices_the_plans_steps_and_the_kinds_read_their_deadlines():
 def grant_root(tmp_path, block: bool, spent_usd: float | None = None, kind: str = "train_sr_a1"):
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
     if block:
-        caps = {k: BUDGET["arms"][a]["kind_cumulative_cap_usd"] for k, a in TM.PACKED_TRAIN_ARMS.items()}
+        caps = {k: BUDGET["arms"][a]["kind_cumulative_cap_usd"] for k, a in SR_ARMS.items()}
         g["session_hard_caps_usd"] = {**g["session_hard_caps_usd"], **caps}
         g[TM.STAGE3_BLOCK] = {"approves": TM.STAGE3_APPROVAL, "granted_by": "maintainer", "decision": "test",
                               "date": "2026-11-07", "cap_is_cumulative": True, "gpu": TM.GPU,
                               "plan_sha256": TM.P1._sha(TM.KIND_RECORDS[kind][0], TM.REPO_ROOT),
                               "budget_sha256": TM.P1._sha(TM.KIND_RECORDS[kind][1], TM.REPO_ROOT),
-                              "kinds": {k: {"arm": a, "hard_cap_usd": caps[k]} for k, a in TM.PACKED_TRAIN_ARMS.items()},
+                              "kinds": {k: {"arm": a, "hard_cap_usd": caps[k]} for k, a in SR_ARMS.items()},
                               "network_volume": {"id": "thprcgh7s9"}, "protected_volumes": ["4rhubprswo", "am5m373kuq"]}
     (tmp_path / TM.STUDY.grant).parent.mkdir(parents=True, exist_ok=True)
     (tmp_path / TM.STUDY.grant).write_text(json.dumps(g))
@@ -116,7 +118,7 @@ def grant_root(tmp_path, block: bool, spent_usd: float | None = None, kind: str 
 
 def test_the_committed_grant_admits_each_kind_up_to_its_cumulative_cap_only():
     """maintainer 2026-11-07, 'Stage 3 六单元正式授权', section IV"""
-    for kind, arm in TM.PACKED_TRAIN_ARMS.items():
+    for kind, arm in SR_ARMS.items():
         left = round(BUDGET["arms"][arm]["kind_cumulative_cap_usd"] - TM.kind_spent(kind)["usd"], 4)
         assert TM.kind_cap_problems(kind, left) == []                     #: what every earlier attempt left
         assert TM.kind_cap_problems(kind, round(left + 0.01, 4))
@@ -155,7 +157,7 @@ def test_a_stage3_session_attaches_only_the_granted_volume(tmp_path, monkeypatch
 
 def test_each_kind_relays_its_frozen_pack_and_c1_its_own_initialization():
     fr = PTP.frozen()["arms"]
-    for kind, arm in TM.PACKED_TRAIN_ARMS.items():
+    for kind, arm in SR_ARMS.items():
         ri = TM.stage3_relay_inputs(kind)
         packs = {Path(r.path).name: r.sha256 for r in ri if r.path.startswith("transfer/stage3_sr/")}
         assert packs == fr[arm]["identity"]["pack_files_sha256"]

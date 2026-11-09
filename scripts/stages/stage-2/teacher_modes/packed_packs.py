@@ -119,6 +119,9 @@ SELECTION_ARM = {"A1-6cat": "A1", "A2-6cat": "A2", "A1-6cat-cs": "A1", "A2-6cat-
                  "A2-6cat-sr": "A2"}
 MANIFEST = "data_manifest.json"
 MANIFEST_SCHEMA = "aadistill.stage2.teacher_modes.data_manifest/v2"
+#: a manifest of documents admitted under SEVERAL modes of one teacher (`mixed_packs.py`): the same document rows
+#: (doc_id first, content sha256 last), frozen documents and seal, with each row's source arm and mode
+MIXED_MANIFEST_SCHEMA = "aadistill.stage2.teacher_modes.mixed_data_manifest/v1"
 #: the frozen documents themselves, beside the manifest that holds their sha256 (`write_documents`)
 DOCUMENTS = "data_documents.npz"
 COLUMNS = ["doc_id", "data_type", "category", "unit", "supervised_tokens", "sha256"]
@@ -608,7 +611,7 @@ def read_manifest(path: Path) -> dict:
     """An admitted, intact manifest, or PackBuildError."""
     man = json.loads(Path(path).read_text())
     body = {k: v for k, v in man.items() if k != "content_sha256"}
-    if man.get("schema") != MANIFEST_SCHEMA or man.get("admitted") is not True:
+    if man.get("schema") not in (MANIFEST_SCHEMA, MIXED_MANIFEST_SCHEMA) or man.get("admitted") is not True:
         raise PackBuildError(f"{path}: not an admitted data manifest")
     if canonical_sha(body) != man.get("content_sha256") or canonical_sha(man["documents"]) != man["documents_sha256"]:
         raise PackBuildError(f"{path}: the manifest was edited after its admission (content_sha256)")

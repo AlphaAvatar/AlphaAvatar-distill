@@ -53,9 +53,14 @@ PLAN_SCHEMA = "aadistill.stage2.teacher_modes.packed_training_plan/v2"
 STUDY_ID = "six_category_schema_restored@v1"
 SEEDS = (20260726, 20260801)
 ARMS = ("A1-6cat-sr", "A2-6cat-sr", "C1-6cat-sr")
-#: arm -> (teacher lineage, mode in the lineage block)
+#: arm -> (teacher lineage, mode in the lineage block -- a tuple for an arm whose pack holds several modes of its one
+#: teacher, `mixed_training_plan.py`)
 LINEAGE = {"A1-6cat-sr": ("hybrid", "thinking"), "A2-6cat-sr": ("hybrid", "non_thinking"),
-           "C1-6cat-sr": ("thinking_2507", "thinking")}
+           "C1-6cat-sr": ("thinking_2507", "thinking"),
+           "A-MIX-6cat-sr": ("hybrid", ("thinking", "non_thinking"))}
+#: every Stage-3 arm the units driver (`a1_units.py`) runs as one: this plan's three and the mixed arm, whose own plan
+#: is `mixed_training_plan.json` (maintainer 2026-11-09)
+STAGE3_ARMS = ARMS + ("A-MIX-6cat-sr",)
 FREEZE = REPO / "logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json"
 PACKS = "artifacts/stages/stage-2/teacher_modes/packs_6cat"
 PACK_FILES = ("blocks.npz", "ladder.json", "audit.jsonl")
@@ -196,7 +201,8 @@ def bind_pack(arm: str, pack_dir: Path, fr: dict | None = None) -> dict:
             "supervised_tokens_in_sequences": int(tr["supervised_tokens"]),
             "non_padding_tokens": int(tr["non_padding_tokens"]),
             "repeated_supervised_tokens": int(tr["repeated_supervised_tokens"]),
-            "packing_spec": lad["packing_spec"], "context_strategy": lad["context_strategy"]}
+            "packing_spec": lad["packing_spec"], "context_strategy": lad["context_strategy"],
+            **({"sources": fr["sources"]} if fr.get("sources") else {})}
 
 
 #: the attention every -sr unit trains with (P19): standard causal attention over the whole packed sequence with
@@ -261,14 +267,22 @@ def unit_config(arm: str, seed: int, data: dict, init: dict) -> dict:
     cfg["checkpoint"] = {"save_every": save_every(kd_per_step(data)), "keep_last": 1, "bind_identity": True}
     #: declared, not left to the trainer's default (maintainer 2026-11-07, Stage 3 authorization, section II)
     cfg["batch"] = {**cfg["batch"], "context_strategy": CONTEXT_STRATEGY}
+    pack = {"files_sha256": dict(data["files_sha256"]), "mode": mode,
+            "teacher": {k: t[k] for k in ("model_id", "revision")},
+            "packed_content_sha256": data["packed_content_sha256"],
+            "data_manifest_content_sha256": data["data_manifest_content_sha256"]}
     cfg["lineage"] = {"teacher": t, "mode": mode, "tokenizer": {"files_sha256": TP.tokenizer_files()[lineage]},
                       "initialization": {"root_teacher": {k: t[k] for k in ("model_id", "revision")},
                                          "model_safetensors_sha256": init["model_safetensors_sha256"],
                                          "provenance": dict(init["provenance"])},
-                      "data": [{"files_sha256": dict(data["files_sha256"]), "mode": mode,
-                                "teacher": {k: t[k] for k in ("model_id", "revision")},
-                                "packed_content_sha256": data["packed_content_sha256"],
-                                "data_manifest_content_sha256": data["data_manifest_content_sha256"]}]}
+                      "data": [pack]}
+    if isinstance(mode, tuple):         #: one teacher, several modes in one pack: declared per source, never mode: null
+        cfg["lineage"].pop("mode")
+        cfg["lineage"]["modes"] = list(mode)
+        pack.pop("mode")
+        pack["modes"] = list(mode)
+        pack["sources"] = [{"mode": s["mode"], "source_arm": arm_, "data_manifest_content_sha256": s["content_sha256"],
+                            "data_manifest_sha256": s["manifest_sha256"]} for arm_, s in data["sources"].items()]
     return cfg
 
 

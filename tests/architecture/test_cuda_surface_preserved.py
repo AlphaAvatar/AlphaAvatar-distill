@@ -2630,6 +2630,15 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "`RunPodProvider.pod_record(pod_id)`: one REST v2 `GET /v2/pods/{id}` read, never raising (None when "
             "unread); `RUNPOD_REST_V2`. Termination, polling and listing unchanged. NO CUDA SURFACE.",
      }),
+    ("07a57cc0fccb66f8506d306a67acd98ae0d74f44",
+     "A-MIX-6cat-sr: one teacher's modes in one pack (maintainer 2026-11-09)",
+     {
+        "src/aadistill/training/lineage.py":
+            "A lineage may declare `modes` (distinct names) instead of one `mode`: each pack then declares the "
+            "`modes` it holds with one `sources` entry per mode, every declared mode is trained by a pack, and "
+            "`mode` with `modes` refuses; a single-mode lineage refuses a pack that declares `modes`. `stamp` "
+            "carries `modes`. Every single-mode declaration checks exactly as before. NO CUDA SURFACE.",
+     }),
 )
 
 

@@ -15,6 +15,7 @@
   "historical_paths",
   "members",
   "n_files",
+  "protection_lifted",
   "reason_physical_weights_deleted",
   "reconstruction_recipe",
   "references_at_deletion",
@@ -34,10 +35,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 61,
-  "active": 59,
-  "active_retired_bytes": 459617821927,
-  "active_retired_human": "428.052 GiB",
+  "tombstones_total": 79,
+  "active": 77,
+  "active_retired_bytes": 485745459202,
+  "active_retired_human": "452.386 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -71,7 +72,7 @@
    "size_human": "1.12 GiB",
    "reason_physical_weights_deleted": "byte-identical to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint (both 86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54). Its scientific value was proving the rebuild path reproduces the control exactly, and that fact is the recorded hash match, not the bytes.",
    "deterministic_reconstruction_possible": true,
-   "reconstruction_recipe": "PYTHONPATH=src python scripts/init/build_stage1_init.py against the pinned Stage-0 activation cache aaeb2e4c\u2026 ; verified by hash equality with the control",
+   "reconstruction_recipe": "PYTHONPATH=src python scripts/init/build_stage1_init.py against the pinned Stage-0 activation cache aaeb2e4c… ; verified by hash equality with the control",
    "expected_reconstruction_cost": "$0 (CPU)",
    "frozen_results_location": "logs/EXPERIMENT_INDEX.md; logs/EXPERIMENTS.md",
    "deleted_utc": "2026-08-12T06:27:23+00:00"
@@ -125,7 +126,7 @@
     "vocab_size": 151936
    },
    "size_human": "1.12 GiB",
-   "reason_physical_weights_deleted": "E1's random-init control. Its result \u2014 PCA decisively beats random \u2014 is frozen in EXPERIMENT_INDEX.md and EXPERIMENTS.md \u00a711/\u00a728. A full copy is on the relay and the init is deterministic from its seed, so local weights add nothing.",
+   "reason_physical_weights_deleted": "E1's random-init control. Its result — PCA decisively beats random — is frozen in EXPERIMENT_INDEX.md and EXPERIMENTS.md §11/§28. A full copy is on the relay and the init is deterministic from its seed, so local weights add nothing.",
    "deterministic_reconstruction_possible": true,
    "reconstruction_recipe": "scripts/init/build_stage1_init.py with the random-init flag and the pinned seed",
    "expected_reconstruction_cost": "$0 (CPU, minutes)",
@@ -153,7 +154,7 @@
     "vocab_size": 151936
    },
    "size_human": "2.23 GiB",
-   "reason_physical_weights_deleted": "0.86M probe rung, seed sa. The frozen 150-prompt battery depends on the PROMPT SAMPLE (mask d6e24e0b09da1bcc\u2026), not on these weights.",
+   "reason_physical_weights_deleted": "0.86M probe rung, seed sa. The frozen 150-prompt battery depends on the PROMPT SAMPLE (mask d6e24e0b09da1bcc…), not on these weights.",
    "deterministic_reconstruction_possible": true,
    "reconstruction_recipe": "retrain from qwen3_0p6b_init_v0 with configs/stage3/e1/e1_r0860k_sa_pca.json",
    "expected_reconstruction_cost": "~$2 on L40S",
@@ -162,7 +163,7 @@
    "relay_copy_deleted_utc": "2026-08-15T00:00:00+00:00",
    "relay_copy_deleted_reason": "relay copy deleted 2026-08-15 to reclaim 2.23 GiB for the vLLM offline wheelhouse, on explicit maintainer instruction naming this checkpoint. NO copy survives anywhere: not on the dev box, not on the relay. The identity below (weights/config sha256) remains the binding record, and the recovery path is deterministic reconstruction from the recipe.",
    "surviving_copies": [],
-   "relay_path_status": "DELETED \u2014 the path no longer resolves",
+   "relay_path_status": "DELETED — the path no longer resolves",
    "recovery": "deterministic reconstruction only: retrain from qwen3_0p6b_init_v0 with configs/stage3/e1/e1_r0860k_sa_pca.json (~$2 on L40S), then verify against weights_sha256 above",
    "relay_lfs_object_permanently_deleted": {
     "utc": "2026-08-14T19:47Z",
@@ -225,7 +226,7 @@
     "vocab_size": 151936
    },
    "size_human": "2.23 GiB",
-   "reason_physical_weights_deleted": "Random-init arm at 2.96M. The init-vs-random conclusion is closed and frozen; no planned experiment reuses these weights. SOLE COPY \u2014 deleted deliberately under the 2026-08-12 closeout, results retained.",
+   "reason_physical_weights_deleted": "Random-init arm at 2.96M. The init-vs-random conclusion is closed and frozen; no planned experiment reuses these weights. SOLE COPY — deleted deliberately under the 2026-08-12 closeout, results retained.",
    "deterministic_reconstruction_possible": true,
    "reconstruction_recipe": "retrain from random_baseline with configs/stage3/e1/e1_r2960k_sb_rand.json",
    "expected_reconstruction_cost": "~$7 on L40S",
@@ -253,7 +254,7 @@
     "vocab_size": 151936
    },
    "size_human": "2.23 GiB",
-   "reason_physical_weights_deleted": "Highest E1 rung. Scientific result frozen; the AutoInitializer phase probes at 0.86M and confirms at 2.96M, so 5.50M weights are not required. SOLE COPY \u2014 deleted deliberately.",
+   "reason_physical_weights_deleted": "Highest E1 rung. Scientific result frozen; the AutoInitializer phase probes at 0.86M and confirms at 2.96M, so 5.50M weights are not required. SOLE COPY — deleted deliberately.",
    "deterministic_reconstruction_possible": true,
    "reconstruction_recipe": "retrain with configs/stage3/e1/e1_r5500k_sb_pca.json",
    "expected_reconstruction_cost": "~$13 on L40S",
@@ -281,7 +282,7 @@
     "vocab_size": 151936
    },
    "size_human": "2.23 GiB",
-   "reason_physical_weights_deleted": "Random-init arm at the highest rung; both its comparisons are closed. SOLE COPY \u2014 deleted deliberately.",
+   "reason_physical_weights_deleted": "Random-init arm at the highest rung; both its comparisons are closed. SOLE COPY — deleted deliberately.",
    "deterministic_reconstruction_possible": true,
    "reconstruction_recipe": "retrain with configs/stage3/e1/e1_r5500k_sb_rand.json",
    "expected_reconstruction_cost": "~$13 on L40S",
@@ -326,15 +327,15 @@
    "experiment": "E8a (RoPE skew diagnostic)",
    "seed": null,
    "scientific_role": "activation-cache reader probe, not a checkpoint",
-   "weights_sha256": "fa42904be1ce040b\u2026(truncated; full value in EXPERIMENTS.md \u00a736)",
+   "weights_sha256": "fa42904be1ce040b…(truncated; full value in EXPERIMENTS.md §36)",
    "config_sha256": null,
    "architecture": null,
    "size_human": "1.81 GiB",
-   "reason_physical_weights_deleted": "transformers 5.13.1 probe of the Stage-0 activation cache, produced to diagnose the 4.x/5.x rope_parameters skew. The finding is recorded (EXPERIMENTS.md \u00a736, decisions.md) and the canonical cache aaeb2e4c\u2026 is retained locally and on the relay.",
+   "reason_physical_weights_deleted": "transformers 5.13.1 probe of the Stage-0 activation cache, produced to diagnose the 4.x/5.x rope_parameters skew. The finding is recorded (EXPERIMENTS.md §36, decisions.md) and the canonical cache aaeb2e4c… is retained locally and on the relay.",
    "deterministic_reconstruction_possible": true,
    "reconstruction_recipe": "re-run scripts/init/collect_stage0.py under the named transformers version against the pinned teacher",
    "expected_reconstruction_cost": "$0 (CPU, ~1 h)",
-   "frozen_results_location": "logs/EXPERIMENTS.md \u00a736; logs/decisions.md",
+   "frozen_results_location": "logs/EXPERIMENTS.md §36; logs/decisions.md",
    "deleted_utc": "2026-08-12T08:36:45+00:00"
   },
   {
@@ -347,7 +348,7 @@
    "experiment": "E8a (RoPE skew diagnostic)",
    "seed": null,
    "scientific_role": "activation-cache reader probe, not a checkpoint",
-   "weights_sha256": "274e6d6d42b64a02\u2026(truncated; full value in EXPERIMENTS.md \u00a736)",
+   "weights_sha256": "274e6d6d42b64a02…(truncated; full value in EXPERIMENTS.md §36)",
    "config_sha256": null,
    "architecture": null,
    "size_human": "1.81 GiB",
@@ -355,7 +356,7 @@
    "deterministic_reconstruction_possible": true,
    "reconstruction_recipe": "re-run scripts/init/collect_stage0.py under the named transformers version against the pinned teacher",
    "expected_reconstruction_cost": "$0 (CPU, ~1 h)",
-   "frozen_results_location": "logs/EXPERIMENTS.md \u00a736; logs/decisions.md",
+   "frozen_results_location": "logs/EXPERIMENTS.md §36; logs/decisions.md",
    "deleted_utc": "2026-08-12T08:36:45+00:00"
   },
   {
@@ -2000,7 +2001,7 @@
    ],
    "deletion_criterion": "verified_stale_cache",
    "deletion_criterion_meaning": "a stale local cache whose canonical remote artifact has been hash-verified",
-   "reason_physical_weights_deleted": "the staging copy left on the dev box after the wheelhouse was uploaded. All 196 wheels verified byte-identical to the relay copy \u2014 123 by LFS oid, and the other 73 downloaded and hashed because a non-LFS blob_id is a git sha1 over different bytes and proves nothing. The tracked manifest wheelhouse_vllm_sha256.json pins the same 196 hashes, and pods fetch from the relay, never from this machine.",
+   "reason_physical_weights_deleted": "the staging copy left on the dev box after the wheelhouse was uploaded. All 196 wheels verified byte-identical to the relay copy — 123 by LFS oid, and the other 73 downloaded and hashed because a non-LFS blob_id is a git sha1 over different bytes and proves nothing. The tracked manifest wheelhouse_vllm_sha256.json pins the same 196 hashes, and pods fetch from the relay, never from this machine.",
    "canonical_surviving_evidence": "the relay prefix transfer/wheelhouse_vllm_cp312, and the tracked hash manifest wheelhouse_vllm_sha256.json",
    "relay_hash_verified": true,
    "deterministic_reconstruction_possible": true,
@@ -2071,7 +2072,7 @@
    "deleted_utc": "2026-08-17T19:44:44+00:00",
    "withdrawn": true,
    "withdrawn_utc": "2026-08-17T20:29:24+00:00",
-   "withdrawn_reason": "WITHDRAWN, and the withdrawal is the useful record. The path was deleted and the deletion was harmless, but it is not a retirement: scripts/pod/simulate_pod_env.sh recreates this quarantine on every sweep by design \u2014 never deleting a recreated destination is what fixed the 2026-08-15 data-loss scare \u2014 and the very next simulator run put it back, which tests/docs/test_storage_inventory.py::test_no_tombstoned_path_is_still_on_disk caught. A tombstone asserts that something stopped existing; a directory regenerated by a routine command has not. This is recurring scratch, documented in the simulator's header, not a tombstoned artifact."
+   "withdrawn_reason": "WITHDRAWN, and the withdrawal is the useful record. The path was deleted and the deletion was harmless, but it is not a retirement: scripts/pod/simulate_pod_env.sh recreates this quarantine on every sweep by design — never deleting a recreated destination is what fixed the 2026-08-15 data-loss scare — and the very next simulator run put it back, which tests/docs/test_storage_inventory.py::test_no_tombstoned_path_is_still_on_disk caught. A tombstone asserts that something stopped existing; a directory regenerated by a routine command has not. This is recurring scratch, documented in the simulator's header, not a tombstoned artifact."
   },
   {
    "canonical_id": "optimizer_state_of_a_completed_experiment.E4",
@@ -4543,7 +4544,7 @@
    ],
    "deletion_criterion": "duplicate_copy",
    "deletion_criterion_meaning": "a byte-identical second copy on the same disk; the protected copy stays where every reader finds it",
-   "reason_physical_weights_deleted": "the dev-box disk at 100% (1.5 GB free) while the packed Full Search runs; the maintainer 2026-11-06: '\u5220\u9664\u4e00\u4e9b\u65e0\u7528\u7684checkpoint'. Re-hashed before deletion: both copies aaeb2e4c1ec6...; the kept copy is artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors (registry: protected); no file under src/, configs/ or scripts/ names relay_retired, and no current session launcher declares either file",
+   "reason_physical_weights_deleted": "the dev-box disk at 100% (1.5 GB free) while the packed Full Search runs; the maintainer 2026-11-06: '删除一些无用的checkpoint'. Re-hashed before deletion: both copies aaeb2e4c1ec6...; the kept copy is artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors (registry: protected); no file under src/, configs/ or scripts/ names relay_retired, and no current session launcher declares either file",
    "canonical_surviving_evidence": "artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors (byte-identical, protected) and this tombstone",
    "relay_hash_verified": null,
    "deterministic_reconstruction_possible": true,
@@ -4585,7 +4586,7 @@
    ],
    "deletion_criterion": "duplicate_copy",
    "deletion_criterion_meaning": "a byte-identical second copy on the same disk; the protected copy stays where every reader finds it",
-   "reason_physical_weights_deleted": "the dev-box disk at 100% (1.5 GB free) while the packed Full Search runs; the maintainer 2026-11-06: '\u5220\u9664\u4e00\u4e9b\u65e0\u7528\u7684checkpoint'. Re-hashed before deletion: both copies 7a0694a5d5c5...; the kept copy is artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors (registry: protected); no file under src/, configs/ or scripts/ names relay_retired, and no current session launcher declares either file",
+   "reason_physical_weights_deleted": "the dev-box disk at 100% (1.5 GB free) while the packed Full Search runs; the maintainer 2026-11-06: '删除一些无用的checkpoint'. Re-hashed before deletion: both copies 7a0694a5d5c5...; the kept copy is artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors (registry: protected); no file under src/, configs/ or scripts/ names relay_retired, and no current session launcher declares either file",
    "canonical_surviving_evidence": "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors (byte-identical, protected) and this tombstone",
    "relay_hash_verified": null,
    "deterministic_reconstruction_possible": true,
@@ -4596,7 +4597,1290 @@
    "withdrawn": false,
    "withdrawn_reason": null,
    "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "devbox_20261109_ctl_sa_trainer_state",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/trainer_state.pt"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage 3 (permanent controls)",
+   "seed": null,
+   "scientific_role": "AdamW/step/RNG state of permanent control preflight_ctl_r0860k_sa (training closed at step 1023)",
+   "weights_sha256": "f7c8816fc234cb8f441885eae897df951a61c3ec476de2fc6b0940e974ac265d",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 3524023523,
+   "size_human": "3.28 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/trainer_state.pt",
+     "size_bytes": 3524023523,
+     "sha256": "f7c8816fc234cb8f441885eae897df951a61c3ec476de2fc6b0940e974ac265d"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-2/reasoning_data/h1pa.json",
+    "logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json",
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/storage/storage_measurements.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_211335/closeout/outcome.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206/closeout/tombstone.json",
+    "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/volume_audit.json",
+    "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
+    "logs/stages/stage-2/teacher_modes/audit/six_category_persistence.json",
+    "logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json",
+    "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/closeout/a1_evidence.json",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md"
+   ],
+   "deletion_criterion": "reproducible_materialization",
+   "deletion_criterion_meaning": "a temporary materialization that is deterministically reproducible",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; a closed training's optimizer state with no exact-continuation consumer (the recovery continuation that resumed from it is COMPLETE); the control's model weights stay, locally and on the relay",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/model; hf:AlphaAvatar/aadistill-artifacts:permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain the control from its recorded config (paid GPU)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/recovery_continuation/; logs/maintenance/inventories/checkpoint_registry.json",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/trainer_state.pt",
+    "retention": "control",
+    "never_delete_clause": "permanent control — named explicitly in the retention rule",
+    "retention_reason": "one of the two permanent controls Stage 3 completed on; the frozen thresholds were materialized against them",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:05:38+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_ctl_sb_trainer_state",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/trainer_state.pt"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage 3 (permanent controls)",
+   "seed": null,
+   "scientific_role": "AdamW/step/RNG state of permanent control preflight_ctl_r0860k_sb (training closed at step 1023)",
+   "weights_sha256": "d333a47a8fa15414e5259711a75d890e66b9174c7f9fc1eca377c7ad4dfb165b",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 3524023523,
+   "size_human": "3.28 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/trainer_state.pt",
+     "size_bytes": 3524023523,
+     "sha256": "d333a47a8fa15414e5259711a75d890e66b9174c7f9fc1eca377c7ad4dfb165b"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-2/reasoning_data/h1pa.json",
+    "logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json",
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/storage/storage_measurements.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_211335/closeout/outcome.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206/closeout/tombstone.json",
+    "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/volume_audit.json",
+    "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
+    "logs/stages/stage-2/teacher_modes/audit/six_category_persistence.json",
+    "logs/stages/stage-2/teacher_modes/plans/packed_training_plan.json",
+    "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/closeout/a1_evidence.json",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md"
+   ],
+   "deletion_criterion": "reproducible_materialization",
+   "deletion_criterion_meaning": "a temporary materialization that is deterministically reproducible",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; a closed training's optimizer state with no exact-continuation consumer (the recovery continuation that resumed from it is COMPLETE); the control's model weights stay, locally and on the relay",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/model; hf:AlphaAvatar/aadistill-artifacts:permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain the control from its recorded config (paid GPU)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/recovery_continuation/; logs/maintenance/inventories/checkpoint_registry.json",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/trainer_state.pt",
+    "retention": "control",
+    "never_delete_clause": "permanent control — named explicitly in the retention rule",
+    "retention_reason": "one of the two permanent controls Stage 3 completed on; the frozen thresholds were materialized against them",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:05:53+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_c2_top5_1d2844488f3a",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_c2_full_search / phase_c2_behavioural",
+   "seed": null,
+   "scientific_role": "C2 full joint re-search Top-5 candidate 1d2844488f3ad630414c3cd69b6fa395, replayed byte for byte (attempt3_replay)",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1193442530,
+   "size_human": "1.11 GiB",
+   "n_files": 5,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395/durable_ack.json",
+     "size_bytes": 410,
+     "sha256": "a0d73124ef1d3d70cdac25859ee4e5675921138d935a15000a0171c3f31db402"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "313e206d12dce3db049835caa39140b629b4505ba2b97074a5f56a912d1ba697"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395/replay_leaf.json",
+     "size_bytes": 1305399,
+     "sha256": "f61212ca78d9f61711065917882d581dbaa886101eb956e831bd594eaba8487f"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt13/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt13/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/evidence/c2_decision.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/evidence/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt3/closeout/outcome.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt3/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/runtime/session.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; C2 CLOSED WITHOUT PROMOTION (c2_behavioural_weight_cleanup.json), its 12 probes trained and scored; a non-winning search state with no active consumer",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_c2_full_search; logs/stages/stage-1/phase_c2_behavioural; logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_launch.py: every step pinned to attempt 3's recorded artifact digest",
+   "expected_reconstruction_cost": "paid GPU (the replay's derived $4.77 for all five)",
+   "frozen_results_location": "logs/stages/stage-1/phase_c2_behavioural/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1d2844488f3ad630414c3cd69b6fa395",
+    "retention": "diagnostic",
+    "never_delete_clause": "unclassified",
+    "retention_reason": "not matched by the classification table — review before any deletion",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:05:58+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_c2_top5_88086555a666",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_c2_full_search / phase_c2_behavioural",
+   "seed": null,
+   "scientific_role": "C2 full joint re-search Top-5 candidate 88086555a6662b206e00ae28fc9d3ca3, replayed byte for byte (attempt3_replay)",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1193163337,
+   "size_human": "1.11 GiB",
+   "n_files": 5,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3/durable_ack.json",
+     "size_bytes": 410,
+     "sha256": "94540f5ffa2fcc619ff05e3fad53153c583500c6a0e20183e42b1c55931024d9"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "695813e6054bc12ce82728106e4d0eae62eb5de374194ee63417665be2aad0ab"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3/replay_leaf.json",
+     "size_bytes": 1026206,
+     "sha256": "623d91adb9fba69967d93e904e30d9b59245a3b2180b877a47aa14ac693ca94d"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt13/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt13/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/evidence/c2_decision.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/evidence/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt3/closeout/outcome.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt3/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/runtime/session.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; C2 CLOSED WITHOUT PROMOTION (c2_behavioural_weight_cleanup.json), its 12 probes trained and scored; a non-winning search state with no active consumer",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_c2_full_search; logs/stages/stage-1/phase_c2_behavioural; logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_launch.py: every step pinned to attempt 3's recorded artifact digest",
+   "expected_reconstruction_cost": "paid GPU (the replay's derived $4.77 for all five)",
+   "frozen_results_location": "logs/stages/stage-1/phase_c2_behavioural/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/88086555a6662b206e00ae28fc9d3ca3",
+    "retention": "diagnostic",
+    "never_delete_clause": "unclassified",
+    "retention_reason": "not matched by the classification table — review before any deletion",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:03+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_c2_top5_1a2b5b030e7e",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_c2_full_search / phase_c2_behavioural",
+   "seed": null,
+   "scientific_role": "C2 full joint re-search Top-5 candidate 1a2b5b030e7e4e202fda3a810ed53c5f, replayed byte for byte (attempt3_replay)",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1193161247,
+   "size_human": "1.11 GiB",
+   "n_files": 5,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f/durable_ack.json",
+     "size_bytes": 410,
+     "sha256": "a6d6f2b3ae356baaa741e216f9c14cdccccbcd3a76f2ab4ab860c380dd324bec"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "03f9a0836b78c5d9882e9eb74f3410eb9734459c529dcf2a46ab4a1da66fb394"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f/replay_leaf.json",
+     "size_bytes": 1024116,
+     "sha256": "62d3e19846d9b459c91045411eda56e0c0875148958b45f776113c01c005db31"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/log_inventory.json",
+    "logs/stages/stage-1/families/d_series/analyses/d2v3_real_logits_check.json",
+    "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_decision_recomputed.json",
+    "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md",
+    "logs/stages/stage-1/phase_c2_behavioural/analyses/transport_and_storage_20260922.json",
+    "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/closeout/outcome.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/closeout/outcome.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt13/closeout/outcome.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; C2 CLOSED WITHOUT PROMOTION (c2_behavioural_weight_cleanup.json), its 12 probes trained and scored; a non-winning search state with no active consumer",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_c2_full_search; logs/stages/stage-1/phase_c2_behavioural; logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_launch.py: every step pinned to attempt 3's recorded artifact digest",
+   "expected_reconstruction_cost": "paid GPU (the replay's derived $4.77 for all five)",
+   "frozen_results_location": "logs/stages/stage-1/phase_c2_behavioural/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/1a2b5b030e7e4e202fda3a810ed53c5f",
+    "retention": "diagnostic",
+    "never_delete_clause": "unclassified",
+    "retention_reason": "not matched by the classification table — review before any deletion",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:08+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_c2_top5_7da1e4e2254e",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_c2_full_search / phase_c2_behavioural",
+   "seed": null,
+   "scientific_role": "C2 full joint re-search Top-5 candidate 7da1e4e2254e59766581e777b8066b7e, replayed byte for byte (attempt3_replay)",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1193160483,
+   "size_human": "1.11 GiB",
+   "n_files": 5,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e/durable_ack.json",
+     "size_bytes": 410,
+     "sha256": "3c35d94537a31228e18e73ffad998468691f919b5a76a754f6154603cfae46e4"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "4d693520981b2124f2465cf0ef15e325e996bb548a87574a573e6995c8982ff0"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e/replay_leaf.json",
+     "size_bytes": 1023352,
+     "sha256": "3bfb99d291bd2305f6fdbf49f37614bb586ad00d88776e3afcee22dc77a73e45"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt13/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt13/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/evidence/c2_decision.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/evidence/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt3/closeout/outcome.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt3/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/runtime/session.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; C2 CLOSED WITHOUT PROMOTION (c2_behavioural_weight_cleanup.json), its 12 probes trained and scored; a non-winning search state with no active consumer",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_c2_full_search; logs/stages/stage-1/phase_c2_behavioural; logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_launch.py: every step pinned to attempt 3's recorded artifact digest",
+   "expected_reconstruction_cost": "paid GPU (the replay's derived $4.77 for all five)",
+   "frozen_results_location": "logs/stages/stage-1/phase_c2_behavioural/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/7da1e4e2254e59766581e777b8066b7e",
+    "retention": "diagnostic",
+    "never_delete_clause": "unclassified",
+    "retention_reason": "not matched by the classification table — review before any deletion",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:14+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_c2_top5_d005dfb27e7b",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_c2_full_search / phase_c2_behavioural",
+   "seed": null,
+   "scientific_role": "C2 full joint re-search Top-5 candidate d005dfb27e7bb5adc46eb988ae79e2a9, replayed byte for byte (attempt3_replay)",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1193158703,
+   "size_human": "1.11 GiB",
+   "n_files": 5,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9/durable_ack.json",
+     "size_bytes": 410,
+     "sha256": "3d08c03cb2863bd196f251c5f8525ad9ab950bc4412219bed8d714d2d2aa26d2"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "85f8f0558b9cb657a4f8e4b076d79b5e49cf263e1c0af261e4042f2957d9ea8f"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9/replay_leaf.json",
+     "size_bytes": 1021572,
+     "sha256": "217d1bf16d4e787c4c0c5d02983efd076946b708e08ed3682bf346ced81fc645"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt10/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/closeout/outcome.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt11/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt12/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt13/runtime/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt13/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/evidence/c2_decision.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/evidence/driver_evidence.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14/runtime/session.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt3/closeout/outcome.json",
+    "logs/stages/stage-1/phase_c2_behavioural/runs/attempt3/runtime/session.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; C2 CLOSED WITHOUT PROMOTION (c2_behavioural_weight_cleanup.json), its 12 probes trained and scored; a non-winning search state with no active consumer",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_c2_full_search; logs/stages/stage-1/phase_c2_behavioural; logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_launch.py: every step pinned to attempt 3's recorded artifact digest",
+   "expected_reconstruction_cost": "paid GPU (the replay's derived $4.77 for all five)",
+   "frozen_results_location": "logs/stages/stage-1/phase_c2_behavioural/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay/d005dfb27e7bb5adc46eb988ae79e2a9",
+    "retention": "diagnostic",
+    "never_delete_clause": "unclassified",
+    "retention_reason": "not matched by the classification table — review before any deletion",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:19+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_phase_a_158b96cf651f",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/phase_a/158b96cf651fd8ba8f8ceaefefde2067"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_a",
+   "seed": null,
+   "scientific_role": "retained Phase-A search leaf 158b96cf651fd8ba8f8ceaefefde2067",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/158b96cf651fd8ba8f8ceaefefde2067/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/158b96cf651fd8ba8f8ceaefefde2067/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/158b96cf651fd8ba8f8ceaefefde2067/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "7f6a7889a87c65aa2ebf135a8b57c9660abefccd26536890dc77f559cc65e2f9"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/shared/analyses/autoinit_selected_leaf_transport_manifest.json",
+    "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_session.json",
+    "logs/stages/stage-1/phase_a/runs/attempt11/phase_a_evidence.json",
+    "logs/stages/stage-1/phase_a/runs/attempt11/search_result.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/phase_a_evidence.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/search_result.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/selected_leaf_durability.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/session.json",
+    "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_continuation_session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt1/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt2/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt3/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt4/phase_a_evidence.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt4/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt4/stage1_import.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; Phase A, Phase B, continuation B, the recovery continuation and C1 are COMPLETE; a search state with no active consumer; its lineage, probe results and selection evidence are committed",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a; logs/stages/stage-1/recovery_continuation; logs/stages/stage-1/phase_c1",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "re-run the recorded Phase-A operator path (scripts/stages/stage-1/phase_a/phase_a_search.py)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/phase_a/results/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/phase_a/158b96cf651fd8ba8f8ceaefefde2067",
+    "retention": "reproducibility_required",
+    "never_delete_clause": null,
+    "retention_reason": "the Phase-A search's retained leaves; their lineage, probe results and selection evidence are committed, and the leaves back every later incumbent comparison",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:24+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_phase_a_281a02c3ac18",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/phase_a/281a02c3ac18419b70e896296dac0d03"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_a",
+   "seed": null,
+   "scientific_role": "retained Phase-A search leaf 281a02c3ac18419b70e896296dac0d03",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/281a02c3ac18419b70e896296dac0d03/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/281a02c3ac18419b70e896296dac0d03/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/281a02c3ac18419b70e896296dac0d03/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "62daf60dac46487a7513b25ae984de4205d2a3e0849a58f7de633493ae7f57c6"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/shared/analyses/autoinit_selected_leaf_transport_manifest.json",
+    "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_session.json",
+    "logs/stages/stage-1/phase_a/runs/attempt11/phase_a_evidence.json",
+    "logs/stages/stage-1/phase_a/runs/attempt11/search_result.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/phase_a_evidence.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/search_result.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/selected_leaf_durability.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/session.json",
+    "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_continuation_session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt1/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt2/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt3/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt4/phase_a_evidence.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt4/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt4/stage1_import.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; Phase A, Phase B, continuation B, the recovery continuation and C1 are COMPLETE; a search state with no active consumer; its lineage, probe results and selection evidence are committed",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a; logs/stages/stage-1/recovery_continuation; logs/stages/stage-1/phase_c1",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "re-run the recorded Phase-A operator path (scripts/stages/stage-1/phase_a/phase_a_search.py)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/phase_a/results/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/phase_a/281a02c3ac18419b70e896296dac0d03",
+    "retention": "reproducibility_required",
+    "never_delete_clause": null,
+    "retention_reason": "the Phase-A search's retained leaves; their lineage, probe results and selection evidence are committed, and the leaves back every later incumbent comparison",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:29+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_phase_a_4e429f7ed722",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/phase_a/4e429f7ed722b180dd662c779895693f"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_a",
+   "seed": null,
+   "scientific_role": "retained Phase-A search leaf 4e429f7ed722b180dd662c779895693f",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/4e429f7ed722b180dd662c779895693f/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/4e429f7ed722b180dd662c779895693f/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/4e429f7ed722b180dd662c779895693f/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "cd334d30d7466ae3c76ed3dcdc7b66cceb0473d56e7af74028d6c7e93de45ace"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/shared/analyses/autoinit_selected_leaf_transport_manifest.json",
+    "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_session.json",
+    "logs/stages/stage-1/phase_a/runs/attempt11/phase_a_evidence.json",
+    "logs/stages/stage-1/phase_a/runs/attempt11/search_result.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/phase_a_evidence.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/search_result.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/selected_leaf_durability.json",
+    "logs/stages/stage-1/phase_a/runs/attempt12/session.json",
+    "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_continuation_session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt1/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt2/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt3/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt4/phase_a_evidence.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt4/session.json",
+    "logs/stages/stage-1/recovery_continuation/runs/attempt4/stage1_import.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; Phase A, Phase B, continuation B, the recovery continuation and C1 are COMPLETE; a search state with no active consumer; its lineage, probe results and selection evidence are committed",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a; logs/stages/stage-1/recovery_continuation; logs/stages/stage-1/phase_c1",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "re-run the recorded Phase-A operator path (scripts/stages/stage-1/phase_a/phase_a_search.py)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/phase_a/results/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/phase_a/4e429f7ed722b180dd662c779895693f",
+    "retention": "reproducibility_required",
+    "never_delete_clause": null,
+    "retention_reason": "the Phase-A search's retained leaves; their lineage, probe results and selection evidence are committed, and the leaves back every later incumbent comparison",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:34+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_phase_a_85bde4ded2c3",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_a",
+   "seed": null,
+   "scientific_role": "retained Phase-A search leaf 85bde4ded2c31953f802e39cf2252c87",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "0a9a5a78e87cc800c1187a2c19f75c5e490734d1518fe8968d517b2077353c45"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/budget/ledger.md",
+    "logs/maintenance/cleanup/autoinit_attempt5_retention_verification.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/shared/analyses/autoinit_behavioural_continuation_pricing.json",
+    "logs/shared/analyses/autoinit_selected_leaf_transport_manifest.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt3.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt4.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt5.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_session.json",
+    "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt3/continuation_evidence.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/continuation_evidence.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/phase_a_result.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/probes/autoinit.v1.phase_a.rung1.85bde4ded2c3.sa.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/probes/autoinit.v1.phase_a.rung2.85bde4ded2c3.sb.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; Phase A, Phase B, continuation B, the recovery continuation and C1 are COMPLETE; a search state with no active consumer; its lineage, probe results and selection evidence are committed",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a; logs/stages/stage-1/recovery_continuation; logs/stages/stage-1/phase_c1",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "re-run the recorded Phase-A operator path (scripts/stages/stage-1/phase_a/phase_a_search.py)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/phase_a/results/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/phase_a/85bde4ded2c31953f802e39cf2252c87",
+    "retention": "reproducibility_required",
+    "never_delete_clause": null,
+    "retention_reason": "the Phase-A search's retained leaves; their lineage, probe results and selection evidence are committed, and the leaves back every later incumbent comparison",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:39+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_phase_a_ab7632b00788",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/phase_a/ab7632b00788f825e252ea8d5ff4be30"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_a",
+   "seed": null,
+   "scientific_role": "retained Phase-A search leaf ab7632b00788f825e252ea8d5ff4be30",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/ab7632b00788f825e252ea8d5ff4be30/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/ab7632b00788f825e252ea8d5ff4be30/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/ab7632b00788f825e252ea8d5ff4be30/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "c576287771e290e534b98c3ebb8b79c6337f7373d4f30d809af438f99497700e"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/cleanup/autoinit_attempt5_retention_verification.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/shared/analyses/autoinit_attempt5_probe_reuse.json",
+    "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/continuation_evidence.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/phase_a_result.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/probes/autoinit.v1.phase_a.rung1.ab7632b00788.sa.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/continuation_evidence.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/phase_a_result.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/probes/autoinit.v1.phase_a.rung1.ab7632b00788.sa.json",
+    "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_attempt5.json",
+    "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json",
+    "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_session.json",
+    "logs/stages/stage-1/phase_b/runs/attempt5/phase_a_evidence.json",
+    "logs/stages/stage-1/phase_b/runs/attempt5/probes/autoinit.v1.phase_a.rung1.ab7632b00788.sa.json",
+    "logs/stages/stage-1/phase_b/runs/attempt5/search_result.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; Phase A, Phase B, continuation B, the recovery continuation and C1 are COMPLETE; a search state with no active consumer; its lineage, probe results and selection evidence are committed",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a; logs/stages/stage-1/recovery_continuation; logs/stages/stage-1/phase_c1",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "re-run the recorded Phase-A operator path (scripts/stages/stage-1/phase_a/phase_a_search.py)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/phase_a/results/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/phase_a/ab7632b00788f825e252ea8d5ff4be30",
+    "retention": "reproducibility_required",
+    "never_delete_clause": null,
+    "retention_reason": "the Phase-A search's retained leaves; their lineage, probe results and selection evidence are committed, and the leaves back every later incumbent comparison",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:45+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_phase_a_cca699c93f34",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_a",
+   "seed": null,
+   "scientific_role": "retained Phase-A search leaf cca699c93f34dad7e94a5d13a25b2bc2",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "db056398840f5c64f767fe8690803478918399c04bd7b4a1aeae6b7549c624af"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/cleanup/autoinit_attempt5_retention_verification.json",
+    "logs/maintenance/cleanup/autoinit_relay_retention_20260822.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/shared/analyses/autoinit_selected_leaf_transport_manifest.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json",
+    "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/continuation_evidence.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/phase_a_result.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/probes/autoinit.v1.phase_a.rung1.cca699c93f34.sa.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/probes/autoinit.v1.phase_a.rung2.cca699c93f34.sb.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/probes/autoinit.v1.phase_a.rung3.cca699c93f34.sc.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/continuation_evidence.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/phase_a_result.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/probes/autoinit.v1.phase_a.rung1.cca699c93f34.sa.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/probes/autoinit.v1.phase_a.rung2.cca699c93f34.sb.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/probes/autoinit.v1.phase_a.rung3.cca699c93f34.sc.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; Phase A, Phase B, continuation B, the recovery continuation and C1 are COMPLETE; a search state with no active consumer; its lineage, probe results and selection evidence are committed",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a; logs/stages/stage-1/recovery_continuation; logs/stages/stage-1/phase_c1",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "re-run the recorded Phase-A operator path (scripts/stages/stage-1/phase_a/phase_a_search.py)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/phase_a/results/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/phase_a/cca699c93f34dad7e94a5d13a25b2bc2",
+    "retention": "reproducibility_required",
+    "never_delete_clause": null,
+    "retention_reason": "the Phase-A search's retained leaves; their lineage, probe results and selection evidence are committed, and the leaves back every later incumbent comparison",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:50+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_phase_a_bf5ae3b6ae00",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/phase_a/bf5ae3b6ae00c3dbb963805135b3838f"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_a",
+   "seed": null,
+   "scientific_role": "retained Phase-A search leaf bf5ae3b6ae00c3dbb963805135b3838f",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136719,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/bf5ae3b6ae00c3dbb963805135b3838f/config.json",
+     "size_bytes": 1418,
+     "sha256": "1a1441421ec4c363b230804e86c2dd7fe13ec4457b902b34f7554c8536eb34d1"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/bf5ae3b6ae00c3dbb963805135b3838f/generation_config.json",
+     "size_bytes": 205,
+     "sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/bf5ae3b6ae00c3dbb963805135b3838f/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "26356cffc6b0cb53842156481eaef84b675e87dc9a68428b8c1e4fab3370b2af"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/cleanup/autoinit_attempt5_retention_verification.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/shared/analyses/autoinit_attempt5_probe_reuse.json",
+    "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/continuation_evidence.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/phase_a_result.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt4/probes/autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/continuation_evidence.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/phase_a_result.json",
+    "logs/stages/stage-1/continuation_b/runs/attempt5/probes/autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa.json",
+    "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_attempt5.json",
+    "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_identity_collapse_amendment.json",
+    "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_session.json",
+    "logs/stages/stage-1/phase_b/runs/attempt5/phase_a_evidence.json",
+    "logs/stages/stage-1/phase_b/runs/attempt5/probes/autoinit.v1.phase_a.rung1.bf5ae3b6ae00.sa.json",
+    "logs/stages/stage-1/phase_b/runs/attempt5/search_result.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; Phase A, Phase B, continuation B, the recovery continuation and C1 are COMPLETE; a search state with no active consumer; its lineage, probe results and selection evidence are committed",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a; logs/stages/stage-1/recovery_continuation; logs/stages/stage-1/phase_c1",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "re-run the recorded Phase-A operator path (scripts/stages/stage-1/phase_a/phase_a_search.py)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/phase_a/results/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/phase_a/bf5ae3b6ae00c3dbb963805135b3838f",
+    "retention": "reproducibility_required",
+    "never_delete_clause": null,
+    "retention_reason": "the Phase-A search's retained leaves; their lineage, probe results and selection evidence are committed, and the leaves back every later incumbent comparison",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:06:55+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_phase_a_fe9683e6a9c7",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_a / phase_c1",
+   "seed": null,
+   "scientific_role": "Phase-A leader, C1's incumbent arm (attention.weight_proxy_v0), which C1 beat (GO); not the standing incumbent B",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "d025f38da508803845ea4d01b7cea160d117d47de3535965c7866dc05cd1e48e"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/budget/decisions.md",
+    "logs/maintenance/cleanup/autoinit_attempt5_retention_verification.json",
+    "logs/maintenance/inventories/c2_behavioural_weight_cleanup.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/log_inventory.json",
+    "logs/maintenance/storage/c1_storage_recovery.json",
+    "logs/shared/analyses/autoinit_attempt4_probe_reuse.json",
+    "logs/shared/analyses/autoinit_attempt5_probe_reuse.json",
+    "logs/shared/analyses/autoinit_behavioural_continuation_pricing.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_assets.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt4.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_attempt5.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_corrected_rung2.json",
+    "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_session.json",
+    "logs/stages/stage-1/continuation_b/history/superseded_authorizations/autoinit_continuation_b_authorization_20260829T115028Z_UNUSED.json",
+    "logs/stages/stage-1/continuation_b/history/superseded_authorizations/autoinit_continuation_b_authorization_20260829T153538Z_CONSUMED.json"
+   ],
+   "deletion_criterion": "rejected_search_leaf",
+   "deletion_criterion_meaning": "a rejected search leaf whose lineage, hashes, probe results and selection evidence are already preserved",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; Phase A, Phase B, continuation B, the recovery continuation and C1 are COMPLETE; a search state with no active consumer; its lineage, probe results and selection evidence are committed",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a; logs/stages/stage-1/recovery_continuation; logs/stages/stage-1/phase_c1",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "re-run the recorded Phase-A operator path (scripts/stages/stage-1/phase_a/phase_a_search.py)",
+   "expected_reconstruction_cost": "paid GPU",
+   "frozen_results_location": "logs/stages/stage-1/phase_a/results/",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6",
+    "retention": "reproducibility_required",
+    "never_delete_clause": null,
+    "retention_reason": "Phase-A's leader, which C1 used as its incumbent arm. C1 returned GO at +0.013725 against a SESOI of 0.010, so what C1 PROMOTED is its treatment arm (see `scientific_artifacts.standing_incumbent_B`, digest 53e30566…), not this. Reproducing C1's comparison needs both arms, which is why this is retained; it is not the standing incumbent and no later round's control arm is these bytes. The 2026-10-09 review caught this entry claiming otherwise.",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:07:00+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_d3_structural_product",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de"
+   ],
+   "store": "external_store",
+   "relay_path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "phase_d3",
+   "seed": null,
+   "scientific_role": "D3 initial checkpoint (q2's path with teacher-referenced DEPTH)",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/budget/approvals/autoinit_d3_probes_grant.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/configs/d3_probes_d3_s1004399678.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/configs/d3_probes_d3_s396880939.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/configs/d3_probes_d3_s766527341.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/d3_probes.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/d3_probes_comparison.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/results/d3_probes_d3_s1004399678.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/results/d3_probes_d3_s396880939.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/results/d3_probes_d3_s766527341.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/training/d3_probes_d3_s1004399678/run_manifest.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/training/d3_probes_d3_s396880939/run_manifest.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/training/d3_probes_d3_s766527341/run_manifest.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/governance/authorization.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/runtime/session.json"
+   ],
+   "deletion_criterion": "verified_stale_cache",
+   "deletion_criterion_meaning": "a stale local cache whose canonical remote artifact has been hash-verified",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; D-series CLOSED 2026-10-17, its three probes complete; the relay copy survives (LFS sha256 verified 2026-11-09)",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "hf_hub_download from the relay path",
+   "expected_reconstruction_cost": "$0 from the relay",
+   "frozen_results_location": "logs/stages/stage-1/phase_d3/",
+   "deleted_utc": "2026-11-09T10:07:01+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_d4_top1_local",
+   "historical_paths": [
+    "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "stage0 calibration_volume D4 / H1-PA / C1-6cat-sr",
+   "seed": null,
+   "scientific_role": "Thinking-2507's D4 Top-1 (C1-6cat-sr's initialization), local copy",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
+    "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
+    "configs/stages/stage-2/reasoning_data/h1pa.json",
+    "docs/stages/stage-2/reasoning_data/H1.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/recovery/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/recovery/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206/closeout/tombstone.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r1_1301deb7_s20260727/recovery_config.json"
+   ],
+   "deletion_criterion": "verified_stale_cache",
+   "deletion_criterion_meaning": "a stale local cache whose canonical remote artifact has been hash-verified",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; C1-6cat-sr's formal training and evaluation are complete and no current experiment initializes from it; the relay copy survives (LFS sha256 fc28e0dd verified 2026-11-09)",
+   "canonical_surviving_evidence": "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "hf_hub_download from the relay path",
+   "expected_reconstruction_cost": "$0 from the relay",
+   "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/stage3_sr_result.json",
+   "protection_lifted": {
+    "path_local": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+    "retention": "diagnostic",
+    "never_delete_clause": "unclassified",
+    "retention_reason": "not matched by the classification table — review before any deletion",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:07:03+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261109_mixed_v2_top1_local",
+   "historical_paths": [
+    "artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "stage0 calibration_volume mixed v2 / H1 Mixed",
+   "seed": null,
+   "scientific_role": "the mixed-calibration v2 search Top-1 (MC1), local copy",
+   "weights_sha256": null,
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192136721,
+   "size_human": "1.11 GiB",
+   "n_files": 3,
+   "members": [
+    {
+     "path": "artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1/config.json",
+     "size_bytes": 1419,
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+    },
+    {
+     "path": "artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1/generation_config.json",
+     "size_bytes": 206,
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    {
+     "path": "artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/mixed_recovery.json",
+    "configs/stages/stage-0/calibration_volume/mixed_search_session.json",
+    "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
+    "configs/stages/stage-1/projected_residual/design.json",
+    "configs/stages/stage-1/projected_residual/engineering_validation.json",
+    "configs/stages/stage-1/projected_residual/independent_gated_design.json",
+    "configs/stages/stage-1/projected_residual/independent_gated_validation.json",
+    "configs/stages/stage-2/reasoning_data/h1_units.json",
+    "configs/stages/stage-2/reasoning_data/h1pa.json",
+    "configs/stages/stage-2/teacher_modes/design.json",
+    "configs/stages/stage-2/teacher_modes/full_search_proposal.json",
+    "configs/stages/stage-2/teacher_modes/packed_round_design.json",
+    "docs/shared/REASONING_TRANSFER_DESIGN.md",
+    "docs/stages/stage-1/projected_residual/DESIGN.md",
+    "docs/stages/stage-2/reasoning_data/H1.md",
+    "docs/stages/stage-2/teacher_modes/PACKED_ROUND.md"
+   ],
+   "deletion_criterion": "verified_stale_cache",
+   "deletion_criterion_meaning": "a stale local cache whose canonical remote artifact has been hash-verified",
+   "reason_physical_weights_deleted": "the dev box at 97% (5.9 GiB free) before the six Stage-3 final weights are copied off thprcgh7s9; its recoveries are complete and no current experiment initializes from it; the relay copy survives (LFS sha256 verified 2026-11-09)",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume/assets/mix_top1_materialization.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "hf_hub_download from the relay path",
+   "expected_reconstruction_cost": "$0 from the relay",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume/",
+   "protection_lifted": {
+    "path_local": "artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1",
+    "retention": "diagnostic",
+    "never_delete_clause": "unclassified",
+    "retention_reason": "not matched by the classification table — review before any deletion",
+    "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
+   },
+   "deleted_utc": "2026-11-09T10:07:04+00:00"
   }
  ],
- "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant. A withdrawn entry is kept, never removed: the reason a tombstone was wrong is worth as much as the tombstone."
+ "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant."
 }

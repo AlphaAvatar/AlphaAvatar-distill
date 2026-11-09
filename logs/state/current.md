@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-08 (UTC), after Stage 3 of the restored composition completed. The human view. Every number here has an owner
+**Updated:** 2026-11-09 (UTC), after the A-MIX-6cat-sr preparation and the dev-box checkpoint retirement. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,26 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 COMPLETE (2026-11-08) -- SIX UNITS TRAINED AND EVALUATED; NOTHING RUNNING, NOTHING BILLING BUT THE THREE VOLUMES.**
+**RESEARCH A: A-MIX-6cat-sr PREPARED AT $0 -- STOPPED AT ITS ONE-USE AUTHORIZATION BOUNDARY (kind `train_sr_mix`, 2026-11-09). NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
+- **Data.** A1-6cat-sr's thinking and A2-6cat-sr's non-thinking documents are in one mixed manifest, 11,862,564
+  unique supervised tokens (50.04 : 49.96), packed in one sequential stream: 6,467 packed sequences and 9,701
+  optimizer steps per seed. Isolation is zero on every key. Owners: `audit/mixed_6cat_sr_freeze.json`,
+  `audit/mixed_6cat_sr_isolation.json`.
+- **Units.** Two seeds from the packed search's Top-1, each checkpoint evaluated in both modes
+  (`plans/mixed_training_plan.json`).
+- **Cost.** Expected $23.70, cumulative cap $45.17 (`plans/mixed_training_budget.json`).
+- **Owed to the maintainer.** The application `logs/budget/applications/research_a_mix_2026-11-09/application.json`:
+  - the kind cap;
+  - closing `stage3_sr`;
+  - the A-TM ceiling $161.1023 and the Research A cap $264.77;
+  - a provider top-up of at least $30. The balance was $18.80 at 2026-11-09T10:17Z, about 10.7 days of the
+    $1.76/day volumes; an unfunded account's volumes may be terminated.
+- **Backup.** The six -sr students' final weights reach the dev box on that session's polls
+  (`storage/stage3_devbox_backup.json`). Until then they exist only on `thprcgh7s9`.
+- **Dev box.** 18 closed checkpoints were retired behind tombstones (24.33 GiB): `/` went from 5.9 to 31 GiB free.
+- Owner: `logs/budget/decisions.md` 2026-11-09 (two entries); `PACKED_ROUND.md` section 18.
+
+**RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 COMPLETE (2026-11-08) -- SIX UNITS TRAINED AND EVALUATED.**
 - Result (`analyses/stage3_sr_result.json`): static fluid correctness on eval-set-1, two-seed means A1-6cat-sr 7.19%,
   A2-6cat-sr 10.96%, C1-6cat-sr 4.47%; registered A1 - A2 INCONCLUSIVE (-3.77 pp, 97.5% [-7.21, -1.03], not
   compute-matched); A1 - C1 (descriptive) NO_GO (+2.72 pp [+0.85, +4.83]).
@@ -17,8 +36,8 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   the provider's confirmation. Project cap $1,000, Research A $262.04, ceiling $158.3762.
 - Open result-persistence item: the six trained weights are only on `thprcgh7s9`; the relay (92.11 of 93.13 GiB)
   refuses them. The provider balance ($19.97, 2026-11-08T18:35Z) funds the three volumes ($1.76/day) for ~11 days;
-  an unfunded account's volumes may be terminated. Application owed (decisions.md 2026-11-08 closeout): top-up,
-  HF PRO, one $2 `persist_sr` session (`storage/stage3_storage_audit.json`).
+  an unfunded account's volumes may be terminated. The 2026-11-08 application (HF PRO, a `persist_sr` session) is
+  superseded 2026-11-09: the dev box is the backup target, carried by `train_sr_mix` (above).
 - Closeout 2026-11-08: verdicts kept; the $0 failure analysis (`analyses/stage3_failure_analysis.json`) finds the
   thinking students fail inside the reasoning, and no training-side defect; PACKED_ROUND.md section 17.
 - Corrected 2026-11-08: the behaviour unit's aggregates in every hybrid-template report were rescored under each

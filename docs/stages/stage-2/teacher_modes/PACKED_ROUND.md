@@ -1511,6 +1511,108 @@ Each needs its own controlled experiment; none is run.
 - The audit's backup plan (HF PRO plus one bounded pod session running `a1_units.py copy-final`) is a maintainer
   decision (decisions.md 2026-11-08).
 
+## 18. A-MIX-6cat-sr prepared: both modes in one pack, authorization requested (2026-11-09)
+
+The maintainer added one arm ("Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简"): the hybrid's thinking and
+non-thinking documents trained together, a fresh student from the packed search's Top-1, each checkpoint evaluated in
+both modes. Everything below ran at $0 on the dev box; nothing trains before the maintainer's one-use authorization
+([`applications/research_a_mix_2026-11-09/application.json`](../../../../logs/budget/applications/research_a_mix_2026-11-09/application.json)).
+
+**Data** ([`audit/mixed_6cat_sr_freeze.json`](../../../../logs/stages/stage-2/teacher_modes/audit/mixed_6cat_sr_freeze.json),
+`mixed_packs.py`). A1-6cat-sr's and A2-6cat-sr's admitted documents are read from their frozen `data_documents.npz`
+(each manifest checked against the -sr freeze record, each document against its content sha256), never from their
+packed sequences. The mixed manifest registers every document with its source arm, mode, teacher revision, source
+document id, data type, category, unit, supervised tokens and sha256. The sources' ids already carry their mode
+(`<task>|H-T|t0`, `<task>|H-N|t0`), are unique across the two sets and are kept. Before packing, counted in unique
+supervised tokens:
+
+| | examples | turns | unique supervised tokens | reasoning | answer | tool calling |
+| --- | --- | --- | --- | --- | --- | --- |
+| thinking (A1's) | 5,612 | 6,243 | 5,935,809 | 4,945,744 | 990,065 | 498,897 |
+| non-thinking (A2's) | 44,731 | 50,165 | 5,926,755 | 0 | 5,926,755 | 496,444 |
+| A-MIX | 45,363 | 56,408 | 11,862,564 | 4,945,744 | 6,916,820 | 995,341 |
+
+The modes are 50.04 : 49.96, and each keeps its own admitted selection and proportion report unchanged. Nothing was
+added, copied, regenerated or re-weighted. 4,980 tasks train in both modes as two legitimate trajectories.
+
+**Think states.** Every supervised span was checked on its tokens:
+
+- all 6,243 thinking spans open with `<think>` right after `<|im_start|>assistant\n` (the template's self-opening
+  state);
+- all 50,165 non-thinking spans follow `<|im_start|>assistant\n<think>\n\n</think>\n\n` (preclosed).
+
+Teacher and student forward the same packed token ids (`Trainer`, `train.py:943`, `:978`), so the mode is carried by
+the tokens alone.
+
+**Isolation** ([`audit/mixed_6cat_sr_isolation.json`](../../../../logs/stages/stage-2/teacher_modes/audit/mixed_6cat_sr_isolation.json)).
+Across both modes, zero training tasks, task contents (the catalogue's content sha256) or first user messages (their
+token ids) are validation ones. No validation rule family trains only in the other mode, so mixing adds no family
+exposure. The union of 43,329 catalogued tasks is disjoint from every eval-set-1 held-out unit.
+
+**Packing.** One random shuffle keyed by document id under the design's seed permutes the two modes together. One
+sequential stream follows (8,192, prefix_restart_v1, cross-context, continuous positions, fragments trained). The
+formal consumer's `verify_pack` re-derived every sequence. Packing, exposure and compute (never data sizes):
+
+| | packed sequences | optimizer steps | non-padding tokens | supervised-token exposure (3 epochs) | training FLOPs |
+| --- | --- | --- | --- | --- | --- |
+| A1-6cat-sr | 1,430 | 2,145 | 11,708,673 | 21,031,455 | 1 |
+| A2-6cat-sr | 5,047 | 7,571 | 41,339,285 | 18,484,038 | 3.53 |
+| A-MIX-6cat-sr | 6,467 | 9,701 | 52,977,465 | 39,460,197 | 4.52 (0.9985 x A1 + A2) |
+
+Further measures of the mixed pack:
+
+- 4,769 of the 6,467 sequences hold both modes.
+- 6,457 fragments in all, 1.29 M repeated supervised tokens, and no truncation.
+- By mode, the thinking documents are exposed to 21.0 M supervised tokens and the non-thinking ones to 18.5 M, about
+  what A1 and A2 each trained on.
+
+**Units** ([`plans/mixed_training_plan.json`](../../../../logs/stages/stage-2/teacher_modes/plans/mixed_training_plan.json),
+`mixed_training_plan.py`).
+
+- **Seeds and initialization.** Seeds 20260726 and 20260801, each fresh from the packed search's Top-1 `1f5e4b42…`
+  (sha256 `b74dede8…`, read on `thprcgh7s9`; its relay copy stays).
+- **Recipe.** A1/A2's, unchanged: CE 0.25 + KD 1.0 at T 1 on the assistant positions with Top-200 + tail, 3 epochs,
+  batch size 2, micro-batch 1, AdamW 5e-5 with cosine to 0.1.
+- **Schedule.** 9,701 optimizer steps, 485 warmup steps, validation every 1,212 steps on 64 sequences, and a save
+  point every 1,104 steps.
+- **Lineage.** One hybrid teacher declared with `modes: [thinking, non_thinking]` and one source per mode: the core
+  lineage contract now describes a multi-mode pack instead of exempting it with `mode: null`.
+- **Evaluation.** Each checkpoint is evaluated twice on eval-set-1 v2 under nucleus_v1, in `evaluation_thinking/`
+  (`enable_thinking=True`) and `evaluation_non_thinking/` (`enable_thinking=False`). A unit is done only when both
+  modes are scored. A later attempt runs only the missing mode. The package hardlinks the weights, so the second
+  evaluation adds no volume bytes.
+
+**Cost** ([`plans/mixed_training_budget.json`](../../../../logs/stages/stage-2/teacher_modes/plans/mixed_training_budget.json)).
+
+- **Step model.** Seconds per step = 2.8908 + 9.10e-5 x KD positions, refit on the six -sr units' 2,308 logged L40S
+  steps (this recipe exactly; residual sd 0.031 s). At 4,068 KD positions per step that is 3.26 s.
+- **Evaluation times.** Thinking mode from A1's measured 3,628-4,106 s; non-thinking from A2's 962-1,081 s. The upper
+  case for either mode is 8,211 s, because the mixed student's non-thinking length is unmeasured.
+- **Totals.** Expected 21.3 GPU hours, $23.70; upper 31.6 h, $38.27.
+- **Caps.** First-attempt hard cap $40.31; kind cumulative cap $45.17 with two resumed attempts; unit deadline 10.75 h.
+
+**Reading.** Mixed-thinking - A1, Mixed-non-thinking - A2 and the checkpoint's thinking - non-thinking will be
+descriptive paired comparisons (`mixed_analysis.py`). The analysis was checked at $0 on stand-ins, with A1's and A2's
+evaluations in the mixed slots: the deltas came out 0 / 0 and A1 - A2 reproduced at -3.77 pp [-7.21, -1.03]. A-MIX
+holds twice the unique data and A1 + A2's compute, so no mixed - single difference is a pure mode-mixing effect. The
+registered A1 - A2 and A1 - C1 verdicts are unchanged.
+
+**Dev-box backup and cleanup.**
+
+- **Cleanup.** The maintainer asked for room on the dev box first. Eighteen closed checkpoints with no consumer were
+  retired behind tombstones (`checkpoint_tombstones.json :: devbox_20261109_*`, 24.33 GiB), which took the free space
+  from 5.9 to 31 GiB:
+  - the two permanent controls' AdamW states (their weights stay, locally and on the relay);
+  - C2's five non-promoted Top-5 inits;
+  - Phase A's eight search leaves;
+  - D3's structural product;
+  - the local copies of the D4 and mixed-v2 Top-1s, whose relay copies were hash-verified first.
+- **Backup.** The six -sr students' final weights (14.31 GB with configs and `resume_identity.json`, no trainer
+  state) leave `thprcgh7s9` on `train_sr_mix`'s polls while it trains, one unit at a time. Each file is received only
+  if its sha256 matches the pod's and the committed record's (`stage3_backup.py`,
+  [`storage/stage3_devbox_backup.json`](../../../../logs/stages/stage-2/teacher_modes/storage/stage3_devbox_backup.json)).
+  The two mixed units follow once trained.
+
 ## Reproduce ($0)
 
 ```
@@ -1593,3 +1695,15 @@ PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher
 ```
 
 The plan and the application record the scratch pool as `<scratch>/tool_pool_dry_v4` (content `be4652d7…`).
+
+A-MIX-6cat-sr (section 18), from the frozen A1/A2 documents:
+
+```bash
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.mixed_packs --build --freeze
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.mixed_training_plan --write
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.stage3_backup --plan
+# after the session: the dev-box copies re-hashed, then the result
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.stage3_backup --verify
+PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.mixed_analysis \
+    --units <extracted stage3_sr> --single-units /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/extracted
+```

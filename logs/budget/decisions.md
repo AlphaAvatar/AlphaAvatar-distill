@@ -16194,3 +16194,68 @@ on a paid pod.
      - Expected $0.6-0.9.
   4. Only after verified copies exist, decide whether `thprcgh7s9` (about $24.5/month) is retired.
 - Revisit when: the maintainer answers the application, or the balance falls below one week of storage.
+
+## 2026-11-09 (UTC) — Dev-box checkpoint retirement by consumer: 18 closed checkpoints, 24.33 GiB, behind tombstones
+
+- Context: the maintainer's "Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简", section 5: "不再默认永久保留所有历史
+  checkpoint"; first clean closed optimizer / trainer state with no continuation consumer, rebuildable caches,
+  duplicate weights and historical intermediate checkpoints without a consumer; D4's initialization may be retired;
+  the old v2 Top-1, non-winning search states and other historical initializations are reviewed by the same rule;
+  keep configs, manifests, metrics and raw generation evidence. The dev box's `/` was at 97% (5.9 GiB free), and
+  20-25 GiB were wanted before the six Stage-3 weights are copied there.
+- Decision: retire, each behind a tombstone (`checkpoint_tombstones.json :: devbox_20261109_*`, via
+  `retire_artifact.py`):
+  - the two permanent controls' `trainer_state.pt` (6.56 GiB). Their recovery continuation is complete. The
+    controls' weights stay, locally and on the relay.
+  - C2's five non-promoted Top-5 replay inits (5.56 GiB). C2 closed without promotion; the replay recipe is kept.
+  - Phase A's eight search leaves (8.89 GiB), the C1 incumbent arm among them. Phase A, B, continuation B, the
+    recovery continuation and C1 are complete.
+  - D3's structural product (1.11 GiB), and the local copies of the D4 Top-1 (C1-6cat-sr's initialization) and of the
+    mixed-v2 Top-1 (2.22 GiB). Their relay copies were re-verified by LFS sha256 first.
+  The consumer audit read code and configs, not the registry's loose `referenced_by`. Every hit was a closed
+  experiment's driver, launcher or historical test, or inventory tooling. `retire_artifact.py` gained
+  `--maintainer-decision` (the tombstone carries the protection it lifted) and now advances the tombstones' running
+  totals and keeps the file's format. The registry was regenerated with `--hash --relay` (60 local units, 35.78 GiB).
+- Result: `/` 159 of 197 GB, 31 GiB free.
+- Not touched: every evaluation record, configuration and manifest; the E-series canonical weights; the
+  controls' weights; the packed search's Top-1 (A-MIX's initialization); and every volume.
+- Revisit when: the E-series canonical weights or the other session's 35 GB under `/var/log/alphaavatar`
+  (not this project's) are the next lever.
+
+## 2026-11-09 (UTC) — A-MIX-6cat-sr prepared at $0; one-use authorization requested (kind train_sr_mix)
+
+- Context: the same brief, sections I-VI: a joint thinking + non-thinking Stage 3 arm from A1-6cat-sr's and
+  A2-6cat-sr's frozen documents, a fresh student from the packed search's Top-1, one joint sequential packing, one
+  hybrid teacher's two modes under a multi-mode lineage, each checkpoint evaluated in both modes. Stop at the paid
+  boundary with the cap, the data hashes, the evaluation design and the budget revision.
+- Done ($0; owners: PACKED_ROUND.md section 18, `audit/mixed_6cat_sr_freeze.json`,
+  `audit/mixed_6cat_sr_isolation.json`, `plans/mixed_training_plan.json`, `plans/mixed_training_budget.json`,
+  `storage/stage3_devbox_backup.json`):
+  - **Data.** 56,408 turns and 11,862,564 unique supervised tokens before packing (50.04 : 49.96). Every span is in
+    its mode's think state, and isolation is zero on every key. One stream gives 6,467 packed sequences; the formal
+    consumer re-derived them.
+  - **Units.** Two units of 9,701 optimizer steps each; save every 1,104 steps.
+  - **Core change.** `aadistill.training.lineage` gained `modes` with one source per mode, with a core regression,
+    instead of exempting the pack by `mode: null`.
+  - **Driver.** `a1_units.py` evaluates a unit once per listed mode, each in its own directory.
+  - **Kind.** `train_sr_mix` has its own grant block, `stage3_mix`; the six units' block never covers it. Its polls
+    carry the six -sr weights (and its own) to the dev box.
+  - **Analysis.** `mixed_analysis.py` is checked on stand-ins.
+- Application (`logs/budget/applications/research_a_mix_2026-11-09/application.json`):
+  - **Kind cap.** `train_sr_mix` cumulative $45.17, first attempt $40.31; expected $23.70 / 21.3 GPU h; upper
+    $38.27. One Secure L40S on `thprcgh7s9`, no separate pilot. US-TX-3 was absent from the L40S stock list when read;
+    the session waits for capacity rather than changing the card.
+  - **Budget revisions.** Close `stage3_sr`; its unspent $42.44 is not carried. The A-TM ceiling goes from $158.3762
+    to $161.1023 and the Research A cap from $262.04 to $264.77. The project cap stays $1,000 (committed $879.71 ->
+    $924.88).
+  - **Top-up.** Provider balance $18.80 at 2026-11-09T10:17Z, about 10.7 days of the three volumes: at least $30,
+    $60 recommended.
+  - **Withdrawn.** The 2026-11-08 HF PRO request ("不用优先考虑 HF PRO").
+  - **For your decision, not done.**
+    - Retire `4rhubprswo`. It holds the v2 Top-1, the A1 (2026-11-02) units and the v2 search state, none with an
+      active consumer. It is the only copy of those bytes, so the deletion is irreversible. It would save about
+      $24.5/month.
+    - After A-MIX and the verified dev-box copies, retire `thprcgh7s9`'s trainer states, then the volume.
+- Science: every mixed comparison is descriptive (2.0x unique data, 0.9985x A1 + A2's FLOPs). The registered
+  A1 - A2 INCONCLUSIVE and A1 - C1 NO_GO stand.
+- Revisit when: the maintainer answers the application.

@@ -1,0 +1,52 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.stage3_devbox_backup/v1",
+ "decided_by": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5",
+ "volume": "thprcgh7s9",
+ "destination_root": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights",
+ "files_per_unit": [
+  "model/model.safetensors",
+  "model/config.json",
+  "model/generation_config.json",
+  "resume_identity.json"
+ ],
+ "not_copied": {
+  "trainer_state.pt": "no exact-continuation consumer (closed training)"
+ },
+ "units": {
+  "A1-6cat-sr-s20260726": {
+   "model_dir": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/train/checkpoints/step_002145/model",
+   "model_safetensors_sha256": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a1_20261107_104149/evidence/A1-6cat-sr_units.json"
+  },
+  "A1-6cat-sr-s20260801": {
+   "model_dir": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/train/checkpoints/step_002145/model",
+   "model_safetensors_sha256": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a1_20261107_104149/evidence/A1-6cat-sr_units.json"
+  },
+  "A2-6cat-sr-s20260726": {
+   "model_dir": "/runpod-volume/teacher_modes/stage3_sr/A2-6cat-sr-s20260726/train/checkpoints/step_007571/model",
+   "model_safetensors_sha256": "5e26ab61fab82ee988d042a98b8e467a284fd5682fa7de9dabc54623ed2606d4",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/evidence/A2-6cat-sr_units.json"
+  },
+  "A2-6cat-sr-s20260801": {
+   "model_dir": "/runpod-volume/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/train/checkpoints/step_007571/model",
+   "model_safetensors_sha256": "236425e5739bc71ba3661cda9e0ef9f1e02cb7c155eeb714a3c4f8686f2a2df6",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/evidence/A2-6cat-sr_units.json"
+  },
+  "C1-6cat-sr-s20260726": {
+   "model_dir": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/model",
+   "model_safetensors_sha256": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_104542/evidence/C1-6cat-sr_units.json"
+  },
+  "C1-6cat-sr-s20260801": {
+   "model_dir": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train/checkpoints/step_001892/model",
+   "model_safetensors_sha256": "a24f887370c62bde491576174128b6a2438051b9cba148c836d4709688c3d057",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_104542/evidence/C1-6cat-sr_units.json"
+  }
+ },
+ "weights_bytes": 14305409808,
+ "transfer_estimate_minutes": 20.7,
+ "carried_by": "kind train_sr_mix: its polls while it trains (token_matched_phase.backup_on_poll), its closeout for what is left; evidence only, never a reason to hold the pod",
+ "independence": "the dev box's cloud disk is outside RunPod; the copy is a second store, the volume's copy stays until the maintainer retires it",
+ "authorizes": "nothing"
+}

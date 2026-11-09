@@ -35,6 +35,11 @@ sequential causal packing, no position ids in the sequences or from the trainer'
 trainer's own log must name that strategy. Once trained, a unit's final weights get their off-volume copy on the relay
 (`persist_off_volume`) before its evaluation starts -- only when the relay's quota admits them; a refusal is recorded
 beside the unit and a later session tries again.
+
+A unit whose plan row lists ``evaluations`` (A-MIX-6cat-sr, `mixed_training_plan.json`: one hybrid checkpoint in both
+of its teacher's modes) is evaluated once per entry, each in its own directory with its own template, in order; the
+unit is done only when every one has its formal report, and a later session runs only the missing ones
+(`evaluations_of`).
 """
 from __future__ import annotations
 
@@ -61,8 +66,10 @@ TEMPLATE = {"enable_thinking": True}
 ARM_TEMPLATE = {"A1": TEMPLATE, "A1-6cat": {"enable_thinking": True}, "A2-6cat": {"enable_thinking": False},
                 "C1-6cat": {},
                 #: six_category_schema_restored@v1's Stage 3 (packed_training_plan.json)
-                "A1-6cat-sr": {"enable_thinking": True}, "A2-6cat-sr": {"enable_thinking": False}, "C1-6cat-sr": {}}
-HYBRID_ARMS = frozenset({"A1", "A1-6cat", "A2-6cat", "A1-6cat-sr", "A2-6cat-sr"})
+                "A1-6cat-sr": {"enable_thinking": True}, "A2-6cat-sr": {"enable_thinking": False}, "C1-6cat-sr": {},
+                #: evaluated in each mode its plan row lists (`evaluations_of`), never under one arm template
+                "A-MIX-6cat-sr": None}
+HYBRID_ARMS = frozenset({"A1", "A1-6cat", "A2-6cat", "A1-6cat-sr", "A2-6cat-sr", "A-MIX-6cat-sr"})
 
 
 def units(plan: dict, arm: str = "A1") -> list[dict]:
@@ -78,8 +85,19 @@ def evaluation_spec() -> dict:
             "decoding": {"path": pr["decoding"]["path"], "sha256": pr["decoding"]["sha256"]}}
 
 
-def state(out_dir: Path, eval_dir: Path) -> str:
-    if (eval_dir / "formal_report.json").is_file():
+def evaluations_of(u: dict, arm: str, unit_dir: Path) -> list[dict]:
+    """The unit's evaluations, each with its directory: the plan row's ``evaluations`` (one per mode), else the arm's
+    single template in ``evaluation/`` as every earlier unit was evaluated."""
+    if u.get("evaluations"):
+        return [{**e, "path": Path(unit_dir) / e["dir"]} for e in u["evaluations"]]
+    if ARM_TEMPLATE.get(arm) is None:
+        raise RuntimeError(f"{u['unit']}: arm {arm} is evaluated per mode, and its plan row lists no evaluations")
+    return [{"mode": None, "template": ARM_TEMPLATE[arm], "dir": "evaluation", "path": Path(unit_dir) / "evaluation"}]
+
+
+def state(out_dir: Path, eval_dir: Path | list[Path]) -> str:
+    dirs = eval_dir if isinstance(eval_dir, list) else [eval_dir]
+    if all((d / "formal_report.json").is_file() for d in dirs):
         return "done"
     if (out_dir / "run_completion.json").is_file() or list(out_dir.glob("run_completion_resume_step*.json")):
         return "trained"
@@ -271,13 +289,13 @@ def main(argv=None) -> int:
         if a.arm in HYBRID_ARMS:
             record["tokenizer"] = TP.stage_tokenizers(snap)
         mark("CONTRACT_OK")
-        states = {u["unit"]: state(Path(u["config"]["out_dir"]), durable / a.units_dir / u["unit"] / "evaluation")
-                  for u in us}
+        evals = {u["unit"]: evaluations_of(u, a.arm, durable / a.units_dir / u["unit"]) for u in us}
+        states = {u["unit"]: state(Path(u["config"]["out_dir"]), [e["path"] for e in evals[u["unit"]]]) for u in us}
         if a.volume_gb is not None:
             record["volume"] = volume_room(durable.parent, a.volume_gb, us, states)
             save()
         from stages.teacher_modes import packed_training_plan as PTP
-        stage3 = a.arm in PTP.ARMS
+        stage3 = a.arm in PTP.STAGE3_ARMS
         if stage3:                          #: a unit an earlier session scored whose off-volume copy is still owed
             for u in us:                    #: (a trained, unscored one is copied in the loop, before its evaluation)
                 if states[u["unit"]] == "done":
@@ -293,9 +311,9 @@ def main(argv=None) -> int:
         for u in us:
             name, cfg = u["unit"], u["config"]
             row = record["units"].setdefault(name, {})
-            out_dir, eval_dir = Path(cfg["out_dir"]), durable / a.units_dir / name / "evaluation"
+            out_dir = Path(cfg["out_dir"])
             out_dir.mkdir(parents=True, exist_ok=True)
-            st = state(out_dir, eval_dir)
+            st = state(out_dir, [e["path"] for e in evals[name]])
             row["state_at_start"] = st
             if st == "done":
                 continue
@@ -336,7 +354,6 @@ def main(argv=None) -> int:
                                                             row["final_model_safetensors_sha256"])
                 mark(f"OFF_VOLUME_{'OK' if row['off_volume_copy'].get('verified') else 'NOT_COPIED'}:{name}")
                 save()
-            mark(f"EVAL_START:{name}")
             from stages.reasoning_data import h1pa_driver as HD
             ident = json.loads((REPO / "configs/stages/stage-2/teacher_modes/teacher_identity.json").read_text())
             if a.arm in HYBRID_ARMS:
@@ -347,13 +364,25 @@ def main(argv=None) -> int:
                 #: train_sr_c1, 2026-11-08: a package without it gave the engine no template)
                 pkg = {"tokenizer_source": str(REPO / TP.TOKENIZERS["thinking_2507"]),
                        "sidecar_sha256": dict(TP.T2507_TOKENIZER_FILES)}
-            t0 = time.time()
-            rep, _files = HD.evaluate({"evaluation": evaluation_spec(), "out": eval_dir, "progress": eval_dir / "progress",
-                                       "label": name, "model_dir": model_dir, "package": pkg,
-                                       "template_kwargs": ARM_TEMPLATE[a.arm],
-                                       "env": {**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1"}})
-            row.update(eval_seconds=round(time.time() - t0, 1), formal_report=str(eval_dir / "formal_report.json"))
-            save()
+            for ev in evals[name]:
+                eval_dir, tag = ev["path"], name if ev["mode"] is None else f"{name}:{ev['mode']}"
+                if (eval_dir / "formal_report.json").is_file():
+                    continue                #: a mode an earlier session scored is never measured again
+                mark(f"EVAL_START:{tag}")
+                t0 = time.time()
+                rep, _files = HD.evaluate({"evaluation": evaluation_spec(), "out": eval_dir,
+                                           "progress": eval_dir / "progress", "label": name, "model_dir": model_dir,
+                                           "package": pkg, "template_kwargs": ev["template"],
+                                           "env": {**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1"}})
+                secs, report = round(time.time() - t0, 1), str(eval_dir / "formal_report.json")
+                if ev["mode"] is None:
+                    row.update(eval_seconds=secs, formal_report=report)
+                else:
+                    row.setdefault("evaluations", {})[ev["mode"]] = {"eval_seconds": secs, "formal_report": report,
+                                                                    "template": ev["template"]}
+                save()
+                if ev["mode"] is not None:
+                    mark(f"EVAL_DONE:{tag}")
             mark(f"UNIT_DONE:{name}")
     except BaseException as exc:  # noqa: BLE001
         ok = False

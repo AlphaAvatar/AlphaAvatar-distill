@@ -30,7 +30,9 @@ out here rather than left to judgement at the keyboard:
 Refusals, which are the point of the tool:
 
   * the path is `protected` in logs/maintenance/inventories/checkpoint_registry.json, or carries a
-    `never_delete_clause`;
+    `never_delete_clause` -- unless `--maintainer-decision` quotes the recorded maintainer decision that
+    retires it (logs/budget/decisions.md); the tombstone then carries the decision and the class and
+    clause it lifted (`protection_lifted`);
   * `--canonical` names something that does not exist;
   * a criterion of `byte_identical_duplicate` when the survivor's bytes differ;
   * a criterion of `verified_stale_cache` without `--relay-verified`.
@@ -93,17 +95,19 @@ def manifest(root: Path) -> tuple[list[dict], int]:
     return out, total
 
 
-def registry_guard(rel: str) -> tuple[bool, str]:
+def registry_guard(rel: str) -> tuple[bool, str, dict | None]:
     if not REGISTRY.is_file():
-        return True, "no registry to check against"
+        return True, "no registry to check against", None
     reg = json.loads(REGISTRY.read_text())
     for e in reg.get("checkpoints", []):
         if e["path_local"] == rel or rel.startswith(e["path_local"] + "/") \
                 or e["path_local"].startswith(rel.rstrip("/") + "/"):
             if e.get("protected"):
                 return False, (f"{e['path_local']} is protected in the registry "
-                               f"({e['retention']}): {e.get('never_delete_clause') or e['retention_reason']}")
-    return True, "not protected in the registry"
+                               f"({e['retention']}): {e.get('never_delete_clause') or e['retention_reason']}"), \
+                    {"path_local": e["path_local"], "retention": e["retention"],
+                     "never_delete_clause": e.get("never_delete_clause"), "retention_reason": e.get("retention_reason")}
+    return True, "not protected in the registry", None
 
 
 def references(rel: str, name: str) -> list[str]:
@@ -144,6 +148,9 @@ def main() -> int:
     ap.add_argument("--relay-verified", action="store_true",
                     help="every file was compared to the relay copy by hash")
     ap.add_argument("--store", default="repo_artifacts")
+    ap.add_argument("--maintainer-decision", default="",
+                    help="the recorded maintainer decision (logs/budget/decisions.md, quoted with its date) that "
+                         "retires an artifact the registry protects")
     ap.add_argument("--apply", action="store_true")
     args = ap.parse_args()
 
@@ -153,8 +160,8 @@ def main() -> int:
         return 1
     rel = args.path.rstrip("/")
 
-    ok, why = registry_guard(rel)
-    if not ok:
+    ok, why, guard = registry_guard(rel)
+    if not ok and not args.maintainer_decision.strip():
         print(f"REFUSED: {why}", file=sys.stderr)
         return 2
     if args.criterion == "verified_stale_cache" and not args.relay_verified:
@@ -209,6 +216,8 @@ def main() -> int:
         "reconstruction_recipe": args.reconstruction or None,
         "expected_reconstruction_cost": args.reconstruction_cost or None,
         "frozen_results_location": args.frozen_results or None,
+        **({"protection_lifted": {**guard, "maintainer_decision": args.maintainer_decision.strip()}}
+           if guard else {}),
         "deleted_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
@@ -232,7 +241,13 @@ def main() -> int:
         "relay_hash_verified. v1 entries are unchanged and remain valid: every "
         "field they carried still means what it meant.")
     doc["tombstones"].append(entry)
-    TOMBSTONES.write_text(json.dumps(doc, indent=2) + "\n")
+    #: the owner's totals are a running account (retire_eligible_checkpoints.py advances them the same way)
+    if "totals" in doc:
+        t = doc["totals"]
+        t.update(tombstones_total=t["tombstones_total"] + 1, active=t["active"] + 1,
+                 active_retired_bytes=t["active_retired_bytes"] + total)
+        t["active_retired_human"] = f"{t['active_retired_bytes'] / 2**30:.3f} GiB"
+    TOMBSTONES.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
 
     if target.is_dir():
         shutil.rmtree(target)

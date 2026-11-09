@@ -79,10 +79,17 @@ ALL = sorted(_registry())
 #: experiment's state, so this is a fact about that session and not a defect in
 #: the registry.
 #:
+#: `phase_c2_behavioural` is the second, since 2026-11-09: C2 closed without
+#: promotion, and the dev-box retirement (maintainer 2026-11-09; tombstones
+#: `devbox_20261109_c2_top5_*`) removed the five reconstructed Top-5 inits its
+#: launcher consumes. It refuses because it consumes reconstructed checkpoints
+#: and does not reconstruct them -- its own stated rule.
+#:
 #: Named rather than tolerated, because the whole point of a list like this is
 #: that a LIVE session which stops constructing shows up as a new entry
-#: somebody has to justify.
-CANNOT_CONSTRUCT: frozenset[str] = frozenset({"phase_c2_replay"})
+#: somebody has to justify. Each one with the reason its refusal must give.
+CANNOT_CONSTRUCT: dict[str, str] = {"phase_c2_replay": "not a replay",
+                                    "phase_c2_behavioural": "has no destination-verified product"}
 
 LIVE = [e for e in ALL if e not in CANNOT_CONSTRUCT]
 
@@ -120,7 +127,7 @@ class TestEveryEntryBindsTheLauncherItClaims:
         contract = _contract(experiment)
         with pytest.raises(Exception) as exc:
             _launcher_spec(contract.launcher_module)
-        assert "not a replay" in str(exc.value), (
+        assert CANNOT_CONSTRUCT[experiment] in str(exc.value), (
             f"{experiment} no longer refuses for the reason this list records; "
             f"it raised {type(exc.value).__name__}: {str(exc.value)[:200]}")
 
