@@ -1,0 +1,187 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.cpu_backup_probe/v1",
+ "read_utc": "2026-11-09T18:56:46Z",
+ "asked_by": "maintainer 2026-11-09 (UTC), 'A-MIX Stage 3 与 Dev Box 备份正式授权', section II: query at $0 whether US-TX-3 has a CPU pod that can attach thprcgh7s9, and its price",
+ "volume": {
+  "id": "thprcgh7s9",
+  "datacenter": "US-TX-3",
+  "rule": "a network volume attaches only to a pod in its own datacenter"
+ },
+ "queries": {
+  "cpu_catalog": "GET https://api.runpod.io/v2/catalog/cpus",
+  "stock": "GraphQL cpuFlavors.specifics(input: {dataCenterId, instanceId}) { stockStatus securePrice }, every datacenter of GET /v2/catalog/datacenters x instances cpu3c-2-4, cpu3g-2-8, cpu5c-2-4, cpu3c-4-8, cpu3g-4-16"
+ },
+ "cpu_catalog": [
+  {
+   "group": "CPU3",
+   "id": "cpu3c",
+   "name": "Compute-Optimized",
+   "price": {
+    "securePerVcpu": 0.03,
+    "serverlessPerVcpu": 0.036
+   },
+   "ramGbPerVcpu": 2,
+   "vcpu": {
+    "max": 32,
+    "min": 2
+   }
+  },
+  {
+   "group": "CPU3",
+   "id": "cpu3g",
+   "name": "General Purpose",
+   "price": {
+    "securePerVcpu": 0.04,
+    "serverlessPerVcpu": 0.05
+   },
+   "ramGbPerVcpu": 4,
+   "vcpu": {
+    "max": 32,
+    "min": 2
+   }
+  },
+  {
+   "group": "CPU3",
+   "id": "cpu3m",
+   "name": "Memory-Optimized",
+   "price": {
+    "securePerVcpu": 0.055,
+    "serverlessPerVcpu": 0
+   },
+   "ramGbPerVcpu": 8,
+   "vcpu": {
+    "max": 32,
+    "min": 2
+   }
+  },
+  {
+   "group": "CPU5",
+   "id": "cpu5c",
+   "name": "Compute-Optimized",
+   "price": {
+    "securePerVcpu": 0.035,
+    "serverlessPerVcpu": 0.042
+   },
+   "ramGbPerVcpu": 2,
+   "vcpu": {
+    "max": 32,
+    "min": 2
+   }
+  },
+  {
+   "group": "CPU5",
+   "id": "cpu5g",
+   "name": "General Purpose",
+   "price": {
+    "securePerVcpu": 0.046,
+    "serverlessPerVcpu": 0.055
+   },
+   "ramGbPerVcpu": 4,
+   "vcpu": {
+    "max": 32,
+    "min": 2
+   }
+  },
+  {
+   "group": "CPU5",
+   "id": "cpu5m",
+   "name": "Memory-Optimized",
+   "price": {
+    "securePerVcpu": 0.065,
+    "serverlessPerVcpu": 0
+   },
+   "ramGbPerVcpu": 8,
+   "vcpu": {
+    "max": 32,
+    "min": 2
+   }
+  }
+ ],
+ "us_tx_3": {
+  "cpu3c-2-4": {
+   "cpu3c": null,
+   "cpu3g": null,
+   "cpu3m": null,
+   "cpu5c": null,
+   "cpu5g": null,
+   "cpu5m": null
+  },
+  "cpu3g-2-8": {
+   "cpu3c": null,
+   "cpu3g": null,
+   "cpu3m": null,
+   "cpu5c": null,
+   "cpu5g": null,
+   "cpu5m": null
+  },
+  "cpu5c-2-4": {
+   "cpu3c": null,
+   "cpu3g": null,
+   "cpu3m": null,
+   "cpu5c": null,
+   "cpu5g": null,
+   "cpu5m": null
+  },
+  "cpu3c-4-8": {
+   "cpu3c": null,
+   "cpu3g": null,
+   "cpu3m": null,
+   "cpu5c": null,
+   "cpu5g": null,
+   "cpu5m": null
+  },
+  "cpu3g-4-16": {
+   "cpu3c": null,
+   "cpu3g": null,
+   "cpu3m": null,
+   "cpu5c": null,
+   "cpu5g": null,
+   "cpu5m": null
+  }
+ },
+ "datacenters_with_cpu_stock": [
+  "EU-CZ-1",
+  "EU-NL-1",
+  "EU-RO-1",
+  "EUR-IS-1",
+  "US-CA-2",
+  "US-GA-2",
+  "US-IL-1",
+  "US-KS-2",
+  "US-MD-1",
+  "US-MO-1",
+  "US-MO-2",
+  "US-NC-1",
+  "US-NC-2",
+  "US-NE-1",
+  "US-WA-1"
+ ],
+ "datacenters_without": [
+  "AP-IN-1",
+  "AP-JP-1",
+  "CA-MTL-1",
+  "CA-MTL-3",
+  "CA-MTL-4",
+  "EU-FR-1",
+  "EU-SE-1",
+  "EUR-IS-2",
+  "EUR-IS-3",
+  "EUR-IS-4",
+  "EUR-IS-5",
+  "EUR-NO-1",
+  "EUR-NO-2",
+  "OC-AU-1",
+  "US-CO-1",
+  "US-PA-1",
+  "US-TX-3",
+  "US-TX-4",
+  "US-WA-2"
+ ],
+ "price_if_offered": {
+  "cpu3c-2-4_secure_usd_per_hour": 0.06,
+  "_": "the flavor price is the same in every datacenter; stock is what differs"
+ },
+ "verdict": "NOT_FEASIBLE: US-TX-3 reports no stock for any CPU flavor or size, while 15 other datacenters report High/Medium for the same query (the query is live, not blind); thprcgh7s9 cannot be attached outside US-TX-3",
+ "consequence": "no backup kind and no CPU pod is created; the $2.00 conditional allowance is not taken; the six -sr weights are copied by train_sr_mix's polls on its L40S pod (stage3_backup.py), as the original plan",
+ "authorizes": "nothing"
+}

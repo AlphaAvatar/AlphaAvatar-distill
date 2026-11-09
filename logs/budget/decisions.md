@@ -16259,3 +16259,47 @@ on a paid pod.
 - Science: every mixed comparison is descriptive (2.0x unique data, 0.9985x A1 + A2's FLOPs). The registered
   A1 - A2 INCONCLUSIVE and A1 - C1 NO_GO stand.
 - Revisit when: the maintainer answers the application.
+
+## 2026-11-09 (UTC) — A-MIX Stage 3 authorized (kind train_sr_mix); CPU-pod backup not feasible; committed figure corrected
+
+- Context: maintainer 2026-11-09, "AlphaAvatar-distill — A-MIX Stage 3 与 Dev Box 备份正式授权" (review of 1cbedaa7).
+  Accepts the frozen data, the joint packing, the lineage, the two-seed plan and the two-mode evaluation; approves
+  `train_sr_mix`; conditionally allows a CPU-pod backup kind (cumulative <= $2.00).
+- Decision (grant `teacher_modes_token_matched_grant.json`, amendment 2026-11-09):
+  - **Kind cap.** `train_sr_mix` $45.17 cumulative over its attempts; the first attempt is at most $40.31. One Secure
+    L40S on `thprcgh7s9`. A recovery reuses the checkpoints and never resets the cap. No stock means wait, never an
+    A100. The `stage3_mix` block binds the mixed plan, budget and freeze record by sha256.
+  - **Closed.** `stage3_sr` (spent $30.7961; its unspent $42.4439 is not carried).
+    `token_matched_phase.stage3_grant_problems` now refuses a closed Stage-3 block, as it already did for
+    `packed_search`.
+  - **Ceilings.** The A-TM ceiling goes $158.3762 -> $161.1023 and Research A $262.04 -> $264.77. The project cap
+    stays $1,000.
+- CPU-pod backup: NOT FEASIBLE, no resource created
+  (`logs/stages/stage-2/teacher_modes/storage/stage3_cpu_backup_probe.json`).
+  - The provider's CPU stock query (`cpuFlavors.specifics`) returns no stock for any CPU flavor or size in US-TX-3.
+    The same query returns High/Medium in 15 other datacenters.
+  - A network volume attaches only in its own datacenter. Price would have been $0.06/h for 2 vCPUs.
+  - The $2.00 allowance is not taken; the ceilings above exclude it.
+  - The six -sr weights ride on `train_sr_mix`'s polls as planned (`stage3_backup.py`).
+- Correction to the 2026-11-09 application's position. Its committed $879.7063 was an UNDERCOUNT, not a release.
+  - **Cause.** Its snapshot (`runpod_billing_v2_2026-11-09T1017Z.json`) was fetched with a billing window starting
+    2026-08-01. `mixed_governance.provider_snapshot` and every issuer read from 2026-06-01, so the 2026-06/07 pod
+    charges, $61.4776 already spent, were missing.
+  - **Correct position.** Re-read at 2026-11-09T18:49Z with the rule's window
+    (`runpod_billing_v2_2026-11-09T1849Z.json`): provider-billed $891.7166, committed $941.1838, project remaining
+    $58.8162, balance $18.2096.
+  - **What moved since 11-08.** From $940.165 at 2026-11-08T15:15Z, committed rose $1.02, all money already spent.
+    The balance fell $20.19 -> $18.21 = $1.98, the three volumes' days alone, so no pod charge happened after that
+    read. The extra $1.02 billed was charged before it and posted later: C1 attempt 2's pod `rewxclkmglugal` had just
+    ended, and the 11-08T18:35Z snapshot holds its full $4.9182. The $1.98 of volume-days moved from the storage
+    reservations into the bill, with no net change.
+  - **What committed never contains.** No authorization release enters "committed": it is provider-billed + unposted
+    sessions + the volumes' future reservations. Unspent grant remainders (stage3_sr's $42.44, packed_search's
+    $27.55) live only in the ceilings, and closing them refunds nothing at the provider.
+  - **With this kind.** $941.18 + $45.17 = $986.35 <= $1,000 (the application's $924.88 was wrong by the same
+    $61.48).
+- Funding at issue: the issuer requires the live balance to cover the session's hard cap. At $18.21 the dry run
+  refuses for that reason alone (`REFUSED at $0: ... holds $18.2095660244, less than the $40.31 hard cap`). Launch
+  waits for the maintainer's top-up to land; a planned top-up is not money.
+- Revisit when: the balance covers $40.31 (launch), or the A-MIX units and all eight dev-box copies are verified
+  (volume retirement proposal).

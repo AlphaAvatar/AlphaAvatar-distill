@@ -9,24 +9,22 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A: A-MIX-6cat-sr PREPARED AT $0 -- STOPPED AT ITS ONE-USE AUTHORIZATION BOUNDARY (kind `train_sr_mix`, 2026-11-09). NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
-- **Data.** A1-6cat-sr's thinking and A2-6cat-sr's non-thinking documents are in one mixed manifest, 11,862,564
-  unique supervised tokens (50.04 : 49.96), packed in one sequential stream: 6,467 packed sequences and 9,701
-  optimizer steps per seed. Isolation is zero on every key. Owners: `audit/mixed_6cat_sr_freeze.json`,
-  `audit/mixed_6cat_sr_isolation.json`.
-- **Units.** Two seeds from the packed search's Top-1, each checkpoint evaluated in both modes
-  (`plans/mixed_training_plan.json`).
-- **Cost.** Expected $23.70, cumulative cap $45.17 (`plans/mixed_training_budget.json`).
-- **Owed to the maintainer.** The application `logs/budget/applications/research_a_mix_2026-11-09/application.json`:
-  - the kind cap;
-  - closing `stage3_sr`;
-  - the A-TM ceiling $161.1023 and the Research A cap $264.77;
-  - a provider top-up of at least $30. The balance was $18.80 at 2026-11-09T10:17Z, about 10.7 days of the
-    $1.76/day volumes; an unfunded account's volumes may be terminated.
-- **Backup.** The six -sr students' final weights reach the dev box on that session's polls
-  (`storage/stage3_devbox_backup.json`). Until then they exist only on `thprcgh7s9`.
-- **Dev box.** 18 closed checkpoints were retired behind tombstones (24.33 GiB): `/` went from 5.9 to 31 GiB free.
-- Owner: `logs/budget/decisions.md` 2026-11-09 (two entries); `PACKED_ROUND.md` section 18.
+**RESEARCH A: A-MIX-6cat-sr AUTHORIZED (kind `train_sr_mix`, maintainer 2026-11-09) -- WAITING FOR THE PROVIDER TOP-UP TO LAND. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
+- **Grant.** `train_sr_mix` $45.17 cumulative, first attempt $40.31; `stage3_mix` binds the mixed plan, budget and
+  freeze by sha256; `stage3_sr` closed (unspent $42.44 not carried); A-TM ceiling $161.1023; Research A $264.77;
+  project cap $1,000.
+- **Pack.** `blocks.npz`, `ladder.json`, `audit.jsonl` staged on the relay (`transfer/stage3_sr/A-MIX-6cat-sr/`).
+- **Blocker.** The issuer needs the live balance to cover the $40.31 hard cap: $18.21 at 2026-11-09T18:59Z (no top-up
+  yet). The issue dry run refuses for that reason alone.
+- **CPU-pod backup.** Not feasible: US-TX-3 offers no CPU pod
+  (`logs/stages/stage-2/teacher_modes/storage/stage3_cpu_backup_probe.json`). The six -sr weights reach the dev box
+  on `train_sr_mix`'s polls (`storage/stage3_devbox_backup.json`). Until then they exist only on `thprcgh7s9`, which
+  stays until all eight students have verified dev-box copies.
+- **Committed.** $941.18 (2026-11-09T18:49Z). The application's $879.71 omitted $61.48 of 2026-06/07 billing (snapshot
+  window). $986.35 with this kind.
+- **Data, units, cost.** 11,862,564 unique supervised tokens (50.04 : 49.96), 6,467 packed sequences, 9,701 steps per
+  seed; two seeds from the packed Top-1, each checkpoint evaluated in both modes; expected $23.70 / 21.3 GPU h.
+- Owner: `logs/budget/decisions.md` 2026-11-09 (three entries); `PACKED_ROUND.md` section 18.
 
 **RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 COMPLETE (2026-11-08) -- SIX UNITS TRAINED AND EVALUATED.**
 - Result (`analyses/stage3_sr_result.json`): static fluid correctness on eval-set-1, two-seed means A1-6cat-sr 7.19%,

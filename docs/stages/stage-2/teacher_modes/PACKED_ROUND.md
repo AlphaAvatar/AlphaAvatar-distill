@@ -1613,6 +1613,16 @@ registered A1 - A2 and A1 - C1 verdicts are unchanged.
   [`storage/stage3_devbox_backup.json`](../../../../logs/stages/stage-2/teacher_modes/storage/stage3_devbox_backup.json)).
   The two mixed units follow once trained.
 
+**Authorized 2026-11-09** ("A-MIX Stage 3 与 Dev Box 备份正式授权"). The grant now holds `train_sr_mix` ($45.17
+cumulative, first attempt $40.31) and the `stage3_mix` block; `stage3_sr` is closed. The pack is staged on the relay.
+
+- **CPU-pod backup.** Not feasible: the provider reports no CPU stock in US-TX-3, the only datacenter that can attach
+  `thprcgh7s9`
+  ([`storage/stage3_cpu_backup_probe.json`](../../../../logs/stages/stage-2/teacher_modes/storage/stage3_cpu_backup_probe.json)).
+  The backup stays on the L40S session's polls.
+- **Launch.** It waits until the live provider balance covers the session's hard cap
+  (`logs/budget/decisions.md`, 2026-11-09, third entry).
+
 ## Reproduce ($0)
 
 ```

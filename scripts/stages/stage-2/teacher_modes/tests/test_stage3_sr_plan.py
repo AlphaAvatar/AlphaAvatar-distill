@@ -116,15 +116,18 @@ def grant_root(tmp_path, block: bool, spent_usd: float | None = None, kind: str 
     return tmp_path, g
 
 
-def test_the_committed_grant_admits_each_kind_up_to_its_cumulative_cap_only():
-    """maintainer 2026-11-07, 'Stage 3 六单元正式授权', section IV"""
-    for kind, arm in SR_ARMS.items():
-        left = round(BUDGET["arms"][arm]["kind_cumulative_cap_usd"] - TM.kind_spent(kind)["usd"], 4)
-        assert TM.kind_cap_problems(kind, left) == []                     #: what every earlier attempt left
-        assert TM.kind_cap_problems(kind, round(left + 0.01, 4))
+def test_the_committed_grant_closed_the_six_unit_block_after_it_completed():
+    """maintainer 2026-11-07, 'Stage 3 六单元正式授权', section IV; closed 2026-11-09 (A-MIX Stage 3 正式授权), its
+    unspent not carried"""
+    for kind in SR_ARMS:
+        bad = TM.kind_cap_problems(kind, 1.0)
+        assert bad and "closed for new attempts" in bad[0], kind
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
-    assert g["ceiling_usd"] == 158.3762 and g["project_cumulative_cap_usd"] == 1000.0
-    assert g["research_a_cumulative"]["cap_usd"] <= 263 and g[TM.STAGE3_BLOCK]["stage_cumulative_cap_usd"] == 73.24
+    closed = g[TM.STAGE3_BLOCK]["closed"]
+    assert closed["spent_usd"] == pytest.approx(sum(TM.kind_spent(k)["usd"] for k in SR_ARMS), abs=1e-4)
+    assert closed["spent_usd"] + closed["unspent_not_carried_usd"] == pytest.approx(
+        g[TM.STAGE3_BLOCK]["stage_cumulative_cap_usd"], abs=1e-4)
+    assert g["project_cumulative_cap_usd"] == 1000.0
     assert TM.kind_cap_problems("packed_search", 1.0)                                 #: closed for new attempts
 
 
@@ -136,6 +139,10 @@ def test_the_stage3_kinds_need_the_grants_block_for_the_plan_as_it_is(tmp_path):
     root, g = grant_root(tmp_path / "a", block=True)
     cap = g["session_hard_caps_usd"]["train_sr_a1"]
     assert TM.kind_cap_problems("train_sr_a1", cap, root) == []
+    g[TM.STAGE3_BLOCK]["closed"] = {"by": "test"}                                       #: a closed block funds nothing
+    (root / TM.STUDY.grant).write_text(json.dumps(g))
+    assert "closed for new attempts" in TM.kind_cap_problems("train_sr_a1", 1.0, root)[0]
+    root, g = grant_root(tmp_path / "a2", block=True)
     root, _ = grant_root(tmp_path / "b", block=True, spent_usd=5.0)                   #: cumulative over attempts
     assert TM.kind_cap_problems("train_sr_a1", round(cap - 5.0, 2), root) == []
     bad = TM.kind_cap_problems("train_sr_a1", round(cap - 4.99, 2), root)

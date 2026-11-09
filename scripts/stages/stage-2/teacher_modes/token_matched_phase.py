@@ -604,6 +604,8 @@ def stage3_grant_problems(g: dict, kind: str, root: Path = REPO_ROOT) -> list[st
     b = g.get(name)
     if not isinstance(b, dict):
         return [f"the grant carries no {name} scope: Stage 3 needs the maintainer's authorization"]
+    if b.get("closed"):                 #: COMPLETE; closed for new attempts (stage3_sr: maintainer 2026-11-09), record kept
+        return [f"the grant's {name} block is closed for new attempts ({b['closed'].get('by', 'the maintainer')})"]
     k = (b.get("kinds") or {}).get(kind) or {}
     want = {"approves": STAGE3_APPROVALS[name], "granted_by": "maintainer", "cap_is_cumulative": True, "gpu": GPU}
     bad = [f"the grant's {name}.{x} is {b.get(x)!r}, not {v!r}" for x, v in want.items() if b.get(x) != v]

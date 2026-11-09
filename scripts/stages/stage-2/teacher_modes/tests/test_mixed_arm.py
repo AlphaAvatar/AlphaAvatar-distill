@@ -163,6 +163,7 @@ def test_a_mixed_unit_is_done_only_when_both_modes_are_scored(tmp_path):
 def _grant(tmp_path, block: bool):
     g = json.loads((TM.REPO_ROOT / TM.STUDY.grant).read_text())
     cap = BUDGET["arms"][MP.ARM]["kind_cumulative_cap_usd"]
+    g.pop(TM.STAGE3_MIX_BLOCK, None)
     if block:
         g["session_hard_caps_usd"] = {**g["session_hard_caps_usd"], "train_sr_mix": cap}
         g[TM.STAGE3_MIX_BLOCK] = {"approves": TM.STAGE3_MIX_APPROVAL, "granted_by": "maintainer", "decision": "test",
@@ -181,7 +182,10 @@ def _grant(tmp_path, block: bool):
 
 
 def test_train_sr_mix_needs_its_own_grant_block_and_the_six_units_grant_never_covers_it(tmp_path):
-    assert TM.kind_cap_problems("train_sr_mix", 1.0)                                  #: the committed grant: no
+    cap = BUDGET["arms"][MP.ARM]["kind_cumulative_cap_usd"]                           #: the committed grant (2026-11-09)
+    first = BUDGET["arms"][MP.ARM]["session_hard_cap"]["hard_cap_usd"]
+    assert TM.kind_cap_problems("train_sr_mix", first) == []
+    assert TM.kind_cap_problems("train_sr_mix", round(cap + 0.01, 2))
     root, cap = _grant(tmp_path / "a", block=False)
     assert TM.kind_cap_problems("train_sr_mix", 1.0, root)
     root, cap = _grant(tmp_path / "b", block=True)
