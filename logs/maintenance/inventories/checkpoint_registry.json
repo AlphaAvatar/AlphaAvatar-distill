@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-11-09T10:11:21+00:00",
+  "created_utc": "2026-11-10T15:38:36+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -1341,47 +1341,43 @@
     }
   },
   "local": {
-    "n_units": 60,
-    "n_weight_files": 51,
-    "total_bytes": 38422944109,
-    "total_human": "35.784 GiB",
-    "artifacts_tree_bytes": 23390494295,
-    "external_store_tree_bytes": 34719035983,
+    "n_units": 61,
+    "n_weight_files": 46,
+    "total_bytes": 27721866414,
+    "total_human": "25.818 GiB",
+    "artifacts_tree_bytes": 20407810613,
+    "external_store_tree_bytes": 27724754719,
     "by_store": {
       "external_store": {
-        "units": 34,
-        "bytes": 31430591705
+        "units": 35,
+        "bytes": 24305884074
       },
       "repo_artifacts": {
         "units": 26,
-        "bytes": 6992352404
+        "bytes": 3415982340
       }
     },
     "proposed_disposition": {
-      "keep": 21,
+      "keep": 12,
       "retire": 2,
-      "review": 37
+      "review": 47
     },
     "proposed_disposition_bytes": {
-      "keep": 37028452610,
+      "keep": 9518953196,
       "retire": 67747076,
-      "review": 1326744423
+      "review": 18135166142
     }
   },
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-11-09T10:08:16+00:00",
-    "n_files": 1679,
-    "total_bytes": 93787475200,
+    "queried_utc": "2026-11-10T15:36:18+00:00",
+    "n_files": 1673,
+    "total_bytes": 70337305200,
     "by_prefix": {
-      "stage3": {
-        "files": 179,
-        "bytes": 26367855424
-      },
       "transfer": {
-        "files": 692,
-        "bytes": 16240788185
+        "files": 696,
+        "bytes": 16632967693
       },
       "stage0_calvol": {
         "files": 39,
@@ -1391,9 +1387,9 @@
         "files": 312,
         "bytes": 14536345939
       },
-      "a3_preserved_probes": {
-        "files": 12,
-        "bytes": 9536946368
+      "stage3": {
+        "files": 173,
+        "bytes": 12062445616
       },
       "permanent_controls": {
         "files": 18,
@@ -1477,18 +1473,22 @@
       },
       ".gitattributes": {
         "files": 1,
-        "bytes": 59483
+        "bytes": 59655
       },
       "c1_preserved_probes": {
         "files": 18,
         "bytes": 14616
+      },
+      "a3_preserved_probes": {
+        "files": 8,
+        "bytes": 6496
       }
     },
     "note": "an LFS object's oid IS the sha256 of its content, so a local copy can be verified against the relay without downloading it",
     "files": [
       {
         "path": ".gitattributes",
-        "size_bytes": 59483,
+        "size_bytes": 59655,
         "sha256": null
       },
       {
@@ -1502,11 +1502,6 @@
         "sha256": null
       },
       {
-        "path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "34eeb80e465a717cf9173178895a636bec2afe8a76f68fa8335f8ee0421aeef5"
-      },
-      {
         "path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.2045359208/config.json",
         "size_bytes": 1418,
         "sha256": null
@@ -1515,11 +1510,6 @@
         "path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.2045359208/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.2045359208/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "47113ca3519ef205cf7237eecabbc555ad7bd094f2950cdd79cb7dd3ab3f884b"
       },
       {
         "path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.217230555/config.json",
@@ -1532,11 +1522,6 @@
         "sha256": null
       },
       {
-        "path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.217230555/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "241585f9d284c014b1579fb5cac748d7045c76471379e72b30c23dce4b63c61e"
-      },
-      {
         "path": "a3_preserved_probes/a3_attempt36/autoinit.v1.phase_a3.A_bsz3.217230555/config.json",
         "size_bytes": 1418,
         "sha256": null
@@ -1545,11 +1530,6 @@
         "path": "a3_preserved_probes/a3_attempt36/autoinit.v1.phase_a3.A_bsz3.217230555/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "a3_preserved_probes/a3_attempt36/autoinit.v1.phase_a3.A_bsz3.217230555/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "33cfecd96d032384f758ea369e198dc17a3e8d276c734e74fe84b329de98861c"
       },
       {
         "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.A_incumbent.1151307191/config.json",
@@ -4827,11 +4807,6 @@
         "sha256": null
       },
       {
-        "path": "stage3/kdconf_ctrl_a/step_001000/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "1919f40b688472d9bdb1aefe46143e7f4b7e311b8cfd8aaabccd677c72536afe"
-      },
-      {
         "path": "stage3/kdconf_ctrl_a/step_001000/model/tokenizer.json",
         "size_bytes": 11422650,
         "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
@@ -4910,11 +4885,6 @@
         "path": "stage3/kdconf_ctrl_b/step_001000/model/generation_config.json",
         "size_bytes": 205,
         "sha256": null
-      },
-      {
-        "path": "stage3/kdconf_ctrl_b/step_001000/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "b31349013baeed79d8ecb59ae2b5129cc42e295bed186f3f296f502d9bc13478"
       },
       {
         "path": "stage3/kdconf_ctrl_b/step_001000/model/tokenizer.json",
@@ -4997,11 +4967,6 @@
         "sha256": null
       },
       {
-        "path": "stage3/kdconf_nothink_a/step_001000/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "0c49d80246e3a4157ad947053c9279777de2a89c75fde9f7ae0602863215e58b"
-      },
-      {
         "path": "stage3/kdconf_nothink_a/step_001000/model/tokenizer.json",
         "size_bytes": 11422650,
         "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
@@ -5080,11 +5045,6 @@
         "path": "stage3/kdconf_nothink_b/step_001000/model/generation_config.json",
         "size_bytes": 205,
         "sha256": null
-      },
-      {
-        "path": "stage3/kdconf_nothink_b/step_001000/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "1f4db5732e588110236a07f98bdb12faccd5f406b4550d46d5a9e0fa2b5ae694"
       },
       {
         "path": "stage3/kdconf_nothink_b/step_001000/model/tokenizer.json",
@@ -5402,11 +5362,6 @@
         "sha256": null
       },
       {
-        "path": "stage3/s2v1_bl2048/step_002700/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "d4d262e07855cdc5cdfb489948d53db3dcc57725a36ea02fe78964a325206934"
-      },
-      {
         "path": "stage3/s2v1_bl2048/step_002700/model/tokenizer.json",
         "size_bytes": 11422650,
         "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
@@ -5480,11 +5435,6 @@
         "path": "stage3/s2v1_bl2048_seedB/step_002700/model/generation_config.json",
         "size_bytes": 205,
         "sha256": null
-      },
-      {
-        "path": "stage3/s2v1_bl2048_seedB/step_002700/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "eecfe5a16fb2a730c6bc0d34ab3b50a36a602bbece696b71b65567698cb71172"
       },
       {
         "path": "stage3/s2v1_bl2048_seedB/step_002700/model/tokenizer.json",
@@ -6782,6 +6732,11 @@
         "sha256": "a5eaffb6a9d31db858d1cb4545927f7da0c2753f612a338c10e6791408576e30"
       },
       {
+        "path": "transfer/aad_autoinit_aacda75b.bundle",
+        "size_bytes": 57388040,
+        "sha256": "34e98da403345dc49b6feac1bb4ecf0f482dbf7c919836700b5300c5ede74b15"
+      },
+      {
         "path": "transfer/aad_autoinit_ab09c706.bundle",
         "size_bytes": 3744955,
         "sha256": "aae671c1b4ec9599feee3c2c2c4bb12980c84ae7812490cab46d0baf3e31b648"
@@ -7655,6 +7610,21 @@
         "path": "transfer/stage3_pilot_20260730.tar.gz",
         "size_bytes": 1259924,
         "sha256": "a33a87109a998f9cddba384d24977d8fee0b75e6476f4d3eb40fc0130d60796d"
+      },
+      {
+        "path": "transfer/stage3_sr/A-MIX-6cat-sr/4c794692a1d6072c/blocks.npz",
+        "size_bytes": 321012486,
+        "sha256": "4c794692a1d6072ced81c2192aa3493b14dab9a6904132a44645c93107cdbfee"
+      },
+      {
+        "path": "transfer/stage3_sr/A-MIX-6cat-sr/63ad3c7fbc8dd2ca/audit.jsonl",
+        "size_bytes": 13776445,
+        "sha256": "63ad3c7fbc8dd2ca2ee4992565f4f85f79184487dea15c512f41a9d40fb0b598"
+      },
+      {
+        "path": "transfer/stage3_sr/A-MIX-6cat-sr/aaa6fcb0b708f766/ladder.json",
+        "size_bytes": 2537,
+        "sha256": null
       },
       {
         "path": "transfer/stage3_sr/A1-6cat-sr/4b0ae5e79f3b9ec6/audit.jsonl",
@@ -16282,57 +16252,6 @@
   ],
   "checkpoints": [
     {
-      "canonical_name": "e1_r2960k_sb_pca",
-      "kind": "checkpoint",
-      "store": "repo_artifacts",
-      "path_local": "artifacts/stages/stage-3/rescued/e1_r2960k_sb_pca",
-      "weight_files": [
-        "artifacts/stages/stage-3/rescued/e1_r2960k_sb_pca/model.safetensors"
-      ],
-      "experiment": "E1/E6",
-      "role": "2.96M rung, seed sb",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "part of the accepted E1 scale curve",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2395664996,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
-      "referenced_by": [
-        "configs/stages/stage-2/reasoning_data/h1pa.json",
-        "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
-        "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json",
-        "configs/stages/stage-3/e6b/provenance.json",
-        "configs/stages/stage-3/e8/arms.json",
-        "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json",
-        "docs/shared/STAGE2_3_HANDOFF.md",
-        "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
-        "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "docs/stages/stage-2/reasoning_data/H1PA.md",
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/log_inventory.json"
-      ],
-      "relay_path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
-      "relay_verified": true,
-      "relay_same_size_unverified": null,
-      "relay_mirror_verification": null,
-      "canonical_location": "relay + local",
-      "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run of configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
-      "reconstruction_cost": "paid GPU (a full 2.96M-token recovery)",
-      "never_delete_clause": "accepted experiment checkpoint; the relay holds its evaluations but NOT its weights, so this is the only copy",
-      "protected": true,
-      "disposition": "keep"
-    },
-    {
       "canonical_name": "model",
       "kind": "checkpoint",
       "store": "external_store",
@@ -16438,15 +16357,15 @@
       "canonical_name": "model",
       "kind": "checkpoint",
       "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sa/model",
+      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260726/step_001892/model",
       "weight_files": [
-        "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sa/model/model.safetensors"
+        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260726/step_001892/model/model.safetensors"
       ],
-      "experiment": "E4",
-      "role": "P2 CE-heavy 1.60M arm",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "the CE-heavy side of the accepted KD-vs-CE comparison. The relay holds no copy of these weights",
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -16455,10 +16374,10 @@
         "num_key_value_heads": 8,
         "vocab_size": 151936
       },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "7ee1d9355b97563f095c15850dff51b7693d65e29d544a10c1575b63fdc78dce",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "size_bytes": 2384236592,
+      "size_human": "2.220 GiB",
+      "weights_sha256": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+      "config_sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
       "referenced_by": [
         "README.md",
         "configs/shared/evaluation/decoding/nucleus_v1.json",
@@ -16475,29 +16394,29 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run of configs/stages/stage-3/e4/*.json",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "accepted experiment checkpoint, and the only copy anywhere",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
       "protected": true,
-      "disposition": "keep"
+      "disposition": "review"
     },
     {
       "canonical_name": "model",
       "kind": "checkpoint",
       "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sb/model",
+      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260801/step_001892/model",
       "weight_files": [
-        "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sb/model/model.safetensors"
+        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260801/step_001892/model/model.safetensors"
       ],
-      "experiment": "E4",
-      "role": "P2 CE-heavy 1.60M arm",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "the CE-heavy side of the accepted KD-vs-CE comparison. The relay holds no copy of these weights",
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -16506,10 +16425,10 @@
         "num_key_value_heads": 8,
         "vocab_size": 151936
       },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "98e8c9811414e982150bac934ae08cd17bb0772b797eaedae8efb2157721708c",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "size_bytes": 2384236592,
+      "size_human": "2.220 GiB",
+      "weights_sha256": "a24f887370c62bde491576174128b6a2438051b9cba148c836d4709688c3d057",
+      "config_sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
       "referenced_by": [
         "README.md",
         "configs/shared/evaluation/decoding/nucleus_v1.json",
@@ -16526,29 +16445,29 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run of configs/stages/stage-3/e4/*.json",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "accepted experiment checkpoint, and the only copy anywhere",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
       "protected": true,
-      "disposition": "keep"
+      "disposition": "review"
     },
     {
       "canonical_name": "model",
       "kind": "checkpoint",
       "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/e6b/e6b_p2_r2960k_sa/model",
+      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A-MIX-6cat-sr-s20260726/step_009701/model",
       "weight_files": [
-        "/home/ecs-user/aad-artifacts/e6b/e6b_p2_r2960k_sa/model/model.safetensors"
+        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A-MIX-6cat-sr-s20260726/step_009701/model/model.safetensors"
       ],
-      "experiment": "E6b",
-      "role": "P2 CE-heavy 2.96M arm",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "the evidence behind the accepted objective x scale interaction. The relay holds no copy of these weights",
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -16557,10 +16476,10 @@
         "num_key_value_heads": 8,
         "vocab_size": 151936
       },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "89b14b839ff9b8a2e4651dbfaee63ab2703cd5737c11af9afb438dc2599497e7",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "size_bytes": 2384236591,
+      "size_human": "2.220 GiB",
+      "weights_sha256": "03cbb97de783a9b2af60cfc9d43540f6ee2bb5eb08d0d5c686945491080dfad5",
+      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
       "referenced_by": [
         "README.md",
         "configs/shared/evaluation/decoding/nucleus_v1.json",
@@ -16577,29 +16496,29 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run of the E6b arm config",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "accepted experiment checkpoint, and the only copy anywhere",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
       "protected": true,
-      "disposition": "keep"
+      "disposition": "review"
     },
     {
       "canonical_name": "model",
       "kind": "checkpoint",
       "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/e6b/e6b_p2_r2960k_sb/model",
+      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260726/step_002145/model",
       "weight_files": [
-        "/home/ecs-user/aad-artifacts/e6b/e6b_p2_r2960k_sb/model/model.safetensors"
+        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260726/step_002145/model/model.safetensors"
       ],
-      "experiment": "E6b",
-      "role": "P2 CE-heavy 2.96M arm",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "the evidence behind the accepted objective x scale interaction. The relay holds no copy of these weights",
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -16608,10 +16527,10 @@
         "num_key_value_heads": 8,
         "vocab_size": 151936
       },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "3c4709b51792c7e6e18c512c240bb20f6b55b0714e6d2c1264522e30633856f6",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "size_bytes": 2384236591,
+      "size_human": "2.220 GiB",
+      "weights_sha256": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
+      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
       "referenced_by": [
         "README.md",
         "configs/shared/evaluation/decoding/nucleus_v1.json",
@@ -16628,29 +16547,29 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run of the E6b arm config",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "accepted experiment checkpoint, and the only copy anywhere",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
       "protected": true,
-      "disposition": "keep"
+      "disposition": "review"
     },
     {
       "canonical_name": "model",
       "kind": "checkpoint",
       "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/e7/e7_control_r1600k_sa/model",
+      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260801/step_002145/model",
       "weight_files": [
-        "/home/ecs-user/aad-artifacts/e7/e7_control_r1600k_sa/model/model.safetensors"
+        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260801/step_002145/model/model.safetensors"
       ],
-      "experiment": "E7",
-      "role": "FineWeb-Edu KD arm or its matched control",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "E7's four accepted arms. The relay holds no copy of these weights",
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -16659,10 +16578,10 @@
         "num_key_value_heads": 8,
         "vocab_size": 151936
       },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "0ea5ec913fdde25e7ea59e81a999c166523736865b86a027a33ff4a0829a4b93",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "size_bytes": 2384236591,
+      "size_human": "2.220 GiB",
+      "weights_sha256": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
+      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
       "referenced_by": [
         "README.md",
         "configs/shared/evaluation/decoding/nucleus_v1.json",
@@ -16679,29 +16598,29 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run of the E7 arm config",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "accepted experiment checkpoint, and the only copy anywhere",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
       "protected": true,
-      "disposition": "keep"
+      "disposition": "review"
     },
     {
       "canonical_name": "model",
       "kind": "checkpoint",
       "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/e7/e7_control_r1600k_sb/model",
+      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260726/step_007571/model",
       "weight_files": [
-        "/home/ecs-user/aad-artifacts/e7/e7_control_r1600k_sb/model/model.safetensors"
+        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260726/step_007571/model/model.safetensors"
       ],
-      "experiment": "E7",
-      "role": "FineWeb-Edu KD arm or its matched control",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "E7's four accepted arms. The relay holds no copy of these weights",
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -16710,10 +16629,10 @@
         "num_key_value_heads": 8,
         "vocab_size": 151936
       },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "285228ed7f9a90deacb68944d94267d29bdcbc63ceeaaa310eab2afa2b73d61e",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "size_bytes": 2384236591,
+      "size_human": "2.220 GiB",
+      "weights_sha256": "5e26ab61fab82ee988d042a98b8e467a284fd5682fa7de9dabc54623ed2606d4",
+      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
       "referenced_by": [
         "README.md",
         "configs/shared/evaluation/decoding/nucleus_v1.json",
@@ -16730,29 +16649,29 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run of the E7 arm config",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "accepted experiment checkpoint, and the only copy anywhere",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
       "protected": true,
-      "disposition": "keep"
+      "disposition": "review"
     },
     {
       "canonical_name": "model",
       "kind": "checkpoint",
       "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/e7/e7_fineweb_r1600k_sa/model",
+      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260801/step_007571/model",
       "weight_files": [
-        "/home/ecs-user/aad-artifacts/e7/e7_fineweb_r1600k_sa/model/model.safetensors"
+        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260801/step_007571/model/model.safetensors"
       ],
-      "experiment": "E7",
-      "role": "FineWeb-Edu KD arm or its matched control",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "E7's four accepted arms. The relay holds no copy of these weights",
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -16761,10 +16680,10 @@
         "num_key_value_heads": 8,
         "vocab_size": 151936
       },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "32a37ebcdf102ee5c40d93680ae404a02c033319f630f6bff35661d74e69156b",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "size_bytes": 2384236591,
+      "size_human": "2.220 GiB",
+      "weights_sha256": "236425e5739bc71ba3661cda9e0ef9f1e02cb7c155eeb714a3c4f8686f2a2df6",
+      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
       "referenced_by": [
         "README.md",
         "configs/shared/evaluation/decoding/nucleus_v1.json",
@@ -16781,168 +16700,15 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run of the E7 arm config",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "accepted experiment checkpoint, and the only copy anywhere",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
       "protected": true,
-      "disposition": "keep"
-    },
-    {
-      "canonical_name": "model",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/e7/e7_fineweb_r1600k_sb/model",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/e7/e7_fineweb_r1600k_sb/model/model.safetensors"
-      ],
-      "experiment": "E7",
-      "role": "FineWeb-Edu KD arm or its matched control",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "E7's four accepted arms. The relay holds no copy of these weights",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "26119845cb5025f76249867c56270b6e5a372072b0a4191b3481924aa075dc69",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
-      "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run of the E7 arm config",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "accepted experiment checkpoint, and the only copy anywhere",
-      "protected": true,
-      "disposition": "keep"
-    },
-    {
-      "canonical_name": "p2_ceheavy_sa",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sa",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sa/model.safetensors"
-      ],
-      "experiment": "P2 / E4 / E5",
-      "role": "CE-heavy 0.86M start checkpoint",
-      "retention": "reproducibility_required",
-      "status": "active",
-      "retention_reason": "the initialization E4's 1.60M arms and E5's arm-C/arm-R recoveries start from; configs/stages/stage-3/{e4,e5}/*.json name it",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "4aface45a12cd02e508a6b0ee58294c97ba032a8d24302c89fc6317e86d75fb4",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
-      "referenced_by": [
-        "configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json",
-        "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
-        "configs/stages/stage-3/e5/e5_c_sa.json",
-        "configs/stages/stage-3/e5/e5_r_sa.json",
-        "configs/stages/stage-3/p2/p2_ceheavy_sa.json",
-        "logs/budget/decisions.md",
-        "logs/maintenance/cleanup/autoinit_relay_retention_20260822.json",
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-        "logs/stages/index.json",
-        "logs/stages/stage-3/README.md",
-        "logs/stages/stage-3/e3/analyses/e3_registration.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "hf download AlphaAvatar/aadistill-artifacts e5_start/",
-      "reconstruction_cost": "$0 (download)",
-      "never_delete_clause": "living recovery path: downstream experiment configs start from it. Its relay copy at e5_start/ is hash-verified, which makes it eligible under the stale-cache clause and the never-delete clause overrides that",
-      "protected": true,
-      "disposition": "keep"
-    },
-    {
-      "canonical_name": "p2_ceheavy_sb",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sb",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sb/model.safetensors"
-      ],
-      "experiment": "P2 / E4 / E5",
-      "role": "CE-heavy 0.86M start checkpoint",
-      "retention": "reproducibility_required",
-      "status": "active",
-      "retention_reason": "the initialization E4's 1.60M arms and E5's arm-C/arm-R recoveries start from; configs/stages/stage-3/{e4,e5}/*.json name it",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "9828b1780a5eb4e2eac40951dff01188f7423a1b2b9121c551a157239f9fa68b",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
-      "referenced_by": [
-        "configs/stages/stage-3/e3/e3_a1_frozen_attn_sb.json",
-        "configs/stages/stage-3/e4/e4_p2_r1600k_sb.json",
-        "configs/stages/stage-3/e5/e5_c_sb.json",
-        "configs/stages/stage-3/e5/e5_r_sb.json",
-        "configs/stages/stage-3/p2/p2_ceheavy_sb.json",
-        "logs/maintenance/cleanup/autoinit_relay_retention_20260822.json",
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-        "logs/stages/stage-3/e3/analyses/e3_registration.json",
-        "logs/stages/stage-3/e4/analyses/e4_registration.json",
-        "logs/stages/stage-3/history/EXPERIMENTS.md",
-        "logs/state/artifact_manifests.md"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "hf download AlphaAvatar/aadistill-artifacts e5_start/",
-      "reconstruction_cost": "$0 (download)",
-      "never_delete_clause": "living recovery path: downstream experiment configs start from it. Its relay copy at e5_start/ is hash-verified, which makes it eligible under the stale-cache clause and the never-delete clause overrides that",
-      "protected": true,
-      "disposition": "keep"
+      "disposition": "review"
     },
     {
       "canonical_name": "activation_stats.safetensors",
@@ -16985,57 +16751,6 @@
       "reconstruction_recipe": "a full teacher statistics pass over the pinned corpus",
       "reconstruction_cost": "paid GPU (teacher inference)",
       "never_delete_clause": "living recovery path: the reconstruction recipe of four tombstoned checkpoints reads it",
-      "protected": true,
-      "disposition": "keep"
-    },
-    {
-      "canonical_name": "e8_contribution_init_v1",
-      "kind": "checkpoint",
-      "store": "repo_artifacts",
-      "path_local": "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint",
-      "weight_files": [
-        "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors"
-      ],
-      "experiment": "E8a",
-      "role": "contribution-guided fully-compressed initialization (FC)",
-      "retention": "canonical",
-      "status": "active",
-      "retention_reason": "E8a's accepted treatment initialization, single-variable against the control",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1203564112,
-      "size_human": "1.121 GiB",
-      "weights_sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb",
-      "config_sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
-      "referenced_by": [
-        "configs/stages/stage-1/operator_ledger.json",
-        "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
-        "configs/stages/stage-3/e8/arms.json",
-        "configs/stages/stage-3/e8/artifacts_b.json",
-        "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json",
-        "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json",
-        "configs/stages/stage-3/e8b/arms.json",
-        "configs/stages/stage-3/e8b/e8b_fc_r1600k_sa.json",
-        "configs/stages/stage-3/e8b/e8b_fc_r1600k_sb.json",
-        "docs/shared/STAGE2_3_HANDOFF.md",
-        "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
-        "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "the E8a initialization recipe against the same Stage-0 cache and the frozen depth map",
-      "reconstruction_cost": "$0 (CPU)",
-      "never_delete_clause": "canonical initialization; named by the experiment index",
       "protected": true,
       "disposition": "keep"
     },
@@ -17363,6 +17078,174 @@
       "disposition": "keep"
     },
     {
+      "canonical_name": "e7",
+      "kind": "artifact_tree",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/e7",
+      "weight_files": [],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 45716064,
+      "size_human": "0.043 GiB",
+      "weights_sha256": null,
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/index.json",
+        "configs/shared/baselines/initialization_forward_baseline_v1.json",
+        "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/selection.json",
+        "configs/shared/datasets/assets.json",
+        "configs/shared/pod/micro_preflight/authorization.json",
+        "configs/stages/stage-0/calibration_volume/battery_session.json",
+        "configs/stages/stage-0/calibration_volume/dose_d4_resume_session.json",
+        "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+        "configs/stages/stage-0/calibration_volume/mixed_recovery.json",
+        "configs/stages/stage-0/calibration_volume/mixed_search_session.json",
+        "configs/stages/stage-0/calibration_volume/pilot_search_session.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "e4",
+      "kind": "artifact_tree",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/e4",
+      "weight_files": [],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 41155862,
+      "size_human": "0.038 GiB",
+      "weights_sha256": null,
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/index.json",
+        "configs/shared/baselines/initialization_forward_baseline_v1.json",
+        "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/selection.json",
+        "configs/shared/datasets/assets.json",
+        "configs/stages/stage-0/calibration_volume/battery_session.json",
+        "configs/stages/stage-0/calibration_volume/dose_d1_session.json",
+        "configs/stages/stage-0/calibration_volume/dose_d2_session.json",
+        "configs/stages/stage-0/calibration_volume/dose_d4_resume_session.json",
+        "configs/stages/stage-0/calibration_volume/dose_d4_session.json",
+        "configs/stages/stage-0/calibration_volume/formal_design.json",
+        "configs/stages/stage-0/calibration_volume/mixed_design.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "e6b",
+      "kind": "artifact_tree",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/e6b",
+      "weight_files": [],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 31893654,
+      "size_human": "0.030 GiB",
+      "weights_sha256": null,
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/index.json",
+        "configs/shared/baselines/initialization_forward_baseline_v1.json",
+        "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
+        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
+        "configs/stages/stage-1/phase_a/preflight_plan.json",
+        "configs/stages/stage-1/projected_residual/engineering_validation.json",
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
+        "configs/stages/stage-2/teacher_modes/full_search_proposal.json",
+        "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+        "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json",
+        "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "p2_ceheavy",
+      "kind": "artifact_tree",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/p2_ceheavy",
+      "weight_files": [],
+      "experiment": "P2 / E4 / E5",
+      "role": "CE-heavy 0.86M start checkpoint",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "the initialization E4's 1.60M arms and E5's arm-C/arm-R recoveries start from; configs/stages/stage-3/{e4,e5}/*.json name it",
+      "architecture": {},
+      "size_bytes": 23510490,
+      "size_human": "0.022 GiB",
+      "weights_sha256": null,
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json",
+        "configs/stages/stage-3/e3/e3_a1_frozen_attn_sb.json",
+        "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
+        "configs/stages/stage-3/e4/e4_p2_r1600k_sb.json",
+        "configs/stages/stage-3/e5/e5_c_sa.json",
+        "configs/stages/stage-3/e5/e5_c_sb.json",
+        "configs/stages/stage-3/e5/e5_r_sa.json",
+        "configs/stages/stage-3/e5/e5_r_sb.json",
+        "configs/stages/stage-3/p2/p2_ceheavy_sa.json",
+        "configs/stages/stage-3/p2/p2_ceheavy_sb.json",
+        "logs/budget/decisions.md",
+        "logs/maintenance/cleanup/autoinit_relay_retention_20260822.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "hf download AlphaAvatar/aadistill-artifacts e5_start/",
+      "reconstruction_cost": "$0 (download)",
+      "never_delete_clause": "living recovery path: downstream experiment configs start from it. Its relay copy at e5_start/ is hash-verified, which makes it eligible under the stale-cache clause and the never-delete clause overrides that",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
       "canonical_name": "d_series_behavioural_v1",
       "kind": "artifact_tree",
       "store": "repo_artifacts",
@@ -17401,6 +17284,90 @@
       "reconstruction_recipe": "scripts/stages/stage-1/families/d_series/build_batteries.py over the frozen pools, then verify_batteries.py",
       "reconstruction_cost": "$0 (CPU)",
       "never_delete_clause": "the family manifest pins these exact bytes",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "e1_r2960k_sb_pca",
+      "kind": "artifact_tree",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-3/rescued/e1_r2960k_sb_pca",
+      "weight_files": [],
+      "experiment": "E1/E6",
+      "role": "2.96M rung, seed sb",
+      "retention": "canonical",
+      "status": "active",
+      "retention_reason": "part of the accepted E1 scale curve",
+      "architecture": {},
+      "size_bytes": 11430028,
+      "size_human": "0.011 GiB",
+      "weights_sha256": null,
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
+        "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
+        "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json",
+        "configs/stages/stage-3/e6b/provenance.json",
+        "configs/stages/stage-3/e8/arms.json",
+        "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json",
+        "docs/shared/STAGE2_3_HANDOFF.md",
+        "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
+        "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
+        "docs/stages/stage-2/reasoning_data/H1PA.md",
+        "logs/budget/decisions.md",
+        "logs/maintenance/inventories/checkpoint_registry.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "a paid recovery run of configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
+      "reconstruction_cost": "paid GPU (a full 2.96M-token recovery)",
+      "never_delete_clause": "accepted experiment checkpoint; the relay holds its evaluations but NOT its weights, so this is the only copy",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "e8_contribution_init_v1",
+      "kind": "artifact_tree",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint",
+      "weight_files": [],
+      "experiment": "E8a",
+      "role": "contribution-guided fully-compressed initialization (FC)",
+      "retention": "canonical",
+      "status": "active",
+      "retention_reason": "E8a's accepted treatment initialization, single-variable against the control",
+      "architecture": {},
+      "size_bytes": 11429016,
+      "size_human": "0.011 GiB",
+      "weights_sha256": null,
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-1/operator_ledger.json",
+        "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
+        "configs/stages/stage-3/e8/arms.json",
+        "configs/stages/stage-3/e8/artifacts_b.json",
+        "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json",
+        "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json",
+        "configs/stages/stage-3/e8b/arms.json",
+        "configs/stages/stage-3/e8b/e8b_fc_r1600k_sa.json",
+        "configs/stages/stage-3/e8b/e8b_fc_r1600k_sb.json",
+        "docs/shared/STAGE2_3_HANDOFF.md",
+        "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
+        "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "the E8a initialization recipe against the same Stage-0 cache and the frozen depth map",
+      "reconstruction_cost": "$0 (CPU)",
+      "never_delete_clause": "canonical initialization; named by the experiment index",
       "protected": true,
       "disposition": "keep"
     },

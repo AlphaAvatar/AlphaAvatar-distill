@@ -16348,3 +16348,25 @@ on a paid pod.
   most without a relay copy); other projects' files. The protected set needs a maintainer decision.
 - Result: 9.4 GiB free (`logs/maintenance/storage/devbox_cleanup_20261110.json`).
 - Irreversible for the C2 probe (no other copy); the A1 v1 weights survive only on `4rhubprswo`.
+
+## 2026-11-10 (UTC) — August E-series weights retired from the dev box (maintainer: "8 月旧检查点可移除")
+
+- Context: the cleanup entry above reported the registry-protected August checkpoints and recommended retiring two
+  groups: E4 / E6b / E7 / P2 (ten final weights, 2026-08-05 to 08-10) and E1's rescued `e1_r2960k_sb_pca` plus E8's
+  contribution-guided initialization (2026-08-02 / 08-11). The maintainer answered "8 月旧检查点可移除" (2026-11-10).
+- Decision: retire the twelve `model.safetensors` files of those two groups (25.53 GiB), each behind a tombstone that
+  quotes this decision and the protection it lifts (`retire_artifact.py --maintainer-decision`). Only the weight file
+  goes; each checkpoint's config, tokenizer, chat template and hash files stay, as do the run logs, side archives
+  (`e4_side.tar.gz`, `p2_side.tar.gz`, `e6b_artifacts.tar.gz`) and every evaluation record.
+- Consumer audit (scripts, src, configs, tests): every hit is a closed experiment's driver, launcher, config or
+  historical test (E1, E3–E8b, P2), H1-PA's complete study (its PCA-Original arm re-evaluated E1 sb; result
+  INCONCLUSIVE, 2026-10-25), maintenance tooling (registry builder, stage attribution), podsim's hidden-path list,
+  usage examples in two evaluation scripts, and one docstring in `stage1_sandwich.py`. None reads the bytes for any
+  open experiment. All twelve belong to the Qwen3-4B-Thinking-2507 lineage, not the current Qwen3-4B@1cfa9a72
+  (P17.1).
+- Surviving copies: E1 sb's weight is on the relay (`e1_scaling_20260801/e1_r2960k_sb_pca/step_002916`, LFS sha256
+  b658fe39… equal to the registry). The other eleven have no other copy: E4/E6b/E7/P2 reconstruct only by a paid
+  retrain from their configs; E8's initialization rebuilds on CPU (`build_and_stage_e8_init.py`).
+- Not touched: the two permanent controls `preflight_ctl_r0860k_sa/sb` (relay copies), `qwen3_0p6b_init_v0`, D1's
+  forward-baseline product, Stage 0's `activation_stats` and E5's diagnostic store. They are the ones the report
+  recommended keeping.

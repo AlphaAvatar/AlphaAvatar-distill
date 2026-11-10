@@ -15,7 +15,7 @@
 Nothing is removed without `--apply`. Everything else about the run happens
 either way, so a dry run produces the exact tombstone that would be written.
 
-The five criteria are the only reasons a deletion is allowed. They are spelled
+The six criteria are the only reasons a deletion is allowed. They are spelled
 out here rather than left to judgement at the keyboard:
 
     unreferenced_failed_partial   an interrupted attempt nothing points at
@@ -26,6 +26,9 @@ out here rather than left to judgement at the keyboard:
                                   are already recorded elsewhere
     verified_stale_cache          the canonical remote copy has been
                                   hash-verified, file by file
+    agents_2_5_standing_retirement
+                                  AGENTS.md 2.5: terminal, evidence and hashes
+                                  durable, no consumer, not an anchor
 
 Refusals, which are the point of the tool:
 
@@ -64,6 +67,9 @@ CRITERIA = {
                             "results and selection evidence are already preserved",
     "verified_stale_cache": "a stale local cache whose canonical remote artifact "
                             "has been hash-verified",
+    "agents_2_5_standing_retirement": "a terminal historical checkpoint whose evidence "
+                                      "and hashes are durable and that no consumer or "
+                                      "anchor needs (AGENTS.md 2.5)",
 }
 
 
