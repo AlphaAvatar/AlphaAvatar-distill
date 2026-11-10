@@ -1702,6 +1702,56 @@ A-MIX-6cat-sr-s20260801 is also on the relay, s20260726 was refused for quota at
 and is not retried. Every unit's generations, rows and formal reports are in the evidence archive `fadea626...` on
 the dev box and the relay (re-downloaded and re-hashed). No volume was deleted.
 
+## 20. Research A closed: CURRENT METHOD NO_GO; storage retirement prepared (2026-11-10)
+
+The maintainer accepted A-MIX's two seeds in both modes ("Research A 最终科学收尾与存储退役准备", review base
+`c7d7950b`) and registered the verdict. Everything below ran at $0; no GPU, no deletion. Record:
+[`analyses/research_a_closeout.json`](../../../../logs/stages/stage-2/teacher_modes/analyses/research_a_closeout.json).
+
+**CURRENT METHOD NO_GO.** Static fluid correctness on eval-set-1's 570 formal items: A1 (thinking) 7.19%, A2
+(non-thinking) 10.96%, A-MIX thinking 10.26%, A-MIX non-thinking 11.23%. A-MIX holds 11.86M unique supervised tokens
+before packing and 4.52x A1's training FLOPs; more data and both modes together did not move generalization enough to
+change the conclusion. The verdict is on the combination: structural initialization from the packed Top-1, the
+teacher-native six-category data and recovery KD. It is not a verdict on the 596M capacity itself. The low correctness
+is not attributed to the decoding parameters, a few truncated targets or a simple EOS problem, none of which has the
+main supporting evidence (section 17): the answer check applied regardless of termination gives the formal rate, and
+correctness among usable rollouts is itself 12-16%. A restart begins by measuring how much of the teacher's reasoning
+survives the structural initialization and the training objective, not by extending this training. Every registered
+comparison and every A-MIX descriptive comparison stands as recorded; nothing is rescored.
+
+**`validation_passed` is not a failed validation.** `closeout/outcome.json :: validation_passed` is True only for a
+kind that defines a verdict (`Launch.verdict`: the L40S engineering check and the engineering validations) whose
+re-derivation from the verified evidence passed. No formal kind defines one, so every formal outcome before
+2026-11-11 (the packed search, A1/A2/C1, A-MIX and the generations) carries a by-construction False. Completion is
+`status` with `runtime/session.json :: passed` (the driver's success marker). The frozen records are not rewritten;
+`study_engineering.closeout` now writes `null` with a `validation` note for a kind without a verdict.
+
+**Backups.** All eight students' Dev Box copies re-hashed against their receipts (2026-11-10T18:41Z); the evidence
+archive `fadea626...` re-hashed on the dev box and re-downloaded from the relay. The relay holds 72.59 GiB of the free
+tier's 93.13 GiB: the 2026-11-10 retirement did free its 22.21 GiB, and the LFS batch endpoint admits up to 20.54 GiB
+more. Proposed, not run: upload the seven weights the relay lacks (15.54 GiB) from the dev box, $0 and about 7 h. No
+trainer state is kept off the volume.
+
+**Volumes** (proposal, nothing deleted:
+[`storage/volume_retirement_proposal_20261110.json`](../../../../logs/stages/stage-2/teacher_modes/storage/volume_retirement_proposal_20261110.json)).
+Inventories are from the records; no volume was listed.
+
+- `thprcgh7s9`: 92 non-winning search states (270.6 GB), eight trainer states, final weights with dev-box copies, the
+  Top-1 with a relay copy. No evidence only there. Retire, after the relay upload; $0; saves $0.82/day.
+- `4rhubprswo`: 93 search states (~274 GB est.), the v2 Top-1 `159e73be` and Research A v1's two A1 weights (only
+  copies, no consumer), trainer state. No evidence only there. Retire without a rescue; $0; saves $0.82/day.
+- `am5m373kuq` (55 GB): H1-PA's and the mixed calibration's six declared-anchor weights, Research A v1's units and
+  save points; only unit 6's small training records are evidence with no copy. Retire once both reviews are confirmed
+  closed; $0.13/day.
+
+Research A v1's teacher, supplement and inputs shards, its search evidence and its recovery evidence had their only
+off-volume copy under `.scratch/research_a/`, a disposable root; they were hard-linked into
+`~/aad-artifacts/research_a/scratch_evidence_20261110/` (2,576 files, 3.56 GB, inode-verified, manifest beside it).
+
+**Budget.** A-MIX $23.4143 of $40.31; A-TM $139.3466 of $161.1023; Research A sessions $185.6483 under its $264.77
+cap; project committed $964.60 of $1,000 ($35.40 left); provider balance $43.03, 0 pods, three volumes at
+$1.76/day.
+
 ## Reproduce ($0)
 
 ```

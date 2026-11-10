@@ -225,7 +225,8 @@ def test_a_kind_that_secures_its_products_closes_on_them(tmp_path, secured):
     (tmp_path / "scr/store/driver.status").write_text("2026-10-30T01:06:39Z MARKER:ALL_DONE\n")
     out = SE.closeout(st, launch, "r1", tmp_path / "scr", root=tmp_path, reconcile=lambda: {"ok": True})
     assert out["status"] == ("COMPLETE" if secured else "INCOMPLETE") and out["evidence"] is None
-    assert out["products_secured"]["ok"] is secured and not out["validation_passed"]
+    assert out["products_secured"]["ok"] is secured and out["validation_passed"] is None
+    assert out["validation"].startswith("not applicable")
 
 
 def test_a_blocked_closeout_records_an_unknown_cost_and_the_envelope_refuses(tmp_path):

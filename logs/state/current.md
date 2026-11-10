@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-10 (UTC), after A-MIX-6cat-sr's completion, the Dev Box backup of all eight students and the dev-box / relay checkpoint retirements. The human view. Every number here has an owner
+**Updated:** 2026-11-10 (UTC), after Research A's closeout (CURRENT METHOD NO_GO) and the volume retirement proposal. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,19 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**RESEARCH A: CLOSED -- CURRENT METHOD NO_GO (maintainer, 2026-11-10). NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES. VOLUME RETIREMENT PROPOSED, NOT EXECUTED.**
+- Verdict (`analyses/research_a_closeout.json`): static fluid 7.19% (A1), 10.96% (A2), 10.26% / 11.23% (A-MIX
+  thinking / non-thinking) at 4.52x A1's compute: the combination of structural initialization, teacher-native data
+  and recovery KD is NO_GO; not a verdict on 596M capacity. Registered and descriptive comparisons unchanged.
+- Backups: eight students' weights on the dev box and evidence archive `fadea626...` on the dev box and the relay,
+  re-verified 2026-11-10T18:41Z. Relay 72.59 of 93.13 GiB; proposed: upload the seven weights it lacks ($0, ~7 h).
+- Volumes: `storage/volume_retirement_proposal_20261110.json` -- `thprcgh7s9` after the upload, `4rhubprswo` without
+  a rescue, `am5m373kuq` once two reviews are confirmed closed. Live 2026-11-10T18:39Z: balance $43.03, 0 pods,
+  $1.76/day (~24 days).
+- Budget: A-TM $139.3466 of $161.1023; project committed $964.60 of $1,000.
+- Not authorized: new GPU work, Stage 4/5/6, a re-search, deleting a volume, a merge into main.
+- Owner: `logs/budget/decisions.md` 2026-11-10; `PACKED_ROUND.md` sections 19-20.
 
 **RESEARCH A: A-MIX-6cat-sr COMPLETE (2026-11-10) -- TWO SEEDS TRAINED, EACH EVALUATED IN BOTH MODES. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
 - Run `a_train_sr_mix_20261109_193709`: one L40S on `thprcgh7s9`, one attempt, $23.4143 of $40.31 (cumulative $45.17);

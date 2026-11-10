@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Research A: A-MIX-6cat-sr COMPLETE 2026-11-10 (two seeds, both modes). Open: the next volume retirement decision. Owner: PACKED_ROUND.md section 19.",
+ "blocker": "BLOCKED NO. Research A CLOSED 2026-11-10: CURRENT METHOD NO_GO. Open: the volume retirement list (storage/volume_retirement_proposal_20261110.json). Owner: PACKED_ROUND.md section 20.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer: read the A-MIX result (analyses/mixed_result.json); decide 4rhubprswo / thprcgh7s9 retirement. Owner: logs/budget/decisions.md 2026-11-10.",
+ "next": "The maintainer: approve the volume retirement list and the relay upload of seven student weights; confirm H1-PA's and the mixed calibration's reviews closed. Owner: logs/budget/decisions.md 2026-11-10.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -200,7 +200,7 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 3,
-  "run": "A-MIX-6cat-sr COMPLETE: a_train_sr_mix_20261109_193709 ($23.4143); pod deleted, provider-confirmed",
+  "run": "none; last: A-MIX-6cat-sr a_train_sr_mix_20261109_193709 ($23.4143), pod deleted, provider-confirmed",
   "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1, the eight Stage-3 units (weights also on the dev box, verified 2026-11-10); 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
  },
  "schema": "aadistill.current_state/v2",

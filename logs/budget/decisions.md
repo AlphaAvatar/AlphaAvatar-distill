@@ -16392,3 +16392,26 @@ on a paid pod.
 - Not done, by the brief: no Stage 4/5/6, no merge, no volume deleted, no HF upload retried.
 - Revisit when: the next explicit retirement decision (`4rhubprswo`, `thprcgh7s9`'s search states and closed
   trainer state).
+
+## 2026-11-10 (UTC) — Research A closed: CURRENT METHOD NO_GO; storage retirement prepared, nothing deleted
+
+- Context: the maintainer's brief "AlphaAvatar-distill — Research A 最终科学收尾与存储退役准备" (review base
+  `c7d7950b`): accept A-MIX, register the verdict, explain `validation_passed`, re-verify the backups, query the relay's
+  real quota, prepare a volume retirement list. No new GPU work, no deletion.
+- Decision: **CURRENT METHOD NO_GO** for the combination of structural initialization (packed Top-1), teacher-native
+  six-category data and recovery KD: static fluid 7.19% (A1), 10.96% (A2), 10.26% / 11.23% (A-MIX thinking /
+  non-thinking) at 4.52x A1's compute. Not a verdict on 596M capacity; not attributed to decoding, a few truncated
+  targets or EOS. A restart first measures the teacher's reasoning retained through initialization and objective.
+  Registered and descriptive comparisons unchanged; nothing rescored (`analyses/research_a_closeout.json`).
+- `validation_passed`: False by construction on every formal kind (no `Launch.verdict`); the frozen outcomes are not
+  rewritten; `study_engineering.closeout` writes `null` with a `validation` note from now on.
+- Backups: eight Dev Box weights and the evidence archive re-verified; relay 72.59 GiB used, 20.54 GiB admitted (the
+  22.21 GiB retirement was freed). Proposed: upload the seven weights the relay lacks from the dev box ($0, ~7 h).
+- Storage: `storage/volume_retirement_proposal_20261110.json` (PROPOSED): retire `thprcgh7s9` after the upload,
+  `4rhubprswo` without a rescue (the v2 Top-1 and A1 v1's weights are historical, no consumer), `am5m373kuq` once
+  H1-PA's and the mixed calibration's reviews are confirmed closed. Research A v1's evidence, found only under the
+  disposable `.scratch/research_a/`, was hard-linked into `~/aad-artifacts/research_a/scratch_evidence_20261110/`.
+- Budget terminal: A-TM $139.3466 of $161.1023; project committed $964.60 of $1,000; balance $43.03, 0 pods.
+- Open: the retirement list; the relay upload; the two reviews; closing the A-TM grant's remaining kinds (only
+  `packed_search` and `stage3_sr` are marked closed).
+- Revisit when: the maintainer approves the retirement list.

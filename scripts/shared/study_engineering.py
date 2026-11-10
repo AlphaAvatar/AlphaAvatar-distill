@@ -667,7 +667,10 @@ def closeout(study: Study, launch: Launch, run_id: str, scr: Path, *, root: Path
     disk = disk_gb * DISK_USD_PER_GB_MONTH * minutes / (60 * 24 * 30.4375)
     #: a create whose answer named no pod on an unreadable account (SessionRunner.create) is an unknown resource, not $0
     created = bool(sess.get("provider_resource_created") or sess.get("provider_state_unknown"))
-    passed = bool(terminal == "ALL_DONE" and rederived and rederived["passed"] and rederived["agrees_with_the_pod"])
+    #: only a kind with a verdict (an engineering check) re-derives one; for every other kind the field is None,
+    #: never False: no validator ran, and records written before 2026-11-11 carry a by-construction False there
+    passed = (bool(terminal == "ALL_DONE" and rederived and rederived["passed"] and rederived["agrees_with_the_pod"])
+              if launch.verdict is not None else None)
     # a kind that secures its products on every poll (no evidence archive, no verdict) is complete when
     # the launcher recorded them secured off-pod and the driver finished
     products = sess.get("required_products_secured") if launch.verdict is None and launch.products_secured else None
@@ -676,7 +679,11 @@ def closeout(study: Study, launch: Launch, run_id: str, scr: Path, *, root: Path
            "recorded_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
            "status": ("COMPLETE" if ((evidence and evidence["verified"]) or secured) and sess.get("provider_confirms_gone")
                       else "INCOMPLETE"),
-           "validation_passed": passed, "products_secured": products, "terminal": terminal, "runner_terminal": sess.get("terminal"),
+           "validation_passed": passed,
+           "validation": ("the driver's verdict re-derived from the evidence archive" if launch.verdict is not None
+                          else "not applicable: this kind defines no verdict (Launch.verdict is None); completion is "
+                               "status, from the secured products or the verified evidence"),
+           "products_secured": products, "terminal": terminal, "runner_terminal": sess.get("terminal"),
            "provider_resource_created": created, "evidence": evidence, "verdict_rederived": rederived,
            # a created resource whose session recorded no teardown cost (a blocked gate retains the pod) is an
            # unknown, never $0: spent() then refuses every later issue until the run is reconciled

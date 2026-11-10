@@ -1,0 +1,239 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.volume_retirement_proposal/v1",
+ "written_utc": "2026-11-10T19:20Z",
+ "status": "PROPOSED: nothing deleted; each volume's deletion waits for the maintainer's approval of this list",
+ "decided_by": "maintainer, 'Research A 最终科学收尾与存储退役准备', section IV",
+ "method": "read-only and at $0: the committed records of every run that attached each volume (runtime/session.json :: volume), the volume records, the units records, the evidence archives and their sha256; no volume was mounted or listed (no S3 API in US-TX-3; a listing needs a paid pod). Sizes marked est. are derived from records, not measured",
+ "provider_live": {
+  "read_utc": "2026-11-10T18:39:40Z",
+  "balance_usd": 43.03,
+  "pods": 0,
+  "volumes": [
+   "4rhubprswo",
+   "am5m373kuq",
+   "thprcgh7s9"
+  ],
+  "spend_per_hour_usd": 0.073,
+  "snapshot": "not committed: the 2026-11-10T1727Z snapshot is history, this read is the live state"
+ },
+ "categories": {
+  "1": "final weights an open or declared consumer still needs",
+  "2": "non-winning intermediate states of a closed search",
+  "3": "optimizer / resume state of closed training (AdamW, scheduler, RNG)",
+  "4": "raw measurement and generation evidence that must be kept",
+  "5": "products that already have a legitimate independent copy",
+  "W0": "final weights with no consumer and no other copy (retirable under AGENTS.md 2.5 with frozen hashes and measurements)"
+ },
+ "volumes": {
+  "thprcgh7s9": {
+   "size_gb": 350,
+   "dc": "US-TX-3",
+   "usd_per_day": 0.8167,
+   "usd_per_month": 24.85,
+   "used_est_gb": "~320 (du 301.66 GB at 2026-11-08T10:52Z, then C1 unit 2 ~8.3 GB and A-MIX ~11.7 GB)",
+   "items": [
+    {
+     "item": "search_packed/search/states: 92 non-winning states of the closed packed full search (prune_weights false)",
+     "cat": "2",
+     "size": "270.6 GB (journal)",
+     "copy": "their scores, lineage and selection in the search evidence archive d781ab9a... (artifacts/ and relay) and states.jsonl 617d1512...",
+     "consumer": "none"
+    },
+    {
+     "item": "search_packed/top1: the packed Top-1 1f5e4b42 (b74dede8...)",
+     "cat": "5",
+     "size": "1.19 GB",
+     "copy": "relay durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad/ (verified 2026-11-07)",
+     "consumer": "none (Research A closed CURRENT_METHOD_NO_GO)"
+    },
+    {
+     "item": "stage3_sr/<8 units>/train/checkpoints/<final>/trainer_state.pt (+ resume_identity.json)",
+     "cat": "3",
+     "size": "8 x ~3.52 GB = ~28.2 GB est.",
+     "copy": "resume_identity.json on the dev box with each receipt; trainer_state none",
+     "consumer": "none: every training is closed"
+    },
+    {
+     "item": "stage3_sr/<8 units> final model weights (+ evaluation package copies)",
+     "cat": "5",
+     "size": "8 x 2.22 GiB (+ six full package copies for the -sr units; A-MIX packages are hard links)",
+     "copy": "dev box, all eight hash-verified 2026-11-10T18:41Z; A-MIX-6cat-sr-s20260801 also on the relay",
+     "consumer": "none open"
+    },
+    {
+     "item": "stage3_sr/<8 units> evaluation generations, rows, formal reports, train logs",
+     "cat": "4 (copied)",
+     "size": "~1 GB",
+     "copy": "evidence archive fadea626... on the dev box and the relay (verified 2026-11-10); C1's c0901fbb... and the committed formal reports",
+     "consumer": "analyses read the copies"
+    },
+    {
+     "item": "the teacher's HF cache",
+     "cat": "5",
+     "size": "0",
+     "copy": "setup sets HF_HOME=/root/.cache (container disk), so nothing of the teacher is expected here",
+     "consumer": "none"
+    }
+   ],
+   "only_copy_evidence": "none identified",
+   "recommendation": "retire the whole volume. Before deleting, upload the seven student weights that have no relay copy from the dev box (section III's plan), so every final weight keeps two independent copies after the volume goes",
+   "one_time_cost_usd": "0 (provider API delete; tombstones in the repo); the relay upload is $0 and ~7 h of dev-box uplink",
+   "residual_risk": [
+    "the 92 search states can be recovered only by re-running the packed search (~$28)",
+    "no exact continuation of any of the eight trainings; retraining costs A1 $7.76, A2 $15.61, C1 $7.43, A-MIX $23.41 (both seeds) and is not bit-reproducible",
+    "until the relay upload is done, seven final weights would live on the dev box alone",
+    "the volume was never listed whole: a file no session recorded would be lost unseen"
+   ]
+  },
+  "4rhubprswo": {
+   "size_gb": 350,
+   "dc": "US-TX-3",
+   "usd_per_day": 0.8167,
+   "usd_per_month": 24.85,
+   "used_est_gb": "~292 est.",
+   "items": [
+    {
+     "item": "search_a1/search/states: 93 states of the closed hybrid D4 full search (a_search_20261101_153803)",
+     "cat": "2",
+     "size": "~274 GB est.",
+     "copy": "journal and selection in search_evidence.tgz ebc81e9f... (journal 5ee31414...), now also in ~/aad-artifacts/research_a/scratch_evidence_20261110/",
+     "consumer": "none"
+    },
+    {
+     "item": "search_a1/top1: the v2 Top-1 159e73be (model.safetensors 3459b9c9..., artifact ab8ffb0d...)",
+     "cat": "W0",
+     "size": "1.19 GB",
+     "copy": "none (audit/six_category_persistence.json :: single_copy); the dev box holds only a 5.8 MB truncated pull",
+     "consumer": "none (packed_round_design.json: no future consumer); protected by PACKED_ROUND.md section 9 item 7 'until a verified copy exists' -- lifting it is the maintainer's decision"
+    },
+    {
+     "item": "v2_units/A1-s20260726|s20260801 final weights 1f3e5eea..., 06c12901... (+ evaluation package copies)",
+     "cat": "W0",
+     "size": "4 x 2384234968 B = 9.54 GB",
+     "copy": "none since the dev-box copies were retired 2026-11-10 (tombstones devbox_20261110_research_a_v1_A1-*)",
+     "consumer": "none"
+    },
+    {
+     "item": "v2_units/A1-*/trainer_state.pt, resume_identity.json",
+     "cat": "3",
+     "size": "~7.0 GB est.",
+     "copy": "none",
+     "consumer": "none"
+    },
+    {
+     "item": "the inputs session's 11 sealed shards",
+     "cat": "4 (copied)",
+     "size": "22.9 MB",
+     "copy": ".scratch/research_a/a_inputs_20261101_125916/store (sha256 per shard in its session.json), now hard-linked into ~/aad-artifacts/research_a/scratch_evidence_20261110/",
+     "consumer": "audit/state_eval_hybrid_freeze.json reads the dev-box copy"
+    },
+    {
+     "item": "the A1 pack (blocks.npz 32a87943...)",
+     "cat": "5",
+     "size": "~93 MB",
+     "copy": "artifacts/stages/stage-2/teacher_modes/packs_tm/A1",
+     "consumer": "none"
+    },
+    {
+     "item": "A1's train logs and evaluation (generations, rows, reports)",
+     "cat": "4 (copied)",
+     "size": "158 MB",
+     "copy": "~/aad-artifacts/research_a/a_train_a1_20261102_184122/a1_evidence/ (166 files, split_manifest.json)",
+     "consumer": "analyses/a1_result.json (closed)"
+    }
+   ],
+   "only_copy_evidence": "none identified (the records do not say whether a state directory holds measurement files beyond the journal)",
+   "recommendation": "retire the whole volume without a rescue: the v2 Top-1 and Research A v1's A1 weights are historical initialization and superseded students with no consumer (the brief: not kept for their bytes alone); their identities, hashes and measurements are frozen, and tombstones carry them",
+   "one_time_cost_usd": "0; optional rescue of the v2 Top-1 (and A1 v1's two weights) to the relay: one L40S in US-TX-3 (no CPU stock there), 30-60 min, ~$0.6-1.2 est. -- not recommended",
+   "residual_risk": [
+    "the v2 Top-1 can be re-materialized only by a GPU replay of the journal, not guaranteed bit-exact",
+    "A1 v1 retraining ~$3.2 per seed plus evaluation, not bit-reproducible",
+    "the search states only by a re-search (~$24)",
+    "no exact continuation of A1 v1"
+   ]
+  },
+  "am5m373kuq": {
+   "size_gb": 55,
+   "dc": "EUR-IS-2",
+   "usd_per_day": 0.1283,
+   "usd_per_month": 3.9,
+   "used_est_gb": "~45 est.",
+   "reserved_to": "2026-12-24 (inside H1-PA's booking)",
+   "items": [
+    {
+     "item": "h1pa/D4-Augmented-s* and D4-Original-s* final weights; mixed_v2/Mix-Augmented-s* final weights",
+     "cat": "1 (declared anchors) / W0 once the reviews close",
+     "size": "6 x 2,384,236,592 B = 14.3 GB",
+     "copy": "none",
+     "consumer": "declared anchors until H1-PA's and the mixed calibration's reviews close (h1pa_volume_am5m373kuq.json :: declared_future_use); no code reads them. Both studies were integrated 2026-10-27; no record says the reviews closed"
+    },
+    {
+     "item": "teacher_modes/units/{H-T-S,H-N-S,H-T-C}-s* (Research A v1) final weights, common_initialization c4f66815...",
+     "cat": "W0",
+     "size": "~15.5 GB est.",
+     "copy": "none",
+     "consumer": "none (v1 stopped)"
+    },
+    {
+     "item": "unit 6 (H-T-C-s20260801) save points step_000200 / step_000231",
+     "cat": "3",
+     "size": "~11.8 GB est.",
+     "copy": "none",
+     "consumer": "none"
+    },
+    {
+     "item": "teacher and supplement generation shards (74 + 413 and 89 + 390 items)",
+     "cat": "4 (copied)",
+     "size": "~2.85 GB",
+     "copy": ".scratch/research_a/a_teacher_*, a_supplement_* (487/487 and 479/479 match their session records), now hard-linked into ~/aad-artifacts/research_a/scratch_evidence_20261110/",
+     "consumer": "data/admission.json and the token-matched / six-category selections read the dev-box copies"
+    },
+    {
+     "item": "H1-PA and MC2 per-unit evaluation evidence",
+     "cat": "4 (copied)",
+     "size": "<= 0.41 GB",
+     "copy": "H1-PA: relay stage2_h1pa/units/evidence/ and artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/; MC2: ~/aad-artifacts/stage0_calvol/mixr_20261026_140539/store/",
+     "consumer": "analyses read the copies"
+    },
+    {
+     "item": "recovery units 1-5 reports, logs, generations",
+     "cat": "4 (copied)",
+     "size": "11.5 MB",
+     "copy": ".scratch/research_a/a_recovery_20261030_211948/store, now hard-linked into the durable store",
+     "consumer": "none"
+    },
+    {
+     "item": "unit 6's train_log.jsonl, run manifests, checkpoint descriptor",
+     "cat": "4",
+     "size": "<1 MB est.",
+     "copy": "none; its digests are committed (maintainer_stop.json)",
+     "consumer": "none"
+    }
+   ],
+   "only_copy_evidence": "unit 6's training records (small, unscored, digests committed)",
+   "recommendation": "low cost ($3.90/month, reserved to 2026-12-24): retire after the maintainer confirms H1-PA's and the mixed calibration's reviews are closed; accept the loss of unit 6's records or collect them on one short EUR-IS-2 pod (~$0.5-1 est.)",
+   "one_time_cost_usd": "0 (or ~$0.5-1 to collect unit 6's records)"
+  }
+ },
+ "evidence_preserved_today": {
+  "what": "the only off-volume copies of Research A v1's teacher, supplement and inputs shards, the v2 search evidence and the recovery evidence sat under .scratch/research_a/, a root whose README says nothing durable lives there",
+  "action": "hard-linked into ~/aad-artifacts/research_a/scratch_evidence_20261110/ (2,576 files, 3,556,981,667 B, every link inode-verified; manifest ~/aad-artifacts/research_a/scratch_evidence_20261110.manifest.json); no extra bytes, original paths unchanged",
+  "second_store": "not on the relay yet: 3.3 GiB, proposed after the student weights (section III)"
+ },
+ "if_all_three_go": {
+  "usd_per_day_saved": 1.7617,
+  "usd_per_month_saved": 53.6
+ },
+ "if_the_two_350gb_go": {
+  "usd_per_day_saved": 1.6334,
+  "usd_per_month_saved": 49.7,
+  "left": "am5m373kuq $0.1283/day: the current balance would carry it ~335 days"
+ },
+ "record_inconsistencies_noted_not_rewritten": [
+  "audit/six_category_persistence.json :: search_evidence.on_the_volume_only says the v2 search journal is only on the volume; it is inside search_evidence.tgz (hash matches)",
+  "checkpoint_tombstones.json :: devbox_20261110_research_a_v1_A1-* call 159e73be 'the v1 packed search Top-1'; it is the unpacked hybrid D4 full search's v2 Top-1",
+  "TOKEN_MATCHED.md says the teacher cache is on the volume; setup sets HF_HOME=/root/.cache"
+ ],
+ "caveat": "the grant's phase_a1 block has no closed marker, so kind train_a1 could still be issued; closing it is part of this round's closeout",
+ "authorizes": "nothing"
+}
