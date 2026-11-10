@@ -16303,3 +16303,29 @@ on a paid pod.
   waits for the maintainer's top-up to land; a planned top-up is not money.
 - Revisit when: the balance covers $40.31 (launch), or the A-MIX units and all eight dev-box copies are verified
   (volume retirement proposal).
+
+## 2026-11-10 (UTC) — Ten historical HF-only checkpoint weights retired (22.21 GiB) to give the relay room
+
+- Context: during A-MIX Stage 3, the relay refused A-MIX-6cat-sr-s20260726's off-volume copy at 05:24:28Z
+  ("REFUSED (403) Private storage limit reached"). Private LFS stood at 86.92 GiB (artifacts) + 5.55 GiB (transport)
+  against the account-wide ~93.13 GiB.
+- Decision (maintainer, 2026-11-10): "你可以自主决定删除一些HF上无用的checkpoint".
+- Retired: the 2026-11-08 storage audit's consumer-free candidates
+  (`stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer`), 10 objects of 2,384,234,968 B.
+  - `stage3/kdconf_{ctrl,nothink}_{a,b}` and `stage3/s2v1_bl2048{,_seedB}`: closed 2026-07-28 Stage-3 ablations.
+    Each run's evaluations, run manifest, train log and artifact-hash list stay on the relay beside them.
+    The hash list names each deleted object's sha256.
+  - `a3_preserved_probes/a3_attempt35/*` (3): A3 probes, completed and validly scored by a3_attempt38.
+    `a3_probe_inventory.json` keeps their results and file hashes.
+  - `a3_preserved_probes/a3_attempt36/...217230555`: a retrain from an attempt that aborted before scoring.
+- How: each object matched by exact filename, file_oid and size (one match each); then a git grep of src/, configs/
+  and scripts/ outside tests (only A3's closed driver and the inventory parser name the prefixes). Ten tombstones
+  were written to `logs/maintenance/inventories/checkpoint_tombstones.json` before
+  `permanently_delete_lfs_files(rewrite_history=True)`.
+- Not touched: `transfer/` (wheelhouses, staged packs), `durable/` (the packed Top-1 copy, Stage-3 evidence), `e1_*`,
+  `stage0_calvol/`, `permanent_controls/`, the canonical initialization and the transport repo.
+- Result: artifacts 86.92 -> 64.72 GiB. The LFS batch endpoint (no bytes sent) admits one, two and eight 2.22 GiB
+  objects. A-MIX seed 20260801's copy, made by the driver after training, therefore has room.
+  - Seed 20260726's relay copy is not retried by this session: the driver re-attempts it only at a later session's
+    start, and the brief said not to retry HF uploads. Its dev-box copy is verified.
+- Irreversible; no copy of the ten weights survives. Reconstruction is a paid retrain from each run's recorded config.

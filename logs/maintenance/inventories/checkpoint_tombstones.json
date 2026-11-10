@@ -35,10 +35,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 79,
-  "active": 77,
-  "active_retired_bytes": 485745459202,
-  "active_retired_human": "452.386 GiB",
+  "tombstones_total": 89,
+  "active": 87,
+  "active_retired_bytes": 509587808882,
+  "active_retired_human": "474.591 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -5880,6 +5880,472 @@
     "maintainer_decision": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section 5: 不再默认永久保留所有历史 checkpoint; 优先清理已关闭且没有继续训练需求的 optimizer/trainer_state、可重建缓存、重复权重和无消费者的历史中间 checkpoint; 对于 D4 初始化 ... 可以将其列入退役范围; 旧 v2 Top-1、非胜出搜索状态和其他历史初始化也按同样的消费者规则审查 (logs/budget/decisions.md, 2026-11-09 (UTC) checkpoint retirement)"
    },
    "deleted_utc": "2026-11-09T10:07:04+00:00"
+  },
+  {
+   "canonical_id": "stage3_kdconf_ctrl_a",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "stage3/kdconf_ctrl_a/step_001000/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Stage 3 offline-recovery ablations on the Qwen3-0.6B-derived student (2026-07-28), closed; superseded by the E1/E6 and every later Stage-3 round",
+   "seed": null,
+   "scientific_role": "kd_scope A/B: control, seed a",
+   "weights_sha256": "1919f40b688472d9bdb1aefe46143e7f4b7e311b8cfd8aaabccd677c72536afe",
+   "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/kdconf_ctrl_a/step_001000/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "1919f40b688472d9bdb1aefe46143e7f4b7e311b8cfd8aaabccd677c72536afe"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md (lists it as not required by the D0->D1->L1->R1/R2 chain)"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "relay stage3/kdconf_ctrl_a/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, kdconf_ctrl_a_artifact_hashes_20260728.txt, probe_think_close.json, run_manifest.json, train_log.jsonl",
+   "frozen_results_location": "relay stage3/kdconf_ctrl_a/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, kdconf_ctrl_a_artifact_hashes_20260728.txt, probe_think_close.json, run_manifest.json, train_log.jsonl",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "retrain from the config named in relay stage3/kdconf_ctrl_a/run_manifest.json",
+   "expected_reconstruction_cost": "paid GPU (a full Stage-3 recovery run of that era)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "stage3_kdconf_ctrl_b",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "stage3/kdconf_ctrl_b/step_001000/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Stage 3 offline-recovery ablations on the Qwen3-0.6B-derived student (2026-07-28), closed; superseded by the E1/E6 and every later Stage-3 round",
+   "seed": null,
+   "scientific_role": "kd_scope A/B: control, seed b",
+   "weights_sha256": "b31349013baeed79d8ecb59ae2b5129cc42e295bed186f3f296f502d9bc13478",
+   "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/kdconf_ctrl_b/step_001000/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "b31349013baeed79d8ecb59ae2b5129cc42e295bed186f3f296f502d9bc13478"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md (lists it as not required by the D0->D1->L1->R1/R2 chain)"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "relay stage3/kdconf_ctrl_b/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, kdconf_ctrl_b_artifact_hashes_20260728.txt, probe_think_close.json, run_manifest.json, train_log.jsonl",
+   "frozen_results_location": "relay stage3/kdconf_ctrl_b/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, kdconf_ctrl_b_artifact_hashes_20260728.txt, probe_think_close.json, run_manifest.json, train_log.jsonl",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "retrain from the config named in relay stage3/kdconf_ctrl_b/run_manifest.json",
+   "expected_reconstruction_cost": "paid GPU (a full Stage-3 recovery run of that era)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "stage3_kdconf_nothink_a",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "stage3/kdconf_nothink_a/step_001000/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Stage 3 offline-recovery ablations on the Qwen3-0.6B-derived student (2026-07-28), closed; superseded by the E1/E6 and every later Stage-3 round",
+   "seed": null,
+   "scientific_role": "kd_scope A/B: no-think arm, seed a",
+   "weights_sha256": "0c49d80246e3a4157ad947053c9279777de2a89c75fde9f7ae0602863215e58b",
+   "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/kdconf_nothink_a/step_001000/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "0c49d80246e3a4157ad947053c9279777de2a89c75fde9f7ae0602863215e58b"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md (lists it as not required by the D0->D1->L1->R1/R2 chain)"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "relay stage3/kdconf_nothink_a/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, kdconf_nothink_a_artifact_hashes_20260728.txt, probe_think_close.json, run_manifest.json, train_log.jsonl",
+   "frozen_results_location": "relay stage3/kdconf_nothink_a/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, kdconf_nothink_a_artifact_hashes_20260728.txt, probe_think_close.json, run_manifest.json, train_log.jsonl",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "retrain from the config named in relay stage3/kdconf_nothink_a/run_manifest.json",
+   "expected_reconstruction_cost": "paid GPU (a full Stage-3 recovery run of that era)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "stage3_kdconf_nothink_b",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "stage3/kdconf_nothink_b/step_001000/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Stage 3 offline-recovery ablations on the Qwen3-0.6B-derived student (2026-07-28), closed; superseded by the E1/E6 and every later Stage-3 round",
+   "seed": null,
+   "scientific_role": "kd_scope A/B: no-think arm, seed b",
+   "weights_sha256": "1f4db5732e588110236a07f98bdb12faccd5f406b4550d46d5a9e0fa2b5ae694",
+   "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/kdconf_nothink_b/step_001000/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "1f4db5732e588110236a07f98bdb12faccd5f406b4550d46d5a9e0fa2b5ae694"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md (lists it as not required by the D0->D1->L1->R1/R2 chain)"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "relay stage3/kdconf_nothink_b/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, kdconf_nothink_b_artifact_hashes_20260728.txt, probe_think_close.json, run_manifest.json, train_log.jsonl",
+   "frozen_results_location": "relay stage3/kdconf_nothink_b/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, kdconf_nothink_b_artifact_hashes_20260728.txt, probe_think_close.json, run_manifest.json, train_log.jsonl",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "retrain from the config named in relay stage3/kdconf_nothink_b/run_manifest.json",
+   "expected_reconstruction_cost": "paid GPU (a full Stage-3 recovery run of that era)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "stage3_s2v1_bl2048",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "stage3/s2v1_bl2048/step_002700/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Stage 3 offline-recovery ablations on the Qwen3-0.6B-derived student (2026-07-28), closed; superseded by the E1/E6 and every later Stage-3 round",
+   "seed": null,
+   "scientific_role": "block length 2048 ablation, seed A",
+   "weights_sha256": "d4d262e07855cdc5cdfb489948d53db3dcc57725a36ea02fe78964a325206934",
+   "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/s2v1_bl2048/step_002700/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "d4d262e07855cdc5cdfb489948d53db3dcc57725a36ea02fe78964a325206934"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md (lists it as not required by the D0->D1->L1->R1/R2 chain)"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "relay stage3/s2v1_bl2048/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, run_manifest.json, s2v1_bl2048_artifact_hashes_20260728.txt, train_log.jsonl",
+   "frozen_results_location": "relay stage3/s2v1_bl2048/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, run_manifest.json, s2v1_bl2048_artifact_hashes_20260728.txt, train_log.jsonl",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "retrain from the config named in relay stage3/s2v1_bl2048/run_manifest.json",
+   "expected_reconstruction_cost": "paid GPU (a full Stage-3 recovery run of that era)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "stage3_s2v1_bl2048_seedB",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "stage3/s2v1_bl2048_seedB/step_002700/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Stage 3 offline-recovery ablations on the Qwen3-0.6B-derived student (2026-07-28), closed; superseded by the E1/E6 and every later Stage-3 round",
+   "seed": null,
+   "scientific_role": "block length 2048 ablation, seed B",
+   "weights_sha256": "eecfe5a16fb2a730c6bc0d34ab3b50a36a602bbece696b71b65567698cb71172",
+   "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/s2v1_bl2048_seedB/step_002700/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "eecfe5a16fb2a730c6bc0d34ab3b50a36a602bbece696b71b65567698cb71172"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md (lists it as not required by the D0->D1->L1->R1/R2 chain)"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "relay stage3/s2v1_bl2048_seedB/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, run_manifest.json, s2v1_bl2048_seedB_artifact_hashes_20260728.txt, train_log.jsonl",
+   "frozen_results_location": "relay stage3/s2v1_bl2048_seedB/ (every file except the weights): console.log, eval_behavior_v0.generations.jsonl, eval_behavior_v0.json, eval_holdout_v1.json, eval_holdout_v1_int8.json, eval_holdout_v1_int8_decoder.json, gen_smoke.json, run_manifest.json, s2v1_bl2048_seedB_artifact_hashes_20260728.txt, train_log.jsonl",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "retrain from the config named in relay stage3/s2v1_bl2048_seedB/run_manifest.json",
+   "expected_reconstruction_cost": "paid GPU (a full Stage-3 recovery run of that era)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "a3_preserved_probes_a3_attempt35_autoinit.v1.phase_a3.A_bsz3.217230555",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.217230555/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Phase A3 (closed; terminal measurement a3_attempt38)",
+   "seed": 217230555,
+   "scientific_role": "A_bsz3 probe, completed and validly scored",
+   "weights_sha256": "241585f9d284c014b1579fb5cac748d7045c76471379e72b30c23dce4b63c61e",
+   "config_sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.217230555/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "241585f9d284c014b1579fb5cac748d7045c76471379e72b30c23dce4b63c61e"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/stages/stage-1/phase_a3/ (its run records and closeout)",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a3/runs/a3_attempt38/evidence/a3_probe_inventory.json (per-probe counts, rates, result_sha256, per_sample_sha256 and these files' sha256) and logs/stages/stage-1/phase_a3/analyses/a3_closeout.md",
+   "frozen_results_location": "logs/stages/stage-1/phase_a3/runs/a3_attempt38/evidence/a3_probe_inventory.json (per-probe counts, rates, result_sha256, per_sample_sha256 and these files' sha256) and logs/stages/stage-1/phase_a3/analyses/a3_closeout.md",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "rerun A3's frozen recipe for this seed (scripts/stages/stage-1/phase_a3/, a3_attempt35's session)",
+   "expected_reconstruction_cost": "paid GPU (about 62 min of L40S per probe)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "a3_preserved_probes_a3_attempt35_autoinit.v1.phase_a3.A_bsz3.1151307191",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Phase A3 (closed; terminal measurement a3_attempt38)",
+   "seed": 1151307191,
+   "scientific_role": "A_bsz3 probe, completed and validly scored",
+   "weights_sha256": "34eeb80e465a717cf9173178895a636bec2afe8a76f68fa8335f8ee0421aeef5",
+   "config_sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "34eeb80e465a717cf9173178895a636bec2afe8a76f68fa8335f8ee0421aeef5"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/stages/stage-1/phase_a3/ (its run records and closeout)",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a3/runs/a3_attempt38/evidence/a3_probe_inventory.json (per-probe counts, rates, result_sha256, per_sample_sha256 and these files' sha256) and logs/stages/stage-1/phase_a3/analyses/a3_closeout.md",
+   "frozen_results_location": "logs/stages/stage-1/phase_a3/runs/a3_attempt38/evidence/a3_probe_inventory.json (per-probe counts, rates, result_sha256, per_sample_sha256 and these files' sha256) and logs/stages/stage-1/phase_a3/analyses/a3_closeout.md",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "rerun A3's frozen recipe for this seed (scripts/stages/stage-1/phase_a3/, a3_attempt35's session)",
+   "expected_reconstruction_cost": "paid GPU (about 62 min of L40S per probe)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "a3_preserved_probes_a3_attempt35_autoinit.v1.phase_a3.A_bsz3.2045359208",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.2045359208/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Phase A3 (closed; terminal measurement a3_attempt38)",
+   "seed": 2045359208,
+   "scientific_role": "A_bsz3 probe, completed and validly scored",
+   "weights_sha256": "47113ca3519ef205cf7237eecabbc555ad7bd094f2950cdd79cb7dd3ab3f884b",
+   "config_sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.2045359208/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "47113ca3519ef205cf7237eecabbc555ad7bd094f2950cdd79cb7dd3ab3f884b"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/stages/stage-1/phase_a3/ (its run records and closeout)",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_a3/runs/a3_attempt38/evidence/a3_probe_inventory.json (per-probe counts, rates, result_sha256, per_sample_sha256 and these files' sha256) and logs/stages/stage-1/phase_a3/analyses/a3_closeout.md",
+   "frozen_results_location": "logs/stages/stage-1/phase_a3/runs/a3_attempt38/evidence/a3_probe_inventory.json (per-probe counts, rates, result_sha256, per_sample_sha256 and these files' sha256) and logs/stages/stage-1/phase_a3/analyses/a3_closeout.md",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "rerun A3's frozen recipe for this seed (scripts/stages/stage-1/phase_a3/, a3_attempt35's session)",
+   "expected_reconstruction_cost": "paid GPU (about 62 min of L40S per probe)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "a3_preserved_probes_a3_attempt36_autoinit.v1.phase_a3.A_bsz3.217230555",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "a3_preserved_probes/a3_attempt36/autoinit.v1.phase_a3.A_bsz3.217230555/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Phase A3 (closed; a3_attempt36 aborted before scoring, DRIVER_EXITED:143)",
+   "seed": 217230555,
+   "scientific_role": "retrain of probe 217230555 in an aborted attempt; never scored, not byte-identical to attempt35's",
+   "weights_sha256": "33cfecd96d032384f758ea369e198dc17a3e8d276c734e74fe84b329de98861c",
+   "config_sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "a3_preserved_probes/a3_attempt36/autoinit.v1.phase_a3.A_bsz3.217230555/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "33cfecd96d032384f758ea369e198dc17a3e8d276c734e74fe84b329de98861c"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/stages/stage-1/phase_a3/ (its run records and closeout)",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_storage_audit.json :: relay.candidates_without_a_code_or_config_consumer"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 under the maintainer's 2026-11-10 decision: the experiment is terminal, its evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), and it is not an incumbent, a control, a release or a retained anchor. NOT a duplicate: no copy survives.",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, after the relay refused A-MIX-6cat-sr-s20260726's off-volume copy for quota: \"你可以自主决定删除一些HF上无用的checkpoint\"",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "the relay held 92.47 GiB of the account's ~93.13 GiB private limit and refused A-MIX-6cat-sr-s20260726's 2.22 GiB off-volume copy (OFF_VOLUME_NOT_COPIED, 2026-11-10T05:24:28Z); these ten objects were the 2026-11-08 storage audit's consumer-free candidates",
+   "canonical_surviving_evidence": "none of its own: a3_attempt36 aborted before scoring (closeout/outcome.json PRE_SCIENCE_ABORT_NO_MEASUREMENT); A3's measurement is a3_attempt38's scoring of a3_attempt35's probes",
+   "frozen_results_location": "none of its own: a3_attempt36 aborted before scoring (closeout/outcome.json PRE_SCIENCE_ABORT_NO_MEASUREMENT); A3's measurement is a3_attempt38's scoring of a3_attempt35's probes",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "rerun A3's frozen recipe for this seed (scripts/stages/stage-1/phase_a3/, a3_attempt35's session)",
+   "expected_reconstruction_cost": "paid GPU (about 62 min of L40S per probe)",
+   "deleted_utc": "2026-11-10T05:32:35+00:00"
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant."
