@@ -16370,3 +16370,25 @@ on a paid pod.
 - Not touched: the two permanent controls `preflight_ctl_r0860k_sa/sb` (relay copies), `qwen3_0p6b_init_v0`, D1's
   forward-baseline product, Stage 0's `activation_stats` and E5's diagnostic store. They are the ones the report
   recommended keeping.
+
+## 2026-11-10 (UTC) — A-MIX-6cat-sr COMPLETE: two seeds, both modes, one attempt ($23.4143 of $40.31)
+
+- Context: the maintainer's 2026-11-09 brief "A-MIX Stage 3 与 Dev Box 备份正式授权" authorized `train_sr_mix`
+  ($45.17 cumulative, first attempt $40.31) and asked for both seeds' training and dual-mode evaluation without a
+  further approval.
+- Done: `a_train_sr_mix_20261109_193709`, one Secure Cloud L40S on `thprcgh7s9`, 1,265 min; both units 9,701 steps,
+  each checkpoint scored on eval-set-1 v2 in thinking and non-thinking mode; ALL_DONE 17:21:50Z; pod deleted,
+  provider confirms gone; the account holds only the three recorded volumes. All-in $23.4143 (GPU $22.9813, container
+  disk $0.4329); the kind's cumulative is $23.4143 of $45.17. The separate $2.00 backup allowance was not used: the
+  backup rode on the training pod's polls.
+- Result (`analyses/mixed_result.json`, descriptive): static fluid correctness 10.26% (thinking) and 11.23%
+  (non-thinking); mixed-thinking - A1 +3.07 pp [+0.71, +5.68] INCONCLUSIVE; mixed-non-thinking - A2 +0.26 pp
+  [-1.72, +2.08] NO_GO; thinking - non-thinking of the same checkpoint -0.96 pp [-3.08, +1.18] NO_GO. Not a pure
+  mode-mixing effect (twice the unique data, 4.52x A1's / 1.28x A2's compute). Registered A1 - A2 INCONCLUSIVE and
+  A1 - C1 NO_GO unchanged.
+- Backup: all eight students' final weights on the dev box, hash-verified (`storage/stage3_devbox_backup.json`); the
+  keep-condition on `thprcgh7s9` is met, and no volume deletion is authorized by this brief. Evidence archive
+  `fadea626...` (all eight units) on the dev box and the relay, verified.
+- Not done, by the brief: no Stage 4/5/6, no merge, no volume deleted, no HF upload retried.
+- Revisit when: the next explicit retirement decision (`4rhubprswo`, `thprcgh7s9`'s search states and closed
+  trainer state).

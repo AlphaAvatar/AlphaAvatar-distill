@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Research A: Stage 3 of six_category_schema_restored@v1 COMPLETE 2026-11-08 (six units). Open: the trained weights' off-volume copy (relay quota); thprcgh7s9 kept. Owner: PACKED_ROUND.md section 16.",
+ "blocker": "BLOCKED NO. Research A: A-MIX-6cat-sr COMPLETE 2026-11-10 (two seeds, both modes). Open: the next volume retirement decision. Owner: PACKED_ROUND.md section 19.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 1000.0,
-  "cumulative_spend_usd": 847.2826,
+  "cumulative_spend_usd": 870.6969,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 152.7174,
+  "remaining_usd": 129.3031,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer: read the Stage-3 result (analyses/stage3_sr_result.json); decide the trained weights' off-volume storage. Owner: logs/budget/decisions.md 2026-11-08.",
+ "next": "The maintainer: read the A-MIX result (analyses/mixed_result.json); decide 4rhubprswo / thprcgh7s9 retirement. Owner: logs/budget/decisions.md 2026-11-10.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -200,8 +200,8 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 3,
-  "run": "Stage 3 COMPLETE: a_train_sr_a1_20261107_104149, a_train_sr_a2_20261107_174531, a_train_sr_c1_20261108_082548 + _104542 ($30.7961)",
-  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1 and the six Stage-3 units (only copy of their weights); 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
+  "run": "A-MIX-6cat-sr COMPLETE: a_train_sr_mix_20261109_193709 ($23.4143); pod deleted, provider-confirmed",
+  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1, the eight Stage-3 units (weights also on the dev box, verified 2026-11-10); 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
@@ -222,7 +222,7 @@
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",
-  "hf_private_headroom_gib": "1.73 of the account's 100 GB (bisected 2026-11-07); owner PACKED_ROUND.md section 15",
+  "hf_private_headroom_gib": "about 20 of the account's 100 GB after the 2026-11-10 retirement (relay 65.51 GiB); owner PACKED_ROUND.md section 19",
   "roots": {
    "artifacts": "/home/ecs-user/aad-artifacts",
    "git": "/home/ecs-user/AlphaAvatar-distill"

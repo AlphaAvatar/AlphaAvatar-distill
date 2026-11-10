@@ -1623,6 +1623,71 @@ cumulative, first attempt $40.31) and the `stage3_mix` block; `stage3_sr` is clo
 - **Launch.** It waits until the live provider balance covers the session's hard cap
   (`logs/budget/decisions.md`, 2026-11-09, third entry).
 
+## 19. A-MIX-6cat-sr COMPLETE: two seeds trained, each evaluated in both modes (2026-11-10)
+
+One attempt, `a_train_sr_mix_20261109_193709`, on one Secure Cloud L40S in US-TX-3 attached to `thprcgh7s9`
+(created 2026-11-09T20:18:51Z after 16 capacity refusals, the card never changed). Both units trained 9,701 steps
+from the packed Top-1 and were evaluated on eval-set-1 v2 under nucleus_v1 in `evaluation_thinking/` and
+`evaluation_non_thinking/`. ALL_DONE 2026-11-10T17:21:50Z; pod deleted, provider confirms gone. Result record:
+[`analyses/mixed_result.json`](../../../../logs/stages/stage-2/teacher_modes/analyses/mixed_result.json)
+(`mixed_analysis.py`, over the run's evidence archive, which also holds the six -sr units; A1 and A2 reproduce at
+7.19% and 10.96%).
+
+**Static fluid correctness, 570 formal items** (two seeds' item-paired mean, bootstrap 95% over items; per seed in
+parentheses):
+
+| arm / mode | static | deduction (189) | induction (142) | composition (144) | abstract/analogical (95) | interactive (144, exploratory) |
+| --- | --- | --- | --- | --- | --- | --- |
+| A-MIX-6cat-sr, thinking | 10.26% [8.16, 12.46] (10.35 / 10.18) | 21.69% | 1.76% | 9.72% | 1.05% | 2 / 0 |
+| A-MIX-6cat-sr, non-thinking | 11.23% [8.95, 13.60] (10.70 / 11.75) | 24.87% | 2.11% | 8.68% | 1.58% | 7 / 6 |
+| A1-6cat-sr (thinking only) | 7.19% [5.53, 9.04] | 17.46% | 1.76% | 3.82% | 0.00% | 0 / 1 |
+| A2-6cat-sr (non-thinking only) | 10.96% [8.86, 13.16] | 23.54% | 3.87% | 7.64% | 1.58% | 6 / 5 |
+
+**Descriptive comparisons** (`mode_statistics.compare`: item-paired over both seeds, rule-family cluster bootstrap
+stratified by axis, 97.5% interval, SESOI 5 pp, per-axis Holm at 8 pp; the labels are that rule's readings, never a
+registered decision):
+
+* **Mixed-thinking - A1: +3.07 pp [+0.71, +5.68]** (seeds +2.63, +3.51; 109 discordant item-seed pairs), INCONCLUSIVE:
+  above zero, not shown beyond 5 pp. By axis composition +5.90 [+0.76, +11.86] and deduction +4.23 [-0.77, +10.42]
+  (both INCONCLUSIVE), induction and abstract/analogical at the floor; no axis survives Holm.
+* **Mixed-non-thinking - A2: +0.26 pp [-1.72, +2.08]** (seeds -0.18, +0.70; 99 pairs), NO_GO: a difference beyond
+  5 pp is excluded; deduction, induction and composition each NO_GO, abstract/analogical at the floor.
+* **The mixed checkpoint, thinking - non-thinking: -0.96 pp [-3.08, +1.18]** (seeds -0.35, -1.58; 109 pairs), NO_GO;
+  deduction -3.17 [-8.18, +1.80] INCONCLUSIVE, composition NO_GO, the other two at the floor.
+
+A-MIX holds about twice either single arm's unique supervised tokens and 4.52x A1's / 1.28x A2's training FLOPs and
+optimizer steps, so no mixed - single difference is a pure mode-mixing effect. The registered A1 - A2
+(INCONCLUSIVE) and A1 - C1 (NO_GO) are unchanged.
+
+**Rollout integrity** (static formal items; a context-limit hit is right-censored): usable 65.6 / 66.1% in thinking
+mode (A1 63.5 / 68.6%), 89.1 / 84.9% in non-thinking mode (A2 87.9 / 90.5%); degeneration stops 33.2 / 33.0%
+(A1 35.8 / 31.2%) and 10.9 / 15.1% (A2 12.1 / 9.5%); context-limit hits 0.7 / 0.9% and 0 / 0%. Median reasoning
+1,860 / 1,805 tokens in thinking mode (A1 1,529 in seed 20260726). Correctness among usable rollouts 15.8 / 15.4%
+(thinking) and 12.0 / 13.8% (non-thinking), against A1's 12.2 / 9.7% and A2's 12.4 / 12.2%. The interactive episodes
+(exploratory) stop on degeneration in 90.3 / 83.3% of thinking-mode episodes and 26.4 / 42.4% of non-thinking ones.
+
+**Supporting and other units** (per seed, never pooled; A1 / A2 from their rescored reports): RAG reading 49 / 43%
+thinking (A1 27 / 24%), 57 / 61% non-thinking (A2 60 / 57%); multi-hop evidence reading 28 / 30% (A1 14 / 15%),
+52 / 51% (A2 46 / 46%); GSM8K 5 / 11% and 4 / 4%; verified math 0-2%; closed-book knowledge 2-3%; abstention pairs
+1.7 / 1.7% and 5.0 / 5.0%; safety pairs 0 / 0% and 2 / 2%. Behaviour unit (65 prompts): natural termination 66.2 /
+76.9% thinking (A1 61.5 / 70.8%), 84.6 / 90.8% non-thinking (A2 93.8 / 90.8%); empty answers 33.9 / 23.1% and
+1.5 / 0%. The in-sample regression set (training prompts) reads 40.0 / 38.7% and 47.3 / 46.7% and is not
+generalization.
+
+**Measured training and cost.** 3.21 s per step median (planned 3.26), peak reserved memory 18.6 GB of 48, final
+validation CE 0.749 / 0.746 and KD 0.613 / 0.608; 8.98 h of training per seed; evaluations 3,992 / 4,005 s (thinking)
+and 1,153 / 1,390 s (non-thinking). Cost **$23.4143** all-in (GPU $22.9813, container disk $0.4329, 1,265 min at
+$1.09/h) of the first attempt's $40.31 and the kind's cumulative $45.17; expected $23.70. Provider billing at
+2026-11-10T17:27Z (`logs/budget/provider/runpod_billing_v2_2026-11-10T1727Z.json`) shows $22.37 for the pod, the last
+hour not yet billed; live balance $43.13.
+
+**Persistence.** Final weights and the last save point of both units on `thprcgh7s9`. All eight Stage-3 students'
+final weights are on the dev box, received against the pod's and the record's sha256 and re-hashed on 2026-11-10
+([`storage/stage3_devbox_backup.json`](../../../../logs/stages/stage-2/teacher_modes/storage/stage3_devbox_backup.json));
+A-MIX-6cat-sr-s20260801 is also on the relay, s20260726 was refused for quota at 05:24Z, before the relay was cleaned,
+and is not retried. Every unit's generations, rows and formal reports are in the evidence archive `fadea626...` on
+the dev box and the relay (re-downloaded and re-hashed). No volume was deleted.
+
 ## Reproduce ($0)
 
 ```

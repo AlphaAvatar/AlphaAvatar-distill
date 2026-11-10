@@ -42,11 +42,29 @@
    "model_dir": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train/checkpoints/step_001892/model",
    "model_safetensors_sha256": "a24f887370c62bde491576174128b6a2438051b9cba148c836d4709688c3d057",
    "record": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_104542/evidence/C1-6cat-sr_units.json"
+  },
+  "A-MIX-6cat-sr-s20260726": {
+   "model_dir": "/runpod-volume/teacher_modes/stage3_sr/A-MIX-6cat-sr-s20260726/train/checkpoints/step_009701/model",
+   "model_safetensors_sha256": "03cbb97de783a9b2af60cfc9d43540f6ee2bb5eb08d0d5c686945491080dfad5",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/A-MIX-6cat-sr_units.json"
+  },
+  "A-MIX-6cat-sr-s20260801": {
+   "model_dir": "/runpod-volume/teacher_modes/stage3_sr/A-MIX-6cat-sr-s20260801/train/checkpoints/step_009701/model",
+   "model_safetensors_sha256": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858",
+   "record": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/A-MIX-6cat-sr_units.json"
   }
  },
- "weights_bytes": 14305409808,
+ "weights_bytes": 19073879744,
  "transfer_estimate_minutes": 20.7,
  "carried_by": "kind train_sr_mix: its polls while it trains (token_matched_phase.backup_on_poll), its closeout for what is left; evidence only, never a reason to hold the pod",
  "independence": "the dev box's cloud disk is outside RunPod; the copy is a second store, the volume's copy stays until the maintainer retires it",
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "verification_2026_11_10": {
+  "utc": "2026-11-10T16:05Z",
+  "state": "ALL EIGHT RECEIVED AND VERIFIED",
+  "how": "each copy received only when its sha256 matched the pod's and the committed record's (receipt.json per unit under destination_root); then re-hashed on the dev box: the six -sr units by `stage3_backup --verify`, the two A-MIX units against their receipts",
+  "carried_by": "a_train_sr_mix_20261109_193709's polls (the six -sr units and A-MIX-6cat-sr-s20260726 during training, A-MIX-6cat-sr-s20260801 at 15:54:55Z in 253 s); no separate billing resource, so the separate $2.00 backup allowance was not used",
+  "relay_copies": "A-MIX-6cat-sr-s20260801 only (durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256, verified); the other seven were refused for quota before the 2026-11-10 HF retirement and are not retried",
+  "effect": "the keep-condition on thprcgh7s9 (every student's Dev Box copy hash-verified) is met; this authorizes no deletion"
+ }
 }

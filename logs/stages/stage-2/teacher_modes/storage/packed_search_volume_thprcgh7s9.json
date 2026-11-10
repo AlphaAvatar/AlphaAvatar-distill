@@ -76,5 +76,17 @@
   "measured": "du -sb 301,657,035,552 B at the start of C1's attempt 2 (2026-11-08T10:52Z), before its second unit's ~8.3 GB",
   "only_copy": "the six units' final weights and save points have NO off-volume copy: the relay's private quota refused them (a1_units.persist_off_volume); their evaluations' evidence is on the dev box and the relay",
   "lifecycle": "KEEP: nothing on this volume is deleted until the trained weights have a verified off-volume copy or the maintainer decides otherwise; reserve booked to 2026-12-03T19:40Z"
+ },
+ "contents_2026_11_10": {
+  "added": "stage3_sr/A-MIX-6cat-sr-s20260726 and -s20260801 (run a_train_sr_mix_20261109_193709): save points, final weights, both modes' evaluations",
+  "second_copies_now": {
+   "eight students' final weights": "dev box, hash-verified 2026-11-10 (storage/stage3_devbox_backup.json); A-MIX-6cat-sr-s20260801 also on the relay",
+   "every unit's generations, rows and formal reports": "evidence archive fadea626... on the dev box and the relay (runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json)",
+   "the Top-1": "relay (since 2026-11-06)"
+  },
+  "only_copy_left_here": "the packed search's 92 state checkpoints (the search's evidence, kept as its brief required); each unit's last save point with its AdamW state (no exact-continuation consumer: training is closed); the evaluation packages (hard links to the final weights)",
+  "keep_condition": "the brief's condition (keep until all eight students' Dev Box copies are hash-verified) is met at 2026-11-10T16:05Z; the 2026-11-10 brief authorizes no volume deletion",
+  "retirement_advice": "enter the next explicit retirement decision: the remaining unique bytes are search-state evidence and closed trainer state; retiring it needs a maintainer decision on the search states (AGENTS.md 2.5 tombstones first) and saves $0.82/day",
+  "provider_balance_2026_11_10T1727Z_usd": 43.13
  }
 }

@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-09 (UTC), after the A-MIX-6cat-sr preparation and the dev-box checkpoint retirement. The human view. Every number here has an owner
+**Updated:** 2026-11-10 (UTC), after A-MIX-6cat-sr's completion, the Dev Box backup of all eight students and the dev-box / relay checkpoint retirements. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,22 +9,20 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A: A-MIX-6cat-sr AUTHORIZED (kind `train_sr_mix`, maintainer 2026-11-09) -- WAITING FOR THE PROVIDER TOP-UP TO LAND. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
-- **Grant.** `train_sr_mix` $45.17 cumulative, first attempt $40.31; `stage3_mix` binds the mixed plan, budget and
-  freeze by sha256; `stage3_sr` closed (unspent $42.44 not carried); A-TM ceiling $161.1023; Research A $264.77;
-  project cap $1,000.
-- **Pack.** `blocks.npz`, `ladder.json`, `audit.jsonl` staged on the relay (`transfer/stage3_sr/A-MIX-6cat-sr/`).
-- **Blocker.** The issuer needs the live balance to cover the $40.31 hard cap: $18.21 at 2026-11-09T18:59Z (no top-up
-  yet). The issue dry run refuses for that reason alone.
-- **CPU-pod backup.** Not feasible: US-TX-3 offers no CPU pod
-  (`logs/stages/stage-2/teacher_modes/storage/stage3_cpu_backup_probe.json`). The six -sr weights reach the dev box
-  on `train_sr_mix`'s polls (`storage/stage3_devbox_backup.json`). Until then they exist only on `thprcgh7s9`, which
-  stays until all eight students have verified dev-box copies.
-- **Committed.** $941.18 (2026-11-09T18:49Z). The application's $879.71 omitted $61.48 of 2026-06/07 billing (snapshot
-  window). $986.35 with this kind.
-- **Data, units, cost.** 11,862,564 unique supervised tokens (50.04 : 49.96), 6,467 packed sequences, 9,701 steps per
-  seed; two seeds from the packed Top-1, each checkpoint evaluated in both modes; expected $23.70 / 21.3 GPU h.
-- Owner: `logs/budget/decisions.md` 2026-11-09 (three entries); `PACKED_ROUND.md` section 18.
+**RESEARCH A: A-MIX-6cat-sr COMPLETE (2026-11-10) -- TWO SEEDS TRAINED, EACH EVALUATED IN BOTH MODES. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
+- Run `a_train_sr_mix_20261109_193709`: one L40S on `thprcgh7s9`, one attempt, $23.4143 of $40.31 (cumulative $45.17);
+  pod deleted, provider confirms gone. Live balance $43.13 (2026-11-10T17:27Z): about 24 days of the three volumes.
+- Result (`analyses/mixed_result.json`, descriptive): static fluid correctness 10.26% thinking, 11.23% non-thinking;
+  mixed-thinking - A1 +3.07 pp [+0.71, +5.68] INCONCLUSIVE; mixed-non-thinking - A2 +0.26 pp NO_GO; thinking -
+  non-thinking -0.96 pp NO_GO. Twice the unique data and 4.52x A1's compute: not a pure mode-mixing effect. The
+  registered A1 - A2 INCONCLUSIVE and A1 - C1 NO_GO are unchanged.
+- Backup: all eight Stage-3 students' final weights on the dev box, hash-verified (`storage/stage3_devbox_backup.json`);
+  A-MIX s20260801 also on the relay. Evidence archive `fadea626...` (all eight units) on the dev box and the relay.
+- Retired 2026-11-10: ten HF-only weights (22.21 GiB) and fifteen dev-box weights (6.66 + 25.54 GiB, the August
+  E-series by the maintainer's decision), all behind tombstones. Dev box 82% used.
+- Open, maintainer: the next retirement decision for `4rhubprswo` and `thprcgh7s9` (search states, closed trainer
+  state); no volume deletion is authorized. Not authorized: Stage 4/5/6, a merge into main.
+- Owner: `logs/budget/decisions.md` 2026-11-09 / 11-10; `PACKED_ROUND.md` sections 18-19.
 
 **RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 COMPLETE (2026-11-08) -- SIX UNITS TRAINED AND EVALUATED.**
 - Result (`analyses/stage3_sr_result.json`): static fluid correctness on eval-set-1, two-seed means A1-6cat-sr 7.19%,
@@ -4604,7 +4602,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$847.2826` spent of `$1000.0000`, leaving `$152.7174` |
+| project cap | `$870.6969` spent of `$1000.0000`, leaving `$129.3031` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

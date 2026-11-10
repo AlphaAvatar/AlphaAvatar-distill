@@ -48,6 +48,7 @@ Everything this experiment produced, in one place.
 * [`a_train_sr_a2_20261107_174531`](runs/a_train_sr_a2_20261107_174531/)
 * [`a_train_sr_c1_20261108_082548`](runs/a_train_sr_c1_20261108_082548/)
 * [`a_train_sr_c1_20261108_104542`](runs/a_train_sr_c1_20261108_104542/)
+* [`a_train_sr_mix_20261109_193709`](runs/a_train_sr_mix_20261109_193709/)
 * [`ae_20261028_091943`](runs/ae_20261028_091943/)
 * [`ae_20261028_093428`](runs/ae_20261028_093428/)
 

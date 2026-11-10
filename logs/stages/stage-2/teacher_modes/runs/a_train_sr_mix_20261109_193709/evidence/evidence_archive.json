@@ -1,0 +1,62 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.stage3_evidence_archive/v1",
+ "run_id": "a_train_sr_mix_20261109_193709",
+ "arm": "A-MIX-6cat-sr",
+ "archive": {
+  "name": "stage3_units_evidence.tgz",
+  "sha256": "fadea6263ed99ed9bbdfbc4646b195bde62bb48fcc17b03804eb55a1e7ed1417",
+  "bytes": 110894387,
+  "dev_box_copy": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
+  "dev_box_extracted": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/extracted",
+  "bytes_by_unit_dir": {
+   "A-MIX-6cat-sr-s20260726": 142791795,
+   "A-MIX-6cat-sr-s20260801": 145797383,
+   "A1-6cat-sr-s20260726": 93656407,
+   "A1-6cat-sr-s20260801": 92216742,
+   "A2-6cat-sr-s20260726": 40446978,
+   "A2-6cat-sr-s20260801": 39025459,
+   "C1-6cat-sr-s20260726": 136353006,
+   "C1-6cat-sr-s20260801": 138882493
+  },
+  "contents": "the volume's stage3_sr tree without save points and evaluation-package weights: train logs and configs, every evaluation's generations, rows and formal report (the six -sr units' as well as both A-MIX units')",
+  "relay_copy": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "path": "durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
+   "sha256": "fadea6263ed99ed9bbdfbc4646b195bde62bb48fcc17b03804eb55a1e7ed1417",
+   "verified": true,
+   "rule": "uploaded from the dev box's copy, downloaded again into a fresh cache and re-hashed (LFS sha256 the same)",
+   "utc": "2026-11-10T17:33Z"
+  }
+ },
+ "committed_here": {
+  "A-MIX-6cat-sr-s20260726/evaluation_non_thinking/formal_report.json": "926efe059cac36528d11c64533f092646a17ef3135a29aac13fbbcdfac5da6de",
+  "A-MIX-6cat-sr-s20260726/evaluation_thinking/formal_report.json": "eebf3f45d5ed2824b9e34abc3b0fc0f332a9ab094dda0e4f4b4e8bb5605a03ba",
+  "A-MIX-6cat-sr-s20260726/off_volume_copy.json": "8bf202a752f446fec1bf1770f989bdf17bfa39ad1b3d0cd318116828dfc0ef9e",
+  "A-MIX-6cat-sr-s20260726/train/config.json": "ab741d9110256d984219260690e45019b2b41ca7d380b90ac657948f136aa774",
+  "A-MIX-6cat-sr-s20260726/train/run_completion.json": "953470011ca1b85ebc237b467b3a38de11c75f2ae138e81efcd2555793d03fc6",
+  "A-MIX-6cat-sr-s20260726/train/run_manifest.json": "2d9fbac6a8c382cf65dd0eb5f45aa8c0e1682f120c187360a544af916173fb93",
+  "A-MIX-6cat-sr-s20260726/train/train_log.jsonl": "79970634a2d33382471787682f20ac40653bc39018e8da6335e604880777f8f1",
+  "A-MIX-6cat-sr-s20260801/evaluation_non_thinking/formal_report.json": "dd4709b514835d273a7334d1c8d3eec7b071bf6ff6caceabae5128cbea57761f",
+  "A-MIX-6cat-sr-s20260801/evaluation_thinking/formal_report.json": "5b3c08950aa5b354878c5d06f517faf75eb70a60db6cdc72e9d0206498aaea1f",
+  "A-MIX-6cat-sr-s20260801/off_volume_copy.json": "07a27cedb6e2d3dbd18bc52e7f3daedd6ca8b16b541d20e51c5e8347e2398893",
+  "A-MIX-6cat-sr-s20260801/train/config.json": "5825c9a009c896b65ad0d77cc994318c9689495ce5eb2726c32cad0cb4a7ea2c",
+  "A-MIX-6cat-sr-s20260801/train/run_completion.json": "b7792f9cd91b3adb2924ee3e241928dfdca12c67109ec669f2dc39a9103b2653",
+  "A-MIX-6cat-sr-s20260801/train/run_manifest.json": "92f74b51817af9853a1b6c5920983eff57cc4e812a4c985125fec98fb074b941",
+  "A-MIX-6cat-sr-s20260801/train/train_log.jsonl": "5284d84eca8fb8e12f27606df4f3df774be0845da4f6a325d9e19a56c176aad5"
+ },
+ "weights": {
+  "A-MIX-6cat-sr-s20260726": {
+   "sha256": "03cbb97de783a9b2af60cfc9d43540f6ee2bb5eb08d0d5c686945491080dfad5",
+   "volume": "thprcgh7s9",
+   "dev_box": "verified",
+   "relay": "refused at 05:24Z (quota, before the 11-10 HF retirement); not retried"
+  },
+  "A-MIX-6cat-sr-s20260801": {
+   "sha256": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858",
+   "volume": "thprcgh7s9",
+   "dev_box": "verified",
+   "relay": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256, verified by a fresh download"
+  }
+ },
+ "note": "the six -sr units' formal reports inside this archive are the pod's originals; their behaviour-unit aggregates predate the 2026-11-08 think_state rescoring, whose rescored reports are the committed ones under each -sr run's evidence/. Fluid correctness reads rows and is unaffected."
+}

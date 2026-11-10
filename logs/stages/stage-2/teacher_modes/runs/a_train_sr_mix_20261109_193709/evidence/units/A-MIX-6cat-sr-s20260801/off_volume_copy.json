@@ -1,0 +1,21 @@
+{
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "prefix": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256",
+ "source": "/runpod-volume/teacher_modes/stage3_sr/A-MIX-6cat-sr-s20260801/train/checkpoints/step_009701/model",
+ "files_sha256_on_volume": {
+  "model.safetensors": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858",
+  "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+  "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+ },
+ "quota": "1 object(s), 2.22 GiB: ACCEPTED (200) 1/1 granted an upload action",
+ "upload_seconds": 15.0,
+ "files_sha256": {
+  "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+  "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+  "model.safetensors": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858"
+ },
+ "verified": true,
+ "verify_seconds": 81.3,
+ "rule": "uploaded from the volume's final model, downloaded again into a fresh cache and re-hashed",
+ "attempted_utc": "2026-11-10T15:51:55Z"
+}
