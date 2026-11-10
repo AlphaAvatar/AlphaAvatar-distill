@@ -16329,3 +16329,22 @@ on a paid pod.
   - Seed 20260726's relay copy is not retried by this session: the driver re-attempts it only at a later session's
     start, and the brief said not to retry HF uploads. Its dev-box copy is verified.
 - Irreversible; no copy of the ten weights survives. Reconstruction is a paid retrain from each run's recorded config.
+
+## 2026-11-10 (UTC) — Dev-box cleanup: three unprotected historical weights retired (6.66 GiB); protected E-series reported
+
+- Context: the maintainer, during A-MIX Stage 3: "本地磁盘空间看看也做一下必要清理，有哪些太久远的checkpoint". `/` was at
+  99% (about 3.7 GiB free) with the eighth student's 2.22 GiB Dev Box backup still owed.
+- Decision: under AGENTS.md 2.5's standing rule, each behind a tombstone (`checkpoint_tombstones.json ::
+  devbox_20261110_*`):
+  - Research A v1's two A1 final weights (2026-11-03), carried home as evaluation-package copies inside
+    `a1_evidence.tgz`. The archive's other 166 files (train logs, generations, rows, reports; 151 MiB) were extracted,
+    re-hashed and moved from the disposable `.scratch/` to `~/aad-artifacts/research_a/a_train_a1_20261102_184122/`,
+    then the archive was deleted. An unverified copy stays on `4rhubprswo`.
+  - C2's last trained probe (confirmation rung of non-promoted candidate `1a2b5b030e7e`, 2026-09-23), in
+    `~/aad-scratch/c2b-p4-root`. Its scoring evidence stays in `~/aad-artifacts/phase_c2_behavioural/`.
+  The sha256 of all three matched their records before deletion. No code or config reads any of them.
+- Not touched: the seven Dev Box student copies; every registry-protected checkpoint (E1/E4/E6b/E7/P2/E8 weights, the
+  two permanent controls, the 0.6B init, D1's forward-baseline product, Stage 0's activation cache; about 32 GiB,
+  most without a relay copy); other projects' files. The protected set needs a maintainer decision.
+- Result: 9.4 GiB free (`logs/maintenance/storage/devbox_cleanup_20261110.json`).
+- Irreversible for the C2 probe (no other copy); the A1 v1 weights survive only on `4rhubprswo`.

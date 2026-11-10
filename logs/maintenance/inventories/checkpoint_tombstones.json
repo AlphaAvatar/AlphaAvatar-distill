@@ -13,8 +13,11 @@
   "experiment",
   "frozen_results_location",
   "historical_paths",
+  "identity",
+  "maintainer_decision",
   "members",
   "n_files",
+  "other_copies",
   "protection_lifted",
   "reason_physical_weights_deleted",
   "reconstruction_recipe",
@@ -35,10 +38,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 89,
-  "active": 87,
-  "active_retired_bytes": 509587808882,
-  "active_retired_human": "474.591 GiB",
+  "tombstones_total": 92,
+  "active": 90,
+  "active_retired_bytes": 516740513786,
+  "active_retired_human": "481.252 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -6346,6 +6349,165 @@
    "reconstruction_recipe": "rerun A3's frozen recipe for this seed (scripts/stages/stage-1/phase_a3/, a3_attempt35's session)",
    "expected_reconstruction_cost": "paid GPU (about 62 min of L40S per probe)",
    "deleted_utc": "2026-11-10T05:32:35+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261110_research_a_v1_A1-s20260726",
+   "historical_paths": [
+    ".scratch/research_a/a_train_a1_20261102_184122/store/a1_evidence.tgz :: ./A1-s20260726/evaluation/package/model.safetensors"
+   ],
+   "store": "scratch",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Research A v1, Phases C and D (a_train_a1_20261102_184122; COMPLETE, no GO / NO-GO)",
+   "seed": 20260726,
+   "scientific_role": "A1-s20260726: A1 trained 1,653 steps from the v1 packed search Top-1 159e73be; evaluated on eval-set-1 v2; superseded by the six-category round's A1-6cat-sr units",
+   "weights_sha256": "1f3e5eead669c6bd76dc68a93a0ca071e716f82233f397a945edda5a03bc1188",
+   "config_sha256": "1dd584b38df0a296ed35eb5aff272b9b2ab972f0e7cb249e400930cc14a0eb34",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "./A1-s20260726/evaluation/package/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "1f3e5eead669c6bd76dc68a93a0ca071e716f82233f397a945edda5a03bc1188"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/closeout/a1_evidence.json",
+    "logs/stages/stage-2/teacher_modes/audit/six_category_persistence.json",
+    "scripts/stages/stage-2/teacher_modes/token_matched_phase.py (a comment: no analysis reads them)"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 standing retirement: the experiment is terminal, its evaluation evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), it is not protected in checkpoint_registry.json and it is not an incumbent, a control, a release or a retained anchor",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, with the dev box's / at 99% (3.7 GiB free) before A-MIX-6cat-sr-s20260801's 2.22 GiB backup: \"本地磁盘空间看看也做一下必要清理，有哪些太久远的checkpoint\"; registry-protected classes (canonical, control, reproducibility_required) were NOT lifted by it",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "dev-box disk at 99%; the archive carried the evaluation package's copy of the final weights, which no analysis reads",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/research_a/a_train_a1_20261102_184122/a1_evidence/A1-s20260726/ (the archive's other contents: train logs, configs, evaluation generations, rows, formal_report.json, re-hashed file by file against /home/ecs-user/aad-artifacts/research_a/a_train_a1_20261102_184122/split_manifest.json); logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/; analyses/a1_result.json",
+   "other_copies": "4rhubprswo :: /runpod-volume/teacher_modes/v2_units/A1-s20260726/train/checkpoints/step_001653/model (not re-verified: that volume is not mounted; its retirement is a separate decision)",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "retrain under the run's frozen config (config_sha256 above) on 4rhubprswo's v1 pack; bf16 training is not bit-reproducible",
+   "expected_reconstruction_cost": "about $3.2 of L40S time per seed (10,480 s of training at the run's $1.09/h), evaluation extra",
+   "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/a1_result.json",
+   "deleted_utc": "2026-11-10T09:41:08+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261110_research_a_v1_A1-s20260801",
+   "historical_paths": [
+    ".scratch/research_a/a_train_a1_20261102_184122/store/a1_evidence.tgz :: ./A1-s20260801/evaluation/package/model.safetensors"
+   ],
+   "store": "scratch",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Research A v1, Phases C and D (a_train_a1_20261102_184122; COMPLETE, no GO / NO-GO)",
+   "seed": 20260801,
+   "scientific_role": "A1-s20260801: A1 trained 1,653 steps from the v1 packed search Top-1 159e73be; evaluated on eval-set-1 v2; superseded by the six-category round's A1-6cat-sr units",
+   "weights_sha256": "06c12901939ec6f04b8a10278385d339845bd31140534d6d96fae587139d21b3",
+   "config_sha256": "3a5283e68c730c575d6cca4722cb08421f41bb51a8c3f8e8bd6a5b6d4693ce31",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "./A1-s20260801/evaluation/package/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "06c12901939ec6f04b8a10278385d339845bd31140534d6d96fae587139d21b3"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/closeout/a1_evidence.json",
+    "logs/stages/stage-2/teacher_modes/audit/six_category_persistence.json",
+    "scripts/stages/stage-2/teacher_modes/token_matched_phase.py (a comment: no analysis reads them)"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 standing retirement: the experiment is terminal, its evaluation evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), it is not protected in checkpoint_registry.json and it is not an incumbent, a control, a release or a retained anchor",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, with the dev box's / at 99% (3.7 GiB free) before A-MIX-6cat-sr-s20260801's 2.22 GiB backup: \"本地磁盘空间看看也做一下必要清理，有哪些太久远的checkpoint\"; registry-protected classes (canonical, control, reproducibility_required) were NOT lifted by it",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "dev-box disk at 99%; the archive carried the evaluation package's copy of the final weights, which no analysis reads",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/research_a/a_train_a1_20261102_184122/a1_evidence/A1-s20260801/ (the archive's other contents: train logs, configs, evaluation generations, rows, formal_report.json, re-hashed file by file against /home/ecs-user/aad-artifacts/research_a/a_train_a1_20261102_184122/split_manifest.json); logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/; analyses/a1_result.json",
+   "other_copies": "4rhubprswo :: /runpod-volume/teacher_modes/v2_units/A1-s20260801/train/checkpoints/step_001653/model (not re-verified: that volume is not mounted; its retirement is a separate decision)",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "retrain under the run's frozen config (config_sha256 above) on 4rhubprswo's v1 pack; bf16 training is not bit-reproducible",
+   "expected_reconstruction_cost": "about $3.2 of L40S time per seed (10,480 s of training at the run's $1.09/h), evaluation extra",
+   "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/a1_result.json",
+   "deleted_utc": "2026-11-10T09:41:08+00:00"
+  },
+  {
+   "canonical_id": "devbox_20261110_c2_confirmation_1a2b5b030e7e_s1523147638",
+   "historical_paths": [
+    "/home/ecs-user/aad-scratch/c2b-p4-root/attempt12/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638/model.safetensors"
+   ],
+   "store": "scratch",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_c2_behavioural (c2-behavioural-12probe-v1, attempt12; closed without promotion)",
+   "seed": 1523147638,
+   "scientific_role": "confirmation-rung probe of C2 Top-5 candidate 1a2b5b030e7e (not promoted), trained 1,023 steps and scored on the restored checkpoint",
+   "weights_sha256": "d84414b35807d723898a4a786a380fb1feb9e0731242f6148877c32e45a49c02",
+   "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "identity": {
+    "artifact_digest": "d9af797a565291b3ed0da58e040922c6ffd8a22b5856f2fca193465850510a16",
+    "weights_digest": "c5a5c25a954cc180d1036e9517f1a4082f566c9c8cf20198c3bb930dc900c268",
+    "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+    "single_shard_sha256": "d84414b35807d723898a4a786a380fb1feb9e0731242f6148877c32e45a49c02",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "num_parameters": 596049920,
+    "tokenizer_sha256": null,
+    "total_bytes": 2384234968
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-scratch/c2b-p4-root/attempt12/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "d84414b35807d723898a4a786a380fb1feb9e0731242f6148877c32e45a49c02"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/storage/devbox_cleanup_20261027.json, devbox_cleanup_20261028.json (kept then as the last local copy)",
+    "logs/stages/stage-1/phase_c2_behavioural/validations/durable-staging/v4/staging_record.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 standing retirement: the experiment is terminal, its evaluation evidence is durable, its hashes are preserved here, no active or declared consumer reads the weights (git grep of src/, configs/, scripts/ outside tests found none), it is not protected in checkpoint_registry.json and it is not an incumbent, a control, a release or a retained anchor",
+   "maintainer_decision": "maintainer 2026-11-10 (UTC), during A-MIX Stage 3, with the dev box's / at 99% (3.7 GiB free) before A-MIX-6cat-sr-s20260801's 2.22 GiB backup: \"本地磁盘空间看看也做一下必要清理，有哪些太久远的checkpoint\"; registry-protected classes (canonical, control, reproducibility_required) were NOT lifted by it",
+   "protection_lifted": null,
+   "reason_physical_weights_deleted": "dev-box disk at 99%; C2 closed without promotion and its Top-5 inits were retired 2026-11-09 (devbox_20261109_c2_top5_*); this was the last trained probe's bytes",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt12/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638/ (result.json, per_sample.jsonl, probe_record.json, c2_durable_unit.json); logs/stages/stage-1/phase_c2_behavioural/",
+   "other_copies": "none known",
+   "relay_hash_verified": false,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "none: its init (devbox_20261109_c2_top5_1a2b5b030e7e) is retired too; replay the C2 search's recorded path, then retrain under config_sha256",
+   "expected_reconstruction_cost": "not reconstructed",
+   "frozen_results_location": "/home/ecs-user/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt12/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638/result.json",
+   "deleted_utc": "2026-11-10T09:41:08+00:00"
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant."
