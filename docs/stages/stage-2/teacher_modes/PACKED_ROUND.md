@@ -1666,13 +1666,27 @@ mode (A1 63.5 / 68.6%), 89.1 / 84.9% in non-thinking mode (A2 87.9 / 90.5%); deg
 (thinking) and 12.0 / 13.8% (non-thinking), against A1's 12.2 / 9.7% and A2's 12.4 / 12.2%. The interactive episodes
 (exploratory) stop on degeneration in 90.3 / 83.3% of thinking-mode episodes and 26.4 / 42.4% of non-thinking ones.
 
-**Supporting and other units** (per seed, never pooled; A1 / A2 from their rescored reports): RAG reading 49 / 43%
-thinking (A1 27 / 24%), 57 / 61% non-thinking (A2 60 / 57%); multi-hop evidence reading 28 / 30% (A1 14 / 15%),
-52 / 51% (A2 46 / 46%); GSM8K 5 / 11% and 4 / 4%; verified math 0-2%; closed-book knowledge 2-3%; abstention pairs
-1.7 / 1.7% and 5.0 / 5.0%; safety pairs 0 / 0% and 2 / 2%. Behaviour unit (65 prompts): natural termination 66.2 /
-76.9% thinking (A1 61.5 / 70.8%), 84.6 / 90.8% non-thinking (A2 93.8 / 90.8%); empty answers 33.9 / 23.1% and
-1.5 / 0%. The in-sample regression set (training prompts) reads 40.0 / 38.7% and 47.3 / 46.7% and is not
-generalization.
+**Every other eval-set-1 unit, correct and usable** ([`analyses/mixed_fullset.json`](../../../../logs/stages/stage-2/teacher_modes/analyses/mixed_fullset.json),
+`mixed_fullset.py`; formal rows, seeds 20260726 / 20260801, never pooled; usable under each reply's own think
+state; A1 / A2 correct from their rescored reports). Each cell is correct, then usable:
+
+| unit (n) | mixed, thinking | A1-6cat-sr | mixed, non-thinking | A2-6cat-sr |
+| --- | --- | --- | --- | --- |
+| GSM8K (100) | 5 / 11 · 90 / 85 | 5 / 1 · 87 / 82 | 4 / 4 · 99 / 99 | 7 / 3 · 98 / 99 |
+| verified math (100) | 0 / 0 · 48 / 48 | 0 / 1 · 34 / 50 | 2 / 0 · 85 / 80 | 4 / 0 · 88 / 83 |
+| multi-hop evidence reading (100) | 28 / 30 · 84 / 88 | 14 / 15 · 84 / 88 | 52 / 51 · 100 / 100 | 46 / 46 · 100 / 100 |
+| RAG reading (100) | 49 / 43 · 95 / 91 | 27 / 24 · 90 / 95 | 57 / 61 · 100 / 100 | 60 / 57 · 100 / 100 |
+| closed-book knowledge (150, not core) | 3 / 4 · 99 / 98 | 3 / 3 · 95 / 102 | 4 / 5 · 142 / 142 | 4 / 5 · 146 / 141 |
+| abstention pairs (60 pairs) | 1 / 1 · 58 / 56 | 0 / 0 · 48 / 56 | 3 / 3 · 60 / 60 | 4 / 1 · 60 / 60 |
+| safety pairs (50 pairs) | 0 / 0 · 5 / 5 | 0 / 0 · 5 / 8 | 1 / 1 · 32 / 23 | 0 / 0 · 36 / 42 |
+| tool-call exact match (5) | 2 / 2 · 4 / 5 | 2 / 1 · 5 / 4 | 2 / 3 · 5 / 5 | 2 / 1 · 5 / 5 |
+| instruction (12; format_ok, no correctness) | 3 / 5 · 3 / 5 | 1 / 2 · 1 / 2 | 7 / 8 · 7 / 8 | 9 / 11 · 9 / 11 |
+| short realtime (10; format_ok) | 3 / 5 · 3 / 5 | 3 / 5 · 3 / 5 | 5 / 8 · 5 / 8 | 10 / 7 · 10 / 7 |
+| behaviour unit (65; terminated, usable) | 43 / 50 · 42 / 50 | 40 / 46 · 39 / 46 | 55 / 59 · 54 / 59 | 61 / 59 · 61 / 59 |
+| legacy_150 (150, in-sample) | 60 / 58 · 120 / 123 | 35 / 40 · 124 / 124 | 71 / 70 · 143 / 148 | 71 / 68 · 148 / 145 |
+
+Paired sets count pairs correct and pairs whose two replies are both usable. legacy_150 is made of training prompts
+and is not generalization.
 
 **Measured training and cost.** 3.21 s per step median (planned 3.26), peak reserved memory 18.6 GB of 48, final
 validation CE 0.749 / 0.746 and KD 0.613 / 0.608; 8.98 h of training per seed; evaluations 3,992 / 4,005 s (thinking)

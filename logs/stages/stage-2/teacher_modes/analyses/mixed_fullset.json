@@ -1,0 +1,518 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.mixed_fullset/v1",
+ "set": "eval-set-1 v2, formal rows",
+ "pairs": "answerability_paired / safety_paired: correct = pairs correct, usable = pairs both usable, n = pairs",
+ "not_core": [
+  "knowledge"
+ ],
+ "in_sample": [
+  "legacy_150"
+ ],
+ "results": {
+  "mixed_thinking": {
+   "20260726": {
+    "gsm8k": {
+     "correct": 5,
+     "usable": 90,
+     "n": 100
+    },
+    "math_verified": {
+     "correct": 0,
+     "usable": 48,
+     "n": 100
+    },
+    "multihop": {
+     "correct": 28,
+     "usable": 84,
+     "n": 100
+    },
+    "rag": {
+     "correct": 49,
+     "usable": 95,
+     "n": 100
+    },
+    "knowledge": {
+     "correct": 3,
+     "usable": 99,
+     "n": 150
+    },
+    "answerability_paired": {
+     "correct": 1,
+     "usable": 58,
+     "n": 60
+    },
+    "safety_paired": {
+     "correct": 0,
+     "usable": 5,
+     "n": 50
+    },
+    "tool_calling": {
+     "correct": 2,
+     "usable": 4,
+     "n": 5
+    },
+    "instruction": {
+     "format_ok": 3,
+     "usable": 3,
+     "n": 12
+    },
+    "short_realtime": {
+     "format_ok": 3,
+     "usable": 3,
+     "n": 10
+    },
+    "behaviour_all": {
+     "terminated": 43,
+     "usable": 42,
+     "n": 65
+    },
+    "legacy_150": {
+     "correct": 60,
+     "usable": 120,
+     "n": 150
+    }
+   },
+   "20260801": {
+    "gsm8k": {
+     "correct": 11,
+     "usable": 85,
+     "n": 100
+    },
+    "math_verified": {
+     "correct": 0,
+     "usable": 48,
+     "n": 100
+    },
+    "multihop": {
+     "correct": 30,
+     "usable": 88,
+     "n": 100
+    },
+    "rag": {
+     "correct": 43,
+     "usable": 91,
+     "n": 100
+    },
+    "knowledge": {
+     "correct": 4,
+     "usable": 98,
+     "n": 150
+    },
+    "answerability_paired": {
+     "correct": 1,
+     "usable": 56,
+     "n": 60
+    },
+    "safety_paired": {
+     "correct": 0,
+     "usable": 5,
+     "n": 50
+    },
+    "tool_calling": {
+     "correct": 2,
+     "usable": 5,
+     "n": 5
+    },
+    "instruction": {
+     "format_ok": 5,
+     "usable": 5,
+     "n": 12
+    },
+    "short_realtime": {
+     "format_ok": 5,
+     "usable": 5,
+     "n": 10
+    },
+    "behaviour_all": {
+     "terminated": 50,
+     "usable": 50,
+     "n": 65
+    },
+    "legacy_150": {
+     "correct": 58,
+     "usable": 123,
+     "n": 150
+    }
+   }
+  },
+  "A1-6cat-sr": {
+   "20260726": {
+    "gsm8k": {
+     "correct": 5,
+     "usable": 87,
+     "n": 100
+    },
+    "math_verified": {
+     "correct": 0,
+     "usable": 34,
+     "n": 100
+    },
+    "multihop": {
+     "correct": 14,
+     "usable": 84,
+     "n": 100
+    },
+    "rag": {
+     "correct": 27,
+     "usable": 90,
+     "n": 100
+    },
+    "knowledge": {
+     "correct": 3,
+     "usable": 95,
+     "n": 150
+    },
+    "answerability_paired": {
+     "correct": 0,
+     "usable": 48,
+     "n": 60
+    },
+    "safety_paired": {
+     "correct": 0,
+     "usable": 5,
+     "n": 50
+    },
+    "tool_calling": {
+     "correct": 2,
+     "usable": 5,
+     "n": 5
+    },
+    "instruction": {
+     "format_ok": 1,
+     "usable": 1,
+     "n": 12
+    },
+    "short_realtime": {
+     "format_ok": 3,
+     "usable": 3,
+     "n": 10
+    },
+    "behaviour_all": {
+     "terminated": 40,
+     "usable": 39,
+     "n": 65
+    },
+    "legacy_150": {
+     "correct": 35,
+     "usable": 124,
+     "n": 150
+    }
+   },
+   "20260801": {
+    "gsm8k": {
+     "correct": 1,
+     "usable": 82,
+     "n": 100
+    },
+    "math_verified": {
+     "correct": 1,
+     "usable": 50,
+     "n": 100
+    },
+    "multihop": {
+     "correct": 15,
+     "usable": 88,
+     "n": 100
+    },
+    "rag": {
+     "correct": 24,
+     "usable": 95,
+     "n": 100
+    },
+    "knowledge": {
+     "correct": 3,
+     "usable": 102,
+     "n": 150
+    },
+    "answerability_paired": {
+     "correct": 0,
+     "usable": 56,
+     "n": 60
+    },
+    "safety_paired": {
+     "correct": 0,
+     "usable": 8,
+     "n": 50
+    },
+    "tool_calling": {
+     "correct": 1,
+     "usable": 4,
+     "n": 5
+    },
+    "instruction": {
+     "format_ok": 2,
+     "usable": 2,
+     "n": 12
+    },
+    "short_realtime": {
+     "format_ok": 5,
+     "usable": 5,
+     "n": 10
+    },
+    "behaviour_all": {
+     "terminated": 46,
+     "usable": 46,
+     "n": 65
+    },
+    "legacy_150": {
+     "correct": 40,
+     "usable": 124,
+     "n": 150
+    }
+   }
+  },
+  "mixed_non_thinking": {
+   "20260726": {
+    "gsm8k": {
+     "correct": 4,
+     "usable": 99,
+     "n": 100
+    },
+    "math_verified": {
+     "correct": 2,
+     "usable": 85,
+     "n": 100
+    },
+    "multihop": {
+     "correct": 52,
+     "usable": 100,
+     "n": 100
+    },
+    "rag": {
+     "correct": 57,
+     "usable": 100,
+     "n": 100
+    },
+    "knowledge": {
+     "correct": 4,
+     "usable": 142,
+     "n": 150
+    },
+    "answerability_paired": {
+     "correct": 3,
+     "usable": 60,
+     "n": 60
+    },
+    "safety_paired": {
+     "correct": 1,
+     "usable": 32,
+     "n": 50
+    },
+    "tool_calling": {
+     "correct": 2,
+     "usable": 5,
+     "n": 5
+    },
+    "instruction": {
+     "format_ok": 7,
+     "usable": 7,
+     "n": 12
+    },
+    "short_realtime": {
+     "format_ok": 5,
+     "usable": 5,
+     "n": 10
+    },
+    "behaviour_all": {
+     "terminated": 55,
+     "usable": 54,
+     "n": 65
+    },
+    "legacy_150": {
+     "correct": 71,
+     "usable": 143,
+     "n": 150
+    }
+   },
+   "20260801": {
+    "gsm8k": {
+     "correct": 4,
+     "usable": 99,
+     "n": 100
+    },
+    "math_verified": {
+     "correct": 0,
+     "usable": 80,
+     "n": 100
+    },
+    "multihop": {
+     "correct": 51,
+     "usable": 100,
+     "n": 100
+    },
+    "rag": {
+     "correct": 61,
+     "usable": 100,
+     "n": 100
+    },
+    "knowledge": {
+     "correct": 5,
+     "usable": 142,
+     "n": 150
+    },
+    "answerability_paired": {
+     "correct": 3,
+     "usable": 60,
+     "n": 60
+    },
+    "safety_paired": {
+     "correct": 1,
+     "usable": 23,
+     "n": 50
+    },
+    "tool_calling": {
+     "correct": 3,
+     "usable": 5,
+     "n": 5
+    },
+    "instruction": {
+     "format_ok": 8,
+     "usable": 8,
+     "n": 12
+    },
+    "short_realtime": {
+     "format_ok": 8,
+     "usable": 8,
+     "n": 10
+    },
+    "behaviour_all": {
+     "terminated": 59,
+     "usable": 59,
+     "n": 65
+    },
+    "legacy_150": {
+     "correct": 70,
+     "usable": 148,
+     "n": 150
+    }
+   }
+  },
+  "A2-6cat-sr": {
+   "20260726": {
+    "gsm8k": {
+     "correct": 7,
+     "usable": 98,
+     "n": 100
+    },
+    "math_verified": {
+     "correct": 4,
+     "usable": 88,
+     "n": 100
+    },
+    "multihop": {
+     "correct": 46,
+     "usable": 100,
+     "n": 100
+    },
+    "rag": {
+     "correct": 60,
+     "usable": 100,
+     "n": 100
+    },
+    "knowledge": {
+     "correct": 4,
+     "usable": 146,
+     "n": 150
+    },
+    "answerability_paired": {
+     "correct": 4,
+     "usable": 60,
+     "n": 60
+    },
+    "safety_paired": {
+     "correct": 0,
+     "usable": 36,
+     "n": 50
+    },
+    "tool_calling": {
+     "correct": 2,
+     "usable": 5,
+     "n": 5
+    },
+    "instruction": {
+     "format_ok": 9,
+     "usable": 9,
+     "n": 12
+    },
+    "short_realtime": {
+     "format_ok": 10,
+     "usable": 10,
+     "n": 10
+    },
+    "behaviour_all": {
+     "terminated": 61,
+     "usable": 61,
+     "n": 65
+    },
+    "legacy_150": {
+     "correct": 71,
+     "usable": 148,
+     "n": 150
+    }
+   },
+   "20260801": {
+    "gsm8k": {
+     "correct": 3,
+     "usable": 99,
+     "n": 100
+    },
+    "math_verified": {
+     "correct": 0,
+     "usable": 83,
+     "n": 100
+    },
+    "multihop": {
+     "correct": 46,
+     "usable": 100,
+     "n": 100
+    },
+    "rag": {
+     "correct": 57,
+     "usable": 100,
+     "n": 100
+    },
+    "knowledge": {
+     "correct": 5,
+     "usable": 141,
+     "n": 150
+    },
+    "answerability_paired": {
+     "correct": 1,
+     "usable": 60,
+     "n": 60
+    },
+    "safety_paired": {
+     "correct": 0,
+     "usable": 42,
+     "n": 50
+    },
+    "tool_calling": {
+     "correct": 1,
+     "usable": 5,
+     "n": 5
+    },
+    "instruction": {
+     "format_ok": 11,
+     "usable": 11,
+     "n": 12
+    },
+    "short_realtime": {
+     "format_ok": 7,
+     "usable": 7,
+     "n": 10
+    },
+    "behaviour_all": {
+     "terminated": 59,
+     "usable": 59,
+     "n": 65
+    },
+    "legacy_150": {
+     "correct": 68,
+     "usable": 145,
+     "n": 150
+    }
+   }
+  }
+ },
+ "authorizes": "nothing"
+}
