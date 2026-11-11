@@ -184,8 +184,13 @@ def _grant(tmp_path, block: bool):
 def test_train_sr_mix_needs_its_own_grant_block_and_the_six_units_grant_never_covers_it(tmp_path):
     cap = BUDGET["arms"][MP.ARM]["kind_cumulative_cap_usd"]                           #: the committed grant (2026-11-09)
     first = BUDGET["arms"][MP.ARM]["session_hard_cap"]["hard_cap_usd"]
-    assert TM.kind_cap_problems("train_sr_mix", first) == []
+    #: the committed grant AFTER the one attempt (a_train_sr_mix_20261109_193709, $23.4143): the first attempt's cap no
+    #: longer fits the cumulative cap, and nothing above the cap ever did
+    assert any("earlier train_sr_mix runs" in b for b in TM.kind_cap_problems("train_sr_mix", first))
     assert TM.kind_cap_problems("train_sr_mix", round(cap + 0.01, 2))
+    #: as granted on 2026-11-09, before any run: the grant's block with no earlier run, where the first attempt fit
+    root, cap = _grant(tmp_path / "h", block=True)
+    assert TM.kind_cap_problems("train_sr_mix", first, root) == []
     root, cap = _grant(tmp_path / "a", block=False)
     assert TM.kind_cap_problems("train_sr_mix", 1.0, root)
     root, cap = _grant(tmp_path / "b", block=True)
@@ -238,7 +243,16 @@ def test_a_units_weights_are_received_only_when_every_file_matches_the_pod_and_t
 
 
 def test_the_backup_record_names_the_six_units_committed_weights():
+    """The record as planned on 2026-11-09 (`BK.plan`: the six -sr units from their committed unit records), plus both
+    A-MIX units, added from their own run's unit record once trained (2026-11-10), and the verifications since."""
     rec = json.loads(BK.RECORD.read_text())
-    assert sorted(rec["units"]) == sorted(f"{a}-s{s}" for a in PTP.ARMS for s in PTP.SEEDS)
-    assert rec == {**BK.plan(Path(rec["destination_root"]))}
+    plan = BK.plan(Path(rec["destination_root"]))
+    six = sorted(f"{a}-s{s}" for a in PTP.ARMS for s in PTP.SEEDS)
+    mix = BK.units_from_records(runs=("a_train_sr_mix_20261109_193709",))
+    assert sorted(plan["units"]) == six and sorted(mix) == sorted(f"{MP.ARM}-s{s}" for s in PTP.SEEDS)
+    assert rec["units"] == {**plan["units"], **mix}
+    assert rec["weights_bytes"] == len(rec["units"]) * PTP.MODEL_BYTES
+    assert ({k: v for k, v in rec.items() if k not in ("units", "weights_bytes") and not k.startswith("verification_")}
+            == {k: v for k, v in plan.items() if k not in ("units", "weights_bytes")})
+    assert rec["verification_2026_11_10"]["state"] == "ALL EIGHT RECEIVED AND VERIFIED"
     assert "trainer_state.pt" in rec["not_copied"]

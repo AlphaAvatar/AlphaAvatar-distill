@@ -1747,10 +1747,65 @@ Inventories are from the records; no volume was listed.
 Research A v1's teacher, supplement and inputs shards, its search evidence and its recovery evidence had their only
 off-volume copy under `.scratch/research_a/`, a disposable root; they were hard-linked into
 `~/aad-artifacts/research_a/scratch_evidence_20261110/` (2,576 files, 3.56 GB, inode-verified, manifest beside it).
+A hard link is a second name for the same inode on the same disk: the files survive a cleanup of `.scratch`, but the
+dev box still holds one physical copy, not a second, independent one.
 
 **Budget.** A-MIX $23.4143 of $40.31; A-TM $139.3466 of $161.1023; Research A sessions $185.6483 under its $264.77
 cap; project committed $964.60 of $1,000 ($35.40 left); provider balance $43.03, 0 pods, three volumes at
 $1.76/day.
+
+## 21. Research A CLOSED: every paid authorization closed, the branch integrated into `main` (2026-11-11)
+
+Maintainer 2026-11-11, "Research A 最终关闭与 Squash Merge Main" (independent review of `e79c8f6a`): the verdict is
+accepted and frozen, every paid execution of Research A is closed by one study-level gate, and the branch is
+squash-merged into `main`.
+
+**Scientific state, frozen.** `CURRENT_METHOD_NO_GO` for the combination of the current structural initialization,
+teacher-native data and recovery KD. It does not say that 596M parameters are too few, that thinking distillation
+does not work, or that the decoding parameters or the few truncated targets caused the failure. Every preregistered
+and descriptive comparison stands; nothing was regenerated, rescored or retrained. Frozen `validation_passed` records
+are unchanged; a closeout for a kind without a verdict writes `null` with a note (section 20).
+
+**The grants are closed as studies.** A-TM
+([`teacher_modes_token_matched_grant.json`](../../../../logs/budget/approvals/teacher_modes_token_matched_grant.json))
+and A-E ([`teacher_modes_engineering_grant.json`](../../../../logs/budget/approvals/teacher_modes_engineering_grant.json))
+each end with a `closed` block: the decision, its UTC time and source, the spend (A-TM by kind), the remainder that
+lapses (A-TM $21.7557 of $161.1023, A-E $2.7911 of $3.50: not carried forward, refunded or transferred), and the
+commit and sha256 of the grant before the closure. Everything above the block is unchanged, `status: granted`
+included: it records that the grant was valid when it funded each run. Research A v1's grant was closed on
+2026-10-31. One gate, `study_engineering.require_open`, refuses a closed study's:
+
+- `issue`, for every kind, a dry run included: in the study's own command before any kind's gate, and in the shared
+  issuer at its grant read;
+- `launch`, before the artifact, the bundle or the provider is read, so an artifact issued before the closure and never
+  used cannot create a pod;
+- session built by any other caller, at the runner's first precheck (`the_study_is_open`), before the create.
+
+Read-only work reads the closed grant through `grant_record`: the envelope, the pilot's reconciliation, identity
+reviews of historical artifacts, the closeout of a launched run. The tests
+(`scripts/stages/stage-2/teacher_modes/tests/test_research_a_closure.py`) drive issue and launch, real and dry-run, for
+all 14 kinds; launch a real issued artifact under an unused run against the closed grant and against its historical
+snapshot; close A-E and v1; read the closed grant read-only; and compare the pre-closure bytes. With `require_open`
+made a no-op, 60 of the 62 fail.
+
+**Research B** keeps its teacher `pending` (`independent_gated_design.json :: teacher.status`); every formal Research B
+execution still refuses (`recovery_driver.formal_teacher`). This integration authorizes nothing for it.
+
+**Storage, unchanged.** Volumes `thprcgh7s9`, `4rhubprswo` and `am5m373kuq` are kept; the retirement list stays a
+proposal. The eight students' final weights stay on the dev box (`~/aad-artifacts/stage3_sr/final_weights/`) and the
+evidence archive `fadea626...` on the dev box and the relay. Re-hashed 2026-11-11T09:39-09:41Z: all 32 files of the
+eight receipts match; the archive matches on the dev box, and the relay's LFS sha256 for it is the same
+(`storage/stage3_devbox_backup.json :: verification_2026_11_11`). The relay still lacks seven of the eight weights; that
+$0 upload belongs to a later storage closeout and is not a condition of the integration.
+
+**Provider, read 2026-11-11T09:39Z (read-only).** Balance $41.93; 0 pods in any state; the three volumes at $0.073/h
+($1.75/day, about 24 days, to ~2026-12-05). Project billed $917.9966, committed $964.6011 of $1,000 ($35.3989 left).
+This decision spent $0.
+
+**Integration.** A squash merge into `main` (AGENTS.md P12.2): one commit naming the source branch, its tip and the
+merge base `72492e46`. The branch is kept, and its final tip is tagged
+`archive/research-teacher-modes-and-projected-residual-2026-11-11`, so every commit a record cites stays reachable.
+Later work starts on a fresh branch cut from `main`.
 
 ## Reproduce ($0)
 

@@ -23,8 +23,8 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Research A CLOSED 2026-11-10: CURRENT METHOD NO_GO. Open: the volume retirement list (storage/volume_retirement_proposal_20261110.json). Owner: PACKED_ROUND.md section 20.",
- "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
+ "blocker": "BLOCKED NO. Research A CLOSED 2026-11-11: CURRENT_METHOD_NO_GO frozen; the A-TM and A-E grants closed (study_engineering.require_open). Owner: PACKED_ROUND.md section 21.",
+ "branch": "research/teacher-modes-and-projected-residual (kept; tag archive/research-teacher-modes-and-projected-residual-2026-11-11), squash-merged into main 2026-11-11 (base 72492e46). New work: a fresh branch from main.",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer: approve the volume retirement list and the relay upload of seven student weights; confirm H1-PA's and the mixed calibration's reviews closed. Owner: logs/budget/decisions.md 2026-11-10.",
+ "next": "The maintainer: the volume retirement list, the relay upload of seven student weights, H1-PA's and the mixed calibration's reviews; Research B's teacher (pending). Owner: logs/budget/decisions.md 2026-11-11.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -201,7 +201,7 @@
   "pods": 0,
   "network_volumes": 3,
   "run": "none; last: A-MIX-6cat-sr a_train_sr_mix_20261109_193709 ($23.4143), pod deleted, provider-confirmed",
-  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1, the eight Stage-3 units (weights also on the dev box, verified 2026-11-10); 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
+  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1, the eight Stage-3 units (weights also on the dev box, re-hashed 2026-11-11); 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
@@ -234,7 +234,7 @@
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
   "core": "see logs/state/current.md; the suite's simulator floor is AAD_TEST_PODSIM_MIN_FREE_GIB (tests/support/podsim.py), never a launch variable.",
   "d1_launch": "1029 passed / 13 skipped / 0 failed, 2m38s: phase_d1 + docs + integration. GREEN, and the accepted out-of-tree source-screen failure is NOT in it.",
-  "integration": "SQUASH AND MERGE, AGENTS.md P12.2. LATEST 2026-10-17: main squashes exec/d1-behavioural-readiness (PRESERVED; base c8f714af; tested tree 27c279b6; tip named by the squash commit). Earlier: c8f714af, 4500d775. Ranges: decisions.md.",
+  "integration": "SQUASH AND MERGE, AGENTS.md P12.2. LATEST 2026-11-11: main squashes research/teacher-modes-and-projected-residual (PRESERVED, tagged; base 72492e46; tip named by the squash commit). Earlier: 72492e46, 2a8bae78, 32246d12. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core and NOT in the D1 launch suite: phase_d_series test_source_evidence::test_it_regenerates_identically. Its screen is nondeterministic across processes. Diagnosis: current.md.",
   "next_work": "none owed.",
   "d_series_closure": "experiment suites 2026-10-17: d_series 465, phase_d1 721, phase_d2 365 (2 skipped), phase_d3 129, shared 319, migration 39; all green."

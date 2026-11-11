@@ -218,7 +218,13 @@
  "evidence_preserved_today": {
   "what": "the only off-volume copies of Research A v1's teacher, supplement and inputs shards, the v2 search evidence and the recovery evidence sat under .scratch/research_a/, a root whose README says nothing durable lives there",
   "action": "hard-linked into ~/aad-artifacts/research_a/scratch_evidence_20261110/ (2,576 files, 3,556,981,667 B, every link inode-verified; manifest ~/aad-artifacts/research_a/scratch_evidence_20261110.manifest.json); no extra bytes, original paths unchanged",
-  "second_store": "not on the relay yet: 3.3 GiB, proposed after the student weights (section III)"
+  "second_store": "not on the relay yet: 3.3 GiB, proposed after the student weights (section III)",
+  "physical_copies": {
+   "dev_box": 1,
+   "relay": 0,
+   "volumes": "the shards' originals, until a volume is retired"
+  },
+  "hard_links": "a hard link is a second name for the same inode on the same dev-box disk: it keeps the path reachable if .scratch is cleaned, but it is NOT a second physical copy and adds no redundancy across storage (maintainer 2026-11-11, section 5); physical copies on the dev box: one"
  },
  "if_all_three_go": {
   "usd_per_day_saved": 1.7617,

@@ -32,5 +32,24 @@
   "sha256": "41eccaf708e311f3fb53174df64af3f5bc45970a46c7deeba72b85c00f95ad47"
  },
  "study_identity_sha256": "d5eb76a143919fb94382a300bab0f51fb77cae21d816a578cdc3df95c4bfd85e",
- "granted_at_commit": "0b5043de61341d4656e1e879aefebbd40b100581"
+ "granted_at_commit": "0b5043de61341d4656e1e879aefebbd40b100581",
+ "closed": {
+  "status": "CLOSED",
+  "utc": "2026-11-11T09:34:55Z",
+  "by": "the maintainer",
+  "decision": "maintainer 2026-11-11 (UTC), 'AlphaAvatar-distill — Research A 最终关闭与 Squash Merge Main' (independent review of e79c8f6a81ea8817f015f82f78bd2445c57d91f6): 「正式决定：接受 Research A 的 CURRENT_METHOD_NO_GO 科学结论」 and, section 一 '正式关闭 Research A 的全部付费授权': 「请正式关闭整个 A-TM 研究的所有新增付费执行权限」「保留旧 grant 内容及正式金额，追加可审计的最终关闭决定、UTC 时间和来源。历史未使用额度不结转、不退款、不转移。」",
+  "source": "the maintainer's written instruction of 2026-11-11 (UTC), section 一's 'Research A 的全部付费授权': A-E is Research A's engineering validation (PASS, ae_20261028_093428); written into this grant by the agent",
+  "scope": "every session kind of A-E: ['engineering_validation']",
+  "enforced_by": "scripts/shared/study_engineering.py :: require_open, the one study-level gate: in grant (so issue and the funding precheck), in launch_main before an artifact, the bundle or the provider is read (an issued, unused artifact included), and as the runner's first precheck (the_study_is_open); the study's own issue command checks it before any kind's gate",
+  "spent_usd": 0.7089,
+  "_spent": "study_engineering.spent at closure: 2 runs, none unknown",
+  "unspent_usd": 2.7911,
+  "remainder": "the unspent $2.7911 of the $3.5 ceiling lapses: not carried forward, not refunded, not transferred",
+  "historical": "every field above is unchanged (grant_before_closure); the PASS and its records stand",
+  "grant_before_closure": {
+   "commit": "e79c8f6a81ea8817f015f82f78bd2445c57d91f6",
+   "sha256": "f5bf6f70d993a905f4d75b4160c2699b1d407e0a9cdd43eb69a3167082c8a391"
+  },
+  "still_available": "read-only work: reports, rescoring of saved generations, archives and identity reviews (study_engineering.grant_record reads this grant open or closed), and the closeout of a run already launched"
+ }
 }

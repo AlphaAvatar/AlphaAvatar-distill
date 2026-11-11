@@ -66,5 +66,18 @@
   "carried_by": "a_train_sr_mix_20261109_193709's polls (the six -sr units and A-MIX-6cat-sr-s20260726 during training, A-MIX-6cat-sr-s20260801 at 15:54:55Z in 253 s); no separate billing resource, so the separate $2.00 backup allowance was not used",
   "relay_copies": "A-MIX-6cat-sr-s20260801 only (durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256, verified); the other seven were refused for quota before the 2026-11-10 HF retirement and are not retried",
   "effect": "the keep-condition on thprcgh7s9 (every student's Dev Box copy hash-verified) is met; this authorizes no deletion"
+ },
+ "verification_2026_11_11": {
+  "utc": "2026-11-11T09:39:41Z to 2026-11-11T09:41:08Z",
+  "state": "ALL EIGHT INTACT",
+  "how": "every file each unit's receipt.json lists (4 per unit, 32 in all) re-hashed on the dev box against the receipt's sha256",
+  "bytes": 19073896848,
+  "evidence_archive": {
+   "dev_box_sha256": "fadea6263ed99ed9bbdfbc4646b195bde62bb48fcc17b03804eb55a1e7ed1417",
+   "relay_lfs_sha256": "fadea6263ed99ed9bbdfbc4646b195bde62bb48fcc17b03804eb55a1e7ed1417",
+   "_": "the relay's LFS metadata read (get_paths_info), no download; both equal the run's evidence_archive.json"
+  },
+  "relay_weights": "A-MIX-6cat-sr-s20260801 only; the other seven are on the dev box alone (their upload is a later $0 storage closeout)",
+  "for": "the maintainer's 2026-11-11 'Research A 最终关闭与 Squash Merge Main', section 5"
  }
 }

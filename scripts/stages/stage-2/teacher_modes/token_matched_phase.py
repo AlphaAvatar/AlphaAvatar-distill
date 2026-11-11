@@ -54,6 +54,11 @@ one mixed pack (`mixed_packs.py`), two seeds from the packed search's Top-1, eac
 (`mixed_training_plan.json`). Its own grant block (``stage3_mix``, `STAGE3_BLOCKS`), never the six units' one. Its
 polls also carry the six closed -sr units' final weights, and its own once trained, to the dev box
 (`backup_on_poll`, `stage3_backup.py`).
+
+CLOSED (maintainer 2026-11-11, 'Research A 最终关闭与 Squash Merge Main', section 1): the grant's ``closed`` block
+ends every kind's new paid execution. `study_engineering.require_open` refuses ``issue`` before any kind's own gate,
+``launch`` before an artifact or the provider is read (an issued, unused artifact included) and the runner's first
+precheck; ``closeout`` and every read-only report stay available. The per-kind caps below are the historical record.
 """
 from __future__ import annotations
 
@@ -1304,6 +1309,12 @@ def main(argv=None) -> int:
             j = rest.index("--minutes")
             minutes = float(rest[j + 1])
             rest = rest[:j] + rest[j + 2:]
+        if argv[0] in ("issue", "launch"):
+            try:
+                SE.require_open(STUDY)        #: the study-level closure, before any kind's own gate or launch spec
+            except SE.AuthorizationError as exc:
+                print(f"REFUSED at $0: {exc}" + ("\nNo provider resource was created." if argv[0] == "launch" else ""))
+                return 11
         if argv[0] == "issue":
             import argparse
             ap = argparse.ArgumentParser(prog=f"{STUDY.key} issue")

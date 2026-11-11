@@ -138,7 +138,7 @@
   "students": "all eight Dev Box copies match their receipts and the committed sha256 (stage3_backup --verify, eight units)",
   "evidence_archive": "fadea626...: dev box re-hashed; relay LFS sha256 equal and a fresh download re-hashed equal",
   "kept_not_trainer_state": "model weights, config, generation_config and resume_identity per unit; AdamW, scheduler and RNG state are not kept off the volume: every training is closed (maintainer brief section III)",
-  "research_a_v1_evidence": "hard-linked into ~/aad-artifacts/research_a/scratch_evidence_20261110/ from the disposable .scratch root (storage/volume_retirement_proposal_20261110.json)"
+  "research_a_v1_evidence": "hard-linked into ~/aad-artifacts/research_a/scratch_evidence_20261110/ from the disposable .scratch root (storage/volume_retirement_proposal_20261110.json). A hard link is a second NAME for the same inode on the same dev-box disk: it keeps the files reachable if .scratch is cleaned, but it is NOT a second physical copy and adds no redundancy across storage: the dev box holds one physical copy, beside whatever the volumes hold"
  },
  "relay_quota": {
   "read_utc": "2026-11-10T18:40Z (between the provider read at 18:39:40Z and the backup verification at 18:41:42Z)",
@@ -169,8 +169,13 @@
  "open_for_the_maintainer": [
   "approve or amend the volume retirement list (storage/volume_retirement_proposal_20261110.json)",
   "the relay upload of the seven student weights ($0, ~7 h)",
-  "whether H1-PA's and the mixed calibration's reviews are closed (am5m373kuq's declared anchors)",
-  "closing the A-TM grant for new issuance: its phase_a1 and tool kinds carry no closed marker (only packed_search and stage3_sr do); a top-level closed marker would need a one-line gate in token_matched_phase.kind_cap_problems and would turn this experiment's issuance tests into historical ones"
+  "whether H1-PA's and the mixed calibration's reviews are closed (am5m373kuq's declared anchors)"
  ],
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "resolved_2026_11_11": {
+  "grant_closure": "DONE: the maintainer's 2026-11-11 decision ('Research A 最终关闭与 Squash Merge Main', section 1) closed A-TM and A-E as studies -- logs/budget/approvals/teacher_modes_token_matched_grant.json and teacher_modes_engineering_grant.json :: closed (Research A v1's grant was closed 2026-10-31). One study-level gate, study_engineering.require_open, refuses issue, launch (before an artifact or the provider is read, an issued unused artifact included) and the runner's first precheck, for every kind; not the per-kind marker this record's earlier note sketched. Tests: scripts/stages/stage-2/teacher_modes/tests/test_research_a_closure.py",
+  "remainders": "A-TM $21.7557 and A-E $2.7911 lapse: not carried forward, not refunded, not transferred",
+  "integration": "the research branch is squash-merged into main under the same decision (section 4)",
+  "storage": "the three volumes are kept unchanged; no retirement and no relay upload is authorized by this decision"
+ }
 }

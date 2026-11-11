@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-10 (UTC), after Research A's closeout (CURRENT METHOD NO_GO) and the volume retirement proposal. The human view. Every number here has an owner
+**Updated:** 2026-11-11 (UTC), Research A CLOSED: every paid authorization closed, the research branch squash-merged into `main`. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,18 +9,26 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A: CLOSED -- CURRENT METHOD NO_GO (maintainer, 2026-11-10). NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES. VOLUME RETIREMENT PROPOSED, NOT EXECUTED.**
+**RESEARCH A: CLOSED (maintainer, 2026-11-11) -- CURRENT_METHOD_NO_GO FROZEN; EVERY PAID AUTHORIZATION CLOSED; THE BRANCH SQUASH-MERGED INTO `main`. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
 - Verdict (`analyses/research_a_closeout.json`): static fluid 7.19% (A1), 10.96% (A2), 10.26% / 11.23% (A-MIX
   thinking / non-thinking) at 4.52x A1's compute: the combination of structural initialization, teacher-native data
-  and recovery KD is NO_GO; not a verdict on 596M capacity. Registered and descriptive comparisons unchanged.
-- Backups: eight students' weights on the dev box and evidence archive `fadea626...` on the dev box and the relay,
-  re-verified 2026-11-10T18:41Z. Relay 72.59 of 93.13 GiB; proposed: upload the seven weights it lacks ($0, ~7 h).
-- Volumes: `storage/volume_retirement_proposal_20261110.json` -- `thprcgh7s9` after the upload, `4rhubprswo` without
-  a rescue, `am5m373kuq` once two reviews are confirmed closed. Live 2026-11-10T18:39Z: balance $43.03, 0 pods,
-  $1.76/day (~24 days).
-- Budget: A-TM $139.3466 of $161.1023; project committed $964.60 of $1,000.
-- Not authorized: new GPU work, Stage 4/5/6, a re-search, deleting a volume, a merge into main.
-- Owner: `logs/budget/decisions.md` 2026-11-10; `PACKED_ROUND.md` sections 19-20.
+  and recovery KD is NO_GO. Not a verdict on 596M capacity or on thinking distillation; not caused by the decoding
+  parameters or the few truncated targets. Registered and descriptive comparisons unchanged; nothing rescored.
+- Closed as studies: the A-TM and A-E grants end with a `closed` block (remainders $21.7557 and $2.7911 lapse);
+  Research A v1's since 2026-10-31. `study_engineering.require_open` refuses issue, launch (an issued, unused artifact
+  included) and the runner's first precheck for every kind; read-only work reads `grant_record`.
+- Research B: its teacher stays `pending`; nothing formal runs, and this integration authorizes nothing for it.
+- Storage, unchanged: eight students' weights on the dev box and evidence archive `fadea626...` on the dev box and
+  the relay, re-hashed 2026-11-11T09:41Z; the relay lacks seven weights (a later $0 upload, not authorized here).
+  Volumes kept; `storage/volume_retirement_proposal_20261110.json` stays a proposal. The Research A v1 evidence in
+  `~/aad-artifacts/research_a/` is hard links: one physical copy, not a second one.
+- Live 2026-11-11T09:39Z: balance $41.93, 0 pods, three volumes at $1.75/day (~24 days); project committed $964.60
+  of $1,000. This decision spent $0.
+- `main` carries the whole research branch (Research A v2, A-TM's 14 kinds, Stage 3 and A-MIX, Research B's
+  engineering validations, the closure); the branch is kept and tagged
+  `archive/research-teacher-modes-and-projected-residual-2026-11-11`. New work starts on a fresh branch from `main`.
+- Not authorized: new GPU work, Stage 4/5/6, Research B, a re-search, deleting a volume, the relay upload.
+- Owner: `logs/budget/decisions.md` 2026-11-11; `PACKED_ROUND.md` sections 20-21.
 
 **RESEARCH A: A-MIX-6cat-sr COMPLETE (2026-11-10) -- TWO SEEDS TRAINED, EACH EVALUATED IN BOTH MODES. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
 - Run `a_train_sr_mix_20261109_193709`: one L40S on `thprcgh7s9`, one attempt, $23.4143 of $40.31 (cumulative $45.17);
@@ -1285,6 +1293,36 @@ whole suite **twice**, once for a `tail -3` and once for an exit status; it is o
 invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
+
+**Research A (v1, A-E, v2 / A-TM) and Research B's design and engineering validation, integrated 2026-11-11 (UTC)
+by SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's instruction ("Research A 最终关闭与 Squash Merge
+Main").** One commit on `main` collapses everything on top of `72492e46` (the Stage-2 squash): the 233 commits up to
+the reviewed `e79c8f6a`, plus this round's closure and pre-integration record commit after it.
+- Research A v1 (D4 scale): STOPPED 2026-10-31, its grant closed; A-E PASS; B-E FAIL (engineering only);
+- Research A v2 / A-TM: the supplement, the inputs, the hybrid full search, A1, the packed round (packed full search,
+  tool generation, six_category_schema_restored), Stage 3 A1/A2/C1-6cat-sr and A-MIX-6cat-sr; verdict
+  CURRENT_METHOD_NO_GO; the A-TM and A-E grants closed (`study_engineering.require_open`);
+- Research B (projected residual): design and engineering validation; its teacher `pending`, nothing formal;
+- every record, raw evidence file, checkpoint identity and closed grant, unchanged. Weights are not in git: on the
+  three volumes, the eight final students on the dev box, the packed Top-1 and one student on the relay.
+
+```text
+source branch : research/teacher-modes-and-projected-residual   (NOT deleted -- P12.2)
+archive tag   : archive/research-teacher-modes-and-projected-residual-2026-11-11 (the final tip)
+merge base    : 72492e468bf1449ecdd4bcadb6611003f7c175b9   (main before)
+reviewed tip  : e79c8f6a81ea8817f015f82f78bd2445c57d91f6
+branch tip    : named by the squash commit and the tag; a record on the branch cannot carry its own hash
+squash commit : `git log -1 main`
+```
+
+- **What was tested** on the final tree: the core full suite and the experiment suites of every directory the branch
+  changed (teacher_modes, shared, projected_residual, calibration_volume, reasoning_data, migration), reported apart;
+  the counts are in `logs/budget/decisions.md` 2026-11-11. Four failures of the closed migration suite fail on
+  `main` as well and are left as they are.
+- **Reachability.** 769 commit hashes the records cite resolve; 139 exist only on the source branch, which is why
+  it and its tag are kept permanently.
+- **Left byte-for-byte as recorded:** the raw `launch.log` evidence of two A1 runs keeps its trailing spaces (the
+  provider CLI's own usage text), so `git diff --check` reports them; they are evidence, not formatting.
 
 **Stage 2 (H1, H1-PA) and the mixed calibration 2x, integrated 2026-10-27
 (UTC) by SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's

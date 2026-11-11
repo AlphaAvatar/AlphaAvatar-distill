@@ -28,6 +28,14 @@ grant document, never here (P3).
   cover it, as a necessary condition and never as headroom.
 * ONE USE. One artifact per run id, never re-issued; a launch refuses an
   artifact whose run has already created a resource or closed out.
+* CLOSURE. A study the maintainer has closed carries a ``closed`` block in
+  its grant (the decision, its UTC time and its source; the grant's own
+  content and amounts stay as they were). `require_open` is the one study-level
+  gate: `grant` (so `issue` and the funding precheck), `launch_main` before it
+  reads an artifact or the provider, and the runner's first precheck all
+  refuse a closed study, whatever its kind and however old its artifact.
+  Read-only work (reports, rescoring, archives, identity reviews) reads the
+  grant through `grant_record`, which funds nothing and never refuses it.
 
 `session_spec` builds the session on the shared runner
 (`aadistill.infrastructure.session_runner`), the same chain H1-PA's sessions
@@ -203,16 +211,40 @@ PHASE_GRANT_FIELDS = ("study", "ceiling_usd", "per_session_hard_cap_usd", "proje
                       "gpu_count_max", "granted_by", "decision")
 
 
+def grant_record(study: Study, root: Path = REPO_ROOT) -> dict:
+    """The grant as recorded, open or closed: what read-only work reads (an envelope, a reconciliation, an identity
+    review). It funds nothing; `grant` is the funding read."""
+    p = Path(root) / study.grant
+    if not p.is_file():
+        raise AuthorizationError(f"no grant at {study.grant}")
+    return {**json.loads(p.read_text()), "_source": str(study.grant)}
+
+
+def closure(study: Study, root: Path = REPO_ROOT) -> dict | str | None:
+    """The maintainer's closure of the study (its grant's ``closed`` block), or None while the study is open."""
+    p = Path(root) / study.grant
+    return (json.loads(p.read_text()).get("closed") or None) if p.is_file() else None
+
+
+def require_open(study: Study, root: Path = REPO_ROOT) -> None:
+    """Refuse every new execution of a closed study: no kind is issued and no artifact, however old, is launched."""
+    c = closure(study, root)
+    if c:
+        why = c if isinstance(c, str) else f"{c.get('utc')}, {c.get('decision')}"
+        raise AuthorizationError(f"{study.key} is CLOSED ({study.grant} :: closed: {why}); nothing is issued or "
+                                 "launched under it, and a new execution needs a new study and grant")
+
+
 def grant(study: Study, root: Path = REPO_ROOT, *, dry_run: bool = False) -> dict:
-    """The maintainer's grant; for a dry run only, the study's proposal in its place."""
+    """The maintainer's grant, read to FUND a session; for a dry run only, the study's proposal in its place.
+    A closed study refuses (`require_open`)."""
     root = Path(root)
     p = root / study.grant
     if p.is_file():
         g = json.loads(p.read_text())
         if g.get("status") != "granted":
             raise AuthorizationError(f"{study.grant} is {g.get('status')!r}, not granted")
-        if g.get("closed"):
-            raise AuthorizationError(f"{study.grant} is closed ({g['closed']})")
+        require_open(study, root)
         g["_source"] = str(study.grant)
     elif dry_run and (root / study.proposal).is_file():
         g = json.loads((root / study.proposal).read_text())
@@ -467,6 +499,13 @@ def all_in(plan, price_per_hour: float, disk_gb: float, cap_usd: float | None = 
 
 def prechecks(study: Study, launch: Launch, root: Path = REPO_ROOT) -> tuple:
     """The session's own gates, each read at $0 before the create."""
+    def the_study_is_open(ctx) -> tuple[bool, str]:
+        try:
+            require_open(study, root)
+        except AuthorizationError as exc:
+            return False, str(exc)
+        return True, f"{study.key} is open"
+
     def the_artifact_is_this_studys_and_unused(ctx) -> tuple[bool, str]:
         sc = ctx.auth.stage_conditions or {}
         if ctx.auth.plan_id != study.plan_id or sc.get("study") != study.key:
@@ -540,9 +579,9 @@ def prechecks(study: Study, launch: Launch, root: Path = REPO_ROOT) -> tuple:
         return (not bad, f"${ctx.auth.hard_cap_usd:.2f} inside the envelope (${env['remaining_usd']}) and the "
                 f"${pos['project_remaining_usd']} the project cap leaves now" if not bad else "; ".join(bad))
 
-    return (the_artifact_is_this_studys_and_unused, the_gpu_and_price_are_the_grants, all_in_within_cap,
-            the_study_identity_is_the_authorized_one, bound_files_are_in_the_session_commit, the_project_cap_holds_now,
-            *launch.extra_prechecks)
+    return (the_study_is_open, the_artifact_is_this_studys_and_unused, the_gpu_and_price_are_the_grants,
+            all_in_within_cap, the_study_identity_is_the_authorized_one, bound_files_are_in_the_session_commit,
+            the_project_cap_holds_now, *launch.extra_prechecks)
 
 
 def owned_volumes(root: Path = REPO_ROOT) -> tuple[str, ...]:
@@ -760,6 +799,12 @@ def launch_main(study: Study, launch: Launch, argv=None, *, root: Path = REPO_RO
     from stages.reasoning_data import h1_generation_launch as GL
 
     args = build_parser(description, gpu=gpu).parse_args(argv)
+    try:
+        #: before the artifact, the bundle or the provider is read: a closed study launches nothing, a dry run included
+        require_open(study, root)
+    except AuthorizationError as exc:
+        print(f"REFUSED at $0: {exc}\nNo provider resource was created.")
+        return 11
     if args.max_price is None:
         raise SystemExit("--max-price is required: read the live price first")
     if args.dry_run:

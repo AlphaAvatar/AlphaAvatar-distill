@@ -163,9 +163,16 @@ class TestQ2IsTheHistoricalReferenceAndNotTheForwardArtifact:
             self, baseline):
         reg = json.loads((REPO / "logs/maintenance/inventories/"
                           "checkpoint_registry.json").read_text())
+        from shared.forward_baseline import selected
+
         row = reg["scientific_artifacts"]["d1_finalist_q2"]
         assert row["retention"] == "canonical"
-        assert row["forward_baseline"]["baseline"] == baseline.qualified_id
+        #: the registry derives from the SELECTED baseline (v2 since 2026-11-03), which names the same q2 artifact as
+        #: this historical v1
+        current = selected(REPO)
+        assert row["forward_baseline"]["baseline"] == current.qualified_id
+        assert ([a.identities["artifact_digest"] for a in current.reference_artifacts]
+                == [a.identities["artifact_digest"] for a in baseline.reference_artifacts])
         assert row["forward_baseline"]["is_the_forward_profile_artifact"] is False
         protected = [c for c in reg["checkpoints"]
                      if c["path_local"].endswith(Q2_STATE)]

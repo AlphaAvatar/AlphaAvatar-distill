@@ -626,7 +626,7 @@ def envelope_reconciliation() -> dict:
     states them -- what the $2.50 pilot would draw on. Nothing here changes a grant."""
     from shared import study_engineering as SE
     from stages.teacher_modes import token_matched_phase as TM
-    g = SE.grant(TM.STUDY)
+    g = SE.grant_record(TM.STUDY)                #: read-only: funds nothing, and reads a closed grant too
     spent = SE.spent(TM.STUDY)
     env = SE.envelope(TM.STUDY, g)
     by_kind = Counter()
@@ -676,7 +676,7 @@ def grant_amendment(plan_path: Path = PLAN) -> dict:
     and ``date`` stay null for the maintainer."""
     from shared import study_engineering as SE
     from stages.teacher_modes import token_matched_phase as TM
-    g = SE.grant(TM.STUDY)
+    g = SE.grant_record(TM.STUDY)                #: read-only: funds nothing, and reads a closed grant too
     doc = json.loads(Path(plan_path).read_text())
     cap, minutes = CAP_OPTIONS["B"]
     block = {"approves": APPROVAL, "granted_by": "maintainer", "decision": None, "date": None,

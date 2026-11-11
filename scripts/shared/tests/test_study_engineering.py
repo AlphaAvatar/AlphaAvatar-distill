@@ -99,6 +99,32 @@ def test_a_granted_artifact_is_one_use_bound_and_tamper_evident(tmp_path, live):
         SE.issue(st, "r2", expected_usd=1.5, hard_cap_usd=3.0, root=tmp_path)
 
 
+def test_a_closed_study_issues_and_launches_nothing_and_its_grant_stays_readable(tmp_path, live, capsys):
+    """The study-level closure: an artifact issued while the study was open refuses at launch once the grant carries
+    ``closed``, before the artifact or the provider is read; issue refuses, dry run included; read-only reads go on."""
+    st = _study(tmp_path)
+    _proposal(tmp_path, st)
+    SE.write_grant(st, decision="approved: X-E $3.00", granted_by="maintainer", root=tmp_path)
+    SE.issue(st, "r1", expected_usd=1.5, hard_cap_usd=3.0, root=tmp_path)
+    p = tmp_path / st.grant
+    g = json.loads(p.read_text())
+    p.write_text(json.dumps({**g, "closed": {"utc": "2026-11-11T00:00:00Z", "decision": "the maintainer closed X-E"}}))
+    for dry in (False, True):
+        with pytest.raises(AuthorizationError, match="X-E is CLOSED"):
+            SE.issue(st, "r2", expected_usd=1.5, hard_cap_usd=3.0, root=tmp_path, dry_run=dry, out=tmp_path / "s/a.json")
+    assert not (tmp_path / st.run_dir("r2")).exists()
+    launch = SE.Launch(session_kind="x", authorization=SE.EngineeringAuthorization, teacher_model="m",
+                       teacher_revision="r", driver="scripts/x/driver.py", validation_minutes=10.0)
+    argv = ["--run-id", "r1", "--scr", str(tmp_path / "scr"), "--session-commit", "HEAD", "--bundle", "b",
+            "--max-price", "1.0"]
+    assert SE.launch_main(st, launch, argv, root=tmp_path) == 11
+    assert "X-E is CLOSED" in capsys.readouterr().out
+    first = SE.prechecks(st, launch, tmp_path)[0]
+    assert first.__name__ == "the_study_is_open" and not first(SimpleNamespace())[0]
+    assert SE.grant_record(st, tmp_path)["closed"]["decision"] == "the maintainer closed X-E"
+    assert SE.envelope(st, SE.grant_record(st, tmp_path), tmp_path)["ceiling_usd"] == 3.0
+
+
 @pytest.mark.parametrize("change, match", [
     ({"hard": 3.01}, "per-session hard cap"),
     ({"spent": 2.5}, "envelope leaves"),
@@ -138,6 +164,12 @@ def test_the_envelope_counts_every_session_and_an_unknown_refuses(tmp_path):
         SE.envelope(st, g, tmp_path)
 
 
+def _checks(st, launch, root, *names):
+    """The named prechecks, by name: their order is the runner's, not a test's index."""
+    by = {c.__name__: c for c in SE.prechecks(st, launch, root)}
+    return [by[n] for n in names]
+
+
 def _ctx(st, auth, run="r9", **args):
     a = SimpleNamespace(run_id=run, dry_run=False, gpu="NVIDIA L40S", max_price=1.09, disk_gb=120, **args)
     return SimpleNamespace(auth=auth, args=a, evidence={}, plan=None)
@@ -148,7 +180,7 @@ def test_launch_gates_refuse_a_dry_run_artifact_a_used_run_and_another_card(tmp_
     _proposal(tmp_path, st)
     launch = SE.Launch(session_kind="x", authorization=SE.EngineeringAuthorization, teacher_model="m", teacher_revision="r", driver="scripts/x/driver.py",
                        validation_minutes=10.0)
-    unused, gpu = SE.prechecks(st, launch, tmp_path)[:2]
+    unused, gpu = _checks(st, launch, tmp_path, "the_artifact_is_this_studys_and_unused", "the_gpu_and_price_are_the_grants")
     dry = SE.load_authorization(st, SE.issue(st, "r9", expected_usd=1.0, hard_cap_usd=3.0, root=tmp_path,
                                              dry_run=True, out=tmp_path / "s/a.json"), allow_dry_run=True)
     ok, why = unused(_ctx(st, dry))
@@ -328,7 +360,7 @@ def test_a_formal_phase_names_its_kinds_and_its_artifacts_claim_exactly_the_phas
     # the hardware boundary: a granted card, at most its price per GPU x the count, at most gpu_count_max GPUs
     launch = SE.Launch(session_kind="x", authorization=SE.EngineeringAuthorization, teacher_model="m",
                        teacher_revision="r", driver="scripts/x/driver.py", validation_minutes=10.0, kind="recovery")
-    unused, gpu = SE.prechecks(ph, launch, tmp_path)[:2]
+    unused, gpu = _checks(ph, launch, tmp_path, "the_artifact_is_this_studys_and_unused", "the_gpu_and_price_are_the_grants")
     ctx = SimpleNamespace(auth=a, args=SimpleNamespace(run_id="r1", dry_run=True, gpu="NVIDIA A100-SXM4-80GB",
                                                        max_price=3.7, gpu_count=2, disk_gb=150), evidence={}, plan=None)
     assert gpu(ctx)[0] and unused(ctx)[0]
@@ -339,7 +371,7 @@ def test_a_formal_phase_names_its_kinds_and_its_artifacts_claim_exactly_the_phas
     ctx.args.gpu, ctx.args.max_price = "NVIDIA L40S", 1.0
     assert not gpu(ctx)[0]
     teacher = dataclasses.replace(launch, kind="teacher")
-    assert not SE.prechecks(ph, teacher, tmp_path)[0](ctx)[0]           # a recovery artifact funds no teacher session
+    assert not _checks(ph, teacher, tmp_path, "the_artifact_is_this_studys_and_unused")[0](ctx)[0]  # a recovery artifact funds no teacher session
 
 
 def test_a_phase_kind_may_claim_less_and_each_artifact_claims_exactly_its_kinds(tmp_path, live, monkeypatch):

@@ -29,7 +29,11 @@ def test_the_plan_fits_the_proposed_cap_at_the_quoted_rate_and_the_granted_ceili
     #: the runner's funds gate calls this on the real plan (a property mistaken for a method failed the
     #: first $0 dry run, 2026-10-28)
     assert s.budget.account_balance_required_usd(at_quote) == at_quote.hard_terminate_usd
-    assert set(s.budget.accounted_provider_resources()) <= {"am5m373kuq"}
+    #: the account may hold exactly the volumes a live storage record owns (am5m373kuq when this was written; the
+    #: Research A volumes 4rhubprswo and thprcgh7s9 since 2026-11-01 / 11-05), never one no record owns
+    from stages.calibration_volume import mixed_governance as MG
+    owned = {v["volume"] for v in MG.volume_records(REPO) if v["deleted"] is None}
+    assert set(s.budget.accounted_provider_resources()) == owned and "am5m373kuq" in owned
     top = s.budget.plan(price_per_hour=prop["max_price_usd_per_hour"], authorized_usd=prop["per_session_hard_cap_usd"])
     assert SE.all_in(top, prop["max_price_usd_per_hour"], 120)["all_in_usd"] <= prop["per_session_hard_cap_usd"]
 

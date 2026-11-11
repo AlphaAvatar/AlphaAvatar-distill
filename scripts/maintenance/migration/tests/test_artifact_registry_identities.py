@@ -82,18 +82,33 @@ def test_that_incumbent_is_c1s_promoted_treatment_not_the_arm_it_beat(reg):
         "subject has changed")
 
 
+def _tombstones() -> list[dict]:
+    return json.loads((REPO / "logs/maintenance/inventories/checkpoint_tombstones.json").read_text())["tombstones"]
+
+
 def test_the_arm_c1_beat_is_classified_as_what_it_is(reg):
-    """It stays protected — C1's comparison needs both arms — but it may not
-    claim to be the promoted treatment or any later round's control."""
+    """It stayed protected -- C1's comparison needs both arms -- until the maintainer's 2026-11-09 decision lifted
+    that protection and its bytes were retired behind a tombstone. Registered or tombstoned, it may not claim to be
+    the promoted treatment or any later round's control; retired, its lift must name that decision and its identity
+    must survive in C1's arm record."""
+    b = reg["scientific_artifacts"]["standing_incumbent_B"]
     rows = [e for e in reg["checkpoints"] if "fe9683e6" in e["path_local"]]
-    assert rows, "the Phase-A leaf C1 measured against is no longer registered"
-    row = rows[0]
-    assert "BEAT" in row["role"] or "beat" in row["role"]
-    assert "promoted" not in row["role"].replace("NOT the promoted", "")
-    assert row["protected"] or row["retention"] == "reproducibility_required"
-    # and it is a DIFFERENT checkpoint from B
-    b = reg["scientific_artifacts"]["standing_incumbent_B"]["identity"]
-    assert row["weights_sha256"] != b["single_shard_sha256"]
+    if rows:
+        row = rows[0]
+        assert "BEAT" in row["role"] or "beat" in row["role"]
+        assert "promoted" not in row["role"].replace("NOT the promoted", "")
+        assert row["protected"] or row["retention"] == "reproducibility_required"
+        # and it is a DIFFERENT checkpoint from B
+        assert row["weights_sha256"] != b["identity"]["single_shard_sha256"]
+        return
+    tomb = [t for t in _tombstones() if any("fe9683e6" in p for p in t.get("historical_paths") or ())]
+    assert tomb, "the Phase-A leaf C1 measured against is neither registered nor tombstoned"
+    t = tomb[0]
+    assert "beat" in t["scientific_role"] and "not the standing incumbent" in t["scientific_role"]
+    assert t["protection_lifted"]["retention"] == "reproducibility_required"
+    assert t["protection_lifted"]["maintainer_decision"].startswith("maintainer 2026-11-09")
+    arms = json.loads((REPO / b["identity_owner"]).read_text())
+    assert arms["incumbent"]["single_shard_sha256"] != b["identity"]["single_shard_sha256"]
 
 
 def test_the_registry_does_not_claim_local_bytes_for_a_reconstructed_arm(reg):
@@ -112,8 +127,10 @@ def test_the_registry_does_not_claim_local_bytes_for_a_reconstructed_arm(reg):
 
 
 def test_each_finalist_is_one_logical_identity_over_its_copies(reg):
-    """q1 and q3 each exist twice on disk (products/ and the out-of-band
-    transport copy). One identity, n copies, every copy verified."""
+    """One identity, n copies, every copy verified. q1 and q3 once existed twice on disk (products/ and the
+    out-of-band transport copy); q1, q3 and q4's copies were retired on 2026-10-28 (AGENTS.md 2.5), so each keeps
+    its identity here with zero copies and a tombstone naming its bytes. q2, the forward baseline's reference, keeps
+    its copy."""
     sa = reg["scientific_artifacts"]
     ids = {k for k in sa if k.startswith("d1_finalist_")}
     assert ids == {"d1_finalist_q1", "d1_finalist_q2",
@@ -125,10 +142,15 @@ def test_each_finalist_is_one_logical_identity_over_its_copies(reg):
     for key, digest in want.items():
         row = sa[key]
         assert row["identity"]["single_shard_sha256"] == digest, key
-        assert row["copies"] >= 1 and row["all_copies_identity_verified"], key
         assert len(row["local_copies"]) == row["copies"]
+        if row["copies"]:
+            assert row["all_copies_identity_verified"], key
+        else:
+            assert row["lifecycle"] == "weights_retired_tombstoned", key
+            assert any(t.get("weights_sha256") == digest for t in _tombstones()), key
         assert row["identity_owner"].endswith(
             "post_search_finalist_retention.json")
+    assert sa["d1_finalist_q2"]["copies"] >= 1
 
 
 def test_what_identity_verified_actually_verifies_is_stated(reg):
@@ -182,8 +204,11 @@ def test_a_finalist_with_zero_physical_copies_stays_discoverable(reg):
     """The lifecycle requirement, exercised without deleting anything.
 
     `scientific_artifacts` is handed a physical inventory with EVERY copy of
-    q1 removed — the state the machine would be in after a legitimate
-    retirement — and q1's scientific identity must still be there. The
+    a finalist removed — the state the machine would be in after a legitimate
+    retirement — and its scientific identity must still be there. q1's copies
+    WERE retired on 2026-10-28, so the committed registry already holds that
+    state for q1, q3 and q4 (checked below); the synthetic removal now takes
+    q2, the finalist that still has a copy. The
     earlier implementation built these rows by iterating the inventory, so
     this produced a registry with q1 simply absent: the one artifact whose
     identity most needs to survive, because nothing else still carries it.
@@ -191,32 +216,40 @@ def test_a_finalist_with_zero_physical_copies_stays_discoverable(reg):
     No checkpoint is touched. The inventory is a list of dicts.
     """
     mod = _builder()
-    q1 = reg["scientific_artifacts"]["d1_finalist_q1"]
-    shard = q1["identity"]["single_shard_sha256"]
+    fields = ("artifact_id", "role", "identity_owner", "creating_run", "consumers", "retention", "reconstruction",
+              "materialization")
+    #: the real retirements: zero copies, every field a reader needs, a replay recipe
+    for key in ("d1_finalist_q1", "d1_finalist_q3", "d1_finalist_q4"):
+        row = reg["scientific_artifacts"][key]
+        assert row["copies"] == 0 and row["local_copies"] == [], key
+        assert row["lifecycle"] == "weights_retired_tombstoned", key
+        assert all(row.get(f) for f in fields) and "replay" in row["reconstruction"], key
+
+    #: and the synthetic one, on the finalist that still has a copy
+    q2 = reg["scientific_artifacts"]["d1_finalist_q2"]
+    shard = q2["identity"]["single_shard_sha256"]
 
     full = reg["checkpoints"]
     assert any(e.get("weights_sha256") == shard for e in full), (
-        "q1 has no local copy in the committed registry, so this test would "
+        "q2 has no local copy in the committed registry, so this test would "
         "pass for the wrong reason")
 
-    without_q1 = [e for e in full if e.get("weights_sha256") != shard]
-    rebuilt = mod.scientific_artifacts(without_q1)
+    without_q2 = [e for e in full if e.get("weights_sha256") != shard]
+    rebuilt = mod.scientific_artifacts(without_q2)
 
-    assert "d1_finalist_q1" in rebuilt, (
+    assert "d1_finalist_q2" in rebuilt, (
         "a finalist with zero local copies vanished from the logical registry")
-    row = rebuilt["d1_finalist_q1"]
-    assert row["identity"] == q1["identity"], "its identity changed"
+    row = rebuilt["d1_finalist_q2"]
+    assert row["identity"] == q2["identity"], "its identity changed"
     assert row["copies"] == 0 and row["local_copies"] == []
     assert row["lifecycle"] in ("no_local_copy", "weights_retired_tombstoned")
     # and everything a reader needs to act on it is still present
-    for field in ("artifact_id", "role", "identity_owner", "creating_run",
-                  "consumers", "retention", "reconstruction",
-                  "materialization"):
-        assert row.get(field), f"zero-copy q1 lost {field}"
+    for field in fields:
+        assert row.get(field), f"zero-copy q2 lost {field}"
     assert "replay" in row["reconstruction"]
 
     # the other three are unaffected
-    for other in ("d1_finalist_q2", "d1_finalist_q3", "d1_finalist_q4"):
+    for other in ("d1_finalist_q1", "d1_finalist_q3", "d1_finalist_q4"):
         assert rebuilt[other]["identity"] == \
             reg["scientific_artifacts"][other]["identity"]
 

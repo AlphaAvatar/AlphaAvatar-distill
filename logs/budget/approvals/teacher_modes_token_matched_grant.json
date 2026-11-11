@@ -707,5 +707,41 @@
   ],
   "off_volume_copy": "the dev box (stage3_backup.py; receipts under /home/ecs-user/aad-artifacts/stage3_sr/final_weights/): the six -sr units' and both A-MIX units' final fp32 weights, configs and resume_identity.json, sha256-checked per file; never trainer_state.pt; no relay upload of weights (private quota)",
   "volume_kept_until": "all eight final students have a hash-verified dev-box copy (section V)"
+ },
+ "closed": {
+  "status": "CLOSED",
+  "utc": "2026-11-11T09:34:55Z",
+  "by": "the maintainer",
+  "decision": "maintainer 2026-11-11 (UTC), 'AlphaAvatar-distill — Research A 最终关闭与 Squash Merge Main' (independent review of e79c8f6a81ea8817f015f82f78bd2445c57d91f6): 「正式决定：接受 Research A 的 CURRENT_METHOD_NO_GO 科学结论」 and, section 一 '正式关闭 Research A 的全部付费授权': 「请正式关闭整个 A-TM 研究的所有新增付费执行权限」「保留旧 grant 内容及正式金额，追加可审计的最终关闭决定、UTC 时间和来源。历史未使用额度不结转、不退款、不转移。」",
+  "source": "the maintainer's written instruction of 2026-11-11 (UTC); written into this grant by the agent on that instruction",
+  "scope": "every session kind of A-TM, none excepted: ['supplement', 'inputs', 'search', 'train_a1', 'tool_generation', 'tool_generation_t2507', 'packed_search', 'tool_pilot', 'tool_generation_sr', 'tool_generation_sr_t2507', 'train_sr_a1', 'train_sr_a2', 'train_sr_c1', 'train_sr_mix']",
+  "enforced_by": "scripts/shared/study_engineering.py :: require_open, the one study-level gate: in grant (so issue and the funding precheck), in launch_main before an artifact, the bundle or the provider is read (an issued, unused artifact included), and as the runner's first precheck (the_study_is_open); the study's own issue command checks it before any kind's gate",
+  "spent_usd": 139.3466,
+  "by_kind_usd": {
+   "supplement": 15.8689,
+   "inputs": 0.5713,
+   "search": 24.1526,
+   "train_a1": 9.0202,
+   "tool_generation": 3.5885,
+   "tool_generation_t2507": 1.9566,
+   "packed_search": 28.1677,
+   "tool_pilot": 0.4328,
+   "tool_generation_sr": 1.048,
+   "tool_generation_sr_t2507": 0.3296,
+   "train_sr_a1": 7.7554,
+   "train_sr_a2": 15.6086,
+   "train_sr_c1": 7.4321,
+   "train_sr_mix": 23.4143
+  },
+  "_spent": "study_engineering.spent at closure: every session's closeout all-in, 28 runs, none unknown",
+  "unspent_usd": 21.7557,
+  "remainder": "the unspent $21.7557 of the $161.1023 ceiling lapses: it is not carried forward, not refunded to any pool and not transferred to any study; a new execution needs a new study and the maintainer's grant",
+  "historical": "every field above is unchanged (grant_before_closure); each earlier artifact, use and amount keeps the validity it had at its time",
+  "grant_before_closure": {
+   "commit": "e79c8f6a81ea8817f015f82f78bd2445c57d91f6",
+   "sha256": "f08b6f32fd48ebdd73d134239e1139c30e155dfd7d0bdc4d8d31753267abfeb9"
+  },
+  "science": "CURRENT_METHOD_NO_GO (logs/stages/stage-2/teacher_modes/analyses/research_a_closeout.json)",
+  "still_available": "read-only work: reports, rescoring of saved generations, archives and identity reviews (study_engineering.grant_record reads this grant open or closed), and the closeout of a run already launched"
  }
 }

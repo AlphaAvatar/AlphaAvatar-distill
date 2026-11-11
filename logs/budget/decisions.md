@@ -16415,3 +16415,59 @@ on a paid pod.
 - Open: the retirement list; the relay upload; the two reviews; closing the A-TM grant's remaining kinds (only
   `packed_search` and `stage3_sr` are marked closed).
 - Revisit when: the maintainer approves the retirement list.
+
+## 2026-11-11 (UTC) — Research A CLOSED: every paid authorization closed; the research branch squash-merged into main
+
+- Context: the maintainer's "AlphaAvatar-distill — Research A 最终关闭与 Squash Merge Main" (independent review of
+  `e79c8f6a`): accept CURRENT_METHOD_NO_GO; close every new paid execution of Research A with one study-level gate;
+  one convergence validation; squash-merge the branch into `main`. No GPU work, no volume deletion, no upload.
+- Decision (science, frozen): CURRENT_METHOD_NO_GO for the combination of the current structural initialization,
+  teacher-native data and recovery KD. Not: 596M parameters too few, thinking distillation ineffective, the decoding
+  parameters or the few truncated targets the main cause. Every preregistered and descriptive comparison and every
+  frozen `validation_passed` record unchanged; nothing regenerated, rescored or retrained.
+- Decision (authorization): the A-TM grant (`approvals/teacher_modes_token_matched_grant.json`, all 14 kinds) and the
+  A-E grant (`approvals/teacher_modes_engineering_grant.json`, Research A's engineering validation) end with a `closed`
+  block: the decision, UTC time and source, the spend (A-TM by kind), the lapsed remainder (A-TM $21.7557 of
+  $161.1023, A-E $2.7911 of $3.50: not carried forward, refunded or transferred) and the commit and sha256 of the grant
+  before closure. Everything above the block is unchanged, `status: granted` included. Research A v1's grant was
+  closed 2026-10-31.
+- Mechanism: `study_engineering.require_open`, one study-level gate, in `grant` (so `issue` and the funding
+  precheck), in `launch_main` before an artifact, the bundle or the provider is read, and as the runner's first
+  precheck (`the_study_is_open`); `token_matched_phase.main` checks it before any kind's gate or launch spec.
+  Read-only work reads `grant_record` (tool_pilot's envelope reconciliation and amendment draft moved to it).
+- Alternatives considered: a `closed` marker per kind block (the brief asked for one study-level gate; a kind added
+  later would be open by default); `status: "closed"` (loses the record that the grant was valid when it funded each
+  run); removing the grant (destroys the historical amounts).
+- Tests: `scripts/stages/stage-2/teacher_modes/tests/test_research_a_closure.py`, 62 tests: issue and launch through
+  the study's own command and the shared functions for all 14 kinds, real and dry-run; a real issued artifact under an
+  unused run refused by the closed grant and passing the gate under the grant's historical snapshot; the runner's
+  first precheck; A-E and v1 closed; read-only reads of the closed grant; the pre-closure bytes. Provider, session,
+  runner and relay are trapped: none is reached. With `require_open` a no-op, 60 of 62 fail.
+- Regressions the convergence run found, repaired without weakening an assertion: two `test_study_engineering` tests
+  unpacked the prechecks by position (now by name); five registry tests still required bytes retired on this branch
+  behind tombstones (D1 finalists q1, q3, q4 on 2026-10-28; the Phase-A leaf C1 beat on 2026-11-09, its protection
+  lifted by the maintainer's 2026-11-09 decision): they now require the identity, the tombstone and that decision,
+  and the zero-copy lifecycle test removes q2, the finalist that still has a copy; the forward-baseline registry test
+  compared against the historical v1 instead of the selected v2 (both name q2); two A-MIX tests and one B-E test
+  asserted the state before A-MIX ran and before the two Research A volumes existed (now: a historical grant
+  snapshot, the record's eight units, the volumes the live storage records own); one docs test re-imported its own
+  module as `tests.docs...`, which a1_units' `sys.path` entry shadows with calibration_volume's `tests` package in a
+  shared process (it now patches itself). Four failures of the closed migration suite exist on `main` as well and
+  are left: a registry row without a field, two dev-box-local data paths and a stale D1 pause text.
+- Final suites on the final tree (AGENTS.md 2.8a, reported apart): core full suite 4,104 passed / 25 failed / 50
+  skipped (16 min); the 25 are all `tests/integration/test_simulator_restore.py`, the pod simulator refusing below
+  its 20 GiB free-disk floor (the dev box had 7.2 GB), and that file with `AAD_TEST_PODSIM_MIN_FREE_GIB=3` passes
+  36/36. Experiment suites (teacher_modes, shared, projected_residual, calibration_volume, reasoning_data,
+  migration): 1,408 passed / 4 failed / 4 skipped (5 min); the 4 are the migration failures that also fail on
+  `main`. Historical suites of other closed experiments: not run.
+- Research B: its teacher stays `pending`; nothing formal runs; this integration authorizes nothing for it.
+- Storage: the three volumes unchanged; the retirement list stays a proposal; the eight students' weights (dev box,
+  32 files) and the evidence archive `fadea626...` (dev box, relay LFS sha256) re-hashed 2026-11-11T09:41Z, all
+  equal. The seven relay uploads are a later $0 storage closeout. The Research A v1 evidence in
+  `~/aad-artifacts/research_a/` is hard links: one physical copy, not cross-storage redundancy.
+- Provider, read-only 2026-11-11T09:39Z: balance $41.93, 0 pods (all states), three volumes at $0.073/h; billed
+  $917.9966, committed $964.6011 of $1,000. This decision spent $0.
+- Integration: AGENTS.md P12.2 squash, source `research/teacher-modes-and-projected-residual` kept and its final tip
+  tagged `archive/research-teacher-modes-and-projected-residual-2026-11-11`; merge base `72492e46`; the squash
+  commit names the tip. 769 cited commits resolve, 139 of them only on the branch.
+- Revisit when: the maintainer decides the volume retirement list, or opens a new study.
