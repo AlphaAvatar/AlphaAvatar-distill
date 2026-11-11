@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.pilot_storage_precheck/v1",
+ "read_utc": "2026-11-04T09:59:07Z",
+ "provider": {
+  "known": true,
+  "error": null,
+  "volume": {
+   "kind": "network_volume",
+   "id": "am5m373kuq",
+   "name": "aad-h1pa",
+   "size": 55,
+   "dataCenterId": "EUR-IS-2"
+  },
+  "other_volumes": [
+   "4rhubprswo"
+  ],
+  "pods": []
+ },
+ "matches_the_planned_volume": true,
+ "recorded_contents_bytes": {
+  "h1pa (4 checkpoints, contents_after_pa2)": 9536946368,
+  "mixed_v2 (2 checkpoints, contents_after_mc2)": 4768473184,
+  "teacher_modes (Research A v1: teacher shards, the common initialization, the recovery units)": "not re-listed since 2026-10-30"
+ },
+ "recorded_lower_bound_bytes": 14305419552,
+ "pilot_writes": {
+  "path": "/runpod-volume/teacher_modes/tool_pilot_hybrid",
+  "estimate_bytes": "< 5e8",
+  "required_free_bytes": 2000000000,
+  "teacher_snapshot": "container disk (setup's HF_HOME=/root/.cache/huggingface), not the volume"
+ },
+ "never_written": [
+  "<mount>/h1pa",
+  "<mount>/mixed_v2",
+  "<mount>/teacher_modes/<every other entry>"
+ ],
+ "pod_side_rule": "tool_session.run_pilot refuses before generating unless the provider's size less the bytes on the mount (h1pa_driver.used_bytes) leaves MIN_FREE_BYTES and the pilot's directory is new or holds only the pilot's own files (tool_pilot.storage_problems)",
+ "4rhubprswo": "never attached: the launch refuses any volume but am5m373kuq (token_matched_phase.the_pilot_volume_is_the_planned_one)",
+ "authorizes": "nothing"
+}

@@ -1,0 +1,148 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.inputs_protocol/v1",
+ "decided_by": "maintainer 2026-11-01 'Research A v2: Execute A1 First', Phase A (1)-(2): the calibration's 10 short (profile, cell, mode) closed and state_eval_hybrid@v1 generated natively in both modes",
+ "base_protocol": {
+  "path": "configs/stages/stage-2/teacher_modes/generation_protocol.json",
+  "sha256": "462034035ccf6d82fddd686e56670c60f7ab52d7c9e55cedde67ccee78516a0a"
+ },
+ "seed_base": 20261102,
+ "_seed_base": "this session's own (a task's seeds are run_battery.request_seed(seed_base, task_id, turn)); every other execution value is the base protocol's",
+ "candidates": 1,
+ "inputs": {
+  "calibration_topup": {
+   "path": "data/stages/stage-2/teacher_modes/tasks/calibration_topup_v1.jsonl",
+   "sha256": "8cf39a31783ed720ab63a96a1f7a147ab8a31d55c9d8d8841c42ced059b5e6a7"
+  },
+  "state_evaluation": {
+   "path": "data/stages/stage-2/teacher_modes/tasks/state_eval_hybrid_v1.tasks.jsonl",
+   "sha256": "d31a7212b04134b9e6085dc2a9f00d383ce907051c2a3d99fce7718c8bca6cb6"
+  },
+  "types": {
+   "path": "configs/stages/stage-2/teacher_modes/full_search_types.json",
+   "sha256": "641b8b3f5eb45a02edd493506050734a53661a7efd82282e119f41127767ff61"
+  },
+  "isolation_proof": {
+   "path": "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json",
+   "sha256": "a137d4c26a1ffbab92d42978e4236119eba7dc6cc15bc5dc30df5f85fb74df84"
+  }
+ },
+ "state_evaluation": {
+  "positions": 12000,
+  "min_tasks": 5,
+  "sizing": 1.25,
+  "min_batch": 4,
+  "max_rounds": 6,
+  "planning_yield": {
+   "grid_transform@v1|H-T": [
+    1.0,
+    3057.9
+   ],
+   "grid_transform@v1|H-N": [
+    1.0,
+    839.6
+   ],
+   "defined_ops@v1|H-T": [
+    1.0,
+    1142.5
+   ],
+   "defined_ops@v1|H-N": [
+    1.0,
+    321.3
+   ],
+   "scan_language@v1|H-T": [
+    1.0,
+    4217.8
+   ],
+   "scan_language@v1|H-N": [
+    1.0,
+    434.5
+   ],
+   "list_induction@v1|H-T": [
+    1.0,
+    2098.0
+   ],
+   "list_induction@v1|H-N": [
+    1.0,
+    733.6
+   ],
+   "string_induction@v1|H-T": [
+    1.0,
+    1966.8
+   ],
+   "string_induction@v1|H-N": [
+    1.0,
+    557.5
+   ],
+   "entity_tracking@v1|H-T": [
+    1.0,
+    1250.8
+   ],
+   "entity_tracking@v1|H-N": [
+    1.0,
+    307.5
+   ],
+   "knights_knaves@v1|H-T": [
+    1.0,
+    3574.7
+   ],
+   "knights_knaves@v1|H-N": [
+    1.0,
+    792.7
+   ],
+   "ordering@v1|H-T": [
+    1.0,
+    1381.3
+   ],
+   "ordering@v1|H-N": [
+    1.0,
+    243.0
+   ],
+   "openmath|H-T": [
+    1.0,
+    2629.0
+   ],
+   "openmath|H-N": [
+    1.0,
+    393.5
+   ],
+   "gsm8k|H-T": [
+    1.0,
+    1337.6
+   ],
+   "gsm8k|H-N": [
+    1.0,
+    232.2
+   ],
+   "rag_evidence|H-T": [
+    1.0,
+    320.5
+   ],
+   "rag_evidence|H-N": [
+    1.0,
+    28.5
+   ],
+   "multihop_qa|H-T": [
+    1.0,
+    661.9
+   ],
+   "multihop_qa|H-N": [
+    1.0,
+    24.6
+   ],
+   "code|H-T": [
+    0.518,
+    2179
+   ],
+   "code|H-N": [
+    0.937,
+    819
+   ]
+  },
+  "_planning_yield": "(natural-termination share, scored positions per terminated task) per (type, mode): build_state_eval_hybrid.yields (the hybrid's calibration records; code from training records); used until 8 tasks of a (type, mode) are generated, then the session's own measured yield",
+  "rule": "per mode and type, the type's queue in order while the (type, mode) holds fewer than 12,000 scored positions or fewer than 5 naturally terminated tasks; both modes from the queue's start; a queue that ends short is EXHAUSTED and reported, never filled from another type or mode"
+ },
+ "calibration": {
+  "rule": "each top-up unit in the modes it is listed for, one candidate; the dev box's profile build takes D4's cell order (build_calibration_supplement.profiles)"
+ },
+ "authorizes": "nothing"
+}

@@ -1,0 +1,461 @@
+{
+ "schema": "aadistill.budget.application/v1",
+ "written_utc": "2026-11-09T11:00:00Z",
+ "status": "REQUESTED",
+ "decided_by": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', section VI: stop at the one-use authorization boundary of the new Mixed Stage 3 and submit the two seeds' cap, the formal data hashes, the evaluation design and the budget revision",
+ "the_one_decision": "authorize kind train_sr_mix: A-MIX-6cat-sr x seeds 20260726, 20260801 trained once each from the packed search's Top-1 and each checkpoint formally evaluated on eval-set-1 in both modes, cumulative hard cap $45.17 (first attempt $40.31), on thprcgh7s9, with the budget revisions below; the session also carries the six -sr students' final weights to the dev box",
+ "identity": {
+  "arm": "A-MIX-6cat-sr",
+  "kind": "train_sr_mix",
+  "teacher": {
+   "model_id": "Qwen/Qwen3-4B",
+   "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+   "dtype": "bfloat16"
+  },
+  "initialization": {
+   "state_id": "1f5e4b420125a345f1d190f0b8f87cad",
+   "model_safetensors_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+   "artifact_digest": "536742c54f5bdb19e436d2a7026d843684cdc1e5bfa34e2b02a0514d83fe98b6",
+   "bytes_on_pod": "the search volume's copy (thprcgh7s9:/teacher_modes/search_packed/top1), read in place",
+   "second_copy": "AlphaAvatar/aadistill-artifacts:durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad"
+  },
+  "data": {
+   "data_manifest_sha256": "cd4375785428399831204f562cc1cfef0d6d7b366557b496afc248f0e4da46fd",
+   "content_sha256": "11c9faf34a8f6260591a87745de5f90dbf19427933922fee40f0945d7a261c56",
+   "documents_file_sha256": "20b67f90a542e68d6210b554babcb94eae141c848a85d4e4234f961ba2f13c78",
+   "packed_content_sha256": "9cbb502b270bb1d4da67f2a58538826fdee650e0c8547045809ea03da80b5206",
+   "pack_files_sha256": {
+    "blocks.npz": "4c794692a1d6072ced81c2192aa3493b14dab9a6904132a44645c93107cdbfee",
+    "ladder.json": "aaa6fcb0b708f7665c4e7b4f9c8fe94666f024425075984ecf90250b735d0519",
+    "audit.jsonl": "63ad3c7fbc8dd2ca2ee4992565f4f85f79184487dea15c512f41a9d40fb0b598"
+   },
+   "sources": {
+    "A1-6cat-sr": {
+     "mode": "thinking",
+     "manifest_sha256": "8595c24841612c088ff400725f68d3ae1f8cc4c9b25f7d12976d4f67f6686209",
+     "content_sha256": "37d1c68fc68d925429ab8241381a04f517053254b503a6c38499ee6e61b4e4c6"
+    },
+    "A2-6cat-sr": {
+     "mode": "non_thinking",
+     "manifest_sha256": "d6f1fd7ec320945a134609e5cb35d312f404b4f38ee5d61ebcfe303d7bad3787",
+     "content_sha256": "28eb51a79244b32c1d17efaa2ffead78ac04ec0cf2c7aff9fe62c076c344e39e"
+    }
+   }
+  },
+  "records": {
+   "plan": {
+    "path": "logs/stages/stage-2/teacher_modes/plans/mixed_training_plan.json",
+    "sha256": "6632bdbc7f68f7ad5d77cb712609bfbc9efa76d3ee4246f332acf08715b7ded1"
+   },
+   "budget": {
+    "path": "logs/stages/stage-2/teacher_modes/plans/mixed_training_budget.json",
+    "sha256": "40bab4803c147e46f3142c4ab0f81ec44263e60103729ae5def087cfe87a24b6"
+   },
+   "freeze_record": {
+    "path": "logs/stages/stage-2/teacher_modes/audit/mixed_6cat_sr_freeze.json",
+    "sha256": "4d758b3dc92d7a6618895afe28e70d9df1bd5d799e767af014c3ed2b692996ba"
+   },
+   "isolation_audit": {
+    "path": "logs/stages/stage-2/teacher_modes/audit/mixed_6cat_sr_isolation.json",
+    "sha256": "796c3b58867e1835116d8bec5c5216e22bc414ba1dd3e6adc3a1f03e5f8b010b"
+   },
+   "source_freeze_record": {
+    "path": "logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json",
+    "sha256": "9e6262b78832b0c75d2a4c0032d1a5f411b23154c1faf9572e96ddd19cd1187b"
+   },
+   "backup_record": {
+    "path": "logs/stages/stage-2/teacher_modes/storage/stage3_devbox_backup.json",
+    "sha256": "3c1690ac02b9233946b987bb371d2d427019af3f277e1d3383a5d3900947bf1a"
+   }
+  }
+ },
+ "data": {
+  "before_packing": {
+   "examples": 45363,
+   "documents": 56408,
+   "unique_supervised_tokens": 11862564,
+   "reasoning_tokens": 4945744,
+   "answer_tokens": 6916820,
+   "tool_calling_tokens": 995341,
+   "by_mode": {
+    "thinking": {
+     "examples": 5612,
+     "documents": 6243,
+     "unique_supervised_tokens": 5935809,
+     "reasoning_tokens": 4945744,
+     "answer_tokens": 990065,
+     "tool_calling_tokens": 498897
+    },
+    "non_thinking": {
+     "examples": 44731,
+     "documents": 50165,
+     "unique_supervised_tokens": 5926755,
+     "reasoning_tokens": 0,
+     "answer_tokens": 5926755,
+     "tool_calling_tokens": 496444
+    }
+   }
+  },
+  "mode_shares": {
+   "thinking": 0.500382,
+   "non_thinking": 0.499618
+  },
+  "packing": {
+   "sequences": 6467,
+   "non_padding_tokens": 52977465,
+   "supervised_tokens": 13153399,
+   "placements": 62865,
+   "fragments": 6457,
+   "repeated_supervised_tokens": 1290835,
+   "truncated_tokens": 0
+  },
+  "validation_sequences": 64,
+  "exposure_by_mode": {
+   "by_mode": {
+    "thinking": {
+     "placements": 7594,
+     "fragments": 1351,
+     "supervised_tokens_placed": 6998756,
+     "sequences_holding_it": 4782,
+     "repeated_supervised_tokens": 1062947,
+     "supervised_token_exposure_3_epochs": 20996268
+    },
+    "non_thinking": {
+     "placements": 55271,
+     "fragments": 5106,
+     "supervised_tokens_placed": 6154643,
+     "sequences_holding_it": 6454,
+     "repeated_supervised_tokens": 227888,
+     "supervised_token_exposure_3_epochs": 18463929
+    }
+   },
+   "sequences_with_both_modes": 4769
+  },
+  "isolation": "no task, task content or first user message crosses training and validation between the modes; no validation family trains only in the other mode; the union is disjoint from eval-set-1's held-out units (audit/mixed_6cat_sr_isolation.json)"
+ },
+ "units": [
+  {
+   "unit": "A-MIX-6cat-sr-s20260726",
+   "seed": 20260726,
+   "optimizer_steps": 9701,
+   "save_points": [
+    1104,
+    2208,
+    3312,
+    4416,
+    5520,
+    6624,
+    7728,
+    8832,
+    9701
+   ],
+   "evaluations": [
+    {
+     "mode": "thinking",
+     "template": {
+      "enable_thinking": true
+     },
+     "dir": "evaluation_thinking"
+    },
+    {
+     "mode": "non_thinking",
+     "template": {
+      "enable_thinking": false
+     },
+     "dir": "evaluation_non_thinking"
+    }
+   ]
+  },
+  {
+   "unit": "A-MIX-6cat-sr-s20260801",
+   "seed": 20260801,
+   "optimizer_steps": 9701,
+   "save_points": [
+    1104,
+    2208,
+    3312,
+    4416,
+    5520,
+    6624,
+    7728,
+    8832,
+    9701
+   ],
+   "evaluations": [
+    {
+     "mode": "thinking",
+     "template": {
+      "enable_thinking": true
+     },
+     "dir": "evaluation_thinking"
+    },
+    {
+     "mode": "non_thinking",
+     "template": {
+      "enable_thinking": false
+     },
+     "dir": "evaluation_non_thinking"
+    }
+   ]
+  }
+ ],
+ "recipe": {
+  "objective": {
+   "ce_weight": 0.25,
+   "kd_weight": 1.0,
+   "kd_temperature": 1.0,
+   "kd_scope": "assistant",
+   "kd_support": {
+    "support_id": "reference_topk_tail_v1",
+    "top_k": 200
+   }
+  },
+  "epochs": 3,
+  "batch_size": 2,
+  "micro_batch_size": 1,
+  "optimizer": "AdamW, lr 5e-5, cosine to 0.1, warmup 485",
+  "sequence_length": 8192,
+  "attention": "cross_context (standard causal, continuous positions)",
+  "lineage": "one hybrid teacher, modes [thinking, non_thinking], one source per mode (aadistill.training.lineage modes)"
+ },
+ "price": {
+  "step_model": {
+   "fit": {
+    "a": 2.8908,
+    "b": 9.0996e-05,
+    "residual_sd": 0.031,
+    "steps": 2308,
+    "source": "the six Stage-3 -sr units' train_log.jsonl (STEP_LOGS), train_step rows after step 20"
+   },
+   "factors": {
+    "lower": 0.97,
+    "expected": 1.0,
+    "upper": 1.15
+   }
+  },
+  "evaluation_model": {
+   "measured_seconds": {
+    "thinking": {
+     "A1-6cat-sr-s20260726": 4105.6,
+     "A1-6cat-sr-s20260801": 3628.3
+    },
+    "non_thinking": {
+     "A2-6cat-sr-s20260726": 1080.7,
+     "A2-6cat-sr-s20260801": 961.7
+    }
+   },
+   "upper_seconds": 8211.2
+  },
+  "per_unit_seconds": {
+   "A-MIX-6cat-sr-s20260726": {
+    "lower": 35996,
+    "expected": 37749,
+    "upper": 54801
+   },
+   "A-MIX-6cat-sr-s20260801": {
+    "lower": 35996,
+    "expected": 37749,
+    "upper": 54801
+   }
+  },
+  "session": {
+   "lower": {
+    "gpu_hours": 20.25,
+    "usd": 22.49
+   },
+   "expected": {
+    "gpu_hours": 21.34,
+    "usd": 23.7
+   },
+   "upper": {
+    "gpu_hours": 31.61,
+    "usd": 38.27
+   }
+  },
+  "rates": {
+   "gpu_expected_usd_per_hour": 1.09,
+   "gpu_cap_usd_per_hour": 1.19,
+   "container_disk_usd_per_hour": 0.0205
+  },
+  "live_price_read_2026-11-09": {
+   "securePricePerHr": 1.09,
+   "US-TX-3_in_stock_list": false,
+   "_": "a capacity question: the session waits for US-TX-3 stock, never a change of card"
+  }
+ },
+ "caps": {
+  "train_sr_mix": {
+   "first_attempt": {
+    "driver_minutes": 1857,
+    "billable_minutes": 1997.5,
+    "hard_cap_usd": 40.31
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 120.0,
+    "usd_each": 2.43,
+    "attempts_reserved": 2,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored mode"
+   },
+   "cumulative_usd": 45.17,
+   "unit_deadline_hours": 10.75
+  }
+ },
+ "evaluation": {
+  "set": "eval-set-1 v2 (frozen), scoring protocol v2 with the corrected behaviour aggregates (fefa7dfd)",
+  "decoding": "nucleus_v1",
+  "modes": "each checkpoint twice: thinking (enable_thinking=true, self-opening) and non-thinking (enable_thinking=false, preclosed), every record keeping its think_state",
+  "report": "stages.teacher_modes.mixed_analysis: per mode the four static fluid axes and abstract/analogical, interactive (exploratory), supporting capabilities, rollout integrity; descriptive paired comparisons Mixed-thinking - A1, Mixed-non-thinking - A2 and the checkpoint's thinking - non-thinking; checked at $0 on A1/A2 stand-ins (deltas 0 / 0, and A1 - A2 reproduced at -3.77 pp)",
+  "registered_verdicts": "A1 - A2 INCONCLUSIVE and A1 - C1 NO_GO are unchanged and not recomputed",
+  "compute_caveat": "A-MIX's training FLOPs are 4.5224x A1's, 1.2814x A2's and 0.9985x A1 + A2; unique supervised tokens 2.0x either: no mixed - single difference is a pure mode-mixing effect"
+ },
+ "execution": {
+  "card": "one Secure Cloud L40S, at most $1.19/h; no separate GPU pilot",
+  "volume": "thprcgh7s9 only (holds the Top-1); never 4rhubprswo or am5m373kuq",
+  "volume_room": {
+   "need_bytes": 22493245409,
+   "volume_gb": 350.0,
+   "room_at_last_read_bytes": 48342964448,
+   "read_at": "a_train_sr_c1_20261108_104542's start",
+   "written_since_bytes_upper": 10676728427,
+   "rule": "a1_units.volume_room measures the room on the pod (size sold less du -sb) and refuses before training when it cannot hold the units; nothing on the volume is deleted for room"
+  },
+  "order": "seed 20260726 trained, then evaluated thinking then non-thinking; then seed 20260801",
+  "resume": "a recoverable failure resumes the same units from the volume in a new attempt of the kind, inside its cumulative cap: the latest save point; a trained unit is only evaluated; a scored mode is never re-run"
+ },
+ "storage": {
+  "devbox_backup": {
+   "what": "the six -sr units' final fp32 weights + configs + resume_identity.json (14.31 GB), then the two mixed units' once trained (4.77 GB)",
+   "how": "the session's polls pull one unit at a time (scp, sha256 against the pod's sha256sum and the committed weights), receipts under /home/ecs-user/aad-artifacts/stage3_sr/final_weights/; the closeout finishes what is left within 30 minutes; evidence only, the volume's copy stands",
+   "devbox_free_after_cleanup_gib": 31,
+   "cleanup": "logs/maintenance/inventories/checkpoint_tombstones.json :: devbox_20261109_* (18 tombstones, 24.33 GiB)"
+  },
+  "proposed_retirements_for_your_decision": {
+   "4rhubprswo": "holds the v2 Top-1 (superseded by the packed search's), A1 (2026-11-02) units and the v2 search state; under the consumer rule none has an active consumer, its identities are committed, but it is the only copy of those bytes: deleting the volume is irreversible and saves $0.8167/day (~$24.5/month). Not done; needs your explicit OK",
+   "thprcgh7s9": "after A-MIX completes and every dev-box copy is verified: its unit checkpoints' trainer_state.pt (no exact-continuation consumer) and later the volume itself (the Top-1 has its relay copy; the search state is evidence). Not done"
+  },
+  "hf_pro": "withdrawn (maintainer 2026-11-09: no priority)"
+ },
+ "position": {
+  "fetched_utc": "2026-11-09T10:17:24Z",
+  "snapshot": "logs/budget/provider/runpod_billing_v2_2026-11-09T1017Z.json",
+  "provider_billed_usd": 829.6518,
+  "committed_usd": 879.7063,
+  "project_cap_usd": 1000.0,
+  "project_remaining_usd": 120.2937,
+  "balance_usd": 18.7968,
+  "spend_per_hour_usd": 0.073,
+  "pods": 0,
+  "volumes_usd_per_day": 1.7617,
+  "runway_days": 10.7,
+  "a_tm_study": {
+   "ceiling_usd": 158.3762,
+   "spent_usd": 115.9323
+  },
+  "stage3_sr": {
+   "cap_usd": 73.24,
+   "spent_usd": 30.7961,
+   "status": "COMPLETE"
+  },
+  "research_a_cumulative_cap_usd": 262.04
+ },
+ "budget_revisions": {
+  "close_stage3_sr": "the six-unit block is COMPLETE: closed for new attempts, its unspent $42.44 not carried (as packed_search's)",
+  "a_tm_ceiling": {
+   "from": 158.3762,
+   "to": 161.1023,
+   "rule": "spent $115.9323 + train_sr_mix's cumulative cap; closed kinds' remainders not carried"
+  },
+  "per_session_hard_cap": {
+   "keep": 55.72,
+   "train_sr_mix_first_attempt": 40.31
+  },
+  "project_cap": {
+   "keep": 1000.0,
+   "committed_now": 879.7063,
+   "with_train_sr_mix": 924.8763
+  },
+  "research_a_cumulative_cap": {
+   "from": 262.04,
+   "to": 264.77,
+   "items": {
+    "v1": 46.3017,
+    "a_tm_ceiling": 161.1023,
+    "4rhubprswo_reserve": 13.34,
+    "4rhubprswo_after_its_reserve_14_days": 13.34,
+    "thprcgh7s9_reserve": 13.34,
+    "thprcgh7s9_reserve_extension": 13.34,
+    "thprcgh7s9_expansion_reserve_max": 4.0
+   },
+   "_": "the 2026-11-05 rule (v1 + the A-TM ceiling + the volumes' reserves)"
+  },
+  "provider_top_up": {
+   "balance_now": 18.7968,
+   "session_first_attempt_cap": 40.31,
+   "kind_cap": 45.17,
+   "volumes_per_day": 1.7617,
+   "minimum_usd": 30,
+   "recommended_usd": 60,
+   "_": "the issue checks the balance against the session's hard cap; $60 covers the whole kind cap, the session's storage and about two more weeks of the three volumes afterwards"
+  }
+ },
+ "proposed_grant_amendment": {
+  "session_hard_caps_usd": {
+   "train_sr_mix": 45.17
+  },
+  "stage3_mix": {
+   "approves": "Stage 3 of six_category_schema_restored@v1, A-MIX-6cat-sr: the hybrid's thinking and non-thinking documents in one pack, seeds 20260726, 20260801, each checkpoint formally evaluated on eval-set-1 in both modes",
+   "granted_by": "maintainer",
+   "date": "<the decision's date>",
+   "decision": "<quoted>",
+   "plan_sha256": "6632bdbc7f68f7ad5d77cb712609bfbc9efa76d3ee4246f332acf08715b7ded1",
+   "budget_sha256": "40bab4803c147e46f3142c4ab0f81ec44263e60103729ae5def087cfe87a24b6",
+   "freeze_record_sha256": "4d758b3dc92d7a6618895afe28e70d9df1bd5d799e767af014c3ed2b692996ba",
+   "kinds": {
+    "train_sr_mix": {
+     "arm": "A-MIX-6cat-sr",
+     "hard_cap_usd": 45.17,
+     "first_attempt_hard_cap_usd": 40.31,
+     "driver_minutes": 1857,
+     "unit_deadline_hours": 10.75
+    }
+   },
+   "cap_is_cumulative": true,
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "max_price_usd_per_hour": 1.19,
+   "network_volume": {
+    "id": "thprcgh7s9",
+    "datacenter": "US-TX-3",
+    "size_gb": 350
+   },
+   "protected_volumes": [
+    "4rhubprswo",
+    "am5m373kuq"
+   ]
+  },
+  "stage3_sr": {
+   "closed": {
+    "by": "<the decision>",
+    "utc": "<date>",
+    "why": "COMPLETE 2026-11-08; unspent not carried"
+   }
+  },
+  "ceiling_usd": 161.1023,
+  "research_a_cumulative.cap_usd": 264.77
+ },
+ "after_approval_zero_cost_steps": [
+  "write the grant amendment exactly as above, citing the decision",
+  "stage_packs train_sr_mix ($0: blocks.npz, ladder.json, audit.jsonl, 335 MB through the dev box's uplink; the relay's quota probe ACCEPTED them 2026-11-09, staged only after approval because relay quota is not reclaimable)",
+  "issue --kind train_sr_mix --run-id a_train_sr_mix_<UTC> --expected-usd 23.70 --hard-cap-usd 40.31; the session commit carrying the authorization; push; bundle; launch on thprcgh7s9 with driver minutes 1857"
+ ],
+ "not_requested": [
+  "re-searching, regenerating or re-packing A1/A2/C1 data",
+  "retraining any of the six units",
+  "a separate GPU pilot",
+  "Stage 4/5/6, a release or a merge into main",
+  "an A100",
+  "deleting anything on any volume"
+ ],
+ "authorizes": "nothing"
+}

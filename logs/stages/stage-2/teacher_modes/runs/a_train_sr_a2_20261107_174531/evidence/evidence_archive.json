@@ -1,0 +1,41 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.stage3_evidence_archive/v1",
+ "run_id": "a_train_sr_a2_20261107_174531",
+ "arm": "A2-6cat-sr",
+ "archive": {
+  "name": "stage3_units_evidence.tgz",
+  "sha256": "d4af3eb73ab4e2c5486dc6d627c6b9d921840a53601279614090263a7a7768d1",
+  "bytes": 33945575,
+  "dev_box_copy": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_a2_20261107_174531/stage3_units_evidence.tgz",
+  "bytes_by_unit_dir": {
+   "A2-6cat-sr-s20260801": 39025459,
+   "A2-6cat-sr-s20260726": 40446978,
+   "A1-6cat-sr-s20260801": 92216742,
+   "A1-6cat-sr-s20260726": 93656407
+  },
+  "contents": "the volume's stage3_sr tree without save points and evaluation-package weights: train logs and configs, every evaluation's generations, rows and formal report",
+  "relay_copy": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "path": "durable/stage3_sr/evidence/a_train_sr_a2_20261107_174531/stage3_units_evidence.tgz",
+   "sha256": "d4af3eb73ab4e2c5486dc6d627c6b9d921840a53601279614090263a7a7768d1",
+   "verified": true,
+   "rule": "uploaded from the dev box's copy, downloaded again into a fresh cache and re-hashed"
+  }
+ },
+ "committed_here": {
+  "A2-6cat-sr-s20260726/train/train_log.jsonl": "a6b6b0b0e6322eb8bf62b37d09768832f54d945d6b358d638c814720467581dd",
+  "A2-6cat-sr-s20260726/train/config.json": "53c7a46c50fad49fc71f83b7a2759a01ac636629fdede734e825fd6aab27eb1a",
+  "A2-6cat-sr-s20260726/train/run_completion.json": "c496411b15189a96a925354146885ac7e5b9d99d472d6dfab4df1e9bceab9350",
+  "A2-6cat-sr-s20260726/train/run_manifest.json": "c63f8dbb0fe80aa1abee78e533f52141180ff62d801f6974ec9c0f8b1d8dfc32",
+  "A2-6cat-sr-s20260726/evaluation/formal_report.json": "e31a25a337979e65cdeb81c2a1632fe74363d71dfc5d5644794cc50dae6d06ee",
+  "A2-6cat-sr-s20260726/off_volume_copy.json": "de86409f11cba4d982534e3ea82ddca3e6bc0104fb1090424ce04bf967476f24",
+  "A2-6cat-sr-s20260801/train/train_log.jsonl": "2a0f91701cdfefd4f8f6042601cbaabac61ee1fe839677cf5f56c62c8048b428",
+  "A2-6cat-sr-s20260801/train/config.json": "a153fc5f5c6544648ec3d45d0dbe142813085b0f074857ddae3d511f419e852c",
+  "A2-6cat-sr-s20260801/train/run_completion.json": "475f238d54b5bdfca77e9d891bdc6c461e22ab7d630af5d98b7ee014ab025da2",
+  "A2-6cat-sr-s20260801/train/run_manifest.json": "68f967df0f4708d2919746c13d40e84baf870c09c5b6bbecfe757a9252383e2d",
+  "A2-6cat-sr-s20260801/evaluation/formal_report.json": "387fb1d2491a6f4db231192a731d3b4d94c27f11f6220b469461e3abd05fdab2",
+  "A2-6cat-sr-s20260801/off_volume_copy.json": "a53ace1d5a244ee8eef3d8beee4a088b3e7f7f03211e51cd682ea6e9bf1714ac"
+ },
+ "weights": "stay on the network volume thprcgh7s9 (their sha256 in the units record); no off-volume copy while the relay's quota refuses them",
+ "rescored_2026_11_09": "committed_here's formal_report.json hashes are the archive's originals; the committed reports were replaced by their rescored renderings (behaviour unit only): logs/stages/stage-2/teacher_modes/audit/behaviour_aggregate_rescoring.json"
+}

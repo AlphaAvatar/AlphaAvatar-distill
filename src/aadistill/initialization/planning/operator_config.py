@@ -124,10 +124,23 @@ def scoring_objective_config(implementation: Any,
     return objective_config(objective)
 
 
+def forward_context_config(implementation: Any, forward_context: Any) -> dict[str, Any]:
+    """The packed causal context as hashed config, for a calibrated operator.
+
+    `{}` when none is declared (the historical one-item-per-row reading, so every
+    committed config hash is unchanged) and `{}` for an implementation that
+    consumes no calibration data, which has nothing to pack.
+    """
+    if forward_context is None or not consumes_calibration(implementation):
+        return {}
+    return {"forward_context": forward_context.as_dict()}
+
+
 def hashed_operator_config(*, implementation: Any, policy: Any,
                            support: Any, items: Sequence[Any],
                            declared: Mapping[str, Any] | None = None,
                            objective: Any = None,
+                           forward_context: Any = None,
                            ) -> dict[str, Any]:
     """Everything an operator is applied with, including `n_calibration_items`.
 
@@ -150,6 +163,7 @@ def hashed_operator_config(*, implementation: Any, policy: Any,
         **position_policy_config(implementation, policy, items),
         **distribution_support_config(support),
         **scoring_objective_config(implementation, objective),
+        **forward_context_config(implementation, forward_context),
         **extra,
     }
     #: A declared KL REFERENCE is validated where every caller builds the

@@ -1,0 +1,88 @@
+{
+ "schema": "aadistill.budget.application/packed_full_search_v1",
+ "written_utc": "2026-11-05T17:40:00Z",
+ "status": "APPROVED by the maintainer 2026-11-05 ('AlphaAvatar-distill — Packed Full Search 正式授权'): project cap $930 (not $912), cap $55.72 cumulative + $13.34 volume reserve; executed through the grant's packed_search block (logs/budget/approvals/teacher_modes_token_matched_grant.json). Before: AUTHORIZATION REQUEST for the maintainer's decision; AUTHORIZES NOTHING: no binding change, no volume, no grant, no launch, no spend",
+ "requested_by": "maintainer 2026-11-05, R1 approval, section VII: stop at the Full Search's own authorization boundary and give its complete budget and authorization request",
+ "the_one_decision": "authorize the hybrid's packed Full Search (kind packed_search, one Secure Cloud L40S) as one package: (1) bind its inputs to the frozen calibration v2 profiles and state_eval_hybrid@v3; (2) create ONE new ~350 GB network volume in a datacenter that offers the L40S, for the search's states, journal and Top-1; (3) a hard cap of $55.72 for the search (cumulative over its attempts) plus $13.34 reserved for the volume, $69.06 together; (4) raise the project cap to at least $912.00 (committed $842.10 at 2026-11-05T17:16Z + $69.06 = $911.16)",
+ "inputs": {
+  "calibration": {
+   "identity": "calibration v2 profiles (configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json, artifacts/.../calibration_v3)",
+   "status": "COMPLETE, frozen; unchanged"
+  },
+  "state_evaluation_recommended": {
+   "suite": "state_eval_hybrid@v3",
+   "content_sha256": "c39d0ec9a38175a8ec0b279afd54094299b9ce83260196fcbb6ae25a8c303c99",
+   "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+   "freeze": "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_v3_freeze.json",
+   "why": "every category and source group meets its registered quota in both modes (no LIMITED_COVERAGE cell), and its schema_arguments cell has the same per-source composition as the -sr arms the Top-1 will initialize"
+  },
+  "state_evaluation_kept": {
+   "suite": "state_eval_hybrid@v2-lc1",
+   "content_sha256": "0d53efd384406a7814ae3d20436d8fbd7e856a71141733bfab46aded2827bf21",
+   "measurement_protocol_id": "d09a48497164406d4704dedc5c5550a5",
+   "use": "frozen and unchanged; for a later sensitivity re-evaluation of the search's final candidates, never a second search"
+  },
+  "v3_vs_lc1": "1,366 vs 1,345 items; tool tasks H-T 40 vs 35 (56,705 vs 53,803 scored positions), H-N 60 vs 55 (14,942 vs 14,120); H-N schema_arguments Pivot 1,038 + schema_synth 847 vs the limited-coverage 1,063; schema_synth's state-evaluation domains are held out from training but share its generator"
+ },
+ "binding_changes_owed_at_0": [
+  "packed_round_design.json :: inputs from v2 (PENDING_TOOL_ITEMS) to the calibration v2 profiles + state_eval_hybrid@v3",
+  "token_matched_phase.KIND_RECORDS['packed_search'] -> the v3 freeze record; launch_spec's suite asset -> state_eval_hybrid_v3",
+  "the v3 suite's critical groups are v2's (CRITICAL_GROUPS_V2); the binding passes them for which != 'v2' as for lc1",
+  "packed_full_search --check-only with the v3 binding (protocol b760ab7e reproduced), then the launch-bound sweep on the clean tree"
+ ],
+ "price": {
+  "basis": "logs/stages/stage-2/teacher_modes/audit/packed_forward_compute_v3.json: v2's measured seconds scaled by the packed context's FLOP ratios on the frozen calibration v2 and v3 items; the target-geometry state-evaluation correction included",
+  "pod_usd_at_1.1067_per_h": {
+   "lower": 27.61,
+   "expected": 35.61,
+   "upper": 40.8
+  },
+  "pod_minutes": {
+   "lower": 1496.9,
+   "expected": 1930.4,
+   "upper": 2212.2
+  },
+  "runner_all_in_usd": {
+   "expected_at_1.1067": 38.98,
+   "upper_at_1.19": 47.83,
+   "upper_plus_two_extra_DEPTH_pairs_at_1.19": 55.72
+  },
+  "hard_cap_usd": 55.72,
+  "_hard_cap": "the runner's all-in (tool_generation_plan.runner_all_in, kind packed_search: setup, contingency 5%, closeout and recovery reserves, the watchdog's margin) at the grant's $1.19/h for the upper case's 2,212.2 minutes plus two extra DEPTH expansion pairs of 3.1 h each (the measured beam-path tail), hard terminate 2,760 minutes",
+  "volume": {
+   "size_gb": 350,
+   "reserve_usd": 13.34,
+   "rule": "14 days at the bills' +17%, as booked for 4rhubprswo; ~$0.82/day while it lives",
+   "datacenter": "one that offers the L40S (a volume locks the datacenter)"
+  },
+  "new_commitment_usd": 69.06,
+  "counterfactual": "the same inputs read one item at a time (v2's execution): $25.61 expected -- packing is the protocol (P19), not a speed-up; it wins only if 8,192-token sequences run ~1/3 more FLOPs per second, which no GPU has measured"
+ },
+ "evidence_levels": {
+  "exact": "item, position and fragment counts",
+  "estimated": "FLOPs, minutes and dollars",
+  "unmeasured": "any packed forward on a GPU; the first state evaluation and first DEPTH round measure it (evaluation_cache.jsonl, telemetry)"
+ },
+ "position": {
+  "read_utc": "2026-11-05T17:16:40Z",
+  "provider_billed_usd": 825.0531,
+  "committed_usd": 842.104,
+  "project_cap_usd": 868.0,
+  "project_remaining_usd": 25.896,
+  "balance_usd": 84.2244,
+  "a_tm_envelope": "the A-TM grant's ceiling $79.53 has $22.56 left after this round; the search needs its own grant block (packed_search has no cap today)",
+  "after_this_request": "committed $911.16, balance after the cap and the reserve about $15 (a top-up is advisable before launch)"
+ },
+ "storage_now": {
+  "4rhubprswo": "350 GB, US-TX-3, the v2 Top-1's only copy, reserve to 2026-11-15T12:55Z; never mounted",
+  "am5m373kuq": "55 GB, EUR-IS-2, archive"
+ },
+ "not_included": [
+  "the -sr arms' Stage 3 training (it reads the packed Top-1)",
+  "Stage 5 rollout",
+  "any formal benchmark",
+  "the unimplemented performance candidates (skipping the last DEPTH candidate's whole-model rerun, logits_to_keep in the statistics passes, fewer host syncs): each needs a CUDA bit-identity check and its own decision",
+  "a merge into main"
+ ],
+ "authorizes": "nothing"
+}

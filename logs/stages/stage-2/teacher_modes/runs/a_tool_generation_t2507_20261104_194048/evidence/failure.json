@@ -1,0 +1,20 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.engineering_failure/v1",
+ "run_id": "a_tool_generation_t2507_20261104_194048",
+ "recorded_utc": "2026-11-04T19:55:00Z",
+ "stage": "pod setup, the authorization-binding step (autoinit_preflight_setup.sh, SESSION_KIND stage2_teacher_modes_tm), after TEACHER_READY and before SETUP_DONE",
+ "formal_measurement_begun": false,
+ "device_admission_begun": false,
+ "failure": "token_matched_phase.kind_conditions('tool_generation_t2507') ran tool_generation_plan.verified(), which reads the canonical pool; the pod never holds the pool (it holds the plan and the lineage's bound task file, P8.4), so PoolIdentityError: /workspace/aad/data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json does not exist -> AUTHORIZATION_MISMATCH, SETUP_RC=98",
+ "classification": "ordinary engineering failure of the implementation (a check valid only on the dev box placed where the pod recomputes it); the branch predates this round but no formal tool_generation kind had reached a pod before",
+ "cost": {
+  "all_in_usd": 0.1459,
+  "elapsed_minutes": 7.88,
+  "price_per_hour": 1.09,
+  "provider_confirms_gone": true
+ },
+ "repair": "kind_conditions reads only what both sides hold -- tool_generation_plan.verified_bound (the plan, its protocol and design, the bound task file by sha256 and ids) and the formal source admission against the plan's content and those tasks; the pool check moved to token_matched_phase.issue_problems, applied at issue on the dev box only",
+ "regression": "test_t2507_device_admission.py::test_the_pod_recomputes_the_conditions_without_the_pool; test_tool_pilot.py::test_the_committed_pilot_passes_the_generation_scope_and_the_whole_phase_gate_still_refuses",
+ "retry": "a new run with a new one-use artifact, its hard cap the kind's cumulative $2.78 less this run's $0.1459",
+ "log": "the launcher's log stays in the session scratchpad; runtime/session.json and closeout/outcome.json are this run's records"
+}

@@ -11,6 +11,10 @@ measuring both at once.
   system prompt is a hard packing boundary, so sessions cannot be interleaved
   across system-prompt groups and the mixture has to be repaired one level up.
 
+`validate_proportions` checks the result, before packing: realized amounts against
+registered quotas and shares, with the caller's tolerances. It orders nothing and
+packs nothing, so a mixture can be judged without building a single sequence.
+
 A third largest-remainder rule lives in `ladder.select_val_blocks`. **The three
 are deliberately not unified.** They optimize different objectives on different
 units: `interleave` tracks a token-share target per type, `order_blocks`
@@ -26,6 +30,7 @@ order on any machine, which is what lets a rung be reproduced from its manifest.
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Mapping, Sequence
 
 
 def interleave(by_type: dict[str, list], shares: dict[str, float] | None = None) -> list:
@@ -143,3 +148,53 @@ def order_blocks(blocks, shares):
         total += sum(mixes[best].values())
         pending.remove(best)
     return out
+
+
+def validate_proportions(counts: Mapping[str, float], quotas: Mapping[str, Mapping],
+                         shares: Sequence[Mapping] = ()) -> dict:
+    """Realized amounts against registered quotas: a pure check of the data BEFORE packing.
+
+    ``counts`` maps each leaf key (a data type, a category) to its amount, in the
+    unit its quotas are declared in -- unique supervised tokens, scored positions,
+    examples. A quota is ``{"target", "below", "above"}`` with an optional ``"of"``
+    (the leaf keys it sums; its own key by default) and holds when
+    ``target - below <= amount <= target + above`` (``None`` leaves that side open).
+    A share is ``{"name", "part", "whole", "target", "max_deviation_points"}``: the
+    part's fraction of the whole, its distance from ``target`` in percentage points.
+    A leaf no quota covers fails, so nothing passes unregistered.
+
+    The tolerances are the caller's registered ones; there is no default here, and
+    nothing about packed sequences, exposure or loss weights enters. Returns every
+    row (target, amount, deviation, bounds, status ``OK`` / ``SHORTFALL`` / ``OVER``),
+    the share rows, ``failures`` and ``passed``; deciding admission is the caller's.
+    """
+    rows, failures, covered = {}, [], set()
+    for key, q in quotas.items():
+        members = list(q.get("of") or [key])
+        covered.update(members)
+        amount = float(sum(counts.get(m, 0) for m in members))
+        target = float(q["target"])
+        lo = None if q.get("below") is None else target - float(q["below"])
+        hi = None if q.get("above") is None else target + float(q["above"])
+        status = ("SHORTFALL" if lo is not None and amount < lo else
+                  "OVER" if hi is not None and amount > hi else "OK")
+        rows[key] = {"target": target, "amount": amount, "deviation": amount - target,
+                     "deviation_fraction": (amount - target) / target if target else None,
+                     "bounds": [lo, hi], "status": status}
+        if status != "OK":
+            failures.append(f"{key}: {status}, {amount:g} against {target:g} (bounds [{lo}, {hi}])")
+    unregistered = sorted(set(counts) - covered)
+    failures += [f"{k}: no registered quota" for k in unregistered]
+    share_rows = {}
+    for s in shares:
+        part = float(sum(counts.get(k, 0) for k in s["part"]))
+        whole = float(sum(counts.get(k, 0) for k in s["whole"]))
+        frac = part / whole if whole else 0.0
+        points = 100.0 * (frac - float(s["target"]))
+        ok = abs(points) <= float(s["max_deviation_points"])
+        share_rows[s["name"]] = {"fraction": frac, "target": float(s["target"]), "deviation_points": points,
+                                 "max_deviation_points": float(s["max_deviation_points"]), "ok": ok}
+        if not ok:
+            failures.append(f"{s['name']}: {frac:.4%} is {points:+.3f} points from {float(s['target']):.4%}")
+    return {"quotas": rows, "shares": share_rows, "unregistered": unregistered, "failures": failures,
+            "passed": not failures}

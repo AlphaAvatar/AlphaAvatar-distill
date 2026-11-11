@@ -150,7 +150,7 @@ class CompositeStage1SandwichV0(OperatorImplementation):
             state = ctx.cached_stats(lambda: collect_activation_stats(
                 adapter, parent, ctx.calibration_items,
                 compute, batch_size=batch_size, packing=packing,
-                active=active))
+                active=active, forward_context=ctx.forward_context))
         state = stats_to(state, compute)
 
         dtype = model_dtype(adapter, parent)

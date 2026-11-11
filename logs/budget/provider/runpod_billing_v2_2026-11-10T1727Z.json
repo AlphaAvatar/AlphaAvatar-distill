@@ -1,0 +1,131 @@
+{
+ "schema": "aadistill.provider_billing_snapshot/v1",
+ "fetched_utc": "2026-11-10T17:27:10+00:00",
+ "query": {
+  "endpoint": "https://api.runpod.io/v2",
+  "api": "rest_v2",
+  "window": "bucketSize=day&startTime=2026-11-09T00:00:00Z&endTime=2026-11-12T00:00:00Z"
+ },
+ "account": {
+  "known": true,
+  "client_balance_usd": 43.1306242378,
+  "current_spend_per_hr": 0.073,
+  "min_balance_usd": 0.0,
+  "under_balance": false,
+  "error": null,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "4rhubprswo",
+    "name": "aad-a1-phase",
+    "size": 350,
+    "dataCenterId": "US-TX-3"
+   },
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 55,
+    "dataCenterId": "EUR-IS-2"
+   },
+   {
+    "kind": "network_volume",
+    "id": "thprcgh7s9",
+    "name": "aad-packed-search",
+    "size": 350,
+    "dataCenterId": "US-TX-3"
+   }
+  ],
+  "balance_known": true,
+  "balance_error": null,
+  "resources_known": true,
+  "resources_error": null
+ },
+ "pods": [
+  {
+   "cpuAmount": 0,
+   "diskAmount": 0.07638888945803046,
+   "endTime": "2026-11-10T00:00:00Z",
+   "gpuAmount": 3.9675803259015083,
+   "podId": "xh067qx82l07qs",
+   "startTime": "2026-11-09T00:00:00Z",
+   "totalAmount": 4.043969215359539,
+   "amount": 4.043969215359539,
+   "time": "2026-11-09 00:00:00"
+  },
+  {
+   "cpuAmount": 0,
+   "diskAmount": 0.3437500025611371,
+   "endTime": "2026-11-11T00:00:00Z",
+   "gpuAmount": 17.984604217112064,
+   "podId": "xh067qx82l07qs",
+   "startTime": "2026-11-10T00:00:00Z",
+   "totalAmount": 18.3283542196732,
+   "amount": 18.3283542196732,
+   "time": "2026-11-10 00:00:00"
+  }
+ ],
+ "networkvolumes": [
+  {
+   "endTime": "2026-11-10T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "4rhubprswo",
+   "standardAmount": 0.8166666626930237,
+   "startTime": "2026-11-09T00:00:00Z",
+   "totalAmount": 0.8166666626930237,
+   "amount": 0.8166666626930237,
+   "startDate": "2026-11-09 00:00:00"
+  },
+  {
+   "endTime": "2026-11-10T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "am5m373kuq",
+   "standardAmount": 0.12833333015441895,
+   "startTime": "2026-11-09T00:00:00Z",
+   "totalAmount": 0.12833333015441895,
+   "amount": 0.12833333015441895,
+   "startDate": "2026-11-09 00:00:00"
+  },
+  {
+   "endTime": "2026-11-10T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "thprcgh7s9",
+   "standardAmount": 0.8166666626930237,
+   "startTime": "2026-11-09T00:00:00Z",
+   "totalAmount": 0.8166666626930237,
+   "amount": 0.8166666626930237,
+   "startDate": "2026-11-09 00:00:00"
+  },
+  {
+   "endTime": "2026-11-11T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "4rhubprswo",
+   "standardAmount": 0.5784722194075584,
+   "startTime": "2026-11-10T00:00:00Z",
+   "totalAmount": 0.5784722194075584,
+   "amount": 0.5784722194075584,
+   "startDate": "2026-11-10 00:00:00"
+  },
+  {
+   "endTime": "2026-11-11T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "am5m373kuq",
+   "standardAmount": 0.09090277552604675,
+   "startTime": "2026-11-10T00:00:00Z",
+   "totalAmount": 0.09090277552604675,
+   "amount": 0.09090277552604675,
+   "startDate": "2026-11-10 00:00:00"
+  },
+  {
+   "endTime": "2026-11-11T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "thprcgh7s9",
+   "standardAmount": 0.5784722194075584,
+   "startTime": "2026-11-10T00:00:00Z",
+   "totalAmount": 0.5784722194075584,
+   "amount": 0.5784722194075584,
+   "startDate": "2026-11-10 00:00:00"
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+{
+ "schema": "aadistill.study_engineering_grant/v1",
+ "status": "proposed",
+ "study": "A-E",
+ "proposed_utc": "2026-10-28",
+ "maintainer_position": "2026-10-28: agreed in principle to proceed with A-E and B-E, paid authorization NOT issued; A-E's $3.50 hard cap kept as the proposed scope (Research A/B Engineering Readiness Review)",
+ "granted_by": "nobody: a proposal, not a grant",
+ "decision": "PENDING the maintainer's explicit approval",
+ "ceiling_usd": 3.5,
+ "per_session_hard_cap_usd": 3.5,
+ "project_cumulative_cap_usd": 740.0,
+ "gpu": "NVIDIA A100-SXM4-80GB",
+ "max_price_usd_per_hour": 1.87,
+ "_max_price": "the highest secure price at which the planned session (25 min setup + 5 transfer + 40 validation, x1.25, + reserves = 110 min hard deadline) stays inside $3.50 all in (shared.study_engineering.all_in); quoted $1.79/h, stock Medium, 2026-10-28T05:40Z. A higher quote is refused at $0",
+ "scope": "Research A's engineering validation on one pod: the hybrid teacher Qwen/Qwen3-4B@1cfa9a72 in both official modes under vLLM 0.27.1 (prompt token identity, think states, stop ids), the real teacher's teacher-forced packed-vs-alone check in fp32 and bf16 under document_isolated, the assistant-target KL mask, a 20-step isolated-pack trainer smoke with the on-the-fly hybrid teacher on the E1 PCA stand-in student, and the eval-set-1 scorers on the H-N (preclosed) and H-T records; scripts/stages/stage-2/teacher_modes/engineering_validation.py",
+ "retries": "ordinary pre-science engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); a deterministic failure is not retried unchanged",
+ "application": "logs/stages/stage-2/teacher_modes/plans/application.json",
+ "never": [
+  "a GPU, a pod or a network volume before the maintainer's explicit approval writes the grant",
+  "formal training, teacher-data generation, recovery or evaluation; nothing it produces is a result or enters a GO decision",
+  "another grant's unspent remainder, or the account balance, as funds",
+  "raising the $740 project cap",
+  "a merge to main"
+ ],
+ "to_grant": "on the maintainer's explicit approval only: `ae_launch.py grant --decision '<the approval, quoted>' --granted-by maintainer` writes logs/budget/approvals/teacher_modes_engineering_grant.json from this proposal with the study identity at that commit",
+ "authorizes": "nothing",
+ "_application": "bound by sha256 when the grant is written (shared.study_engineering.write_grant)"
+}

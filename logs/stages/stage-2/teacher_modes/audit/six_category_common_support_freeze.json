@@ -1,0 +1,689 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.six_category_common_support_freeze/v1",
+ "study_id": "six_category_common_support@v1",
+ "written_utc": "2026-11-05T11:29:59Z",
+ "config": {
+  "path": "configs/stages/stage-2/teacher_modes/six_category_common_support.json",
+  "sha256": "3c1c63121139b7741c14128d378e8e9a6a5ec0dbb2d0c1ebfd5d7c642583c001"
+ },
+ "rule": "each arm's own teacher's admitted episodes, whole, in the pool's frozen order up to each category's target (tool_generation_plan.select); the base types and fluid as registered; admitted episodes beyond a target stay unused in the records; matched: the category targets and the token budget, not identical tasks",
+ "arms": {
+  "A1-6cat-cs": {
+   "arm": "A1-6cat-cs",
+   "mode": "H-T",
+   "teacher": {
+    "lineage": "hybrid",
+    "model": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+   },
+   "status": "FROZEN",
+   "identity": {
+    "data_manifest_sha256": "ee6937d2db2802e48806c2660e6fd21877cb7bdef4bd2965c03a030fb598fe57",
+    "content_sha256": "b98374beb1a564e2915b115f5c72dfa7df9e4e99504d1e122da434a340907325",
+    "documents_sha256": "77d7641cbb3c93a96232dce6a7b719101d3a76a97238085b4c09dc63e57ddf49",
+    "selection_sha256": "ee0be2633d3a60d2d93dd4465da862f4dede9ab3949059d0f4167cc3276ddcd0",
+    "documents_file": {
+     "name": "data_documents.npz",
+     "sha256": "5bb3d71d803753526a24cccd642cd0b86696c88c2a56d2cbdf379ecdf4cc1a05",
+     "arrays": [
+      "training_ids",
+      "training_mask",
+      "training_offsets",
+      "validation_ids",
+      "validation_mask",
+      "validation_offsets"
+     ],
+     "order": "per split, the manifest's document rows in order"
+    },
+    "packed_content_sha256": "b5b2454d6ee1501bf06cbd58cbfeebeffa71bfb0b4282186bebe7a5e6eb44c16",
+    "pack_files_sha256": {
+     "blocks.npz": "9b5517353907cc0ee5984d5c0e20c4196d842b3230463fa21fa1af399eea7fac",
+     "ladder.json": "586cec2dc252362f51549e55b353e5c093c4a11b6a9602a44e924b689df06b9a",
+     "audit.jsonl": "844a04b3475876702e5fbd773074b9d3d300a7806ad46720a7b5e1dd8cd7f654"
+    }
+   },
+   "before_packing": {
+    "training": {
+     "examples": 5594,
+     "documents": 6230,
+     "unique_supervised_tokens": 5939049,
+     "reasoning_tokens": 4944229,
+     "answer_tokens": 994820,
+     "tool_calling_tokens": 502137
+    },
+    "validation": {
+     "examples": 109,
+     "documents": 120,
+     "unique_supervised_tokens": 135822,
+     "reasoning_tokens": 110251,
+     "answer_tokens": 25571,
+     "tool_calling_tokens": 24198
+    }
+   },
+   "types": {
+    "competition_math": {
+     "target": 493417.8,
+     "amount": 495452.0,
+     "deviation": 2034.2,
+     "status": "OK"
+    },
+    "gsm8k": {
+     "target": 493417.8,
+     "amount": 492622.0,
+     "deviation": -795.8,
+     "status": "OK"
+    },
+    "rag_reading": {
+     "target": 493417.8,
+     "amount": 492038.0,
+     "deviation": -1379.8,
+     "status": "OK"
+    },
+    "multihop_reading": {
+     "target": 493417.8,
+     "amount": 492449.0,
+     "deviation": -968.8,
+     "status": "OK"
+    },
+    "code": {
+     "target": 493417.8,
+     "amount": 494656.0,
+     "deviation": 1238.2,
+     "status": "OK"
+    },
+    "fluid": {
+     "target": 2962514.0,
+     "amount": 2969695.0,
+     "deviation": 7181.0,
+     "status": "OK"
+    },
+    "tool_calling": {
+     "target": 493417.8,
+     "amount": 502137.0,
+     "deviation": 8719.2,
+     "status": "OK"
+    },
+    "supporting": {
+     "target": 2960507.0,
+     "amount": 2969354.0,
+     "deviation": 8847.0,
+     "status": "OK"
+    },
+    "total": {
+     "target": 5923021.0,
+     "amount": 5939049.0,
+     "deviation": 16028.0,
+     "status": "OK"
+    }
+   },
+   "tool_cells": {
+    "training/error_recovery": {
+     "target": 56661.1,
+     "selected": 60152.0,
+     "episodes": 25,
+     "overshoot": 3490.9,
+     "deviation_pct": 6.16,
+     "status": "REACHED"
+    },
+    "training/mcp_agent": {
+     "target": 84991.2,
+     "selected": 86434.0,
+     "episodes": 67,
+     "overshoot": 1442.8,
+     "deviation_pct": 1.7,
+     "status": "REACHED"
+    },
+    "training/multi_turn": {
+     "target": 113321.8,
+     "selected": 115985.0,
+     "episodes": 36,
+     "overshoot": 2663.2,
+     "deviation_pct": 2.35,
+     "status": "REACHED"
+    },
+    "training/multiple_parallel": {
+     "target": 84991.2,
+     "selected": 85414.0,
+     "episodes": 73,
+     "overshoot": 422.8,
+     "deviation_pct": 0.5,
+     "status": "REACHED"
+    },
+    "training/no_tool": {
+     "target": 56661.1,
+     "selected": 56868.0,
+     "episodes": 95,
+     "overshoot": 206.9,
+     "deviation_pct": 0.37,
+     "status": "REACHED"
+    },
+    "training/schema_arguments": {
+     "target": 11800.1,
+     "selected": 12234.0,
+     "episodes": 16,
+     "overshoot": 433.9,
+     "deviation_pct": 3.68,
+     "status": "REACHED"
+    },
+    "training/tool_selection": {
+     "target": 84991.2,
+     "selected": 85050.0,
+     "episodes": 119,
+     "overshoot": 58.8,
+     "deviation_pct": 0.07,
+     "status": "REACHED"
+    },
+    "validation/None": {
+     "target": 32.0,
+     "selected": 32.0,
+     "episodes": 32,
+     "overshoot": 0.0,
+     "deviation_pct": 0.0,
+     "status": "REACHED"
+    }
+   },
+   "tool_episode_sources": {
+    "path": "artifacts/stages/stage-2/teacher_modes/tool_admission/hybrid_H-T_cs_final/tool_documents.jsonl",
+    "sha256": "007d9482a7400585e25ed5e2c49572e62bf282698dca291b796b99844ca2f1ff",
+    "pool": {
+     "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1",
+     "content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+     "pool_json_sha256": "4b75c1edc47769e5dca33687c0f2db08837d7da1cabff4cf278e3a00705de181"
+    },
+    "plan_protocol_sha256": "95d7f4a5939421deecd746e818fe6f4a9800170e77d474f26f8070334e3f96fd"
+   },
+   "packing": {
+    "packed_sequences": 1437,
+    "validation_sequences": 35,
+    "sequence_length": 8192,
+    "non_padding_tokens": 11766017,
+    "context_tokens": 4698845,
+    "supervised_tokens_in_sequences": 7067172,
+    "repeated_supervised_tokens": 1128123,
+    "fragments": 1435,
+    "padding_fraction": 0.0005,
+    "spec": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1",
+     "sequence_length": 8192,
+     "shuffle_seed": 20261106
+    }
+   },
+   "compute": {
+    "epochs": 3,
+    "packed_sequences": 1437,
+    "optimizer_steps": 2156,
+    "warmup_steps": 108,
+    "eval_every": 269,
+    "save_every": 1078,
+    "supervised_token_exposure": 21201516,
+    "non_padding_tokens_trained": 35298051,
+    "training_flops": "6 x N x tokens per sequence position, N the student's parameter count from the packed search's Top-1 (not run: UNMEASURED); every sequence is 8,192 positions with causal attention, so for one shared student the FLOPs ratio between arms is their packed-sequence ratio"
+   }
+  },
+  "A2-6cat-cs": {
+   "arm": "A2-6cat-cs",
+   "mode": "H-N",
+   "teacher": {
+    "lineage": "hybrid",
+    "model": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+   },
+   "status": "FROZEN",
+   "identity": {
+    "data_manifest_sha256": "89fa58a0f4bd161f7ad39f9f8740328108aaf537db233211b160bc7a85ac9ab3",
+    "content_sha256": "68c8c29236ea182a41027f633199724844ab96d7b6c4821fc1ec31817cb73531",
+    "documents_sha256": "3dc01eadd7ba71cbe17a33b0c9f6e4cd84b25da54da4335e7bc6a14438fb963e",
+    "selection_sha256": "7d93d97ebed3fe0ecc9da128130eadcff0c93e38709b7f0b20ae440eff01b568",
+    "documents_file": {
+     "name": "data_documents.npz",
+     "sha256": "5e6df234226fc71b1164106b3cf1ce0cfa9ee054cfd142f676490e42bcd218e0",
+     "arrays": [
+      "training_ids",
+      "training_mask",
+      "training_offsets",
+      "validation_ids",
+      "validation_mask",
+      "validation_offsets"
+     ],
+     "order": "per split, the manifest's document rows in order"
+    },
+    "packed_content_sha256": "ae41abaa1389bb677da783829aafa3acb5292712a794de83c263ee95208d4c6a",
+    "pack_files_sha256": {
+     "blocks.npz": "974a91ff4af72c6d7debc28b26694bf5a20c8852b9b0724444682af60f96a9be",
+     "ladder.json": "57c1c44559624e1dee967aba19a92c2620aeb7b1024db8ffddaafda81ed4c3ba",
+     "audit.jsonl": "07128218c6d2d8927d111f5c8f6744ca4ab48328fb63ca77cde54f3fe420ff2c"
+    }
+   },
+   "before_packing": {
+    "training": {
+     "examples": 44447,
+     "documents": 49784,
+     "unique_supervised_tokens": 5928313,
+     "reasoning_tokens": 0,
+     "answer_tokens": 5928313,
+     "tool_calling_tokens": 498002
+    },
+    "validation": {
+     "examples": 218,
+     "documents": 251,
+     "unique_supervised_tokens": 64776,
+     "reasoning_tokens": 0,
+     "answer_tokens": 64776,
+     "tool_calling_tokens": 9654
+    }
+   },
+   "types": {
+    "competition_math": {
+     "target": 493417.8,
+     "amount": 493404.0,
+     "deviation": -13.8,
+     "status": "OK"
+    },
+    "gsm8k": {
+     "target": 493417.8,
+     "amount": 493495.0,
+     "deviation": 77.2,
+     "status": "OK"
+    },
+    "rag_reading": {
+     "target": 493417.8,
+     "amount": 493276.0,
+     "deviation": -141.8,
+     "status": "OK"
+    },
+    "multihop_reading": {
+     "target": 493417.8,
+     "amount": 493296.0,
+     "deviation": -121.8,
+     "status": "OK"
+    },
+    "code": {
+     "target": 493417.8,
+     "amount": 493701.0,
+     "deviation": 283.2,
+     "status": "OK"
+    },
+    "fluid": {
+     "target": 2962514.0,
+     "amount": 2963139.0,
+     "deviation": 625.0,
+     "status": "OK"
+    },
+    "tool_calling": {
+     "target": 493417.8,
+     "amount": 498002.0,
+     "deviation": 4584.2,
+     "status": "OK"
+    },
+    "supporting": {
+     "target": 2960507.0,
+     "amount": 2965174.0,
+     "deviation": 4667.0,
+     "status": "OK"
+    },
+    "total": {
+     "target": 5923021.0,
+     "amount": 5928313.0,
+     "deviation": 5292.0,
+     "status": "OK"
+    }
+   },
+   "tool_cells": {
+    "training/error_recovery": {
+     "target": 56661.1,
+     "selected": 57829.0,
+     "episodes": 119,
+     "overshoot": 1167.9,
+     "deviation_pct": 2.06,
+     "status": "REACHED"
+    },
+    "training/mcp_agent": {
+     "target": 84991.2,
+     "selected": 85013.0,
+     "episodes": 366,
+     "overshoot": 21.8,
+     "deviation_pct": 0.03,
+     "status": "REACHED"
+    },
+    "training/multi_turn": {
+     "target": 113321.8,
+     "selected": 115499.0,
+     "episodes": 115,
+     "overshoot": 2177.2,
+     "deviation_pct": 1.92,
+     "status": "REACHED"
+    },
+    "training/multiple_parallel": {
+     "target": 84991.2,
+     "selected": 85153.0,
+     "episodes": 271,
+     "overshoot": 161.8,
+     "deviation_pct": 0.19,
+     "status": "REACHED"
+    },
+    "training/no_tool": {
+     "target": 56661.1,
+     "selected": 57544.0,
+     "episodes": 324,
+     "overshoot": 882.9,
+     "deviation_pct": 1.56,
+     "status": "REACHED"
+    },
+    "training/schema_arguments": {
+     "target": 11800.1,
+     "selected": 11837.0,
+     "episodes": 161,
+     "overshoot": 36.9,
+     "deviation_pct": 0.31,
+     "status": "REACHED"
+    },
+    "training/tool_selection": {
+     "target": 84991.2,
+     "selected": 85127.0,
+     "episodes": 485,
+     "overshoot": 135.8,
+     "deviation_pct": 0.16,
+     "status": "REACHED"
+    },
+    "validation/None": {
+     "target": 32.0,
+     "selected": 32.0,
+     "episodes": 32,
+     "overshoot": 0.0,
+     "deviation_pct": 0.0,
+     "status": "REACHED"
+    }
+   },
+   "tool_episode_sources": {
+    "path": "artifacts/stages/stage-2/teacher_modes/tool_admission/hybrid_H-N_cs_final/tool_documents.jsonl",
+    "sha256": "9bdeb1ac361f4e48be854e638bd606d8a29843726bb9ab61df0c5baf019fc65f",
+    "pool": {
+     "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1",
+     "content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+     "pool_json_sha256": "4b75c1edc47769e5dca33687c0f2db08837d7da1cabff4cf278e3a00705de181"
+    },
+    "plan_protocol_sha256": "95d7f4a5939421deecd746e818fe6f4a9800170e77d474f26f8070334e3f96fd"
+   },
+   "packing": {
+    "packed_sequences": 4988,
+    "validation_sequences": 30,
+    "sequence_length": 8192,
+    "non_padding_tokens": 40861497,
+    "context_tokens": 34691201,
+    "supervised_tokens_in_sequences": 6170296,
+    "repeated_supervised_tokens": 241983,
+    "fragments": 4982,
+    "padding_fraction": 5e-06,
+    "spec": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1",
+     "sequence_length": 8192,
+     "shuffle_seed": 20261106
+    }
+   },
+   "compute": {
+    "epochs": 3,
+    "packed_sequences": 4988,
+    "optimizer_steps": 7482,
+    "warmup_steps": 374,
+    "eval_every": 935,
+    "save_every": 3741,
+    "supervised_token_exposure": 18510888,
+    "non_padding_tokens_trained": 122584491,
+    "training_flops": "6 x N x tokens per sequence position, N the student's parameter count from the packed search's Top-1 (not run: UNMEASURED); every sequence is 8,192 positions with causal attention, so for one shared student the FLOPs ratio between arms is their packed-sequence ratio"
+   }
+  },
+  "C1-6cat-cs": {
+   "arm": "C1-6cat-cs",
+   "mode": "T2507",
+   "teacher": {
+    "lineage": "thinking_2507",
+    "model": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+   },
+   "status": "FROZEN",
+   "identity": {
+    "data_manifest_sha256": "e2b5a4e1ad138ef03307edd1f92eb914eec40890961448106e7803eb295bfdd2",
+    "content_sha256": "c612c426944334f87806c298a9566e997570f4741828b33c0a8f197465fdd869",
+    "documents_sha256": "2c985a429d30839c5082719e17fd74a6c202af2e9a82827978745467f60460e3",
+    "selection_sha256": "beb528a1bdcd49895682ba35156ca9936fdf5e37245c2884c0f70b2e8a4cae4d",
+    "documents_file": {
+     "name": "data_documents.npz",
+     "sha256": "8219fa956fef3fc0f786d8ab13bf7af56cba6369092ae66b39ffbb80ecbae7cc",
+     "arrays": [
+      "training_ids",
+      "training_mask",
+      "training_offsets",
+      "validation_ids",
+      "validation_mask",
+      "validation_offsets"
+     ],
+     "order": "per split, the manifest's document rows in order"
+    },
+    "packed_content_sha256": "2a2a9bb1dc19b9fddaec619ae68d8fdcf8219960879650abe5e80df2b66e8bbf",
+    "pack_files_sha256": {
+     "blocks.npz": "111ad1b0eb8de8cc2042b6940744e020fdd0b9ffc47e917338a76477db66ffbd",
+     "ladder.json": "c70013cee82768c9384769d1e5cf3c6f8517fd5929f24405c094c86c265c1182",
+     "audit.jsonl": "b481f480715fff83055daffcae995a72e8326dd1ff979461591b59d2ec639ca3"
+    }
+   },
+   "before_packing": {
+    "training": {
+     "examples": 3940,
+     "documents": 4211,
+     "unique_supervised_tokens": 5931091,
+     "reasoning_tokens": 4819720,
+     "answer_tokens": 1111371,
+     "tool_calling_tokens": 500657
+    },
+    "validation": {
+     "examples": 59,
+     "documents": 65,
+     "unique_supervised_tokens": 81741,
+     "reasoning_tokens": 59271,
+     "answer_tokens": 22470,
+     "tool_calling_tokens": 13170
+    }
+   },
+   "types": {
+    "competition_math": {
+     "target": 494130.0,
+     "amount": 494130.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "gsm8k": {
+     "target": 494582.0,
+     "amount": 494582.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "multihop_reading": {
+     "target": 492790.0,
+     "amount": 492790.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "rag_reading": {
+     "target": 493581.0,
+     "amount": 493581.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "code": {
+     "target": 492837.0,
+     "amount": 492837.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "fluid": {
+     "target": 2962514.0,
+     "amount": 2962514.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "tool_calling": {
+     "target": 492587.0,
+     "amount": 500657.0,
+     "deviation": 8070.0,
+     "status": "OK"
+    },
+    "supporting": {
+     "target": 2960507.0,
+     "amount": 2968577.0,
+     "deviation": 8070.0,
+     "status": "OK"
+    },
+    "total": {
+     "target": 5923021.0,
+     "amount": 5931091.0,
+     "deviation": 8070.0,
+     "status": "OK"
+    }
+   },
+   "tool_cells": {
+    "training/error_recovery": {
+     "target": 56565.7,
+     "selected": 57275.0,
+     "episodes": 14,
+     "overshoot": 709.3,
+     "deviation_pct": 1.25,
+     "status": "REACHED"
+    },
+    "training/mcp_agent": {
+     "target": 84848.1,
+     "selected": 86152.0,
+     "episodes": 29,
+     "overshoot": 1303.9,
+     "deviation_pct": 1.54,
+     "status": "REACHED"
+    },
+    "training/multi_turn": {
+     "target": 113131.0,
+     "selected": 113880.0,
+     "episodes": 20,
+     "overshoot": 749.0,
+     "deviation_pct": 0.66,
+     "status": "REACHED"
+    },
+    "training/multiple_parallel": {
+     "target": 84848.1,
+     "selected": 85267.0,
+     "episodes": 42,
+     "overshoot": 418.9,
+     "deviation_pct": 0.49,
+     "status": "REACHED"
+    },
+    "training/no_tool": {
+     "target": 56565.7,
+     "selected": 56671.0,
+     "episodes": 84,
+     "overshoot": 105.3,
+     "deviation_pct": 0.19,
+     "status": "REACHED"
+    },
+    "training/schema_arguments": {
+     "target": 11780.2,
+     "selected": 15276.0,
+     "episodes": 10,
+     "overshoot": 3495.8,
+     "deviation_pct": 29.68,
+     "status": "REACHED"
+    },
+    "training/tool_selection": {
+     "target": 84848.1,
+     "selected": 86136.0,
+     "episodes": 60,
+     "overshoot": 1287.9,
+     "deviation_pct": 1.52,
+     "status": "REACHED"
+    },
+    "validation/None": {
+     "target": 12624.0,
+     "selected": 13170.0,
+     "episodes": 12,
+     "overshoot": 546.0,
+     "deviation_pct": 4.33,
+     "status": "REACHED"
+    }
+   },
+   "tool_episode_sources": {
+    "path": "artifacts/stages/stage-2/teacher_modes/tool_admission/thinking_2507_cs_final/tool_documents.jsonl",
+    "sha256": "b8a16b0a03dc7c574f09e4d2f1ea76a9c8b66e9193939037ad2a51fa49538c59",
+    "pool": {
+     "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1",
+     "content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+     "pool_json_sha256": "4b75c1edc47769e5dca33687c0f2db08837d7da1cabff4cf278e3a00705de181"
+    },
+    "plan_protocol_sha256": "73b6f8a997522029d33fabddfe67e8263f6d0d43b9e01494f6f09c4bb6e9ec5d"
+   },
+   "packing": {
+    "packed_sequences": 1264,
+    "validation_sequences": 17,
+    "sequence_length": 8192,
+    "non_padding_tokens": 10346968,
+    "context_tokens": 3088126,
+    "supervised_tokens_in_sequences": 7258842,
+    "repeated_supervised_tokens": 1327751,
+    "fragments": 1262,
+    "padding_fraction": 0.000746,
+    "spec": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1",
+     "sequence_length": 8192,
+     "shuffle_seed": 20261106
+    }
+   },
+   "compute": {
+    "epochs": 3,
+    "packed_sequences": 1264,
+    "optimizer_steps": 1896,
+    "warmup_steps": 95,
+    "eval_every": 237,
+    "save_every": 948,
+    "supervised_token_exposure": 21776526,
+    "non_padding_tokens_trained": 31040904,
+    "training_flops": "6 x N x tokens per sequence position, N the student's parameter count from the packed search's Top-1 (not run: UNMEASURED); every sequence is 8,192 positions with causal attention, so for one shared student the FLOPs ratio between arms is their packed-sequence ratio"
+   }
+  }
+ },
+ "a1_a2_compute": {
+  "packed_sequences": {
+   "A1-6cat-cs": 1437,
+   "A2-6cat-cs": 4988,
+   "A2_over_A1": 3.4711
+  },
+  "non_padding_tokens": {
+   "A1-6cat-cs": 11766017,
+   "A2-6cat-cs": 40861497,
+   "A2_over_A1": 3.4728
+  },
+  "optimizer_steps": {
+   "A1-6cat-cs": 2156,
+   "A2-6cat-cs": 7482,
+   "A2_over_A1": 3.4703
+  },
+  "supervised_token_exposure": {
+   "A1-6cat-cs": 21201516,
+   "A2-6cat-cs": 18510888,
+   "A2_over_A1": 0.8731
+  },
+  "unique_supervised_tokens": {
+   "A1-6cat-cs": 5939049,
+   "A2-6cat-cs": 5928313
+  },
+  "training_flops_ratio_A2_over_A1": 3.4711
+ },
+ "comparison": "a supervised-token-budget and category-composition matched comparison, NOT compute matched",
+ "authorizes": "nothing: search and training need their own decisions"
+}

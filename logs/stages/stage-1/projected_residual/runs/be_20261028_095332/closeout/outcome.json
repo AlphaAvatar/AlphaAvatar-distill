@@ -1,0 +1,64 @@
+{
+ "schema": "aadistill.stage1.projected_residual.engineering_authorization_outcome/v1",
+ "run_id": "be_20261028_095332",
+ "study": "B-E",
+ "recorded_utc": "2026-10-28T10:18:32+00:00",
+ "status": "COMPLETE",
+ "validation_passed": false,
+ "terminal": "RUN_FAILED",
+ "runner_terminal": "RUN_FAILED",
+ "provider_resource_created": true,
+ "evidence": {
+  "path": "/home/ecs-user/aad-scratch/be_20261028_095332/store/evidence.tgz",
+  "sha256": "b0c80dabffb5465abd43a0caba9ca13181c5172757387ec32afc3d3a221d4580",
+  "bytes": 49292,
+  "verified": true
+ },
+ "verdict_rederived": {
+  "passed": false,
+  "checks": {
+   "initialization": "PASS",
+   "structural_fold": "PASS",
+   "fold_cuda": "PASS",
+   "trainer_smoke": "FAIL",
+   "resume": "FAIL",
+   "checkpoint_identity": "PASS",
+   "gpu_isolation": "PASS",
+   "vllm": "FAIL"
+  },
+  "agrees_with_the_pod": true
+ },
+ "money": {
+  "all_in_usd": 0.4366,
+  "gpu_usd": 0.4301,
+  "disk_usd": 0.0065,
+  "elapsed_minutes": 23.68,
+  "price_per_hour": 1.09,
+  "authorized_usd": 3.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (120 GB)"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "scientific_use": false,
+ "authorizes": "nothing"
+}

@@ -1,0 +1,1064 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.budget_v2/v1",
+ "written_utc": "2026-11-01T10:34:19Z",
+ "purpose": "maintainer review 2026-11-01, section 8: re-estimate the state evaluation suite, the L40S micro-batch-1 full search, the six trainings, the 300 GB volume and the bounded funding, from committed telemetry and the run stores committed records name. $0; nothing was launched or created.",
+ "rate": {
+  "usd_per_hour": 1.11,
+  "basis": "L40S securePrice 1.09 (logs/stages/stage-2/teacher_modes/audit/provider_resources_20261101.json :: facts.l40s_price, 2026-11-01T10:21:50Z) + 150 GB container disk at $0.10/GB-month (scripts/stages/stage-2/teacher_modes/phase_forecast.py :: DISK_USD_PER_HOUR) = 0.0205/h"
+ },
+ "scenarios": {
+  "lower": "fastest measured rates, fewest forced operations",
+  "expected": "measured medians / the historical placement",
+  "conservative": "historical worst placement, slowest measured rates, stated allowances: the proposed DEADLINE for each paid phase",
+  "hard_cap": "every DEPTH position the beam schedule allows (38); a mathematical bound, not a forecast"
+ },
+ "1_state_evaluation_suite": {
+  "suite": "state_eval_hybrid@v1: 1,722 prompts (data/stages/stage-2/teacher_modes/tasks/state_eval_hybrid_v1.tasks.jsonl), 26 sub-types, quota 12,000 scored positions per (type, mode), whole items in queue order",
+  "method": "prompts tokenized with the hybrid's chat template (Qwen/Qwen3-4B snapshot in the HF cache; system 'You are a helpful Assistant.'; enable_thinking per mode, H-N includes the preclosed think block). Output length per item drawn from the hybrid's own admitted outputs of the same type and mode (A1/A2 packs' audit.jsonl :: sessions.supervised_retained; generators string_induction/ordering @v2 in training, @v1 in the suite) pooled with the hybrid calibration items (artifacts/stages/stage-2/teacher_modes/calibration_v2/*.items.jsonl :: tags.assistant). lower: every item at the pool's p90 yield; expected: bootstrap median of 2,000 draws (seed 20261101); p95: bootstrap p95; upper: every item at the pool's p10 yield (more items, more prompt tokens), capped by the queue",
+  "forward_tokens": {
+   "lower": 721527,
+   "expected": 1000377,
+   "p95": 1079775,
+   "upper": 1583249
+  },
+  "scored_positions": "about 312,000 (+ whole-item overshoot)",
+  "dominant_cells": {
+   "multihop_qa|H-N": {
+    "lower": 270005,
+    "expected": 449215,
+    "p95": 475409,
+    "upper": 981016
+   },
+   "rag_evidence|H-N": {
+    "lower": 79392,
+    "expected": 133344,
+    "p95": 138593,
+    "upper": 148704
+   },
+   "note": "non-thinking HotpotQA items forward ~1,420 prompt tokens for ~39 scored positions: forward tokens are ~3.2x the scored positions"
+  },
+  "by_subtype": {
+   "code|H-T": {
+    "pool_n": 246,
+    "scored_per_item": {
+     "p10": 1540,
+     "median": 2080,
+     "mean": 2255.8,
+     "p90": 3105
+    },
+    "queue_prompts": 22,
+    "items": {
+     "lower": 4,
+     "expected": 6,
+     "upper": 8
+    },
+    "forward_tokens": {
+     "lower": 13046,
+     "expected": 14078,
+     "p95": 16033,
+     "upper": 13605
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "code|H-N": {
+    "pool_n": 704,
+    "scored_per_item": {
+     "p10": 501,
+     "median": 662,
+     "mean": 789.1,
+     "p90": 993
+    },
+    "queue_prompts": 22,
+    "items": {
+     "lower": 13,
+     "expected": 16,
+     "upper": 22
+    },
+    "forward_tokens": {
+     "lower": 15067,
+     "expected": 15173,
+     "p95": 16654,
+     "upper": 14913
+    },
+    "short_probability": 0.0,
+    "short_at_upper": true
+   },
+   "defined_ops@v1|H-T": {
+    "pool_n": 170,
+    "scored_per_item": {
+     "p10": 934,
+     "median": 1244,
+     "mean": 1314.9,
+     "p90": 1766
+    },
+    "queue_prompts": 53,
+    "items": {
+     "lower": 7,
+     "expected": 10,
+     "upper": 13
+    },
+    "forward_tokens": {
+     "lower": 13705,
+     "expected": 14504,
+     "p95": 15507,
+     "upper": 14622
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "defined_ops@v1|H-N": {
+    "pool_n": 948,
+    "scored_per_item": {
+     "p10": 262,
+     "median": 329,
+     "mean": 337.6,
+     "p90": 432
+    },
+    "queue_prompts": 53,
+    "items": {
+     "lower": 28,
+     "expected": 36,
+     "upper": 46
+    },
+    "forward_tokens": {
+     "lower": 17511,
+     "expected": 19123,
+     "p95": 19601,
+     "upper": 20911
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "entity_tracking@v1|H-T": {
+    "pool_n": 86,
+    "scored_per_item": {
+     "p10": 643,
+     "median": 1163,
+     "mean": 1190.7,
+     "p90": 1856
+    },
+    "queue_prompts": 53,
+    "items": {
+     "lower": 7,
+     "expected": 11,
+     "upper": 19
+    },
+    "forward_tokens": {
+     "lower": 14015,
+     "expected": 14194,
+     "p95": 15483,
+     "upper": 15059
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "entity_tracking@v1|H-N": {
+    "pool_n": 378,
+    "scored_per_item": {
+     "p10": 160,
+     "median": 300,
+     "mean": 297.0,
+     "p90": 433
+    },
+    "queue_prompts": 53,
+    "items": {
+     "lower": 28,
+     "expected": 41,
+     "upper": 53
+    },
+    "forward_tokens": {
+     "lower": 16477,
+     "expected": 18567,
+     "p95": 19259,
+     "upper": 16745
+    },
+    "short_probability": 0.0,
+    "short_at_upper": true
+   },
+   "grid_transform@v1|H-T": {
+    "pool_n": 97,
+    "scored_per_item": {
+     "p10": 2177,
+     "median": 3673,
+     "mean": 3995.4,
+     "p90": 6423
+    },
+    "queue_prompts": 21,
+    "items": {
+     "lower": 2,
+     "expected": 4,
+     "upper": 6
+    },
+    "forward_tokens": {
+     "lower": 13348,
+     "expected": 15071,
+     "p95": 18612,
+     "upper": 14772
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "grid_transform@v1|H-N": {
+    "pool_n": 568,
+    "scored_per_item": {
+     "p10": 444,
+     "median": 627,
+     "mean": 680.2,
+     "p90": 1011
+    },
+    "queue_prompts": 21,
+    "items": {
+     "lower": 12,
+     "expected": 18,
+     "upper": 21
+    },
+    "forward_tokens": {
+     "lower": 15600,
+     "expected": 17605,
+     "p95": 18459,
+     "upper": 15393
+    },
+    "short_probability": 0.01,
+    "short_at_upper": true
+   },
+   "gsm8k|H-T": {
+    "pool_n": 562,
+    "scored_per_item": {
+     "p10": 451,
+     "median": 832,
+     "mean": 1068.3,
+     "p90": 2016
+    },
+    "queue_prompts": 73,
+    "items": {
+     "lower": 6,
+     "expected": 12,
+     "upper": 27
+    },
+    "forward_tokens": {
+     "lower": 12484,
+     "expected": 13440,
+     "p95": 15363,
+     "upper": 14192
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "gsm8k|H-N": {
+    "pool_n": 2768,
+    "scored_per_item": {
+     "p10": 115,
+     "median": 198,
+     "mean": 215.6,
+     "p90": 330
+    },
+    "queue_prompts": 73,
+    "items": {
+     "lower": 37,
+     "expected": 56,
+     "upper": 73
+    },
+    "forward_tokens": {
+     "lower": 15165,
+     "expected": 16665,
+     "p95": 17153,
+     "upper": 14269
+    },
+    "short_probability": 0.0,
+    "short_at_upper": true
+   },
+   "knights_knaves@v1|H-T": {
+    "pool_n": 87,
+    "scored_per_item": {
+     "p10": 2211,
+     "median": 2781,
+     "mean": 2998.2,
+     "p90": 4125
+    },
+    "queue_prompts": 21,
+    "items": {
+     "lower": 3,
+     "expected": 5,
+     "upper": 6
+    },
+    "forward_tokens": {
+     "lower": 12695,
+     "expected": 14005,
+     "p95": 16013,
+     "upper": 13927
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "knights_knaves@v1|H-N": {
+    "pool_n": 276,
+    "scored_per_item": {
+     "p10": 612,
+     "median": 882,
+     "mean": 949.8,
+     "p90": 1375
+    },
+    "queue_prompts": 21,
+    "items": {
+     "lower": 9,
+     "expected": 13,
+     "upper": 20
+    },
+    "forward_tokens": {
+     "lower": 13425,
+     "expected": 14008,
+     "p95": 14787,
+     "upper": 14569
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "list_induction@v1|H-T": {
+    "pool_n": 189,
+    "scored_per_item": {
+     "p10": 1191,
+     "median": 1771,
+     "mean": 2271.4,
+     "p90": 4062
+    },
+    "queue_prompts": 23,
+    "items": {
+     "lower": 3,
+     "expected": 6,
+     "upper": 11
+    },
+    "forward_tokens": {
+     "lower": 12917,
+     "expected": 14448,
+     "p95": 17393,
+     "upper": 15612
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "list_induction@v1|H-N": {
+    "pool_n": 608,
+    "scored_per_item": {
+     "p10": 405,
+     "median": 634,
+     "mean": 716.8,
+     "p90": 1152
+    },
+    "queue_prompts": 23,
+    "items": {
+     "lower": 11,
+     "expected": 17,
+     "upper": 23
+    },
+    "forward_tokens": {
+     "lower": 15227,
+     "expected": 16484,
+     "p95": 17575,
+     "upper": 14719
+    },
+    "short_probability": 0.001,
+    "short_at_upper": true
+   },
+   "multihop_qa|H-T": {
+    "pool_n": 1424,
+    "scored_per_item": {
+     "p10": 210,
+     "median": 309,
+     "mean": 419.2,
+     "p90": 706
+    },
+    "queue_prompts": 683,
+    "items": {
+     "lower": 17,
+     "expected": 30,
+     "upper": 58
+    },
+    "forward_tokens": {
+     "lower": 35722,
+     "expected": 56812,
+     "p95": 67004,
+     "upper": 94628
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "multihop_qa|H-N": {
+    "pool_n": 15298,
+    "scored_per_item": {
+     "p10": 16,
+     "median": 34,
+     "mean": 39.0,
+     "p90": 66
+    },
+    "queue_prompts": 683,
+    "items": {
+     "lower": 182,
+     "expected": 309,
+     "upper": 683
+    },
+    "forward_tokens": {
+     "lower": 270005,
+     "expected": 449215,
+     "p95": 475409,
+     "upper": 981016
+    },
+    "short_probability": 0.0,
+    "short_at_upper": true
+   },
+   "openmath|H-T": {
+    "pool_n": 182,
+    "scored_per_item": {
+     "p10": 1143,
+     "median": 2579,
+     "mean": 3279.8,
+     "p90": 6517
+    },
+    "queue_prompts": 43,
+    "items": {
+     "lower": 2,
+     "expected": 4,
+     "upper": 11
+    },
+    "forward_tokens": {
+     "lower": 13154,
+     "expected": 14071,
+     "p95": 18192,
+     "upper": 13337
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "openmath|H-N": {
+    "pool_n": 953,
+    "scored_per_item": {
+     "p10": 190,
+     "median": 443,
+     "mean": 627.5,
+     "p90": 1293
+    },
+    "queue_prompts": 43,
+    "items": {
+     "lower": 10,
+     "expected": 20,
+     "upper": 43
+    },
+    "forward_tokens": {
+     "lower": 13651,
+     "expected": 14160,
+     "p95": 15661,
+     "upper": 11828
+    },
+    "short_probability": 0.0,
+    "short_at_upper": true
+   },
+   "ordering@v1|H-T": {
+    "pool_n": 71,
+    "scored_per_item": {
+     "p10": 394,
+     "median": 1719,
+     "mean": 1593.8,
+     "p90": 2747
+    },
+    "queue_prompts": 70,
+    "items": {
+     "lower": 5,
+     "expected": 8,
+     "upper": 31
+    },
+    "forward_tokens": {
+     "lower": 14130,
+     "expected": 13566,
+     "p95": 15385,
+     "upper": 14757
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "ordering@v1|H-N": {
+    "pool_n": 398,
+    "scored_per_item": {
+     "p10": 65,
+     "median": 246,
+     "mean": 246.5,
+     "p90": 424
+    },
+    "queue_prompts": 70,
+    "items": {
+     "lower": 29,
+     "expected": 49,
+     "upper": 70
+    },
+    "forward_tokens": {
+     "lower": 14788,
+     "expected": 16430,
+     "p95": 17092,
+     "upper": 10603
+    },
+    "short_probability": 0.0,
+    "short_at_upper": true
+   },
+   "rag_evidence|H-T": {
+    "pool_n": 2542,
+    "scored_per_item": {
+     "p10": 139,
+     "median": 193,
+     "mean": 234.9,
+     "p90": 312
+    },
+    "queue_prompts": 590,
+    "items": {
+     "lower": 39,
+     "expected": 53,
+     "upper": 87
+    },
+    "forward_tokens": {
+     "lower": 20577,
+     "expected": 23361,
+     "p95": 24993,
+     "upper": 31660
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "rag_evidence|H-N": {
+    "pool_n": 25078,
+    "scored_per_item": {
+     "p10": 12,
+     "median": 19,
+     "mean": 23.8,
+     "p90": 42
+    },
+    "queue_prompts": 590,
+    "items": {
+     "lower": 286,
+     "expected": 505,
+     "upper": 590
+    },
+    "forward_tokens": {
+     "lower": 79392,
+     "expected": 133344,
+     "p95": 138593,
+     "upper": 148704
+    },
+    "short_probability": 0.0,
+    "short_at_upper": true
+   },
+   "scan_language@v1|H-T": {
+    "pool_n": 46,
+    "scored_per_item": {
+     "p10": 3090,
+     "median": 4296,
+     "mean": 4645,
+     "p90": 6637
+    },
+    "queue_prompts": 39,
+    "items": {
+     "lower": 2,
+     "expected": 3,
+     "upper": 4
+    },
+    "forward_tokens": {
+     "lower": 13757,
+     "expected": 15121,
+     "p95": 18445,
+     "upper": 13339
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "scan_language@v1|H-N": {
+    "pool_n": 268,
+    "scored_per_item": {
+     "p10": 310,
+     "median": 416,
+     "mean": 434.8,
+     "p90": 557
+    },
+    "queue_prompts": 39,
+    "items": {
+     "lower": 22,
+     "expected": 28,
+     "upper": 39
+    },
+    "forward_tokens": {
+     "lower": 17841,
+     "expected": 19384,
+     "p95": 20020,
+     "upper": 22024
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "string_induction@v1|H-T": {
+    "pool_n": 137,
+    "scored_per_item": {
+     "p10": 1402,
+     "median": 1997,
+     "mean": 2271.2,
+     "p90": 3528
+    },
+    "queue_prompts": 31,
+    "items": {
+     "lower": 4,
+     "expected": 6,
+     "upper": 9
+    },
+    "forward_tokens": {
+     "lower": 14470,
+     "expected": 13642,
+     "p95": 16132,
+     "upper": 13430
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   },
+   "string_induction@v1|H-N": {
+    "pool_n": 387,
+    "scored_per_item": {
+     "p10": 446,
+     "median": 682,
+     "mean": 797.2,
+     "p90": 1242
+    },
+    "queue_prompts": 31,
+    "items": {
+     "lower": 10,
+     "expected": 16,
+     "upper": 27
+    },
+    "forward_tokens": {
+     "lower": 13358,
+     "expected": 13906,
+     "p95": 14957,
+     "upper": 14615
+    },
+    "short_probability": 0.0,
+    "short_at_upper": false
+   }
+  },
+  "queue_risk": "at the p10 yield the H-N queues of code, entity_tracking, grid_transform, gsm8k, list_induction, multihop_qa, openmath, ordering and rag_evidence run out before 12,000 scored positions; in the bootstrap the probability is <=1% per cell (grid_transform|H-N 1.0%). A completion condition must say what happens to a short cell.",
+  "per_state_seconds_l40s_mb1": {
+   "lower": 66.2,
+   "expected": 106.3,
+   "conservative": 161.7,
+   "upper": 237.1
+  },
+  "per_state_basis": "d4's state evaluation, 92 states (/home/ecs-user/aad-artifacts/stage0_calvol/dose_d4_20261020_212310/store/d4/search/search/telemetry.jsonl (the store named by logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json :: method_identity.search_evidence) :: state_evaluation_seconds: min 6.48, median 7.50, max 9.61 s) at 74,102 forward tokens (artifacts/stages/stage-1/state_eval_v1/items.jsonl, 80 items; 74,022 prediction positions), A100 micro-batch 3; scaled linearly by forward tokens (the DEPTH fit below finds no measurable per-forward term) and by the L40S micro-batch-1 factor 1.0496 (logs/stages/stage-2/teacher_modes/runs/a_check_20261029_190241/check_evidence/report.json :: operations.initialization.attempts[0].steps[1].seconds 2,371.3 against the same path's DEPTH 2,258.9 s in the d4 telemetry); conservative and upper add 10% for micro-batch 1 on ~1,300 short items (unmeasured)",
+  "states_scored": 93,
+  "hours": {
+   "lower": 1.76,
+   "expected": 2.86,
+   "conservative": 4.38,
+   "upper": 6.37
+  },
+  "correction": "the proposal's 0.9 h scaled d4's 7.5 s by SCORED positions (312,000 / 74,022); the evaluator forwards every prompt token, so the expected cost is ~2.9 h"
+ },
+ "2_full_search_l40s_mb1": {
+  "profile_tokens_after_top_up": {
+   "now": {
+    "calib.hybrid_d4_base": 449155,
+    "calib.hybrid_d4_rh": 319611
+   },
+   "lower_expected_upper": {
+    "lower": {
+     "calib.hybrid_d4_base": 469245.42887302104,
+     "calib.hybrid_d4_rh": 336618.60842403997
+    },
+    "expected": {
+     "calib.hybrid_d4_base": 472696.37382916623,
+     "calib.hybrid_d4_rh": 340069.55338018516
+    },
+    "upper": {
+     "calib.hybrid_d4_base": 493311.57346583914,
+     "calib.hybrid_d4_rh": 360684.75301685807
+    }
+   },
+   "basis": "configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json :: profiles[].metadata.tokens; the 10 short cells' deficits (census quota - scored) x the type/mode's forward-tokens-per-scored-position from the packs (+ half an item expected, + the largest item upper)"
+  },
+  "depth_rates_min_per_million_forward_tokens_a100_mb3": {
+   "L1": {
+    "lower": 209.2,
+    "expected": "base 215.1, rh 226.3 (d4's own)",
+    "max": 227.7
+   },
+   "L2": {
+    "lower": 155.8,
+    "expected": "base 167.4, rh 176.9 (d4's own means)",
+    "max": 189.5
+   },
+   "L3": {
+    "lower": 137.3,
+    "expected": 148.4,
+    "max": "189.5 (L2's max; L3 measured twice, L4 never)"
+   },
+   "basis": "d1/d2/d4 telemetry (dose_d1_20261019_055515, dose_d2_20261020_002929, dose_d4_20261020_212310 stores :: operator_seconds / (operator_timing.forward_rows / candidate_subsets)); per-slot minima are valid per-token lower bounds; maxima x 1.04 (the largest slot/token ratio, d4 rh 245,094/236,666); expected L3 = docs/stages/stage-0/calibration_volume/MIXED.md section 5"
+  },
+  "token_linearity_check": "v1's common initialization (logs/stages/stage-2/teacher_modes/assets/common_initialization.json :: steps[1].seconds 896.7 s, L40S micro-batch 3, 105 hybrid items of ~817 tokens) runs at ~174 min/Mtok at L2 against d4's 165 on the same path's A100: the same 1.05 factor at short items. A least-squares fit of d4/bench DEPTH times on rows and calls (bench_20261019_051316 :: stages.B/C timing_on, d4 telemetry) gives no positive per-forward term.",
+  "depth_placement": {
+   "lower": "14 = 2 at the root + 12 at level 2 (forced by beam.delayed_prune@v1 with two profiles; d1 and d4)",
+   "expected": "14.67 = the mean of d1 14, d2 16, d4 14",
+   "conservative": "16 = d2's placement, the historical maximum",
+   "hard_cap": "38 = every DEPTH position the schedule allows (2 + 12 + 12 + 12)"
+  },
+  "other_operators": "lower/expected: MIXED.md section 5 per expansion (FFN 49 + 80 s/Mtok, WIDTH 38 + 80, ATTENTION 47 + 110; d4's mix 24/32/22) x 1.05; conservative/upper: every non-DEPTH expansion at d4's slowest (98.9 s) x the base profile's token ratio to d4 (2.16) x 1.05 x 1.10",
+  "per_expansion_overhead": "d4 telemetry reload+identify+materialize+validation mean 5.8 s, max 15.2 s; MIXED.md 14.3 s",
+  "state_persistence": "274 GB of states (d4's, the same tree and geometry; full_search_proposal.json :: execution.storage): lower 0 (inside d4's measured times), expected at the docs' low 200 MB/s, conservative at the measured 132.5 MB/s copy+re-identify (provider_resources_20261101.json :: facts.write_throughput), upper 3x bytes at 400 MB/s + 10 s per state (decisions.md's pessimistic I/O model)",
+  "by_scenario": {
+   "lower": {
+    "depth_expansions": 14,
+    "profile_tokens": {
+     "calib.hybrid_d4_base": 469245,
+     "calib.hybrid_d4_rh": 336619
+    },
+    "depth_h": 16.13,
+    "other_operators_h": 1.72,
+    "state_evaluation_h": 1.76,
+    "per_expansion_overhead_h": 0.15,
+    "state_persistence_h": 0.0,
+    "session_h": 0.58,
+    "hours": 20.34,
+    "usd": 22.59
+   },
+   "expected": {
+    "depth_expansions": 14.666666666666666,
+    "profile_tokens": {
+     "calib.hybrid_d4_base": 472696,
+     "calib.hybrid_d4_rh": 340070
+    },
+    "depth_h": 18.45,
+    "other_operators_h": 1.8,
+    "state_evaluation_h": 2.86,
+    "per_expansion_overhead_h": 0.37,
+    "state_persistence_h": 0.38,
+    "session_h": 0.6,
+    "hours": 24.45,
+    "usd": 27.16
+   },
+   "conservative": {
+    "depth_expansions": 16,
+    "profile_tokens": {
+     "calib.hybrid_d4_base": 493312,
+     "calib.hybrid_d4_rh": 360685
+    },
+    "depth_h": 25.54,
+    "other_operators_h": 5.21,
+    "state_evaluation_h": 4.38,
+    "per_expansion_overhead_h": 0.58,
+    "state_persistence_h": 0.57,
+    "session_h": 1.0,
+    "hours": 37.29,
+    "usd": 41.41
+   },
+   "upper": {
+    "depth_expansions": 38,
+    "profile_tokens": {
+     "calib.hybrid_d4_base": 493312,
+     "calib.hybrid_d4_rh": 360685
+    },
+    "depth_h": 59.8,
+    "other_operators_h": 3.7,
+    "state_evaluation_h": 6.37,
+    "per_expansion_overhead_h": 0.58,
+    "state_persistence_h": 0.83,
+    "session_h": 1.5,
+    "hours": 72.79,
+    "usd": 80.84
+   }
+  },
+  "vs_proposal": "the proposal's 20.5 h expected / 25.6 h conservative ($22.35 / $27.90) omitted the state evaluation's prompt tokens (+2.0 h), the top-up's tokens and the historical mean DEPTH placement; its conservative was 1.25x expected rather than a placement and rate bound"
+ },
+ "3_training": {
+  "steps": {
+   "A1": 1653,
+   "A2": 6866,
+   "C1": 3702,
+   "note": "A2 re-read from the rebuilt pack (4,577 packed sequences after the MBPP removal, 2026-11-01)"
+  },
+  "kd_positions_per_step": {
+   "A1": 10763,
+   "A2": 2589,
+   "C1": 4800
+  },
+  "measured": {
+   "v1_units_l40s": {
+    "source": ".scratch/research_a/a_recovery_20261030_211948/store/units__*.tgz :: training/trainer/train_log.jsonl (train_step.seconds), all document_isolated, Top-200+tail KD at assistant positions, the hybrid on the fly",
+    "H-T-S-s20260726": {
+     "median": 6.71,
+     "p95": 6.84,
+     "max": 6.94,
+     "kd_positions_per_step": 15077,
+     "steps": 887
+    },
+    "H-T-S-s20260801": {
+     "median": 6.69,
+     "p95": 6.77,
+     "max": 6.81,
+     "kd_positions_per_step": 14989,
+     "steps": 887
+    },
+    "H-T-C-s20260726": {
+     "median": 6.7,
+     "p95": 6.77,
+     "max": 6.85,
+     "kd_positions_per_step": 14670,
+     "steps": 231
+    },
+    "H-N-S-s20260726": {
+     "median": 6.43,
+     "p95": 6.52,
+     "max": 6.55,
+     "kd_positions_per_step": 12030,
+     "steps": 231
+    },
+    "H-N-S-s20260801": {
+     "median": 6.41,
+     "p95": 6.48,
+     "max": 6.63,
+     "kd_positions_per_step": 11997,
+     "steps": 231
+    },
+    "spread": "per-unit medians 6.41-6.71 s; within a unit p95/median <= 1.02"
+   },
+   "l40s_check": {
+    "source": "logs/stages/stage-2/teacher_modes/runs/a_check_20261029_190241/check_evidence/train_H-T.json, train_H-N.json :: seconds_per_step_mean_after_warmup",
+    "H-T": {
+     "mean": 6.214,
+     "kd_positions_per_step": 13112
+    },
+    "H-N": {
+     "mean": 5.665,
+     "kd_positions_per_step": 6689
+    }
+   },
+   "d4_augmented_l40s": {
+    "source": "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261025_055042/store/D4-Augmented-s20260801.evidence.tgz :: training/trainer/train_log.jsonl; closeout/outcome.json :: units.D4-Augmented-s20260801.seconds (train 13,385.3, evaluate 3,917.1)",
+    "median": 3.595,
+    "p95": 4.29,
+    "max": 4.55,
+    "context": "cross_context, full-vocabulary KD at all 6,153 non-padding positions per step, the same pack as C1"
+   }
+  },
+  "document_isolated_cost": "the trainer passes per-document position_ids and no 2-D mask (src/aadistill/training/train.py :: context_strategy), so transformers builds a block-diagonal causal mask; every v1 hybrid unit already ran it, so the 6.4-6.7 s includes it. Against cross-context the measured cost is about 1.6-1.8x per step (A100: 5.19 s isolated vs 3.33 s E1, phase_forecast.MEASURED; L40S: 6.4-6.7 vs D4-Augmented's 3.6). C1 is cross-context and is therefore priced on D4-Augmented's own steps, not on 6.7 s.",
+  "seconds_per_step_rule": {
+   "A1": "lower: check-run fit 5.093 + 8.548e-5 x KD positions; expected: v1 H-N-S's measured 6.40 (the nearest measured KD load, 12.0k vs A1's 10.8k); upper: the worst measured hybrid step 6.94 x 1.15",
+   "A2": "lower: the same fit at 2,589 KD positions; expected: the L40S check's measured H-N 5.66 (6.7k KD positions; A2 has fewer); upper: 6.94 x 1.15",
+   "C1": "lower: D4-Augmented's median 3.595; expected: its mean wall step 3.616 x 1.05 for Top-200+tail at assistant positions (unmeasured in cross-context); upper: its worst step 4.55 x 1.25",
+   "safety_factor": "1.15: pod-to-pod variation (the check pod ran 7% faster than the v1 pod on the same workload) and data-order variation; 1.25 for C1's unmeasured KD-support change"
+  },
+  "per_unit_overheads": {
+   "in_training_evaluation_and_saves_s": {
+    "lower": 100,
+    "expected": 320,
+    "upper": 640
+   },
+   "student_evaluation_s": {
+    "lower": 2653.1,
+    "expected": 3917.1,
+    "upper": 7834.2,
+    "basis": "h1pa2 outcome :: units.*.seconds.evaluate (2,653-3,917 s, L40S, all of eval-set-1, nucleus_v1); upper 2x: unrestricted generation to the 40,960 context (P18), a deadline not a forecast"
+   },
+   "fixed_s": {
+    "lower": 300,
+    "expected": 600,
+    "upper": 1200
+   }
+  },
+  "units": {
+   "A1": {
+    "lower": {
+     "seconds_per_step": 6.013,
+     "train_s": 9940,
+     "hours": 3.61,
+     "usd": 4.01
+    },
+    "expected": {
+     "seconds_per_step": 6.4,
+     "train_s": 10579,
+     "hours": 4.28,
+     "usd": 4.76
+    },
+    "upper": {
+     "seconds_per_step": 7.981,
+     "train_s": 13193,
+     "hours": 6.35,
+     "usd": 7.05
+    }
+   },
+   "A2": {
+    "lower": {
+     "seconds_per_step": 5.314,
+     "train_s": 36486,
+     "hours": 10.98,
+     "usd": 12.2
+    },
+    "expected": {
+     "seconds_per_step": 5.66,
+     "train_s": 38862,
+     "hours": 12.14,
+     "usd": 13.48
+    },
+    "upper": {
+     "seconds_per_step": 7.981,
+     "train_s": 54798,
+     "hours": 17.91,
+     "usd": 19.89
+    }
+   },
+   "C1": {
+    "lower": {
+     "seconds_per_step": 3.595,
+     "train_s": 13309,
+     "hours": 4.54,
+     "usd": 5.05
+    },
+    "expected": {
+     "seconds_per_step": 3.797,
+     "train_s": 14056,
+     "hours": 5.25,
+     "usd": 5.83
+    },
+    "upper": {
+     "seconds_per_step": 5.688,
+     "train_s": 21055,
+     "hours": 8.54,
+     "usd": 9.48
+    }
+   }
+  },
+  "sessions": {
+   "hours": {
+    "lower": 0.58,
+    "expected": 1.17,
+    "upper": 1.75
+   },
+   "basis": "setup 20 min + teardown 15 min per pod session (phase_forecast SETUP_H, CLOSE_H); one, two or three sessions"
+  },
+  "six_trainings_usd": {
+   "lower": 43.16,
+   "expected": 49.44,
+   "upper": 74.78
+  },
+  "six_trainings_hours": {
+   "lower": 38.84,
+   "expected": 44.51,
+   "upper": 67.35
+  },
+  "per_unit_deadlines_hours": {
+   "A1": 6.35,
+   "A2": 17.91,
+   "C1": 8.54
+  },
+  "vs_plan": "the plan's $57.78 priced every step at 6.7 s: C1 is cross-context (3.6 s measured) and A2 carries 2.6k KD positions per step (5.66 s measured on the nearest load)"
+ },
+ "4_volume": {
+  "price": "$0.07/GB-month = $0.70/day for 300 GB; conservative $0.8167/day for 300 GB (the bill's +17% GB-hour overrun) (provider_resources_20261101.json :: conclusion.volume_300_gb)",
+  "retention": {
+   "lower": "3 days: search ~1 day, six trainings ~1.7 days back to back",
+   "expected": "7 days: with the maintainer's evidence review between the search and the trainings",
+   "upper": "14 days at 350 GB with the overrun"
+  },
+  "capacity": "the search's states take ~274 GB; six units' save points (5.91 GB each, h1pa.json :: storage.bytes.save_point) and checkpoints (2.38 GB) add ~50 GB: 300 GB cannot hold both unless the non-Top-1 search states are retired after the evidence audit (a maintainer decision) -- or the volume is 350 GB",
+  "save_time": "274 GB at 132.5 MB/s measured copy+re-identify = 0.57 h over the search (~9 s per 1.19 GB state); a 5.91 GB save point ~45 s",
+  "usd": {
+   "lower": {
+    "days": 3,
+    "gb": 300,
+    "usd": 2.1
+   },
+   "expected": {
+    "days": 7,
+    "gb": 300,
+    "usd": 4.9
+   },
+   "upper": {
+    "days": 14,
+    "gb": 350,
+    "usd": 13.34
+   }
+  }
+ },
+ "5_inputs_session": {
+  "generated_tokens": {
+   "H-T_state_eval": 193226,
+   "H-N_state_eval_expected": 167406,
+   "H-N_state_eval_all_1722_prompts": 244036,
+   "calibration_top_up": 40748
+  },
+  "rates": "the L40S check's measured generation 437.3 (H-T) and 258.5 (H-N) tokens/s (report.json :: operations.generation.tokens_per_second); upper at half those rates, H-N over all 1,722 prompts, 1 h setup",
+  "hours_usd": {
+   "lower": {
+    "hours": 1.02,
+    "usd": 1.13
+   },
+   "expected": {
+    "hours": 1.12,
+    "usd": 1.24
+   },
+   "upper": {
+    "hours": 2.39,
+    "usd": 2.65
+   }
+  }
+ },
+ "totals_usd": {
+  "lower": 68.98,
+  "expected": 82.74,
+  "conservative": 132.18,
+  "hard_cap": 171.61,
+  "composition": "inputs + search + volume + six trainings; conservative = inputs upper + search conservative (the deadline) + volume upper + trainings upper (per-unit deadlines); hard_cap = the same with the 38-DEPTH search",
+  "with_10_usd_engineering_reserve": {
+   "lower": 78.98,
+   "expected": 92.74,
+   "conservative": 142.18,
+   "hard_cap": 181.61
+  }
+ },
+ "gaps": {
+  "left": {
+   "research_a": 80.02,
+   "project": 81.68,
+   "provider_balance": 79.23,
+   "provider_hourly_spend_limit": 80.0,
+   "_provider_hourly_spend_limit": "per hour (provider docs), not cumulative: no constraint on a $1.11/h pod (corrected 2026-11-01)"
+  },
+  "by_scenario_with_reserve": {
+   "lower": {
+    "without_reserve": 68.98,
+    "with_10_reserve": 78.98,
+    "gap_vs_research_a": -1.04,
+    "gap_vs_project": -2.7,
+    "gap_vs_provider_balance": -0.25
+   },
+   "expected": {
+    "without_reserve": 82.74,
+    "with_10_reserve": 92.74,
+    "gap_vs_research_a": 12.72,
+    "gap_vs_project": 11.06,
+    "gap_vs_provider_balance": 13.51
+   },
+   "conservative": {
+    "without_reserve": 132.18,
+    "with_10_reserve": 142.18,
+    "gap_vs_research_a": 62.16,
+    "gap_vs_project": 60.5,
+    "gap_vs_provider_balance": 62.95
+   },
+   "hard_cap": {
+    "without_reserve": 171.61,
+    "with_10_reserve": 181.61,
+    "gap_vs_research_a": 101.59,
+    "gap_vs_project": 99.93,
+    "gap_vs_provider_balance": 102.38
+   }
+  },
+  "reading": "the expected total with the $10 reserve ($92.74) exceeds every remaining amount by $11-14; the conservative deadline total ($142.18) by about $62; only the lower scenario fits"
+ },
+ "levers_that_change_no_protocol": [
+  "prune_weights after the evidence audit (volume, not compute)",
+  "running C1 first: its steps are the cheapest and its cost the best measured",
+  "an A100 at micro-batch 3 for the search (a hardware change, separate approval)"
+ ],
+ "authorizes": "nothing",
+ "revised_utc": "2026-11-01: A2 re-priced at the rebuilt pack's 6,866 optimizer steps; provider balance 79.23 (provider_resources_20261101.json)"
+}

@@ -1,0 +1,179 @@
+{
+ "schema": "aadistill.stage1.projected_residual.engineering_validation/v2",
+ "run_id": "be_20261028_095332",
+ "study": "B-E",
+ "tiny": false,
+ "device": "cuda:0",
+ "config": {
+  "path": "configs/stages/stage-1/projected_residual/engineering_validation.json",
+  "sha256": "d8fd84fd6aa641be1fa4f4f3a72656e96a9aafd5a4485aa19c71d8ea604a442f"
+ },
+ "environment": {
+  "python": "3.12.3",
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1",
+  "cuda_runtime": "12.8",
+  "gpu": "NVIDIA L40S",
+  "capability": [
+   8,
+   9
+  ],
+  "driver": "595.91.07",
+  "vllm": "0.27.1"
+ },
+ "checks": {
+  "initialization": {
+   "num_parameters": 902911488,
+   "num_parameters_cost_model": 902911488,
+   "seconds": 626.2,
+   "calibration_positions": 228237,
+   "energy_captured_min": {
+    "pooled_energy_captured": 0.931222,
+    "attn_in_energy_captured": 0.94939,
+    "ffn_in_energy_captured": 0.912544,
+    "residual_in_energy_under_declared_basis": 0.675976,
+    "attn_out_energy_under_declared_basis": 0.430989,
+    "ffn_out_energy_under_declared_basis": 0.480699
+   },
+   "config_sha256": "3dcd2c70117f5c112b211ac2a3f95c08503be6c3933751bb0058ccf491606f8d",
+   "timings": {
+    "load_s": 5.4,
+    "statistics_s": 421.2,
+    "bases_s": 133.7
+   },
+   "status": "PASS"
+  },
+  "structural_fold": {
+   "device": "cpu",
+   "dtype": "float32",
+   "probe_tokens": 256,
+   "max_abs_logit_diff": 0.000652700662612915,
+   "max_abs_logit": 20.281524658203125,
+   "relative": 3.218203136167684e-05,
+   "_": "whether the fold is the same function; device numerics are fold_numerics'",
+   "criterion": "max |diff| / max |logit| <= 0.001 (CPU, float32)",
+   "status": "PASS"
+  },
+  "fold_cuda": {
+   "max_abs_logit_diff_fp32": 0.006077289581298828,
+   "max_abs_logit_diff_bf16": 12.03125,
+   "bf16_vs_fp32_same_model": 11.220019340515137,
+   "diagnostics": {
+    "mean_abs_logit_diff_bf16": 0.5231633107954016,
+    "argmax_agreement_bf16": 0.6562500013969839
+   },
+   "positions": 768,
+   "device_name": "NVIDIA L40S",
+   "attn_implementation": {
+    "factored": "sdpa",
+    "folded": "sdpa"
+   },
+   "dtypes": {
+    "factored": "torch.bfloat16",
+    "folded": "torch.bfloat16"
+   },
+   "criterion": "on the L40S, over the whole probe: max |folded_bf16 - factored_bf16| <= factor x max |factored_bf16 - factored_fp32|",
+   "problems": [],
+   "status": "PASS"
+  },
+  "trainer_smoke": {
+   "status": "FAIL",
+   "why": "not measured: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 298.00 MiB. GPU 0 has a total capacity of 44.39 GiB of which 77.31 MiB is free. Including non-PyTorch memory, this process has 44.31 GiB memory in use. Of the allocated memory 42.56 GiB is allocated by PyTorch, and 1.20 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)"
+  },
+  "resume": {
+   "status": "FAIL",
+   "why": "not measured: RuntimeError: no uninterrupted run to compare with: the trainer smoke failed"
+  },
+  "checkpoint_identity": {
+   "resave_shards_identical": true,
+   "shards": {
+    "model.safetensors": "ee4caf42f364673bbbbaf203367c373ad15fa457f2796e8ad2da75fe113406a4"
+   },
+   "folded_class": "Qwen3ForCausalLM",
+   "folded_reload_max_abs_diff": 0.0,
+   "folded_shards": {
+    "model.safetensors": "e65a58614ff780b4761ef3c678fd123d251c0ec89f1fbf6dac1e161cf9d2d1f7"
+   },
+   "folded_config_sha256": "6428ec0e4b4d41a3cc50b3695e6a443977f1c5d2ad104a81252a235fb6f7db4d",
+   "status": "PASS"
+  },
+  "gpu_isolation": {
+   "status": "PASS",
+   "problems": [],
+   "torch_child": {
+    "pid": 2946,
+    "returncode": 0,
+    "seconds": 714.5
+   },
+   "gpu_before": {
+    "read_utc": "2026-10-28T10:14:06+00:00",
+    "known": true,
+    "name": "NVIDIA L40S",
+    "driver": "595.91.07",
+    "used_mib": 0,
+    "total_mib": 46068,
+    "compute_processes": []
+   },
+   "gpu_after": {
+    "read_utc": "2026-10-28T10:16:18+00:00",
+    "known": true,
+    "name": "NVIDIA L40S",
+    "driver": "595.91.07",
+    "used_mib": 0,
+    "total_mib": 46068,
+    "compute_processes": []
+   },
+   "criterion": "the PyTorch checks' child process exited before the engine started, the parent never imported torch, and nvidia-smi showed no compute process and at most max_used_mib_before_engine MiB in use when the engine was started"
+  },
+  "vllm": {
+   "status": "FAIL",
+   "problems": [
+    "median |delta| 0.2344484751586915 exceeds 0.1 nats"
+   ],
+   "criteria": {
+    "median_abs_realized_logprob_delta_max": 0.1,
+    "confident_margin_nats": 1.0,
+    "confident_top1_agreement_min": 0.98,
+    "confident_positions_min": 20
+   },
+   "positions": 761,
+   "median_abs_realized_logprob_delta": 0.2344484751586915,
+   "max_abs_realized_logprob_delta": 3.172270316528321,
+   "p99_abs_realized_logprob_delta": 1.8998063825378417,
+   "confident_positions": 295,
+   "confident_top1_agreement": 0.9864406779661017,
+   "finish_reasons": [
+    "length",
+    "length",
+    "length",
+    "length",
+    "length",
+    "length",
+    "length"
+   ],
+   "generated_tokens": [
+    128,
+    128,
+    128,
+    128,
+    128,
+    128,
+    128
+   ],
+   "max_model_len": 8192,
+   "load_seconds": 116.6,
+   "generate_seconds": 0.7,
+   "versions": {
+    "vllm": "0.27.1",
+    "torch": "2.13.0+cu130",
+    "cuda": "13.0"
+   },
+   "device": "NVIDIA L40S",
+   "scientific_use": false
+  }
+ },
+ "passed": false,
+ "scientific_use": false,
+ "authorizes": "nothing",
+ "written_utc": "2026-10-28T10:16:18+00:00"
+}

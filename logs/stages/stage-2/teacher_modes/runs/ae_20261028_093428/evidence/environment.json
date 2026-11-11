@@ -1,0 +1,26 @@
+{
+ "python": "3.12.3",
+ "torch": "2.11.0+cu128",
+ "transformers": "5.13.1",
+ "cuda": "12.8",
+ "gpu": {
+  "read_utc": "2026-10-28T09:48:31+00:00",
+  "known": true,
+  "name": "NVIDIA A100-SXM4-80GB",
+  "driver": "595.91.07",
+  "used_mib": 0,
+  "total_mib": 81920,
+  "compute_processes": []
+ },
+ "vllm": {
+  "vllm": "0.27.1",
+  "torch": "2.13.0+cu130",
+  "cuda": "13.0"
+ },
+ "inputs": {
+  "student": {
+   "path": "/workspace/aad/artifacts/stages/stage-2/reasoning_data/h1pa/pca_original/20260726",
+   "model_safetensors_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3"
+  }
+ }
+}

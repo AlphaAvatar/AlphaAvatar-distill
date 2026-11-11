@@ -1,0 +1,747 @@
+{
+ "schema": "aadistill.study_phase_grant/v1",
+ "status": "granted",
+ "study": "A-TM",
+ "proposed_utc": "2026-10-31",
+ "granted_by": "maintainer",
+ "decision": "Maintainer 2026-10-31 'Research A Immediate STOP and Token-Matched Data Completion': 「本次指令允许在现有 Research A 和项目累计硬上限内开展补数，但旧的冻结科学身份不能被当成新版授权使用。必须先完成合法的设计变更、预算核算及新的适用授权，所有既有实际支出必须计入累计账本，不得重置额度。」 and 2026-10-31 'Research A STOP、Token-Matched 数据补齐及 D4 Full Search 方案审查': 「可以在适用的合法授权范围内继续补充 Teacher 数据；如果旧冻结授权不能覆盖新设计，必须先处理新的授权身份，不能直接沿用旧的科学执行权限。不得自动提高预算或改用 A100。」 || AMENDED by the maintainer's 2026-11-01 'Research A v2: Execute A1 First': 「现在优先完成 A1：Hybrid Teacher Thinking Mode Distillation 的完整实验，包括新 Full Search 初始化、两个 Seed 的 Recovery Training 和正式评估。」「A1 本次新增费用的总硬上限建议为 $77.00，包含工程波动以及全部本次新增的持续性资源费用，不得超过剩余 Research A、项目和 Provider 的有效上限。」「不提高原有 Research A 累计 $142.19、项目累计 $868 上限，不自动更改 Provider 的消费限制。」「不允许创建 A100 Pod。」",
+ "ceiling_usd": 161.1023,
+ "_ceiling": "sessions only: the supplement's $15.8689 (closed) + $63.66 for the A1 phase's sessions; the A1 phase's $77.00 hard cap = $63.66 sessions + $13.34 for the new 350 GB volume (14 days at the bills' +17%), so all new spend stays <= $77.00 and Research A's cumulative $142.19 is not exceeded ($62.17 spent before the phase) || AMENDED 2026-11-05 (Packed Full Search 正式授权): + $55.72 for kind packed_search, cumulative over its attempts -> $135.2489 (sessions only; the search's volume reserve $13.34 is booked by its storage record, outside the ceiling). Research A's cumulative cap $142.19 + $69.06 = $211.25 (research_a_cumulative): v1 $46.3017 + this ceiling + the two 350 GB volumes' reserves $26.68 = $208.23, inside it || AMENDED 2026-11-09 (A-MIX Stage 3 正式授权): spent $115.9323 + kind train_sr_mix's cumulative $45.17 = $161.1023; the closed stage3_sr block's unspent $42.4439 is not carried. The conditional CPU-pod backup ($2.00) is NOT added: US-TX-3 offers no CPU pod (stage3_cpu_backup_probe.json), so no backup kind exists",
+ "per_session_hard_cap_usd": 55.72,
+ "_per_session": "the largest kind cap (packed_search's cumulative $55.72, 2026-11-05); each kind's own cap is session_hard_caps_usd[kind], enforced at issue",
+ "session_hard_caps_usd": {
+  "supplement": 0.0,
+  "inputs": 2.65,
+  "search": 41.41,
+  "train_a1": 14.1,
+  "tool_pilot": 2.5,
+  "tool_generation_t2507": 2.78,
+  "tool_generation": 9.13,
+  "tool_generation_sr": 6.16,
+  "tool_generation_sr_t2507": 2.31,
+  "packed_search": 55.72,
+  "train_sr_a1": 18.33,
+  "train_sr_a2": 37.54,
+  "train_sr_c1": 17.37,
+  "train_sr_mix": 45.17
+ },
+ "project_cumulative_cap_usd": 1000.0,
+ "gpus": {
+  "NVIDIA L40S": 1.19
+ },
+ "gpu_count_max": 1,
+ "_gpus": "the L40S only, at most one GPU on one pod; no A100",
+ "engineering_reserve_usd": 10.0,
+ "network_volume": {
+  "am5m373kuq": {
+   "datacenter": "EUR-IS-2",
+   "size_gb": 55,
+   "role": "historical archive; its storage is booked in the cumulative ledger, outside the $77"
+  },
+  "a1_phase": {
+   "size_gb": 350,
+   "datacenter": "US-TX-3",
+   "reserve_usd": 26.68,
+   "role": "the full search's states and journal (prune_weights false), the inputs' shards, A1's checkpoints; lifecycle decided by the maintainer after the evidence audit",
+   "id": "4rhubprswo",
+   "created_utc": "2026-11-01T12:55:01Z",
+   "_reserve_2026_11_07": "+$13.34 (14 more days), maintainer 2026-11-07, Stage 3 authorization, section IV; booked by its storage record"
+  },
+  "packed_search": {
+   "id": "thprcgh7s9",
+   "size_gb": 350,
+   "datacenter": "US-TX-3",
+   "created_utc": "2026-11-05T19:40:35Z",
+   "reserve_usd": 26.68,
+   "storage_record": "logs/stages/stage-2/teacher_modes/storage/packed_search_volume_thprcgh7s9.json",
+   "role": "the packed search's journal, states (prune_weights false), statistics caches and Top-1; its storage is booked by the storage record, outside the ceiling",
+   "_reserve_2026_11_07": "+$13.34 (14 more days), maintainer 2026-11-07, Stage 3 authorization, section IV; booked by its storage record"
+  }
+ },
+ "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them || AMENDED 2026-11-04: the L40S tool pilot -- kind tool_pilot through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --pilot) on the frozen pilot plan 0a1c831fdfe4... and task file e67e8acb7050..., measurement only, one L40S on am5m373kuq, hard cap $2.50, inside this grant's remaining envelope || AMENDED 2026-11-04: the tool pilot's placement -- any Secure Cloud datacenter offering one L40S at or below the grant's price, no network volume (the pod's container disk, sealed shards pulled to the dev box and resumed from them); its $2.50 kind cap cumulative over every attempt || AMENDED 2026-11-04 (maintainer review of a143b7ed, section 4): Thinking-2507's formal tool generation -- kind tool_generation_t2507 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --lineage thinking_2507) on the canonical bounded plan, its in-session L40S device admission first, one L40S on the container disk with no network volume, cumulative hard cap $2.78 || AMENDED 2026-11-05 (maintainer review of f06ccd4, sections 1, 3 and 4): Thinking-2507's top-up to the common-support targets inside the same cumulative $2.78, its registered device admission reused with the pod's own confirmation; and the hybrid's formal tool generation -- kind tool_generation through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (tool_session.py --lineage hybrid) on the plan rebuilt at six_category_common_support@v1, one L40S on the container disk with no network volume, cumulative hard cap $9.13 || AMENDED 2026-11-05 (maintainer 'Packed Full Search 正式授权'): the hybrid's packed Full Search -- kind packed_search through scripts/stages/stage-2/teacher_modes/token_matched_phase.py (packed_full_search.py) over the frozen calibration v2 profiles and state_eval_hybrid@v3, one Secure Cloud L40S on the network volume thprcgh7s9 (US-TX-3, 350 GB), cumulative hard cap $55.72 over every attempt, resumed from its journal after an ordinary failure",
+ "retries": "ordinary pre-generation engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); sealed records are never regenerated; a deterministic failure is never retried unchanged",
+ "application": {
+  "path": "logs/budget/applications/research_a_tm_2026-10-31/proposal.json"
+ },
+ "never": [
+  "A2's or C1's training or evaluation; any arm but A1",
+  "an A100 or any card other than the L40S; a budget or limit increase",
+  "Research A v1's frozen identity or grant as authority for any of this",
+  "Research B"
+ ],
+ "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind; and tool_pilot artifacts, one per attempt, measurement only, together capped by the kind's cumulative $2.50; and tool_generation_t2507 artifacts, one per attempt, together capped by the kind's cumulative $2.78 (its device admission and formal generation only); and tool_generation artifacts, one per attempt, together capped by the kind's cumulative $9.13 (the hybrid's formal generation only); and tool_generation_sr artifacts, one per attempt, together capped by the kind's cumulative $6.16, and tool_generation_sr_t2507 artifacts, together capped by the kind's cumulative $2.31 (six_category_schema_restored@v1's formal generation only); and packed_search artifacts, one per attempt, together capped by the kind's cumulative $55.72 (the hybrid's packed Full Search only, on its own volume thprcgh7s9)",
+ "_session_hard_caps": "supplement 0: done, closed for new work. inputs: the calibration top-up and the state evaluation's generation ($2.65). search: the hybrid D4 full search ($41.41). train_a1: A1's two seeds trained and evaluated in turn ($7.05 each). A retry of a kind draws on the same envelope; the phase total never exceeds the ceiling. tool_pilot: the pilot ($2.50 cumulative). tool_generation_t2507: Thinking-2507's device admission, formal generation and top-up ($2.78 cumulative). tool_generation: the hybrid's formal generation at the common-support composition ($9.13 cumulative). packed_search: the hybrid's packed Full Search ($55.72 cumulative over its attempts; maintainer 2026-11-05). train_sr_mix: A-MIX-6cat-sr's two seeds trained and each checkpoint evaluated in both modes ($45.17 cumulative over its attempts, the first at most $40.31).",
+ "phase_a1": {
+  "decided_utc": "2026-11-01",
+  "hard_cap_usd": 77.0,
+  "phase_caps_usd": {
+   "inputs": 2.65,
+   "search": 41.41,
+   "storage_350gb_14d": 13.34,
+   "a1_seed_20260726": 7.05,
+   "a1_seed_20260801": 7.05
+  },
+  "sum_of_phase_caps_usd": 71.5,
+  "order": [
+   "inputs (Phase A)",
+   "search (Phase B)",
+   "train_a1 seed 20260726 then 20260801 (Phases C and D)"
+  ],
+  "stop_if": [
+   "the scientific protocol, calibration distribution, state evaluation or training objective would have to change",
+   "the data types cannot meet the frozen quotas",
+   "the full search cannot finish inside its deadline",
+   "a GPU change or out of memory",
+   "any lineage, tokenizer, RoPE, checkpoint, resume or data-hash gate fails",
+   "a phase or the global cap is reached",
+   "the provider's balance or limits block the next legal step"
+  ],
+  "never": [
+   "A2 or C1 training or evaluation",
+   "an A100",
+   "Research B",
+   "a merge to main",
+   "raising a cap or the provider's limits"
+  ]
+ },
+ "amendments": [
+  {
+   "utc": "2026-11-01",
+   "by": "maintainer decision 'Execute A1 First'",
+   "previous_ceiling_usd": 95.8883,
+   "previous_scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it",
+   "previous_session_hard_caps_usd": {
+    "supplement": 63.76
+   }
+  },
+  {
+   "utc": "2026-11-04",
+   "by": "maintainer decision 'Research A Tool Pilot 正式授权（方案 B）' (2026-11-04), reaffirmed the same day",
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1
+   },
+   "previous_scope_sha256": "ee8723d727c4580fa87f0dee9cb19ce2ffb4d3b625c52496aa03e7a6b4337d7a",
+   "added": "kind tool_pilot and its block"
+  },
+  {
+   "utc": "2026-11-04",
+   "by": "maintainer decision 'GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正' (2026-11-04), section 1",
+   "previous_tool_pilot": {
+    "network_volume": "am5m373kuq"
+   },
+   "previous_scope_sha256": "eeeba2cd81a415109a9fde77c35ef4a4ce037e5eacbef83e38389a3640030eea",
+   "changed": "tool_pilot: placement (no network volume, any Secure Cloud L40S datacenter), the kind cap cumulative over attempts; nothing else",
+   "unchanged": "ceiling, per-session cap, project cap, cards and price, every other kind's cap"
+  },
+  {
+   "utc": "2026-11-04",
+   "by": "maintainer review of a143b7ed (2026-11-04), section 4",
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1,
+    "tool_pilot": 2.5
+   },
+   "previous_scope_sha256": "63574c1e5035eeba58e7ab4819170d9beb7b53229954ced9445aa3ac2b7d4f73",
+   "added": "kind tool_generation_t2507 ($2.78 cumulative) and its block",
+   "unchanged": "ceiling, per-session cap, project cap, cards and price, every other kind's cap; the hybrid's tool_generation is NOT authorized"
+  },
+  {
+   "utc": "2026-11-05",
+   "by": "maintainer independent review of f06ccd4 (2026-11-05), sections 1, 3 and 4",
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1,
+    "tool_pilot": 2.5,
+    "tool_generation_t2507": 2.78
+   },
+   "previous_scope_sha256": "69d7250b52d5d193113cfbeab45fa0433c76c3a98c825ef09318cb6f3380267c",
+   "added": "kind tool_generation ($9.13 cumulative) and its block; tool_generation_t2507.top_up (inside the unchanged cumulative $2.78)",
+   "unchanged": "ceiling, per-session cap, project cap, cards and price, every other kind's cap"
+  },
+  {
+   "utc": "2026-11-05",
+   "by": "maintainer R1 approval (2026-11-05), section IV",
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1,
+    "tool_pilot": 2.5,
+    "tool_generation_t2507": 2.78,
+    "tool_generation": 9.13
+   },
+   "previous_scope_sha256": "545b585f3b6ea74f850c572208a11dc25e75fec50ce8ca22dc3887840316fcb4",
+   "added": "kinds tool_generation_sr ($6.16 cumulative) and tool_generation_sr_t2507 ($2.31 cumulative) and their blocks; $8.47 together, inside the unchanged ceiling",
+   "unchanged": "ceiling, per-session cap, project cap ($868), cards and price, every other kind's cap"
+  },
+  {
+   "utc": "2026-11-05",
+   "by": "maintainer 'AlphaAvatar-distill — Packed Full Search 正式授权' (2026-11-05), sections II-IV",
+   "ceiling_usd": 79.5289,
+   "per_session_hard_cap_usd": 41.41,
+   "project_cumulative_cap_usd": 868.0,
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1,
+    "tool_pilot": 2.5,
+    "tool_generation_t2507": 2.78,
+    "tool_generation": 9.13,
+    "tool_generation_sr": 6.16,
+    "tool_generation_sr_t2507": 2.31
+   },
+   "previous_scope_sha256": "d7c022035ad1c8b3f1ffeebd1e8997b49e5a65ee015d0fc631473b995955783f",
+   "added": "kind packed_search ($55.72 cumulative) and its block; the volume thprcgh7s9 ($13.34 reserve, booked by its storage record); research_a_cumulative",
+   "raised": {
+    "ceiling_usd": [
+     79.5289,
+     135.2489
+    ],
+    "per_session_hard_cap_usd": [
+     41.41,
+     55.72
+    ],
+    "project_cumulative_cap_usd": [
+     868.0,
+     930.0
+    ],
+    "research_a_cumulative_cap_usd": [
+     142.19,
+     211.25
+    ]
+   },
+   "unchanged": "cards and price (one L40S at <= $1.19/h), every other kind's cap, the scope of every earlier kind"
+  },
+  {
+   "utc": "2026-11-07",
+   "by": "maintainer 'AlphaAvatar-distill — Stage 3 六单元正式授权' (2026-11-07), sections I-VIII",
+   "ceiling_usd": 135.2489,
+   "per_session_hard_cap_usd": 55.72,
+   "project_cumulative_cap_usd": 930.0,
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1,
+    "tool_pilot": 2.5,
+    "tool_generation_t2507": 2.78,
+    "tool_generation": 9.13,
+    "tool_generation_sr": 6.16,
+    "tool_generation_sr_t2507": 2.31,
+    "packed_search": 55.72
+   },
+   "previous_scope_sha256": "fe587742014cfd7bf572984efc572e2c6eb3928c21e975e146639ab71a834d72",
+   "added": "kinds train_sr_a1 / train_sr_a2 / train_sr_c1 (cumulative $18.33 / $37.54 / $17.37 = $73.24) and the stage3_sr block binding the plan and budget as amended (explicit cross_context); the thprcgh7s9 reserve extension ($13.34) and its <= 50 GB / <= $4 expansion; 4rhubprswo's next 14 days ($13.34)",
+   "closed": "packed_search (COMPLETE; its unspent $27.55 is not carried)",
+   "raised": {
+    "ceiling_usd": [
+     135.2489,
+     158.3762
+    ],
+    "project_cumulative_cap_usd": [
+     930.0,
+     1000.0
+    ],
+    "research_a_cumulative_cap_usd": [
+     211.25,
+     262.04
+    ]
+   },
+   "unchanged": "the per-session hard cap $55.72, cards and price (one Secure L40S at <= $1.19/h), every earlier kind's cap and scope; the project cap's extra room funds no Stage 3 GPU beyond $73.24 and no other experiment"
+  },
+  {
+   "utc": "2026-11-09",
+   "by": "maintainer 'AlphaAvatar-distill — A-MIX Stage 3 与 Dev Box 备份正式授权' (2026-11-09 UTC), sections I-VI",
+   "ceiling_usd": 158.3762,
+   "per_session_hard_cap_usd": 55.72,
+   "project_cumulative_cap_usd": 1000.0,
+   "previous_session_hard_caps_usd": {
+    "supplement": 0.0,
+    "inputs": 2.65,
+    "search": 41.41,
+    "train_a1": 14.1,
+    "tool_pilot": 2.5,
+    "tool_generation_t2507": 2.78,
+    "tool_generation": 9.13,
+    "tool_generation_sr": 6.16,
+    "tool_generation_sr_t2507": 2.31,
+    "packed_search": 55.72,
+    "train_sr_a1": 18.33,
+    "train_sr_a2": 37.54,
+    "train_sr_c1": 17.37
+   },
+   "added": "kind train_sr_mix (cumulative $45.17, first attempt $40.31) and the stage3_mix block binding the mixed plan, budget and freeze record by sha256",
+   "closed": "stage3_sr (COMPLETE; its unspent $42.4439 is not carried)",
+   "raised": {
+    "ceiling_usd": [
+     158.3762,
+     161.1023
+    ],
+    "research_a_cumulative_cap_usd": [
+     262.04,
+     264.77
+    ]
+   },
+   "not_taken": "the conditional CPU-pod backup kind (<= $2.00): US-TX-3 offers no CPU pod, so the backup rides on train_sr_mix",
+   "unchanged": "the project cap $1,000, the per-session hard cap $55.72, the card and price (one Secure L40S at <= $1.19/h), every earlier kind's cap and scope; no network volume is deleted"
+  }
+ ],
+ "tool_pilot": {
+  "approves": "tool_pilot measurement only",
+  "granted_by": "maintainer",
+  "decision": "Research A Tool Pilot 正式授权（方案 B）(2026-11-04), reaffirmed 2026-11-04 in '评估标准独立复核、L40S Generation Gate 修复及 Pilot 执行', section 5: '此前 Pilot 授权保持有效 ... 按已有批准完成 Pilot-Only Source Admission 与最小 Grant Amendment' -- kind tool_pilot, Qwen/Qwen3-4B@1cfa9a72 Hybrid Thinking and Non-Thinking, 397 tasks / 794 runs, one NVIDIA L40S, 55-minute driver budget, new-cost hard cap $2.50, volume am5m373kuq; the 7 signature fields filled by the agent on that explicit written instruction",
+  "date": "2026-11-04",
+  "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
+  "tasks_sha256": "e67e8acb7050bd6e150b93af76683a2c77937e4d01c650ee398448b747b6fea1",
+  "source_admission": "logs/stages/stage-2/teacher_modes/audit/tool_pilot_source_admission.json",
+  "hard_cap_usd": 2.5,
+  "driver_minutes": 55.0,
+  "gpu": "NVIDIA L40S",
+  "network_volume": null,
+  "placement": {
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "network_volume": null,
+   "data_centers": "any Secure Cloud datacenter offering the L40S at or below the grant's price",
+   "work_root": "/workspace",
+   "storage": "the pod's container disk; sealed shards pulled to the dev box on every poll and staged back to a replacement pod (--resume-from); no network volume"
+  },
+  "cap_is_cumulative": true,
+  "attempts": "each attempt is a new run with a new one-use artifact; its hard cap is at most the kind cap less the closeout all-in of every earlier tool_pilot run (token_matched_phase.kind_cap_problems)",
+  "ceiling_usd_at_amendment": 79.5289,
+  "draws_on": "this grant's remaining envelope; the ceiling, the per-session cap, the project cap and the card list unchanged",
+  "kind": "tool_pilot (teacher_generation only; never formal, training or evaluation)",
+  "requires": [
+   "the pilot-only source admission signed (tool_pilot.admission_problems)",
+   "issue, launch and pod checks as the application lists them"
+  ],
+  "amended": {
+   "date": "2026-11-04",
+   "decision": "maintainer 2026-11-04 ('GPU/RunPod 操作知识更新、Pilot 跨数据中心调度与恢复修正', section 1): '本次 Pilot 的候选范围扩大为所有满足现有运行环境、价格、资源和数据持久化要求的 Secure Cloud L40S，不再固定 EUR-IS-2 ... 本轮 Pilot 所有 attempt 的累计新增费用上限仍为 $2.50 ... 不能把 $2.50 变成每个 attempt 都可重新使用的额度'",
+   "changed": [
+    "network_volume am5m373kuq -> none (placement)",
+    "cap_is_cumulative"
+   ],
+   "by": "the agent, on that explicit written instruction"
+  }
+ },
+ "tool_generation_t2507": {
+  "approves": "tool_generation_t2507 device admission and formal tool_generation",
+  "granted_by": "maintainer",
+  "decision": "maintainer 2026-11-04 (review of a143b7ed), section 4, 'T2507 独立 L40S device admission + 正式 tool_generation': '复用正式池。在同一正式会话中使用最小 GPU 准入：真实 Teacher revision、tokenizer、chat template、vLLM lock、8,184 context 和代表性 generation path；通过后继续。不做 CPU-only rehearsal，也不做完整 pilot。默认 L40S；只有测得 OOM 才可用 A100，库存或环境问题不得作为理由。将 T2507 runner 上限 $2.7742 按正常金额规则向上取整至 $2.78 ... 本轮同意在累计新增 $2.78 上限内完成 T2507 的上述设备准入和正式 tool_generation' -- valid only while the source admission, teacher lineage, frozen protocol, model parameters, import and recovery gates all pass; not extended to training, search or any other experiment; a failed first admission is repaired only inside the same cumulative budget",
+  "date": "2026-11-04",
+  "hard_cap_usd": 2.78,
+  "cap_is_cumulative": true,
+  "_hard_cap": "the plan's runner all-in for Thinking-2507 ($2.7742 at $1.19/h: 66 driver minutes, hard terminate 136.2 minutes, logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json :: price) rounded UP to the cent; cumulative over every attempt of the kind (token_matched_phase.kind_cap_problems)",
+  "gpu": "NVIDIA L40S",
+  "placement": {
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "network_volume": null,
+   "data_centers": "any Secure Cloud datacenter offering the L40S at or below the grant's price",
+   "work_root": "/workspace",
+   "storage": "the pod's container disk; sealed shards pulled to the dev box on every poll and staged back to a replacement pod (--resume-from); no network volume"
+  },
+  "network_volume": null,
+  "source_admission": "logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json",
+  "device_admission": "configs/stages/stage-2/teacher_modes/t2507_device_admission.json",
+  "ceiling_usd_at_amendment": 79.5289,
+  "kind": "tool_generation_t2507 (teacher_generation only: Thinking-2507's bounded tool-calling episodes for C1-6cat's data; never training, search, calibration, state evaluation or formal evaluation)",
+  "requires": [
+   "the formal source admission signed and naming the plan's pool content (tool_source_admission.problems)",
+   "the bounded plan verified against the canonical pool at issue (tool_generation_plan.verified) and its bound task file on the pod (verified_bound)",
+   "the in-session device admission passing before any formal invocation (tool_session.run_device_admission), or -- from 2026-11-05 -- its registered result reused with the pod's own confirmation (tool_session.device_confirmation)",
+   "issue, launch and pod checks as for every container kind"
+  ],
+  "card_rule": "the L40S only; an A100 needs a measured CUDA out-of-memory on the L40S and a separate authorization -- stock or environment problems are never a reason",
+  "attempts": "each attempt is a new run with a new one-use artifact; its hard cap is at most $2.78 less the closeout all-in of every earlier tool_generation_t2507 run; sealed shards are receipted and resumed, never regenerated",
+  "never": [
+   "the hybrid's tool_generation (its grant is deferred until the A2 design and the state-evaluation coverage plan are settled; at least $8.48 then)",
+   "C1-6cat's training or any search",
+   "an A100 without a measured OOM"
+  ],
+  "top_up": {
+   "decision": "maintainer 2026-11-05 (independent review of f06ccd4), rulings 1-2 and sections 1 and 3: the completed device admission and formal generation accepted; the two SHORTFALLs not approved; '授权继续在原 tool_generation_t2507 累计 $2.78 硬上限内完成补数。先核对两次历史 attempt 的全部已发生费用和未入账部分，并使用真实剩余额度，不重置累计上限' and '相同 Teacher、revision、引擎依赖和合规 GPU 环境下，可以复用已登记的设备适配证据；新 Pod 仍须实际确认能加载和运行，不必无意义地重复完整的八任务准入采样'",
+   "date": "2026-11-05",
+   "targets": "the common-support training targets (six_category_common_support.json): error_recovery 56,565.5 and mcp_agent 84,848.3 supervised tokens; every other cell already reached",
+   "spent_before_usd": {
+    "a_tool_generation_t2507_20261104_194048": 0.1459,
+    "a_tool_generation_t2507_20261104_195411": 1.097,
+    "provider_posted_2026_11_05": {
+     "t9mu5mwk20uchj": 0.1417,
+     "0lbf43rtt6yn2a": 1.0943
+    },
+    "ledger_rule": "the closeout all-in estimates (higher than the posted amounts) stay the booked spend"
+   },
+   "remaining_usd": 1.5371,
+   "device_admission": "reused from configs/stages/stage-2/teacher_modes/t2507_device_admission.json :: registered_result; the new pod hashes the teacher snapshot first and confirms on its first formal invocation (tool_session.device_confirmation)"
+  }
+ },
+ "tool_generation": {
+  "approves": "tool_generation formal hybrid generation, six_category_common_support@v1",
+  "granted_by": "maintainer",
+  "decision": "maintainer 2026-11-05 (independent review of f06ccd4), ruling 5 and section 4, 'Hybrid 正式生成': '批准按 common-support 新设计完成 Hybrid 的正式数据生成，预计 $2.65。runner 的实际 all-in 硬上限为 $9.127，Grant 取向上取整的 $9.13。此金额是本次 kind 所有 attempt 的累计新增上限，不是每次失败后可以重置的额度。... 全部通过后在累计 $9.13 内直接完成正式生成；库存拒绝、普通工程故障和中断按既有自主恢复原则处理。不得每个小问题都停下等待新的授权。' -- generation only; not Full Search, Stage 3 training, formal benchmark evaluation or a merge into main",
+  "date": "2026-11-05",
+  "hard_cap_usd": 9.13,
+  "cap_is_cumulative": true,
+  "_hard_cap": "the runner's all-in for the hybrid session at the common-support targets ($9.127 at $1.19/h in the design record six_category_common_support.json :: price) rounded UP to the cent; cumulative over every attempt of the kind (token_matched_phase.kind_cap_problems); the session's driver deadline is its launch minutes, so it stops at a round boundary inside that cap",
+  "gpu": "NVIDIA L40S",
+  "placement": {
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "network_volume": null,
+   "data_centers": "any Secure Cloud datacenter offering the L40S at or below the grant's price",
+   "work_root": "/workspace",
+   "storage": "the pod's container disk; sealed shards pulled to the dev box on every poll and staged back to a replacement pod (--resume-from); no network volume"
+  },
+  "network_volume": null,
+  "source_admission": "logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json",
+  "ceiling_usd_at_amendment": 79.5289,
+  "kind": "tool_generation (teacher_generation only: the hybrid's bounded tool-calling episodes in both modes for A1-6cat-cs and A2-6cat-cs, and its calibration, state-evaluation and validation tool items; never training, search or formal evaluation)",
+  "requires": [
+   "the formal source admission signed and naming the plan's pool content (tool_source_admission.problems)",
+   "the plan rebuilt at the registered common-support training composition (six_category_common_support.json), bound to the pilot's and Thinking-2507's import records, verified against the canonical pool at issue (tool_generation_plan.verified) and its bound task file on the pod (verified_bound)",
+   "the generation-scoped L40S gate (the committed L40S measurement of the hybrid's engine)",
+   "issue, launch and pod checks as for every container kind"
+  ],
+  "card_rule": "the L40S only; an A100 needs a measured CUDA out-of-memory on the L40S and a separate authorization -- stock or environment problems are never a reason",
+  "attempts": "each attempt a new run and a new one-use artifact, all inside the cumulative $9.13; an ordinary pre-science failure is repaired and retried without a new decision; sealed episodes are never regenerated (resume or import)",
+  "never": [
+   "Packed Full Search, Stage 3 training, formal benchmark evaluation, a merge into main",
+   "an A100 without a measured L40S out-of-memory and a separate authorization",
+   "a reset or increase of the cumulative cap"
+  ]
+ },
+ "tool_generation_sr": {
+  "approves": "tool_generation_sr formal hybrid generation, six_category_schema_restored@v1",
+  "granted_by": "maintainer",
+  "decision": "maintainer 2026-11-05, R1 approval '原则批准方案一 R1', section IV '一次性 GPU 授权': '上述 $0 发射前校验全部通过后，允许直接启动两个正式 Teacher generation 会话。授权预算：Hybrid Thinking + Non-Thinking：本次 kind 全部 attempt 累计不超过 $6.16。Thinking-2507：本次 kind 全部 attempt 累计不超过 $2.31。两个 kind 合计累计新增硬上限 $8.47。费用全部计入 Research A、项目和 Provider 的原有有效累计上限，不重置历史费用，不自动提高 $868 项目上限。... Secure Cloud，优先一张 L40S，保持同一时刻最多一个新计费 Pod。不为本次生成新建 Network Volume ... 工程失败、Pod 库存失败、可恢复中断必须自主修复并继续；同一任务不得重新生成 ... 若真实预算硬边界或来源准入边界触发，必须安全停止' -- generation only; not Full Search, Stage 3 training, Stage 5 rollout or any formal benchmark",
+  "date": "2026-11-05",
+  "hard_cap_usd": 6.16,
+  "cap_is_cumulative": true,
+  "_hard_cap": "the maintainer's cumulative cap for every attempt of this kind (R1 approval, section IV); the plan's own runner cap is below it (logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan.json :: price); an attempt's hard cap is at most $6.16 less the closeout all-in of every earlier tool_generation_sr run (token_matched_phase.kind_cap_problems); spend on the common-support kinds never counts toward it, nor the reverse",
+  "gpu": "NVIDIA L40S",
+  "placement": {
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "network_volume": null,
+   "data_centers": "any Secure Cloud datacenter offering the L40S at or below the grant's price",
+   "work_root": "/workspace",
+   "storage": "the pod's container disk; sealed shards pulled to the dev box on every poll and staged back to a replacement pod (--resume-from); no network volume"
+  },
+  "network_volume": null,
+  "source_admission": "logs/stages/stage-2/teacher_modes/audit/tool_source_admission_schema_synth.json",
+  "ceiling_usd_at_amendment": 79.5289,
+  "kind": "tool_generation_sr (teacher_generation only: the hybrid's bounded tool-calling episodes in both modes for A1-6cat-sr and A2-6cat-sr (training) and their state-evaluation items for state_eval_hybrid@v3; never training, search, calibration or formal evaluation)",
+  "requires": [
+   "the extension's formal source admission signed and naming the plan's pool content (tool_source_admission.problems, ADMISSIONS[tool_pool@v1+schema_synth@v1])",
+   "the design's plan verified against the extension at issue (tool_generation_plan.verified, protocol tool_generation_protocol_sr.json) and its bound task file on the pod (verified_bound)",
+   "the generation-scoped L40S gate (the committed L40S measurement of the hybrid's engine)",
+   "issue, launch and pod checks as for every container kind"
+  ],
+  "card_rule": "the L40S only; an A100 needs a measured CUDA out-of-memory on the L40S and a separate authorization -- stock or environment problems are never a reason",
+  "attempts": "each attempt is a new run with a new one-use artifact; its hard cap is at most $6.16 less the closeout all-in of every earlier tool_generation_sr run; sealed shards are receipted and resumed or imported by task identity, never regenerated",
+  "never": [
+   "the common-support kinds' remaining caps as a source of funds, or the reverse",
+   "Full Search, Stage 3 training, Stage 5 rollout or any formal benchmark",
+   "an A100 without a measured OOM",
+   "a new network volume"
+  ]
+ },
+ "tool_generation_sr_t2507": {
+  "approves": "tool_generation_sr_t2507 formal Thinking-2507 generation, six_category_schema_restored@v1",
+  "granted_by": "maintainer",
+  "decision": "maintainer 2026-11-05, R1 approval '原则批准方案一 R1', section IV '一次性 GPU 授权': '上述 $0 发射前校验全部通过后，允许直接启动两个正式 Teacher generation 会话。授权预算：Hybrid Thinking + Non-Thinking：本次 kind 全部 attempt 累计不超过 $6.16。Thinking-2507：本次 kind 全部 attempt 累计不超过 $2.31。两个 kind 合计累计新增硬上限 $8.47。费用全部计入 Research A、项目和 Provider 的原有有效累计上限，不重置历史费用，不自动提高 $868 项目上限。... Secure Cloud，优先一张 L40S，保持同一时刻最多一个新计费 Pod。不为本次生成新建 Network Volume ... 工程失败、Pod 库存失败、可恢复中断必须自主修复并继续；同一任务不得重新生成 ... 若真实预算硬边界或来源准入边界触发，必须安全停止' -- generation only; not Full Search, Stage 3 training, Stage 5 rollout or any formal benchmark",
+  "date": "2026-11-05",
+  "hard_cap_usd": 2.31,
+  "cap_is_cumulative": true,
+  "_hard_cap": "the maintainer's cumulative cap for every attempt of this kind (R1 approval, section IV); the plan's own runner cap is below it (logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan.json :: price); an attempt's hard cap is at most $2.31 less the closeout all-in of every earlier tool_generation_sr_t2507 run (token_matched_phase.kind_cap_problems); spend on the common-support kinds never counts toward it, nor the reverse",
+  "gpu": "NVIDIA L40S",
+  "placement": {
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "network_volume": null,
+   "data_centers": "any Secure Cloud datacenter offering the L40S at or below the grant's price",
+   "work_root": "/workspace",
+   "storage": "the pod's container disk; sealed shards pulled to the dev box on every poll and staged back to a replacement pod (--resume-from); no network volume"
+  },
+  "network_volume": null,
+  "source_admission": "logs/stages/stage-2/teacher_modes/audit/tool_source_admission_schema_synth.json",
+  "device_admission": "configs/stages/stage-2/teacher_modes/t2507_device_admission.json",
+  "ceiling_usd_at_amendment": 79.5289,
+  "kind": "tool_generation_sr_t2507 (teacher_generation only: Thinking-2507's bounded tool-calling episodes for C1-6cat-sr (training); never training, search, calibration or formal evaluation)",
+  "requires": [
+   "the extension's formal source admission signed and naming the plan's pool content (tool_source_admission.problems, ADMISSIONS[tool_pool@v1+schema_synth@v1])",
+   "the design's plan verified against the extension at issue (tool_generation_plan.verified, protocol tool_generation_protocol_sr.json) and its bound task file on the pod (verified_bound)",
+   "the registered device admission reused and confirmed on the pod's first invocation (tool_session.device_confirmation)",
+   "issue, launch and pod checks as for every container kind"
+  ],
+  "card_rule": "the L40S only; an A100 needs a measured CUDA out-of-memory on the L40S and a separate authorization -- stock or environment problems are never a reason",
+  "attempts": "each attempt is a new run with a new one-use artifact; its hard cap is at most $2.31 less the closeout all-in of every earlier tool_generation_sr_t2507 run; sealed shards are receipted and resumed or imported by task identity, never regenerated",
+  "never": [
+   "the common-support kinds' remaining caps as a source of funds, or the reverse",
+   "Full Search, Stage 3 training, Stage 5 rollout or any formal benchmark",
+   "an A100 without a measured OOM",
+   "a new network volume"
+  ]
+ },
+ "granted_utc": "2026-11-07",
+ "_granted_utc": "the date of the latest amendment that states the project cap ($868 -> $930, maintainer 2026-11-05): derive_budget.latest_project_cap reads the newest dated grant that states one; the grant itself dates from 2026-10-31 (proposed_utc)",
+ "research_a_cumulative": {
+  "cap_usd": 264.77,
+  "previous_cap_usd": 262.04,
+  "raised_by_usd": 2.73,
+  "decided_by": "maintainer 2026-11-09 (UTC), 'AlphaAvatar-distill — A-MIX Stage 3 与 Dev Box 备份正式授权', section II: '原 Research A 申请上限 $264.77' (the +$2 to $266.77 was conditional on a CPU-pod backup, which US-TX-3 cannot host: not taken)",
+  "items_usd": {
+   "research_a_v1": 46.3017,
+   "a_tm_ceiling": 161.1023,
+   "4rhubprswo_reserve": 13.34,
+   "4rhubprswo_after_its_reserve_14_days": 13.34,
+   "thprcgh7s9_reserve": 13.34,
+   "thprcgh7s9_reserve_extension": 13.34,
+   "thprcgh7s9_expansion_reserve_max": 4.0
+  },
+  "_": "the 2026-11-05 rule (v1 + the A-TM ceiling + the volumes' reserves): 264.7640 rounded up to the cent",
+  "history": [
+   {
+    "cap_usd": 262.04,
+    "previous_cap_usd": 211.25,
+    "raised_by_usd": 50.79,
+    "decided_by": "maintainer 2026-11-07, Stage 3 authorization, section IV: 'Research A 累计上限按当前有效费用规则重新推导，至少覆盖已申请的 $258.04 及下述受控存储扩容预留，推荐设置不超过 $263 的对应边界'",
+    "items_usd": {
+     "research_a_v1": 46.3017,
+     "a_tm_ceiling": 158.3762,
+     "4rhubprswo_reserve": 13.34,
+     "4rhubprswo_after_its_reserve_14_days": 13.34,
+     "thprcgh7s9_reserve": 13.34,
+     "thprcgh7s9_reserve_extension": 13.34,
+     "thprcgh7s9_expansion_reserve_max": 4.0
+    },
+    "_": "the 2026-11-05 rule (v1 + the A-TM ceiling + the volumes' reserves) plus the controlled expansion reserve: 262.0379 rounded up to the cent"
+   }
+  ]
+ },
+ "packed_search": {
+  "approves": "packed_search: the hybrid's packed Full Search research_a_packed_hybrid_full_search over input set v3 (packed_round_design.json :: full_search.formal_inputs)",
+  "granted_by": "maintainer",
+  "decision": "maintainer 2026-11-05, 'AlphaAvatar-distill — Packed Full Search 正式授权', section II '完整预算授权': '批准本次 Packed Full Search：新搜索 kind：packed_search。正式搜索所有 attempt 累计 GPU/runner all-in 硬上限：$55.72。为一块约 350 GB Network Volume 预留最多 $13.34。本轮搜索和存储的新增预算合计：$69.06。项目累计硬上限从 $868 提高到 $930，为已有资源持续费用和账单延迟预留合理空间。注意：提高项目总上限不代表扩大本次搜索 $55.72 的执行额度，也不代表自动批准 Stage 3 或其他阶段。现有 A-TM grant 的 ceiling、per-session cap、Research A 累计上限、阶段范围和历史支出不得被忽略。请在发射前一次性建立相互一致的正式搜索 Grant，按实际最新账本核算 Research A 和项目累计费用。本次 search kind 的所有新 attempt 使用同一个累计 $55.72 硬上限，不允许失败后重置额度。' and section III: '完成后，在本消息的授权额度内直接启动正式 Hybrid Packed Full Search，不要再次停下来要求同样的发射批准。'",
+  "date": "2026-11-05",
+  "hard_cap_usd": 55.72,
+  "cap_is_cumulative": true,
+  "_hard_cap": "every attempt of this kind together: an attempt's hard cap is at most $55.72 less the closeout all-in of every earlier packed_search run (token_matched_phase.kind_cap_problems); a failure never resets it",
+  "gpu": "NVIDIA L40S",
+  "gpu_count": 1,
+  "cloud": "SECURE",
+  "network_volume": {
+   "id": "thprcgh7s9",
+   "datacenter": "US-TX-3",
+   "size_gb": 350
+  },
+  "protected_volumes": [
+   "4rhubprswo",
+   "am5m373kuq"
+  ],
+  "_volumes": "the search attaches only its own volume (the_search_volume_is_the_granted_one): 4rhubprswo holds the v2 Top-1's only copy and am5m373kuq the H1-PA archive; neither is mounted, written or deleted",
+  "inputs": {
+   "calibration": "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json (frozen profiles v2)",
+   "state_evaluation": "state_eval_hybrid@v3, content c39d0ec9a38175a8ec0b279afd54094299b9ce83260196fcbb6ae25a8c303c99, measurement protocol b760ab7ec7ab4b557dc4eb971801835d",
+   "forward_baseline": "stage1_init.d1_target_aware.scored_v1@v2 (configs/shared/baselines/initialization_forward_baseline_v2.json)",
+   "kept_frozen": "state_eval_hybrid@v2-lc1: sensitivity re-evaluation only, never a ranking input"
+  },
+  "lineage": "the hybrid Qwen/Qwen3-4B@1cfa9a72 only; its Top-1 initializes A1-6cat-sr and A2-6cat-sr; C1-6cat-sr keeps its Thinking-2507 initialization",
+  "resume": "an ordinary engineering failure (pod, network, driver) is repaired and the search resumed from the volume's journal under the same search identity in a new attempt with a new one-use artifact, inside what the cumulative cap leaves; no completed expansion is re-run and the search is never restarted",
+  "a100": "never automatic: only a measured L40S CUDA out-of-memory supports a new request; this grant's card authorization is not widened",
+  "top1": "a Top-1 only from a complete search whose decision protocol and identities verify; its volume copy and one verified off-volume copy (the project's private relay)",
+  "never": [
+   "Stage 3 (the six recovery training units)",
+   "a formal benchmark",
+   "Stage 5 rollout",
+   "a merge into main",
+   "a performance optimization of the forward (logits_to_keep, skipping the last DEPTH candidate's rerun, fewer host syncs)"
+  ],
+  "ceiling_usd_at_amendment": 135.2489,
+  "closed": {
+   "utc": "2026-11-07",
+   "by": "maintainer 2026-11-07, Stage 3 authorization, section IV ('关闭该 kind 的新增执行权限，保持历史账本')",
+   "spent_usd": 28.1677,
+   "unspent_not_carried_usd": 27.5523,
+   "_": "no new packed_search attempt is issued (token_matched_phase.packed_search_grant_problems); its cap and block stay as the record"
+  }
+ },
+ "stage3_sr": {
+  "approves": "Stage 3 of six_category_schema_restored@v1: A1-6cat-sr, A2-6cat-sr, C1-6cat-sr x seeds 20260726, 20260801, trained and formally evaluated on eval-set-1",
+  "granted_by": "maintainer",
+  "decision": "maintainer 2026-11-07, 'AlphaAvatar-distill — Stage 3 六单元正式授权' (review of 1b9052cd): '批准 Stage 3 的三个 arm、两个 seed，共六个 Recovery Training 单元及其 eval-set-1 正式评估。允许在完成以下发射前修正后，直接执行整个阶段，不必再次申请相同的训练授权。' Section IV '正式 GPU 授权': '批准三个训练 kind 的累计硬上限：train_sr_a1：$18.33；train_sr_a2：$37.54；train_sr_c1：$17.37。Stage 3 总新增 GPU/runner all-in 硬上限：$73.24。每个 kind 的所有 attempts 共用自己的累计上限，失败恢复不能重置余额。原 Packed Search 已经 COMPLETE，其剩余 $27.55 不自动转移。关闭该 kind 的新增执行权限，保持历史账本。' Section II: '请改成显式 batch.context_strategy = \"cross_context\"，并在正式 launch admission 中断言配置、pack 的 context_strategy、无独立文档 position_ids 和训练器实际 Attention 语义一致。'",
+  "date": "2026-11-07",
+  "plan_sha256": "477a08ea9d49cf56388854ee49c4212f39076717b42194b578dce7e7930631ce",
+  "budget_sha256": "3b4792dfbadc45a4907d72c34f3ac7439592adbeaa066359692be36af9dcd836",
+  "freeze_record_sha256": "9e6262b78832b0c75d2a4c0032d1a5f411b23154c1faf9572e96ddd19cd1187b",
+  "kinds": {
+   "train_sr_a1": {
+    "arm": "A1-6cat-sr",
+    "hard_cap_usd": 18.33,
+    "first_attempt_hard_cap_usd": 15.64,
+    "driver_minutes": 692,
+    "unit_deadline_hours": 3.75
+   },
+   "train_sr_a2": {
+    "arm": "A2-6cat-sr",
+    "hard_cap_usd": 37.54,
+    "first_attempt_hard_cap_usd": 32.16,
+    "driver_minutes": 1472,
+    "unit_deadline_hours": 10.25
+   },
+   "train_sr_c1": {
+    "arm": "C1-6cat-sr",
+    "hard_cap_usd": 17.37,
+    "first_attempt_hard_cap_usd": 14.68,
+    "driver_minutes": 647,
+    "unit_deadline_hours": 3.25
+   }
+  },
+  "stage_cumulative_cap_usd": 73.24,
+  "cap_is_cumulative": true,
+  "gpu": "NVIDIA L40S",
+  "gpu_count": 1,
+  "cloud": "SECURE",
+  "max_price_usd_per_hour": 1.19,
+  "network_volume": {
+   "id": "thprcgh7s9",
+   "datacenter": "US-TX-3",
+   "size_gb": 350
+  },
+  "protected_volumes": [
+   "4rhubprswo",
+   "am5m373kuq"
+  ],
+  "storage": {
+   "thprcgh7s9_reserve_extension_usd": 13.34,
+   "thprcgh7s9_expansion": {
+    "max_gb": 50,
+    "max_reserve_usd": 4.0,
+    "when": "only if the first session's du shows the room cannot hold Stage 3, where the provider supports it safely; the actual bill recorded; never a deletion of search states or checkpoints for room"
+   },
+   "4rhubprswo": "kept and protected (the v2 Top-1's only copy): its storage after its first reserve is booked by its own record (+$13.34, 14 days)",
+   "_": "booked by the volumes' storage records (logs/stages/stage-2/teacher_modes/storage/)"
+  },
+  "order": [
+   "train_sr_a1",
+   "train_sr_a2",
+   "train_sr_c1"
+  ],
+  "resume": "a recoverable failure resumes the same units from the volume in a new attempt of the same kind (new one-use artifact, inside the kind's cumulative cap): the latest save point; a trained unit is only evaluated; a scored unit is never re-run",
+  "never": [
+   "an A100 without a measured L40S out-of-memory and its own authorization",
+   "more than one billing pod",
+   "attaching 4rhubprswo or am5m373kuq",
+   "re-searching, re-packing or regenerating any data",
+   "a second measurement of a scored unit",
+   "Stage 4/5, a release or a merge into main"
+  ],
+  "off_volume_copy": "each trained unit's final fp32 weights and config go to the project's private relay (a1_units.persist_off_volume) only when its quota admits them; otherwise the network volume is protected and kept, and the gap is recorded as an open result-persistence item",
+  "attention": "batch.context_strategy cross_context, declared; asserted at launch admission (packed_training_plan.attention_problems)",
+  "closed": {
+   "utc": "2026-11-09",
+   "by": "maintainer 2026-11-09 (UTC), 'AlphaAvatar-distill — A-MIX Stage 3 与 Dev Box 备份正式授权', accepting the application logs/budget/applications/research_a_mix_2026-11-09/application.json (budget_revisions.close_stage3_sr)",
+   "spent_usd": 30.7961,
+   "unspent_not_carried_usd": 42.4439,
+   "_": "COMPLETE 2026-11-08; no new train_sr_a1/_a2/_c1 attempt is issued (token_matched_phase.stage3_grant_problems); its caps and block stay as the record"
+  }
+ },
+ "stage3_mix": {
+  "approves": "Stage 3 of six_category_schema_restored@v1, A-MIX-6cat-sr: the hybrid's thinking and non-thinking documents in one pack, seeds 20260726, 20260801, each checkpoint formally evaluated on eval-set-1 in both modes",
+  "granted_by": "maintainer",
+  "date": "2026-11-09",
+  "decision": "maintainer 2026-11-09 (UTC), 'AlphaAvatar-distill — A-MIX Stage 3 与 Dev Box 备份正式授权' (independent review of 1cbedaa7): '接受 A-MIX-6cat-sr 的冻结数据、混合 Packing、lineage、两 seed 训练计划和双模式评估设计。' Section I: '批准 train_sr_mix ... 批准该 kind 所有 attempts 累计硬上限 $45.17，其中第一次 attempt 上限 $40.31。失败恢复继续复用原有 checkpoint，不允许重置费用额度。GPU 使用 Secure Cloud 单张 L40S、thprcgh7s9。US-TX-3 无库存时不自动换 A100，也不因为普通库存问题结束研究。' Section VI: '可以在上述授权范围内直接完成 A-MIX 两 seed 的训练及各自 Thinking/Non-Thinking 双模式正式评估，不必重新申请同一阶段的 GPU 执行许可。'",
+  "plan_sha256": "6632bdbc7f68f7ad5d77cb712609bfbc9efa76d3ee4246f332acf08715b7ded1",
+  "budget_sha256": "40bab4803c147e46f3142c4ab0f81ec44263e60103729ae5def087cfe87a24b6",
+  "freeze_record_sha256": "4d758b3dc92d7a6618895afe28e70d9df1bd5d799e767af014c3ed2b692996ba",
+  "kinds": {
+   "train_sr_mix": {
+    "arm": "A-MIX-6cat-sr",
+    "hard_cap_usd": 45.17,
+    "first_attempt_hard_cap_usd": 40.31,
+    "driver_minutes": 1857,
+    "unit_deadline_hours": 10.75
+   }
+  },
+  "cap_is_cumulative": true,
+  "gpu": "NVIDIA L40S",
+  "gpu_count": 1,
+  "cloud": "SECURE",
+  "max_price_usd_per_hour": 1.19,
+  "network_volume": {
+   "id": "thprcgh7s9",
+   "datacenter": "US-TX-3",
+   "size_gb": 350
+  },
+  "protected_volumes": [
+   "4rhubprswo",
+   "am5m373kuq"
+  ],
+  "order": [
+   "train_sr_mix"
+  ],
+  "resume": "a recoverable failure resumes the same units from the volume in a new attempt of train_sr_mix (new one-use artifact, inside the kind's cumulative $45.17): the latest save point; a trained unit is only evaluated; a scored mode is never re-run; no attempt resets the cap",
+  "never": [
+   "an A100 (no stock is a capacity question: wait)",
+   "more than one billing pod",
+   "attaching 4rhubprswo or am5m373kuq",
+   "deleting any network volume (maintainer 2026-11-09, section V)",
+   "re-searching, re-packing or regenerating any data; retraining A1/A2/C1",
+   "a second measurement of a scored mode",
+   "Stage 4/5/6, a release or a merge into main"
+  ],
+  "off_volume_copy": "the dev box (stage3_backup.py; receipts under /home/ecs-user/aad-artifacts/stage3_sr/final_weights/): the six -sr units' and both A-MIX units' final fp32 weights, configs and resume_identity.json, sha256-checked per file; never trainer_state.pt; no relay upload of weights (private quota)",
+  "volume_kept_until": "all eight final students have a hash-verified dev-box copy (section V)"
+ },
+ "closed": {
+  "status": "CLOSED",
+  "utc": "2026-11-11T09:34:55Z",
+  "by": "the maintainer",
+  "decision": "maintainer 2026-11-11 (UTC), 'AlphaAvatar-distill — Research A 最终关闭与 Squash Merge Main' (independent review of e79c8f6a81ea8817f015f82f78bd2445c57d91f6): 「正式决定：接受 Research A 的 CURRENT_METHOD_NO_GO 科学结论」 and, section 一 '正式关闭 Research A 的全部付费授权': 「请正式关闭整个 A-TM 研究的所有新增付费执行权限」「保留旧 grant 内容及正式金额，追加可审计的最终关闭决定、UTC 时间和来源。历史未使用额度不结转、不退款、不转移。」",
+  "source": "the maintainer's written instruction of 2026-11-11 (UTC); written into this grant by the agent on that instruction",
+  "scope": "every session kind of A-TM, none excepted: ['supplement', 'inputs', 'search', 'train_a1', 'tool_generation', 'tool_generation_t2507', 'packed_search', 'tool_pilot', 'tool_generation_sr', 'tool_generation_sr_t2507', 'train_sr_a1', 'train_sr_a2', 'train_sr_c1', 'train_sr_mix']",
+  "enforced_by": "scripts/shared/study_engineering.py :: require_open, the one study-level gate: in grant (so issue and the funding precheck), in launch_main before an artifact, the bundle or the provider is read (an issued, unused artifact included), and as the runner's first precheck (the_study_is_open); the study's own issue command checks it before any kind's gate",
+  "spent_usd": 139.3466,
+  "by_kind_usd": {
+   "supplement": 15.8689,
+   "inputs": 0.5713,
+   "search": 24.1526,
+   "train_a1": 9.0202,
+   "tool_generation": 3.5885,
+   "tool_generation_t2507": 1.9566,
+   "packed_search": 28.1677,
+   "tool_pilot": 0.4328,
+   "tool_generation_sr": 1.048,
+   "tool_generation_sr_t2507": 0.3296,
+   "train_sr_a1": 7.7554,
+   "train_sr_a2": 15.6086,
+   "train_sr_c1": 7.4321,
+   "train_sr_mix": 23.4143
+  },
+  "_spent": "study_engineering.spent at closure: every session's closeout all-in, 28 runs, none unknown",
+  "unspent_usd": 21.7557,
+  "remainder": "the unspent $21.7557 of the $161.1023 ceiling lapses: it is not carried forward, not refunded to any pool and not transferred to any study; a new execution needs a new study and the maintainer's grant",
+  "historical": "every field above is unchanged (grant_before_closure); each earlier artifact, use and amount keeps the validity it had at its time",
+  "grant_before_closure": {
+   "commit": "e79c8f6a81ea8817f015f82f78bd2445c57d91f6",
+   "sha256": "f08b6f32fd48ebdd73d134239e1139c30e155dfd7d0bdc4d8d31753267abfeb9"
+  },
+  "science": "CURRENT_METHOD_NO_GO (logs/stages/stage-2/teacher_modes/analyses/research_a_closeout.json)",
+  "still_available": "read-only work: reports, rescoring of saved generations, archives and identity reviews (study_engineering.grant_record reads this grant open or closed), and the closeout of a run already launched"
+ }
+}

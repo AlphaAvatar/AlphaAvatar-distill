@@ -1,0 +1,86 @@
+{
+ "schema": "aadistill.stage1.projected_residual.engineering_validation_config/v1",
+ "validation": "B-E",
+ "study_id": "stage1.projected_residual.pw900_v1",
+ "_contract": "Everything B-E's verdict depends on, fixed before the session: the probe, the numeric identity, every threshold and the engine settings. scripts/stages/stage-1/projected_residual/engineering_validation.py :: verdict re-derives every check from the evidence and this file alone. Engineering only: nothing measured here is a result, a selection or a GO, and no student it builds is kept.",
+ "design": "configs/stages/stage-1/projected_residual/design.json",
+ "driver": "scripts/stages/stage-1/projected_residual/engineering_validation.py",
+ "smoke": {
+  "recipe": "configs/stages/stage-2/reasoning_data/h1pa.json :: recipe.e1_configs.20260726 (D4-Augmented's E1 config for the smoke seed) plus the \\.projection$ trainable pattern; sequence length, batch size, micro-batch, bf16 autocast and gradient checkpointing as the recipe has them",
+  "e1_seed": "20260726",
+  "steps": 20,
+  "tiny_steps": 4,
+  "data": "synthetic token sequences (seeded): a smoke measures the training step's shape, time and memory, not learning"
+ },
+ "probe": {
+  "_": "real eval-set-1 prompts from safe reasoning components only (no safety, answerability or knowledge item), rendered as the evaluation route renders them: run_battery's system message, the item's messages, the Thinking-2507 template with its generation prompt (which opens <think>), tokenized without special tokens. The token ids are recomputed on the pod and must hash to these values; the evidence records ids and hashes, never prompt text",
+  "eval_set_id": "eval-set-1",
+  "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+  "system_message": "You are a helpful Assistant.",
+  "tokenizer": {"model": "Qwen/Qwen3-4B-Thinking-2507", "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+                "tokenizer_files_sha256": "432738f604172d754f429813517fb6045a2b13be31d78faba60f6f8a9b0e14d0"},
+  "token_ids_hash": "sha256 of json.dumps(ids, separators=(',', ':'))",
+  "items": [
+   {"component": "fluid_reasoning_720", "unit": "dev_v1", "item_id": "424bd847a714f66694d7", "axis": "inductive_rule_discovery", "tokens": 221, "token_ids_sha256": "b8825c7b1330e64f1393ff5058b2285964c0b2e6c2ad8a47b82110426395737b"},
+   {"component": "fluid_reasoning_720", "unit": "dev_v1", "item_id": "e7a33cb050605fe24cef", "axis": "compositional_generalization", "tokens": 188, "token_ids_sha256": "87ce7bd8f0fc68e79f3d40698026dce49662cc94b45e8404dd2c693f7fac08bb"},
+   {"component": "fluid_reasoning_720", "unit": "dev_v1", "item_id": "e5c87fa5a00a2ee777fd", "axis": "task_contained_deduction", "tokens": 70, "token_ids_sha256": "2332d31a0dabe7913dc8d37444494bebfcd2fe03516e044d6d2624dc1080ef52"},
+   {"component": "fluid_reasoning_720", "unit": "dev_v1", "item_id": "a68fc81fffe597f45d54", "axis": "abstract_analogical", "tokens": 66, "token_ids_sha256": "16c0e7c7e4dfec0efe0aab039de8a83d12a17af4cb16a23d1cd6e97612284abe"},
+   {"component": "stage3_capability_846", "unit": "gsm8k", "item_id": "gsm8k-test-00917", "axis": null, "tokens": 55, "token_ids_sha256": "41491c60397ec6c10bccfc5d8113ff3970b8ae37f0ac65c9520b96741aebbd4a"},
+   {"component": "stage3_capability_846", "unit": "gsm8k", "item_id": "gsm8k-test-01007", "axis": null, "tokens": 74, "token_ids_sha256": "ea4a0695a1a940303e13f24922a2834561abfded8d1f6e6b338c60416867b7ba"},
+   {"component": "stage3_capability_846", "unit": "math_verified", "item_id": "math500-test/algebra/2102.json", "axis": null, "tokens": 94, "token_ids_sha256": "23dae360a1a398f8c2f520554088c3872736b614ca42ade20cea915f2d2c3294"}
+  ],
+  "tiny_lengths": [17, 33, 41],
+  "_tiny": "the host path's tiny teacher has a 97-token vocabulary, so its probe is seeded random ids of these lengths; it rehearses the code, never the numbers"
+ },
+ "numeric_identity": {
+  "device_class": "NVIDIA L40S",
+  "_device_class": "matched as a substring of torch.cuda.get_device_name; a different card is recorded and FAILS the device-bound checks: the formal route runs on the L40S",
+  "dtype": "bfloat16",
+  "reference_dtype": "float32",
+  "attn_implementation": "sdpa",
+  "tf32": false,
+  "_tf32": "torch.backends.cuda.matmul.allow_tf32 and torch.backends.cudnn.allow_tf32 set False before any CUDA work, so float32 is float32",
+  "deterministic_algorithms": "warn_only",
+  "cublas_workspace_config": ":4096:8",
+  "_deterministic": "torch.use_deterministic_algorithms(True, warn_only=True) with CUBLAS_WORKSPACE_CONFIG set before CUDA initializes; kernels with no deterministic implementation warn rather than abort, and the resume check measures what remains"
+ },
+ "structural_fold": {
+  "device": "cpu",
+  "dtype": "float32",
+  "max_relative_logit_diff": 0.001,
+  "_": "materialize.py's check: max |factored - folded| / max |logit| on the CPU in float32. A transposed or misplaced projection moves logits by their own magnitude (relative ~1); a correct fold by float32 rounding through 28 layers (relative 1e-6 to 1e-4). 1e-3 sits between the two"
+ },
+ "fold_acceptance": {
+  "source": "design.json :: evaluation.fold_acceptance",
+  "factor": 2.0,
+  "criterion": "on the L40S, over the whole probe: max |folded_bf16 - factored_bf16| <= factor x max |factored_bf16 - factored_fp32|",
+  "diagnostics_not_criteria": ["mean |folded_bf16 - factored_bf16|", "argmax agreement folded_bf16 vs factored_bf16", "the float32 fold difference on the device"]
+ },
+ "resume": {
+  "criterion": "the run resumed from a mid-run checkpoint ends with parameters bit-identical to the uninterrupted run's",
+  "kernel_nondeterminism": "if they differ, a second uninterrupted run measures the device's own run-to-run difference; the check then PASSES only if the resumed run differs from the first uninterrupted run by no more than the two uninterrupted runs differ from each other (P5: the nondeterministic source is logged, not hidden), and FAILS otherwise or if the uninterrupted runs agree"
+ },
+ "vllm": {
+  "_": "an engineering load and consistency check of the evaluation route's engine on the folded checkpoint: not a measurement, not a P18 evaluation, no score and no GO. Generation is greedy and bounded because nothing here judges what is generated; the bound is declared, not a measurement allowance",
+  "engine": "vLLM 0.27.1 in /opt/vllm (requirements-vllm.txt), its own process, after the PyTorch checks' process has exited (shared.validation.vllm_check.run_isolated)",
+  "context": {"trained_context": 8192, "rule": "shared.evaluation.uncapped_eval.resolve_context(folded config, None, trained_context): the formal evaluation's own resolution (H1-PA evaluation :: trained_context 8,192)"},
+  "gpu_memory_utilization": 0.9,
+  "_gpu_memory_utilization": "the formal evaluation's default (uncapped_eval / run_battery --gpu-mem-util)",
+  "max_used_mib_before_engine": 1024,
+  "sampling": {"temperature": 0.0, "max_tokens": 128, "logprobs": 1, "prompt_logprobs": 1, "seed": 0},
+  "stop": "the evaluation's stop ids (uncapped_eval.resolve_stop_ids on the teacher's tokenizer and config)",
+  "reference": "the folded checkpoint's saved bytes loaded as a stock Qwen3ForCausalLM on the L40S in bfloat16 (sdpa): per prompt position, the log-probability of the realized next token, the argmax and the top-1 margin over the second token",
+  "criteria": {
+   "median_abs_realized_logprob_delta_max": 0.1,
+   "confident_margin_nats": 1.0,
+   "confident_top1_agreement_min": 0.98,
+   "confident_positions_min": 20
+  },
+  "_criteria": "two bf16 implementations of the same weights (HF sdpa and the engine's kernels) differ by accumulation order: realized-token log-probabilities move by hundredths of a nat and only near-ties change their argmax. A wrong weight mapping, RoPE base, norm, head layout or tied head moves them by nats and flips confident predictions. So: the median |delta| over every prompt position must not exceed 0.1 nats, and where the reference's top-1 leads its second by at least 1 nat the engine must agree on at least 98% of at least 20 such positions. Fixed before any measurement; a FAIL is an engineering finding to diagnose, not a result",
+  "structural": ["the engine loads and exits 0", "every echoed prompt_token_ids equals the request's", "every reported log-probability is finite", "every request generates at least one token and records its finish reason (stop or length)", "the engine ran at the resolved max_model_len"]
+ },
+ "gpu_isolation": {
+  "criterion": "the PyTorch checks' child process exited before the engine started, the parent never imported torch, and nvidia-smi showed no compute process and at most max_used_mib_before_engine MiB in use when the engine was started"
+ },
+ "authorizes": "nothing"
+}

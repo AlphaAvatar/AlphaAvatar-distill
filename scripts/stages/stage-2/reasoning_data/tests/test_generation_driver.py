@@ -154,6 +154,20 @@ def test_a_stream_left_by_a_killed_driver_is_sealed_first_and_a_torn_line_ignore
     assert len(_records(out, "pass0_generation_input_g0")) == 4
 
 
+def test_a_raw_unicode_line_separator_inside_a_streamed_record_does_not_tear_it(tmp_path, stage0):
+    """run_battery streams ensure_ascii=False: a U+2028 / U+0085 inside a string is raw, not a line end."""
+    a, b = stage0[2][:2]
+    text = "x\u2028y\x85z"
+    recs = [{**stage0[1][a], "messages": [{"role": "user", "content": text}]}, stage0[1][b]]
+    stream = tmp_path / "L.seg0.stream.jsonl"
+    stream.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in recs), encoding="utf-8")
+    s = D.Sealer(tmp_path, "L", stream, {"index": 0, "launch_identity_sha256": LID}, {a, b}, set(),
+                 every_records=1, every_seconds=0)
+    assert s.seal(force=True) == 2 and not s.anomalies
+    got = _records(tmp_path, "L")
+    assert set(got) == {a, b} and got[a]["messages"][0]["content"] == text
+
+
 def test_resume_from_secured_shards_and_refuse_a_tampered_one(tmp_path, stage0):
     repo = _repo(tmp_path, stage0)
     D.main(_argv(tmp_path), run=Gen(stage0[1], die_after=2), authorize=_ok, repo=repo)

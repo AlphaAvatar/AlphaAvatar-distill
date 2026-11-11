@@ -1,0 +1,737 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_generation_session_summary/v1",
+ "run_id": "a_tool_generation_20261105_074146",
+ "kind": "tool_generation",
+ "lineage": "hybrid",
+ "terminal": "ALL_DONE",
+ "session_utc": [
+  "2026-11-05T07:49:45Z",
+  "2026-11-05T10:25:59Z"
+ ],
+ "identity": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+ "imported_from": [
+  "a_tool_pilot_20261104_164531",
+  "a_tool_generation_t2507_20261104_195411",
+  "a_tool_generation_t2507_20261105_064829"
+ ],
+ "deadline_minutes": 330.0,
+ "device_confirmation": null,
+ "invocations": [
+  {
+   "label": "tool_H-N_r1_pass0",
+   "wall_seconds": 3758.0,
+   "output_tokens": 3274462,
+   "output_tokens_per_second": 919.0,
+   "engine_ready_seconds": [
+    158.1
+   ],
+   "peak_memory_used_mib": 38180
+  },
+  {
+   "label": "tool_H-N_r1_pass1",
+   "wall_seconds": 2111.8,
+   "output_tokens": 1695617,
+   "output_tokens_per_second": 823.1,
+   "engine_ready_seconds": [
+    21.7
+   ],
+   "peak_memory_used_mib": 37965
+  },
+  {
+   "label": "tool_H-N_r2_pass0",
+   "wall_seconds": 307.1,
+   "output_tokens": 252409,
+   "output_tokens_per_second": 950.7,
+   "engine_ready_seconds": [
+    21.7
+   ],
+   "peak_memory_used_mib": 37965
+  },
+  {
+   "label": "tool_H-N_r2_pass1",
+   "wall_seconds": 325.6,
+   "output_tokens": 209303,
+   "output_tokens_per_second": 728.5,
+   "engine_ready_seconds": [
+    20.4
+   ],
+   "peak_memory_used_mib": 37965
+  },
+  {
+   "label": "tool_H-N_r3_pass0",
+   "wall_seconds": 63.5,
+   "output_tokens": 10996,
+   "output_tokens_per_second": 387.2,
+   "engine_ready_seconds": [
+    20.7
+   ],
+   "peak_memory_used_mib": 37965
+  },
+  {
+   "label": "tool_H-N_r3_pass1",
+   "wall_seconds": 61.5,
+   "output_tokens": 9952,
+   "output_tokens_per_second": 402.9,
+   "engine_ready_seconds": [
+    20.6
+   ],
+   "peak_memory_used_mib": 37965
+  },
+  {
+   "label": "tool_H-N_r4_pass0",
+   "wall_seconds": 152.1,
+   "output_tokens": 59560,
+   "output_tokens_per_second": 522.0,
+   "engine_ready_seconds": [
+    21.2
+   ],
+   "peak_memory_used_mib": 37969
+  },
+  {
+   "label": "tool_H-N_r4_pass1",
+   "wall_seconds": 125.0,
+   "output_tokens": 53563,
+   "output_tokens_per_second": 607.3,
+   "engine_ready_seconds": [
+    20.5
+   ],
+   "peak_memory_used_mib": 37969
+  },
+  {
+   "label": "tool_H-T_r1_pass0",
+   "wall_seconds": 1168.6,
+   "output_tokens": 1433146,
+   "output_tokens_per_second": 1269.3,
+   "engine_ready_seconds": [
+    21.1
+   ],
+   "peak_memory_used_mib": 37982
+  },
+  {
+   "label": "tool_H-T_r1_pass1",
+   "wall_seconds": 846.7,
+   "output_tokens": 887238,
+   "output_tokens_per_second": 1097.8,
+   "engine_ready_seconds": [
+    20.5
+   ],
+   "peak_memory_used_mib": 37965
+  },
+  {
+   "label": "tool_H-T_r2_pass0",
+   "wall_seconds": 170.9,
+   "output_tokens": 89504,
+   "output_tokens_per_second": 669.9,
+   "engine_ready_seconds": [
+    20.8
+   ],
+   "peak_memory_used_mib": 37965
+  },
+  {
+   "label": "tool_H-T_r2_pass1",
+   "wall_seconds": 170.9,
+   "output_tokens": 76224,
+   "output_tokens_per_second": 568.8,
+   "engine_ready_seconds": [
+    21.4
+   ],
+   "peak_memory_used_mib": 37965
+  },
+  {
+   "label": "tool_H-T_r3_pass0",
+   "wall_seconds": 42.3,
+   "output_tokens": 1363,
+   "output_tokens_per_second": 186.7,
+   "engine_ready_seconds": [
+    21.0
+   ],
+   "peak_memory_used_mib": 37357
+  },
+  {
+   "label": "tool_H-T_r3_pass1",
+   "wall_seconds": 47.1,
+   "output_tokens": 1338,
+   "output_tokens_per_second": 122.8,
+   "engine_ready_seconds": [
+    20.9
+   ],
+   "peak_memory_used_mib": 37357
+  }
+ ],
+ "output_tokens": 8054675,
+ "modes": {
+  "H-N": {
+   "cells": [
+    {
+     "split": "training",
+     "category": "error_recovery",
+     "unit": "supervised_tokens",
+     "target": 56661.14309022001,
+     "bound": 1071,
+     "attempted": 776,
+     "units": 59384.0,
+     "admitted": 122,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "mcp_agent",
+     "unit": "supervised_tokens",
+     "target": 84991.2212175,
+     "bound": 2207,
+     "attempted": 2207,
+     "units": 68422.0,
+     "admitted": 281,
+     "imported": 24,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "training",
+     "category": "multi_turn",
+     "unit": "supervised_tokens",
+     "target": 113321.79276261001,
+     "bound": 11891,
+     "attempted": 4859,
+     "units": 1341197.0,
+     "admitted": 1231,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "multiple_parallel",
+     "unit": "supervised_tokens",
+     "target": 84991.2212175,
+     "bound": 1039,
+     "attempted": 727,
+     "units": 99590.0,
+     "admitted": 317,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "no_tool",
+     "unit": "supervised_tokens",
+     "target": 56661.14309022001,
+     "bound": 575,
+     "attempted": 457,
+     "units": 80615.0,
+     "admitted": 436,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "schema_arguments",
+     "unit": "supervised_tokens",
+     "target": 11800.08740445,
+     "bound": 1804,
+     "attempted": 1804,
+     "units": 17290.0,
+     "admitted": 303,
+     "imported": 124,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "tool_selection",
+     "unit": "supervised_tokens",
+     "target": 84991.2212175,
+     "bound": 1043,
+     "attempted": 838,
+     "units": 85270.0,
+     "admitted": 487,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "validation",
+     "category": null,
+     "unit": "tasks",
+     "target": 32.0,
+     "bound": 100,
+     "attempted": 85,
+     "units": 50.0,
+     "admitted": 50,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "calibration",
+     "category": "error_recovery",
+     "unit": "scored_positions",
+     "target": 420.0,
+     "bound": 9,
+     "attempted": 9,
+     "units": 0.0,
+     "admitted": 0,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "calibration",
+     "category": "mcp_agent",
+     "unit": "scored_positions",
+     "target": 630.0,
+     "bound": 17,
+     "attempted": 17,
+     "units": 0.0,
+     "admitted": 0,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "calibration",
+     "category": "multi_turn",
+     "unit": "scored_positions",
+     "target": 840.0,
+     "bound": 89,
+     "attempted": 37,
+     "units": 6902.0,
+     "admitted": 10,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "calibration",
+     "category": "multiple_parallel",
+     "unit": "scored_positions",
+     "target": 630.0,
+     "bound": 8,
+     "attempted": 8,
+     "units": 331.0,
+     "admitted": 1,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "calibration",
+     "category": "no_tool",
+     "unit": "scored_positions",
+     "target": 420.0,
+     "bound": 5,
+     "attempted": 4,
+     "units": 1699.0,
+     "admitted": 4,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "calibration",
+     "category": "schema_arguments",
+     "unit": "scored_positions",
+     "target": 630.0,
+     "bound": 0,
+     "attempted": 0,
+     "units": 772.0,
+     "admitted": 14,
+     "imported": 100,
+     "status": "REACHED"
+    },
+    {
+     "split": "calibration",
+     "category": "tool_selection",
+     "unit": "scored_positions",
+     "target": 630.0,
+     "bound": 8,
+     "attempted": 8,
+     "units": 276.0,
+     "admitted": 3,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "state_eval",
+     "category": "error_recovery",
+     "unit": "scored_positions",
+     "target": 1200.0,
+     "bound": 24,
+     "attempted": 14,
+     "units": 1522.0,
+     "admitted": 6,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "state_eval",
+     "category": "mcp_agent",
+     "unit": "scored_positions",
+     "target": 1800.0,
+     "bound": 48,
+     "attempted": 48,
+     "units": 3386.0,
+     "admitted": 14,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "state_eval",
+     "category": "multi_turn",
+     "unit": "scored_positions",
+     "target": 2400.0,
+     "bound": 205,
+     "attempted": 104,
+     "units": 33512.0,
+     "admitted": 29,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "state_eval",
+     "category": "multiple_parallel",
+     "unit": "scored_positions",
+     "target": 1800.0,
+     "bound": 23,
+     "attempted": 23,
+     "units": 712.0,
+     "admitted": 3,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "state_eval",
+     "category": "no_tool",
+     "unit": "scored_positions",
+     "target": 1200.0,
+     "bound": 13,
+     "attempted": 13,
+     "units": 1171.0,
+     "admitted": 10,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "state_eval",
+     "category": "schema_arguments",
+     "unit": "scored_positions",
+     "target": 1800.0,
+     "bound": 0,
+     "attempted": 0,
+     "units": 1063.0,
+     "admitted": 11,
+     "imported": 29,
+     "status": "SHORTFALL",
+     "shortfall": "source_exhausted"
+    },
+    {
+     "split": "state_eval",
+     "category": "tool_selection",
+     "unit": "scored_positions",
+     "target": 1800.0,
+     "bound": 23,
+     "attempted": 23,
+     "units": 2517.0,
+     "admitted": 9,
+     "imported": 0,
+     "status": "REACHED"
+    }
+   ],
+   "deadline_stop": null
+  },
+  "H-T": {
+   "cells": [
+    {
+     "split": "training",
+     "category": "error_recovery",
+     "unit": "supervised_tokens",
+     "target": 56661.14309022001,
+     "bound": 107,
+     "attempted": 107,
+     "units": 52946.0,
+     "admitted": 24,
+     "imported": 24,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "training",
+     "category": "mcp_agent",
+     "unit": "supervised_tokens",
+     "target": 84991.2212175,
+     "bound": 847,
+     "attempted": 428,
+     "units": 120196.0,
+     "admitted": 88,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "multi_turn",
+     "unit": "supervised_tokens",
+     "target": 113321.79276261001,
+     "bound": 453,
+     "attempted": 210,
+     "units": 209284.0,
+     "admitted": 65,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "multiple_parallel",
+     "unit": "supervised_tokens",
+     "target": 84991.2212175,
+     "bound": 191,
+     "attempted": 137,
+     "units": 101520.0,
+     "admitted": 89,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "no_tool",
+     "unit": "supervised_tokens",
+     "target": 56661.14309022001,
+     "bound": 181,
+     "attempted": 147,
+     "units": 88054.0,
+     "admitted": 152,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "schema_arguments",
+     "unit": "supervised_tokens",
+     "target": 11800.08740445,
+     "bound": 0,
+     "attempted": 0,
+     "units": 27837.0,
+     "admitted": 37,
+     "imported": 124,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "tool_selection",
+     "unit": "supervised_tokens",
+     "target": 84991.2212175,
+     "bound": 214,
+     "attempted": 183,
+     "units": 85050.0,
+     "admitted": 119,
+     "imported": 24,
+     "status": "REACHED"
+    },
+    {
+     "split": "validation",
+     "category": null,
+     "unit": "tasks",
+     "target": 32.0,
+     "bound": 89,
+     "attempted": 76,
+     "units": 55.0,
+     "admitted": 55,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "calibration",
+     "category": "error_recovery",
+     "unit": "scored_positions",
+     "target": 420.0,
+     "bound": 2,
+     "attempted": 2,
+     "units": 0.0,
+     "admitted": 0,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "calibration",
+     "category": "mcp_agent",
+     "unit": "scored_positions",
+     "target": 630.0,
+     "bound": 7,
+     "attempted": 4,
+     "units": 3434.0,
+     "admitted": 1,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "calibration",
+     "category": "multi_turn",
+     "unit": "scored_positions",
+     "target": 840.0,
+     "bound": 4,
+     "attempted": 2,
+     "units": 3674.0,
+     "admitted": 2,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "calibration",
+     "category": "multiple_parallel",
+     "unit": "scored_positions",
+     "target": 630.0,
+     "bound": 2,
+     "attempted": 2,
+     "units": 0.0,
+     "admitted": 0,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "calibration",
+     "category": "no_tool",
+     "unit": "scored_positions",
+     "target": 420.0,
+     "bound": 2,
+     "attempted": 2,
+     "units": 1370.0,
+     "admitted": 2,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "calibration",
+     "category": "schema_arguments",
+     "unit": "scored_positions",
+     "target": 630.0,
+     "bound": 0,
+     "attempted": 0,
+     "units": 24150.0,
+     "admitted": 22,
+     "imported": 100,
+     "status": "REACHED"
+    },
+    {
+     "split": "calibration",
+     "category": "tool_selection",
+     "unit": "scored_positions",
+     "target": 630.0,
+     "bound": 2,
+     "attempted": 2,
+     "units": 0.0,
+     "admitted": 0,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "state_eval",
+     "category": "error_recovery",
+     "unit": "scored_positions",
+     "target": 1200.0,
+     "bound": 5,
+     "attempted": 5,
+     "units": 0.0,
+     "admitted": 0,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "state_eval",
+     "category": "mcp_agent",
+     "unit": "scored_positions",
+     "target": 1800.0,
+     "bound": 19,
+     "attempted": 13,
+     "units": 7701.0,
+     "admitted": 5,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "state_eval",
+     "category": "multi_turn",
+     "unit": "scored_positions",
+     "target": 2400.0,
+     "bound": 11,
+     "attempted": 7,
+     "units": 23464.0,
+     "admitted": 5,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "state_eval",
+     "category": "multiple_parallel",
+     "unit": "scored_positions",
+     "target": 1800.0,
+     "bound": 5,
+     "attempted": 5,
+     "units": 2529.0,
+     "admitted": 2,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "state_eval",
+     "category": "no_tool",
+     "unit": "scored_positions",
+     "target": 1200.0,
+     "bound": 5,
+     "attempted": 5,
+     "units": 2084.0,
+     "admitted": 4,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    },
+    {
+     "split": "state_eval",
+     "category": "schema_arguments",
+     "unit": "scored_positions",
+     "target": 1800.0,
+     "bound": 0,
+     "attempted": 0,
+     "units": 4236.0,
+     "admitted": 11,
+     "imported": 29,
+     "status": "REACHED"
+    },
+    {
+     "split": "state_eval",
+     "category": "tool_selection",
+     "unit": "scored_positions",
+     "target": 1800.0,
+     "bound": 6,
+     "attempted": 6,
+     "units": 791.0,
+     "admitted": 2,
+     "imported": 0,
+     "status": "SHORTFALL",
+     "shortfall": "bound"
+    }
+   ],
+   "deadline_stop": null
+  }
+ },
+ "cost": {
+  "all_in_usd": 3.1438,
+  "pod_life_minutes": 169.85,
+  "provider_rate_usd_per_hour": 1.09,
+  "gpu_usd": 3.0856,
+  "disk_usd": 0.0581,
+  "authorized_usd": 9.13,
+  "watchdog_accrued_gpu_usd": 3.096,
+  "retained_after_gate_usd": 0.0382,
+  "provider_posted_usd_at_snapshot": 2.1053,
+  "provider_snapshot": {
+   "path": "logs/budget/provider/runpod_billing_v2_2026-11-05T1039Z.json",
+   "sha256": "6eb97b081a3fa7b43ce02a9d6737dff35c9fdd44f99dffcce89b8d078967454c"
+  },
+  "final_buckets_posted": false,
+  "_basis": "the pod's life from the provider's createdAt (07:43:35Z) to the provider's TERMINATED confirmation (10:33:26Z) at the pod's $1.09/h, plus container disk at $0.1/GB-month (150 GB), rounded up; the provider had posted $2.1053 at 10:39Z (posting lags); the booked figure stands until the rows post"
+ },
+ "provider_confirms_gone": true,
+ "authorizes": "nothing"
+}

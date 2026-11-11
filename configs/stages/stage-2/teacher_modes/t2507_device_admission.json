@@ -1,0 +1,60 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.device_admission/v1",
+ "kind": "tool_generation_t2507",
+ "lineage": "thinking_2507",
+ "decided_by": "maintainer 2026-11-04 (review of a143b7ed), section 4: 'T2507 independent L40S device admission plus formal tool_generation' -- in the same formal session, a minimal GPU admission on the real teacher revision, tokenizer, chat template, vLLM lock, the 8,184 context and a representative generation path; continue when it passes; no CPU-only rehearsal and no full pilot; the L40S by default, an A100 only on a measured out-of-memory",
+ "why": "the generation-scoped L40S gate (l40s_check.generation_scope_problems) measured the hybrid's engine and refuses Thinking-2507 (another model, revision and chat template), so no committed record says this teacher's generation fits the card at the session limit; this admission measures it inside the formal session instead of a separate check",
+ "teacher": {
+  "model": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+  "_chat_template_sha256": "sha256 of tokenizer.chat_template (run_battery's rule); the value teacher_identity.json :: historical_teacher and reasoning_data/generation_protocol.json register for this revision",
+  "files_sha256": {
+   "config.json": "5beea1a4a34c62782bfb2f911c606741a3bab8f92d80a118fa053c28af12e8ba",
+   "generation_config.json": "2325da0f15bb848e018c5ae071b7943332e9f871d6b60e2ed22ca97d4cb993d2",
+   "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+   "tokenizer_config.json": "60adcfc35f5f251e19a196ec977b4ca0fcfb534852911b3196d68d5e3b146aa0",
+   "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+   "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+   "model.safetensors.index.json": "d6c42883a895dfef5b0080ed2116a1bcd764f558406b98923d675978a1abf29c"
+  },
+  "weight_shards_sha256": {
+   "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+   "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+   "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+  },
+  "weight_shards_bytes": {
+   "model-00001-of-00003.safetensors": 3957900840,
+   "model-00002-of-00003.safetensors": 3987450520,
+   "model-00003-of-00003.safetensors": 99630640
+  },
+  "_source": "2026-11-04 UTC: the hub's tree at this revision (api/models/Qwen/Qwen3-4B-Thinking-2507/tree/768f209d; git blob ids and LFS sha256 with sizes) agrees with the dev box's cached snapshot, whose every cached file's content hashes to its blob name; the per-file sha256 above are those files' contents. The tokenizer_sha256 3ec3c124... that corpus_v2's manifest recorded uses a convention not reproducible from these files (it is not the concatenation of tokenizer*.json, 432738f6...), so the admission checks each tokenizer file instead"
+ },
+ "engine": {
+  "vllm_version": "0.27.1",
+  "_vllm_version": "requirements-vllm.txt's pin (vllm==0.27.1); the pod checks the runner's recorded engine version against the pin it reads from that file",
+  "session_limit": 8184,
+  "_session_limit": "tool_generation_protocol.json :: execution.session_limit; the runner's session_limit, effective_limit and the engine's max_model_len must all equal it",
+  "gpu_memory_utilization": 0.8,
+  "dtype": "bfloat16"
+ },
+ "memory": {
+  "free_memory_wanted_gib": "l40s_check.json :: free_memory_wanted_gib (read there, not copied)",
+  "rule": "the GPU sampler's peak memory.used over the admission invocation leaves at least that much of memory.total free; a CUDA out-of-memory line in the engine log, or an engine that never reports its KV cache, fails"
+ },
+ "tasks": {
+  "rule": "the first task of every cell of the lineage's mode, in the plan's cell order (its task_ids, the frozen order): one per category and the validation cell",
+  "candidate": "pass 0 only, at the protocol's seed base",
+  "outputs": "device evidence only, under <out>/device_admission/: never sealed under a formal label, never imported, admitted, counted or packed; the formal rounds generate every task of the plan, these included"
+ },
+ "on_failure": "the session ends RUN_FAILED before any formal invocation, with the measured evidence; an ordinary failure of the mechanism is repaired inside the same cumulative $2.78; an A100 only after a measured CUDA out-of-memory on the L40S and a separate authorization",
+ "authorizes": "nothing by itself: the grant's tool_generation_t2507 block authorizes the session",
+ "registered_result": {
+  "path": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_t2507_20261104_195411/evidence/device_admission.json",
+  "sha256": "82e43ca1e79cbf64b1776f90bcad75f93f2e3f31bb75a8b16920728ac0bf5769",
+  "run_id": "a_tool_generation_t2507_20261104_195411",
+  "admitted": true,
+  "measured": "all 15 criteria passed on an L40S (US-TX-4): engine ready 157.9 s, KV cache 195,009 tokens at the 8,184 session limit, peak 37,611 of 46,068 MiB (8.26 GiB free), vLLM 0.27.1",
+  "reuse": "maintainer 2026-11-05 (review of f06ccd4), section 1: '相同 Teacher、revision、引擎依赖和合规 GPU 环境下，可以复用已登记的设备适配证据；新 Pod 仍须实际确认能加载和运行，不必无意义地重复完整的八任务准入采样'. A later session with the same teacher, revision, chat template, vLLM pin and session limit (tool_session.registered_device_admission) does not sample the admission's tasks: it hashes the teacher snapshot before any invocation and applies device_verdict to its first formal invocation (tool_session.device_confirmation); a failed verdict ends the session and that invocation's shards are not imported"
+ }
+}

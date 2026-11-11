@@ -32,7 +32,9 @@ every issue and before every launch (the maintainer's corrections of
    recorded volume on the account that whole UTC day, and never beyond the
    volume's own size x the hours it existed that day. Rows on shared days and
    any excess (2026-10-25: 870 GB-h posted where one 30 GB volume can accrue
-   720) stay in the bill and reduce nothing;
+   720) stay in the bill and reduce nothing. A REST v2 row names its volume
+   (``networkVolumeId``): it is netted against that volume alone, still never
+   beyond its size x hours at the stated rate;
 4. a volume deleted inside the posting window: its whole actual cost again,
    beside whatever of it the bill already shows.
 
@@ -303,15 +305,36 @@ def _hours_in_day(v: dict, day: datetime, now: datetime) -> float:
     return float(math.ceil(max((end - start).total_seconds(), 0.0) / 3600 - 1e-9))
 
 
+def _usd_per_gb_hour() -> float:
+    """The stated network-volume rate per GB-hour (provider_storage_pricing.json: usd_per_gb_month / hours_per_month)."""
+    d = json.loads((REPO / "configs/shared/infrastructure/provider_storage_pricing.json").read_text())
+    return float(d["network_volume"]["usd_per_gb_month"]) / float(d["proration"]["hours_per_month"])
+
+
 def netted_posted(v: dict, rows: list[dict], records: list[dict], now: datetime) -> dict:
     """The provider-posted volume charge attributable to `v`, conservatively: a
     day's row only on a UTC day `v` was the sole recorded volume on the account,
     and never more than `v`'s own size x hours that day. Everything else stays
-    unattributed (it is in the bill either way)."""
+    unattributed (it is in the bill either way). A REST v2 row names its volume
+    and is netted against that volume only, capped at its size x hours x the
+    stated rate (v2 reports dollars, not GB-hours)."""
     days, gbh, usd = [], 0.0, 0.0
+    rate = None
     for r in rows:
         day = datetime.fromisoformat(r["startDate"][:10]).replace(tzinfo=timezone.utc)
         if day + timedelta(days=1) <= v["created"] or (v["deleted"] and day > v["deleted"]):
+            continue
+        if "networkVolumeId" in r:
+            if r["networkVolumeId"] != v["volume"]:
+                continue
+            rate = rate if rate is not None else _usd_per_gb_hour()
+            own = v["size_gb"] * _hours_in_day(v, day, now)
+            amount = min(float(r["amount"]), own * rate)
+            days.append({"day": r["startDate"][:10], "row_usd": float(r["amount"]), "own_max_gb_h": own,
+                         "netted_gb_h": amount / rate if rate else 0.0, "netted_usd": round(amount, 6),
+                         "shared_with": []})
+            gbh += amount / rate if rate else 0.0
+            usd += amount
             continue
         others = [w["volume"] for w in records if w["volume"] != v["volume"]
                   and w["created"] < day + timedelta(days=1) and (w["deleted"] is None or w["deleted"] > day)]
@@ -324,6 +347,17 @@ def netted_posted(v: dict, rows: list[dict], records: list[dict], now: datetime)
         gbh += take
         usd += amount
     return {"netted_gb_h": gbh, "netted_usd": round(usd, 6), "days": days}
+
+
+def closeout_confirms_gone(outcome: dict | None, pod: str) -> bool:
+    """Whether a run's closeout confirms ``pod`` gone when its launcher could not: a teardown finished after the
+    launcher's gate refused writes ``provider_confirms_gone`` into closeout/outcome.json with the provider
+    reconciliation that proves it (``ok`` and the pod no longer listed); runtime/session.json keeps what the
+    launcher wrote and is never edited."""
+    if not outcome or outcome.get("provider_confirms_gone") is not True:
+        return False
+    rec = outcome.get("provider_reconciliation_after") or {}
+    return rec.get("ok") is True and not any(str(x.get("id")) == pod for x in rec.get("pods") or [])
 
 
 def position(repo_root: Path = REPO, *, snapshot: dict | None = None, now: datetime | None = None,
@@ -356,7 +390,7 @@ def position(repo_root: Path = REPO, *, snapshot: dict | None = None, now: datet
         row = {"run": str(run.relative_to(root)), "pod_id": pod, "usd": usd, "ended_utc": ended.isoformat()}
         if pod in expect_pods:
             continue
-        if not sess.get("provider_confirms_gone"):
+        if not (sess.get("provider_confirms_gone") or closeout_confirms_gone(out, pod)):
             raise AuthorizationError(f"{row['run']}: pod {pod} is not confirmed gone and not posted; reconcile first")
         if usd is None:
             raise AuthorizationError(f"{row['run']}: pod {pod} is unposted and its session records no cost")

@@ -1,0 +1,55 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.a1_evidence_closeout/v1",
+ "run_id": "a_train_a1_20261102_184122",
+ "recorded_utc": "2026-11-03T03:40:00Z",
+ "terminal": "ALL_DONE (driver 2026-11-03T03:02:42Z); launcher COMPLETE 03:16:45Z",
+ "units": {
+  "A1-s20260726": {
+   "train": {"steps": 1653, "planned": 1653, "completed_all_steps": true, "train_seconds": 10488.5,
+             "config_sha256": "1dd584b38df0a296ed35eb5aff272b9b2ab972f0e7cb249e400930cc14a0eb34",
+             "final_val_ce": 0.789844, "final_val_kd": 0.648207},
+   "final_model_safetensors_sha256": "1f3e5eead669c6bd76dc68a93a0ca071e716f82233f397a945edda5a03bc1188",
+   "evaluation_package_model_sha256": "1f3e5eead669c6bd76dc68a93a0ca071e716f82233f397a945edda5a03bc1188",
+   "eval_seconds": 3198.0
+  },
+  "A1-s20260801": {
+   "train": {"steps": 1653, "planned": 1653, "completed_all_steps": true, "train_seconds": 10478.9,
+             "config_sha256": "3a5283e68c730c575d6cca4722cb08421f41bb51a8c3f8e8bd6a5b6d4693ce31",
+             "final_val_ce": 0.790869, "final_val_kd": 0.648641},
+   "final_model_safetensors_sha256": "06c12901939ec6f04b8a10278385d339845bd31140534d6d96fae587139d21b3",
+   "evaluation_package_model_sha256": "06c12901939ec6f04b8a10278385d339845bd31140534d6d96fae587139d21b3",
+   "eval_seconds": 2936.1
+  },
+  "_hashes": "final_model_safetensors_sha256 is a1_units.py's hash on the pod; evaluation_package_model_sha256 was recomputed on the dev box from the archive's evaluation/package/model.safetensors (2,384,234,968 B each, fp32): the evaluated model is the trained one"
+ },
+ "on_the_volume": {
+  "volume": "4rhubprswo (350 GB, US-TX-3)",
+  "per_unit": "/runpod-volume/teacher_modes/v2_units/A1-s<seed>/",
+  "checkpoint": "train/checkpoints/step_001653/{model/ (fp32 safetensors, sha256 above), trainer_state.pt (AdamW state, step, consumed sequences, torch and CUDA RNG, resume identity), resume_identity.json}; keep_last 1, so step_000826 was removed",
+  "trainer_state_sha256": "not recorded: the session hashed the model weights only; the trainer state stays on the volume unhashed",
+  "evaluation": "evaluation/ (package, generations, rows, formal_report.json)",
+  "top1": "/runpod-volume/teacher_modes/search_a1/top1 (model.safetensors 3459b9c9..., verified by the search's closeout)"
+ },
+ "evidence_archive": {
+  "path": ".scratch/research_a/a_train_a1_20261102_184122/store/a1_evidence.tgz (ignored, dev box)",
+  "sha256": "a893547d867e35a04b6a111931c3f5141bfabcf9384e66bc34348f9fc1f9f933",
+  "bytes": 3869177657,
+  "verified": "re-hashed on the dev box: matches the pod's digest",
+  "entries": 187,
+  "contents": "v2_units/A1-s<seed>/{train/ without checkpoints, evaluation/}; it also carried each evaluation/package/model.safetensors (2 x 2.38 GB) that no analysis reads -- the closeout's tar now excludes them (token_matched_phase.files_secured)",
+  "committed_here": "evidence/units/<unit>/train/{config.json, run_manifest.json, run_completion.json, train_log.jsonl}, evidence/units/<unit>/evaluation/{formal_report.json, generations/*.summary.json}; evidence/{a1_units.json, driver.status, launch.log, watchdog_8glbonkyvwdy5v.out}",
+  "not_committed": "generations/*.jsonl and rows/*.rows.jsonl (raw completions, including the safety_paired unit's completions of unsafe prompts), progress/, uncapped_*: they stay in the archive"
+ },
+ "analysis": "logs/stages/stage-2/teacher_modes/analyses/a1_result.json (a1_analysis.py over the archive's units and v1's thinking-mode teacher evaluation)",
+ "money": {
+  "launcher_all_in_usd": 8.7766,
+  "provider_posted_usd_at_record": 7.7419,
+  "provider_posted_buckets": "8 hourly buckets, 2026-11-02 19:00 to 2026-11-03 02:00; the 03:00 bucket (to 03:16:45) had not posted",
+  "_": "the envelope reads the launcher's conservative all-in until the last bucket posts"
+ },
+ "teardown": {
+  "pod": "8glbonkyvwdy5v deleted 03:16:45Z; provider confirms gone; pod list --all empty at 03:17:40Z",
+  "provider_reconciliation": "only the 2 accounted volumes (4rhubprswo, am5m373kuq)",
+  "observers": "the launcher exited; the watchdog exited pod_gone; the session's background watchers have all ended (P12.3)"
+ }
+}

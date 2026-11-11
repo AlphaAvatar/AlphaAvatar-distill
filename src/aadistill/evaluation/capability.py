@@ -25,7 +25,8 @@ from __future__ import annotations
 import re
 
 from ..data.verify import boxed_answer, normalize_math
-from .behavior import ECHO_THRESHOLD, is_refusal, normalize_text, split_generation
+from .behavior import (ECHO_THRESHOLD, is_refusal, normalize_text, record_think_state,
+                       split_generation)
 from .strict_answer import extract_final_answer, normalize_number, protocol_valid
 
 BATTERY_VERSION = "capability-v2"
@@ -67,12 +68,15 @@ def _shared(record: dict) -> dict:
     teacher's template pre-opens it, the released Qwen3-0.6B's does not, and
     judging one under the other's rule rejects every generation. Absent (every
     record written before 2026-08-04) it defaults to True, which is correct for
-    every checkpoint in this project's own lineage.
+    every checkpoint in this project's own lineage. A record that states
+    `think_state` (a hybrid template's `preclosed` among them) is read as
+    written; see `behavior.record_think_state`.
     """
     raw = record.get("raw", "")
-    preopened = bool(record.get("think_preopened", True))
-    parts = split_generation(raw, think_preopened=preopened)
-    valid, reason = protocol_valid(raw, think_preopened=preopened)
+    state = record_think_state(record)
+    preopened = state == "preopened"
+    parts = split_generation(raw, think_state=state)
+    valid, reason = protocol_valid(raw, think_state=state)
     return {
         "answer": parts["answer"],
         "protocol_valid": valid,

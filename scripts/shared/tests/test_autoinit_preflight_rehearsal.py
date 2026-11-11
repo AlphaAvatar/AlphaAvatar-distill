@@ -465,7 +465,8 @@ def test_a_tampered_authorization_does_not_load(tmp_path):
 def test_the_launcher_treats_a_dead_or_hung_driver_as_terminal():
     source = RUNNER_PATH.read_text()
     assert 'live, _ = probe(target, job)' in source
-    assert 'terminal = f"DRIVER_{live}"' in source
+    #: since 2026-10-24 the classification is `driver_terminal`, which returns f"DRIVER_{live}"
+    assert "driver_terminal(" in source and 'return f"DRIVER_{live}", unanswered_since' in source
     # It polls the PROVIDER, not the log: a wedged driver writes no lines and
     # silence must not look like an idle session.
     assert "state = self.provider.get(self.pod_id)" in source

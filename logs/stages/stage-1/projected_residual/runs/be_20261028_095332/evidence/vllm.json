@@ -1,0 +1,27 @@
+{
+ "gpu_before": {
+  "read_utc": "2026-10-28T10:14:06+00:00",
+  "known": true,
+  "name": "NVIDIA L40S",
+  "driver": "595.91.07",
+  "used_mib": 0,
+  "total_mib": 46068,
+  "compute_processes": []
+ },
+ "max_used_mib": 1024,
+ "engine_started": true,
+ "returncode": 0,
+ "seconds": 131.5,
+ "stderr_tail": "(EngineCore pid=6930) \nLoading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]\n(EngineCore pid=6930) \nLoading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.73s/it]\n(EngineCore pid=6930) \nLoading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.73s/it]\n(EngineCore pid=6930) \n(EngineCore pid=6930) \nCapturing CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]\nCapturing CUDA graphs (PIECEWISE):   4%|\u258d         | 2/51 [00:00<00:03, 12.91it/s]\nCapturing CUDA graphs (PIECEWISE):  10%|\u2589         | 5/51 [00:00<00:02, 19.80it/s]\nCapturing CUDA graphs (PIECEWISE):  16%|\u2588\u258c        | 8/51 [00:00<00:01, 23.56it/s]\nCapturing CUDA graphs (PIECEWISE):  22%|\u2588\u2588\u258f       | 11/51 [00:00<00:01, 24.55it/s]\nCapturing CUDA graphs (PIECEWISE):  27%|\u2588\u2588\u258b       | 14/51 [00:00<00:01, 26.23it/s]\nCapturing CUDA graphs (PIECEWISE):  33%|\u2588\u2588\u2588\u258e      | 17/51 [00:00<00:01, 20.30it/s]\nCapturing CUDA graphs (PIECEWISE):  39%|\u2588\u2588\u2588\u2589      | 20/51 [00:00<00:01, 22.46it/s]\nCapturing CUDA graphs (PIECEWISE):  45%|\u2588\u2588\u2588\u2588\u258c     | 23/51 [00:01<00:01, 24.41it/s]\nCapturing CUDA graphs (PIECEWISE):  51%|\u2588\u2588\u2588\u2588\u2588     | 26/51 [00:01<00:00, 25.72it/s]\nCapturing CUDA graphs (PIECEWISE):  57%|\u2588\u2588\u2588\u2588\u2588\u258b    | 29/51 [00:01<00:00, 26.60it/s]\nCapturing CUDA graphs (PIECEWISE):  63%|\u2588\u2588\u2588\u2588\u2588\u2588\u258e   | 32/51 [00:01<00:00, 21.40it/s]\nCapturing CUDA graphs (PIECEWISE):  71%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588   | 36/51 [00:01<00:00, 24.05it/s]\nCapturing CUDA graphs (PIECEWISE):  76%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b  | 39/51 [00:01<00:00, 25.33it/s]\nCapturing CUDA graphs (PIECEWISE):  84%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d | 43/51 [00:01<00:00, 26.93it/s]\nCapturing CUDA graphs (PIECEWISE):  92%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f| 47/51 [00:01<00:00, 23.95it/s]\nCapturing CUDA graphs (PIECEWISE):  98%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a| 50/51 [00:02<00:00, 24.35it/s]\nCapturing CUDA graphs (PIECEWISE): 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 51/51 [00:02<00:00, 23.78it/s]\n(EngineCore pid=6930) \nCapturing CUDA graphs (FULL):   0%|          | 0/35 [00:00<?, ?it/s]\nCapturing CUDA graphs (FULL):  17%|\u2588\u258b        | 6/35 [00:00<00:00, 50.82it/s]\nCapturing CUDA graphs (FULL):  34%|\u2588\u2588\u2588\u258d      | 12/35 [00:00<00:00, 49.85it/s]\nCapturing CUDA graphs (FULL):  51%|\u2588\u2588\u2588\u2588\u2588\u258f    | 18/35 [00:00<00:00, 52.03it/s]\nCapturing CUDA graphs (FULL):  69%|\u2588\u2588\u2588\u2588\u2588\u2588\u258a   | 24/35 [00:00<00:00, 48.51it/s]\nCapturing CUDA graphs (FULL):  86%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c | 30/35 [00:00<00:00, 49.73it/s]\nCapturing CUDA graphs (FULL): 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 35/35 [00:00<00:00, 51.22it/s]\n",
+ "gpu_after": {
+  "read_utc": "2026-10-28T10:16:18+00:00",
+  "known": true,
+  "name": "NVIDIA L40S",
+  "driver": "595.91.07",
+  "used_mib": 0,
+  "total_mib": 46068,
+  "compute_processes": []
+ },
+ "status": "PASS",
+ "problems": []
+}

@@ -1,0 +1,330 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_generation_session_summary/v1",
+ "run_id": "a_tool_generation_t2507_20261104_195411",
+ "kind": "tool_generation_t2507",
+ "terminal": "ALL_DONE",
+ "session_utc": [
+  "2026-11-04T20:03:39Z",
+  "2026-11-04T20:52:28Z"
+ ],
+ "identity": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+ "device_admission": {
+  "admitted": true,
+  "failed": [],
+  "checks": {
+   "teacher_model": true,
+   "teacher_revision": true,
+   "teacher_files": true,
+   "chat_template": true,
+   "template_kwargs": true,
+   "sampling": true,
+   "stop_ids": true,
+   "vllm_lock": true,
+   "context": true,
+   "gpu_memory_utilization": true,
+   "dtype": true,
+   "engine_started_with_a_kv_cache": true,
+   "no_out_of_memory": true,
+   "generation_complete": true,
+   "memory_margin": true
+  },
+  "measured": {
+   "engine_ready_seconds": [
+    157.9
+   ],
+   "kv_cache_tokens": [
+    195009.0
+   ],
+   "max_concurrency_at_8184": [
+    8184.0,
+    23.83
+   ],
+   "peak_memory_used_mib": 37611,
+   "memory_total_mib": 46068,
+   "free_gib": 8.26,
+   "teacher_files_seconds": 7.0,
+   "wall_seconds": 241.7
+  }
+ },
+ "invocations": [
+  {
+   "label": "admission_T2507_pass0",
+   "wall_seconds": 241.7,
+   "output_tokens": 13272,
+   "output_tokens_per_second": 204.5,
+   "engine_ready_seconds": [
+    157.9
+   ],
+   "peak_memory_used_mib": 37611
+  },
+  {
+   "label": "tool_T2507_r1_pass0",
+   "wall_seconds": 1223.3,
+   "output_tokens": 1239677,
+   "output_tokens_per_second": 1046.2,
+   "engine_ready_seconds": [
+    21.7
+   ],
+   "peak_memory_used_mib": 37979
+  },
+  {
+   "label": "tool_T2507_r1_pass1",
+   "wall_seconds": 899.2,
+   "output_tokens": 748132,
+   "output_tokens_per_second": 866.5,
+   "engine_ready_seconds": [
+    20.3
+   ],
+   "peak_memory_used_mib": 37979
+  },
+  {
+   "label": "tool_T2507_r2_pass0",
+   "wall_seconds": 292.4,
+   "output_tokens": 156270,
+   "output_tokens_per_second": 609.7,
+   "engine_ready_seconds": [
+    20.5
+   ],
+   "peak_memory_used_mib": 37979
+  },
+  {
+   "label": "tool_T2507_r2_pass1",
+   "wall_seconds": 263.0,
+   "output_tokens": 133118,
+   "output_tokens_per_second": 587.2,
+   "engine_ready_seconds": [
+    20.9
+   ],
+   "peak_memory_used_mib": 37979
+  }
+ ],
+ "formal_output_tokens": 2277197,
+ "formal_tokens_per_second": 899.6,
+ "cells": [
+  {
+   "split": "training",
+   "category": "error_recovery",
+   "target": 49258.7,
+   "bound": 39,
+   "attempted": 39,
+   "admitted": 11,
+   "supervised_tokens": 45631.0,
+   "status": "SHORTFALL",
+   "admission_yield": 0.2821,
+   "supervised_tokens_per_attempted_task": 1170.0,
+   "generated_tokens_per_attempted_task": 5635.8,
+   "supply_tasks": 2668
+  },
+  {
+   "split": "training",
+   "category": "mcp_agent",
+   "target": 73888.1,
+   "bound": 86,
+   "attempted": 86,
+   "admitted": 16,
+   "supervised_tokens": 48874.0,
+   "status": "SHORTFALL",
+   "admission_yield": 0.186,
+   "supervised_tokens_per_attempted_task": 568.3,
+   "generated_tokens_per_attempted_task": 4778.7,
+   "supply_tasks": 4542
+  },
+  {
+   "split": "training",
+   "category": "multi_turn",
+   "target": 98517.4,
+   "bound": 77,
+   "attempted": 64,
+   "admitted": 20,
+   "supervised_tokens": 113880.0,
+   "status": "REACHED",
+   "admission_yield": 0.3125,
+   "supervised_tokens_per_attempted_task": 1779.4,
+   "generated_tokens_per_attempted_task": 5630.0,
+   "supply_tasks": 12224
+  },
+  {
+   "split": "training",
+   "category": "multiple_parallel",
+   "target": 73888.1,
+   "bound": 159,
+   "attempted": 116,
+   "admitted": 63,
+   "supervised_tokens": 123617.0,
+   "status": "REACHED",
+   "admission_yield": 0.5431,
+   "supervised_tokens_per_attempted_task": 1065.7,
+   "generated_tokens_per_attempted_task": 3381.0,
+   "supply_tasks": 4581
+  },
+  {
+   "split": "training",
+   "category": "no_tool",
+   "target": 49258.7,
+   "bound": 236,
+   "attempted": 168,
+   "admitted": 151,
+   "supervised_tokens": 100510.0,
+   "status": "REACHED",
+   "admission_yield": 0.8988,
+   "supervised_tokens_per_attempted_task": 598.3,
+   "generated_tokens_per_attempted_task": 845.1,
+   "supply_tasks": 37880
+  },
+  {
+   "split": "training",
+   "category": "schema_arguments",
+   "target": 73888.1,
+   "bound": 177,
+   "attempted": 136,
+   "admitted": 39,
+   "supervised_tokens": 75152.0,
+   "status": "REACHED",
+   "admission_yield": 0.2868,
+   "supervised_tokens_per_attempted_task": 552.6,
+   "generated_tokens_per_attempted_task": 3063.7,
+   "supply_tasks": 1928
+  },
+  {
+   "split": "training",
+   "category": "tool_selection",
+   "target": 73888.1,
+   "bound": 177,
+   "attempted": 126,
+   "admitted": 76,
+   "supervised_tokens": 106617.0,
+   "status": "REACHED",
+   "admission_yield": 0.6032,
+   "supervised_tokens_per_attempted_task": 846.2,
+   "generated_tokens_per_attempted_task": 2390.3,
+   "supply_tasks": 12499
+  },
+  {
+   "split": "validation",
+   "category": null,
+   "target": 12624.0,
+   "bound": 28,
+   "attempted": 18,
+   "admitted": 14,
+   "supervised_tokens": 16345.0,
+   "status": "REACHED",
+   "admission_yield": 0.7778,
+   "supervised_tokens_per_attempted_task": 908.1,
+   "generated_tokens_per_attempted_task": null,
+   "supply_tasks": null
+  }
+ ],
+ "dev_box_admission": {
+  "record": "artifacts/stages/stage-2/teacher_modes/tool_admission/thinking_2507_a_tool_generation_t2507_20261104_195411/tool_admission.json",
+  "matches_the_session": true,
+  "validation_supervised_tokens": 16345
+ },
+ "shortfalls": {
+  "status": "SHORTFALL at the plan bound, NOT approved; supply far from exhausted (every bounded task attempted; the bounds came from protocol priors, which overestimated this teacher's per-task yield)",
+  "cells": [
+   "error_recovery",
+   "mcp_agent"
+  ]
+ },
+ "top_up_requirement": {
+  "registered": {
+   "cells": {
+    "error_recovery": {
+     "gap_supervised_tokens": 3627.7,
+     "new_tasks_at_measured_yield": 4,
+     "generated_tokens": 22543
+    },
+    "mcp_agent": {
+     "gap_supervised_tokens": 25014.1,
+     "new_tasks_at_measured_yield": 45,
+     "generated_tokens": 215041
+    },
+    "multi_turn": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    },
+    "multiple_parallel": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    },
+    "no_tool": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    },
+    "schema_arguments": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    },
+    "tool_selection": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    }
+   },
+   "price": {
+    "new_tasks": 49,
+    "generated_tokens": 237584,
+    "generation_minutes": 4.4,
+    "session_minutes_expected": 22.1,
+    "usd_expected_at_1.09": 0.42
+   }
+  },
+  "common_support": {
+   "cells": {
+    "error_recovery": {
+     "gap_supervised_tokens": 10934.5,
+     "new_tasks_at_measured_yield": 10,
+     "generated_tokens": 56358
+    },
+    "mcp_agent": {
+     "gap_supervised_tokens": 35974.3,
+     "new_tasks_at_measured_yield": 64,
+     "generated_tokens": 305836
+    },
+    "multi_turn": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    },
+    "multiple_parallel": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    },
+    "no_tool": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    },
+    "schema_arguments": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    },
+    "tool_selection": {
+     "gap_supervised_tokens": 0.0,
+     "new_tasks_at_measured_yield": 0,
+     "generated_tokens": 0
+    }
+   },
+   "price": {
+    "new_tasks": 74,
+    "generated_tokens": 362194,
+    "generation_minutes": 6.7,
+    "session_minutes_expected": 24.4,
+    "usd_expected_at_1.09": 0.46
+   }
+  }
+ },
+ "top_up_rule": "a later session from each cell's frozen order: new tasks only, sealed shards never regenerated, at the measured yields above; it needs the plan rebuilt with these measured Thinking-2507 strata (a plan identity change) and the maintainer's choice of composition",
+ "cost": {
+  "all_in_usd": 1.097,
+  "elapsed_minutes": 59.27,
+  "price_per_hour": 1.09
+ },
+ "authorizes": "nothing"
+}

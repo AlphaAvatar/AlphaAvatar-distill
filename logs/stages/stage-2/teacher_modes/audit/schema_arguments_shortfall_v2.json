@@ -1,0 +1,103 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.schema_arguments_shortfall/v2",
+ "written_utc": "2026-11-04",
+ "supersedes": "audit/schema_arguments_shortfall.json and schema_arguments_options.json (priors: 85,015 training tokens and ~1,400 state-evaluation positions expected; the pilot measured 19,968 and 1,063)",
+ "question": "the non-thinking (H-N) schema_arguments cells after the tool pilot (maintainer 2026-11-04: no SHORTFALL approved; adaptation first, then compliant independent supply; else a quantified recommended design)",
+ "measured": {
+  "state_eval": {
+   "target_scored_positions": 1800.0,
+   "supply_tasks": 29,
+   "all_attempted": true,
+   "admitted_tasks": 11,
+   "scored_positions": 1063.0,
+   "gap": 737.0,
+   "status": "SHORTFALL_EXHAUSTED"
+  },
+  "training": {
+   "target_supervised_tokens": 74012.7,
+   "supply_by_shape": {
+    "full_episode@v1": 368,
+    "single_step_gold_tool_call@v1": 1560
+   },
+   "sealed_tokens": 1292.0,
+   "projection_low_expected_high": [
+    11802.7,
+    19968.0,
+    33174.7
+   ],
+   "status": "SHORTFALL_PROJECTED",
+   "by_shape": "full 368 x 29.25 + single-step 1,560 x 5.9 tokens per attempted task (tool_pilot report v4)"
+  },
+  "why_non_thinking_only": "the same tasks: H-T reaches every schema_arguments cell (training 432,641 projected; state evaluation 4,236 sealed). A non-thinking call turn carries ~37 supervised tokens per admitted single-step episode against ~702 in thinking mode, so a token target needs ~19x the tasks"
+ },
+ "adaptation_checked": "no adaptation defect (evidence/refusal_diagnosis.json): Pivot single-step tasks keep the original step-1 context; refusals are other-tool, no-call, value and free-text disagreements with one recorded action; replay misses are calls the table never recorded; no int/float or default-argument canonicalization defect; a free-text rule was evaluated and NOT proposed (audit/tool_pilot_free_text_review.json)",
+ "independent_supply_checked": {
+  "Pivot Conversational": "exhausted: every schema_arguments task of every split is in the pool (training 1,928, calibration 100, state_eval 29, validation 24, reserve 2); the single-step tier already added",
+  "Pivot Function-Calling": "not adopted (maintainer 2026-11-03); 78 rebuildable tasks, 15 repeat xLAM / Glaive prompts (T3)",
+  "Toucan-1.5M": "no gold arguments: its single calls are tool_selection; re-labelling them would weaken the category's verification (rejected 2026-11-03)",
+  "WorkBench": "2 of 69 templates qualify (one tool); one environment under the frozen atomic isolation, so no state-evaluation supply is expected (4%); a public benchmark (contamination); an executable backend and its numpy<2 environment: days of engineering",
+  "Nemotron-SFT-Agentic-v4": "deferred (licence, generator terms, tool provenance); simulated tool results, no verifier",
+  "ToolACE, Nemotron-Agentic-v1": "ranked below (older and single-turn / no verifier, simulated tools)",
+  "verdict": "no compliant independent supply closes either gap under the frozen category definition, split isolation and decontamination; none is fabricated by duplication, packing counts, cross-split borrowing or a weaker category"
+ },
+ "recommended_design": {
+  "what": "generate the WHOLE remaining H-N schema_arguments training supply (1,804 tasks: 344 full episodes + 1,460 single-step) inside the hybrid session at its measured price; keep the seven shares as the registered targets; register the two H-N schema_arguments cells as measured supply-limited cells -- an approved exception in packed_round_design.json :: approved_exceptions for A2-6cat's tool type, and in the generation plan's approved_shortfalls for state_eval and training -- with the realized numbers recorded after generation; change no other category, arm or split",
+  "mixture_impact_A2_6cat": {
+   "at_low": {
+    "tool_type_tokens": 431208,
+    "tool_type_change": -62210,
+    "tool_type_change_pct": -12.61,
+    "whole_set_change_pct": -1.8,
+    "tool_type_share_of_six_types_pct": 12.71,
+    "schema_share_of_tool_type_pct": 2.74
+   },
+   "at_expected": {
+    "tool_type_tokens": 439373,
+    "tool_type_change": -54045,
+    "tool_type_change_pct": -10.95,
+    "whole_set_change_pct": -1.56,
+    "tool_type_share_of_six_types_pct": 12.92,
+    "schema_share_of_tool_type_pct": 4.54
+   },
+   "at_high": {
+    "tool_type_tokens": 452580,
+    "tool_type_change": -40838,
+    "tool_type_change_pct": -8.28,
+    "whole_set_change_pct": -1.18,
+    "tool_type_share_of_six_types_pct": 13.26,
+    "schema_share_of_tool_type_pct": 7.33
+   },
+   "registered": {
+    "tool_type_tokens": 493418,
+    "tool_type_share_of_six_types_pct": 14.29,
+    "schema_share_of_tool_type_pct": 15.0
+   },
+   "note": "the fluid : supporting 50:50 of the five base types is untouched; the six-type pack's share check (+-2%) would refuse without the exception"
+  },
+  "evaluation_coverage": {
+   "state_eval_hybrid_v2_H-N_schema": {
+    "scored_positions": 1063.0,
+    "of_target_pct": 59.1,
+    "admitted_tasks": 11,
+    "min_tasks_per_category": 5,
+    "standard_error_factor": 1.3,
+    "note": "the equal-domain mean weighs each category 1/7: this category's KL is estimated on 59% of the positions, its standard error ~1.30x; H-T's category is full"
+   },
+   "A1_6cat_C1_6cat": "unaffected",
+   "calibration_v2": "unaffected (772 of 630 measured)"
+  },
+  "cost": {
+   "remaining_H-N_schema_training_generated_tokens": 207196,
+   "minutes_at_measured_throughput": 6.0,
+   "usd_expected": 0.109,
+   "_": "inside the hybrid session's price (the plan's bound already holds all 1,804 tasks)"
+  },
+  "decision_owed": "one maintainer decision: approve the two measured exceptions as designed (or name another design); nothing is approved here"
+ },
+ "not_recommended": {
+  "reduce A2-6cat's other categories to keep its shares": "breaks the token match with A1-6cat, which reaches every cell",
+  "lower A1-6cat's schema_arguments to match": "removes data that exists and verifies; changes the registered shares",
+  "WorkBench now": "no state-evaluation supply, one tool for training, days of engineering, a benchmark lost as an evaluation"
+ },
+ "authorizes": "nothing"
+}

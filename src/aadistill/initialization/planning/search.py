@@ -304,6 +304,13 @@ class SearchConfig:
     #: the two fields a pre-identity record carries. See
     #: `aadistill.initialization.scoring.protocol_identity`.
     measurement_protocol_id: str | None = None
+    #: HOW CALIBRATION ITEMS ARE COMPOSED INTO FORWARDS: a
+    #: `calibration.packing.ForwardContext` packs them into causal sequences
+    #: (maintainer decision 2026-11-03). Run-level for the same reason as the
+    #: support -- a candidate selected from statistics read in one context must
+    #: not be pruned by a measurer reading another -- and OMITTED from `as_dict`
+    #: when `None`, so every committed search keeps its `config_hash`.
+    forward_context: Any = None
     max_depth: int | None = None
     allow_kind_repeat: bool = False
     device: str = "cpu"
@@ -361,6 +368,8 @@ class SearchConfig:
             #: still hash to the value its own record carries.
             **({"measurement_protocol_id": self.measurement_protocol_id}
                if self.measurement_protocol_id else {}),
+            **({} if self.forward_context is None else
+               {"forward_context": self.forward_context.as_dict()}),
             "max_depth": self.max_depth,
             "allow_kind_repeat": self.allow_kind_repeat,
             "device": self.device,
@@ -499,6 +508,25 @@ class BeamSearch:
         #:
         #: `None` only when the measurer declares none, which is the historical
         #: case; `measurement_is_comparable` then applies the historical rule.
+        #: ONE FORWARD CONTEXT for the operators and the measurer, refused at
+        #: construction when the measurer exposes its own and it differs.
+        mine_context = (None if self.config.forward_context is None
+                        else self.config.forward_context.as_dict())
+        if hasattr(measurer, "forward_context"):
+            theirs = getattr(measurer, "forward_context")
+            theirs = None if theirs is None else theirs.as_dict()
+            if theirs != mine_context:
+                raise SearchError(
+                    f"this search reads calibration items in forward context "
+                    f"{mine_context!r} and its measurer reads the suite in "
+                    f"{theirs!r}; operators and beam would measure in different "
+                    "contexts")
+        if mine_context is not None and self.config.scoring_objective is not None:
+            raise SearchError(
+                "a packed forward context is implemented for the forward "
+                "baseline's KL-only path; this search declares a scoring "
+                "objective (which reads a root reference store with no packed "
+                "path)")
         measurer_protocol = getattr(measurer, "measurement_protocol_id", None)
         declared = self.config.measurement_protocol_id
         if declared and measurer_protocol and str(measurer_protocol) != declared:
@@ -971,7 +999,8 @@ class BeamSearch:
             implementation=impl, policy=self.config.position_policy,
             support=self.config.distribution_support,
             items=self.calibration_for(profile),
-            objective=self.config.scoring_objective)
+            objective=self.config.scoring_objective,
+            forward_context=self.config.forward_context)
         plan = impl.plan(parent.spec, self.config.target_spec, self.adapter, operator_config)
         config_hash = operator_config_hash(operator_config)
 
@@ -1009,6 +1038,7 @@ class BeamSearch:
             scoring_objective=self.config.scoring_objective,
             root_reference=(self.root_reference_for(profile)
                             if self._needs_root_reference(impl) else None),
+            forward_context=self.config.forward_context,
             deadline=self.deadline)
 
         # Before the expansion, so a budget already spent does not buy one more
@@ -1199,6 +1229,11 @@ class BeamSearch:
                               **self.execution.as_fingerprint(),
                               "position_policy_hash":
                                   self.config.position_policy.policy_hash,
+                              #: The packed context the pass was read in;
+                              #: ABSENT for the historical reading.
+                              **({} if self.config.forward_context is None else
+                                 {"forward_context":
+                                      self.config.forward_context.context_hash}),
                               **({"token_weighting":
                                       self.root_reference_for(profile).identity_hash}
                                  if impl is not None

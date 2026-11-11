@@ -1,0 +1,492 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.six_category_design/v1",
+ "status": "DESIGN at $0 (2026-11-03). Nothing is downloaded, generated, searched, trained or evaluated; the canonical pool's sources wait for the maintainer's ruling on the source review. AUTHORIZES NOTHING.",
+ "decided_by": "maintainer 2026-11-03, 'AlphaAvatar-distill — Thinking-2507 六类数据对照方案补充': a future A1 retrains with the base-corpus category restored to six types at about 1/6 each; C1 uses tool-calling data of the same kind, source and task composition as the new A1, never the Glaive / xLAM records; $0 design, source audit, data protocol and feasibility only",
+ "narrative": "docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md",
+ "arms": {
+  "A1-6cat": {
+   "teacher": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+   "mode": "thinking",
+   "initialization": "the hybrid D4 full-search Top-1 (state 159e73be..., model.safetensors 3459b9c9...), reused, not re-searched",
+   "data": "base-corpus category six types at 1/6 each (five of them re-selected from A1's verified supply, tool calling new); fluid category unchanged",
+   "packing": "document_isolated at 8,192 (token_documents.pack_isolated), as A1"
+  },
+  "A2-6cat": {
+   "teacher": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+   "mode": "non-thinking",
+   "initialization": "the same hybrid Top-1",
+   "data": "the same six-type recipe, its own mode's teacher-native outputs",
+   "packing": "document_isolated at 8,192, as A2"
+  },
+  "C1-6cat": {
+   "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+   "mode": "thinking (the model's only mode)",
+   "initialization": "the historical Thinking-2507 D4 full-search Top-1, model.safetensors fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "data": "D4A_merged_whole's 989 tool-free training sequences and 10 tool-free validation sequences byte for byte, plus Thinking-2507-native tool-calling turns over the canonical pool in place of its 1,479 tool-only training and 6 tool-only validation sequences (audit/c1_tool_replacement.json)",
+   "packing": "the historical D4 strategy kept: E1's packer, sequential within system-prompt group (cross-context), run for the new tool part without terminal truncation (the configuration the fluid part was packed with)"
+  },
+  "common_recipe": "unchanged from TOKEN_MATCHED.md C: KD target positions only (kd_scope assistant), reference_topk_tail_v1 K = 200 + tail, KD weight 1.0, CE weight 0.25, temperature 1.0, 3 epochs, batch size 2, micro-batch 1, sequence length 8,192, AdamW lr 5e-5, seeds 20260726 and 20260801, formal evaluation eval-set-1 v2 + nucleus_v1; steps, warmup, evaluation and save intervals re-derived from each new pack"
+ },
+ "base_category": {
+  "total_supervised_tokens": 2960507,
+  "per_type": 493417.83,
+  "A1_6cat_and_A2_6cat": {
+   "competition_math": {
+    "cells": [
+     [
+      "supporting.math_new",
+      "math_train"
+     ]
+    ],
+    "share": "1/6",
+    "verifier": "boxed_math against MATH train's gold"
+   },
+   "gsm8k": {
+    "cells": [
+     [
+      "supporting.math_gsm8k",
+      "gsm8k_train"
+     ]
+    ],
+    "share": "1/6",
+    "verifier": "final_number"
+   },
+   "rag_reading": {
+    "cells": [
+     [
+      "supporting.reading_verified",
+      "squad_v2_train_answerable"
+     ]
+    ],
+    "share": "1/6",
+    "verifier": "span"
+   },
+   "multihop_reading": {
+    "cells": [
+     [
+      "supporting.reading_verified",
+      "hotpot_qa_train"
+     ]
+    ],
+    "share": "1/6",
+    "verifier": "span"
+   },
+   "code": {
+    "cells": [
+     [
+      "supporting.code_algorithmic",
+      "mbpp_train"
+     ],
+     [
+      "supporting.code_algorithmic",
+      "reasoning_core"
+     ]
+    ],
+    "share": "1/6",
+    "split": "MBPP capped at the smaller mode's admitted MBPP supply (38,260 today), the rest of the type (455,158) reasoning_core's code modules -- the registered rule, unchanged"
+   },
+   "tool_calling": {
+    "cells": [
+     [
+      "supporting.tool_calling",
+      "tool_pool@v1"
+     ]
+    ],
+    "share": "1/6",
+    "verifier": "tool_calling_protocol (below)"
+   },
+   "selection": "token_matched_design.json :: selection unchanged: per mode and per category a largest-remainder interleave over the cells on supervised tokens, whole examples, the category within 0.5% of its total and each cell within one task of its share; a cell exhausted first is a SHORTFALL, never filled from another cell",
+   "five_types": "re-selected at $0 from the verified records A1/A2 were admitted from: every type already holds more than 592,101 admitted tokens per mode, so 493,418 is reachable without generation; the five types' selections are expected to be subsets of the current ones (to be confirmed by the re-admission)",
+   "fluid": "unchanged: 2,962,514 target, the same cells and shares, so the fluid selection and its documents are expected to be the current ones byte for byte; the pack is rebuilt as a whole (new identity) because the document shuffle covers every document"
+  },
+  "C1_6cat": {
+   "kept_byte_for_byte": {
+    "competition_math (openmath)": 494130,
+    "gsm8k": 494582,
+    "multihop_qa": 492790,
+    "rag_evidence": 493581,
+    "code": 492837,
+    "_": "E1's corpus_v2 types as trained by D4-Augmented, 2,467,920 supervised tokens in 465 sequences; hygiene-only targets and 352 cut traces stay exactly as they were"
+   },
+   "tool_calling_target": 492587,
+   "nominal_sixth_deviation": "492,587 - 493,417.83 = -830.83 (-0.168%), reported",
+   "rule": "walk the canonical order with the category interleave below until the tool type first reaches 492,587; the last task's overshoot is reported; a SHORTFALL is reported, never filled from another type and never closed by lowering a verifier"
+  }
+ },
+ "tool_calling": {
+  "categories": {
+   "tool_selection": {
+    "share": 0.15,
+    "what": "pick the right function among the offered tools; correct name; simple arguments; one call",
+    "verifier_strength": "G1 (WorkBench final state) or G2 (Pivot expected_action; Toucan target tools)"
+   },
+   "schema_arguments": {
+    "share": 0.15,
+    "what": "one call whose arguments need nested objects, arrays, enums, numbers with units or optional fields; schema-valid JSON",
+    "verifier_strength": "G1 (WorkBench) or G2 (Pivot programmatic argument comparison), with JSON Schema validation always"
+   },
+   "no_tool": {
+    "share": 0.1,
+    "what": "tools are offered but none is needed or none fits: answer directly without a call",
+    "verifier_strength": "B (no call), plus a gold answer where the task carries one"
+   },
+   "multiple_parallel": {
+    "share": 0.15,
+    "what": "two or more calls in one assistant turn, same or different functions",
+    "verifier_strength": "G1 for sequential multiple calls (WorkBench); parallel calls only G2 by tool names and replay agreement (Toucan): no legal source with gold parallel arguments"
+   },
+   "multi_turn": {
+    "share": 0.2,
+    "what": "sequential calls across turns, reading tool results, follow-up reasoning and a final answer from the results; multi-user-turn conversations",
+    "verifier_strength": "G1 (WorkBench multi-step) or G2 (Pivot per step; Toucan replay agreement)"
+   },
+   "error_recovery": {
+    "share": 0.1,
+    "what": "a tool returns an error or fails, or a required parameter is missing: retry with corrected arguments, report the failure, or ask for the missing value",
+    "verifier_strength": "G1, partial: tool errors raised by WorkBench code, recovery judged by final state; ask-for-the-missing-value has no admitted source"
+   },
+   "mcp_agent": {
+    "share": 0.15,
+    "what": "MCP-server tool catalogs and agent-style tasks over several steps",
+    "verifier_strength": "G2 only (Toucan: target tools in order, replay agreement, no final-state check); a maintainer decision whether this counts as task success"
+   }
+  },
+  "shares": "proposed in supervised tokens, for the maintainer to confirm; a category without a legal deterministic source is a SHORTFALL in every arm (none is filled from another category)",
+  "expected_per_arm": {
+   "basis": "per-turn supervised tokens from the records: the hybrid's first tool turn on eval-set-1's 12 tool prompts averages 241 (thinking) and 39 (non-thinking) generated tokens, exact gold call 9/12 in both modes (a1 teacher evaluation a_teacher_20261030_012648, local rows); Thinking-2507's historical tool turns average 303.5 (glaive, 1,591 turns) and 510 (xLAM, 19). Ranges until a pilot measures them",
+   "A1-6cat": {
+    "target": 493418,
+    "supervised_tokens_per_turn": [
+     250,
+     350,
+     450
+    ],
+    "turns": [
+     1097,
+     1410,
+     1974
+    ],
+    "tasks_at_1_8_turns": [
+     609,
+     783,
+     1097
+    ]
+   },
+   "A2-6cat": {
+    "target": 493418,
+    "supervised_tokens_per_turn": [
+     40,
+     70,
+     120
+    ],
+    "turns": [
+     4112,
+     7049,
+     12335
+    ],
+    "tasks_at_1_8_turns": [
+     2284,
+     3916,
+     6853
+    ]
+   },
+   "C1-6cat": {
+    "target": 492587,
+    "supervised_tokens_per_turn": [
+     300,
+     350,
+     450
+    ],
+    "turns": [
+     1095,
+     1407,
+     1642
+    ],
+    "tasks_at_1_8_turns": [
+     608,
+     782,
+     912
+    ]
+   },
+   "_order": "[lower, expected, upper] per field; tasks need dividing by the pass rate (0.45-0.8) to give the pool prefix each arm walks"
+  }
+ },
+ "task_pool": {
+  "id": "tool_pool@v1",
+  "status": "DESIGN, revised 2026-11-03 (the maintainer's independent review): the sources are CANDIDATES, none approved (audit/tool_calling_source_review_v2.json supersedes the v1 review and the 'proposed' list below); Toucan's SFT config is downloaded and converted dry into scratch, never into data/. data/six_category_selection.json cites this file's earlier revision (116e186b), whose base-category quotas are unchanged here",
+  "shared_by": [
+   "A1-6cat (hybrid thinking)",
+   "A2-6cat (hybrid non-thinking)",
+   "C1-6cat (Thinking-2507)",
+   "future hybrid and Thinking-2507 state evaluation and calibration (their own splits)"
+  ],
+  "task_record": {
+   "task_id": "tc1- + sha256('<dataset>@<revision>|<upstream row key>|<variant>')[:20]: one id per task, the same for every teacher",
+   "category": "one of tool_calling.categories",
+   "episode_shape": "one of protocol.episode_shapes (absent: full_episode@v1); a task carries exactly one, and the shape decides how its episode ends and which levels it can verify",
+   "source": "dataset id, revision, split, upstream row key, the review's verdict",
+   "family": "the task's environment: sha256 of its sorted atoms. Atoms are the atomic identities a split may not share -- every MCP server the converter declares (it owns the tools named '<slug>-<tool>') and every offered tool no declared server owns (sha256 of its bare name and canonical schema)",
+   "tools": "the function schemas as JSON Schema, canonicalized (keys sorted); never edited beyond canonical serialization",
+   "inputs": "the non-assistant messages: system text a source carries, user turns and when scripted later user turns arrive",
+   "backend": "kind replay | executable | none; replay: canonical call -> recorded response; executable: pinned code with no network run inside the episode loop (WorkBench's sandbox); never a live API, a network call or a tool simulated by an LLM at generation time; scripted errors by step",
+   "success": "per step the gold call set (name + arguments, with allowed argument variants) and the order rule (G2), or the sandbox's final state against the ground truth (G1); the final check (none | no_call | contains_all | number | asks_for)",
+   "limits": "max_turns; the rendered prompt length under each teacher's template",
+   "split": "training | validation | state_eval | calibration | reserve",
+   "content_keys": "sha256 of the normalized first user message and of the canonical tool set"
+  },
+  "splits": {
+   "rule": "by ATOM, never by task or by a combined family string: int(sha256('tool_pool@v1|' + atom), 16) mod 100 -> 0-2 validation, 3-6 state_eval, 7-10 calibration, 11-12 reserve, 13-99 training; a task enters the split all its atoms share and is refused when they disagree, so no server or tool is in two splits. A combined 'server1|server2' family (v1) could put one server in two splits, and connected components are no option (Toucan's multi-server tasks chain 99.8% of it into one)",
+   "order": "the training split's canonical order is a seeded shuffle (seed 20261103) frozen with its sha256 before any generation; every teacher walks the same order"
+  },
+  "sources": {
+   "status": "SUPERSEDED by audit/tool_calling_source_review_v2.json: every source is a CANDIDATE, none approved; the entries below are the v1 proposal, kept as written except where a statement was wrong",
+   "verification_classes": {
+    "G1": "deterministic ground truth: the task's own program defines the answer (an executable sandbox's final state)",
+    "G2": "model-generated gold compared deterministically (an expert model's recorded call or trajectory, filtered by its authors' judge): agreement, not human-verified correctness",
+    "B": "behavioural: no call where none is wanted"
+   },
+   "proposed": [
+    {
+     "id": "Agent-Ark/Toucan-1.5M",
+     "revision": "0df3cf37f2abefb380370cfb02eabea2a35ae782",
+     "licence": "Apache-2.0",
+     "take": "the SFT config (119,287 rows: irrelevant, multi-turn, single-turn-original, single-turn-diversify). CORRECTED 2026-11-03: the SFT config carries no metadata column, so the v1 per-row generator allowlist cannot be applied to it; its assistant turns are never read into a context or a target, so the generators matter only for the task text",
+     "categories": [
+      "tool_selection",
+      "no_tool",
+      "multiple_parallel",
+      "multi_turn",
+      "error_recovery",
+      "mcp_agent"
+     ],
+     "backend": "replay of the recorded real MCP responses for a call equal to a recorded one after canonicalization; no live server",
+     "success": "tool selection only: every target tool called (calls_tools), or no call in the irrelevant subset (B); no gold arguments, no per-step gold, no task-success verifier; schema validity and recorded execution (every call answered by the replay table) on every episode",
+     "conditions": [
+      "Apache-2.0 notice; third-party MCP content may carry residual PII, so its generations stay outside git (P15)",
+      "tool responses are dated June-September 2025",
+      "only the configs the pool reads are downloaded (P8.4)",
+      "a call recorded with conflicting responses makes its task refused, never resolved silently"
+     ]
+    },
+    {
+     "id": "nvidia/Nemotron-RL-Agentic-Function-Calling-Pivot-v1",
+     "revision": "0ac34ec81bb6976d3746407df306a57ce48f0bd8",
+     "licence": "CC-BY-4.0"
+    },
+    {
+     "id": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1",
+     "revision": "bfc7a4dd55ec1424cc3761ceacdd85a5743b4f4e",
+     "licence": "CC-BY-4.0",
+     "take_both_pivot_sets": "each trajectory rebuilt from its per-step rows (trajectory_id, step): the tools, the user turns, every step's expected_action and the recorded tool responses. The teacher generates from the first step on its own; a step whose call equals expected_action (exact after canonicalization, no fuzzy string option) is answered by the recorded response. The expert's assistant turns are never put in the teacher's context, which keeps every supervised turn teacher-native (P17)",
+     "categories": [
+      "tool_selection",
+      "schema_arguments",
+      "no_tool",
+      "multi_turn",
+      "multiple_parallel only if batch rows exist (not established)"
+     ],
+     "success": "every step equals expected_action, the final step's chat message where expected; G2 (expert-model actions by DeepSeek-V3.2 / GLM-4.6 / gpt-oss-120b / Kimi-K2 / Qwen3, all MIT or Apache)",
+     "conditions": [
+      "CC-BY-4.0 attribution",
+      "decontamination against BFCL, API-Bank, When2Call test and tau-bench (seed sets unnamed)",
+      "the cards' and datasets-server's row counts disagree (8,458 vs 9,620; 170,320 vs 96,968): the pool records what it reads"
+     ]
+    },
+    {
+     "id": "olly-styles/WorkBench",
+     "revision": "pinned at pool construction",
+     "licence": "MIT",
+     "take": "new task instances generated from WorkBench's templates (its own generator), never its 690 published tasks",
+     "categories": [
+      "tool_selection",
+      "schema_arguments",
+      "multiple_parallel (sequential multiple calls)",
+      "multi_turn (multi-step, one user turn)",
+      "error_recovery (errors raised by the real tool code)"
+     ],
+     "backend": "the sandbox's 26 tools over its five databases, pinned code, no network",
+     "success": "the sandbox's final state equals the template's ground truth; G1",
+     "conditions": [
+      "a published benchmark: never reported as held-out once trained on; its task families are shared with it"
+     ]
+    }
+   ],
+   "excluded_by_T3": {
+    "rule": "no Glaive or xLAM row and no dataset built from their prompts or tool sets (the brief: the questionable Glaive / xLAM records are not C1's tool data)",
+    "members": {
+     "Salesforce/xlam-function-calling-60k": "conditional on its own (gate, research only, DeepSeek clause for ids 0-33658); even its Mixtral rows are xLAM",
+     "nvidia/When2Call train": "questions rewritten from APIGen/xLAM queries; the only labelled 'ask for the missing parameter' source: an override is the maintainer's",
+     "nvidia/Nemotron-Post-Training-Dataset-v1 tool_calling": "xLAM / Glaive / When2Call prompts",
+     "nvidia/Nemotron-Agentic-v1": "Glaive-seeded tool sets, LLM-judge only",
+     "NousResearch/hermes-function-calling-v1": "contains Glaive; generator unnamed",
+     "nvidia/Nemotron-SFT-Agentic-v2": "Glaive and API-Bank seeds"
+    }
+   },
+   "excluded_otherwise": {
+    "Team-ACE/ToolACE": "unproven: every stage by an unnamed 'frontier LLM'",
+    "OpenBMB/ToolBench, StableToolBench": "generated by the OpenAI API",
+    "Salesforce/APIGen-MT-5k": "CC-BY-NC, GPT-4o, tau-bench environment",
+    "nvidia/ToolScale": "non-commercial licence binding derivatives",
+    "Seal-Tools": "unproven",
+    "nvidia/Nemotron-SFT-Agentic-v4": "conditional, but no gold and verification not stated: nothing to verify against",
+    "BFCL, tau-bench / tau2-bench, ToolSandbox, NESTFUL, API-Bank, ToolHop": "evaluation benchmarks: evaluation-only and decontamination targets"
+   },
+   "coverage": {
+    "tool_selection": "Pivot (G2), Toucan (G2), WorkBench (G1)",
+    "schema_arguments": "Pivot (G2), WorkBench (G1)",
+    "no_tool": "Toucan irrelevance and Pivot chat steps (B)",
+    "multiple_parallel": "WorkBench sequential multiple calls (G1); Toucan parallel calls with tool names and replay agreement only (G2); parallel calls with gold arguments: none (xLAM excluded) -- SHORTFALL RISK",
+    "multi_turn": "Pivot conversational (G2), WorkBench (G1), Toucan (G2)",
+    "error_recovery": "WorkBench tool errors judged by final state (G1, partial); missing-parameter questions: none unless When2Call train is admitted -- SHORTFALL RISK",
+    "mcp_agent": "Toucan only (G2: target tools, order and replay agreement; no final-state check) -- the maintainer decides whether recorded-trajectory agreement is MCP's success criterion; otherwise SHORTFALL"
+   }
+  },
+  "size_needed": "A2-6cat walks the longest prefix: about 2,300-6,900 admitted tasks, so 3,500-15,000 training tasks at pass rates 0.45-0.8, plus about 3% validation, 4% state evaluation, 4% calibration; a smaller legal supply is a SHORTFALL reported per category",
+  "isolation": {
+   "T1_eval_set_1": "shared.eval_sets.require_disjoint against held_out_paths(): no content key, and no tool family, shared with eval-set-1's tool prompts (eval_behavior_v0: 5 glaive in the formal core, 7 xLAM withheld) or any other held-out item",
+   "T2_benchmarks": "no task from, or duplicating by normalized query and tool family, a benchmark's evaluation data (BFCL, API-Bank test, ToolBench test, tau-bench / tau2-bench tasks, When2Call test): evaluation-only sources stay evaluation-only",
+   "T3_old_sources": "no Glaive or xLAM row, and no task duplicating one (normalized query + tool names), including datasets that re-package them",
+   "T4_splits": "training shares no family and no content key with validation, state_eval or calibration",
+   "T5_dedup": "exact and normalized-query duplicates collapse to one task, the first in canonical order"
+  },
+  "rendered_length": "a task whose rendered first prompt exceeds 6,144 tokens under any of the three templates is left out of the pool for every teacher (recorded), so every turn keeps at least 2,040 tokens of generation allowance inside the 8,192-token training sequence; nothing is cut"
+ },
+ "protocol": {
+  "lineages": {
+   "A1-6cat": {
+    "teacher": "Qwen/Qwen3-4B@1cfa9a72",
+    "template_kwargs": {
+     "enable_thinking": true
+    },
+    "sampling": {
+     "temperature": 0.6,
+     "top_p": 0.95,
+     "top_k": 20,
+     "min_p": 0.0
+    },
+    "think_state": "self_opening"
+   },
+   "A2-6cat": {
+    "teacher": "Qwen/Qwen3-4B@1cfa9a72",
+    "template_kwargs": {
+     "enable_thinking": false
+    },
+    "sampling": {
+     "temperature": 0.7,
+     "top_p": 0.8,
+     "top_k": 20,
+     "min_p": 0.0
+    },
+    "think_state": "preclosed"
+   },
+   "C1-6cat": {
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d",
+    "template_kwargs": {},
+    "sampling": {
+     "temperature": 0.6,
+     "top_p": 0.95,
+     "top_k": 20,
+     "min_p": 0.0
+    },
+    "think_state": "the template opens <think>"
+   },
+   "_": "each teacher's official template and preset (generation_protocol.json; c1_identity_audit.json :: targets_teacher); the tools go to apply_chat_template(tools=...) and the template renders them; nothing is prefilled by hand"
+  },
+  "execution": {
+   "runner": "run_battery.run_episodes' episode loop: each turn's prompt is the official template's rendering of the conversation so far; the backend answers the turn's parsed calls with tool messages; the episode ends at a turn without a call, at max_turns, or at any non-EOS stop",
+   "session_limit": 8184,
+   "allowance": "per turn 8,184 minus the rendered prompt; a turn that reaches it is length_limited and its episode refused whole, never cut",
+   "seeds": "request_seed(seed_base, task_id, turn), candidate pass k at seed_base + k, the same rule for every teacher, so a (task, candidate, turn) has one seed whatever the model",
+   "candidates": "2: pass 1 only for a task whose first candidate fails verification (the current protocol)",
+   "context_rendering": "the next turn's prompt renders the parsed assistant turn (reasoning, content, tool_calls) through the template, as a deployed runtime does; whether that re-rendering reproduces the generated ids is recorded per turn and reported; only generated ids are ever supervised"
+  },
+  "verification": {
+   "where": "the dev box, pure Python, one verifier for every teacher, no teacher-specific leniency",
+   "version": "tool_verification@v2",
+   "version_history": {
+    "tool_verification@v1": "through 2468c1aa: V1's tail rule (below) enforced only on a single-step gold tool call's turn; nothing was generated or admitted under it",
+    "tool_verification@v2": "maintainer 2026-11-04 (review of 2468c1aa): V1's tail rule enforced on EVERY assistant turn that makes a call, as registered; an answer turn without a call is not subject to it. Recorded with every admission (tool_admission.json :: verification_version); historical frozen data and measurement identities are not re-verified or rewritten"
+   },
+   "V1_protocol": "natural termination, no degeneration stop; thinking modes close </think> before any call, non-thinking keeps the preclosed empty think; every <tool_call> block is JSON with name and arguments; nothing but whitespace after the last </tool_call>",
+   "V2_schema": "the name is an offered tool; the arguments validate against its JSON Schema (required, types, enums, nesting, no undeclared field where additionalProperties is false)",
+   "V3_gold_calls": "each step's call set equals the gold set (order-free for parallel calls) under the task's declared argument variants (G2); an executable task's final state equals its ground truth (G1)",
+   "V4_execution": "the backend answered every call: recorded or executed response, or the step's scripted error; an off-script call ends the episode (refused, counted per teacher)",
+   "V5_task_success": "the final turn makes no call and passes the task's final check (no_call; contains_all values from the tool results or the gold answer; number; asks_for the missing parameter)",
+   "admission": "an episode enters training whole only if V1-V5 pass on every turn; otherwise the task's next candidate, then nothing",
+   "V1_tail_rule_scope": "the tail rule applies to each assistant turn that contains a <tool_call> block: after its last </tool_call> only whitespace and the stop token's text may follow; a final-answer turn (no call) is checked by the other V1 terms only (tool_episodes.text_after_last_call)"
+  },
+  "episode_shapes": {
+   "_contract": "How an episode ends and what it can verify, per registered shape (tool_episodes.EPISODE_SHAPES executes it; a test holds the two equal). A new shape is a protocol version, registered here before any task of it enters a pool.",
+   "full_episode@v1": {
+    "what": "the shape every task had before 2026-11-04: turns until one without a call (or max_turns); every call answered by the task's backend; the episode ends on an answer",
+    "categories": "all seven",
+    "levels": "protocol, schema_validity and recorded_execution always; step_gold, tool_selection and task_success where the task carries that verifier (V1-V5 above)"
+   },
+   "single_step_gold_tool_call@v1": {
+    "decided_by": "maintainer 2026-11-04 (review of 647eea0e, item 4): option 1 accepted in principle for the non-thinking schema_arguments gap; approved ONLY for this shape's $0 code, the conversion preparation, static audits and synthetic tests -- no paid teacher generation, no approved shortfall, no lowered share or quota",
+    "what": "ONE assistant turn from the first real user input: the teacher's own tool call, which ends the sample at its natural termination; the call decision is the training example. No tool response and no final answer exist or are required",
+    "source": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd only: a trajectory that tool_sources_pivot.py skipped ONLY because its first gold call has no recorded output (every other converter rule applied, the same context: system text and the first user message(s)); task id variant 'turn1-step1'. Pivot Function-Calling is not adopted",
+    "categories": [
+     "schema_arguments"
+    ],
+    "category_rule": "the first gold call's arguments are structured (tool_sources_pivot.structured, the existing rule); an unstructured first call would be a tool_selection decision: outside the approval, counted and not converted",
+    "max_turns": 1,
+    "backend": "none: nothing executes the call",
+    "gold": "the first step's expected_action (name + arguments), compared exactly after canonicalization (step_matches_gold); it only verifies -- the target is the teacher's own generated ids",
+    "verification": {
+     "protocol": "V1 on the turn (natural termination, no degeneration stop, the mode's think rule, every tool_call block parsed) and the turn ENDS on its call: it makes at least one call, nothing but whitespace and the stop token after the last </tool_call>, no response attached",
+     "schema_validity": "V2 unchanged",
+     "step_gold": "V3: the call set equals the gold set (one call)",
+     "recorded_execution": null,
+     "tool_selection": null,
+     "task_success": null,
+     "_": "None = unverified, never passed (aadistill.data.tool_calls.verify_episode, unexecuted_final_call); the verified levels are protocol+schema_validity+step_gold"
+    },
+    "verification_class": "G2 (an expert model's recorded call, compared deterministically)",
+    "is_not": [
+     "a recorded execution",
+     "a task success",
+     "a completed task",
+     "a rule for multi_turn, error_recovery, mcp_agent or any other category or source"
+    ],
+    "supervision": "unchanged: the turn's generated ids (kd_scope assistant); the prompt is context",
+    "counting": "unchanged: one turn = one token-in/token-out document; unique supervised tokens before packing; Stage-3 sequential packing with prefix restart, Stage-1 forwards and scored positions as for any turn",
+    "pool_order": "a second tier of every split's frozen order (tool_pool.SHAPE_TIERS, pool schema v4): a cell reaches a single-step task only after every full episode of its category; a T5 duplicate keeps the full episode",
+    "measurement_identity": "a calibration / state-evaluation item of this shape carries episode_shape and enters the profile's and state_eval_hybrid@v2's content identity like any item; the evaluator's measurement protocol id is unchanged",
+    "status": "IMPLEMENTED at $0 (code, conversion into scratch, dry pool and plan audit, synthetic tests); nothing generated; not admitted to data/"
+   }
+  },
+  "supervision": "only the teacher's own assistant output ids (kd_scope assistant: CE and KD positions); system text, tool schemas, user turns and tool responses are context with mask 0, never targets",
+  "never": "another teacher's or mode's output ids, thinking traces, tool calls or reference logits; the upstream dataset's assistant turns; a re-rendered target",
+  "records": "per turn: task_id, teacher id and revision, mode, template and tokenizer sha256, seed, prompt_token_ids, output_token_ids, raw text, parsed calls, backend responses, stop reason, think state, scored positions; per episode: every V-check verdict, admission, source, family, category; sealed shards with sha256 (the supplement's completion-shard route)",
+  "pairing_report": "per category and source: tasks offered, admitted per lineage, the intersections (A1-6cat and C1-6cat; A1-6cat and A2-6cat; all three), refusals by check, family distribution and supervised-token deviation from the quota"
+ },
+ "validation": {
+  "A1_6cat_and_A2_6cat": "the current rule plus the tool type: per mode the admitted documents of 32 validation-split tasks, document-isolated, at most 16 sequences, diagnostic only",
+  "C1_6cat": "the 10 tool-free validation sequences byte for byte; the 6 tool-only ones replaced by Thinking-2507-native verified turns of validation-split tasks at about the historical 12,624 supervised tokens, packed by E1's packer without truncation",
+  "isolation": "validation tasks come from the validation split (family-disjoint from training); Glaive's train/validation crossing (glaive-000941) disappears with Glaive"
+ },
+ "packing_steps_budget": {
+  "steps": "T = ceil(3 x training sequences / 2); warmup max(10, round(0.05 T)); evaluation every max(25, T // 8); save every max(200, T // 2)",
+  "C1_6cat_sequences": "989 kept + the new tool sequences (E1's packer opens a sequence per system-prompt group, and a tool task's tools sit in its system prompt, so roughly one sequence per conversation unless tasks share a catalog)",
+  "A_arms_sequences": "the pack's own count; estimate = non-padding tokens / (8,192 x (1 - padding share of the current pack))",
+  "seconds_per_step": "A1-6cat: A1's measured 6.18-6.20 (lower 6.013, upper 6.94 x 1.15); A2-6cat: 5.66 (5.314, 7.981); C1-6cat: D4-Augmented's measured 3.595 / 3.797 / 5.688 (plans/budget_v2.json)",
+  "per_unit": "hours = T x seconds_per_step + in-training evaluation and saves (100 / 320 / 640 s) + formal evaluation (2,653 / 3,198-3,917 / 7,834 s) + fixed (300 / 600 / 1,200 s); usd = hours x 1.11",
+  "generation": "per lineage: generated tokens = admitted supervised tokens / pass rate x (1 + second-candidate share); throughput from the supplement (about 1,170 tokens/s thinking, 755 non-thinking, both batched on one L40S); plus setup 20 min, teardown 15 min, model load; verification on the dev box at $0",
+  "estimates": "SIX_CATEGORY.md 'Packing, steps and budget' (lower / expected / upper), replaced by a pilot's measured pass rates, turn lengths and context sizes before any authorization is priced"
+ },
+ "comparisons": "SIX_CATEGORY.md 'Comparisons': Historical D4-Augmented, C1-6cat, A1 (five types, done), A1-6cat and A2-6cat are five identities; no report pools them, and each pair's unmatched variables are listed there",
+ "state_eval_and_calibration": {
+  "now": "unchanged: the hybrid Top-1 (state_eval_hybrid@v1, protocol 1c830524..., hybrid_d4_profiles.json) and the Thinking-2507 D4 Top-1 (state_eval@v1, the historical profiles), their rankings and scoring identities",
+  "type": "(domain supporting, subtype tool_calling@v1, mode): a subtype of the existing supporting domain (no sixth domain, as decided 2026-11-01 for the hybrid search); the hybrid in both modes, Thinking-2507 in thinking",
+  "items": "teacher-native verified episodes of the search's own root teacher in each mode, from the pool's state_eval and calibration splits (disjoint from each other, from training and from eval-set-1); tool schemas and responses unscored context",
+  "coverage": "the same (domain, subtype, mode) set in calibration and state evaluation (the full_search_types.json type check); every category with at least 5 tasks where the split holds them (THIN reported); at least 12,000 scored positions per (type, mode), the hybrid suite's floor",
+  "critical_tokens": "add tool_call_open (the position predicting <tool_call>, 151657) and tool_call_close (</tool_call>, 151658) to each mode's critical group (group_balanced/v1), beside think_close, eos and final_answer",
+  "versions": "state_eval_hybrid@v2 (v1's 13 types + tool_calling@v1, a new protocol id) and a hybrid profile set v2; for a Thinking-2507 search a new suite built the same way. v1 and the historical state_eval@v1 stay frozen; nothing is re-scored",
+  "authorizes": "nothing: no generation of these items and no search GPU work"
+ },
+ "persistence": "logs/stages/stage-2/teacher_modes/audit/six_category_persistence.json",
+ "source_review": "logs/stages/stage-2/teacher_modes/audit/tool_calling_source_review.json",
+ "c1_replacement": "logs/stages/stage-2/teacher_modes/audit/c1_tool_replacement.json",
+ "authorizes": "nothing"
+}

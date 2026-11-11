@@ -1,0 +1,26 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.engineering_validation/v1",
+ "run_id": "ae_20261028_093428",
+ "study": "A-E",
+ "tiny": false,
+ "device": "cuda:0",
+ "config": "configs/stages/stage-2/teacher_modes/engineering_validation.json",
+ "config_sha256": "5afb3149805b3b5d75885c4e8d674632e57fd40de006de9f705b2e96210c9176",
+ "started_utc": "2026-10-28T09:40:34+00:00",
+ "argv": [
+  "--run-id",
+  "ae_20261028_093428",
+  "--out",
+  "/workspace/aad/artifacts/audit/stage2_teacher_modes_engineering/ae_20261028_093428",
+  "--work",
+  "/workspace/stage2_teacher_modes_work",
+  "--status",
+  "/workspace/stage2_teacher_modes.status",
+  "--device",
+  "cuda:0",
+  "--vllm-python",
+  "/opt/vllm/bin/python",
+  "--student",
+  "/workspace/aad/artifacts/stages/stage-2/reasoning_data/h1pa/pca_original/20260726"
+ ]
+}

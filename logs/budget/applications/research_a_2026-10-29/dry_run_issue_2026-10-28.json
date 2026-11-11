@@ -1,0 +1,16 @@
+{
+ "schema": "aadistill.budget.phase_dry_run/v1",
+ "run_utc": "2026-10-28T21:45:00Z",
+ "what": "phase.py issue --dry-run for each session kind against the proposal (no artifact is written on a refusal; nothing is created)",
+ "teacher": {
+  "command": "phase.py issue --kind teacher --run-id a_teacher_dry --expected-usd 33.17 --hard-cap-usd 49.76 --dry-run --out <scratch>/auth_teacher.json",
+  "result": "REFUSED at $0: A-D4 at $49.76 is not fundable: ['the project cap is $740.0, the grant was written under $888.0: a new maintainer decision, not an inference', '$49.76 does not fit the $14.5089 the $740.0 project cap leaves as the provider bills it now']",
+  "reading": "the expected refusals only: the phase identity was computed, the proposal read, the envelope and the per-session cap held, the live provider position was read and the balance covers the session; what refuses is the project cap, which only the maintainer raises"
+ },
+ "recovery": {
+  "command": "phase.py issue --kind recovery --run-id a_recovery_dry --expected-usd 59.74 --hard-cap-usd 89.61 --dry-run --out <scratch>/auth_recovery.json",
+  "result": "REFUSED at $0: a recovery session reads logs/stages/stage-2/teacher_modes/data/admission.json and logs/stages/stage-2/teacher_modes/assets/common_initialization.json; ['admission_sha256', 'initialization_record_sha256'] do not exist yet: the teacher session and the dev box's admission come first",
+  "reading": "expected: a recovery artifact binds the records the teacher session and the dev box's admission produce"
+ },
+ "authorizes": "nothing"
+}

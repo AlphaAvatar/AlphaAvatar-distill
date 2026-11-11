@@ -142,7 +142,8 @@ class Sealer:
             f.seek(self.offset)
             chunk = f.read()
         end = chunk.rfind(b"\n") + 1
-        lines = [l for l in chunk[:end].decode().splitlines() if l.strip()]
+        #: "\n" only: the stream is ensure_ascii=False, and splitlines() would tear a record at a raw U+2028
+        lines = [l for l in chunk[:end].decode().split("\n") if l.strip()]
         if not lines or (not force and len(lines) < self.every_records
                          and time.time() - self.last < self.every_seconds):
             return 0
@@ -202,10 +203,13 @@ def second_pass(c: dict, records: dict[str, dict]) -> list[str]:
     return retry
 
 
-def run_group(c: dict, out: Path, inputs: Path, f: dict, k: int, ids: list[str] | None, run, mark) -> dict:
-    """One pass of one input group to completion, or as far as it gets."""
+def run_group(c: dict, out: Path, inputs: Path, f: dict, k: int, ids: list[str] | None, run, mark, *,
+              label: str | None = None, extra_args: tuple[str, ...] = ()) -> dict:
+    """One pass of one input group to completion, or as far as it gets. ``label`` and
+    ``extra_args`` (runner flags appended to the command, such as a mode's template kwargs
+    and sampling) are a caller's own group naming; H1 passes neither."""
     ex = c["protocol"]["execution"]
-    label = f"pass{k}_{Path(f['file']).stem}"
+    label = label or f"pass{k}_{Path(f['file']).stem}"
     rows = [r for r in A.jsonl(inputs / f["file"]) if ids is None or r["task_id"] in ids]
     want = {r["task_id"] for r in rows}
     entry = {"label": label, "pass": k, "seed_base": ex["seed_base"] + k, "tasks": len(want), "segments": []}
@@ -214,7 +218,7 @@ def run_group(c: dict, out: Path, inputs: Path, f: dict, k: int, ids: list[str] 
         raise ShardError(f"{label}: sealed records for tasks outside its input: {sorted(set(have) - want)[:3]}")
     meta = {"index": k, "seed_base": ex["seed_base"] + k, "group_input": f["file"], "group_input_sha256": f["sha256"],
             "launch_identity_sha256": c["launch_identity_sha256"],
-            "protocol_sha256": sha(A.REPO / GOV.PROTOCOL), "runner_sha256": sha(A.REPO / RUNNER)}
+            "protocol_sha256": sha(A.REPO / c.get("protocol_path", GOV.PROTOCOL)), "runner_sha256": sha(A.REPO / RUNNER)}
     # a stream a killed generator left on this machine: its finished lines count first
     for old in sorted(out.glob(f"{label}.seg*.stream.jsonl")):
         s = Sealer(out, label, old, {**meta, "segment": old.name}, want, have, every_records=1, every_seconds=0)
@@ -238,7 +242,8 @@ def run_group(c: dict, out: Path, inputs: Path, f: dict, k: int, ids: list[str] 
                "--label", f"{label}.seg{seg}", "--tasks", str(seg_in), "--mode", "generate",
                "--session-limit", str(ex["session_limit"]), "--seed-base", str(ex["seed_base"] + k),
                "--system", f["system"], "--action-protocol", ex["action_protocol"],
-               "--stream-completed", str(stream), "--out", str(out / f"{label}.seg{seg}.raw.jsonl")]
+               "--stream-completed", str(stream), "--out", str(out / f"{label}.seg{seg}.raw.jsonl"),
+               *extra_args]
         try:
             rc = run(cmd, out / f"{label}.seg{seg}.log", sealer.seal)
         finally:

@@ -1,0 +1,90 @@
+{
+ "schema": "aadistill.stage1.projected_residual.preregistration/v1",
+ "version": 1,
+ "study_id": "stage1.projected_residual.pw900_v1",
+ "written_utc": "2026-10-27T12:00:00Z",
+ "status": "DRAFTED before any projected-residual model exists; REGISTERED (frozen, its sha256 bound into the grant) only on the maintainer's approval, and never amended after the first PW-Augmented result exists",
+ "design": {"path": "configs/stages/stage-1/projected_residual/design.json"},
+ "arms": {
+  "PW-Augmented": "NEW: the 900M projected-residual student (design.json :: architecture, initialization), trained exactly as D4-Augmented with the projections trainable (design.json :: recovery), two seeds",
+  "D4-Augmented": "REUSED: H1-PA's two D4-Augmented units; not retrained, not re-evaluated",
+  "PCA-Original": "REUSED: H1-PA's two re-evaluated E1 checkpoints; descriptive only"
+ },
+ "isolated_variable": "the student architecture and its initialization: full-width residual stream with per-layer trainable PCA projections, against D4 Top-1's global 1,024-wide PCA residual. Selections (layers, heads, neurons), teacher, data, recipe, seeds and evaluation are D4-Augmented's",
+ "inside_the_variable": {
+  "_": "these change together and P is never read as any one of them",
+  "parameters": "902.9M vs 596.0M; trainable 514.0M vs 440.5M",
+  "compute": "1.18x the training FLOPs per supervised position with the teacher's forward (1.42x student-only); 1.49x the inference FLOPs at context 4,096",
+  "residual_width": "2,560 vs 1,024",
+  "width_reduction": "28 trainable per-layer bases vs one fixed global basis",
+  "basis_statistic": "the two normalized sub-layer inputs at each layer, unweighted over every real token, vs the forward baseline's global residual second moments",
+  "output_head": "the teacher's 2,560-wide tied head, frozen, vs D4's projected 1,024-wide tied head, frozen"
+ },
+ "seeds": [20260726, 20260801],
+ "seed_pairing": "P pairs PW-Augmented and D4-Augmented by training-seed number; every directional label needs both seeds' own estimates on its side",
+ "comparisons": {
+  "P": {"contrast": "PW-Augmented - D4-Augmented", "role": "decided"},
+  "Q": {"contrast": "PW-Augmented - PCA-Original", "role": "descriptive"}
+ },
+ "primary_comparison": "P",
+ "multiplicity": "P is the only decided comparison, at its own 95% interval; within it the four static-axis contrasts are a Holm family at alpha 0.05 (h1_statistics)",
+ "evaluation": {
+  "identical_to": {"path": "logs/stages/stage-2/reasoning_data/plans/h1pa_preregistration.json",
+                   "sha256": "ae67279d15cddab4c14798313177d4554b8e585745cfd9b8f0afa8a42655261f", "section": "evaluation"},
+  "route": "the folded stock-Qwen3 form of each recovered checkpoint (design.json :: evaluation.route), admitted only under design.json :: evaluation.fold_acceptance"
+ },
+ "primary_measure": "identical to the H1-PA / mixed-calibration primary measure: correctness on the 570 formal static items of fluid_reasoning_720 (dev_v1), one nucleus_v1 sample per item and seed, clustered by rule family; the 144 interactive episodes are exploratory",
+ "decision_rule": {
+  "module": "scripts/stages/stage-2/reasoning_data/h1_statistics.py",
+  "rule_id": "stage2.reasoning_data.h1_statistics/v1",
+  "bound_sha256": {
+   "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
+   "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
+  },
+  "constants": {"sesoi": 0.05, "sesoi_axis": 0.08, "level": 0.95, "iterations": 10000, "bootstrap_seed": 20261027,
+                "floor_rate": 0.02, "min_discordant": 10, "min_informative_clusters": 5, "alpha_axes": 0.05},
+  "labels": {
+   "GO": "the interval lies wholly above +5 pp and both seeds' estimates are above +5 pp",
+   "NO_GO": "the interval and both seeds' estimates lie inside (-5, +5) pp and neither arm is below 2%",
+   "REVERSED": "the interval lies wholly below -5 pp and both seeds' estimates are below -5 pp",
+   "INCONCLUSIVE": "anything else off the floor",
+   "NOT_RESOLVED": "both arms below 2% (flag FLOOR); one arm below 2% is flagged FLOOR_<arm> beside the label"
+  },
+  "same_rule_as": "the H1-PA and mixed-calibration decisions (constants identical except the new bootstrap seed)"
+ },
+ "reachable_labels": "D4-Augmented is at 4.56% pooled static correctness, so REVERSED cannot occur on the pooled contrast and GO needs PW-Augmented near 11% or above; deduction (13.5%, SESOI 8 pp) can reach every label. The study is powered to exclude or detect a 5 pp pooled difference, not a small one",
+ "advancement_to_600m": {
+  "_": "the maintainer decides after reviewing the complete result; nothing here starts any 600M work automatically (brief 3.3)",
+  "expected_for_recommending_600m": [
+   "P labelled GO, or deduction labelled GO and surviving Holm with the pooled label not REVERSED",
+   "no guard rail breached (below)",
+   "training evidence: both seeds' runs complete without divergence, their final validation KD at or below D4-Augmented's at the same step, and the projections' orthogonality drift reported"
+  ],
+  "guard_rails": [
+   "protocol integrity: natural termination over the 996 capability and legacy replies not more than 10 points below D4-Augmented's for either seed",
+   "no eval-set-1 unit's correctness more than 10 points below D4-Augmented's mean on both seeds",
+   "the fold check passed for both checkpoints"
+  ],
+  "if_NO_GO": "a meaningful gain is excluded at 1.5x the parameters and 1.18x the training compute; recommend not funding 600M on this evidence",
+  "if_INCONCLUSIVE_or_NOT_RESOLVED": "no recommendation either way; the reasoning difficulty ladder (docs/shared/REASONING_DIFFICULTY_LADDER.md), if registered, is the instrument that can resolve below the floor"
+ },
+ "reported_beside": [
+  "each static axis per arm and seed, unseen rule and unseen format tiers",
+  "the 144 interactive episodes (exploratory)",
+  "every eval-set-1 unit, correct AND usable side by side over its formal items (the h1pa_fullset layout)",
+  "protocol integrity: natural termination, degeneration stops, context-limit hits",
+  "generation lengths (reasoning and answer tokens) per unit",
+  "training: loss curves, validation CE/KD at every eval step, step-0 KD (diagnostic only)",
+  "per-layer projection orthogonality and singular values at step 0 and at the end",
+  "parameters, training FLOPs, inference FLOPs, KV cache, measured training step time and peak memory, measured evaluation throughput (design.json :: not_matched)"
+ ],
+ "never": [
+  "retraining D4-Augmented or regenerating its evaluation",
+  "changing this rule, its constants, the evaluation set, the mask, the scorers or the decoding protocol after a PW-Augmented result is seen",
+  "a pooled score across units, or usable rollout, KL, loss or PCA energy read as reasoning",
+  "selecting, dropping or re-running a seed for its result",
+  "claiming a same-size advantage: neither parameters nor FLOPs are matched",
+  "starting any 600M work, or any other search or recovery, automatically from a result of this study"
+ ],
+ "authorizes": "nothing"
+}

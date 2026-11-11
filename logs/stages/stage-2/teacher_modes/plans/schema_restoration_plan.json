@@ -1,0 +1,2317 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_generation_plan/v1",
+ "written_utc": "2026-11-05T17:10:28Z",
+ "pool": {
+  "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth",
+  "content_sha256": "e771393a98a6fd844c7d0ed3fa2d3327eb6c2b1c77a29033de707a5c4906649e",
+  "pool_json_sha256": "85c995a52c3062bb727e8205cfecfa01e5873357e80fc9ee695e1d4562f3a99e"
+ },
+ "protocol_sha256": "5a42bcc45cc323d4340636777d325d1f11209f50b8ce0da764fdc88ac66fdff8",
+ "protocol_path": "configs/stages/stage-2/teacher_modes/tool_generation_protocol_sr.json",
+ "six_category_design_sha256": "d41cc3b0fe6b90db64622aaec9dcd5917c18a9dbee335771e5e718dd25b44ce2",
+ "shares": {
+  "tool_selection": 0.15,
+  "schema_arguments": 0.15,
+  "no_tool": 0.1,
+  "multiple_parallel": 0.15,
+  "multi_turn": 0.2,
+  "error_recovery": 0.1,
+  "mcp_agent": 0.15
+ },
+ "rules": {
+  "first": "per cell the frozen-order prefix whose expected yield reaches the target",
+  "top_up": "ceil(remaining units / observed units per attempted task x top_up_margin); with nothing admitted yet, the pessimistic prefix of what is left; the LAST round (max_rounds) takes every task left within the bound",
+  "top_up_margin": 1.1,
+  "max_rounds": 4,
+  "expected_rounds": {
+   "lower": 1,
+   "expected": 2
+  },
+  "bound": "a cell never attempts more than the frozen-order prefix whose pessimistic yield (the lower end of its measured stratum, else the low tokens per turn and pass rate) reaches its target, nor more than its supply; a whole-supply cell (six_category_common_support.json :: whole_supply_cells) is bound by its whole remaining supply; a cell still short at its bound or after max_rounds is a SHORTFALL -- of its bound when supply remains (a top-up continues from the frozen order), of its source only when its whole supply was attempted",
+  "invocations": "one engine invocation per mode and round for the first candidates, one for the second candidates of the round's refused tasks",
+  "first_round_bound_lineages": [
+   "thinking_2507",
+   "hybrid"
+  ],
+  "_first_round_bound_lineages": "first session (a_tool_generation_sr_20261105_153741): none -- round 1 the expected prefix at the labelled proxy:other_source stratum, later rounds sized from the session's own measurement. It measured schema_synth (non-thinking training 1,108 / 2,593 admitted, thinking 173 / 225) and left one cell short at its bound (non-thinking state evaluation, 686 / 800 scored positions, 14 of 110 tasks attempted). From then on each lineage needs about ONE more session, and each session costs a ~20-minute setup: round 1 takes the cell's bound, at least the shortest prefix that reaches the remaining target with probability >= 0.95 at its measured stratum's lower Wilson yield (tool_generation_plan.reach_bound; Thinking-2507 at its labelled proxy), inside the kind's cumulative cap (maintainer 2026-11-05, R1 approval, section IV.5-6: later rounds adjust the task count from measurement)"
+ },
+ "common_support": {
+  "path": "configs/stages/stage-2/teacher_modes/six_category_schema_restored.json",
+  "sha256": "9f2ad477c6cdf1619f4735ed0ed06c453559857070f3d1c9dd6ae7ad2972660b",
+  "training_shares": {
+   "tool_selection": 0.15,
+   "schema_arguments": 0.15,
+   "no_tool": 0.1,
+   "multiple_parallel": 0.15,
+   "multi_turn": 0.2,
+   "error_recovery": 0.1,
+   "mcp_agent": 0.15
+  },
+  "whole_supply_cells": [],
+  "source_groups": {
+   "training": {
+    "schema_arguments": [
+     {
+      "group": "pivot_conversational",
+      "datasets": [
+       "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1"
+      ],
+      "per_mode": {
+       "H-T": 17200.0,
+       "H-N": 17200.0,
+       "T2507": 17171.0
+      }
+     },
+     {
+      "group": "schema_synth",
+      "datasets": [
+       "aadistill/schema_synth"
+      ],
+      "rest": true
+     }
+    ]
+   },
+   "state_eval": {
+    "schema_arguments": [
+     {
+      "group": "pivot_conversational",
+      "datasets": [
+       "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1"
+      ],
+      "per_mode": {
+       "H-T": 1000.0,
+       "H-N": 1000.0
+      }
+     },
+     {
+      "group": "schema_synth",
+      "datasets": [
+       "aadistill/schema_synth"
+      ],
+      "rest": true
+     }
+    ]
+   }
+  }
+ },
+ "approved_shortfalls": [],
+ "priors": {
+  "path": "logs/stages/stage-2/teacher_modes/audit/tool_generation_priors_sr.json",
+  "sha256": "5b248f2392ab9c3a7b31f5bf8398fc3381ab06d07790abeaf8499eb221ebd8cb"
+ },
+ "imports": [
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json",
+   "sha256": "86a156db30dc1de3fc6aef507c957e9184600b7730a94c7763e0fa0b0447e88e",
+   "lineage": "hybrid",
+   "run_id": "a_tool_pilot_20261104_164531"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json",
+   "sha256": "a04733474d3e6beb14f0652a072684556146c57724c5b00938db6cefb0c4cecb",
+   "lineage": "thinking_2507",
+   "run_id": "a_tool_generation_t2507_20261104_195411"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a3.json",
+   "sha256": "ba6718359baba32a7e7276cbbe0404b7a91a3845a3c888f217bb17b09bc7be32",
+   "lineage": "thinking_2507",
+   "run_id": "a_tool_generation_t2507_20261105_064829"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507_a4.json",
+   "sha256": "787e907458a5fec8fdba7ec3ab8e0731af095aa316a0d0463bf6fccfb59ec555",
+   "lineage": "thinking_2507",
+   "run_id": "a_tool_generation_t2507_20261105_072112"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_hybrid_a1.json",
+   "sha256": "37d18b8d0ef7fcd8eb65110b8b1366683ccd1304e745d46ef07f2d4d69a869ec",
+   "lineage": "hybrid",
+   "run_id": "a_tool_generation_20261105_074146"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_hybrid_a2.json",
+   "sha256": "d00df802969676aa92fc4db5389de21bf8f3b549977b32fcfc502eab5efc6ffd",
+   "lineage": "hybrid",
+   "run_id": "a_tool_generation_20261105_105512"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_sr_hybrid_a1.json",
+   "sha256": "d56192ae280075a6acac41f2067f5c34199b561a9e198f592108eff5625ce5f6",
+   "lineage": "hybrid",
+   "run_id": "a_tool_generation_sr_20261105_153741"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_sr_hybrid_a2.json",
+   "sha256": "7da32cf9a3a894b96fec1c236ba185ee461023b3acaadc6fce12dd715294984b",
+   "lineage": "hybrid",
+   "run_id": "a_tool_generation_sr_20261105_162909"
+  },
+  {
+   "path": "logs/stages/stage-2/teacher_modes/plans/tool_generation_import_sr_t2507_a1.json",
+   "sha256": "7024afc20a88ab9a0071b1a8555aaaeaa4025927e55a1226d88a701e17876372",
+   "lineage": "thinking_2507",
+   "run_id": "a_tool_generation_sr_t2507_20261105_164515"
+  }
+ ],
+ "lineages": {
+  "hybrid": {
+   "modes": {
+    "H-N": {
+     "cells": [
+      {
+       "split": "training",
+       "category": "error_recovery",
+       "unit": "supervised_tokens",
+       "target": 49341.783,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 2668,
+       "supply_by_shape": {
+        "full_episode@v1": 2668
+       },
+       "sealed": {
+        "tasks": 800,
+        "admitted": 122,
+        "units": 59384.0
+       },
+       "new_supply": 1868,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         180103.5,
+         198045.6,
+         218119.2
+        ],
+        "within_bound_units": [
+         59384.0,
+         59384.0,
+         59384.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 1868
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "mcp_agent",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 4542,
+       "supply_by_shape": {
+        "full_episode@v1": 4542
+       },
+       "sealed": {
+        "tasks": 2948,
+        "admitted": 385,
+        "units": 89455.0
+       },
+       "new_supply": 1594,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         134168.3,
+         137823.3,
+         141730.2
+        ],
+        "within_bound_units": [
+         89455.0,
+         89455.0,
+         89455.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 1594
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "multi_turn",
+       "unit": "supervised_tokens",
+       "target": 98683.566,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 12224,
+       "supply_by_shape": {
+        "full_episode@v1": 12224
+       },
+       "sealed": {
+        "tasks": 4883,
+        "admitted": 1231,
+        "units": 1341197.0
+       },
+       "new_supply": 7341,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         3276886.6,
+         3357527.4,
+         3440355.9
+        ],
+        "within_bound_units": [
+         1341197.0,
+         1341197.0,
+         1341197.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 7341
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "multiple_parallel",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 4581,
+       "supply_by_shape": {
+        "full_episode@v1": 4581
+       },
+       "sealed": {
+        "tasks": 751,
+        "admitted": 317,
+        "units": 99590.0
+       },
+       "new_supply": 3830,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         572215.8,
+         607486.3,
+         643430.8
+        ],
+        "within_bound_units": [
+         99590.0,
+         99590.0,
+         99590.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 3830
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "no_tool",
+       "unit": "supervised_tokens",
+       "target": 49341.783,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 37880,
+       "supply_by_shape": {
+        "full_episode@v1": 37880
+       },
+       "sealed": {
+        "tasks": 481,
+        "admitted": 436,
+        "units": 80615.0
+       },
+       "new_supply": 37399,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         6181476.5,
+         6348650.0,
+         6484333.6
+        ],
+        "within_bound_units": [
+         80615.0,
+         80615.0,
+         80615.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 37399
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "schema_arguments",
+       "unit": "supervised_tokens",
+       "target": 17200.0,
+       "min_tasks": 0,
+       "group": "pivot_conversational",
+       "datasets": [
+        "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 1928,
+       "supply_by_shape": {
+        "full_episode@v1": 368,
+        "single_step_gold_tool_call@v1": 1560
+       },
+       "sealed": {
+        "tasks": 1928,
+        "admitted": 303,
+        "units": 17290.0
+       },
+       "new_supply": 0,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         17290.0,
+         17290.0,
+         17290.0
+        ],
+        "within_bound_units": [
+         17290.0,
+         17290.0,
+         17290.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {},
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "schema_arguments",
+       "unit": "supervised_tokens",
+       "target": 56812.674499999994,
+       "min_tasks": 0,
+       "group": "schema_synth",
+       "datasets": [
+        "aadistill/schema_synth"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 4625,
+       "supply_by_shape": {
+        "full_episode@v1": 4625
+       },
+       "sealed": {
+        "tasks": 2593,
+        "admitted": 1108,
+        "units": 168435.0
+       },
+       "new_supply": 2032,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         295518.3,
+         300429.7,
+         305385.7
+        ],
+        "within_bound_units": [
+         168435.0,
+         168435.0,
+         168435.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 2032
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "tool_selection",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 12499,
+       "supply_by_shape": {
+        "full_episode@v1": 12499
+       },
+       "sealed": {
+        "tasks": 862,
+        "admitted": 487,
+        "units": 85270.0
+       },
+       "new_supply": 11637,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         1179497.1,
+         1236413.7,
+         1292504.0
+        ],
+        "within_bound_units": [
+         85270.0,
+         85270.0,
+         85270.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 11637
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "validation",
+       "category": null,
+       "unit": "tasks",
+       "target": 32.0,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 1576,
+       "supply_by_shape": {
+        "full_episode@v1": 1557,
+        "single_step_gold_tool_call@v1": 19
+       },
+       "sealed": {
+        "tasks": 85,
+        "admitted": 50,
+        "units": 50.0
+       },
+       "new_supply": 1491,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         447.4,
+         457.7,
+         468.1
+        ],
+        "within_bound_units": [
+         50.0,
+         50.0,
+         50.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:proxy:mode": 1472,
+        "single_step_gold_tool_call@v1:proxy:mode": 19
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "error_recovery",
+       "unit": "scored_positions",
+       "target": 1200.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 29,
+       "supply_by_shape": {
+        "full_episode@v1": 29
+       },
+       "sealed": {
+        "tasks": 14,
+        "admitted": 6,
+        "units": 1522.0
+       },
+       "new_supply": 15,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         2437.7,
+         3152.7,
+         3955.8
+        ],
+        "within_bound_units": [
+         1522.0,
+         1522.0,
+         1522.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 15
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "mcp_agent",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 78,
+       "supply_by_shape": {
+        "full_episode@v1": 78
+       },
+       "sealed": {
+        "tasks": 48,
+        "admitted": 14,
+        "units": 3386.0
+       },
+       "new_supply": 30,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         4816.8,
+         5502.3,
+         6349.0
+        ],
+        "within_bound_units": [
+         3386.0,
+         3386.0,
+         3386.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 30
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "multi_turn",
+       "unit": "scored_positions",
+       "target": 2400.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 205,
+       "supply_by_shape": {
+        "full_episode@v1": 205
+       },
+       "sealed": {
+        "tasks": 104,
+        "admitted": 29,
+        "units": 33512.0
+       },
+       "new_supply": 101,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         58351.9,
+         66057.3,
+         75071.7
+        ],
+        "within_bound_units": [
+         33512.0,
+         33512.0,
+         33512.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 101
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "multiple_parallel",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 125,
+       "supply_by_shape": {
+        "full_episode@v1": 125
+       },
+       "sealed": {
+        "tasks": 125,
+        "admitted": 20,
+        "units": 5557.0
+       },
+       "new_supply": 0,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         5557.0,
+         5557.0,
+         5557.0
+        ],
+        "within_bound_units": [
+         5557.0,
+         5557.0,
+         5557.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {},
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "no_tool",
+       "unit": "scored_positions",
+       "target": 1200.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 1535,
+       "supply_by_shape": {
+        "full_episode@v1": 1535
+       },
+       "sealed": {
+        "tasks": 17,
+        "admitted": 14,
+        "units": 1811.0
+       },
+       "new_supply": 1518,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         125722.3,
+         163522.0,
+         183876.9
+        ],
+        "within_bound_units": [
+         1811.0,
+         1811.0,
+         1811.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 1518
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "schema_arguments",
+       "unit": "scored_positions",
+       "target": 1000.0,
+       "min_tasks": 5,
+       "group": "pivot_conversational",
+       "datasets": [
+        "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 29,
+       "supply_by_shape": {
+        "full_episode@v1": 7,
+        "single_step_gold_tool_call@v1": 22
+       },
+       "sealed": {
+        "tasks": 29,
+        "admitted": 11,
+        "units": 1063.0
+       },
+       "new_supply": 0,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         1063.0,
+         1063.0,
+         1063.0
+        ],
+        "within_bound_units": [
+         1063.0,
+         1063.0,
+         1063.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {},
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "schema_arguments",
+       "unit": "scored_positions",
+       "target": 800.0,
+       "min_tasks": 5,
+       "group": "schema_synth",
+       "datasets": [
+        "aadistill/schema_synth"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 110,
+       "supply_by_shape": {
+        "full_episode@v1": 110
+       },
+       "sealed": {
+        "tasks": 29,
+        "admitted": 9,
+        "units": 1367.0
+       },
+       "new_supply": 81,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         3434.8,
+         5336.0,
+         7751.5
+        ],
+        "within_bound_units": [
+         1367.0,
+         1367.0,
+         1367.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 81
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "tool_selection",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 333,
+       "supply_by_shape": {
+        "full_episode@v1": 333
+       },
+       "sealed": {
+        "tasks": 23,
+        "admitted": 9,
+        "units": 2517.0
+       },
+       "new_supply": 310,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         23670.5,
+         36441.8,
+         51196.6
+        ],
+        "within_bound_units": [
+         2517.0,
+         2517.0,
+         2517.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 310
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      }
+     ]
+    },
+    "H-T": {
+     "cells": [
+      {
+       "split": "training",
+       "category": "error_recovery",
+       "unit": "supervised_tokens",
+       "target": 49341.783,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 2668,
+       "supply_by_shape": {
+        "full_episode@v1": 2668
+       },
+       "sealed": {
+        "tasks": 165,
+        "admitted": 33,
+        "units": 81610.0
+       },
+       "new_supply": 2503,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         1033648.6,
+         1319608.8,
+         1665488.4
+        ],
+        "within_bound_units": [
+         81610.0,
+         81610.0,
+         81610.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 2503
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "mcp_agent",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 4542,
+       "supply_by_shape": {
+        "full_episode@v1": 4542
+       },
+       "sealed": {
+        "tasks": 452,
+        "admitted": 88,
+        "units": 120196.0
+       },
+       "new_supply": 4090,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         1047026.8,
+         1207808.8,
+         1388893.6
+        ],
+        "within_bound_units": [
+         120196.0,
+         120196.0,
+         120196.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 4090
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "multi_turn",
+       "unit": "supervised_tokens",
+       "target": 98683.566,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 12224,
+       "supply_by_shape": {
+        "full_episode@v1": 12224
+       },
+       "sealed": {
+        "tasks": 234,
+        "admitted": 65,
+        "units": 209284.0
+       },
+       "new_supply": 11990,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         9179638.5,
+         10932852.2,
+         12882186.4
+        ],
+        "within_bound_units": [
+         209284.0,
+         209284.0,
+         209284.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 11990
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "multiple_parallel",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 4581,
+       "supply_by_shape": {
+        "full_episode@v1": 4581
+       },
+       "sealed": {
+        "tasks": 161,
+        "admitted": 89,
+        "units": 101520.0
+       },
+       "new_supply": 4420,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         2561886.5,
+         2888590.8,
+         3206494.9
+        ],
+        "within_bound_units": [
+         101520.0,
+         101520.0,
+         101520.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 4420
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "no_tool",
+       "unit": "supervised_tokens",
+       "target": 49341.783,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 37880,
+       "supply_by_shape": {
+        "full_episode@v1": 37880
+       },
+       "sealed": {
+        "tasks": 171,
+        "admitted": 152,
+        "units": 88054.0
+       },
+       "new_supply": 37709,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         18506487.1,
+         19505775.6,
+         20240422.4
+        ],
+        "within_bound_units": [
+         88054.0,
+         88054.0,
+         88054.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 37709
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "schema_arguments",
+       "unit": "supervised_tokens",
+       "target": 17200.0,
+       "min_tasks": 0,
+       "group": "pivot_conversational",
+       "datasets": [
+        "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 1928,
+       "supply_by_shape": {
+        "full_episode@v1": 368,
+        "single_step_gold_tool_call@v1": 1560
+       },
+       "sealed": {
+        "tasks": 124,
+        "admitted": 37,
+        "units": 27837.0
+       },
+       "new_supply": 1804,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         320717.2,
+         432640.6,
+         572435.8
+        ],
+        "within_bound_units": [
+         27837.0,
+         27837.0,
+         27837.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 344,
+        "single_step_gold_tool_call@v1:measured": 1460
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "schema_arguments",
+       "unit": "supervised_tokens",
+       "target": 56812.674499999994,
+       "min_tasks": 0,
+       "group": "schema_synth",
+       "datasets": [
+        "aadistill/schema_synth"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 4625,
+       "supply_by_shape": {
+        "full_episode@v1": 4625
+       },
+       "sealed": {
+        "tasks": 225,
+        "admitted": 173,
+        "units": 156551.0
+       },
+       "new_supply": 4400,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         3021870.6,
+         3217991.8,
+         3388672.2
+        ],
+        "within_bound_units": [
+         156551.0,
+         156551.0,
+         156551.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 4400
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "tool_selection",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 12499,
+       "supply_by_shape": {
+        "full_episode@v1": 12499
+       },
+       "sealed": {
+        "tasks": 207,
+        "admitted": 119,
+        "units": 85050.0
+       },
+       "new_supply": 12292,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         4633581.7,
+         5135464.0,
+         5620358.9
+        ],
+        "within_bound_units": [
+         85050.0,
+         85050.0,
+         85050.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 12292
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "validation",
+       "category": null,
+       "unit": "tasks",
+       "target": 32.0,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 1576,
+       "supply_by_shape": {
+        "full_episode@v1": 1557,
+        "single_step_gold_tool_call@v1": 19
+       },
+       "sealed": {
+        "tasks": 76,
+        "admitted": 55,
+        "units": 55.0
+       },
+       "new_supply": 1500,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         608.9,
+         640.6,
+         672.9
+        ],
+        "within_bound_units": [
+         55.0,
+         55.0,
+         55.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:proxy:mode": 1481,
+        "single_step_gold_tool_call@v1:proxy:mode": 19
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "error_recovery",
+       "unit": "scored_positions",
+       "target": 1200.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 29,
+       "supply_by_shape": {
+        "full_episode@v1": 29
+       },
+       "sealed": {
+        "tasks": 29,
+        "admitted": 7,
+        "units": 10441.0
+       },
+       "new_supply": 0,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         10441.0,
+         10441.0,
+         10441.0
+        ],
+        "within_bound_units": [
+         10441.0,
+         10441.0,
+         10441.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {},
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "mcp_agent",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 78,
+       "supply_by_shape": {
+        "full_episode@v1": 78
+       },
+       "sealed": {
+        "tasks": 13,
+        "admitted": 5,
+        "units": 7701.0
+       },
+       "new_supply": 65,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         27882.7,
+         46206.0,
+         68509.4
+        ],
+        "within_bound_units": [
+         7701.0,
+         7701.0,
+         7701.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 65
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "multi_turn",
+       "unit": "scored_positions",
+       "target": 2400.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 205,
+       "supply_by_shape": {
+        "full_episode@v1": 205
+       },
+       "sealed": {
+        "tasks": 7,
+        "admitted": 5,
+        "units": 23464.0
+       },
+       "new_supply": 198,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         403180.3,
+         687160.0,
+         860127.1
+        ],
+        "within_bound_units": [
+         23464.0,
+         23464.0,
+         23464.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 198
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "multiple_parallel",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 125,
+       "supply_by_shape": {
+        "full_episode@v1": 125
+       },
+       "sealed": {
+        "tasks": 47,
+        "admitted": 11,
+        "units": 12853.0
+       },
+       "new_supply": 78,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         26403.7,
+         34183.5,
+         44602.3
+        ],
+        "within_bound_units": [
+         12853.0,
+         12853.0,
+         12853.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 78
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "no_tool",
+       "unit": "scored_positions",
+       "target": 1200.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 1535,
+       "supply_by_shape": {
+        "full_episode@v1": 1535
+       },
+       "sealed": {
+        "tasks": 11,
+        "admitted": 9,
+        "units": 6342.0
+       },
+       "new_supply": 1524,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         621532.0,
+         884996.6,
+         1013549.0
+        ],
+        "within_bound_units": [
+         6342.0,
+         6342.0,
+         6342.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 1524
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "schema_arguments",
+       "unit": "scored_positions",
+       "target": 1000.0,
+       "min_tasks": 5,
+       "group": "pivot_conversational",
+       "datasets": [
+        "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 29,
+       "supply_by_shape": {
+        "full_episode@v1": 7,
+        "single_step_gold_tool_call@v1": 22
+       },
+       "sealed": {
+        "tasks": 29,
+        "admitted": 11,
+        "units": 4236.0
+       },
+       "new_supply": 0,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         4236.0,
+         4236.0,
+         4236.0
+        ],
+        "within_bound_units": [
+         4236.0,
+         4236.0,
+         4236.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {},
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "schema_arguments",
+       "unit": "scored_positions",
+       "target": 800.0,
+       "min_tasks": 5,
+       "group": "schema_synth",
+       "datasets": [
+        "aadistill/schema_synth"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 110,
+       "supply_by_shape": {
+        "full_episode@v1": 110
+       },
+       "sealed": {
+        "tasks": 5,
+        "admitted": 5,
+        "units": 2902.0
+       },
+       "new_supply": 105,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         42445.5,
+         63844.0,
+         63844.0
+        ],
+        "within_bound_units": [
+         2902.0,
+         2902.0,
+         2902.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 105
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "state_eval",
+       "category": "tool_selection",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 333,
+       "supply_by_shape": {
+        "full_episode@v1": 333
+       },
+       "sealed": {
+        "tasks": 58,
+        "admitted": 30,
+        "units": 25311.0
+       },
+       "new_supply": 275,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         120664.2,
+         145320.2,
+         169619.5
+        ],
+        "within_bound_units": [
+         25311.0,
+         25311.0,
+         25311.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 275
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      }
+     ]
+    }
+   },
+   "splits": [
+    "training",
+    "validation",
+    "state_eval"
+   ],
+   "tasks_file": {
+    "path": "artifacts/stages/stage-2/teacher_modes/tool_generation_sr/hybrid/tasks.jsonl",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks": 0,
+    "bytes": 0
+   }
+  },
+  "thinking_2507": {
+   "modes": {
+    "T2507": {
+     "cells": [
+      {
+       "split": "training",
+       "category": "error_recovery",
+       "unit": "supervised_tokens",
+       "target": 49258.700000000004,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 2668,
+       "supply_by_shape": {
+        "full_episode@v1": 2668
+       },
+       "sealed": {
+        "tasks": 72,
+        "admitted": 17,
+        "units": 72874.0
+       },
+       "new_supply": 2596,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         1831895.0,
+         2737764.1,
+         3917503.3
+        ],
+        "within_bound_units": [
+         72874.0,
+         72874.0,
+         72874.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 2596
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "mcp_agent",
+       "unit": "supervised_tokens",
+       "target": 73888.05,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 4542,
+       "supply_by_shape": {
+        "full_episode@v1": 4542
+       },
+       "sealed": {
+        "tasks": 179,
+        "admitted": 36,
+        "units": 101551.0
+       },
+       "new_supply": 4363,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         2027082.5,
+         2576785.6,
+         3236034.9
+        ],
+        "within_bound_units": [
+         101551.0,
+         101551.0,
+         101551.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 4363
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "multi_turn",
+       "unit": "supervised_tokens",
+       "target": 98517.40000000001,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 12224,
+       "supply_by_shape": {
+        "full_episode@v1": 12224
+       },
+       "sealed": {
+        "tasks": 64,
+        "admitted": 20,
+        "units": 113880.0
+       },
+       "new_supply": 12160,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         15792704.3,
+         21751080.0,
+         28762621.1
+        ],
+        "within_bound_units": [
+         113880.0,
+         113880.0,
+         113880.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 12160
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "multiple_parallel",
+       "unit": "supervised_tokens",
+       "target": 73888.05,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 4581,
+       "supply_by_shape": {
+        "full_episode@v1": 4581
+       },
+       "sealed": {
+        "tasks": 116,
+        "admitted": 63,
+        "units": 123617.0
+       },
+       "new_supply": 4465,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         4214253.5,
+         4881806.8,
+         5532142.9
+        ],
+        "within_bound_units": [
+         123617.0,
+         123617.0,
+         123617.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 4465
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "no_tool",
+       "unit": "supervised_tokens",
+       "target": 49258.700000000004,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 37880,
+       "supply_by_shape": {
+        "full_episode@v1": 37880
+       },
+       "sealed": {
+        "tasks": 168,
+        "admitted": 151,
+        "units": 100510.0
+       },
+       "new_supply": 37712,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         21537745.6,
+         22662619.1,
+         23470146.1
+        ],
+        "within_bound_units": [
+         100510.0,
+         100510.0,
+         100510.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 37712
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "schema_arguments",
+       "unit": "supervised_tokens",
+       "target": 17171.0,
+       "min_tasks": 0,
+       "group": "pivot_conversational",
+       "datasets": [
+        "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 1928,
+       "supply_by_shape": {
+        "full_episode@v1": 368,
+        "single_step_gold_tool_call@v1": 1560
+       },
+       "sealed": {
+        "tasks": 136,
+        "admitted": 39,
+        "units": 75152.0
+       },
+       "new_supply": 1792,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         503342.8,
+         661992.4,
+         907431.3
+        ],
+        "within_bound_units": [
+         75152.0,
+         75152.0,
+         75152.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 232,
+        "single_step_gold_tool_call@v1:prior": 1560
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "schema_arguments",
+       "unit": "supervised_tokens",
+       "target": 56717.05,
+       "min_tasks": 0,
+       "group": "schema_synth",
+       "datasets": [
+        "aadistill/schema_synth"
+       ],
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 4625,
+       "supply_by_shape": {
+        "full_episode@v1": 4625
+       },
+       "sealed": {
+        "tasks": 169,
+        "admitted": 153,
+        "units": 314834.0
+       },
+       "new_supply": 4456,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         2269342.5,
+         2777166.1,
+         3356423.8
+        ],
+        "within_bound_units": [
+         314834.0,
+         314834.0,
+         314834.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:proxy:other_source": 4456
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "training",
+       "category": "tool_selection",
+       "unit": "supervised_tokens",
+       "target": 73888.05,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 12499,
+       "supply_by_shape": {
+        "full_episode@v1": 12499
+       },
+       "sealed": {
+        "tasks": 126,
+        "admitted": 76,
+        "units": 106617.0
+       },
+       "new_supply": 12373,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         9306759.1,
+         10576241.3,
+         11770421.4
+        ],
+        "within_bound_units": [
+         106617.0,
+         106617.0,
+         106617.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 12373
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      },
+      {
+       "split": "validation",
+       "category": null,
+       "unit": "supervised_tokens",
+       "target": 12624.0,
+       "min_tasks": 0,
+       "first_round": "bound",
+       "reach_bound": null,
+       "supply": 1576,
+       "supply_by_shape": {
+        "full_episode@v1": 1557,
+        "single_step_gold_tool_call@v1": 19
+       },
+       "sealed": {
+        "tasks": 18,
+        "admitted": 14,
+        "units": 16345.0
+       },
+       "new_supply": 1558,
+       "tasks": {
+        "lower": 0,
+        "expected": 0,
+        "upper": 0
+       },
+       "bound": 0,
+       "projection": {
+        "whole_supply_units": [
+         941053.4,
+         1408691.7,
+         1705850.9
+        ],
+        "within_bound_units": [
+         16345.0,
+         16345.0,
+         16345.0
+        ],
+        "unmeasured_units_within_bound": 0,
+        "_": "[low, expected, high]; sealed units included"
+       },
+       "basis_of_new_tasks": {
+        "full_episode@v1:measured": 1213,
+        "full_episode@v1:proxy:other_source_training": 40,
+        "full_episode@v1:proxy:training": 286,
+        "single_step_gold_tool_call@v1:prior": 19
+       },
+       "status": "REACHED",
+       "task_ids": [],
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 0
+      }
+     ]
+    }
+   },
+   "splits": [
+    "training",
+    "validation"
+   ],
+   "tasks_file": {
+    "path": "artifacts/stages/stage-2/teacher_modes/tool_generation_sr/thinking_2507/tasks.jsonl",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tasks": 0,
+    "bytes": 0
+   }
+  }
+ },
+ "authorizes": "nothing",
+ "price": {
+  "sessions": {
+   "hybrid": {
+    "lower": {
+     "usd": 0.21,
+     "minutes": 11.4,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
+     "rounds": 1,
+     "rate_usd_per_hour": 1.09
+    },
+    "expected": {
+     "usd": 0.23,
+     "minutes": 12.9,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
+     "rounds": 2,
+     "rate_usd_per_hour": 1.09
+    },
+    "upper": {
+     "usd": 0.85,
+     "minutes": 43.0,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
+     "rounds": 4,
+     "rate_usd_per_hour": 1.19
+    },
+    "runner_cap": {
+     "driver_minutes": 8.0,
+     "hard_terminate_minutes": 63.8,
+     "rate_usd_per_hour": 1.19,
+     "all_in_usd": 1.3115
+    }
+   },
+   "thinking_2507": {
+    "lower": {
+     "usd": 0.19,
+     "minutes": 10.7,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
+     "rounds": 1,
+     "rate_usd_per_hour": 1.09
+    },
+    "expected": {
+     "usd": 0.21,
+     "minutes": 11.4,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
+     "rounds": 2,
+     "rate_usd_per_hour": 1.09
+    },
+    "upper": {
+     "usd": 0.8,
+     "minutes": 40.2,
+     "generated_tokens": 0,
+     "generated_tokens_by_basis": {},
+     "rounds": 4,
+     "rate_usd_per_hour": 1.19
+    },
+    "runner_cap": {
+     "driver_minutes": 5.2,
+     "hard_terminate_minutes": 60.2,
+     "rate_usd_per_hour": 1.19,
+     "all_in_usd": 1.2408
+    }
+   }
+  },
+  "total_usd": {
+   "lower": 0.4,
+   "expected": 0.44,
+   "upper": 1.65
+  },
+  "proposed_hard_caps_usd": {
+   "hybrid": 1.3115,
+   "thinking_2507": 1.2408
+  },
+  "levels": {
+   "lower": {
+    "tasks": "lower",
+    "rounds": 1
+   },
+   "expected": {
+    "tasks": "expected",
+    "rounds": 2
+   },
+   "upper": {
+    "tasks": "bound",
+    "rounds": 4
+   }
+  },
+  "basis": "the pilot's measured generated tokens per attempted task (every candidate, its measured second-candidate rate), measured output tokens per second and engine starts, measured session overhead; the cap is the runner's own all-in at $1.19/h for the upper level's driver minutes; strata the pilot did not measure are priced by proxy or prior and listed in generated_tokens_by_basis"
+ }
+}

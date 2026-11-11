@@ -1,0 +1,1457 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.inputs_session/v1",
+ "started_utc": "2026-11-01T13:51:54Z",
+ "rounds": [
+  {
+   "round": 0,
+   "modes": {
+    "H-T": {
+     "stage": "c00t",
+     "tasks": 20,
+     "complete": true,
+     "seconds": 279.4,
+     "terminated": 19
+    },
+    "H-N": {
+     "stage": "c00n",
+     "tasks": 30,
+     "complete": true,
+     "seconds": 151.6,
+     "terminated": 28
+    }
+   }
+  },
+  {
+   "round": 1,
+   "modes": {
+    "H-T": {
+     "stage": "e01t",
+     "tasks": 177,
+     "types": {
+      "code": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 1128.7,
+       "tasks": 14
+      },
+      "defined_ops@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 1142.5,
+       "tasks": 14
+      },
+      "entity_tracking@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 1250.8,
+       "tasks": 12
+      },
+      "grid_transform@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 3057.9,
+       "tasks": 7
+      },
+      "gsm8k": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 1337.6,
+       "tasks": 12
+      },
+      "knights_knaves@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 3574.7,
+       "tasks": 7
+      },
+      "list_induction@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 2098.0,
+       "tasks": 8
+      },
+      "multihop_qa": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 661.9,
+       "tasks": 23
+      },
+      "openmath": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 2629.0,
+       "tasks": 7
+      },
+      "ordering@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 1381.3,
+       "tasks": 11
+      },
+      "rag_evidence": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 320.5,
+       "tasks": 47
+      },
+      "scan_language@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 4217.8,
+       "tasks": 7
+      },
+      "string_induction@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 1966.8,
+       "tasks": 8
+      }
+     },
+     "complete": true,
+     "seconds": 298.4
+    },
+    "H-N": {
+     "stage": "e01n",
+     "tasks": 1539,
+     "types": {
+      "code": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 767.4,
+       "tasks": 20
+      },
+      "defined_ops@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 321.3,
+       "tasks": 47
+      },
+      "entity_tracking@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 307.5,
+       "tasks": 49
+      },
+      "grid_transform@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 839.6,
+       "tasks": 18
+      },
+      "gsm8k": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 232.2,
+       "tasks": 65
+      },
+      "knights_knaves@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 792.7,
+       "tasks": 19
+      },
+      "list_induction@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 733.6,
+       "tasks": 21
+      },
+      "multihop_qa": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 24.6,
+       "tasks": 610
+      },
+      "openmath": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 393.5,
+       "tasks": 39
+      },
+      "ordering@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 243.0,
+       "tasks": 62
+      },
+      "rag_evidence": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 28.5,
+       "tasks": 527
+      },
+      "scan_language@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 434.5,
+       "tasks": 35
+      },
+      "string_induction@v1": {
+       "short_positions": 12000,
+       "short_tasks": 5,
+       "positions_per_task": 557.5,
+       "tasks": 27
+      }
+     },
+     "complete": true,
+     "seconds": 265.8
+    }
+   },
+   "state": {
+    "code|H-T": {
+     "scored_positions": 27647,
+     "terminated_tasks": 14,
+     "generated_tasks": 14,
+     "queue_position": 14,
+     "queue": 32,
+     "exhausted": false,
+     "short": false
+    },
+    "code|H-N": {
+     "scored_positions": 12375,
+     "terminated_tasks": 20,
+     "generated_tasks": 20,
+     "queue_position": 20,
+     "queue": 32,
+     "exhausted": false,
+     "short": false
+    },
+    "defined_ops@v1|H-T": {
+     "scored_positions": 18636,
+     "terminated_tasks": 14,
+     "generated_tasks": 14,
+     "queue_position": 14,
+     "queue": 75,
+     "exhausted": false,
+     "short": false
+    },
+    "defined_ops@v1|H-N": {
+     "scored_positions": 16252,
+     "terminated_tasks": 47,
+     "generated_tasks": 47,
+     "queue_position": 47,
+     "queue": 75,
+     "exhausted": false,
+     "short": false
+    },
+    "entity_tracking@v1|H-T": {
+     "scored_positions": 11784,
+     "terminated_tasks": 12,
+     "generated_tasks": 12,
+     "queue_position": 12,
+     "queue": 77,
+     "exhausted": false,
+     "short": true
+    },
+    "entity_tracking@v1|H-N": {
+     "scored_positions": 15018,
+     "terminated_tasks": 49,
+     "generated_tasks": 49,
+     "queue_position": 49,
+     "queue": 77,
+     "exhausted": false,
+     "short": false
+    },
+    "grid_transform@v1|H-T": {
+     "scored_positions": 13324,
+     "terminated_tasks": 3,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 29,
+     "exhausted": false,
+     "short": true
+    },
+    "grid_transform@v1|H-N": {
+     "scored_positions": 12201,
+     "terminated_tasks": 16,
+     "generated_tasks": 18,
+     "queue_position": 18,
+     "queue": 29,
+     "exhausted": false,
+     "short": false
+    },
+    "gsm8k|H-T": {
+     "scored_positions": 8789,
+     "terminated_tasks": 12,
+     "generated_tasks": 12,
+     "queue_position": 12,
+     "queue": 104,
+     "exhausted": false,
+     "short": true
+    },
+    "gsm8k|H-N": {
+     "scored_positions": 13993,
+     "terminated_tasks": 65,
+     "generated_tasks": 65,
+     "queue_position": 65,
+     "queue": 104,
+     "exhausted": false,
+     "short": false
+    },
+    "knights_knaves@v1|H-T": {
+     "scored_positions": 19884,
+     "terminated_tasks": 7,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 30,
+     "exhausted": false,
+     "short": false
+    },
+    "knights_knaves@v1|H-N": {
+     "scored_positions": 16961,
+     "terminated_tasks": 18,
+     "generated_tasks": 19,
+     "queue_position": 19,
+     "queue": 30,
+     "exhausted": false,
+     "short": false
+    },
+    "list_induction@v1|H-T": {
+     "scored_positions": 13715,
+     "terminated_tasks": 6,
+     "generated_tasks": 8,
+     "queue_position": 8,
+     "queue": 33,
+     "exhausted": false,
+     "short": false
+    },
+    "list_induction@v1|H-N": {
+     "scored_positions": 17775,
+     "terminated_tasks": 21,
+     "generated_tasks": 21,
+     "queue_position": 21,
+     "queue": 33,
+     "exhausted": false,
+     "short": false
+    },
+    "multihop_qa|H-T": {
+     "scored_positions": 11291,
+     "terminated_tasks": 23,
+     "generated_tasks": 23,
+     "queue_position": 23,
+     "queue": 976,
+     "exhausted": false,
+     "short": true
+    },
+    "multihop_qa|H-N": {
+     "scored_positions": 24924,
+     "terminated_tasks": 610,
+     "generated_tasks": 610,
+     "queue_position": 610,
+     "queue": 976,
+     "exhausted": false,
+     "short": false
+    },
+    "openmath|H-T": {
+     "scored_positions": 15709,
+     "terminated_tasks": 5,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 61,
+     "exhausted": false,
+     "short": false
+    },
+    "openmath|H-N": {
+     "scored_positions": 19473,
+     "terminated_tasks": 38,
+     "generated_tasks": 39,
+     "queue_position": 39,
+     "queue": 61,
+     "exhausted": false,
+     "short": false
+    },
+    "ordering@v1|H-T": {
+     "scored_positions": 15796,
+     "terminated_tasks": 11,
+     "generated_tasks": 11,
+     "queue_position": 11,
+     "queue": 99,
+     "exhausted": false,
+     "short": false
+    },
+    "ordering@v1|H-N": {
+     "scored_positions": 14475,
+     "terminated_tasks": 62,
+     "generated_tasks": 62,
+     "queue_position": 62,
+     "queue": 99,
+     "exhausted": false,
+     "short": false
+    },
+    "rag_evidence|H-T": {
+     "scored_positions": 16006,
+     "terminated_tasks": 47,
+     "generated_tasks": 47,
+     "queue_position": 47,
+     "queue": 843,
+     "exhausted": false,
+     "short": false
+    },
+    "rag_evidence|H-N": {
+     "scored_positions": 15624,
+     "terminated_tasks": 527,
+     "generated_tasks": 527,
+     "queue_position": 527,
+     "queue": 843,
+     "exhausted": false,
+     "short": false
+    },
+    "scan_language@v1|H-T": {
+     "scored_positions": 20608,
+     "terminated_tasks": 4,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 56,
+     "exhausted": false,
+     "short": true
+    },
+    "scan_language@v1|H-N": {
+     "scored_positions": 16951,
+     "terminated_tasks": 34,
+     "generated_tasks": 35,
+     "queue_position": 35,
+     "queue": 56,
+     "exhausted": false,
+     "short": false
+    },
+    "string_induction@v1|H-T": {
+     "scored_positions": 12756,
+     "terminated_tasks": 6,
+     "generated_tasks": 8,
+     "queue_position": 8,
+     "queue": 44,
+     "exhausted": false,
+     "short": false
+    },
+    "string_induction@v1|H-N": {
+     "scored_positions": 30055,
+     "terminated_tasks": 26,
+     "generated_tasks": 27,
+     "queue_position": 27,
+     "queue": 44,
+     "exhausted": false,
+     "short": false
+    }
+   }
+  },
+  {
+   "round": 2,
+   "modes": {
+    "H-T": {
+     "stage": "e02t",
+     "tasks": 22,
+     "types": {
+      "entity_tracking@v1": {
+       "short_positions": 216,
+       "short_tasks": 0,
+       "positions_per_task": 982.0,
+       "tasks": 4
+      },
+      "grid_transform@v1": {
+       "short_positions": 0,
+       "short_tasks": 2,
+       "positions_per_task": 3057.9,
+       "tasks": 4
+      },
+      "gsm8k": {
+       "short_positions": 3211,
+       "short_tasks": 0,
+       "positions_per_task": 732.4,
+       "tasks": 6
+      },
+      "multihop_qa": {
+       "short_positions": 709,
+       "short_tasks": 0,
+       "positions_per_task": 490.9,
+       "tasks": 4
+      },
+      "scan_language@v1": {
+       "short_positions": 0,
+       "short_tasks": 1,
+       "positions_per_task": 4217.8,
+       "tasks": 4
+      }
+     },
+     "complete": true,
+     "seconds": 167.9
+    }
+   },
+   "state": {
+    "code|H-T": {
+     "scored_positions": 27647,
+     "terminated_tasks": 14,
+     "generated_tasks": 14,
+     "queue_position": 14,
+     "queue": 32,
+     "exhausted": false,
+     "short": false
+    },
+    "code|H-N": {
+     "scored_positions": 12375,
+     "terminated_tasks": 20,
+     "generated_tasks": 20,
+     "queue_position": 20,
+     "queue": 32,
+     "exhausted": false,
+     "short": false
+    },
+    "defined_ops@v1|H-T": {
+     "scored_positions": 18636,
+     "terminated_tasks": 14,
+     "generated_tasks": 14,
+     "queue_position": 14,
+     "queue": 75,
+     "exhausted": false,
+     "short": false
+    },
+    "defined_ops@v1|H-N": {
+     "scored_positions": 16252,
+     "terminated_tasks": 47,
+     "generated_tasks": 47,
+     "queue_position": 47,
+     "queue": 75,
+     "exhausted": false,
+     "short": false
+    },
+    "entity_tracking@v1|H-T": {
+     "scored_positions": 16013,
+     "terminated_tasks": 16,
+     "generated_tasks": 16,
+     "queue_position": 16,
+     "queue": 77,
+     "exhausted": false,
+     "short": false
+    },
+    "entity_tracking@v1|H-N": {
+     "scored_positions": 15018,
+     "terminated_tasks": 49,
+     "generated_tasks": 49,
+     "queue_position": 49,
+     "queue": 77,
+     "exhausted": false,
+     "short": false
+    },
+    "grid_transform@v1|H-T": {
+     "scored_positions": 17276,
+     "terminated_tasks": 4,
+     "generated_tasks": 11,
+     "queue_position": 11,
+     "queue": 29,
+     "exhausted": false,
+     "short": true
+    },
+    "grid_transform@v1|H-N": {
+     "scored_positions": 12201,
+     "terminated_tasks": 16,
+     "generated_tasks": 18,
+     "queue_position": 18,
+     "queue": 29,
+     "exhausted": false,
+     "short": false
+    },
+    "gsm8k|H-T": {
+     "scored_positions": 14423,
+     "terminated_tasks": 18,
+     "generated_tasks": 18,
+     "queue_position": 18,
+     "queue": 104,
+     "exhausted": false,
+     "short": false
+    },
+    "gsm8k|H-N": {
+     "scored_positions": 13993,
+     "terminated_tasks": 65,
+     "generated_tasks": 65,
+     "queue_position": 65,
+     "queue": 104,
+     "exhausted": false,
+     "short": false
+    },
+    "knights_knaves@v1|H-T": {
+     "scored_positions": 19884,
+     "terminated_tasks": 7,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 30,
+     "exhausted": false,
+     "short": false
+    },
+    "knights_knaves@v1|H-N": {
+     "scored_positions": 16961,
+     "terminated_tasks": 18,
+     "generated_tasks": 19,
+     "queue_position": 19,
+     "queue": 30,
+     "exhausted": false,
+     "short": false
+    },
+    "list_induction@v1|H-T": {
+     "scored_positions": 13715,
+     "terminated_tasks": 6,
+     "generated_tasks": 8,
+     "queue_position": 8,
+     "queue": 33,
+     "exhausted": false,
+     "short": false
+    },
+    "list_induction@v1|H-N": {
+     "scored_positions": 17775,
+     "terminated_tasks": 21,
+     "generated_tasks": 21,
+     "queue_position": 21,
+     "queue": 33,
+     "exhausted": false,
+     "short": false
+    },
+    "multihop_qa|H-T": {
+     "scored_positions": 12688,
+     "terminated_tasks": 27,
+     "generated_tasks": 27,
+     "queue_position": 27,
+     "queue": 976,
+     "exhausted": false,
+     "short": false
+    },
+    "multihop_qa|H-N": {
+     "scored_positions": 24924,
+     "terminated_tasks": 610,
+     "generated_tasks": 610,
+     "queue_position": 610,
+     "queue": 976,
+     "exhausted": false,
+     "short": false
+    },
+    "openmath|H-T": {
+     "scored_positions": 15709,
+     "terminated_tasks": 5,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 61,
+     "exhausted": false,
+     "short": false
+    },
+    "openmath|H-N": {
+     "scored_positions": 19473,
+     "terminated_tasks": 38,
+     "generated_tasks": 39,
+     "queue_position": 39,
+     "queue": 61,
+     "exhausted": false,
+     "short": false
+    },
+    "ordering@v1|H-T": {
+     "scored_positions": 15796,
+     "terminated_tasks": 11,
+     "generated_tasks": 11,
+     "queue_position": 11,
+     "queue": 99,
+     "exhausted": false,
+     "short": false
+    },
+    "ordering@v1|H-N": {
+     "scored_positions": 14475,
+     "terminated_tasks": 62,
+     "generated_tasks": 62,
+     "queue_position": 62,
+     "queue": 99,
+     "exhausted": false,
+     "short": false
+    },
+    "rag_evidence|H-T": {
+     "scored_positions": 16006,
+     "terminated_tasks": 47,
+     "generated_tasks": 47,
+     "queue_position": 47,
+     "queue": 843,
+     "exhausted": false,
+     "short": false
+    },
+    "rag_evidence|H-N": {
+     "scored_positions": 15624,
+     "terminated_tasks": 527,
+     "generated_tasks": 527,
+     "queue_position": 527,
+     "queue": 843,
+     "exhausted": false,
+     "short": false
+    },
+    "scan_language@v1|H-T": {
+     "scored_positions": 36721,
+     "terminated_tasks": 7,
+     "generated_tasks": 11,
+     "queue_position": 11,
+     "queue": 56,
+     "exhausted": false,
+     "short": false
+    },
+    "scan_language@v1|H-N": {
+     "scored_positions": 16951,
+     "terminated_tasks": 34,
+     "generated_tasks": 35,
+     "queue_position": 35,
+     "queue": 56,
+     "exhausted": false,
+     "short": false
+    },
+    "string_induction@v1|H-T": {
+     "scored_positions": 12756,
+     "terminated_tasks": 6,
+     "generated_tasks": 8,
+     "queue_position": 8,
+     "queue": 44,
+     "exhausted": false,
+     "short": false
+    },
+    "string_induction@v1|H-N": {
+     "scored_positions": 30055,
+     "terminated_tasks": 26,
+     "generated_tasks": 27,
+     "queue_position": 27,
+     "queue": 44,
+     "exhausted": false,
+     "short": false
+    }
+   }
+  },
+  {
+   "round": 3,
+   "modes": {
+    "H-T": {
+     "stage": "e03t",
+     "tasks": 4,
+     "types": {
+      "grid_transform@v1": {
+       "short_positions": 0,
+       "short_tasks": 1,
+       "positions_per_task": 1570.5,
+       "tasks": 4
+      }
+     },
+     "complete": true,
+     "seconds": 152.6
+    }
+   },
+   "state": {
+    "code|H-T": {
+     "scored_positions": 27647,
+     "terminated_tasks": 14,
+     "generated_tasks": 14,
+     "queue_position": 14,
+     "queue": 32,
+     "exhausted": false,
+     "short": false
+    },
+    "code|H-N": {
+     "scored_positions": 12375,
+     "terminated_tasks": 20,
+     "generated_tasks": 20,
+     "queue_position": 20,
+     "queue": 32,
+     "exhausted": false,
+     "short": false
+    },
+    "defined_ops@v1|H-T": {
+     "scored_positions": 18636,
+     "terminated_tasks": 14,
+     "generated_tasks": 14,
+     "queue_position": 14,
+     "queue": 75,
+     "exhausted": false,
+     "short": false
+    },
+    "defined_ops@v1|H-N": {
+     "scored_positions": 16252,
+     "terminated_tasks": 47,
+     "generated_tasks": 47,
+     "queue_position": 47,
+     "queue": 75,
+     "exhausted": false,
+     "short": false
+    },
+    "entity_tracking@v1|H-T": {
+     "scored_positions": 16013,
+     "terminated_tasks": 16,
+     "generated_tasks": 16,
+     "queue_position": 16,
+     "queue": 77,
+     "exhausted": false,
+     "short": false
+    },
+    "entity_tracking@v1|H-N": {
+     "scored_positions": 15018,
+     "terminated_tasks": 49,
+     "generated_tasks": 49,
+     "queue_position": 49,
+     "queue": 77,
+     "exhausted": false,
+     "short": false
+    },
+    "grid_transform@v1|H-T": {
+     "scored_positions": 19933,
+     "terminated_tasks": 5,
+     "generated_tasks": 15,
+     "queue_position": 15,
+     "queue": 29,
+     "exhausted": false,
+     "short": false
+    },
+    "grid_transform@v1|H-N": {
+     "scored_positions": 12201,
+     "terminated_tasks": 16,
+     "generated_tasks": 18,
+     "queue_position": 18,
+     "queue": 29,
+     "exhausted": false,
+     "short": false
+    },
+    "gsm8k|H-T": {
+     "scored_positions": 14423,
+     "terminated_tasks": 18,
+     "generated_tasks": 18,
+     "queue_position": 18,
+     "queue": 104,
+     "exhausted": false,
+     "short": false
+    },
+    "gsm8k|H-N": {
+     "scored_positions": 13993,
+     "terminated_tasks": 65,
+     "generated_tasks": 65,
+     "queue_position": 65,
+     "queue": 104,
+     "exhausted": false,
+     "short": false
+    },
+    "knights_knaves@v1|H-T": {
+     "scored_positions": 19884,
+     "terminated_tasks": 7,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 30,
+     "exhausted": false,
+     "short": false
+    },
+    "knights_knaves@v1|H-N": {
+     "scored_positions": 16961,
+     "terminated_tasks": 18,
+     "generated_tasks": 19,
+     "queue_position": 19,
+     "queue": 30,
+     "exhausted": false,
+     "short": false
+    },
+    "list_induction@v1|H-T": {
+     "scored_positions": 13715,
+     "terminated_tasks": 6,
+     "generated_tasks": 8,
+     "queue_position": 8,
+     "queue": 33,
+     "exhausted": false,
+     "short": false
+    },
+    "list_induction@v1|H-N": {
+     "scored_positions": 17775,
+     "terminated_tasks": 21,
+     "generated_tasks": 21,
+     "queue_position": 21,
+     "queue": 33,
+     "exhausted": false,
+     "short": false
+    },
+    "multihop_qa|H-T": {
+     "scored_positions": 12688,
+     "terminated_tasks": 27,
+     "generated_tasks": 27,
+     "queue_position": 27,
+     "queue": 976,
+     "exhausted": false,
+     "short": false
+    },
+    "multihop_qa|H-N": {
+     "scored_positions": 24924,
+     "terminated_tasks": 610,
+     "generated_tasks": 610,
+     "queue_position": 610,
+     "queue": 976,
+     "exhausted": false,
+     "short": false
+    },
+    "openmath|H-T": {
+     "scored_positions": 15709,
+     "terminated_tasks": 5,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 61,
+     "exhausted": false,
+     "short": false
+    },
+    "openmath|H-N": {
+     "scored_positions": 19473,
+     "terminated_tasks": 38,
+     "generated_tasks": 39,
+     "queue_position": 39,
+     "queue": 61,
+     "exhausted": false,
+     "short": false
+    },
+    "ordering@v1|H-T": {
+     "scored_positions": 15796,
+     "terminated_tasks": 11,
+     "generated_tasks": 11,
+     "queue_position": 11,
+     "queue": 99,
+     "exhausted": false,
+     "short": false
+    },
+    "ordering@v1|H-N": {
+     "scored_positions": 14475,
+     "terminated_tasks": 62,
+     "generated_tasks": 62,
+     "queue_position": 62,
+     "queue": 99,
+     "exhausted": false,
+     "short": false
+    },
+    "rag_evidence|H-T": {
+     "scored_positions": 16006,
+     "terminated_tasks": 47,
+     "generated_tasks": 47,
+     "queue_position": 47,
+     "queue": 843,
+     "exhausted": false,
+     "short": false
+    },
+    "rag_evidence|H-N": {
+     "scored_positions": 15624,
+     "terminated_tasks": 527,
+     "generated_tasks": 527,
+     "queue_position": 527,
+     "queue": 843,
+     "exhausted": false,
+     "short": false
+    },
+    "scan_language@v1|H-T": {
+     "scored_positions": 36721,
+     "terminated_tasks": 7,
+     "generated_tasks": 11,
+     "queue_position": 11,
+     "queue": 56,
+     "exhausted": false,
+     "short": false
+    },
+    "scan_language@v1|H-N": {
+     "scored_positions": 16951,
+     "terminated_tasks": 34,
+     "generated_tasks": 35,
+     "queue_position": 35,
+     "queue": 56,
+     "exhausted": false,
+     "short": false
+    },
+    "string_induction@v1|H-T": {
+     "scored_positions": 12756,
+     "terminated_tasks": 6,
+     "generated_tasks": 8,
+     "queue_position": 8,
+     "queue": 44,
+     "exhausted": false,
+     "short": false
+    },
+    "string_induction@v1|H-N": {
+     "scored_positions": 30055,
+     "terminated_tasks": 26,
+     "generated_tasks": 27,
+     "queue_position": 27,
+     "queue": 44,
+     "exhausted": false,
+     "short": false
+    }
+   }
+  },
+  {
+   "round": 4,
+   "modes": {},
+   "state": {
+    "code|H-T": {
+     "scored_positions": 27647,
+     "terminated_tasks": 14,
+     "generated_tasks": 14,
+     "queue_position": 14,
+     "queue": 32,
+     "exhausted": false,
+     "short": false
+    },
+    "code|H-N": {
+     "scored_positions": 12375,
+     "terminated_tasks": 20,
+     "generated_tasks": 20,
+     "queue_position": 20,
+     "queue": 32,
+     "exhausted": false,
+     "short": false
+    },
+    "defined_ops@v1|H-T": {
+     "scored_positions": 18636,
+     "terminated_tasks": 14,
+     "generated_tasks": 14,
+     "queue_position": 14,
+     "queue": 75,
+     "exhausted": false,
+     "short": false
+    },
+    "defined_ops@v1|H-N": {
+     "scored_positions": 16252,
+     "terminated_tasks": 47,
+     "generated_tasks": 47,
+     "queue_position": 47,
+     "queue": 75,
+     "exhausted": false,
+     "short": false
+    },
+    "entity_tracking@v1|H-T": {
+     "scored_positions": 16013,
+     "terminated_tasks": 16,
+     "generated_tasks": 16,
+     "queue_position": 16,
+     "queue": 77,
+     "exhausted": false,
+     "short": false
+    },
+    "entity_tracking@v1|H-N": {
+     "scored_positions": 15018,
+     "terminated_tasks": 49,
+     "generated_tasks": 49,
+     "queue_position": 49,
+     "queue": 77,
+     "exhausted": false,
+     "short": false
+    },
+    "grid_transform@v1|H-T": {
+     "scored_positions": 19933,
+     "terminated_tasks": 5,
+     "generated_tasks": 15,
+     "queue_position": 15,
+     "queue": 29,
+     "exhausted": false,
+     "short": false
+    },
+    "grid_transform@v1|H-N": {
+     "scored_positions": 12201,
+     "terminated_tasks": 16,
+     "generated_tasks": 18,
+     "queue_position": 18,
+     "queue": 29,
+     "exhausted": false,
+     "short": false
+    },
+    "gsm8k|H-T": {
+     "scored_positions": 14423,
+     "terminated_tasks": 18,
+     "generated_tasks": 18,
+     "queue_position": 18,
+     "queue": 104,
+     "exhausted": false,
+     "short": false
+    },
+    "gsm8k|H-N": {
+     "scored_positions": 13993,
+     "terminated_tasks": 65,
+     "generated_tasks": 65,
+     "queue_position": 65,
+     "queue": 104,
+     "exhausted": false,
+     "short": false
+    },
+    "knights_knaves@v1|H-T": {
+     "scored_positions": 19884,
+     "terminated_tasks": 7,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 30,
+     "exhausted": false,
+     "short": false
+    },
+    "knights_knaves@v1|H-N": {
+     "scored_positions": 16961,
+     "terminated_tasks": 18,
+     "generated_tasks": 19,
+     "queue_position": 19,
+     "queue": 30,
+     "exhausted": false,
+     "short": false
+    },
+    "list_induction@v1|H-T": {
+     "scored_positions": 13715,
+     "terminated_tasks": 6,
+     "generated_tasks": 8,
+     "queue_position": 8,
+     "queue": 33,
+     "exhausted": false,
+     "short": false
+    },
+    "list_induction@v1|H-N": {
+     "scored_positions": 17775,
+     "terminated_tasks": 21,
+     "generated_tasks": 21,
+     "queue_position": 21,
+     "queue": 33,
+     "exhausted": false,
+     "short": false
+    },
+    "multihop_qa|H-T": {
+     "scored_positions": 12688,
+     "terminated_tasks": 27,
+     "generated_tasks": 27,
+     "queue_position": 27,
+     "queue": 976,
+     "exhausted": false,
+     "short": false
+    },
+    "multihop_qa|H-N": {
+     "scored_positions": 24924,
+     "terminated_tasks": 610,
+     "generated_tasks": 610,
+     "queue_position": 610,
+     "queue": 976,
+     "exhausted": false,
+     "short": false
+    },
+    "openmath|H-T": {
+     "scored_positions": 15709,
+     "terminated_tasks": 5,
+     "generated_tasks": 7,
+     "queue_position": 7,
+     "queue": 61,
+     "exhausted": false,
+     "short": false
+    },
+    "openmath|H-N": {
+     "scored_positions": 19473,
+     "terminated_tasks": 38,
+     "generated_tasks": 39,
+     "queue_position": 39,
+     "queue": 61,
+     "exhausted": false,
+     "short": false
+    },
+    "ordering@v1|H-T": {
+     "scored_positions": 15796,
+     "terminated_tasks": 11,
+     "generated_tasks": 11,
+     "queue_position": 11,
+     "queue": 99,
+     "exhausted": false,
+     "short": false
+    },
+    "ordering@v1|H-N": {
+     "scored_positions": 14475,
+     "terminated_tasks": 62,
+     "generated_tasks": 62,
+     "queue_position": 62,
+     "queue": 99,
+     "exhausted": false,
+     "short": false
+    },
+    "rag_evidence|H-T": {
+     "scored_positions": 16006,
+     "terminated_tasks": 47,
+     "generated_tasks": 47,
+     "queue_position": 47,
+     "queue": 843,
+     "exhausted": false,
+     "short": false
+    },
+    "rag_evidence|H-N": {
+     "scored_positions": 15624,
+     "terminated_tasks": 527,
+     "generated_tasks": 527,
+     "queue_position": 527,
+     "queue": 843,
+     "exhausted": false,
+     "short": false
+    },
+    "scan_language@v1|H-T": {
+     "scored_positions": 36721,
+     "terminated_tasks": 7,
+     "generated_tasks": 11,
+     "queue_position": 11,
+     "queue": 56,
+     "exhausted": false,
+     "short": false
+    },
+    "scan_language@v1|H-N": {
+     "scored_positions": 16951,
+     "terminated_tasks": 34,
+     "generated_tasks": 35,
+     "queue_position": 35,
+     "queue": 56,
+     "exhausted": false,
+     "short": false
+    },
+    "string_induction@v1|H-T": {
+     "scored_positions": 12756,
+     "terminated_tasks": 6,
+     "generated_tasks": 8,
+     "queue_position": 8,
+     "queue": 44,
+     "exhausted": false,
+     "short": false
+    },
+    "string_induction@v1|H-N": {
+     "scored_positions": 30055,
+     "terminated_tasks": 26,
+     "generated_tasks": 27,
+     "queue_position": 27,
+     "queue": 44,
+     "exhausted": false,
+     "short": false
+    }
+   }
+  }
+ ],
+ "contract": {
+  "authorization_id": "stage2.teacher_modes.token_matched.a_inputs_20261101_125916",
+  "launch_identity_sha256": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+  "harness_digest": "69c6fa74c5335bb4b8adeac1804551c0feeb704239006caf150872977b5ff797"
+ },
+ "final": {
+  "code|H-T": {
+   "scored_positions": 27647,
+   "terminated_tasks": 14,
+   "generated_tasks": 14,
+   "queue_position": 14,
+   "queue": 32,
+   "exhausted": false,
+   "short": false
+  },
+  "code|H-N": {
+   "scored_positions": 12375,
+   "terminated_tasks": 20,
+   "generated_tasks": 20,
+   "queue_position": 20,
+   "queue": 32,
+   "exhausted": false,
+   "short": false
+  },
+  "defined_ops@v1|H-T": {
+   "scored_positions": 18636,
+   "terminated_tasks": 14,
+   "generated_tasks": 14,
+   "queue_position": 14,
+   "queue": 75,
+   "exhausted": false,
+   "short": false
+  },
+  "defined_ops@v1|H-N": {
+   "scored_positions": 16252,
+   "terminated_tasks": 47,
+   "generated_tasks": 47,
+   "queue_position": 47,
+   "queue": 75,
+   "exhausted": false,
+   "short": false
+  },
+  "entity_tracking@v1|H-T": {
+   "scored_positions": 16013,
+   "terminated_tasks": 16,
+   "generated_tasks": 16,
+   "queue_position": 16,
+   "queue": 77,
+   "exhausted": false,
+   "short": false
+  },
+  "entity_tracking@v1|H-N": {
+   "scored_positions": 15018,
+   "terminated_tasks": 49,
+   "generated_tasks": 49,
+   "queue_position": 49,
+   "queue": 77,
+   "exhausted": false,
+   "short": false
+  },
+  "grid_transform@v1|H-T": {
+   "scored_positions": 19933,
+   "terminated_tasks": 5,
+   "generated_tasks": 15,
+   "queue_position": 15,
+   "queue": 29,
+   "exhausted": false,
+   "short": false
+  },
+  "grid_transform@v1|H-N": {
+   "scored_positions": 12201,
+   "terminated_tasks": 16,
+   "generated_tasks": 18,
+   "queue_position": 18,
+   "queue": 29,
+   "exhausted": false,
+   "short": false
+  },
+  "gsm8k|H-T": {
+   "scored_positions": 14423,
+   "terminated_tasks": 18,
+   "generated_tasks": 18,
+   "queue_position": 18,
+   "queue": 104,
+   "exhausted": false,
+   "short": false
+  },
+  "gsm8k|H-N": {
+   "scored_positions": 13993,
+   "terminated_tasks": 65,
+   "generated_tasks": 65,
+   "queue_position": 65,
+   "queue": 104,
+   "exhausted": false,
+   "short": false
+  },
+  "knights_knaves@v1|H-T": {
+   "scored_positions": 19884,
+   "terminated_tasks": 7,
+   "generated_tasks": 7,
+   "queue_position": 7,
+   "queue": 30,
+   "exhausted": false,
+   "short": false
+  },
+  "knights_knaves@v1|H-N": {
+   "scored_positions": 16961,
+   "terminated_tasks": 18,
+   "generated_tasks": 19,
+   "queue_position": 19,
+   "queue": 30,
+   "exhausted": false,
+   "short": false
+  },
+  "list_induction@v1|H-T": {
+   "scored_positions": 13715,
+   "terminated_tasks": 6,
+   "generated_tasks": 8,
+   "queue_position": 8,
+   "queue": 33,
+   "exhausted": false,
+   "short": false
+  },
+  "list_induction@v1|H-N": {
+   "scored_positions": 17775,
+   "terminated_tasks": 21,
+   "generated_tasks": 21,
+   "queue_position": 21,
+   "queue": 33,
+   "exhausted": false,
+   "short": false
+  },
+  "multihop_qa|H-T": {
+   "scored_positions": 12688,
+   "terminated_tasks": 27,
+   "generated_tasks": 27,
+   "queue_position": 27,
+   "queue": 976,
+   "exhausted": false,
+   "short": false
+  },
+  "multihop_qa|H-N": {
+   "scored_positions": 24924,
+   "terminated_tasks": 610,
+   "generated_tasks": 610,
+   "queue_position": 610,
+   "queue": 976,
+   "exhausted": false,
+   "short": false
+  },
+  "openmath|H-T": {
+   "scored_positions": 15709,
+   "terminated_tasks": 5,
+   "generated_tasks": 7,
+   "queue_position": 7,
+   "queue": 61,
+   "exhausted": false,
+   "short": false
+  },
+  "openmath|H-N": {
+   "scored_positions": 19473,
+   "terminated_tasks": 38,
+   "generated_tasks": 39,
+   "queue_position": 39,
+   "queue": 61,
+   "exhausted": false,
+   "short": false
+  },
+  "ordering@v1|H-T": {
+   "scored_positions": 15796,
+   "terminated_tasks": 11,
+   "generated_tasks": 11,
+   "queue_position": 11,
+   "queue": 99,
+   "exhausted": false,
+   "short": false
+  },
+  "ordering@v1|H-N": {
+   "scored_positions": 14475,
+   "terminated_tasks": 62,
+   "generated_tasks": 62,
+   "queue_position": 62,
+   "queue": 99,
+   "exhausted": false,
+   "short": false
+  },
+  "rag_evidence|H-T": {
+   "scored_positions": 16006,
+   "terminated_tasks": 47,
+   "generated_tasks": 47,
+   "queue_position": 47,
+   "queue": 843,
+   "exhausted": false,
+   "short": false
+  },
+  "rag_evidence|H-N": {
+   "scored_positions": 15624,
+   "terminated_tasks": 527,
+   "generated_tasks": 527,
+   "queue_position": 527,
+   "queue": 843,
+   "exhausted": false,
+   "short": false
+  },
+  "scan_language@v1|H-T": {
+   "scored_positions": 36721,
+   "terminated_tasks": 7,
+   "generated_tasks": 11,
+   "queue_position": 11,
+   "queue": 56,
+   "exhausted": false,
+   "short": false
+  },
+  "scan_language@v1|H-N": {
+   "scored_positions": 16951,
+   "terminated_tasks": 34,
+   "generated_tasks": 35,
+   "queue_position": 35,
+   "queue": 56,
+   "exhausted": false,
+   "short": false
+  },
+  "string_induction@v1|H-T": {
+   "scored_positions": 12756,
+   "terminated_tasks": 6,
+   "generated_tasks": 8,
+   "queue_position": 8,
+   "queue": 44,
+   "exhausted": false,
+   "short": false
+  },
+  "string_induction@v1|H-N": {
+   "scored_positions": 30055,
+   "terminated_tasks": 26,
+   "generated_tasks": 27,
+   "queue_position": 27,
+   "queue": 44,
+   "exhausted": false,
+   "short": false
+  }
+ },
+ "exhausted": [],
+ "short_after": [],
+ "finished_utc": "2026-11-01T14:13:50Z",
+ "terminal": "ALL_DONE"
+}

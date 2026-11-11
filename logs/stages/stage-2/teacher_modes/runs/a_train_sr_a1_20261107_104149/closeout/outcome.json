@@ -1,0 +1,67 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tm_authorization_outcome/v1",
+ "run_id": "a_train_sr_a1_20261107_104149",
+ "study": "A-TM",
+ "recorded_utc": "2026-11-07T17:44:44+00:00",
+ "status": "COMPLETE",
+ "validation_passed": false,
+ "products_secured": {
+  "ok": true,
+  "why": "secured: final_weights_on_volume/A1-6cat-sr-s20260726, final_weights_on_volume/A1-6cat-sr-s20260801, stage3_units_evidence"
+ },
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "provider_resource_created": true,
+ "evidence": null,
+ "verdict_rederived": null,
+ "money": {
+  "all_in_usd": 7.7554,
+  "gpu_usd": 7.612,
+  "disk_usd": 0.1434,
+  "elapsed_minutes": 419.01,
+  "price_per_hour": 1.09,
+  "authorized_usd": 15.64,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "4rhubprswo",
+    "name": "aad-a1-phase",
+    "size": 350,
+    "dataCenterId": "US-TX-3"
+   },
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 55,
+    "dataCenterId": "EUR-IS-2"
+   },
+   {
+    "kind": "network_volume",
+    "id": "thprcgh7s9",
+    "name": "aad-packed-search",
+    "size": 350,
+    "dataCenterId": "US-TX-3"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "4rhubprswo",
+   "am5m373kuq",
+   "thprcgh7s9"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 3 resource(s) the records account for"
+ },
+ "kind": "train_sr_a1",
+ "scientific_use": true,
+ "authorizes": "nothing"
+}

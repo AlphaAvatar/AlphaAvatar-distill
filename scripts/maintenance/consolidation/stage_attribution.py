@@ -1566,6 +1566,49 @@ STAGE_1 = [
             "this project makes. Declared here as a known exception with its "
             "blocker rather than left looking stage-neutral."),
     ),
+    dict(
+        id="projected_residual",
+        kind="experiment",
+        stage_id="1",
+        status=("$0 READY 2026-10-27, NOT AUTHORIZED: the 900M full-width-residual student "
+                "(902,911,488 parameters, per-layer trainable PCA projections), its initializer, exact "
+                "counters and folded evaluation route implemented and host-validated; design and "
+                "decision rule drafted, frozen only on the maintainer's approval; B-E engineering "
+                "validation ($3.00 cap) and B1 formal ($21.00 cap) applied for. 600M reserved"),
+        title="Full-width residual stream with per-layer trainable PCA (Research B)",
+        question=("Keeping the teacher's 2,560-wide residual stream, embedding and head and "
+                  "computing each layer's attention and FFN in a 1,024-wide space reached "
+                  "through a trainable per-layer PCA projection, does a student recover better "
+                  "fluid-reasoning correctness than D4-Augmented under its teacher, data, recipe "
+                  "and evaluation?"),
+        canonical_config="configs/stages/stage-1/projected_residual/design.json",
+        evidence=[
+            E("configs/stages/stage-1/projected_residual/design.json",
+              "the architecture, selection, calibration, initialization, recovery, "
+              "evaluation route and what is not matched",
+              field="authorizes", equals="nothing"),
+            E("configs/stages/stage-1/projected_residual/d4_top1_selection.json",
+              "D4 Top-1's kept layers, heads and FFN neurons, bound to its search journal",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/projected_residual/analyses/architecture_report.json",
+              "exact parameters, FLOPs, KV cache and memory against D4 and the teacher",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/projected_residual/plans/preregistration.json",
+              "comparison P, the decision rule, what would recommend 600M",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/projected_residual/plans/application.json",
+              "the engineering and formal requests and the project-cap consequence",
+              field="authorizes", equals="nothing"),
+        ],
+        external_material=[],
+        decisions=["logs/budget/decisions.md -- 2026-10-27: the next research programme "
+                   "(Research A and B) opened at $0"],
+        canonical_log_destination="logs/stages/stage-1/projected_residual",
+        classification_reason=(
+            "Stage 1 by subject and product: a student architecture and its structural "
+            "initialization from teacher activations (AGENTS.md 4.3). Stage-3 recovery and "
+            "eval-set-1 are its instruments, the rule phase_c1 declares."),
+    ),
 ]
 
 #: ---------------------------------------------------------------------------
@@ -1836,6 +1879,50 @@ STAGE_2 = [
             "reasoning-transfer priority). Stage-3 recovery and eval-set-1 are "
             "its instruments, as Stage-3 probes were for the Stage-0 and "
             "Stage-1 experiments."),
+    ),
+    dict(
+        id="teacher_modes",
+        kind="experiment",
+        stage_id="2",
+        status=("$0 READY 2026-10-27, NOT AUTHORIZED: the hybrid Qwen3-4B identity and both modes "
+                "pinned; token-in/token-out documents, document-isolated packing, kd_scope "
+                "assistant on generated tokens and the preclosed think state implemented and "
+                "host-validated; the re-rendered H1-PA path audited (0 of 767 sessions trained on "
+                "exactly the generated tokens); design and decision rule drafted; A-E engineering "
+                "validation ($3.50 cap) and the formal phases ($60.00 total) applied for"),
+        title="Hybrid teacher: thinking against non-thinking distillation (Research A)",
+        question=("With one hybrid teacher, one student architecture, one common initialization "
+                  "and one recipe, does the teacher's native thinking or non-thinking "
+                  "distribution give a small student better fluid-reasoning correctness -- on "
+                  "the same tasks, and at the same training compute?"),
+        canonical_config="configs/stages/stage-2/teacher_modes/design.json",
+        evidence=[
+            E("configs/stages/stage-2/teacher_modes/teacher_identity.json",
+              "the hybrid teacher's revision, hashes, template, vocabulary and both modes",
+              field="authorizes", equals="nothing"),
+            E("configs/stages/stage-2/teacher_modes/design.json",
+              "modes, token protocol, packing, supervision, tasks, initialization, arms, "
+              "recovery and evaluation",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json",
+              "the re-rendered path against the generated tokens on H1-PA's data, and "
+              "isolated packing on real documents",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/teacher_modes/plans/preregistration.json",
+              "comparisons S and C, the decision rule and the data-budget rules",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/teacher_modes/plans/application.json",
+              "the engineering and formal requests and the project-cap consequence",
+              field="authorizes", equals="nothing"),
+        ],
+        external_material=[],
+        decisions=["logs/budget/decisions.md -- 2026-10-27: the next research programme "
+                   "(Research A and B) opened at $0"],
+        canonical_log_destination="logs/stages/stage-2/teacher_modes",
+        classification_reason=(
+            "Stage 2 by subject and product: which native teacher distribution the offline "
+            "training data is generated from (AGENTS.md 4.4). The initialization, Stage-3 "
+            "recovery and eval-set-1 are its instruments."),
     ),
 ]
 

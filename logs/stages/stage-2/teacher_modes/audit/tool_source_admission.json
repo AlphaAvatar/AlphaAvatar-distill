@@ -1,0 +1,126 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_source_admission/v1",
+ "written_utc": "2026-11-04T19:31:17Z",
+ "status": "SIGNED by the maintainer's written decision of 2026-11-04 (signature below)",
+ "scope": "tool_pool@v1's two sources as FORMAL tool-calling task sources: every split the pool assigns them (training, validation, calibration, state evaluation, reserve), for each lineage's teacher-native generation and the episodes admitted from it under the pool's verification",
+ "pool_id": "tool_pool@v1",
+ "pool_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+ "pool_json_sha256": "4b75c1edc47769e5dca33687c0f2db08837d7da1cabff4cf278e3a00705de181",
+ "reviewed_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+ "provenance": {
+  "builder": "scripts/stages/stage-2/teacher_modes/tool_pool.py",
+  "builder_sha256": "d360b85a4ca13e8babf61e22f42f2b310046726a7afe45b863c551ddfc0acfdb",
+  "converted_sources_sha256": {
+   "pivot_conversational": "4e60dac04b322e9fe81f0e39de4b3d4c92cd3346b20a410b6f4b9c34b68f1f18",
+   "toucan_sft": "83b288fd7e304ea0432f51415bd724ae0ac3f52198a5a2978da590e8724c3478"
+  },
+  "reviewed_copy": {
+   "path": "artifacts/stages/stage-2/teacher_modes/tool_pool_candidates/v4_be4652d7",
+   "pool_json_sha256": "b893e965bb6121643d0117ab18405af0811e20afef7a539a224f75c5cab05282",
+   "split_files_identical": true,
+   "content_sha256_equal": true,
+   "pool_json_keys_that_differ": [
+    "verification_levels",
+    "written_utc"
+   ]
+  }
+ },
+ "sources": [
+  "Agent-Ark/Toucan-1.5M@0df3cf37f2abefb380370cfb02eabea2a35ae782",
+  "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd55ec1424cc3761ceacdd85a5743b4f4e"
+ ],
+ "per_source": {
+  "pivot_conversational": {
+   "datasets": [
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd55ec1424cc3761ceacdd85a5743b4f4e"
+   ],
+   "converted_sha256": "4e60dac04b322e9fe81f0e39de4b3d4c92cd3346b20a410b6f4b9c34b68f1f18",
+   "tasks": 10760,
+   "licence": [
+    "CC-BY-4.0"
+   ]
+  },
+  "toucan_sft": {
+   "datasets": [
+    "Agent-Ark/Toucan-1.5M@0df3cf37f2abefb380370cfb02eabea2a35ae782"
+   ],
+   "converted_sha256": "83b288fd7e304ea0432f51415bd724ae0ac3f52198a5a2978da590e8724c3478",
+   "tasks": 119287,
+   "licence": [
+    "Apache-2.0"
+   ]
+  }
+ },
+ "tasks_by_split": {
+  "calibration": {
+   "tasks": 4886,
+   "by_source": {
+    "Agent-Ark/Toucan-1.5M": 4356,
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 530
+   },
+   "sha256": "1f9547bfe6c7aca185099e82e8e74d6ffa1d3361b16f9d92fbb50d0f3af0760d"
+  },
+  "reserve": {
+   "tasks": 360,
+   "by_source": {
+    "Agent-Ark/Toucan-1.5M": 304,
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 56
+   },
+   "sha256": "d11d429d319d2c16ccb0f96dd8cd5cc9f5e79ca2ea1607920011bee2d6575fd4"
+  },
+  "state_eval": {
+   "tasks": 2334,
+   "by_source": {
+    "Agent-Ark/Toucan-1.5M": 2180,
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 154
+   },
+   "sha256": "1da76b34c238c703a6bfafe7dcfa0f64bf30b8fc5b2fa97ac400551612d20c8f"
+  },
+  "training": {
+   "tasks": 76322,
+   "by_source": {
+    "Agent-Ark/Toucan-1.5M": 66727,
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 9595
+   },
+   "sha256": "b24047e7e1e5b3421bf0b002ae0448a451ae9f4c773e4675bf6f0d95ce4ee801"
+  },
+  "validation": {
+   "tasks": 1536,
+   "by_source": {
+    "Agent-Ark/Toucan-1.5M": 1368,
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 168
+   },
+   "sha256": "b9c3eadd09a8b3a2f1f7387001e628a9762be834d7577846b16b15777e1fe058"
+  }
+ },
+ "conditions": [
+  "every training target and every online KD signal comes natively from the student's own teacher (P17, P17.1); another model's output in a source record -- its assistant turns, gold calls, recorded tool responses -- is task material (the prompt, the tool schema, the replay environment) or registered reference verification only, never a student target",
+  "the pool's audit, licence, revision, attribution, per-atom isolation, decontamination (T1-T5) and verification levels unchanged; the pilot's import record is reused only while the pool's content is REVIEWED_CONTENT",
+  "each source's licence and attribution kept with every derived record (Apache-2.0 notice for Toucan; CC-BY-4.0 attribution for Pivot Conversational)",
+  "third-party MCP and tool content may carry residual PII: generations stay outside git (P15); only counts, hashes and measurements enter the repository"
+ ],
+ "not_admitted": [
+  "nvidia/Nemotron-RL-Agentic-Function-Calling-Pivot-v1",
+  "nvidia/Nemotron-SFT-Agentic-v4",
+  "any dataset or revision not listed under sources"
+ ],
+ "does_not": [
+  "authorize a GPU, a pod or any spend",
+  "authorize any experiment stage: a search, a training, a calibration, a state evaluation or a formal evaluation",
+  "approve any SHORTFALL, proportion exception or approved_exceptions entry",
+  "admit any source or revision not listed under sources"
+ ],
+ "signature": {
+  "signed_by": "maintainer",
+  "approves": "formal tool-calling task sources",
+  "decision": "maintainer 2026-11-04 (review of a143b7ed), section 1, '正式数据源 GO': '批准 Toucan-1.5M SFT 与 Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1 作为正式 tool-calling 任务来源。按现有审计、license、revision、attribution、T1–T5 隔离与验证标准构建正式池。内容身份必须与已审查的 be4652d7… 一致，才能直接复用 Pilot 的导入记录。本消息构成上述两个数据源的正式准入批准；可以依照既有签名契约登记本次书面决定。来源准入不自动授权其他实验阶段。不得引入 Pivot Function-Calling、Nemotron-SFT-Agentic-v4 或其他尚未准入的来源。所有训练目标和在线 KD 必须由对应 Teacher 原生提供。来源记录中的其他模型输出只能作为任务材料或已登记的参考验证信息，不得进入 Student 训练目标。' -- the signature fields filled by the agent on that explicit written instruction",
+  "date": "2026-11-04",
+  "pool_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+  "sources": [
+   "Agent-Ark/Toucan-1.5M@0df3cf37f2abefb380370cfb02eabea2a35ae782",
+   "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd55ec1424cc3761ceacdd85a5743b4f4e"
+  ]
+ },
+ "_signature": "the maintainer's fields: signed_by 'maintainer', approves exactly 'formal tool-calling task sources', the decision quoted, the date (YYYY-MM-DD), and the pool content and sources copied from this record (problems checks all of them); filled by the agent only on the maintainer's explicit written instruction to register the decision",
+ "authorizes": "nothing by itself: each kind's grant authorizes its sessions"
+}

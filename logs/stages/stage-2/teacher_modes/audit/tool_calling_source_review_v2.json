@@ -1,0 +1,302 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_calling_source_review/v2",
+ "written_utc": "2026-11-03T10:42:29Z",
+ "question": "the maintainer's supplement (2026-11-03): review the CANDIDATES Nemotron-SFT-Agentic-v4 (tool_calling first), Toucan-1.5M and the NeMo Gym Pivot pair (plus ToolACE and Nemotron-Agentic named earlier) -- card, real schema, revision, licence, upstream generator provenance, sample content, tool results, verifier, backend, isolation -- and compare. None is approved for training.",
+ "reuses": {
+  "review_v1": "logs/stages/stage-2/teacher_modes/audit/tool_calling_source_review.json (licences, gates, generator terms, coverage matrix; not repeated)",
+  "six_category": "docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md and six_category_design.json (pool, protocol, quotas: unchanged)"
+ },
+ "method": "Hub API (commit sha, licence tag, gate, file sizes); the official cards (README.md at the pinned revision); real rows: Toucan's SFT config whole (119,287 rows), the two Pivot files (first 20,000 step rows each), ToolACE whole (11,300), and HTTP range heads of Nemotron-SFT-Agentic-v4 tool_calling (2,526 rows of 549,707) and Nemotron-Agentic-v1 interactive_agent (593 rows); isolation screened by exact prompt key (shared.eval_sets) and tool family against eval-set-1's 1,419 held-out prompt keys and 12 held-out tool families. Downloads and heads stay outside git (artifacts/.../tool_sources, manifest.json).",
+ "candidates": {
+  "nvidia/Nemotron-SFT-Agentic-v4": {
+   "revision": "a4593a26ea83a700035bbe0ec1edc9ef3810669d",
+   "last_modified": "2026-10-15",
+   "licence": "OpenMDW-1.1 (card); persona grounding from Nemotron-Personas-USA (CC-BY-4.0)",
+   "gated": false,
+   "size": "tool_calling 549,707 rows (10.7 GB), knowledge_agent 84,957 (8.2 GB)",
+   "provenance": "card: synthetic single- and multi-turn trajectories 'generated with Qwen3.5-397B-A17B and GLM-5.2'; tool-set origin not stated; created 2026-10-09; replaces the tool-calling data of Nemotron-SFT-Agentic-v2",
+   "observed_schema": "messages (system / user / assistant with reasoning_content and tool_calls / tool with tool_call_id), tools (OpenAI envelopes), uuid, parallel_tool_calls, used_in ('Super-3.5-VL' on every sampled row)",
+   "observed_sample": "median 7 tools offered, 2 assistant turns, 1.38 user turns per row; 135/2,526 rows with parallel calls; system prompts empty in the head",
+   "tool_results": "model-generated (e.g. an 'OpenWeatherMap' reply with a prose forecast); no execution record",
+   "gold_and_verifier": "none: the recorded calls are the generators' own; no verifier or judge statement on the card",
+   "backend": "none (a replay of the recorded responses only when the teacher's call equals the recorded one)",
+   "verification_class": "G2-weak: agreement with the upstream generator's call; schema; behavioural (no call)",
+   "recency_and_scale": "the newest and largest candidate (October 2026, 549,707 rows)",
+   "blockers": [
+    "OpenMDW-1.1's terms were not read in full: whether outputs and derived training data carry obligations is unconfirmed",
+    "GLM-5.2's output terms are not in the earlier generator review (Qwen3.5-397B-A17B is Apache-2.0 there)",
+    "the tool sets' origin is unstated: whether any derive from Glaive/xLAM (T3) cannot be confirmed from the card; v2 (its predecessor) did",
+    "no verifier: only schema and agreement with the generator's call; the head is not a random sample (the file's first 32 MB)"
+   ]
+  },
+  "Agent-Ark/Toucan-1.5M": {
+   "revision": "0df3cf37f2abefb380370cfb02eabea2a35ae782",
+   "licence": "Apache-2.0",
+   "gated": false,
+   "size": "21.81 GB in four configs (Kimi-K2, OSS, Qwen3, SFT); the SFT config, 119,287 rows (0.43 GB), downloaded and hub-sha256-verified",
+   "provenance": "card/paper: tasks by Mistral-Small, Devstral-Small, GPT-OSS, Kimi-K2, Qwen3-32B; trajectories by GPT-OSS-120B, Kimi-K2, Qwen3-32B (all permissive, review v1); tool specs from real MCP servers; the SFT config carries no per-row metadata.synthetic_data_gen_configs (the per-model configs do)",
+   "observed_schema": "uuid, subset_name, question, target_tools, tools (OpenAI envelopes, JSON string), messages (user / assistant / tool_call / tool_response; a tool_call's content is a Python-literal {'name', 'arguments'})",
+   "observed_sample": "subsets: irrelevant 40,000 (no call), multi-turn 35,243 (2-4 user turns), single-turn-original 28,254, single-turn-diversify 15,790; 1-5+ calls per row; about 6-14% of rows with an error response followed by recovery; 20-40% of calling rows with a later call reusing an earlier response's content (heuristic); 41,151 repeated first prompts (T5 collapses them)",
+   "tool_results": "REAL MCP executions recorded June-Sept 2025, including real failures (e.g. 'McpError ... Traceback' from the collection machine)",
+   "gold_and_verifier": "no gold arguments; target_tools (the seed tools) and their order; the irrelevant subset's no-call",
+   "backend": "replay of the recorded responses for exact-match calls; the live servers are not reproducible offline",
+   "verification_class": "G2 (target tools / order), B (no call); execution realism from recorded responses",
+   "recency_and_scale": "2025; 1.5M trajectories, 119,287 curated",
+   "blockers": [
+    "per-row generator not recorded in the SFT config: accept the card's all-permissive statement, or verify each row against the per-model configs (download only what is matched)",
+    "third-party MCP content and machine paths in error traces: generations over them stay outside git (P15)",
+    "replay misses whenever the teacher's call differs from the recorded one: the episode is refused (a selection effect, reported)"
+   ]
+  },
+  "nvidia/Nemotron-RL-Agentic-Function-Calling-Pivot-v1 + Conversational-Tool-Use-Pivot-v1": {
+   "revisions": {
+    "function_calling": "0ac34ec81bb6976d3746407df306a57ce48f0bd8",
+    "conversational": "bfc7a4dd55ec1424cc3761ceacdd85a5743b4f4e"
+   },
+   "licence": "CC-BY-4.0",
+   "gated": false,
+   "size": "function-calling 9,620 step rows (0.29 GB); conversational 1.75 GB (first 20,000 step rows read); both downloaded, hub-sha256-verified",
+   "provenance": "review v1: DeepSeek-V3.2, GLM-4.6, gpt-oss-120b, Kimi-K2, Qwen3 (MIT / Apache) expert trajectories; per-step rewards of a Qwen3-235B policy (conversational: qwen_235b_info, pass_rate)",
+   "observed_schema": "one row per step: responses_create_params.input (system, user, the expert's reasoning items and assistant messages, function_call / function_call_output items) and tools; expected_action (function_call with name and arguments, or message); agent_ref names the comparator",
+   "observed_sample": "function-calling: 2,824 trajectories in 6,000 steps, expected actions 52% calls / 48% messages; conversational: 4,041 trajectories, 69% calls",
+   "tool_results": "recorded function_call_output items, model-generated (e.g. a fabricated balance sheet)",
+   "gold_and_verifier": "deterministic per-step expected_action comparison (argument comparison agents): the strongest step-level gold among the candidates; per the maintainer, step matching is NOT task success",
+   "backend": "replay of the recorded outputs when the teacher's call equals the step's expected action",
+   "verification_class": "G2 (per-step gold); B (message steps)",
+   "recency_and_scale": "2025; about 9.6k + 97-170k step rows",
+   "blockers": [
+    "every step's context holds the expert's assistant turns: teacher-native use requires rebuilding each trajectory so the teacher runs from its first step (P17)",
+    "card and hub row counts disagree (review v1)"
+   ]
+  },
+  "Team-ACE/ToolACE": {
+   "revision": "6bda777c88d21e5a204703c1ee45597a8fa4f734",
+   "licence": "Apache-2.0 tag",
+   "gated": false,
+   "size": "11,300 rows (37 MB), downloaded for this review",
+   "provenance": "every stage by an undisclosed 'frontier LLM' (review v1: unproven)",
+   "observed_schema": "system (the tool list as text inside an instruction) + conversations [{from, value}]; calls only as bracket strings inside assistant turns",
+   "observed_sample": "10,500 / 11,300 rows with a single assistant turn; 1,367 tool messages in all",
+   "tool_results": "LLM-simulated",
+   "gold_and_verifier": "none beyond the upstream call text",
+   "backend": "none",
+   "verification_class": "G2-weak (agreement with the upstream call), schema after parsing the text tool list",
+   "recency_and_scale": "2024; small and mostly single-turn",
+   "blockers": [
+    "undisclosed generator: output terms cannot be assessed",
+    "tools are text in the system prompt and need parsing into JSON Schema"
+   ]
+  },
+  "nvidia/Nemotron-Agentic-v1": {
+   "revision": "650d590978ca35c8f1ecea2faf136e5fac421b62",
+   "licence": "CC-BY-4.0",
+   "gated": false,
+   "size": "interactive_agent 19,028 (449 MB), tool_calling 316,094 (5.3 GB); a 593-row head of interactive_agent read",
+   "provenance": "Qwen3-235B-A22B (Thinking/Instruct), Qwen3-32B, GPT-OSS-120B; tool_calling's tool sets from public datasets incl. glaive-function-calling-v2 (review v1)",
+   "observed_schema": "uuid, messages (system policy / user / assistant with tool_calls / tool), license, used_in, tools, reasoning",
+   "observed_sample": "interactive_agent: tau-bench-style customer service under a written policy; simulated tool outputs",
+   "tool_results": "LLM-simulated",
+   "gold_and_verifier": "none",
+   "backend": "none",
+   "verification_class": "G2-weak / policy-following, no gold",
+   "recency_and_scale": "2025; superseded for tool calling by the v2/v4 line",
+   "blockers": [
+    "tool_calling subset: Glaive-derived tool sets (T3 conflict; eval-set-1 holds Glaive tool prompts)",
+    "no verifier"
+   ]
+  }
+ },
+ "isolation_screen": {
+  "rule": "exact prompt key (shared.eval_sets.prompt_key of the first user message) and tool family against eval-set-1's held-out units",
+  "results": {
+   "Nemotron-SFT-Agentic-v4 (head 2,526)": {
+    "rows": 2526,
+    "held_out_prompt_matches": 0,
+    "held_out_tool_family_matches": 0,
+    "duplicate_first_prompts": 0
+   },
+   "Toucan-1.5M SFT (119,287)": {
+    "rows": 119287,
+    "held_out_prompt_matches": 0,
+    "held_out_tool_family_matches": 0,
+    "duplicate_first_prompts": 41151
+   },
+   "Nemotron-RL-Agentic-Function-Calling-Pivot-v1 (first 20,000 steps)": {
+    "rows": 9620,
+    "held_out_prompt_matches": 0,
+    "held_out_tool_family_matches": 0,
+    "duplicate_first_prompts": 5852
+   },
+   "Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1 (first 20,000 steps)": {
+    "rows": 20000,
+    "held_out_prompt_matches": 0,
+    "held_out_tool_family_matches": 0,
+    "duplicate_first_prompts": 6620
+   },
+   "ToolACE (11,300)": {
+    "rows": 11300,
+    "held_out_prompt_matches": 0,
+    "held_out_tool_family_matches": 0,
+    "duplicate_first_prompts": 135
+   },
+   "Nemotron-Agentic-v1 interactive_agent (head 593)": {
+    "rows": 593,
+    "held_out_prompt_matches": 0,
+    "held_out_tool_family_matches": 0,
+    "duplicate_first_prompts": 0
+   }
+  },
+  "not_yet_run": [
+   "the 13-gram (R2) and benchmark screens for the Pivot pair, v4, ToolACE and Nemotron-Agentic-v1 (they are not converted)",
+   "Glaive/xLAM-derived tool-set detection (T3) for Nemotron-SFT-Agentic-v4 beyond exact matches"
+  ],
+  "toucan_full_screen_2026_11_03": "audit/tool_pool_dry_run_v2.json: against eval-set-1 0 prompt keys, 0 13-gram near-duplicates, 1,878 tasks refused for a held-out tool's bare name (factorial 1,856, get_news 22; none with the same name and schema); against BFCL v3, When2Call, API-Bank, tau-bench and ToolSandbox 2 exact prompts refused, 0 near-duplicates, 0 tool identities (bare-name-only hits counted, not refused). The 'tool family' column above compared whole tool-set hashes, which cannot see a shared tool inside different sets: superseded for Toucan by the atomic comparison"
+ },
+ "comparison": {
+  "criteria": "verifiable gold or real executions or a reproducible backend first; then recency and quality (2025-2026); licence and generator provenance; teacher-native conversion cost; category coverage",
+  "ranking": [
+   {
+    "rank": 1,
+    "source": "Agent-Ark/Toucan-1.5M (SFT config)",
+    "why": "the only candidate with REAL tool executions (failures included) and recovery; multi-turn, parallel, no-tool and MCP coverage; permissive licence and generators",
+    "role": "primary pool source: selection, no-tool, multiple/parallel, multi-turn, errors, MCP"
+   },
+   {
+    "rank": 2,
+    "source": "NeMo Gym Pivot pair",
+    "why": "the strongest deterministic step-level gold (expected_action comparator); clean licence",
+    "role": "selection and schema/arguments; per-step gold only, never task success; teacher runs from step one"
+   },
+   {
+    "rank": 3,
+    "source": "nvidia/Nemotron-SFT-Agentic-v4 tool_calling",
+    "why": "newest and largest, strong generators, multi-turn and parallel structure, but simulated tool results and no verifier; its licence terms, GLM-5.2's terms and its tool-set origin are open",
+    "role": "CONDITIONAL supplement for task material where 1-2 run short, under G2-weak verification; only after the three blockers are resolved"
+   },
+   {
+    "rank": 4,
+    "source": "nvidia/Nemotron-Agentic-v1 interactive_agent",
+    "why": "policy-following multi-turn agent tasks; no verifier; simulated tools",
+    "role": "hold (evaluation-style material at most)"
+   },
+   {
+    "rank": 5,
+    "source": "Team-ACE/ToolACE",
+    "why": "older, mostly single-turn, undisclosed generators, simulated responses",
+    "role": "not recommended"
+   },
+   {
+    "rank": "excluded",
+    "source": "Nemotron-Agentic-v1 tool_calling",
+    "why": "Glaive-derived tool sets (T3)"
+   }
+  ],
+  "is_a_new_source_clearly_better": "No single new candidate dominates: Nemotron-SFT-Agentic-v4 is newer and larger than Toucan, but Toucan's recorded real executions and the Pivot sets' deterministic step gold are what the protocol's verification needs; v4 adds scale without a verifier. Recommendation: Toucan + Pivot as the pool's base, v4 as a conditional supplement once its licence, GLM-5.2 terms and tool-set provenance are confirmed. Nothing frozen is replaced.",
+  "coverage_by_category": {
+   "tool_selection": "Toucan (G2), Pivot (G2), v4 (G2-weak)",
+   "schema_arguments": "Pivot (G2 per step), v4 (G2-weak); Toucan schema only",
+   "no_tool": "Toucan irrelevant subset (B), Pivot message steps (B)",
+   "multiple_parallel": "Toucan (names/replay, no gold args), v4 parallel 5% (G2-weak)",
+   "multi_turn": "Toucan (2-4 user turns, real results), Pivot conversational (G2 per step), v4",
+   "error_recovery": "Toucan: recorded real tool errors, 'corrected_retry' (an error, then a successful call of the same tool with other arguments) and 'tool_failure' (errors without one), no gold; 'ask for the missing value': no source (revised 2026-11-03; v1 counted any response containing 'error', including '\"error\": null')",
+   "mcp_agent": "Toucan only"
+  },
+  "remaining_gaps": [
+   "gold arguments for parallel calls",
+   "'ask for the missing parameter' with gold",
+   "a task-success verifier: no candidate's Toucan task verifies more than tool selection (calls_tools / no call); Pivot adds per-step gold, not task success",
+   "near-duplicate and benchmark decontamination of the Pivot pair and v4 once converted (Toucan's is done: audit/tool_pool_dry_run_v2.json)",
+   "a registered tool-calling evaluation (eval-set-2) for closed-loop success"
+  ]
+ },
+ "teacher_native_rule": "every source contributes task material only -- user turns, tool schemas, recorded tool responses for replay, recorded calls as gold where they are gold; no upstream assistant turn, reasoning or call is ever a target; the hybrid and Thinking-2507 generate every assistant turn themselves (tool_episodes.py)",
+ "authorizes": "nothing",
+ "data_preparation": {
+  "toucan_dry_pool": {
+   "what": "Toucan's SFT config converted (tool_sources_toucan.py) and assembled by tool_pool.assemble with eval-set-1 isolation; a DRY run into scratch, nothing written under data/, nothing generated",
+   "converted": 119287,
+   "admitted": 91044,
+   "excluded_by_reason": {
+    "T5": 28243
+   },
+   "census": {
+    "calibration": {
+     "no_tool": 1096,
+     "errors_missing_parameters": 155,
+     "tool_selection": 323,
+     "multi_turn": 502,
+     "multiple_parallel": 254,
+     "mcp_agent": 125
+    },
+    "reserve": {
+     "errors_missing_parameters": 50,
+     "no_tool": 433,
+     "multi_turn": 229,
+     "tool_selection": 114,
+     "multiple_parallel": 122,
+     "mcp_agent": 31
+    },
+    "state_eval": {
+     "multi_turn": 579,
+     "mcp_agent": 151,
+     "no_tool": 1414,
+     "tool_selection": 623,
+     "errors_missing_parameters": 193,
+     "multiple_parallel": 246
+    },
+    "training": {
+     "multiple_parallel": 6952,
+     "multi_turn": 15849,
+     "errors_missing_parameters": 4891,
+     "tool_selection": 13502,
+     "no_tool": 35961,
+     "mcp_agent": 4736
+    },
+    "validation": {
+     "no_tool": 1095,
+     "tool_selection": 401,
+     "errors_missing_parameters": 105,
+     "multi_turn": 526,
+     "multiple_parallel": 296,
+     "mcp_agent": 90
+    }
+   },
+   "families": 5401,
+   "calling_tasks_without_replay": 0,
+   "training_order_sha256": "99005ca8cdccaf8d22ef21b8dc5a4de5f1d9710ed93621ad07518a829422b893",
+   "first_prompt_tokens_sample_2000": {
+    "hybrid_H-T": {
+     "median": 688,
+     "p95": 3604,
+     "max": 95679,
+     "over_6144": 19
+    },
+    "hybrid_H-N": {
+     "median": 692,
+     "p95": 3608,
+     "max": 95683,
+     "over_6144": 19
+    },
+    "thinking_2507": {
+     "median": 690,
+     "p95": 3606,
+     "max": 95681,
+     "over_6144": 19
+    }
+   },
+   "_reading": "91,044 tasks after T5 collapsed 28,243 duplicates; every category in every split; the length bound (6,144) would exclude about 1% (19 of a 2,000-task sample under each of the three templates)",
+   "superseded_by": "audit/tool_pool_dry_run_v2.json (2026-11-03, the maintainer's independent review): per-atom splits, step-based categories, real error detection, replay conflicts refused, eval-set-1 / benchmark / between-split decontamination, the length bound applied by the entry point; 82,083 tasks admitted of 119,287",
+   "v1_defects": [
+    "the combined server-string family could put one MCP server in two splits",
+    "'errors_missing_parameters' was any response containing the substring 'error' (including '\"error\": null'); 'multiple_parallel' was two calls in total, not two in one step",
+    "a call recorded with different responses kept the first silently",
+    "the 6,144-token bound was sampled (2,000 tasks), not applied: main() passed no length checker"
+   ]
+  },
+  "not_converted_yet": [
+   "Nemotron-SFT-Agentic-v4 (deferred: licence, GLM-5.2 terms and tool-set provenance)"
+  ],
+  "pivot_2026_11_03": "audit/pivot_conversion_v1.json: rebuilt from the first user turn so the teacher runs from step one (later user turns were written to the expert's replies and are not used). Conversational: 9,051 tasks with per-step gold (no_tool 7,265, tool_selection 1,112, schema_arguments 430, multi_turn 244; no parallel calls, no recorded errors); 9,558 trajectories lack a gold call's recorded output. Function-Calling: 78 tasks, of which 15 repeat xLAM-60k / Glaive-v2 prompts exactly -- it fails T3. Pool: audit/tool_pool_dry_run_v3.json"
+ },
+ "maintainer_opinion_2026_11_03": "third review: Toucan SFT and NeMo Gym Pivot Conversational may be prepared as priority candidate task sources, keeping their licence, revision, attribution, provenance and verification level; Pivot Function-Calling not adopted; Nemotron-SFT-Agentic-v4 deferred. Not a paid teacher-generation authorization"
+}

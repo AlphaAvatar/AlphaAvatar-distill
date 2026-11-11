@@ -1,0 +1,71 @@
+{
+ "artifact_digest": "f8130b67b052a2237a6b70bad51ddcd46d251bf1f9cb6b7aa34d86ccdaf17d10",
+ "critical_problems": [],
+ "first_values": {
+  "state.teacher_kl.equal_domain_mean": 2.8969029502722434,
+  "state.teacher_kl.worst_domain": 3.3851514196274475,
+  "state.critical_token_kl": 6.724724383493202
+ },
+ "repeats": 10,
+ "series": {
+  "state.teacher_kl.equal_domain_mean": [
+   2.8969029502722434,
+   2.8969029502722434,
+   2.8969029502722434,
+   2.8969029502722434,
+   2.8969029502722434,
+   2.8969029502722434,
+   2.8969029502722434,
+   2.8969029502722434,
+   2.8969029502722434,
+   2.8969029502722434
+  ],
+  "state.teacher_kl.worst_domain": [
+   3.3851514196274475,
+   3.3851514196274475,
+   3.3851514196274475,
+   3.3851514196274475,
+   3.3851514196274475,
+   3.3851514196274475,
+   3.3851514196274475,
+   3.3851514196274475,
+   3.3851514196274475,
+   3.3851514196274475
+  ],
+  "state.critical_token_kl": [
+   6.724724383493202,
+   6.724724383493202,
+   6.724724383493202,
+   6.724724383493202,
+   6.724724383493202,
+   6.724724383493202,
+   6.724724383493202,
+   6.724724383493202,
+   6.724724383493202,
+   6.724724383493202
+  ]
+ },
+ "measured_range": 0.0,
+ "rule": {
+  "rule_id": "conservative_review_gate",
+  "version": 1,
+  "declared_epsilon": 0.0001,
+  "measurement_definition": "one materialized checkpoint, scored N times through the full materialize -> reload -> measure cycle on the frozen state-eval suite, on the pilot's GPU backend; the statistic is max(max - min) across the policy's objective metrics",
+  "repeats": 10,
+  "if_below": "epsilon stands unchanged",
+  "if_at_or_above": "no automatic re-derivation; preflight requires review and Phase A is blocked",
+  "rejected_alternative": "epsilon_final = max(1e-4, 2 * measured) - rejected for v1 because it derives a scientific tolerance from a single profiling run"
+ },
+ "decision": {
+  "rule_id": "conservative_review_gate",
+  "version": 1,
+  "declared_epsilon": 0.0001,
+  "measured_range": 0.0,
+  "passes": true,
+  "epsilon_final": 0.0001,
+  "action": "proceed: the measured range is below the declared epsilon, which stands unchanged",
+  "requires_review": false,
+  "phase_a_blocked": false
+ },
+ "passes": true
+}

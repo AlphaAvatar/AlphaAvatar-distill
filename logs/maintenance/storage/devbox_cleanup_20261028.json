@@ -1,0 +1,46 @@
+{
+ "schema": "aadistill.devbox_cleanup/v1",
+ "written_utc": "2026-10-28T06:05:00Z",
+ "why": "the maintainer's 2026-10-28 review: continue the $0 consumer audit and safe cleanup; keep anything uncertain and report the block",
+ "free_bytes_before": 17028747264,
+ "deleted": [
+  {
+   "path": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/085d41c5-.../scratchpad/civenv",
+   "apparent_bytes": 826953506,
+   "reclaimed_bytes": 43204608,
+   "what": "a uv-built CPython 3.12 virtual environment in a 2026-10-18 session's scratch (CACHEDIR.TAG)",
+   "consumer_audit": "no process holds it (lsof), no record, script or config in the repository names it; rebuildable from uv's cache",
+   "why_so_little": "uv installs by hard link from its own cache (~/.cache/uv), so the environment's blocks are shared with the cache and deleting the environment frees only its own files"
+  }
+ ],
+ "not_deleted": [
+  {
+   "path": "~/aad-artifacts: the 14 checkpoints the registry marks retire (15.5 GiB)",
+   "why": "the maintainer's instruction: not deleted automatically; each needs an AGENTS.md 2.5 consumer audit and a tombstone, and D1's lack a relay copy"
+  },
+  {
+   "path": "/var/log/alphaavatar (34 GiB)",
+   "why": "another project's live service holds the files open"
+  },
+  {
+   "path": "~/.cache/uv, ~/.cache/pnpm",
+   "why": "shared with another project's running service"
+  },
+  {
+   "path": "~/.vscode-server idle servers",
+   "why": "a tmux shell's PATH still points into one"
+  },
+  {
+   "path": "/tmp/claude-1000/.../085d41c5-.../scratchpad (the rest, 0.6 GiB: generations of fluid_reasoning_720 dev, three repository bundles, logs)",
+   "why": "an earlier session's working material whose collection into the records is not confirmed; uncertain, so kept"
+  },
+  {
+   "path": "/tmp/claude-1000/.../e3b6a9c9-... (0.6 GiB), ~/aad-scratch/c2b-p4-root/attempt12 (2.2 GiB)",
+   "why": "unchanged from 2026-10-27: staging whose evidence was not confirmed collected; the last local copy of a C2 probe"
+  }
+ ],
+ "free_bytes_after": 17071951872,
+ "reclaimed_bytes": 43204608,
+ "effect": "16 GiB free, below the pod simulator's 20 GiB default. The test suite now has its own floor (tests/support/podsim.py, AAD_TEST_PODSIM_MIN_FREE_GIB) and a real sweep's floor cannot be lowered (record_pod_environment.min_free_gib); A-E and B-E declare no on-pod suite and need no launch-bound sweep, so the disk blocks neither",
+ "authorizes": "nothing"
+}

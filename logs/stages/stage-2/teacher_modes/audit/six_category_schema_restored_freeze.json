@@ -1,0 +1,971 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.six_category_common_support_freeze/v1",
+ "study_id": "six_category_schema_restored@v1",
+ "written_utc": "2026-11-05T17:13:38Z",
+ "config": {
+  "path": "configs/stages/stage-2/teacher_modes/six_category_schema_restored.json",
+  "sha256": "9f2ad477c6cdf1619f4735ed0ed06c453559857070f3d1c9dd6ae7ad2972660b"
+ },
+ "rule": "each arm's own teacher's admitted episodes, whole, in the pool's frozen order up to each category's target (tool_generation_plan.select); the base types and fluid as registered; admitted episodes beyond a target stay unused in the records; matched: the category targets and the token budget, not identical tasks",
+ "arms": {
+  "A1-6cat-sr": {
+   "arm": "A1-6cat-sr",
+   "mode": "H-T",
+   "teacher": {
+    "lineage": "hybrid",
+    "model": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+   },
+   "status": "FROZEN",
+   "identity": {
+    "data_manifest_sha256": "8595c24841612c088ff400725f68d3ae1f8cc4c9b25f7d12976d4f67f6686209",
+    "content_sha256": "37d1c68fc68d925429ab8241381a04f517053254b503a6c38499ee6e61b4e4c6",
+    "documents_sha256": "bb187d1ff44dd674f910480e6eb6e85a20dd5298b9ee4877f04244ddb1af4c0c",
+    "selection_sha256": "81afe61b57dd1f5d267df23a1c9d9d039b06dfb2616994cfc13ea653abc4d182",
+    "documents_file": {
+     "name": "data_documents.npz",
+     "sha256": "69d00163b93f69e4804a5934cf2bbd0a26716cfd699596a38af5358fef2a1f7f",
+     "arrays": [
+      "training_ids",
+      "training_mask",
+      "training_offsets",
+      "validation_ids",
+      "validation_mask",
+      "validation_offsets"
+     ],
+     "order": "per split, the manifest's document rows in order"
+    },
+    "packed_content_sha256": "15968a84a4250293f301bb59c2bcde11c8b51c6f83efeded71928d5432e51d61",
+    "pack_files_sha256": {
+     "blocks.npz": "ae1b31c11912156844cbbb2a3a7486c56643330a3dfdf2d6f91b3d64cf96046c",
+     "ladder.json": "617bd544c2f4689f2316539e76d2139306475d0810eb5f1eac538c3ea6b9d327",
+     "audit.jsonl": "4b0ae5e79f3b9ec64dc2f385c483eeae59b6ce721a5d8e24250607e40523c648"
+    }
+   },
+   "before_packing": {
+    "training": {
+     "examples": 5612,
+     "documents": 6243,
+     "unique_supervised_tokens": 5935809,
+     "reasoning_tokens": 4945744,
+     "answer_tokens": 990065,
+     "tool_calling_tokens": 498897
+    },
+    "validation": {
+     "examples": 109,
+     "documents": 120,
+     "unique_supervised_tokens": 135822,
+     "reasoning_tokens": 110251,
+     "answer_tokens": 25571,
+     "tool_calling_tokens": 24198
+    }
+   },
+   "types": {
+    "competition_math": {
+     "target": 493417.8,
+     "amount": 495452.0,
+     "deviation": 2034.2,
+     "status": "OK"
+    },
+    "gsm8k": {
+     "target": 493417.8,
+     "amount": 492622.0,
+     "deviation": -795.8,
+     "status": "OK"
+    },
+    "rag_reading": {
+     "target": 493417.8,
+     "amount": 492038.0,
+     "deviation": -1379.8,
+     "status": "OK"
+    },
+    "multihop_reading": {
+     "target": 493417.8,
+     "amount": 492449.0,
+     "deviation": -968.8,
+     "status": "OK"
+    },
+    "code": {
+     "target": 493417.8,
+     "amount": 494656.0,
+     "deviation": 1238.2,
+     "status": "OK"
+    },
+    "fluid": {
+     "target": 2962514.0,
+     "amount": 2969695.0,
+     "deviation": 7181.0,
+     "status": "OK"
+    },
+    "tool_calling": {
+     "target": 493417.8,
+     "amount": 498897.0,
+     "deviation": 5479.2,
+     "status": "OK"
+    },
+    "supporting": {
+     "target": 2960507.0,
+     "amount": 2966114.0,
+     "deviation": 5607.0,
+     "status": "OK"
+    },
+    "total": {
+     "target": 5923021.0,
+     "amount": 5935809.0,
+     "deviation": 12788.0,
+     "status": "OK"
+    }
+   },
+   "tool_cells": {
+    "training/error_recovery": {
+     "target": 49341.8,
+     "selected": 51373.0,
+     "episodes": 23,
+     "overshoot": 2031.2,
+     "deviation_pct": 4.12,
+     "status": "REACHED"
+    },
+    "training/mcp_agent": {
+     "target": 74012.7,
+     "selected": 75152.0,
+     "episodes": 59,
+     "overshoot": 1139.3,
+     "deviation_pct": 1.54,
+     "status": "REACHED"
+    },
+    "training/multi_turn": {
+     "target": 98683.6,
+     "selected": 99542.0,
+     "episodes": 31,
+     "overshoot": 858.4,
+     "deviation_pct": 0.87,
+     "status": "REACHED"
+    },
+    "training/multiple_parallel": {
+     "target": 74012.7,
+     "selected": 74298.0,
+     "episodes": 65,
+     "overshoot": 285.3,
+     "deviation_pct": 0.39,
+     "status": "REACHED"
+    },
+    "training/no_tool": {
+     "target": 49341.8,
+     "selected": 49365.0,
+     "episodes": 87,
+     "overshoot": 23.2,
+     "deviation_pct": 0.05,
+     "status": "REACHED"
+    },
+    "training/schema_arguments/pivot_conversational": {
+     "target": 17200.0,
+     "selected": 17779.0,
+     "episodes": 24,
+     "overshoot": 579.0,
+     "deviation_pct": 3.37,
+     "status": "REACHED"
+    },
+    "training/schema_arguments/schema_synth": {
+     "target": 56812.7,
+     "selected": 56940.0,
+     "episodes": 57,
+     "overshoot": 127.3,
+     "deviation_pct": 0.22,
+     "status": "REACHED"
+    },
+    "training/tool_selection": {
+     "target": 74012.7,
+     "selected": 74448.0,
+     "episodes": 103,
+     "overshoot": 435.3,
+     "deviation_pct": 0.59,
+     "status": "REACHED"
+    },
+    "validation/None": {
+     "target": 32.0,
+     "selected": 32.0,
+     "episodes": 32,
+     "overshoot": 0.0,
+     "deviation_pct": 0.0,
+     "status": "REACHED"
+    }
+   },
+   "tool_episode_sources": {
+    "path": "artifacts/stages/stage-2/teacher_modes/tool_admission/hybrid_H-T_sr_final/tool_documents.jsonl",
+    "sha256": "442a41b8fc807bd980e93f4cd3f40239a074e232d1556bdac8111c50b6a799db",
+    "pool": {
+     "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth",
+     "content_sha256": "e771393a98a6fd844c7d0ed3fa2d3327eb6c2b1c77a29033de707a5c4906649e",
+     "pool_json_sha256": "85c995a52c3062bb727e8205cfecfa01e5873357e80fc9ee695e1d4562f3a99e"
+    },
+    "plan_protocol_sha256": "5a42bcc45cc323d4340636777d325d1f11209f50b8ce0da764fdc88ac66fdff8"
+   },
+   "packing": {
+    "packed_sequences": 1430,
+    "validation_sequences": 35,
+    "sequence_length": 8192,
+    "non_padding_tokens": 11708673,
+    "context_tokens": 4698188,
+    "supervised_tokens_in_sequences": 7010485,
+    "repeated_supervised_tokens": 1074676,
+    "fragments": 1428,
+    "padding_fraction": 0.000503,
+    "spec": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1",
+     "sequence_length": 8192,
+     "shuffle_seed": 20261106
+    }
+   },
+   "compute": {
+    "epochs": 3,
+    "packed_sequences": 1430,
+    "optimizer_steps": 2145,
+    "warmup_steps": 107,
+    "eval_every": 268,
+    "save_every": 1072,
+    "supervised_token_exposure": 21031455,
+    "non_padding_tokens_trained": 35126019,
+    "training_flops": "6 x N x tokens per sequence position, N the student's parameter count from the packed search's Top-1 (not run: UNMEASURED); every sequence is 8,192 positions with causal attention, so for one shared student the FLOPs ratio between arms is their packed-sequence ratio"
+   },
+   "tool_composition": {
+    "cells": {
+     "error_recovery": {
+      "episodes": 23,
+      "turns": 77,
+      "tool_calls": 83,
+      "supervised_tokens": 51373,
+      "reasoning_tokens": 37474,
+      "tool_call_tokens": 4418,
+      "answer_tokens": 9481
+     },
+     "mcp_agent": {
+      "episodes": 59,
+      "turns": 142,
+      "tool_calls": 116,
+      "supervised_tokens": 75152,
+      "reasoning_tokens": 60649,
+      "tool_call_tokens": 4005,
+      "answer_tokens": 10498
+     },
+     "multi_turn": {
+      "episodes": 31,
+      "turns": 137,
+      "tool_calls": 58,
+      "supervised_tokens": 99542,
+      "reasoning_tokens": 62711,
+      "tool_call_tokens": 2161,
+      "answer_tokens": 34670
+     },
+     "multiple_parallel": {
+      "episodes": 65,
+      "turns": 139,
+      "tool_calls": 170,
+      "supervised_tokens": 74298,
+      "reasoning_tokens": 51582,
+      "tool_call_tokens": 6051,
+      "answer_tokens": 16665
+     },
+     "no_tool": {
+      "episodes": 87,
+      "turns": 87,
+      "tool_calls": 0,
+      "supervised_tokens": 49365,
+      "reasoning_tokens": 37798,
+      "tool_call_tokens": 0,
+      "answer_tokens": 11567
+     },
+     "schema_arguments/pivot_conversational": {
+      "episodes": 24,
+      "turns": 30,
+      "tool_calls": 24,
+      "supervised_tokens": 17779,
+      "reasoning_tokens": 15997,
+      "tool_call_tokens": 870,
+      "answer_tokens": 912
+     },
+     "schema_arguments/schema_synth": {
+      "episodes": 57,
+      "turns": 114,
+      "tool_calls": 57,
+      "supervised_tokens": 56940,
+      "reasoning_tokens": 46197,
+      "tool_call_tokens": 5250,
+      "answer_tokens": 5493
+     },
+     "tool_selection": {
+      "episodes": 103,
+      "turns": 206,
+      "tool_calls": 103,
+      "supervised_tokens": 74448,
+      "reasoning_tokens": 55360,
+      "tool_call_tokens": 3415,
+      "answer_tokens": 15673
+     }
+    },
+    "total": {
+     "episodes": 449,
+     "turns": 932,
+     "tool_calls": 611,
+     "supervised_tokens": 498897,
+     "reasoning_tokens": 367768,
+     "tool_call_tokens": 26170,
+     "answer_tokens": 104959
+    },
+    "rule": "the frozen selection re-derived and equal to the manifest's quota record; decisions = assistant turns (each decides to call or not), counted before packing"
+   }
+  },
+  "A2-6cat-sr": {
+   "arm": "A2-6cat-sr",
+   "mode": "H-N",
+   "teacher": {
+    "lineage": "hybrid",
+    "model": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+   },
+   "status": "FROZEN",
+   "identity": {
+    "data_manifest_sha256": "d6f1fd7ec320945a134609e5cb35d312f404b4f38ee5d61ebcfe303d7bad3787",
+    "content_sha256": "28eb51a79244b32c1d17efaa2ffead78ac04ec0cf2c7aff9fe62c076c344e39e",
+    "documents_sha256": "35c7b144ca09af93dde5a8311cbefa52ab534878fe567d2aa12603bd183a1ff5",
+    "selection_sha256": "34b4299819f1704c3fd79a9272f1e73e5b302c6b905c82db3e95f375cbd89d27",
+    "documents_file": {
+     "name": "data_documents.npz",
+     "sha256": "5a1f5de2a66fe8674b5bc25ab3a2bb7cea4cb67354d22f2713c38eb5e93867d5",
+     "arrays": [
+      "training_ids",
+      "training_mask",
+      "training_offsets",
+      "validation_ids",
+      "validation_mask",
+      "validation_offsets"
+     ],
+     "order": "per split, the manifest's document rows in order"
+    },
+    "packed_content_sha256": "649ac3a40142fe70b8f28be9308944a8ba1f916f54d5801d733bc7327c94a8ec",
+    "pack_files_sha256": {
+     "blocks.npz": "88246ecc330df9b7773d7902890c81c228bf858206d88451f1de6c85612d613f",
+     "ladder.json": "4f9177e27e0a488c76307cf8007b704d330471bfe6d90bebe6f8dbd15c024713",
+     "audit.jsonl": "ad3b78fdf04818bf95148e99212da4488d9ea601f74756dea31c5fa834780c4d"
+    }
+   },
+   "before_packing": {
+    "training": {
+     "examples": 44731,
+     "documents": 50165,
+     "unique_supervised_tokens": 5926755,
+     "reasoning_tokens": 0,
+     "answer_tokens": 5926755,
+     "tool_calling_tokens": 496444
+    },
+    "validation": {
+     "examples": 218,
+     "documents": 251,
+     "unique_supervised_tokens": 64776,
+     "reasoning_tokens": 0,
+     "answer_tokens": 64776,
+     "tool_calling_tokens": 9654
+    }
+   },
+   "types": {
+    "competition_math": {
+     "target": 493417.8,
+     "amount": 493404.0,
+     "deviation": -13.8,
+     "status": "OK"
+    },
+    "gsm8k": {
+     "target": 493417.8,
+     "amount": 493495.0,
+     "deviation": 77.2,
+     "status": "OK"
+    },
+    "rag_reading": {
+     "target": 493417.8,
+     "amount": 493276.0,
+     "deviation": -141.8,
+     "status": "OK"
+    },
+    "multihop_reading": {
+     "target": 493417.8,
+     "amount": 493296.0,
+     "deviation": -121.8,
+     "status": "OK"
+    },
+    "code": {
+     "target": 493417.8,
+     "amount": 493701.0,
+     "deviation": 283.2,
+     "status": "OK"
+    },
+    "fluid": {
+     "target": 2962514.0,
+     "amount": 2963139.0,
+     "deviation": 625.0,
+     "status": "OK"
+    },
+    "tool_calling": {
+     "target": 493417.8,
+     "amount": 496444.0,
+     "deviation": 3026.2,
+     "status": "OK"
+    },
+    "supporting": {
+     "target": 2960507.0,
+     "amount": 2963616.0,
+     "deviation": 3109.0,
+     "status": "OK"
+    },
+    "total": {
+     "target": 5923021.0,
+     "amount": 5926755.0,
+     "deviation": 3734.0,
+     "status": "OK"
+    }
+   },
+   "tool_cells": {
+    "training/error_recovery": {
+     "target": 49341.8,
+     "selected": 49361.0,
+     "episodes": 109,
+     "overshoot": 19.2,
+     "deviation_pct": 0.04,
+     "status": "REACHED"
+    },
+    "training/mcp_agent": {
+     "target": 74012.7,
+     "selected": 74159.0,
+     "episodes": 311,
+     "overshoot": 146.3,
+     "deviation_pct": 0.2,
+     "status": "REACHED"
+    },
+    "training/multi_turn": {
+     "target": 98683.6,
+     "selected": 100931.0,
+     "episodes": 102,
+     "overshoot": 2247.4,
+     "deviation_pct": 2.28,
+     "status": "REACHED"
+    },
+    "training/multiple_parallel": {
+     "target": 74012.7,
+     "selected": 74143.0,
+     "episodes": 235,
+     "overshoot": 130.3,
+     "deviation_pct": 0.18,
+     "status": "REACHED"
+    },
+    "training/no_tool": {
+     "target": 49341.8,
+     "selected": 49558.0,
+     "episodes": 279,
+     "overshoot": 216.2,
+     "deviation_pct": 0.44,
+     "status": "REACHED"
+    },
+    "training/schema_arguments/pivot_conversational": {
+     "target": 17200.0,
+     "selected": 17241.0,
+     "episodes": 302,
+     "overshoot": 41.0,
+     "deviation_pct": 0.24,
+     "status": "REACHED"
+    },
+    "training/schema_arguments/schema_synth": {
+     "target": 56812.7,
+     "selected": 56908.0,
+     "episodes": 370,
+     "overshoot": 95.3,
+     "deviation_pct": 0.17,
+     "status": "REACHED"
+    },
+    "training/tool_selection": {
+     "target": 74012.7,
+     "selected": 74143.0,
+     "episodes": 417,
+     "overshoot": 130.3,
+     "deviation_pct": 0.18,
+     "status": "REACHED"
+    },
+    "validation/None": {
+     "target": 32.0,
+     "selected": 32.0,
+     "episodes": 32,
+     "overshoot": 0.0,
+     "deviation_pct": 0.0,
+     "status": "REACHED"
+    }
+   },
+   "tool_episode_sources": {
+    "path": "artifacts/stages/stage-2/teacher_modes/tool_admission/hybrid_H-N_sr_final/tool_documents.jsonl",
+    "sha256": "bf1a9f42bb30474dfd4c084e501481ef64fb5c8251af80ab7d4dd5853ec1fe3d",
+    "pool": {
+     "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth",
+     "content_sha256": "e771393a98a6fd844c7d0ed3fa2d3327eb6c2b1c77a29033de707a5c4906649e",
+     "pool_json_sha256": "85c995a52c3062bb727e8205cfecfa01e5873357e80fc9ee695e1d4562f3a99e"
+    },
+    "plan_protocol_sha256": "5a42bcc45cc323d4340636777d325d1f11209f50b8ce0da764fdc88ac66fdff8"
+   },
+   "packing": {
+    "packed_sequences": 5047,
+    "validation_sequences": 30,
+    "sequence_length": 8192,
+    "non_padding_tokens": 41339285,
+    "context_tokens": 35177939,
+    "supervised_tokens_in_sequences": 6161346,
+    "repeated_supervised_tokens": 234591,
+    "fragments": 5041,
+    "padding_fraction": 0.000139,
+    "spec": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1",
+     "sequence_length": 8192,
+     "shuffle_seed": 20261106
+    }
+   },
+   "compute": {
+    "epochs": 3,
+    "packed_sequences": 5047,
+    "optimizer_steps": 7571,
+    "warmup_steps": 379,
+    "eval_every": 946,
+    "save_every": 3785,
+    "supervised_token_exposure": 18484038,
+    "non_padding_tokens_trained": 124017855,
+    "training_flops": "6 x N x tokens per sequence position, N the student's parameter count from the packed search's Top-1 (not run: UNMEASURED); every sequence is 8,192 positions with causal attention, so for one shared student the FLOPs ratio between arms is their packed-sequence ratio"
+   },
+   "tool_composition": {
+    "cells": {
+     "error_recovery": {
+      "episodes": 109,
+      "turns": 353,
+      "tool_calls": 329,
+      "supervised_tokens": 49361,
+      "reasoning_tokens": 0,
+      "tool_call_tokens": 16031,
+      "answer_tokens": 33330
+     },
+     "mcp_agent": {
+      "episodes": 311,
+      "turns": 745,
+      "tool_calls": 587,
+      "supervised_tokens": 74159,
+      "reasoning_tokens": 0,
+      "tool_call_tokens": 18478,
+      "answer_tokens": 55681
+     },
+     "multi_turn": {
+      "episodes": 102,
+      "turns": 465,
+      "tool_calls": 162,
+      "supervised_tokens": 100931,
+      "reasoning_tokens": 0,
+      "tool_call_tokens": 5116,
+      "answer_tokens": 95815
+     },
+     "multiple_parallel": {
+      "episodes": 235,
+      "turns": 480,
+      "tool_calls": 513,
+      "supervised_tokens": 74143,
+      "reasoning_tokens": 0,
+      "tool_call_tokens": 17372,
+      "answer_tokens": 56771
+     },
+     "no_tool": {
+      "episodes": 279,
+      "turns": 279,
+      "tool_calls": 0,
+      "supervised_tokens": 49558,
+      "reasoning_tokens": 0,
+      "tool_call_tokens": 0,
+      "answer_tokens": 49558
+     },
+     "schema_arguments/pivot_conversational": {
+      "episodes": 302,
+      "turns": 357,
+      "tool_calls": 301,
+      "supervised_tokens": 17241,
+      "reasoning_tokens": 0,
+      "tool_call_tokens": 10754,
+      "answer_tokens": 6487
+     },
+     "schema_arguments/schema_synth": {
+      "episodes": 370,
+      "turns": 740,
+      "tool_calls": 370,
+      "supervised_tokens": 56908,
+      "reasoning_tokens": 0,
+      "tool_call_tokens": 33765,
+      "answer_tokens": 23143
+     },
+     "tool_selection": {
+      "episodes": 417,
+      "turns": 834,
+      "tool_calls": 419,
+      "supervised_tokens": 74143,
+      "reasoning_tokens": 0,
+      "tool_call_tokens": 14679,
+      "answer_tokens": 59464
+     }
+    },
+    "total": {
+     "episodes": 2125,
+     "turns": 4253,
+     "tool_calls": 2681,
+     "supervised_tokens": 496444,
+     "reasoning_tokens": 0,
+     "tool_call_tokens": 116195,
+     "answer_tokens": 380249
+    },
+    "rule": "the frozen selection re-derived and equal to the manifest's quota record; decisions = assistant turns (each decides to call or not), counted before packing"
+   }
+  },
+  "C1-6cat-sr": {
+   "arm": "C1-6cat-sr",
+   "mode": "T2507",
+   "teacher": {
+    "lineage": "thinking_2507",
+    "model": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+   },
+   "status": "FROZEN",
+   "identity": {
+    "data_manifest_sha256": "5729d85c1c9d3fbc9eb424b83ff04c007c16ec88dbe6c2c80604c737e313e751",
+    "content_sha256": "76b04c0a03c61ef34fea3900fb668a7f9c1350da66b089290d30287749d90763",
+    "documents_sha256": "2824bc826ad183d686482cffe60acb4f91e38d423fe6b1069c1efb97063d3a03",
+    "selection_sha256": "bdfbee7d76c12f8f9751ebc1993f753129a276e7a8ffaf1ef7bd3dee5b6d4f4a",
+    "documents_file": {
+     "name": "data_documents.npz",
+     "sha256": "f0edac3195e1909bc821da0fb0411ab9c8aa91c0550ee97a6eb6646d7e719d62",
+     "arrays": [
+      "training_ids",
+      "training_mask",
+      "training_offsets",
+      "validation_ids",
+      "validation_mask",
+      "validation_offsets"
+     ],
+     "order": "per split, the manifest's document rows in order"
+    },
+    "packed_content_sha256": "e627ce975d30fb9e3874370cf34d258116cf042a310a9e695878c3beba0a07c9",
+    "pack_files_sha256": {
+     "blocks.npz": "cd438b50261a52d417f1b57b99c1aefcb8f64533f84d357dcbf7bd9f07131133",
+     "ladder.json": "fae376522b592bd46d8cd242c27a16649106be655cc570cc0347df599b8dabe2",
+     "audit.jsonl": "55eee5bf53bee442ac1fd395d9a79e9a26c2e53782e6242e521b89cb16cc4a02"
+    }
+   },
+   "before_packing": {
+    "training": {
+     "examples": 3931,
+     "documents": 4197,
+     "unique_supervised_tokens": 5937691,
+     "reasoning_tokens": 4831223,
+     "answer_tokens": 1106468,
+     "tool_calling_tokens": 507257
+    },
+    "validation": {
+     "examples": 59,
+     "documents": 65,
+     "unique_supervised_tokens": 81741,
+     "reasoning_tokens": 59271,
+     "answer_tokens": 22470,
+     "tool_calling_tokens": 13170
+    }
+   },
+   "types": {
+    "competition_math": {
+     "target": 494130.0,
+     "amount": 494130.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "gsm8k": {
+     "target": 494582.0,
+     "amount": 494582.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "multihop_reading": {
+     "target": 492790.0,
+     "amount": 492790.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "rag_reading": {
+     "target": 493581.0,
+     "amount": 493581.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "code": {
+     "target": 492837.0,
+     "amount": 492837.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "fluid": {
+     "target": 2962514.0,
+     "amount": 2962514.0,
+     "deviation": 0.0,
+     "status": "OK"
+    },
+    "tool_calling": {
+     "target": 492587.0,
+     "amount": 507257.0,
+     "deviation": 14670.0,
+     "status": "OK"
+    },
+    "supporting": {
+     "target": 2960507.0,
+     "amount": 2975177.0,
+     "deviation": 14670.0,
+     "status": "OK"
+    },
+    "total": {
+     "target": 5923021.0,
+     "amount": 5937691.0,
+     "deviation": 14670.0,
+     "status": "OK"
+    }
+   },
+   "tool_cells": {
+    "training/error_recovery": {
+     "target": 49258.7,
+     "selected": 49440.0,
+     "episodes": 12,
+     "overshoot": 181.3,
+     "deviation_pct": 0.37,
+     "status": "REACHED"
+    },
+    "training/mcp_agent": {
+     "target": 73888.1,
+     "selected": 79265.0,
+     "episodes": 26,
+     "overshoot": 5376.9,
+     "deviation_pct": 7.28,
+     "status": "REACHED"
+    },
+    "training/multi_turn": {
+     "target": 98517.4,
+     "selected": 102170.0,
+     "episodes": 19,
+     "overshoot": 3652.6,
+     "deviation_pct": 3.71,
+     "status": "REACHED"
+    },
+    "training/multiple_parallel": {
+     "target": 73888.1,
+     "selected": 75097.0,
+     "episodes": 36,
+     "overshoot": 1208.9,
+     "deviation_pct": 1.64,
+     "status": "REACHED"
+    },
+    "training/no_tool": {
+     "target": 49258.7,
+     "selected": 49426.0,
+     "episodes": 71,
+     "overshoot": 167.3,
+     "deviation_pct": 0.34,
+     "status": "REACHED"
+    },
+    "training/schema_arguments/pivot_conversational": {
+     "target": 17171.0,
+     "selected": 17900.0,
+     "episodes": 11,
+     "overshoot": 729.0,
+     "deviation_pct": 4.25,
+     "status": "REACHED"
+    },
+    "training/schema_arguments/schema_synth": {
+     "target": 56717.1,
+     "selected": 59411.0,
+     "episodes": 25,
+     "overshoot": 2693.9,
+     "deviation_pct": 4.75,
+     "status": "REACHED"
+    },
+    "training/tool_selection": {
+     "target": 73888.1,
+     "selected": 74548.0,
+     "episodes": 50,
+     "overshoot": 659.9,
+     "deviation_pct": 0.89,
+     "status": "REACHED"
+    },
+    "validation/None": {
+     "target": 12624.0,
+     "selected": 13170.0,
+     "episodes": 12,
+     "overshoot": 546.0,
+     "deviation_pct": 4.33,
+     "status": "REACHED"
+    }
+   },
+   "tool_episode_sources": {
+    "path": "artifacts/stages/stage-2/teacher_modes/tool_admission/thinking_2507_sr_final/tool_documents.jsonl",
+    "sha256": "d60f3db6b7abe83eb719bf9d29e599ab0ce9a4f0dee9979a4dbc1e457e5f59f5",
+    "pool": {
+     "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth",
+     "content_sha256": "e771393a98a6fd844c7d0ed3fa2d3327eb6c2b1c77a29033de707a5c4906649e",
+     "pool_json_sha256": "85c995a52c3062bb727e8205cfecfa01e5873357e80fc9ee695e1d4562f3a99e"
+    },
+    "plan_protocol_sha256": "5a42bcc45cc323d4340636777d325d1f11209f50b8ce0da764fdc88ac66fdff8"
+   },
+   "packing": {
+    "packed_sequences": 1261,
+    "validation_sequences": 17,
+    "sequence_length": 8192,
+    "non_padding_tokens": 10324059,
+    "context_tokens": 3065858,
+    "supervised_tokens_in_sequences": 7258201,
+    "repeated_supervised_tokens": 1320510,
+    "fragments": 1259,
+    "padding_fraction": 0.000586,
+    "spec": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1",
+     "sequence_length": 8192,
+     "shuffle_seed": 20261106
+    }
+   },
+   "compute": {
+    "epochs": 3,
+    "packed_sequences": 1261,
+    "optimizer_steps": 1892,
+    "warmup_steps": 95,
+    "eval_every": 236,
+    "save_every": 946,
+    "supervised_token_exposure": 21774603,
+    "non_padding_tokens_trained": 30972177,
+    "training_flops": "6 x N x tokens per sequence position, N the student's parameter count from the packed search's Top-1 (not run: UNMEASURED); every sequence is 8,192 positions with causal attention, so for one shared student the FLOPs ratio between arms is their packed-sequence ratio"
+   },
+   "tool_composition": {
+    "cells": {
+     "error_recovery": {
+      "episodes": 12,
+      "turns": 44,
+      "tool_calls": 41,
+      "supervised_tokens": 49440,
+      "reasoning_tokens": 41082,
+      "tool_call_tokens": 2141,
+      "answer_tokens": 6217
+     },
+     "mcp_agent": {
+      "episodes": 26,
+      "turns": 69,
+      "tool_calls": 54,
+      "supervised_tokens": 79265,
+      "reasoning_tokens": 72434,
+      "tool_call_tokens": 1735,
+      "answer_tokens": 5096
+     },
+     "multi_turn": {
+      "episodes": 19,
+      "turns": 86,
+      "tool_calls": 36,
+      "supervised_tokens": 102170,
+      "reasoning_tokens": 83752,
+      "tool_call_tokens": 1019,
+      "answer_tokens": 17399
+     },
+     "multiple_parallel": {
+      "episodes": 36,
+      "turns": 74,
+      "tool_calls": 79,
+      "supervised_tokens": 75097,
+      "reasoning_tokens": 64162,
+      "tool_call_tokens": 2705,
+      "answer_tokens": 8230
+     },
+     "no_tool": {
+      "episodes": 71,
+      "turns": 71,
+      "tool_calls": 0,
+      "supervised_tokens": 49426,
+      "reasoning_tokens": 38424,
+      "tool_call_tokens": 0,
+      "answer_tokens": 11002
+     },
+     "schema_arguments/pivot_conversational": {
+      "episodes": 11,
+      "turns": 22,
+      "tool_calls": 11,
+      "supervised_tokens": 17900,
+      "reasoning_tokens": 16099,
+      "tool_call_tokens": 353,
+      "answer_tokens": 1448
+     },
+     "schema_arguments/schema_synth": {
+      "episodes": 25,
+      "turns": 50,
+      "tool_calls": 25,
+      "supervised_tokens": 59411,
+      "reasoning_tokens": 54511,
+      "tool_call_tokens": 2347,
+      "answer_tokens": 2553
+     },
+     "tool_selection": {
+      "episodes": 50,
+      "turns": 100,
+      "tool_calls": 50,
+      "supervised_tokens": 74548,
+      "reasoning_tokens": 64874,
+      "tool_call_tokens": 1647,
+      "answer_tokens": 8027
+     }
+    },
+    "total": {
+     "episodes": 250,
+     "turns": 516,
+     "tool_calls": 296,
+     "supervised_tokens": 507257,
+     "reasoning_tokens": 435338,
+     "tool_call_tokens": 11947,
+     "answer_tokens": 59972
+    },
+    "rule": "the frozen selection re-derived and equal to the manifest's quota record; decisions = assistant turns (each decides to call or not), counted before packing"
+   }
+  }
+ },
+ "a1_a2_compute": {
+  "packed_sequences": {
+   "A1-6cat-sr": 1430,
+   "A2-6cat-sr": 5047,
+   "A2_over_A1": 3.5294
+  },
+  "non_padding_tokens": {
+   "A1-6cat-sr": 11708673,
+   "A2-6cat-sr": 41339285,
+   "A2_over_A1": 3.5307
+  },
+  "optimizer_steps": {
+   "A1-6cat-sr": 2145,
+   "A2-6cat-sr": 7571,
+   "A2_over_A1": 3.5296
+  },
+  "supervised_token_exposure": {
+   "A1-6cat-sr": 21031455,
+   "A2-6cat-sr": 18484038,
+   "A2_over_A1": 0.8789
+  },
+  "unique_supervised_tokens": {
+   "A1-6cat-sr": 5935809,
+   "A2-6cat-sr": 5926755
+  },
+  "training_flops_ratio_A2_over_A1": 3.5294
+ },
+ "comparison": "a supervised-token-budget and category-composition matched comparison, NOT compute matched",
+ "authorizes": "nothing: search and training need their own decisions"
+}

@@ -1,0 +1,193 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.engineering_validation/v1",
+ "run_id": "ae_20261028_093428",
+ "study": "A-E",
+ "tiny": false,
+ "device": "cuda:0",
+ "started_utc": "2026-10-28T09:40:34+00:00",
+ "config": {
+  "path": "configs/stages/stage-2/teacher_modes/engineering_validation.json",
+  "sha256": "5afb3149805b3b5d75885c4e8d674632e57fd40de006de9f705b2e96210c9176",
+  "matches_verdict_config": true
+ },
+ "environment": {
+  "python": "3.12.3",
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1",
+  "cuda": "12.8",
+  "gpu": {
+   "read_utc": "2026-10-28T09:48:31+00:00",
+   "known": true,
+   "name": "NVIDIA A100-SXM4-80GB",
+   "driver": "595.91.07",
+   "used_mib": 0,
+   "total_mib": 81920,
+   "compute_processes": []
+  },
+  "vllm": {
+   "vllm": "0.27.1",
+   "torch": "2.13.0+cu130",
+   "cuda": "13.0"
+  },
+  "inputs": {
+   "student": {
+    "path": "/workspace/aad/artifacts/stages/stage-2/reasoning_data/h1pa/pca_original/20260726",
+    "model_safetensors_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3"
+   }
+  }
+ },
+ "checks": {
+  "prompt_identity": {
+   "status": "PASS",
+   "problems": [],
+   "prompts": 16,
+   "tokenizer": "teacher",
+   "prompt_tokens": {
+    "H-T": [
+     156,
+     210,
+     124,
+     42,
+     42,
+     46,
+     56,
+     61
+    ],
+    "H-N": [
+     160,
+     214,
+     128,
+     46,
+     46,
+     50,
+     60,
+     65
+    ]
+   }
+  },
+  "generation": {
+   "status": "PASS",
+   "problems": [],
+   "per_mode": {
+    "H-T": {
+     "turns": 8,
+     "ended_on_stop": 8,
+     "at_limit": 0,
+     "ht_opened_think": 8,
+     "output_tokens_mean": 3587.1,
+     "output_tokens_max": 14598,
+     "documents": 4
+    },
+    "H-N": {
+     "turns": 8,
+     "ended_on_stop": 8,
+     "at_limit": 0,
+     "ht_opened_think": 0,
+     "output_tokens_mean": 748.5,
+     "output_tokens_max": 3567,
+     "documents": 4
+    }
+   },
+   "vllm": {
+    "vllm": "0.27.1",
+    "torch": "2.13.0+cu130",
+    "cuda": "13.0"
+   },
+   "refused": []
+  },
+  "teacher_forward": {
+   "status": "PASS",
+   "problems": [],
+   "per_mode": {
+    "H-T": {
+     "documents": 4,
+     "targets": 11965,
+     "ref_bf16_alone": 15.526291847229004,
+     "ref_bf16_packed": 15.213794708251953,
+     "d_bf16": 13.78125,
+     "d_fp32": 0.02440398931503296,
+     "bf16_limit": 31.052583694458008,
+     "fp32_limit": 1.5526291847229006,
+     "engine": {
+      "mean_abs": 0.007483212046705445,
+      "max_abs": 0.2765878438949585,
+      "p99_abs": 0.09492194652557373,
+      "hf_bf16_mean_abs": 0.00910056272742154,
+      "limit": 0.03640225090968616
+     }
+    },
+    "H-N": {
+     "documents": 4,
+     "targets": 4604,
+     "ref_bf16_alone": 13.471625328063965,
+     "ref_bf16_packed": 12.369718551635742,
+     "d_bf16": 11.53125,
+     "d_fp32": 0.0039157867431640625,
+     "bf16_limit": 26.94325065612793,
+     "fp32_limit": 1.3471625328063965,
+     "engine": {
+      "mean_abs": 0.0023351736029174034,
+      "max_abs": 0.15253663063049316,
+      "p99_abs": 0.04730570316314697,
+      "hf_bf16_mean_abs": 0.0030563788530203547,
+      "limit": 0.012225515412081419
+     }
+    }
+   },
+   "attn_implementation": "sdpa",
+   "tf32": {
+    "matmul": false,
+    "cudnn": false
+   },
+   "device": "NVIDIA A100-SXM4-80GB"
+  },
+  "assistant_target_kl": {
+   "status": "PASS",
+   "problems": [],
+   "kd_positions": 16569,
+   "kd_scope": "assistant"
+  },
+  "trainer_smoke": {
+   "status": "PASS",
+   "problems": [],
+   "seconds_per_step_mean_after_warmup": 5.1898,
+   "peak_memory_gib": 38.5,
+   "sequence_length": 8192,
+   "pack": {
+    "strategy": "document_isolated",
+    "sequences": 3,
+    "sequence_length": 8192,
+    "documents": 8,
+    "refused": 0,
+    "non_padding_tokens": 17649,
+    "supervised_tokens": 16569,
+    "context_tokens": 1080,
+    "padding_fraction": 0.28186,
+    "pack_sha256": "3c1c6f8ce09d7b3be83c3677a008769e4dd84300a24a4c82bb0aac5bddf735e4"
+   },
+   "documents_synthetic": [
+    false
+   ],
+   "device": "NVIDIA A100-SXM4-80GB"
+  },
+  "preclosed_scoring": {
+   "status": "PASS",
+   "problems": [],
+   "records": 8,
+   "well_formed": {
+    "H-T": 4,
+    "H-N": 4
+   },
+   "identity_sha256": {
+    "H-T": "6f5ef37680d70b1ff2aca115c68d8facb9a3bd6e9ef669985c85c8bbf9fdd00f",
+    "H-N": "5c31ae9686ba5e590a687263b0c7f658143d9412bda23cd8943f71cf712abfed"
+   },
+   "synthetic": [
+    false
+   ]
+  }
+ },
+ "passed": true,
+ "scientific_use": false,
+ "authorizes": "nothing"
+}

@@ -3,7 +3,8 @@
     from shared import forward_baseline as FB
     baseline = FB.selected()            # checked against the core at load
     FB.register_operators(baseline)     # registry + signature check
-    execution = baseline.execution      # bsz 3, length_sorted_v1, scored_v1
+    execution = baseline.execution      # 1 packed sequence per forward, scored_v1
+    context = FB.forward_context(baseline, sequence_length=..., shuffle_seed=...)
 
 A new initialization experiment builds its session from this rather than from
 a historical experiment's constants. Two different questions live in two
@@ -11,7 +12,11 @@ different places, and both keep working:
 
 * "what does NEW work run by default?" -- this module, resolved from
   `configs/shared/baselines/selection.json` (maintainer decision 2026-10-17:
-  D1's method with `prediction_rows=scored_v1`);
+  D1's method with `prediction_rows=scored_v1`; 2026-11-03: version 2, the
+  same method read in a packed causal forward context);
+* "what did a PAST experiment run?" -- `historical(version)`, the superseded
+  record that experiment resolved, still sha256-bound. A replay pins its
+  version; it never floats with the selection;
 * "which checkpoint did a PAST round challenge?" -- `stages.d_series.incumbent.
   standing_incumbent()`, unchanged, which still answers B for every historical
   record that asks.
@@ -41,6 +46,21 @@ def selected(repo_root: str | Path = REPO_ROOT):
     from aadistill.initialization.baseline import resolve_selection
 
     return resolve_selection(Path(repo_root) / SELECTION, ROLE)
+
+
+def historical(version: int, repo_root: str | Path = REPO_ROOT):
+    """The superseded initialization record of ``version``, for replaying the
+    experiments that ran it (version 1: every search before 2026-11-03)."""
+    from aadistill.initialization.baseline import resolve_superseded
+
+    return resolve_superseded(Path(repo_root) / SELECTION, ROLE, int(version))
+
+
+def forward_context(baseline=None, *, sequence_length: int, shuffle_seed: int):
+    """The baseline's forward context with an experiment's own instance values,
+    or ``None`` for a record that reads one item per row."""
+    return (baseline or selected()).forward_context(
+        sequence_length=sequence_length, shuffle_seed=shuffle_seed)
 
 
 def register_operators(baseline=None) -> dict[str, str]:
@@ -73,10 +93,13 @@ def session_terms(baseline=None) -> dict[str, Any]:
     What an experiment still supplies itself, because the baseline leaves it
     free: the target geometry, the calibration profiles and operator order its
     registered protocol searches over, the state-evaluation suite, the seed and
-    the run's identities.
+    the run's identities -- and, under a forward-context policy, the sequence
+    length and shuffle seed (`forward_context`).
     """
     b = baseline or selected()
     return {
+        "forward_context_policy": (None if b.forward_context_policy is None
+                                   else dict(b.forward_context_policy)),
         "execution": b.execution,
         "numerics": b.numerics,
         "position_policy": b.position_policy,

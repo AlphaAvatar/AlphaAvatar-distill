@@ -55,12 +55,15 @@ def build_evaluation_package(model_dir: str | Path, *,
                              tokenizer_source: str | Path,
                              dest: str | Path,
                              expected_sidecar_sha256: Mapping[str, str],
+                             sidecars: tuple[str, ...] = EVAL_TOKENIZER_SIDECARS,
                              ) -> dict[str, Any]:
     """A directory the evaluator may treat as "the evaluated checkpoint".
 
     Fail-closed in both directions: a sidecar whose bytes are not the pinned ones
     is refused before anything is linked, and the training checkpoint's listing
-    must be byte-identical afterwards.
+    must be byte-identical afterwards. ``sidecars`` names the tokenizer files the
+    evaluation tokenizer consists of (a template stored inside
+    ``tokenizer_config.json`` has no ``chat_template.jinja``).
     """
     model_dir, src, dest = Path(model_dir), Path(tokenizer_source), Path(dest)
     if not model_dir.is_dir():
@@ -72,7 +75,7 @@ def build_evaluation_package(model_dir: str | Path, *,
     #: Check the sidecars BEFORE touching anything, so a bad tokenizer never
     #: produces a half-built package that a later step might use.
     landed = []
-    for name in EVAL_TOKENIZER_SIDECARS:
+    for name in sidecars:
         want = expected_sidecar_sha256.get(name)
         if not want:
             raise C1PackagingError(
@@ -89,7 +92,7 @@ def build_evaluation_package(model_dir: str | Path, *,
         landed.append({"file": name, "sha256": got})
 
     before = _listing(model_dir)
-    carried = [n for n in EVAL_TOKENIZER_SIDECARS if n in before]
+    carried = [n for n in sidecars if n in before]
     if carried:
         raise C1PackagingError(
             f"{model_dir} already carries {carried}. The trainer writes no "
@@ -111,7 +114,7 @@ def build_evaluation_package(model_dir: str | Path, *,
             shutil.copyfile(p, target)
             how = "copy"
         linked.append({"file": p.name, "how": how})
-    for name in EVAL_TOKENIZER_SIDECARS:
+    for name in sidecars:
         shutil.copyfile(src / name, dest / name)
 
     after = _listing(model_dir)

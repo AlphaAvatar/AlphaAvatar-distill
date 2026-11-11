@@ -1,0 +1,134 @@
+{
+ "schema": "aadistill.stage1.projected_residual.independent_gated_validation_config/v1",
+ "validation": "independent-gated engineering validation",
+ "study_id": "stage1.projected_residual.independent_gated_v1",
+ "_contract": "Everything the validation's verdict depends on, fixed before the session: the probe, the numeric identity, the smoke and resume shapes, every threshold. scripts/stages/stage-1/projected_residual/independent_gated_validation.py :: verdict re-derives every check from the evidence and this file alone. Engineering only: nothing measured here is a result, a selection or a GO, and nothing it trains is kept as a student.",
+ "design": "configs/stages/stage-1/projected_residual/independent_gated_design.json",
+ "driver": "scripts/stages/stage-1/projected_residual/independent_gated_validation.py",
+ "probe": {
+  "_": "engineering diagnostic texts written for engine numerics (prose, arithmetic, code, a JSON record, a numbered procedure, one ChatML exchange), never an evaluation item: maintainer brief 2026-10-29 section 5 keeps the formal evaluation set out of implementation debugging. Tokenized as plain text without added special tokens (shared.validation.engine_admission.probe_ids), so no teacher's chat template enters; Qwen3-4B@1cfa9a72 and Qwen3-4B-Thinking-2507@768f209d give the same ids. The ids are recomputed on the pod and must hash to these values; the evidence records ids and hashes, never the text",
+  "isolation": "shares no key with any held-out unit of eval-set-1 (shared.eval_sets.require_disjoint; scripts/stages/stage-1/projected_residual/tests/test_independent_gated.py)",
+  "tokenizer": {
+   "model": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+  },
+  "token_ids_hash": "sha256 of json.dumps(ids, separators=(',', ':'))",
+  "texts": [
+   {
+    "id": "prose",
+    "text": "The river ran slowly through the valley, and the old mill at its bend had not turned in years. Every spring the villagers talked about repairing the wheel, and every autumn the conversation moved on to the harvest, the roof of the school and the price of feed. Nobody minded very much. The mill had become a place to sit in the evening, to watch the swallows skim the water and to argue, without heat, about whether the weather would hold.",
+    "tokens": 92,
+    "token_ids_sha256": "92713f97e00c8d77713cf3154c78942aaeffb58fa9791161ba3acbd38ba5ca96"
+   },
+   {
+    "id": "arithmetic",
+    "text": "To add two fractions with different denominators, first rewrite them over a common denominator. For example, to compute 1/4 + 1/6, note that the least common multiple of 4 and 6 is 12. Then 1/4 = 3/12 and 1/6 = 2/12, so the sum is 5/12. The same idea works for subtraction: 5/8 - 1/3 = 15/24 - 8/24 = 7/24. Multiplying fractions is simpler, because the numerators and denominators are multiplied separately: 2/3 x 9/10 = 18/30 = 3/5.",
+    "tokens": 158,
+    "token_ids_sha256": "1b696fdc0e5d8547b0324ab2c2abfb646fba8f8bcde0c7e4f66b6040fdd9eaf8"
+   },
+   {
+    "id": "code",
+    "text": "def running_mean(values):\n    \"\"\"Return the mean of each prefix of values.\"\"\"\n    means = []\n    total = 0.0\n    for count, value in enumerate(values, start=1):\n        total += value\n        means.append(total / count)\n    return means\n\n\nif __name__ == \"__main__\":\n    print(running_mean([2.0, 4.0, 6.0, 8.0]))\n",
+    "tokens": 90,
+    "token_ids_sha256": "b47cb8561a0fbaa143e9e2dd2cb9f2098b85e4e0b4f636a90d5587ee61ee486f"
+   },
+   {
+    "id": "structured",
+    "text": "{\n  \"name\": \"weather-station-07\",\n  \"location\": {\"latitude\": 46.21, \"longitude\": 6.14, \"elevation_m\": 375},\n  \"sensors\": [\n    {\"kind\": \"temperature\", \"unit\": \"celsius\", \"interval_s\": 60},\n    {\"kind\": \"humidity\", \"unit\": \"percent\", \"interval_s\": 60},\n    {\"kind\": \"pressure\", \"unit\": \"hectopascal\", \"interval_s\": 300}\n  ],\n  \"active\": true\n}",
+    "tokens": 129,
+    "token_ids_sha256": "25e2bcf8f0a27230bc66b17d8b615a911359ed59e8f735274b464ee7c974e202"
+   },
+   {
+    "id": "procedure",
+    "text": "How to repot a houseplant:\n1. Water the plant a day before, so the root ball holds together.\n2. Choose a new pot about two centimetres wider than the old one, with a drainage hole.\n3. Put a layer of fresh potting mix in the bottom of the new pot.\n4. Turn the old pot on its side and ease the plant out, supporting the base of the stems.\n5. Loosen any circling roots gently with your fingers.\n6. Set the plant in the new pot at the same depth as before and fill around it with mix.\n7. Water thoroughly and keep the plant out of direct sun for a few days.",
+    "tokens": 138,
+    "token_ids_sha256": "1feed9a6e1f2c9197f639d1b0553fa627cf277365183ba6dfe5366e61bce2697"
+   },
+   {
+    "id": "dialogue",
+    "text": "<|im_start|>user\nCan you suggest a name for a small bakery that sells bread and cakes?<|im_end|>\n<|im_start|>assistant\nHere are a few ideas: \"The Daily Crumb\", \"Flour and Ember\", \"Rise and Shine Bakery\" and \"The Corner Loaf\". A name that mentions your street or town can also help local customers remember you.<|im_end|>\n",
+    "tokens": 73,
+    "token_ids_sha256": "1a8af4a6aae91604f4a0d493ae8f99b2bf37e16e381af7f1bbdc712c4305e130"
+   }
+  ],
+  "tiny_lengths": [
+   17,
+   33,
+   41
+  ],
+  "_tiny": "the host path's tiny teacher has a 97-token vocabulary, so its probe is seeded random ids of these lengths; it rehearses the code, never the numbers",
+  "superseded": "the eval-set-1 probe of 2026-10-28 (7 items of fluid_reasoning_720 and stage3_capability_846): never run, replaced before any session; B-E's frozen evidence keeps its own probe"
+ },
+ "numeric_identity": {
+  "device_class": null,
+  "_device_class": "recorded, never required: this study's card follows the measured peak memory and step time (independent_gated_design.json :: execution.hardware), and the validation measures whichever card the session runs on",
+  "dtype": "bfloat16",
+  "reference_dtype": "float32",
+  "attn_implementation": "sdpa",
+  "tf32": false,
+  "_tf32": "torch.backends.cuda.matmul.allow_tf32 and torch.backends.cudnn.allow_tf32 set False before any CUDA work, so float32 is float32",
+  "deterministic_algorithms": "warn_only",
+  "cublas_workspace_config": ":4096:8",
+  "_deterministic": "torch.use_deterministic_algorithms(True, warn_only=True) with CUBLAS_WORKSPACE_CONFIG set before CUDA initializes; kernels with no deterministic implementation warn rather than abort, and the resume check measures what remains"
+ },
+ "smoke": {
+  "recipe": "recovery_driver.load_plan(arm) :: the derived recipe of each arm for seed 20260726 (D4-Augmented's E1 config, its schedule, the new KD protocol, the arm's overrides) under validation-only overrides",
+  "validation_only_overrides": [
+   "schedule.total_steps",
+   "schedule.warmup_steps",
+   "checkpoint.save_every",
+   "checkpoint.keep_last",
+   "intervals.eval_every",
+   "intervals.log_every",
+   "monitor.every",
+   "student_path",
+   "out_dir",
+   "run_name"
+  ],
+  "seed": 20260726,
+  "steps": 20,
+  "steady_state_from_step": 4,
+  "data": "the real training pack (packs/D4A_merged_whole, staged by setup), so the target-row fraction, the prefill exclusion and the step's memory are the formal run's",
+  "tiny_steps": 4
+ },
+ "resume": {
+  "steps": 8,
+  "save_at": 4,
+  "how": "X: 8 steps uninterrupted; Y: 8 steps with a save point at 4, killed (SIGKILL) as soon as that save point is logged, then --resume latest to 8; X2: a second uninterrupted run, only when X and Y are not bit-identical"
+ },
+ "memory": {
+  "headroom_gib_min": 4.0,
+  "measure": "torch.cuda.max_memory_reserved over the run (the allocator's pool, what an OOM exhausts) against the card's total"
+ },
+ "expected": {
+  "num_parameters": 1123227136,
+  "trainable_parameters": {
+   "Projected-1123M-topk200": 734270976,
+   "D4-Augmented-topk200": 440467456
+  }
+ },
+ "native_generation": {
+  "new_tokens": 32,
+  "equality_dtype": "float32",
+  "diagnostic_dtype": "bfloat16"
+ },
+ "engine_admission": {
+  "factor": 2.0,
+  "confident_margin_nats": 1.0,
+  "confident_top1_agreement_min": 0.98,
+  "confident_positions_min": 50,
+  "max_model_len": 8192
+ },
+ "throughput": {
+  "prompts": 16,
+  "new_tokens": 256,
+  "_": "greedy, both arms' smoke checkpoints, the same prompts (the probe, repeated): a measurement for pricing evaluation, never a criterion"
+ },
+ "authorizes": "nothing",
+ "control_init_files": {
+  "config.json": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+  "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+  "model.safetensors": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+  "_provenance": "sha256 of the dev box's copy that logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json :: copies records as read back and VERIFIED; model.safetensors equals that record's lfs_sha256 and checkpoint_sha256"
+ }
+}

@@ -151,6 +151,12 @@ class ActivePositions:
         self.require_binary_token_weights()
         mask = torch.zeros(rows, width, dtype=torch.bool,
                            device=batch.input_ids.device)
+        if _segments(batch, original_indices, self.n_items) is not None:
+            for seg in batch.segments:
+                w = self._token[seg.index].active_mask()
+                mask[seg.row, seg.start:seg.start + seg.length] = \
+                    w[:seg.length].to(mask.device)
+            return mask
         for row, index in enumerate(_checked_indices(original_indices, rows,
                                                     self.n_items)):
             w = self._token[index]
@@ -170,6 +176,12 @@ class ActivePositions:
         rows, width = _batch_shape(batch)
         out = torch.zeros(rows, width, dtype=WEIGHT_DTYPE,
                           device=batch.input_ids.device)
+        if _segments(batch, original_indices, self.n_items) is not None:
+            for seg in batch.segments:
+                w = self._token[seg.index].weights
+                out[seg.row, seg.start:seg.start + seg.length] = \
+                    w[:seg.length].to(out.device)
+            return out
         for row, index in enumerate(_checked_indices(original_indices, rows,
                                                     self.n_items)):
             w = self._token[index]
@@ -198,6 +210,14 @@ class ActivePositions:
         rows, width = _batch_shape(batch)
         out = torch.zeros(rows, width - 1, dtype=WEIGHT_DTYPE,
                           device=batch.input_ids.device)
+        if _segments(batch, original_indices, self.n_items) is not None:
+            #: A segment of L tokens predicts L - 1 positions; the position after
+            #: them predicts the next segment's first token and keeps weight 0.
+            for seg in batch.segments:
+                w = self._prediction[seg.index].weights
+                out[seg.row, seg.prediction_slice] = \
+                    w[:seg.length - 1].to(out.device)
+            return out
         for row, index in enumerate(_checked_indices(original_indices, rows,
                                                     self.n_items)):
             w = self._prediction[index]
@@ -276,6 +296,27 @@ def _batch_shape(batch: Any) -> tuple[int, int]:
             "expected an ItemBatch whose `input_ids` is [B, T_max]; a position "
             "mask cannot be shaped against anything else")
     return int(ids.shape[0]), int(ids.shape[1])
+
+
+def _segments(batch: Any, original_indices: Sequence[int],
+              n_items: int) -> Any:
+    """A packed batch's segments, checked against ``original_indices``; ``None``
+    for a batch with one item per row."""
+    segments = getattr(batch, "segments", None)
+    if segments is None:
+        return None
+    index = [int(i) for i in original_indices]
+    if index != [s.index for s in segments]:
+        raise ScoringPositionError(
+            "a packed batch's original_indices are not its segments' indices; "
+            "a mask built from them would attribute one item's positions to "
+            "another")
+    bad = sorted(i for i in index if not 0 <= i < n_items)
+    if bad:
+        raise ScoringPositionError(
+            f"original indices {bad[:4]} are outside the {n_items} items this "
+            "policy was evaluated against")
+    return segments
 
 
 def _checked_indices(original_indices: Sequence[int], rows: int,

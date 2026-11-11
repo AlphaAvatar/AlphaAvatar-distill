@@ -1,0 +1,30 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.failure_diagnosis/v1",
+ "run_id": "a_train_a1_20261102_165858",
+ "recorded_utc": "2026-11-02T18:34:00Z",
+ "classification": "engineering failure before formal training: the lineage gate's own mechanism read the wrong hash; no training step ran, no measurement exists",
+ "failure": {
+  "at": "2026-11-02T18:28:52Z, a1_units.py -> training_plan.admit, unit A1-s20260726, before TRAIN_START",
+  "error": "LineageError: the teacher's weight shards [a6f5dec1..., ecdf3488..., 9e03420e...] are not the lineage's [328a91d3..., 6cd087b3..., e4bf4369...]",
+  "evidence": "evidence/a1_units.json (error and traceback), evidence/driver.status, evidence/launch.log"
+ },
+ "cause": "aadistill.training.lineage.snapshot_facts named each shard by Path.resolve(), the END of its symlink chain. The pod's huggingface_hub keeps Xet files in a shared store: snapshots/<rev>/<shard> -> blobs/<lfs sha256> -> hub/blobs/<xx>/<xet hash>. The end of the chain is the Xet hash, not a sha256, so the gate compared Xet hashes with the pinned LFS sha256s.",
+ "the_teacher_was_the_pinned_one": {
+  "pod_layout_observed": {
+   "model-00001-of-00003.safetensors": "-> blobs/328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223 -> ../../blobs/a6/a6f5dec111c34cd267ff4fd7889ef961237b30418d123d5b60b2c1fd3cbd3cc7",
+   "model-00002-of-00003.safetensors": "-> blobs/6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5 -> ../../blobs/ec/ecdf348827111862a9e3830801e7ee1724029573294e851f4aefa70b69116fdd",
+   "model-00003-of-00003.safetensors": "-> blobs/e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1 -> ../../blobs/9e/9e03420e9ba417fa0d35ccd26596147c96e2303391318f9a9304a8238dac0614"
+  },
+  "hub_paths_info_at_revision_1cfa9a7208912126459214e8b04321603b3df60c": {
+   "model-00001-of-00003.safetensors": {"lfs_sha256": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223", "xet_hash": "a6f5dec111c34cd267ff4fd7889ef961237b30418d123d5b60b2c1fd3cbd3cc7"},
+   "model-00002-of-00003.safetensors": {"lfs_sha256": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5", "xet_hash": "ecdf348827111862a9e3830801e7ee1724029573294e851f4aefa70b69116fdd"},
+   "model-00003-of-00003.safetensors": {"lfs_sha256": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1", "xet_hash": "9e03420e9ba417fa0d35ccd26596147c96e2303391318f9a9304a8238dac0614"}
+  },
+  "reading": "every 'refused' digest is the pinned shard's own Xet hash; the search session (a_search_20261101_153803), same image and setup, hashed these shards' bytes and matched the LFS sha256s (search_record.json root_teacher.verified)"
+ },
+ "repair": "snapshot_facts reads the link's first hop (os.readlink), the huggingface_hub blob named by the LFS sha256; regression tests/training/test_lineage.py::test_snapshot_facts_read_the_first_hop_not_a_shared_xet_store_behind_it. The trainer's own on-pod check (train_stage3.py) uses the same function.",
+ "money": "outcome.json: all-in $0.2436 (13.15 min), provider confirms the pod gone; the watchdog ended on pod_gone",
+ "next": "a fresh one-use train_a1 authorization under a new run id, its hard cap netted against this attempt: $14.10 - $0.2436 -> $13.85",
+ "a1_evidence_tgz_sha256": "ea78ccf2d5bb4afe6eb8eece84cd6b09336acf2315578978caaaf93ed1c6ef30",
+ "a1_evidence_tgz_contents": "only the empty A1-s20260726/train directory; kept locally, not committed"
+}

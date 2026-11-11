@@ -1,0 +1,275 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.packed_training_budget/v2",
+ "study_id": "six_category_schema_restored@v1",
+ "written_utc": "2026-11-07T10:33:22Z",
+ "is_an_estimate": true,
+ "step_model": {
+  "fit": {
+   "a": 3.0134,
+   "b": 8.554e-05,
+   "residual_sd": 0.043,
+   "steps": 368,
+   "mean": 3.539,
+   "max": 4.55,
+   "source": "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261025_055042/store/D4-Augmented-s20260801.evidence.tgz (sha256 680a598a...) :: training/trainer/train_log.jsonl, train_step rows after step 20"
+  },
+  "factors": {
+   "lower": 1.0,
+   "expected": 1.05,
+   "upper": 1.4375
+  }
+ },
+ "per_unit": {
+  "A1-6cat-sr-s20260726": {
+   "lower": {
+    "seconds_per_step": 3.852,
+    "train_s": 8633,
+    "evaluation_s": 2653.1,
+    "unit_s": 11286
+   },
+   "expected": {
+    "seconds_per_step": 4.045,
+    "train_s": 9317,
+    "evaluation_s": 3917.1,
+    "unit_s": 13234
+   },
+   "upper": {
+    "seconds_per_step": 5.537,
+    "train_s": 12937,
+    "evaluation_s": 7834.2,
+    "unit_s": 20771
+   }
+  },
+  "A1-6cat-sr-s20260801": {
+   "lower": {
+    "seconds_per_step": 3.852,
+    "train_s": 8633,
+    "evaluation_s": 2653.1,
+    "unit_s": 11286
+   },
+   "expected": {
+    "seconds_per_step": 4.045,
+    "train_s": 9317,
+    "evaluation_s": 3917.1,
+    "unit_s": 13234
+   },
+   "upper": {
+    "seconds_per_step": 5.537,
+    "train_s": 12937,
+    "evaluation_s": 7834.2,
+    "unit_s": 20771
+   }
+  },
+  "A2-6cat-sr-s20260726": {
+   "lower": {
+    "seconds_per_step": 3.222,
+    "train_s": 24824,
+    "evaluation_s": 2653.1,
+    "unit_s": 27477
+   },
+   "expected": {
+    "seconds_per_step": 3.383,
+    "train_s": 26333,
+    "evaluation_s": 3917.1,
+    "unit_s": 30250
+   },
+   "upper": {
+    "seconds_per_step": 4.632,
+    "train_s": 36329,
+    "evaluation_s": 7834.2,
+    "unit_s": 44163
+   }
+  },
+  "A2-6cat-sr-s20260801": {
+   "lower": {
+    "seconds_per_step": 3.222,
+    "train_s": 24824,
+    "evaluation_s": 2653.1,
+    "unit_s": 27477
+   },
+   "expected": {
+    "seconds_per_step": 3.383,
+    "train_s": 26333,
+    "evaluation_s": 3917.1,
+    "unit_s": 30250
+   },
+   "upper": {
+    "seconds_per_step": 4.632,
+    "train_s": 36329,
+    "evaluation_s": 7834.2,
+    "unit_s": 44163
+   }
+  },
+  "C1-6cat-sr-s20260726": {
+   "lower": {
+    "seconds_per_step": 3.998,
+    "train_s": 7790,
+    "evaluation_s": 2653.1,
+    "unit_s": 10443
+   },
+   "expected": {
+    "seconds_per_step": 4.198,
+    "train_s": 8331,
+    "evaluation_s": 3917.1,
+    "unit_s": 12248
+   },
+   "upper": {
+    "seconds_per_step": 5.747,
+    "train_s": 11573,
+    "evaluation_s": 7834.2,
+    "unit_s": 19408
+   }
+  },
+  "C1-6cat-sr-s20260801": {
+   "lower": {
+    "seconds_per_step": 3.998,
+    "train_s": 7790,
+    "evaluation_s": 2653.1,
+    "unit_s": 10443
+   },
+   "expected": {
+    "seconds_per_step": 4.198,
+    "train_s": 8331,
+    "evaluation_s": 3917.1,
+    "unit_s": 12248
+   },
+   "upper": {
+    "seconds_per_step": 5.747,
+    "train_s": 11573,
+    "evaluation_s": 7834.2,
+    "unit_s": 19408
+   }
+  }
+ },
+ "arms": {
+  "A1-6cat-sr": {
+   "kind": "train_sr_a1",
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "session": {
+    "lower": {
+     "gpu_hours": 6.52,
+     "usd": 7.24
+    },
+    "expected": {
+     "gpu_hours": 7.72,
+     "usd": 8.57
+    },
+    "upper": {
+     "gpu_hours": 12.21,
+     "usd": 14.78
+    }
+   },
+   "unit_deadline_hours": 3.75,
+   "session_hard_cap": {
+    "driver_minutes": 692,
+    "billable_minutes": 775.0,
+    "hard_cap_usd": 15.64
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 133.1,
+    "usd_each": 2.69,
+    "attempts_reserved": 1,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored one"
+   },
+   "kind_cumulative_cap_usd": 18.33
+  },
+  "A2-6cat-sr": {
+   "kind": "train_sr_a2",
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "session": {
+    "lower": {
+     "gpu_hours": 15.52,
+     "usd": 17.23
+    },
+    "expected": {
+     "gpu_hours": 17.17,
+     "usd": 19.07
+    },
+    "upper": {
+     "gpu_hours": 25.2,
+     "usd": 30.51
+    }
+   },
+   "unit_deadline_hours": 10.25,
+   "session_hard_cap": {
+    "driver_minutes": 1472,
+    "billable_minutes": 1593.7,
+    "hard_cap_usd": 32.16
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 133.1,
+    "usd_each": 2.69,
+    "attempts_reserved": 2,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored one"
+   },
+   "kind_cumulative_cap_usd": 37.54
+  },
+  "C1-6cat-sr": {
+   "kind": "train_sr_c1",
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "session": {
+    "lower": {
+     "gpu_hours": 6.05,
+     "usd": 6.72
+    },
+    "expected": {
+     "gpu_hours": 7.17,
+     "usd": 7.96
+    },
+    "upper": {
+     "gpu_hours": 11.45,
+     "usd": 13.86
+    }
+   },
+   "unit_deadline_hours": 3.25,
+   "session_hard_cap": {
+    "driver_minutes": 647,
+    "billable_minutes": 727.3,
+    "hard_cap_usd": 14.68
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 133.2,
+    "usd_each": 2.69,
+    "attempts_reserved": 1,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored one"
+   },
+   "kind_cumulative_cap_usd": 17.37
+  }
+ },
+ "six_units_usd": {
+  "lower": 31.19,
+  "expected": 35.6,
+  "upper": 59.15
+ },
+ "six_units_gpu_hours": {
+  "lower": 28.09,
+  "expected": 32.06,
+  "upper": 48.86
+ },
+ "stage3_cumulative_cap_usd": 73.24,
+ "evaluation": "each unit's formal eval-set-1 evaluation runs on the same pod right after its training (a1_units.py): its seconds are inside the unit's row and its cost inside the arm's session cap; no separate evaluation session is priced",
+ "rates": {
+  "gpu_expected_usd_per_hour": 1.09,
+  "gpu_cap_usd_per_hour": 1.19,
+  "container_disk_usd_per_hour": 0.0205
+ },
+ "capacity": {
+  "save_point_bytes": 5908258491,
+  "unit_after_evaluation_bytes": 8292493459,
+  "while_saving_bytes": 11816516982,
+  "stage3_high_water_bytes": 55663219245,
+  "stage3_after_bytes": 49754960754,
+  "rule": "keep_last 1: while a save point is written the previous one stays (2 x 5.91 GB), then is removed; after a unit, its final save point (weights + AdamW state) and the evaluation package remain",
+  "unmeasured": "the search's own footprint on the volume after its last level (221 GB by du before it); the journal's checkpoints sum to 270.6 GB (decimal) -- the first session measures it (a1_units.volume_room) and refuses a unit that would not fit"
+ },
+ "authorizes": "nothing"
+}

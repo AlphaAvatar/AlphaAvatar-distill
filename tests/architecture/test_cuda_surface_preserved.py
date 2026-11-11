@@ -2335,6 +2335,310 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "passed through to `plan_session`. THIS IS A DECLARED SEMANTIC "
             "CHANGE of the spec. NO CUDA SURFACE.",
      }),
+    ("d5f1c6f2a89471f99d9477b3b39e11178998b47b",
+     "Research A (hybrid teacher modes) and B (projected residual) at $0",
+     {
+        "src/aadistill/evaluation/behavior.py":
+            "NEW `THINK_STATES`, `template_think_state`, `record_think_state`; "
+            "`split_generation(think_state=...)` and `score_sample(think_state=...)` "
+            "add the `preclosed` state (a hybrid template's empty closed think "
+            "block: no delimiter allowed in the continuation, the body is the "
+            "answer); every split now also reports `think_state`. Absent the "
+            "argument every path is the historical one. THIS IS A DECLARED "
+            "SEMANTIC CHANGE of protocol parsing. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/strict_answer.py":
+            "`protocol_valid(think_state=...)`; `score_numeric` reads the record's "
+            "state through `record_think_state` (identical for every record without "
+            "`think_state`). THIS IS A DECLARED SEMANTIC CHANGE. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/capability.py":
+            "`_shared` reads the record's state through `record_think_state`; "
+            "identical for every record without `think_state`. THIS IS A DECLARED "
+            "SEMANTIC CHANGE. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/usable_rollout.py":
+            "`components(think_state=...)` passed to the protocol check and the "
+            "answer split. THIS IS A DECLARED SEMANTIC CHANGE. NO CUDA SURFACE.",
+        "src/aadistill/training/train.py":
+            "NEW `batch.context_strategy`: `cross_context` (the default, every "
+            "logged run's path, unchanged) or `document_isolated`, whose blocks "
+            "carry per-document position ids forwarded to student and teacher so "
+            "transformers builds a block-diagonal causal mask; refused unless the "
+            "strategy and the blocks agree; recorded in every step's metrics. THIS "
+            "IS A DECLARED SEMANTIC CHANGE of training; CUDA SURFACE: the attention "
+            "mask on the real models, owed to a GPU validation.",
+        "src/aadistill/data/token_documents.py":
+            "NEW MODULE: token-in/token-out teacher documents, the template's "
+            "generation suffix and message terminator, both context strategies "
+            "(`pack_isolated`, `pack_cross_context`, `pack_documents`), "
+            "`context_exposure` and `isolation_report`. NO CUDA SURFACE.",
+        "src/aadistill/initialization/adapters/projected_residual.py":
+            "NEW MODULE: the `aad_projected_residual` family (full-width residual, "
+            "per-layer projection), `fold_to_qwen3`, `projection_orthogonality`, "
+            "explicit `register_auto_classes`. CUDA SURFACE: a new model, owed to "
+            "a GPU validation.",
+        "src/aadistill/initialization/transforms/projected_residual.py":
+            "NEW MODULE: `select_full_width`, `SublayerStatsCollector`, "
+            "`projection_basis`, `materialize_projected`. CUDA SURFACE: forward "
+            "hooks on the parent's blocks, owed to a GPU validation.",
+        "src/aadistill/models/cost_model.py":
+            "NEW MODULE: exact parameter counts and analytic FLOPs. NO CUDA SURFACE.",
+     }),
+    ("4c5888442331611b99158ed0c6fc1f7d2a1e2c6a",
+     "Revised Research A/B programme: the Top-K + tail KD training baseline and the gated projected model",
+     {
+        "src/aadistill/training/topk_kd.py":
+            "NEW MODULE: reference-Top-K + complement-logsumexp tail forward KL as a "
+            "differentiable training objective at head rows selected before the output "
+            "head (`head_rows`, `teacher_sketch`, `topk_tail_losses` under activation "
+            "checkpointing). CUDA SURFACE: bf16 autocast head blocks and checkpointed "
+            "recompute on the real models, owed to a GPU validation.",
+        "src/aadistill/training/train.py":
+            "NEW optional `loss.kd_support` (switches CE and KD to head-row selection and "
+            "the Top-K + tail KL), `loss.exclude_template_prefill`, "
+            "`checkpoint.bind_identity` (resume refused on other data or initialization "
+            "identities; `resume_identity.json` beside each save point), `monitor` "
+            "(parameter statistics), CUDA RNG states in save points, reserved-memory "
+            "logging, a local-directory teacher without a revision. Absent keys keep every "
+            "historical config's path. THIS IS A DECLARED SEMANTIC CHANGE of training; "
+            "CUDA SURFACE: the new loss path's memory and numerics, owed to a GPU validation.",
+        "src/aadistill/data/target_policy.py":
+            "NEW MODULE: `drop_template_prefill`, template-prefilled targets removed from a "
+            "loss mask by token ids. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/function_error.py":
+            "NEW MODULE: `function_error`, two causal LMs' next-token distributions compared "
+            "at chosen rows (KL, top-1 agreement, centred logit differences, CE). CUDA "
+            "SURFACE: runs on the materializing device, owed to a GPU validation.",
+        "src/aadistill/initialization/adapters/projected_residual.py":
+            "`projection_sharing` gains `independent` (four Linear projections per layer) "
+            "and `projection_activation` `learnable_silu_residual` (phi(z) = z + alpha * "
+            "silu(z), alpha zero-initialized); `projections` returns per-site maps, "
+            "`gate_statistics`, `fold_to_qwen3` folds independent linear models and refuses "
+            "gated ones. The transpose-shared default is unchanged. THIS IS A DECLARED "
+            "SEMANTIC CHANGE of the family; CUDA SURFACE: a new model, owed to a GPU validation.",
+        "src/aadistill/initialization/transforms/projected_residual.py":
+            "NEW `INDEPENDENT_BASES`, `independent_bases`; `materialize_projected` takes "
+            "per-site bases and a projection activation (the shared form unchanged). CUDA "
+            "SURFACE: the materialization on the real teacher, owed to a GPU validation.",
+        "src/aadistill/initialization/adapters/families.py":
+            "NEW MODULE: `CUSTOM_MODEL_FAMILIES` and `register_custom_model_families` "
+            "(explicit, idempotent Auto-class registration). NO CUDA SURFACE.",
+        "src/aadistill/models/cost_model.py":
+            "`projection_sharing` and `projection_activation` in the geometry: four "
+            "projections and the gates' parameters counted; `per_layer.gates` only for a "
+            "gated geometry, so earlier geometries serialize as before. NO CUDA SURFACE.",
+        "src/aadistill/models/teacher.py":
+            "`resolve_revision` returns a full 40-hex commit without a hub call and None "
+            "for a local directory. THIS IS A DECLARED SEMANTIC CHANGE of loading (an "
+            "offline pod can load a pinned teacher). NO CUDA SURFACE.",
+        "src/aadistill/initialization/adapters/projected_residual_vllm.py":
+            "NEW MODULE: the projected-residual family as a vLLM out-of-tree model and its "
+            "general-plugin `register`; imported only in the vLLM environment. CUDA "
+            "SURFACE: the whole engine path, owed to a GPU validation.",
+     }),
+    ("e70c1d92b3f35822c524cab23183ba6879b8085a",
+     "Research A first: its chain at $0 (isolated packs on disk, a multi-GPU pod)",
+     {
+        "src/aadistill/data/ladder.py":
+            "`ladder_blocks` returns four-tuples with the pack's own `position_ids` when "
+            "`blocks.npz` stores them (document-isolated packs); packs without them load "
+            "as before. NO CUDA SURFACE.",
+        "src/aadistill/data/token_documents.py":
+            "NEW `isolated_sequence_count` (pack_isolated's sequence count without "
+            "tensors, the same placement) and `write_pack` (the ladder contract with "
+            "position ids and a validation tail). NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session_runner.py":
+            "`--gpu-count` (default 1): the pod is created with that many GPUs and priced "
+            "per pod (the per-GPU quote x the count) against --max-price; one GPU keeps "
+            "every earlier session's command and price. THIS IS A DECLARED SEMANTIC "
+            "CHANGE of provisioning; NO CUDA SURFACE.",
+        "src/aadistill/training/lineage.py":
+            "NEW: the teacher-student lineage gate (Research A v2, maintainer 2026-10-31). A "
+            "declared lineage against the observed KD teacher (model id, revision, snapshot "
+            "weight shards, vocabulary, chat template, RoPE base, position limit), the student "
+            "config and initialization bytes, and the pack bytes; every mismatch refuses. "
+            "Called only where a config declares a lineage. Maintainer review 2026-11-01: a "
+            "field the declaration or the student's EFFECTIVE config leaves unstated is a "
+            "problem, never a match; the tokenizer is bound by its files; the initialization "
+            "by its search record's root id, shard-set hash and checkpoint sha256 "
+            "(`initialization_provenance`, `shard_set_sha256`); a resume by the checkpoint's "
+            "lineage `stamp`. NEW `effective_config`, `tokenizer_files`. NO CUDA SURFACE.",
+        "src/aadistill/data/code_exec.py":
+            "v4 (`CODE_EXEC_SCHEMA` .../v4): the child runs with `-s -P` and "
+            "PYTHONHASHSEED=0 instead of `-I` (which ignores the seed), so a program whose "
+            "result depends on string-hash order gets the same verdict on every run; the "
+            "probe admits the variable as the interpreter's own. THIS IS A DECLARED "
+            "SEMANTIC CHANGE of a verdict (a hash-dependent program no longer passes or "
+            "fails at random); limits, sandbox and the pass rule are unchanged. Then "
+            "`hash_seed` (default 0: every v4 verdict unchanged) and NEW "
+            "`run_asserts_across_seeds`: passed only when the tests pass under every given "
+            "seed and seed 0 twice, else `unstable`. NO CUDA SURFACE.",
+        "src/aadistill/initialization/specs/metrics.py":
+            "`StateEvalSuite.critical_groups` and `SuiteItem.critical_group` (optional): a "
+            "suite whose items carry different critical-token classes by group. Versioned by "
+            "absence: an undeclared suite's `suite_hash` and `as_dict` are byte-identical. NO "
+            "CUDA SURFACE.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "with `critical_groups` declared, `state.critical_token_kl` (and the objective's "
+            "`critical_token`) is the unweighted mean over groups of each group's mean over "
+            "its own classes (`CRITICAL_GROUP_AGGREGATION`), per-group values beside it; a "
+            "class with no scored position in its group, or an item outside a declared group, "
+            "is refused at construction. THIS IS A DECLARED SEMANTIC CHANGE only for a suite "
+            "that declares groups; every undeclared suite's values and protocol id are "
+            "unchanged. The per-group sums are on the logits' device like every other "
+            "`DistortionSums`. NO NEW CUDA SURFACE.",
+        "src/aadistill/initialization/scoring/protocol_identity.py":
+            "`ReductionSemantics.critical_aggregation` (optional, versioned by absence): set "
+            "for a grouped suite, so its measurement protocol id is new; every historical id "
+            "unchanged. NO CUDA SURFACE.",
+     }),    ("b7ee0c93c2f1e96c376381c3db11ee4e2441f674",
+     "Packed round: sequential causal packing for Stage-1 forwards and Stage-3 training (maintainer 2026-11-03)",
+     {
+        "src/aadistill/data/tool_calls.py":
+            "NEW MODULE: tool calls in generated text -- parsing (caller-supplied delimiters), the JSON Schema "
+            "subset check, a replay backend, order-free gold matching and the five episode checks. NO CUDA SURFACE.",
+        "src/aadistill/data/sequence_packing.py":
+            "NEW MODULE: the maintainer's `packing_conversation` verbatim, `sequential_pack` (its "
+            "index lists, checked against it on every call, with the prefix-restart token "
+            "materialization), `shuffled_order` (sha256-keyed), `SequencePackingSpec`, "
+            "`plan_report`. NO CUDA SURFACE.",
+        "src/aadistill/data/token_documents.py":
+            "NEW `pack_sequential` (strategy `sequential_causal`), `MaskedDocument`; "
+            "`PackedDocuments.packing` and sequential statistics; `write_pack` names a "
+            "sequential pack's rung by its unique supervised tokens and records placements' "
+            "`final`. Isolated and cross-context packs are unchanged. NO CUDA SURFACE.",
+        "src/aadistill/data/ladder.py":
+            "`ladder_blocks` reports `train_unique_supervised_tokens` for a sequential pack; "
+            "every other pack loads as before. NO CUDA SURFACE.",
+        "src/aadistill/initialization/baseline.py":
+            "a record may name `method.forward_context` (its rules checked against the core); "
+            "`ForwardBaseline.forward_context(...)`; `resolve_superseded` loads a superseded "
+            "record through the selection. A record without the block parses as before. NO "
+            "CUDA SURFACE.",
+        "src/aadistill/initialization/calibration/batching.py":
+            "NEW `Segment`, `build_packed_batch`; `ItemBatch.segments` (optional): a packed "
+            "batch's `prediction_mask` excludes each segment's boundary position and its "
+            "per-row views refuse. Unpacked batches are unchanged. CUDA SURFACE: packed "
+            "8,192-token forwards, owed to a GPU validation.",
+        "src/aadistill/initialization/calibration/packing.py":
+            "NEW `ForwardContext`, `forward_context_from`, `forward_context_profile`; "
+            "`packed_batches(..., forward_context=)` yields packed batches. THIS IS A DECLARED "
+            "SEMANTIC CHANGE only under a forward context; every historical grouping is "
+            "unchanged. CUDA SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/operators/_common.py":
+            "`collect_activation_stats(..., forward_context=)`: the statistics pass reads packed "
+            "sequences; absent, the historical paths. CUDA SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/operators/attention/gqa/activation_importance.py":
+            "passes `ctx.forward_context` to its batched loop and traces it; its reference "
+            "path requires no forward context. Unchanged without one. CUDA SURFACE: owed to a "
+            "GPU validation.",
+        "src/aadistill/initialization/operators/attention/gqa/causal_kl.py":
+            "refuses a forward context (no packed path). NO CUDA SURFACE.",
+        "src/aadistill/initialization/operators/base.py":
+            "`OperatorContext.forward_context`; `execute` refuses a disagreement between the "
+            "config's `forward_context` and the object, by the two-sides rule. NO CUDA SURFACE.",
+        "src/aadistill/initialization/operators/composite/stage1_sandwich.py":
+            "passes `ctx.forward_context` to the statistics pass. Unchanged without one. CUDA "
+            "SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "NEW `_PackedDepthScorer`, `_PackedReferenceSketches`, `PACKED_KL_ROW_CHUNK`: under a "
+            "forward context, the scored-row Top-K + tail parent KL over packed sequences, "
+            "per-item means pooling every placement, prefix reuse; other configurations "
+            "refused. Unchanged without one. CUDA SURFACE: memory and numerics of 8,192-token "
+            "sequences, owed to a GPU validation.",
+        "src/aadistill/initialization/operators/ffn/dense/activation_importance.py":
+            "passes `ctx.forward_context` to the statistics pass and traces it. Unchanged "
+            "without one. CUDA SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/operators/width/residual/global_pca.py":
+            "passes `ctx.forward_context` to the statistics pass and traces it. Unchanged "
+            "without one. CUDA SURFACE: owed to a GPU validation.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "`FixedPathSpec.forward_context` (absent from `as_dict` when unset): a replay "
+            "passes it to the operator config, the context and the statistics-cache key. "
+            "Every historical spec hash and replay unchanged. On the historical surface: "
+            "listed in HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION. NO NEW CUDA SURFACE "
+            "without a forward context.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "`StateEvaluator(forward_context=)`: the packed path (scored rows, Top-K + tail, "
+            "RECOMPUTE with teacher sketches cached per packed segment), its protocol id "
+            "carrying the context. Unchanged without one. CUDA SURFACE: owed to a GPU "
+            "validation.",
+        "src/aadistill/initialization/planning/operator_config.py":
+            "`hashed_operator_config(..., forward_context=)` adds `forward_context` for a "
+            "calibrated operator; absent, every config hash unchanged. NO CUDA SURFACE.",
+        "src/aadistill/initialization/planning/search.py":
+            "`SearchConfig.forward_context` (absent from `as_dict` when unset); passed to every "
+            "operator config and context and to the statistics-cache key; a measurer reading "
+            "another context, or an objective, is refused at construction. Every historical "
+            "config hash unchanged. NO CUDA SURFACE.",
+        "src/aadistill/initialization/scoring/batches.py":
+            "`ActivePositions` places each segment's token and prediction weights at its "
+            "offset in a packed batch; unpacked batches unchanged. NO CUDA SURFACE.",
+        "src/aadistill/initialization/scoring/protocol_identity.py":
+            "`ReductionSemantics.forward_context` (optional, versioned by absence): a packed "
+            "measurement's protocol id is new; every historical id unchanged. NO CUDA SURFACE.",
+     }),
+    ("fc6fa1d68aa79575d79f3a9e02c72ad9b0a4dcad",
+     "Packed round: data selection, proportion validation, admission and packing separated (maintainer 2026-11-04)",
+     {
+        "src/aadistill/data/mixture.py":
+            "NEW `validate_proportions(counts, quotas, shares)`: realized amounts against the caller's "
+            "registered quotas and shares, before packing; pure, no default tolerance, no import. "
+            "`interleave` and `order_blocks` unchanged. NO CUDA SURFACE.",
+     }),
+    ("647eea0ee16686df68de0344b99d5df7b7b469c7",
+     "Packed round: single-step gold tool call, report and pack identity (maintainer 2026-11-04, review of 647eea0e)",
+     {
+        "src/aadistill/data/tool_calls.py":
+            "`verify_episode(..., unexecuted_final_call=False)`: an optional decision-step episode that ends on "
+            "calls nothing executes -- they must exist and carry no response, are checked for protocol, schema "
+            "and gold, and `recorded_execution` is None when no earlier turn executed a call. The default "
+            "(an episode ends on an answer) is unchanged. NO CUDA SURFACE.",
+     }),
+    ("0b96ed38f608bed5d48632b05b0fa67ecc2ad29a",
+     "Metric review: verifier levels report what they check (maintainer 2026-11-04)",
+     {
+        "src/aadistill/data/tool_calls.py":
+            "`verify_episode`: `recorded_execution` is None for an episode that executed no call (a vacuous True "
+            "before); new final level `target_tools_called` (recall of a target tool set, not tool-selection "
+            "accuracy) in `LEVELS` / `FINAL_LEVELS`. Admission unchanged: a level is still admitted unless False. "
+            "NO CUDA SURFACE.",
+     }),
+    ("a5a20be854f8cb6343894c198e8755ee7259aa38",
+     "Acquisition and placement: per-attempt deadline, datacenter rotation, ambiguous creates reconciled (maintainer 2026-11-04)",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "`create()`: `--terminate-after` computed at each create from this session's first resource (it was "
+            "computed once before the retry loop, so queueing shortened a late pod's backstop); each answer "
+            "classified -- an id, the provider's capacity refusal (`CAPACITY_REFUSAL`, retried), or unknown "
+            "(timeout, transport, no id): the account is read (`reconcile_create`), a pod with this session's name "
+            "is adopted, an unreadable account stops (`provider_state_unknown`), the same non-capacity refusal twice "
+            "stops. `placement(attempt)`: without a volume, `--data-center-ids` groups (`A,B;C`) rotate per attempt; "
+            "a launcher that declares none gets the command it always got. NO CUDA SURFACE.",
+     }),
+    ("1937bdc6bd4f47246d4e45dc9a22be8730581890",
+     "Create protection: request identity, provider creation time, reconcile across a window, every matching resource (maintainer 2026-11-04)",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "`create()`: each request carries a unique name (`pod_name(request)`) and its start, recorded before "
+            "the call; an answer with no id is settled by reading the account across a window (`reconcile_create`, "
+            "`--reconcile-window-seconds`: two empty reads, the last one read; a found pod ends it), and before each "
+            "further create; `own()` starts cost, deadline and watchdog at the provider's `createdAt` (else the "
+            "request's start) and records the pod's REST v2 record (datacenter); `_take()` keeps one resource and "
+            "releases every further one of this session's requests with confirmation, billed from its request "
+            "(`release_extra`, `teardown_now`'s `extra_resources_usd`); a created-then-aborted draw is recorded as "
+            "created. NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/provider.py":
+            "`RunPodProvider.pod_record(pod_id)`: one REST v2 `GET /v2/pods/{id}` read, never raising (None when "
+            "unread); `RUNPOD_REST_V2`. Termination, polling and listing unchanged. NO CUDA SURFACE.",
+     }),
+    ("07a57cc0fccb66f8506d306a67acd98ae0d74f44",
+     "A-MIX-6cat-sr: one teacher's modes in one pack (maintainer 2026-11-09)",
+     {
+        "src/aadistill/training/lineage.py":
+            "A lineage may declare `modes` (distinct names) instead of one `mode`: each pack then declares the "
+            "`modes` it holds with one `sources` entry per mode, every declared mode is trained by a pack, and "
+            "`mode` with `modes` refuses; a single-mode lineage refuses a pack that declares `modes`. `stamp` "
+            "carries `modes`. Every single-mode declaration checks exactly as before. NO CUDA SURFACE.",
+     }),
 )
 
 

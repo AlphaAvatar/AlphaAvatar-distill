@@ -1,0 +1,805 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_pilot_free_text_review/v1",
+ "run_id": "a_tool_pilot_20261104_164531",
+ "scope": "every first-candidate refusal whose only gold differences are string arguments over 30 characters (tool_pilot_diagnosis.gold_kind == 'free_text'): 43 single-step tasks and 1 full-episode task per mode (2), one argument each",
+ "reviewer": "the agent, reading the user input, the parameter's schema, the gold value and the teacher's value side by side (2026-11-04); not a human rating and not an admission",
+ "criteria": {
+  "equivalent": "every identifier, amount, date and contact the user supplied and the gold keeps is kept, the request is the same, nothing contradicts the input; the gold's own additions (policy notes, judgments) are not required",
+  "omits_user_facts": "a fact the user supplied and the gold keeps (an id, an email, a date, an action already taken) is missing: not the same summary for the human or tool that reads it",
+  "contradicts_input": "states something the input does not say or reverses it"
+ },
+ "counts": {
+  "H-N": {
+   "omits_user_facts": 12,
+   "equivalent": 9
+  },
+  "H-T": {
+   "equivalent": 15,
+   "omits_user_facts": 8,
+   "contradicts_input": 1
+  }
+ },
+ "cases": [
+  {
+   "mode": "H-N",
+   "task_id": "tc1-333985efb05110843d07",
+   "source_row": "49622",
+   "recorded_step_pass_rates": [
+    0.375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling from CC-555 regarding Order #MG555 for magazine covers. We require extended bleed specifications beyond standard parameters and need to discuss custom printing requirements. Could you confirm the maximum allowable bleed dimensions and any special handling protocols for this order?",
+   "gold": "Customer from CC-555 regarding Order #MG555 for magazine covers requires extended bleed specifications beyond standard parameters and needs to discuss custom printing requirements, including maximum allowable bleed dimensions and special handling protocols.",
+   "teacher": "Request for extended bleed specifications and custom printing requirements for Order #MG555",
+   "judgment": "omits_user_facts",
+   "reason": "omits the company id CC-555 and the asked specifics (maximum bleed dimensions, handling protocols)",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-966f1d3c926a543674a6",
+   "source_row": "39531",
+   "recorded_step_pass_rates": [
+    0.4375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, my name is [Customer Name], and I’m with a non-profit organization under company ID NC-666. I’m calling about Order #SM999 for social media graphics that need to be adapted for print. The digital assets we provided require significant design adjustments—like resolution enhancement and layout reformatting—to meet commercial printing standards. I realize this might be beyond your current scope, but could you please escalate this to a design specialist or a higher-tier support team who can assist with technical print adaptations? We’re on a tight timeline for a community campaign launch.",
+   "gold": "Customer from non-profit organization (company ID NC-666) needs design adjustments for Order #SM999: resolution enhancement and layout reformatting of digital assets for print adaptation. Tight timeline for community campaign launch.",
+   "teacher": "Request for design specialist assistance with print adaptations for Order #SM999",
+   "judgment": "omits_user_facts",
+   "reason": "omits company id NC-666, the named adjustments and the campaign timeline",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-dc70769e08e1623d0ef3",
+   "source_row": "94962",
+   "recorded_step_pass_rates": [
+    0.53125
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling regarding order #GOV3344. We require a spot UV coating for this government document print job, which I believe necessitates manual approval. Could you please initiate the custom finish approval process for this order?",
+   "gold": "Customer requests spot UV coating approval for order #GOV3344, a government document print job requiring custom finish approval.",
+   "teacher": "Request for manual approval of spot UV coating for order #GOV3344",
+   "judgment": "equivalent",
+   "reason": "order, spot UV coating and the approval request kept; only 'government document' context dropped",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-858743e8265300a01c41",
+   "source_row": "20226",
+   "recorded_step_pass_rates": [
+    0.59375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I need to report an expired rigging certification for your film production team. My name is [Inspector Name], and I’m with the safety inspection division. I’m calling regarding Project ID INSPECT-999 and Personnel ID RIG-123. The individual’s aerial rigging certification expired on August 1, 2025, which violates our hazardous condition protocol. I need this escalated immediately to ensure the set remains safe for production. Can you confirm this is being prioritized?",
+   "gold": "Safety inspector reports expired aerial rigging certification for Personnel ID RIG-123 on Project ID INSPECT-999, expired August 1, 2025. Violates hazardous condition protocol.",
+   "teacher": "Expired rigging certification for Project ID INSPECT-999 and Personnel ID RIG-123. The certification expired on August 1, 2025, violating hazardous condition protocol.",
+   "judgment": "equivalent",
+   "reason": "project id, personnel id, date and the violation kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-6d3f817cdc170a8dc784",
+   "source_row": "33805",
+   "recorded_step_pass_rates": [
+    0.03125
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I recently received my order #GUEST123, but the shipping container was torn upon arrival. I noticed the external packaging is damaged—there’s a large tear on the side of the box. I haven’t opened it yet to check the contents. Do you need me to provide photos of the damaged box? Also, if the internal items are damaged, would you require photographic evidence to escalate this as a claim?",
+   "gold": "Customer reports damaged shipping container for order #GUEST123. External packaging torn upon arrival. Customer hasn't opened box yet. Asking about photographic evidence requirements for damage claim.",
+   "teacher": "Shipping container was torn upon arrival with damage to the external packaging. The user is asking if photos of the damaged box are needed and if internal items being damaged would require photographic evidence to escalate the claim.",
+   "judgment": "omits_user_facts",
+   "reason": "omits the order id #GUEST123 and that the box is unopened",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-24ca336e3203a6ce8324",
+   "source_row": "58867",
+   "recorded_step_pass_rates": [
+    0.59375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I'm reaching out regarding Order #BUS555 under Company ID MATERIAL666. We require urgent clarification about substrate compatibility for a specialty vinyl material we're using. Could you confirm if your team can advise on this, or should I be escalated to a materials specialist?",
+   "gold": "Customer requesting substrate compatibility clarification for specialty vinyl material on Order #BUS555 under Company ID MATERIAL666",
+   "teacher": "Inquiry about substrate compatibility for specialty vinyl material in Order #BUS555 under Company ID MATERIAL666",
+   "judgment": "equivalent",
+   "reason": "same order, company id and request",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-4d834beb06102d3b7ec6",
+   "source_row": "54118",
+   "recorded_step_pass_rates": [
+    0.34375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "I need to request service for our sterilization equipment (Equipment ID: STER-8866) at Plant RIC-1144. Due to the confidentiality agreement requirements for this service request, I need to be transferred to a technical specialist immediately. The equipment is experiencing a sterilization cycle failure (Criticality Tier 4), and I have access credentials QA9977 ready for verification.",
+   "gold": "Sterilization equipment STER-8866 at Plant RIC-1144 experiencing sterilization cycle failure (Criticality Tier 4). User has access credentials QA9977.",
+   "teacher": "Request for technical specialist to handle sterilization equipment (ID: STER-8866) at Plant RIC-1144 with confidentiality agreement requirements. The equipment is experiencing a sterilization cycle failure (Criticality Tier 4). Access credentials QA9977 are ready for verification.",
+   "judgment": "equivalent",
+   "reason": "equipment, plant, failure tier and credentials all kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-5146ce50ffb89b596ef6",
+   "source_row": "49726",
+   "recorded_step_pass_rates": [
+    0.125
+   ],
+   "tool": "escalate_to_licensed_engineer",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling regarding an urgent matter related to legal discovery for a project. My name is [Your Name], and I'm the general contractor for the university lab construction project. My client ID is C-1010 and project ID is P-555 (Institutional, Construction Admin, $8M value). A law firm has formally requested design documents for litigation purposes, and per our protocol, this needs to be escalated immediately to a licensed engineer for legal review. Can you handle this escalation right away?",
+   "gold": "Legal discovery request for design documents related to university lab construction project P-555 (Institutional, Construction Admin, $8M value). Law firm has formally requested design documents for litigation purposes. Client ID: C-1010.",
+   "teacher": "Legal discovery request for design documents related to university lab construction project (Project ID: P-555, $8M value).",
+   "judgment": "omits_user_facts",
+   "reason": "omits client id C-1010 and the litigation request by a law firm",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-7488c73abe0b10c650a6",
+   "source_row": "92209",
+   "recorded_step_pass_rates": [
+    0.5
+   ],
+   "tool": "transfer_to_tax_specialist",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "I need to speak with an estate tax specialist regarding U.S.-France treaty provisions. My name is [Client Name], Client ID NY222. I'm a dual U.S./French citizen with €2 million in French assets, and I need guidance on how estate tax treaties will apply to my situation. Can you please transfer me to a specialist who handles international tax treaties?",
+   "gold": "Client NY222 requests guidance on U.S.-France estate tax treaty provisions. Dual U.S./French citizen with €2 million in French assets. Needs specialist for international tax treaty application.",
+   "teacher": "U.S.-France treaty provisions for estate tax on €2 million in French assets",
+   "judgment": "omits_user_facts",
+   "reason": "omits client id NY222 and the dual citizenship",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-82578efc0796714c9893",
+   "source_row": "68363",
+   "recorded_step_pass_rates": [
+    0.5
+   ],
+   "tool": "transfer_to_tax_specialist",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling regarding a concern about a will execution. My client ID is PA4411, and the will in question was executed on February 10, 2025. I believe there may be issues with the witnesses' capacity during the signing. Specifically, I suspect undue influence may have been exerted on one of the witnesses who appears to have had diminished mental capacity at the time. Can you guide me on how to formally report this concern?",
+   "gold": "Client PA4411 reports concerns about will execution dated February 10, 2025, alleging potential undue influence on witness with diminished mental capacity. Requesting guidance on formal reporting process.",
+   "teacher": "Concern about will execution with potential undue influence on a witness due to diminished mental capacity",
+   "judgment": "omits_user_facts",
+   "reason": "omits client id PA4411 and the execution date",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-9afd5231f7ca6431f64b",
+   "source_row": "83337",
+   "recorded_step_pass_rates": [
+    0.5625
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I'm a member with ID CY99991 and vessel registration ending in 5577 at Slip A-22. I need to report a boundary violation incident that occurred yesterday afternoon. A neighboring vessel repeatedly encroached on my slip space between 2-3 PM, causing damage to my yacht's starboard hull. I have photos and a witness statement from a dock attendant. Would you please transfer me to a human agent to discuss liability and next steps for resolving this dispute?",
+   "gold": "Member CY99991 reports boundary violation incident at Slip A-22. Neighboring vessel repeatedly encroached on slip space between 2-3 PM yesterday, causing damage to yacht's starboard hull. Member has photos and witness statement from dock attendant. Vessel registration ends in 5577. Member requests transfer to discuss liability and next steps for resolving dispute.",
+   "teacher": "A neighboring vessel encroached on my slip space between 2-3 PM, causing damage to my yacht's starboard hull. I have photos and a witness statement from a dock attendant.",
+   "judgment": "omits_user_facts",
+   "reason": "written in the user's first person; omits member id, slip A-22 and the vessel registration",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-fc2df2b086baebd7a4ba",
+   "source_row": "4302",
+   "recorded_step_pass_rates": [
+    0.25
+   ],
+   "tool": "emergency_transfer",
+   "parameter": "situation_summary",
+   "parameter_description": "",
+   "user": "Hello, I need urgent assistance. I’m calling because I’m in a safety emergency related to domestic violence and must change my therapist immediately. My client ID is ME890123, and my current therapist is T123456. I’ve been instructed to state this is a “safety emergency” to bypass standard matching protocols under crisis exceptions. Please help me connect with a new therapist as soon as possible. Is there someone available to handle this urgently?",
+   "gold": "Client reports safety emergency related to domestic violence, requests immediate therapist change.",
+   "teacher": "Client is in a safety emergency related to domestic violence and needs to change therapist immediately.",
+   "judgment": "equivalent",
+   "reason": "same emergency and request",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-35e8e4103787943bbe6f",
+   "source_row": "16031",
+   "recorded_step_pass_rates": [
+    0.46875
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hi, I’m calling to request a $120 cash refund for a service I received at your spa. My booking ID is BX567890. I’d appreciate it if you could process this as soon as possible.",
+   "gold": "Client requesting $120 cash refund for service with booking ID BX567890.",
+   "teacher": "Request for $120 cash refund for booking ID BX567890",
+   "judgment": "equivalent",
+   "reason": "same amount, booking and request",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-1e1548fc0c6fcd9d34dc",
+   "source_row": "66320",
+   "recorded_step_pass_rates": [
+    0.59375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling to request a cash refund for a service I received at your salon. My booking ID is BX567890, and the service charge was $120. I'm not satisfied with the results and would like a full refund. Since this amount exceeds your $100 policy threshold, I understand you'll need to escalate this to a human supervisor for approval. Can you please start that process for me?",
+   "gold": "Client requests cash refund of $120 for booking BX567890, citing dissatisfaction with service results. Amount exceeds $100 policy threshold.",
+   "teacher": "Request for full refund of $120 service charge with booking ID BX567890.",
+   "judgment": "omits_user_facts",
+   "reason": "omits the reason (dissatisfaction) and the stated policy threshold",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-b5de80dcdd4b2aaaba80",
+   "source_row": "105674",
+   "recorded_step_pass_rates": [
+    0.34375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, my name is Emma Moore and my email is emoore@email.com. I recently purchased a $120 gift card for your beauty spa 30 days ago, but I need to request a cash refund because I no longer need it. Can you help me with that?",
+   "gold": "Client Emma Moore (emoore@email.com) requests cash refund for $120 gift card purchased 30 days ago. Gift card policy states non-refundable after 24 hours.",
+   "teacher": "Emma Moore is requesting a cash refund for a $120 gift card purchased 30 days ago.",
+   "judgment": "omits_user_facts",
+   "reason": "omits the email the user gave",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-064a8dacf4e65a2c3054",
+   "source_row": "69344",
+   "recorded_step_pass_rates": [
+    0.09375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I’m Emma Moore, and my email is emoore@email.com. I’d like to request a cash refund for a $120 gift card I purchased 30 days ago. Can you help me with that?",
+   "gold": "Client Emma Moore (emoore@email.com) requests cash refund for $120 gift card purchased 30 days ago. Gift card policy states non-refundable after 24 hours, but client is requesting refund.",
+   "teacher": "Emma Moore is requesting a cash refund for a $120 gift card purchased 30 days ago.",
+   "judgment": "omits_user_facts",
+   "reason": "omits the email the user gave",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-825d146838c8024e3994",
+   "source_row": "38740",
+   "recorded_step_pass_rates": [
+    0.125
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "I recently purchased the Vitamin C Serum (Purchase ID: PX234567) but found it doesn’t suit my skin type. It’s still unopened, and I’d like to request a refund. Could you assist with processing this?",
+   "gold": "Client requests refund for unopened Vitamin C Serum (Purchase ID: PX234567) stating it doesn't suit their skin type. Skincare products are final sale per policy, but client is seeking exception.",
+   "teacher": "Customer wants a refund for unopened Vitamin C Serum (Purchase ID: PX234567) as it doesn’t suit their skin type.",
+   "judgment": "equivalent",
+   "reason": "every user-supplied fact kept; the gold adds a policy note the user did not state",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-255df4f35bf0e243525a",
+   "source_row": "52119",
+   "recorded_step_pass_rates": [
+    0.21875
+   ],
+   "tool": "assess_hazard_level",
+   "parameter": "hazard_description",
+   "parameter_description": "",
+   "user": "Hi, I’m the owner of a restaurant with your Commercial service, and I need to report an emergency. A 5-gallon container of degreaser ruptured in the alley behind my establishment near a storm drain. I don’t have the chemical composition details on hand, but this is a high-risk situation. Can you initiate your spill emergency workflow and use the assess_hazard_level tool immediately to determine the next steps?",
+   "gold": "5-gallon container of degreaser ruptured in alley behind restaurant near storm drain",
+   "teacher": "A 5-gallon container of degreaser ruptured in the alley behind a restaurant near a storm drain",
+   "judgment": "equivalent",
+   "reason": "same hazard and location",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-2ea98125c5600c75c724",
+   "source_row": "21665",
+   "recorded_step_pass_rates": [
+    0.3125
+   ],
+   "tool": "transfer_to_genealogist",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "I'm reaching out to inquire about accessing Holocaust survivor records as part of my family's genealogy research. My request is under reference RR-001, and I have archival numbers 12A-487 and 12A-613 from the United States Holocaust Memorial Museum. I understand the sensitive nature of these records and would greatly appreciate your assistance in retrieving this information with appropriate care and respect. Could you confirm if this falls within your department's scope of support?",
+   "gold": "User requesting access to Holocaust survivor records with archival numbers 12A-487 and 12A-613 from United States Holocaust Memorial Museum. Sensitive records involving deceased persons.",
+   "teacher": "Request to access Holocaust survivor records (archival numbers 12A-487 and 12A-613) under reference RR-001.",
+   "judgment": "equivalent",
+   "reason": "archival numbers kept; drops the museum name, adds the user's reference RR-001",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-c403264c4640c8af7e29",
+   "source_row": "20411",
+   "recorded_step_pass_rates": [
+    0.5625
+   ],
+   "tool": "transfer_to_genealogist",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm a Pro subscriber with Research Request ID RR951. I'm working on documenting my ancestors' timeline from 1750 to 1900 and need assistance creating a 6-generation ancestral chart. Since this exceeds the standard 5-generation limit for automated tools, I'd like to request a transfer to a human genealogist for this extended research. Can you help facilitate that?",
+   "gold": "Pro subscriber requests 6-generation ancestral chart documentation from 1750-1900, exceeding standard 5-generation limit for automated tools. Research Request ID: RR951.",
+   "teacher": "User is requesting assistance with creating a 6-generation ancestral chart for ancestors from 1750 to 1900, which exceeds the standard 5-generation limit for automated tools.",
+   "judgment": "omits_user_facts",
+   "reason": "omits the research request id RR951 and the Pro subscription",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-858743e8265300a01c41",
+   "source_row": "20226",
+   "recorded_step_pass_rates": [
+    0.59375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I need to report an expired rigging certification for your film production team. My name is [Inspector Name], and I’m with the safety inspection division. I’m calling regarding Project ID INSPECT-999 and Personnel ID RIG-123. The individual’s aerial rigging certification expired on August 1, 2025, which violates our hazardous condition protocol. I need this escalated immediately to ensure the set remains safe for production. Can you confirm this is being prioritized?",
+   "gold": "Safety inspector reports expired aerial rigging certification for Personnel ID RIG-123 on Project ID INSPECT-999, expired August 1, 2025. Violates hazardous condition protocol.",
+   "teacher": "Expired aerial rigging certification (Personnel ID: RIG-123) for Project ID: INSPECT-999. Certification expired August 1, 2025. This violates hazardous condition protocol and requires immediate safety inspection verification.",
+   "judgment": "equivalent",
+   "reason": "every identifier, the date and the violation kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-4d834beb06102d3b7ec6",
+   "source_row": "54118",
+   "recorded_step_pass_rates": [
+    0.34375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "I need to request service for our sterilization equipment (Equipment ID: STER-8866) at Plant RIC-1144. Due to the confidentiality agreement requirements for this service request, I need to be transferred to a technical specialist immediately. The equipment is experiencing a sterilization cycle failure (Criticality Tier 4), and I have access credentials QA9977 ready for verification.",
+   "gold": "Sterilization equipment STER-8866 at Plant RIC-1144 experiencing sterilization cycle failure (Criticality Tier 4). User has access credentials QA9977.",
+   "teacher": "Requesting technical specialist for sterilization equipment (ID: STER-8866) at Plant RIC-1144 with Criticality Tier 4 sterilization cycle failure. Confidentiality agreement requirements apply. QA9977 credentials available for verification.",
+   "judgment": "equivalent",
+   "reason": "equipment, plant, tier, confidentiality and credentials kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-6d3f817cdc170a8dc784",
+   "source_row": "33805",
+   "recorded_step_pass_rates": [
+    0.03125
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I recently received my order #GUEST123, but the shipping container was torn upon arrival. I noticed the external packaging is damaged—there’s a large tear on the side of the box. I haven’t opened it yet to check the contents. Do you need me to provide photos of the damaged box? Also, if the internal items are damaged, would you require photographic evidence to escalate this as a claim?",
+   "gold": "Customer reports damaged shipping container for order #GUEST123. External packaging torn upon arrival. Customer hasn't opened box yet. Asking about photographic evidence requirements for damage claim.",
+   "teacher": "Received order #GUEST123 with torn shipping container. Request for photographic evidence of damaged packaging and potential internal damage.",
+   "judgment": "equivalent",
+   "reason": "order, torn container and the photo question kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-dc70769e08e1623d0ef3",
+   "source_row": "94962",
+   "recorded_step_pass_rates": [
+    0.53125
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling regarding order #GOV3344. We require a spot UV coating for this government document print job, which I believe necessitates manual approval. Could you please initiate the custom finish approval process for this order?",
+   "gold": "Customer requests spot UV coating approval for order #GOV3344, a government document print job requiring custom finish approval.",
+   "teacher": "Request for manual approval of custom spot UV coating for order #GOV3344",
+   "judgment": "equivalent",
+   "reason": "order, spot UV and the approval request kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-966f1d3c926a543674a6",
+   "source_row": "39531",
+   "recorded_step_pass_rates": [
+    0.4375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, my name is [Customer Name], and I’m with a non-profit organization under company ID NC-666. I’m calling about Order #SM999 for social media graphics that need to be adapted for print. The digital assets we provided require significant design adjustments—like resolution enhancement and layout reformatting—to meet commercial printing standards. I realize this might be beyond your current scope, but could you please escalate this to a design specialist or a higher-tier support team who can assist with technical print adaptations? We’re on a tight timeline for a community campaign launch.",
+   "gold": "Customer from non-profit organization (company ID NC-666) needs design adjustments for Order #SM999: resolution enhancement and layout reformatting of digital assets for print adaptation. Tight timeline for community campaign launch.",
+   "teacher": "Order #SM999 requires technical print adaptations (resolution enhancement, layout reformatting) for social media graphics",
+   "judgment": "omits_user_facts",
+   "reason": "omits company id NC-666 and the timeline",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-1d4db283201e34b4ef0a",
+   "source_row": "77335",
+   "recorded_step_pass_rates": [
+    0.28125
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling from the compliance department of XYZ Corporation. I need to request official verification documents for all certification completion records related to our employees who took your standardized test prep courses. We have a regulatory audit due in two weeks, and the auditor requires these records. Can you confirm if you can provide this documentation and let me know if there's an option for expedited processing to meet our compliance deadline?",
+   "gold": "Third-party compliance department (XYZ Corporation) requesting official verification documents for certification completion records of their employees who took test prep courses. They have a regulatory audit deadline in two weeks and need expedited processing. This request appears to be outside chatbot capabilities and requires legal/compliance review.",
+   "teacher": "Request for official certification documentation and expedited processing for regulatory audit compliance",
+   "judgment": "omits_user_facts",
+   "reason": "omits the company (XYZ Corporation), the employees and the two-week deadline",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-9afd5231f7ca6431f64b",
+   "source_row": "83337",
+   "recorded_step_pass_rates": [
+    0.5625
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I'm a member with ID CY99991 and vessel registration ending in 5577 at Slip A-22. I need to report a boundary violation incident that occurred yesterday afternoon. A neighboring vessel repeatedly encroached on my slip space between 2-3 PM, causing damage to my yacht's starboard hull. I have photos and a witness statement from a dock attendant. Would you please transfer me to a human agent to discuss liability and next steps for resolving this dispute?",
+   "gold": "Member CY99991 reports boundary violation incident at Slip A-22. Neighboring vessel repeatedly encroached on slip space between 2-3 PM yesterday, causing damage to yacht's starboard hull. Member has photos and witness statement from dock attendant. Vessel registration ends in 5577. Member requests transfer to discuss liability and next steps for resolving dispute.",
+   "teacher": "Boundary violation incident on Slip A-22 yesterday afternoon (2-3 PM) caused damage to starboard hull. Neighboring vessel encroached on slip space. Photos and witness statement from dock attendant available.",
+   "judgment": "omits_user_facts",
+   "reason": "omits member id CY99991 and the vessel registration",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-574af16418a92da7119b",
+   "source_row": "66253",
+   "recorded_step_pass_rates": [
+    0.5625
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I'm reaching out regarding a custom paint matching request for a 1930s classic yacht I'm restoring. My member ID is CY88446 and you can reach me at history@marinerestoration.com. The vessel originally used a rare three-part alkyd enamel blend that's no longer commercially available. I need precise color matching for the hull (1934 British Admiralty blue) and the superstructure (1930s French Ivory). The original paint samples show unique mica and iron oxide pigments that require specialized formulation. Could you connect me with your custom fabrication specialist for marine heritage projects?",
+   "gold": "Custom paint matching request for 1930s classic yacht restoration. Member ID: CY88446, email: history@marinerestoration.com. Requires precise color matching for hull (1934 British Admiralty blue) and superstructure (1930s French Ivory). Original paint samples show unique mica and iron oxide pigments needing specialized formulation. Needs custom fabrication specialist for marine heritage projects.",
+   "teacher": "Request for custom paint matching of 1930s classic yacht (1934 British Admiralty blue hull and 1930s French Ivory superstructure) requiring specialized formulation with mica and iron oxide pigments.",
+   "judgment": "omits_user_facts",
+   "reason": "omits member id and email",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-fc2df2b086baebd7a4ba",
+   "source_row": "4302",
+   "recorded_step_pass_rates": [
+    0.25
+   ],
+   "tool": "emergency_transfer",
+   "parameter": "situation_summary",
+   "parameter_description": "",
+   "user": "Hello, I need urgent assistance. I’m calling because I’m in a safety emergency related to domestic violence and must change my therapist immediately. My client ID is ME890123, and my current therapist is T123456. I’ve been instructed to state this is a “safety emergency” to bypass standard matching protocols under crisis exceptions. Please help me connect with a new therapist as soon as possible. Is there someone available to handle this urgently?",
+   "gold": "Client reports safety emergency related to domestic violence, requests immediate therapist change.",
+   "teacher": "Client is experiencing domestic violence and requires immediate therapist change due to safety emergency. Current therapist T123456 is no longer appropriate for this crisis situation.",
+   "judgment": "equivalent",
+   "reason": "same emergency and request, with the current therapist id the user gave",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-7488c73abe0b10c650a6",
+   "source_row": "92209",
+   "recorded_step_pass_rates": [
+    0.5
+   ],
+   "tool": "transfer_to_tax_specialist",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "I need to speak with an estate tax specialist regarding U.S.-France treaty provisions. My name is [Client Name], Client ID NY222. I'm a dual U.S./French citizen with €2 million in French assets, and I need guidance on how estate tax treaties will apply to my situation. Can you please transfer me to a specialist who handles international tax treaties?",
+   "gold": "Client NY222 requests guidance on U.S.-France estate tax treaty provisions. Dual U.S./French citizen with €2 million in French assets. Needs specialist for international tax treaty application.",
+   "teacher": "Dual U.S./French citizen with €2 million in French assets seeking guidance on U.S.-France estate tax treaty provisions",
+   "judgment": "omits_user_facts",
+   "reason": "omits client id NY222",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-316c32e419e74d26ad48",
+   "source_row": "34417",
+   "recorded_step_pass_rates": [
+    0.0625
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I’m a corporate security officer conducting a PCI audit and require access logs for your \"Cybersecurity\" course. Per PCI DSS compliance requirements, I need complete access records for the audit period. Please provide these logs to **security-officer@companydomain.com**. Could you confirm the timeframe for which you can supply these records?",
+   "gold": "User claims to be corporate security officer requesting access logs for Cybersecurity course for PCI audit. Request exceeds chatbot capabilities.",
+   "teacher": "Request for access logs of 'Cybersecurity' course during PCI audit. Logs needed for security-officer@companydomain.com.",
+   "judgment": "equivalent",
+   "reason": "course, audit and the delivery email kept; drops the gold's judgment that the identity is only claimed",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-82578efc0796714c9893",
+   "source_row": "68363",
+   "recorded_step_pass_rates": [
+    0.5
+   ],
+   "tool": "transfer_to_tax_specialist",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling regarding a concern about a will execution. My client ID is PA4411, and the will in question was executed on February 10, 2025. I believe there may be issues with the witnesses' capacity during the signing. Specifically, I suspect undue influence may have been exerted on one of the witnesses who appears to have had diminished mental capacity at the time. Can you guide me on how to formally report this concern?",
+   "gold": "Client PA4411 reports concerns about will execution dated February 10, 2025, alleging potential undue influence on witness with diminished mental capacity. Requesting guidance on formal reporting process.",
+   "teacher": "Concern about will execution on 2025-02-10 (Client ID PA4411) involving potential undue influence on a witness with alleged diminished mental capacity at the time of signing",
+   "judgment": "equivalent",
+   "reason": "client id, date and the concern kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-1e1548fc0c6fcd9d34dc",
+   "source_row": "66320",
+   "recorded_step_pass_rates": [
+    0.59375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling to request a cash refund for a service I received at your salon. My booking ID is BX567890, and the service charge was $120. I'm not satisfied with the results and would like a full refund. Since this amount exceeds your $100 policy threshold, I understand you'll need to escalate this to a human supervisor for approval. Can you please start that process for me?",
+   "gold": "Client requests cash refund of $120 for booking BX567890, citing dissatisfaction with service results. Amount exceeds $100 policy threshold.",
+   "teacher": "Request for $120 refund for booking BX567890 - customer not satisfied with service results",
+   "judgment": "equivalent",
+   "reason": "amount, booking and reason kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-255df4f35bf0e243525a",
+   "source_row": "52119",
+   "recorded_step_pass_rates": [
+    0.21875
+   ],
+   "tool": "assess_hazard_level",
+   "parameter": "hazard_description",
+   "parameter_description": "",
+   "user": "Hi, I’m the owner of a restaurant with your Commercial service, and I need to report an emergency. A 5-gallon container of degreaser ruptured in the alley behind my establishment near a storm drain. I don’t have the chemical composition details on hand, but this is a high-risk situation. Can you initiate your spill emergency workflow and use the assess_hazard_level tool immediately to determine the next steps?",
+   "gold": "5-gallon container of degreaser ruptured in alley behind restaurant near storm drain",
+   "teacher": "ruptured 5-gallon degreaser container near storm drain",
+   "judgment": "equivalent",
+   "reason": "same hazard; drops 'alley behind restaurant'",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-35e8e4103787943bbe6f",
+   "source_row": "16031",
+   "recorded_step_pass_rates": [
+    0.46875
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hi, I’m calling to request a $120 cash refund for a service I received at your spa. My booking ID is BX567890. I’d appreciate it if you could process this as soon as possible.",
+   "gold": "Client requesting $120 cash refund for service with booking ID BX567890.",
+   "teacher": "Requesting $120 cash refund for booking BX567890",
+   "judgment": "equivalent",
+   "reason": "same amount, booking and request",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-fe2dd91cc604ae555c97",
+   "source_row": "54285",
+   "recorded_step_pass_rates": [
+    0.09375
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm calling about a lost gift card I received from your salon. I purchased it on September 1st, 2023, and I only have part of the card number memorized (let me check... I remember \"XXXX-5678\" at the end). I really need a replacement since it was your salon's gift card, and I'd hate to lose the value. Could you help me get this sorted out?",
+   "gold": "Customer reports lost gift card purchased September 1, 2023. Only remembers partial card number ending with 'XXXX-5678'. Requests replacement. No full card number available for verification.",
+   "teacher": "Client reporting lost gift card purchased on 2023-09-01 with partial card number 'XXXX-5678'. Requesting replacement due to loss.",
+   "judgment": "equivalent",
+   "reason": "date, partial card number and replacement request kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-f6702c04816e6a6aaf3f",
+   "source_row": "10395",
+   "recorded_step_pass_rates": [
+    0.125
+   ],
+   "tool": "contact_human_agents",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I need to report an unauthorized purchase made by my 10-year-old child on your platform. They bought a $75 skin pack without my consent, and I’ve already initiated a chargeback dispute with my bank. My account email is parent@domain.com. I understand this might result in a permanent suspension from chargebacks, but I need to proceed with the dispute. Can you guide me through the necessary steps?",
+   "gold": "User reports unauthorized purchase by child, $75 skin pack, already initiated chargeback with bank. Account email: parent@domain.com. User understands potential permanent suspension but needs to proceed with dispute.",
+   "teacher": "Unauthorized purchase of $75 skin pack by child account (parent@domain.com)",
+   "judgment": "omits_user_facts",
+   "reason": "omits that a chargeback was already initiated and the account consequence",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-14e7d1f162e79d173e7e",
+   "source_row": "88933",
+   "recorded_step_pass_rates": [
+    0.125
+   ],
+   "tool": "transfer_to_genealogist",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm reaching out regarding my research request (ID: RR-111) about tracing land ownership through five generations of my family. Could you clarify if your genealogy team handles research beyond the standard 5-generation scope? I'd like to understand the next steps for this specific ancestral property inquiry.",
+   "gold": "User inquiry about research request RR-111 regarding land ownership tracing through five generations, asking about handling research beyond standard 5-generation scope for ancestral property inquiry.",
+   "teacher": "Research request (RR-111) seeks land ownership trace beyond standard 5-generation scope (requesting 5 generations) requiring specialized analysis",
+   "judgment": "contradicts_input",
+   "reason": "says the request is beyond the 5-generation scope while 'requesting 5 generations'; the user ASKED whether beyond-scope work is handled",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-c403264c4640c8af7e29",
+   "source_row": "20411",
+   "recorded_step_pass_rates": [
+    0.5625
+   ],
+   "tool": "transfer_to_genealogist",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hello, I'm a Pro subscriber with Research Request ID RR951. I'm working on documenting my ancestors' timeline from 1750 to 1900 and need assistance creating a 6-generation ancestral chart. Since this exceeds the standard 5-generation limit for automated tools, I'd like to request a transfer to a human genealogist for this extended research. Can you help facilitate that?",
+   "gold": "Pro subscriber requests 6-generation ancestral chart documentation from 1750-1900, exceeding standard 5-generation limit for automated tools. Research Request ID: RR951.",
+   "teacher": "User requires 6-generation ancestral chart documentation (1750-1900) exceeding automated tool limits. Requesting human genealogist assistance for extended research beyond 5 generations.",
+   "judgment": "omits_user_facts",
+   "reason": "omits the research request id RR951",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-2ea98125c5600c75c724",
+   "source_row": "21665",
+   "recorded_step_pass_rates": [
+    0.3125
+   ],
+   "tool": "transfer_to_genealogist",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "I'm reaching out to inquire about accessing Holocaust survivor records as part of my family's genealogy research. My request is under reference RR-001, and I have archival numbers 12A-487 and 12A-613 from the United States Holocaust Memorial Museum. I understand the sensitive nature of these records and would greatly appreciate your assistance in retrieving this information with appropriate care and respect. Could you confirm if this falls within your department's scope of support?",
+   "gold": "User requesting access to Holocaust survivor records with archival numbers 12A-487 and 12A-613 from United States Holocaust Memorial Museum. Sensitive records involving deceased persons.",
+   "teacher": "Request to access Holocaust survivor records (archival numbers 12A-487 and 12A-613) from the United States Holocaust Memorial Museum for family genealogy research under reference RR-001.",
+   "judgment": "equivalent",
+   "reason": "archival numbers, museum and reference kept",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-0195caad11dfc72ce4f1",
+   "source_row": "45286",
+   "recorded_step_pass_rates": [
+    0.15625
+   ],
+   "tool": "search_catalog",
+   "parameter": "query",
+   "parameter_description": "",
+   "user": "Hi, I'd like to inquire about placing a hold on *The Silent Patient* by Alex Michaelides. Could you check the current availability status and let me know the estimated wait time before I proceed with placing the hold?",
+   "gold": "The Silent Patient Alex Michaelides",
+   "teacher": "The Silent Patient by Alex Michaelides",
+   "judgment": "equivalent",
+   "reason": "search query: same title and author ('by' added)",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-825d146838c8024e3994",
+   "source_row": "38740",
+   "recorded_step_pass_rates": [
+    0.125
+   ],
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "I recently purchased the Vitamin C Serum (Purchase ID: PX234567) but found it doesn’t suit my skin type. It’s still unopened, and I’d like to request a refund. Could you assist with processing this?",
+   "gold": "Client requests refund for unopened Vitamin C Serum (Purchase ID: PX234567) stating it doesn't suit their skin type. Skincare products are final sale per policy, but client is seeking exception.",
+   "teacher": "Customer requests refund for unopened Vitamin C Serum (Purchase ID: PX234567) due to it not suitting their skin type.",
+   "judgment": "equivalent",
+   "reason": "every fact kept (a spelling error)",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-6b67ac2f0924d8ed07d4",
+   "source_row": "12940",
+   "recorded_step_pass_rates": [
+    0.1875
+   ],
+   "tool": "transfer_to_tax_specialist",
+   "parameter": "issue_summary",
+   "parameter_description": "",
+   "user": "Hello, I’m calling to clarify the estate tax implications for a non-resident alien inheriting US assets. My client ID is TX777, and I’m a Canadian citizen with US assets valued at $1.5 million. Could you confirm the treaty status between the US and Canada regarding estate taxes? Also, I’ve heard non-resident aliens have a lower exemption threshold—could you verify if it’s $60,000 instead of the standard $13.61 million? I’d like to ensure I understand the correct requirements for filing.",
+   "gold": "Canadian citizen non-resident alien inquiring about US-Canada estate tax treaty status and non-resident alien exemption threshold of $60,000 vs standard $13.61 million for US assets valued at $1.5 million",
+   "teacher": "Clarification on US-Canada tax treaty status for non-resident alien estate tax implications and exemption thresholds",
+   "judgment": "omits_user_facts",
+   "reason": "omits client id TX777, the asset value and the thresholds",
+   "shape": "single_step_gold_tool_call@v1"
+  },
+  {
+   "mode": "H-N",
+   "task_id": "tc1-c894d29fb9e8271a544d",
+   "source_row": "83644",
+   "recorded_step_pass_rates": [
+    0.46875
+   ],
+   "shape": "full_episode@v1",
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hi, my name is Benjamin Clark. I’d like to request a refund for a facial I received at your spa on October 15th. The service cost $200, but the results were unsatisfactory. I’m asking for a $150 cash refund. Can you assist with that?",
+   "gold": "Client Benjamin Clark requesting $150 refund for facial service on October 15th, citing unsatisfactory results. Service cost $200, refund request exceeds $100 threshold.",
+   "teacher": "Benjamin Clark requests a $150 cash refund for a facial service on October 15th, which he claims was unsatisfactory.",
+   "judgment": "omits_user_facts",
+   "reason": "omits the $200 service cost the user gave",
+   "note": "a full episode: the differing call is also not in the replay table, so it stays unexecuted whatever its wording"
+  },
+  {
+   "mode": "H-T",
+   "task_id": "tc1-c894d29fb9e8271a544d",
+   "source_row": "83644",
+   "recorded_step_pass_rates": [
+    0.46875
+   ],
+   "shape": "full_episode@v1",
+   "tool": "transfer_to_human_agent",
+   "parameter": "summary",
+   "parameter_description": "",
+   "user": "Hi, my name is Benjamin Clark. I’d like to request a refund for a facial I received at your spa on October 15th. The service cost $200, but the results were unsatisfactory. I’m asking for a $150 cash refund. Can you assist with that?",
+   "gold": "Client Benjamin Clark requesting $150 refund for facial service on October 15th, citing unsatisfactory results. Service cost $200, refund request exceeds $100 threshold.",
+   "teacher": "Benjamin Clark requests $150 cash refund for unsatisfactory facial service on 10/15, which cost $200.",
+   "judgment": "equivalent",
+   "reason": "name, amounts, date and reason kept; the gold's threshold note is its own addition",
+   "note": "a full episode: the differing call is also not in the replay table, so it stays unexecuted whatever its wording"
+  }
+ ],
+ "reading": "length alone does not make two strings equivalent: of 45, 24 are equivalent, 20 omit user-supplied facts and 1 contradicts the input",
+ "authorizes": "nothing",
+ "candidate_rule_evaluation": {
+  "rule": "string arguments are not compared word for word; every identifier-like token of the gold value (an email, a currency amount, a token holding a digit) that the user's input also holds must appear in the teacher's value; every other argument still compared exactly",
+  "against_this_review": {
+   "equivalent_admitted": 22,
+   "equivalent_refused": 2,
+   "omits_user_facts_admitted": 3,
+   "omits_user_facts_refused": 17,
+   "contradicts_input_admitted": 1,
+   "agreement": "39 of 45"
+  },
+  "verdict": "NOT PROPOSED as tool_verification@v3: it admits 4 of 45 (3 omissions, 1 contradiction) and refuses 2 equivalent; faithfulness of a free-text summary needs a semantic judgement no deterministic rule here makes. Its ceiling is small besides: at most 9 (H-N) / 14 (H-T) of 194 single-step first candidates, and none of the full episodes, whose differing call is also unexecuted by the replay. v2 stays the rule."
+ }
+}

@@ -1,0 +1,133 @@
+{
+ "schema": "aadistill.devbox_cleanup/v1",
+ "written_utc": "2026-11-10T15:45:00Z",
+ "why": "the maintainer's 2026-11-10 answer \"8 月旧检查点可移除\" to the protected-set report in devbox_cleanup_20261110.json; / was at 96%",
+ "free_bytes_before": 9376530432,
+ "deleted": [
+  {
+   "path": "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sa/model/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "7ee1d9355b97563f095c15850dff51b7693d65e29d544a10c1575b63fdc78dce",
+   "tombstone": "devbox_20261110_e4_p2_r1600k_sa",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/e6b/e6b_p2_r2960k_sa/model/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "89b14b839ff9b8a2e4651dbfaee63ab2703cd5737c11af9afb438dc2599497e7",
+   "tombstone": "devbox_20261110_e6b_p2_r2960k_sa",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/e7/e7_control_r1600k_sa/model/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "0ea5ec913fdde25e7ea59e81a999c166523736865b86a027a33ff4a0829a4b93",
+   "tombstone": "devbox_20261110_e7_control_r1600k_sa",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/e7/e7_fineweb_r1600k_sa/model/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "32a37ebcdf102ee5c40d93680ae404a02c033319f630f6bff35661d74e69156b",
+   "tombstone": "devbox_20261110_e7_fineweb_r1600k_sa",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sa/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "4aface45a12cd02e508a6b0ee58294c97ba032a8d24302c89fc6317e86d75fb4",
+   "tombstone": "devbox_20261110_p2_ceheavy_sa",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "reproducibility_required"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sb/model/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "98e8c9811414e982150bac934ae08cd17bb0772b797eaedae8efb2157721708c",
+   "tombstone": "devbox_20261110_e4_p2_r1600k_sb",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/e6b/e6b_p2_r2960k_sb/model/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "3c4709b51792c7e6e18c512c240bb20f6b55b0714e6d2c1264522e30633856f6",
+   "tombstone": "devbox_20261110_e6b_p2_r2960k_sb",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/e7/e7_control_r1600k_sb/model/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "285228ed7f9a90deacb68944d94267d29bdcbc63ceeaaa310eab2afa2b73d61e",
+   "tombstone": "devbox_20261110_e7_control_r1600k_sb",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/e7/e7_fineweb_r1600k_sb/model/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "26119845cb5025f76249867c56270b6e5a372072b0a4191b3481924aa075dc69",
+   "tombstone": "devbox_20261110_e7_fineweb_r1600k_sb",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sb/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "9828b1780a5eb4e2eac40951dff01188f7423a1b2b9121c551a157239f9fa68b",
+   "tombstone": "devbox_20261110_p2_ceheavy_sb",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "reproducibility_required"
+  },
+  {
+   "path": "artifacts/stages/stage-3/rescued/e1_r2960k_sb_pca/model.safetensors",
+   "apparent_bytes": 2384234968,
+   "sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+   "tombstone": "devbox_20261110_e1_r2960k_sb_pca",
+   "criterion": "verified_stale_cache",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors",
+   "apparent_bytes": 1192135096,
+   "sha256": "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb",
+   "tombstone": "devbox_20261110_e8_contribution_init_v1",
+   "criterion": "reproducible_materialization",
+   "protection_lifted": "canonical"
+  }
+ ],
+ "kept_beside_each": "config.json, tokenizer files, chat template and hash files of each checkpoint; the run logs, status files and side archives (e4_side.tar.gz, p2_side.tar.gz, e6b_artifacts.tar.gz); every evaluation record",
+ "consumer_audit": "grep of scripts/, src/, configs/, tests/ for each name and store path: closed experiments' drivers, launchers, configs and historical tests (E1, E3-E8b, P2), H1-PA's complete study, maintenance tooling, podsim's hidden-path list, usage examples and one docstring; no open consumer (logs/budget/decisions.md :: 2026-11-10 — August E-series weights retired from the dev box)",
+ "other_copies": "e1_r2960k_sb_pca only, on the relay (LFS sha256 equal); the other eleven have none",
+ "not_deleted": [
+  {
+   "path": "~/aad-artifacts/autoinit/preflight_ctl_r0860k_sa|sb (4.46 GiB)",
+   "why": "permanent controls, recommended kept; relay copies exist"
+  },
+  {
+   "path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0 (1.12 GiB)",
+   "why": "canonical initialization; recommended kept"
+  },
+  {
+   "path": "~/aad-artifacts/phase_d1/d1_replay_002/products/afd50c9f... (1.11 GiB)",
+   "why": "D1's forward-baseline product; recommended kept"
+  },
+  {
+   "path": "artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors (1.81 GiB)",
+   "why": "Stage 0 activation cache (E8's initialization rebuilds from it); recommended kept"
+  },
+  {
+   "path": "~/aad-artifacts/stage3_sr/final_weights/",
+   "why": "the Dev Box backup contract (eighth student still training)"
+  }
+ ],
+ "free_bytes_after": 36795187200,
+ "reclaimed_bytes": 27418656768,
+ "effect": "82% used, 34.3 GiB free",
+ "authorizes": "nothing"
+}

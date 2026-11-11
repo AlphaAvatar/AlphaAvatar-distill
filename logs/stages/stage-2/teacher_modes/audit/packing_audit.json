@@ -1,0 +1,861 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.packing_audit/v1",
+ "written_utc": "2026-11-03T09:10:25Z",
+ "design_sha256": "c4615f42eb434abe0dc835d32e0abd94bd09641996c4ede69bb1b053406e598f",
+ "stage1": {
+  "calib.hybrid_d4_base@v1": {
+   "set": "calib.hybrid_d4_base",
+   "items": 565,
+   "sequences": 64,
+   "unique_tokens": 472966,
+   "placed_tokens": 521613,
+   "repeated_tokens": 48647,
+   "truncated_tokens": 0,
+   "padding_tokens": 2675,
+   "fragments": 63,
+   "examples_truncated": 0,
+   "examples_per_sequence_mean": 9.8125,
+   "unique_scored_positions": 197084,
+   "placed_scored_positions": 219083,
+   "repeated_scored_positions": 21999,
+   "repeated_scored_share": 0.100414,
+   "unique_scored_positions_by_mode": {
+    "H-T": 103961,
+    "H-N": 93123
+   },
+   "max_scored_rows_in_one_sequence": 7437,
+   "max_item_tokens": 5102,
+   "forwards": {
+    "packed_batch_1": 64,
+    "one_item_per_forward": 565
+   },
+   "attention_cost_ratio_sum_T2": 5.9233,
+   "token_positions_ratio": 1.102855,
+   "packing_identity": "3daa20cbb53d9ce0a72f3fa089f139fc9dec0225038be83bfb9e8ddefb9e52d2",
+   "forward_context": {
+    "packing": "sequential_truncate_v1",
+    "truncate": true,
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261105
+   },
+   "alternatives_not_adopted": {
+    "truncate_false": {
+     "sequences": 64,
+     "padding_share": 0.097889,
+     "skipped_longer_than_capacity": 0
+    },
+    "fragments_context_only": {
+     "scored_or_supervised_positions": 197084,
+     "positions_computed_but_unscored": 21999
+    }
+   }
+  },
+  "calib.hybrid_d4_rh@v1": {
+   "set": "calib.hybrid_d4_rh",
+   "items": 377,
+   "sequences": 47,
+   "unique_tokens": 339452,
+   "placed_tokens": 379534,
+   "repeated_tokens": 40082,
+   "truncated_tokens": 0,
+   "padding_tokens": 5490,
+   "fragments": 46,
+   "examples_truncated": 0,
+   "examples_per_sequence_mean": 9.0,
+   "unique_scored_positions": 198206,
+   "placed_scored_positions": 222986,
+   "repeated_scored_positions": 24780,
+   "repeated_scored_share": 0.111128,
+   "unique_scored_positions_by_mode": {
+    "H-T": 105057,
+    "H-N": 93149
+   },
+   "max_scored_rows_in_one_sequence": 7549,
+   "max_item_tokens": 5102,
+   "forwards": {
+    "packed_batch_1": 47,
+    "one_item_per_forward": 377
+   },
+   "attention_cost_ratio_sum_T2": 5.5727,
+   "token_positions_ratio": 1.118079,
+   "packing_identity": "1f8cf7384604959a6cadc46a3140bdf84fef36e8fdaad2f00ca28a2b6b6151f4",
+   "forward_context": {
+    "packing": "sequential_truncate_v1",
+    "truncate": true,
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261105
+   },
+   "alternatives_not_adopted": {
+    "truncate_false": {
+     "sequences": 47,
+     "padding_share": 0.118361,
+     "skipped_longer_than_capacity": 0
+    },
+    "fragments_context_only": {
+     "scored_or_supervised_positions": 198206,
+     "positions_computed_but_unscored": 24780
+    }
+   }
+  },
+  "state_eval_hybrid@v1": {
+   "set": "state_eval_hybrid@v1",
+   "items": 1135,
+   "sequences": 131,
+   "unique_tokens": 956195,
+   "placed_tokens": 1068600,
+   "repeated_tokens": 112405,
+   "truncated_tokens": 0,
+   "padding_tokens": 4552,
+   "fragments": 130,
+   "examples_truncated": 0,
+   "examples_per_sequence_mean": 9.6565,
+   "unique_scored_positions": 350415,
+   "placed_scored_positions": 403017,
+   "repeated_scored_positions": 52602,
+   "repeated_scored_share": 0.130521,
+   "unique_scored_positions_by_mode": {
+    "H-T": 192246,
+    "H-N": 158169
+   },
+   "max_scored_rows_in_one_sequence": 7736,
+   "max_item_tokens": 7128,
+   "forwards": {
+    "packed_batch_1": 131,
+    "one_item_per_forward": 1135
+   },
+   "attention_cost_ratio_sum_T2": 5.6877,
+   "token_positions_ratio": 1.117554,
+   "packing_identity": "e338e8f123bdefa17986a9b1c786922d3d0a75c7c3b5c8c78d18e1ccfb09ab7d",
+   "forward_context": {
+    "packing": "sequential_truncate_v1",
+    "truncate": true,
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261105
+   },
+   "alternatives_not_adopted": {
+    "truncate_false": {
+     "sequences": 131,
+     "padding_share": 0.108985,
+     "skipped_longer_than_capacity": 0
+    },
+    "fragments_context_only": {
+     "scored_or_supervised_positions": 350415,
+     "positions_computed_but_unscored": 52602
+    }
+   }
+  }
+ },
+ "stage3": {
+  "A1": {
+   "arm": "A1",
+   "mode": "H-T",
+   "source_pack": {
+    "dir": "artifacts/stages/stage-2/teacher_modes/packs_tm/A1",
+    "blocks_npz_sha256": "32a87943433cf6747a897f09160b0068a1288a5cee45e1a306cca8c8e0c67a86",
+    "audit_sha256": "7d71e9e1ebfd5fcd1dde56a07914cb7d5797161a2ed9a70eb9fff30ca5aa0a13",
+    "packing": "token_documents.document_isolated"
+   },
+   "A_selected_data": {
+    "examples_or_turns": 6105,
+    "unique_supervised_tokens": 5930273,
+    "prompt_context_tokens": 2994498,
+    "reasoning_tokens": 4983377,
+    "answer_tokens": 946896,
+    "tool_calling_tokens": 0,
+    "unique_supervised_tokens_by_category": {
+     "primary.abstract_analogical": 366150,
+     "primary.compositional_generalization": 633858,
+     "primary.inductive_rule_discovery": 725310,
+     "primary.interactive_adaptation": 514586,
+     "primary.task_contained_deduction": 729791,
+     "supporting.code_algorithmic": 593449,
+     "supporting.math_gsm8k": 592205,
+     "supporting.math_new": 591618,
+     "supporting.reading_verified": 1183306
+    },
+    "_note": "examples_or_turns counts documents (one assistant turn each); tool calling is absent from the five-type data"
+   },
+   "B_training_coverage": {
+    "packed_sequences": 1288,
+    "non_padding_tokens": 10545409,
+    "padding_tokens": 5887,
+    "truncated_tokens": 0,
+    "truncated_supervised_tokens": 0,
+    "repeated_tokens": 1620638,
+    "repeated_supervised_tokens": 1110226,
+    "repeated_supervised_tokens_by_category": {
+     "primary.abstract_analogical": 119945,
+     "primary.compositional_generalization": 159197,
+     "primary.inductive_rule_discovery": 145664,
+     "primary.interactive_adaptation": 159958,
+     "primary.task_contained_deduction": 139491,
+     "supporting.code_algorithmic": 108915,
+     "supporting.math_gsm8k": 56392,
+     "supporting.math_new": 173480,
+     "supporting.reading_verified": 47184
+    },
+    "fragments": 1286,
+    "ce_target_positions_per_epoch": 7040499,
+    "kd_scored_positions_per_epoch": 7040499,
+    "supervised_token_exposure_3_epochs": 21121497,
+    "_kd_equals_ce": "kd_scope assistant: KD is scored at exactly the CE target positions"
+   },
+   "C_loss_weighting": {
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "normalization": "per optimizer step: CE sum / that step's CE target count, KD sum / that step's KD count",
+    "by_seed": [
+     {
+      "seed": 20260726,
+      "steps": 1932,
+      "supervised_positions_per_step": {
+       "mean": 10932.5,
+       "cv": 0.2048,
+       "min": 3618,
+       "max": 15840
+      },
+      "category": {
+       "primary.abstract_analogical": {
+        "exposure_share": 0.06904,
+        "loss_weight_share": 0.0634,
+        "ratio": 0.9183
+       },
+       "primary.compositional_generalization": {
+        "exposure_share": 0.11264,
+        "loss_weight_share": 0.10968,
+        "ratio": 0.9737
+       },
+       "primary.inductive_rule_discovery": {
+        "exposure_share": 0.12371,
+        "loss_weight_share": 0.12188,
+        "ratio": 0.9853
+       },
+       "primary.interactive_adaptation": {
+        "exposure_share": 0.09581,
+        "loss_weight_share": 0.09062,
+        "ratio": 0.9458
+       },
+       "primary.task_contained_deduction": {
+        "exposure_share": 0.12347,
+        "loss_weight_share": 0.1218,
+        "ratio": 0.9865
+       },
+       "supporting.code_algorithmic": {
+        "exposure_share": 0.09976,
+        "loss_weight_share": 0.09943,
+        "ratio": 0.9966
+       },
+       "supporting.math_gsm8k": {
+        "exposure_share": 0.09212,
+        "loss_weight_share": 0.0942,
+        "ratio": 1.0225
+       },
+       "supporting.math_new": {
+        "exposure_share": 0.10867,
+        "loss_weight_share": 0.10056,
+        "ratio": 0.9254
+       },
+       "supporting.reading_verified": {
+        "exposure_share": 0.17477,
+        "loss_weight_share": 0.19843,
+        "ratio": 1.1354
+       }
+      }
+     },
+     {
+      "seed": 20260801,
+      "steps": 1932,
+      "supervised_positions_per_step": {
+       "mean": 10932.5,
+       "cv": 0.2058,
+       "min": 3882,
+       "max": 15855
+      },
+      "category": {
+       "primary.abstract_analogical": {
+        "exposure_share": 0.06904,
+        "loss_weight_share": 0.06452,
+        "ratio": 0.9346
+       },
+       "primary.compositional_generalization": {
+        "exposure_share": 0.11264,
+        "loss_weight_share": 0.10913,
+        "ratio": 0.9688
+       },
+       "primary.inductive_rule_discovery": {
+        "exposure_share": 0.12371,
+        "loss_weight_share": 0.12257,
+        "ratio": 0.9908
+       },
+       "primary.interactive_adaptation": {
+        "exposure_share": 0.09581,
+        "loss_weight_share": 0.09103,
+        "ratio": 0.9501
+       },
+       "primary.task_contained_deduction": {
+        "exposure_share": 0.12347,
+        "loss_weight_share": 0.12207,
+        "ratio": 0.9886
+       },
+       "supporting.code_algorithmic": {
+        "exposure_share": 0.09976,
+        "loss_weight_share": 0.09832,
+        "ratio": 0.9856
+       },
+       "supporting.math_gsm8k": {
+        "exposure_share": 0.09212,
+        "loss_weight_share": 0.09386,
+        "ratio": 1.0189
+       },
+       "supporting.math_new": {
+        "exposure_share": 0.10867,
+        "loss_weight_share": 0.09975,
+        "ratio": 0.9179
+       },
+       "supporting.reading_verified": {
+        "exposure_share": 0.17477,
+        "loss_weight_share": 0.19875,
+        "ratio": 1.1372
+       }
+      }
+     }
+    ]
+   },
+   "schedule_sequential": {
+    "optimizer_steps": 1932,
+    "warmup_steps": 97,
+    "eval_every": 241,
+    "save_every": 966
+   },
+   "isolated_pack_for_comparison": {
+    "packed_sequences": 1102,
+    "non_padding_tokens": 8924771,
+    "padding_fraction": 0.011389,
+    "optimizer_steps": 1653,
+    "loss_weighting": [
+     {
+      "seed": 20260726,
+      "steps": 1653,
+      "supervised_positions_per_step": {
+       "mean": 10762.7,
+       "cv": 0.2034,
+       "min": 3859,
+       "max": 15535
+      },
+      "category": {
+       "primary.abstract_analogical": {
+        "exposure_share": 0.06174,
+        "loss_weight_share": 0.05756,
+        "ratio": 0.9322
+       },
+       "primary.compositional_generalization": {
+        "exposure_share": 0.10689,
+        "loss_weight_share": 0.10276,
+        "ratio": 0.9614
+       },
+       "primary.inductive_rule_discovery": {
+        "exposure_share": 0.12231,
+        "loss_weight_share": 0.1205,
+        "ratio": 0.9852
+       },
+       "primary.interactive_adaptation": {
+        "exposure_share": 0.08677,
+        "loss_weight_share": 0.08151,
+        "ratio": 0.9394
+       },
+       "primary.task_contained_deduction": {
+        "exposure_share": 0.12306,
+        "loss_weight_share": 0.12189,
+        "ratio": 0.9905
+       },
+       "supporting.code_algorithmic": {
+        "exposure_share": 0.10007,
+        "loss_weight_share": 0.09913,
+        "ratio": 0.9906
+       },
+       "supporting.math_gsm8k": {
+        "exposure_share": 0.09986,
+        "loss_weight_share": 0.1016,
+        "ratio": 1.0174
+       },
+       "supporting.math_new": {
+        "exposure_share": 0.09976,
+        "loss_weight_share": 0.09134,
+        "ratio": 0.9155
+       },
+       "supporting.reading_verified": {
+        "exposure_share": 0.19954,
+        "loss_weight_share": 0.22371,
+        "ratio": 1.1212
+       }
+      }
+     },
+     {
+      "seed": 20260801,
+      "steps": 1653,
+      "supervised_positions_per_step": {
+       "mean": 10762.7,
+       "cv": 0.2032,
+       "min": 2902,
+       "max": 15627
+      },
+      "category": {
+       "primary.abstract_analogical": {
+        "exposure_share": 0.06174,
+        "loss_weight_share": 0.05693,
+        "ratio": 0.922
+       },
+       "primary.compositional_generalization": {
+        "exposure_share": 0.10689,
+        "loss_weight_share": 0.10273,
+        "ratio": 0.9611
+       },
+       "primary.inductive_rule_discovery": {
+        "exposure_share": 0.12231,
+        "loss_weight_share": 0.11965,
+        "ratio": 0.9783
+       },
+       "primary.interactive_adaptation": {
+        "exposure_share": 0.08677,
+        "loss_weight_share": 0.08257,
+        "ratio": 0.9515
+       },
+       "primary.task_contained_deduction": {
+        "exposure_share": 0.12306,
+        "loss_weight_share": 0.12116,
+        "ratio": 0.9846
+       },
+       "supporting.code_algorithmic": {
+        "exposure_share": 0.10007,
+        "loss_weight_share": 0.09918,
+        "ratio": 0.9911
+       },
+       "supporting.math_gsm8k": {
+        "exposure_share": 0.09986,
+        "loss_weight_share": 0.10258,
+        "ratio": 1.0272
+       },
+       "supporting.math_new": {
+        "exposure_share": 0.09976,
+        "loss_weight_share": 0.09241,
+        "ratio": 0.9263
+       },
+       "supporting.reading_verified": {
+        "exposure_share": 0.19954,
+        "loss_weight_share": 0.2228,
+        "ratio": 1.1166
+       }
+      }
+     }
+    ]
+   },
+   "packing_spec": {
+    "packing": "sequential_truncate_v1",
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261106
+   },
+   "alternatives_not_adopted": {
+    "truncate_false": {
+     "sequences": 1288,
+     "padding_share": 0.154154,
+     "skipped_longer_than_capacity": 0
+    },
+    "fragments_context_only": {
+     "scored_or_supervised_positions": 5930273,
+     "positions_computed_but_unscored": 1110226
+    }
+   },
+   "training_flops": {
+    "positions_computed": 31653888,
+    "flops": 6.01e+17,
+    "isolated_pack_flops": 5.142e+17,
+    "per_position": 18987351040,
+    "_method": "token_admission.per_position_flops (student 4 x forward + teacher forward per computed position, the A1 accounting); the attention term grows with the context each position sees, which packing lengthens, and is not in this per-position figure"
+   }
+  },
+  "A2": {
+   "arm": "A2",
+   "mode": "H-N",
+   "source_pack": {
+    "dir": "artifacts/stages/stage-2/teacher_modes/packs_tm/A2",
+    "blocks_npz_sha256": "a583763d27371a3635a165cda5b860c18d16b2c86bbc8d7fdba88e0158e33acb",
+    "audit_sha256": "e75c1ddd10e07e7f5794c829d06a9be8fa7f43a3e5fd6bb0a012d2a4927108c4",
+    "packing": "token_documents.document_isolated"
+   },
+   "A_selected_data": {
+    "examples_or_turns": 53136,
+    "unique_supervised_tokens": 5923646,
+    "prompt_context_tokens": 31406627,
+    "reasoning_tokens": 0,
+    "answer_tokens": 5923646,
+    "tool_calling_tokens": 0,
+    "unique_supervised_tokens_by_category": {
+     "primary.abstract_analogical": 365686,
+     "primary.compositional_generalization": 636331,
+     "primary.inductive_rule_discovery": 729532,
+     "primary.interactive_adaptation": 497683,
+     "primary.task_contained_deduction": 733907,
+     "supporting.code_algorithmic": 593622,
+     "supporting.math_gsm8k": 591639,
+     "supporting.math_new": 592022,
+     "supporting.reading_verified": 1183224
+    },
+    "_note": "examples_or_turns counts documents (one assistant turn each); tool calling is absent from the five-type data"
+   },
+   "B_training_coverage": {
+    "packed_sequences": 4935,
+    "non_padding_tokens": 40426422,
+    "padding_tokens": 1098,
+    "truncated_tokens": 0,
+    "truncated_supervised_tokens": 0,
+    "repeated_tokens": 3096149,
+    "repeated_supervised_tokens": 257500,
+    "repeated_supervised_tokens_by_category": {
+     "primary.abstract_analogical": 16507,
+     "primary.compositional_generalization": 19530,
+     "primary.inductive_rule_discovery": 50719,
+     "primary.interactive_adaptation": 17039,
+     "primary.task_contained_deduction": 37957,
+     "supporting.code_algorithmic": 56774,
+     "supporting.math_gsm8k": 12545,
+     "supporting.math_new": 42930,
+     "supporting.reading_verified": 3499
+    },
+    "fragments": 4929,
+    "ce_target_positions_per_epoch": 6181146,
+    "kd_scored_positions_per_epoch": 6181146,
+    "supervised_token_exposure_3_epochs": 18543438,
+    "_kd_equals_ce": "kd_scope assistant: KD is scored at exactly the CE target positions"
+   },
+   "C_loss_weighting": {
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "normalization": "per optimizer step: CE sum / that step's CE target count, KD sum / that step's KD count",
+    "by_seed": [
+     {
+      "seed": 20260726,
+      "steps": 7403,
+      "supervised_positions_per_step": {
+       "mean": 2504.9,
+       "cv": 0.4553,
+       "min": 309,
+       "max": 8240
+      },
+      "category": {
+       "primary.abstract_analogical": {
+        "exposure_share": 0.06183,
+        "loss_weight_share": 0.05514,
+        "ratio": 0.8917
+       },
+       "primary.compositional_generalization": {
+        "exposure_share": 0.1061,
+        "loss_weight_share": 0.1039,
+        "ratio": 0.9792
+       },
+       "primary.inductive_rule_discovery": {
+        "exposure_share": 0.12623,
+        "loss_weight_share": 0.10853,
+        "ratio": 0.8598
+       },
+       "primary.interactive_adaptation": {
+        "exposure_share": 0.08328,
+        "loss_weight_share": 0.09239,
+        "ratio": 1.1094
+       },
+       "primary.task_contained_deduction": {
+        "exposure_share": 0.12487,
+        "loss_weight_share": 0.11156,
+        "ratio": 0.8934
+       },
+       "supporting.code_algorithmic": {
+        "exposure_share": 0.10522,
+        "loss_weight_share": 0.09052,
+        "ratio": 0.8603
+       },
+       "supporting.math_gsm8k": {
+        "exposure_share": 0.09774,
+        "loss_weight_share": 0.10656,
+        "ratio": 1.0902
+       },
+       "supporting.math_new": {
+        "exposure_share": 0.10272,
+        "loss_weight_share": 0.08643,
+        "ratio": 0.8414
+       },
+       "supporting.reading_verified": {
+        "exposure_share": 0.192,
+        "loss_weight_share": 0.24498,
+        "ratio": 1.2759
+       }
+      }
+     },
+     {
+      "seed": 20260801,
+      "steps": 7403,
+      "supervised_positions_per_step": {
+       "mean": 2504.9,
+       "cv": 0.4529,
+       "min": 387,
+       "max": 9110
+      },
+      "category": {
+       "primary.abstract_analogical": {
+        "exposure_share": 0.06183,
+        "loss_weight_share": 0.05563,
+        "ratio": 0.8998
+       },
+       "primary.compositional_generalization": {
+        "exposure_share": 0.1061,
+        "loss_weight_share": 0.10437,
+        "ratio": 0.9837
+       },
+       "primary.inductive_rule_discovery": {
+        "exposure_share": 0.12623,
+        "loss_weight_share": 0.10939,
+        "ratio": 0.8666
+       },
+       "primary.interactive_adaptation": {
+        "exposure_share": 0.08327,
+        "loss_weight_share": 0.09199,
+        "ratio": 1.1048
+       },
+       "primary.task_contained_deduction": {
+        "exposure_share": 0.12487,
+        "loss_weight_share": 0.11124,
+        "ratio": 0.8908
+       },
+       "supporting.code_algorithmic": {
+        "exposure_share": 0.10522,
+        "loss_weight_share": 0.09072,
+        "ratio": 0.8622
+       },
+       "supporting.math_gsm8k": {
+        "exposure_share": 0.09776,
+        "loss_weight_share": 0.10611,
+        "ratio": 1.0855
+       },
+       "supporting.math_new": {
+        "exposure_share": 0.10272,
+        "loss_weight_share": 0.08603,
+        "ratio": 0.8375
+       },
+       "supporting.reading_verified": {
+        "exposure_share": 0.192,
+        "loss_weight_share": 0.24452,
+        "ratio": 1.2735
+       }
+      }
+     }
+    ]
+   },
+   "schedule_sequential": {
+    "optimizer_steps": 7403,
+    "warmup_steps": 370,
+    "eval_every": 925,
+    "save_every": 3701
+   },
+   "isolated_pack_for_comparison": {
+    "packed_sequences": 4577,
+    "non_padding_tokens": 37330273,
+    "padding_fraction": 0.004388,
+    "optimizer_steps": 6866,
+    "loss_weighting": [
+     {
+      "seed": 20260726,
+      "steps": 6866,
+      "supervised_positions_per_step": {
+       "mean": 2588.5,
+       "cv": 0.4532,
+       "min": 335,
+       "max": 9453
+      },
+      "category": {
+       "primary.abstract_analogical": {
+        "exposure_share": 0.06173,
+        "loss_weight_share": 0.05623,
+        "ratio": 0.9109
+       },
+       "primary.compositional_generalization": {
+        "exposure_share": 0.10741,
+        "loss_weight_share": 0.10472,
+        "ratio": 0.975
+       },
+       "primary.inductive_rule_discovery": {
+        "exposure_share": 0.12317,
+        "loss_weight_share": 0.10613,
+        "ratio": 0.8617
+       },
+       "primary.interactive_adaptation": {
+        "exposure_share": 0.08401,
+        "loss_weight_share": 0.09285,
+        "ratio": 1.1052
+       },
+       "primary.task_contained_deduction": {
+        "exposure_share": 0.12389,
+        "loss_weight_share": 0.11079,
+        "ratio": 0.8943
+       },
+       "supporting.code_algorithmic": {
+        "exposure_share": 0.1002,
+        "loss_weight_share": 0.08555,
+        "ratio": 0.8538
+       },
+       "supporting.math_gsm8k": {
+        "exposure_share": 0.09987,
+        "loss_weight_share": 0.10749,
+        "ratio": 1.0763
+       },
+       "supporting.math_new": {
+        "exposure_share": 0.09999,
+        "loss_weight_share": 0.0832,
+        "ratio": 0.832
+       },
+       "supporting.reading_verified": {
+        "exposure_share": 0.19974,
+        "loss_weight_share": 0.25305,
+        "ratio": 1.2669
+       }
+      }
+     },
+     {
+      "seed": 20260801,
+      "steps": 6866,
+      "supervised_positions_per_step": {
+       "mean": 2588.3,
+       "cv": 0.4551,
+       "min": 368,
+       "max": 9040
+      },
+      "category": {
+       "primary.abstract_analogical": {
+        "exposure_share": 0.06173,
+        "loss_weight_share": 0.0559,
+        "ratio": 0.9056
+       },
+       "primary.compositional_generalization": {
+        "exposure_share": 0.10742,
+        "loss_weight_share": 0.10439,
+        "ratio": 0.9718
+       },
+       "primary.inductive_rule_discovery": {
+        "exposure_share": 0.12315,
+        "loss_weight_share": 0.10503,
+        "ratio": 0.8529
+       },
+       "primary.interactive_adaptation": {
+        "exposure_share": 0.08401,
+        "loss_weight_share": 0.09304,
+        "ratio": 1.1074
+       },
+       "primary.task_contained_deduction": {
+        "exposure_share": 0.12391,
+        "loss_weight_share": 0.111,
+        "ratio": 0.8958
+       },
+       "supporting.code_algorithmic": {
+        "exposure_share": 0.10021,
+        "loss_weight_share": 0.08554,
+        "ratio": 0.8537
+       },
+       "supporting.math_gsm8k": {
+        "exposure_share": 0.09987,
+        "loss_weight_share": 0.10721,
+        "ratio": 1.0735
+       },
+       "supporting.math_new": {
+        "exposure_share": 0.09994,
+        "loss_weight_share": 0.08345,
+        "ratio": 0.835
+       },
+       "supporting.reading_verified": {
+        "exposure_share": 0.19976,
+        "loss_weight_share": 0.25444,
+        "ratio": 1.2738
+       }
+      }
+     }
+    ]
+   },
+   "packing_spec": {
+    "packing": "sequential_truncate_v1",
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261106
+   },
+   "alternatives_not_adopted": {
+    "truncate_false": {
+     "sequences": 4935,
+     "padding_share": 0.076612,
+     "skipped_longer_than_capacity": 0
+    },
+    "fragments_context_only": {
+     "scored_or_supervised_positions": 5923646,
+     "positions_computed_but_unscored": 257500
+    }
+   },
+   "training_flops": {
+    "positions_computed": 121290752,
+    "flops": 2.303e+18,
+    "isolated_pack_flops": 2.136e+18,
+    "per_position": 18987351040,
+    "_method": "token_admission.per_position_flops (student 4 x forward + teacher forward per computed position, the A1 accounting); the attention term grows with the context each position sees, which packing lengthens, and is not in this per-position figure"
+   }
+  },
+  "C1_kept_part": {
+   "source_pack": {
+    "dir": "artifacts/stages/stage-2/reasoning_data/packs/D4A_merged_whole",
+    "blocks_npz_sha256": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+    "audit_sha256": "0fab85184e83b5b5ebf0454cb656d3752e80f48eeabc75a092a2a9906949080b"
+   },
+   "kept_documents": 3681,
+   "cut_traces_kept_as_cut": 352,
+   "unique_supervised_tokens": 5430434,
+   "unique_supervised_tokens_by_type": {
+    "code": 492837,
+    "gsm8k": 494582,
+    "multihop_qa": 492790,
+    "openmath": 494130,
+    "primary.abstract_analogical": 365838,
+    "primary.compositional_generalization": 636746,
+    "primary.inductive_rule_discovery": 729633,
+    "primary.interactive_adaptation": 497313,
+    "primary.task_contained_deduction": 732984,
+    "rag_evidence": 493581
+   },
+   "packed_sequences_without_tool_part": 1042,
+   "non_padding_tokens": 8528344,
+   "repeated_supervised_tokens": 1265950,
+   "repeated_supervised_tokens_by_type": {
+    "code": 79415,
+    "gsm8k": 51886,
+    "multihop_qa": 35922,
+    "openmath": 98835,
+    "primary.abstract_analogical": 143926,
+    "primary.compositional_generalization": 211807,
+    "primary.inductive_rule_discovery": 221849,
+    "primary.interactive_adaptation": 173741,
+    "primary.task_contained_deduction": 226029,
+    "rag_evidence": 22540
+   },
+   "historical_kept_sequences": 989,
+   "_note": "the tool part (target 492,587 supervised tokens, Thinking-2507-native, from the canonical pool) is packed together with these documents once it exists; the shuffle covers every document, so no kept sequence is carried over byte for byte -- the tokens of every kept session are"
+  }
+ },
+ "authorizes": "nothing"
+}

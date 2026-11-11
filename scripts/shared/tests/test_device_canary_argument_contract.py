@@ -132,12 +132,18 @@ def test_the_canary_pins_the_same_teacher_revision_as_every_other_session():
     it — so the value must be the frozen one every other session pins, not a
     canary-specific stand-in.
     """
-    revisions = {name: spec.setup.teacher_revision
-                 for name, _mod, _args, spec in all_specs()}
-    assert len(set(revisions.values())) == 1, (
-        f"sessions pin different teacher revisions: {revisions}. The shared "
-        "setup would behave differently depending on which session drove it")
-    assert revisions[CANARY] == "768f209d9ea81521153ed38c47d515654e938aea"
+    #: per TEACHER MODEL: since 2026-10-28 the teacher is a session input (`TEACHER_MODEL`, unset =
+    #: Thinking-2507), and Research A's hybrid Qwen/Qwen3-4B is a different repository at its own revision
+    default = "Qwen/Qwen3-4B-Thinking-2507"
+    by_model: dict[str, dict[str, str]] = {}
+    for name, _mod, _args, spec in all_specs():
+        model = spec.setup.env.get("TEACHER_MODEL", default)
+        by_model.setdefault(model, {})[name] = spec.setup.teacher_revision
+    for model, revisions in by_model.items():
+        assert len(set(revisions.values())) == 1, (
+            f"sessions of teacher {model} pin different revisions: {revisions}. The shared "
+            "setup would behave differently depending on which session drove it")
+    assert by_model[default][CANARY] == "768f209d9ea81521153ed38c47d515654e938aea"
 
 
 def test_an_empty_local_asset_declaration_is_honoured_by_the_setup():

@@ -337,17 +337,32 @@ def train_recovery(student_dir: Path, rec_out: Path, cfg: Path, log: Path, *, en
 
 
 def evaluate_all(model_dir: Path, out: Path, vol_gens: Path, label: str, prereg: dict,
-                 env: dict) -> tuple[dict, list]:
+                 env: dict, *, package: dict | str | None = None,
+                 template_kwargs: dict | None = None) -> tuple[dict, list]:
     """Every item of eval-set-1 on the recovered student, then its formal report.
     Generations already on the volume (`vol_gens`) are rescored, never regenerated;
-    each finished unit is pushed there before the next starts."""
+    each finished unit is pushed there before the next starts.
+
+    ``package``: None packages the checkpoint with the historical evaluation
+    tokenizer (Stage-1/3's Thinking-2507 sidecars); a dict ``{"tokenizer_source",
+    "sidecar_sha256"}`` with that tokenizer's files instead; ``"as_is"`` evaluates
+    a directory that already carries its own tokenizer (a teacher snapshot).
+    ``template_kwargs`` go to both runners' ``--chat-template-kwargs`` (a hybrid
+    template's ``enable_thinking``); absent, neither runner is passed any."""
     from shared import eval_sets as ES
     from stages.phase_c1.autoinit_c1_driver import TOKENIZER_SIDECAR_SHA256, TOKENIZER_SOURCE
     from stages.phase_c1.packaging import build_evaluation_package
     pkg = out / "package"
-    shutil.rmtree(pkg, ignore_errors=True)
-    build_evaluation_package(model_dir, tokenizer_source=TOKENIZER_SOURCE,
-                             dest=pkg, expected_sidecar_sha256=TOKENIZER_SIDECAR_SHA256)
+    if package == "as_is":
+        pkg = Path(model_dir)
+    else:
+        shutil.rmtree(pkg, ignore_errors=True)
+        src = package or {"tokenizer_source": TOKENIZER_SOURCE, "sidecar_sha256": TOKENIZER_SIDECAR_SHA256}
+        build_evaluation_package(model_dir, tokenizer_source=src["tokenizer_source"], dest=pkg,
+                                 expected_sidecar_sha256=src["sidecar_sha256"],
+                                 sidecars=tuple(src["sidecar_sha256"]))
+    kw = (["--chat-template-kwargs", json.dumps(template_kwargs, sort_keys=True)]
+          if template_kwargs is not None else [])
     gens = out / "generations"
     gens.mkdir(exist_ok=True)
     sync("pull", vol_gens, gens, out / "sync.log")
@@ -368,7 +383,7 @@ def evaluate_all(model_dir: Path, out: Path, vol_gens: Path, label: str, prereg:
                  "--mode", "eval", "--out", str(tmp), "--trained-context", ctx,
                  "--action-protocol", prereg["evaluation"]["action_protocol"]]
                 + (["--decoding", str(REPO / decoding), "--seed-namespace", "fluid_reasoning_720__dev_v1"]
-                   if decoding else []),
+                   if decoding else []) + kw,
                 cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
         if rc != 0:
             raise RuntimeError(f"run_battery exited {rc}; see eval_fluid.log")
@@ -397,7 +412,7 @@ def evaluate_all(model_dir: Path, out: Path, vol_gens: Path, label: str, prereg:
                 [VLLM_PY, "scripts/shared/evaluation/uncapped_eval.py", "--model", str(pkg),
                  "--label", label, "--prompts", *sorted(str(staged / f"{k}.jsonl") for k in missing),
                  "--out-dir", str(raw), "--trained-context", ctx]
-                + (["--decoding", str(REPO / decoding)] if decoding else []),
+                + (["--decoding", str(REPO / decoding)] if decoding else []) + kw,
                 cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
         if rc != 0:
             raise RuntimeError(f"uncapped_eval exited {rc}; see eval_capability.log")

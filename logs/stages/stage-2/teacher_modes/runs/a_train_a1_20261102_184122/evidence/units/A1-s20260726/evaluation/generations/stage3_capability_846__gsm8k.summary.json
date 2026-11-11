@@ -1,0 +1,199 @@
+{
+ "label": "A1-s20260726",
+ "model": "/runpod-volume/teacher_modes/v2_units/A1-s20260726/evaluation/package",
+ "prompts": "/runpod-volume/teacher_modes/v2_units/A1-s20260726/evaluation/uncapped_in/stage3_capability_846__gsm8k.jsonl",
+ "n_samples": 100,
+ "unrestricted_within_effective_context": true,
+ "censored_measurement": false,
+ "context_len": 8192,
+ "context_resolution": {
+  "resolved_context": 8192,
+  "context_source": "trained_block_len",
+  "config_max_position_embeddings": 40960,
+  "rope_scaling_factor": null,
+  "architectural_context": 40960,
+  "trained_context": 8192,
+  "context_len_override": null,
+  "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+  "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+ },
+ "stop_ids": [
+  151645
+ ],
+ "system_message": "You are a helpful Assistant.",
+ "protocol": "project",
+ "chat_template_kwargs": {
+  "enable_thinking": true
+ },
+ "model_revision": null,
+ "tokenizer_source": "/runpod-volume/teacher_modes/v2_units/A1-s20260726/evaluation/package",
+ "tokenizer_source_rule": "the evaluated checkpoint",
+ "tokenizer_sha256": "0d96ecc916745b3a6eb234433e6ddeeab051736a6336ef0db95b3022c425c3eb",
+ "identity": {
+  "generation_source_digest": "9eb5d477ef83414aa8b50afaa63b8d9d5e544ba917145c5ecc4a23cc728f65ad",
+  "generation_source_set_version": 1,
+  "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+  "runtime": {
+   "version": 1,
+   "image_digest": null,
+   "python_version": "3.12.3",
+   "torch_version": "2.13.0+cu130",
+   "transformers_version": "5.15.0",
+   "cuda_runtime": "13.0",
+   "attention_backend": "vllm:default"
+  },
+  "runtime_digest": "2b18483d1018fb9fa0fd3c939e8673bdc8ae57ce21d0ffa28d8562007811ba2a",
+  "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+  "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+  "chat_template_kwargs_json": "{\"enable_thinking\": true}",
+  "image_digest_source": "ABSENT — runtime is not pinned"
+ },
+ "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+ "thinking_mode": true,
+ "sampling": {
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": -1,
+  "min_p": 0.0,
+  "repetition_penalty": 1.0,
+  "presence_penalty": 0.0,
+  "frequency_penalty": 0.0,
+  "detokenize": false,
+  "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+  "degeneration_check_every": 256
+ },
+ "decoding_protocol": {
+  "protocol_id": "nucleus_v1",
+  "path": "/workspace/aad/configs/shared/evaluation/decoding/nucleus_v1.json",
+  "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4",
+  "sampling": {
+   "temperature": 0.6,
+   "top_p": 0.95,
+   "top_k": -1,
+   "min_p": 0.0,
+   "repetition_penalty": 1.0,
+   "presence_penalty": 0.0,
+   "frequency_penalty": 0.0
+  },
+  "samples_per_item": 1,
+  "seed_rule": {
+   "base": 20261024,
+   "key": "<namespace>|<item id>|<turn>|<sample>",
+   "namespace": "the evaluated unit's key <component>__<unit> (e.g. fluid_reasoning_720__dev_v1, stage3_capability_846__gsm8k): uncapped_eval reads it from the prompt file's stem, which dose_driver.evaluate_all stages as <component>__<unit>.jsonl; run_battery takes it as --seed-namespace",
+   "derivation": "int.from_bytes(sha256('<base>|<key>').digest()[:8], 'big') % 2**63",
+   "independent_of": "the model, the arm and the training seed: every checkpoint draws with the same seed for the same item, turn and sample"
+  }
+ },
+ "libraries": {
+  "transformers": "5.15.0",
+  "tokenizers": "0.22.2",
+  "safetensors": "0.8.0",
+  "numpy": "2.3.5",
+  "datasets": null,
+  "vllm": "0.27.1"
+ },
+ "degeneration_stop": true,
+ "wave_seconds": 44.0,
+ "throughput": {
+  "input_tokens": 7866,
+  "output_tokens": 80812,
+  "output_tokens_p50": 699,
+  "output_tokens_p95": 1702,
+  "output_tokens_max": 3713,
+  "generation_wall_seconds": 44.0,
+  "output_tokens_per_second": 1836.6,
+  "prompts_per_second": 2.2727,
+  "scheduler_steps": 8139,
+  "seconds_per_step": 0.0054,
+  "step_seconds_p50": 0.00494,
+  "step_seconds_p95": 0.00927,
+  "step_ms_p50": 4.94,
+  "concurrency_start": 1,
+  "concurrency_max": 100,
+  "effective_batch_size_mean": 11.74,
+  "submission": "all requests added to the engine before the first step; vLLM schedules them with continuous batching — not a serial loop"
+ },
+ "engine": {
+  "max_model_len": 8192,
+  "gpu_memory_utilization": 0.9,
+  "dtype": "bfloat16",
+  "dtype_engine": "torch.bfloat16",
+  "max_num_seqs": 256,
+  "max_num_batched_tokens": 8192,
+  "vllm_version": "0.27.1",
+  "enforce_eager": false,
+  "init_seconds": 25.9,
+  "init_amortised_over_sets": 9
+ },
+ "stop_reasons": {
+  "degeneration": 3,
+  "eos": 97
+ },
+ "natural_termination_rate": 0.97,
+ "degeneration_rate": 0.03,
+ "degeneration_kinds": {
+  "cycle": 1,
+  "low_novelty": 2,
+  "rambling": 0
+ },
+ "context_limit_rate": 0.0,
+ "right_censored_rate": 0.03,
+ "generated_tokens_p50": 699,
+ "generated_tokens_mean": 808.1,
+ "behavior": {
+  "score": 0.4405,
+  "axes": {
+   "format_ok": 0.0,
+   "fluency": 0.881,
+   "grounding": null,
+   "refusal": null,
+   "tool_call": null,
+   "math": null
+  },
+  "n": {
+   "format_ok": 100,
+   "fluency": 100,
+   "grounding": 0,
+   "refusal": 0,
+   "tool_call": 0,
+   "math": 0
+  }
+ },
+ "aggregate": {
+  "overall": {
+   "n": 100,
+   "terminated": 0.97,
+   "truncated_at_cap": 0.0,
+   "think_closed": 0.0,
+   "think_immediate": 0.0,
+   "no_stray_markers": 0.0,
+   "format_ok": 0.0,
+   "empty_answer": 0.03,
+   "answer_is_echo": 0.0,
+   "echo_4gram": 0.0942,
+   "rep_3gram": 0.089,
+   "answer_words": 64.72
+  },
+  "by_group": {
+   "gsm8k": {
+    "n": 100,
+    "terminated": 0.97,
+    "truncated_at_cap": 0.0,
+    "think_closed": 0.0,
+    "think_immediate": 0.0,
+    "no_stray_markers": 0.0,
+    "format_ok": 0.0,
+    "empty_answer": 0.03,
+    "echo_4gram": 0.0942,
+    "rep_3gram": 0.089,
+    "answer_words": 64.72,
+    "answer_is_echo": 0.0,
+    "answer_em": 0.02,
+    "answer_em_credited": 0.02
+   }
+  },
+  "stray_marker_counts": {
+   "<think>": 100
+  }
+ }
+}

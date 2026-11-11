@@ -1,0 +1,25 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.durable_session_archives/v1",
+ "written_utc": "2026-11-05T17:20:00Z",
+ "what": "six_category_schema_restored@v1's three generation sessions: each secured store's archive (every sealed shard, the session record and telemetry), byte for byte as the closeout pulled it, on the project's private relay beside the dev box's copy (artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/<run>/)",
+ "why": "the shards are paid teacher generations; the import records bind them by sha256 and the -sr packs are derived from them (AGENTS.md P8.2.1: persist completed work at completion)",
+ "archives": {
+  "a_tool_generation_sr_20261105_153741": {
+   "relay": "AlphaAvatar/aadistill-artifacts:durable/tool_generation_sessions/a_tool_generation_sr_20261105_153741/tool_generation_hybrid.tgz",
+   "sha256": "2e269bedb685b3afbde5b95f731c64922a73b5dc89d63f22aa4673cdd60d185e",
+   "bytes": 18221797
+  },
+  "a_tool_generation_sr_20261105_162909": {
+   "relay": "AlphaAvatar/aadistill-artifacts:durable/tool_generation_sessions/a_tool_generation_sr_20261105_162909/tool_generation_hybrid.tgz",
+   "sha256": "f7f7bb734404d6e4e8c2358ba41330a9036fcd3745be5d1159e4f28221176022",
+   "bytes": 68400
+  },
+  "a_tool_generation_sr_t2507_20261105_164515": {
+   "relay": "AlphaAvatar/aadistill-artifacts:durable/tool_generation_sessions/a_tool_generation_sr_t2507_20261105_164515/tool_generation_thinking_2507.tgz",
+   "sha256": "a5584e18c4bf4a0b982bf81d0cfed9a077618dcd31886f3604aa592208b632a3",
+   "bytes": 4108091
+  }
+ },
+ "privacy": "third-party tool content and teacher outputs: private relay only, never git (P15)",
+ "authorizes": "nothing"
+}

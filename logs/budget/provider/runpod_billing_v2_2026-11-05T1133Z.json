@@ -1,0 +1,148 @@
+{
+ "schema": "aadistill.provider_billing_snapshot/v1",
+ "fetched_utc": "2026-11-05T11:33:52+00:00",
+ "query": {
+  "endpoint": "https://api.runpod.io/v2",
+  "api": "rest_v2",
+  "window": "bucketSize=day&startTime=2026-11-04T00:00:00Z&endTime=2026-11-07T00:00:00Z"
+ },
+ "account": {
+  "known": true,
+  "client_balance_usd": 85.8290937807,
+  "current_spend_per_hr": 0.039,
+  "min_balance_usd": 0.0,
+  "under_balance": false,
+  "error": null,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "4rhubprswo",
+    "name": "aad-a1-phase",
+    "size": 350,
+    "dataCenterId": "US-TX-3"
+   },
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 55,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "balance_known": true,
+  "balance_error": null,
+  "resources_known": true,
+  "resources_error": null
+ },
+ "pods": [
+  {
+   "cpuAmount": 0,
+   "diskAmount": 0.020833333488553762,
+   "endTime": "2026-11-05T00:00:00Z",
+   "gpuAmount": 1.0734816566109657,
+   "podId": "0lbf43rtt6yn2a",
+   "startTime": "2026-11-04T00:00:00Z",
+   "totalAmount": 1.0943149900995195,
+   "amount": 1.0943149900995195,
+   "time": "2026-11-04 00:00:00"
+  },
+  {
+   "cpuAmount": 0,
+   "diskAmount": 0.0017361111240461469,
+   "endTime": "2026-11-05T00:00:00Z",
+   "gpuAmount": 0.13995781540870667,
+   "podId": "t9mu5mwk20uchj",
+   "startTime": "2026-11-04T00:00:00Z",
+   "totalAmount": 0.1416939265327528,
+   "amount": 0.1416939265327528,
+   "time": "2026-11-04 00:00:00"
+  },
+  {
+   "cpuAmount": 0,
+   "diskAmount": 0.0069444444961845875,
+   "endTime": "2026-11-05T00:00:00Z",
+   "gpuAmount": 0.4216386452317238,
+   "podId": "ugfmxda8y1tuyo",
+   "startTime": "2026-11-04T00:00:00Z",
+   "totalAmount": 0.4285830897279084,
+   "amount": 0.4285830897279084,
+   "time": "2026-11-04 00:00:00"
+  },
+  {
+   "cpuAmount": 0,
+   "diskAmount": 0.005208333372138441,
+   "endTime": "2026-11-06T00:00:00Z",
+   "gpuAmount": 0.36496682465076447,
+   "podId": "87a2i3lwiy1ugm",
+   "startTime": "2026-11-05T00:00:00Z",
+   "totalAmount": 0.3701751580229029,
+   "amount": 0.3701751580229029,
+   "time": "2026-11-05 00:00:00"
+  },
+  {
+   "cpuAmount": 0,
+   "diskAmount": 0.059027778217568994,
+   "endTime": "2026-11-06T00:00:00Z",
+   "gpuAmount": 3.0654079243540764,
+   "podId": "jsudkf50ehi314",
+   "startTime": "2026-11-05T00:00:00Z",
+   "totalAmount": 3.1244357025716454,
+   "amount": 3.1244357025716454,
+   "time": "2026-11-05 00:00:00"
+  },
+  {
+   "cpuAmount": 0,
+   "diskAmount": 0.005208333372138441,
+   "endTime": "2026-11-06T00:00:00Z",
+   "gpuAmount": 0.32894110679626465,
+   "podId": "yu9wuiottlp0o4",
+   "startTime": "2026-11-05T00:00:00Z",
+   "totalAmount": 0.3341494401684031,
+   "amount": 0.3341494401684031,
+   "time": "2026-11-05 00:00:00"
+  }
+ ],
+ "networkvolumes": [
+  {
+   "endTime": "2026-11-05T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "4rhubprswo",
+   "standardAmount": 0.8166666626930237,
+   "startTime": "2026-11-04T00:00:00Z",
+   "totalAmount": 0.8166666626930237,
+   "amount": 0.8166666626930237,
+   "startDate": "2026-11-04 00:00:00"
+  },
+  {
+   "endTime": "2026-11-05T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "am5m373kuq",
+   "standardAmount": 0.12833333015441895,
+   "startTime": "2026-11-04T00:00:00Z",
+   "totalAmount": 0.12833333015441895,
+   "amount": 0.12833333015441895,
+   "startDate": "2026-11-04 00:00:00"
+  },
+  {
+   "endTime": "2026-11-06T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "4rhubprswo",
+   "standardAmount": 0.3743055537343025,
+   "startTime": "2026-11-05T00:00:00Z",
+   "totalAmount": 0.3743055537343025,
+   "amount": 0.3743055537343025,
+   "startDate": "2026-11-05 00:00:00"
+  },
+  {
+   "endTime": "2026-11-06T00:00:00Z",
+   "highPerformanceAmount": 0,
+   "networkVolumeId": "am5m373kuq",
+   "standardAmount": 0.05881944298744202,
+   "startTime": "2026-11-05T00:00:00Z",
+   "totalAmount": 0.05881944298744202,
+   "amount": 0.05881944298744202,
+   "startDate": "2026-11-05 00:00:00"
+  }
+ ]
+}

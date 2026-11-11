@@ -1,0 +1,2300 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_pilot_report/v4",
+ "state": "COMPLETE",
+ "pilot_plan_sha256": "0a1c831fdfe42361d1229e39a474281cd073ce15f29b9075c6f44963ad6d5b83",
+ "identity": "4c208793f4e9ec52d9aa01af5dbdfa896dedba7cf2ceeb4592cbd20d860b777a",
+ "metrics": {
+  "first_candidate_admission_rate": "candidate-0 episodes admitted / candidate-0 episodes sealed (unattempted and attempted-but-unsealed tasks are in neither)",
+  "admission_yield_up_to_two_candidates": "tasks with an admitted episode / tasks whose outcome is determined (admitted at candidate 0, or candidate 0 rejected and candidate 1 sealed). Candidate 1 is generated ONLY for a task whose candidate 0 was sealed and rejected: a bounded data-admission retry, not pass@2 (which samples two candidates for every task) and not pass^k",
+  "level_pass_rate": "per verifier level and candidate: sealed episodes that passed it / sealed episodes it was checked on (passed + failed); unverified (None) episodes are counted apart, never as passed",
+  "protocol_validity": "level protocol: natural termination, the mode's think rule, every tool-call block parsed, V1's tail rule",
+  "schema_validity": "level schema_validity: every call names an offered tool and its arguments satisfy its JSON Schema",
+  "gold_tool_call_match": "level step_gold: the call set of every gold-carrying turn equals one allowed gold set (name + arguments, canonicalized; order-free) -- exact match against the source's recorded expert call (G2: agreement with a model-generated gold, not human-verified)",
+  "recorded_execution": "level recorded_execution: every executed call matched a recorded response of the replay table (recorded-response replay; no executable environment, no final-state check); None when the episode executed no call",
+  "target_tools_called": "level target_tools_called: every target tool called at least once (recall; extra or wrong calls unchecked) -- not tool-selection accuracy",
+  "tool_selection": "level tool_selection: here only no_call -- no call on any turn of a no-tool task",
+  "verification_coverage": "admitted episodes by the exact set of levels they were verified at (True), per source and episode shape",
+  "supervised_tokens": "generated token ids of the admitted training/validation episodes' turns (each counted once)",
+  "scored_positions": "assistant positions of the admitted calibration/state-evaluation episodes' items"
+ },
+ "metric_contract": "docs/shared/METRIC_CONTRACT.md",
+ "session_evidence": {
+  "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/40abda2f-efac-4413-af84-45085d7650d4/scratchpad/pilot2/scr_a_tool_pilot_20261104_164531/store/unpacked": {
+   "kind": "tool_pilot",
+   "authorization": "stage2.teacher_modes.token_matched.a_tool_pilot_20261104_164531",
+   "terminal": "ALL_DONE",
+   "started_utc": "2026-11-04T17:07:15Z",
+   "finished_utc": "2026-11-04T17:23:12Z"
+  }
+ },
+ "modes": {
+  "H-N": {
+   "cells": {
+    "calibration|schema_arguments|full_episode@v1": {
+     "offered": 28,
+     "candidate_0": {
+      "attempted": 28,
+      "sealed": 28,
+      "admitted": 1,
+      "rejected": 27,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 27,
+      "sealed": 27,
+      "admitted": 0,
+      "rejected": 27,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 1,
+      "rejected": 27,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.0357,
+     "admission_yield_up_to_two_candidates": 0.0357,
+     "supervised_tokens": 0,
+     "scored_positions": 202,
+     "units_per_admitted_episode": 202.0,
+     "c0": {
+      "rejected": 27,
+      "admitted": 1
+     },
+     "c1": {
+      "required": 27,
+      "rejected": 27
+     }
+    },
+    "calibration|schema_arguments|single_step_gold_tool_call@v1": {
+     "offered": 72,
+     "candidate_0": {
+      "attempted": 72,
+      "sealed": 72,
+      "admitted": 13,
+      "rejected": 59,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 59,
+      "sealed": 59,
+      "admitted": 0,
+      "rejected": 59,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 13,
+      "rejected": 59,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.1806,
+     "admission_yield_up_to_two_candidates": 0.1806,
+     "supervised_tokens": 0,
+     "scored_positions": 570,
+     "units_per_admitted_episode": 43.8,
+     "c0": {
+      "rejected": 59,
+      "admitted": 13
+     },
+     "c1": {
+      "required": 59,
+      "rejected": 59
+     }
+    },
+    "state_eval|schema_arguments|full_episode@v1": {
+     "offered": 7,
+     "candidate_0": {
+      "attempted": 7,
+      "sealed": 7,
+      "admitted": 4,
+      "rejected": 3,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 3,
+      "sealed": 3,
+      "admitted": 0,
+      "rejected": 3,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 4,
+      "rejected": 3,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.5714,
+     "admission_yield_up_to_two_candidates": 0.5714,
+     "supervised_tokens": 0,
+     "scored_positions": 837,
+     "units_per_admitted_episode": 209.2,
+     "c0": {
+      "rejected": 3,
+      "admitted": 4
+     },
+     "c1": {
+      "required": 3,
+      "rejected": 3
+     }
+    },
+    "state_eval|schema_arguments|single_step_gold_tool_call@v1": {
+     "offered": 22,
+     "candidate_0": {
+      "attempted": 22,
+      "sealed": 22,
+      "admitted": 4,
+      "rejected": 18,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 18,
+      "sealed": 18,
+      "admitted": 3,
+      "rejected": 15,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 7,
+      "rejected": 15,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.1818,
+     "admission_yield_up_to_two_candidates": 0.3182,
+     "supervised_tokens": 0,
+     "scored_positions": 226,
+     "units_per_admitted_episode": 32.3,
+     "c0": {
+      "rejected": 18,
+      "admitted": 4
+     },
+     "c1": {
+      "required": 18,
+      "rejected": 15,
+      "admitted": 3
+     }
+    },
+    "training|error_recovery|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 7,
+      "rejected": 17,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 17,
+      "sealed": 17,
+      "admitted": 0,
+      "rejected": 17,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 7,
+      "rejected": 17,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.2917,
+     "admission_yield_up_to_two_candidates": 0.2917,
+     "supervised_tokens": 2141,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 305.9,
+     "c0": {
+      "rejected": 17,
+      "admitted": 7
+     },
+     "c1": {
+      "required": 17,
+      "rejected": 17
+     }
+    },
+    "training|mcp_agent|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 4,
+      "rejected": 20,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 20,
+      "sealed": 20,
+      "admitted": 1,
+      "rejected": 19,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 5,
+      "rejected": 19,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.1667,
+     "admission_yield_up_to_two_candidates": 0.2083,
+     "supervised_tokens": 1791,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 358.2,
+     "c0": {
+      "rejected": 20,
+      "admitted": 4
+     },
+     "c1": {
+      "required": 20,
+      "rejected": 19,
+      "admitted": 1
+     }
+    },
+    "training|multi_turn|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 3,
+      "rejected": 21,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 21,
+      "sealed": 21,
+      "admitted": 0,
+      "rejected": 21,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 3,
+      "rejected": 21,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.125,
+     "admission_yield_up_to_two_candidates": 0.125,
+     "supervised_tokens": 557,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 185.7,
+     "c0": {
+      "rejected": 21,
+      "admitted": 3
+     },
+     "c1": {
+      "required": 21,
+      "rejected": 21
+     }
+    },
+    "training|multiple_parallel|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 12,
+      "rejected": 12,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 12,
+      "sealed": 12,
+      "admitted": 1,
+      "rejected": 11,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 13,
+      "rejected": 11,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.5,
+     "admission_yield_up_to_two_candidates": 0.5417,
+     "supervised_tokens": 2718,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 209.1,
+     "c0": {
+      "admitted": 12,
+      "rejected": 12
+     },
+     "c1": {
+      "required": 12,
+      "rejected": 11,
+      "admitted": 1
+     }
+    },
+    "training|no_tool|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 19,
+      "rejected": 5,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 5,
+      "sealed": 5,
+      "admitted": 0,
+      "rejected": 5,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 19,
+      "rejected": 5,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.7917,
+     "admission_yield_up_to_two_candidates": 0.7917,
+     "supervised_tokens": 2830,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 148.9,
+     "c0": {
+      "admitted": 19,
+      "rejected": 5
+     },
+     "c1": {
+      "required": 5,
+      "rejected": 5
+     }
+    },
+    "training|schema_arguments|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 4,
+      "rejected": 20,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 20,
+      "sealed": 20,
+      "admitted": 0,
+      "rejected": 20,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 4,
+      "rejected": 20,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.1667,
+     "admission_yield_up_to_two_candidates": 0.1667,
+     "supervised_tokens": 702,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 175.5,
+     "c0": {
+      "rejected": 20,
+      "admitted": 4
+     },
+     "c1": {
+      "required": 20,
+      "rejected": 20
+     }
+    },
+    "training|schema_arguments|single_step_gold_tool_call@v1": {
+     "offered": 100,
+     "candidate_0": {
+      "attempted": 100,
+      "sealed": 100,
+      "admitted": 16,
+      "rejected": 84,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 84,
+      "sealed": 84,
+      "admitted": 0,
+      "rejected": 84,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 16,
+      "rejected": 84,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.16,
+     "admission_yield_up_to_two_candidates": 0.16,
+     "supervised_tokens": 590,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 36.9,
+     "c0": {
+      "rejected": 84,
+      "admitted": 16
+     },
+     "c1": {
+      "required": 84,
+      "rejected": 84
+     }
+    },
+    "training|tool_selection|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 12,
+      "rejected": 12,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 12,
+      "sealed": 12,
+      "admitted": 1,
+      "rejected": 11,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 13,
+      "rejected": 11,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.5,
+     "admission_yield_up_to_two_candidates": 0.5417,
+     "supervised_tokens": 2708,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 208.3,
+     "c0": {
+      "rejected": 12,
+      "admitted": 12
+     },
+     "c1": {
+      "required": 12,
+      "rejected": 11,
+      "admitted": 1
+     }
+    }
+   },
+   "by_source_and_shape": {
+    "Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "offered": 135,
+     "candidate_0": {
+      "attempted": 135,
+      "sealed": 135,
+      "admitted": 55,
+      "rejected": 80,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 80,
+      "sealed": 80,
+      "admitted": 3,
+      "rejected": 77,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 58,
+      "rejected": 77,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.4074,
+     "admission_yield_up_to_two_candidates": 0.4296,
+     "supervised_tokens": 12638,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 217.9,
+     "c0": {
+      "rejected": 80,
+      "admitted": 55
+     },
+     "c1": {
+      "required": 80,
+      "rejected": 77,
+      "admitted": 3
+     }
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "offered": 68,
+     "candidate_0": {
+      "attempted": 68,
+      "sealed": 68,
+      "admitted": 11,
+      "rejected": 57,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 57,
+      "sealed": 57,
+      "admitted": 0,
+      "rejected": 57,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 11,
+      "rejected": 57,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.1618,
+     "admission_yield_up_to_two_candidates": 0.1618,
+     "supervised_tokens": 809,
+     "scored_positions": 1039,
+     "units_per_admitted_episode": 168.0,
+     "c0": {
+      "admitted": 11,
+      "rejected": 57
+     },
+     "c1": {
+      "required": 57,
+      "rejected": 57
+     }
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "offered": 194,
+     "candidate_0": {
+      "attempted": 194,
+      "sealed": 194,
+      "admitted": 33,
+      "rejected": 161,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 161,
+      "sealed": 161,
+      "admitted": 3,
+      "rejected": 158,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 36,
+      "rejected": 158,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.1701,
+     "admission_yield_up_to_two_candidates": 0.1856,
+     "supervised_tokens": 590,
+     "scored_positions": 796,
+     "units_per_admitted_episode": 38.5,
+     "c0": {
+      "rejected": 161,
+      "admitted": 33
+     },
+     "c1": {
+      "required": 161,
+      "rejected": 158,
+      "admitted": 3
+     }
+    }
+   },
+   "levels": {
+    "Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "candidate_0": {
+      "protocol": {
+       "passed": 75,
+       "failed": 60,
+       "unverified": 0,
+       "pass_rate": 0.5556
+      },
+      "schema_validity": {
+       "passed": 133,
+       "failed": 2,
+       "unverified": 0,
+       "pass_rate": 0.9852
+      },
+      "recorded_execution": {
+       "passed": 50,
+       "failed": 57,
+       "unverified": 28,
+       "pass_rate": 0.4673
+      },
+      "step_gold": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 135,
+       "pass_rate": "UNMEASURED"
+      },
+      "target_tools_called": {
+       "passed": 74,
+       "failed": 44,
+       "unverified": 17,
+       "pass_rate": 0.6271
+      },
+      "tool_selection": {
+       "passed": 17,
+       "failed": 0,
+       "unverified": 118,
+       "pass_rate": 1.0
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 135,
+       "pass_rate": "UNMEASURED"
+      }
+     },
+     "candidate_1": {
+      "protocol": {
+       "passed": 18,
+       "failed": 62,
+       "unverified": 0,
+       "pass_rate": 0.225
+      },
+      "schema_validity": {
+       "passed": 77,
+       "failed": 3,
+       "unverified": 0,
+       "pass_rate": 0.9625
+      },
+      "recorded_execution": {
+       "passed": 13,
+       "failed": 60,
+       "unverified": 7,
+       "pass_rate": 0.1781
+      },
+      "step_gold": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 80,
+       "pass_rate": "UNMEASURED"
+      },
+      "target_tools_called": {
+       "passed": 40,
+       "failed": 40,
+       "unverified": 0,
+       "pass_rate": 0.5
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 80,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 80,
+       "pass_rate": "UNMEASURED"
+      }
+     }
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "candidate_0": {
+      "protocol": {
+       "passed": 24,
+       "failed": 44,
+       "unverified": 0,
+       "pass_rate": 0.3529
+      },
+      "schema_validity": {
+       "passed": 67,
+       "failed": 1,
+       "unverified": 0,
+       "pass_rate": 0.9853
+      },
+      "recorded_execution": {
+       "passed": 9,
+       "failed": 44,
+       "unverified": 15,
+       "pass_rate": 0.1698
+      },
+      "step_gold": {
+       "passed": 12,
+       "failed": 56,
+       "unverified": 0,
+       "pass_rate": 0.1765
+      },
+      "target_tools_called": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 68,
+       "pass_rate": "UNMEASURED"
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 68,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 68,
+       "pass_rate": "UNMEASURED"
+      }
+     },
+     "candidate_1": {
+      "protocol": {
+       "passed": 10,
+       "failed": 47,
+       "unverified": 0,
+       "pass_rate": 0.1754
+      },
+      "schema_validity": {
+       "passed": 56,
+       "failed": 1,
+       "unverified": 0,
+       "pass_rate": 0.9825
+      },
+      "recorded_execution": {
+       "passed": 0,
+       "failed": 46,
+       "unverified": 11,
+       "pass_rate": 0.0
+      },
+      "step_gold": {
+       "passed": 1,
+       "failed": 56,
+       "unverified": 0,
+       "pass_rate": 0.0175
+      },
+      "target_tools_called": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 57,
+       "pass_rate": "UNMEASURED"
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 57,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 57,
+       "pass_rate": "UNMEASURED"
+      }
+     }
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "candidate_0": {
+      "protocol": {
+       "passed": 143,
+       "failed": 51,
+       "unverified": 0,
+       "pass_rate": 0.7371
+      },
+      "schema_validity": {
+       "passed": 189,
+       "failed": 5,
+       "unverified": 0,
+       "pass_rate": 0.9742
+      },
+      "recorded_execution": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 194,
+       "pass_rate": "UNMEASURED"
+      },
+      "step_gold": {
+       "passed": 33,
+       "failed": 161,
+       "unverified": 0,
+       "pass_rate": 0.1701
+      },
+      "target_tools_called": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 194,
+       "pass_rate": "UNMEASURED"
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 194,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 194,
+       "pass_rate": "UNMEASURED"
+      }
+     },
+     "candidate_1": {
+      "protocol": {
+       "passed": 114,
+       "failed": 47,
+       "unverified": 0,
+       "pass_rate": 0.7081
+      },
+      "schema_validity": {
+       "passed": 155,
+       "failed": 6,
+       "unverified": 0,
+       "pass_rate": 0.9627
+      },
+      "recorded_execution": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 161,
+       "pass_rate": "UNMEASURED"
+      },
+      "step_gold": {
+       "passed": 3,
+       "failed": 158,
+       "unverified": 0,
+       "pass_rate": 0.0186
+      },
+      "target_tools_called": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 161,
+       "pass_rate": "UNMEASURED"
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 161,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 161,
+       "pass_rate": "UNMEASURED"
+      }
+     }
+    }
+   },
+   "verification_coverage": {
+    "Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "protocol+schema_validity+recorded_execution+target_tools_called": 41,
+     "protocol+schema_validity+tool_selection": 17
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "protocol+schema_validity+step_gold": 2,
+     "protocol+schema_validity+recorded_execution+step_gold": 9
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "protocol+schema_validity+step_gold": 36
+    }
+   },
+   "totals": {
+    "offered": 397,
+    "candidate_0": {
+     "attempted": 397,
+     "sealed": 397,
+     "admitted": 99,
+     "rejected": 298,
+     "attempted_unsealed": 0,
+     "unattempted": 0
+    },
+    "candidate_1": {
+     "required": 298,
+     "sealed": 298,
+     "admitted": 6,
+     "rejected": 292,
+     "attempted_unsealed": 0,
+     "unattempted": 0
+    },
+    "final": {
+     "admitted": 105,
+     "rejected": 292,
+     "undetermined": 0
+    },
+    "first_candidate_admission_rate": 0.2494,
+    "admission_yield_up_to_two_candidates": 0.2645,
+    "supervised_tokens": 14037,
+    "scored_positions": 1835,
+    "units_per_admitted_episode": 151.2,
+    "c0": {
+     "rejected": 298,
+     "admitted": 99
+    },
+    "c1": {
+     "required": 298,
+     "rejected": 292,
+     "admitted": 6
+    }
+   },
+   "sealed_records": 695,
+   "attempted": {
+    "candidate_0": 397,
+    "candidate_1": 298
+   },
+   "groups_complete": {
+    "candidate_0": true,
+    "candidate_1": true
+   }
+  },
+  "H-T": {
+   "cells": {
+    "calibration|schema_arguments|full_episode@v1": {
+     "offered": 28,
+     "candidate_0": {
+      "attempted": 28,
+      "sealed": 28,
+      "admitted": 2,
+      "rejected": 26,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 26,
+      "sealed": 26,
+      "admitted": 0,
+      "rejected": 26,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 2,
+      "rejected": 26,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.0714,
+     "admission_yield_up_to_two_candidates": 0.0714,
+     "supervised_tokens": 0,
+     "scored_positions": 5215,
+     "units_per_admitted_episode": 2607.5,
+     "c0": {
+      "rejected": 26,
+      "admitted": 2
+     },
+     "c1": {
+      "required": 26,
+      "rejected": 26
+     }
+    },
+    "calibration|schema_arguments|single_step_gold_tool_call@v1": {
+     "offered": 72,
+     "candidate_0": {
+      "attempted": 72,
+      "sealed": 72,
+      "admitted": 18,
+      "rejected": 54,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 54,
+      "sealed": 54,
+      "admitted": 2,
+      "rejected": 52,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 20,
+      "rejected": 52,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.25,
+     "admission_yield_up_to_two_candidates": 0.2778,
+     "supervised_tokens": 0,
+     "scored_positions": 18935,
+     "units_per_admitted_episode": 946.8,
+     "c0": {
+      "rejected": 54,
+      "admitted": 18
+     },
+     "c1": {
+      "required": 54,
+      "rejected": 52,
+      "admitted": 2
+     }
+    },
+    "state_eval|schema_arguments|full_episode@v1": {
+     "offered": 7,
+     "candidate_0": {
+      "attempted": 7,
+      "sealed": 7,
+      "admitted": 2,
+      "rejected": 5,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 5,
+      "sealed": 5,
+      "admitted": 0,
+      "rejected": 5,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 2,
+      "rejected": 5,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.2857,
+     "admission_yield_up_to_two_candidates": 0.2857,
+     "supervised_tokens": 0,
+     "scored_positions": 1447,
+     "units_per_admitted_episode": 723.5,
+     "c0": {
+      "rejected": 5,
+      "admitted": 2
+     },
+     "c1": {
+      "required": 5,
+      "rejected": 5
+     }
+    },
+    "state_eval|schema_arguments|single_step_gold_tool_call@v1": {
+     "offered": 22,
+     "candidate_0": {
+      "attempted": 22,
+      "sealed": 22,
+      "admitted": 9,
+      "rejected": 13,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 13,
+      "sealed": 13,
+      "admitted": 0,
+      "rejected": 13,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 9,
+      "rejected": 13,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.4091,
+     "admission_yield_up_to_two_candidates": 0.4091,
+     "supervised_tokens": 0,
+     "scored_positions": 2789,
+     "units_per_admitted_episode": 309.9,
+     "c0": {
+      "rejected": 13,
+      "admitted": 9
+     },
+     "c1": {
+      "required": 13,
+      "rejected": 13
+     }
+    },
+    "training|error_recovery|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 6,
+      "rejected": 18,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 18,
+      "sealed": 18,
+      "admitted": 3,
+      "rejected": 15,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 9,
+      "rejected": 15,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.25,
+     "admission_yield_up_to_two_candidates": 0.375,
+     "supervised_tokens": 15032,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 1670.2,
+     "c0": {
+      "rejected": 18,
+      "admitted": 6
+     },
+     "c1": {
+      "required": 18,
+      "rejected": 15,
+      "admitted": 3
+     }
+    },
+    "training|mcp_agent|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 5,
+      "rejected": 19,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 19,
+      "sealed": 19,
+      "admitted": 0,
+      "rejected": 19,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 5,
+      "rejected": 19,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.2083,
+     "admission_yield_up_to_two_candidates": 0.2083,
+     "supervised_tokens": 4516,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 903.2,
+     "c0": {
+      "rejected": 19,
+      "admitted": 5
+     },
+     "c1": {
+      "required": 19,
+      "rejected": 19
+     }
+    },
+    "training|multi_turn|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 2,
+      "rejected": 22,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 22,
+      "sealed": 22,
+      "admitted": 2,
+      "rejected": 20,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 4,
+      "rejected": 20,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.0833,
+     "admission_yield_up_to_two_candidates": 0.1667,
+     "supervised_tokens": 11661,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 2915.2,
+     "c0": {
+      "rejected": 22,
+      "admitted": 2
+     },
+     "c1": {
+      "required": 22,
+      "rejected": 20,
+      "admitted": 2
+     }
+    },
+    "training|multiple_parallel|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 13,
+      "rejected": 11,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 11,
+      "sealed": 11,
+      "admitted": 1,
+      "rejected": 10,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 14,
+      "rejected": 10,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.5417,
+     "admission_yield_up_to_two_candidates": 0.5833,
+     "supervised_tokens": 12724,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 908.9,
+     "c0": {
+      "admitted": 13,
+      "rejected": 11
+     },
+     "c1": {
+      "required": 11,
+      "rejected": 10,
+      "admitted": 1
+     }
+    },
+    "training|no_tool|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 20,
+      "rejected": 4,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 4,
+      "sealed": 4,
+      "admitted": 0,
+      "rejected": 4,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 20,
+      "rejected": 4,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.8333,
+     "admission_yield_up_to_two_candidates": 0.8333,
+     "supervised_tokens": 7963,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 398.1,
+     "c0": {
+      "admitted": 20,
+      "rejected": 4
+     },
+     "c1": {
+      "required": 4,
+      "rejected": 4
+     }
+    },
+    "training|schema_arguments|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 4,
+      "rejected": 20,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 20,
+      "sealed": 20,
+      "admitted": 2,
+      "rejected": 18,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 6,
+      "rejected": 18,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.1667,
+     "admission_yield_up_to_two_candidates": 0.25,
+     "supervised_tokens": 6062,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 1010.3,
+     "c0": {
+      "rejected": 20,
+      "admitted": 4
+     },
+     "c1": {
+      "required": 20,
+      "admitted": 2,
+      "rejected": 18
+     }
+    },
+    "training|schema_arguments|single_step_gold_tool_call@v1": {
+     "offered": 100,
+     "candidate_0": {
+      "attempted": 100,
+      "sealed": 100,
+      "admitted": 24,
+      "rejected": 76,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 76,
+      "sealed": 76,
+      "admitted": 7,
+      "rejected": 69,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 31,
+      "rejected": 69,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.24,
+     "admission_yield_up_to_two_candidates": 0.31,
+     "supervised_tokens": 21775,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 702.4,
+     "c0": {
+      "rejected": 76,
+      "admitted": 24
+     },
+     "c1": {
+      "required": 76,
+      "rejected": 69,
+      "admitted": 7
+     }
+    },
+    "training|tool_selection|full_episode@v1": {
+     "offered": 24,
+     "candidate_0": {
+      "attempted": 24,
+      "sealed": 24,
+      "admitted": 13,
+      "rejected": 11,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 11,
+      "sealed": 11,
+      "admitted": 0,
+      "rejected": 11,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 13,
+      "rejected": 11,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.5417,
+     "admission_yield_up_to_two_candidates": 0.5417,
+     "supervised_tokens": 11757,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 904.4,
+     "c0": {
+      "rejected": 11,
+      "admitted": 13
+     },
+     "c1": {
+      "required": 11,
+      "rejected": 11
+     }
+    }
+   },
+   "by_source_and_shape": {
+    "Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "offered": 135,
+     "candidate_0": {
+      "attempted": 135,
+      "sealed": 135,
+      "admitted": 56,
+      "rejected": 79,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 79,
+      "sealed": 79,
+      "admitted": 6,
+      "rejected": 73,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 62,
+      "rejected": 73,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.4148,
+     "admission_yield_up_to_two_candidates": 0.4593,
+     "supervised_tokens": 62165,
+     "scored_positions": 0,
+     "units_per_admitted_episode": 1002.7,
+     "c0": {
+      "rejected": 79,
+      "admitted": 56
+     },
+     "c1": {
+      "required": 79,
+      "rejected": 73,
+      "admitted": 6
+     }
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "offered": 68,
+     "candidate_0": {
+      "attempted": 68,
+      "sealed": 68,
+      "admitted": 11,
+      "rejected": 57,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 57,
+      "sealed": 57,
+      "admitted": 2,
+      "rejected": 55,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 13,
+      "rejected": 55,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.1618,
+     "admission_yield_up_to_two_candidates": 0.1912,
+     "supervised_tokens": 7550,
+     "scored_positions": 6662,
+     "units_per_admitted_episode": 1093.2,
+     "c0": {
+      "admitted": 11,
+      "rejected": 57
+     },
+     "c1": {
+      "required": 57,
+      "rejected": 55,
+      "admitted": 2
+     }
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "offered": 194,
+     "candidate_0": {
+      "attempted": 194,
+      "sealed": 194,
+      "admitted": 51,
+      "rejected": 143,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "candidate_1": {
+      "required": 143,
+      "sealed": 143,
+      "admitted": 9,
+      "rejected": 134,
+      "attempted_unsealed": 0,
+      "unattempted": 0
+     },
+     "final": {
+      "admitted": 60,
+      "rejected": 134,
+      "undetermined": 0
+     },
+     "first_candidate_admission_rate": 0.2629,
+     "admission_yield_up_to_two_candidates": 0.3093,
+     "supervised_tokens": 21775,
+     "scored_positions": 21724,
+     "units_per_admitted_episode": 725.0,
+     "c0": {
+      "rejected": 143,
+      "admitted": 51
+     },
+     "c1": {
+      "required": 143,
+      "rejected": 134,
+      "admitted": 9
+     }
+    }
+   },
+   "levels": {
+    "Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "candidate_0": {
+      "protocol": {
+       "passed": 65,
+       "failed": 70,
+       "unverified": 0,
+       "pass_rate": 0.4815
+      },
+      "schema_validity": {
+       "passed": 129,
+       "failed": 6,
+       "unverified": 0,
+       "pass_rate": 0.9556
+      },
+      "recorded_execution": {
+       "passed": 50,
+       "failed": 63,
+       "unverified": 22,
+       "pass_rate": 0.4425
+      },
+      "step_gold": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 135,
+       "pass_rate": "UNMEASURED"
+      },
+      "target_tools_called": {
+       "passed": 89,
+       "failed": 29,
+       "unverified": 17,
+       "pass_rate": 0.7542
+      },
+      "tool_selection": {
+       "passed": 17,
+       "failed": 0,
+       "unverified": 118,
+       "pass_rate": 1.0
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 135,
+       "pass_rate": "UNMEASURED"
+      }
+     },
+     "candidate_1": {
+      "protocol": {
+       "passed": 13,
+       "failed": 66,
+       "unverified": 0,
+       "pass_rate": 0.1646
+      },
+      "schema_validity": {
+       "passed": 72,
+       "failed": 7,
+       "unverified": 0,
+       "pass_rate": 0.9114
+      },
+      "recorded_execution": {
+       "passed": 14,
+       "failed": 62,
+       "unverified": 3,
+       "pass_rate": 0.1842
+      },
+      "step_gold": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 79,
+       "pass_rate": "UNMEASURED"
+      },
+      "target_tools_called": {
+       "passed": 55,
+       "failed": 24,
+       "unverified": 0,
+       "pass_rate": 0.6962
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 79,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 79,
+       "pass_rate": "UNMEASURED"
+      }
+     }
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "candidate_0": {
+      "protocol": {
+       "passed": 27,
+       "failed": 41,
+       "unverified": 0,
+       "pass_rate": 0.3971
+      },
+      "schema_validity": {
+       "passed": 68,
+       "failed": 0,
+       "unverified": 0,
+       "pass_rate": 1.0
+      },
+      "recorded_execution": {
+       "passed": 8,
+       "failed": 40,
+       "unverified": 20,
+       "pass_rate": 0.1667
+      },
+      "step_gold": {
+       "passed": 14,
+       "failed": 54,
+       "unverified": 0,
+       "pass_rate": 0.2059
+      },
+      "target_tools_called": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 68,
+       "pass_rate": "UNMEASURED"
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 68,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 68,
+       "pass_rate": "UNMEASURED"
+      }
+     },
+     "candidate_1": {
+      "protocol": {
+       "passed": 19,
+       "failed": 38,
+       "unverified": 0,
+       "pass_rate": 0.3333
+      },
+      "schema_validity": {
+       "passed": 57,
+       "failed": 0,
+       "unverified": 0,
+       "pass_rate": 1.0
+      },
+      "recorded_execution": {
+       "passed": 2,
+       "failed": 38,
+       "unverified": 17,
+       "pass_rate": 0.05
+      },
+      "step_gold": {
+       "passed": 5,
+       "failed": 52,
+       "unverified": 0,
+       "pass_rate": 0.0877
+      },
+      "target_tools_called": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 57,
+       "pass_rate": "UNMEASURED"
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 57,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 57,
+       "pass_rate": "UNMEASURED"
+      }
+     }
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "candidate_0": {
+      "protocol": {
+       "passed": 136,
+       "failed": 58,
+       "unverified": 0,
+       "pass_rate": 0.701
+      },
+      "schema_validity": {
+       "passed": 194,
+       "failed": 0,
+       "unverified": 0,
+       "pass_rate": 1.0
+      },
+      "recorded_execution": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 194,
+       "pass_rate": "UNMEASURED"
+      },
+      "step_gold": {
+       "passed": 51,
+       "failed": 143,
+       "unverified": 0,
+       "pass_rate": 0.2629
+      },
+      "target_tools_called": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 194,
+       "pass_rate": "UNMEASURED"
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 194,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 194,
+       "pass_rate": "UNMEASURED"
+      }
+     },
+     "candidate_1": {
+      "protocol": {
+       "passed": 94,
+       "failed": 49,
+       "unverified": 0,
+       "pass_rate": 0.6573
+      },
+      "schema_validity": {
+       "passed": 141,
+       "failed": 2,
+       "unverified": 0,
+       "pass_rate": 0.986
+      },
+      "recorded_execution": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 143,
+       "pass_rate": "UNMEASURED"
+      },
+      "step_gold": {
+       "passed": 9,
+       "failed": 134,
+       "unverified": 0,
+       "pass_rate": 0.0629
+      },
+      "target_tools_called": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 143,
+       "pass_rate": "UNMEASURED"
+      },
+      "tool_selection": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 143,
+       "pass_rate": "UNMEASURED"
+      },
+      "task_success": {
+       "passed": 0,
+       "failed": 0,
+       "unverified": 143,
+       "pass_rate": "UNMEASURED"
+      }
+     }
+    }
+   },
+   "verification_coverage": {
+    "Agent-Ark/Toucan-1.5M|full_episode@v1": {
+     "protocol+schema_validity+recorded_execution+target_tools_called": 45,
+     "protocol+schema_validity+tool_selection": 17
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|full_episode@v1": {
+     "protocol+schema_validity+step_gold": 3,
+     "protocol+schema_validity+recorded_execution+step_gold": 10
+    },
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1|single_step_gold_tool_call@v1": {
+     "protocol+schema_validity+step_gold": 60
+    }
+   },
+   "totals": {
+    "offered": 397,
+    "candidate_0": {
+     "attempted": 397,
+     "sealed": 397,
+     "admitted": 118,
+     "rejected": 279,
+     "attempted_unsealed": 0,
+     "unattempted": 0
+    },
+    "candidate_1": {
+     "required": 279,
+     "sealed": 279,
+     "admitted": 17,
+     "rejected": 262,
+     "attempted_unsealed": 0,
+     "unattempted": 0
+    },
+    "final": {
+     "admitted": 135,
+     "rejected": 262,
+     "undetermined": 0
+    },
+    "first_candidate_admission_rate": 0.2972,
+    "admission_yield_up_to_two_candidates": 0.3401,
+    "supervised_tokens": 91490,
+    "scored_positions": 28386,
+    "units_per_admitted_episode": 888.0,
+    "c0": {
+     "rejected": 279,
+     "admitted": 118
+    },
+    "c1": {
+     "required": 279,
+     "rejected": 262,
+     "admitted": 17
+    }
+   },
+   "sealed_records": 676,
+   "attempted": {
+    "candidate_0": 397,
+    "candidate_1": 279
+   },
+   "groups_complete": {
+    "candidate_0": true,
+    "candidate_1": true
+   }
+  }
+ },
+ "schema_arguments_non_thinking_supply": {
+  "calibration|full_episode@v1": {
+   "offered": 28,
+   "final": {
+    "admitted": 1,
+    "rejected": 27,
+    "undetermined": 0
+   },
+   "supervised_tokens": 0,
+   "scored_positions": 202,
+   "first_candidate_admission_rate": 0.0357,
+   "admission_yield_up_to_two_candidates": 0.0357
+  },
+  "calibration|single_step_gold_tool_call@v1": {
+   "offered": 72,
+   "final": {
+    "admitted": 13,
+    "rejected": 59,
+    "undetermined": 0
+   },
+   "supervised_tokens": 0,
+   "scored_positions": 570,
+   "first_candidate_admission_rate": 0.1806,
+   "admission_yield_up_to_two_candidates": 0.1806
+  },
+  "state_eval|full_episode@v1": {
+   "offered": 7,
+   "final": {
+    "admitted": 4,
+    "rejected": 3,
+    "undetermined": 0
+   },
+   "supervised_tokens": 0,
+   "scored_positions": 837,
+   "first_candidate_admission_rate": 0.5714,
+   "admission_yield_up_to_two_candidates": 0.5714
+  },
+  "state_eval|single_step_gold_tool_call@v1": {
+   "offered": 22,
+   "final": {
+    "admitted": 7,
+    "rejected": 15,
+    "undetermined": 0
+   },
+   "supervised_tokens": 0,
+   "scored_positions": 226,
+   "first_candidate_admission_rate": 0.1818,
+   "admission_yield_up_to_two_candidates": 0.3182
+  },
+  "training|full_episode@v1": {
+   "offered": 24,
+   "final": {
+    "admitted": 4,
+    "rejected": 20,
+    "undetermined": 0
+   },
+   "supervised_tokens": 702,
+   "scored_positions": 0,
+   "first_candidate_admission_rate": 0.1667,
+   "admission_yield_up_to_two_candidates": 0.1667
+  },
+  "training|single_step_gold_tool_call@v1": {
+   "offered": 100,
+   "final": {
+    "admitted": 16,
+    "rejected": 84,
+    "undetermined": 0
+   },
+   "supervised_tokens": 590,
+   "scored_positions": 0,
+   "first_candidate_admission_rate": 0.16,
+   "admission_yield_up_to_two_candidates": 0.16
+  }
+ },
+ "formal_plan_projection": {
+  "H-N|training|error_recovery": {
+   "unit": "supervised_tokens",
+   "target": 49341.783,
+   "supply_tasks": 2668,
+   "attempted_tasks": 24,
+   "sealed_units": 2141,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 2668,
+     "attempted": 24,
+     "units_per_attempted_task": 89.208,
+     "projected_units": 238007.8
+    }
+   },
+   "projected_units_from_whole_supply": 238007.8,
+   "status": "REACHABLE"
+  },
+  "H-N|training|mcp_agent": {
+   "unit": "supervised_tokens",
+   "target": 74012.6745,
+   "supply_tasks": 4542,
+   "attempted_tasks": 24,
+   "sealed_units": 1791,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 4542,
+     "attempted": 24,
+     "units_per_attempted_task": 74.625,
+     "projected_units": 338946.8
+    }
+   },
+   "projected_units_from_whole_supply": 338946.8,
+   "status": "REACHABLE"
+  },
+  "H-N|training|multi_turn": {
+   "unit": "supervised_tokens",
+   "target": 98683.566,
+   "supply_tasks": 12224,
+   "attempted_tasks": 24,
+   "sealed_units": 557,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 12224,
+     "attempted": 24,
+     "units_per_attempted_task": 23.208,
+     "projected_units": 283698.7
+    }
+   },
+   "projected_units_from_whole_supply": 283698.7,
+   "status": "REACHABLE"
+  },
+  "H-N|training|multiple_parallel": {
+   "unit": "supervised_tokens",
+   "target": 74012.6745,
+   "supply_tasks": 4581,
+   "attempted_tasks": 24,
+   "sealed_units": 2718,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 4581,
+     "attempted": 24,
+     "units_per_attempted_task": 113.25,
+     "projected_units": 518798.2
+    }
+   },
+   "projected_units_from_whole_supply": 518798.2,
+   "status": "REACHABLE"
+  },
+  "H-N|training|no_tool": {
+   "unit": "supervised_tokens",
+   "target": 49341.783,
+   "supply_tasks": 37880,
+   "attempted_tasks": 24,
+   "sealed_units": 2830,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 37880,
+     "attempted": 24,
+     "units_per_attempted_task": 117.917,
+     "projected_units": 4466683.3
+    }
+   },
+   "projected_units_from_whole_supply": 4466683.3,
+   "status": "REACHABLE"
+  },
+  "H-N|training|schema_arguments": {
+   "unit": "supervised_tokens",
+   "target": 74012.6745,
+   "supply_tasks": 1928,
+   "attempted_tasks": 124,
+   "sealed_units": 1292,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 368,
+     "attempted": 24,
+     "units_per_attempted_task": 29.25,
+     "projected_units": 10764.0
+    },
+    "single_step_gold_tool_call@v1": {
+     "supply_tasks": 1560,
+     "attempted": 100,
+     "units_per_attempted_task": 5.9,
+     "projected_units": 9204.0
+    }
+   },
+   "projected_units_from_whole_supply": 19968.0,
+   "status": "SHORTFALL_PROJECTED"
+  },
+  "H-N|training|tool_selection": {
+   "unit": "supervised_tokens",
+   "target": 74012.6745,
+   "supply_tasks": 12499,
+   "attempted_tasks": 24,
+   "sealed_units": 2708,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 12499,
+     "attempted": 24,
+     "units_per_attempted_task": 112.833,
+     "projected_units": 1410303.8
+    }
+   },
+   "projected_units_from_whole_supply": 1410303.8,
+   "status": "REACHABLE"
+  },
+  "H-N|calibration|schema_arguments": {
+   "unit": "scored_positions",
+   "target": 630.0,
+   "supply_tasks": 100,
+   "attempted_tasks": 100,
+   "sealed_units": 772,
+   "basis": "measured: the whole supply attempted",
+   "status": "REACHED"
+  },
+  "H-N|state_eval|schema_arguments": {
+   "unit": "scored_positions",
+   "target": 1800.0,
+   "supply_tasks": 29,
+   "attempted_tasks": 29,
+   "sealed_units": 1063,
+   "basis": "measured: the whole supply attempted",
+   "status": "SHORTFALL_EXHAUSTED"
+  },
+  "H-T|training|error_recovery": {
+   "unit": "supervised_tokens",
+   "target": 49341.783,
+   "supply_tasks": 2668,
+   "attempted_tasks": 24,
+   "sealed_units": 15032,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 2668,
+     "attempted": 24,
+     "units_per_attempted_task": 626.333,
+     "projected_units": 1671057.3
+    }
+   },
+   "projected_units_from_whole_supply": 1671057.3,
+   "status": "REACHABLE"
+  },
+  "H-T|training|mcp_agent": {
+   "unit": "supervised_tokens",
+   "target": 74012.6745,
+   "supply_tasks": 4542,
+   "attempted_tasks": 24,
+   "sealed_units": 4516,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 4542,
+     "attempted": 24,
+     "units_per_attempted_task": 188.167,
+     "projected_units": 854653.0
+    }
+   },
+   "projected_units_from_whole_supply": 854653.0,
+   "status": "REACHABLE"
+  },
+  "H-T|training|multi_turn": {
+   "unit": "supervised_tokens",
+   "target": 98683.566,
+   "supply_tasks": 12224,
+   "attempted_tasks": 24,
+   "sealed_units": 11661,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 12224,
+     "attempted": 24,
+     "units_per_attempted_task": 485.875,
+     "projected_units": 5939336.0
+    }
+   },
+   "projected_units_from_whole_supply": 5939336.0,
+   "status": "REACHABLE"
+  },
+  "H-T|training|multiple_parallel": {
+   "unit": "supervised_tokens",
+   "target": 74012.6745,
+   "supply_tasks": 4581,
+   "attempted_tasks": 24,
+   "sealed_units": 12724,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 4581,
+     "attempted": 24,
+     "units_per_attempted_task": 530.167,
+     "projected_units": 2428693.5
+    }
+   },
+   "projected_units_from_whole_supply": 2428693.5,
+   "status": "REACHABLE"
+  },
+  "H-T|training|no_tool": {
+   "unit": "supervised_tokens",
+   "target": 49341.783,
+   "supply_tasks": 37880,
+   "attempted_tasks": 24,
+   "sealed_units": 7963,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 37880,
+     "attempted": 24,
+     "units_per_attempted_task": 331.792,
+     "projected_units": 12568268.3
+    }
+   },
+   "projected_units_from_whole_supply": 12568268.3,
+   "status": "REACHABLE"
+  },
+  "H-T|training|schema_arguments": {
+   "unit": "supervised_tokens",
+   "target": 74012.6745,
+   "supply_tasks": 1928,
+   "attempted_tasks": 124,
+   "sealed_units": 27837,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 368,
+     "attempted": 24,
+     "units_per_attempted_task": 252.583,
+     "projected_units": 92950.7
+    },
+    "single_step_gold_tool_call@v1": {
+     "supply_tasks": 1560,
+     "attempted": 100,
+     "units_per_attempted_task": 217.75,
+     "projected_units": 339690.0
+    }
+   },
+   "projected_units_from_whole_supply": 432640.7,
+   "status": "REACHABLE"
+  },
+  "H-T|training|tool_selection": {
+   "unit": "supervised_tokens",
+   "target": 74012.6745,
+   "supply_tasks": 12499,
+   "attempted_tasks": 24,
+   "sealed_units": 11757,
+   "basis": "projection by shape",
+   "by_shape": {
+    "full_episode@v1": {
+     "supply_tasks": 12499,
+     "attempted": 24,
+     "units_per_attempted_task": 489.875,
+     "projected_units": 6122947.6
+    }
+   },
+   "projected_units_from_whole_supply": 6122947.6,
+   "status": "REACHABLE"
+  },
+  "H-T|calibration|schema_arguments": {
+   "unit": "scored_positions",
+   "target": 630.0,
+   "supply_tasks": 100,
+   "attempted_tasks": 100,
+   "sealed_units": 24150,
+   "basis": "measured: the whole supply attempted",
+   "status": "REACHED"
+  },
+  "H-T|state_eval|schema_arguments": {
+   "unit": "scored_positions",
+   "target": 1800.0,
+   "supply_tasks": 29,
+   "attempted_tasks": 29,
+   "sealed_units": 4236,
+   "basis": "measured: the whole supply attempted",
+   "status": "REACHED"
+  }
+ },
+ "telemetry": {
+  "invocations": 4,
+  "peak_vram_mib": {
+   "value": 37965
+  },
+  "model_load_seconds": {
+   "value": [
+    104.9,
+    14.9,
+    14.7,
+    14.6
+   ]
+  },
+  "kv_cache_tokens": {
+   "value": [
+    195616.0,
+    197151.0,
+    197151.0,
+    197151.0
+   ]
+  },
+  "kv_cache_usage_peak": {
+   "value": [
+    0.07510010623518837,
+    0.0,
+    0.9925403389280791,
+    0.9978918349144571
+   ]
+  },
+  "preemptions": {
+   "value": [
+    1,
+    0,
+    298,
+    126
+   ]
+  },
+  "preemption_log_lines": 0,
+  "decode_output_tokens_per_second": {
+   "value": [
+    599.4,
+    536.3,
+    1019.7,
+    978.8
+   ]
+  },
+  "ttft_seconds": {
+   "p50": 45.556,
+   "p90": 141.956,
+   "max": 172.367
+  },
+  "per_request_decode_tokens_per_second": {
+   "p50": 14.31,
+   "p10": 11.82
+  },
+  "prompt_tokens": {
+   "p50": 2623,
+   "p90": 3624,
+   "total": 2008197
+  },
+  "prefill_tokens_per_second": {
+   "value": "UNMEASURED",
+   "why": "the batched engine interleaves prefill and decode; the TTFT distribution and the prompt tokens are reported"
+  }
+ },
+ "priors": {
+  "supervised_tokens_per_turn": {
+   "H-T": [
+    250,
+    350,
+    450
+   ],
+   "H-N": [
+    40,
+    70,
+    120
+   ],
+   "T2507": [
+    300,
+    350,
+    450
+   ]
+  },
+  "episode_pass_rate": [
+   0.45,
+   0.6,
+   0.8
+  ],
+  "_": "[low, expected, high]; six_category_design.json :: tool_calling.expected_per_arm (A1's teacher evaluation and Thinking-2507's historical tool turns). A pilot's measured values replace them before the cap is final"
+ },
+ "authorizes": "nothing"
+}

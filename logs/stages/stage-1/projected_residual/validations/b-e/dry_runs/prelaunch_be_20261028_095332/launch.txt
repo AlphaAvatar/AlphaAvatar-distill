@@ -1,0 +1,149 @@
+bundle OK: transfer/aad_autoinit_84fbcdd1.bundle on the relay
+[09:54:33] budget: expected 105 min $1.99 · soft $2.73 · hard $2.92 (authorized $3.00)
+[09:54:33] NVIDIA L40S $1.09/h, stock Low
+[09:54:34] account funds OK: the provider account holds $138.4751 against the $2.9212 this session must be able to fund
+[09:54:34] account resources OK: the provider account holds only the 1 resource(s) the records account for
+[09:54:34] a B-E engineering-validation artifact, unused
+[09:54:34] NVIDIA L40S at no more than $1.14/h, as granted
+[09:54:34] all-in $2.9875 over 155.0 min, inside $3.00
+[09:54:34] study identity 4d5920df8678 is the authorized one
+[09:54:34] every bound file is in the session commit
+[09:54:36] $3.00 inside the envelope ($3.0) and the $14.9373 the project cap leaves now
+[09:54:36] precheck OK: 0 relay inputs (), 1 local assets
+[09:54:36] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+{
+ "terminal": "DRY_RUN_GATES_PASSED",
+ "provider_resource_created": false,
+ "bundle_on_relay": {
+  "ok": true,
+  "why": "transfer/aad_autoinit_84fbcdd1.bundle on the relay"
+ },
+ "budget_plan": {
+  "price_per_hour": 1.14,
+  "authorized_usd": 3.0,
+  "expected_minutes": 105.0,
+  "soft_stop_minutes": 143.75,
+  "artifact_recovery_reserve_minutes": 10.0,
+  "hard_terminate_minutes": 153.75,
+  "step_time": {
+   "seconds": 1.0,
+   "source": "unused: the validation is one phase (arms=0)",
+   "measured": true
+  },
+  "breakdown": [
+   {
+    "name": "setup",
+    "minutes": 25.0
+   },
+   {
+    "name": "train",
+    "minutes": 0.0
+   },
+   {
+    "name": "evaluate",
+    "minutes": 0.0
+   },
+   {
+    "name": "transfer",
+    "minutes": 5.0
+   },
+   {
+    "name": "B-E_validation",
+    "minutes": 75.0
+   }
+  ],
+  "soft_stop_reserves": [
+   {
+    "name": "closeout_and_teardown",
+    "minutes": 12.5
+   }
+  ],
+  "notes": [],
+  "soft_stop_reserve_minutes": 12.5,
+  "expected_usd": 1.995,
+  "soft_stop_usd": 2.7312,
+  "artifact_recovery_reserve_usd": 0.19,
+  "hard_terminate_usd": 2.9212
+ },
+ "quoted_price_per_hour": 1.09,
+ "stock": "Low",
+ "account_balance": {
+  "known": true,
+  "client_balance_usd": 138.4750513947,
+  "current_spend_per_hr": 0.003,
+  "min_balance_usd": 0.0,
+  "under_balance": false,
+  "error": null,
+  "required_usd": 2.9212,
+  "ok": true,
+  "why": "the provider account holds $138.4751 against the $2.9212 this session must be able to fund",
+  "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+ },
+ "account_resources": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "prechecks": [
+  {
+   "check": "the_artifact_is_this_studys_and_unused",
+   "ok": true,
+   "message": "a B-E engineering-validation artifact, unused"
+  },
+  {
+   "check": "the_gpu_and_price_are_the_grants",
+   "ok": true,
+   "message": "NVIDIA L40S at no more than $1.14/h, as granted"
+  },
+  {
+   "check": "all_in_within_cap",
+   "ok": true,
+   "message": "all-in $2.9875 over 155.0 min, inside $3.00"
+  },
+  {
+   "check": "the_study_identity_is_the_authorized_one",
+   "ok": true,
+   "message": "study identity 4d5920df8678 is the authorized one"
+  },
+  {
+   "check": "bound_files_are_in_the_session_commit",
+   "ok": true,
+   "message": "every bound file is in the session commit"
+  },
+  {
+   "check": "the_project_cap_holds_now",
+   "ok": true,
+   "message": "$3.00 inside the envelope ($3.0) and the $14.9373 the project cap leaves now"
+  }
+ ],
+ "precheck": {
+  "relay_needed": [],
+  "relay_missing": [],
+  "relay_repos": {},
+  "relay_repo_files_listed": {},
+  "local_assets": [
+   "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1/calib.s0v_base_d4.items.jsonl"
+  ],
+  "local_missing": []
+ },
+ "harness": "017d26676894ffd10f8244c1acf0e35a7c38029df0cbac4be465dad7c73b8213",
+ "study_identity": "4d5920df867859b6d671bc5a963e8a0e97c80548352a084ca6674d005e20ebd0",
+ "record": "logs/stages/stage-1/projected_residual/validations/b-e/dry_runs/prelaunch_be_20261028_095332/session.dry_run.json"
+}
+rc=0

@@ -1,0 +1,340 @@
+{
+ "schema": "aadistill.budget.accounting_audit/v1",
+ "written_utc": "2026-10-27T19:14:00+00:00",
+ "snapshot": {
+  "path": "logs/budget/provider/runpod_billing_2026-10-27T1913Z.json",
+  "sha256": "d8d4256f8eeba16c934e1a6e3e68d1f7ccfddb528c10bcf33bc748e18baa455d",
+  "fetched_utc": "2026-10-27T19:13:18+00:00"
+ },
+ "verdict": "CLOSED: the provider-based position is complete and conservative; no unposted session is outstanding; every post-anchor billed pod is attributed; the remaining gap lies before the 2026-09-11 anchor, which the maintainer stated, and its attribution is the maintainer's",
+ "billed_pods": {
+  "total": 344,
+  "created_by_a_run_record": 140,
+  "only_mentioned": 148,
+  "attributed_by_evidence": [
+   "xrksmenhg7dlps"
+  ],
+  "evidence_problems": [],
+  "unattributed_before_anchor": {
+   "pods": 55,
+   "usd": 77.3325
+  },
+  "unattributed_since_anchor": []
+ },
+ "gap": {
+  "provider_total_usd": 720.2266,
+  "records_cumulative_usd": 687.4031,
+  "provider_minus_records_usd": 32.8235,
+  "before_the_anchor": {
+   "anchor_day": "2026-09-11",
+   "provider_usd": 305.4327,
+   "maintainer_stated_anchor_usd": 267.8998,
+   "provider_minus_anchor_usd": 37.5329
+  },
+  "since_the_anchor": {
+   "provider_usd": 414.7939,
+   "records_usd": 419.5033,
+   "provider_minus_records_usd": -4.7094
+  }
+ },
+ "recorded_pods_not_billed": {
+  "inside_posting_window": [],
+  "never_charged": [
+   {
+    "pod_id": "2iaipmt4cd45qs",
+    "run_id": "a3_attempt20",
+    "run_booked_usd": 0.83,
+    "ended_utc": "2026-10-02T13:30:41+08:00",
+    "ended_basis": "the commit that added its closeout",
+    "age_hours": 613.7
+   },
+   {
+    "pod_id": "5fddwpg5tzc0bv",
+    "run_id": "a3_attempt20",
+    "run_booked_usd": 0.83,
+    "ended_utc": "2026-10-02T13:30:41+08:00",
+    "ended_basis": "the commit that added its closeout",
+    "age_hours": 613.7
+   },
+   {
+    "pod_id": "6mhoepslb8c6gu",
+    "run_id": "a3_attempt37",
+    "run_booked_usd": 0.94,
+    "ended_utc": "2026-10-02T23:26:36+08:00",
+    "ended_basis": "the commit that added its closeout",
+    "age_hours": 603.8
+   },
+   {
+    "pod_id": "6wjl0c32g6f0bw",
+    "run_id": "volaudit_20261021_142638",
+    "run_booked_usd": 0.0018,
+    "ended_utc": "2026-10-21T14:28:23+00:00",
+    "ended_basis": "closeout recorded_utc",
+    "age_hours": 148.7
+   },
+   {
+    "pod_id": "mysxzb2hm198y1",
+    "run_id": "a3_attempt20",
+    "run_booked_usd": 0.83,
+    "ended_utc": "2026-10-02T13:30:41+08:00",
+    "ended_basis": "the commit that added its closeout",
+    "age_hours": 613.7
+   }
+  ],
+  "engineering_campaign_subruns_not_billed": [],
+  "engineering_campaigns_scanned": 18,
+  "_rule": "a pod absent from the bill for 72 h was never charged; its booked cost stays in the records, which therefore overstate by that much"
+ },
+ "network_volumes": {
+  "days": [
+   {
+    "day": "2026-09-22",
+    "billed_gb_h": 240.0,
+    "billed_usd": 0.0233,
+    "recorded_volumes": [],
+    "recorded_max_gb_h": 0,
+    "unattributed_gb_h": 240.0,
+    "unattributed_usd": 0.0233
+   },
+   {
+    "day": "2026-09-23",
+    "billed_gb_h": 840.0,
+    "billed_usd": 0.0817,
+    "recorded_volumes": [],
+    "recorded_max_gb_h": 0,
+    "unattributed_gb_h": 840.0,
+    "unattributed_usd": 0.0817
+   },
+   {
+    "day": "2026-09-24",
+    "billed_gb_h": 40.0,
+    "billed_usd": 0.0039,
+    "recorded_volumes": [],
+    "recorded_max_gb_h": 0,
+    "unattributed_gb_h": 40.0,
+    "unattributed_usd": 0.0039
+   },
+   {
+    "day": "2026-10-19",
+    "billed_gb_h": 6600.0,
+    "billed_usd": 0.6417,
+    "recorded_volumes": [
+     "ugllmlv19t"
+    ],
+    "recorded_max_gb_h": 5700.0,
+    "unattributed_gb_h": 900.0,
+    "unattributed_usd": 0.0875
+   },
+   {
+    "day": "2026-10-20",
+    "billed_gb_h": 8200.0,
+    "billed_usd": 0.7972,
+    "recorded_volumes": [
+     "ugllmlv19t",
+     "b9jwu0g1eg",
+     "wn3avnine2"
+    ],
+    "recorded_max_gb_h": 8000.0,
+    "unattributed_gb_h": 200.0,
+    "unattributed_usd": 0.0194
+   },
+   {
+    "day": "2026-10-21",
+    "billed_gb_h": 6800.0,
+    "billed_usd": 0.6611,
+    "recorded_volumes": [
+     "ugllmlv19t",
+     "b9jwu0g1eg",
+     "wn3avnine2"
+    ],
+    "recorded_max_gb_h": 6000.0,
+    "unattributed_gb_h": 800.0,
+    "unattributed_usd": 0.0778
+   },
+   {
+    "day": "2026-10-23",
+    "billed_gb_h": 210.0,
+    "billed_usd": 0.0204,
+    "recorded_volumes": [
+     "1980hnh75i"
+    ],
+    "recorded_max_gb_h": 180.0,
+    "unattributed_gb_h": 30.0,
+    "unattributed_usd": 0.0029
+   },
+   {
+    "day": "2026-10-24",
+    "billed_gb_h": 540.0,
+    "billed_usd": 0.0525,
+    "recorded_volumes": [
+     "1980hnh75i",
+     "am5m373kuq"
+    ],
+    "recorded_max_gb_h": 450.0,
+    "unattributed_gb_h": 90.0,
+    "unattributed_usd": 0.0088
+   },
+   {
+    "day": "2026-10-25",
+    "billed_gb_h": 870.0,
+    "billed_usd": 0.0846,
+    "recorded_volumes": [
+     "am5m373kuq"
+    ],
+    "recorded_max_gb_h": 720.0,
+    "unattributed_gb_h": 150.0,
+    "unattributed_usd": 0.0146
+   },
+   {
+    "day": "2026-10-26",
+    "billed_gb_h": 1560.0,
+    "billed_usd": 0.1517,
+    "recorded_volumes": [
+     "am5m373kuq",
+     "t6yrsvujha"
+    ],
+    "recorded_max_gb_h": 1320.0,
+    "unattributed_gb_h": 240.0,
+    "unattributed_usd": 0.0233
+   },
+   {
+    "day": "2026-10-27",
+    "billed_gb_h": 660.0,
+    "billed_usd": 0.0642,
+    "recorded_volumes": [
+     "am5m373kuq"
+    ],
+    "recorded_max_gb_h": 600.0,
+    "unattributed_gb_h": 60.0,
+    "unattributed_usd": 0.0058
+   }
+  ],
+  "unattributed_usd": 0.349,
+  "billed_usd": 2.5822
+ },
+ "mixed_calibration": {
+  "items": [
+   {
+    "item": "MC1 attempt 1",
+    "run": "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_102914",
+    "pod_id": "6cy5fhf4q1tru0",
+    "booked_usd": 0.1903,
+    "provider_billed_usd": 0.1847,
+    "billed_days": [
+     "2026-10-26"
+    ]
+   },
+   {
+    "item": "MC1 attempt 2",
+    "run": "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634",
+    "pod_id": "z90fahqwqrlgb0",
+    "booked_usd": 6.1817,
+    "provider_billed_usd": 6.1777,
+    "billed_days": [
+     "2026-10-26"
+    ]
+   },
+   {
+    "item": "MC2",
+    "run": "logs/stages/stage-0/calibration_volume/runs/mixr_20261026_140539",
+    "pod_id": "ntluvkf9fod0ec",
+    "booked_usd": 10.912,
+    "provider_billed_usd": 10.9119,
+    "billed_days": [
+     "2026-10-26"
+    ]
+   },
+   {
+    "item": "MC1 volume",
+    "run": "logs/stages/stage-0/calibration_volume/runs/mixvol_20261026_102835",
+    "volume_id": "t6yrsvujha",
+    "booked_usd": 0.0526,
+    "provider_billed_usd": null,
+    "_provider": "volume rows carry no volume id: 2026-10-26's row (1,560 GB-h, $0.1517) holds this 150 GB x 4 h (600 GB-h) and am5m373kuq's 720 GB-h; see network_volumes"
+   }
+  ],
+  "booked_total_usd": 17.3366,
+  "grant_closed_spent_usd": 17.3366,
+  "agrees_with_the_grant_closeout": true
+ },
+ "cap": {
+  "binding_project_cap_usd": 740.0,
+  "owner": "logs/budget/approvals/mixed_calibration_grant.json",
+  "package_cap_usd_stale": 712.17
+ },
+ "position": {
+  "provider_billed_usd": 720.2266,
+  "unposted_sessions": [],
+  "committed_usd": 724.3509,
+  "project_cap_usd": 740.0,
+  "project_remaining_usd": 15.6491,
+  "balance_usd": 139.2135134535,
+  "account_pods": [],
+  "account_volumes": [
+   "am5m373kuq"
+  ],
+  "storage": [
+   {
+    "volume": "am5m373kuq",
+    "record": "logs/stages/stage-2/reasoning_data/storage/h1pa_volume_am5m373kuq.json",
+    "basis": "reserved",
+    "obligation_usd": 4.2,
+    "netted_posted_usd": 0.128333,
+    "future_usd": 4.0717
+   },
+   {
+    "volume": "t6yrsvujha",
+    "record": "logs/stages/stage-0/calibration_volume/runs/mixvol_20261026_102835/runtime/session.json",
+    "basis": "deleted inside the posting window",
+    "obligation_usd": 0.0526,
+    "netted_posted_usd": 0.0,
+    "future_usd": 0.0526
+   }
+  ],
+  "campaign_subruns_unposted": [],
+  "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns"
+ },
+ "findings": [
+  {
+   "id": "stale_package_cap",
+   "severity": "accounting",
+   "what": "the records derivation read the project cap from configs/stages/stage-1/phase_c1/authorization.json ($712.17), which no grant after 2026-10-23 updated; every issuer used $740.0 (logs/budget/approvals/mixed_calibration_grant.json)",
+   "fix": "derive_budget.latest_project_cap reads the newest grant that states the cap; no record edited"
+  },
+  {
+   "id": "misrecorded_pod_id",
+   "severity": "attribution",
+   "what": "a billed pod named by no record is the C3 packing pilot's subrun v6, booked under v5's pod id",
+   "rows": {
+    "xrksmenhg7dlps": {
+     "record": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2/campaign.json",
+     "subrun_id": "c3pack2_20260927_v6",
+     "recorded_pod_id": "gbiz85xcmiq6gh",
+     "recorded_elapsed_minutes": 143.017,
+     "recorded_cost_usd": 2.6378,
+     "billed_usd": 2.6349,
+     "billed_minutes": 142.897
+    }
+   },
+   "fix": "attributed by logs/budget/audits/attribution_evidence.json; its cost was already in the records, so nothing is added"
+  },
+  {
+   "id": "campaign_subruns_not_scanned_for_unposted_pods",
+   "severity": "governance",
+   "what": "mixed_governance.position (and h1pa_governance.live_position) look for unposted pods only in runs/*/runtime/session.json; an engineering campaign's subruns (validations/, pilots/) are invisible to it, so an engineering pod still inside the 72 h posting window would be missing from 'committed'",
+   "fix": "FIXED 2026-10-27: shared.project_position counts them (an unposted subrun inside the window at its booked cost, refused without a confirmed teardown); this position uses it: 18 campaigns, 55 subruns with a pod, 0 unposted inside the window. Every new issuer reads this rule; the closed studies' issuers are left as they ran"
+  },
+  {
+   "id": "volume_rows_exceed_lifetimes",
+   "severity": "attribution",
+   "what": "the provider's volume rows bill 0.349 USD of GB-h beyond what every recorded volume's lifetime can accrue (including three September rows no stage storage record covers: the C2 behavioural durable-staging volumes, booked in their own validation records)",
+   "fix": "none needed for safety: the position counts every billed row; the excess is never netted against a reservation"
+  }
+ ],
+ "not_changed": [
+  "no historical conclusion, authorization, grant or run record was edited",
+  "no cap was raised: $740 is the maintainer's 2026-10-26 decision",
+  "the pre-anchor difference is reported, not booked"
+ ],
+ "authorizes": "nothing"
+}

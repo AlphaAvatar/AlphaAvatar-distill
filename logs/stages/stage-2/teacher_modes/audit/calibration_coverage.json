@@ -1,0 +1,532 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.calibration_supplement/v1",
+ "written_utc": "2026-10-31T09:06:45Z",
+ "d4": {
+  "design": {
+   "path": "configs/stages/stage-0/calibration_volume/formal_design.json",
+   "sha256": "11e4fd92a6a3bcae4793a11ef86fcac7e249d5b9ce7338b345a2edec1b7b267d"
+  },
+  "pool_items_sha256": "c9e18612f994795d0764ceb0d0d0f403bcf5acb7f9a746581fe45b12829c93d7",
+  "dose": 4,
+  "sampling_seed": 1308798386,
+  "profiles": {
+   "base": "calib.s0v_base_d4@v1",
+   "rh": "calib.s0v_rh_d4@v1"
+  }
+ },
+ "rule": "per profile, mode and cell: D4's cell order, the mode's own naturally terminated scored positions, half of D4's cell quota per mode; v1's sealed calibration covers D4's 4x prefix",
+ "v1_records": {
+  "dir": ".scratch/research_a/a_teacher_20261030_012648/store/generation",
+  "identity": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+  "inputs_sha256": "86c1431b70219d3fc7db08cfe02181fda63b4179d00e37fb3a363e42edf4d9ef"
+ },
+ "quotas": {
+  "base": {
+   "inductive_rule_discovery/list_induction@v1": 16200.0,
+   "inductive_rule_discovery/string_induction@v1": 16200.0,
+   "compositional_generalization/defined_ops@v1": 16200.0,
+   "compositional_generalization/scan_language@v1": 16200.0,
+   "task_contained_deduction/entity_tracking@v1": 10800.0,
+   "task_contained_deduction/knights_knaves@v1": 10800.0,
+   "task_contained_deduction/ordering@v1": 10800.0,
+   "abstract_analogical/grid_transform@v1": 32400.0,
+   "supporting/gsm8k": 12600.000000000002,
+   "supporting/multihop_qa": 12600.000000000002,
+   "supporting/openmath": 12600.000000000002,
+   "supporting/rag_evidence": 12600.000000000002
+  },
+  "rh": {
+   "inductive_rule_discovery/list_induction@v1": 19800.0,
+   "inductive_rule_discovery/string_induction@v1": 19800.0,
+   "compositional_generalization/defined_ops@v1": 19800.0,
+   "compositional_generalization/scan_language@v1": 19800.0,
+   "task_contained_deduction/entity_tracking@v1": 13200.0,
+   "task_contained_deduction/knights_knaves@v1": 13200.0,
+   "task_contained_deduction/ordering@v1": 13200.0,
+   "abstract_analogical/grid_transform@v1": 39600.0,
+   "supporting/gsm8k": 5400.0,
+   "supporting/multihop_qa": 5400.0,
+   "supporting/openmath": 5400.0,
+   "supporting/rag_evidence": 5400.0
+  }
+ },
+ "audit": {
+  "base|H-T|abstract_analogical/grid_transform@v1": {
+   "quota_per_mode": 16200.0,
+   "v1_positions": 21405,
+   "v1_units": 8,
+   "positions_per_unit_v1": 3057.9,
+   "new_units": 0,
+   "pool_units": 43,
+   "short_after_pool": false
+  },
+  "base|H-N|abstract_analogical/grid_transform@v1": {
+   "quota_per_mode": 16200.0,
+   "v1_positions": 6717,
+   "v1_units": 8,
+   "positions_per_unit_v1": 839.6,
+   "new_units": 18,
+   "pool_units": 43,
+   "short_after_pool": false
+  },
+  "base|H-T|compositional_generalization/defined_ops@v1": {
+   "quota_per_mode": 8100.0,
+   "v1_positions": 11425,
+   "v1_units": 10,
+   "positions_per_unit_v1": 1142.5,
+   "new_units": 0,
+   "pool_units": 73,
+   "short_after_pool": false
+  },
+  "base|H-N|compositional_generalization/defined_ops@v1": {
+   "quota_per_mode": 8100.0,
+   "v1_positions": 3213,
+   "v1_units": 10,
+   "positions_per_unit_v1": 321.3,
+   "new_units": 23,
+   "pool_units": 73,
+   "short_after_pool": false
+  },
+  "base|H-T|compositional_generalization/scan_language@v1": {
+   "quota_per_mode": 8100.0,
+   "v1_positions": 16871,
+   "v1_units": 4,
+   "positions_per_unit_v1": 4217.8,
+   "new_units": 0,
+   "pool_units": 29,
+   "short_after_pool": false
+  },
+  "base|H-N|compositional_generalization/scan_language@v1": {
+   "quota_per_mode": 8100.0,
+   "v1_positions": 1738,
+   "v1_units": 4,
+   "positions_per_unit_v1": 434.5,
+   "new_units": 21,
+   "pool_units": 29,
+   "short_after_pool": false
+  },
+  "base|H-T|inductive_rule_discovery/list_induction@v1": {
+   "quota_per_mode": 8100.0,
+   "v1_positions": 14686,
+   "v1_units": 7,
+   "positions_per_unit_v1": 2098.0,
+   "new_units": 0,
+   "pool_units": 69,
+   "short_after_pool": false
+  },
+  "base|H-N|inductive_rule_discovery/list_induction@v1": {
+   "quota_per_mode": 8100.0,
+   "v1_positions": 5135,
+   "v1_units": 7,
+   "positions_per_unit_v1": 733.6,
+   "new_units": 8,
+   "pool_units": 69,
+   "short_after_pool": false
+  },
+  "base|H-T|inductive_rule_discovery/string_induction@v1": {
+   "quota_per_mode": 8100.0,
+   "v1_positions": 9834,
+   "v1_units": 6,
+   "positions_per_unit_v1": 1966.8,
+   "new_units": 0,
+   "pool_units": 68,
+   "short_after_pool": false
+  },
+  "base|H-N|inductive_rule_discovery/string_induction@v1": {
+   "quota_per_mode": 8100.0,
+   "v1_positions": 3345,
+   "v1_units": 6,
+   "positions_per_unit_v1": 557.5,
+   "new_units": 13,
+   "pool_units": 68,
+   "short_after_pool": false
+  },
+  "base|H-T|supporting/gsm8k": {
+   "quota_per_mode": 6300.0,
+   "v1_positions": 13376,
+   "v1_units": 10,
+   "positions_per_unit_v1": 1337.6,
+   "new_units": 0,
+   "pool_units": 1349,
+   "short_after_pool": false
+  },
+  "base|H-N|supporting/gsm8k": {
+   "quota_per_mode": 6300.0,
+   "v1_positions": 2322,
+   "v1_units": 10,
+   "positions_per_unit_v1": 232.2,
+   "new_units": 26,
+   "pool_units": 1349,
+   "short_after_pool": false
+  },
+  "base|H-T|supporting/multihop_qa": {
+   "quota_per_mode": 6300.0,
+   "v1_positions": 4633,
+   "v1_units": 7,
+   "positions_per_unit_v1": 661.9,
+   "new_units": 6,
+   "pool_units": 731,
+   "short_after_pool": false
+  },
+  "base|H-N|supporting/multihop_qa": {
+   "quota_per_mode": 6300.0,
+   "v1_positions": 172,
+   "v1_units": 7,
+   "positions_per_unit_v1": 24.6,
+   "new_units": 327,
+   "pool_units": 731,
+   "short_after_pool": false
+  },
+  "base|H-T|supporting/openmath": {
+   "quota_per_mode": 6300.0,
+   "v1_positions": 15774,
+   "v1_units": 6,
+   "positions_per_unit_v1": 2629.0,
+   "new_units": 0,
+   "pool_units": 303,
+   "short_after_pool": false
+  },
+  "base|H-N|supporting/openmath": {
+   "quota_per_mode": 6300.0,
+   "v1_positions": 2361,
+   "v1_units": 6,
+   "positions_per_unit_v1": 393.5,
+   "new_units": 15,
+   "pool_units": 303,
+   "short_after_pool": false
+  },
+  "base|H-T|supporting/rag_evidence": {
+   "quota_per_mode": 6300.0,
+   "v1_positions": 7693,
+   "v1_units": 24,
+   "positions_per_unit_v1": 320.5,
+   "new_units": 0,
+   "pool_units": 3637,
+   "short_after_pool": false
+  },
+  "base|H-N|supporting/rag_evidence": {
+   "quota_per_mode": 6300.0,
+   "v1_positions": 684,
+   "v1_units": 24,
+   "positions_per_unit_v1": 28.5,
+   "new_units": 264,
+   "pool_units": 3637,
+   "short_after_pool": false
+  },
+  "base|H-T|task_contained_deduction/entity_tracking@v1": {
+   "quota_per_mode": 5400.0,
+   "v1_positions": 7505,
+   "v1_units": 6,
+   "positions_per_unit_v1": 1250.8,
+   "new_units": 0,
+   "pool_units": 75,
+   "short_after_pool": false
+  },
+  "base|H-N|task_contained_deduction/entity_tracking@v1": {
+   "quota_per_mode": 5400.0,
+   "v1_positions": 1845,
+   "v1_units": 6,
+   "positions_per_unit_v1": 307.5,
+   "new_units": 17,
+   "pool_units": 75,
+   "short_after_pool": false
+  },
+  "base|H-T|task_contained_deduction/knights_knaves@v1": {
+   "quota_per_mode": 5400.0,
+   "v1_positions": 10724,
+   "v1_units": 3,
+   "positions_per_unit_v1": 3574.7,
+   "new_units": 0,
+   "pool_units": 74,
+   "short_after_pool": false
+  },
+  "base|H-N|task_contained_deduction/knights_knaves@v1": {
+   "quota_per_mode": 5400.0,
+   "v1_positions": 2378,
+   "v1_units": 3,
+   "positions_per_unit_v1": 792.7,
+   "new_units": 6,
+   "pool_units": 74,
+   "short_after_pool": false
+  },
+  "base|H-T|task_contained_deduction/ordering@v1": {
+   "quota_per_mode": 5400.0,
+   "v1_positions": 4144,
+   "v1_units": 3,
+   "positions_per_unit_v1": 1381.3,
+   "new_units": 3,
+   "pool_units": 75,
+   "short_after_pool": false
+  },
+  "base|H-N|task_contained_deduction/ordering@v1": {
+   "quota_per_mode": 5400.0,
+   "v1_positions": 729,
+   "v1_units": 3,
+   "positions_per_unit_v1": 243.0,
+   "new_units": 26,
+   "pool_units": 75,
+   "short_after_pool": false
+  },
+  "rh|H-T|abstract_analogical/grid_transform@v1": {
+   "quota_per_mode": 19800.0,
+   "v1_positions": 21405,
+   "v1_units": 8,
+   "positions_per_unit_v1": 3057.9,
+   "new_units": 0,
+   "pool_units": 43,
+   "short_after_pool": false
+  },
+  "rh|H-N|abstract_analogical/grid_transform@v1": {
+   "quota_per_mode": 19800.0,
+   "v1_positions": 6717,
+   "v1_units": 8,
+   "positions_per_unit_v1": 839.6,
+   "new_units": 23,
+   "pool_units": 43,
+   "short_after_pool": false
+  },
+  "rh|H-T|compositional_generalization/defined_ops@v1": {
+   "quota_per_mode": 9900.0,
+   "v1_positions": 11425,
+   "v1_units": 10,
+   "positions_per_unit_v1": 1142.5,
+   "new_units": 0,
+   "pool_units": 73,
+   "short_after_pool": false
+  },
+  "rh|H-N|compositional_generalization/defined_ops@v1": {
+   "quota_per_mode": 9900.0,
+   "v1_positions": 3213,
+   "v1_units": 10,
+   "positions_per_unit_v1": 321.3,
+   "new_units": 31,
+   "pool_units": 73,
+   "short_after_pool": false
+  },
+  "rh|H-T|compositional_generalization/scan_language@v1": {
+   "quota_per_mode": 9900.0,
+   "v1_positions": 16871,
+   "v1_units": 4,
+   "positions_per_unit_v1": 4217.8,
+   "new_units": 0,
+   "pool_units": 29,
+   "short_after_pool": false
+  },
+  "rh|H-N|compositional_generalization/scan_language@v1": {
+   "quota_per_mode": 9900.0,
+   "v1_positions": 1738,
+   "v1_units": 4,
+   "positions_per_unit_v1": 434.5,
+   "new_units": 25,
+   "pool_units": 29,
+   "short_after_pool": false
+  },
+  "rh|H-T|inductive_rule_discovery/list_induction@v1": {
+   "quota_per_mode": 9900.0,
+   "v1_positions": 14686,
+   "v1_units": 7,
+   "positions_per_unit_v1": 2098.0,
+   "new_units": 0,
+   "pool_units": 69,
+   "short_after_pool": false
+  },
+  "rh|H-N|inductive_rule_discovery/list_induction@v1": {
+   "quota_per_mode": 9900.0,
+   "v1_positions": 5135,
+   "v1_units": 7,
+   "positions_per_unit_v1": 733.6,
+   "new_units": 11,
+   "pool_units": 69,
+   "short_after_pool": false
+  },
+  "rh|H-T|inductive_rule_discovery/string_induction@v1": {
+   "quota_per_mode": 9900.0,
+   "v1_positions": 9834,
+   "v1_units": 6,
+   "positions_per_unit_v1": 1966.8,
+   "new_units": 2,
+   "pool_units": 68,
+   "short_after_pool": false
+  },
+  "rh|H-N|inductive_rule_discovery/string_induction@v1": {
+   "quota_per_mode": 9900.0,
+   "v1_positions": 3345,
+   "v1_units": 6,
+   "positions_per_unit_v1": 557.5,
+   "new_units": 18,
+   "pool_units": 68,
+   "short_after_pool": false
+  },
+  "rh|H-T|supporting/gsm8k": {
+   "quota_per_mode": 2700.0,
+   "v1_positions": 13376,
+   "v1_units": 10,
+   "positions_per_unit_v1": 1337.6,
+   "new_units": 0,
+   "pool_units": 1349,
+   "short_after_pool": false
+  },
+  "rh|H-N|supporting/gsm8k": {
+   "quota_per_mode": 2700.0,
+   "v1_positions": 2322,
+   "v1_units": 10,
+   "positions_per_unit_v1": 232.2,
+   "new_units": 6,
+   "pool_units": 1349,
+   "short_after_pool": false
+  },
+  "rh|H-T|supporting/multihop_qa": {
+   "quota_per_mode": 2700.0,
+   "v1_positions": 4633,
+   "v1_units": 7,
+   "positions_per_unit_v1": 661.9,
+   "new_units": 0,
+   "pool_units": 731,
+   "short_after_pool": false
+  },
+  "rh|H-N|supporting/multihop_qa": {
+   "quota_per_mode": 2700.0,
+   "v1_positions": 172,
+   "v1_units": 7,
+   "positions_per_unit_v1": 24.6,
+   "new_units": 136,
+   "pool_units": 731,
+   "short_after_pool": false
+  },
+  "rh|H-T|supporting/openmath": {
+   "quota_per_mode": 2700.0,
+   "v1_positions": 15774,
+   "v1_units": 6,
+   "positions_per_unit_v1": 2629.0,
+   "new_units": 0,
+   "pool_units": 303,
+   "short_after_pool": false
+  },
+  "rh|H-N|supporting/openmath": {
+   "quota_per_mode": 2700.0,
+   "v1_positions": 2361,
+   "v1_units": 6,
+   "positions_per_unit_v1": 393.5,
+   "new_units": 3,
+   "pool_units": 303,
+   "short_after_pool": false
+  },
+  "rh|H-T|supporting/rag_evidence": {
+   "quota_per_mode": 2700.0,
+   "v1_positions": 7693,
+   "v1_units": 24,
+   "positions_per_unit_v1": 320.5,
+   "new_units": 0,
+   "pool_units": 3637,
+   "short_after_pool": false
+  },
+  "rh|H-N|supporting/rag_evidence": {
+   "quota_per_mode": 2700.0,
+   "v1_positions": 684,
+   "v1_units": 24,
+   "positions_per_unit_v1": 28.5,
+   "new_units": 100,
+   "pool_units": 3637,
+   "short_after_pool": false
+  },
+  "rh|H-T|task_contained_deduction/entity_tracking@v1": {
+   "quota_per_mode": 6600.0,
+   "v1_positions": 7505,
+   "v1_units": 6,
+   "positions_per_unit_v1": 1250.8,
+   "new_units": 0,
+   "pool_units": 75,
+   "short_after_pool": false
+  },
+  "rh|H-N|task_contained_deduction/entity_tracking@v1": {
+   "quota_per_mode": 6600.0,
+   "v1_positions": 1845,
+   "v1_units": 6,
+   "positions_per_unit_v1": 307.5,
+   "new_units": 22,
+   "pool_units": 75,
+   "short_after_pool": false
+  },
+  "rh|H-T|task_contained_deduction/knights_knaves@v1": {
+   "quota_per_mode": 6600.0,
+   "v1_positions": 10724,
+   "v1_units": 3,
+   "positions_per_unit_v1": 3574.7,
+   "new_units": 0,
+   "pool_units": 74,
+   "short_after_pool": false
+  },
+  "rh|H-N|task_contained_deduction/knights_knaves@v1": {
+   "quota_per_mode": 6600.0,
+   "v1_positions": 2378,
+   "v1_units": 3,
+   "positions_per_unit_v1": 792.7,
+   "new_units": 8,
+   "pool_units": 74,
+   "short_after_pool": false
+  },
+  "rh|H-T|task_contained_deduction/ordering@v1": {
+   "quota_per_mode": 6600.0,
+   "v1_positions": 4144,
+   "v1_units": 3,
+   "positions_per_unit_v1": 1381.3,
+   "new_units": 4,
+   "pool_units": 75,
+   "short_after_pool": false
+  },
+  "rh|H-N|task_contained_deduction/ordering@v1": {
+   "quota_per_mode": 6600.0,
+   "v1_positions": 729,
+   "v1_units": 3,
+   "positions_per_unit_v1": 243.0,
+   "new_units": 33,
+   "pool_units": 75,
+   "short_after_pool": false
+  }
+ },
+ "new_units": 801,
+ "by_cell_and_modes": {
+  "abstract_analogical/grid_transform@v1|H-N": 23,
+  "compositional_generalization/defined_ops@v1|H-N": 31,
+  "compositional_generalization/scan_language@v1|H-N": 25,
+  "inductive_rule_discovery/list_induction@v1|H-N": 11,
+  "inductive_rule_discovery/string_induction@v1|H-N": 16,
+  "inductive_rule_discovery/string_induction@v1|H-N|H-T": 2,
+  "supporting/gsm8k|H-N": 26,
+  "supporting/multihop_qa|H-N": 321,
+  "supporting/multihop_qa|H-N|H-T": 6,
+  "supporting/openmath|H-N": 15,
+  "supporting/rag_evidence|H-N": 262,
+  "task_contained_deduction/entity_tracking@v1|H-N": 22,
+  "task_contained_deduction/knights_knaves@v1|H-N": 8,
+  "task_contained_deduction/ordering@v1|H-N": 29,
+  "task_contained_deduction/ordering@v1|H-N|H-T": 4
+ },
+ "removed_by_isolation": [
+  "calib2_798572a9ca87fff50328",
+  "calib2_b5ae6b4452c06204cbe2"
+ ],
+ "isolation": {
+  "R1_held_out_prompt_keys": [],
+  "R2_flagged": [
+   "calib2_798572a9ca87fff50328",
+   "calib2_b5ae6b4452c06204cbe2"
+  ],
+  "R3": {
+   "applicable_items": 803,
+   "overlap": {
+    "generator_family": 0,
+    "family": 0
+   },
+   "pass": true
+  },
+  "R9_refused_family_units": [],
+  "pass": false
+ },
+ "output": {
+  "path": "data/stages/stage-2/teacher_modes/tasks/calibration_v2.jsonl",
+  "sha256": "da246f6732016451fb22b62db373c67b9103c12572b991512dcec9e869277387"
+ },
+ "held_out_of_training": "order_v2 excludes these prompt keys (build_supplement_tasks.isolate)",
+ "authorizes": "nothing"
+}

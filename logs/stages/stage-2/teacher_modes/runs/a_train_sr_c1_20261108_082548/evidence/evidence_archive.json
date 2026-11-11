@@ -1,0 +1,27 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.stage3_evidence_archive/v1",
+ "run_id": "a_train_sr_c1_20261108_082548",
+ "arm": "C1-6cat-sr",
+ "archive": {
+  "name": "stage3_units_evidence.tgz",
+  "sha256": "a9aee54c8cd83f3c6c6b20829b38d3ef743b417f5d5caad4bb8db04f4195d0ba",
+  "bytes": 36122544,
+  "dev_box_copy": "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_082548/stage3_units_evidence.tgz",
+  "bytes_by_unit_dir": {
+   "C1-6cat-sr-s20260726": 11587922,
+   "A2-6cat-sr-s20260801": 39025459,
+   "A2-6cat-sr-s20260726": 40446978,
+   "A1-6cat-sr-s20260801": 92216742,
+   "A1-6cat-sr-s20260726": 93656407
+  },
+  "contents": "the volume's stage3_sr tree without save points and evaluation-package weights: train logs and configs, every evaluation's generations, rows and formal report"
+ },
+ "committed_here": {
+  "C1-6cat-sr-s20260726/train/train_log.jsonl": "b3e538f924943ae946b692fc1c78e1059dca04917f2c7c30ff43f099ea7657b0",
+  "C1-6cat-sr-s20260726/train/config.json": "05c4401b0d36d89352f8ee1a24d689bda9ab5427d633239e3f3bbf1f9ebbf589",
+  "C1-6cat-sr-s20260726/train/run_completion.json": "dbd47f8f0f2fa015ad187f5df15d21d5d5352e2f53a703994f127af99aa5c3f8",
+  "C1-6cat-sr-s20260726/train/run_manifest.json": "e592443cb1e4a7f62ed63e7cf4dee2553b67ed373b05134054919c7bf43245f5",
+  "C1-6cat-sr-s20260726/off_volume_copy.json": "7a86e39446ab95ae9f474f5cb7bc18e813e3ce2d8178ba3294e4594ed32557f5"
+ },
+ "weights": "stay on the network volume thprcgh7s9 (their sha256 in the units record); no off-volume copy while the relay's quota refuses them"
+}

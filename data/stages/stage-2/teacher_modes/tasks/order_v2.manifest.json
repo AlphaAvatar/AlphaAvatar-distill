@@ -1,0 +1,209 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.supplement_order/v1",
+ "name": "order_v2",
+ "created_utc": "2026-10-31T09:15:16Z",
+ "command": "python -m stages.teacher_modes.build_supplement_tasks build --exports export_tm_n512.jsonl export_tm_n1024.jsonl",
+ "design": {
+  "path": "configs/stages/stage-2/teacher_modes/token_matched_design.json",
+  "sha256": "b8f2d75e863ced6025e5e0f29f5db19bd6c6148be9ec8ec7be4e0763a72634b3"
+ },
+ "plan": {
+  "path": "logs/stages/stage-2/teacher_modes/data/supplement_plan.json",
+  "sha256": "a48ce65ace613dd90a7027b2e7ae4b443ca7c4b81f0688336b5f497c5334c7d2"
+ },
+ "catalogue": {
+  "path": "configs/stages/stage-2/teacher_modes/token_matched_sources.json",
+  "sha256": "4edfa876a601c8955c074fd06285d7c5038c26540fa047bbd7ae2fb18aa7a045"
+ },
+ "n_tasks": 80771,
+ "built_per_cell": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit": 3012,
+  "primary.compositional_generalization/reasoning_gym": 2015,
+  "primary.compositional_generalization/s0_generators_v2_calsplit": 653,
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": 5221,
+  "primary.task_contained_deduction/reasoning_core": 1445,
+  "supporting.code_algorithmic/reasoning_core": 1445,
+  "supporting.math_gsm8k/gsm8k_train": 5008,
+  "supporting.math_new/math_train": 548,
+  "supporting.reading_verified/hotpot_qa_train": 18573,
+  "supporting.reading_verified/squad_v2_train_answerable": 42900
+ },
+ "by_cell_and_slice": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit|S": 3012,
+  "primary.compositional_generalization/reasoning_gym|S": 2015,
+  "primary.compositional_generalization/s0_generators_v2_calsplit|S": 653,
+  "primary.interactive_adaptation/s0_generators_v2_calsplit|S": 5172,
+  "primary.task_contained_deduction/reasoning_core|S": 1445,
+  "supporting.code_algorithmic/reasoning_core|S": 1445,
+  "supporting.math_gsm8k/gsm8k_train|S": 4976,
+  "supporting.math_gsm8k/gsm8k_train|V2": 32,
+  "supporting.math_new/math_train|S": 548,
+  "supporting.reading_verified/hotpot_qa_train|S": 18541,
+  "supporting.reading_verified/hotpot_qa_train|V2": 32,
+  "supporting.reading_verified/squad_v2_train_answerable|S": 42868,
+  "supporting.reading_verified/squad_v2_train_answerable|V2": 32
+ },
+ "groups_per_cell": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit": {
+   "grid_transform@v1/L1": 1003,
+   "grid_transform@v1/L2": 1005,
+   "grid_transform@v1/L3": 1004
+  },
+  "primary.compositional_generalization/reasoning_gym": {
+   "game_of_life": 504,
+   "largest_island": 504,
+   "rotate_matrix": 504,
+   "string_manipulation": 503
+  },
+  "primary.compositional_generalization/s0_generators_v2_calsplit": {
+   "defined_ops@v1/L1": 109,
+   "defined_ops@v1/L2": 109,
+   "defined_ops@v1/L3": 109,
+   "scan_language@v1/L1": 109,
+   "scan_language@v1/L2": 109,
+   "scan_language@v1/L3": 108
+  },
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+   "hidden_buttons@v1/L1": 867,
+   "hidden_buttons@v1/L2": 869,
+   "hidden_buttons@v1/L3": 869,
+   "probe_function@v1/L1": 855,
+   "probe_function@v1/L2": 857,
+   "probe_function@v1/L3": 855
+  },
+  "primary.task_contained_deduction/reasoning_core": {
+   "multistep_evidence_retrieval": 1445
+  },
+  "supporting.code_algorithmic/reasoning_core": {
+   "controlled_code_execution": 723,
+   "dynamic_programming": 722
+  },
+  "supporting.math_gsm8k/gsm8k_train": {
+   "gsm8k_train": 5008
+  },
+  "supporting.math_new/math_train": {
+   "math_train": 548
+  },
+  "supporting.reading_verified/hotpot_qa_train": {
+   "hotpot_qa_train": 18573
+  },
+  "supporting.reading_verified/squad_v2_train_answerable": {
+   "squad_v2_train_answerable": 42900
+  }
+ },
+ "events": [
+  {
+   "cell": "primary.interactive_adaptation/s0_generators_v2_calsplit",
+   "event": "built 5172 of 5221"
+  }
+ ],
+ "never_built_families": [
+  "primary.compositional_generalization/reasoning_gym/reasoning_gym/binary_matrix",
+  "primary.compositional_generalization/reasoning_gym/reasoning_gym/spiral_matrix",
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.caesar",
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.double_last",
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.duplicate_each",
+  "primary.task_contained_deduction/reasoning_core/reasoning_core/logic_derivation",
+  "primary.task_contained_deduction/reasoning_gym/reasoning_gym/cryptarithm",
+  "supporting.code_algorithmic/reasoning_gym/reasoning_gym/bf"
+ ],
+ "removed_before_isolation": 828,
+ "first_pass_violations": [
+  "R1_held_out_keys",
+  "R2_near_duplicate",
+  "R7_arc_agi"
+ ],
+ "project_group_shortfalls": {},
+ "external_exports": [
+  {
+   "name": "export_tm_n512.jsonl",
+   "sha256": "b907186836a6a5431a21ac80df73461cd4ca81f2d92aa745cc5f20a87943a414",
+   "rows": 7168
+  },
+  {
+   "name": "export_tm_n1024.jsonl",
+   "sha256": "6df0f3da497570f02793cfb2cfcccf22cc33cd0076fc35bd30c39856b6e13e0d",
+   "rows": 2048
+  }
+ ],
+ "external_drops": {
+  "largest_island: duplicate prompt": 22,
+  "multistep_evidence_retrieval: duplicate prompt": 3,
+  "rotate_matrix: the answer is the input (gold verbatim in the prompt)": 194,
+  "string_manipulation: the answer is the input (gold verbatim in the prompt)": 152,
+  "tower_of_hanoi: duplicate prompt": 998
+ },
+ "datasets": {
+  "gsm8k_train": {
+   "dataset": "openai/gsm8k main, train",
+   "files": [
+    {
+     "file": "main/train-00000-of-00001.parquet",
+     "sha256": "ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d",
+     "snapshot": "740312add88f781978c0658806c59bc2815b9866"
+    }
+   ],
+   "render": "build_stage2_v0.build_gsm8k"
+  },
+  "squad_v2_train_answerable": {
+   "dataset": "rajpurkar/squad_v2, train, answerable questions",
+   "files": [
+    {
+     "file": "squad_v2/train-00000-of-00001.parquet",
+     "sha256": "f6da32ffb482ff463ad056477740d1bb284b96a45db3a08bee6a225ca6abf291",
+     "snapshot": "3ffb306f725f7d2ce8394bc1873b24868140c412"
+    }
+   ],
+   "render": "build_stage2_v0.build_squad (RAG_PROMPT)"
+  },
+  "hotpot_qa_train": {
+   "dataset": "hotpotqa/hotpot_qa distractor, train",
+   "files": [
+    {
+     "file": "distractor/train-00000-of-00002.parquet",
+     "sha256": "76d3bb3048a7cc73c1958107c0c5872a00d7e7d00c105b81e92f6769e7822e68",
+     "snapshot": "1908d6afbbead072334abe2965f91bd2709910ab"
+    },
+    {
+     "file": "distractor/train-00001-of-00002.parquet",
+     "sha256": "713661628434fbb19fff7392e2e321e4ed107e3c7c7784d0690946e5f722763f",
+     "snapshot": "1908d6afbbead072334abe2965f91bd2709910ab"
+    }
+   ],
+   "render": "build_stage2_v0.build_hotpot (HOTPOT_PROMPT)"
+  }
+ },
+ "e1_rendering": {
+  "squad_v2_train_answerable": {
+   "sessions": 4100,
+   "identical": 4100
+  },
+  "hotpot_qa_train": {
+   "sessions": 1074,
+   "identical": 1074
+  },
+  "gsm8k_train": {
+   "sessions": 1698,
+   "identical": 1698
+  }
+ },
+ "slices": {
+  "S": "the supplement: a (mode, cell)'s generation takes its next tasks in cell_position order",
+  "V2": "the first 32 tasks of each new dataset cell: validation documents only, both modes"
+ },
+ "seed_rules": {
+  "project": "R5 lo + 600,000 + group index x 10,000 + i",
+  "external": "external_export.entry_seed(seed base 2026103100, source, module, level)",
+  "math_train": "build_supporting_tasks._order (its SALT), past every pooled and ordered task",
+  "gsm8k, squad v2, hotpotqa": "the dataset's own row order (E1's prompts are its first rows)"
+ },
+ "isolation_report": "order_v2.isolation.json",
+ "license": "project-generated tasks; third-party generators' licenses as external_modules.json records; MATH (MIT), GSM8K (MIT), SQuAD v2 and HotpotQA (CC-BY-SA-4.0) train splits only; no ARC-AGI material",
+ "status": "FROZEN at $0 before any of its tasks is generated (token_matched_design.json :: supplement)",
+ "authorizes": "nothing",
+ "jsonl_sha256": "b5fcf6561acd5e5caad011aea62d0673428a805c9868bf310abcd40c1e330684",
+ "path": "artifacts/stages/stage-2/teacher_modes/tasks/order_v2.jsonl.gz",
+ "sha256": "02c98b81a3d0fd0dacb184435572decae225c5d07ff411d8322330b8db8a9306",
+ "bytes": 55579102,
+ "storage": "outside git (232 MB uncompressed): the gzip (mtime 0, level 9) under artifacts/, its sha256 here and in supplement_protocol.json; staged to the pod as a local asset and copied to the network volume (teacher_modes/inputs/) by the session"
+}

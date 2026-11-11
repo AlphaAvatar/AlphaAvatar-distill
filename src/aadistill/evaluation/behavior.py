@@ -113,7 +113,50 @@ def template_opens_think(rendered_prompt: str) -> bool:
     return rendered_prompt.rstrip().endswith(THINK_OPEN)
 
 
-def split_generation(raw: str, *, think_preopened: bool = True) -> dict:
+#: What the generation prompt did to the think block. `preopened`: it emitted
+#: `<think>` and the continuation must close it; `self_opening`: it left the
+#: block to the model; `preclosed`: it emitted an empty, closed block (a hybrid
+#: template's non-thinking switch) and the continuation must not touch it.
+THINK_STATES = ("preopened", "self_opening", "preclosed")
+IM_START = "<|im_start|>"
+
+
+def template_think_state(rendered_prompt: str) -> str:
+    """The think state the rendered generation prompt leaves the continuation in.
+
+    Read from the prompt, like `template_opens_think`, never from the
+    generation. `preclosed` requires the final turn's prefix to end in a think
+    block holding only whitespace, so a closed block from an earlier turn of the
+    conversation is not mistaken for it.
+    """
+    tail = rendered_prompt.rstrip()
+    if tail.endswith(THINK_OPEN):
+        return "preopened"
+    last_turn = tail.rsplit(IM_START, 1)[-1]
+    if last_turn.endswith(THINK_CLOSE):
+        _, opened, inner = last_turn[: -len(THINK_CLOSE)].rpartition(THINK_OPEN)
+        if opened and not inner.strip():
+            return "preclosed"
+    return "self_opening"
+
+
+def record_think_state(record: dict) -> str:
+    """The think state a stored generation record was produced under.
+
+    A record that states `think_state` is read as written. One written before
+    the field existed carries only `think_preopened` (default True, this
+    project's own lineage), which is exactly the two states it could express.
+    """
+    state = record.get("think_state")
+    if state is not None:
+        if state not in THINK_STATES:
+            raise ValueError(f"unknown think_state {state!r}")
+        return state
+    return "preopened" if bool(record.get("think_preopened", True)) else "self_opening"
+
+
+def split_generation(raw: str, *, think_preopened: bool = True,
+                     think_state: str | None = None) -> dict:
     """Split a raw decoded continuation into its structural parts.
 
     `think_preopened` describes the assistant-prefix state the active chat
@@ -126,6 +169,12 @@ def split_generation(raw: str, *, think_preopened: bool = True) -> dict:
     * ``False`` — the prompt did not open the block, so a correct continuation
       opens it **exactly once, before any other content**, and closes it exactly
       once. A missing or late `<think>` is a violation.
+
+    * ``think_state="preclosed"`` -- the prompt emitted an empty, closed block
+      (a hybrid template's non-thinking switch). A correct continuation holds
+      **no** think delimiter at all; its whole body is the answer. Passing
+      ``think_state`` overrides ``think_preopened``; ``"preopened"`` and
+      ``"self_opening"`` are the two cases above.
 
     Getting this wrong is not cosmetic. Scoring a self-opening model under the
     pre-opened rule marked its own `<think>` as a stray marker and rejected 100%
@@ -144,10 +193,35 @@ def split_generation(raw: str, *, think_preopened: bool = True) -> dict:
                             empty when the block was never closed.
       ``think_preopened`` — the state this split was evaluated under.
     """
+    if think_state is not None:
+        if think_state not in THINK_STATES:
+            raise ValueError(f"unknown think_state {think_state!r}")
+        think_preopened = think_state == "preopened"
     body = raw.split(IM_END)[0]
     terminated = IM_END in raw
     n_close = body.count(THINK_CLOSE)
     n_open = body.count(THINK_OPEN)
+
+    if think_state == "preclosed":
+        think_closed = n_open == 0 and n_close == 0
+        stray = [m for m in STRAY_MARKERS if m in body]
+        if n_close and THINK_CLOSE not in stray:
+            stray.append(THINK_CLOSE)
+        if raw.count(IM_END) > 1:
+            stray.append(IM_END)
+        return {
+            "terminated": terminated,
+            "think_closed": think_closed,
+            "think_immediate": think_closed,
+            "no_stray_markers": not stray,
+            "stray_markers": stray,
+            "n_think_close": n_close,
+            "n_think_open": n_open,
+            "think_preopened": False,
+            "think_state": think_state,
+            "think": "",
+            "answer": body.strip() if think_closed else "",
+        }
 
     if think_preopened:
         think_closed = n_close == 1 and n_open == 0
@@ -189,6 +263,7 @@ def split_generation(raw: str, *, think_preopened: bool = True) -> dict:
         "n_think_close": n_close,
         "n_think_open": n_open,
         "think_preopened": think_preopened,
+        "think_state": "preopened" if think_preopened else "self_opening",
         "think": think,
         "answer": answer.strip(),
     }
@@ -320,7 +395,8 @@ def score_tool_call(answer: str, tools: list[dict], gold_calls: list[dict]) -> d
     }
 
 
-def score_sample(sample: dict, raw: str, hit_cap: bool = False) -> dict:
+def score_sample(sample: dict, raw: str, hit_cap: bool = False,
+                 think_state: str | None = None) -> dict:
     """Score one generation. `sample` is an eval_behavior_v0 prompt-set entry.
 
     `hit_cap` says the generation was cut off at ``max_new_tokens`` rather than
@@ -330,8 +406,11 @@ def score_sample(sample: dict, raw: str, hit_cap: bool = False) -> dict:
     generous cap says the model does not know how to stop. Measured at the
     200-token cap, 100% of `s2_blocks_v1`'s non-terminations were cap hits —
     which is why the cap is now 512 and this metric exists.
+
+    `think_state` is the prompt state the record states (`record_think_state`);
+    absent, the pre-opened rule every earlier score used applies.
     """
-    parts = split_generation(raw)
+    parts = split_generation(raw, think_state=think_state)
     answer = parts["answer"]
     group = sample["group"]
 

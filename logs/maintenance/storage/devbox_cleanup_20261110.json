@@ -1,0 +1,46 @@
+{
+ "schema": "aadistill.devbox_cleanup/v1",
+ "written_utc": "2026-11-10T09:42:17Z",
+ "why": "the maintainer's 2026-11-10 request during A-MIX Stage 3: \"本地磁盘空间看看也做一下必要清理，有哪些太久远的checkpoint\"; the dev box's / was at 99% with A-MIX-6cat-sr-s20260801's 2.22 GiB Dev Box backup still owed",
+ "free_bytes_before": "about 3.7 GiB (df -h: 185G of 197G used)",
+ "deleted": [
+  {
+   "path": ".scratch/research_a/a_train_a1_20261102_184122/store/a1_evidence.tgz",
+   "apparent_bytes": 3869177657,
+   "what": "Research A v1's A1 evidence archive (sha256 a893547d...): two evaluation-package copies of the final weights (2 x 2.22 GiB) plus 151 MiB of train logs, evaluation generations, rows and reports",
+   "kept": "the 166 non-weight files, extracted and re-hashed file by file into ~/aad-artifacts/research_a/a_train_a1_20261102_184122/a1_evidence/ (split_manifest.json beside it); the raw evaluation evidence was in a disposable scratch root and now sits in the durable store",
+   "weights": "tombstoned: devbox_20261110_research_a_v1_A1-s20260726, devbox_20261110_research_a_v1_A1-s20260801 (sha256 matched a1_evidence.json before deletion)",
+   "consumer_audit": "git grep of src/, configs/, scripts/ outside tests: no reader of either weight sha256 or of the archive; token_matched_phase.py says no analysis reads them; a1_analysis.py reads extracted units, which are kept"
+  },
+  {
+   "path": "~/aad-scratch/c2b-p4-root/attempt12/confirmation.1a2b5b030e7e4e202fda3a810ed53c5f.s1523147638",
+   "apparent_bytes": 2384263000,
+   "what": "the last bytes of C2's confirmation-rung probe of non-promoted candidate 1a2b5b030e7e (2.22 GiB weights) and hard links of its durable metadata",
+   "kept": "~/aad-artifacts/phase_c2_behavioural/c2-behavioural-12probe-v1/attempt12/<probe>/ (result.json, per_sample.jsonl, probe_record.json, c2_durable_unit.json); each scratch metadata file was checked to be a hard link of that copy",
+   "weights": "tombstoned: devbox_20261110_c2_confirmation_1a2b5b030e7e_s1523147638 (sha256 matched its single_shard_sha256)",
+   "consumer_audit": "no code or config reads the path or the weights; C2 closed without promotion and the candidate's init was retired 2026-11-09 (devbox_20261109_c2_top5_1a2b5b030e7e)"
+  }
+ ],
+ "not_deleted": [
+  {
+   "path": "~/aad-artifacts/stage3_sr/final_weights/ (seven students, 16 GiB)",
+   "why": "the maintainer's backup contract: thprcgh7s9 is kept until all eight students' Dev Box copies are hash-verified; the eighth (A-MIX-6cat-sr-s20260801) is still training"
+  },
+  {
+   "path": "registry-protected checkpoints (canonical / control / reproducibility_required), 13 weight sets and Stage 0's activation cache, about 32 GiB, 2026-07-14 to 2026-10-08",
+   "why": "protected in checkpoint_registry.json; lifting the protection needs a maintainer decision (retire_artifact.py --maintainer-decision). Most of the E4 / E6b / E7 / P2 / E8 / D1 weights have no relay copy, so deletion would be permanent. Reported to the maintainer with a recommendation"
+  },
+  {
+   "path": "/var/log/alphaavatar (35 GiB), /tmp/claude-1000/-home-ecs-user-AlphaAvatar (13 GiB), ~/.cache/uv (12 GiB)",
+   "why": "another project's live service and session; unchanged from 2026-10-27/28"
+  },
+  {
+   "path": "this project's session scratchpads and .scratch/research_a (other runs), about 6 GiB",
+   "why": "no checkpoint weights; mixed working material, some of it raw evaluation generations whose collection is not confirmed; not needed for the backup"
+  }
+ ],
+ "free_bytes_after": 10057265152,
+ "reclaimed_bytes": "about 5.8 GiB (3.60 GiB archive + 2.22 GiB probe; 0.15 GiB re-housed)",
+ "effect": "9.4 GiB free: room for the eighth student's 2.22 GiB backup with margin",
+ "authorizes": "nothing"
+}

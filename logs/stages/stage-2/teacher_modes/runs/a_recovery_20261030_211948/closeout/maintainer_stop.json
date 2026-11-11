@@ -1,0 +1,128 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.maintainer_stop/v1",
+ "run_id": "a_recovery_20261030_211948",
+ "directive": "maintainer 2026-10-31: Research A Immediate STOP and Token-Matched Data Completion (stop the recovery now; keep every valid product; do not continue)",
+ "stop": {
+  "how": "the unit driver and its evaluation engine were killed (SIGKILL) at the nearest persistence boundary: unit 6's final training checkpoint (step 231/231) and its descriptor were on the volume, its evaluation had started but generated nothing",
+  "driver_killed_utc": "2026-10-31T08:06Z, seconds before the parent wrote RUN_FAILED (not timed more precisely)",
+  "run_failed_marker_utc": "2026-10-31T08:06:03Z",
+  "launcher_terminal": "RUN_FAILED -> the shared collect-and-teardown path",
+  "pod": "qa8rgmd67mpgei",
+  "pod_deleted_utc": "2026-10-31T08:07:47Z",
+  "provider_confirms_gone": true,
+  "watchdog_end": "2026-10-31T08:08:11Z pod_gone",
+  "observers": "guard, launcher tmux session and watchdog all exited; none armed",
+  "provider_after": "pods: none; network volumes: am5m373kuq (55 GB, EUR-IS-2) only, accounted"
+ },
+ "money": {
+  "gpu_usd": 11.7351,
+  "container_disk_usd": 0.2211,
+  "all_in_usd": 11.9562,
+  "elapsed_minutes": 645.97,
+  "price_per_hour": 1.09,
+  "authorized_usd": 20.0,
+  "owner": "closeout/outcome.json :: money"
+ },
+ "units": [
+  {
+   "unit": "H-T-S-s20260726",
+   "arm": "H-T-S",
+   "seed": 20260726,
+   "optimizer_steps_planned": 887,
+   "volume_dir": "am5m373kuq:/teacher_modes/units/H-T-S-s20260726",
+   "state": "trained and scored (training, checkpoint, evaluation and report persisted on the volume)",
+   "optimizer_steps_done": 887,
+   "evidence_archive": {
+    "dev_box": ".scratch/research_a/a_recovery_20261030_211948/store/units__H-T-S-s20260726.tgz",
+    "sha256": "d93c2aada00df10f7fb76f1df9ba2efd53f3b9ede4df1e15db5d4bc19b8968e0",
+    "bytes": 3547151,
+    "contents": "report + evaluation (formal_report, rows, generations, logs); git-ignored: it holds generations, the safety_paired unit's included"
+   }
+  },
+  {
+   "unit": "H-T-S-s20260801",
+   "arm": "H-T-S",
+   "seed": 20260801,
+   "optimizer_steps_planned": 887,
+   "volume_dir": "am5m373kuq:/teacher_modes/units/H-T-S-s20260801",
+   "state": "trained and scored (training, checkpoint, evaluation and report persisted on the volume)",
+   "optimizer_steps_done": 887,
+   "evidence_archive": {
+    "dev_box": ".scratch/research_a/a_recovery_20261030_211948/store/units__H-T-S-s20260801.tgz",
+    "sha256": "bc3e5f3c9d1e7745ff46d6e63fda88dc2f8d07638e6c72ce2d1e8d53f461164a",
+    "bytes": 3436049,
+    "contents": "report + evaluation (formal_report, rows, generations, logs); git-ignored: it holds generations, the safety_paired unit's included"
+   }
+  },
+  {
+   "unit": "H-N-S-s20260726",
+   "arm": "H-N-S",
+   "seed": 20260726,
+   "optimizer_steps_planned": 231,
+   "volume_dir": "am5m373kuq:/teacher_modes/units/H-N-S-s20260726",
+   "state": "trained and scored (training, checkpoint, evaluation and report persisted on the volume)",
+   "optimizer_steps_done": 231,
+   "evidence_archive": {
+    "dev_box": ".scratch/research_a/a_recovery_20261030_211948/store/units__H-N-S-s20260726.tgz",
+    "sha256": "fee12269d2e650c12e9ba12e692bf00195be9c4bf1dae15e2e69f6aa62841f5e",
+    "bytes": 1223805,
+    "contents": "report + evaluation (formal_report, rows, generations, logs); git-ignored: it holds generations, the safety_paired unit's included"
+   }
+  },
+  {
+   "unit": "H-N-S-s20260801",
+   "arm": "H-N-S",
+   "seed": 20260801,
+   "optimizer_steps_planned": 231,
+   "volume_dir": "am5m373kuq:/teacher_modes/units/H-N-S-s20260801",
+   "state": "trained and scored (training, checkpoint, evaluation and report persisted on the volume)",
+   "optimizer_steps_done": 231,
+   "evidence_archive": {
+    "dev_box": ".scratch/research_a/a_recovery_20261030_211948/store/units__H-N-S-s20260801.tgz",
+    "sha256": "9f054c24f21353c7dc00f13bfb8f4bf6a49976fc3be0f573288cd06ca0dc4942",
+    "bytes": 1073178,
+    "contents": "report + evaluation (formal_report, rows, generations, logs); git-ignored: it holds generations, the safety_paired unit's included"
+   }
+  },
+  {
+   "unit": "H-T-C-s20260726",
+   "arm": "H-T-C",
+   "seed": 20260726,
+   "optimizer_steps_planned": 231,
+   "volume_dir": "am5m373kuq:/teacher_modes/units/H-T-C-s20260726",
+   "state": "trained and scored (training, checkpoint, evaluation and report persisted on the volume)",
+   "optimizer_steps_done": 231,
+   "evidence_archive": {
+    "dev_box": ".scratch/research_a/a_recovery_20261030_211948/store/units__H-T-C-s20260726.tgz",
+    "sha256": "1390f8421c9d4960a2bff0514990986c3b7756fbdeba9792c0375ebe91ff2e74",
+    "bytes": 2179787,
+    "contents": "report + evaluation (formal_report, rows, generations, logs); git-ignored: it holds generations, the safety_paired unit's included"
+   }
+  },
+  {
+   "unit": "H-T-C-s20260801",
+   "arm": "H-T-C",
+   "seed": 20260801,
+   "optimizer_steps_planned": 231,
+   "volume_dir": "am5m373kuq:/teacher_modes/units/H-T-C-s20260801",
+   "state": "trained, NOT scored: training complete (231/231), checkpoint persisted and identified on the volume; its evaluation had just started (engine loading, no item generated) when the driver was stopped",
+   "optimizer_steps_done": 231,
+   "checkpoint": {
+    "step": 231,
+    "artifact_digest": "2d892de308aee0e852c179c5b7683ad1202fe95a736991458f3174e55fff71c7",
+    "weights_digest": "989d2481912d6eb9f890685528a81b14390c30151236a35522668e4c5d804079",
+    "num_parameters": 596049920,
+    "descriptor": "am5m373kuq:/teacher_modes/units/H-T-C-s20260801/checkpoint.descriptor.json (written 2026-10-31T08:05:11Z)",
+    "trainer_dir": "am5m373kuq:/teacher_modes/units/H-T-C-s20260801/train/a1 (checkpoints step_000200 and step_000231, train_log.jsonl)",
+    "read": "over ssh from the pod before teardown; the descriptor and training records stay on the volume and are pulled by the next session that mounts it"
+   }
+  }
+ ],
+ "not_done": [
+  "H-T-C-s20260801's eval-set-1 measurement",
+  "Research A v1's analysis (S, C), evidence audit and closeout"
+ ],
+ "scientific_status": "Every student product of this run is HISTORICAL evidence of Research A v1 (study identity 848f6508..., the 2,468-sequence design). None is a result of the token-matched redesign. The agent has not read any of the five units' scores; they were not consulted for the redesign, which the maintainer fixed before they were seen.",
+ "retained": "the network volume and every checkpoint on it (the six units', the common initialization, the historical ones); nothing deleted",
+ "authorizes": "nothing"
+}

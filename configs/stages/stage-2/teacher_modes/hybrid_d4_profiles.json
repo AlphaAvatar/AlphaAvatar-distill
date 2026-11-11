@@ -1,0 +1,662 @@
+{
+ "schema": "aadistill.calibration_profiles/v1",
+ "status": "COMPLETE: every cell holds half its D4 quota in each mode",
+ "_contract": "Research A v2's hybrid D4-scale calibration profiles (build_calibration_supplement.py profiles); data for the PROPOSED full search -- nothing searches with them before the maintainer's approval",
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+ },
+ "profiles": [
+  {
+   "profile_id": "calib.hybrid_d4_base",
+   "version": 1,
+   "description": "the hybrid's D4 base profile: D4's cells, order and quotas, half of every cell from each mode",
+   "sources": [
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "inductive_rule_discovery",
+     "n_items": 32,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "compositional_generalization",
+     "n_items": 53,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "task_contained_deduction",
+     "n_items": 57,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "abstract_analogical",
+     "n_items": 26,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "supporting",
+     "n_items": 397,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    }
+   ],
+   "sample_rule": "per cell and mode: D4's cell order over base_pool_v1 (the code cell: its own prompt list), held-out units passed over, the mode's own naturally terminated whole trajectories until half the cell's D4 quota of scored positions (build_calibration_supplement.profiles)",
+   "leakage_exclusions": [
+    "eval-set-1 held-out prompts and near-copies (R1, R2) and R9's refused families",
+    "A1/A2's and C1's training prompts",
+    "state_eval_hybrid@v1's prompts"
+   ],
+   "leakage_proof_path": "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json",
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 180000,
+   "seed": 1308798386,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-2/teacher_modes/calibration_v2/calib.hybrid_d4_base.items.jsonl",
+   "items_file_sha256": "ce1a22439e4ae1e2b0812c7b110e19489cd192aa6617aaa2b28bb8f5a00fc181",
+   "content_sha256": "1e40ad0af3dc07ed608558bc87e00c3991944e5cfdf2ec3ff6416f015a72fb71",
+   "metadata": {
+    "uesp": 197084,
+    "scored_positions_by_mode": {
+     "H-T": 103961,
+     "H-N": 93123
+    },
+    "n_items": 565,
+    "tokens": 472966,
+    "short_cells": []
+   }
+  },
+  {
+   "profile_id": "calib.hybrid_d4_rh",
+   "version": 1,
+   "description": "the hybrid's D4 rh profile: D4's cells, order and quotas, half of every cell from each mode",
+   "sources": [
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "inductive_rule_discovery",
+     "n_items": 37,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "compositional_generalization",
+     "n_items": 64,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "task_contained_deduction",
+     "n_items": 69,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "abstract_analogical",
+     "n_items": 32,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "supporting",
+     "n_items": 175,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    }
+   ],
+   "sample_rule": "per cell and mode: D4's cell order over base_pool_v1 (the code cell: its own prompt list), held-out units passed over, the mode's own naturally terminated whole trajectories until half the cell's D4 quota of scored positions (build_calibration_supplement.profiles)",
+   "leakage_exclusions": [
+    "eval-set-1 held-out prompts and near-copies (R1, R2) and R9's refused families",
+    "A1/A2's and C1's training prompts",
+    "state_eval_hybrid@v1's prompts"
+   ],
+   "leakage_proof_path": "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json",
+   "domain_weights": {
+    "inductive_rule_discovery": 0.22,
+    "compositional_generalization": 0.22,
+    "task_contained_deduction": 0.22,
+    "abstract_analogical": 0.22,
+    "supporting": 0.12
+   },
+   "token_budget": 180000,
+   "seed": 1308798386,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-2/teacher_modes/calibration_v2/calib.hybrid_d4_rh.items.jsonl",
+   "items_file_sha256": "59fc17f2c881d8eeab45053e2a008dd28199900328f5fef884f176b0a122c501",
+   "content_sha256": "2cf4a8f1d98a4914b135b0b79bba0846b39d10644155492408e808ab5799dcc5",
+   "metadata": {
+    "uesp": 198206,
+    "scored_positions_by_mode": {
+     "H-T": 105057,
+     "H-N": 93149
+    },
+    "n_items": 377,
+    "tokens": 339452,
+    "short_cells": []
+   }
+  }
+ ],
+ "census": {
+  "calib.hybrid_d4_base": {
+   "abstract_analogical/grid_transform@v1|H-T": {
+    "quota": 16200.0,
+    "scored": 17211,
+    "items": 6,
+    "not_naturally_terminated": 1,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "abstract_analogical/grid_transform@v1|H-N": {
+    "quota": 16200.0,
+    "scored": 16322,
+    "items": 20,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/defined_ops@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 8273,
+    "items": 7,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/defined_ops@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8144,
+    "items": 24,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/scan_language@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 10930,
+    "items": 3,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/scan_language@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8409,
+    "items": 19,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/list_induction@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 9249,
+    "items": 5,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/list_induction@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8306,
+    "items": 10,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/string_induction@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 10131,
+    "items": 4,
+    "not_naturally_terminated": 1,
+    "held_out_units": 7,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/string_induction@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8137,
+    "items": 13,
+    "not_naturally_terminated": 2,
+    "held_out_units": 20,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/code|H-T": {
+    "quota": 5040.0,
+    "scored": 5476,
+    "items": 3,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/code|H-N": {
+    "quota": 5040.0,
+    "scored": 5504,
+    "items": 9,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/gsm8k|H-T": {
+    "quota": 5040.0,
+    "scored": 8182,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/gsm8k|H-N": {
+    "quota": 5040.0,
+    "scored": 5150,
+    "items": 22,
+    "not_naturally_terminated": 0,
+    "held_out_units": 5,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/multihop_qa|H-T": {
+    "quota": 5040.0,
+    "scored": 5117,
+    "items": 8,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/multihop_qa|H-N": {
+    "quota": 5040.0,
+    "scored": 5077,
+    "items": 129,
+    "not_naturally_terminated": 0,
+    "held_out_units": 117,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/openmath|H-T": {
+    "quota": 5040.0,
+    "scored": 5306,
+    "items": 4,
+    "not_naturally_terminated": 0,
+    "held_out_units": 1,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/openmath|H-N": {
+    "quota": 5040.0,
+    "scored": 5967,
+    "items": 11,
+    "not_naturally_terminated": 0,
+    "held_out_units": 6,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/rag_evidence|H-T": {
+    "quota": 5040.0,
+    "scored": 5633,
+    "items": 15,
+    "not_naturally_terminated": 0,
+    "held_out_units": 5,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/rag_evidence|H-N": {
+    "quota": 5040.0,
+    "scored": 5045,
+    "items": 190,
+    "not_naturally_terminated": 0,
+    "held_out_units": 49,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/entity_tracking@v1|H-T": {
+    "quota": 5400.0,
+    "scored": 6214,
+    "items": 5,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/entity_tracking@v1|H-N": {
+    "quota": 5400.0,
+    "scored": 5473,
+    "items": 19,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/knights_knaves@v1|H-T": {
+    "quota": 5400.0,
+    "scored": 6257,
+    "items": 2,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/knights_knaves@v1|H-N": {
+    "quota": 5400.0,
+    "scored": 6130,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/ordering@v1|H-T": {
+    "quota": 5400.0,
+    "scored": 5982,
+    "items": 4,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/ordering@v1|H-N": {
+    "quota": 5400.0,
+    "scored": 5459,
+    "items": 21,
+    "not_naturally_terminated": 1,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   }
+  },
+  "calib.hybrid_d4_rh": {
+   "abstract_analogical/grid_transform@v1|H-T": {
+    "quota": 19800.0,
+    "scored": 21405,
+    "items": 7,
+    "not_naturally_terminated": 1,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "abstract_analogical/grid_transform@v1|H-N": {
+    "quota": 19800.0,
+    "scored": 20646,
+    "items": 25,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/defined_ops@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10512,
+    "items": 9,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/defined_ops@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 10052,
+    "items": 30,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/scan_language@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10930,
+    "items": 3,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/scan_language@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 10469,
+    "items": 22,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/list_induction@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10851,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/list_induction@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 10221,
+    "items": 12,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/string_induction@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10131,
+    "items": 4,
+    "not_naturally_terminated": 1,
+    "held_out_units": 7,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/string_induction@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 9974,
+    "items": 15,
+    "not_naturally_terminated": 2,
+    "held_out_units": 21,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/code|H-T": {
+    "quota": 2160.0,
+    "scored": 3805,
+    "items": 2,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/code|H-N": {
+    "quota": 2160.0,
+    "scored": 2627,
+    "items": 4,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/gsm8k|H-T": {
+    "quota": 2160.0,
+    "scored": 2385,
+    "items": 2,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/gsm8k|H-N": {
+    "quota": 2160.0,
+    "scored": 2175,
+    "items": 9,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/multihop_qa|H-T": {
+    "quota": 2160.0,
+    "scored": 4056,
+    "items": 5,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/multihop_qa|H-N": {
+    "quota": 2160.0,
+    "scored": 2163,
+    "items": 53,
+    "not_naturally_terminated": 0,
+    "held_out_units": 38,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/openmath|H-T": {
+    "quota": 2160.0,
+    "scored": 2560,
+    "items": 2,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/openmath|H-N": {
+    "quota": 2160.0,
+    "scored": 2194,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 2,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/rag_evidence|H-T": {
+    "quota": 2160.0,
+    "scored": 2384,
+    "items": 12,
+    "not_naturally_terminated": 0,
+    "held_out_units": 3,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/rag_evidence|H-N": {
+    "quota": 2160.0,
+    "scored": 2178,
+    "items": 80,
+    "not_naturally_terminated": 0,
+    "held_out_units": 25,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/entity_tracking@v1|H-T": {
+    "quota": 6600.0,
+    "scored": 7505,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/entity_tracking@v1|H-N": {
+    "quota": 6600.0,
+    "scored": 6798,
+    "items": 23,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/knights_knaves@v1|H-T": {
+    "quota": 6600.0,
+    "scored": 10724,
+    "items": 3,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/knights_knaves@v1|H-N": {
+    "quota": 6600.0,
+    "scored": 6905,
+    "items": 7,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/ordering@v1|H-T": {
+    "quota": 6600.0,
+    "scored": 7809,
+    "items": 5,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/ordering@v1|H-N": {
+    "quota": 6600.0,
+    "scored": 6747,
+    "items": 25,
+    "not_naturally_terminated": 1,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   }
+  }
+ },
+ "held_out": {
+  "R9 (family name)": 33,
+  "a training prompt": 5034,
+  "isolation (R1/R2 against eval-set-1)": 2
+ },
+ "refill": {
+  "units": 0,
+  "by_cell_and_modes": {},
+  "unit_ids": {}
+ },
+ "authorizes": "nothing"
+}

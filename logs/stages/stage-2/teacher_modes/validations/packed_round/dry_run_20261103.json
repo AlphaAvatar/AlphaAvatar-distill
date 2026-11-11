@@ -1,0 +1,158 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.packed_round_dry_run/v1",
+ "written_utc": "2026-11-03T09:05:53Z",
+ "cost_usd": 0,
+ "where": "dev box, CPU, --check-only (nothing loaded)",
+ "packed_search_over_v1_inputs": {
+  "status": "CHECK_ONLY_OK",
+  "inputs": "v1_dry_run (structural check, never a search input)",
+  "session": {
+   "config_hash": "2102c0050f874948f1ed8206cec9240896210fb0c7e910ad02ff637a94713e0c",
+   "numerical_execution_fingerprint": "1dcaad69f40d5356f049c78e201f14dc2ace7f5650a3fd62c0260cb4c173b768",
+   "measurement_protocol_id": "85332c644bb687d78fffcaff5ceaef1d",
+   "profiles": [
+    "calib.hybrid_d4_base@v1",
+    "calib.hybrid_d4_rh@v1"
+   ],
+   "profile_hashes": {
+    "calib.hybrid_d4_base@v1": "5d4d92f2afcc2f514b7b44ac32d0bc7af36c800b863d8662b7d3832fcf0e5bc2",
+    "calib.hybrid_d4_rh@v1": "768443f63002b90abb1f01a05a96cf806433e869f93ebdcd778c3f92e1348661"
+   },
+   "suite": {
+    "suite_id": "state_eval_hybrid",
+    "content_sha256": "b36c6abc601f799f6cc0d44eac9887962163e73f48efd4b5d1f8e2b38abc4598",
+    "items_sha256": "0ddc148e95ee2c91e0f08f868554a6c4d3f331f31af034384cfbc333678d36f1"
+   },
+   "execution": {
+    "evaluator": {
+     "micro_batch_size": 1,
+     "calibration_batch_packing": "original_order_v1",
+     "prediction_rows": "scored_v1"
+    },
+    "operators": {
+     "micro_batch_size": 1,
+     "calibration_batch_packing": "original_order_v1",
+     "prediction_rows": "scored_v1",
+     "depth_prefix_reuse": true
+    }
+   },
+   "baseline": {
+    "baseline": "stage1_init.d1_target_aware.scored_v1@v2",
+    "record_sha256": "737aabdec7d6d409f93bf3b0814a0273e4158e558c5a95e5019e7193986386a3",
+    "numerical_execution_fingerprint": "1dcaad69f40d5356f049c78e201f14dc2ace7f5650a3fd62c0260cb4c173b768",
+    "execution": {
+     "micro_batch_size": 1,
+     "calibration_batch_packing": "original_order_v1",
+     "prediction_rows": "scored_v1"
+    },
+    "implementations": {
+     "FFN": "ffn.activation_importance_v0",
+     "DEPTH": "depth.causal_kl_greedy_v1",
+     "RESIDUAL_WIDTH": "width.global_pca_v0",
+     "ATTENTION": "attention.activation_importance_v1"
+    },
+    "position_policy": "positions.supervised_target_v1@v1",
+    "distribution_support": {
+     "support_id": "reference_topk_tail_v1",
+     "top_k": 200
+    },
+    "forward_context_policy": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1"
+    }
+   },
+   "seed": 20260815,
+   "beam": {
+    "width": 6,
+    "warmup_levels": 1
+   },
+   "prune_weights": false,
+   "forward_context": {
+    "packing": "sequential_truncate_v1",
+    "truncate": true,
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261105
+   },
+   "packing": {
+    "calib.hybrid_d4_base@v1": {
+     "packing_identity": "3daa20cbb53d9ce0a72f3fa089f139fc9dec0225038be83bfb9e8ddefb9e52d2",
+     "packing": "sequential_truncate_v1",
+     "materialization": "prefix_restart_v1",
+     "sequence_length": 8192,
+     "examples": 565,
+     "sequences": 64,
+     "unique_tokens": 472966,
+     "placed_tokens": 521613,
+     "repeated_tokens": 48647,
+     "truncated_tokens": 0,
+     "padding_tokens": 2675,
+     "padding_share": 0.005102,
+     "fragments": 63,
+     "examples_truncated": 0,
+     "sequences_with_padding": 1,
+     "examples_per_sequence_mean": 9.8125
+    },
+    "calib.hybrid_d4_rh@v1": {
+     "packing_identity": "1f8cf7384604959a6cadc46a3140bdf84fef36e8fdaad2f00ca28a2b6b6151f4",
+     "packing": "sequential_truncate_v1",
+     "materialization": "prefix_restart_v1",
+     "sequence_length": 8192,
+     "examples": 377,
+     "sequences": 47,
+     "unique_tokens": 339452,
+     "placed_tokens": 379534,
+     "repeated_tokens": 40082,
+     "truncated_tokens": 0,
+     "padding_tokens": 5490,
+     "padding_share": 0.014259,
+     "fragments": 46,
+     "examples_truncated": 0,
+     "sequences_with_padding": 1,
+     "examples_per_sequence_mean": 9.0
+    },
+    "state_eval_hybrid@v1": {
+     "packing_identity": "e338e8f123bdefa17986a9b1c786922d3d0a75c7c3b5c8c78d18e1ccfb09ab7d",
+     "packing": "sequential_truncate_v1",
+     "materialization": "prefix_restart_v1",
+     "sequence_length": 8192,
+     "examples": 1135,
+     "sequences": 131,
+     "unique_tokens": 956195,
+     "placed_tokens": 1068600,
+     "repeated_tokens": 112405,
+     "truncated_tokens": 0,
+     "padding_tokens": 4552,
+     "padding_share": 0.004242,
+     "fragments": 130,
+     "examples_truncated": 0,
+     "sequences_with_padding": 1,
+     "examples_per_sequence_mean": 9.6565
+    }
+   }
+  }
+ },
+ "historical_v2_search_reproduces": {
+  "status": "CHECK_ONLY_OK",
+  "baseline": "forward baseline v1 pinned (shared.forward_baseline.historical(1))",
+  "config_hash": "e8a43631eec71442ef783c127e5e2d7dc10cb04942d503287042bbc633d58675",
+  "measurement_protocol_id": "1c8305246073213e58d0c1098ba4e4e0",
+  "historical_record": {
+   "path": "logs/stages/stage-2/teacher_modes/runs/a_search_20261101_153803/evidence/search_record.json",
+   "config_hash": "e8a43631eec71442ef783c127e5e2d7dc10cb04942d503287042bbc633d58675",
+   "measurement_protocol_id": "1c8305246073213e58d0c1098ba4e4e0"
+  },
+  "identical": true
+ },
+ "identities_differ": {
+  "config_hash": true,
+  "measurement_protocol_id": true,
+  "numerical_execution_fingerprint": true
+ },
+ "authorizes": "nothing"
+}

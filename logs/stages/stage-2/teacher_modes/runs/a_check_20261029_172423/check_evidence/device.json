@@ -1,0 +1,22 @@
+{
+ "generation": {
+  "used_mib_peak": 40981,
+  "total_mib": 46068,
+  "samples": 380
+ },
+ "evaluation_engine": {
+  "used_mib_peak": 41697,
+  "total_mib": 46068,
+  "samples": 54
+ },
+ "train": {
+  "used_mib_peak": 20241,
+  "total_mib": 46068,
+  "samples": 131
+ },
+ "initialization": {
+  "used_mib_peak": 45319,
+  "total_mib": 46068,
+  "samples": 1480
+ }
+}

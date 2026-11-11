@@ -1175,7 +1175,10 @@ class TestTheWholeTreePredicateModelsThePod:
         sp.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
                 "commit", "-qm", "x"], cwd=root, check=True)
 
-        import tests.docs.test_log_organisation as mod  # noqa: PLC0415
+        #: this module itself, not a re-import by the name ``tests.docs...``: an experiment driver that puts its stage
+        #: directory on sys.path (a1_units: scripts/stages/stage-0/calibration_volume) exposes that suite's regular
+        #: ``tests`` package under the same top-level name, and the re-import then fails in a shared process
+        mod = sys.modules[__name__]
         monkeypatch.setattr(mod, "REPO", root)
 
         assert mod._missing_tracked_logs() == []

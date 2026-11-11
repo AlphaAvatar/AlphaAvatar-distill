@@ -1,0 +1,32 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tm_closeout_after_gate/v1",
+ "run_id": "a_tool_generation_20261105_074146",
+ "recorded_utc": "2026-11-05T10:39:34Z",
+ "status": "COMPLETE",
+ "why_this_record": "The driver finished ALL_DONE at 2026-11-05T10:25:59Z, but the launcher's teardown gate refused at 10:31:18Z: required_products_secured was False only because ctx.evidence.listing_unknown still held 'tool_generation_hybrid' from ONE earlier poll whose shard listing failed; every later listing answered, all 193 sealed shards were pulled and receipted by sha256 (secured: 193, none failed), and the whole directory's archive was tarred, pulled and re-hashed equal (files_secured.tool_generation: true). The pod was retained under the watchdog's verified ownership. The products were re-verified on the dev box, and the pod was released by hand.",
+ "products_secured": {
+  "archive": {
+   "local": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/tool_generation_hybrid.tgz",
+   "sha256": "33e992a9490f367cc138559ddea8241776edb050cafaec8823e3c793bb2fdc6d",
+   "verified": "pod-side sha256sum equals the dev box's re-hash (2026-11-05T10:32Z)",
+   "bytes": 373399375
+  },
+  "shards": {
+   "sealed": 193,
+   "complete_labels": 14,
+   "verified": "every shard each .complete lists is present in the archive and hashes to its listed sha256; every shard was also pulled and receipted on the polls"
+  },
+  "session_record": "tool_session.json :: terminal ALL_DONE"
+ },
+ "teardown": {
+  "pod_id": "jsudkf50ehi314",
+  "deleted": "runpodctl remove pod -> rc 0 at 2026-11-05T10:33:16Z (the watchdog saw RUNNING at 10:32:59Z)",
+  "provider_confirms_gone": "RunPodProvider.get -> exists False, desiredStatus TERMINATED, billing False at 10:33:26Z",
+  "watchdog": "journal event watchdog_end reason pod_gone at 2026-11-05T10:34:00Z (ticks 170); no watchdog or launcher process remains",
+  "observers_closed": true,
+  "retained_after_gate_minutes": 2.1
+ },
+ "repair": "phase.listing_outcome: the latest listing decides whether the products are known (a later success clears an earlier transient failure; failures stay counted in listing_failures); phase._listing retries a failed listing once. Regression: test_a_transient_listing_failure_does_not_block_the_teardown_of_secured_products",
+ "authorizes": "nothing",
+ "cost": "closeout/outcome.json :: money (the envelope's one owner)"
+}

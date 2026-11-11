@@ -1,0 +1,181 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.research_a_closeout/v1",
+ "written_utc": "2026-11-10T19:00Z",
+ "decided_by": "maintainer, 'AlphaAvatar-distill — Research A 最终科学收尾与存储退役准备' (review base c7d7950b), section I",
+ "verdict": {
+  "label": "CURRENT_METHOD_NO_GO",
+  "scope": "the current method as one combination: structural initialization from the packed full search's Top-1 (596,049,920 parameters, root teacher Qwen/Qwen3-4B@1cfa9a72), the teacher-native six-category training data, and recovery KD (CE 0.25 + KD 1.0 at T 1, Top-200 + tail, 3 epochs, 8,192 sequential causal packing)",
+  "not_a_verdict_on": "the 596M student's capacity itself (H3 in stage3_failure_analysis is untested)",
+  "basis": {
+   "static_fluid_correctness_two_seed_mean": {
+    "A1-6cat-sr (thinking)": 0.0719,
+    "A2-6cat-sr (non-thinking)": 0.1096,
+    "A-MIX-6cat-sr, thinking mode": 0.1026,
+    "A-MIX-6cat-sr, non-thinking mode": 0.1123
+   },
+   "set": "eval-set-1 v2 (frozen), scoring protocol v2, validity mask v1: 570 static formal items",
+   "scale": "A-MIX holds 11,862,564 unique supervised tokens before packing and 4.52x A1's training FLOPs; adding the data and joining both modes did not move generalization enough to change the scientific conclusion"
+  },
+  "not_attributable_to": {
+   "_": "low correctness is not attributed to these, each lacking the main supporting evidence (PACKED_ROUND.md section 17)",
+   "decoding parameters": "nucleus_v1 is registered and identical for every arm and mode; H6 untested",
+   "a few truncated targets": "only C1 inherits cut traces (350 of 4,197); A1, A2 and A-MIX targets all end in a supervised <|im_end|>",
+   "a simple EOS problem": "the registered answer check applied regardless of termination gives exactly the formal rate (no unterminated rollout held a correct answer), and correctness among usable rollouts is itself 12-16%"
+  },
+  "if_restarted": "first measure how much of the teacher's reasoning survives structural initialization and the training objective; do not simply extend the current training"
+ },
+ "registered_results_kept": {
+  "A1_minus_A2": "INCONCLUSIVE, -3.77 pp [-7.21, -1.03] (decided)",
+  "A1_minus_C1": "NO_GO, +2.72 pp [+0.85, +4.83] (descriptive)",
+  "mixed_thinking_minus_A1": "INCONCLUSIVE reading, +3.07 pp [+0.71, +5.68] (descriptive)",
+  "mixed_non_thinking_minus_A2": "NO_GO reading, +0.26 pp [-1.72, +2.08] (descriptive)",
+  "mixed_thinking_minus_mixed_non_thinking": "NO_GO reading, -0.96 pp [-3.08, +1.18] (descriptive)",
+  "rescored": "nothing"
+ },
+ "records": {
+  "logs/stages/stage-2/teacher_modes/analyses/stage3_sr_result.json": "748c3acbcbed99f0b6ff81b0363879520d02a5739e305ead043e522b6c3e2934",
+  "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json": "4ae28188e8c3854fe5e889957c4c2d4b075a4df1b7b21903ba09df3955232c83",
+  "logs/stages/stage-2/teacher_modes/analyses/mixed_fullset.json": "6bd34836c83aa4e7b5731bd1e43f0500e72a65bd8d31458fe8cd826dbb46caaf",
+  "logs/stages/stage-2/teacher_modes/analyses/stage3_failure_analysis.json": "84d58ceea8cbb2f07b4bcf591a16423c06256c01fbabb3d5ee20afd3d76d040f",
+  "logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json": "9e6262b78832b0c75d2a4c0032d1a5f411b23154c1faf9572e96ddd19cd1187b",
+  "logs/stages/stage-2/teacher_modes/audit/mixed_6cat_sr_freeze.json": "4d758b3dc92d7a6618895afe28e70d9df1bd5d799e767af014c3ed2b692996ba",
+  "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011/evidence/products.json": "483312b274b182df5c4aaca90c791c6682c998c80cb20bb0d1205a346629f40e"
+ },
+ "artifacts": {
+  "initialization": {
+   "top1_state_id": "1f5e4b420125a345f1d190f0b8f87cad",
+   "model_safetensors_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+   "copies": [
+    "thprcgh7s9:/teacher_modes/search_packed/top1",
+    "relay durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad/"
+   ]
+  },
+  "students": {
+   "A1-6cat-sr-s20260726": {
+    "model_safetensors_sha256": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
+    "bytes": 2384234968,
+    "copies": [
+     "thprcgh7s9",
+     "dev box (verified 2026-11-10T18:41Z)"
+    ]
+   },
+   "A1-6cat-sr-s20260801": {
+    "model_safetensors_sha256": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
+    "bytes": 2384234968,
+    "copies": [
+     "thprcgh7s9",
+     "dev box (verified 2026-11-10T18:41Z)"
+    ]
+   },
+   "A2-6cat-sr-s20260726": {
+    "model_safetensors_sha256": "5e26ab61fab82ee988d042a98b8e467a284fd5682fa7de9dabc54623ed2606d4",
+    "bytes": 2384234968,
+    "copies": [
+     "thprcgh7s9",
+     "dev box (verified 2026-11-10T18:41Z)"
+    ]
+   },
+   "A2-6cat-sr-s20260801": {
+    "model_safetensors_sha256": "236425e5739bc71ba3661cda9e0ef9f1e02cb7c155eeb714a3c4f8686f2a2df6",
+    "bytes": 2384234968,
+    "copies": [
+     "thprcgh7s9",
+     "dev box (verified 2026-11-10T18:41Z)"
+    ]
+   },
+   "C1-6cat-sr-s20260726": {
+    "model_safetensors_sha256": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+    "bytes": 2384234968,
+    "copies": [
+     "thprcgh7s9",
+     "dev box (verified 2026-11-10T18:41Z)"
+    ]
+   },
+   "C1-6cat-sr-s20260801": {
+    "model_safetensors_sha256": "a24f887370c62bde491576174128b6a2438051b9cba148c836d4709688c3d057",
+    "bytes": 2384234968,
+    "copies": [
+     "thprcgh7s9",
+     "dev box (verified 2026-11-10T18:41Z)"
+    ]
+   },
+   "A-MIX-6cat-sr-s20260726": {
+    "model_safetensors_sha256": "03cbb97de783a9b2af60cfc9d43540f6ee2bb5eb08d0d5c686945491080dfad5",
+    "bytes": 2384234968,
+    "copies": [
+     "thprcgh7s9",
+     "dev box (verified 2026-11-10T18:41Z)"
+    ]
+   },
+   "A-MIX-6cat-sr-s20260801": {
+    "model_safetensors_sha256": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858",
+    "bytes": 2384234968,
+    "copies": [
+     "thprcgh7s9",
+     "dev box (verified 2026-11-10T18:41Z)",
+     "relay durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256 (verified)"
+    ]
+   }
+  },
+  "evidence_archives": {
+   "stage3_units_evidence (all eight units)": {
+    "sha256": "fadea6263ed99ed9bbdfbc4646b195bde62bb48fcc17b03804eb55a1e7ed1417",
+    "copies": [
+     "/home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz (re-hashed 2026-11-10T18:41Z)",
+     "relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz (LFS sha256 equal; re-downloaded and re-hashed 2026-11-10, after 18:41Z)"
+    ]
+   }
+  }
+ },
+ "validation_passed_reading": {
+  "contract": "closeout/outcome.json :: validation_passed is True only when the kind defines a verdict (Launch.verdict: the L40S engineering check and the engineering validations) and that verdict, re-derived from the verified evidence archive, passed and agrees with the pod. Every formal kind (inputs, search, packed_search, train_*, tool_*, teacher, supplement, recovery) defines none, so the field is False by construction there: no validator ran, nothing failed",
+  "completion_is": "outcome.status (COMPLETE: the products secured off-pod or the evidence verified, and the provider confirms the pod gone) with runtime/session.json :: passed (the driver reached its success marker)",
+  "records_affected": "every pre-2026-11-11 formal-kind outcome, among them a_packed_search_20261105_195011 and the A1/A2/C1/A-MIX training runs; they are frozen and NOT rewritten",
+  "future_records": "scripts/shared/study_engineering.closeout writes validation_passed null with a 'validation' note for a kind without a verdict"
+ },
+ "backup": {
+  "verified_utc": "2026-11-10T18:41Z",
+  "students": "all eight Dev Box copies match their receipts and the committed sha256 (stage3_backup --verify, eight units)",
+  "evidence_archive": "fadea626...: dev box re-hashed; relay LFS sha256 equal and a fresh download re-hashed equal",
+  "kept_not_trainer_state": "model weights, config, generation_config and resume_identity per unit; AdamW, scheduler and RNG state are not kept off the volume: every training is closed (maintainer brief section III)",
+  "research_a_v1_evidence": "hard-linked into ~/aad-artifacts/research_a/scratch_evidence_20261110/ from the disposable .scratch root (storage/volume_retirement_proposal_20261110.json). A hard link is a second NAME for the same inode on the same dev-box disk: it keeps the files reachable if .scratch is cleaned, but it is NOT a second physical copy and adds no redundancy across storage: the dev box holds one physical copy, beside whatever the volumes hold"
+ },
+ "relay_quota": {
+  "read_utc": "2026-11-10T18:40Z (between the provider read at 18:39:40Z and the backup verification at 18:41:42Z)",
+  "inventory": "AlphaAvatar/aadistill-artifacts 67.039 GiB (usedStorage = LFS inventory), AlphaAvatar/aadistill-transport 5.551 GiB: 72.59 GiB of the free tier's 100 GB (93.13 GiB)",
+  "probe": "LFS batch endpoint, fresh random oids, no bytes sent: largest admitted object 22,056,874,560 B (20.54 GiB); 7 and 8 weights both admitted",
+  "the_2026_11_10_retirement_freed": "yes: 86.92 -> 64.72 GiB at the retirement; the present 67.04 is 64.72 plus A-MIX-6cat-sr-s20260801's weights (2.22 GiB) and the evidence archive (0.10 GiB). The bytes went through permanently_delete_lfs_files, not by removing the pointers"
+ },
+ "relay_upload_plan": {
+  "status": "PROPOSED, not executed",
+  "what": "the seven final weights without a relay copy (A1, A2, C1 x 2 seeds, A-MIX-6cat-sr-s20260726) with config.json, generation_config.json and resume_identity.json, from the dev box's verified copies; A-MIX-6cat-sr-s20260801 is already there and is not uploaded again",
+  "where": "durable/stage3_sr/<unit>/<first 16 of the weights sha256>/ (the driver's own scheme)",
+  "bytes": "7 x 2,384,234,968 B = 15.54 GiB; leaves ~5.0 GiB of the relay's headroom",
+  "verification": "each file's LFS sha256 against the receipt, then a fresh download re-hashed",
+  "cost_usd": 0,
+  "time": "~7 h of dev-box uplink at the 0.63 MB/s measured on 2026-11-10 (the evidence archive), plus ~30 min of verifying downloads",
+  "alternative_not_proposed": "one L40S on thprcgh7s9 at hub speed (~$0.6-0.9): a GPU resource this round does not authorize",
+  "order": "before thprcgh7s9 is deleted, so every final weight keeps two independent copies"
+ },
+ "budget_terminal": {
+  "read_utc": "2026-11-10T18:46:12Z",
+  "train_sr_mix": "$23.4143 of the first attempt's $40.31 and the kind's cumulative $45.17 (one attempt); the $2.00 backup allowance unused",
+  "a_tm": "$139.3466 spent of the $161.1023 ceiling (study_engineering.envelope)",
+  "research_a_sessions": "v1 $46.3017 + A-TM $139.3466 = $185.6483 under the $264.77 Research A cap (whose remainder is the volumes' storage reserves)",
+  "project": "provider billed $916.8956, committed $964.6012 of the $1,000 cap: $35.3988 left (shared.project_position, live)",
+  "provider": "balance $43.03, 0 pods, 3 volumes at $0.073/h ($1.76/day): about 24 days, to ~2026-12-05",
+  "unspent_not_carried": "the A-TM ceiling's remaining $21.7557 funds nothing new: no new GPU work is authorized"
+ },
+ "open_for_the_maintainer": [
+  "approve or amend the volume retirement list (storage/volume_retirement_proposal_20261110.json)",
+  "the relay upload of the seven student weights ($0, ~7 h)",
+  "whether H1-PA's and the mixed calibration's reviews are closed (am5m373kuq's declared anchors)"
+ ],
+ "authorizes": "nothing",
+ "resolved_2026_11_11": {
+  "grant_closure": "DONE: the maintainer's 2026-11-11 decision ('Research A 最终关闭与 Squash Merge Main', section 1) closed A-TM and A-E as studies -- logs/budget/approvals/teacher_modes_token_matched_grant.json and teacher_modes_engineering_grant.json :: closed (Research A v1's grant was closed 2026-10-31). One study-level gate, study_engineering.require_open, refuses issue, launch (before an artifact or the provider is read, an issued unused artifact included) and the runner's first precheck, for every kind; not the per-kind marker this record's earlier note sketched. Tests: scripts/stages/stage-2/teacher_modes/tests/test_research_a_closure.py",
+  "remainders": "A-TM $21.7557 and A-E $2.7911 lapse: not carried forward, not refunded, not transferred",
+  "integration": "the research branch is squash-merged into main under the same decision (section 4)",
+  "storage": "the three volumes are kept unchanged; no retirement and no relay upload is authorized by this decision"
+ }
+}

@@ -217,7 +217,8 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         #: is never silently ignored. At `bsz1 + length_sorted` there is no
         #: padding to save; what changes is the order the float64 accumulator
         #: sees, which is a real protocol difference and is traced as one.
-        reference_path = batch_size <= 1 and packing == ORIGINAL_ORDER_V1
+        reference_path = (batch_size <= 1 and packing == ORIGINAL_ORDER_V1
+                          and ctx.forward_context is None)
         #: TIMED HONESTLY, and for one reason: the A-bsz1/A-bsz3 comparison
         #: reports a ratio of two wall clocks. CUDA kernels are asynchronous,
         #: so a timer that does not synchronize at BOTH ends attributes the
@@ -264,7 +265,8 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                 for packed in packed_batches(ctx.calibration_items, batch_size,
                                              packing=packing,
                                              pad_id=resolve_pad_id(parent),
-                                             device=compute):
+                                             device=compute,
+                                             forward_context=ctx.forward_context):
                     physical_invocations += 1
                     executed_positions += (packed.batch.size
                                            * int(packed.batch.input_ids.shape[1]))
@@ -373,6 +375,8 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                    #: so a run's trace always states which grouping produced
                    #: its statistics rather than leaving it inferable.
                    "calibration_batch_packing": packing,
+                   **({"forward_context": ctx.forward_context.as_dict()}
+                      if ctx.forward_context is not None else {}),
                    "reference_path": reference_path,
                    #: SCIENCE evidence: what the policy named in the hashed
                    #: config actually restricted, recorded so a reader checks the

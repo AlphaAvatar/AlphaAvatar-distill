@@ -1,0 +1,221 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.full_search_record/v1",
+ "search_run_id": "research_a_v2_hybrid_d4_full_search",
+ "started_utc": "2026-11-01T19:16:11Z",
+ "stages": {
+  "A_contract": {
+   "config_hash": "e8a43631eec71442",
+   "seconds": 2.16,
+   "status": "ok"
+  },
+  "B_teacher": {
+   "seconds": 10.8,
+   "status": "ok"
+  },
+  "C_beam_search": {
+   "n_states": 93,
+   "n_complete_leaves": 12,
+   "n_resumed": 0,
+   "seconds": 71215.23,
+   "status": "ok"
+  },
+  "D_commit": {
+   "k": 1,
+   "seconds": 6.23,
+   "status": "ok"
+  }
+ },
+ "status": "COMPLETE",
+ "authorization_id": "stage2.teacher_modes.token_matched.a_search_20261101_153803",
+ "session": {
+  "config_hash": "e8a43631eec71442ef783c127e5e2d7dc10cb04942d503287042bbc633d58675",
+  "numerical_execution_fingerprint": "24787ea9c00dbbba2006530f70397076998b95915199f03270e4130c6298c6ef",
+  "measurement_protocol_id": "1c8305246073213e58d0c1098ba4e4e0",
+  "profiles": [
+   "calib.hybrid_d4_base@v1",
+   "calib.hybrid_d4_rh@v1"
+  ],
+  "profile_hashes": {
+   "calib.hybrid_d4_base@v1": "5d4d92f2afcc2f514b7b44ac32d0bc7af36c800b863d8662b7d3832fcf0e5bc2",
+   "calib.hybrid_d4_rh@v1": "768443f63002b90abb1f01a05a96cf806433e869f93ebdcd778c3f92e1348661"
+  },
+  "suite": {
+   "suite_id": "state_eval_hybrid",
+   "content_sha256": "b36c6abc601f799f6cc0d44eac9887962163e73f48efd4b5d1f8e2b38abc4598",
+   "items_sha256": "0ddc148e95ee2c91e0f08f868554a6c4d3f331f31af034384cfbc333678d36f1"
+  },
+  "execution": {
+   "evaluator": {
+    "micro_batch_size": 1,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1"
+   },
+   "operators": {
+    "micro_batch_size": 1,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1",
+    "depth_prefix_reuse": true
+   }
+  },
+  "baseline": {
+   "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+   "record_sha256": "333af13d9f2441fc658ee064f1a6ec6b15ebf5be5ee8ab31320763bbe41ce266",
+   "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "execution": {
+    "micro_batch_size": 3,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1"
+   },
+   "implementations": {
+    "FFN": "ffn.activation_importance_v0",
+    "DEPTH": "depth.causal_kl_greedy_v1",
+    "RESIDUAL_WIDTH": "width.global_pca_v0",
+    "ATTENTION": "attention.activation_importance_v1"
+   },
+   "position_policy": "positions.supervised_target_v1@v1",
+   "distribution_support": {
+    "support_id": "reference_topk_tail_v1",
+    "top_k": 200
+   }
+  },
+  "seed": 20260815,
+  "beam": {
+   "width": 6,
+   "warmup_levels": 1
+  },
+  "prune_weights": false
+ },
+ "root_teacher": {
+  "verified": [
+   "model-00001-of-00003.safetensors",
+   "model-00002-of-00003.safetensors",
+   "model-00003-of-00003.safetensors"
+  ],
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192",
+  "root_identity_hash": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192"
+ },
+ "first_evaluation_check": {
+  "artifact_digest": "e90cdfcb188000e1dd4f8a38dc986355511a50b8466b65abb3a2a55317b9c6f4",
+  "critical_problems": [],
+  "first_values": {
+   "state.teacher_kl.equal_domain_mean": 2.555000887776042,
+   "state.teacher_kl.worst_domain": 2.9242526207435326,
+   "state.critical_token_kl": 7.686439329158217
+  },
+  "repeats": 10,
+  "series": {
+   "state.teacher_kl.equal_domain_mean": [
+    2.555000887776042,
+    2.555000887776042,
+    2.555000887776042,
+    2.555000887776042,
+    2.555000887776042,
+    2.555000887776042,
+    2.555000887776042,
+    2.555000887776042,
+    2.555000887776042,
+    2.555000887776042
+   ],
+   "state.teacher_kl.worst_domain": [
+    2.9242526207435326,
+    2.9242526207435326,
+    2.9242526207435326,
+    2.9242526207435326,
+    2.9242526207435326,
+    2.9242526207435326,
+    2.9242526207435326,
+    2.9242526207435326,
+    2.9242526207435326,
+    2.9242526207435326
+   ],
+   "state.critical_token_kl": [
+    7.686439329158217,
+    7.686439329158217,
+    7.686439329158217,
+    7.686439329158217,
+    7.686439329158217,
+    7.686439329158217,
+    7.686439329158217,
+    7.686439329158217,
+    7.686439329158217,
+    7.686439329158217
+   ]
+  },
+  "measured_range": 0.0,
+  "rule": {
+   "rule_id": "conservative_review_gate",
+   "version": 1,
+   "declared_epsilon": 0.0001,
+   "measurement_definition": "one materialized checkpoint, scored N times through the full materialize -> reload -> measure cycle on the frozen state-eval suite, on the pilot's GPU backend; the statistic is max(max - min) across the policy's objective metrics",
+   "repeats": 10,
+   "if_below": "epsilon stands unchanged",
+   "if_at_or_above": "no automatic re-derivation; preflight requires review and Phase A is blocked",
+   "rejected_alternative": "epsilon_final = max(1e-4, 2 * measured) - rejected for v1 because it derives a scientific tolerance from a single profiling run"
+  },
+  "decision": {
+   "rule_id": "conservative_review_gate",
+   "version": 1,
+   "declared_epsilon": 0.0001,
+   "measured_range": 0.0,
+   "passes": true,
+   "epsilon_final": 0.0001,
+   "action": "proceed: the measured range is below the declared epsilon, which stands unchanged",
+   "requires_review": false,
+   "phase_a_blocked": false
+  },
+  "passes": true
+ },
+ "commit": {
+  "selection_path": "/runpod-volume/teacher_modes/search_a1/stage1_selection.json",
+  "selected_rows": [
+   {
+    "state_id": "159e73be3e1157e8367a476eb72e6afc",
+    "path": "DEPTH(calib.hybrid_d4_base@v1)->FFN(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_base@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_rh@v1)",
+    "artifact_digest": "ab8ffb0d05ae95539432b5a31ea7cfa193ff0e7fb6ef854fd6b32958589f18f4",
+    "single_shard_sha256": "3459b9c99492b33ea41fc5545fc3a1d80a89bfba28fb5181c2d1606ea5c3220c",
+    "checkpoint_path": "/runpod-volume/teacher_modes/search_a1/search/states/159e73be3e1157e8367a476eb72e6afc/33c7430abdb61d03b46f2fb73732b57a",
+    "num_parameters": 596049920,
+    "impl_ids": [
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0",
+     "attention.activation_importance_v1",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.hybrid_d4_base@v1",
+     "calib.hybrid_d4_rh@v1"
+    ],
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "weights_digest": "e19abcd93f575a6c0f53975311738d85fda7f87d2ed0667e9220fc759e1baa4c"
+   }
+  ],
+  "pareto_order_of_complete_leaves": [
+   "159e73be3e1157e8367a476eb72e6afc",
+   "3119e1ef1c5e1a8d07923b67229a37f6",
+   "3b20d0b1f3b10c15e5f5b7e8061fd167",
+   "c8b9a124d0951a5927f760d9eb7d5040",
+   "5dcbd5b61b1c4ccdf43ed31adbfa5e62",
+   "cdc6550cb1625b6a32c9080e689831fb",
+   "374f7825582702df13b3649eafab4776",
+   "dc604d45e2b8ff35968a4232b8008cdd",
+   "db2bb5c16f5e1113c3321854a32b48a2",
+   "8fd62a96e4e35c995e94b81ec2f29889",
+   "4cd1acbe0956ff59f5af42640de2cfed",
+   "469d567c52938f9f655f79c9d3a2fc33"
+  ]
+ },
+ "top1": {
+  "path": "/runpod-volume/teacher_modes/search_a1/top1",
+  "files_sha256": {
+   "model.safetensors": "3459b9c99492b33ea41fc5545fc3a1d80a89bfba28fb5181c2d1606ea5c3220c",
+   "config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+   "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+  },
+  "state_id": "159e73be3e1157e8367a476eb72e6afc",
+  "artifact_digest": "ab8ffb0d05ae95539432b5a31ea7cfa193ff0e7fb6ef854fd6b32958589f18f4",
+  "weights_digest": "e19abcd93f575a6c0f53975311738d85fda7f87d2ed0667e9220fc759e1baa4c",
+  "source_checkpoint_path": "/runpod-volume/teacher_modes/search_a1/search/states/159e73be3e1157e8367a476eb72e6afc/33c7430abdb61d03b46f2fb73732b57a"
+ },
+ "ended_utc": "2026-11-02T15:03:25Z"
+}

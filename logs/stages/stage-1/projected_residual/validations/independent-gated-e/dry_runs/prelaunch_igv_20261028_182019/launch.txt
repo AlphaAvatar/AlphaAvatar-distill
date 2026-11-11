@@ -1,0 +1,159 @@
+REFUSED at $0: the relay holds no transfer/aad_autoinit_38ca9154.bundle; stage it first
+[18:20:21] budget: expected 85 min $1.54 · soft $2.16 · hard $2.34 (authorized $3.00)
+[18:20:22] NVIDIA L40S $1.09/h, stock None
+[18:20:22] account funds OK: the provider account holds $138.0149 against the $2.3390 this session must be able to fund
+[18:20:23] account resources OK: the provider account holds only the 1 resource(s) the records account for
+[18:20:23] a independent-gated-E engineering-validation artifact, unused
+[18:20:23] NVIDIA L40S at no more than $1.09/h, as granted
+[18:20:23] all-in $2.3973 over 130.0 min, inside $3.00
+[18:20:23] study identity 1c266d022520 is the authorized one
+[18:20:23] every bound file is in the session commit
+[18:20:25] $3.00 inside the envelope ($3.0) and the $14.5118 the project cap leaves now
+[18:20:26] precheck OK: 6 relay inputs (6 from AlphaAvatar/aadistill-artifacts), 1 local assets
+[18:20:26] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+{
+ "terminal": "DRY_RUN_GATES_PASSED",
+ "provider_resource_created": false,
+ "bundle_on_relay": {
+  "ok": false,
+  "why": "the relay holds no transfer/aad_autoinit_38ca9154.bundle; stage it first"
+ },
+ "budget_plan": {
+  "price_per_hour": 1.09,
+  "authorized_usd": 3.0,
+  "expected_minutes": 85.0,
+  "soft_stop_minutes": 118.75,
+  "artifact_recovery_reserve_minutes": 10.0,
+  "hard_terminate_minutes": 128.75,
+  "step_time": {
+   "seconds": 1.0,
+   "source": "unused: the validation is one phase (arms=0)",
+   "measured": true
+  },
+  "breakdown": [
+   {
+    "name": "setup",
+    "minutes": 20.0
+   },
+   {
+    "name": "train",
+    "minutes": 0.0
+   },
+   {
+    "name": "evaluate",
+    "minutes": 0.0
+   },
+   {
+    "name": "transfer",
+    "minutes": 5.0
+   },
+   {
+    "name": "independent-gated-E_validation",
+    "minutes": 60.0
+   }
+  ],
+  "soft_stop_reserves": [
+   {
+    "name": "closeout_and_teardown",
+    "minutes": 12.5
+   }
+  ],
+  "notes": [],
+  "soft_stop_reserve_minutes": 12.5,
+  "expected_usd": 1.5442,
+  "soft_stop_usd": 2.1573,
+  "artifact_recovery_reserve_usd": 0.1817,
+  "hard_terminate_usd": 2.339
+ },
+ "quoted_price_per_hour": 1.09,
+ "stock": null,
+ "account_balance": {
+  "known": true,
+  "client_balance_usd": 138.0148939582,
+  "current_spend_per_hr": 0.003,
+  "min_balance_usd": 0.0,
+  "under_balance": false,
+  "error": null,
+  "required_usd": 2.339,
+  "ok": true,
+  "why": "the provider account holds $138.0149 against the $2.3390 this session must be able to fund",
+  "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+ },
+ "account_resources": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "prechecks": [
+  {
+   "check": "the_artifact_is_this_studys_and_unused",
+   "ok": true,
+   "message": "a independent-gated-E engineering-validation artifact, unused"
+  },
+  {
+   "check": "the_gpu_and_price_are_the_grants",
+   "ok": true,
+   "message": "NVIDIA L40S at no more than $1.09/h, as granted"
+  },
+  {
+   "check": "all_in_within_cap",
+   "ok": true,
+   "message": "all-in $2.3973 over 130.0 min, inside $3.00"
+  },
+  {
+   "check": "the_study_identity_is_the_authorized_one",
+   "ok": true,
+   "message": "study identity 1c266d022520 is the authorized one"
+  },
+  {
+   "check": "bound_files_are_in_the_session_commit",
+   "ok": true,
+   "message": "every bound file is in the session commit"
+  },
+  {
+   "check": "the_project_cap_holds_now",
+   "ok": true,
+   "message": "$3.00 inside the envelope ($3.0) and the $14.5118 the project cap leaves now"
+  }
+ ],
+ "precheck": {
+  "relay_needed": [
+   "stage2_h1pa/packs/D4A_merged_whole/audit.jsonl",
+   "stage2_h1pa/packs/D4A_merged_whole/blocks.npz",
+   "stage2_h1pa/packs/D4A_merged_whole/ladder.json",
+   "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/config.json",
+   "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/generation_config.json",
+   "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors"
+  ],
+  "relay_missing": [],
+  "relay_repos": {
+   "AlphaAvatar/aadistill-artifacts": 6
+  },
+  "relay_repo_files_listed": {
+   "AlphaAvatar/aadistill-artifacts": 1619
+  },
+  "local_assets": [
+   "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1/calib.s0v_base_d4.items.jsonl"
+  ],
+  "local_missing": []
+ },
+ "harness": "2edaa6bad49037f5de6963240d3b724c19c91dcd459a843d49b55b5f70a07861",
+ "study_identity": "1c266d02252077ec23528e67d282b99df88e5607b50f233fbbb284b18ac5a9f9",
+ "record": "/home/ecs-user/aad-scratch/igv_20261028_182019/dry_run_session.json"
+}

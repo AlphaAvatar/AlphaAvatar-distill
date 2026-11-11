@@ -341,7 +341,11 @@ def test_a_launcher_that_refuses_to_build_is_recorded_not_swallowed():
     #: to the reason it is allowed.
     #: The D2 confirmation launcher refuses since 2026-10-24: its frozen
     #: generator pins predate `uncapped_eval.py --decoding` (KINDS_ONLY_REFUSING).
+    #: The C2 behavioural launcher refuses since 2026-11-09: C2 closed without
+    #: promotion and the dev-box retirement removed the five Top-5 inits it
+    #: consumes (tombstones devbox_20261109_c2_top5_*); it never reconstructs them.
     expected = {"autoinit_c2_replay_launch": "ReplaySourceError",
+                "autoinit_c2_behavioural_launch": "BehaviouralProposalError",
                 "autoinit_d2_confirmation_launch": "D2ScreeningError"}
     assert dict(UNBUILDABLE) == expected, (
         f"unexpected set of launchers that refused to build: {UNBUILDABLE}")

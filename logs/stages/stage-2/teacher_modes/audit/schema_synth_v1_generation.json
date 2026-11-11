@@ -1,0 +1,402 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.schema_synth_generation/v1",
+ "written_utc": "2026-11-05T17:25:00Z",
+ "source": "the three -sr sessions' import records (tool_verification@v2, up to two candidates), the pool's task sources, and each -sr arm's frozen selection (packed_packs.select)",
+ "attempted_admitted_by_mode_split": {
+  "H-N|state_eval": {
+   "attempted": 29,
+   "admitted": 9,
+   "by_domain": {
+    "hotel_booking": [
+     3,
+     9
+    ],
+    "thermostat_program": [
+     1,
+     8
+    ],
+    "ticket_purchase": [
+     5,
+     12
+    ]
+   }
+  },
+  "H-N|training": {
+   "attempted": 2593,
+   "admitted": 1108,
+   "by_domain": {
+    "bug_tracker": [
+     133,
+     133
+    ],
+    "car_rental": [
+     52,
+     118
+    ],
+    "conference_registration": [
+     71,
+     122
+    ],
+    "crm_update": [
+     6,
+     127
+    ],
+    "expense_report": [
+     37,
+     124
+    ],
+    "grocery_order": [
+     50,
+     111
+    ],
+    "insurance_claim": [
+     53,
+     118
+    ],
+    "lab_samples": [
+     113,
+     115
+    ],
+    "medication_reminders": [
+     25,
+     122
+    ],
+    "orders_report": [
+     44,
+     134
+    ],
+    "parcel_shipment": [
+     5,
+     123
+    ],
+    "parking_reservation": [
+     40,
+     84
+    ],
+    "pet_grooming": [
+     18,
+     110
+    ],
+    "recipe_scaling": [
+     80,
+     119
+    ],
+    "restaurant_booking": [
+     3,
+     120
+    ],
+    "subscription_change": [
+     77,
+     122
+    ],
+    "timesheet": [
+     0,
+     104
+    ],
+    "translation_job": [
+     32,
+     116
+    ],
+    "utility_payment": [
+     55,
+     129
+    ],
+    "vm_provisioning": [
+     89,
+     113
+    ],
+    "warehouse_transfer": [
+     13,
+     109
+    ],
+    "workout_log": [
+     112,
+     120
+    ]
+   }
+  },
+  "H-T|state_eval": {
+   "attempted": 5,
+   "admitted": 5,
+   "by_domain": {
+    "hotel_booking": [
+     1,
+     1
+    ],
+    "thermostat_program": [
+     1,
+     1
+    ],
+    "ticket_purchase": [
+     3,
+     3
+    ]
+   }
+  },
+  "H-T|training": {
+   "attempted": 225,
+   "admitted": 173,
+   "by_domain": {
+    "bug_tracker": [
+     11,
+     11
+    ],
+    "car_rental": [
+     8,
+     9
+    ],
+    "conference_registration": [
+     6,
+     6
+    ],
+    "crm_update": [
+     8,
+     9
+    ],
+    "expense_report": [
+     10,
+     10
+    ],
+    "grocery_order": [
+     7,
+     9
+    ],
+    "insurance_claim": [
+     6,
+     10
+    ],
+    "lab_samples": [
+     15,
+     15
+    ],
+    "medication_reminders": [
+     5,
+     11
+    ],
+    "orders_report": [
+     5,
+     11
+    ],
+    "parcel_shipment": [
+     7,
+     9
+    ],
+    "parking_reservation": [
+     6,
+     8
+    ],
+    "pet_grooming": [
+     8,
+     13
+    ],
+    "recipe_scaling": [
+     5,
+     5
+    ],
+    "restaurant_booking": [
+     5,
+     10
+    ],
+    "subscription_change": [
+     17,
+     18
+    ],
+    "timesheet": [
+     1,
+     9
+    ],
+    "translation_job": [
+     9,
+     13
+    ],
+    "utility_payment": [
+     9,
+     11
+    ],
+    "vm_provisioning": [
+     9,
+     9
+    ],
+    "warehouse_transfer": [
+     6,
+     9
+    ],
+    "workout_log": [
+     10,
+     10
+    ]
+   }
+  },
+  "T2507|training": {
+   "attempted": 169,
+   "admitted": 153,
+   "by_domain": {
+    "bug_tracker": [
+     6,
+     6
+    ],
+    "car_rental": [
+     7,
+     8
+    ],
+    "conference_registration": [
+     5,
+     5
+    ],
+    "crm_update": [
+     6,
+     7
+    ],
+    "expense_report": [
+     8,
+     8
+    ],
+    "grocery_order": [
+     7,
+     7
+    ],
+    "insurance_claim": [
+     7,
+     8
+    ],
+    "lab_samples": [
+     12,
+     12
+    ],
+    "medication_reminders": [
+     6,
+     7
+    ],
+    "orders_report": [
+     3,
+     5
+    ],
+    "parcel_shipment": [
+     6,
+     6
+    ],
+    "parking_reservation": [
+     5,
+     5
+    ],
+    "pet_grooming": [
+     9,
+     10
+    ],
+    "recipe_scaling": [
+     4,
+     4
+    ],
+    "restaurant_booking": [
+     8,
+     8
+    ],
+    "subscription_change": [
+     13,
+     14
+    ],
+    "timesheet": [
+     0,
+     8
+    ],
+    "translation_job": [
+     11,
+     11
+    ],
+    "utility_payment": [
+     11,
+     11
+    ],
+    "vm_provisioning": [
+     9,
+     9
+    ],
+    "warehouse_transfer": [
+     6,
+     6
+    ],
+    "workout_log": [
+     4,
+     4
+    ]
+   }
+  }
+ },
+ "selected_training_episodes_by_domain": {
+  "A1-6cat-sr": {
+   "bug_tracker": 3,
+   "car_rental": 5,
+   "conference_registration": 3,
+   "crm_update": 3,
+   "expense_report": 2,
+   "grocery_order": 3,
+   "insurance_claim": 1,
+   "lab_samples": 4,
+   "parcel_shipment": 2,
+   "parking_reservation": 4,
+   "pet_grooming": 3,
+   "recipe_scaling": 1,
+   "restaurant_booking": 2,
+   "subscription_change": 8,
+   "translation_job": 2,
+   "utility_payment": 6,
+   "vm_provisioning": 1,
+   "warehouse_transfer": 2,
+   "workout_log": 2
+  },
+  "A2-6cat-sr": {
+   "bug_tracker": 38,
+   "car_rental": 17,
+   "conference_registration": 28,
+   "crm_update": 2,
+   "expense_report": 13,
+   "grocery_order": 18,
+   "insurance_claim": 22,
+   "lab_samples": 43,
+   "medication_reminders": 7,
+   "orders_report": 13,
+   "parcel_shipment": 3,
+   "parking_reservation": 12,
+   "pet_grooming": 9,
+   "recipe_scaling": 22,
+   "restaurant_booking": 1,
+   "subscription_change": 24,
+   "translation_job": 9,
+   "utility_payment": 22,
+   "vm_provisioning": 29,
+   "warehouse_transfer": 2,
+   "workout_log": 36
+  },
+  "C1-6cat-sr": {
+   "bug_tracker": 1,
+   "car_rental": 2,
+   "conference_registration": 1,
+   "grocery_order": 2,
+   "lab_samples": 1,
+   "medication_reminders": 2,
+   "parcel_shipment": 2,
+   "parking_reservation": 1,
+   "pet_grooming": 2,
+   "restaurant_booking": 2,
+   "subscription_change": 3,
+   "translation_job": 1,
+   "utility_payment": 3,
+   "vm_provisioning": 1,
+   "warehouse_transfer": 1
+  }
+ },
+ "state_eval_v3_items_by_domain": {
+  "H-T": {
+   "ticket_purchase": 6,
+   "thermostat_program": 2,
+   "hotel_booking": 2
+  },
+  "H-N": {
+   "ticket_purchase": 8,
+   "hotel_booking": 2,
+   "thermostat_program": 2
+  }
+ },
+ "reading": "admission is by exact match with the program's call, so the admitted and selected episodes lean toward the domains each teacher computes correctly (non-thinking: timesheet, restaurant, parcel and CRM domains admit least: date arithmetic and the E.164 phone format); the selection takes whole episodes in the pool's frozen order up to each source group's target",
+ "authorizes": "nothing"
+}

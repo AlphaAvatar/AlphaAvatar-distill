@@ -1,11 +1,17 @@
-"""The SELECTED forward baseline: it resolves, and it is the method D1 ran.
+"""The forward baseline: version 1 is the method D1 ran; version 2, selected, is that method packed.
 
 Maintainer decision 2026-10-17 adopted D1's initialization methodology with
-`prediction_rows=scored_v1`. These tests hold the record to the records it
-claims to describe -- D1's own search wiring and q2's recorded identities --
-so the baseline cannot drift from the method it names, and they hold the one
-distinction the decision insists on: q2 was produced under `all_v1`, and the
-forward profile has no checkpoint of its own.
+`prediction_rows=scored_v1` (version 1). These tests hold that record to the
+records it claims to describe -- D1's own search wiring and q2's recorded
+identities -- so the baseline cannot drift from the method it names, and they
+hold the one distinction the decision insists on: q2 was produced under
+`all_v1`, and the forward profile has no checkpoint of its own.
+
+Maintainer decision 2026-11-03 selected version 2: the same method read in the
+packed causal forward context. Version 1 is superseded and still resolves
+through `historical(1)`, which is what the D1-method checks below read;
+`TestVersion2IsTheSameMethodPacked` holds the selected record to version 1's
+method and to the packing rules the core implements.
 """
 from __future__ import annotations
 
@@ -23,6 +29,16 @@ Q2_STATE = "afd50c9ff0e3d20542bb5473ea745b55"
 
 @pytest.fixture(scope="module")
 def baseline():
+    """Version 1, the method D1 ran (superseded 2026-11-03, still resolvable)."""
+    from shared.forward_baseline import historical, register_operators
+
+    b = historical(1, REPO)
+    register_operators(b)
+    return b
+
+
+@pytest.fixture(scope="module")
+def selected_baseline():
     from shared.forward_baseline import register_operators, selected
 
     b = selected(REPO)
@@ -147,9 +163,16 @@ class TestQ2IsTheHistoricalReferenceAndNotTheForwardArtifact:
             self, baseline):
         reg = json.loads((REPO / "logs/maintenance/inventories/"
                           "checkpoint_registry.json").read_text())
+        from shared.forward_baseline import selected
+
         row = reg["scientific_artifacts"]["d1_finalist_q2"]
         assert row["retention"] == "canonical"
-        assert row["forward_baseline"]["baseline"] == baseline.qualified_id
+        #: the registry derives from the SELECTED baseline (v2 since 2026-11-03), which names the same q2 artifact as
+        #: this historical v1
+        current = selected(REPO)
+        assert row["forward_baseline"]["baseline"] == current.qualified_id
+        assert ([a.identities["artifact_digest"] for a in current.reference_artifacts]
+                == [a.identities["artifact_digest"] for a in baseline.reference_artifacts])
         assert row["forward_baseline"]["is_the_forward_profile_artifact"] is False
         protected = [c for c in reg["checkpoints"]
                      if c["path_local"].endswith(Q2_STATE)]
@@ -185,9 +208,49 @@ class TestProvenanceIsCheckable:
             got = hashlib.sha256((REPO / rel).read_bytes()).hexdigest()
             assert got == digest, rel
 
-    def test_the_snapshot_names_the_resolved_baseline(self, baseline):
+    def test_the_snapshot_names_the_resolved_baseline(self, selected_baseline):
         snap = json.loads((REPO / "logs/state/current.json").read_text())
         block = snap["forward_baseline"]
-        assert block["baseline"] == baseline.qualified_id
+        assert block["baseline"] == selected_baseline.qualified_id
         assert "prediction_rows=scored_v1" in block["execution"]
         assert block["forward_materialization"] is None
+
+
+class TestVersion2IsTheSameMethodPacked:
+    def test_the_method_is_version_1s(self, baseline, selected_baseline):
+        v1, v2 = baseline, selected_baseline
+        assert v2.qualified_id.endswith("@v2") and v1.qualified_id.endswith("@v1")
+        assert v2.operators == v1.operators
+        assert v2.position_policy.policy_hash == v1.position_policy.policy_hash
+        assert v2.distribution_support == v1.distribution_support
+        assert v2.schedule.schedule_hash == v1.schedule.schedule_hash
+        assert v2.ranking_policy.policy_hash == v1.ranking_policy.policy_hash
+        assert v2.operator_kl_references == v1.operator_kl_references
+        assert v2.state_evaluation_reference == v1.state_evaluation_reference
+
+    def test_it_declares_the_packed_context_the_core_implements(self, selected_baseline):
+        from aadistill.initialization.baseline import FORWARD_CONTEXT_RULES
+
+        assert dict(selected_baseline.forward_context_policy) == dict(FORWARD_CONTEXT_RULES)
+        assert selected_baseline.execution.micro_batch_size == 1
+        assert selected_baseline.execution.calibration_batch_packing == "original_order_v1"
+        assert selected_baseline.execution.prediction_rows == "scored_v1"
+        fc = selected_baseline.forward_context(sequence_length=8192, shuffle_seed=1)
+        assert fc.as_dict()["packing"] == "sequential_truncate_v1"
+
+    def test_version_1_declares_none_and_its_fingerprint_is_unchanged(self, baseline,
+                                                                      selected_baseline):
+        assert baseline.forward_context_policy is None
+        assert baseline.forward_context(sequence_length=8192, shuffle_seed=1) is None
+        assert baseline.execution_fingerprint.startswith("e627f461")
+        assert selected_baseline.execution_fingerprint != baseline.execution_fingerprint
+
+    def test_the_selection_binds_both_records(self):
+        sel = json.loads((REPO / "configs/shared/baselines/selection.json").read_text())
+        cur = sel["selections"]["initialization"]
+        (old,) = sel["superseded"]["initialization"]
+        for entry in (cur, old):
+            got = hashlib.sha256((REPO / "configs/shared/baselines" / entry["record"]).read_bytes()).hexdigest()
+            assert got == entry["sha256"], entry["record"]
+        assert old["record"] == "initialization_forward_baseline_v1.json"
+        assert old["superseded_by"] == cur["record"]

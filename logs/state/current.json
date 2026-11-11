@@ -23,16 +23,16 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Mixed Calibration 2x COMPLETE 2026-10-27: preregistered M (Mix-Augmented - D4-Augmented, static fluid) NO_GO (-1.32 pp [-2.71, -0.17]); $17.3366 of $33.05; grant closed. Awaiting the maintainer's review. Owner: docs/stages/stage-0/calibration_volume/MIXED.md section 13.",
- "branch": "main (squash of stage2/reasoning-data, 2026-10-28); next work on research/teacher-modes-and-projected-residual, merged with main",
+ "blocker": "BLOCKED NO. Research A CLOSED 2026-11-11: CURRENT_METHOD_NO_GO frozen; the A-TM and A-E grants closed (study_engineering.require_open). Owner: PACKED_ROUND.md section 21.",
+ "branch": "research/teacher-modes-and-projected-residual (kept; tag archive/research-teacher-modes-and-projected-residual-2026-11-11), squash-merged into main 2026-11-11 (base 72492e46). New work: a fresh branch from main.",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
-  "authorized_cap_usd": 712.17,
-  "cumulative_spend_usd": 687.4031,
+  "authorized_cap_usd": 1000.0,
+  "cumulative_spend_usd": 870.6969,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 24.7669,
+  "remaining_usd": 129.3031,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -60,7 +60,7 @@
   "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
   "why_b_stands": "no valid C2 challenger displaced it"
  },
- "commit": "2a8bae7848f99076eded2a7c6bf7038f166247c4",
+ "commit": "980fbea963b05ba13451615e09b72ec5427a2889",
  "cuda_engineering_validation": {
   "_what": "engineering evidence only; none authorizes anything.",
   "authorizes": "nothing",
@@ -81,7 +81,7 @@
   "scoring_protocol": "reference_topk_tail_v1, K=200. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
  },
- "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
+ "deferred": "duplicate_checkpoints RETIRED 2026-11-06 (2.92 GiB; logs/maintenance/inventories/checkpoint_tombstones.json). historical_probe_reuse REFUSED by scoring_contract_matches_live.",
  "dirty": false,
  "frozen": {
   "equivalence_interval": 0.011695296982299022,
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-26T00:00:00Z",
+ "generated_utc": "2026-11-03T18:00:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,13 +123,13 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer: review MIXED.md section 13 (mixed calibration 2x NO_GO) and H1-PA; the six checkpoints on am5m373kuq are kept for that review. Nothing runs or is authorized until then.",
+ "next": "The maintainer: the volume retirement list, the relay upload of seven student weights, H1-PA's and the mixed calibration's reviews; Research B's teacher (pending). Owner: logs/budget/decisions.md 2026-11-11.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "none: the mixed-calibration 2x study is terminal; awaiting the maintainer",
+  "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
-  "then": "the preregistered M decision and the full eval-set-1 report (mixed_analysis.py); NOTHING follows automatically: 4x is the maintainer's decision"
+  "then": "nothing follows automatically: every grant is the maintainer's"
  },
  "phase_b_result": {
   "authorizes": "nothing",
@@ -194,14 +194,14 @@
  },
  "read_order": [
   "logs/README.md -- START HERE, the index",
-  "docs/stages/stage-0/calibration_volume/MIXED.md -- the live design (mixed calibration 2x)"
+  "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
   "paid_compute": false,
   "pods": 0,
-  "network_volumes": 1,
-  "run": null,
-  "volume": "am5m373kuq: the four D4 checkpoints and the two Mix-Augmented checkpoints, kept for the review (storage record)"
+  "network_volumes": 3,
+  "run": "none; last: A-MIX-6cat-sr a_train_sr_mix_20261109_193709 ($23.4143), pod deleted, provider-confirmed",
+  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1, the eight Stage-3 units (weights also on the dev box, re-hashed 2026-11-11); 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
@@ -222,7 +222,7 @@
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",
-  "hf_private_headroom_gib": "accepts 2 GB (would_accept 2026-10-22T15:53Z); owner logs/stages/stage-2/reasoning_data/plans/durability_plan.json",
+  "hf_private_headroom_gib": "about 20 of the account's 100 GB after the 2026-11-10 retirement (relay 65.51 GiB); owner PACKED_ROUND.md section 19",
   "roots": {
    "artifacts": "/home/ecs-user/aad-artifacts",
    "git": "/home/ecs-user/AlphaAvatar-distill"
@@ -232,18 +232,18 @@
  "test_suites": {
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
-  "core": "3701 passed / 32 skipped / 0 failed, 12m18s (2026-10-18, eval registry + Stage-0 round 2), run with PODSIM_MIN_FREE_GIB=15: the simulator's 20 GiB disk floor exceeds the dev box's 17 GiB free.",
+  "core": "see logs/state/current.md; the suite's simulator floor is AAD_TEST_PODSIM_MIN_FREE_GIB (tests/support/podsim.py), never a launch variable.",
   "d1_launch": "1029 passed / 13 skipped / 0 failed, 2m38s: phase_d1 + docs + integration. GREEN, and the accepted out-of-tree source-screen failure is NOT in it.",
-  "integration": "SQUASH AND MERGE, AGENTS.md P12.2. LATEST 2026-10-17: main squashes exec/d1-behavioural-readiness (PRESERVED; base c8f714af; tested tree 27c279b6; tip named by the squash commit). Earlier: c8f714af, 4500d775. Ranges: decisions.md.",
+  "integration": "SQUASH AND MERGE, AGENTS.md P12.2. LATEST 2026-11-11: main squashes research/teacher-modes-and-projected-residual (PRESERVED, tagged; base 72492e46; tip named by the squash commit). Earlier: 72492e46, 2a8bae78, 32246d12. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core and NOT in the D1 launch suite: phase_d_series test_source_evidence::test_it_regenerates_identically. Its screen is nondeterministic across processes. Diagnosis: current.md.",
   "next_work": "none owed.",
   "d_series_closure": "experiment suites 2026-10-17: d_series 465, phase_d1 721, phase_d2 365 (2 skipped), phase_d3 129, shared 319, migration 39; all green."
  },
  "forward_baseline": {
   "_derived_by": "render_log_navigation.py, via shared.forward_baseline",
-  "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+  "baseline": "stage1_init.d1_target_aware.scored_v1@v2",
   "owner": "configs/shared/baselines/selection.json",
-  "execution": "micro_batch_size=3, length_sorted_v1, prediction_rows=scored_v1",
+  "execution": "micro_batch_size=1, original_order_v1, prediction_rows=scored_v1",
   "historical_reference": "d1_q2 afd50c9f/3a4b4ede under prediction_rows=all_v1",
   "forward_materialization": null
  }

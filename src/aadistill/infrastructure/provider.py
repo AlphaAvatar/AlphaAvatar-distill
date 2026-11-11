@@ -17,7 +17,11 @@ Two transports, chosen for what this project has actually verified (P14):
   call every session in this project has actually made. The GraphQL
   `podTerminate` mutation is implemented as a fallback and is marked
   `verified=False` in the journal: it comes from RunPod's public schema and has
-  never been exercised against the live endpoint from this repo.
+  never been exercised against the live endpoint from this repo. runpodctl
+  3.x deletes over REST v2 (its legacy `remove pod` and `pod delete` share one
+  call); 2.x deleted over REST v1, which RunPod retires on 2026-11-15, so a 2.x
+  CLI after that date leaves only the GraphQL fallback. GraphQL itself retires
+  in early 2027.
 
 The ground truth for "did the pod stop" is neither of those. It is a subsequent
 **poll** showing the pod gone or exited. A termination call that returns 200 and
@@ -38,6 +42,8 @@ from dataclasses import dataclass, field
 from typing import Protocol
 
 RUNPOD_GRAPHQL = "https://api.runpod.io/graphql"
+#: REST v2, the API RunPod keeps (v1 retires 2026-11-15, GraphQL in early 2027)
+RUNPOD_REST_V2 = "https://api.runpod.io/v2"
 
 # RunPod's edge rejects the default `Python-urllib/3.x` User-Agent with **403
 # Forbidden** — every query, including ones that succeed byte-for-byte from
@@ -413,6 +419,22 @@ class RunPodProvider:
             cost_per_hr=float(cost) if cost is not None else None,
             raw=body,
         )
+
+    def pod_record(self, pod_id: str) -> dict | None:
+        """The provider's REST v2 record of one pod (``GET /v2/pods/{id}``):
+        its ``createdAt``, ``dataCenterId``, ``cost`` and the rest, read once
+        right after a create. Never raises; ``None`` when it cannot be read --
+        an unread record is unknown, never a creation time or a location."""
+        req = urllib.request.Request(
+            f"{RUNPOD_REST_V2}/pods/{pod_id}",
+            headers={"Authorization": f"Bearer {self._key}", "User-Agent": USER_AGENT,
+                     "Accept": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                body = json.loads(resp.read().decode())
+        except TRANSIENT_TRANSPORT:
+            return None
+        return body if isinstance(body, dict) and body.get("id") == pod_id else None
 
     # -- termination -------------------------------------------------------
     def terminate(self, pod_id: str) -> list[TerminationAttempt]:

@@ -117,7 +117,7 @@ class WidthGlobalPCAV0(OperatorImplementation):
         state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
             adapter, parent, ctx.calibration_items,
             compute, batch_size=batch_size, packing=packing,
-            active=active)), compute)
+            active=active, forward_context=ctx.forward_context)), compute)
 
         # Same point set and weights as the incumbent recipe: all pre-norm stream
         # states plus the post-final-norm point, ends upweighted 9/8.
@@ -176,6 +176,10 @@ class WidthGlobalPCAV0(OperatorImplementation):
             trace={"source": "global_activation_pca", "scale_compensation": scale,
                    "micro_batch_size": batch_size,
                    "calibration_batch_packing": packing,
+                   #: SCIENCE evidence: the packed causal context the statistics
+                   #: were read in (in the hashed config too). Absent otherwise.
+                   **({"forward_context": ctx.forward_context.as_dict()}
+                      if ctx.forward_context is not None else {}),
                    "scoring_positions": (None if active is None
                                          else active.report()),
                    "d_parent": d_p, "d_child": d_c},

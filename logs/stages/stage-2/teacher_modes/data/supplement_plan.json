@@ -1,0 +1,535 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.supplement_plan/v1",
+ "written_utc": "2026-10-31T08:34:37Z",
+ "design": {
+  "path": "configs/stages/stage-2/teacher_modes/token_matched_design.json",
+  "sha256": "b8f2d75e863ced6025e5e0f29f5db19bd6c6148be9ec8ec7be4e0763a72634b3"
+ },
+ "supply_rows": {
+  "path": "artifacts/stages/stage-2/teacher_modes/audit/supply_rows.jsonl",
+  "sha256": "485800e8cb5fea6a5dba0eb374ecf00a47b796ffd4af8731532a92122f3d3fcc"
+ },
+ "mbpp_cap": 38431,
+ "skip": {
+  "H-T": [
+   "primary.compositional_generalization/reasoning_gym/reasoning_gym/binary_matrix",
+   "primary.compositional_generalization/reasoning_gym/reasoning_gym/game_of_life",
+   "primary.compositional_generalization/reasoning_gym/reasoning_gym/spiral_matrix",
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.caesar",
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.double_last",
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.duplicate_each",
+   "primary.task_contained_deduction/reasoning_core/reasoning_core/logic_derivation",
+   "primary.task_contained_deduction/reasoning_gym/reasoning_gym/cryptarithm",
+   "supporting.code_algorithmic/reasoning_gym/reasoning_gym/bf"
+  ],
+  "H-N": [
+   "primary.compositional_generalization/reasoning_gym/reasoning_gym/binary_matrix",
+   "primary.compositional_generalization/reasoning_gym/reasoning_gym/rotate_matrix",
+   "primary.compositional_generalization/reasoning_gym/reasoning_gym/spiral_matrix",
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.caesar",
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.double_last",
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.duplicate_each",
+   "primary.interactive_adaptation/s0_generators_v2_calsplit/probe_function@v1/probe.digit_sum",
+   "primary.task_contained_deduction/prontoqa/prontoqa/fictional",
+   "primary.task_contained_deduction/reasoning_core/reasoning_core/logic_derivation",
+   "primary.task_contained_deduction/reasoning_gym/reasoning_gym/cryptarithm",
+   "primary.task_contained_deduction/reasoning_gym/reasoning_gym/n_queens",
+   "supporting.code_algorithmic/reasoning_gym/reasoning_gym/bf"
+  ]
+ },
+ "never_built": [
+  "primary.compositional_generalization/reasoning_gym/reasoning_gym/binary_matrix",
+  "primary.compositional_generalization/reasoning_gym/reasoning_gym/spiral_matrix",
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.caesar",
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.double_last",
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.duplicate_each",
+  "primary.task_contained_deduction/reasoning_core/reasoning_core/logic_derivation",
+  "primary.task_contained_deduction/reasoning_gym/reasoning_gym/cryptarithm",
+  "supporting.code_algorithmic/reasoning_gym/reasoning_gym/bf"
+ ],
+ "cells": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit": {
+   "category": "fluid",
+   "quota": 365837.9,
+   "modes": {
+    "H-T": {
+     "have": 595648,
+     "need": 0.0,
+     "admitted_tasks": 139,
+     "generated_tasks": 285,
+     "tokens_per_generated_task": 2089.99,
+     "generated_tokens_per_task": 10449.4,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 124878,
+     "need": 240959.9,
+     "admitted_tasks": 192,
+     "generated_tasks": 975,
+     "tokens_per_generated_task": 128.08,
+     "generated_tokens_per_task": 1629.6,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 1882,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  },
+  "primary.compositional_generalization/reasoning_core": {
+   "category": "fluid",
+   "quota": 119546.3,
+   "modes": {
+    "H-T": {
+     "have": 898381,
+     "need": 0.0,
+     "admitted_tasks": 182,
+     "generated_tasks": 201,
+     "tokens_per_generated_task": 4469.56,
+     "generated_tokens_per_task": 6558.7,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 389781,
+     "need": 0.0,
+     "admitted_tasks": 324,
+     "generated_tasks": 688,
+     "tokens_per_generated_task": 566.54,
+     "generated_tokens_per_task": 2278.8,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  },
+  "primary.compositional_generalization/reasoning_gym": {
+   "category": "fluid",
+   "quota": 100876.6,
+   "modes": {
+    "H-T": {
+     "have": 222643,
+     "need": 0.0,
+     "admitted_tasks": 51,
+     "generated_tasks": 474,
+     "tokens_per_generated_task": 923.83,
+     "generated_tokens_per_task": 8188.3,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [
+      "primary.compositional_generalization/reasoning_gym/reasoning_gym/binary_matrix",
+      "primary.compositional_generalization/reasoning_gym/reasoning_gym/game_of_life",
+      "primary.compositional_generalization/reasoning_gym/reasoning_gym/spiral_matrix"
+     ],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 39969,
+     "need": 60907.6,
+     "admitted_tasks": 78,
+     "generated_tasks": 1622,
+     "tokens_per_generated_task": 48.39,
+     "generated_tokens_per_task": 1842.0,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 1259,
+     "skipped_families": [
+      "primary.compositional_generalization/reasoning_gym/reasoning_gym/binary_matrix",
+      "primary.compositional_generalization/reasoning_gym/reasoning_gym/rotate_matrix",
+      "primary.compositional_generalization/reasoning_gym/reasoning_gym/spiral_matrix"
+     ],
+     "unreachable": false
+    }
+   }
+  },
+  "primary.compositional_generalization/s0_generators_v2_calsplit": {
+   "category": "fluid",
+   "quota": 416322.1,
+   "modes": {
+    "H-T": {
+     "have": 1012191,
+     "need": 0.0,
+     "admitted_tasks": 370,
+     "generated_tasks": 429,
+     "tokens_per_generated_task": 2359.42,
+     "generated_tokens_per_task": 4769.3,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 325985,
+     "need": 90337.1,
+     "admitted_tasks": 911,
+     "generated_tasks": 1469,
+     "tokens_per_generated_task": 221.91,
+     "generated_tokens_per_task": 645.8,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 408,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  },
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+   "category": "fluid",
+   "quota": 729631.6,
+   "modes": {
+    "H-T": {
+     "have": 1146760,
+     "need": 0.0,
+     "admitted_tasks": 472,
+     "generated_tasks": 711,
+     "tokens_per_generated_task": 1930.57,
+     "generated_tokens_per_task": 4773.9,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [
+      "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.caesar",
+      "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.double_last",
+      "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.duplicate_each"
+     ],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 1165044,
+     "need": 0.0,
+     "admitted_tasks": 1562,
+     "generated_tasks": 2434,
+     "tokens_per_generated_task": 502.82,
+     "generated_tokens_per_task": 1677.6,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [
+      "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.caesar",
+      "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.double_last",
+      "primary.inductive_rule_discovery/s0_generators_v2_calsplit/string_induction@v2/str.duplicate_each"
+     ],
+     "unreachable": false
+    }
+   }
+  },
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+   "category": "fluid",
+   "quota": 497314.3,
+   "modes": {
+    "H-T": {
+     "have": 227894,
+     "need": 269420.3,
+     "admitted_tasks": 18,
+     "generated_tasks": 300,
+     "tokens_per_generated_task": 759.65,
+     "generated_tokens_per_task": 18282.1,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 355,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 95060,
+     "need": 402254.3,
+     "admitted_tasks": 113,
+     "generated_tasks": 1026,
+     "tokens_per_generated_task": 123.29,
+     "generated_tokens_per_task": 1656.6,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 3263,
+     "skipped_families": [
+      "primary.interactive_adaptation/s0_generators_v2_calsplit/probe_function@v1/probe.digit_sum"
+     ],
+     "unreachable": false
+    }
+   }
+  },
+  "primary.task_contained_deduction/reasoning_core": {
+   "category": "fluid",
+   "quota": 171405.1,
+   "modes": {
+    "H-T": {
+     "have": 60675,
+     "need": 110730.1,
+     "admitted_tasks": 18,
+     "generated_tasks": 177,
+     "tokens_per_generated_task": 689.49,
+     "generated_tokens_per_task": 6194.9,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 161,
+     "skipped_families": [
+      "primary.task_contained_deduction/reasoning_core/reasoning_core/logic_derivation"
+     ],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 42990,
+     "need": 128415.1,
+     "admitted_tasks": 68,
+     "generated_tasks": 606,
+     "tokens_per_generated_task": 142.35,
+     "generated_tokens_per_task": 1070.5,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 903,
+     "skipped_families": [
+      "primary.task_contained_deduction/reasoning_core/reasoning_core/logic_derivation"
+     ],
+     "unreachable": false
+    }
+   }
+  },
+  "primary.task_contained_deduction/reasoning_gym": {
+   "category": "fluid",
+   "quota": 109159.8,
+   "modes": {
+    "H-T": {
+     "have": 215699,
+     "need": 0.0,
+     "admitted_tasks": 87,
+     "generated_tasks": 171,
+     "tokens_per_generated_task": 1551.79,
+     "generated_tokens_per_task": 8046.3,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [
+      "primary.task_contained_deduction/reasoning_gym/reasoning_gym/cryptarithm"
+     ],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 134114,
+     "need": 0.0,
+     "admitted_tasks": 254,
+     "generated_tasks": 585,
+     "tokens_per_generated_task": 322.39,
+     "generated_tokens_per_task": 1666.4,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [
+      "primary.task_contained_deduction/reasoning_gym/reasoning_gym/cryptarithm",
+      "primary.task_contained_deduction/reasoning_gym/reasoning_gym/n_queens"
+     ],
+     "unreachable": false
+    }
+   }
+  },
+  "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+   "category": "fluid",
+   "quota": 452420.3,
+   "modes": {
+    "H-T": {
+     "have": 634236,
+     "need": 0.0,
+     "admitted_tasks": 330,
+     "generated_tasks": 330,
+     "tokens_per_generated_task": 1921.93,
+     "generated_tokens_per_task": 1942.3,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 498757,
+     "need": 0.0,
+     "admitted_tasks": 1060,
+     "generated_tasks": 1130,
+     "tokens_per_generated_task": 441.38,
+     "generated_tokens_per_task": 667.6,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  },
+  "supporting.code_algorithmic/mbpp_train": {
+   "category": "base_counterpart",
+   "quota": 38431.0,
+   "modes": {
+    "H-T": {
+     "have": 686702,
+     "need": 0.0,
+     "admitted_tasks": 311,
+     "generated_tasks": 372,
+     "tokens_per_generated_task": 1845.97,
+     "generated_tokens_per_task": 2920.2,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 38431,
+     "need": 0.0,
+     "admitted_tasks": 330,
+     "generated_tasks": 456,
+     "tokens_per_generated_task": 84.28,
+     "generated_tokens_per_task": 132.9,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  },
+  "supporting.code_algorithmic/reasoning_core": {
+   "category": "base_counterpart",
+   "quota": 553670.4,
+   "modes": {
+    "H-T": {
+     "have": 100666,
+     "need": 453004.4,
+     "admitted_tasks": 43,
+     "generated_tasks": 105,
+     "tokens_per_generated_task": 958.72,
+     "generated_tokens_per_task": 9309.9,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 473,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 271273,
+     "need": 282397.4,
+     "admitted_tasks": 311,
+     "generated_tasks": 867,
+     "tokens_per_generated_task": 312.89,
+     "generated_tokens_per_task": 2867.0,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 903,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  },
+  "supporting.math_gsm8k/gsm8k_train": {
+   "category": "base_counterpart",
+   "quota": 592101.4,
+   "modes": {
+    "H-T": {
+     "have": 0,
+     "need": 592101.4,
+     "admitted_tasks": 0,
+     "generated_tasks": 0,
+     "tokens_per_generated_task": 1053.15,
+     "generated_tokens_per_task": 1400,
+     "yield_basis": "planning figure (PLANNING)",
+     "planned_tasks": 563,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 0,
+     "need": 592101.4,
+     "admitted_tasks": 0,
+     "generated_tasks": 0,
+     "tokens_per_generated_task": 190.4,
+     "generated_tokens_per_task": 250,
+     "yield_basis": "planning figure (PLANNING)",
+     "planned_tasks": 3110,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  },
+  "supporting.math_new/math_train": {
+   "category": "base_counterpart",
+   "quota": 592101.4,
+   "modes": {
+    "H-T": {
+     "have": 691481,
+     "need": 0.0,
+     "admitted_tasks": 210,
+     "generated_tasks": 264,
+     "tokens_per_generated_task": 2619.25,
+     "generated_tokens_per_task": 5249.8,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 0,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 429917,
+     "need": 162184.4,
+     "admitted_tasks": 725,
+     "generated_tasks": 904,
+     "tokens_per_generated_task": 475.57,
+     "generated_tokens_per_task": 1074.2,
+     "yield_basis": "v1 records of this (mode, cell), skipped families out",
+     "planned_tasks": 342,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  },
+  "supporting.reading_verified/hotpot_qa_train": {
+   "category": "base_counterpart",
+   "quota": 592101.4,
+   "modes": {
+    "H-T": {
+     "have": 0,
+     "need": 592101.4,
+     "admitted_tasks": 0,
+     "generated_tasks": 0,
+     "tokens_per_generated_task": 379.5,
+     "generated_tokens_per_task": 600,
+     "yield_basis": "planning figure (PLANNING)",
+     "planned_tasks": 1561,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 0,
+     "need": 592101.4,
+     "admitted_tasks": 0,
+     "generated_tasks": 0,
+     "tokens_per_generated_task": 51.1,
+     "generated_tokens_per_task": 80,
+     "yield_basis": "planning figure (PLANNING)",
+     "planned_tasks": 11588,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  },
+  "supporting.reading_verified/squad_v2_train_answerable": {
+   "category": "base_counterpart",
+   "quota": 592101.4,
+   "modes": {
+    "H-T": {
+     "have": 0,
+     "need": 592101.4,
+     "admitted_tasks": 0,
+     "generated_tasks": 0,
+     "tokens_per_generated_task": 254.7,
+     "generated_tokens_per_task": 320,
+     "yield_basis": "planning figure (PLANNING)",
+     "planned_tasks": 2325,
+     "skipped_families": [],
+     "unreachable": false
+    },
+    "H-N": {
+     "have": 0,
+     "need": 592101.4,
+     "admitted_tasks": 0,
+     "generated_tasks": 0,
+     "tokens_per_generated_task": 22.1,
+     "generated_tokens_per_task": 28,
+     "yield_basis": "planning figure (PLANNING)",
+     "planned_tasks": 26792,
+     "skipped_families": [],
+     "unreachable": false
+    }
+   }
+  }
+ },
+ "planned_generated_tokens": {
+  "H-T": 14359887,
+  "H-N": 17432785
+ },
+ "_": "need = quota - the supervised tokens the frozen v1 verdict admits for the (mode, cell) in T0, E and X; planned_tasks = need / admitted tokens per generated task; the session re-sizes every round from its own records",
+ "authorizes": "nothing"
+}

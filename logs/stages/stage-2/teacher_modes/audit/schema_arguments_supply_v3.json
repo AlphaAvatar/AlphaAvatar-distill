@@ -1,0 +1,1494 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.schema_arguments_supply/v3",
+ "written_utc": "2026-11-05T13:42:28Z",
+ "pool": {
+  "id": "tool_pool@v1",
+  "content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff"
+ },
+ "supply": {
+  "calibration": {
+   "full_episode@v1": 28,
+   "source:nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 100,
+   "single_step_gold_tool_call@v1": 72
+  },
+  "reserve": {
+   "full_episode@v1": 1,
+   "source:nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 2,
+   "single_step_gold_tool_call@v1": 1
+  },
+  "state_eval": {
+   "single_step_gold_tool_call@v1": 22,
+   "source:nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 29,
+   "full_episode@v1": 7
+  },
+  "training": {
+   "single_step_gold_tool_call@v1": 1560,
+   "source:nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 1928,
+   "full_episode@v1": 368
+  },
+  "validation": {
+   "single_step_gold_tool_call@v1": 19,
+   "source:nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 24,
+   "full_episode@v1": 5
+  }
+ },
+ "modes": {
+  "H-T": {
+   "training": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 368,
+      "attempted": 24,
+      "untried": 344,
+      "candidates_generated": 44,
+      "admitted": 6,
+      "admitted_per_attempted": 0.25,
+      "wilson90": [
+       0.1352,
+       0.4155
+      ],
+      "pass_per_candidate": 0.1364,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 6,
+       "mean": 1010.3,
+       "p25": 748,
+       "median": 887,
+       "p75": 1169,
+       "max": 1884,
+       "sum": 6062
+      },
+      "turns_per_admitted": {
+       "n": 6,
+       "mean": 2.0,
+       "p25": 2,
+       "median": 2,
+       "p75": 2,
+       "max": 2,
+       "sum": 12
+      },
+      "calls_per_admitted": {
+       "n": 6,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 6
+      },
+      "token_split": {
+       "supervised": 6062,
+       "reasoning": 4994,
+       "answer": 876,
+       "tool_call": 192
+      },
+      "admitted_gold_profile": {
+       "calls": 6,
+       "arguments_per_call": 1.67,
+       "tasks_with_optional_arguments": 3,
+       "tasks_with_nested_or_array_arguments": 1,
+       "tasks_with_enum_arguments": 4,
+       "tasks_with_numeric_arguments": 1,
+       "max_depth_histogram": {
+        "1": 5,
+        "2": 1
+       }
+      },
+      "admitted_environments": 4,
+      "admitted_subsets": {
+       "turn1": 6
+      },
+      "untried_reach_projection": {
+       "low": 46988,
+       "expected": 86889,
+       "high": 144395
+      }
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 1560,
+      "attempted": 100,
+      "untried": 1460,
+      "candidates_generated": 176,
+      "admitted": 31,
+      "admitted_per_attempted": 0.31,
+      "wilson90": [
+       0.2398,
+       0.3902
+      ],
+      "pass_per_candidate": 0.1761,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 31,
+       "mean": 702.4,
+       "p25": 345,
+       "median": 477,
+       "p75": 1013,
+       "max": 2531,
+       "sum": 21775
+      },
+      "turns_per_admitted": {
+       "n": 31,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 31
+      },
+      "calls_per_admitted": {
+       "n": 31,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 31
+      },
+      "token_split": {
+       "supervised": 21775,
+       "reasoning": 20595,
+       "answer": 62,
+       "tool_call": 1118
+      },
+      "admitted_gold_profile": {
+       "calls": 31,
+       "arguments_per_call": 2.0,
+       "tasks_with_optional_arguments": 15,
+       "tasks_with_nested_or_array_arguments": 7,
+       "tasks_with_enum_arguments": 21,
+       "tasks_with_numeric_arguments": 5,
+       "max_depth_histogram": {
+        "1": 24,
+        "2": 7
+       }
+      },
+      "admitted_environments": 18,
+      "admitted_subsets": {
+       "turn1-step1": 31
+      },
+      "untried_reach_projection": {
+       "low": 245896,
+       "expected": 317915,
+       "high": 400200
+      }
+     }
+    },
+    "admitted_units": 27837,
+    "target": 74012.6745,
+    "gap": 46175.7
+   },
+   "validation": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 5,
+      "attempted": 0,
+      "untried": 5,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 19,
+      "attempted": 0,
+      "untried": 19,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     }
+    },
+    "admitted_units": 0,
+    "target": null,
+    "gap": null
+   },
+   "calibration": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 28,
+      "attempted": 28,
+      "untried": 0,
+      "candidates_generated": 54,
+      "admitted": 2,
+      "admitted_per_attempted": 0.0714,
+      "wilson90": [
+       0.0239,
+       0.1945
+      ],
+      "pass_per_candidate": 0.037,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 2,
+       "mean": 2607.5,
+       "p25": 2494,
+       "median": 2721,
+       "p75": 2721,
+       "max": 2721,
+       "sum": 5215
+      },
+      "turns_per_admitted": {
+       "n": 2,
+       "mean": 2.0,
+       "p25": 2,
+       "median": 2,
+       "p75": 2,
+       "max": 2,
+       "sum": 4
+      },
+      "calls_per_admitted": {
+       "n": 2,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 2
+      },
+      "admitted_gold_profile": {
+       "calls": 2,
+       "arguments_per_call": 2.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 2,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {
+        "1": 2
+       }
+      },
+      "admitted_environments": 1,
+      "admitted_subsets": {
+       "turn1": 2
+      }
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 72,
+      "attempted": 72,
+      "untried": 0,
+      "candidates_generated": 126,
+      "admitted": 20,
+      "admitted_per_attempted": 0.2778,
+      "wilson90": [
+       0.2002,
+       0.3714
+      ],
+      "pass_per_candidate": 0.1587,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 20,
+       "mean": 946.8,
+       "p25": 369,
+       "median": 717,
+       "p75": 1659,
+       "max": 2411,
+       "sum": 18935
+      },
+      "turns_per_admitted": {
+       "n": 20,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 20
+      },
+      "calls_per_admitted": {
+       "n": 20,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 20
+      },
+      "admitted_gold_profile": {
+       "calls": 20,
+       "arguments_per_call": 2.0,
+       "tasks_with_optional_arguments": 6,
+       "tasks_with_nested_or_array_arguments": 5,
+       "tasks_with_enum_arguments": 13,
+       "tasks_with_numeric_arguments": 1,
+       "max_depth_histogram": {
+        "1": 15,
+        "2": 5
+       }
+      },
+      "admitted_environments": 2,
+      "admitted_subsets": {
+       "turn1-step1": 20
+      }
+     }
+    },
+    "admitted_units": 24150,
+    "target": 630.0,
+    "gap": 0.0
+   },
+   "state_eval": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 7,
+      "attempted": 7,
+      "untried": 0,
+      "candidates_generated": 12,
+      "admitted": 2,
+      "admitted_per_attempted": 0.2857,
+      "wilson90": [
+       0.0996,
+       0.5913
+      ],
+      "pass_per_candidate": 0.1667,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 2,
+       "mean": 723.5,
+       "p25": 599,
+       "median": 848,
+       "p75": 848,
+       "max": 848,
+       "sum": 1447
+      },
+      "turns_per_admitted": {
+       "n": 2,
+       "mean": 2.0,
+       "p25": 2,
+       "median": 2,
+       "p75": 2,
+       "max": 2,
+       "sum": 4
+      },
+      "calls_per_admitted": {
+       "n": 2,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 2
+      },
+      "admitted_gold_profile": {
+       "calls": 2,
+       "arguments_per_call": 2.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 2,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {
+        "1": 2
+       }
+      },
+      "admitted_environments": 2,
+      "admitted_subsets": {
+       "turn1": 2
+      }
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 22,
+      "attempted": 22,
+      "untried": 0,
+      "candidates_generated": 35,
+      "admitted": 9,
+      "admitted_per_attempted": 0.4091,
+      "wilson90": [
+       0.256,
+       0.5821
+      ],
+      "pass_per_candidate": 0.2571,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 9,
+       "mean": 309.9,
+       "p25": 175,
+       "median": 358,
+       "p75": 402,
+       "max": 470,
+       "sum": 2789
+      },
+      "turns_per_admitted": {
+       "n": 9,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 9
+      },
+      "calls_per_admitted": {
+       "n": 9,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 9
+      },
+      "admitted_gold_profile": {
+       "calls": 9,
+       "arguments_per_call": 1.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 9,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {
+        "1": 9
+       }
+      },
+      "admitted_environments": 1,
+      "admitted_subsets": {
+       "turn1-step1": 9
+      }
+     }
+    },
+    "admitted_units": 4236,
+    "target": 1800.0,
+    "gap": 0.0
+   },
+   "reserve": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 1,
+      "attempted": 0,
+      "untried": 1,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 1,
+      "attempted": 0,
+      "untried": 1,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     }
+    },
+    "admitted_units": 0,
+    "target": null,
+    "gap": null
+   }
+  },
+  "H-N": {
+   "training": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 368,
+      "attempted": 368,
+      "untried": 0,
+      "candidates_generated": 684,
+      "admitted": 55,
+      "admitted_per_attempted": 0.1495,
+      "wilson90": [
+       0.1214,
+       0.1826
+      ],
+      "pass_per_candidate": 0.0804,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 55,
+       "mean": 146.6,
+       "p25": 108,
+       "median": 132,
+       "p75": 167,
+       "max": 309,
+       "sum": 8064
+      },
+      "turns_per_admitted": {
+       "n": 55,
+       "mean": 2.0,
+       "p25": 2,
+       "median": 2,
+       "p75": 2,
+       "max": 2,
+       "sum": 110
+      },
+      "calls_per_admitted": {
+       "n": 55,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 54
+      },
+      "token_split": {
+       "supervised": 8064,
+       "reasoning": 0,
+       "answer": 5994,
+       "tool_call": 2070
+      },
+      "admitted_gold_profile": {
+       "calls": 55,
+       "arguments_per_call": 2.05,
+       "tasks_with_optional_arguments": 23,
+       "tasks_with_nested_or_array_arguments": 16,
+       "tasks_with_enum_arguments": 30,
+       "tasks_with_numeric_arguments": 10,
+       "max_depth_histogram": {
+        "1": 39,
+        "2": 14,
+        "3": 2
+       }
+      },
+      "admitted_environments": 19,
+      "admitted_subsets": {
+       "turn1": 55
+      }
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 1560,
+      "attempted": 1560,
+      "untried": 0,
+      "candidates_generated": 2883,
+      "admitted": 248,
+      "admitted_per_attempted": 0.159,
+      "wilson90": [
+       0.1443,
+       0.1748
+      ],
+      "pass_per_candidate": 0.086,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 248,
+       "mean": 37.2,
+       "p25": 29,
+       "median": 36,
+       "p75": 43,
+       "max": 109,
+       "sum": 9226
+      },
+      "turns_per_admitted": {
+       "n": 248,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 248
+      },
+      "calls_per_admitted": {
+       "n": 248,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 248
+      },
+      "token_split": {
+       "supervised": 9226,
+       "reasoning": 0,
+       "answer": 494,
+       "tool_call": 8732
+      },
+      "admitted_gold_profile": {
+       "calls": 248,
+       "arguments_per_call": 1.98,
+       "tasks_with_optional_arguments": 120,
+       "tasks_with_nested_or_array_arguments": 48,
+       "tasks_with_enum_arguments": 147,
+       "tasks_with_numeric_arguments": 49,
+       "max_depth_histogram": {
+        "1": 200,
+        "2": 42,
+        "3": 6
+       }
+      },
+      "admitted_environments": 55,
+      "admitted_subsets": {
+       "turn1-step1": 248
+      }
+     }
+    },
+    "admitted_units": 17290,
+    "target": 74012.6745,
+    "gap": 56722.7
+   },
+   "validation": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 5,
+      "attempted": 0,
+      "untried": 5,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 19,
+      "attempted": 0,
+      "untried": 19,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     }
+    },
+    "admitted_units": 0,
+    "target": null,
+    "gap": null
+   },
+   "calibration": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 28,
+      "attempted": 28,
+      "untried": 0,
+      "candidates_generated": 55,
+      "admitted": 1,
+      "admitted_per_attempted": 0.0357,
+      "wilson90": [
+       0.008,
+       0.1452
+      ],
+      "pass_per_candidate": 0.0182,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 1,
+       "mean": 202.0,
+       "p25": 202,
+       "median": 202,
+       "p75": 202,
+       "max": 202,
+       "sum": 202
+      },
+      "turns_per_admitted": {
+       "n": 1,
+       "mean": 2.0,
+       "p25": 2,
+       "median": 2,
+       "p75": 2,
+       "max": 2,
+       "sum": 2
+      },
+      "calls_per_admitted": {
+       "n": 1,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 1
+      },
+      "admitted_gold_profile": {
+       "calls": 1,
+       "arguments_per_call": 2.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {
+        "1": 1
+       }
+      },
+      "admitted_environments": 1,
+      "admitted_subsets": {
+       "turn1": 1
+      }
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 72,
+      "attempted": 72,
+      "untried": 0,
+      "candidates_generated": 131,
+      "admitted": 13,
+      "admitted_per_attempted": 0.1806,
+      "wilson90": [
+       0.118,
+       0.2662
+      ],
+      "pass_per_candidate": 0.0992,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 13,
+       "mean": 43.8,
+       "p25": 40,
+       "median": 42,
+       "p75": 49,
+       "max": 61,
+       "sum": 570
+      },
+      "turns_per_admitted": {
+       "n": 13,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 13
+      },
+      "calls_per_admitted": {
+       "n": 13,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 13
+      },
+      "admitted_gold_profile": {
+       "calls": 13,
+       "arguments_per_call": 2.15,
+       "tasks_with_optional_arguments": 4,
+       "tasks_with_nested_or_array_arguments": 6,
+       "tasks_with_enum_arguments": 6,
+       "tasks_with_numeric_arguments": 1,
+       "max_depth_histogram": {
+        "1": 7,
+        "2": 6
+       }
+      },
+      "admitted_environments": 2,
+      "admitted_subsets": {
+       "turn1-step1": 13
+      }
+     }
+    },
+    "admitted_units": 772,
+    "target": 630.0,
+    "gap": 0.0
+   },
+   "state_eval": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 7,
+      "attempted": 7,
+      "untried": 0,
+      "candidates_generated": 10,
+      "admitted": 4,
+      "admitted_per_attempted": 0.5714,
+      "wilson90": [
+       0.2895,
+       0.8136
+      ],
+      "pass_per_candidate": 0.4,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 4,
+       "mean": 209.2,
+       "p25": 161,
+       "median": 163,
+       "p75": 163,
+       "max": 388,
+       "sum": 837
+      },
+      "turns_per_admitted": {
+       "n": 4,
+       "mean": 2.0,
+       "p25": 2,
+       "median": 2,
+       "p75": 2,
+       "max": 2,
+       "sum": 8
+      },
+      "calls_per_admitted": {
+       "n": 4,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 4
+      },
+      "admitted_gold_profile": {
+       "calls": 4,
+       "arguments_per_call": 1.75,
+       "tasks_with_optional_arguments": 1,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 3,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {
+        "1": 4
+       }
+      },
+      "admitted_environments": 2,
+      "admitted_subsets": {
+       "turn1": 4
+      }
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 22,
+      "attempted": 22,
+      "untried": 0,
+      "candidates_generated": 40,
+      "admitted": 7,
+      "admitted_per_attempted": 0.3182,
+      "wilson90": [
+       0.1827,
+       0.4935
+      ],
+      "pass_per_candidate": 0.175,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 7,
+       "mean": 32.3,
+       "p25": 25,
+       "median": 25,
+       "p75": 40,
+       "max": 56,
+       "sum": 226
+      },
+      "turns_per_admitted": {
+       "n": 7,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 7
+      },
+      "calls_per_admitted": {
+       "n": 7,
+       "mean": 0.9,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 6
+      },
+      "admitted_gold_profile": {
+       "calls": 7,
+       "arguments_per_call": 1.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 7,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {
+        "1": 7
+       }
+      },
+      "admitted_environments": 1,
+      "admitted_subsets": {
+       "turn1-step1": 7
+      }
+     }
+    },
+    "admitted_units": 1063,
+    "target": 1800.0,
+    "gap": 737.0
+   },
+   "reserve": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 1,
+      "attempted": 0,
+      "untried": 1,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 1,
+      "attempted": 0,
+      "untried": 1,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     }
+    },
+    "admitted_units": 0,
+    "target": null,
+    "gap": null
+   }
+  },
+  "T2507": {
+   "training": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 368,
+      "attempted": 136,
+      "untried": 232,
+      "candidates_generated": 245,
+      "admitted": 39,
+      "admitted_per_attempted": 0.2868,
+      "wilson90": [
+       0.2276,
+       0.3542
+      ],
+      "pass_per_candidate": 0.1592,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 39,
+       "mean": 1927.0,
+       "p25": 1210,
+       "median": 1875,
+       "p75": 2498,
+       "max": 4100,
+       "sum": 75152
+      },
+      "turns_per_admitted": {
+       "n": 39,
+       "mean": 2.0,
+       "p25": 2,
+       "median": 2,
+       "p75": 2,
+       "max": 2,
+       "sum": 78
+      },
+      "calls_per_admitted": {
+       "n": 39,
+       "mean": 1.0,
+       "p25": 1,
+       "median": 1,
+       "p75": 1,
+       "max": 1,
+       "sum": 39
+      },
+      "token_split": {
+       "supervised": 75152,
+       "reasoning": 69393,
+       "answer": 4263,
+       "tool_call": 1496
+      },
+      "admitted_gold_profile": {
+       "calls": 39,
+       "arguments_per_call": 2.13,
+       "tasks_with_optional_arguments": 21,
+       "tasks_with_nested_or_array_arguments": 12,
+       "tasks_with_enum_arguments": 21,
+       "tasks_with_numeric_arguments": 7,
+       "max_depth_histogram": {
+        "1": 27,
+        "2": 12
+       }
+      },
+      "admitted_environments": 14,
+      "admitted_subsets": {
+       "turn1": 39
+      },
+      "untried_reach_projection": {
+       "low": 101761,
+       "expected": 128200,
+       "high": 158358
+      }
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 1560,
+      "attempted": 0,
+      "untried": 1560,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     }
+    },
+    "admitted_units": 75152,
+    "target": 73888.05,
+    "gap": 0.0
+   },
+   "validation": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 5,
+      "attempted": 0,
+      "untried": 5,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 19,
+      "attempted": 0,
+      "untried": 19,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     }
+    },
+    "admitted_units": 0,
+    "target": null,
+    "gap": null
+   },
+   "calibration": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 28,
+      "attempted": 0,
+      "untried": 28,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 72,
+      "attempted": 0,
+      "untried": 72,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     }
+    },
+    "admitted_units": 0,
+    "target": null,
+    "gap": null
+   },
+   "state_eval": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 7,
+      "attempted": 0,
+      "untried": 7,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 22,
+      "attempted": 0,
+      "untried": 22,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "scored_positions",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     }
+    },
+    "admitted_units": 0,
+    "target": null,
+    "gap": null
+   },
+   "reserve": {
+    "by_shape": {
+     "full_episode@v1": {
+      "supply": 1,
+      "attempted": 0,
+      "untried": 1,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     },
+     "single_step_gold_tool_call@v1": {
+      "supply": 1,
+      "attempted": 0,
+      "untried": 1,
+      "candidates_generated": 0,
+      "admitted": 0,
+      "admitted_per_attempted": null,
+      "wilson90": null,
+      "pass_per_candidate": null,
+      "units": "supervised",
+      "units_per_admitted": {
+       "n": 0
+      },
+      "turns_per_admitted": {
+       "n": 0
+      },
+      "calls_per_admitted": {
+       "n": 0
+      },
+      "token_split": {},
+      "admitted_gold_profile": {
+       "calls": 0,
+       "arguments_per_call": 0.0,
+       "tasks_with_optional_arguments": 0,
+       "tasks_with_nested_or_array_arguments": 0,
+       "tasks_with_enum_arguments": 0,
+       "tasks_with_numeric_arguments": 0,
+       "max_depth_histogram": {}
+      },
+      "admitted_environments": 0,
+      "admitted_subsets": {}
+     }
+    },
+    "admitted_units": 0,
+    "target": null,
+    "gap": null
+   }
+  }
+ },
+ "overlap_training_admitted": {
+  "H-T&H-N": {
+   "both": 18,
+   "H-T": 37,
+   "H-N": 303
+  },
+  "H-T&T2507": {
+   "both": 6,
+   "H-T": 37,
+   "T2507": 39
+  },
+  "H-N&T2507": {
+   "both": 14,
+   "H-N": 303,
+   "T2507": 39
+  }
+ },
+ "authorizes": "nothing",
+ "attempted_training_tasks": {
+  "H-N": 1928,
+  "H-T": 124,
+  "T2507": 136
+ },
+ "attempted_training_in_common": 24
+}

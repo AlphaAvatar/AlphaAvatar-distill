@@ -1,0 +1,329 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.mixed_freeze/v1",
+ "study_id": "six_category_schema_restored@v1",
+ "written_utc": "2026-11-09T10:15:09Z",
+ "decided_by": "maintainer 2026-11-09 (UTC), 'Research A 新增 Hybrid Mixed Stage 3 与 Checkpoint 精简', sections I-II",
+ "source_freeze_record": {
+  "path": "logs/stages/stage-2/teacher_modes/audit/six_category_schema_restored_freeze.json",
+  "sha256": "9e6262b78832b0c75d2a4c0032d1a5f411b23154c1faf9572e96ddd19cd1187b"
+ },
+ "isolation_record": {
+  "path": "logs/stages/stage-2/teacher_modes/audit/mixed_6cat_sr_isolation.json",
+  "sha256": "796c3b58867e1835116d8bec5c5216e22bc414ba1dd3e6adc3a1f03e5f8b010b"
+ },
+ "arms": {
+  "A-MIX-6cat-sr": {
+   "arm": "A-MIX-6cat-sr",
+   "modes": [
+    "thinking",
+    "non_thinking"
+   ],
+   "teacher": {
+    "lineage": "hybrid",
+    "model": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+   },
+   "status": "FROZEN",
+   "identity": {
+    "data_manifest_sha256": "cd4375785428399831204f562cc1cfef0d6d7b366557b496afc248f0e4da46fd",
+    "content_sha256": "11c9faf34a8f6260591a87745de5f90dbf19427933922fee40f0945d7a261c56",
+    "documents_sha256": "e594fd5bf25d4f41564d89406b4ebc8cd2e6630b245b580df30885c6aed8fad6",
+    "documents_file": {
+     "name": "data_documents.npz",
+     "sha256": "20b67f90a542e68d6210b554babcb94eae141c848a85d4e4234f961ba2f13c78",
+     "arrays": [
+      "training_ids",
+      "training_mask",
+      "training_offsets",
+      "validation_ids",
+      "validation_mask",
+      "validation_offsets"
+     ],
+     "order": "per split, the manifest's document rows in order"
+    },
+    "packed_content_sha256": "9cbb502b270bb1d4da67f2a58538826fdee650e0c8547045809ea03da80b5206",
+    "pack_files_sha256": {
+     "blocks.npz": "4c794692a1d6072ced81c2192aa3493b14dab9a6904132a44645c93107cdbfee",
+     "ladder.json": "aaa6fcb0b708f7665c4e7b4f9c8fe94666f024425075984ecf90250b735d0519",
+     "audit.jsonl": "63ad3c7fbc8dd2ca2ee4992565f4f85f79184487dea15c512f41a9d40fb0b598"
+    }
+   },
+   "sources": {
+    "A1-6cat-sr": {
+     "mode": "thinking",
+     "mode_code": "H-T",
+     "think_state": "self_opening",
+     "template": {
+      "enable_thinking": true
+     },
+     "manifest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A1-6cat-sr/data_manifest.json",
+     "manifest_sha256": "8595c24841612c088ff400725f68d3ae1f8cc4c9b25f7d12976d4f67f6686209",
+     "content_sha256": "37d1c68fc68d925429ab8241381a04f517053254b503a6c38499ee6e61b4e4c6",
+     "documents_file_sha256": "69d00163b93f69e4804a5934cf2bbd0a26716cfd699596a38af5358fef2a1f7f"
+    },
+    "A2-6cat-sr": {
+     "mode": "non_thinking",
+     "mode_code": "H-N",
+     "think_state": "preclosed",
+     "template": {
+      "enable_thinking": false
+     },
+     "manifest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A2-6cat-sr/data_manifest.json",
+     "manifest_sha256": "d6f1fd7ec320945a134609e5cb35d312f404b4f38ee5d61ebcfe303d7bad3787",
+     "content_sha256": "28eb51a79244b32c1d17efaa2ffead78ac04ec0cf2c7aff9fe62c076c344e39e",
+     "documents_file_sha256": "5a1f5de2a66fe8674b5bc25ab3a2bb7cea4cb67354d22f2713c38eb5e93867d5"
+    }
+   },
+   "before_packing": {
+    "training": {
+     "examples": 45363,
+     "documents": 56408,
+     "unique_supervised_tokens": 11862564,
+     "reasoning_tokens": 4945744,
+     "answer_tokens": 6916820,
+     "tool_calling_tokens": 995341,
+     "by_mode": {
+      "thinking": {
+       "examples": 5612,
+       "documents": 6243,
+       "unique_supervised_tokens": 5935809,
+       "reasoning_tokens": 4945744,
+       "answer_tokens": 990065,
+       "tool_calling_tokens": 498897
+      },
+      "non_thinking": {
+       "examples": 44731,
+       "documents": 50165,
+       "unique_supervised_tokens": 5926755,
+       "reasoning_tokens": 0,
+       "answer_tokens": 5926755,
+       "tool_calling_tokens": 496444
+      }
+     }
+    },
+    "validation": {
+     "examples": 234,
+     "documents": 371,
+     "unique_supervised_tokens": 200598,
+     "reasoning_tokens": 110251,
+     "answer_tokens": 90347,
+     "tool_calling_tokens": 33852,
+     "by_mode": {
+      "thinking": {
+       "examples": 109,
+       "documents": 120,
+       "unique_supervised_tokens": 135822,
+       "reasoning_tokens": 110251,
+       "answer_tokens": 25571,
+       "tool_calling_tokens": 24198
+      },
+      "non_thinking": {
+       "examples": 218,
+       "documents": 251,
+       "unique_supervised_tokens": 64776,
+       "reasoning_tokens": 0,
+       "answer_tokens": 64776,
+       "tool_calling_tokens": 9654
+      }
+     }
+    }
+   },
+   "proportions": {
+    "counted": "unique supervised tokens before packing",
+    "mode_shares": {
+     "thinking": 0.500382,
+     "non_thinking": 0.499618
+    },
+    "by_mode": {
+     "thinking": {
+      "report_sha256": "640a6eaadf17e5a15df1cf6cc006776ba330e7be2805e136fbc951cbb71d3370",
+      "passed": true,
+      "six_types_and_fluid": {
+       "gsm8k": 492622,
+       "code": 494656,
+       "fluid": 2969695,
+       "competition_math": 495452,
+       "tool_calling": 498897,
+       "rag_reading": 492038,
+       "multihop_reading": 492449
+      },
+      "by_data_type": {
+       "primary.abstract_analogical": 366150,
+       "primary.compositional_generalization": 633858,
+       "primary.inductive_rule_discovery": 725310,
+       "primary.interactive_adaptation": 514586,
+       "primary.task_contained_deduction": 729791,
+       "supporting.code_algorithmic": 494656,
+       "supporting.math_gsm8k": 492622,
+       "supporting.math_new": 495452,
+       "supporting.reading_verified": 984487,
+       "supporting.tool_calling": 498897
+      }
+     },
+     "non_thinking": {
+      "report_sha256": "c482d1cdd753806792aed984a3060a29a9655086959bbf7242231e425b718c26",
+      "passed": true,
+      "six_types_and_fluid": {
+       "fluid": 2963139,
+       "gsm8k": 493495,
+       "code": 493701,
+       "competition_math": 493404,
+       "tool_calling": 496444,
+       "rag_reading": 493276,
+       "multihop_reading": 493296
+      },
+      "by_data_type": {
+       "primary.abstract_analogical": 365686,
+       "primary.compositional_generalization": 636331,
+       "primary.inductive_rule_discovery": 729532,
+       "primary.interactive_adaptation": 497683,
+       "primary.task_contained_deduction": 733907,
+       "supporting.code_algorithmic": 493701,
+       "supporting.math_gsm8k": 493495,
+       "supporting.math_new": 493404,
+       "supporting.reading_verified": 986572,
+       "supporting.tool_calling": 496444
+      }
+     }
+    },
+    "rule": "each mode keeps its own admitted selection and proportion report unchanged; the mixed set adds, removes, copies and re-weights nothing",
+    "by_data_type_total": {
+     "primary.abstract_analogical": 731836,
+     "primary.compositional_generalization": 1270189,
+     "primary.inductive_rule_discovery": 1454842,
+     "primary.interactive_adaptation": 1012269,
+     "primary.task_contained_deduction": 1463698,
+     "supporting.code_algorithmic": 988357,
+     "supporting.math_gsm8k": 986117,
+     "supporting.math_new": 988856,
+     "supporting.reading_verified": 1971059,
+     "supporting.tool_calling": 995341
+    }
+   },
+   "think_states": {
+    "A1-6cat-sr/training": {
+     "declared": "self_opening",
+     "spans": 6243,
+     "by_state": {
+      "self_opening": 6243
+     },
+     "all_declared": true
+    },
+    "A1-6cat-sr/validation": {
+     "declared": "self_opening",
+     "spans": 120,
+     "by_state": {
+      "self_opening": 120
+     },
+     "all_declared": true
+    },
+    "A2-6cat-sr/training": {
+     "declared": "preclosed",
+     "spans": 50165,
+     "by_state": {
+      "preclosed": 50165
+     },
+     "all_declared": true
+    },
+    "A2-6cat-sr/validation": {
+     "declared": "preclosed",
+     "spans": 251,
+     "by_state": {
+      "preclosed": 251
+     },
+     "all_declared": true
+    }
+   },
+   "packing": {
+    "spec": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1",
+     "sequence_length": 8192,
+     "shuffle_seed": 20261106
+    },
+    "train": {
+     "strategy": "sequential_causal",
+     "sequences": 6467,
+     "sequence_length": 8192,
+     "documents": 56408,
+     "refused": 0,
+     "non_padding_tokens": 52977465,
+     "supervised_tokens": 13153399,
+     "context_tokens": 39824066,
+     "padding_fraction": 4e-06,
+     "placements": 62865,
+     "fragments": 6457,
+     "unique_tokens": 47590335,
+     "unique_supervised_tokens": 11862564,
+     "repeated_tokens": 5387130,
+     "repeated_supervised_tokens": 1290835,
+     "truncated_tokens": 0,
+     "truncated_supervised_tokens": 0
+    },
+    "validation": {
+     "strategy": "sequential_causal",
+     "sequences": 64,
+     "sequence_length": 8192,
+     "documents": 371,
+     "refused": 0,
+     "non_padding_tokens": 520736,
+     "supervised_tokens": 224682,
+     "context_tokens": 296054,
+     "padding_fraction": 0.006775,
+     "placements": 434,
+     "fragments": 63,
+     "unique_tokens": 450991,
+     "unique_supervised_tokens": 200598,
+     "repeated_tokens": 69745,
+     "repeated_supervised_tokens": 24084,
+     "truncated_tokens": 0,
+     "truncated_supervised_tokens": 0
+    },
+    "by_mode": {
+     "by_mode": {
+      "thinking": {
+       "placements": 7594,
+       "fragments": 1351,
+       "supervised_tokens_placed": 6998756,
+       "sequences_holding_it": 4782,
+       "repeated_supervised_tokens": 1062947,
+       "supervised_token_exposure_3_epochs": 20996268
+      },
+      "non_thinking": {
+       "placements": 55271,
+       "fragments": 5106,
+       "supervised_tokens_placed": 6154643,
+       "sequences_holding_it": 6454,
+       "repeated_supervised_tokens": 227888,
+       "supervised_token_exposure_3_epochs": 18463929
+      }
+     },
+     "sequences_with_both_modes": 4769
+    }
+   },
+   "compute": {
+    "packed_sequences": 6467,
+    "validation_sequences": 64,
+    "optimizer_steps": 9701,
+    "non_padding_tokens": 52977465,
+    "supervised_tokens_in_sequences": 13153399,
+    "supervised_token_exposure": 39460197,
+    "training_flops_ratio": {
+     "over_A1-6cat-sr": 4.5224,
+     "over_A2-6cat-sr": 1.2814,
+     "over_A1_plus_A2": 0.9985,
+     "rule": "every packed sequence is 8,192 positions with standard causal attention, so training FLOPs scale with packed sequences x epochs (the same student, teacher and objective)"
+    }
+   }
+  }
+ },
+ "comparison": {
+  "with_A1": "the same thinking documents, plus A2's non-thinking ones: unique supervised tokens ~2.0x, packed sequences and training FLOPs as `compute.training_flops_ratio`",
+  "with_A2": "the same non-thinking documents, plus A1's thinking ones",
+  "reading": "a mixed-minus-single difference confounds mode mixing with about twice the unique data and a different compute and exposure; it is descriptive, never a pure mixing effect"
+ },
+ "authorizes": "nothing: training needs its own decision"
+}

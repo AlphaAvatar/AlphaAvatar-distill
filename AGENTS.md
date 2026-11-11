@@ -789,6 +789,14 @@ authorized identities; `data/eval-set/README.md` is the contract.
   tool use, interaction and rollout integrity are reported beside them, each on
   its own. No pooled score across units or capabilities is defined, and none is
   invented in a report.
+* **A benchmark's metric is the benchmark's** (maintainer 2026-11-04). An accuracy,
+  pass rate, task success, pass@k or pass^k of a public benchmark (BFCL, τ-bench /
+  τ²-bench, AgentBench, GAIA, ARC-AGI, …) uses that benchmark's dataset, interface,
+  scorer, aggregation, attempt budget and version; an agent never chooses its
+  meaning, numerator or denominator. Internal metrics (data admission yields,
+  verifier levels, usable rollout, registered composites, state-evaluation KL) are
+  reported under their own names and never as a benchmark score.
+  `docs/shared/METRIC_CONTRACT.md` defines each one.
 * **Unsupported is not zero.** A unit a model's modality or interface cannot take
   is reported `unsupported`; a withheld unit without its verified copy is
   `withheld`; an unrun one `not_run`. None is dropped silently or scored zero.
@@ -1175,6 +1183,21 @@ Short fixed-compute runs are **diagnostics** unless convergence evidence
 demonstrates sufficient data coverage and optimization. A short-run failure MUST
 NOT by itself reject the teacher-aligned route.
 
+### P17.1. One teacher lineage per student
+
+**MAINTAINER DECISION 2026-11-04.** A student is initialized directly from its
+own teacher, and everything that later trains it belongs to that same teacher
+lineage: offline SFT and KD targets, the online KD teacher, the tokenizer, the
+chat template and the model configuration. Initializing a student from
+teacher A and then distilling or training it with teacher B is forbidden.
+
+A lineage is one teacher checkpoint identity (repository and revision) and
+what is derived from it: calibration, search, initialization, generated data,
+online KD teacher and checkpoints. The same model family or the same
+architecture is NOT the same lineage. Each experiment records its lineage's
+identities and compatibility requirements in its configuration and manifests;
+`src/aadistill` names no teacher (P3).
+
 ### P18. Unrestricted generation during model measurement
 
 Formal model measurement MUST NOT impose an artificial reasoning-token or
@@ -1222,6 +1245,55 @@ Realtime behaviour MUST be achieved through student scale, architecture,
 distillation, numerical format, quantization, operators, kernels, target
 hardware and deployment-runtime optimization — not by truncating or changing the
 intended model behaviour during model-quality measurement.
+
+### P19. Packing and attention by stage
+
+**MAINTAINER DECISION 2026-11-03.** How examples are composed into sequences is
+part of what a measurement or a training run IS, so it is decided per stage and
+never changed as a performance optimization.
+
+| stage | context |
+| --- | --- |
+| Stage 1 search forwards (calibration statistics, DEPTH causal KL, teacher reference, candidates, state evaluation) | random shuffle → sequential packing → truncation → standard causal attention |
+| Stage 3 recovery / SFT / KD training | the same |
+| Stage 0 | not packed by rule; data a Stage-1 forward consumes is read under Stage 1's rule |
+| Stage 2 | prepares teacher-native data; builds Stage 3's packed training set |
+| Stage 4 / 5 rollout and on-policy training, Stage 6 deployment | the real context, fixed BEFORE generation; standard causal attention; rollouts are batched (padding), never packed together or re-composed after generation |
+
+The packing is the maintainer's reference algorithm
+(`aadistill.data.sequence_packing.packing_conversation`, `truncate=True`) over a
+seeded shuffle of stable ids: no best fit, no length sorting or bucketing, no
+skipping ahead. Every placement is a prefix of its example; an example that does
+not fit the room left fills it with its first tokens (a fragment, trained and
+scored like any placement and counted as repeated exposure) and is read again
+from its first token in the next sequence. Position ids run continuously over
+the packed sequence; there is no block-diagonal mask and no per-example reset.
+Padding appears only at the end of the last sequence.
+
+* The packing (rules, sequence length, seed) is SCIENTIFIC identity: it enters
+  hashed operator configs, measurement protocol ids and data identities.
+  `document_isolated` and best-fit packers stay only so historical packs remain
+  readable; no new experiment uses them.
+* Sequence length and seed are each experiment's configuration, never core
+  constants (P3).
+* Report a packed data set's three layers apart: the selected data before
+  packing (unique supervised tokens), what the sequences train on (repeated,
+  truncated and padding tokens, supervised-token exposure), and the loss
+  weighting.
+* **Fragments are accepted as specified** (maintainer 2026-11-03): a
+  fragment's supervised and scored positions count in CE/KD and KL like any
+  other placement. No context-only mask, no extra supervision mask, no loss
+  re-weighting. The new contexts and repeated scoring packing creates are part
+  of the measurement identity, not a defect to correct.
+* **Formal data volumes and proportions are counted BEFORE packing**
+  (maintainer 2026-11-03): examples and turns; unique supervised tokens,
+  split into reasoning, answer and tool-calling tokens; fluid : supporting
+  50:50 and each supporting type's share; calibration and state-evaluation
+  unique scored positions, their domain / subtype / mode quotas and critical-
+  token counts. Packed sequences, non-padding, repeated, truncated and padding
+  tokens and supervised-token exposure are recorded as packing, compute and
+  exposure measures only. They never redefine a data set's size or its
+  proportions, and no loss weight corrects a quota.
 
 ---
 

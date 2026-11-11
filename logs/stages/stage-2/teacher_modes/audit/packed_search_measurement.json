@@ -1,0 +1,185 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.packed_search_measurement/v1",
+ "written_utc": "2026-11-06T22:45:00Z",
+ "run": "a_packed_search_20261105_195011",
+ "search_run_id": "research_a_packed_hybrid_full_search",
+ "status": "COMPLETE",
+ "identity": {
+  "config_hash": "457d5adbe0696631a168c038afd14122d49d6c0fd1ca363115a27b99d026fea5",
+  "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+  "suite": "state_eval_hybrid@v3 c39d0ec9a38175a8ec0b279afd54094299b9ce83260196fcbb6ae25a8c303c99",
+  "profiles": {
+   "calib.hybrid_d4_base@v2": "d835fad13756d21cf5a2e5cc66c7c9b7badbf251133aa13c53ab033056b2fb45",
+   "calib.hybrid_d4_rh@v2": "6a20196d550d0f1c7570faf5b84366fb0e5e1404fa6b82cc40c24129b1efa590"
+  },
+  "root_teacher": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "forward_context": {
+   "packing": "sequential_truncate_v1",
+   "truncate": true,
+   "materialization": "prefix_restart_v1",
+   "shuffle": "sha256_keyed_v1",
+   "attention": "causal_continuous_positions_v1",
+   "sequence_length": 8192,
+   "shuffle_seed": 20261105
+  },
+  "selection_sha256": "728a1119348b3b41921991c47f2050bcef76388752ecb5179e06a55507e52c88",
+  "policy": "beam.pareto_multi_objective@v2"
+ },
+ "beam": {
+  "expansions": 92,
+  "states": 93,
+  "complete_leaves": 12,
+  "resumed": 0,
+  "by_operator_family": {
+   "attention": 30,
+   "depth": 16,
+   "ffn": 16,
+   "width": 30
+  },
+  "first_evaluation_check": {
+   "passes": true,
+   "repeats": 10,
+   "measured_range": 0.0,
+   "declared_epsilon": 0.0001
+  }
+ },
+ "top1": {
+  "path": "FFN(calib.hybrid_d4_base@v2)->DEPTH(calib.hybrid_d4_base@v2)->RESIDUAL_WIDTH(calib.hybrid_d4_rh@v2)->ATTENTION(calib.hybrid_d4_rh@v2)",
+  "files_sha256": {
+   "model.safetensors": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+   "config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+   "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+  },
+  "state_id": "1f5e4b420125a345f1d190f0b8f87cad",
+  "artifact_digest": "536742c54f5bdb19e436d2a7026d843684cdc1e5bfa34e2b02a0514d83fe98b6",
+  "weights_digest": "4640af774e8c296178489861d459cdc6594a1d52cf56d9b8c738c5f799ff9ea0",
+  "source_checkpoint_path": "/runpod-volume/teacher_modes/search_packed/search/states/1f5e4b420125a345f1d190f0b8f87cad/f7d0b1c86f41085dc4f2c5ffe708b6db",
+  "objectives": {
+   "state.teacher_kl.equal_domain_mean": 6.776847381671165,
+   "state.teacher_kl.worst_domain": 7.912165105739422,
+   "state.critical_token_kl": 12.567125745346956
+  },
+  "num_parameters": 596049920,
+  "off_volume_copy": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad",
+   "files_sha256": {
+    "config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+    "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+    "model.safetensors": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d"
+   },
+   "verified": true,
+   "upload_seconds": 10.8,
+   "verify_seconds": 35.0,
+   "rule": "uploaded from the volume's copy, downloaded again into a fresh cache and re-hashed"
+  },
+  "relay_verified_from_dev_box": "2026-11-06T22:40Z: HfApi.get_paths_info lfs.sha256 b74dede8... (1,192,135,096 bytes) = the commit's single_shard_sha256; config.json and generation_config.json re-hashed by the closeout (top1_off_volume)"
+ },
+ "measured": {
+  "gpu": "one NVIDIA L40S (Secure Cloud, US-TX-3, $1.09/h), image runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+  "pod_minutes": 1521.84,
+  "driver_minutes": "2026-11-05T21:16:51Z -> 2026-11-06T22:28:38Z = 1511.8",
+  "peak_vram": {
+   "nvidia_smi_memory_used_gib": 35.32,
+   "torch_peak_allocated_gib_state_evaluation": 24.728,
+   "card_gib": 44.99,
+   "oom": false
+  },
+  "state_evaluation": {
+   "n": 92,
+   "first_s": 248.228,
+   "median_s_after_first": 70.6,
+   "teacher_forwards_first": 217,
+   "teacher_forwards_after_first": 0,
+   "teacher_forwards_skipped_after_first": 19747,
+   "sketch_cache_gib": 1.056,
+   "peak_allocated_gib_max": 24.728,
+   "packed_sequences_per_eval": 217,
+   "tokens_per_eval": 1773112,
+   "scored_positions_per_eval": 469569,
+   "candidate_tokens_per_s_median": 25114.2,
+   "scored_positions_per_s_median": 6650.9,
+   "total_seconds": 7434.3,
+   "_": "first evaluation 248 s with the teacher's 217 packed forwards; every later evaluation served the teacher from its sketches (19,747 forwards skipped, 0 recomputed); total_seconds includes the first evaluation's nine repeatability re-evaluations"
+  },
+  "depth": {
+   "expansions": 16,
+   "operator_seconds": 75182.1,
+   "mean_seconds": 4698.9,
+   "first_root_expansions_seconds": [
+    7073.8,
+    5477.5
+   ],
+   "candidate_evaluations_per_minute_root": "~2.0"
+  },
+  "other_operators_seconds": 6486.4,
+  "nvidia_smi_peak_utilization_pct": 100
+ },
+ "vs_v2_search_measured": {
+  "_": "v2 = a_search_20261101_153803 (inputs read one item at a time, state_eval_hybrid@v1, 92 expansions, 14 DEPTH)",
+  "depth_seconds": [
+   75182.1,
+   51956.0
+  ],
+  "depth_mean_per_expansion": [
+   4698.9,
+   3711.1
+  ],
+  "depth_expansions": [
+   16,
+   14
+  ],
+  "other_operator_seconds": [
+   6486.4,
+   6452.9
+  ],
+  "state_evaluation_seconds": [
+   7434.3,
+   11293.3
+  ],
+  "pod_minutes": [
+   1521.84,
+   1298.76
+  ]
+ },
+ "vs_estimate": {
+  "_": "audit/packed_forward_compute_v3.json (unvalidated before this run)",
+  "pod_minutes": {
+   "measured": 1521.84,
+   "lower": 1496.9,
+   "expected": 1930.4,
+   "upper": 2212.2
+  },
+  "usd": {
+   "measured_all_in": 28.1677,
+   "estimate_pod_lower": 27.61,
+   "estimate_pod_expected": 35.61,
+   "estimate_runner_all_in_expected": 38.98,
+   "hard_cap": 55.72
+  },
+  "reading": "near the lower case: DEPTH ran 1.27x v2 per expansion (the estimate's FLOP ratios 1.27-1.68) and took two more DEPTH expansions than v2 (the beam's own path); state evaluation ran 0.66x v2's total, where the estimate assumed it would grow (packed sequences cost more FLOPs but run one 217-sequence pass with the teacher cached, against v2's 1,135 one-item forwards); the other operators matched v2. These are measurements of this run, not a validated speed-up claim: packing is the protocol (P19)"
+ },
+ "cost": {
+  "closeout_all_in_usd": 28.1677,
+  "gpu_usd": 27.6468,
+  "container_disk_usd": 0.5208,
+  "provider_posted_usd_2026_11_06T22_33Z": 27.0853,
+  "_provider": "daily rows through 2026-11-06; the final hours may post later. The kind's cumulative spend is the closeout's $28.1677 of $55.72",
+  "kind_remaining_usd": 27.5523,
+  "volume": "thprcgh7s9 350 GB ~$0.82/day from 2026-11-05T19:40Z (reserve $13.34), kept"
+ },
+ "remaining_cost_forecast": {
+  "search": "$0: COMPLETE, nothing to resume",
+  "storage": "thprcgh7s9 ~$0.82/day until the maintainer decides its lifecycle; the Top-1 has a verified relay copy",
+  "not_forecast": "Stage 3 (not authorized)"
+ },
+ "evidence": {
+  "run_evidence": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011/evidence/",
+  "archive": "artifacts/stages/stage-2/teacher_modes/search_sessions/a_packed_search_20261105_195011/search_evidence.tgz",
+  "archive_sha256": "d781ab9a10b64d06187e67c41d525fb40d5e781b1ffb4b900edc6aa3ee7b16da",
+  "archive_relay": "AlphaAvatar/aadistill-artifacts:durable/packed_full_search/research_a_packed_hybrid_full_search/evidence/a_packed_search_20261105_195011/search_evidence.tgz (lfs sha256 verified)",
+  "journal_sha256": "617d1512959f4966ed4b57a6c5e7137b5b95b1e31b7b26b7266a6cac3da262e8",
+  "states_and_checkpoints": "every state's checkpoint on thprcgh7s9:/teacher_modes/search_packed/search/states (prune_weights false), the journal beside them"
+ },
+ "authorizes": "nothing"
+}

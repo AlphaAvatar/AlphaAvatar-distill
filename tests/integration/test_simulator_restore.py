@@ -19,13 +19,16 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from support.podsim import simulator_env  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "scripts/shared/pod/simulate_pod_env.sh"
 
 
 def run_sim(root: Path, hide: Path, hidden_paths: str, cmd: str, **extra):
-    env = {**os.environ,
+    #: `simulator_env`: the suite's own free-space floor, never a launch variable
+    #: the developer exported (tests/support/podsim.py)
+    env = {**simulator_env(),
            "PODSIM_ROOT": str(root),
            "HIDE_DIR": str(hide),
            "PODSIM_LOCK": str(hide) + ".lock",
@@ -489,7 +492,7 @@ def test_no_interpreter_and_no_repo_venv_refuses_loudly(tmp_path):
     assert not (tmp_path / "checkout/.venv").exists()
 
     root = build_tree(tmp_path)
-    env = {k: v for k, v in os.environ.items() if k != "PODSIM_PYTHON"}
+    env = {k: v for k, v in simulator_env().items() if k != "PODSIM_PYTHON"}
     env.update({"PODSIM_ROOT": str(root), "HIDE_DIR": str(tmp_path / "h"),
                 "PODSIM_LOCK": str(tmp_path / "h.lock"),
                 "HIDDEN_PATHS": "artifacts/audit", "PODSIM_CMD": "true"})
@@ -670,7 +673,7 @@ def test_a_nested_simulation_does_not_inherit_the_interpreter_control(tmp_path):
 def _run_simulator(tmp_path, *, min_free_gib, cmd="true"):
     import subprocess
 
-    env = {**os.environ,
+    env = {**simulator_env(),
            "HIDE_DIR": str(tmp_path / "hide"),
            "PODSIM_LOCK": str(tmp_path / "lock"),
            "PODSIM_MIN_FREE_GIB": str(min_free_gib),
@@ -712,7 +715,7 @@ def test_the_sweep_proceeds_when_the_requirement_is_met(tmp_path):
     assert "REFUSING" not in out.stderr
 
 
-def test_the_threshold_is_an_input_not_a_constant_in_the_core():
+def test_the_threshold_is_an_input_not_a_constant_in_the_core(monkeypatch):
     """The number lives with the caller that knows the footprint.
 
     `src/aadistill` must not learn this machine's capacity, and the simulator
@@ -724,6 +727,8 @@ def test_the_threshold_is_an_input_not_a_constant_in_the_core():
         "rpe", REPO / "scripts/shared/pod/record_pod_environment.py")
     rpe = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(rpe)
+    #: the DEFAULT, whatever the developer's shell exports
+    monkeypatch.delenv("AAD_PODSIM_MIN_FREE_GIB", raising=False)
     assert rpe.min_free_gib() >= 20, "the derived requirement lost its headroom"
 
     sim = (REPO / "scripts/shared/pod/simulate_pod_env.sh").read_text()
@@ -733,7 +738,7 @@ def test_the_threshold_is_an_input_not_a_constant_in_the_core():
     assert not offenders, f"a disk threshold reached the core: {offenders}"
 
 
-def test_the_threshold_is_overridable_and_says_what_it_describes():
+def test_the_threshold_is_overridable_and_says_what_it_describes(monkeypatch):
     """A number derived from one workload must not silently govern another.
 
     A larger student, a longer battery or a sweep that retains more per test has
@@ -747,12 +752,16 @@ def test_the_threshold_is_overridable_and_says_what_it_describes():
     rpe = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(rpe)
 
+    #: monkeypatch, not os.environ: popping the variable in `finally` deleted the
+    #: developer's own value for every later test in the session
+    monkeypatch.delenv("AAD_PODSIM_MIN_FREE_GIB", raising=False)
     default = rpe.min_free_gib()
-    os.environ["AAD_PODSIM_MIN_FREE_GIB"] = "77"
-    try:
-        assert rpe.min_free_gib() == 77, "the override is not honoured"
-    finally:
-        os.environ.pop("AAD_PODSIM_MIN_FREE_GIB", None)
+    monkeypatch.setenv("AAD_PODSIM_MIN_FREE_GIB", "77")
+    assert rpe.min_free_gib() == 77, "the override is not honoured"
+    #: a real sweep's floor is raised by an override, never lowered (the suite has its own)
+    monkeypatch.setenv("AAD_PODSIM_MIN_FREE_GIB", "3")
+    assert rpe.min_free_gib() == default, "an override lowered a real sweep's floor"
+    monkeypatch.delenv("AAD_PODSIM_MIN_FREE_GIB")
     assert rpe.min_free_gib() == default
 
     #: Whitespace-normalised: the docstring wraps at the margin, so the phrase

@@ -26,6 +26,8 @@ Four owners, by what the record is *about* — not one drawer of dated files.
 `log_inventory.json`, `checkpoint_registry.json`, `checkpoint_tombstones.json`,
 `scratch_inventory_20260829.json`, and the `architecture_*.json` set. An
 inventory owns pointers and identities, never the facts they point at.
+`convergence_findings.json` lists what `converge_before_sweep.py` reports that
+is not a launch blocker: its open historical problems, and what was fixed.
 
 **The registry and the tombstones are read by executables at these paths.** A
 tombstone names where a deleted checkpoint's result is frozen, which is what

@@ -1,0 +1,90 @@
+{
+ "schema": "aadistill.stage1.projected_residual.design/v1",
+ "study_id": "stage1.projected_residual.pw900_v1",
+ "status": "PROPOSED 2026-10-27, NOT FROZEN. Implemented and validated at $0 on the host; frozen with its preregistration only on the maintainer's approval, before any projected-residual model exists. Nothing here is authorized to run.",
+ "decided_by": "maintainer brief 2026-10-27 'Next Research Programme: Teacher Reasoning Modes & Trainable PCA Architecture', Research B",
+ "question": "Keeping the teacher's full 2,560-wide residual stream, token embedding and tied output head, and computing each layer's attention and FFN in a 1,024-wide space reached through a per-layer projection initialized by PCA and trained in recovery, does a student recover better fluid-reasoning correctness than D4-Augmented under D4-Augmented's own teacher, data, recipe and evaluation?",
+ "teacher": {"model": "Qwen/Qwen3-4B-Thinking-2507", "revision": "768f209d9ea81521153ed38c47d515654e938aea", "dtype": "bfloat16",
+  "_": "D4-Augmented's teacher, unchanged: the hybrid teacher of Research A is not used here (brief section 4)"},
+ "architecture": {
+  "model_type": "aad_projected_residual",
+  "implementation": "src/aadistill/initialization/adapters/projected_residual.py",
+  "projection_sharing": "transpose_shared: one P_l [2560, 1024] per layer, the down map for attention and FFN, its transpose the up map",
+  "hidden_size": 2560, "internal_size": 1024, "intermediate_size": 3072, "num_hidden_layers": 28,
+  "num_attention_heads": 16, "num_key_value_heads": 8, "head_dim": 128, "tie_word_embeddings": true,
+  "inherited_from_teacher_config": ["vocab_size 151936", "rope_theta 5,000,000", "max_position_embeddings 262,144", "rms_norm_eps 1e-6", "hidden_act silu", "attention_bias false"],
+  "norms": "input_layernorm and post_attention_layernorm are RMSNorm over the full 2,560-wide stream (the teacher's weights at the kept layer), applied BEFORE the down projection; q_norm/k_norm per head as the teacher; RoPE on the 128-dim heads as the teacher; the final norm is the teacher's",
+  "num_parameters": 902911488,
+  "trainable_parameters": 513955328,
+  "frozen_parameters": {"tied embedding / output head": 388956160},
+  "counted_by": "aadistill.models.cost_model.parameter_counts, equal to the meta-device build (tests/models/test_projected_residual.py)",
+  "statistic": "sublayer_inputs",
+  "_statistic": "P_l is the top-1,024 eigenbasis of the trace-normalized mean of the two normalized sub-layer inputs' uncentered second moments at that layer -- the vectors P_l multiplies. residual_input (the un-normalized block input) and read_write (inputs plus the two sub-layer outputs P_l^T writes) are implemented and computed in the engineering validation as diagnostics only; the choice is declared here, before any result, and is not switched on a diagnostic",
+  "orthogonality": "not constrained and not regularized in v1: P_l starts orthonormal and trains freely under the recipe's AdamW weight decay 0.01 like every trainable matrix; projection_orthogonality (||P^T P - I||_F / sqrt(r), singular-value range) is logged at every checkpoint and reported. A constraint would be a separate, declared arm"
+ },
+ "selection": {
+  "path": "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
+  "content_sha256": "0c44e2e8da0c63c94c7d34a1cd5712905b2f1946de5f200643734bc1f57548b2",
+  "what": "D4 Top-1's kept teacher layers (28 of 36; removed 8, 11, 12, 15, 18, 21, 25, 32), kept query heads (16 of 32 per kept layer, two per KV group, all 8 KV heads kept) and kept FFN neurons (3,072 of 9,728 per layer), exported from the d4 search journal (sha256 c162a362...) by scripts/stages/stage-1/projected_residual/export_selection.py",
+  "why": "every selection decision is D4 Top-1's, so the comparison varies the width mechanism and nothing a search chose",
+  "declared_bias": "FFN's neurons were selected on D4's 1,024-wide state after its global PCA; reusing them favours nothing in this architecture's favour, but they were not chosen for it"
+ },
+ "calibration": {
+  "profile_id": "calib.s0v_base_d4@v1",
+  "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1/calib.s0v_base_d4.items.jsonl",
+  "items_file_sha256": "2e8b99565a147e8253ca1768383fb9d4d728ceb105e283ad3653f043485e7e05",
+  "content_sha256": "c86538325799eca55bc276cae11a64e78596e6685957299c2fd651207add6ca0",
+  "items": 85,
+  "positions": "every real token of every item, unweighted",
+  "why": "the profile D4 Top-1's RESIDUAL_WIDTH (global PCA) step was computed on; the per-layer bases read the same tokens",
+  "declared_difference": "D4's width step ran under the D1 forward baseline's statistics position policy; the per-layer bases use every real token unweighted. This is part of the width mechanism under test, not a separate variable"
+ },
+ "initialization": {
+  "driver": "scripts/stages/stage-1/projected_residual/materialize.py",
+  "steps": [
+   "W0 = select_full_width(teacher, selection): the teacher with the kept layers, heads and neurons, width 2,560 (a stock Qwen3 of 1,490,114,048 parameters)",
+   "SublayerStatsCollector over the 85 calibration items through W0, float64",
+   "P_l = projection_basis(attn_in, ffn_in of layer l, 1024) for each of the 28 layers",
+   "the student = materialize_projected(W0, P): readers W P_l, writers P_l^T W; norms, q/k norms, embedding and head are W0's",
+   "save_pretrained, sha256 of every weight file, the fold check"
+  ],
+  "exactness_anchors": ["with internal_size = hidden_size and P_l = I the student computes W0 exactly", "when every sub-layer input lies in an r-dimensional subspace the collector's bases reproduce W0 exactly at rank r"],
+  "not_a_search": "one materialization; no candidate is ranked or selected"
+ },
+ "recovery": {
+  "as": "D4-Augmented exactly: configs/stages/stage-2/reasoning_data/h1pa.json (sha256 fe0ea966...) :: arms.D4-Augmented, dataset e1_2p96M_plus_fluid (E1's 1,944 + the fluid increment's 524 sequences, 5,923,021 supervised tokens, packs/D4A_merged_whole blocks.npz 8b97b202...), recipe e1 under its derive rule, seeds 20260726 and 20260801, 3,702 optimizer steps, warmup 185, batch size 2, micro-batch 1, sequence length 8,192, CE 0.25 + KD 1.0 (T 1, kd_scope all), AdamW lr 5e-5 betas (0.9, 0.95) eps 1e-8 weight decay 0.01, clipping 1.0, cosine to 0.1, fp32 weights with bf16 autocast, gradient checkpointing",
+  "changed": {
+   "student_path": "the projected-residual initialization",
+   "trainable_patterns": "E1's list plus '\\\\.projection$' -- the new parameters are trainable; nothing else moves. E1's list never matched the embedding, so the tied embedding and head are frozen in D4-Augmented too"
+  },
+  "unchanged_and_checked": "every other key of the derived config, nested keys included, against D4-Augmented's recorded recipe identity for the same seed",
+  "hardware": "NVIDIA L40S (D4-Augmented's)"
+ },
+ "evaluation": {
+  "identical_to": {"path": "logs/stages/stage-2/reasoning_data/plans/h1pa_preregistration.json", "sha256": "ae67279d15cddab4c14798313177d4554b8e585745cfd9b8f0afa8a42655261f", "section": "evaluation"},
+  "decoding": {"protocol_id": "nucleus_v1", "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"},
+  "route": "the recovered checkpoint is folded to a stock Qwen3ForCausalLM (fold_to_qwen3, exact in real arithmetic) and evaluated by vLLM 0.27.1 like every other student; the folded checkpoint's identity is recorded beside the factored one",
+  "fold_acceptance": "before any evaluation, on a fixed probe of eval-set-1 prompts, the folded bf16 model's max |logit difference| from the factored model must not exceed twice the factored model's own bf16-vs-fp32 difference on the same probe; otherwise the route is refused (an engineering failure, not a result)"
+ },
+ "comparisons": {
+  "P": {"contrast": "PW-Augmented - D4-Augmented", "role": "decided", "control": "H1-PA's two D4-Augmented units, reused: neither retrained nor re-evaluated"},
+  "Q": {"contrast": "PW-Augmented - PCA-Original", "role": "descriptive"}
+ },
+ "not_matched": {
+  "_": "900M against 596M is neither parameter- nor FLOPs-matched; P is a feasibility and effect measurement of the architecture at this size, never a same-size claim",
+  "parameters": "902,911,488 vs 596,049,920 (1.515x); trainable 513,955,328 vs 440,467,456",
+  "training_flops_per_supervised_position": "student forward+backward+recompute 11.19 vs 7.90 GFLOPs (1.415x); with the 4B teacher's forward 21.65 vs 18.37 (1.179x) at mean context 4,096",
+  "inference_flops_per_token": "3.19 vs 2.13 GFLOPs at context 4,096 (1.49x); 2.25 vs 1.19 at context 1 (1.88x): the full-width output head is 0.78 of the 2.25",
+  "kv_cache": "identical, 114,688 bytes per token in bf16 (28 layers x 8 KV heads x 128)",
+  "weights_bf16": "1.81 GB vs 1.19 GB factored; 2.98 GB folded",
+  "training_state": "9.78 vs 7.67 GB (fp32 weights + gradients + AdamW moments for the trainable part, fp32 frozen embedding)",
+  "owner": "logs/stages/stage-1/projected_residual/analyses/architecture_report.json"
+ },
+ "reserved_600m": {
+  "status": "RESERVED DESIGN ONLY: not implemented as an experiment, not priced for execution, not authorized; studied only after the 900M result and the maintainer's review (brief 3.3)",
+  "geometry": {"hidden_size": 2560, "internal_size": 512, "intermediate_size": 1910, "num_hidden_layers": 28, "num_attention_heads": 16, "num_key_value_heads": 8, "head_dim": 128},
+  "num_parameters": 596035072,
+  "_": "parameter-matched to the 596,049,920 baseline within 14,848 at intermediate 1,910 (the brief's 1,904-1,920 range); still 1.10x its forward FLOPs at context 4,096 because the full-width output head costs 0.78 GFLOPs per token. With internal 512 the attention reads a 512-wide space: 16 x 128 query heads exceed it, a rank bottleneck the 900M design does not have"
+ },
+ "authorizes": "nothing"
+}

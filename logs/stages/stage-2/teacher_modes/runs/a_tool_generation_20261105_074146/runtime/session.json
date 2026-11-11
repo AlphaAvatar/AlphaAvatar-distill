@@ -1,0 +1,1999 @@
+{
+  "schema": "aadistill.stage2.teacher_modes.tm_authorization_session/v1",
+  "provider_cli": {
+    "path": "/home/ecs-user/.local/bin/runpodctl",
+    "version": "runpodctl 3.0.1-551d6a4",
+    "pod_create_terminate_after": false
+  },
+  "session_id": "stage2_teacher_modes_tm-tool_generation",
+  "session_spec": {
+    "session_id": "stage2_teacher_modes_tm-tool_generation",
+    "schema": "aadistill.stage2.teacher_modes.tm_authorization_session/v1",
+    "description": "Research A packed round: the hybrid's tool-calling episodes, both modes",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_20261105_074146/governance/authorization.json",
+    "authorization_type": "EngineeringAuthorization.load",
+    "plan_id": "stage2.teacher_modes.token_matched",
+    "plan_hash": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+    "status_path": "/workspace/stage2_teacher_modes_tm.status",
+    "run_log_path": "/workspace/stage2_teacher_modes_tm_run.log",
+    "driver_job_id": "stage2_teacher_modes_tm_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage2_teacher_modes_tm",
+      "evidence_filename": "report.json",
+      "archive_basename": "stage2_teacher_modes_tm",
+      "spec_success": "configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
+      "spec_failed": "configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage2_teacher_modes_tm",
+        "TEACHER_MODEL": "Qwen/Qwen3-4B",
+        "PHASE_KIND": "tool_generation"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION",
+        "TEACHER_MODEL"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/tool_generation/hybrid/8ee8476e844c267d/tasks.jsonl",
+          "dest": "artifacts/stages/stage-2/teacher_modes/tool_generation/hybrid",
+          "sha256": "8ee8476e844c267d5e61ef1fc9ca48c4da26921e5d5f57d2bd96b7da1e8eeafc",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "battery_v2:artifacts/stages/stage-3/eval"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 10,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-11-05T07:43:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 355 min $6.45 \u00b7 soft $8.29 \u00b7 hard $8.47 (authorized $9.13)"
+    },
+    {
+      "utc": "2026-11-05T07:43:27+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-11-05T07:43:27+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $89.5700 against the $8.4702 this session must be able to fund"
+    },
+    {
+      "utc": "2026-11-05T07:43:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account resources OK: the provider account holds only the 2 resource(s) the records account for"
+    },
+    {
+      "utc": "2026-11-05T07:43:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "a A-TM tool_generation artifact, unused"
+    },
+    {
+      "utc": "2026-11-05T07:43:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "utc": "2026-11-05T07:43:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "all-in $8.6530 over 467.5 min, inside $9.13"
+    },
+    {
+      "utc": "2026-11-05T07:43:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "study identity 2a24101c2c92 is the authorized one"
+    },
+    {
+      "utc": "2026-11-05T07:43:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "every bound file is in the session commit"
+    },
+    {
+      "utc": "2026-11-05T07:43:30+00:00",
+      "elapsed_min": 0.0,
+      "msg": "$9.13 inside the envelope ($27.5265) and the $30.7414 the project cap leaves now"
+    },
+    {
+      "utc": "2026-11-05T07:43:33+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the kind's bound records are the committed ones"
+    },
+    {
+      "utc": "2026-11-05T07:43:33+00:00",
+      "elapsed_min": 0.0,
+      "msg": "one NVIDIA L40S"
+    },
+    {
+      "utc": "2026-11-05T07:43:33+00:00",
+      "elapsed_min": 0.0,
+      "msg": "no network volume; drawn in any Secure Cloud datacenter"
+    },
+    {
+      "utc": "2026-11-05T07:43:33+00:00",
+      "elapsed_min": 0.0,
+      "msg": "task file 8ee8476e844c relayed at transfer/tool_generation/hybrid/8ee8476e844c267d/tasks.jsonl"
+    },
+    {
+      "utc": "2026-11-05T07:43:34+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 1 local assets"
+    },
+    {
+      "utc": "2026-11-05T07:43:36+00:00",
+      "elapsed_min": 0.02,
+      "msg": "watchdog detached \u2014 hard 466 min = $8.47"
+    },
+    {
+      "utc": "2026-11-05T07:43:36+00:00",
+      "elapsed_min": 0.02,
+      "msg": "created jsudkf50ehi314 at $1.09/h in US-NC-1"
+    },
+    {
+      "utc": "2026-11-05T07:44:28+00:00",
+      "elapsed_min": 0.9,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-11-05T07:45:31+00:00",
+      "elapsed_min": 1.94,
+      "msg": "  starting (120s) \u2014 $0.04"
+    },
+    {
+      "utc": "2026-11-05T07:46:34+00:00",
+      "elapsed_min": 2.98,
+      "msg": "  starting (180s) \u2014 $0.05"
+    },
+    {
+      "utc": "2026-11-05T07:46:54+00:00",
+      "elapsed_min": 3.33,
+      "msg": "TCP 22 at 103.196.86.52:25052 after 3.3 min"
+    },
+    {
+      "utc": "2026-11-05T07:46:58+00:00",
+      "elapsed_min": 3.38,
+      "msg": "draw 1: ssh reachable \u2014 $0.06"
+    },
+    {
+      "utc": "2026-11-05T07:47:26+00:00",
+      "elapsed_min": 3.86,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-11-05T07:47:26+00:00",
+      "elapsed_min": 3.86,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-11-05T07:49:42+00:00",
+      "elapsed_min": 6.12,
+      "msg": "draw 1: setup complete \u2014 $0.11"
+    },
+    {
+      "utc": "2026-11-05T07:49:48+00:00",
+      "elapsed_min": 6.23,
+      "msg": "driver detached, pid 1978, confirmed by descriptor_probe \u2014 $0.11"
+    },
+    {
+      "utc": "2026-11-05T07:51:01+00:00",
+      "elapsed_min": 7.44,
+      "msg": "  2026-11-05T07:50:00Z MARKER:CONTRACT_OK \u2014 $0.14"
+    },
+    {
+      "utc": "2026-11-05T08:54:09+00:00",
+      "elapsed_min": 70.58,
+      "msg": "  2026-11-05T08:52:39Z MARKER:UNIT_OK:tool_H-N_r1_pass0 \u2014 $1.28"
+    },
+    {
+      "utc": "2026-11-05T09:29:06+00:00",
+      "elapsed_min": 105.52,
+      "msg": "  2026-11-05T09:27:55Z MARKER:ROUND_DONE:tool_H-N_r1 \u2014 $1.92"
+    },
+    {
+      "utc": "2026-11-05T09:33:21+00:00",
+      "elapsed_min": 109.77,
+      "msg": "  2026-11-05T09:33:03Z MARKER:UNIT_OK:tool_H-N_r2_pass0 \u2014 $1.99"
+    },
+    {
+      "utc": "2026-11-05T09:40:01+00:00",
+      "elapsed_min": 116.43,
+      "msg": "  2026-11-05T09:39:33Z MARKER:UNIT_OK:tool_H-N_r3_pass0 \u2014 $2.12"
+    },
+    {
+      "utc": "2026-11-05T09:42:14+00:00",
+      "elapsed_min": 118.66,
+      "msg": "  2026-11-05T09:40:34Z MARKER:ROUND_DONE:tool_H-N_r3 \u2014 $2.16"
+    },
+    {
+      "utc": "2026-11-05T09:44:36+00:00",
+      "elapsed_min": 121.03,
+      "msg": "  2026-11-05T09:43:06Z MARKER:UNIT_OK:tool_H-N_r4_pass0 \u2014 $2.20"
+    },
+    {
+      "utc": "2026-11-05T09:47:09+00:00",
+      "elapsed_min": 123.57,
+      "msg": "  2026-11-05T09:45:12Z MARKER:ROUND_DONE:tool_H-N_r4 \u2014 $2.24"
+    },
+    {
+      "utc": "2026-11-05T10:06:38+00:00",
+      "elapsed_min": 143.06,
+      "msg": "  2026-11-05T10:04:41Z MARKER:UNIT_OK:tool_H-T_r1_pass0 \u2014 $2.60"
+    },
+    {
+      "utc": "2026-11-05T10:19:00+00:00",
+      "elapsed_min": 155.43,
+      "msg": "  2026-11-05T10:18:48Z MARKER:ROUND_DONE:tool_H-T_r1 \u2014 $2.82"
+    },
+    {
+      "utc": "2026-11-05T10:23:51+00:00",
+      "elapsed_min": 160.27,
+      "msg": "  2026-11-05T10:21:39Z MARKER:UNIT_OK:tool_H-T_r2_pass0 \u2014 $2.91"
+    },
+    {
+      "utc": "2026-11-05T10:26:25+00:00",
+      "elapsed_min": 162.83,
+      "msg": "  2026-11-05T10:25:59Z MARKER:ALL_DONE \u2014 $2.96"
+    },
+    {
+      "utc": "2026-11-05T10:26:25+00:00",
+      "elapsed_min": 162.83,
+      "msg": "polling ended: ALL_DONE \u2014 $2.96"
+    },
+    {
+      "utc": "2026-11-05T10:26:41+00:00",
+      "elapsed_min": 163.1,
+      "msg": "  manifest rc=0\n0 file(s) across 0 class(es) -> /workspace/manifest.json\n  final_required: 0 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-11-05T10:31:18+00:00",
+      "elapsed_min": 167.73,
+      "msg": "  PRODUCTS NOT SECURED: not secured off-pod: [] ['tool_generation_hybrid']; secured: tool_generation"
+    },
+    {
+      "utc": "2026-11-05T10:31:18+00:00",
+      "elapsed_min": 167.73,
+      "msg": "  RECORDED: PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK"
+    },
+    {
+      "utc": "2026-11-05T10:31:18+00:00",
+      "elapsed_min": 167.73,
+      "msg": "teardown gate: allowed=False failed=required_products_secured \u00b7 PRODUCTS_UNSECURED/ARTIFACT_LOSS_RISK"
+    },
+    {
+      "utc": "2026-11-05T10:31:18+00:00",
+      "elapsed_min": 167.73,
+      "msg": "GATE BLOCKED \u2014 pod retained for evidence; ownership VERIFIED: watchdog pid 1221035 is live and holds jsudkf50ehi314 to a 466 min hard cap"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage2.teacher_modes.tm_authorization/v1",
+    "authorization_id": "stage2.teacher_modes.token_matched.a_tool_generation_20261105_074146",
+    "version": 1,
+    "granted_utc": "2026-11-05T07:42:05+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "stage2.teacher_modes.token_matched",
+    "study_identity_sha256": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+    "expected_usd": 2.65,
+    "hard_cap_usd": 9.13,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "l40s_check_record_sha256": "a98174e35acef9a9eefc1e75a5a748238761a8a0bbc5312b7cfd1a4d1c10b784",
+      "l40s_generation_scope_sha256": "285682d33e63134888c3e720209f6bd8e2bc13227f5848cdd84e2be66a5cd3bc",
+      "record:configs/stages/stage-2/teacher_modes/tool_generation_protocol.json": "73b6f8a997522029d33fabddfe67e8263f6d0d43b9e01494f6f09c4bb6e9ec5d",
+      "record:logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json": "74a1f06fb958a42451aa36a6046afba6e7068b17ee0cd6f4e6c0087ff131c68d",
+      "record:logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json": "86a156db30dc1de3fc6aef507c957e9184600b7730a94c7763e0fa0b0447e88e",
+      "record:logs/stages/stage-2/teacher_modes/audit/tool_generation_priors.json": "437715c1262cb1a03b614390a2ee1ea6618ad5d8a4e213a9e6e2fb6323680ae9",
+      "record:logs/stages/stage-2/teacher_modes/audit/tool_source_admission.json": "8daf04d3792c1bdd26b07d870ef4424bbe3b1a6a1b7e8a4445eb067b36312fab",
+      "record:configs/stages/stage-2/teacher_modes/six_category_common_support.json": "3c1c63121139b7741c14128d378e8e9a6a5ec0dbb2d0c1ebfd5d7c642583c001",
+      "record:logs/stages/stage-2/teacher_modes/plans/tool_generation_import_t2507.json": "a04733474d3e6beb14f0652a072684556146c57724c5b00938db6cefb0c4cecb",
+      "kind": "tool_generation",
+      "study": "A-TM",
+      "dry_run": "false",
+      "grant": "logs/budget/approvals/teacher_modes_token_matched_grant.json",
+      "grant_sha256": "6ad7ed8695696a7f7857f5d28cd3425ca108ef7fbc79457d79d26a77b12982e6",
+      "gpus": "{\"NVIDIA L40S\": 1.19}",
+      "gpu_count_max": "1",
+      "envelope": "{\"ceiling_usd\": 79.5289, \"spent_usd\": 52.0024, \"remaining_usd\": 27.5265, \"runs\": [{\"run_id\": \"a_inputs_20261101_125520\", \"usd\": 0.0}, {\"run_id\": \"a_inputs_20261101_125709\", \"usd\": 0.0}, {\"run_id\": \"a_inputs_20261101_125916\", \"usd\": 0.5713}, {\"run_id\": \"a_search_20261101_142659\", \"usd\": 0.1973}, {\"run_id\": \"a_search_20261101_153803\", \"usd\": 23.9553}, {\"run_id\": \"a_supplement_20261031_091618\", \"usd\": 0.0}, {\"run_id\": \"a_supplement_20261031_092108\", \"usd\": 5.7873}, {\"run_id\": \"a_supplement_20261031_144618\", \"usd\": 10.0816}, {\"run_id\": \"a_tool_generation_t2507_20261104_194048\", \"usd\": 0.1459}, {\"run_id\": \"a_tool_generation_t2507_20261104_195411\", \"usd\": 1.097}, {\"run_id\": \"a_tool_generation_t2507_20261105_064829\", \"usd\": 0.3752}, {\"run_id\": \"a_tool_generation_t2507_20261105_072112\", \"usd\": 0.3385}, {\"run_id\": \"a_tool_pilot_20261104_140656\", \"usd\": 0.0}, {\"run_id\": \"a_tool_pilot_20261104_164531\", \"usd\": 0.4328}, {\"run_id\": \"a_train_a1_20261102_165858\", \"usd\": 0.2436}, {\"run_id\": \"a_train_a1_20261102_183510\", \"usd\": 0.0}, {\"run_id\": \"a_train_a1_20261102_184122\", \"usd\": 8.7766}]}",
+      "live_position": "{\"fetched_utc\": \"2026-11-05T07:42:04+00:00\", \"provider_billed_usd\": 819.6859, \"committed_usd\": 837.2586, \"project_cap_usd\": 868.0, \"project_remaining_usd\": 30.7414, \"account_pods\": [], \"account_volumes\": [\"4rhubprswo\", \"am5m373kuq\"], \"balance_usd\": 89.6372832001, \"spend_per_hour\": 0.039, \"rule\": \"shared.project_position: mixed_governance.position + engineering-campaign subruns\", \"unposted_sessions\": 2, \"campaign_unposted\": 0, \"campaign_teardown_confirmed_by\": {\"subrun record\": 25, \"reconciliation\": 30}}"
+    },
+    "scope_note": "attempt 1 of tool_generation: the hybrid's formal tool generation, both modes, at the registered six_category_common_support@v1 training composition (maintainer review of f06ccd4, 2026-11-05, ruling 5 and section 4); the plan imports the pilot's 794 mode-task outcomes (1,371 candidates, never regenerated); the non-thinking training schema_arguments cell bound by its whole remaining supply (1,804 tasks); validation, calibration and state evaluation as registered; hard cap $9.13 cumulative (the runner's $9.127 rounded up); driver deadline 330 minutes ($8.653 all-in at $1.09/h); any Secure Cloud L40S, no network volume",
+    "authorizes_engineering_validation": false,
+    "authorizes_formal": true,
+    "authorizes_training": false,
+    "authorizes_evaluation": false,
+    "authorizes_teacher_generation": true,
+    "authorizes_paid_storage": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "9674c8f760b029a5f7ffa8f9c9e24fe18b2812a4462049cd1707d6b17c09a30f",
+    "harness_source_files": [
+      "src/aadistill/__init__.py",
+      "src/aadistill/data/__init__.py",
+      "src/aadistill/data/cleaning.py",
+      "src/aadistill/data/code_exec.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/diversity.py",
+      "src/aadistill/data/e5_pack.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/mixture.py",
+      "src/aadistill/data/nested_ladder.py",
+      "src/aadistill/data/paired_corpus.py",
+      "src/aadistill/data/prefix_split.py",
+      "src/aadistill/data/recovery.py",
+      "src/aadistill/data/sequence_packing.py",
+      "src/aadistill/data/sessions.py",
+      "src/aadistill/data/target_policy.py",
+      "src/aadistill/data/target_quality.py",
+      "src/aadistill/data/token_documents.py",
+      "src/aadistill/data/tool_calls.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/eval_registry.py",
+      "src/aadistill/evaluation/function_error.py",
+      "src/aadistill/evaluation/general_text.py",
+      "src/aadistill/evaluation/init_nll.py",
+      "src/aadistill/evaluation/isolation.py",
+      "src/aadistill/evaluation/oracle_reasoning.py",
+      "src/aadistill/evaluation/paired_stats.py",
+      "src/aadistill/evaluation/protocol_field.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/__init__.py",
+      "src/aadistill/governance/artifact_manifest.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/governance/post_freeze.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/source_identity.py",
+      "src/aadistill/infrastructure/transfer.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/__init__.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/families.py",
+      "src/aadistill/initialization/adapters/projected_residual.py",
+      "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/calibration/__init__.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/__init__.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_import.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/__init__.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/kl_reference.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/__init__.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/identity_collapse.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/__init__.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/reweight.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/__init__.py",
+      "src/aadistill/initialization/transforms/nll_gate.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/projected_residual.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/__init__.py",
+      "src/aadistill/models/cost_model.py",
+      "src/aadistill/models/quant.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/rollout/__init__.py",
+      "src/aadistill/rollout/engines.py",
+      "src/aadistill/rollout/generate.py",
+      "src/aadistill/rollout/snapshots.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/durable_store.py",
+      "src/aadistill/runtime/hub_capacity.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/setup_steps.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/__init__.py",
+      "src/aadistill/training/accounting.py",
+      "src/aadistill/training/lineage.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/topk_kd.py",
+      "src/aadistill/training/train.py",
+      "scripts/stages/stage-2/teacher_modes/token_matched_phase.py",
+      "scripts/stages/stage-2/teacher_modes/phase.py",
+      "scripts/stages/stage-2/teacher_modes/supplement_session.py",
+      "scripts/stages/stage-2/teacher_modes/teacher_session.py",
+      "scripts/stages/stage-2/teacher_modes/admission.py",
+      "scripts/stages/stage-2/teacher_modes/supply_audit.py",
+      "scripts/stages/stage-2/teacher_modes/build_supplement_tasks.py",
+      "scripts/stages/stage-2/teacher_modes/build_tasks.py",
+      "scripts/stages/stage-2/teacher_modes/build_calibration_supplement.py",
+      "scripts/stages/stage-2/teacher_modes/hybrid_calibration.py",
+      "scripts/stages/stage-2/teacher_modes/inputs_session.py",
+      "scripts/stages/stage-2/teacher_modes/full_search.py",
+      "scripts/stages/stage-2/teacher_modes/hybrid_state_eval.py",
+      "scripts/stages/stage-2/teacher_modes/freeze_state_eval.py",
+      "scripts/stages/stage-2/teacher_modes/a1_units.py",
+      "scripts/stages/stage-2/teacher_modes/training_plan.py",
+      "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+      "scripts/stages/stage-2/teacher_modes/packed_inputs.py",
+      "scripts/stages/stage-2/teacher_modes/packed_packs.py",
+      "scripts/stages/stage-2/teacher_modes/packed_training_plan.py",
+      "scripts/stages/stage-2/teacher_modes/packing_audit.py",
+      "scripts/stages/stage-2/teacher_modes/tool_episodes.py",
+      "scripts/stages/stage-2/teacher_modes/tool_admission.py",
+      "scripts/stages/stage-2/teacher_modes/tool_pool.py",
+      "scripts/stages/stage-2/teacher_modes/tool_session.py",
+      "scripts/stages/stage-2/teacher_modes/six_category_selection.py",
+      "scripts/stages/stage-2/teacher_modes/tool_generation_plan.py",
+      "scripts/stages/stage-2/teacher_modes/tool_benchmarks.py",
+      "scripts/stages/stage-2/teacher_modes/tool_sources_toucan.py",
+      "scripts/stages/stage-2/teacher_modes/tool_sources_pivot.py",
+      "scripts/stages/stage-2/teacher_modes/tool_pilot.py",
+      "scripts/shared/study_engineering.py",
+      "scripts/shared/project_position.py",
+      "scripts/shared/eval_sets.py",
+      "scripts/shared/pod/teacher_cache.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/mixed_governance.py",
+      "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+      "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+      "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+      "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+      "scripts/maintenance/consolidation/derive_budget.py",
+      "scripts/maintenance/consolidation/provider_billing.py",
+      "scripts/shared/deployment.py",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/collect_artifacts.py"
+    ],
+    "per_launch_hard_usd": 9.13,
+    "provenance_commit": "7dfd99d05a08dc53ea9f0dd11a3e54302a3cccaa",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the study identity and the harness on disk, is not a dry run, has not been used, and its hard cap covers the planned all-in bound and fits the project cap as the provider bills it at launch; setup re-checks the binding on the pod; one artifact funds one run inside the grant's envelope",
+    "authorization_sha256": "f0a037059a339f670570aa211e701f5b3ea6faaa9160ad900febe2935d3b7adf"
+  },
+  "session_plan_hash": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+  "harness_source_digest": "9674c8f760b029a5f7ffa8f9c9e24fe18b2812a4462049cd1707d6b17c09a30f",
+  "harness_source_files": [
+    "scripts/maintenance/consolidation/derive_budget.py",
+    "scripts/maintenance/consolidation/provider_billing.py",
+    "scripts/shared/deployment.py",
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/teacher_cache.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/project_position.py",
+    "scripts/shared/study_engineering.py",
+    "scripts/stages/stage-0/calibration_volume/mixed_governance.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+    "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+    "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+    "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+    "scripts/stages/stage-2/teacher_modes/a1_units.py",
+    "scripts/stages/stage-2/teacher_modes/admission.py",
+    "scripts/stages/stage-2/teacher_modes/build_calibration_supplement.py",
+    "scripts/stages/stage-2/teacher_modes/build_supplement_tasks.py",
+    "scripts/stages/stage-2/teacher_modes/build_tasks.py",
+    "scripts/stages/stage-2/teacher_modes/freeze_state_eval.py",
+    "scripts/stages/stage-2/teacher_modes/full_search.py",
+    "scripts/stages/stage-2/teacher_modes/hybrid_calibration.py",
+    "scripts/stages/stage-2/teacher_modes/hybrid_state_eval.py",
+    "scripts/stages/stage-2/teacher_modes/inputs_session.py",
+    "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+    "scripts/stages/stage-2/teacher_modes/packed_inputs.py",
+    "scripts/stages/stage-2/teacher_modes/packed_packs.py",
+    "scripts/stages/stage-2/teacher_modes/packed_training_plan.py",
+    "scripts/stages/stage-2/teacher_modes/packing_audit.py",
+    "scripts/stages/stage-2/teacher_modes/phase.py",
+    "scripts/stages/stage-2/teacher_modes/six_category_selection.py",
+    "scripts/stages/stage-2/teacher_modes/supplement_session.py",
+    "scripts/stages/stage-2/teacher_modes/supply_audit.py",
+    "scripts/stages/stage-2/teacher_modes/teacher_session.py",
+    "scripts/stages/stage-2/teacher_modes/token_matched_phase.py",
+    "scripts/stages/stage-2/teacher_modes/tool_admission.py",
+    "scripts/stages/stage-2/teacher_modes/tool_benchmarks.py",
+    "scripts/stages/stage-2/teacher_modes/tool_episodes.py",
+    "scripts/stages/stage-2/teacher_modes/tool_generation_plan.py",
+    "scripts/stages/stage-2/teacher_modes/tool_pilot.py",
+    "scripts/stages/stage-2/teacher_modes/tool_pool.py",
+    "scripts/stages/stage-2/teacher_modes/tool_session.py",
+    "scripts/stages/stage-2/teacher_modes/tool_sources_pivot.py",
+    "scripts/stages/stage-2/teacher_modes/tool_sources_toucan.py",
+    "scripts/stages/stage-2/teacher_modes/training_plan.py",
+    "src/aadistill/__init__.py",
+    "src/aadistill/data/__init__.py",
+    "src/aadistill/data/cleaning.py",
+    "src/aadistill/data/code_exec.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/diversity.py",
+    "src/aadistill/data/e5_pack.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/mixture.py",
+    "src/aadistill/data/nested_ladder.py",
+    "src/aadistill/data/paired_corpus.py",
+    "src/aadistill/data/prefix_split.py",
+    "src/aadistill/data/recovery.py",
+    "src/aadistill/data/sequence_packing.py",
+    "src/aadistill/data/sessions.py",
+    "src/aadistill/data/target_policy.py",
+    "src/aadistill/data/target_quality.py",
+    "src/aadistill/data/token_documents.py",
+    "src/aadistill/data/tool_calls.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/function_error.py",
+    "src/aadistill/evaluation/general_text.py",
+    "src/aadistill/evaluation/init_nll.py",
+    "src/aadistill/evaluation/isolation.py",
+    "src/aadistill/evaluation/oracle_reasoning.py",
+    "src/aadistill/evaluation/paired_stats.py",
+    "src/aadistill/evaluation/protocol_field.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/__init__.py",
+    "src/aadistill/governance/artifact_manifest.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/governance/post_freeze.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/source_identity.py",
+    "src/aadistill/infrastructure/transfer.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/__init__.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/families.py",
+    "src/aadistill/initialization/adapters/projected_residual.py",
+    "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/calibration/__init__.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/__init__.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_import.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/__init__.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/kl_reference.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/__init__.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/identity_collapse.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/__init__.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/reweight.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/__init__.py",
+    "src/aadistill/initialization/transforms/nll_gate.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/projected_residual.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/__init__.py",
+    "src/aadistill/models/cost_model.py",
+    "src/aadistill/models/quant.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/rollout/__init__.py",
+    "src/aadistill/rollout/engines.py",
+    "src/aadistill/rollout/generate.py",
+    "src/aadistill/rollout/snapshots.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/durable_store.py",
+    "src/aadistill/runtime/hub_capacity.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/setup_steps.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/__init__.py",
+    "src/aadistill/training/accounting.py",
+    "src/aadistill/training/lineage.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/topk_kd.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 9.13,
+    "expected_minutes": 355.0,
+    "soft_stop_minutes": 456.25,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 466.25,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: the validation is one phase (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 20.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 5.0
+      },
+      {
+        "name": "A-TM_tool_generation",
+        "minutes": 330.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "closeout_and_teardown",
+        "minutes": 12.5
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 12.5,
+    "expected_usd": 6.4492,
+    "soft_stop_usd": 8.2885,
+    "artifact_recovery_reserve_usd": 0.1817,
+    "hard_terminate_usd": 8.4702
+  },
+  "quoted_price_per_hour": 1.09,
+  "gpu_count": 1,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 89.5700177862,
+    "current_spend_per_hr": 0.039,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 8.4702,
+    "ok": true,
+    "why": "the provider account holds $89.5700 against the $8.4702 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "account_resources": {
+    "checked": true,
+    "known": true,
+    "pods": [],
+    "network_volumes": [
+      {
+        "kind": "network_volume",
+        "id": "4rhubprswo",
+        "name": "aad-a1-phase",
+        "size": 350,
+        "dataCenterId": "US-TX-3"
+      },
+      {
+        "kind": "network_volume",
+        "id": "am5m373kuq",
+        "name": "aad-h1pa",
+        "size": 55,
+        "dataCenterId": "EUR-IS-2"
+      }
+    ],
+    "error": null,
+    "accounted": [
+      "4rhubprswo",
+      "am5m373kuq"
+    ],
+    "unaccounted": [],
+    "ok": true,
+    "why": "the provider account holds only the 2 resource(s) the records account for"
+  },
+  "prechecks": [
+    {
+      "check": "the_artifact_is_this_studys_and_unused",
+      "ok": true,
+      "message": "a A-TM tool_generation artifact, unused"
+    },
+    {
+      "check": "the_gpu_and_price_are_the_grants",
+      "ok": true,
+      "message": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "check": "all_in_within_cap",
+      "ok": true,
+      "message": "all-in $8.6530 over 467.5 min, inside $9.13"
+    },
+    {
+      "check": "the_study_identity_is_the_authorized_one",
+      "ok": true,
+      "message": "study identity 2a24101c2c92 is the authorized one"
+    },
+    {
+      "check": "bound_files_are_in_the_session_commit",
+      "ok": true,
+      "message": "every bound file is in the session commit"
+    },
+    {
+      "check": "the_project_cap_holds_now",
+      "ok": true,
+      "message": "$9.13 inside the envelope ($27.5265) and the $30.7414 the project cap leaves now"
+    },
+    {
+      "check": "the_kind_records_are_the_bound_ones",
+      "ok": true,
+      "message": "the kind's bound records are the committed ones"
+    },
+    {
+      "check": "the_pilot_runs_on_an_l40s",
+      "ok": true,
+      "message": "one NVIDIA L40S"
+    },
+    {
+      "check": "the_pilot_placement_is_the_planned_one",
+      "ok": true,
+      "message": "no network volume; drawn in any Secure Cloud datacenter"
+    },
+    {
+      "check": "the_bound_task_file_is_relayed",
+      "ok": true,
+      "message": "task file 8ee8476e844c relayed at transfer/tool_generation/hybrid/8ee8476e844c267d/tasks.jsonl"
+    }
+  ],
+  "all_in_bound": {
+    "billable_minutes": 467.5,
+    "price_per_hour": 1.09,
+    "container_disk_gb": 150,
+    "gpu_usd": 8.4929,
+    "disk_usd": 0.16,
+    "all_in_usd": 8.653,
+    "highest_price_inside_cap": 1.15
+  },
+  "live_position": {
+    "fetched_utc": "2026-11-05T07:43:29+00:00",
+    "provider_billed_usd": 819.6859,
+    "committed_usd": 837.2586,
+    "project_cap_usd": 868.0,
+    "project_remaining_usd": 30.7414,
+    "account_pods": [],
+    "account_volumes": [
+      "4rhubprswo",
+      "am5m373kuq"
+    ],
+    "balance_usd": 89.5700177862,
+    "spend_per_hour": 0.039,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 2,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+      "subrun record": 25,
+      "reconciliation": 30
+    }
+  },
+  "envelope": {
+    "ceiling_usd": 79.5289,
+    "spent_usd": 52.0024,
+    "remaining_usd": 27.5265,
+    "runs": [
+      {
+        "run_id": "a_inputs_20261101_125520",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_inputs_20261101_125709",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_inputs_20261101_125916",
+        "usd": 0.5713
+      },
+      {
+        "run_id": "a_search_20261101_142659",
+        "usd": 0.1973
+      },
+      {
+        "run_id": "a_search_20261101_153803",
+        "usd": 23.9553
+      },
+      {
+        "run_id": "a_supplement_20261031_091618",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_supplement_20261031_092108",
+        "usd": 5.7873
+      },
+      {
+        "run_id": "a_supplement_20261031_144618",
+        "usd": 10.0816
+      },
+      {
+        "run_id": "a_tool_generation_20261105_074146",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_tool_generation_t2507_20261104_194048",
+        "usd": 0.1459
+      },
+      {
+        "run_id": "a_tool_generation_t2507_20261104_195411",
+        "usd": 1.097
+      },
+      {
+        "run_id": "a_tool_generation_t2507_20261105_064829",
+        "usd": 0.3752
+      },
+      {
+        "run_id": "a_tool_generation_t2507_20261105_072112",
+        "usd": 0.3385
+      },
+      {
+        "run_id": "a_tool_pilot_20261104_140656",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_tool_pilot_20261104_164531",
+        "usd": 0.4328
+      },
+      {
+        "run_id": "a_train_a1_20261102_165858",
+        "usd": 0.2436
+      },
+      {
+        "run_id": "a_train_a1_20261102_183510",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_train_a1_20261102_184122",
+        "usd": 8.7766
+      }
+    ]
+  },
+  "precheck": {
+    "relay_needed": [
+      "transfer/tool_generation/hybrid/8ee8476e844c267d/tasks.jsonl"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 1
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1646
+    },
+    "local_assets": [
+      "artifacts/stages/stage-3/eval/battery_v2"
+    ],
+    "local_missing": []
+  },
+  "acquisition": {
+    "create_attempts": 10,
+    "create_retry_seconds": 60.0,
+    "attempts": [
+      {
+        "draw": 1,
+        "attempt": 1,
+        "request": "d1a10b7c3c",
+        "placement": [],
+        "request_utc": "2026-11-05T07:43:34+00:00",
+        "terminate_after_utc": "2026-11-05T15:29:49Z",
+        "outcome": "created",
+        "pod_id": "jsudkf50ehi314"
+      }
+    ]
+  },
+  "pod_id": "jsudkf50ehi314",
+  "actual_price_per_hour": 1.09,
+  "pod_record": {
+    "dataCenterId": "US-NC-1",
+    "createdAt": "2026-11-05T07:43:35.058Z",
+    "costPerHr": null,
+    "cost": 1.09,
+    "machineId": null,
+    "name": "aadistill-stage2_teacher_modes_tm-tool_generation-d1a10b7c3c"
+  },
+  "start": {
+    "basis": "provider createdAt",
+    "request_utc": "2026-11-05T07:43:34+00:00",
+    "provider_created_utc": "2026-11-05T07:43:35.058Z",
+    "start_epoch": 1793864615.058
+  },
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/40abda2f-efac-4413-af84-45085d7650d4/scratchpad/t2507/scr_a_tool_generation_20261105_074146/watchdog_jsudkf50ehi314.jsonl"
+  ],
+  "watchdog_owns_pod": "jsudkf50ehi314",
+  "billed_window_deadline_utc": "2026-11-05T15:29:50Z",
+  "terminate_after_utc": null,
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_4197e782.bundle",
+    "PHASE_KIND": "tool_generation",
+    "SESSION_ASSETS": "battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_20261105_074146/governance/authorization.json",
+    "SESSION_COMMIT": "4197e78262091a24ceb62af81af0d839080cf690",
+    "SESSION_KIND": "stage2_teacher_modes_tm",
+    "SESSION_PLAN_HASH": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/tool_generation/hybrid\",\"path\":\"transfer/tool_generation/hybrid/8ee8476e844c267d/tasks.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8ee8476e844c267d5e61ef1fc9ca48c4da26921e5d5f57d2bd96b7da1e8eeafc\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage2_teacher_modes_tm.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_MODEL": "Qwen/Qwen3-4B",
+    "TEACHER_REVISION": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage2_teacher_modes_tm_driver",
+    "pid": 1978,
+    "workdir": "/workspace/aad",
+    "command": "mkdir -p /workspace/teacher_modes && cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts:/workspace/aad/scripts/stages/stage-1 /opt/train/bin/python scripts/stages/stage-2/teacher_modes/tool_session.py --authorization /workspace/aad/logs/stages/stage-2/teacher_modes/runs/a_tool_generation_20261105_074146/governance/authorization.json --lineage hybrid --deadline-minutes 330.0 --durable-root /workspace/teacher_modes --status /workspace/stage2_teacher_modes_tm.status; grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' /workspace/stage2_teacher_modes_tm.status || echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> /workspace/stage2_teacher_modes_tm.status",
+    "log_path": "/workspace/stage2_teacher_modes_tm_run.log",
+    "status_path": "/workspace/stage2_teacher_modes_tm.status",
+    "pid_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.job.json",
+    "exit_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.exit",
+    "started_utc": "2026-11-05T07:49:45Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "secured": {
+    "tool_H-N_r1_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "7ed434323881d151ae8b46f35b30d39c7213ba3b4a705ed36020fae83026109b"
+    },
+    "tool_H-N_r1_pass0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "0ff8e73fdb61a5838ba030f9f9bddd12ca4bb81ecd8445378ae646c4269043cf"
+    },
+    "tool_H-N_r1_pass0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "00d3d820bc84f43952aa0807d9769d1ca1e6febdd1ec3bd9ecac485908d5e163"
+    },
+    "tool_H-N_r1_pass0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "7e487a9f36354abcdd55857784816f01bb95a7b39158b6442f7153f84f746f6f"
+    },
+    "tool_H-N_r1_pass0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "cc4cc43f97e1e8b3e9072c03780bf0390f629ed8101de5e0f57970bf66044cc0"
+    },
+    "tool_H-N_r1_pass0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "6ca5f59685419905a482d7a46d9212e3ef27eabd59c7dc1d359dcb9523c7ce24"
+    },
+    "tool_H-N_r1_pass0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "b759661e985eeda0c73b32bb5a245a3428d25a12fe789d100ccc8eb8237ac8e0"
+    },
+    "tool_H-N_r1_pass0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "ac9fbfa5c7df74ab9c119fdb8918f0f2375c83296400deceb27f37effe338881"
+    },
+    "tool_H-N_r1_pass0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "8364ffc8cdd3abed3b1c2020833d65fe47176c86cbb12aff4c42739faa1f12dc"
+    },
+    "tool_H-N_r1_pass0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "bad5309b0b9f55b32e72f6963246bf27b27d9ec2aeef079ff7b1a6976815c2ad"
+    },
+    "tool_H-N_r1_pass0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "9ebe8a8f970854a87c1c1878d9cfe79226521f4986037a3e0904c6d611103000"
+    },
+    "tool_H-N_r1_pass0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "a3b2156a2f6a9a1c63d0d8cf9cde6bec4c3b5dd52e5412e99a193dadd91e2425"
+    },
+    "tool_H-N_r1_pass0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "1f4e14b8cdef7a495a49ab15e1394df868d2b00d961ebb608b3a2330bf05160d"
+    },
+    "tool_H-N_r1_pass0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "554e8cf88b117c2b1b5e1d548122d1c00b2b76962a87d5ad848b76a3c0b16d12"
+    },
+    "tool_H-N_r1_pass0.part0014.jsonl": {
+      "ok": true,
+      "sha256": "b422e3a979cd8783d55c0a39d6af509864a1baf7cfa446b62c07baf0e972c62a"
+    },
+    "tool_H-N_r1_pass0.part0015.jsonl": {
+      "ok": true,
+      "sha256": "4c0b47e0d5895360d90ee8ad37775bf7b939e61865ed5d567bfe110a92c73500"
+    },
+    "tool_H-N_r1_pass0.part0016.jsonl": {
+      "ok": true,
+      "sha256": "e86b1ca04084f5efe189d05202d872e3cf7f659b66d5e20a752f4688e51f5e3f"
+    },
+    "tool_H-N_r1_pass0.part0017.jsonl": {
+      "ok": true,
+      "sha256": "b4f6ec66b60b0ea738866701e8c8d5246eb1b52e687b079a51d63e790d69c5f2"
+    },
+    "tool_H-N_r1_pass0.part0018.jsonl": {
+      "ok": true,
+      "sha256": "2911012634bcc25590fef5ca441007187599a53c8cb33f36f18f4ee2f57f844d"
+    },
+    "tool_H-N_r1_pass0.part0019.jsonl": {
+      "ok": true,
+      "sha256": "34613550a601efe362b03ceaef098c6817f633240ccdddb63abf0b66851dd028"
+    },
+    "tool_H-N_r1_pass0.part0020.jsonl": {
+      "ok": true,
+      "sha256": "6d78992e11d4da8da1438d2858428f1cd46ad9d3d41b9877903a0f1ffe7ca5ec"
+    },
+    "tool_H-N_r1_pass0.part0021.jsonl": {
+      "ok": true,
+      "sha256": "a6601d70845f6ae49d345488bab4265314b7cedf3f372dc2f6bcfbc29d0ea0d5"
+    },
+    "tool_H-N_r1_pass0.part0022.jsonl": {
+      "ok": true,
+      "sha256": "57a6d4d9781d09a80f065067ddae4d1321ba79fe1fc1ccaf10def3442044fc89"
+    },
+    "tool_H-N_r1_pass0.part0023.jsonl": {
+      "ok": true,
+      "sha256": "e81960344a45d31019d84a949a76bbf77cf628c6274269ee2da4b7e08cfa02a9"
+    },
+    "tool_H-N_r1_pass0.part0024.jsonl": {
+      "ok": true,
+      "sha256": "fb7d7e5479d4a9944036362fb75aafc1e7a5c3829d4afa0e612f65fa6000465a"
+    },
+    "tool_H-N_r1_pass0.part0025.jsonl": {
+      "ok": true,
+      "sha256": "752a8b83fa4f2984a2de3c9bfba9b2673c933482136a524835a1669116b79fba"
+    },
+    "tool_H-N_r1_pass0.part0026.jsonl": {
+      "ok": true,
+      "sha256": "141fb08585c0eaaa770cba9e67c35920b9e0b29855a2bbd9ed1298c07f5ce8fe"
+    },
+    "tool_H-N_r1_pass0.part0027.jsonl": {
+      "ok": true,
+      "sha256": "aa1f18e0ab9bdea0ddc73b8b3a611f37ab7e4b475b5573e68ece6f6f88407920"
+    },
+    "tool_H-N_r1_pass0.part0028.jsonl": {
+      "ok": true,
+      "sha256": "8e3501d0efd4041493d1aece582751de344150f40dcd47d9ebd4113c71f40c3a"
+    },
+    "tool_H-N_r1_pass0.part0029.jsonl": {
+      "ok": true,
+      "sha256": "5c9cde5afd3b3190b170d5f33010e7379622aab3db5c4c4e16691c04d2f03073"
+    },
+    "tool_H-N_r1_pass0.part0030.jsonl": {
+      "ok": true,
+      "sha256": "24bc102320e71b03a2e7f7d99fdc34bbe88e0338af338b5751482ff03e05ef9f"
+    },
+    "tool_H-N_r1_pass0.part0031.jsonl": {
+      "ok": true,
+      "sha256": "bfbe28fa77c548441c1dd39f33e686f68c976fb3b9c4ef19db04798ca098dd43"
+    },
+    "tool_H-N_r1_pass0.part0032.jsonl": {
+      "ok": true,
+      "sha256": "f571993dcaf2646664800b91aa518a53f77e8513e20291c39e7f50fea997dacc"
+    },
+    "tool_H-N_r1_pass0.part0033.jsonl": {
+      "ok": true,
+      "sha256": "57b7d575fb0e753eca2cf96ca0e93154272b21ba65c0966760ba082c54c1f68d"
+    },
+    "tool_H-N_r1_pass0.part0034.jsonl": {
+      "ok": true,
+      "sha256": "38ae16389bd0aef5d90c7630c4e6e3eab37a6b4f5d237a46e8c7901d379c8f38"
+    },
+    "tool_H-N_r1_pass0.part0035.jsonl": {
+      "ok": true,
+      "sha256": "fd2792ef0d4cf252b0c8b58540dba3a3eee3d06a4dcf4e60297b3f4dbc435055"
+    },
+    "tool_H-N_r1_pass0.part0036.jsonl": {
+      "ok": true,
+      "sha256": "263cb5922924f4105929665dd6cdb6612c8acdae79dbfbc63e92619c1a1af657"
+    },
+    "tool_H-N_r1_pass0.part0037.jsonl": {
+      "ok": true,
+      "sha256": "06aad9f88b1bc3466ab2ca19cdcb4a16cbf09fe585f5c10b76c42adbb971f23b"
+    },
+    "tool_H-N_r1_pass0.part0038.jsonl": {
+      "ok": true,
+      "sha256": "f843a48d4b3af235bcfb5819dd70d74517a9ea3b94d1bd6dce48f43fcc6f8834"
+    },
+    "tool_H-N_r1_pass0.part0039.jsonl": {
+      "ok": true,
+      "sha256": "c40c75740a58fa0ad2caff2325e5a38401a99d0d81ad80d82e83c16c5a6e07bd"
+    },
+    "tool_H-N_r1_pass0.part0040.jsonl": {
+      "ok": true,
+      "sha256": "c839b8e4346a2a0babc106db97a03f7d80b4a8e395420edb88de2eb6862f3970"
+    },
+    "tool_H-N_r1_pass0.part0041.jsonl": {
+      "ok": true,
+      "sha256": "1ee56dbd5f3aa48e969dffd7e8715d06402f78095b2ef85e9d791012d9049c6a"
+    },
+    "tool_H-N_r1_pass0.part0042.jsonl": {
+      "ok": true,
+      "sha256": "e9335497a6914d5a0bc076f9eca739ef74c348524a9d3b25dc0cf7b310d45b12"
+    },
+    "tool_H-N_r1_pass0.part0043.jsonl": {
+      "ok": true,
+      "sha256": "8e20b956e7485a6cf37185d89b243352b819263df981dbdba12edfe4cebf531b"
+    },
+    "tool_H-N_r1_pass0.part0044.jsonl": {
+      "ok": true,
+      "sha256": "b4703cc57029b82aedc4b90e30e076d67dd74ff0b692d6bff75c655e614245cd"
+    },
+    "tool_H-N_r1_pass0.part0045.jsonl": {
+      "ok": true,
+      "sha256": "6bb26e41ba6590338a4898bf305909020185ff2e3311cbd6379b18baeb4ebed2"
+    },
+    "tool_H-N_r1_pass0.part0046.jsonl": {
+      "ok": true,
+      "sha256": "37b157b30a96ccec0f7d4058aed696f00cdf2cb4f33008571221d52a172c69a9"
+    },
+    "tool_H-N_r1_pass0.part0047.jsonl": {
+      "ok": true,
+      "sha256": "4601f45ac57f939d5e763d842085e7420bad38b1eaa64a6e040c41dd3a634086"
+    },
+    "tool_H-N_r1_pass0.part0048.jsonl": {
+      "ok": true,
+      "sha256": "051c908ae5d53483133e0b5673ce8f0e38a5f9d58f65d270cb40db157cf74073"
+    },
+    "tool_H-N_r1_pass0.part0049.jsonl": {
+      "ok": true,
+      "sha256": "ddedd19be06f9c4de6d6957958b4c8b0790d342027a0366e9bd47ec455197192"
+    },
+    "tool_H-N_r1_pass0.part0050.jsonl": {
+      "ok": true,
+      "sha256": "0cc4a28063b0e52cde442e57c5dbce45023558a1f06a98ea02ea2107d70c67cb"
+    },
+    "tool_H-N_r1_pass0.part0051.jsonl": {
+      "ok": true,
+      "sha256": "859eb25fa933d29184e0e29e63074c44260ba994c0276f8325f880d9da930dfb"
+    },
+    "tool_H-N_r1_pass0.part0052.jsonl": {
+      "ok": true,
+      "sha256": "fee01ea1c96fe0cc4291d7bad4e5732406c09c79b12ac4476e52b7ae3ef29b4f"
+    },
+    "tool_H-N_r1_pass0.part0053.jsonl": {
+      "ok": true,
+      "sha256": "70c4780270d484dbba35fd8d2ab4b89c77cd37ae45f092c59f8587b5d02fe4a7"
+    },
+    "tool_H-N_r1_pass0.part0054.jsonl": {
+      "ok": true,
+      "sha256": "d0005dbee131c300d95aa325ffec34270414e1c4c9a9e9499b7aebb535aa70bb"
+    },
+    "tool_H-N_r1_pass0.part0055.jsonl": {
+      "ok": true,
+      "sha256": "710ff6c7db4bf7925e893b02c4caa27ca379a99b8c24d8f43d62489b2a2bb13c"
+    },
+    "tool_H-N_r1_pass0.part0056.jsonl": {
+      "ok": true,
+      "sha256": "3a139f4ea50a7244d74d5fb8f7048cd9c2f16a37e181811aef6929ebe8e825f5"
+    },
+    "tool_H-N_r1_pass0.part0057.jsonl": {
+      "ok": true,
+      "sha256": "e00eba519fb1ad0964aba8de24c52b3b474a43d47ef711c506ae43d412b8b758"
+    },
+    "tool_H-N_r1_pass0.part0058.jsonl": {
+      "ok": true,
+      "sha256": "dd92f37132df73228bca7ab09d0b1c2ced84796fe4d483f5ee1ccf96e378616e"
+    },
+    "tool_H-N_r1_pass0.part0059.jsonl": {
+      "ok": true,
+      "sha256": "1f9c3b9f90f208ebc25306de53e2ed2414d70a4014559a2eec11c13e405095a6"
+    },
+    "tool_H-N_r1_pass0.part0060.jsonl": {
+      "ok": true,
+      "sha256": "b2ab20ff3cced4407746793e13e556021c2db9690bd7451dd464f41ef3e6c5cb"
+    },
+    "tool_H-N_r1_pass0.part0061.jsonl": {
+      "ok": true,
+      "sha256": "bb52662dee3653f19892ac40368bbce9bf7fee8861e6171748fbd02db7bd4b92"
+    },
+    "tool_H-N_r1_pass0.part0062.jsonl": {
+      "ok": true,
+      "sha256": "43cec4ee2c66e07a95ff09ba2296bda04b871660280238c28c48d25d5b1642dc"
+    },
+    "tool_H-N_r1_pass0.part0063.jsonl": {
+      "ok": true,
+      "sha256": "3cbf7d3c5ffc494cb257f6d0e73ee3f207aa2e5cb22990e02e6e6ca29dd73663"
+    },
+    "tool_H-N_r1_pass0.part0064.jsonl": {
+      "ok": true,
+      "sha256": "b1d4492b48a9a4ed95a02ecdb801692813a287fa1e9fcad02e8315508cea9491"
+    },
+    "tool_H-N_r1_pass0.part0065.jsonl": {
+      "ok": true,
+      "sha256": "6dc76a9bdace106af83a1c5824d49775772182701468fc2a5d0c654974588eb1"
+    },
+    "tool_H-N_r1_pass0.part0066.jsonl": {
+      "ok": true,
+      "sha256": "db6fffda3c6c5cd81578ef69626a57056a68abd8aabc25263013caf58ab1aa81"
+    },
+    "tool_H-N_r1_pass0.part0067.jsonl": {
+      "ok": true,
+      "sha256": "f1a7c7dfefd5a464507e57741524126ed4973b143c810fc675088b32d796a91f"
+    },
+    "tool_H-N_r1_pass0.part0068.jsonl": {
+      "ok": true,
+      "sha256": "63a30755a1b56e3e2df3979ef0951a8888b7f80dc95f94e43b15a2f42d8d9c1c"
+    },
+    "tool_H-N_r1_pass0.part0069.jsonl": {
+      "ok": true,
+      "sha256": "014fd1137b044d5696a2790164f114bc0f41b148b8b3a695f39d0454f2f18e06"
+    },
+    "tool_H-N_r1_pass0.part0070.jsonl": {
+      "ok": true,
+      "sha256": "2c37715b1da86f314a84d9fc1a275847c124fc6b6d08491d3bfd855123e78222"
+    },
+    "tool_H-N_r1_pass0.part0071.jsonl": {
+      "ok": true,
+      "sha256": "a0cb0f8ccaaef368bfd056bacdbfe79c319c27f9260b6b0505a4ad353fdd84ad"
+    },
+    "tool_H-N_r1_pass0.part0072.jsonl": {
+      "ok": true,
+      "sha256": "6da3199f23fd4062874bc64aea0f86e9733c9f85b68f59992555d67017993769"
+    },
+    "tool_H-N_r1_pass0.part0073.jsonl": {
+      "ok": true,
+      "sha256": "54628468166e5d7befa5ec8cfad6aa7429759fb8d49ffdc24e76aac5bcf0d6d9"
+    },
+    "tool_H-N_r1_pass0.part0074.jsonl": {
+      "ok": true,
+      "sha256": "9de860ef7808886e53b30811b334d6bf0084baa64c6eb2657be815e4aabf65a7"
+    },
+    "tool_H-N_r1_pass0.part0075.jsonl": {
+      "ok": true,
+      "sha256": "d7dff7e642340316e2fff5fb003e53c773e53cbec08ca8b108d187fe38090791"
+    },
+    "tool_H-N_r1_pass0.part0076.jsonl": {
+      "ok": true,
+      "sha256": "967f97a1a472bbfe0774bf17639f7eecf3c6933b7b914d15bc16c855310b9838"
+    },
+    "tool_H-N_r1_pass0.part0077.jsonl": {
+      "ok": true,
+      "sha256": "aa5d0073b426f38709887f98b89b4d0a0629871d8a3cc02c1ef338191cb6b605"
+    },
+    "tool_H-N_r1_pass0.part0078.jsonl": {
+      "ok": true,
+      "sha256": "48fad4ef7073f2545dd69e72e0928a91d4a0e35e9cf0f251dbd779058abf4713"
+    },
+    "tool_H-N_r1_pass0.part0079.jsonl": {
+      "ok": true,
+      "sha256": "94ecf739614ade35cf9f0d03f466b717ac95d404f2bf5c936c3876436df24740"
+    },
+    "tool_H-N_r1_pass0.part0080.jsonl": {
+      "ok": true,
+      "sha256": "300979df958de3b1f3081fe5f85b2d03954513ef478da67549c9e5d02496ab3f"
+    },
+    "tool_H-N_r1_pass0.part0081.jsonl": {
+      "ok": true,
+      "sha256": "a4dc7333b4d10200e7251fb4a27fc024933b55af0b64de3fd1e91ccdb1cd928f"
+    },
+    "tool_H-N_r1_pass0.part0082.jsonl": {
+      "ok": true,
+      "sha256": "e67005baba1dcba720185b199d025881d6bb18ebc8dd9305f798114566219fff"
+    },
+    "tool_H-N_r1_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "4d7fa0bbe7201a1ceaf769c04549fbce441f7eb3f9eb12a3e521eb5775f08468"
+    },
+    "tool_H-N_r1_pass1.part0001.jsonl": {
+      "ok": true,
+      "sha256": "ea6f360ee3ffdce2b829ef693c999fd7c617dbc6773dada20caa8468f7139a03"
+    },
+    "tool_H-N_r1_pass1.part0002.jsonl": {
+      "ok": true,
+      "sha256": "4e0b6f5e72ad08f33d58515a3b3c53b4c4e5160a846d13050a80b127830849b8"
+    },
+    "tool_H-N_r1_pass1.part0003.jsonl": {
+      "ok": true,
+      "sha256": "19c5c193fd97dbbba5e80c154f12a255855eb811646aa46f1467ff35e9006678"
+    },
+    "tool_H-N_r1_pass1.part0004.jsonl": {
+      "ok": true,
+      "sha256": "14aa92526747aaa1dffcdd610d5b94d8b07624b1e6c83467c4522d8ca144d647"
+    },
+    "tool_H-N_r1_pass1.part0005.jsonl": {
+      "ok": true,
+      "sha256": "4eec1894dddf9920bff31e8e32f5ac697f6322ca3f30f825d7793093d3625c82"
+    },
+    "tool_H-N_r1_pass1.part0006.jsonl": {
+      "ok": true,
+      "sha256": "22729f249e778b33bc8d67c86ee7d8b60095c741ad9f03e8b4924be76ccac034"
+    },
+    "tool_H-N_r1_pass1.part0007.jsonl": {
+      "ok": true,
+      "sha256": "24d43ec9cc4729812621bc6bdf2870d20fe32d1c634d8a7c0d1ddae001aeb30d"
+    },
+    "tool_H-N_r1_pass1.part0008.jsonl": {
+      "ok": true,
+      "sha256": "d75628459b83012eb7dbef58ebfc01c9922b70546336e2bc7d03f70180b1d2be"
+    },
+    "tool_H-N_r1_pass1.part0009.jsonl": {
+      "ok": true,
+      "sha256": "b49d7a2daa595f10c7c20e7838eba94e7574221cc6716aa18e2aff9241517824"
+    },
+    "tool_H-N_r1_pass1.part0010.jsonl": {
+      "ok": true,
+      "sha256": "92b8f5252d587c3ac55ccacc2d983da6976d605ef2c8da7bc1094b800e7b5524"
+    },
+    "tool_H-N_r1_pass1.part0011.jsonl": {
+      "ok": true,
+      "sha256": "1af26ef6f1c78cbb7ed2d45830da4fbed4e9f430647dcbb38de85fc99cd857db"
+    },
+    "tool_H-N_r1_pass1.part0012.jsonl": {
+      "ok": true,
+      "sha256": "a5d7bbee3288e66ce2bb316bbe5c83a067499c0f62bf17eec3875bf0d6e45338"
+    },
+    "tool_H-N_r1_pass1.part0013.jsonl": {
+      "ok": true,
+      "sha256": "944fe79e3fb9a5942b7cfd5671770eb57ef228545228be0a818467e418964084"
+    },
+    "tool_H-N_r1_pass1.part0014.jsonl": {
+      "ok": true,
+      "sha256": "4863a5d0f6ce748f581a97e4406ea090b9d7595eecd6831aaa58b1911a964246"
+    },
+    "tool_H-N_r1_pass1.part0015.jsonl": {
+      "ok": true,
+      "sha256": "4939a1668372238d66902b339bd89ad824379bb97cb68cd734f4992a7aa95044"
+    },
+    "tool_H-N_r1_pass1.part0016.jsonl": {
+      "ok": true,
+      "sha256": "a558f52bab6579f50f41565b7e25fb85efd4f26966a5f05a0e2602ae2648dc07"
+    },
+    "tool_H-N_r1_pass1.part0017.jsonl": {
+      "ok": true,
+      "sha256": "cf540141768eddb4e5c9e33095de0824ab44fc458fd5e0e6d4820ddbb85808b9"
+    },
+    "tool_H-N_r1_pass1.part0018.jsonl": {
+      "ok": true,
+      "sha256": "20fda9c1f5355e32ffb836aa00113c1ce0d7c7e3e8aa016c6d90de4880c5aade"
+    },
+    "tool_H-N_r1_pass1.part0019.jsonl": {
+      "ok": true,
+      "sha256": "814a4ef58cd0cfbf5f6175f29e86c5c37e9f3f752097d08d883afd599da3c2f0"
+    },
+    "tool_H-N_r1_pass1.part0020.jsonl": {
+      "ok": true,
+      "sha256": "87f7fecb604d8a5c732cb01607d6276fc93369c689fd3ee740dbf8eceb8a2816"
+    },
+    "tool_H-N_r1_pass1.part0021.jsonl": {
+      "ok": true,
+      "sha256": "83c7111e1eb9c19d378a2b4883dfc88750bfcdcdd229629e1e66af894624e0e6"
+    },
+    "tool_H-N_r1_pass1.part0022.jsonl": {
+      "ok": true,
+      "sha256": "2277857359dcc4d06be3651a73fd266aacf3d5b8dcddfcc23f02088848986450"
+    },
+    "tool_H-N_r1_pass1.part0023.jsonl": {
+      "ok": true,
+      "sha256": "082ee806f576c980ef254829e607e74583845ff7a759167c7da4cfda9424a4f2"
+    },
+    "tool_H-N_r1_pass1.part0024.jsonl": {
+      "ok": true,
+      "sha256": "eb1732a88c3aeb1e2342491dbb3687b996f1d1b3646075014168162411a64571"
+    },
+    "tool_H-N_r1_pass1.part0025.jsonl": {
+      "ok": true,
+      "sha256": "88b1b15d708b1dac7b44969b7712506676fd13e20f038b02a048082fc9d5981e"
+    },
+    "tool_H-N_r1_pass1.part0026.jsonl": {
+      "ok": true,
+      "sha256": "c19437c183932a8b6929faef9e6e67e8cf11cb1806d3b485bb4c3fc2e7f14d70"
+    },
+    "tool_H-N_r1_pass1.part0027.jsonl": {
+      "ok": true,
+      "sha256": "104951262b24c91f35b0a86961e118c908fca7c512de0a00ef1c6fe502564e4e"
+    },
+    "tool_H-N_r1_pass1.part0028.jsonl": {
+      "ok": true,
+      "sha256": "0a5f4e6015a55c4ef757c8d33b5ce2b83404be2690028470059feaa324ebe85b"
+    },
+    "tool_H-N_r1_pass1.part0029.jsonl": {
+      "ok": true,
+      "sha256": "219bc7dcfbe470804c8136518341b007a3fd85255c3f9abfa63c74bbb540d56c"
+    },
+    "tool_H-N_r1_pass1.part0030.jsonl": {
+      "ok": true,
+      "sha256": "59cd4de44dd4646f3ab0f3fbd378f05707cc0b817f6f3410db973524841d2b13"
+    },
+    "tool_H-N_r1_pass1.part0031.jsonl": {
+      "ok": true,
+      "sha256": "e7ef703b623ff2d867e1ba1b9e51d7312befa769026a020795e05f89785c8b88"
+    },
+    "tool_H-N_r1_pass1.part0032.jsonl": {
+      "ok": true,
+      "sha256": "b7ce6939db5f2a3f7f952147a1f2a7f02f3c24b1ff13a8294ee98e5542e5c642"
+    },
+    "tool_H-N_r1_pass1.part0033.jsonl": {
+      "ok": true,
+      "sha256": "7a3d7bc85e9c1af1fc04c42a7566a0b46b348f27a61095f9c522c91666a21cdb"
+    },
+    "tool_H-N_r1_pass1.part0034.jsonl": {
+      "ok": true,
+      "sha256": "aafeafe4ed30bd71b0940315a924e2e4be5886da047943ebf01765d8ae64a0e0"
+    },
+    "tool_H-N_r1_pass1.part0035.jsonl": {
+      "ok": true,
+      "sha256": "dc5ce659c5cb24042277a8d6d89fba3284a0538802eeca93b87a8a77eeb2f275"
+    },
+    "tool_H-N_r1_pass1.part0036.jsonl": {
+      "ok": true,
+      "sha256": "c226b2212de9786cbb06e014addd3fd6fe68f11b3711a6600ad5525a0863fd4c"
+    },
+    "tool_H-N_r1_pass1.part0037.jsonl": {
+      "ok": true,
+      "sha256": "3ec4b89bf58cfced3eb4d604fd2f4d1bd2670c97d2afe1bfdc60a77225a73aab"
+    },
+    "tool_H-N_r1_pass1.part0038.jsonl": {
+      "ok": true,
+      "sha256": "95357b9202164f98d92bf70f1188b50492bccf1abc94e2a4dbce673e4299bc63"
+    },
+    "tool_H-N_r1_pass1.part0039.jsonl": {
+      "ok": true,
+      "sha256": "b43686085a44782c9d03545aad8fff1bb3137495171392fd3455651ec901c0e6"
+    },
+    "tool_H-N_r1_pass1.part0040.jsonl": {
+      "ok": true,
+      "sha256": "fae66c387383681c4d8fa713669df1a3b2cad9e4e2e525fe8ad7c42ee048d651"
+    },
+    "tool_H-N_r1_pass1.part0041.jsonl": {
+      "ok": true,
+      "sha256": "6ff3096a213501a0946b2c9a7ffed0ba9bba49853b7587d3d91384a14bd79730"
+    },
+    "tool_H-N_r1_pass1.part0042.jsonl": {
+      "ok": true,
+      "sha256": "5054437ab9680053bdde291e882c8fab17668c2d427acd16e966b0bbc06edbf0"
+    },
+    "tool_H-N_r1_pass1.part0043.jsonl": {
+      "ok": true,
+      "sha256": "1de923f99861c98eb1df180987cd0d1f6f383e56a8bd8998aa809e103ad50a2e"
+    },
+    "tool_H-N_r1_pass1.part0044.jsonl": {
+      "ok": true,
+      "sha256": "28091ec37de3c07ea613b65887b1f08e7b2fe717e4f943e09c13b7b427fdb082"
+    },
+    "tool_H-N_r1_pass1.part0045.jsonl": {
+      "ok": true,
+      "sha256": "af71d10ea0e04a1890161ee0e6b3a33e05adf32ea603d20fb9468914c1fe55da"
+    },
+    "tool_H-N_r1_pass1.part0046.jsonl": {
+      "ok": true,
+      "sha256": "21b16db12dfd1f710ab50d7105197ffaa6d960f35b33042b7bda358247db850f"
+    },
+    "tool_H-N_r1_pass1.part0047.jsonl": {
+      "ok": true,
+      "sha256": "61ea4b2240d9eb054f1b4c583985daa8164b6ce87611631c0854b8ed142a57f6"
+    },
+    "tool_H-N_r1_pass1.part0048.jsonl": {
+      "ok": true,
+      "sha256": "da4c7cab7b9de0437eb6fab26318e391e18efb0732c7ad626a2e997a65c3e931"
+    },
+    "tool_H-N_r2_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "473e439bb93cffe9c173281d76691ccee2b36892f84d491a633594b7bece6cb9"
+    },
+    "tool_H-N_r2_pass0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "98102af1a7c0538a4a435edf49dd1133e9f3a2c60595adb2bb57da8bbdaae02b"
+    },
+    "tool_H-N_r2_pass0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "6f5f3849c4a6835220ff7346ad9ce17cd0ea7da9183eba61d80c8bd7712ca36f"
+    },
+    "tool_H-N_r2_pass0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "b18a7c1f1df13af1dd61df1b78a00b6cd5684d46673d6d0922e81d774b456d77"
+    },
+    "tool_H-N_r2_pass0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "fd39b10fec4b41b728db3368d4127bda4014879c209e6502c967dcacd2d53450"
+    },
+    "tool_H-N_r2_pass0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "e469b2b378e43f7eaf7c5fb2f72b70cc273f86f95531f8633945365838ef7352"
+    },
+    "tool_H-N_r2_pass0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "38066a56f87bbcb5c02499d3f6e5f56f72e2b0653b182627ffc35b5060a74596"
+    },
+    "tool_H-N_r2_pass0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "ad5e721ac9304bfbc544e4abd83825b34f76c8bf7eebc032fca84445e4eabc23"
+    },
+    "tool_H-N_r2_pass0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "c0362fc4c5b8acc6e31f361fb6688ed64d67340f6d1551610e0b9d8852e9b06b"
+    },
+    "tool_H-N_r2_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "b807119497a9696fe2692c121e6ce469bd7b212d2a257e9809b551fb79e5895f"
+    },
+    "tool_H-N_r2_pass1.part0001.jsonl": {
+      "ok": true,
+      "sha256": "06c0c818146beeae268be54f7a898cfe22aea4618a624eb420249b9d6a6dfe31"
+    },
+    "tool_H-N_r2_pass1.part0002.jsonl": {
+      "ok": true,
+      "sha256": "1b1887bbaccfc16a2084fb2189c1d70cebfe8de293439aefd6659ecbd28066d5"
+    },
+    "tool_H-N_r2_pass1.part0003.jsonl": {
+      "ok": true,
+      "sha256": "96f3a665a26099215782d53557658d8c7f18b2cfd458dbcada33922cd52e3c11"
+    },
+    "tool_H-N_r2_pass1.part0004.jsonl": {
+      "ok": true,
+      "sha256": "441cc922869b977a99b3a052c0dfe9ac111cf4a51955dfdfaedf20c4899f76bd"
+    },
+    "tool_H-N_r2_pass1.part0005.jsonl": {
+      "ok": true,
+      "sha256": "3b330deea2891c5e919f76b140e0e29ac73579c3a2d08c7e6354def7b8dbc6bd"
+    },
+    "tool_H-N_r2_pass1.part0006.jsonl": {
+      "ok": true,
+      "sha256": "cbbf4dffb5f3066c40673619f185d45c4ac3dd1066618b8f048b4bb0d7146d7a"
+    },
+    "tool_H-N_r3_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "9d153d944284538cbafe295d6d15d69991ac0d11ffa3a66663fd0179e21275b3"
+    },
+    "tool_H-N_r3_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "8c7939e3a001de9cdf9dcfe4decb3dcba9022811d73dff1103d55d492f7db180"
+    },
+    "tool_H-N_r4_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "d74aa4b70b568294bfc3d27bb0e93cd9aaf5393b329e075865b421b69db31e4d"
+    },
+    "tool_H-N_r4_pass0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "2c18ad18ab8ea5749b918f22234b82c60a75bb03048fdb882d32935d0c4db593"
+    },
+    "tool_H-N_r4_pass0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "5b76e2316e36edfbfb51c040d2d3763586ba2366981d131f8333de08f138a6bc"
+    },
+    "tool_H-N_r4_pass0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "d206b36842f943b8bcfc566ed60bd4597891dc0bb2e6b874e73618b71ca58ea9"
+    },
+    "tool_H-N_r4_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "a732adc17b8c2a2f52ec5a3b81cb5760799944cbecc7370e489df0e0b57a3aff"
+    },
+    "tool_H-N_r4_pass1.part0001.jsonl": {
+      "ok": true,
+      "sha256": "984d94ea74c608347ced927b2f5ff54bba253155815661c86e963087239c723b"
+    },
+    "tool_H-N_r4_pass1.part0002.jsonl": {
+      "ok": true,
+      "sha256": "547e3e35c7857f54aa1fa2e8969771243a52cc853aa2864da6386f648ce97318"
+    },
+    "tool_H-T_r1_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "03ee1c3af63d7d69787238aefc015bbb41f5f57509664c6d0d2ca9e848209c37"
+    },
+    "tool_H-T_r1_pass0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "b6e852bf6f50fc644ed7c071b35d8d07712b14fa2c0ecf2e0ce98ad1d6f95119"
+    },
+    "tool_H-T_r1_pass0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "065c901e587b19cfebf5ae3b54eb4588f61f40db0895b5ac7b295d5224248fff"
+    },
+    "tool_H-T_r1_pass0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "9e4cd662248c08e0afcfeabd1d9493255a06381dd3f8b1dc0bb71db636936d47"
+    },
+    "tool_H-T_r1_pass0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "02c75f9188ace8343528bc4f83495f8fcf791518649e74c9452c36528cae1280"
+    },
+    "tool_H-T_r1_pass0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "ceaa0590fb5260bb2992631b2a511f97d949bd1f06cd95a64e1ee56f8c4c39c9"
+    },
+    "tool_H-T_r1_pass0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "cce0e2b7a5058165e206010b1f0f3fe2f8dc55a5e2509b6f82162ed8f97d6da5"
+    },
+    "tool_H-T_r1_pass0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "8e9765f0f79e61b3cbaa8ed92a29cdff527f3d95ca9490c3f56cf463bfe1c4a0"
+    },
+    "tool_H-T_r1_pass0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "ffb0cc4e028ff5917e5c19fba5a3f03aee81e2d28486d9d9dc01ae3accd34ed4"
+    },
+    "tool_H-T_r1_pass0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "4526993a8c1ad9b6bc317dc564c4ae64cdc13616b1f5b4c3058ff3df8a27a405"
+    },
+    "tool_H-T_r1_pass0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "358ccd4b568c29f6abbc69d789a03b756d8ae0a3c69cde595f267bd152be2f00"
+    },
+    "tool_H-T_r1_pass0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "249d87762393c579b7ace8ed0e1b31457d7e7b5a461d831b83ca60eefd1f89a7"
+    },
+    "tool_H-T_r1_pass0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "b3ac8a7157c7e30f42246eee93e7f7f72a7429d7cc974d21df0e43e6f59fcd83"
+    },
+    "tool_H-T_r1_pass0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "005e658cb86b75ef8d185af1ae533f197d98bd347d161e70a38930d6fb02d9d4"
+    },
+    "tool_H-T_r1_pass0.part0014.jsonl": {
+      "ok": true,
+      "sha256": "27d23d50d5c5a41ba3eae551749c6b163e743a183a40e16d247d2b82ba240fb7"
+    },
+    "tool_H-T_r1_pass0.part0015.jsonl": {
+      "ok": true,
+      "sha256": "cce53e8357db7163a8bca584a168faf62adf267976c7f3d572ead2f00918a4dd"
+    },
+    "tool_H-T_r1_pass0.part0016.jsonl": {
+      "ok": true,
+      "sha256": "778a69bd57663e00b14d5518a57740202fd5cbb1edfc448df0dfef8b0ddd4f4e"
+    },
+    "tool_H-T_r1_pass0.part0017.jsonl": {
+      "ok": true,
+      "sha256": "5d51d6b8d18485dfad83145db0c3ac2dc869e3c39095b2fe649796fd630ab171"
+    },
+    "tool_H-T_r1_pass0.part0018.jsonl": {
+      "ok": true,
+      "sha256": "e57df9da70ad5b97e9e941118fb205323d73930d6ff9e9a3b22ff38a22c376be"
+    },
+    "tool_H-T_r1_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "107e60ef3e940d0067ee66cdcec943a7efc83c4cbc8ba0803701a56077dc2e29"
+    },
+    "tool_H-T_r1_pass1.part0001.jsonl": {
+      "ok": true,
+      "sha256": "7223d047e30befd10f7cadbd3ad9fdd05c35691adad1cfd06014fea5061c7882"
+    },
+    "tool_H-T_r1_pass1.part0002.jsonl": {
+      "ok": true,
+      "sha256": "3a22b96ae6965c538d6521705a3b9f77038d30132f5e3eb0ff470a243e840868"
+    },
+    "tool_H-T_r1_pass1.part0003.jsonl": {
+      "ok": true,
+      "sha256": "fbdfe38502687e61a0da03b12914e6cd1db0a0b9d338b2da481c6a82381fe356"
+    },
+    "tool_H-T_r1_pass1.part0004.jsonl": {
+      "ok": true,
+      "sha256": "38aeb2afe9c582a5356aef6a55af819893162ae8e939f63ac729c13ed182b3eb"
+    },
+    "tool_H-T_r1_pass1.part0005.jsonl": {
+      "ok": true,
+      "sha256": "6084ceb82a19f57c63b632f2d0c50f81c55c4bdc11e51d400fb85c59a55d52ed"
+    },
+    "tool_H-T_r1_pass1.part0006.jsonl": {
+      "ok": true,
+      "sha256": "b7c32848294fa13130d4c2de0f3dd4d178c4392b9d478bad07286c4142fedc78"
+    },
+    "tool_H-T_r1_pass1.part0007.jsonl": {
+      "ok": true,
+      "sha256": "f082eff27a2db600bccb7c7121cc3d6acdca1695a28f8b2d4870883db9912605"
+    },
+    "tool_H-T_r1_pass1.part0008.jsonl": {
+      "ok": true,
+      "sha256": "e86c2ecab26b18a446279599c529a5b780bbda9b0344cbe1c3a7bb7b680990d8"
+    },
+    "tool_H-T_r1_pass1.part0009.jsonl": {
+      "ok": true,
+      "sha256": "6abd4da536fee57fcc680d9108f8d4facf4e726d9b0eda9cbc808575262e905c"
+    },
+    "tool_H-T_r1_pass1.part0010.jsonl": {
+      "ok": true,
+      "sha256": "e9524a995a0844a6c4ca24d38a085d59dc8d31f7d01fc75bfbe966c3c0544b10"
+    },
+    "tool_H-T_r2_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "006e7811cf2b3e9214e666080c285e28655c0cadf9800fb7f0e7470525587cf8"
+    },
+    "tool_H-T_r2_pass0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "389f1799030ce67058c62fd86349160869d389e781c1dccc883bb9b9355ce419"
+    },
+    "tool_H-T_r2_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "02af5f440ec2e54b5017d7252d5d164a52338c445acae04d2932338b80a0b804"
+    },
+    "tool_H-T_r2_pass1.part0001.jsonl": {
+      "ok": true,
+      "sha256": "79c1b95726e783440d170d635575e964ab4c802e1d64241a44c49fe4c06e746e"
+    },
+    "tool_H-T_r3_pass0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "3e3de29f0c2c7944bbd024a300f2c3c54455bd5fa3b61162f2c5d8d90dd0637a"
+    },
+    "tool_H-T_r3_pass1.part0000.jsonl": {
+      "ok": true,
+      "sha256": "a624e0f86acb32181213362c8387712197c148c9868acf6f8528e2ce4c17efa1"
+    }
+  },
+  "listing_unknown": [
+    "tool_generation_hybrid"
+  ],
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "runner_logs": {
+    "tool_H-N_r1_pass0.seg0.log": true,
+    "tool_H-N_r1_pass1.seg0.log": true,
+    "tool_H-N_r2_pass0.seg0.log": true,
+    "tool_H-N_r2_pass1.seg0.log": true,
+    "tool_H-N_r3_pass0.seg0.log": true,
+    "tool_H-N_r3_pass1.seg0.log": true,
+    "tool_H-N_r4_pass0.seg0.log": true,
+    "tool_H-N_r4_pass1.seg0.log": true,
+    "tool_H-T_r1_pass0.seg0.log": true,
+    "tool_H-T_r1_pass1.seg0.log": true,
+    "tool_H-T_r2_pass0.seg0.log": true,
+    "tool_H-T_r2_pass1.seg0.log": true,
+    "tool_H-T_r3_pass0.seg0.log": true,
+    "tool_H-T_r3_pass1.seg0.log": true
+  },
+  "files_secured": {
+    "tool_generation": true
+  },
+  "required_products_secured": {
+    "ok": false,
+    "why": "not secured off-pod: [] ['tool_generation_hybrid']; secured: tool_generation"
+  },
+  "artifact_loss_risk": {
+    "condition": "PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK",
+    "why": "not secured off-pod: [] ['tool_generation_hybrid']; secured: tool_generation",
+    "fetched": 0,
+    "note": "the bounded fetch ran and did not secure what this session owes off-pod; the pod is deleted anyway because an unbounded hold is a worse failure, and this record is what makes the risk visible"
+  },
+  "teardown_gate": {
+    "allowed": false,
+    "emergency": false,
+    "failed_check": "required_products_secured",
+    "reason": "teardown blocked at 'required_products_secured'; the pod must not be deleted while a required artifact is only on it",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": false,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 0,
+    "missing": [],
+    "still_being_written": []
+  },
+  "blocked_teardown_ownership": {
+    "pod_id": "jsudkf50ehi314",
+    "pid": 1221035,
+    "owned": true,
+    "why": "watchdog pid 1221035 is live and names jsudkf50ehi314",
+    "hard_minutes": 466.25
+  },
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-11-05T10:31:18+00:00"
+}

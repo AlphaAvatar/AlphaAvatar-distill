@@ -1,0 +1,100 @@
+{
+ "identity": {
+  "label": "A1-s20260726",
+  "model": "/runpod-volume/teacher_modes/v2_units/A1-s20260726/evaluation/package",
+  "revision": null,
+  "mode": "eval",
+  "tasks_file": "/workspace/aad/data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
+  "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+  "context_resolution": {
+   "resolved_context": 8192,
+   "context_source": "trained_block_len",
+   "config_max_position_embeddings": 40960,
+   "rope_scaling_factor": null,
+   "architectural_context": 40960,
+   "trained_context": 8192,
+   "context_len_override": null,
+   "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+   "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+  },
+  "session_limit": null,
+  "effective_limit": 8192,
+  "stop_ids": [
+   151645
+  ],
+  "sampling": {
+   "temperature": 0.6,
+   "top_p": 0.95,
+   "top_k": -1,
+   "min_p": 0.0,
+   "repetition_penalty": 1.0,
+   "presence_penalty": 0.0,
+   "frequency_penalty": 0.0
+  },
+  "seed_base": null,
+  "decoding_protocol": {
+   "protocol_id": "nucleus_v1",
+   "path": "/workspace/aad/configs/shared/evaluation/decoding/nucleus_v1.json",
+   "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4",
+   "sampling": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": -1,
+    "min_p": 0.0,
+    "repetition_penalty": 1.0,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+   },
+   "samples_per_item": 1,
+   "seed_rule": {
+    "base": 20261024,
+    "key": "<namespace>|<item id>|<turn>|<sample>",
+    "namespace": "the evaluated unit's key <component>__<unit> (e.g. fluid_reasoning_720__dev_v1, stage3_capability_846__gsm8k): uncapped_eval reads it from the prompt file's stem, which dose_driver.evaluate_all stages as <component>__<unit>.jsonl; run_battery takes it as --seed-namespace",
+    "derivation": "int.from_bytes(sha256('<base>|<key>').digest()[:8], 'big') % 2**63",
+    "independent_of": "the model, the arm and the training seed: every checkpoint draws with the same seed for the same item, turn and sample"
+   }
+  },
+  "seed_namespace": "fluid_reasoning_720__dev_v1",
+  "action_protocol": "v2",
+  "system_message": "You are a helpful Assistant.",
+  "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+  "chat_template_kwargs": {
+   "enable_thinking": true
+  },
+  "tokenizer_sha256": "0d96ecc916745b3a6eb234433e6ddeeab051736a6336ef0db95b3022c425c3eb",
+  "degeneration_check_every": 256,
+  "engine": {
+   "max_model_len": 8192,
+   "gpu_memory_utilization": 0.9,
+   "dtype": "bfloat16",
+   "dtype_engine": "torch.bfloat16",
+   "max_num_seqs": 256,
+   "max_num_batched_tokens": 8192,
+   "vllm_version": "0.27.1",
+   "enforce_eager": false,
+   "init_seconds": 129.2
+  },
+  "libraries": {
+   "transformers": "5.15.0",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.8.0",
+   "numpy": "2.3.5",
+   "datasets": null,
+   "vllm": "0.27.1"
+  },
+  "image_digest": null,
+  "runner_sha256": "7c8b65bea721f1a011757608a68f6e651c2536dab5b907c36242fdf2b4ae2394"
+ },
+ "n_tasks": 720,
+ "turns": 900,
+ "output_tokens": 1781512,
+ "generation_seconds": 1794.0,
+ "output_tokens_per_second": 993.0,
+ "ends": {
+  "answered": 416,
+  "context_limit": 6,
+  "degeneration": 291,
+  "episode_done": 1,
+  "turn_limit": 6
+ }
+}

@@ -1,0 +1,158 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.state_eval_limited_coverage/v1",
+ "written_utc": "2026-11-04T19:57:31Z",
+ "status": "PLAN at $0 for the maintainer's review: no suite built, frozen or scored",
+ "decided_by": "maintainer 2026-11-04 (review of a143b7ed), section 3: 1,063 / 1,800 accepted as a real measurement (29 tasks exhausted, 11 episodes admitted); prepare an independent, versioned evaluation plan with the same KL, scored-position and domain-aggregation definitions and frozen shared inputs; never marked as meeting the quota; any identity or protocol change bound separately",
+ "inputs": {
+  "logs/stages/stage-2/teacher_modes/plans/tool_generation_import.json": "86a156db30dc1de3fc6aef507c957e9184600b7730a94c7763e0fa0b0447e88e",
+  "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json": "2e98393062814b205e90681882720a14036bd31da3d198ba38deb64615ca368f",
+  "configs/stages/stage-2/teacher_modes/full_search_types_v2.json": "4f108ca1515351beab7719d9158ed462ca11b7b576351f4af3032c2a1a708744"
+ },
+ "cell": {
+  "suite": "state_eval_hybrid (tool_calling@v1, non-thinking mode)",
+  "category": "schema_arguments",
+  "target_scored_positions": 1800.0,
+  "status": "SHORTFALL_EXHAUSTED",
+  "measured": {
+   "tasks_in_split": 29,
+   "attempted": 29,
+   "admitted_episodes": 11,
+   "refused": 18,
+   "admitted_by_shape": {
+    "single_step_gold_tool_call@v1": 7,
+    "full_episode@v1": 4
+   },
+   "admitted_on_candidate": {
+    "0": 8,
+    "1": 3
+   },
+   "scored_positions": 1063.0,
+   "positions_per_episode": [
+    388.0,
+    163.0,
+    161.0,
+    125.0,
+    56.0,
+    40.0,
+    30.0,
+    25.0,
+    25.0,
+    25.0,
+    25.0
+   ],
+   "largest_episode_share_pct": 36.5,
+   "four_largest_share_pct": 78.7,
+   "kish_effective_episodes": 4.98,
+   "sources": {
+    "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 29
+   },
+   "verification_levels": {
+    "protocol+schema_validity+step_gold": 22,
+    "protocol+schema_validity+recorded_execution+step_gold": 7
+   }
+  }
+ },
+ "thinking_mode_same_cell": {
+  "tasks_in_split": 29,
+  "attempted": 29,
+  "admitted_episodes": 11,
+  "refused": 18,
+  "admitted_by_shape": {
+   "single_step_gold_tool_call@v1": 9,
+   "full_episode@v1": 2
+  },
+  "admitted_on_candidate": {
+   "0": 11
+  },
+  "scored_positions": 4236.0,
+  "positions_per_episode": [
+   848.0,
+   599.0,
+   470.0,
+   410.0,
+   402.0,
+   372.0,
+   358.0,
+   319.0,
+   175.0,
+   173.0,
+   110.0
+  ],
+  "largest_episode_share_pct": 20.0,
+  "four_largest_share_pct": 54.9,
+  "kish_effective_episodes": 8.67,
+  "sources": {
+   "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1": 29
+  },
+  "verification_levels": {
+   "protocol+schema_validity+step_gold": 22,
+   "protocol+schema_validity+recorded_execution+step_gold": 7
+  },
+  "admitted_in_both_modes": 4
+ },
+ "weights": {
+  "registered": {
+   "within_tool_subtype": 0.15,
+   "in_supporting_domain_mean": 0.0125,
+   "in_equal_domain_mean": 0.0025
+  },
+  "limited": {
+   "within_tool_subtype": 0.0944,
+   "in_supporting_domain_mean": 0.00786,
+   "in_equal_domain_mean": 0.001573
+  },
+  "kl_difference_that_moves_the_objective_by_epsilon_nats": {
+   "equal_domain_mean": 0.0636,
+   "worst_domain (when supporting is the worst domain)": 0.0127
+  },
+  "_": "pooled over positions inside the tool sub-type (DistortionSums merge), unweighted over sub-types and domains (aadistill.initialization.statistics.contribution.domain_balanced_score); the other tool categories at their quotas (whole-episode overshoot moves these by a little)"
+ },
+ "uncertainty": {
+  "unit": "the episode: 1,063 positions are NOT 1,063 independent observations; the cell's KL is a ratio (sum of position KL / positions) over 11 clusters, four of which carry 78.7% of the positions",
+  "kish_effective_episodes": 4.98,
+  "method": "a delete-one-episode jackknife of the cell's position-weighted KL (and of its contribution to each objective), t with n - 1 = 10 degrees of freedom; the Kish effective count is reported beside it; no normal approximation over positions",
+  "registered_comparison": "at the registered 1,800 positions with episodes like these (about 97 positions each) the cell would hold about 19 episodes; its standard error is expected to be about sqrt(19/11) = 1.3x larger here, more where the largest episodes dominate"
+ },
+ "decision_rule": {
+  "what": "a REPORTING rule beside every ranking that reads this suite; the ranking itself is unchanged",
+  "report": [
+   "each objective as defined (equal-domain mean, worst domain, critical-token KL)",
+   "each objective with this cell left out (the tool sub-type pooled over the other six categories' positions; nothing else reweighted)",
+   "for the Top-1 against each state it is compared with (the Pareto front and the runner-up), the cell's contribution to their difference with its jackknife 90% interval"
+  ],
+  "flag": "SENSITIVE_TO_THE_LIMITED_CELL when leaving the cell out changes the Top-1 or the Pareto front, or when the Top-1's margin on an objective is within that interval of the cell's contribution; a flagged decision is reported as such, never re-decided by dropping the cell"
+ },
+ "follow_up_validation": [
+  "re-score the retained Pareto front on a later suite version with full coverage when a compliant, admitted source supplies it (the search keeps the front's states; re-scoring is a forward pass, not a new search)",
+  "the trained students' formal measurement reads eval-set-1 (P10.3), where tool calling is reported as its own unit; it never selects a state",
+  "closed-loop tool success belongs to a registered tool evaluation (eval-set-2), not to teacher-forced KL"
+ ],
+ "identity": {
+  "proposed": "state_eval_hybrid@v2-lc1",
+  "differs_from_the_registered": "state_eval_hybrid@v2 requires each category's share of 12,000 positions per mode and >= 5 tasks; on this pool it is not realizable and stays PENDING, never re-labelled. @v2-lc1 has its own items file, manifest, content sha256 and a coverage declaration naming this cell, its target, its realized positions, tasks and episodes and the status LIMITED_COVERAGE (never REACHED); every other cell meets the v2 rule or the suite does not freeze",
+  "unchanged": [
+   "v1's 1,135 items byte for byte",
+   "the type table (full_search_types_v2.json)",
+   "teacher-forced KL against the root teacher, scored positions, the domain aggregation",
+   "the critical groups (tool_call_open / tool_call_close added in both modes) and their 50:50",
+   "the forward context (Stage-1 packing) and the measurement protocol"
+  ],
+  "not_used": "bounded_plan.approved_shortfalls (no SHORTFALL is approved by this plan)",
+  "binding": "a separate maintainer decision registers @v2-lc1; only then does freeze_state_eval gain a declared limited-coverage cell (a small code path), and every search that reads it names it"
+ },
+ "at_risk_cells": {
+  "multi_turn": {
+   "target": 2400.0,
+   "supply": 205,
+   "bound": 205,
+   "status": "AT_RISK",
+   "projection": [
+    1944.2,
+    4757.6,
+    10463.4
+   ]
+  }
+ },
+ "at_risk_rule": "monitored in the hybrid session: such a cell runs to its bound; a cell that ends short is reported with its realized positions and tasks (SHORTFALL_EXHAUSTED) and handled by the existing mechanism -- nothing is pre-approved",
+ "authorizes": "nothing"
+}

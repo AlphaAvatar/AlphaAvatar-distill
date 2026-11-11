@@ -1,0 +1,339 @@
+{
+  "created_utc": "2026-11-02T23:19:16.747754+00:00",
+  "command": "scripts/shared/training/train_stage3.py --config /runpod-volume/teacher_modes/v2_units/A1-s20260801/train/config.json",
+  "config": {
+    "stage": "stage3_recovery",
+    "run_name": "research_a_v2_A1_s20260801",
+    "student_path": "/runpod-volume/teacher_modes/search_a1/top1",
+    "teacher": {
+      "model_id": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_tm/A1",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260801,
+    "trainable_patterns": [
+      "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+      "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+      "input_layernorm",
+      "post_attention_layernorm",
+      "model\\.norm\\."
+    ],
+    "loss": {
+      "ce_weight": 0.25,
+      "kd_weight": 1.0,
+      "kd_temperature": 1.0,
+      "kd_scope": "assistant",
+      "kd_support": {
+        "support_id": "reference_topk_tail_v1",
+        "top_k": 200
+      }
+    },
+    "optim": {
+      "lr": 5e-05,
+      "weight_decay": 0.01,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "grad_clip": 1.0
+    },
+    "schedule": {
+      "total_steps": 1653,
+      "warmup_steps": 83,
+      "min_lr_frac": 0.1
+    },
+    "batch": {
+      "blocks_per_step": 2,
+      "micro_blocks": 1,
+      "context_strategy": "document_isolated"
+    },
+    "checkpoint": {
+      "save_every": 826,
+      "keep_last": 1,
+      "bind_identity": true
+    },
+    "intervals": {
+      "log_every": 10,
+      "eval_every": 206,
+      "eval_blocks": 16
+    },
+    "out_dir": "/runpod-volume/teacher_modes/v2_units/A1-s20260801/train",
+    "rung": 5930273,
+    "val_blocks": 16,
+    "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+    "lineage": {
+      "teacher": {
+        "model_id": "Qwen/Qwen3-4B",
+        "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+        "weights_sha256": {
+          "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
+          "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
+          "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
+        },
+        "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+        "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+        "rope_theta": 1000000.0,
+        "max_position_embeddings": 40960,
+        "vocab_size": 151936
+      },
+      "mode": "thinking",
+      "tokenizer": {
+        "files_sha256": {
+          "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+          "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+          "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+        }
+      },
+      "initialization": {
+        "root_teacher": {
+          "model_id": "Qwen/Qwen3-4B",
+          "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+        },
+        "model_safetensors_sha256": "3459b9c99492b33ea41fc5545fc3a1d80a89bfba28fb5181c2d1606ea5c3220c",
+        "provenance": {
+          "record": "logs/stages/stage-2/teacher_modes/runs/a_search_20261101_153803/evidence/search_record.json",
+          "record_sha256": "ae62566f80cd1cdcc0ab567f8ffdccdc185d6be5ca206854a51f13add43cf95e"
+        }
+      },
+      "data": [
+        {
+          "files_sha256": {
+            "blocks.npz": "32a87943433cf6747a897f09160b0068a1288a5cee45e1a306cca8c8e0c67a86",
+            "ladder.json": "dccfe323109be7f157a184fe8d4208354a4e10e0e5b214ce2a4b72088c9f4e75",
+            "audit.jsonl": "7d71e9e1ebfd5fcd1dde56a07914cb7d5797161a2ed9a70eb9fff30ca5aa0a13"
+          },
+          "mode": "thinking",
+          "teacher": {
+            "model_id": "Qwen/Qwen3-4B",
+            "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+          }
+        }
+      ]
+    }
+  },
+  "config_sha256": "3a5283e68c730c575d6cca4722cb08421f41bb51a8c3f8e8bd6a5b6d4693ce31",
+  "resumed_from": null,
+  "device": "cuda",
+  "data_manifests": {},
+  "ladder": {
+    "source": "token_ladder",
+    "packed_dir": "/workspace/aad/artifacts/stages/stage-2/teacher_modes/packs_tm/A1",
+    "rung_target_supervised_tokens": 5930273,
+    "train_blocks": 1102,
+    "train_supervised_tokens": 5930273,
+    "train_token_mix": {
+      "primary.abstract_analogical": 0.0617,
+      "primary.compositional_generalization": 0.1069,
+      "primary.inductive_rule_discovery": 0.1223,
+      "primary.interactive_adaptation": 0.0868,
+      "primary.task_contained_deduction": 0.1231,
+      "supporting.code_algorithmic": 0.1001,
+      "supporting.math_gsm8k": 0.0999,
+      "supporting.math_new": 0.0998,
+      "supporting.reading_verified": 0.1995
+    },
+    "val_blocks": 16,
+    "val_supervised_tokens": 111624,
+    "val_token_mix": {
+      "primary.abstract_analogical": 0.08,
+      "primary.compositional_generalization": 0.1854,
+      "primary.inductive_rule_discovery": 0.1468,
+      "primary.task_contained_deduction": 0.1273,
+      "supporting.answerability": 0.0167,
+      "supporting.code_algorithmic": 0.133,
+      "supporting.math_gsm8k": 0.0903,
+      "supporting.math_new": 0.1758,
+      "supporting.reading_verified": 0.0448
+    },
+    "val_disjoint_from_all_rungs": true,
+    "declared_mixture": null,
+    "block_len": 8192,
+    "pack_blocks": 1118,
+    "blocks_sha256": "32a87943433cf6747a897f09160b0068a1288a5cee45e1a306cca8c8e0c67a86",
+    "ladder_json_sha256": "dccfe323109be7f157a184fe8d4208354a4e10e0e5b214ce2a4b72088c9f4e75",
+    "audit_sha256": "7d71e9e1ebfd5fcd1dde56a07914cb7d5797161a2ed9a70eb9fff30ca5aa0a13"
+  },
+  "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "attn_implementation": "sdpa",
+    "num_parameters": 4022468096,
+    "architecture": [
+      "Qwen3ForCausalLM"
+    ],
+    "hidden_size": 2560,
+    "num_hidden_layers": 36,
+    "intermediate_size": 9728,
+    "vocab_size": 151936,
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654"
+  },
+  "student_source": "/runpod-volume/teacher_modes/search_a1/top1",
+  "trainable_params": 440467456,
+  "full_rank_trainable_params": 440467456,
+  "lora_trainable_params": 0,
+  "lora": null,
+  "lora_modules": null,
+  "total_params": 596049920,
+  "extra_stream": null,
+  "execution": {
+    "record_version": 1,
+    "optimizer": "AdamW",
+    "optimizer_defaults": {
+      "lr": 5e-05,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.01
+    },
+    "optimizer_param_groups": 1,
+    "grad_clip": 1.0,
+    "lr_schedule": "cosine to min_lr_frac",
+    "total_steps": 1653,
+    "warmup_steps": 83,
+    "min_lr_frac": 0.1,
+    "block_ordering": "per-epoch torch.randperm(n_blocks, seed*1000003 + epoch) over the rung's blocks, walked by the global consumed-block counter",
+    "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "assistant",
+    "kd_chunk": 512,
+    "kd_chunk_source": "trainer default KD_CHUNK_DEFAULT",
+    "kd_objective": {
+      "objective": "target_rows_reference_topk_tail_forward_kl/v1",
+      "support": {
+        "support_id": "reference_topk_tail_v1",
+        "top_k": 200
+      },
+      "support_selection": "torch.topk of the teacher's float32-widened logits / T",
+      "tail": "complement_logsumexp/v1",
+      "rows": "final hidden states at the loss's prediction positions, before the output head",
+      "position_policy": "kd_scope 'assistant'",
+      "temperature": 1.0,
+      "reduction": "sum over the step's KD positions of tau^2 * KL, divided by that step's KD position count (the trainer's normalizer); CE likewise over its own positions",
+      "is_full_vocabulary_kl": false
+    },
+    "resume_identity": {
+      "data": "accdd503473eeb3f2817e0761159bfa4e8d7cda9aefd4bd50af6bf0dba2a5916",
+      "initialization": "8e04e75c55eab7a9adb1e247a8694dd15b07f4cff56c5da2db9ac2fc528f7ce3",
+      "lineage": {
+        "lineage_sha256": "21d2d6d2d0b8b54e255feb77aa5b47dec08246ad7a411479b34e4f851f7d5d24",
+        "teacher": {
+          "model_id": "Qwen/Qwen3-4B",
+          "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+        },
+        "mode": "thinking",
+        "initialization_sha256": "3459b9c99492b33ea41fc5545fc3a1d80a89bfba28fb5181c2d1606ea5c3220c"
+      }
+    },
+    "blocks_per_step": 2,
+    "micro_blocks": 1,
+    "train_blocks_available": 1102,
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "gradient_checkpointing_applied": true,
+    "device": "cuda",
+    "student_attn_implementation": "sdpa",
+    "teacher_attn_implementation": "sdpa",
+    "seed": 20260801,
+    "step_at_record": 0,
+    "consumed_blocks_at_record": 0,
+    "trainable_params": 440467456,
+    "trainer_source": {
+      "digest": "21893fd95f0fe407e43870c2e03048fa6947a9c5bb07f148aa3f56f829806c8b",
+      "set_version": 1,
+      "files": [
+        {
+          "path": "scripts/shared/training/train_stage3.py",
+          "sha256": "81074e9de40124f0c43e7bd507571fe163e2f8f9677600facf936a1b7a327417",
+          "bytes": 24136
+        },
+        {
+          "path": "src/aadistill/training/train.py",
+          "sha256": "c0b29981a6d8a527dbb801513b8da1193f44afa79f559f75be8a8a119fcaa23c",
+          "bytes": 76969
+        },
+        {
+          "path": "src/aadistill/training/lora.py",
+          "sha256": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+          "bytes": 10657
+        },
+        {
+          "path": "src/aadistill/data/ladder.py",
+          "sha256": "31507fac4d1cae58b0ea40c05b29a391b6401b496a80041a52c91d1f2ccc59f3",
+          "bytes": 7472
+        },
+        {
+          "path": "src/aadistill/data/dataset.py",
+          "sha256": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+          "bytes": 18533
+        },
+        {
+          "path": "src/aadistill/models/teacher.py",
+          "sha256": "41409a479014b6da92dff85069f9b269016037343498085576a5520da20c5265",
+          "bytes": 4002
+        },
+        {
+          "path": "src/aadistill/models/student.py",
+          "sha256": "2ad3655c5726567944ff078fa56e26f9052d51d7e8bcd9d879b7cf9976b9c79c",
+          "bytes": 6653
+        }
+      ],
+      "rule": "sha256 over sorted 'path:sha256' lines of the declared trainer source set; whole-repo commit is provenance only"
+    },
+    "runtime": {
+      "version": 1,
+      "image_digest": null,
+      "python_version": "3.12.3",
+      "torch_version": "2.11.0+cu128",
+      "transformers_version": "5.13.1",
+      "cuda_runtime": "12.8",
+      "attention_backend": "sdpa"
+    },
+    "runtime_digest": "f214425c9e0b8e1e4d7a288df409d90e6dedcd3454b40e11eee16d87b61c428d",
+    "image_digest_source": "ABSENT — runtime is not pinned"
+  },
+  "code_state": {
+    "git_commit": "571e4a72dcf2900f29dbad227185068e081dab75",
+    "git_commit_source": "git",
+    "dirty": true,
+    "uncommitted_state_sha256": "f6fff010393d7c85a5235f1edf6abdef0ee7d7a8e0a28f6e12a9a5b29e80d9a7",
+    "untracked_files": []
+  },
+  "hardware": {
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "torch": "2.11.0+cu128",
+    "cpu_count": 64,
+    "cuda_available": true,
+    "libraries": {
+      "transformers": "5.13.1",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.5.1",
+      "datasets": "5.0.0",
+      "vllm": null
+    },
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ]
+  }
+}

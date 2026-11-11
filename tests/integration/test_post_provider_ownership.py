@@ -313,10 +313,15 @@ def test_there_is_no_raw_unconfirmed_remove_inside_create():
 
 
 def test_registration_precedes_the_price_check_in_source_order():
+    """Since 2026-11-04 `create()` hands every owned resource to `_take`, which REGISTERS it (`own`: id, start,
+    watchdog, save) before it judges the price."""
     src = RUNNER_SRC.read_text()
-    body = src.split("def create(self)")[1].split("def launch_watchdog")[0]
-    assert body.index("self.pod_id = pid") < body.index("self.save()") \
-        < body.index("if self.price > self.a.max_price:")
+    own = src.split("    def own(self")[1].split("    def ")[0]
+    assert own.index("self.pod_id = pid") < own.index("self.launch_watchdog()") < own.index("self.save()")
+    take = src.split("    def _take(self")[1].split("    def launch_watchdog")[0]
+    assert take.index("self.own(") < take.index("if self.price > self.a.max_price:")
+    create = src.split("    def create(self)")[1].split("    def _take(self")[0]
+    assert "self._take(" in create and "self.pod_id = " not in create
 
 
 # --- the watchdog is established at registration, exactly once --------------
@@ -411,5 +416,5 @@ def test_run_no_longer_starts_the_watchdog_itself():
     src = RUNNER_SRC.read_text()
     run_body = src.split("    def run(self) -> bool:")[1]
     assert "self.launch_watchdog()" not in run_body.split("def ")[0]
-    create_body = src.split("def create(self)")[1].split("def launch_watchdog")[0]
-    assert "self.launch_watchdog()" in create_body
+    own_body = src.split("    def own(self")[1].split("    def ")[0]          #: `create` -> `_take` -> `own`
+    assert "self.launch_watchdog()" in own_body

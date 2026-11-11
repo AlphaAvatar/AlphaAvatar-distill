@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import re
 
-from .behavior import IM_END, STRAY_MARKERS, split_generation
+from .behavior import IM_END, STRAY_MARKERS, record_think_state, split_generation
 from ..data.verify import boxed_answer, normalize_math
 
 # `Final Answer:` / `Answer:` at a line start (optionally decorated with markup
@@ -91,7 +91,8 @@ def extract_final_answer(answer: str) -> tuple[str | None, str]:
 
 
 def protocol_valid(raw: str, *, think_preopened: bool = True,
-                   tools_offered: bool = False) -> tuple[bool, str]:
+                   tools_offered: bool = False,
+                   think_state: str | None = None) -> tuple[bool, str]:
     """Structural validity of the generation, independent of its content.
 
     `think_preopened` is the assistant-prefix state the active chat template
@@ -113,10 +114,13 @@ def protocol_valid(raw: str, *, think_preopened: bool = True,
     The default is `False`, so every historical result and every caller that does
     not know the prompt's tool state is scored exactly as before. Only a caller
     that can see the prompt may relax it.
+
+    `think_state`, when given, names the prompt state outright (see
+    `behavior.split_generation`), including the hybrid template's `preclosed`.
     """
     if IM_END not in raw:
         return False, "not_terminated"
-    parts = split_generation(raw, think_preopened=think_preopened)
+    parts = split_generation(raw, think_preopened=think_preopened, think_state=think_state)
     if not parts["think_closed"]:
         return False, "think_delimiters_invalid"
     if any(marker in parts["answer"] for marker in STRAY_MARKERS):
@@ -138,9 +142,9 @@ def score_numeric(record: dict, gold: str) -> dict:
     # Same rule as capability._shared: the template state travels with the
     # record. GSM8K takes this path rather than the capability scorers, and
     # missing it here left gsm8k at 0 while every other set rescored correctly.
-    preopened = bool(record.get("think_preopened", True))
-    parts = split_generation(raw, think_preopened=preopened)
-    valid, protocol_reason = protocol_valid(raw, think_preopened=preopened)
+    state = record_think_state(record)
+    parts = split_generation(raw, think_state=state)
+    valid, protocol_reason = protocol_valid(raw, think_state=state)
     degenerate = bool(record.get("degeneration_triggered"))
 
     extracted, how = extract_final_answer(parts["answer"])

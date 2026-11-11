@@ -1,0 +1,37 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tm_closeout_after_gate/v1",
+ "run_id": "a_search_20261101_153803",
+ "recorded_utc": "2026-11-02T16:55:00Z",
+ "status": "COMPLETE",
+ "why_this_record": "The launcher finished the search (ALL_DONE 2026-11-02T15:03:25Z) but its teardown gate refused: outcome.json records PRODUCTS_UNSECURED because the closeout pulled the Top-1's 1,192,135,096-byte model.safetensors to the dev box and the pull moved 5.7 MB in its 1,200 s limit. The pod was retained under the watchdog's verified ownership from 15:39:58Z. Nothing on the dev box reads those bytes: their one consumer is the train_a1 pod, which reads them on the network volume (training_plan.TOP1_ON_VOLUME). The Top-1 was therefore verified by sha256 on the volume and the pod torn down by hand; outcome.json is kept as the launcher wrote it.",
+ "products_secured": {
+  "search_evidence": {
+   "local": ".scratch/research_a/a_search_20261101_153803/store/search_evidence.tgz",
+   "sha256": "ebc81e9fbc0a3c1a7eb31710bcabc2b561d95d728e9777ee05f6966a5ca985d9",
+   "verified": "pulled and re-hashed by the launcher; re-hashed on the dev box 2026-11-02T16:51Z",
+   "contents": "search_record.json, stage1_selection.json, first_evaluation_check.json, products.json, search/states.jsonl (sha256 5ee31414ec087db5a672550b14e9fe29f30952eaf722d0854a8530bd137a14af, the journal stage1_selection.json names), search/telemetry.jsonl"
+  },
+  "top1_on_volume": {
+   "volume": "4rhubprswo (US-TX-3)",
+   "path": "/runpod-volume/teacher_modes/search_a1/top1",
+   "sha256sum_on_pod_utc": "2026-11-02T16:48Z",
+   "sha256": {
+    "model.safetensors": "3459b9c99492b33ea41fc5545fc3a1d80a89bfba28fb5181c2d1606ea5c3220c",
+    "config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+    "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+   },
+   "matches": "products.json :: top1.files_sha256 and search_record.json :: commit.selected_rows[0].single_shard_sha256"
+  }
+ },
+ "teardown": {
+  "pod_id": "jzslup672m2jiy",
+  "deleted": "runpodctl pod delete -> {\"deleted\": true}, between the watchdog polls at 16:48:21Z (RUNNING) and 16:49:22Z (TERMINATED)",
+  "provider_confirms_gone": "runpodctl pod get -> 404 pod not found; runpodctl pod list --all -> []",
+  "watchdog": "journal event watchdog_end reason pod_gone at 2026-11-02T16:49:22Z (ticks 1289); no watchdog or launcher process remains",
+  "observers_closed": true,
+  "retained_after_gate_minutes": 69.4
+ },
+ "repair": "token_matched_phase.top1_on_volume: the search closeout hashes the Top-1 files on the volume against the committed digests and pulls no weights; regression test_the_search_closeout_verifies_the_top1_on_the_volume_and_pulls_no_weights",
+ "authorizes": "nothing",
+ "cost": "closeout/outcome.json :: money (the envelope's one owner)"
+}

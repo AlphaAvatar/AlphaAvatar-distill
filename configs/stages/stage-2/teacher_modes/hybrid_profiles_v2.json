@@ -1,0 +1,908 @@
+{
+ "schema": "aadistill.calibration_profiles/v1",
+ "status": "COMPLETE: every cell reaches its v2 quota",
+ "_contract": "Research A v2's hybrid D4-scale calibration profiles (build_calibration_supplement.py profiles); data for the PROPOSED full search -- nothing searches with them before the maintainer's approval",
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+ },
+ "profiles": [
+  {
+   "profile_id": "calib.hybrid_d4_base",
+   "version": 2,
+   "description": "the hybrid's D4 base profile: D4's cells, order and quotas, half of every cell from each mode; v2: the supporting domain over six sub-types, tool calling added (packed_inputs.profiles_v2)",
+   "sources": [
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "inductive_rule_discovery",
+     "n_items": 32,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "compositional_generalization",
+     "n_items": 53,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "task_contained_deduction",
+     "n_items": 57,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "abstract_analogical",
+     "n_items": 26,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "supporting",
+     "n_items": 397,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_tool_calling_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "supporting",
+     "n_items": 59,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own episodes over tool_pool@v1 tasks",
+     "note": "tool_pool@v1 calibration split"
+    }
+   ],
+   "sample_rule": "per cell and mode: D4's cell order over base_pool_v1 (the code cell: its own prompt list), held-out units passed over, the mode's own naturally terminated whole trajectories until half the cell's D4 quota of scored positions (build_calibration_supplement.profiles)",
+   "leakage_exclusions": [
+    "eval-set-1 held-out prompts and near-copies (R1, R2) and R9's refused families",
+    "A1/A2's and C1's training prompts",
+    "state_eval_hybrid@v1's prompts"
+   ],
+   "leakage_proof_path": "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json",
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 180000,
+   "seed": 1308798386,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-2/teacher_modes/calibration_v3/calib.hybrid_d4_base.v2.items.jsonl",
+   "items_file_sha256": "c335032d9bf497724489d646713810492512c50da545e57817734f9e59893a7e",
+   "content_sha256": "81064733168199ffb5fd4370c5babc76b0d3a48783796a930dafa2729fe55356",
+   "metadata": {
+    "uesp": 211203,
+    "scored_positions_by_mode": {
+     "H-T": 115657,
+     "H-N": 95546
+    },
+    "n_items": 558,
+    "tokens": 569270,
+    "short_cells": []
+   }
+  },
+  {
+   "profile_id": "calib.hybrid_d4_rh",
+   "version": 2,
+   "description": "the hybrid's D4 rh profile: D4's cells, order and quotas, half of every cell from each mode; v2: the supporting domain over six sub-types, tool calling added (packed_inputs.profiles_v2)",
+   "sources": [
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "inductive_rule_discovery",
+     "n_items": 37,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "compositional_generalization",
+     "n_items": 64,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "task_contained_deduction",
+     "n_items": 69,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "abstract_analogical",
+     "n_items": 32,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "supporting",
+     "n_items": 175,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_tool_calling_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "supporting",
+     "n_items": 40,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own episodes over tool_pool@v1 tasks",
+     "note": "tool_pool@v1 calibration split"
+    }
+   ],
+   "sample_rule": "per cell and mode: D4's cell order over base_pool_v1 (the code cell: its own prompt list), held-out units passed over, the mode's own naturally terminated whole trajectories until half the cell's D4 quota of scored positions (build_calibration_supplement.profiles)",
+   "leakage_exclusions": [
+    "eval-set-1 held-out prompts and near-copies (R1, R2) and R9's refused families",
+    "A1/A2's and C1's training prompts",
+    "state_eval_hybrid@v1's prompts"
+   ],
+   "leakage_proof_path": "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json",
+   "domain_weights": {
+    "inductive_rule_discovery": 0.22,
+    "compositional_generalization": 0.22,
+    "task_contained_deduction": 0.22,
+    "abstract_analogical": 0.22,
+    "supporting": 0.12
+   },
+   "token_budget": 180000,
+   "seed": 1308798386,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-2/teacher_modes/calibration_v3/calib.hybrid_d4_rh.v2.items.jsonl",
+   "items_file_sha256": "b5ec79dcb19757cf96c4c513db7648e0acef9e938b76a4a772f70fbe28f241da",
+   "content_sha256": "ef4569734094cc9d36a2eca7aa215b0354824ceb4d04b947481feae316a1b8f5",
+   "metadata": {
+    "uesp": 213361,
+    "scored_positions_by_mode": {
+     "H-T": 118768,
+     "H-N": 94593
+    },
+    "n_items": 388,
+    "tokens": 418072,
+    "short_cells": []
+   }
+  }
+ ],
+ "census": {
+  "calib.hybrid_d4_base": {
+   "abstract_analogical/grid_transform@v1|H-N": {
+    "quota": 16200.0,
+    "scored": 16322,
+    "items": 20,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "abstract_analogical/grid_transform@v1|H-T": {
+    "quota": 16200.0,
+    "scored": 17211,
+    "items": 6,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "compositional_generalization/defined_ops@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8144,
+    "items": 24,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "compositional_generalization/defined_ops@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 8273,
+    "items": 7,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "compositional_generalization/scan_language@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8409,
+    "items": 19,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "compositional_generalization/scan_language@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 10930,
+    "items": 3,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "inductive_rule_discovery/list_induction@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8306,
+    "items": 10,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "inductive_rule_discovery/list_induction@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 9249,
+    "items": 5,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "inductive_rule_discovery/string_induction@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8137,
+    "items": 13,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "inductive_rule_discovery/string_induction@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 10131,
+    "items": 4,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "supporting/code|H-N": {
+    "quota": 4200.000000000001,
+    "scored": 4421,
+    "items": 7,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/code|H-T": {
+    "quota": 4200.000000000001,
+    "scored": 5476,
+    "items": 3,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/gsm8k|H-N": {
+    "quota": 4200.000000000001,
+    "scored": 4239,
+    "items": 17,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/gsm8k|H-T": {
+    "quota": 4200.000000000001,
+    "scored": 4804,
+    "items": 5,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/multihop_qa|H-N": {
+    "quota": 4200.000000000001,
+    "scored": 4217,
+    "items": 109,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/multihop_qa|H-T": {
+    "quota": 4200.000000000001,
+    "scored": 4476,
+    "items": 6,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/openmath|H-N": {
+    "quota": 4200.000000000001,
+    "scored": 5967,
+    "items": 11,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/openmath|H-T": {
+    "quota": 4200.000000000001,
+    "scored": 4853,
+    "items": 3,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/rag_evidence|H-N": {
+    "quota": 4200.000000000001,
+    "scored": 4202,
+    "items": 155,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/rag_evidence|H-T": {
+    "quota": 4200.000000000001,
+    "scored": 5633,
+    "items": 15,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/tool_calling@v1|H-N": {
+    "quota": 4200.000000000001,
+    "scored": 6120.0,
+    "items": 41,
+    "short": false,
+    "rule": "tool items, whole episodes per category",
+    "categories": {
+     "error_recovery": {
+      "target": 420.0000000000001,
+      "scored": 878.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 6,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "mcp_agent": {
+      "target": 630.0000000000001,
+      "scored": 1454.0,
+      "tasks": 4,
+      "min_tasks": 0,
+      "admitted_supply": 6,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "multi_turn": {
+      "target": 840.0000000000002,
+      "scored": 1001.0,
+      "tasks": 2,
+      "min_tasks": 0,
+      "admitted_supply": 10,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "multiple_parallel": {
+      "target": 630.0000000000001,
+      "scored": 992.0,
+      "tasks": 2,
+      "min_tasks": 0,
+      "admitted_supply": 10,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "no_tool": {
+      "target": 420.0000000000001,
+      "scored": 477.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 4,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "schema_arguments": {
+      "target": 630.0000000000001,
+      "scored": 638.0,
+      "tasks": 11,
+      "min_tasks": 0,
+      "admitted_supply": 14,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "tool_selection": {
+      "target": 630.0000000000001,
+      "scored": 680.0,
+      "tasks": 4,
+      "min_tasks": 0,
+      "admitted_supply": 15,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     }
+    },
+    "unmet_categories": [],
+    "below_quota_by_approved_shortfalls": 0.0
+   },
+   "supporting/tool_calling@v1|H-T": {
+    "quota": 4200.000000000001,
+    "scored": 16168.0,
+    "items": 18,
+    "short": false,
+    "rule": "tool items, whole episodes per category",
+    "categories": {
+     "error_recovery": {
+      "target": 420.0000000000001,
+      "scored": 3682.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 2,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "mcp_agent": {
+      "target": 630.0000000000001,
+      "scored": 3434.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 1,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "multi_turn": {
+      "target": 840.0000000000002,
+      "scored": 2136.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 2,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "multiple_parallel": {
+      "target": 630.0000000000001,
+      "scored": 962.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 1,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "no_tool": {
+      "target": 420.0000000000001,
+      "scored": 831.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 2,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "schema_arguments": {
+      "target": 630.0000000000001,
+      "scored": 2721.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 22,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "tool_selection": {
+      "target": 630.0000000000001,
+      "scored": 2402.0,
+      "tasks": 2,
+      "min_tasks": 0,
+      "admitted_supply": 5,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     }
+    },
+    "unmet_categories": [],
+    "below_quota_by_approved_shortfalls": 0.0
+   },
+   "task_contained_deduction/entity_tracking@v1|H-N": {
+    "quota": 5400.0,
+    "scored": 5473,
+    "items": 19,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/entity_tracking@v1|H-T": {
+    "quota": 5400.0,
+    "scored": 6214,
+    "items": 5,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/knights_knaves@v1|H-N": {
+    "quota": 5400.0,
+    "scored": 6130,
+    "items": 6,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/knights_knaves@v1|H-T": {
+    "quota": 5400.0,
+    "scored": 6257,
+    "items": 2,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/ordering@v1|H-N": {
+    "quota": 5400.0,
+    "scored": 5459,
+    "items": 21,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/ordering@v1|H-T": {
+    "quota": 5400.0,
+    "scored": 5982,
+    "items": 4,
+    "short": false,
+    "rule": "v1's cell"
+   }
+  },
+  "calib.hybrid_d4_rh": {
+   "abstract_analogical/grid_transform@v1|H-N": {
+    "quota": 19800.0,
+    "scored": 20646,
+    "items": 25,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "abstract_analogical/grid_transform@v1|H-T": {
+    "quota": 19800.0,
+    "scored": 21405,
+    "items": 7,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "compositional_generalization/defined_ops@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 10052,
+    "items": 30,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "compositional_generalization/defined_ops@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10512,
+    "items": 9,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "compositional_generalization/scan_language@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 10469,
+    "items": 22,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "compositional_generalization/scan_language@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10930,
+    "items": 3,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "inductive_rule_discovery/list_induction@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 10221,
+    "items": 12,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "inductive_rule_discovery/list_induction@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10851,
+    "items": 6,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "inductive_rule_discovery/string_induction@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 9974,
+    "items": 15,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "inductive_rule_discovery/string_induction@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10131,
+    "items": 4,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "supporting/code|H-N": {
+    "quota": 1800.0,
+    "scored": 2079,
+    "items": 3,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/code|H-T": {
+    "quota": 1800.0,
+    "scored": 3805,
+    "items": 2,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/gsm8k|H-N": {
+    "quota": 1800.0,
+    "scored": 1890,
+    "items": 8,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/gsm8k|H-T": {
+    "quota": 1800.0,
+    "scored": 2385,
+    "items": 2,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/multihop_qa|H-N": {
+    "quota": 1800.0,
+    "scored": 1808,
+    "items": 44,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/multihop_qa|H-T": {
+    "quota": 1800.0,
+    "scored": 4056,
+    "items": 5,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/openmath|H-N": {
+    "quota": 1800.0,
+    "scored": 2018,
+    "items": 5,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/openmath|H-T": {
+    "quota": 1800.0,
+    "scored": 2560,
+    "items": 2,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/rag_evidence|H-N": {
+    "quota": 1800.0,
+    "scored": 1827,
+    "items": 65,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/rag_evidence|H-T": {
+    "quota": 1800.0,
+    "scored": 1896,
+    "items": 10,
+    "short": false,
+    "rule": "prefix of v1's cell"
+   },
+   "supporting/tool_calling@v1|H-N": {
+    "quota": 1800.0,
+    "scored": 3159.0,
+    "items": 24,
+    "short": false,
+    "rule": "tool items, whole episodes per category",
+    "categories": {
+     "error_recovery": {
+      "target": 180.0,
+      "scored": 878.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 6,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "mcp_agent": {
+      "target": 270.0,
+      "scored": 390.0,
+      "tasks": 3,
+      "min_tasks": 0,
+      "admitted_supply": 6,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "multi_turn": {
+      "target": 360.0,
+      "scored": 523.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 10,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "multiple_parallel": {
+      "target": 270.0,
+      "scored": 331.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 10,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "no_tool": {
+      "target": 180.0,
+      "scored": 477.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 4,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "schema_arguments": {
+      "target": 270.0,
+      "scored": 284.0,
+      "tasks": 3,
+      "min_tasks": 0,
+      "admitted_supply": 14,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "tool_selection": {
+      "target": 270.0,
+      "scored": 276.0,
+      "tasks": 3,
+      "min_tasks": 0,
+      "admitted_supply": 15,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     }
+    },
+    "unmet_categories": [],
+    "below_quota_by_approved_shortfalls": 0.0
+   },
+   "supporting/tool_calling@v1|H-T": {
+    "quota": 1800.0,
+    "scored": 14199.0,
+    "items": 16,
+    "short": false,
+    "rule": "tool items, whole episodes per category",
+    "categories": {
+     "error_recovery": {
+      "target": 180.0,
+      "scored": 3682.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 2,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "mcp_agent": {
+      "target": 270.0,
+      "scored": 3434.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 1,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "multi_turn": {
+      "target": 360.0,
+      "scored": 2136.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 2,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "multiple_parallel": {
+      "target": 270.0,
+      "scored": 962.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 1,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "no_tool": {
+      "target": 180.0,
+      "scored": 831.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 2,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "schema_arguments": {
+      "target": 270.0,
+      "scored": 2721.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 22,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     },
+     "tool_selection": {
+      "target": 270.0,
+      "scored": 433.0,
+      "tasks": 1,
+      "min_tasks": 0,
+      "admitted_supply": 5,
+      "short": false,
+      "thin": false,
+      "approved_shortfall": null
+     }
+    },
+    "unmet_categories": [],
+    "below_quota_by_approved_shortfalls": 0.0
+   },
+   "task_contained_deduction/entity_tracking@v1|H-N": {
+    "quota": 6600.0,
+    "scored": 6798,
+    "items": 23,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/entity_tracking@v1|H-T": {
+    "quota": 6600.0,
+    "scored": 7505,
+    "items": 6,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/knights_knaves@v1|H-N": {
+    "quota": 6600.0,
+    "scored": 6905,
+    "items": 7,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/knights_knaves@v1|H-T": {
+    "quota": 6600.0,
+    "scored": 10724,
+    "items": 3,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/ordering@v1|H-N": {
+    "quota": 6600.0,
+    "scored": 6747,
+    "items": 25,
+    "short": false,
+    "rule": "v1's cell"
+   },
+   "task_contained_deduction/ordering@v1|H-T": {
+    "quota": 6600.0,
+    "scored": 7809,
+    "items": 5,
+    "short": false,
+    "rule": "v1's cell"
+   }
+  }
+ },
+ "held_out": {
+  "R9 (family name)": 33,
+  "a training prompt": 5034,
+  "isolation (R1/R2 against eval-set-1)": 2
+ },
+ "refill": {
+  "units": 0,
+  "by_cell_and_modes": {},
+  "unit_ids": {}
+ },
+ "authorizes": "nothing",
+ "supersedes": {
+  "path": "configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json",
+  "sha256": "b967c8d3981bcdee9169ef0055e91bd6cf47596a4ca61e518eb50b850a978665"
+ },
+ "types": {
+  "path": "/home/ecs-user/AlphaAvatar-distill/configs/stages/stage-2/teacher_modes/full_search_types_v2.json",
+  "sha256": "4f108ca1515351beab7719d9158ed462ca11b7b576351f4af3032c2a1a708744"
+ }
+}

@@ -1,0 +1,71 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.recovery_audit/v1",
+ "command": "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.packed_packs --arm A2-6cat --recovery-audit <out>",
+ "question": "maintainer 2026-11-04 (review of 647eea0e), item 6: the selected task(s) the old source pack lacks, recovered through the frozen admission records, tokens and source identity verified",
+ "arm": "A2-6cat",
+ "mode": "H-N",
+ "source_pack": {
+  "dir": "artifacts/stages/stage-2/teacher_modes/packs_tm/A2",
+  "files_sha256": {
+   "blocks.npz": "a583763d27371a3635a165cda5b860c18d16b2c86bbc8d7fdba88e0158e33acb",
+   "audit.jsonl": "e75c1ddd10e07e7f5794c829d06a9be8fa7f43a3e5fd6bb0a012d2a4927108c4"
+  }
+ },
+ "selection_record_sha256": "26d621d838755d8440e307b1e013e1d95e16886dace582bf5ddcf743b7d54beb",
+ "records": {
+  "v1": {
+   "dir": ".scratch/research_a/a_teacher_20261030_012648/store/generation",
+   "identity": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+   "labels_verified": 84
+  },
+  "supplement": {
+   "dir": ".scratch/research_a/a_supplement_20261031_144618/store/generation",
+   "identity": "0d39ad935bc3d32b255345afac8995defeb8ef38c59c27e851cd9f4f1baea259",
+   "labels_verified": 4
+  }
+ },
+ "missing_from_the_pack": [
+  {
+   "task_id": "79c86b17e0b933ee3483",
+   "cell": "supporting.code_algorithmic/mbpp_train",
+   "records_from": [
+    "v1"
+   ],
+   "candidates": [
+    0
+   ],
+   "admitted": true,
+   "isolation_flagged": false,
+   "isolation_recheck_pass": true,
+   "code_stability_changed": {},
+   "documents": [
+    {
+     "doc_id": "79c86b17e0b933ee3483|H-N|t0",
+     "mode_suffix": "H-N",
+     "prompt_tokens": 113,
+     "supervised_tokens": 14,
+     "ends_on_a_stop_id": true,
+     "content_sha256": "9e46361cd03a3b8b2585d729193c1c98c33c27f34aa0211b81596e9c29a3438a"
+    }
+   ]
+  }
+ ],
+ "counts_with_them": {
+  "fluid": 2963139,
+  "gsm8k": 493495,
+  "code": 493701,
+  "competition_math": 493404,
+  "rag_reading": 493276,
+  "multihop_reading": 493296
+ },
+ "selection_record_counts": {
+  "competition_math": 493404,
+  "gsm8k": 493495,
+  "rag_reading": 493276,
+  "multihop_reading": 493296,
+  "code": 493701,
+  "fluid": 2963139
+ },
+ "equal_to_the_selection_record": true,
+ "authorizes": "nothing"
+}

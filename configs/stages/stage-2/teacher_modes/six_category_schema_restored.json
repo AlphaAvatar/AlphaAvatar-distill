@@ -1,0 +1,162 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.six_category_schema_restored_config/v1",
+ "id": "six_category_schema_restored@v1",
+ "status": "REGISTERED (maintainer 2026-11-05, R1 approval '原则批准方案一 R1'): the registered seven-category tool composition (schema_arguments 0.15) for A1-6cat-sr / A2-6cat-sr / C1-6cat-sr; generation under the kinds tool_generation_sr (hybrid, cumulative $6.16) and tool_generation_sr_t2507 (Thinking-2507, cumulative $2.31); it authorizes nothing by itself: each session needs its own one-use artifact",
+ "requested_by": "maintainer 2026-11-05, 'AlphaAvatar-distill -- 原始数据配比恢复、Packed Forward 效率审查与 Full Search 前置准备', section 1: restore the registered seven-category proportions (schema_arguments 15% of the tool type), counted before packing; a new source is an independent scientific design; every legal product and identity kept",
+ "registered_identities_kept": [
+  "configs/stages/stage-2/teacher_modes/six_category_design.json (A1-6cat / A2-6cat / C1-6cat)",
+  "configs/stages/stage-2/teacher_modes/six_category_common_support.json (A1-6cat-cs / A2-6cat-cs / C1-6cat-cs, frozen packs ee6937d2 / 89fa58a0 / e2b5a4e1)",
+  "state_eval_hybrid@v2-lc1 (FROZEN) and the calibration profiles v2"
+ ],
+ "research_question": "The registered six-category comparison at its registered tool composition: with one hybrid teacher (Qwen/Qwen3-4B), does its thinking mode (A1-6cat-sr) or its non-thinking mode (A2-6cat-sr) give the better student, each arm trained on the same unique supervised tokens before packing, the same seven tool-calling categories at the registered shares (schema_arguments 0.15 of the tool type), and within schema_arguments the same tokens from each task source. Supervised-token-budget and composition matched; NOT compute matched.",
+ "secondary_comparison": "A1-6cat-sr vs C1-6cat-sr (hybrid thinking vs Thinking-2507), each lineage end to end (P17.1); secondary, with the stated confounder that C1's initialization search protocol differs from A1's",
+ "arms": {
+  "A1-6cat-sr": {
+   "lineage": "hybrid",
+   "mode": "H-T"
+  },
+  "A2-6cat-sr": {
+   "lineage": "hybrid",
+   "mode": "H-N"
+  },
+  "C1-6cat-sr": {
+   "lineage": "thinking_2507",
+   "mode": "T2507"
+  }
+ },
+ "pool": {
+  "id": "tool_pool@v1+schema_synth@v1",
+  "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1_schema_synth",
+  "kind": "tool_pool.extend: tool_pool@v1 byte for byte (content be4652d7..., every split's frozen order a prefix) plus schema_synth@v1's tasks: 5,070 instances (training 220 per domain x 22, state evaluation 40 x 3, calibration 30 x 2, validation 20 x 2, reserve 10 x 1); 226 ambiguous requests left out by the independent semantic review (schema_synth.ambiguity); 4,844 written, 4,843 admitted (one T5 duplicate prompt): training 4,625, state evaluation 110, calibration 58, validation 40, reserve 10",
+  "content_sha256": "e771393a98a6fd844c7d0ed3fa2d3327eb6c2b1c77a29033de707a5c4906649e",
+  "base_content_sha256": "be4652d77873b629197ca22e84d302d35d21d995a0684a0db02041f307906eff",
+  "new_source": {
+   "dataset": "aadistill/schema_synth",
+   "revision": "schema_synth@v1",
+   "generator": "scripts/stages/stage-2/teacher_modes/schema_synth.py",
+   "audit": "logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_audit.json",
+   "admission": "logs/stages/stage-2/teacher_modes/audit/tool_source_admission_schema_synth.json (signed for this content on the maintainer's 2026-11-05 written decision; tool_source_admission.ADMISSIONS)",
+   "training_instances": "220 per training domain (maintainer 2026-11-05, R1 approval, section II: 160 -> 220 along the same deterministic indices; the first 3,750 tasks byte for byte unchanged); the earlier 3,750-task content 6139e647... was never admitted",
+   "semantic_review": "logs/stages/stage-2/teacher_modes/audit/schema_synth_v1_semantic_review.json (independent reviewer, all 30 domains, every gold re-derived: 0 computation defects; 226 ambiguous requests left out, exactly the reviewer's set)",
+   "verification_strength": "schema_synth_audit.VERIFICATION_STRENGTH: schema validity structural; step_gold an exact match with the program's call; recorded execution a replay hit keyed by that call -- one piece of correctness evidence with step_gold, G2, never G1 environment success",
+   "audit_result": "4,844 tasks: 0 problems, every mutation refused, 0 unexplained strings, deterministic, the renderer unchanged by the reference in both modes"
+  },
+  "pool_json_sha256": "85c995a52c3062bb727e8205cfecfa01e5873357e80fc9ee695e1d4562f3a99e"
+ },
+ "tool_calling": {
+  "applies_to": "the training split of every arm, as registered; calibration and state evaluation keep six_category_design.json's shares",
+  "categories": {
+   "tool_selection": {
+    "share": 0.15
+   },
+   "schema_arguments": {
+    "share": 0.15
+   },
+   "no_tool": {
+    "share": 0.1
+   },
+   "multiple_parallel": {
+    "share": 0.15
+   },
+   "multi_turn": {
+    "share": 0.2
+   },
+   "error_recovery": {
+    "share": 0.1
+   },
+   "mcp_agent": {
+    "share": 0.15
+   }
+  },
+  "_": "six_category_design.json's registered shares, unchanged: schema_arguments 0.15 of each arm's tool type (A arms 74,012.67, C1 73,888.05 supervised tokens)"
+ },
+ "source_groups": {
+  "training": {
+   "schema_arguments": [
+    {
+     "group": "pivot_conversational",
+     "datasets": [
+      "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1"
+     ],
+     "per_mode": {
+      "H-T": 17200.0,
+      "H-N": 17200.0,
+      "T2507": 17171.0
+     }
+    },
+    {
+     "group": "schema_synth",
+     "datasets": [
+      "aadistill/schema_synth"
+     ],
+     "rest": true
+    }
+   ]
+  },
+  "state_eval": {
+   "schema_arguments": [
+    {
+     "group": "pivot_conversational",
+     "datasets": [
+      "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1"
+     ],
+     "per_mode": {
+      "H-T": 1000.0,
+      "H-N": 1000.0
+     }
+    },
+    {
+     "group": "schema_synth",
+     "datasets": [
+      "aadistill/schema_synth"
+     ],
+     "rest": true
+    }
+   ]
+  }
+ },
+ "source_group_rule": "within schema_arguments every arm holds the same supervised tokens from each source: Pivot Conversational at the largest hundred every arm's sealed Pivot supply holds (the non-thinking mode's 17,290 -> 17,200; C1 the same share of its tool type, 17171.0), schema_synth the rest of the registered 15%. Each arm selects its own admitted episodes whole, in the pool's frozen order, per group (tool_generation_plan.select); unselected legal episodes are kept. State evaluation: Pivot 1,000 of each hybrid mode's 1,800 scored positions (the non-thinking supply is 1,063), schema_synth the remaining 800, >= 5 admitted tasks per group",
+ "why_source_matched": "the non-thinking mode is the only arm whose Pivot supply is exhausted. Filling only its cell from a new source (design R2, priced beside this one) would make 77% of A2's schema_arguments tokens synthetic and 0% of A1's: a source difference confounded with the mode, the variable under test. Matching the source composition costs one synthetic top-up per arm.",
+ "whole_supply_cells": [],
+ "reused": {
+  "tool_pool@v1 sealed sessions": "the six import records (pilot, Thinking-2507 x3, hybrid x2): every attempted task stays DONE in its mode by task identity (tool_generation_plan.import_records), never re-attempted; their shards keep their own identities",
+  "six categories": "every admitted episode of tool_selection, no_tool, multiple_parallel, multi_turn, error_recovery and mcp_agent is reused as admitted; their registered targets are below the common-support ones every arm already reached",
+  "schema Pivot episodes": "H-T 27,837 / H-N 17,290 / T2507 75,152 sealed supervised tokens; each arm selects 17,200 (C1 17171.0) of them in frozen order",
+  "state evaluation Pivot items": "H-T 4,236 / H-N 1,063 sealed scored positions",
+  "not reused": "no frozen pack, manifest or suite is edited: these arms get new manifests and packs; state evaluation with the synthetic cell would be a new suite identity (state_eval_hybrid@v3), never a rewrite of v2-lc1"
+ },
+ "recorded_per_arm": [
+  "selected examples, turns, tool calls and tool-calling decisions per category and per source group",
+  "unique supervised tokens split into reasoning, answer and tool-call tokens",
+  "whole-episode overshoot per cell",
+  "packed sequences, non-padding tokens, optimizer steps, supervised-token exposure, training FLOPs (compute measures only; never a data size)"
+ ],
+ "fallback": {
+  "registered_before": "any generation under this design",
+  "reads_only": "verified teacher supply under tool_verification@v2 (the dev box's tool_admission census); never a student, search, training or evaluation result",
+  "rule": "a schema_synth group short after its whole supply is attempted is extended by the same generator's next instance indices of the same domains (existing tasks unchanged, a new extension content imported by task identity), never by lowering a verifier, repeating a task, borrowing across splits or counting after packing; a Pivot group cannot be short (sealed)"
+ },
+ "interpretation_limits": [
+  "schema_synth tasks are programmatic: their language is compositional templates with paraphrase, distractors and corrections, not organic user requests; schema_arguments is 15% of the tool type, about 2.5% of each arm's base category",
+  "equal supervised tokens are not equal tasks, tool calls or compute: the non-thinking arm holds about 4-10x the schema tool-calling decisions of a thinking arm at the same tokens",
+  "C1 vs A1 secondary and confounded (initialization protocol)",
+  "the three schema_synth state-evaluation domains are held out from the training domains but share the generator and its derivation patterns: they test domain hold-out, not generalization to real unseen tool-calling tasks; that needs an independent real tool-calling evaluation later",
+  "the per-source targets inside schema_arguments are targets: whole episodes overshoot them, and each arm's real per-source and per-category composition is reported from its frozen selection, never asserted as exact"
+ ],
+ "authorizes": "nothing",
+ "approved_by": "maintainer 2026-11-05, R1 approval: '原则批准方案一 R1，恢复原始 schema_arguments = 15% 的训练配比，而不是用 common-support 的 2.39% 替代主要研究设计。' -- sections I-VII",
+ "generation": {
+  "protocol": "configs/stages/stage-2/teacher_modes/tool_generation_protocol_sr.json",
+  "plan": "logs/stages/stage-2/teacher_modes/plans/schema_restoration_plan.json",
+  "kinds": {
+   "hybrid": "tool_generation_sr",
+   "thinking_2507": "tool_generation_sr_t2507"
+  },
+  "caps_usd": {
+   "tool_generation_sr": 6.16,
+   "tool_generation_sr_t2507": 2.31
+  },
+  "rounds": "round 1 the expected prefix (schema_synth cells at the labelled proxy:other_source stratum); later rounds sized from the session's own measured admitted units per attempted task, inside the bound and the cumulative cap"
+ },
+ "state_evaluation": "state_eval_hybrid@v3: a NEW suite identity from this design's state-evaluation cells (Pivot 1,000 + schema_synth 800 scored positions per mode in schema_arguments, the other categories as @v2); @v2-lc1 stays frozen and unchanged for later sensitivity checks; calibration v2 unchanged"
+}

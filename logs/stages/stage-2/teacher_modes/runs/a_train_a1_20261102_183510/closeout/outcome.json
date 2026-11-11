@@ -1,0 +1,21 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tm_authorization_outcome/v1",
+ "run_id": "a_train_a1_20261102_183510",
+ "study": "A-TM",
+ "recorded_utc": "2026-11-02T18:39:00Z",
+ "status": "ABORTED_BEFORE_CREATE",
+ "validation_passed": false,
+ "terminal": null,
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "_basis": "no create call succeeded: attempt 1 of the create loop returned 'no instances available' at 18:36:17Z; the provider listed zero pods before and after the launcher was stopped at 18:37:54Z"
+ },
+ "provider_confirms_gone": true,
+ "stopped_by": "the agent, during the launcher's 300 s create-retry sleep (no pod_id written, last line 'create failed', provider pod list empty), to land a trainer repair found at $0 before any pod existed",
+ "reason": "scripts/shared/training/train_stage3.py checks the teacher lineage with snapshot_download(model, revision, local_files_only=True) and no file patterns; huggingface_hub 1.x refuses that offline lookup when the cached tree listing names files setup did not fetch (README.md, LICENSE, .gitattributes: A-E ae_20261028_091943). Setup fetches only shared.pod.teacher_cache.TEACHER_FILES, so the trainer would have refused at its first start on the pod. The session commit c1bc1740 does not carry the repair, so this one-use artifact is closed and a new one is issued.",
+ "evidence": "evidence/launch.log (the $0 gates all passed; one create attempt, no capacity)",
+ "kind": "train_a1",
+ "scientific_use": false,
+ "authorizes": "nothing"
+}

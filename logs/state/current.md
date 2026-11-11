@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-26 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-11-11 (UTC), Research A CLOSED: every paid authorization closed, the research branch squash-merged into `main`. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,337 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**RESEARCH A: CLOSED (maintainer, 2026-11-11) -- CURRENT_METHOD_NO_GO FROZEN; EVERY PAID AUTHORIZATION CLOSED; THE BRANCH SQUASH-MERGED INTO `main`. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
+- Verdict (`analyses/research_a_closeout.json`): static fluid 7.19% (A1), 10.96% (A2), 10.26% / 11.23% (A-MIX
+  thinking / non-thinking) at 4.52x A1's compute: the combination of structural initialization, teacher-native data
+  and recovery KD is NO_GO. Not a verdict on 596M capacity or on thinking distillation; not caused by the decoding
+  parameters or the few truncated targets. Registered and descriptive comparisons unchanged; nothing rescored.
+- Closed as studies: the A-TM and A-E grants end with a `closed` block (remainders $21.7557 and $2.7911 lapse);
+  Research A v1's since 2026-10-31. `study_engineering.require_open` refuses issue, launch (an issued, unused artifact
+  included) and the runner's first precheck for every kind; read-only work reads `grant_record`.
+- Research B: its teacher stays `pending`; nothing formal runs, and this integration authorizes nothing for it.
+- Storage, unchanged: eight students' weights on the dev box and evidence archive `fadea626...` on the dev box and
+  the relay, re-hashed 2026-11-11T09:41Z; the relay lacks seven weights (a later $0 upload, not authorized here).
+  Volumes kept; `storage/volume_retirement_proposal_20261110.json` stays a proposal. The Research A v1 evidence in
+  `~/aad-artifacts/research_a/` is hard links: one physical copy, not a second one.
+- Live 2026-11-11T09:39Z: balance $41.93, 0 pods, three volumes at $1.75/day (~24 days); project committed $964.60
+  of $1,000. This decision spent $0.
+- `main` carries the whole research branch (Research A v2, A-TM's 14 kinds, Stage 3 and A-MIX, Research B's
+  engineering validations, the closure); the branch is kept and tagged
+  `archive/research-teacher-modes-and-projected-residual-2026-11-11`. New work starts on a fresh branch from `main`.
+- Not authorized: new GPU work, Stage 4/5/6, Research B, a re-search, deleting a volume, the relay upload.
+- Owner: `logs/budget/decisions.md` 2026-11-11; `PACKED_ROUND.md` sections 20-21.
+
+**RESEARCH A: A-MIX-6cat-sr COMPLETE (2026-11-10) -- TWO SEEDS TRAINED, EACH EVALUATED IN BOTH MODES. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
+- Run `a_train_sr_mix_20261109_193709`: one L40S on `thprcgh7s9`, one attempt, $23.4143 of $40.31 (cumulative $45.17);
+  pod deleted, provider confirms gone. Live balance $43.13 (2026-11-10T17:27Z): about 24 days of the three volumes.
+- Result (`analyses/mixed_result.json`, descriptive): static fluid correctness 10.26% thinking, 11.23% non-thinking;
+  mixed-thinking - A1 +3.07 pp [+0.71, +5.68] INCONCLUSIVE; mixed-non-thinking - A2 +0.26 pp NO_GO; thinking -
+  non-thinking -0.96 pp NO_GO. Twice the unique data and 4.52x A1's compute: not a pure mode-mixing effect. The
+  registered A1 - A2 INCONCLUSIVE and A1 - C1 NO_GO are unchanged.
+- Backup: all eight Stage-3 students' final weights on the dev box, hash-verified (`storage/stage3_devbox_backup.json`);
+  A-MIX s20260801 also on the relay. Evidence archive `fadea626...` (all eight units) on the dev box and the relay.
+- Retired 2026-11-10: ten HF-only weights (22.21 GiB) and fifteen dev-box weights (6.66 + 25.54 GiB, the August
+  E-series by the maintainer's decision), all behind tombstones. Dev box 82% used.
+- Open, maintainer: the next retirement decision for `4rhubprswo` and `thprcgh7s9` (search states, closed trainer
+  state); no volume deletion is authorized. Not authorized: Stage 4/5/6, a merge into main.
+- Owner: `logs/budget/decisions.md` 2026-11-09 / 11-10; `PACKED_ROUND.md` sections 18-19.
+
+**RESEARCH A: STAGE 3 OF six_category_schema_restored@v1 COMPLETE (2026-11-08) -- SIX UNITS TRAINED AND EVALUATED.**
+- Result (`analyses/stage3_sr_result.json`): static fluid correctness on eval-set-1, two-seed means A1-6cat-sr 7.19%,
+  A2-6cat-sr 10.96%, C1-6cat-sr 4.47%; registered A1 - A2 INCONCLUSIVE (-3.77 pp, 97.5% [-7.21, -1.03], not
+  compute-matched); A1 - C1 (descriptive) NO_GO (+2.72 pp [+0.85, +4.83]).
+- Cost: $30.7961 of the $73.24 caps (A1 $7.7554, A2 $15.6086, C1 $7.4321 over two attempts); all pods deleted with
+  the provider's confirmation. Project cap $1,000, Research A $262.04, ceiling $158.3762.
+- Open result-persistence item: the six trained weights are only on `thprcgh7s9`; the relay (92.11 of 93.13 GiB)
+  refuses them. The provider balance ($19.97, 2026-11-08T18:35Z) funds the three volumes ($1.76/day) for ~11 days;
+  an unfunded account's volumes may be terminated. The 2026-11-08 application (HF PRO, a `persist_sr` session) is
+  superseded 2026-11-09: the dev box is the backup target, carried by `train_sr_mix` (above).
+- Closeout 2026-11-08: verdicts kept; the $0 failure analysis (`analyses/stage3_failure_analysis.json`) finds the
+  thinking students fail inside the reasoning, and no training-side defect; PACKED_ROUND.md section 17.
+- Corrected 2026-11-08: the behaviour unit's aggregates in every hybrid-template report were rescored under each
+  record's think state (`audit/behaviour_aggregate_rescoring.json`); no correctness number or comparison changed.
+- Owner: `logs/budget/decisions.md` 2026-11-08 (two entries); `PACKED_ROUND.md` sections 15-17; runs `a_train_sr_*`.
+
+**RESEARCH A: THE PACKED FULL SEARCH IS COMPLETE (2026-11-06) -- TOP-1 `1f5e4b42...`, ONE ATTEMPT, $28.17 OF $55.72.**
+- Top-1: FFN(base) -> DEPTH(base) -> WIDTH(rh) -> ATTENTION(rh), 596,049,920 parameters, single shard `b74dede8...`; on
+  the volume `thprcgh7s9` and on the private relay (`runs/a_packed_search_20261105_195011/evidence/products.json`).
+- Measured: 1,521.8 pod minutes, state evaluation 70.6 s median, peak VRAM 36.2 of 46 GB
+  (`audit/packed_search_measurement.json`). Nothing is running or billing; volumes `thprcgh7s9`, `4rhubprswo`, `am5m373kuq`.
+- Accepted by the maintainer 2026-11-07; Stage 3 prepared from it (above).
+
+Earlier the same round:
+- Inputs: the frozen calibration v2 profiles + `state_eval_hybrid@v3` (`c39d0ec9...`, protocol `b760ab7e...`,
+  reproduced by the check-only); `@v2-lc1` kept for sensitivity only. The Top-1 is for A1-6cat-sr / A2-6cat-sr.
+- Grant: kind `packed_search`, $55.72 cumulative over every attempt; ceiling $135.2489, project cap $930, Research A
+  $211.25. Volume `thprcgh7s9` (350 GB, US-TX-3, reserve $13.34) is the only one the search may attach.
+- Not authorized: Stage 3's six units, any formal benchmark, Stage 5 rollout, a merge into main.
+- Owner: `logs/budget/decisions.md` 2026-11-05 ("Packed Full Search authorized"); `PACKED_ROUND.md` section 13.
+
+**RESEARCH A: R1 GENERATION COMPLETE -- A1/A2/C1-6cat-sr FROZEN AT THE REGISTERED COMPOSITION (schema_arguments ~15%), state_eval_hybrid@v3 FROZEN; STOPPED AT THE FULL SEARCH'S AUTHORIZATION BOUNDARY (2026-11-05).**
+- Source: `schema_synth@v1` admitted in the extension `e771393a...` (220 training instances per domain; the independent
+  semantic review's 226 ambiguous requests left out; `audit/tool_source_admission_schema_synth.json`).
+- Generation: three sessions, $1.3776 of the caps $6.16 + $2.31 (hybrid $1.0480, Thinking-2507 $0.3296); every cell
+  of `plans/schema_restoration_plan.json` REACHED. Measured schema_synth admission: non-thinking 42.7%, thinking 76.9%,
+  Thinking-2507 90.5% of attempted tasks.
+- Frozen: `audit/six_category_schema_restored_freeze.json` (schema_arguments 14.98% / 14.94% / 15.24% of the tool type;
+  A2/A1 3.53x the packed sequences); `audit/state_eval_hybrid_v3_freeze.json` (`c39d0ec9...`, protocol `b760ab7e...`);
+  `@v2-lc1`, the -cs packs and the calibration v2 profiles unchanged.
+- The packed Full Search's application was approved 2026-11-05 (above).
+- Owner: `logs/budget/decisions.md` 2026-11-05 (R1 approved; R1 generation complete); `PACKED_ROUND.md` section 12.
+
+**RESEARCH A: THE REGISTERED TOOL COMPOSITION CAN BE RESTORED -- DESIGN R1 READY FOR ONE DECISION; THE PACKED FORWARD RE-PRICED ON THE FROZEN INPUTS (2026-11-05, $0, nothing generated, searched, trained or evaluated).**
+- schema_arguments supply recounted (`audit/schema_arguments_supply_v3.json`): non-thinking EXHAUSTED (all 1,928
+  Pivot tasks tried, 17,290 / 74,013); thinking UNTRIED beyond the pilot (124 tried, 27,837); Thinking-2507 above
+  target (75,152 / 73,888).
+- New source prepared, not admitted: `schema_synth@v1` (3,750 programmatically verified tasks,
+  `audit/schema_synth_v1_audit.json`) as the pool extension `tool_pool@v1+schema_synth@v1` (`6139e647...`, base
+  byte for byte); sealed sessions reused by task identity; per-source strata and cells.
+- The one decision owed: design R1 (`configs/.../six_category_schema_restored.json`), caps hybrid $6.16 + Thinking-2507
+  $2.31 (expected $1.12); application `logs/budget/applications/research_a_schema_restoration_2026-11-05/`.
+- Packed forward (`audit/packed_forward_compute.json`): 84-86% fewer forwards, about 1.4x the FLOPs per pass on the
+  same items; the search re-priced at $34.12 expected ($26.46-$39.09) vs $25.58 for the same inputs read alone;
+  unmeasured on a GPU. The search still needs its suite binding (`@v2-lc1` or a v3), a ~350 GB volume and a raised
+  project cap ($27.17 left).
+- Unchanged: the -cs packs, `@v2-lc1`, the calibration v2 profiles, every sealed shard. No pod, no watcher; volumes
+  `4rhubprswo` and `am5m373kuq` untouched.
+- Owner: `PACKED_ROUND.md` sections 9 and 11; the decision record is `logs/budget/decisions.md` 2026-11-05.
+
+**RESEARCH A: TOOL GENERATION COMPLETE FOR ALL THREE ARMS; `six_category_common_support@v1` FROZEN (A1/A2/C1-6cat-cs); `state_eval_hybrid@v2-lc1` FROZEN; `@v2` PENDING (maintainer review of `f06ccd4`, 2026-11-05).**
+- Done (2026-11-05 UTC):
+  - cross-plan import of completed tool sessions (`tool_generation_import.build_session`); every import reconciles
+    exactly with its session's own record;
+  - `six_category_common_support@v1` registered (`configs/.../six_category_common_support.json`) and the plan rebuilt
+    on it (training split only);
+  - Thinking-2507's top-up: attempts 3 and 4, $0.7137; every cell REACHED; the kind $1.9566 of its cumulative $2.78;
+  - the hybrid's formal generation: attempts 1 and 2, $3.5885 of the cumulative $9.13; 51 of 52 cells REACHED, the
+    remaining one the registered limited-coverage cell (non-thinking state-eval schema_arguments, 1,063 / 1,800,
+    source exhausted);
+  - the three -cs arms frozen and packed (`audit/six_category_common_support_freeze.json`): A2/A1 3.47x the packed
+    sequences, optimizer steps and training FLOPs for the same unique supervised tokens;
+  - calibration v2 profiles COMPLETE; `state_eval_hybrid@v2-lc1` FROZEN (protocol `d09a4849`).
+- Repaired: the teardown gate's sticky `listing_unknown` retained hybrid attempt 1's pod for 2.1 minutes after every
+  product was secured. The pod was released by hand after re-verification (`closeout/teardown.json`), and the
+  listing now lets its latest answer decide.
+- No pod and no watcher is left; the provider holds only the two accounted volumes. The envelope has $23.94 left; the
+  project cap has $27.18 left.
+- **Not authorized:** the packed full search (its binding to `@v2-lc1` and a raised project cap are owed), Stage 3
+  training, formal benchmark evaluation, a merge.
+- Owner: `PACKED_ROUND.md` sections 8 and 9; the decision record is `logs/budget/decisions.md` 2026-11-05.
+
+**RESEARCH A TOOL PILOT: COMPLETE AND ACCEPTED (`a_tool_pilot_20261104_164531`; $0.4328 estimated, $0.4286 posted by the provider). THE BOUNDED TOOL GENERATION: REVISED ON IT, READY FOR ONE REVIEW, NOT AUTHORIZED.**
+- Revised (2026-11-04, $0): measured priors, an explicit import of the pilot's 794 tasks, the plan's sealed /
+  projected / bounded / unmeasured units per cell, a measured price (hybrid $2.54 expected, cap $8.47; Thinking-2507
+  unmeasured, cap $2.77), the formal kinds on the pilot's placement with receipts and a relayed task file, the refusal
+  diagnosis, the schema_arguments design. Owner: `PACKED_ROUND.md` section 8, "The bounded tool generation, revised".
+Attempt 1 (`a_tool_pilot_20261104_140656`) ended at $0 (no L40S in EUR-IS-2). Attempt 2, on any Secure Cloud L40S,
+was created after 15 minutes and finished ALL_DONE in 23.4 billed minutes. The pod is confirmed gone.
+- **Measured:** first-candidate admission rate 99/397 (non-thinking) and 118/397 (thinking); admission yield of up to
+  two candidates 105/397 and 135/397.
+- **Supervised tokens before packing:** 14,037 and 91,490.
+- **SHORTFALL projected for non-thinking `schema_arguments`** (training and state evaluation), not approved.
+- **Owner:** `PACKED_ROUND.md` section 8, "Pilot result"; awaiting the maintainer's review.
+- **Storage and placement:** no network volume. The session writes to the pod's container disk, sealed shards are
+  pulled to the dev box on every poll, and a replacement pod resumes from that copy (`--resume-from`).
+- **Cap:** $2.50 cumulative over every attempt (`token_matched_phase.kind_cap_problems`); each attempt is a new run
+  with a new one-use artifact.
+- **Unchanged:** the frozen 397 tasks / 794 runs, both modes, the candidate rule, the teacher, the generation and
+  verification protocols, and the L40S card.
+- **Tooling, the same day:** runpodctl 3.0.1 (REST v2); billing read from REST v2 (v1 retires 2026-11-15); the
+  runner's per-attempt deadline, datacenter rotation and reconciliation of ambiguous creates; the official
+  `runpodctl` skill from `runpod-plugins-official`; the project skill `aadistill-gpu-experiments`; AGENTS.md P17.1.
+- **Owners:** [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)
+  section 8; the decision record is `logs/budget/decisions.md` 2026-11-04.
+- **Already in force (2026-11-04):**
+  - the generation-scoped L40S gate admits the pilot (`l40s_check.generation_scope_problems`), and the whole-phase gate
+    still refuses every other A-TM generation kind;
+  - the metric contract is `docs/shared/METRIC_CONTRACT.md` (AGENTS.md P10.3): the pilot reports teacher data
+    admission rates, never a benchmark score.
+- **Not authorized:** formal tool generation, packed full search, training, formal evaluation, a SHORTFALL approval,
+  a merge.
+
+**RESEARCH A PACKED ROUND: PREPARATION_BLOCKED (2026-11-04; maintainer brief "Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备"). Code, identities, tests, $0 audits, the new full-search chain, the training plans and the bounded tool-generation plan are done; nothing searched, trained, generated or evaluated (only candidate-source and decontamination-reference files downloaded, gitignored); no pod; no cap raised.**
+The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)
+(design `configs/stages/stage-2/teacher_modes/packed_round_design.json`). Decision record: `logs/budget/decisions.md`
+2026-11-03 (sequential packing). AGENTS.md P19 states the rule by stage.
+- **The rule:** Stage-1 search forwards and Stage-3 training read examples randomly shuffled, sequentially packed
+  with truncation (the maintainer's `packing_conversation`) and standard causal attention; Stage-5 rollouts keep
+  their real context and are never packed. Core: `aadistill.data.sequence_packing`; Stage 1's `ForwardContext`;
+  Stage 3's `pack_sequential`.
+- **Forward baseline version 2 selected** (`configs/shared/baselines/initialization_forward_baseline_v2.json`): D1's
+  method in the packed context, fingerprint `1dcaad69…`. Version 1 superseded, still loadable; Research A v2 and
+  Stage-0 drivers pin it, and the v2 search's identities reproduce exactly.
+- **Measured at $0** (`audit/packing_audit.json`): Stage-1 sets re-score 10–13% of scored positions in fragments; A1's
+  documents add 18.7% repeated supervised tokens (1,288 sequences vs 1,102), A2's 4.3%; on this data
+  `truncate=False` gives the same sequences.
+- **The maintainer's reviews of `649d25dd` and `77be6e13` (2026-11-03).** The packing core stands: fragments are
+  accepted, formal data is counted before packing, and loss normalization is kept. Both rounds of $0 repairs are done.
+  - **Bounded generation.** Tool generation is bounded by a frozen plan (`tool_generation_plan.py`): per-category
+    targets in the consumer's unit, frozen orders, rounds, a hard bound. Priced over the dry pool at
+    $2.27 / $3.72 / $11.01, cap $12.11 with the single-step tier (was $3.62 / $10.31, cap $11.34); 5,238 tasks
+    expected, 10,129 at the bound (`plans/tool_generation_plan_dry_run.json`).
+  - **Pool identity.** Every split file is sha256-registered and re-verified at every read.
+  - **Isolation.** Exact prompts and tool identities are isolated across splits.
+  - **Fail closed.** Schema validation and the reference caches fail closed. T3 now checks xLAM-60k and Glaive-v2.
+  - **Pivot.** Pivot Conversational is rebuilt (9,051 tasks, step gold); Pivot Function-Calling fails T3.
+  - **Evidence.** The dry pool: 83,764 tasks (`audit/tool_pool_dry_run_v3.json`). The `a_search` position
+    reconciliation is repaired, and the four experiment-suite failures are closed.
+- **Third review, of `acbbbbfb`.** Two repairs are done:
+  - per-category gates on calibration v2 and `state_eval_hybrid@v2`: an unapproved SHORTFALL or THIN freezes nothing;
+  - every consumer reads through `tool_generation_plan.verified`.
+
+  The maintainer allows Toucan SFT and Pivot Conversational to be PREPARED as priority sources; this is not
+  generation.
+- **Review of `fc6fa1d6` (2026-11-04).** Done at $0:
+  - selection, proportion validation, admission / freeze and packing are four functions (`packed_packs.select`,
+    `proportions` -> core `aadistill.data.mixture.validate_proportions`, `admit` -> `data_manifest.json`, `pack`); the
+    packing judges no proportion, and `packed_training_plan.bind` reads only a pack `verify_pack` accepts;
+  - the agent's `share_check` (2% per type, fluid 49-51%) is withdrawn: it was looser than the registered tolerance,
+    which every arm's real data passes (`audit/proportion_tolerance_audit.json`);
+  - option 1 vs option 2 for `schema_arguments` measured (`audit/schema_arguments_options.json`).
+- **Review of `647eea0e` (2026-11-04).** The packing core and the decoupling are accepted and frozen. Done at $0:
+  - the admission takes only the proportion report of the selection it admits (`packed_packs.selection_identity`:
+    tokens, masks, types, categories, splits, tool cells, sources, quota designs; the report sealed);
+  - the training binding verifies the actual packed tokens and supervision (`packed_content_sha256` recorded at
+    packing, every document against the manifest, the sequences re-derived exactly);
+  - `single_step_gold_tool_call@v1` implemented (`six_category_design.json :: protocol.episode_shapes`; Pivot
+    Conversational, schema_arguments only, a second tier of the pool's frozen order); dry pool v4 and plan
+    (`audit/single_step_supply_audit.json`): every earlier task unchanged;
+  - the token identity audit's intermittent failure: a cold first-forward CPU effect on eight threads, repaired by a
+    single-threaded probe (PACKED_ROUND.md section 10);
+  - the L40S pilot's application prepared, not authorized
+    (`logs/budget/applications/research_a_tool_pilot_2026-11-04/application.json`).
+- **Review of `2468c1aa` (2026-11-04).** The identity hardening and the single-step protocol are accepted. Done at $0:
+  - `verify_pack` re-derives the packed sequences from the documents the admission froze (`data_documents.npz`), so
+    `truncate=True` is verified rather than refused;
+  - `tool_verification@v2`: V1's tail rule on every call turn (0 of the hybrid's 22 recorded call turns affected);
+  - the L40S pilot's execution preparation: kind `tool_pilot`, frozen cells (`plans/tool_pilot_plan.json`, 397 tasks,
+    794 runs), `tool_session.py --pilot`, telemetry, the runner's hard-cap check, a pilot-only source admission
+    (unsigned) and the re-verified application. Owed: the signature, the grant's cap, option A ($1.80) or B ($2.50).
+- **Final authorization review of `56381f55` (2026-11-04): conditional GO for option B ($2.50).** Done at $0: issue
+  requires the grant's pilot-only `tool_pilot` block (amendment drafted, not applied; envelope $29.9159 left of
+  $79.5289, no unknown cost); resumption bound to the pilot plan, round input, protocol, verification version and
+  generation implementation. Owed: the signature, the amendment, the final authorization.
+- **Review of `29b62c93` (2026-11-04).** Option B ($2.50) recommended for the pilot; done at $0: the pilot report reads
+  partial, verified sealed results (COMPLETE / PARTIAL / INCOMPLETE / FAILED, UNMEASURED never 0); one strict check of
+  the source admission's signature at issue and on the pod; the volume checked read-only and measured on the pod.
+  Owed: the signature, the grant's cap, the final authorization.
+- **Blocked on tool calling.**
+  - The non-thinking `schema_arguments` SHORTFALL: option 1 is implemented; at the priors it fills training and leaves
+    state evaluation short (~1,400 of 1,800). No SHORTFALL is approved, so the A2-6cat admission refuses and the suite
+    cannot freeze, hence no search. The pilot would measure the real supply.
+  - The generation (and the pilot) are paid sessions to authorize.
+  Calibration v2, `state_eval_hybrid@v2` and therefore the new search wait for it.
+- **Next: the maintainer's ruling** on:
+  - source admission;
+  - the expected SHORTFALLS: non-thinking `schema_arguments`, and "ask for the missing value";
+  - the isolation costs and the validation-coverage gaps;
+  - the L40S pilot (signature, grant cap, option B $2.50 recommended; not authorized);
+  - a raised cap: generation plus search is $36.15 expected against $30.05 left (live 2026-11-04T08:06Z);
+  - volume `4rhubprswo`.
+
+  0 pods; the two volumes are retained.
+
+**RESEARCH A: SIX BASE-CORPUS TYPES — A1-6cat, A2-6cat, C1-6cat DESIGNED AT $0 (2026-11-03; maintainer brief "Thinking-2507 六类数据对照方案补充"). STOPPED at the maintainer's review: nothing generated, downloaded, searched, trained or evaluated; no pod; no cap raised.**
+The owner: [`docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md`](../../docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md)
+(design `configs/stages/stage-2/teacher_modes/six_category_design.json`). Decision record: `logs/budget/decisions.md`
+2026-11-03.
+- **Sources** (`audit/tool_calling_source_review.json`): none covered outright. Proposed under conditions:
+  Toucan-1.5M, the two NeMo Gym Pivot sets and WorkBench. Glaive, xLAM and everything built from them are excluded.
+  Three gaps (gold parallel arguments, missing-parameter questions, an MCP success check) are SHORTFALL risks.
+- **C1-6cat** (`audit/c1_tool_replacement.json`): replaces only the 1,479 tool-only training sequences (492,587
+  supervised tokens) and 6 validation sequences; 989 + 10 sequences are kept byte for byte; `D4A_merged_whole` is
+  untouched.
+- **Persistence** (`audit/six_category_persistence.json`): the hybrid Top-1's only copy is on `4rhubprswo`
+  (reserve to 2026-11-15T12:55Z); the D4 Top-1 was re-hashed on the dev box and relay.
+- **Next: the maintainer's ruling** on sources, category shares, a tool-calling evaluation, the volume, and a
+  phase-by-phase budget (six trainings about $47.58 expected). Nothing is running and nothing is billing apart from
+  the two retained volumes (0 pods).
+
+**RESEARCH A v2: THE A1 PHASE IS COMPLETE (2026-11-03; maintainer 2026-11-01, "Execute A1 First"). Both seeds trained and evaluated; A1 spent $33.74 of its $63.66 sessions envelope plus the volume's $13.34 storage reserve (cap $77.00). STOPPED: A2, C1 and Research B are NOT authorized; no merge.**
+The owner: [`docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md`](../../docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md)
+section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries). Grant:
+`logs/budget/approvals/teacher_modes_token_matched_grant.json` (amended). Branch
+`research/teacher-modes-and-projected-residual`; `main` stays at `72492e46`.
+- **Resources:** the new 350 GB volume `4rhubprswo` (US-TX-3, record `storage/a1_phase_volume_4rhubprswo.json`);
+  `am5m373kuq` kept as the archive. One L40S at a time.
+- **Phase A (inputs): done** (`a_inputs_20261101_125916`, $0.5713): profiles COMPLETE, `state_eval_hybrid@v1`
+  frozen (1,135 items, protocol `1c830524`).
+- **Phase B (search): COMPLETE** (`a_search_20261101_153803`, $23.96 of $41.21): 93 states, 12 complete leaves;
+  Top-1 `159e73be` (DEPTH(base) → FFN(base) → ATTENTION(base) → RESIDUAL_WIDTH(rh), 596,049,920 parameters,
+  `model.safetensors` `3459b9c9…`) on volume `4rhubprswo`, sha256-verified there. Pod gone; no observers remain.
+- **Phases C and D (A1's two seeds trained and evaluated): COMPLETE** (`a_train_a1_20261102_184122`, $8.7766 of
+  $13.85; pod gone, no observers remain). Both seeds ran all 1,653 steps (validation CE 0.790 / 0.791). On eval-set-1
+  v2's 570 formal static items each seed scored 30 (5.3%; deduction 26/189, induction 2/142, composition 2/144,
+  abstract 0/95) against the thinking-mode teacher's 511 (89.6%); interactive 0 and 2 of 144 (teacher 62).
+  Result: `analyses/a1_result.json`; TOKEN_MATCHED.md D has the tables, the volume's contents and A2's plan.
+  Attempts 1 ($0.2436) and 2 ($0) ended before any training step and were repaired. No GO / NO-GO is made.
+- **Next: the maintainer's decision** on A2 / C1 (C1's tool data is now redesigned as C1-6cat, above) and on
+  volume `4rhubprswo` (reserve to 2026-11-15T12:55Z).
+  Nothing is running and nothing is billing apart from the two retained volumes (0 pods, provider-confirmed).
+- **Spent before the phase:** A-TM $15.8689; project position read at issue: $67.21 left after the new volume's reserve.
+
+**RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**
+Decision record: `logs/budget/decisions.md` 2026-10-28 "A-E ($3.50) and B-E ($3.00) ... authorized". Neither PASS is a scientific GO; A1–A3, B1 and 600M stay unauthorized. The text below is the $0 readiness state the authorization was granted on.
+The maintainer agreed in principle to A-E ($3.50) and B-E ($3.00) and issued no grant
+(`logs/budget/decisions.md` 2026-10-28). Branch `research/teacher-modes-and-projected-residual`; `main` stays at
+`72492e46`, and this branch is NOT merged. Nothing runs. The account holds 0 pods and the retained volume
+`am5m373kuq`.
+- **The issuance chain** (`shared.study_engineering`; instances `ae_launch.py`, `be_launch.py`):
+  - grant from the maintainer's decision only; until then each study's proposal
+    (`plans/engineering_grant_proposal.json`), which funds a dry run and nothing else;
+  - per-study cumulative envelope; one-use authorization bound to the study identity and the harness;
+  - the live project position at issue and at launch (fail closed); the balance a necessary condition, never
+    headroom;
+  - the shared session runner (watchdog, hard deadline from the accepted price, pinned train and vLLM
+    environments, the evidence relayed and hash-checked, teardown confirmed by the provider), and a closeout that
+    re-derives the driver's verdict.
+- **$0 dry runs:** `logs/stages/stage-2/teacher_modes/validations/a-e/dry_runs/` and
+  `logs/stages/stage-1/projected_residual/validations/b-e/dry_runs/` hold, per study, the dry-run artifact and
+  the runner's own record of every pre-provider gate.
+  - The final runs (`20261028T0625Z`, commit `6b1fb231`) end `DRY_RUN_GATES_PASSED` for both studies.
+  - The only refusal is the expected one: no relay bundle until the granted commit exists.
+  - Nothing was created. The first run found a $0 defect, fixed in `19fcab54`.
+- **Budget, four views kept apart** (owner `logs/budget/provider/runpod_billing_2026-10-28T0537Z.json` through
+  `scripts/shared/project_position.py`; the 2026-10-27 audit stays CLOSED):
+  - *provider bill and live resources*: billed $720.2558; 0 pods; `am5m373kuq` only. The balance ($139.18) is
+    not a grant.
+  - *project commitment*: $724.3538 of the $740 cap, headroom $15.6462. A-E + B-E caps would take it to $730.8538.
+    Every one of the 55 campaign subruns has a confirmed teardown (25 by their own records, 30 by
+    `logs/budget/reconciliations/campaign_teardowns_2026-10-28.json`); an unconfirmed one now refuses whatever its
+    age.
+  - *historical budget records*: as booked. `current.json`'s records-based remainder is not headroom.
+  - *unfinished attribution*, NOT explained: +$37.53 billed before the 2026-09-11 anchor beyond the maintainer's
+    stated anchor; 55 pre-anchor pods ($77.33) named by no record; $0.35 of volume rows outside every recorded
+    lifetime; pod `gbiz85xcmiq6gh` named by two subruns and billed once.
+- **Research A, hybrid teacher thinking vs non-thinking:** `docs/stages/stage-2/teacher_modes/DESIGN.md`.
+  - Teacher `Qwen/Qwen3-4B@1cfa9a72`; token-in/token-out documents; `kd_scope="assistant"`.
+  - **Both context strategies supported** (`batch.context_strategy`: `cross_context`, the default and H1/H1-PA's,
+    a deliberate design; `document_isolated`). The study declares `document_isolated` for every arm so the
+    context distribution does not move with the mode. The strategy itself is not compared in round 1.
+  - A-E driver `engineering_validation.py`: prompt token identity in both modes, vLLM generation in both modes,
+    the real teacher teacher-forced (packed vs alone, fp32/bf16), the assistant-target KL mask, a 20-step
+    isolated-pack smoke on the E1 PCA stand-in, `preclosed` scoring. One A100-SXM4-80GB, at most $1.87/h.
+  - Applied for: A-E $3.50, then A1-A3 + storage + reserve, $60.00 in all.
+- **Research B, 900M full-width residual + per-layer trainable PCA:** `docs/stages/stage-1/projected_residual/DESIGN.md`.
+  - 902,911,488 parameters (513,955,328 trainable), architecture unchanged.
+  - B-E driver `engineering_validation.py`:
+    - the CPU float32 structural fold check, plus a CUDA fp32/bf16 fold check on 7 fixed eval-set-1 prompts
+      against `fold_acceptance`;
+    - smoke, resume and checkpoint identity, on the requested device;
+    - vLLM in its own process on a clear GPU, on the same prompts, against the HF reference.
+    - One L40S, at most $1.14/h.
+  - Applied for: B-E $3.00, then B1 $21.00 (needs a project cap of $749 or more). 600M reserved only.
+- **Disk:** 16 GiB free (`logs/maintenance/storage/devbox_cleanup_20261028.json`). The suite has its own simulator
+  floor (`AAD_TEST_PODSIM_MIN_FREE_GIB`); a real sweep's floor cannot be lowered. The 14 retire-listed checkpoints,
+  D1's weights without a relay copy and other projects' assets are kept for the maintainer.
+- **Next:** the maintainer's decision on the two grants. On approval:
+  1. `<launcher> grant --decision ...`;
+  2. `issue`;
+  3. commit;
+  4. `stages.phase_c1.bundle.stage_bundle` for that commit;
+  5. `launch`.
 
 **MIXED CALIBRATION 2x: COMPLETE; PREREGISTERED M = NO_GO (2026-10-27).**
 Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md)
@@ -963,7 +1294,37 @@ invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
 
-**Stage 2 (H1, H1-PA) and the mixed calibration 2x, integrated 2026-10-28
+**Research A (v1, A-E, v2 / A-TM) and Research B's design and engineering validation, integrated 2026-11-11 (UTC)
+by SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's instruction ("Research A 最终关闭与 Squash Merge
+Main").** One commit on `main` collapses everything on top of `72492e46` (the Stage-2 squash): the 233 commits up to
+the reviewed `e79c8f6a`, plus this round's closure and pre-integration record commit after it.
+- Research A v1 (D4 scale): STOPPED 2026-10-31, its grant closed; A-E PASS; B-E FAIL (engineering only);
+- Research A v2 / A-TM: the supplement, the inputs, the hybrid full search, A1, the packed round (packed full search,
+  tool generation, six_category_schema_restored), Stage 3 A1/A2/C1-6cat-sr and A-MIX-6cat-sr; verdict
+  CURRENT_METHOD_NO_GO; the A-TM and A-E grants closed (`study_engineering.require_open`);
+- Research B (projected residual): design and engineering validation; its teacher `pending`, nothing formal;
+- every record, raw evidence file, checkpoint identity and closed grant, unchanged. Weights are not in git: on the
+  three volumes, the eight final students on the dev box, the packed Top-1 and one student on the relay.
+
+```text
+source branch : research/teacher-modes-and-projected-residual   (NOT deleted -- P12.2)
+archive tag   : archive/research-teacher-modes-and-projected-residual-2026-11-11 (the final tip)
+merge base    : 72492e468bf1449ecdd4bcadb6611003f7c175b9   (main before)
+reviewed tip  : e79c8f6a81ea8817f015f82f78bd2445c57d91f6
+branch tip    : named by the squash commit and the tag; a record on the branch cannot carry its own hash
+squash commit : `git log -1 main`
+```
+
+- **What was tested** on the final tree: the core full suite and the experiment suites of every directory the branch
+  changed (teacher_modes, shared, projected_residual, calibration_volume, reasoning_data, migration), reported apart;
+  the counts are in `logs/budget/decisions.md` 2026-11-11. Four failures of the closed migration suite fail on
+  `main` as well and are left as they are.
+- **Reachability.** 769 commit hashes the records cite resolve; 139 exist only on the source branch, which is why
+  it and its tag are kept permanently.
+- **Left byte-for-byte as recorded:** the raw `launch.log` evidence of two A1 runs keeps its trailing spaces (the
+  provider CLI's own usage text), so `git diff --check` reports them; they are evidence, not formatting.
+
+**Stage 2 (H1, H1-PA) and the mixed calibration 2x, integrated 2026-10-27
 (UTC) by SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's
 instruction.** One commit on `main` collapses everything on top of `2a8bae78`
 (the Stage-0 squash): the 75 commits up to the tested tree `d5f1c6f2`, plus the
@@ -999,7 +1360,7 @@ squash commit : `git log -1 main`
 - **Reachability.** Every commit hash the records cite was checked before the
   squash: zero unreachable. The source branch is where this round's commit
   hashes live, so it is kept permanently.
-- **Budget: four things kept apart** (maintainer, 2026-10-28). None of them
+- **Budget: four things kept apart** (maintainer, 2026-10-27). None of them
   substitutes for another.
   1. *The provider's bill and live resources*: the provider's own billing and
      account listing. `main`'s newest committed snapshot is
@@ -1065,7 +1426,7 @@ closeout tree : fa311c679cbf0454966ed50034849cb48dbf5385
   squash: zero unreachable. The source branch is where this round's commit
   hashes live, so it is kept permanently.
 - **Where work continued.** On `stage2/reasoning-data`, cut fresh from that
-  squash commit (itself integrated 2026-10-28, above).
+  squash commit (itself integrated 2026-10-27, above).
 
 **The D-series and its closure, integrated 2026-10-17 (UTC) by SQUASH AND
 MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One commit on
@@ -4292,7 +4653,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$687.4031` spent of `$712.1700`, leaving `$24.7669` |
+| project cap | `$870.6969` spent of `$1000.0000`, leaving `$129.3031` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

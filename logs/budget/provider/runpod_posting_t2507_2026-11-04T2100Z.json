@@ -1,0 +1,26 @@
+{
+ "schema": "aadistill.budget.provider_posting_check/v1",
+ "fetched_utc": "2026-11-04T20:58:05+00:00",
+ "api": "RunPod REST v2 billing (provider_billing.py fetch)",
+ "pods": [
+  {
+   "pod": "0lbf43rtt6yn2a",
+   "run_id": "a_tool_generation_t2507_20261104_195411",
+   "posted_usd": 0.0282,
+   "gpu_usd": 0.0264,
+   "disk_usd": 0.0017,
+   "closeout_estimate_usd": 1.097,
+   "state": "PARTIALLY POSTED at fetch time (posting lags); not reconciled yet"
+  },
+  {
+   "pod": "t9mu5mwk20uchj",
+   "run_id": "a_tool_generation_t2507_20261104_194048",
+   "posted_usd": 0.1417,
+   "gpu_usd": 0.14,
+   "disk_usd": 0.0017,
+   "closeout_estimate_usd": 0.1459,
+   "state": "POSTED (below the estimate; the envelope keeps the estimate)"
+  }
+ ],
+ "ledger_rule": "the cumulative cap and the envelope use the closeout all-in estimates until a later fetch posts in full"
+}

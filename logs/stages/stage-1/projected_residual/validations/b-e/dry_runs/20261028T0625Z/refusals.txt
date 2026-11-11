@@ -1,0 +1,7 @@
+$ be issue (no --dry-run)
+REFUSED at $0: no grant at logs/budget/approvals/projected_residual_engineering_grant.json: B-E is not authorized (a proposal exists)
+RC=11
+$ be launch (no --dry-run, no artifact)
+REFUSED at $0: no authorization at /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/projected_residual/runs/beneg_probe/governance/authorization.json: nothing was issued for this run
+No provider resource was created.
+RC=11

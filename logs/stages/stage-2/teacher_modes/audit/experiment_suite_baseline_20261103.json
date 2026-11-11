@@ -1,0 +1,26 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.experiment_suite_baseline/v1",
+ "written_utc": "2026-11-03",
+ "question": "are the four experiment-suite failures seen on 649d25dd introduced by the packed round?",
+ "method": "the four node ids run in detached worktrees of b7ee0c93 (the packed round's base) and c861d704 (its parent), with the repository's .venv; same command as on the current tree",
+ "command": "PYTHONPATH=src:scripts:tests .venv/bin/python -m pytest -q -p no:cacheprovider <node ids>",
+ "node_ids": [
+  "scripts/stages/stage-2/teacher_modes/tests/test_ae_session.py::test_the_plan_fits_the_proposed_cap_at_the_quoted_rate_and_the_granted_ceiling",
+  "scripts/shared/tests/test_project_position.py::test_the_position_on_the_repository_is_the_issuers_rule_plus_campaign_subruns",
+  "scripts/shared/tests/test_project_position.py::test_position_adds_what_the_campaign_scan_counts",
+  "scripts/stages/stage-0/calibration_volume/tests/test_mixed_execution.py::test_position_counts_unposted_inside_the_window_and_lists_older"
+ ],
+ "results": {
+  "c861d704": "4 failed",
+  "b7ee0c93": "4 failed",
+  "649d25dd": "4 failed",
+  "this round's tree": "4 failed"
+ },
+ "causes": {
+  "test_ae_session": "asserts the AE session accounts only volume am5m373kuq; the ledger also accounts 4rhubprswo, the volume retained since a_search_20261101 (the v2 Top-1's only copy) -- a historical state assertion",
+  "test_project_position (x2)": "run a_search_20261101_153803's pod jzslup672m2jiy is neither confirmed gone nor posted in its records, so the position refuses ('reconcile first'); the live provider reading at 2026-11-03T09:06Z showed 0 pods -- a record gap, not a billing resource",
+  "test_mixed_execution": "future_usd 7.6708 against the asserted 4.1708: the projection also carries the retained 4rhubprswo volume"
+ },
+ "verdict": "PRE-EXISTING: all four fail identically before the packed round began (b7ee0c93) and one commit earlier (c861d704); none touches code this round changed. Their repair is the a_search runs' record reconciliation (pod jzslup672m2jiy) and the 4rhubprswo volume decision, both owed to the maintainer",
+ "authorizes": "nothing"
+}

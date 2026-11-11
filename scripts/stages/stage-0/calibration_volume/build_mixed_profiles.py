@@ -442,7 +442,7 @@ def operator_view(items: list[dict]) -> dict:
     from aadistill.initialization.scoring.batches import PREDICTION_AXIS, TOKEN_AXIS, weights_for_items
     from aadistill.initialization.statistics.contribution import domain_balanced_score
     from shared import forward_baseline as FB
-    policy = FB.selected().position_policy
+    policy = FB.historical(1).position_policy
     out = {"position_policy": policy.qualified_id}
     for name, axis in (("token_axis", TOKEN_AXIS), ("prediction_axis", PREDICTION_AXIS)):
         by = Counter()
@@ -706,7 +706,7 @@ def main(argv=None) -> int:
     pool_manifest = json.loads((pool_dir / "manifest.json").read_text())
     if pool_manifest["items_sha256"] != design["pool"]["items_sha256"]:
         raise SystemExit("the pool on disk is not the pool the design names")
-    micro_batch = int(FB.selected().execution.micro_batch_size)
+    micro_batch = int(FB.historical(1).execution.micro_batch_size)
     seed_text = f"stage0.calibration_volume.{design['draw']}|draw|1"
     if f"'{seed_text}'" not in design["seed_derivation"]:
         raise SystemExit(f"the design's seed derivation does not declare {seed_text!r}")

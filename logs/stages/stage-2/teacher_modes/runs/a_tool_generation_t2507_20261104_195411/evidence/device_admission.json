@@ -1,0 +1,312 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.device_admission_result/v1",
+ "lineage": "thinking_2507",
+ "mode": "T2507",
+ "config": {
+  "path": "configs/stages/stage-2/teacher_modes/t2507_device_admission.json",
+  "sha256": "ca0d1f8cf0630c9c6a454180f5f2899684a24be4376d1ff7cd69ceb61481134b"
+ },
+ "tasks": [
+  "tc1-10fa5e9f032de766ebe9",
+  "tc1-04dc7f3f3e70e809b63d",
+  "tc1-ff4aa54de5d7aad90e70",
+  "tc1-6905d8a37d0c8a249600",
+  "tc1-1eecced1931debc551ff",
+  "tc1-e8a7e3c22e6aab0bf253",
+  "tc1-4f2468879b2db7f3d0a2",
+  "tc1-7d3dac0c411341e25ce9"
+ ],
+ "teacher_files": {
+  "snapshot": "/root/.cache/huggingface/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+  "sha256": {
+   "config.json": "5beea1a4a34c62782bfb2f911c606741a3bab8f92d80a118fa053c28af12e8ba",
+   "generation_config.json": "2325da0f15bb848e018c5ae071b7943332e9f871d6b60e2ed22ca97d4cb993d2",
+   "merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+   "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+   "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+   "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953",
+   "model.safetensors.index.json": "d6c42883a895dfef5b0080ed2116a1bcd764f558406b98923d675978a1abf29c",
+   "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+   "tokenizer_config.json": "60adcfc35f5f251e19a196ec977b4ca0fcfb534852911b3196d68d5e3b146aa0",
+   "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+  },
+  "differ": []
+ },
+ "teacher_files_seconds": 7.0,
+ "invocation": {
+  "label": "admission_T2507_pass0",
+  "complete": true,
+  "error": null,
+  "wall_seconds": 241.7,
+  "engine": [
+   {
+    "log": "admission_T2507_pass0.seg0.log",
+    "log_found": true,
+    "engine_ready_seconds": [
+     157.9
+    ],
+    "model_loading_gib_seconds": [
+     7.64,
+     6.573714
+    ],
+    "kv_cache_tokens": [
+     195009.0
+    ],
+    "max_concurrency": [
+     8184.0,
+     23.83
+    ],
+    "preemption_lines": 0,
+    "init_seconds": 157.9,
+    "output_tokens": 13272,
+    "generation_seconds": 64.9,
+    "output_tokens_per_second": 204.5,
+    "engine_metrics": {
+     "samples": 3,
+     "max": {
+      "vllm:num_requests_running": 1.0,
+      "vllm:num_requests_waiting": 0.0,
+      "vllm:num_requests_waiting_by_reason": 0.0,
+      "vllm:kv_cache_usage_perc": 0.022460857447331728,
+      "vllm:prefix_cache_queries": 25938,
+      "vllm:prefix_cache_hits": 7264,
+      "vllm:external_prefix_cache_queries": 0,
+      "vllm:external_prefix_cache_hits": 0,
+      "vllm:num_preemptions": 0,
+      "vllm:prompt_tokens": 25938,
+      "vllm:prompt_tokens_by_source": 18674,
+      "vllm:prompt_tokens_cached": 7264,
+      "vllm:generation_tokens": 13272
+     },
+     "final": {
+      "vllm:num_requests_running": 0.0,
+      "vllm:num_requests_waiting": 0.0,
+      "vllm:num_requests_waiting_by_reason": 0.0,
+      "vllm:kv_cache_usage_perc": 0.0,
+      "vllm:prefix_cache_queries": 25938,
+      "vllm:prefix_cache_hits": 7264,
+      "vllm:external_prefix_cache_queries": 0,
+      "vllm:external_prefix_cache_hits": 0,
+      "vllm:num_preemptions": 0,
+      "vllm:prompt_tokens": 25938,
+      "vllm:prompt_tokens_by_source": 0,
+      "vllm:prompt_tokens_cached": 7264,
+      "vllm:generation_tokens": 13272
+     },
+     "errors": []
+    },
+    "vllm_version": "0.27.1",
+    "max_num_seqs": 256,
+    "max_num_batched_tokens": 8192
+   }
+  ],
+  "gpu": {
+   "every_seconds": 5.0,
+   "samples": 49,
+   "gpus": {
+    "0": {
+     "name": "NVIDIA L40S",
+     "memory_total_mib": 46068,
+     "peak_memory_used_mib": 37611,
+     "peak_utilization_pct": 100
+    }
+   },
+   "errors": []
+  },
+  "turns": {
+   "turns": 10,
+   "ttft_seconds": {
+    "p50": 7.568,
+    "p90": 7.579,
+    "max": 7.586
+   },
+   "per_request_decode_tokens_per_second": {
+    "p50": 62.26,
+    "p10": 50.509
+   },
+   "prompt_tokens": {
+    "p50": 929,
+    "p90": 5414,
+    "total": 25938
+   },
+   "_": "batched engine: a request's TTFT includes its queueing"
+  }
+ },
+ "runner_identity": {
+  "label": "admission_T2507_pass0.seg0",
+  "model": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "mode": "generate",
+  "tasks_file": "/workspace/teacher_modes/tool_generation_thinking_2507/device_admission/admission_T2507_pass0.seg0.input.jsonl",
+  "tasks_sha256": "9a3cd75c2fa0fa1d85f371d54063815630a33277a38270d53f11f0cfcf8964fc",
+  "context_resolution": {
+   "resolved_context": 262144,
+   "context_source": "config:max_position_embeddings",
+   "config_max_position_embeddings": 262144,
+   "rope_scaling_factor": null,
+   "architectural_context": 262144,
+   "trained_context": null,
+   "context_len_override": null,
+   "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+   "note": null
+  },
+  "session_limit": 8184,
+  "effective_limit": 8184,
+  "stop_ids": [
+   151643,
+   151645
+  ],
+  "sampling": {
+   "min_p": 0.0,
+   "temperature": 0.6,
+   "top_k": 20,
+   "top_p": 0.95
+  },
+  "seed_base": 2026110300,
+  "action_protocol": "v1",
+  "system_message": "You are a helpful Assistant.",
+  "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+  "chat_template_kwargs": {},
+  "tokenizer_sha256": null,
+  "degeneration_check_every": 256,
+  "engine": {
+   "max_model_len": 8184,
+   "gpu_memory_utilization": 0.8,
+   "dtype": "bfloat16",
+   "dtype_engine": "torch.bfloat16",
+   "max_num_seqs": 256,
+   "max_num_batched_tokens": 8192,
+   "vllm_version": "0.27.1",
+   "enforce_eager": false,
+   "init_seconds": 157.9
+  },
+  "libraries": {
+   "transformers": "5.15.0",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.8.0",
+   "numpy": "2.3.5",
+   "datasets": null,
+   "vllm": "0.27.1"
+  },
+  "image_digest": null,
+  "runner_sha256": "5cb6529dfc64eea4c3511ff59537b897bc75669a726d0f3c82a262d5d19fdd9a"
+ },
+ "checks": {
+  "teacher_model": {
+   "ok": true,
+   "measured": "Qwen/Qwen3-4B-Thinking-2507",
+   "wanted": "Qwen/Qwen3-4B-Thinking-2507"
+  },
+  "teacher_revision": {
+   "ok": true,
+   "measured": "768f209d9ea81521153ed38c47d515654e938aea",
+   "wanted": "768f209d9ea81521153ed38c47d515654e938aea"
+  },
+  "teacher_files": {
+   "ok": true,
+   "measured": [],
+   "wanted": "every registered file and shard by sha256"
+  },
+  "chat_template": {
+   "ok": true,
+   "measured": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+   "wanted": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+  },
+  "template_kwargs": {
+   "ok": true,
+   "measured": {},
+   "wanted": {}
+  },
+  "sampling": {
+   "ok": true,
+   "measured": {
+    "min_p": 0.0,
+    "temperature": 0.6,
+    "top_k": 20,
+    "top_p": 0.95
+   },
+   "wanted": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0
+   }
+  },
+  "stop_ids": {
+   "ok": true,
+   "measured": [
+    151643,
+    151645
+   ],
+   "wanted": [
+    151645,
+    151643
+   ]
+  },
+  "vllm_lock": {
+   "ok": true,
+   "measured": "0.27.1",
+   "wanted": {
+    "requirements-vllm.txt": "0.27.1",
+    "record": "0.27.1"
+   }
+  },
+  "context": {
+   "ok": true,
+   "measured": [
+    8184,
+    8184,
+    8184
+   ],
+   "wanted": 8184
+  },
+  "gpu_memory_utilization": {
+   "ok": true,
+   "measured": 0.8,
+   "wanted": 0.8
+  },
+  "dtype": {
+   "ok": true,
+   "measured": "bfloat16",
+   "wanted": "bfloat16"
+  },
+  "engine_started_with_a_kv_cache": {
+   "ok": true,
+   "measured": 195009.0,
+   "wanted": "an engine that starts and reports a KV cache of at least 8184 tokens"
+  },
+  "no_out_of_memory": {
+   "ok": true,
+   "measured": null,
+   "wanted": null
+  },
+  "generation_complete": {
+   "ok": true,
+   "measured": {
+    "complete": true,
+    "turns": 10
+   },
+   "wanted": "the invocation completes with generated turns"
+  },
+  "memory_margin": {
+   "ok": true,
+   "measured": {
+    "gpus": [
+     [
+      "NVIDIA L40S",
+      46068,
+      37611
+     ]
+    ],
+    "free_gib": [
+     8.26
+    ],
+    "samples": 49
+   },
+   "wanted": ">= 4.0 GiB free"
+  }
+ },
+ "admitted": true,
+ "failed": [],
+ "outputs": "device evidence only: never sealed under a formal label, imported, admitted, counted or packed"
+}

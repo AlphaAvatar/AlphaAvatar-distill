@@ -1,0 +1,92 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.storage_record/v1",
+ "volume_id": "thprcgh7s9",
+ "name": "aad-packed-search",
+ "data_center_id": "US-TX-3",
+ "size_gb": 350,
+ "created_utc": "2026-11-05T19:40:35Z",
+ "reserved_usd": 26.68,
+ "actual_usd": null,
+ "decided_by": "maintainer 2026-11-05 'AlphaAvatar-distill — Packed Full Search 正式授权', sections II and IV: '为一块约 350 GB Network Volume 预留最多 $13.34' ... '先根据实际 L40S 可用区域选择数据中心，再创建对应的新 Network Volume。不固定 EUR-IS-2'",
+ "purpose": "research_a_packed_hybrid_full_search (kind packed_search): BeamSearch's journal (search_packed/search/states.jsonl), every state's checkpoint (prune_weights false), the statistics caches, the search record and evidence, and the Top-1 (search_packed/top1) -- everything a replacement session resumes from",
+ "price": "$0.07 per GB-month: $0.82/day (the bills have run up to 17% over the rate); the reserve is 14 days, as booked for 4rhubprswo",
+ "lifecycle": "kept: the Top-1's consumers (A1-6cat-sr / A2-6cat-sr) are not trained yet; the Top-1 has a verified off-volume copy, so the volume's states are evidence, not the only copy of the product. What stays after the reserve (2026-11-19T19:40Z) is the maintainer's decision; nothing is deleted automatically",
+ "datacenter_choice": "read 2026-11-05T19:34-19:40Z: L40S Secure stock moved between OC-AU-1, US-TX-3, US-MO-1 and EU-NL-1 within minutes (runpodctl datacenter list; GraphQL dataCenters.gpuAvailability); of those only US-TX-3 and EU-NL-1 support network storage (storageSupport). US-TX-3 chosen: the v2 search ran there for 21.7 h on L40S hosts at $1.1067/h with the image's 595.91.07 driver, and the A1 phase's sessions all drew L40S there; EU-NL-1 hosts carried that driver 0/3 times in this project's history",
+ "protected_neighbour": "4rhubprswo (the v2 Top-1's only copy) is in the same datacenter: the packed search attaches only this volume (token_matched_phase.the_search_volume_is_the_granted_one refuses any other and every protected volume)",
+ "authorizes": "nothing",
+ "contents_2026_11_06": {
+  "search": "research_a_packed_hybrid_full_search COMPLETE (a_packed_search_20261105_195011): teacher_modes/search_packed -- the journal, 93 states' checkpoints (prune_weights false), statistics caches, the selection and evidence; 221 GB by du at 2026-11-06T20:02Z, before the last level",
+  "top1": {
+   "path": "teacher_modes/search_packed/top1",
+   "state_id": "1f5e4b420125a345f1d190f0b8f87cad",
+   "model_safetensors_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d"
+  },
+  "off_volume_copies": [
+   "AlphaAvatar/aadistill-artifacts:durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad/ (model.safetensors, config.json, generation_config.json; re-downloaded and re-hashed on the pod, lfs sha256 re-read from the dev box)",
+   "the search evidence archive d781ab9a... on the relay and under artifacts/stages/stage-2/teacher_modes/search_sessions/"
+  ],
+  "consumers": "A1-6cat-sr and A2-6cat-sr's Stage-3 initialization (the Top-1; not authorized yet); the states are evidence of the search"
+ },
+ "stage3_plan_2026_11_07": {
+  "decided_by": "maintainer 2026-11-07 (Stage 3 preparation, section V): reuse this volume for Stage 3's save points if it holds them without disturbing the search's states, its Top-1 or any candidate; delete nothing automatically",
+  "role": "the three Stage-3 kinds attach it (token_matched_phase.the_training_volume_is_the_granted_one): A1/A2 read the Top-1 at teacher_modes/search_packed/top1 in place; every unit writes teacher_modes/stage3_sr/<unit>/ (save points, its final weights, its evaluation)",
+  "consumers_of_what_is_here": {
+   "search_packed/top1": "A1-6cat-sr and A2-6cat-sr's initialization (4 units); second copy on the relay, re-downloaded and re-hashed on the dev box 2026-11-07 (all three files equal)",
+   "search_packed/search/states (92 checkpoints, 270.6 GB by the journal)": "no execution consumer; the search's evidence, kept as the search brief required (every state's checkpoint, the full journal, the Pareto front)",
+   "the 12 complete leaves (14.3 GB, the Pareto front)": "no execution consumer; the ranking's evidence (their scores are in stage1_selection.json, committed)",
+   "search_packed/search/states.jsonl, the selection, statistics caches": "off-volume in search_evidence.tgz d781ab9a... (artifacts/ and the relay) and states.jsonl 617d1512...",
+   "stage3_sr/ (after Stage 3)": "each unit's final weights: the formal evaluation's input, and the candidates for any later stage; no second copy (the relay cannot hold six)"
+  },
+  "capacity": {
+   "provisioned_gb": 350,
+   "taken_as_bytes": 350000000000.0,
+   "search_footprint_estimate_gb": "272-285 (the journal's 270.6 GB of checkpoints, the Top-1 copy, caches)",
+   "stage3_high_water_gb": 55.7,
+   "stage3_after_gb": 49.8,
+   "headroom_gb": "9-20",
+   "measured_by": "a1_units.volume_room at each Stage-3 session's start (du -sb of the mount); a unit that would not fit is refused before it trains"
+  },
+  "retention_plan": {
+   "during_stage3": "keep everything: the Top-1 is consumed, the states are evidence, nothing is moved or deleted",
+   "after_stage3_options_for_the_maintainer": [
+    "keep the volume as is (~$0.82-0.96/day)",
+    "retire the 80 non-leaf intermediate states' weights under AGENTS.md 2.5 (terminal, scores and identities committed, no consumer), keeping the journal, the 12 leaves, the Top-1 and stage3_sr/: frees ~256 GB, after which the volume could be shrunk only by a new one",
+    "after the final weights are copied elsewhere, retire the volume: a maintainer decision with a tombstone"
+   ],
+   "never": "deleting the Top-1 or a unit's final weights while they are the only copy; attaching or touching 4rhubprswo"
+  },
+  "reserve": {
+   "booked_until": "2026-11-19T19:40Z",
+   "requested_extension_usd": 13.34,
+   "to": "2026-12-03T19:40Z",
+   "application": "logs/budget/applications/research_a_stage3_sr_2026-11-07/application.json"
+  }
+ },
+ "reserve_history": [
+  {
+   "utc": "2026-11-07",
+   "from_usd": 13.34,
+   "to_usd": 26.68,
+   "by": "maintainer 2026-11-07, Stage 3 authorization, section IV",
+   "covers": "14 more days at $0.07 per GB-month for 350 GB"
+  }
+ ],
+ "contents_2026_11_08": {
+  "stage3_sr": "the six Stage-3 units (teacher_modes/stage3_sr/<unit>/): each unit's final save point (fp32 weights + AdamW state + trainer_state, keep_last 1), its evaluation package (the weights again) and its evaluation's generations, rows and formal report; ~49.8 GB (6 x 8.3 GB)",
+  "measured": "du -sb 301,657,035,552 B at the start of C1's attempt 2 (2026-11-08T10:52Z), before its second unit's ~8.3 GB",
+  "only_copy": "the six units' final weights and save points have NO off-volume copy: the relay's private quota refused them (a1_units.persist_off_volume); their evaluations' evidence is on the dev box and the relay",
+  "lifecycle": "KEEP: nothing on this volume is deleted until the trained weights have a verified off-volume copy or the maintainer decides otherwise; reserve booked to 2026-12-03T19:40Z"
+ },
+ "contents_2026_11_10": {
+  "added": "stage3_sr/A-MIX-6cat-sr-s20260726 and -s20260801 (run a_train_sr_mix_20261109_193709): save points, final weights, both modes' evaluations",
+  "second_copies_now": {
+   "eight students' final weights": "dev box, hash-verified 2026-11-10 (storage/stage3_devbox_backup.json); A-MIX-6cat-sr-s20260801 also on the relay",
+   "every unit's generations, rows and formal reports": "evidence archive fadea626... on the dev box and the relay (runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json)",
+   "the Top-1": "relay (since 2026-11-06)"
+  },
+  "only_copy_left_here": "the packed search's 92 state checkpoints (the search's evidence, kept as its brief required); each unit's last save point with its AdamW state (no exact-continuation consumer: training is closed); the evaluation packages (hard links to the final weights)",
+  "keep_condition": "the brief's condition (keep until all eight students' Dev Box copies are hash-verified) is met at 2026-11-10T16:05Z; the 2026-11-10 brief authorizes no volume deletion",
+  "retirement_advice": "enter the next explicit retirement decision: the remaining unique bytes are search-state evidence and closed trainer state; retiring it needs a maintainer decision on the search states (AGENTS.md 2.5 tombstones first) and saves $0.82/day",
+  "provider_balance_2026_11_10T1727Z_usd": 43.13
+ }
+}

@@ -123,6 +123,16 @@ class ReductionSemantics:
     #: so it moves the protocol id -- and an evaluator that declares none
     #: serializes as it always did. See `aadistill.initialization.scoring.objective`.
     scoring_objective: Any | None = None
+    #: HOW CRITICAL-TOKEN CLASSES ARE COMBINED, when the suite declares
+    #: critical-token groups (`StateEvalSuite.critical_groups`). Versioned by
+    #: absence like the two fields above: `None` is the historical flat mean
+    #: over classes and serializes exactly as before.
+    critical_aggregation: str | None = None
+    #: The packed causal context the items were read in
+    #: (`calibration.packing.ForwardContext.as_dict()`), or `None` for the
+    #: historical one-item-per-row reading -- omitted then, so every recorded
+    #: protocol id is unchanged.
+    forward_context: Mapping[str, Any] | None = None
 
     def as_dict(self) -> dict[str, Any]:
         out = {"chunk": int(self.chunk),
@@ -133,6 +143,10 @@ class ReductionSemantics:
             out["distribution_support"] = support.as_dict()
         if self.scoring_objective is not None:
             out["scoring_objective"] = self.scoring_objective.as_dict()
+        if self.critical_aggregation is not None:
+            out["critical_aggregation"] = str(self.critical_aggregation)
+        if self.forward_context is not None:
+            out["forward_context"] = dict(self.forward_context)
         return out
 
 

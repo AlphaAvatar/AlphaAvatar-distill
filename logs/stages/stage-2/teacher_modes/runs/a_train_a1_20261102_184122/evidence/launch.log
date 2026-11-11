@@ -1,0 +1,87 @@
+bundle OK: transfer/aad_autoinit_571e4a72.bundle on the relay
+[18:42:24] budget: expected 694 min $12.61 · soft $13.43 · hard $13.61 (authorized $13.85)
+[18:42:24] NVIDIA L40S $1.09/h, stock None
+[18:42:24] account funds OK: the provider account holds $53.0825 against the $13.6105 this session must be able to fund
+[18:42:25] account resources OK: the provider account holds only the 2 resource(s) the records account for
+[18:42:25] a A-TM train_a1 artifact, unused
+[18:42:25] 1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted
+[18:42:25] all-in $13.8387 over 750.45 min, inside $13.85
+[18:42:25] study identity 2a24101c2c92 is the authorized one
+[18:42:25] every bound file is in the session commit
+[18:42:27] $13.85 inside the envelope ($38.675) and the $40.8328 the project cap leaves now
+[18:42:28] volume 4rhubprswo: 350 GB in US-TX-3
+[18:42:28] the kind's bound records are the committed ones
+[18:42:29] precheck OK: 3 relay inputs (3 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[18:42:29] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[18:47:30] attempt 2: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[18:52:30] attempt 3: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[18:57:31] attempt 4: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:02:31] attempt 5: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:07:32] attempt 6: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:12:32] attempt 7: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:17:33] attempt 8: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:22:34] watchdog detached — hard 749 min = $13.61
+[19:22:34] created 8glbonkyvwdy5v at $1.09/h
+[19:23:27]   starting (60s) — $0.02
+[19:24:30]   starting (120s) — $0.04
+[19:25:12] TCP 22 at 209.170.80.132:20128 after 2.6 min
+[19:25:15] draw 1: ssh reachable — $0.05
+[19:28:02] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[19:28:02] draw 1: running setup
+[19:30:32] draw 1: setup complete — $0.14
+[19:30:41] driver detached, pid 2432, confirmed by descriptor_probe — $0.15
+[19:31:53]   2026-11-02T19:30:50Z MARKER:TRAIN_START:A1-s20260726 — $0.17
+[22:26:07]   2026-11-02T22:25:40Z MARKER:EVAL_START:A1-s20260726 — $3.33
+[23:20:31]   2026-11-02T23:19:05Z MARKER:TRAIN_START:A1-s20260801 — $4.32
+[02:14:52]   2026-11-03T02:13:46Z MARKER:EVAL_START:A1-s20260801 — $7.49
+[03:03:25]   2026-11-03T03:02:42Z MARKER:ALL_DONE — $8.37
+[03:03:25] polling ended: ALL_DONE — $8.37
+[03:03:39]   manifest rc=0
+0 file(s) across 0 class(es) -> /workspace/manifest.json
+  final_required: 0 · mutable_snapshot: 0 · final_streams_quiescent: True
+[03:16:34] teardown gate: allowed=True failed=None
+[03:16:34] deleting pod (gate passed)
+[03:16:45] pod deleted — 474.2 min, $8.61; provider confirms gone: True
+
+stage2_teacher_modes_tm-train_a1 COMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122/runtime/session.json. 
+{"all_in_usd": 8.7766, "gpu_usd": 8.6143, "disk_usd": 0.1623, "elapsed_minutes": 474.18, "price_per_hour": 1.09, "authorized_usd": 13.85, "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"}

@@ -1,0 +1,164 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.teacher_session/v1",
+ "started_utc": "2026-10-29T20:23:52Z",
+ "phases": {
+  "calibration": {
+   "complete": true,
+   "groups": [
+    {
+     "label": "cal_H-T_pass0_cal_g0",
+     "pass": 0,
+     "seed_base": 20261029,
+     "tasks": 160,
+     "segments": [
+      {
+       "segment": 0,
+       "rc": 0,
+       "todo": 160,
+       "sealed": 160,
+       "anomalies": []
+      }
+     ],
+     "sealed": 160,
+     "complete": true
+    },
+    {
+     "label": "cal_H-N_pass0_cal_g0",
+     "pass": 0,
+     "seed_base": 20261029,
+     "tasks": 160,
+     "segments": [
+      {
+       "segment": 0,
+       "rc": 0,
+       "todo": 160,
+       "sealed": 160,
+       "anomalies": []
+      }
+     ],
+     "sealed": 160,
+     "complete": true
+    }
+   ]
+  },
+  "initialization": {
+   "status": "persisted",
+   "returncode": 0,
+   "attempts": [
+    {
+     "micro_batch_size": 3,
+     "returncode": 0,
+     "out_of_memory": false
+    }
+   ]
+  },
+  "waves": {
+   "stages": [
+    {
+     "stage": "w00",
+     "complete": true,
+     "groups": [
+      {
+       "label": "w00_H-T_pass0_w00_g0",
+       "pass": 0,
+       "seed_base": 20261029,
+       "tasks": 2001,
+       "segments": [
+        {
+         "segment": 0,
+         "rc": 0,
+         "todo": 2001,
+         "sealed": 2001,
+         "anomalies": []
+        }
+       ],
+       "sealed": 2001,
+       "complete": true
+      },
+      {
+       "label": "w00_H-T_pass1_w00_g0",
+       "pass": 1,
+       "seed_base": 20261030,
+       "tasks": 964,
+       "segments": [
+        {
+         "segment": 0,
+         "rc": 0,
+         "todo": 964,
+         "sealed": 964,
+         "anomalies": []
+        }
+       ],
+       "sealed": 964,
+       "complete": true
+      },
+      {
+       "label": "w00_H-N_pass0_w00_g0",
+       "pass": 0,
+       "seed_base": 20261029,
+       "tasks": 2001,
+       "segments": [
+        {
+         "segment": 0,
+         "rc": 0,
+         "todo": 2001,
+         "sealed": 2001,
+         "anomalies": []
+        }
+       ],
+       "sealed": 2001,
+       "complete": true
+      },
+      {
+       "label": "w00_H-N_pass1_w00_g0",
+       "pass": 1,
+       "seed_base": 20261030,
+       "tasks": 1174,
+       "segments": [
+        {
+         "segment": 0,
+         "rc": 0,
+         "todo": 1174,
+         "sealed": 1174,
+         "anomalies": []
+        }
+       ],
+       "sealed": 1174,
+       "complete": true
+      }
+     ],
+     "generated_here": true,
+     "seconds": 15287.5,
+     "generated_tokens": 13747648
+    }
+   ],
+   "bound": {
+    "stages": [
+     {
+      "stage": "w00",
+      "I_lower": 597,
+      "I_upper": 701,
+      "H-T-S_lower": 183,
+      "H-T-S_upper": 212
+     }
+    ],
+    "e_reached": false,
+    "x_target": 214.12,
+    "H-N-C_lower": 51,
+    "x_reached": false
+   },
+   "stopped": {
+    "after": "w00",
+    "reason": "a bounded session: --phases waves@w00"
+   }
+  }
+ },
+ "contract": {
+  "authorization_id": "stage2.teacher_modes.d4_scale.a_teacher_20261029_201915",
+  "launch_identity_sha256": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+  "harness_digest": "3893b3dd13cd981da0ee9a742870019773370c607a61438a27debe4e86d35ac5",
+  "status": "ok"
+ },
+ "finished_utc": "2026-10-30T01:06:39Z",
+ "terminal": "ALL_DONE"
+}

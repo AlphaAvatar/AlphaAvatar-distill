@@ -108,8 +108,14 @@ def test_the_registry_binds_all_four_finalists_verified():
             # copy failing verification is a finding either way.
             assert e["identity_verified"] is True, e["path_local"]
             seen[si["artifact_id"]] = si["single_shard_sha256"]
-    assert set(seen) == {"d1_finalist_q1", "d1_finalist_q2",
+    #: every finalist is a logical identity; one without a local copy (q1, q3 and q4 since the 2026-10-28
+    #: retirement, AGENTS.md 2.5) is tombstoned, and no finalist is both
+    sa = reg["scientific_artifacts"]
+    finalists = {k for k in sa if k.startswith("d1_finalist_")}
+    assert finalists == {"d1_finalist_q1", "d1_finalist_q2",
                          "d1_finalist_q3", "d1_finalist_q4"}
+    retired = {k for k in finalists if sa[k]["lifecycle"] == "weights_retired_tombstoned"}
+    assert set(seen) | retired == finalists and not set(seen) & retired
     battery = [e for e in reg["checkpoints"]
                if e["path_local"].endswith("batteries/d_series_behavioural_v1")]
     assert battery and battery[0]["protected"]

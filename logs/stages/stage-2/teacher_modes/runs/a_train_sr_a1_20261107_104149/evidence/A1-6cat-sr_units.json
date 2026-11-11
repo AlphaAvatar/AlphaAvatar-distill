@@ -1,0 +1,114 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.a1_units/v1",
+ "started_utc": "2026-11-07T10:51:28Z",
+ "units": {
+  "A1-6cat-sr-s20260726": {
+   "state_at_start": "fresh",
+   "attention": {
+    "context_strategy": "cross_context",
+    "checked": "config, ladder.json, blocks.npz, the trainer's reader"
+   },
+   "admitted_utc": "2026-11-07T10:51:39Z",
+   "train_rc": 0,
+   "train_seconds": 8456.1,
+   "telemetry": {
+    "logged_steps": 214,
+    "median_seconds_per_step": 3.77,
+    "p95_seconds_per_step": 4.21,
+    "kd_positions_per_step_median": 9913.0,
+    "peak_gpu_mem_gb": 17.47,
+    "peak_gpu_mem_reserved_gb": 19.14,
+    "save_points": [
+     890,
+     1780,
+     2145
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
+   "final_model_path": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/train/checkpoints/step_002145/model",
+   "off_volume_copy": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage3_sr/A1-6cat-sr-s20260726/e0745469c9fbb53a",
+    "source": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/train/checkpoints/step_002145/model",
+    "files_sha256_on_volume": {
+     "model.safetensors": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
+     "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+     "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+    "verified": false,
+    "refused": "the relay's private storage quota does not admit the weights",
+    "attempted_utc": "2026-11-07T13:12:39Z"
+   },
+   "eval_seconds": 4105.6,
+   "formal_report": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/evaluation/formal_report.json"
+  },
+  "A1-6cat-sr-s20260801": {
+   "state_at_start": "fresh",
+   "attention": {
+    "context_strategy": "cross_context",
+    "checked": "config, ladder.json, blocks.npz, the trainer's reader"
+   },
+   "admitted_utc": "2026-11-07T14:21:11Z",
+   "train_rc": 0,
+   "train_seconds": 8467.3,
+   "telemetry": {
+    "logged_steps": 214,
+    "median_seconds_per_step": 3.755,
+    "p95_seconds_per_step": 4.11,
+    "kd_positions_per_step_median": 9696.0,
+    "peak_gpu_mem_gb": 17.47,
+    "peak_gpu_mem_reserved_gb": 19.08,
+    "save_points": [
+     890,
+     1780,
+     2145
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
+   "final_model_path": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/train/checkpoints/step_002145/model",
+   "off_volume_copy": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage3_sr/A1-6cat-sr-s20260801/06595d35abcca7c7",
+    "source": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/train/checkpoints/step_002145/model",
+    "files_sha256_on_volume": {
+     "model.safetensors": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
+     "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+     "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+    },
+    "quota": "1 object(s), 2.22 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+    "verified": false,
+    "refused": "the relay's private storage quota does not admit the weights",
+    "attempted_utc": "2026-11-07T16:42:22Z"
+   },
+   "eval_seconds": 3628.3,
+   "formal_report": "/runpod-volume/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/evaluation/formal_report.json"
+  }
+ },
+ "arm": "A1-6cat-sr",
+ "kind": "train_sr_a1",
+ "authorization": "stage2.teacher_modes.token_matched.a_train_sr_a1_20261107_104149",
+ "tokenizer": {
+  "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+  "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+  "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+  "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+ },
+ "volume": {
+  "mount": "/runpod-volume",
+  "volume_gb": 350.0,
+  "used_bytes": 271838789760,
+  "room_bytes": 78161210240,
+  "need_bytes": 22493245409
+ },
+ "finished_utc": "2026-11-07T17:42:51Z",
+ "terminal": "ALL_DONE"
+}

@@ -1,0 +1,341 @@
+{
+  "created_utc": "2026-11-08T11:57:50.177700+00:00",
+  "command": "scripts/shared/training/train_stage3.py --config /runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train/config.json",
+  "config": {
+    "stage": "stage3_recovery",
+    "run_name": "research_a_stage3_C1-6cat-sr_s20260801",
+    "student_path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+    "teacher": {
+      "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+      "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_6cat/C1-6cat-sr",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260801,
+    "trainable_patterns": [
+      "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+      "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+      "input_layernorm",
+      "post_attention_layernorm",
+      "model\\.norm\\."
+    ],
+    "loss": {
+      "ce_weight": 0.25,
+      "kd_weight": 1.0,
+      "kd_temperature": 1.0,
+      "kd_scope": "assistant",
+      "kd_support": {
+        "support_id": "reference_topk_tail_v1",
+        "top_k": 200
+      }
+    },
+    "optim": {
+      "lr": 5e-05,
+      "weight_decay": 0.01,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "grad_clip": 1.0
+    },
+    "schedule": {
+      "total_steps": 1892,
+      "warmup_steps": 95,
+      "min_lr_frac": 0.1
+    },
+    "batch": {
+      "blocks_per_step": 2,
+      "micro_blocks": 1,
+      "context_strategy": "cross_context"
+    },
+    "checkpoint": {
+      "save_every": 858,
+      "keep_last": 1,
+      "bind_identity": true
+    },
+    "intervals": {
+      "log_every": 10,
+      "eval_every": 236,
+      "eval_blocks": 17
+    },
+    "out_dir": "/runpod-volume/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train",
+    "rung": 5937691,
+    "val_blocks": 17,
+    "tokenizer_source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+    "lineage": {
+      "teacher": {
+        "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+        "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+        "weights_sha256": {
+          "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+          "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+          "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+        },
+        "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+        "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+        "rope_theta": 5000000.0,
+        "max_position_embeddings": 262144,
+        "vocab_size": 151936
+      },
+      "mode": "thinking",
+      "tokenizer": {
+        "files_sha256": {
+          "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+        }
+      },
+      "initialization": {
+        "root_teacher": {
+          "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+          "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+        },
+        "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+        "provenance": {
+          "record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
+          "record_sha256": "81a0e2dda20c81f6bf1d8a2294bfc7f53c417b5fb294cdd3bb52232001922473"
+        }
+      },
+      "data": [
+        {
+          "files_sha256": {
+            "blocks.npz": "cd438b50261a52d417f1b57b99c1aefcb8f64533f84d357dcbf7bd9f07131133",
+            "ladder.json": "fae376522b592bd46d8cd242c27a16649106be655cc570cc0347df599b8dabe2",
+            "audit.jsonl": "55eee5bf53bee442ac1fd395d9a79e9a26c2e53782e6242e521b89cb16cc4a02"
+          },
+          "mode": "thinking",
+          "teacher": {
+            "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+            "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+          },
+          "packed_content_sha256": "e627ce975d30fb9e3874370cf34d258116cf042a310a9e695878c3beba0a07c9",
+          "data_manifest_content_sha256": "76b04c0a03c61ef34fea3900fb668a7f9c1350da66b089290d30287749d90763"
+        }
+      ]
+    }
+  },
+  "config_sha256": "2b8a904f295a2bf33e22e281bb636dc857d5de4404caa59d08c30c0f0d908d27",
+  "resumed_from": null,
+  "device": "cuda",
+  "data_manifests": {},
+  "ladder": {
+    "source": "token_ladder",
+    "packed_dir": "/workspace/aad/artifacts/stages/stage-2/teacher_modes/packs_6cat/C1-6cat-sr",
+    "rung_target_supervised_tokens": 5937691,
+    "train_blocks": 1261,
+    "train_supervised_tokens": 7258201,
+    "train_supervised_positions_include_fragments": true,
+    "train_unique_supervised_tokens": 5937691,
+    "train_token_mix": {
+      "code": 0.0811,
+      "gsm8k": 0.0761,
+      "multihop_qa": 0.0732,
+      "openmath": 0.081,
+      "primary.abstract_analogical": 0.0712,
+      "primary.compositional_generalization": 0.1164,
+      "primary.inductive_rule_discovery": 0.1316,
+      "primary.interactive_adaptation": 0.0884,
+      "primary.task_contained_deduction": 0.1316,
+      "rag_evidence": 0.0707,
+      "supporting.tool_calling": 0.0787
+    },
+    "val_blocks": 17,
+    "val_supervised_tokens": 90455,
+    "val_token_mix": {
+      "code": 0.1808,
+      "gsm8k": 0.1378,
+      "multihop_qa": 0.1818,
+      "openmath": 0.1603,
+      "rag_evidence": 0.1865,
+      "supporting.tool_calling": 0.1529
+    },
+    "val_disjoint_from_all_rungs": true,
+    "declared_mixture": null,
+    "block_len": 8192,
+    "pack_blocks": 1278,
+    "blocks_sha256": "cd438b50261a52d417f1b57b99c1aefcb8f64533f84d357dcbf7bd9f07131133",
+    "ladder_json_sha256": "fae376522b592bd46d8cd242c27a16649106be655cc570cc0347df599b8dabe2",
+    "audit_sha256": "55eee5bf53bee442ac1fd395d9a79e9a26c2e53782e6242e521b89cb16cc4a02"
+  },
+  "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "attn_implementation": "sdpa",
+    "num_parameters": 4022468096,
+    "architecture": [
+      "Qwen3ForCausalLM"
+    ],
+    "hidden_size": 2560,
+    "num_hidden_layers": 36,
+    "intermediate_size": 9728,
+    "vocab_size": 151936,
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654"
+  },
+  "student_source": "/workspace/aad/artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+  "trainable_params": 440467456,
+  "full_rank_trainable_params": 440467456,
+  "lora_trainable_params": 0,
+  "lora": null,
+  "lora_modules": null,
+  "total_params": 596049920,
+  "extra_stream": null,
+  "execution": {
+    "record_version": 1,
+    "optimizer": "AdamW",
+    "optimizer_defaults": {
+      "lr": 5e-05,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "eps": 1e-08,
+      "weight_decay": 0.01
+    },
+    "optimizer_param_groups": 1,
+    "grad_clip": 1.0,
+    "lr_schedule": "cosine to min_lr_frac",
+    "total_steps": 1892,
+    "warmup_steps": 95,
+    "min_lr_frac": 0.1,
+    "block_ordering": "per-epoch torch.randperm(n_blocks, seed*1000003 + epoch) over the rung's blocks, walked by the global consumed-block counter",
+    "resume_semantics": "step counter + RNG state + consumed-block position, asserted on restore",
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "assistant",
+    "kd_chunk": 512,
+    "kd_chunk_source": "trainer default KD_CHUNK_DEFAULT",
+    "kd_objective": {
+      "objective": "target_rows_reference_topk_tail_forward_kl/v1",
+      "support": {
+        "support_id": "reference_topk_tail_v1",
+        "top_k": 200
+      },
+      "support_selection": "torch.topk of the teacher's float32-widened logits / T",
+      "tail": "complement_logsumexp/v1",
+      "rows": "final hidden states at the loss's prediction positions, before the output head",
+      "position_policy": "kd_scope 'assistant'",
+      "temperature": 1.0,
+      "reduction": "sum over the step's KD positions of tau^2 * KL, divided by that step's KD position count (the trainer's normalizer); CE likewise over its own positions",
+      "is_full_vocabulary_kl": false
+    },
+    "resume_identity": {
+      "data": "c91b3f8bfabcb82c7104273dc20586b23cba63b9f77fc4730ab422905e39e6d0",
+      "initialization": "59574879b9b9065492ae8016e05f19b423e72e46ff04ef7282c75e2980cf1bfe",
+      "lineage": {
+        "lineage_sha256": "a4be041ecd61e57f4741442803d4ef410c7086134cfab5413d3e6d6e83b00499",
+        "teacher": {
+          "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+          "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+        },
+        "mode": "thinking",
+        "initialization_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8"
+      }
+    },
+    "blocks_per_step": 2,
+    "micro_blocks": 1,
+    "train_blocks_available": 1261,
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "gradient_checkpointing_applied": true,
+    "device": "cuda",
+    "student_attn_implementation": "sdpa",
+    "teacher_attn_implementation": "sdpa",
+    "seed": 20260801,
+    "step_at_record": 0,
+    "consumed_blocks_at_record": 0,
+    "trainable_params": 440467456,
+    "trainer_source": {
+      "digest": "f66d44b1d567a641eb93e612a655ca245528de0cc2cddd8aa29e2bea702eeff9",
+      "set_version": 1,
+      "files": [
+        {
+          "path": "scripts/shared/training/train_stage3.py",
+          "sha256": "81074e9de40124f0c43e7bd507571fe163e2f8f9677600facf936a1b7a327417",
+          "bytes": 24136
+        },
+        {
+          "path": "src/aadistill/training/train.py",
+          "sha256": "c0b29981a6d8a527dbb801513b8da1193f44afa79f559f75be8a8a119fcaa23c",
+          "bytes": 76969
+        },
+        {
+          "path": "src/aadistill/training/lora.py",
+          "sha256": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+          "bytes": 10657
+        },
+        {
+          "path": "src/aadistill/data/ladder.py",
+          "sha256": "b2b84aa0aab3c45711a36a655d2f0367ace63c4ecc90fe0799c94532cdd54c2d",
+          "bytes": 8095
+        },
+        {
+          "path": "src/aadistill/data/dataset.py",
+          "sha256": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+          "bytes": 18533
+        },
+        {
+          "path": "src/aadistill/models/teacher.py",
+          "sha256": "41409a479014b6da92dff85069f9b269016037343498085576a5520da20c5265",
+          "bytes": 4002
+        },
+        {
+          "path": "src/aadistill/models/student.py",
+          "sha256": "2ad3655c5726567944ff078fa56e26f9052d51d7e8bcd9d879b7cf9976b9c79c",
+          "bytes": 6653
+        }
+      ],
+      "rule": "sha256 over sorted 'path:sha256' lines of the declared trainer source set; whole-repo commit is provenance only"
+    },
+    "runtime": {
+      "version": 1,
+      "image_digest": null,
+      "python_version": "3.12.3",
+      "torch_version": "2.11.0+cu128",
+      "transformers_version": "5.13.1",
+      "cuda_runtime": "12.8",
+      "attention_backend": "sdpa"
+    },
+    "runtime_digest": "f214425c9e0b8e1e4d7a288df409d90e6dedcd3454b40e11eee16d87b61c428d",
+    "image_digest_source": "ABSENT — runtime is not pinned"
+  },
+  "code_state": {
+    "git_commit": "a2baff8fe66f76b5f291d1463be1291035dcbbdd",
+    "git_commit_source": "git",
+    "dirty": true,
+    "uncommitted_state_sha256": "f6fff010393d7c85a5235f1edf6abdef0ee7d7a8e0a28f6e12a9a5b29e80d9a7",
+    "untracked_files": []
+  },
+  "hardware": {
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "torch": "2.11.0+cu128",
+    "cpu_count": 64,
+    "cuda_available": true,
+    "libraries": {
+      "transformers": "5.13.1",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.5.1",
+      "datasets": "5.0.0",
+      "vllm": null
+    },
+    "cuda_devices": [
+      "NVIDIA L40S"
+    ]
+  }
+}

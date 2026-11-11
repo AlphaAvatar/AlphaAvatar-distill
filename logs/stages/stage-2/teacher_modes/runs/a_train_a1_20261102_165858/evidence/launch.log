@@ -1,0 +1,126 @@
+bundle OK: transfer/aad_autoinit_f8884680.bundle on the relay
+[17:02:36] budget: expected 704 min $12.79 · soft $13.62 · hard $13.80 (authorized $14.10)
+[17:02:36] NVIDIA L40S $1.09/h, stock None
+[17:02:36] account funds OK: the provider account holds $53.3999 against the $13.8012 this session must be able to fund
+[17:02:37] account resources OK: the provider account holds only the 2 resource(s) the records account for
+[17:02:37] a A-TM train_a1 artifact, unused
+[17:02:37] 1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted
+[17:02:37] all-in $14.0323 over 760.95 min, inside $14.10
+[17:02:37] study identity 2a24101c2c92 is the authorized one
+[17:02:37] every bound file is in the session commit
+[17:02:39] $14.10 inside the envelope ($38.9186) and the $41.9656 the project cap leaves now
+[17:02:39] volume 4rhubprswo: 350 GB in US-TX-3
+[17:02:39] the kind's bound records are the committed ones
+[17:02:48] precheck OK: 3 relay inputs (3 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[17:02:48] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:07:49] attempt 2: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:12:50] attempt 3: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:17:50] attempt 4: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:22:51] attempt 5: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:27:51] attempt 6: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:32:51] attempt 7: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:37:52] attempt 8: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:42:52] attempt 9: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:47:53] attempt 10: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:52:54] attempt 11: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:57:54] attempt 12: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[18:02:55] attempt 13: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[18:07:55] attempt 14: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[18:12:55] attempt 15: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[18:17:56] watchdog detached — hard 760 min = $13.80
+[18:17:56] created 1g6dhv36tti666 at $1.09/h
+[18:18:50]   starting (60s) — $0.02
+[18:19:53]   starting (120s) — $0.04
+[18:20:46] TCP 22 at 209.170.80.132:20222 after 2.8 min
+[18:20:48] draw 1: ssh reachable — $0.05
+[18:24:56] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[18:24:56] draw 1: running setup
+[18:28:40] draw 1: setup complete — $0.19
+[18:28:46] driver detached, pid 2249, confirmed by descriptor_probe — $0.20
+[18:30:01]   2026-11-02T18:28:52Z MARKER:RUN_FAILED — $0.22
+[18:30:01] finished work is on the network volume as it completes and its evidence is pulled on every poll
+[18:30:01] polling ended: RUN_FAILED — $0.22
+[18:30:17]   manifest rc=0
+0 file(s) across 0 class(es) -> /workspace/manifest.json
+  final_required: 0 · mutable_snapshot: 0 · final_streams_quiescent: True
+[18:30:55] teardown gate: allowed=True failed=training_complete
+[18:30:55] deleting pod (gate passed after RUN_FAILED)
+[18:31:06] pod deleted — 13.2 min, $0.24; provider confirms gone: True
+
+stage2_teacher_modes_tm-train_a1 INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_165858/runtime/session.json. 
+{"all_in_usd": 0.2436, "gpu_usd": 0.239, "disk_usd": 0.0045, "elapsed_minutes": 13.15, "price_per_hour": 1.09, "authorized_usd": 14.1, "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"}

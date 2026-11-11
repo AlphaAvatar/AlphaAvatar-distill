@@ -1,0 +1,68 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tm_authorization_outcome/v1",
+ "run_id": "a_tool_generation_20261105_074146",
+ "study": "A-TM",
+ "recorded_utc": "2026-11-05T10:36:58+00:00",
+ "status": "COMPLETE",
+ "validation_passed": false,
+ "products_secured": {
+  "ok": true,
+  "why": "193 sealed shards pulled and receipted by sha256; the archive re-hashed equal; re-verified on the dev box (closeout/teardown.json)"
+ },
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "provider_resource_created": true,
+ "evidence": null,
+ "verdict_rederived": null,
+ "money": {
+  "all_in_usd": 3.1438,
+  "pod_life_minutes": 169.85,
+  "provider_rate_usd_per_hour": 1.09,
+  "gpu_usd": 3.0856,
+  "disk_usd": 0.0581,
+  "authorized_usd": 9.13,
+  "watchdog_accrued_gpu_usd": 3.096,
+  "retained_after_gate_usd": 0.0382,
+  "provider_posted_usd_at_snapshot": 2.1053,
+  "provider_snapshot": {
+   "path": "logs/budget/provider/runpod_billing_v2_2026-11-05T1039Z.json",
+   "sha256": "6eb97b081a3fa7b43ce02a9d6737dff35c9fdd44f99dffcce89b8d078967454c"
+  },
+  "final_buckets_posted": false,
+  "_basis": "the pod's life from the provider's createdAt (07:43:35Z) to the provider's TERMINATED confirmation (10:33:26Z) at the pod's $1.09/h, plus container disk at $0.1/GB-month (150 GB), rounded up; the provider had posted $2.1053 at 10:39Z (posting lags); the booked figure stands until the rows post"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "4rhubprswo",
+    "name": "aad-a1-phase",
+    "size": 350,
+    "dataCenterId": "US-TX-3"
+   },
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 55,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "4rhubprswo",
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 2 resource(s) the records account for"
+ },
+ "kind": "tool_generation",
+ "scientific_use": true,
+ "authorizes": "nothing",
+ "reconciled_by": "closeout/teardown.json"
+}

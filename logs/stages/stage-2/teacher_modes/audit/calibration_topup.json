@@ -1,0 +1,65 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.calibration_topup/v1",
+ "written_utc": "2026-11-01T12:38:20Z",
+ "decided_by": "maintainer 2026-11-01 'Execute A1 First', Phase A.1: the remaining 10 short (profile, cell, mode)",
+ "rule": "per short (profile, cell, mode): D4's cell order, held-out units passed over; the refill a profile build lists, then reserve_of(refill) = max(3, refill) more units not yet generated in that mode; the code cell's 9 prompts in both modes; one candidate per (unit, mode), the mode's official template and sampling",
+ "short_cells": {
+  "base|inductive_rule_discovery/string_induction@v1|H-T": {
+   "scored_now": 4294,
+   "quota": 8100.0,
+   "refill": 2,
+   "reserve": 3,
+   "pool_left_after": 27
+  },
+  "base|inductive_rule_discovery/string_induction@v1|H-N": {
+   "scored_now": 4578,
+   "quota": 8100.0,
+   "refill": 5,
+   "reserve": 5,
+   "pool_left_after": 15
+  },
+  "rh|inductive_rule_discovery/string_induction@v1|H-T": {
+   "scored_now": 4294,
+   "quota": 9900.0,
+   "refill": 3,
+   "reserve": 3,
+   "pool_left_after": 26
+  },
+  "rh|inductive_rule_discovery/string_induction@v1|H-N": {
+   "scored_now": 4578,
+   "quota": 9900.0,
+   "refill": 8,
+   "reserve": 8,
+   "pool_left_after": 9
+  }
+ },
+ "units": 36,
+ "by_cell_and_modes": {
+  "inductive_rule_discovery/string_induction@v1|H-N": 16,
+  "inductive_rule_discovery/string_induction@v1|H-T": 6,
+  "supporting/code|H-T+H-N": 14
+ },
+ "removed": {
+  "isolation": [],
+  "state_evaluation_or_training_prompt": []
+ },
+ "isolation": {
+  "R1_held_out_prompt_keys": [],
+  "R2_flagged": [],
+  "R3": {
+   "applicable_items": 22,
+   "overlap": {
+    "generator_family": 0,
+    "family": 0
+   },
+   "pass": true
+  },
+  "R9_refused_family_units": [],
+  "pass": true
+ },
+ "output": {
+  "path": "data/stages/stage-2/teacher_modes/tasks/calibration_topup_v1.jsonl",
+  "sha256": "8cf39a31783ed720ab63a96a1f7a147ab8a31d55c9d8d8841c42ced059b5e6a7"
+ },
+ "authorizes": "nothing"
+}

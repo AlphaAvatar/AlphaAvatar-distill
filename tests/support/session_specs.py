@@ -65,6 +65,15 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: volume, so `session_args` fills them (P1g sorts first and builds). Its
     #: own run id: both H1 launchers file under one experiment's run layout.
     ("h1_unit_launch", ("--run-id", "h1_units_spec_check")),
+    ("ae_launch", ("--run-id", "ae_spec_check")),
+    ("be_launch", ("--run-id", "be_spec_check")),
+    #: Research B's independent-gated study's engineering validation, added WITH
+    #: its launcher (2026-10-28) so every structural check covers it before any grant.
+    ("igv_launch", ("--run-id", "igv_spec_check")),
+    #: Research A's D4-scale phase (both kinds share one launcher, `phase.py`), added WITH it
+    #: (2026-10-28) so every structural check covers it before any grant.
+    ("phase", ("--run-id", "phase_spec_check", "--network-volume-id", "v", "--volume-mount-path", "/runpod-volume",
+               "--volume-gb", "60")),
 )
 
 

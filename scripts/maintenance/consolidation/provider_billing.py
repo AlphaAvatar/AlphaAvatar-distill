@@ -15,8 +15,15 @@ history is the independent check: each billed pod is attributed to the run
 record that names it, and what no record names is reported as unattributed --
 never assumed to belong to the project, and never assumed not to.
 
-Network-volume billing arrives as daily totals with no volume id, so it can be
-compared with booked volume runs only over a window, not per volume.
+REST API v2 (`/v2/billing/pods`, `/v2/billing/network-volumes`; v1 retires
+2026-11-15). v2 answers ``{"records": [...], "metadata": {..., "totals"}}`` with
+``totalAmount`` and an RFC 3339 bucket; `fetch` keeps every v2 field and adds the
+names this repository's readers use (``amount``, a pod row's ``time``, a volume
+row's ``startDate``). Two differences from v1 are real, not renames: v2's pod
+records include CPU pods (v1 left them out), and a network-volume record is ONE
+VOLUME's day with its ``networkVolumeId`` (v1 summed every volume into one row
+without an id and billed more hours than a volume existed). A snapshot of either
+version reads the same way; ``query.api`` says which.
 """
 from __future__ import annotations
 
@@ -27,12 +34,33 @@ import os
 import sys
 import urllib.request
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-REST = "https://rest.runpod.io/v1"
+REST = "https://api.runpod.io/v2"
 SCHEMA = "aadistill.provider_billing_snapshot/v1"
+
+
+def _day(t: str) -> str:
+    """``2026-07-22T00:00:00Z`` -> ``2026-07-22 00:00:00``: v1's bucket spelling, which readers slice."""
+    return str(t).replace("T", " ").rstrip("Z")
+
+
+def v2_rows(body: dict, kind: str) -> list[dict]:
+    """A v2 billing answer's records with the v1 names beside v2's own: ``amount`` is ``totalAmount``; a pod row's
+    ``time`` and a volume row's ``startDate`` are the bucket's start. Refuses an answer that is not v2's shape."""
+    if not isinstance(body, dict) or not isinstance(body.get("records"), list):
+        raise ValueError(f"the {kind} billing answer has no records list: {str(body)[:200]}")
+    out = []
+    for r in body["records"]:
+        row = {**r, "amount": float(r["totalAmount"])}
+        row["time" if kind == "pods" else "startDate"] = _day(r["startTime"])
+        out.append(row)
+    total = float(((body.get("metadata") or {}).get("totals") or {}).get("totalAmount", 0.0))
+    if abs(sum(x["amount"] for x in out) - total) > 1e-6:
+        raise ValueError(f"the {kind} billing records sum to {sum(x['amount'] for x in out)}, the totals to {total}")
+    return out
 
 
 def fetch(api_key: str, start: str, end: str) -> dict:
@@ -47,7 +75,9 @@ def fetch(api_key: str, start: str, end: str) -> dict:
         with urllib.request.urlopen(req, timeout=60) as resp:
             return json.loads(resp.read().decode())
 
-    window = f"bucketSize=day&startTime={start}T00:00:00Z&endTime={end}T23:59:59Z"
+    #: v2 buckets are half-open [startTime, endTime): the end is the day after `end`
+    stop = (datetime.fromisoformat(end) + timedelta(days=1)).strftime("%Y-%m-%d")
+    window = f"bucketSize=day&startTime={start}T00:00:00Z&endTime={stop}T00:00:00Z"
     sys.path.insert(0, str(REPO_ROOT / "src"))
     from aadistill.infrastructure.provider import RunPodProvider
     prov = RunPodProvider(api_key)
@@ -55,7 +85,7 @@ def fetch(api_key: str, start: str, end: str) -> dict:
     return {
         "schema": SCHEMA,
         "fetched_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "query": {"endpoint": REST, "window": window},
+        "query": {"endpoint": REST, "api": "rest_v2", "window": window},
         #: the balance's and the resource listing's own `known` and `error` side
         #: by side: merging them let an unreadable listing read as known
         "account": {**bal.as_dict(), "pods": list(res.pods),
@@ -64,8 +94,8 @@ def fetch(api_key: str, start: str, end: str) -> dict:
                     "balance_known": bal.known, "balance_error": bal.error,
                     "resources_known": res.known, "resources_error": res.error,
                     "error": "; ".join(e for e in (bal.error, res.error) if e) or None},
-        "pods": get(f"/billing/pods?{window}"),
-        "networkvolumes": get(f"/billing/networkvolumes?{window}"),
+        "pods": v2_rows(get(f"/billing/pods?{window}"), "pods"),
+        "networkvolumes": v2_rows(get(f"/billing/network-volumes?{window}"), "networkvolumes"),
     }
 
 
@@ -95,6 +125,7 @@ def run_records(root: Path) -> dict[str, list[dict]]:
 #: name is not thereby known to the repository -- committing the list of
 #: unattributed pods once made all 53 of them read as "mentioned".
 BILLING_EVIDENCE = (":(exclude)logs/budget/provider/**",
+                    ":(exclude)logs/budget/audits/**",
                     ":(exclude)**/budget_reconciliation.json",
                     ":(exclude)**/provider_attribution.json")
 
@@ -142,8 +173,47 @@ def billed_by_pod(snapshot: dict) -> dict[str, dict]:
 
 
 def volumes_by_day(snapshot: dict) -> dict[str, float]:
-    return {row["startDate"][:10]: float(row["amount"])
-            for row in snapshot["networkvolumes"]}
+    """Billed storage per UTC day; a v2 snapshot has one row per volume per day, summed here."""
+    days: dict[str, float] = defaultdict(float)
+    for row in snapshot["networkvolumes"]:
+        days[row["startDate"][:10]] += float(row["amount"])
+    return dict(days)
+
+
+def compare_v1_v2(raw: dict) -> dict:
+    """Item by item, one window read from both APIs (``raw``: ``{"fetched_utc", "v1": {"pods", "networkvolumes"},
+    "v2": {"pods", "network_volumes"}}``, the answers as received): every pod's v1 and v2 totals and their difference,
+    the pods only one of them bills, and per UTC day v1's single volume row against v2's per-volume rows summed."""
+    v1p, v1v = raw["v1"]["pods"], raw["v1"]["networkvolumes"]
+    v2p, v2v = raw["v2"]["pods"]["records"], raw["v2"]["network_volumes"]["records"]
+    pods: dict[str, dict] = defaultdict(lambda: {"v1": 0.0, "v2": 0.0, "v2_cpu": 0.0})
+    for r in v1p:
+        pods[r["podId"]]["v1"] += float(r["amount"])
+    for r in v2p:
+        pods[r["podId"]]["v2"] += float(r["totalAmount"])
+        pods[r["podId"]]["v2_cpu"] += float(r.get("cpuAmount") or 0.0)
+    rows = {pid: {k: round(v, 6) for k, v in d.items()} | {"diff": round(d["v2"] - d["v1"], 6)} for pid, d in pods.items()}
+    days: dict[str, dict] = defaultdict(lambda: {"v1": 0.0, "v2": 0.0, "v2_by_volume": {}})
+    for r in v1v:
+        days[r["startDate"][:10]]["v1"] += float(r["amount"])
+    for r in v2v:
+        d = days[str(r["startTime"])[:10]]
+        d["v2"] += float(r["totalAmount"])
+        d["v2_by_volume"][r["networkVolumeId"]] = round(float(r["totalAmount"]), 6)
+    vol = {k: {"v1": round(v["v1"], 6), "v2": round(v["v2"], 6), "diff": round(v["v2"] - v["v1"], 6),
+               "v2_by_volume": v["v2_by_volume"]} for k, v in sorted(days.items())}
+    t1 = sum(r["v1"] for r in rows.values()) + sum(v["v1"] for v in vol.values())
+    t2 = sum(r["v2"] for r in rows.values()) + sum(v["v2"] for v in vol.values())
+    return {"fetched_utc": raw.get("fetched_utc"), "windows": {"v1": raw["v1"].get("window"), "v2": raw["v2"].get("window")},
+            "totals": {"pods": {"v1": round(sum(r["v1"] for r in rows.values()), 4), "v2": round(sum(r["v2"] for r in rows.values()), 4)},
+                       "network_volumes": {"v1": round(sum(v["v1"] for v in vol.values()), 4),
+                                           "v2": round(sum(v["v2"] for v in vol.values()), 4)},
+                       "all": {"v1": round(t1, 4), "v2": round(t2, 4), "diff": round(t2 - t1, 4)}},
+            "pods_only_in_v2": {k: v for k, v in rows.items() if v["v1"] == 0 and v["v2"] > 0},
+            "pods_only_in_v1": {k: v for k, v in rows.items() if v["v2"] == 0 and v["v1"] > 0},
+            "pods_that_differ": {k: v for k, v in rows.items() if v["v1"] and v["v2"] and abs(v["diff"]) > 1e-6},
+            "pods_equal": sum(1 for v in rows.values() if v["v1"] and v["v2"] and abs(v["diff"]) <= 1e-6),
+            "volume_days": vol}
 
 
 def snapshot_identity(path: Path, root: Path) -> dict:
@@ -196,7 +266,17 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--runpod-config", default="~/.runpod/config.toml")
     r = sub.add_parser("report")
     r.add_argument("--snapshot", required=True)
+    c = sub.add_parser("compare-v1-v2", help="item-by-item v1 / v2 reconciliation of one raw same-window read")
+    c.add_argument("--raw", required=True)
+    c.add_argument("--write", required=True)
     a = ap.parse_args(argv)
+    if a.cmd == "compare-v1-v2":
+        doc = {"schema": "aadistill.provider_billing_v1_v2/v1", "raw": a.raw,
+               "raw_sha256": hashlib.sha256(Path(a.raw).read_bytes()).hexdigest(),
+               **compare_v1_v2(json.loads(Path(a.raw).read_text()))}
+        Path(a.write).write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({k: doc[k] for k in ("totals", "pods_only_in_v2", "pods_only_in_v1", "pods_equal")}, indent=1))
+        return 0
     if a.cmd == "fetch":
         sys.path.insert(0, str(REPO_ROOT / "src"))
         from aadistill.infrastructure.provider import read_api_key

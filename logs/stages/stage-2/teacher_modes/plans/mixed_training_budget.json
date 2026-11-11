@@ -1,0 +1,145 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.mixed_training_budget/v1",
+ "study_id": "six_category_schema_restored@v1",
+ "written_utc": "2026-11-09T10:24:26Z",
+ "is_an_estimate": true,
+ "step_model": {
+  "fit": {
+   "a": 2.8908,
+   "b": 9.0996e-05,
+   "residual_sd": 0.031,
+   "steps": 2308,
+   "source": "the six Stage-3 -sr units' train_log.jsonl (STEP_LOGS), train_step rows after step 20"
+  },
+  "factors": {
+   "lower": 0.97,
+   "expected": 1.0,
+   "upper": 1.15
+  }
+ },
+ "evaluation_model": {
+  "measured_seconds": {
+   "thinking": {
+    "A1-6cat-sr-s20260726": 4105.6,
+    "A1-6cat-sr-s20260801": 3628.3
+   },
+   "non_thinking": {
+    "A2-6cat-sr-s20260726": 1080.7,
+    "A2-6cat-sr-s20260801": 961.7
+   }
+  },
+  "upper_seconds": 8211.2
+ },
+ "per_unit": {
+  "A-MIX-6cat-sr-s20260726": {
+   "lower": {
+    "seconds_per_step": 3.163,
+    "train_s": 31406,
+    "evaluation_s": {
+     "thinking": 3628.3,
+     "non_thinking": 961.7
+    },
+    "unit_s": 35996
+   },
+   "expected": {
+    "seconds_per_step": 3.261,
+    "train_s": 32861,
+    "evaluation_s": {
+     "thinking": 3867.0,
+     "non_thinking": 1021.2
+    },
+    "unit_s": 37749
+   },
+   "upper": {
+    "seconds_per_step": 3.75,
+    "train_s": 38379,
+    "evaluation_s": {
+     "thinking": 8211.2,
+     "non_thinking": 8211.2
+    },
+    "unit_s": 54801
+   }
+  },
+  "A-MIX-6cat-sr-s20260801": {
+   "lower": {
+    "seconds_per_step": 3.163,
+    "train_s": 31406,
+    "evaluation_s": {
+     "thinking": 3628.3,
+     "non_thinking": 961.7
+    },
+    "unit_s": 35996
+   },
+   "expected": {
+    "seconds_per_step": 3.261,
+    "train_s": 32861,
+    "evaluation_s": {
+     "thinking": 3867.0,
+     "non_thinking": 1021.2
+    },
+    "unit_s": 37749
+   },
+   "upper": {
+    "seconds_per_step": 3.75,
+    "train_s": 38379,
+    "evaluation_s": {
+     "thinking": 8211.2,
+     "non_thinking": 8211.2
+    },
+    "unit_s": 54801
+   }
+  }
+ },
+ "arms": {
+  "A-MIX-6cat-sr": {
+   "kind": "train_sr_mix",
+   "seeds": [
+    20260726,
+    20260801
+   ],
+   "session": {
+    "lower": {
+     "gpu_hours": 20.25,
+     "usd": 22.49
+    },
+    "expected": {
+     "gpu_hours": 21.34,
+     "usd": 23.7
+    },
+    "upper": {
+     "gpu_hours": 31.61,
+     "usd": 38.27
+    }
+   },
+   "unit_deadline_hours": 10.75,
+   "session_hard_cap": {
+    "driver_minutes": 1857,
+    "billable_minutes": 1997.5,
+    "hard_cap_usd": 40.31
+   },
+   "recovery": {
+    "per_resumed_attempt_minutes": 120.0,
+    "usd_each": 2.43,
+    "attempts_reserved": 2,
+    "rule": "a resumed attempt pays the runner's fixed minutes, the training since the last save point at the upper step time, and a reload; it never retrains a finished unit or re-evaluates a scored mode"
+   },
+   "kind_cumulative_cap_usd": 45.17
+  }
+ },
+ "evaluation": "each unit's two formal evaluations (thinking, then non-thinking) run on the same pod right after its training; their seconds are inside the unit's row",
+ "backup": "the six closed -sr units' final weights and the mixed units' own reach the dev box on the session's polls while it trains (token_matched_phase.backup_final_weights); the closeout finishes what is left, at most 30 minutes, priced in the upper case",
+ "rates": {
+  "gpu_expected_usd_per_hour": 1.09,
+  "gpu_cap_usd_per_hour": 1.19,
+  "container_disk_usd_per_hour": 0.0205
+ },
+ "capacity": {
+  "need_bytes": 22493245409,
+  "volume_gb": 350.0,
+  "room_at_last_read_bytes": 48342964448,
+  "read_at": "a_train_sr_c1_20261108_104542's start",
+  "written_since_bytes_upper": 10676728427,
+  "rule": "a1_units.volume_room measures the room on the pod (size sold less du -sb) and refuses before training when it cannot hold the units; nothing on the volume is deleted for room"
+ },
+ "authorizes": "nothing"
+}

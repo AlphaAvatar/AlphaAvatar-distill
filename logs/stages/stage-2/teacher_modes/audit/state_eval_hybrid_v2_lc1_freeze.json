@@ -1,0 +1,77 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.state_eval_hybrid_freeze/v2",
+ "coverage": {
+  "cells": {
+   "tool_calling@v1|H-N|schema_arguments": {
+    "target_scored_positions": 1800,
+    "realized_scored_positions": 1063,
+    "admitted_episodes": 11,
+    "kish_effective_episodes": 4.98,
+    "measured_scored_positions": 1063.0,
+    "measured_episodes": 11,
+    "items": 15,
+    "every_admitted_episode_selected": true,
+    "equal_to_the_registration": true,
+    "status": "LIMITED_COVERAGE"
+   }
+  },
+  "registration": {
+   "path": "configs/stages/stage-2/teacher_modes/state_eval_hybrid_v2_lc1.json",
+   "sha256": "0f7dd1d23f183a9c3e41f1f17ff37dc12bbfa78e85f77f579ad67d4eab9c5880"
+  },
+  "rule": "a LIMITED_COVERAGE cell is the registered one, its whole admitted supply selected and its realized positions and episodes the registered ones; it is never REACHED, and every other cell meets the v2 rule"
+ },
+ "written_utc": "2026-11-05T11:32:10Z",
+ "suite_identity": {
+  "suite_id": "state_eval_hybrid@v2-lc1",
+  "content_sha256": "0d53efd384406a7814ae3d20436d8fbd7e856a71141733bfab46aded2827bf21",
+  "items_sha256": "57cef6e9efa4271fdd468e003e1d834e6c874add10e95d92818f8ed62b706a98",
+  "suite_hash": "91a92223b8f8ef6a98463bc4a4366e9970d0540bd39331d1e00dfe86de9022bc",
+  "measurement_protocol_id": "d09a48497164406d4704dedc5c5550a5",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "recompute",
+   "aggregation_rule": "equal_subtype_then_equal_domain/v1",
+   "distribution_support": {
+    "support_id": "reference_topk_tail_v1",
+    "top_k": 200
+   },
+   "critical_aggregation": "group_balanced/v1: per group, each of its declared classes pooled over the group's items' scored positions; unweighted mean over the group's classes; unweighted mean over groups",
+   "forward_context": {
+    "packing": "sequential_truncate_v1",
+    "truncate": true,
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261105
+   }
+  },
+  "baseline": "stage1_init.d1_target_aware.scored_v1@v2",
+  "forward_context": {
+   "packing": "sequential_truncate_v1",
+   "truncate": true,
+   "materialization": "prefix_restart_v1",
+   "shuffle": "sha256_keyed_v1",
+   "attention": "causal_continuous_positions_v1",
+   "sequence_length": 8192,
+   "shuffle_seed": 20261105
+  }
+ },
+ "tool_calling": {
+  "reached": {
+   "H-T": true,
+   "H-N": true
+  },
+  "short_categories": {
+   "H-T": [],
+   "H-N": []
+  },
+  "thin_categories": {
+   "H-T": [],
+   "H-N": []
+  },
+  "rule": "the state_eval split's episodes selected per category (whole episodes, frozen order, each category to its share of 12000 scored positions and >= 5 tasks); a mode is reached only when its total, its tasks and EVERY category meet them, a category's SHORTFALL counting only where the maintainer approved it"
+ },
+ "authorizes": "nothing"
+}

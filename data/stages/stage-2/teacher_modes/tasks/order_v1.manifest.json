@@ -1,0 +1,361 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.task_order/v1",
+ "name": "order_v1",
+ "created_utc": "2026-10-28T20:26:04Z",
+ "command": "python -m stages.teacher_modes.build_tasks build --exports export_rgenv_n128.jsonl export_rgenv_n64.jsonl export_mdenv_n64.jsonl export_pq_n256.jsonl export_rgenv_n256.jsonl export_code_supplement_n256.jsonl",
+ "design": {
+  "path": "configs/stages/stage-2/teacher_modes/d4_scale_design.json",
+  "section": "tasks"
+ },
+ "t0_lists": [
+  {
+   "path": "logs/stages/stage-2/reasoning_data/plans/generation_inputs/generation_input_g0.jsonl",
+   "sha256": "424934ac16103aa2e304db87ae1a8deca4fc0f6202215750a105a746ef023445"
+  },
+  {
+   "path": "logs/stages/stage-2/reasoning_data/plans/p1t/generation_inputs/generation_input_g0.jsonl",
+   "sha256": "fd1d604d0094d761a2db501a15f2b611c7ad0e7a482b8ba6ca21c99e5bf69fe8"
+  },
+  {
+   "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_topup/generation_inputs/generation_input_g0.jsonl",
+   "sha256": "0516bea7fa955ed2888568d601c7b27bd4e18f1a4a110cae758ce41438a2a1f0"
+  }
+ ],
+ "t0_cells": {
+  "primary.abstract_analogical/reasoning_core": 40,
+  "primary.abstract_analogical/s0_generators_v2_calsplit": 95,
+  "primary.compositional_generalization/reasoning_core": 67,
+  "primary.compositional_generalization/reasoning_gym": 158,
+  "primary.compositional_generalization/s0_generators_v2_calsplit": 143,
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 237,
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": 100,
+  "primary.task_contained_deduction/prontoqa": 56,
+  "primary.task_contained_deduction/reasoning_core": 59,
+  "primary.task_contained_deduction/reasoning_gym": 57,
+  "primary.task_contained_deduction/s0_generators_v2_calsplit": 110,
+  "supporting.answerability/squad_v2_train_unanswerable": 281,
+  "supporting.code_algorithmic/mbpp_train": 124,
+  "supporting.code_algorithmic/reasoning_core": 35,
+  "supporting.code_algorithmic/reasoning_gym": 22,
+  "supporting.math_new/math_train": 88,
+  "supporting.math_new/mathematics_dataset": 59,
+  "supporting.math_new/reasoning_gym": 30
+ },
+ "slices": {
+  "V": {
+   "positions": [
+    0,
+    240
+   ],
+   "use": "per-mode validation documents (diagnostic only)"
+  },
+  "E": {
+   "positions": [
+    240,
+    3762
+   ],
+   "waves_of": 400,
+   "use": "the D4-scale extension, both modes, generated wave by wave after T0"
+  },
+  "X": {
+   "positions": [
+    3762,
+    17762
+   ],
+   "waves_of": 400,
+   "use": "the compute-matching extension, H-N only"
+  }
+ },
+ "n_tasks": 17762,
+ "by_slice": {
+  "V": {
+   "primary.abstract_analogical/reasoning_core": 5,
+   "primary.abstract_analogical/s0_generators_v2_calsplit": 13,
+   "primary.compositional_generalization/reasoning_core": 9,
+   "primary.compositional_generalization/reasoning_gym": 22,
+   "primary.compositional_generalization/s0_generators_v2_calsplit": 19,
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 32,
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": 14,
+   "primary.task_contained_deduction/prontoqa": 8,
+   "primary.task_contained_deduction/reasoning_core": 8,
+   "primary.task_contained_deduction/reasoning_gym": 8,
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": 15,
+   "supporting.answerability/squad_v2_train_unanswerable": 38,
+   "supporting.code_algorithmic/mbpp_train": 17,
+   "supporting.code_algorithmic/reasoning_core": 5,
+   "supporting.code_algorithmic/reasoning_gym": 3,
+   "supporting.math_new/math_train": 12,
+   "supporting.math_new/mathematics_dataset": 8,
+   "supporting.math_new/reasoning_gym": 4
+  },
+  "E": {
+   "primary.abstract_analogical/reasoning_core": 80,
+   "primary.abstract_analogical/s0_generators_v2_calsplit": 190,
+   "primary.compositional_generalization/reasoning_core": 134,
+   "primary.compositional_generalization/reasoning_gym": 316,
+   "primary.compositional_generalization/s0_generators_v2_calsplit": 286,
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 474,
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": 200,
+   "primary.task_contained_deduction/prontoqa": 112,
+   "primary.task_contained_deduction/reasoning_core": 118,
+   "primary.task_contained_deduction/reasoning_gym": 114,
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": 220,
+   "supporting.answerability/squad_v2_train_unanswerable": 562,
+   "supporting.code_algorithmic/mbpp_train": 248,
+   "supporting.code_algorithmic/reasoning_core": 70,
+   "supporting.code_algorithmic/reasoning_gym": 44,
+   "supporting.math_new/math_train": 176,
+   "supporting.math_new/mathematics_dataset": 118,
+   "supporting.math_new/reasoning_gym": 60
+  },
+  "X": {
+   "primary.abstract_analogical/reasoning_core": 318,
+   "primary.abstract_analogical/s0_generators_v2_calsplit": 755,
+   "primary.compositional_generalization/reasoning_core": 533,
+   "primary.compositional_generalization/reasoning_gym": 1256,
+   "primary.compositional_generalization/s0_generators_v2_calsplit": 1137,
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 1884,
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": 795,
+   "primary.task_contained_deduction/prontoqa": 445,
+   "primary.task_contained_deduction/reasoning_core": 469,
+   "primary.task_contained_deduction/reasoning_gym": 453,
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": 874,
+   "supporting.answerability/squad_v2_train_unanswerable": 2234,
+   "supporting.code_algorithmic/mbpp_train": 84,
+   "supporting.code_algorithmic/reasoning_core": 886,
+   "supporting.code_algorithmic/reasoning_gym": 469,
+   "supporting.math_new/math_train": 700,
+   "supporting.math_new/mathematics_dataset": 469,
+   "supporting.math_new/reasoning_gym": 239
+  }
+ },
+ "stratum_share_shift_points_vs_t0": {
+  "V": {
+   "primary.abstract_analogical": -0.166,
+   "primary.compositional_generalization": -0.064,
+   "primary.inductive_rule_discovery": -0.125,
+   "primary.interactive_adaptation": 0.155,
+   "primary.task_contained_deduction": 0.236,
+   "supporting.answerability": -0.124,
+   "supporting.code_algorithmic": 0.138,
+   "supporting.math_new": -0.051
+  },
+  "E": {
+   "primary.abstract_analogical": 0.0,
+   "primary.compositional_generalization": 0.0,
+   "primary.inductive_rule_discovery": 0.0,
+   "primary.interactive_adaptation": 0.0,
+   "primary.task_contained_deduction": 0.0,
+   "supporting.answerability": 0.0,
+   "supporting.code_algorithmic": 0.0,
+   "supporting.math_new": 0.0
+  },
+  "X": {
+   "primary.abstract_analogical": -0.002,
+   "primary.compositional_generalization": 0.003,
+   "primary.inductive_rule_discovery": -0.001,
+   "primary.interactive_adaptation": -0.0,
+   "primary.task_contained_deduction": -0.006,
+   "supporting.answerability": 0.0,
+   "supporting.code_algorithmic": 0.0,
+   "supporting.math_new": 0.006
+  }
+ },
+ "substitutions": [
+  {
+   "position": 4948,
+   "event": "supporting.code_algorithmic/mbpp_train exhausted; its share goes to ['reasoning_core', 'reasoning_gym']"
+  },
+  {
+   "position": 16391,
+   "event": "supporting.code_algorithmic/reasoning_gym exhausted; its share goes to ['reasoning_core']"
+  }
+ ],
+ "need": {
+  "primary.abstract_analogical/reasoning_core": {
+   "t0": 40,
+   "share": 0.022714366837024418,
+   "order_need": 404,
+   "unused_supply": 16,
+   "new_needed": 388
+  },
+  "primary.abstract_analogical/s0_generators_v2_calsplit": {
+   "t0": 95,
+   "share": 0.05394662123793299,
+   "order_need": 959,
+   "unused_supply": 181,
+   "new_needed": 778
+  },
+  "primary.compositional_generalization/reasoning_core": {
+   "t0": 67,
+   "share": 0.0380465644520159,
+   "order_need": 676,
+   "unused_supply": 45,
+   "new_needed": 631
+  },
+  "primary.compositional_generalization/reasoning_gym": {
+   "t0": 158,
+   "share": 0.08972174900624645,
+   "order_need": 1594,
+   "unused_supply": 95,
+   "new_needed": 1499
+  },
+  "primary.compositional_generalization/s0_generators_v2_calsplit": {
+   "t0": 143,
+   "share": 0.08120386144236229,
+   "order_need": 1443,
+   "unused_supply": 601,
+   "new_needed": 842
+  },
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+   "t0": 237,
+   "share": 0.13458262350936967,
+   "order_need": 2391,
+   "unused_supply": 453,
+   "new_needed": 1938
+  },
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+   "t0": 100,
+   "share": 0.05678591709256105,
+   "order_need": 1009,
+   "unused_supply": 356,
+   "new_needed": 653
+  },
+  "primary.task_contained_deduction/prontoqa": {
+   "t0": 56,
+   "share": 0.03180011357183418,
+   "order_need": 565,
+   "unused_supply": 16,
+   "new_needed": 549
+  },
+  "primary.task_contained_deduction/reasoning_core": {
+   "t0": 59,
+   "share": 0.033503691084611015,
+   "order_need": 596,
+   "unused_supply": 53,
+   "new_needed": 543
+  },
+  "primary.task_contained_deduction/reasoning_gym": {
+   "t0": 57,
+   "share": 0.03236797274275979,
+   "order_need": 575,
+   "unused_supply": 178,
+   "new_needed": 397
+  },
+  "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+   "t0": 110,
+   "share": 0.06246450880181715,
+   "order_need": 1110,
+   "unused_supply": 385,
+   "new_needed": 725
+  },
+  "supporting.answerability/squad_v2_train_unanswerable": {
+   "t0": 281,
+   "share": 0.15956842703009655,
+   "order_need": 2835,
+   "unused_supply": 0,
+   "new_needed": 2835
+  },
+  "supporting.code_algorithmic/mbpp_train": {
+   "t0": 124,
+   "share": 0.0704145371947757,
+   "order_need": 1251,
+   "unused_supply": 0,
+   "new_needed": 1251
+  },
+  "supporting.code_algorithmic/reasoning_core": {
+   "t0": 35,
+   "share": 0.019875070982396367,
+   "order_need": 354,
+   "unused_supply": 77,
+   "new_needed": 277
+  },
+  "supporting.code_algorithmic/reasoning_gym": {
+   "t0": 22,
+   "share": 0.01249290176036343,
+   "order_need": 222,
+   "unused_supply": 19,
+   "new_needed": 203
+  },
+  "supporting.math_new/math_train": {
+   "t0": 88,
+   "share": 0.04997160704145372,
+   "order_need": 888,
+   "unused_supply": 19,
+   "new_needed": 869
+  },
+  "supporting.math_new/mathematics_dataset": {
+   "t0": 59,
+   "share": 0.033503691084611015,
+   "order_need": 596,
+   "unused_supply": 69,
+   "new_needed": 527
+  },
+  "supporting.math_new/reasoning_gym": {
+   "t0": 30,
+   "share": 0.017035775127768313,
+   "order_need": 303,
+   "unused_supply": 12,
+   "new_needed": 291
+  }
+ },
+ "new_tasks": 21336,
+ "removed_before_isolation": 17,
+ "external_exports": [
+  {
+   "name": "export_rgenv_n128.jsonl",
+   "sha256": "4b6818555a9c4c5819cb34c4ef2ba0853a65e48d0cbfe2acaa0a66e240b5ce37",
+   "rows": 512
+  },
+  {
+   "name": "export_rgenv_n64.jsonl",
+   "sha256": "e2cdae3d5ca823e210d0ccce77725f299689f46c070d17b8176cbc4f57c7b4e4",
+   "rows": 768
+  },
+  {
+   "name": "export_mdenv_n64.jsonl",
+   "sha256": "cadaa76ff49c20e71eec04ea7042b4a5dccfa6774138e21974c7b843a33de91e",
+   "rows": 896
+  },
+  {
+   "name": "export_pq_n256.jsonl",
+   "sha256": "65a4a088cb48af02d0a17615aa9b01646db21797086e797b401ddaf0490fdf31",
+   "rows": 768
+  },
+  {
+   "name": "export_rgenv_n256.jsonl",
+   "sha256": "92980bce4ae3f9a18a45343a7b6fe5e30d25555f5f51de76921a5aeaeac51944",
+   "rows": 7167
+  },
+  {
+   "name": "export_code_supplement_n256.jsonl",
+   "sha256": "9cd9e79dba9d49f1cde2e8d9d1053e5b1ee1fddf991304e27d3a2ea53869dee8",
+   "rows": 1535
+  }
+ ],
+ "external_drops": {
+  "algebra__polynomial_roots_composed: outside the project checker's domain: a factorization item: the project has no factored-form checker": 60,
+  "bf: duplicate prompt": 524,
+  "controlled_code_execution: duplicate prompt": 254,
+  "dynamic_programming: duplicate prompt": 254,
+  "largest_island: duplicate prompt": 2,
+  "logic_derivation: duplicate prompt": 2,
+  "multistep_evidence_retrieval: duplicate prompt": 1,
+  "n_queens: duplicate prompt": 74,
+  "rotate_matrix: the answer is the input (gold verbatim in the prompt)": 87,
+  "self_reference: duplicate prompt": 18,
+  "string_manipulation: the answer is the input (gold verbatim in the prompt)": 79,
+  "tower_of_hanoi: duplicate prompt": 486
+ },
+ "project_group_shortfalls": {},
+ "seed_rules": {
+  "project": "R5 lo + 500,000 + cell index x 10,000 + i",
+  "external": "external_export.entry_seed(seed base 2026102900, source, module, level); the code stratum's supplement at 2026102901",
+  "datasets": "build_supporting_tasks._order (its SALT), past every pooled task"
+ },
+ "sha256": "d71ac56b99f323e5b12f38668a6f28980a379eba9a2926ad928e48d68cf12d1a",
+ "isolation_report": "order_v1.isolation.json",
+ "license": "project-generated tasks; third-party generators' licenses as external_modules.json records; MATH (MIT), MBPP (CC-BY-4.0), SQuAD v2 (CC-BY-SA-4.0) train splits only; no ARC-AGI material",
+ "status": "FROZEN at $0 before any of its tasks is generated (d4_scale_design.json :: tasks.E)",
+ "authorizes": "nothing"
+}

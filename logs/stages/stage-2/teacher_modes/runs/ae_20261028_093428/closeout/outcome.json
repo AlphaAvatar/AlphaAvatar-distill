@@ -1,0 +1,62 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.engineering_authorization_outcome/v1",
+ "run_id": "ae_20261028_093428",
+ "study": "A-E",
+ "recorded_utc": "2026-10-28T09:51:49+00:00",
+ "status": "COMPLETE",
+ "validation_passed": true,
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "provider_resource_created": true,
+ "evidence": {
+  "path": "/home/ecs-user/aad-scratch/ae_20261028_093428/store/evidence.tgz",
+  "sha256": "de28e9e9f507447647ea43014dfb9d563dc460a2378cd7d3d38c120f3d411adc",
+  "bytes": 424632,
+  "verified": true
+ },
+ "verdict_rederived": {
+  "passed": true,
+  "checks": {
+   "prompt_identity": "PASS",
+   "generation": "PASS",
+   "teacher_forward": "PASS",
+   "assistant_target_kl": "PASS",
+   "trainer_smoke": "PASS",
+   "preclosed_scoring": "PASS"
+  },
+  "agrees_with_the_pod": true
+ },
+ "money": {
+  "all_in_usd": 0.4814,
+  "gpu_usd": 0.477,
+  "disk_usd": 0.0044,
+  "elapsed_minutes": 15.99,
+  "price_per_hour": 1.79,
+  "authorized_usd": 3.2725,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (120 GB)"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "scientific_use": false,
+ "authorizes": "nothing"
+}

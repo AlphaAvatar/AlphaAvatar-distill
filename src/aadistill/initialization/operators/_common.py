@@ -158,7 +158,8 @@ def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
                              batch_size: int = 1,
                              packing: str = ORIGINAL_ORDER_V1,
                              active: Any = None,
-                             pad_id: int | None = None) -> dict[str, torch.Tensor]:
+                             pad_id: int | None = None,
+                             forward_context: Any = None) -> dict[str, torch.Tensor]:
     """Streaming sufficient statistics for the model **as it is now**.
 
     The whole reason width and FFN selection are re-run per state rather than
@@ -194,6 +195,12 @@ def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
     ``token_batches`` accepts either bare ``[1, T]`` id tensors (what the
     operators have always passed) or full calibration items; batching needs only
     the ids, and taking both means no call site has to change shape to opt in.
+
+    ``forward_context`` (a
+    :class:`~aadistill.initialization.calibration.packing.ForwardContext`)
+    packs the items into causal sequences instead; ``batch_size`` is then the
+    number of packed sequences per forward. It changes the estimand, so it
+    arrives from the hashed operator config, like ``active``.
     """
     items = [it if isinstance(it, Mapping) else {"input_ids": it}
              for it in token_batches]
@@ -207,7 +214,8 @@ def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
             f"the scoring policy was evaluated against {active.n_items} items "
             f"but {len(items)} were handed to the statistics pass; a mask built "
             "from a different list attributes one item's positions to another")
-    reference_path = batch_size <= 1 and packing == ORIGINAL_ORDER_V1
+    reference_path = (batch_size <= 1 and packing == ORIGINAL_ORDER_V1
+                      and forward_context is None)
     collector = adapter.stats_collector(model)
     try:
         if reference_path:
@@ -241,7 +249,8 @@ def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
             resolved_pad = (resolve_pad_id(model) if pad_id is None else int(pad_id))
             for packed in packed_batches(items, max(int(batch_size), 1),
                                          packing=packing, pad_id=resolved_pad,
-                                         device=device):
+                                         device=device,
+                                         forward_context=forward_context):
                 if active is not None and active.token_weighted:
                     collector.process_batch(
                         packed.batch, token_weights=active.token_weights_for(

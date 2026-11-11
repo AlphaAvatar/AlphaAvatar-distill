@@ -1,0 +1,282 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.stage3_storage_audit/v1",
+ "recorded_utc": "2026-11-08T18:48:56Z",
+ "decided_by": "maintainer 2026-11-08 ('Stage 3 科学收尾、模型备份与失败原因分析', section 2): a read-only audit and an executable backup plan; no storage purchase and no pod are authorized by it",
+ "read_only": "every fact below was read at $0: the committed records, the provider's account and billing APIs, the hub's file listings and its LFS batch endpoint. The volume itself cannot be read without a pod: US-TX-3 has no S3-compatible API for network volumes (docs.runpod.io/storage/s3-api, 2026-11-08)",
+ "units": {
+  "A1-6cat-sr-s20260726": {
+   "trained_by": "a_train_sr_a1_20261107_104149",
+   "final_step": 2145,
+   "final_weights": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/train/checkpoints/step_002145/model/model.safetensors",
+    "bytes": 2384234968,
+    "sha256": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
+    "dtype": "fp32",
+    "hashed": "on the pod by a1_units.py when the unit's training ended (units record)"
+   },
+   "model_config": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/train/checkpoints/step_002145/model/{config.json,generation_config.json}",
+    "sha256": "not recorded (KB-sized; read on the pod with the weights)"
+   },
+   "training_identity": {
+    "config": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a1_20261107_104149/evidence/units/A1-6cat-sr-s20260726/train/config.json (committed)",
+    "run_manifest": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a1_20261107_104149/evidence/units/A1-6cat-sr-s20260726/train/run_manifest.json (committed)",
+    "resume_identity": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/train/checkpoints/step_002145/resume_identity.json (on the volume only)"
+   },
+   "full_checkpoint": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/train/checkpoints/step_002145/ (model/, trainer_state.pt, resume_identity.json)",
+    "trainer_state_bytes_planned": 3524023523,
+    "trainer_state_sha256": "not recorded: the session hashed the weights only",
+    "contents": "AdamW moments, scheduler, step, consumed sequences, torch and CUDA RNG"
+   },
+   "evaluation_package_copy": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260726/evaluation/package/model.safetensors (the same weights again)",
+   "consumers": {
+    "weights": "none active; potential: a re-evaluation, Stage 4/5 initialization, a release -- none authorized",
+    "trainer_state": "none: training is complete; only an exact continuation of the same run would read it"
+   },
+   "off_volume_copy": "none: refused for quota at each unit's end (off_volume_copy.json per unit)"
+  },
+  "A1-6cat-sr-s20260801": {
+   "trained_by": "a_train_sr_a1_20261107_104149",
+   "final_step": 2145,
+   "final_weights": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/train/checkpoints/step_002145/model/model.safetensors",
+    "bytes": 2384234968,
+    "sha256": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
+    "dtype": "fp32",
+    "hashed": "on the pod by a1_units.py when the unit's training ended (units record)"
+   },
+   "model_config": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/train/checkpoints/step_002145/model/{config.json,generation_config.json}",
+    "sha256": "not recorded (KB-sized; read on the pod with the weights)"
+   },
+   "training_identity": {
+    "config": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a1_20261107_104149/evidence/units/A1-6cat-sr-s20260801/train/config.json (committed)",
+    "run_manifest": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a1_20261107_104149/evidence/units/A1-6cat-sr-s20260801/train/run_manifest.json (committed)",
+    "resume_identity": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/train/checkpoints/step_002145/resume_identity.json (on the volume only)"
+   },
+   "full_checkpoint": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/train/checkpoints/step_002145/ (model/, trainer_state.pt, resume_identity.json)",
+    "trainer_state_bytes_planned": 3524023523,
+    "trainer_state_sha256": "not recorded: the session hashed the weights only",
+    "contents": "AdamW moments, scheduler, step, consumed sequences, torch and CUDA RNG"
+   },
+   "evaluation_package_copy": "thprcgh7s9:/teacher_modes/stage3_sr/A1-6cat-sr-s20260801/evaluation/package/model.safetensors (the same weights again)",
+   "consumers": {
+    "weights": "none active; potential: a re-evaluation, Stage 4/5 initialization, a release -- none authorized",
+    "trainer_state": "none: training is complete; only an exact continuation of the same run would read it"
+   },
+   "off_volume_copy": "none: refused for quota at each unit's end (off_volume_copy.json per unit)"
+  },
+  "A2-6cat-sr-s20260726": {
+   "trained_by": "a_train_sr_a2_20261107_174531",
+   "final_step": 7571,
+   "final_weights": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260726/train/checkpoints/step_007571/model/model.safetensors",
+    "bytes": 2384234968,
+    "sha256": "5e26ab61fab82ee988d042a98b8e467a284fd5682fa7de9dabc54623ed2606d4",
+    "dtype": "fp32",
+    "hashed": "on the pod by a1_units.py when the unit's training ended (units record)"
+   },
+   "model_config": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260726/train/checkpoints/step_007571/model/{config.json,generation_config.json}",
+    "sha256": "not recorded (KB-sized; read on the pod with the weights)"
+   },
+   "training_identity": {
+    "config": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/evidence/units/A2-6cat-sr-s20260726/train/config.json (committed)",
+    "run_manifest": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/evidence/units/A2-6cat-sr-s20260726/train/run_manifest.json (committed)",
+    "resume_identity": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260726/train/checkpoints/step_007571/resume_identity.json (on the volume only)"
+   },
+   "full_checkpoint": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260726/train/checkpoints/step_007571/ (model/, trainer_state.pt, resume_identity.json)",
+    "trainer_state_bytes_planned": 3524023523,
+    "trainer_state_sha256": "not recorded: the session hashed the weights only",
+    "contents": "AdamW moments, scheduler, step, consumed sequences, torch and CUDA RNG"
+   },
+   "evaluation_package_copy": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260726/evaluation/package/model.safetensors (the same weights again)",
+   "consumers": {
+    "weights": "none active; potential: a re-evaluation, Stage 4/5 initialization, a release -- none authorized",
+    "trainer_state": "none: training is complete; only an exact continuation of the same run would read it"
+   },
+   "off_volume_copy": "none: refused for quota at each unit's end (off_volume_copy.json per unit)"
+  },
+  "A2-6cat-sr-s20260801": {
+   "trained_by": "a_train_sr_a2_20261107_174531",
+   "final_step": 7571,
+   "final_weights": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/train/checkpoints/step_007571/model/model.safetensors",
+    "bytes": 2384234968,
+    "sha256": "236425e5739bc71ba3661cda9e0ef9f1e02cb7c155eeb714a3c4f8686f2a2df6",
+    "dtype": "fp32",
+    "hashed": "on the pod by a1_units.py when the unit's training ended (units record)"
+   },
+   "model_config": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/train/checkpoints/step_007571/model/{config.json,generation_config.json}",
+    "sha256": "not recorded (KB-sized; read on the pod with the weights)"
+   },
+   "training_identity": {
+    "config": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/evidence/units/A2-6cat-sr-s20260801/train/config.json (committed)",
+    "run_manifest": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_a2_20261107_174531/evidence/units/A2-6cat-sr-s20260801/train/run_manifest.json (committed)",
+    "resume_identity": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/train/checkpoints/step_007571/resume_identity.json (on the volume only)"
+   },
+   "full_checkpoint": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/train/checkpoints/step_007571/ (model/, trainer_state.pt, resume_identity.json)",
+    "trainer_state_bytes_planned": 3524023523,
+    "trainer_state_sha256": "not recorded: the session hashed the weights only",
+    "contents": "AdamW moments, scheduler, step, consumed sequences, torch and CUDA RNG"
+   },
+   "evaluation_package_copy": "thprcgh7s9:/teacher_modes/stage3_sr/A2-6cat-sr-s20260801/evaluation/package/model.safetensors (the same weights again)",
+   "consumers": {
+    "weights": "none active; potential: a re-evaluation, Stage 4/5 initialization, a release -- none authorized",
+    "trainer_state": "none: training is complete; only an exact continuation of the same run would read it"
+   },
+   "off_volume_copy": "none: refused for quota at each unit's end (off_volume_copy.json per unit)"
+  },
+  "C1-6cat-sr-s20260726": {
+   "trained_by": "a_train_sr_c1_20261108_082548",
+   "final_step": 1892,
+   "final_weights": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/model/model.safetensors",
+    "bytes": 2384234968,
+    "sha256": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+    "dtype": "fp32",
+    "hashed": "on the pod by a1_units.py when the unit's training ended (units record)"
+   },
+   "model_config": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/model/{config.json,generation_config.json}",
+    "sha256": "not recorded (KB-sized; read on the pod with the weights)"
+   },
+   "training_identity": {
+    "config": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_082548/evidence/units/C1-6cat-sr-s20260726/train/config.json (committed)",
+    "run_manifest": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_082548/evidence/units/C1-6cat-sr-s20260726/train/run_manifest.json (committed)",
+    "resume_identity": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/resume_identity.json (on the volume only)"
+   },
+   "full_checkpoint": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/train/checkpoints/step_001892/ (model/, trainer_state.pt, resume_identity.json)",
+    "trainer_state_bytes_planned": 3524023523,
+    "trainer_state_sha256": "not recorded: the session hashed the weights only",
+    "contents": "AdamW moments, scheduler, step, consumed sequences, torch and CUDA RNG"
+   },
+   "evaluation_package_copy": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260726/evaluation/package/model.safetensors (the same weights again)",
+   "consumers": {
+    "weights": "none active; potential: a re-evaluation, Stage 4/5 initialization, a release -- none authorized",
+    "trainer_state": "none: training is complete; only an exact continuation of the same run would read it"
+   },
+   "off_volume_copy": "none: refused for quota at each unit's end (off_volume_copy.json per unit)"
+  },
+  "C1-6cat-sr-s20260801": {
+   "trained_by": "a_train_sr_c1_20261108_104542",
+   "final_step": 1892,
+   "final_weights": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train/checkpoints/step_001892/model/model.safetensors",
+    "bytes": 2384234968,
+    "sha256": "a24f887370c62bde491576174128b6a2438051b9cba148c836d4709688c3d057",
+    "dtype": "fp32",
+    "hashed": "on the pod by a1_units.py when the unit's training ended (units record)"
+   },
+   "model_config": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train/checkpoints/step_001892/model/{config.json,generation_config.json}",
+    "sha256": "not recorded (KB-sized; read on the pod with the weights)"
+   },
+   "training_identity": {
+    "config": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_104542/evidence/units/C1-6cat-sr-s20260801/train/config.json (committed)",
+    "run_manifest": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_104542/evidence/units/C1-6cat-sr-s20260801/train/run_manifest.json (committed)",
+    "resume_identity": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train/checkpoints/step_001892/resume_identity.json (on the volume only)"
+   },
+   "full_checkpoint": {
+    "path": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/train/checkpoints/step_001892/ (model/, trainer_state.pt, resume_identity.json)",
+    "trainer_state_bytes_planned": 3524023523,
+    "trainer_state_sha256": "not recorded: the session hashed the weights only",
+    "contents": "AdamW moments, scheduler, step, consumed sequences, torch and CUDA RNG"
+   },
+   "evaluation_package_copy": "thprcgh7s9:/teacher_modes/stage3_sr/C1-6cat-sr-s20260801/evaluation/package/model.safetensors (the same weights again)",
+   "consumers": {
+    "weights": "none active; potential: a re-evaluation, Stage 4/5 initialization, a release -- none authorized",
+    "trainer_state": "none: training is complete; only an exact continuation of the same run would read it"
+   },
+   "off_volume_copy": "none: refused for quota at each unit's end (off_volume_copy.json per unit)"
+  }
+ },
+ "sizes": {
+  "final_weights_bytes": 14305409808,
+  "final_weights_gib": 13.32,
+  "trainer_state_bytes_planned": 21144141138,
+  "trainer_state_gib": 19.69,
+  "weights_and_full_checkpoints_gib": 33.01,
+  "_": "trainer_state from the plan's OPTIM_BYTES; the exact size is read on the pod"
+ },
+ "relay": {
+  "account": "AlphaAvatar (a user account, free tier: 100 GB private; not PRO; no payment method)",
+  "private_lfs_used_gib": 92.11,
+  "limit_gib": 93.13,
+  "probe_2026_11_08": "one 2,384,234,968 B object refused (403 'Private storage limit reached')",
+  "candidates_without_a_code_or_config_consumer": {
+   "a3_preserved_probes/ (4 objects)": 8.88,
+   "stage3/kdconf_* (4)": 8.88,
+   "stage3/s2v1_bl2048* (2)": 4.44,
+   "_": "GiB; found by grep of scripts/, configs/, src/; each is probably the only copy of a historical checkpoint, so none is retired without the maintainer (AGENTS.md 2.5 and the 2026-11-07 brief)"
+  },
+  "kept": "transfer/wheelhouse_* (every pod setup installs from them), the packed-search Top-1, evidence archives, frozen packs and every prefix a launcher or config names"
+ },
+ "provider": {
+  "read_utc": "2026-11-08T18:35:02Z",
+  "balance_usd": 19.97,
+  "spend_per_hour_usd": 0.073,
+  "pods": 0,
+  "billing_snapshot": "logs/budget/provider/runpod_billing_v2_2026-11-08T1835Z.json",
+  "volumes": {
+   "thprcgh7s9": {
+    "dc": "US-TX-3",
+    "gb": 350,
+    "usd_per_day": 0.8167,
+    "holds": "the six units' weights and save points (only copy), the packed search state (its Top-1 also on the relay)"
+   },
+   "4rhubprswo": {
+    "dc": "US-TX-3",
+    "gb": 350,
+    "usd_per_day": 0.8167,
+    "holds": "the v2 Top-1's only copy and A1 (2026-11-02) units; never mounted"
+   },
+   "am5m373kuq": {
+    "dc": "EUR-IS-2",
+    "gb": 55,
+    "usd_per_day": 0.1283,
+    "holds": "H1-PA / Mixed formal student weights; untouched"
+   }
+  },
+  "usd_per_day": 1.7617,
+  "runway_days": 11.3,
+  "balance_exhausted_about_utc": "2026-11-20T02:00Z",
+  "risk": "RunPod: a network volume may be terminated when the account cannot pay its storage, and the data is not recoverable (docs.runpod.io/storage/network-volumes). Every one of the three volumes holds a unique artifact"
+ },
+ "options": {
+  "hf_pro": {
+   "cost": "$9/month (1 TB private storage, then $18/TB-month)",
+   "engineering": "none: a1_units.py copy-final uploads FINAL_FILES, re-downloads into a fresh cache and re-hashes (tested)",
+   "needs": "the maintainer subscribes the AlphaAvatar account (a payment method)"
+  },
+  "relay_retirement": {
+   "cost": "$0",
+   "frees_gib": 22.2,
+   "needs": "the maintainer's decision: irreversible, probably sole copies; enough for the weights (13.32 GiB), not for weights and checkpoints (33.0 GiB)"
+  },
+  "other_object_store": {
+   "cost": "Backblaze B2 ~$6.95/TB-month (first 10 GB free); Cloudflare R2 $0.015/GB-month (10 GB free, no egress fee): cents per month at 13-33 GiB",
+   "needs": "a new account and credentials, and an upload and verification path this repo does not have"
+  },
+  "volume_only": {
+   "cost": "$0.8167/day for thprcgh7s9",
+   "note": "not an independent copy: same provider, same funding risk"
+  }
+ },
+ "transfer_estimate": {
+  "pod": "one Secure L40S in US-TX-3 attaching thprcgh7s9 only ($1.09/h + container disk), the card the grant admits on this volume",
+  "work": "read and hash each file on the volume, upload, re-download into a fresh cache, re-hash",
+  "weights_only": "13.32 GiB up + 13.32 GiB verify at hub speed: ~10 min of transfer plus setup",
+  "with_trainer_state": "33.0 GiB each way: ~20 min of transfer plus setup",
+  "bounded_cost_usd": 2.0,
+  "expected_cost_usd": "0.6-0.9"
+ },
+ "nothing_deleted": "no weight, checkpoint, relay object or volume was deleted or changed by this audit",
+ "authorizes": "nothing"
+}

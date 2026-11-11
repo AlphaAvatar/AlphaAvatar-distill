@@ -1,0 +1,56 @@
+{
+ "schema": "aadistill.stage1.projected_residual.cost_forecast/v1",
+ "inputs": {
+  "d4_augmented_mean_train_seconds": 13443.6,
+  "d4_augmented_mean_evaluate_seconds": 3792.4,
+  "mc2_overhead_minutes": 9.0,
+  "l40s_usd_per_hour_all_in": 1.1108,
+  "_sources": [
+   "logs/stages/stage-0/calibration_volume/analyses/mixed_result.json",
+   "logs/stages/stage-0/calibration_volume/runs/mixr_20261026_140539/closeout/outcome.json",
+   "logs/stages/stage-1/projected_residual/analyses/architecture_report.json"
+  ],
+  "ratios": {
+   "train_expected (FLOPs with teacher)": 1.1787,
+   "train_conservative (student-only FLOPs)": 1.4153,
+   "evaluate_expected (folded inference FLOPs at 4,096)": 1.8388,
+   "evaluate_conservative (bf16 weight bytes)": 2.5
+  }
+ },
+ "B_E_engineering_validation": {
+  "hours_expected": 1.0,
+  "hours_conservative": 2.0,
+  "usd_expected": 1.11,
+  "usd_conservative": 2.22,
+  "hard_cap_usd": 3.0,
+  "gpu": "NVIDIA L40S",
+  "what": "design.json's initialization on the real teacher, the fold check in bf16, a 20-step trainer smoke at the recipe's shape (step time, peak memory), save/load/resume on CUDA, the folded model under vLLM 0.27.1"
+ },
+ "B1_formal_session": {
+  "expected": {
+   "train_seconds_per_seed": 15846,
+   "evaluate_seconds_per_seed": 6973,
+   "materialization_minutes": 15,
+   "overhead_minutes": 9.0,
+   "hours": 13.08,
+   "usd": 14.53
+  },
+  "conservative": {
+   "train_seconds_per_seed": 19027,
+   "evaluate_seconds_per_seed": 9481,
+   "materialization_minutes": 30,
+   "overhead_minutes": 20,
+   "hours": 16.67,
+   "usd": 18.52
+  },
+  "hard_cap_usd": 21.0,
+  "gpu": "NVIDIA L40S, EUR-IS-2, am5m373kuq",
+  "what": "the formal initialization, two recoveries and every item of eval-set-1 per seed, one billing pod"
+ },
+ "storage": {
+  "checkpoints": "two factored fp32 checkpoints (~3.6 GB each) on am5m373kuq, which then holds ~22 GB of 30; no new volume and no new storage cost",
+  "folded_checkpoints": "built at evaluation time from the factored ones, not retained"
+ },
+ "total_hard_cap_usd": 24.0,
+ "authorizes": "nothing"
+}

@@ -1,0 +1,139 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_pilot_secured/v1",
+ "run_id": "a_tool_pilot_20261104_164531",
+ "archive": {
+  "path": "artifacts/stages/stage-2/teacher_modes/tool_pilot_sessions/a_tool_pilot_20261104_164531/tool_pilot_hybrid.tgz",
+  "sha256": "2336efd3fac2f2de9a20513ecc782eede8a6e1fa6f9cf1593d6d8f4ad00df353",
+  "bytes": 26571244,
+  "matches_its_sha256_file": true
+ },
+ "polled_copy": {
+  "path": "artifacts/stages/stage-2/teacher_modes/tool_pilot_sessions/a_tool_pilot_20261104_164531/polled",
+  "files": 44,
+  "shards": {
+   "pilot_H-N_r1_pass0.part0000.jsonl": "ad32ad2bfb2776b1294d8fbc7c5f7f7be32b88d7f6d703c9b9a79f280091b1fe",
+   "pilot_H-N_r1_pass0.part0001.jsonl": "f41da51a6d4df31f8a4a1ae25daec15c1df1230540fe96be20049a6ed15ebb12",
+   "pilot_H-N_r1_pass0.part0002.jsonl": "5804822d730e0a41de4e69efc3822a5b99d6aa3e7acfe9f0c3d8b14b4e6eb93d",
+   "pilot_H-N_r1_pass1.part0000.jsonl": "a98b7330e4b9a65350c65a430a31b7938a6d8b799245e4890fa0ae4d635cb345",
+   "pilot_H-N_r1_pass1.part0001.jsonl": "f47f8d4cb358407618ae9202dd1f13b2cfe7642bee8309d22d9c3bd585e39619",
+   "pilot_H-T_r1_pass0.part0000.jsonl": "a027891fd5fe0b4a67a871f99e84f13ccd1b29086158c217551669c602cc689e",
+   "pilot_H-T_r1_pass0.part0001.jsonl": "03085f9be344698fa35054ec8b6c1bc9358042b6e226bd7f1bda550b8ec21e27",
+   "pilot_H-T_r1_pass0.part0002.jsonl": "ee3d33e206f5f97fe96205d90ea4952dcc5250895bc5b5cffcfa3d23e5cf0766",
+   "pilot_H-T_r1_pass0.part0003.jsonl": "3ed9087df7424dee98048c03bcfbbf1d4c27e3577ee1f764530cd1380211bed1",
+   "pilot_H-T_r1_pass0.part0004.jsonl": "6f6091ec348b38871e19bfe4ae7e959dc9fc8002fa8ecdc3b31e456b0a0b845e",
+   "pilot_H-T_r1_pass0.part0005.jsonl": "7d25bffcd0a5b6497f863930a1768c7e552d7d1681f1754bb65ac8f1fefcc6ae",
+   "pilot_H-T_r1_pass0.part0006.jsonl": "fc595f58bc2a128d7494955373d3508eacd401d5cf4aba0eeb05f36957f4091e",
+   "pilot_H-T_r1_pass1.part0000.jsonl": "31b169cf09d3254f279fd7c586023412cb03aee3f37be650bebd246571c48aa0",
+   "pilot_H-T_r1_pass1.part0001.jsonl": "f481e2d2d90b799a5b86d751183763c924a8a630474578ddd8593909d3504bc3",
+   "pilot_H-T_r1_pass1.part0002.jsonl": "63aef466367858a758feb239157768a1f11c994523790e6be756da165d787e96",
+   "pilot_H-T_r1_pass1.part0003.jsonl": "5462343aec8cb441b7486307f4a434a2b5fd4cfe29775dd66d9b2ccd9c48f568",
+   "pilot_H-T_r1_pass1.part0004.jsonl": "b1538d207c86dbc5739e09c7d3aa041e455d24bf0f85c7218f0837cadef7fd8e",
+   "telemetry.jsonl": "07c121223ced53317a4e7e85d804936368b6ed24f9adb0a99df8e1aeb1a57183"
+  },
+  "equals_the_archive": true
+ },
+ "where": "outside git (artifacts/, gitignored): the sealed episodes, raw engine outputs, logs, inputs and telemetry; this record carries their identity",
+ "placement_read_before_launch": {
+  "schema": "aadistill.stage2.teacher_modes.pilot_placement/v1",
+  "read_utc": "2026-11-04T16:47:19Z",
+  "gpu": "NVIDIA L40S",
+  "placement": {
+   "gpu": "NVIDIA L40S",
+   "gpu_count": 1,
+   "cloud": "SECURE",
+   "network_volume": null,
+   "data_centers": "any Secure Cloud datacenter offering the L40S at or below the grant's price",
+   "work_root": "/workspace",
+   "storage": "the pod's container disk; sealed shards pulled to the dev box on every poll and staged back to a replacement pod (--resume-from); no network volume"
+  },
+  "datacenters_known": true,
+  "error": null,
+  "datacenters": [
+   {
+    "id": "EU-NL-1",
+    "name": "EU-NL-1",
+    "location": "Europe",
+    "listed": true,
+    "storage_support": true,
+    "stock": null,
+    "available": false
+   },
+   {
+    "id": "EUR-IS-2",
+    "name": "EUR-IS-2",
+    "location": "Europe",
+    "listed": true,
+    "storage_support": false,
+    "stock": null,
+    "available": false
+   },
+   {
+    "id": "OC-AU-1",
+    "name": "OC-AU-1",
+    "location": "Australia",
+    "listed": true,
+    "storage_support": false,
+    "stock": null,
+    "available": false
+   },
+   {
+    "id": "US-MO-1",
+    "name": "US-MO-1",
+    "location": "United States",
+    "listed": true,
+    "storage_support": false,
+    "stock": null,
+    "available": false
+   },
+   {
+    "id": "US-NC-1",
+    "name": "US-NC-1",
+    "location": "United States",
+    "listed": true,
+    "storage_support": true,
+    "stock": null,
+    "available": false
+   },
+   {
+    "id": "US-TX-3",
+    "name": "US-TX-3",
+    "location": "United States",
+    "listed": true,
+    "storage_support": true,
+    "stock": null,
+    "available": false
+   },
+   {
+    "id": "US-TX-4",
+    "name": "US-TX-4",
+    "location": "United States",
+    "listed": true,
+    "storage_support": false,
+    "stock": null,
+    "available": false
+   }
+  ],
+  "candidates": [],
+  "price": [
+   {
+    "id": "NVIDIA L40S",
+    "securePrice": 1.09,
+    "lowestPrice": {
+     "stockStatus": null
+    }
+   }
+  ],
+  "account": {
+   "known": true,
+   "pods": [],
+   "network_volumes": [
+    "4rhubprswo",
+    "am5m373kuq"
+   ],
+   "error": null
+  },
+  "_": "stock is the provider's hint, not a reservation; the create's own answer decides",
+  "authorizes": "nothing"
+ },
+ "authorizes": "nothing"
+}

@@ -1,0 +1,111 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.engineering_validation/v1",
+ "run_id": "ae_20261028_091943",
+ "study": "A-E",
+ "tiny": false,
+ "device": "cuda:0",
+ "started_utc": "2026-10-28T09:26:33+00:00",
+ "config": {
+  "path": "configs/stages/stage-2/teacher_modes/engineering_validation.json",
+  "sha256": "5afb3149805b3b5d75885c4e8d674632e57fd40de006de9f705b2e96210c9176",
+  "matches_verdict_config": true
+ },
+ "environment": {
+  "python": "3.12.3",
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1",
+  "cuda": "12.8",
+  "gpu": {
+   "read_utc": "2026-10-28T09:26:53+00:00",
+   "known": true,
+   "name": "NVIDIA A100-SXM4-80GB",
+   "driver": "595.91.07",
+   "used_mib": 0,
+   "total_mib": 81920,
+   "compute_processes": []
+  },
+  "vllm": null,
+  "inputs": {
+   "student": {
+    "path": "/workspace/aad/artifacts/stages/stage-2/reasoning_data/h1pa/pca_original/20260726",
+    "model_safetensors_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3"
+   }
+  }
+ },
+ "checks": {
+  "prompt_identity": {
+   "status": "PASS",
+   "problems": [],
+   "prompts": 16,
+   "tokenizer": "teacher",
+   "prompt_tokens": {
+    "H-T": [
+     156,
+     210,
+     124,
+     42,
+     42,
+     46,
+     56,
+     61
+    ],
+    "H-N": [
+     160,
+     214,
+     128,
+     46,
+     46,
+     50,
+     60,
+     65
+    ]
+   }
+  },
+  "generation": {
+   "status": "FAIL",
+   "problems": [
+    "no generation evidence"
+   ]
+  },
+  "teacher_forward": {
+   "status": "FAIL",
+   "problems": [
+    "no teacher_forward evidence (phase: ['the teacher phase exited 1'])"
+   ]
+  },
+  "assistant_target_kl": {
+   "status": "FAIL",
+   "problems": [
+    "H-T/0: no teacher-phase KL evidence",
+    "H-N/0: no teacher-phase KL evidence"
+   ],
+   "kd_positions": 124,
+   "kd_scope": "assistant"
+  },
+  "trainer_smoke": {
+   "status": "FAIL",
+   "problems": [
+    "no trainer_smoke evidence (phase: ['the train phase exited 1'])"
+   ]
+  },
+  "preclosed_scoring": {
+   "status": "PASS",
+   "problems": [],
+   "records": 8,
+   "well_formed": {
+    "H-T": 4,
+    "H-N": 4
+   },
+   "identity_sha256": {
+    "H-T": "6f5ef37680d70b1ff2aca115c68d8facb9a3bd6e9ef669985c85c8bbf9fdd00f",
+    "H-N": "5c31ae9686ba5e590a687263b0c7f658143d9412bda23cd8943f71cf712abfed"
+   },
+   "synthetic": [
+    true
+   ]
+  }
+ },
+ "passed": false,
+ "scientific_use": false,
+ "authorizes": "nothing"
+}

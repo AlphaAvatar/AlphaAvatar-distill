@@ -58,11 +58,12 @@ def _from_three_mode(rec: dict, *, think_preopened: bool) -> dict:
 
 
 def _from_behavior_v0(rec: dict, *, think_preopened: bool,
-                      tools_offered: bool = False) -> dict:
+                      tools_offered: bool = False, think_state: str | None = None) -> dict:
     raw = rec.get("raw") or ""
     valid, _ = protocol_valid(raw, think_preopened=think_preopened,
-                              tools_offered=tools_offered)
-    answer = split_generation(raw, think_preopened=think_preopened)["answer"]
+                              tools_offered=tools_offered, think_state=think_state)
+    answer = split_generation(raw, think_preopened=think_preopened,
+                              think_state=think_state)["answer"]
     return {
         "non_empty": bool(answer.strip()),
         "natural_termination": bool(rec["natural_termination"]),
@@ -85,7 +86,8 @@ def detect_schema(rec: dict) -> str:
 
 
 def components(rec: dict, *, think_preopened: bool = True,
-               schema: str | None = None, tools_offered: bool = False) -> dict:
+               schema: str | None = None, tools_offered: bool = False,
+               think_state: str | None = None) -> dict:
     """The five component booleans for one generation record.
 
     `tools_offered` says whether the *prompt* declared tools. It defaults to
@@ -95,13 +97,17 @@ def components(rec: dict, *, think_preopened: bool = True,
     recorded as an invalid rollout — and, through `correct => usable`, as
     incorrect too. The `three_mode` schema carries its own `protocol_valid` and
     is unaffected.
+
+    `think_state` names the prompt state outright and overrides
+    `think_preopened` (`behavior.split_generation`); a caller holding a record
+    that states one passes `behavior.record_think_state(rec)`.
     """
     schema = schema or detect_schema(rec)
     if schema == "three_mode":
         out = _from_three_mode(rec, think_preopened=think_preopened)
     elif schema == "behavior_v0":
         out = _from_behavior_v0(rec, think_preopened=think_preopened,
-                                tools_offered=tools_offered)
+                                tools_offered=tools_offered, think_state=think_state)
     else:
         raise ValueError(f"unknown schema {schema!r}")
     assert set(out) == set(COMPONENTS), sorted(out)

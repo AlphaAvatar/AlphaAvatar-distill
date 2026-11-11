@@ -101,7 +101,7 @@ class FFNActivationImportanceV0(OperatorImplementation):
         state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
             adapter, parent, ctx.calibration_items,
             compute, batch_size=batch_size, packing=packing,
-            active=active)), compute)
+            active=active, forward_context=ctx.forward_context)), compute)
 
         new_spec = ctx.parent_spec.replace(**{FFN_FIELD: keep})
         builder = ChildBuilder(adapter, parent, new_spec, seed=ctx.seed)
@@ -156,6 +156,10 @@ class FFNActivationImportanceV0(OperatorImplementation):
                    #: does not read `trace` and neither knob changes the estimand.
                    "micro_batch_size": batch_size,
                    "calibration_batch_packing": packing,
+                   #: SCIENCE evidence: the packed causal context the statistics
+                   #: were read in (in the hashed config too). Absent otherwise.
+                   **({"forward_context": ctx.forward_context.as_dict()}
+                      if ctx.forward_context is not None else {}),
                    #: SCIENCE evidence, and the one trace field here that
                    #: corresponds to something inside the state id: the policy's
                    #: id and hash are in the hashed config, and this records what

@@ -1,0 +1,122 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.generation_protocol/v1",
+ "status": "DRAFTED 2026-10-29 at $0 with d4_scale_design.json; frozen with the preregistration when the maintainer authorizes the phase (its sha256 is in the phase identity). Every value the teacher session passes to the runner is read from this file after the identity is checked on the pod",
+ "teacher": {
+  "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "stop_ids": [
+   151645,
+   151643
+  ],
+  "pad_id": 151643
+ },
+ "modes": {
+  "H-T": {
+   "template_kwargs": {
+    "enable_thinking": true
+   },
+   "sampling": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0
+   },
+   "generation_suffix_ids": [
+    151644,
+    77091,
+    198
+   ],
+   "think_state": "self_opening"
+  },
+  "H-N": {
+   "template_kwargs": {
+    "enable_thinking": false
+   },
+   "sampling": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0
+   },
+   "generation_suffix_ids": [
+    151644,
+    77091,
+    198,
+    151667,
+    271,
+    151668,
+    271
+   ],
+   "think_state": "preclosed"
+  },
+  "_": "each mode's official preset (teacher_identity.json :: modes.*.official_sampling), passed as run_battery --generate-sampling; the hard switch only (--chat-template-kwargs)"
+ },
+ "execution": {
+  "action_protocol": "v2",
+  "session_limit": 8184,
+  "seed_base": 20261029,
+  "seed_rule": "candidate pass k runs with seed base seed_base + k in BOTH modes; a turn's seed is run_battery.request_seed(base, task_id, turn), so a (task, candidate, turn) has one seed in both modes and a resumed task regenerates under the seed its identity names",
+  "candidates": 2,
+  "no_second_candidate_verifiers": [
+   "code_asserts"
+  ],
+  "_no_second_candidate": "H1's rule, unchanged: MBPP's verdict needs the dev-box sandbox and the pod never runs teacher code; one candidate, both modes",
+  "completion_shards": {
+   "seal_every_records": 100,
+   "seal_every_seconds": 300
+  },
+  "allowance": "per turn session_limit - the rendered prompt: a document never exceeds the 8,192-token training sequence, so nothing is ever cut; a turn that reaches it is recorded length_limited (training-length-limited, right-censored), never a context-limit hit (the teacher's supported context is 40,960)"
+ },
+ "inputs": {
+  "t0": [
+   {
+    "path": "logs/stages/stage-2/reasoning_data/plans/generation_inputs/generation_input_g0.jsonl",
+    "sha256": "424934ac16103aa2e304db87ae1a8deca4fc0f6202215750a105a746ef023445",
+    "tasks": 1587
+   },
+   {
+    "path": "logs/stages/stage-2/reasoning_data/plans/p1t/generation_inputs/generation_input_g0.jsonl",
+    "sha256": "fd1d604d0094d761a2db501a15f2b611c7ad0e7a482b8ba6ca21c99e5bf69fe8",
+    "tasks": 59
+   },
+   {
+    "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_topup/generation_inputs/generation_input_g0.jsonl",
+    "sha256": "0516bea7fa955ed2888568d601c7b27bd4e18f1a4a110cae758ce41438a2a1f0",
+    "tasks": 115
+   }
+  ],
+  "order": {
+   "path": "data/stages/stage-2/teacher_modes/tasks/order_v1.jsonl",
+   "sha256": "d71ac56b99f323e5b12f38668a6f28980a379eba9a2926ad928e48d68cf12d1a",
+   "_": "frozen 2026-10-29 at $0 (build_tasks.py; order_v1.manifest.json: 17,762 tasks, V 240, E 3,522, X 14,000; R0-R9 pass)"
+  },
+  "calibration": {
+   "path": "logs/stages/stage-2/teacher_modes/plans/calibration_inputs/calibration_input_g0.jsonl",
+   "sha256": "86c1431b70219d3fc7db08cfe02181fda63b4179d00e37fb3a363e42edf4d9ef",
+   "tasks": 160
+  },
+  "pools": "data/stages/stage-2/reasoning_data/tasks (T0's own pool rows, which the pod's first-candidate judgement reads)"
+ },
+ "waves": {
+  "first": "W00 = T0 (1,761 tasks) and V (the order's first 240), both modes",
+  "E": "W01..W09 = the order's E slice in waves of 400, both modes",
+  "X": "X01.. = the order's X slice in waves of 400, H-N only",
+  "passes": "per wave and mode: pass 0 for every task, then pass 1 for each task whose first candidate the pod rejects (generation_adapter.candidate, pure Python)"
+ },
+ "stopping": {
+  "target_sequences": 2468,
+  "sequence_length": 8192,
+  "pack_order_seed": 20261029,
+  "doc_order": "documents sorted by doc id '<task id>|<mode>|t<turn>' before the seeded shuffle of pack_isolated",
+  "pod_margin": 0.01,
+  "pod_rule": "the pod cannot run MBPP's sandbox, so it bounds the rule: after each wave it packs I's H-T documents with every pending MBPP task out (LOWER) and in (UPPER). E stops after the first wave whose LOWER count reaches target x (1 + pod_margin); X waves run, H-N only, until H-N-C's LOWER count (I_lower of the waves up to the first whose UPPER reached the target, and X's admitted tasks) reaches the highest UPPER H-T-S count among the generated waves x (1 + pod_margin), or X is exhausted",
+  "exact_rule": "on the dev box (admission.py), with every verifier: the stopping wave is the first wave whose exact H-T-S count reaches the target; waves after it are generated and never trained on; X's prefix is the smallest whole-task prefix whose H-N documents, packed with I's, reach H-T-S's count. A rule the pod under-generated for is completed by a resumed session, never approximated"
+ },
+ "teacher_evaluation": {
+  "context": 40960,
+  "what": "eval-set-1, every item of every unit, the teacher in each mode, nucleus_v1, the remaining capacity of the 40,960-token supported context (P18)",
+  "package": "as_is (the teacher snapshot carries its tokenizer and template)"
+ },
+ "authorizes": "nothing"
+}

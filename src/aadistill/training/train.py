@@ -51,7 +51,9 @@ import torch
 import torch.nn.functional as F
 
 from ..data.dataset import best_fit_blocks, encode_sample, load_split, pack_blocks
+from ..data.token_documents import CONTEXT_STRATEGIES
 from ..infrastructure.manifest import sha256_json
+from . import topk_kd
 from .lora import (
     LoRAConfig,
     apply_lora,
@@ -103,8 +105,11 @@ def validate_train_config(cfg: dict) -> None:
     need(cfg, "groups", (list, type(None)))
     teacher = need(cfg, "teacher", (dict, type(None)))
     if teacher is not None:
-        for key in ("model_id", "revision", "dtype"):
+        for key in ("model_id", "dtype"):
             need(teacher, key, str, "teacher.")
+        # A hub teacher is always pinned; only a local directory has no revision.
+        if not (teacher.get("revision") is None and "revision" in teacher and Path(teacher["model_id"]).is_dir()):
+            need(teacher, "revision", str, "teacher.")
     patterns = need(cfg, "trainable_patterns", (list, str))
     if isinstance(patterns, str) and patterns != "all":
         raise ValueError("trainable_patterns must be 'all' or a list of regexes")
@@ -121,6 +126,29 @@ def validate_train_config(cfg: dict) -> None:
     if "kd_chunk" in loss:
         if not isinstance(loss["kd_chunk"], int) or loss["kd_chunk"] < 1:
             raise ValueError("loss.kd_chunk must be a positive int")
+    # Optional. Absent means the historical full-vocabulary KD over full logits,
+    # byte-identical for every config written before this key existed. Present,
+    # it names the KD support (topk_kd.TRAINING_SUPPORTS) and switches both models
+    # to head-row selection: only the loss's prediction positions reach the
+    # output head. It is part of the config, so of the hash.
+    # Optional. `loss.exclude_template_prefill`: {generation_prompt, prefill} token
+    # ids; every target the chat template prefilled stops being a target for CE
+    # AND KD (aadistill.data.target_policy). Absent: the pack's mask as built.
+    if "exclude_template_prefill" in loss:
+        ex = loss["exclude_template_prefill"]
+        if not isinstance(ex, dict) or set(ex) != {"generation_prompt", "prefill"} or not all(
+                isinstance(v, list) and v and all(isinstance(t, int) for t in v) for v in ex.values()):
+            raise ValueError("loss.exclude_template_prefill must be {generation_prompt: [ids], prefill: [ids]}")
+        if cfg.get("extra_val") is not None:
+            raise ValueError("loss.exclude_template_prefill is not applied to extra_val sets")
+    if "kd_support" in loss:
+        topk_kd.training_support(loss["kd_support"])
+        if not loss["kd_weight"] > 0:
+            raise ValueError("loss.kd_support names a KD support but kd_weight is 0")
+        if cfg.get("extra_stream") is not None:
+            raise ValueError("loss.kd_support is not implemented for the extra stream")
+        if cfg.get("lora") is not None:
+            raise ValueError("loss.kd_support is not implemented together with lora")
     optim = need(cfg, "optim", dict)
     for key in ("lr", "weight_decay", "eps", "grad_clip"):
         need(optim, key, (int, float), "optim.")
@@ -150,9 +178,13 @@ def validate_train_config(cfg: dict) -> None:
             raise ValueError(f"batch.{key} must be >= 1")
     if "truncate_padding" in batch and not isinstance(batch["truncate_padding"], bool):
         raise ValueError("batch.truncate_padding must be a bool")
+    if batch.get("context_strategy", "cross_context") not in CONTEXT_STRATEGIES:
+        raise ValueError(f"batch.context_strategy must be one of {CONTEXT_STRATEGIES}")
     ck = need(cfg, "checkpoint", dict)
     for key in ("save_every", "keep_last"):
         need(ck, key, int, "checkpoint.")
+    if "bind_identity" in ck and not isinstance(ck["bind_identity"], bool):
+        raise ValueError("checkpoint.bind_identity must be a bool")
     iv = need(cfg, "intervals", dict)
     for key in ("log_every", "eval_every", "eval_blocks"):
         need(iv, key, int, "intervals.")
@@ -166,6 +198,16 @@ def validate_train_config(cfg: dict) -> None:
             raise ValueError("extra_val name 'val' collides with the primary val")
     if cfg.get("extra_stream") is not None:
         validate_extra_stream_config(cfg["extra_stream"])
+    # Optional. `monitor`: {"every": N, "groups": {name: regex}} logs a
+    # `param_stats` event every N optimizer steps -- each group's parameter
+    # count, mean, mean |x|, max |x| and its gradient norm before clipping.
+    # Observation only: it reads tensors and changes nothing.
+    mon = cfg.get("monitor")
+    if mon is not None:
+        if (not isinstance(mon, dict) or not isinstance(mon.get("every"), int) or mon["every"] < 1
+                or not isinstance(mon.get("groups"), dict) or not mon["groups"]
+                or not all(isinstance(k, str) and isinstance(v, str) for k, v in mon["groups"].items())):
+            raise ValueError("monitor must be {every: positive int, groups: {name: regex}}")
 
 
 EXTRA_STREAM_KINDS = ("general_text_kd", "in_domain_kd_control")
@@ -357,12 +399,18 @@ def nonpad_extent(content_mask: torch.Tensor) -> int:
 
 
 def _unpack_blocks(blocks):
-    """Accept (ids, loss_mask) or (ids, loss_mask, content_mask)."""
+    """Accept (ids, loss_mask), (ids, loss_mask, content_mask) or
+    (ids, loss_mask, content_mask, position_ids); returns all four."""
     if len(blocks) == 2:
-        return blocks[0], blocks[1], None
+        return blocks[0], blocks[1], None, None
     if len(blocks) == 3:
-        return blocks
-    raise ValueError("block tuples must be (ids, mask) or (ids, mask, content)")
+        return (*blocks, None)
+    if len(blocks) == 4:
+        if blocks[2] is None:
+            raise ValueError("position ids need a content mask: isolated documents are padded")
+        return tuple(blocks)
+    raise ValueError("block tuples must be (ids, mask), (ids, mask, content) or "
+                     "(ids, mask, content, position_ids)")
 
 
 def masked_ce(logits: torch.Tensor, input_ids: torch.Tensor, loss_mask: torch.Tensor):
@@ -556,6 +604,7 @@ def gradient_share(trainer, n_steps: int = 4) -> dict:
         ids, mask = trainer.train_ids[idxs], trainer.train_mask[idxs]
         content = (None if trainer.train_content is None
                    else trainer.train_content[idxs])
+        pos = None if trainer.train_pos is None else trainer.train_pos[idxs]
         ce_total = int(mask[:, 1:].sum()) if loss_cfg["ce_weight"] > 0 else 0
         kd_total = (
             int(prediction_mask(mask, loss_cfg["kd_scope"], content,
@@ -565,7 +614,8 @@ def gradient_share(trainer, n_steps: int = 4) -> dict:
         trainer.opt.zero_grad(set_to_none=True)
         ce_sum, _, kd_sum, _ = trainer._micro_losses(
             ids.to(trainer.device), mask.to(trainer.device),
-            None if content is None else content.to(trainer.device))
+            None if content is None else content.to(trainer.device),
+            None if pos is None else pos.to(trainer.device))
         loss = torch.zeros((), device=trainer.device)
         if ce_total:
             loss = loss + loss_cfg["ce_weight"] * ce_sum / ce_total
@@ -649,9 +699,18 @@ class Trainer:
         extra_val_blocks: dict | None = None,
         think_ids: tuple[int, int] | None = None,
         extra_stream_blocks: tuple | None = None,
+        resume_identity: dict | None = None,
     ):
         validate_train_config(cfg)
         loss_cfg = cfg["loss"]
+        # What a checkpoint must have been written against besides the config:
+        # the caller's identities of the bytes the config only names (the data,
+        # the initialization, the trainer code). Saved with every checkpoint and
+        # compared exactly on restore, so optimizer state is never resumed onto a
+        # different dataset or starting point that kept its path.
+        self.resume_identity = dict(resume_identity or {})
+        self.kd_support = (topk_kd.training_support(loss_cfg["kd_support"])
+                           if "kd_support" in loss_cfg else None)
         if loss_cfg["kd_weight"] > 0 and teacher is None:
             raise ValueError("loss.kd_weight > 0 requires a teacher model")
         # Fail here rather than at the first backward: a run that silently fell
@@ -679,6 +738,18 @@ class Trainer:
         # config also changes that config's hash, so the manifest records which
         # path a run took instead of leaving it to the code version.
         self.truncate_padding = bool(cfg["batch"].get("truncate_padding", False))
+        # Context strategy, a training-distribution choice; both are supported.
+        # "cross_context" (the default, and every logged run's): one causal
+        # context per packed sequence, positions continuous, so a later document
+        # is conditioned on the earlier ones; teacher and student run on the same
+        # composed sequence, so KD compares them on one context. "document_isolated":
+        # blocks carry per-document position ids restarting at 0, and both models
+        # run with them and no 2-D mask, which makes transformers build a
+        # block-diagonal causal mask -- each document is conditioned only on
+        # itself, the context its teacher generation had. Declared in the config
+        # so its hash records which distribution a run trained on.
+        self.context_strategy = cfg["batch"].get("context_strategy", "cross_context")
+        self.document_isolation = self.context_strategy == "document_isolated"
         # Token accounting, kept as three distinct quantities so a saving is
         # never confused with a change in how much supervision the run saw.
         self._exec_logical = 0         # cumulative: blocks x logical block length
@@ -702,6 +773,11 @@ class Trainer:
             self.teacher.config.use_cache = False
             for p in self.teacher.parameters():
                 p.requires_grad_(False)
+        if self.kd_support is not None:
+            self.student_head = topk_kd.output_head(self.student)
+            self.teacher_head = topk_kd.output_head(self.teacher)
+        # Per-step sums of the head-row KD diagnostics (see _row_micro_losses).
+        self._step_kd_diag = {"rows": 0, "teacher_tail_mass": 0.0, "target_in_support": 0}
 
         # LoRA is applied *before* the freeze sweep and the optimizer is built,
         # so the adapter is part of the trainable set from step 0 and never
@@ -728,30 +804,59 @@ class Trainer:
             weight_decay=opt_cfg["weight_decay"],
         )
 
-        # Block tuples are (ids, loss_mask) or (ids, loss_mask, content_mask);
-        # the content mask is present only under padded (best-fit) packing.
-        self.train_ids, self.train_mask, self.train_content = _unpack_blocks(
+        # Block tuples are (ids, loss_mask), (ids, loss_mask, content_mask) or,
+        # for isolated documents, (ids, loss_mask, content_mask, position_ids);
+        # the content mask is present only under padded packing.
+        self.train_ids, self.train_mask, self.train_content, self.train_pos = _unpack_blocks(
             train_blocks
         )
+        if (self.train_pos is not None) != self.document_isolation:
+            raise ValueError(
+                "batch.context_strategy must be 'document_isolated' exactly when the blocks "
+                "carry position ids: isolated blocks run without them would be conditioned on "
+                "their neighbours, and a config that did not say so would not record the "
+                "distribution it trained on")
         if self.train_ids.shape[0] == 0:
             raise ValueError("no training blocks")
+        self.target_policy = None
+        if "exclude_template_prefill" in loss_cfg:
+            from ..data.target_policy import drop_template_prefill
+
+            ex = loss_cfg["exclude_template_prefill"]
+            self.train_mask, stats = drop_template_prefill(self.train_ids, self.train_mask, **ex)
+            if stats["unmatched_runs_after_generation_prompt"]:
+                raise ValueError(f"{stats['unmatched_runs_after_generation_prompt']} supervised runs follow the "
+                                 "generation prompt without the declared prefill: the template is not the one "
+                                 "the policy describes")
+            self.target_policy = {"train": stats}
         if val_blocks is not None:
-            val_ids, val_mask, val_content = _unpack_blocks(val_blocks)
+            val_ids, val_mask, val_content, val_pos = _unpack_blocks(val_blocks)
+            if (val_pos is not None) != self.document_isolation:
+                raise ValueError("validation blocks must match batch.context_strategy")
             # Fixed shuffle so a truncated eval (eval_blocks < all) still
             # samples across groups instead of the first groups alphabetically.
+            if self.target_policy is not None:
+                from ..data.target_policy import drop_template_prefill
+
+                val_mask, self.target_policy["val"] = drop_template_prefill(
+                    val_ids, val_mask, **loss_cfg["exclude_template_prefill"])
             perm = epoch_permutation(val_ids.shape[0], cfg["seed"] + 777, 0)
             self.val_ids, self.val_mask = val_ids[perm], val_mask[perm]
             self.val_content = None if val_content is None else val_content[perm]
+            self.val_pos = None if val_pos is None else val_pos[perm]
         else:
-            self.val_ids = self.val_mask = self.val_content = None
+            self.val_ids = self.val_mask = self.val_content = self.val_pos = None
         # Named secondary val sets (e.g. the frozen val_v0 alongside a v1
         # mixture's own val split); evaluated and logged next to the primary.
         self.extra_vals: dict[str, tuple] = {}
         for name, blocks in (extra_val_blocks or {}).items():
-            ids, mask, content = _unpack_blocks(blocks)
+            ids, mask, content, pos = _unpack_blocks(blocks)
+            if (pos is not None) != self.document_isolation:
+                raise ValueError(f"extra validation set {name} must match batch.context_strategy")
             perm = epoch_permutation(ids.shape[0], cfg["seed"] + 777, 0)
             self.extra_vals[name] = (
-                ids[perm], mask[perm], None if content is None else content[perm]
+                ids[perm], mask[perm], None if content is None else content[perm],
+                None if pos is None else pos[perm],
             )
         if self.extra_vals and self.val_ids is None:
             raise ValueError("extra_val_blocks given but no primary val_blocks")
@@ -791,7 +896,8 @@ class Trainer:
         return nullcontext()
 
     def _micro_losses(
-        self, ids: torch.Tensor, mask: torch.Tensor, content: torch.Tensor | None = None
+        self, ids: torch.Tensor, mask: torch.Tensor, content: torch.Tensor | None = None,
+        positions: torch.Tensor | None = None,
     ):
         """Forward one microbatch; returns (ce_sum, ce_n, kd_sum, kd_n).
 
@@ -816,6 +922,9 @@ class Trainer:
                 ids = ids[:, :extent]
                 mask = mask[:, :extent]
                 content = content[:, :extent]
+                if positions is not None:
+                    positions = positions[:, :extent]
+        fwd = {} if positions is None else {"position_ids": positions}
         # Accounted in both paths so the two are directly comparable.
         executed = int(ids.shape[0] * ids.shape[1])
         self._exec_logical += n_blocks * logical_len
@@ -823,13 +932,15 @@ class Trainer:
         self._exec_nonpad += nonpad
         self._step_positions += executed
         self._step_nonpad += nonpad
+        if self.kd_support is not None:
+            return self._row_micro_losses(ids, mask, content, fwd)
         with self._autocast():
-            logits = self.student(ids).logits
+            logits = self.student(ids, **fwd).logits
         ce_sum, ce_n = masked_ce(logits, ids, mask)
         kd_sum, kd_n = torch.zeros((), device=ids.device), 0
         if self.teacher is not None and loss_cfg["kd_weight"] > 0:
             with torch.no_grad(), self._autocast():
-                t_logits = self.teacher(ids).logits
+                t_logits = self.teacher(ids, **fwd).logits
             kd_sum, kd_n = kd_forward_kl(
                 logits,
                 t_logits,
@@ -839,6 +950,70 @@ class Trainer:
                 chunk=loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT),
             )
         return ce_sum, ce_n, kd_sum, kd_n
+
+    def _row_micro_losses(self, ids, mask, content, fwd):
+        """`_micro_losses` under `loss.kd_support`: only the loss's rows reach either head.
+
+        Both backbones run the whole sequence; the CE rows (the loss mask) and the
+        KD rows (`prediction_mask` under `kd_scope`) are selected from the final
+        hidden states, their union is projected through each model's own output
+        head in blocks, and the teacher keeps only its Top-K sketch. The CE and KD
+        sums, and the counts the caller normalizes by, are those of the full-logit
+        path for the same rows; KD is the reference-Top-K + tail KL, not the
+        full-vocabulary one (`topk_kd`).
+        """
+        loss_cfg = self.cfg["loss"]
+        ce_pos = (mask[:, 1:].bool() if loss_cfg["ce_weight"] > 0
+                  else torch.zeros_like(mask[:, 1:], dtype=torch.bool))
+        kd_pos = prediction_mask(mask, loss_cfg["kd_scope"], content,
+                                 input_ids=ids, think_ids=self.think_ids).bool()
+        rows = ce_pos | kd_pos
+        if not bool(rows.any()):
+            zero = torch.zeros((), device=ids.device)
+            return zero, 0, zero, 0
+        targets = ids[:, 1:][rows]
+        chunk = loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT)
+        temperature = float(loss_cfg["kd_temperature"])
+        with torch.no_grad(), self._autocast():
+            t_hidden = topk_kd.head_rows(self.teacher, ids, rows, **fwd)
+            sketch = topk_kd.teacher_sketch(self.teacher_head, t_hidden,
+                                            top_k=int(self.kd_support.top_k),
+                                            temperature=temperature, chunk=chunk)
+        del t_hidden
+        kd_rows = kd_pos[rows]
+        with self._autocast():
+            s_hidden = topk_kd.head_rows(self.student, ids, rows, **fwd)
+            ce_sum, kd_sum = topk_kd.topk_tail_losses(
+                self.student_head, s_hidden, sketch, targets, ce_pos[rows], kd_rows,
+                temperature=temperature, chunk=chunk)
+        with torch.no_grad():
+            n_kd = int(kd_rows.sum())
+            if n_kd:
+                d = self._step_kd_diag
+                d["rows"] += n_kd
+                d["teacher_tail_mass"] += float(sketch.tail_log_prob[kd_rows].exp().sum())
+                d["target_in_support"] += int(
+                    (sketch.support_indices[kd_rows] == targets[kd_rows, None]).any(-1).sum())
+        return ce_sum, int(ce_pos.sum()), kd_sum, int(kd_pos.sum())
+
+    def _monitor_due(self, step: int) -> bool:
+        mon = self.cfg.get("monitor")
+        return mon is not None and step % int(mon["every"]) == 0
+
+    @torch.no_grad()
+    def _param_stats(self) -> dict:
+        """Per monitored group: parameters, mean, mean |x|, max |x|, gradient norm before clipping."""
+        out = {}
+        for name, pattern in self.cfg["monitor"]["groups"].items():
+            ps = [p for n, p in self.student.named_parameters() if re.search(pattern, n)]
+            if not ps:
+                raise ValueError(f"monitor group {name!r} ({pattern}) matches no parameter")
+            flat = torch.cat([p.detach().double().flatten() for p in ps])
+            grads = [p.grad.detach().double().pow(2).sum() for p in ps if p.grad is not None]
+            out[name] = {"parameters": int(flat.numel()), "mean": float(flat.mean()),
+                         "mean_abs": float(flat.abs().mean()), "max_abs": float(flat.abs().max()),
+                         "grad_norm": float(torch.stack(grads).sum().sqrt()) if grads else None}
+        return out
 
     def _extra_micro_kd(self, ids: torch.Tensor):
         """Forward one extra-stream microbatch; returns (kd_sum, kd_n).
@@ -946,6 +1121,7 @@ class Trainer:
         )
         ids, mask = self.train_ids[idxs], self.train_mask[idxs]
         content = None if self.train_content is None else self.train_content[idxs]
+        pos = None if self.train_pos is None else self.train_pos[idxs]
         # Normalizers are known from the masks alone, so microbatch losses can
         # be scaled exactly before backward (sum over micro = true step mean).
         ce_total = int(mask[:, 1:].sum()) if loss_cfg["ce_weight"] > 0 else 0
@@ -966,6 +1142,7 @@ class Trainer:
         self.student.train()
         self.opt.zero_grad(set_to_none=True)
         self._step_positions = self._step_nonpad = 0
+        self._step_kd_diag = {"rows": 0, "teacher_tail_mass": 0.0, "target_in_support": 0}
         ce_acc = kd_acc = 0.0
         for i in range(0, bps, micro):
             mids = ids[i : i + micro].to(self.device)
@@ -973,7 +1150,8 @@ class Trainer:
             mcontent = (
                 None if content is None else content[i : i + micro].to(self.device)
             )
-            ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask, mcontent)
+            mpos = None if pos is None else pos[i : i + micro].to(self.device)
+            ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask, mcontent, mpos)
             loss = torch.zeros((), device=self.device)
             if ce_total > 0:
                 loss = loss + loss_cfg["ce_weight"] * ce_sum / ce_total
@@ -990,11 +1168,14 @@ class Trainer:
         # this branch runs.
         extra_metrics = (self._extra_pass() if self.extra_active(self.step)
                          else {})
+        monitored = self._param_stats() if self._monitor_due(self.step + 1) else None
         grad_norm = torch.nn.utils.clip_grad_norm_(
             self.params, cfg["optim"]["grad_clip"]
         )
         self.opt.step()
         self.step += 1
+        if monitored is not None:
+            self.logger.log("param_stats", step=self.step, groups=monitored)
 
         ce_mean = ce_acc / ce_total if ce_total else None
         kd_mean = kd_acc / kd_total if kd_total else None
@@ -1014,6 +1195,12 @@ class Trainer:
                 float(self.extra_cfg["lambda_extra"]) * extra_metrics["extra_kd"], 6)
             extra_metrics["lambda_extra"] = float(self.extra_cfg["lambda_extra"])
         extra_metrics.pop("extra_block_indices", None)
+        diag = self._step_kd_diag
+        if self.kd_support is not None and diag["rows"]:
+            # Evidence beside the loss, never folded into it: how much teacher
+            # mass the tail bucket carries and how often the target is in S.
+            extra_metrics["kd_teacher_tail_mass"] = round(diag["teacher_tail_mass"] / diag["rows"], 6)
+            extra_metrics["kd_target_in_support"] = round(diag["target_in_support"] / diag["rows"], 6)
         return {
             "step": self.step,
             "loss": round(total, 6),
@@ -1036,11 +1223,12 @@ class Trainer:
             "executed_nonpad_tokens": self._step_nonpad,
             "supervised_tokens": ce_total,
             "truncate_padding": self.truncate_padding,
+            "context_strategy": self.context_strategy,
         }
 
     @torch.no_grad()
     def _eval_blocks(
-        self, val_ids, val_mask, max_blocks: int | None, val_content=None
+        self, val_ids, val_mask, max_blocks: int | None, val_content=None, val_pos=None
     ) -> dict:
         """CE (assistant targets) and KD metrics over a fixed block order."""
         n = val_ids.shape[0]
@@ -1058,7 +1246,8 @@ class Trainer:
                 None if val_content is None
                 else val_content[i : i + micro].to(self.device)
             )
-            ce_sum, cn, kd_sum, kn = self._micro_losses(ids, mask, content)
+            pos = None if val_pos is None else val_pos[i : i + micro].to(self.device)
+            ce_sum, cn, kd_sum, kn = self._micro_losses(ids, mask, content, pos)
             ce_s += float(ce_sum)
             ce_n += cn
             kd_s += float(kd_sum)
@@ -1078,7 +1267,7 @@ class Trainer:
         if self.val_ids is None:
             raise ValueError("trainer has no validation blocks")
         return self._eval_blocks(
-            self.val_ids, self.val_mask, max_blocks, self.val_content
+            self.val_ids, self.val_mask, max_blocks, self.val_content, self.val_pos
         )
 
     def _eval_and_log(self, eval_blocks, suffix: str = "") -> dict:
@@ -1086,8 +1275,8 @@ class Trainer:
         ev = self.evaluate(eval_blocks)
         self.logger.log("eval_result", step=self.step, val_set="val", **ev)
         print(f"eval step {self.step}{suffix}: {ev}", flush=True)
-        for name, (ids, mask, content) in self.extra_vals.items():
-            ex = self._eval_blocks(ids, mask, eval_blocks, content)
+        for name, (ids, mask, content, pos) in self.extra_vals.items():
+            ex = self._eval_blocks(ids, mask, eval_blocks, content, pos)
             self.logger.log("eval_result", step=self.step, val_set=name, **ex)
             print(f"eval step {self.step}{suffix} [{name}]: {ex}", flush=True)
         return ev
@@ -1143,6 +1332,11 @@ class Trainer:
             "kd_chunk": int(loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT)),
             "kd_chunk_source": ("config" if "kd_chunk" in loss_cfg
                                 else "trainer default KD_CHUNK_DEFAULT"),
+            **({"kd_objective": topk_kd.objective_identity(
+                    self.kd_support, loss_cfg["kd_scope"], loss_cfg["kd_temperature"])}
+               if self.kd_support is not None else {}),
+            **({"resume_identity": self.resume_identity} if self.resume_identity else {}),
+            **({"target_policy": self.target_policy} if self.target_policy else {}),
             # batch semantics as executed
             "blocks_per_step": int(batch["blocks_per_step"]),
             "micro_blocks": int(batch["micro_blocks"]),
@@ -1200,12 +1394,19 @@ class Trainer:
                 "consumed_blocks": self.consumed_blocks(),
                 "optimizer": self.opt.state_dict(),
                 "torch_rng_state": torch.get_rng_state(),
+                **({"cuda_rng_states": torch.cuda.get_rng_state_all()}
+                   if str(self.device).startswith("cuda") and torch.cuda.is_available() else {}),
+                **({"resume_identity": self.resume_identity} if self.resume_identity else {}),
                 "config_sha256": self.config_sha,
                 "trainable_names": self.freeze_report["trainable_names"],
                 "lora_config": self.lora_cfg.to_dict() if self.lora_cfg else None,
             },
             ckpt_dir / "trainer_state.pt",
         )
+        if self.resume_identity:
+            # Readable without loading the optimizer state: a resume on another
+            # resource compares against it before anything heavy loads.
+            (ckpt_dir / "resume_identity.json").write_text(json.dumps(self.resume_identity, indent=1) + "\n")
         (self.out_dir / "checkpoints" / "latest.txt").write_text(tag + "\n")
         keep = self.cfg["checkpoint"]["keep_last"]
         if keep > 0:
@@ -1236,6 +1437,11 @@ class Trainer:
             )
         if list(state["trainable_names"]) != self.freeze_report["trainable_names"]:
             raise ValueError("checkpoint freeze set differs from current config")
+        if dict(state.get("resume_identity") or {}) != self.resume_identity:
+            raise ValueError(
+                "checkpoint was written against different data, initialization or code "
+                f"identities ({state.get('resume_identity')} != {self.resume_identity}); "
+                "refusing to resume its optimizer state")
         saved_lora = state.get("lora_config")
         current_lora = self.lora_cfg.to_dict() if self.lora_cfg else None
         if saved_lora != current_lora:
@@ -1256,6 +1462,8 @@ class Trainer:
                 f"consumed-block position {self.consumed_blocks()} does not match "
                 f"the checkpoint's {expected}; batch config changed")
         torch.set_rng_state(state["torch_rng_state"])
+        if state.get("cuda_rng_states") is not None and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(state["cuda_rng_states"])
         self.logger.log("resume_loaded", step=self.step, checkpoint=str(ckpt_dir),
                         consumed_blocks=self.consumed_blocks())
 
@@ -1287,6 +1495,7 @@ class Trainer:
                               "lora_trainable_params", "total_params")
                 },
                 lora_config=self.lora_cfg.to_dict() if self.lora_cfg else None,
+                target_policy=self.target_policy,
                 extra_stream=(
                     {**self.extra_cfg,
                      "stream_blocks": int(self.extra_ids.shape[0]),
@@ -1304,6 +1513,8 @@ class Trainer:
             m["tokens_seen"] = self.step * bps * block_len
             if torch.cuda.is_available() and str(self.device).startswith("cuda"):
                 m["gpu_mem_gb"] = round(torch.cuda.max_memory_allocated() / 2**30, 2)
+                # the allocator's pool: what an out-of-memory error actually exhausts
+                m["gpu_mem_reserved_gb"] = round(torch.cuda.max_memory_reserved() / 2**30, 2)
             if iv["log_every"] and self.step % iv["log_every"] == 0:
                 self.logger.log("train_step", **m)
                 parts = [f"step {self.step}/{total}", f"loss {m['loss']:.4f}"]

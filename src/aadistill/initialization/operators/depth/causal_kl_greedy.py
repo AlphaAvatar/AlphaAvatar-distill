@@ -202,6 +202,26 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 f"{self.impl_id}: {KL_REFERENCE_KEY}={kl_reference!r} reads "
                 "a stored root reference of Top-K sketches; full_vocab_v1 is "
                 "the KL-only oracle path")
+        #: A PACKED FORWARD CONTEXT (`ctx.forward_context`): the calibration
+        #: items are packed into causal sequences, and the reference and every
+        #: candidate are read in those same sequences. Implemented for the
+        #: forward baseline's DEPTH path -- scored rows, the parent's Top-K +
+        #: tail sketch, the KL-only objective -- and refused elsewhere rather
+        #: than run on a path that would still read one item per row.
+        forward_context = ctx.forward_context
+        if forward_context is not None:
+            unsupported = [why for why, bad in (
+                ("prediction_rows must be scored_v1", not select_rows),
+                ("the support must be a reference Top-K + tail",
+                 support.is_full_vocab or union),
+                ("no scoring objective", objective is not None),
+                ("the KL reference must be the intact parent", declared_root),
+                ("no score observer", ctx.score_observer is not None),
+            ) if bad]
+            if unsupported:
+                raise OperatorError(
+                    f"{self.impl_id}: a packed forward context needs "
+                    f"{'; '.join(unsupported)}")
         #: Per candidate subset: every component's domain-balanced value, so a
         #: low objective can always be read against the raw KL it came from.
         objective_candidates: dict[str, dict[str, Any]] = {}
@@ -277,6 +297,10 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         elif support.is_full_vocab:
             reference = _ReferenceLogits(model, items, compute)
             sketches = None
+        elif forward_context is not None:
+            #: Built below, once the packed sequences and their scored rows exist.
+            sketches = None
+            reference = None
         else:
             sketches = _ReferenceSketches(model, items, compute,
                                           top_k=support.top_k)
@@ -302,7 +326,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         groups = [(p.batch, p.original_indices) for p in packed_batches(
             items, max(int(batch_size), 1), packing=packing,
             pad_id=(resolve_pad_id(model) if batch_size > 1 else 0),
-            device=compute)]
+            device=compute, forward_context=forward_context)]
         #: WHICH PREDICTION POSITIONS the causal KL is a mean over. The objective
         #: is `KL(parent || parent-with-S-bypassed)` averaged over positions, and
         #: this decides which: every real prediction under the incumbent policy,
@@ -310,7 +334,13 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         #: from the hashed config and therefore forks the state, unlike the batch
         #: size and packing above it.
         active = active_positions(items, ctx.position_policy)
-        if select_rows:
+        packed_scorer = None
+        if forward_context is not None:
+            packed_scorer = _PackedDepthScorer(
+                model, adapter, items, groups, active, compute,
+                top_k=support.top_k, domains=domains)
+            sketches = packed_scorer.sketches
+        elif select_rows:
             #: The reference state now holds only the scored rows; size it so.
             sketches.restrict_to_scored(active)
             if parent_sketches is not None:
@@ -780,6 +810,13 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         if prefix_reuse:
             timing["depth_prefix_reuse"] = True
             timing["prefix_capture_forwards"] = 0
+        if packed_scorer is not None:
+            #: The packed path's own two entry points, same contract: one value
+            #: per candidate subset, the domain balance of sub-type means of
+            #: per-item means. Only the reading context differs.
+            packed_scorer.bind(timing, ctx.deadline, cuda_sync, n_layers)
+            score = packed_scorer.score
+            score_round = packed_scorer.score_round
 
         n_remove = ctx.parent_spec[DEPTH_FIELD] - ctx.target_spec[DEPTH_FIELD]
 
@@ -866,6 +903,10 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                    #: actually restricted.
                    "scoring_positions": (None if active is None
                                          else active.report()),
+                   #: SCIENCE evidence: the packed context and its accounting.
+                   **({} if packed_scorer is None else
+                      {"forward_context": forward_context.as_dict(),
+                       "packing": packed_scorer.report()}),
                    **({} if objective is None else
                       {"scoring_objective": objective.as_dict()}),
                    #: Recorded only when declared, so a parent-reference
@@ -992,6 +1033,295 @@ def _forward_logits(model, item, device: str, skip=frozenset()):
         return model(ids).logits[0, :-1]
     with bypassed_blocks(model, skip):
         return model(ids).logits[0, :-1]
+
+
+#: Rows per float32 KL reduction on the packed path. A packed sequence can hold
+#: thousands of scored rows, and the candidate's full-vocabulary normalizer is
+#: upcast to float32 per call; reducing in fixed row chunks bounds that
+#: transient. Same chunks for the reference-free KL of every candidate, so the
+#: comparison between candidates is unaffected; recorded in the trace.
+PACKED_KL_ROW_CHUNK = 2048
+
+
+class _PackedDepthScorer:
+    """DEPTH's candidate scoring over PACKED causal sequences.
+
+    The same estimand as the one-item-per-row path, read in a different context:
+    ``KL(parent || parent-with-S-bypassed)`` on the reference's Top-K + tail
+    partition, at each item's scored prediction positions, averaged per item,
+    then per sub-type, then balanced over domains. What changes is that every
+    forward is a packed sequence read with standard causal attention, so an
+    item's positions are conditioned on the items before it in its sequence --
+    for the parent reference and for every candidate alike, from the SAME
+    sequences built once.
+
+    **An item's mean pools all of its placements.** A fragment's scored
+    positions (`aadistill.data.sequence_packing`) are scored positions of that
+    item read in another context, so they enter its weighted sum and its
+    denominator like the final placement's; `report()` counts them.
+    """
+
+    def __init__(self, model, adapter, items, groups, active, device: str, *,
+                 top_k: int, domains) -> None:
+        self.model, self.adapter, self.items = model, adapter, list(items)
+        self.groups, self.device, self.domains = groups, device, domains
+        self.subtypes = [item["subtype"] for item in self.items]
+        self.rows: list[torch.Tensor] = []
+        self.owners: list[torch.Tensor] = []
+        self.weights: list[torch.Tensor] = []
+        self.segment_items: list[list[int]] = []
+        self.repeated_scored = 0
+        for group, indices in groups:
+            batch_weights = (None if active is None else
+                             active.prediction_weights_for(group, indices))
+            mask = group.prediction_mask().to(device)
+            m = mask.float() if batch_weights is None else (
+                mask.float() * batch_weights.to(device).float())
+            rows = scored_rows(mask, batch_weights)
+            owner = torch.full(tuple(mask.shape), -1, dtype=torch.long, device=device)
+            for k, seg in enumerate(group.segments):
+                owner[seg.row, seg.prediction_slice] = k
+                if not seg.final:
+                    self.repeated_scored += int((m[seg.row, seg.prediction_slice] > 0).sum())
+            #: Only positions a segment owns AND the policy weights: the reducer
+            #: below sums exactly what `masked_item_means` sums for one row.
+            owner = torch.where(m > 0, owner, torch.full_like(owner, -1))
+            self.rows.append(rows)
+            self.owners.append(owner)
+            self.weights.append(m)
+            self.segment_items.append([seg.index for seg in group.segments])
+        denominators = [0.0] * len(self.items)
+        for g, owner in enumerate(self.owners):
+            sel = owner >= 0
+            per_seg = torch.zeros(len(self.segment_items[g]), dtype=torch.float64,
+                                  device=device).index_add_(
+                0, owner[sel], self.weights[g][sel].double())
+            for k, v in enumerate(per_seg.tolist()):
+                denominators[self.segment_items[g][k]] += v
+        bad = [self.items[i]["item_id"] for i, d in enumerate(denominators) if d <= 0]
+        if bad:
+            raise OperatorError(
+                f"depth.causal_kl_greedy_v1: items {bad[:4]} have no weighted "
+                "scored position in the packed sequences; an item that "
+                "contributes nothing must not be scored")
+        self.denominators = denominators
+        self.sketches = _PackedReferenceSketches(model, self.rows, device,
+                                                 top_k=top_k)
+        self.timing = None
+
+    def bind(self, timing, deadline, cuda_sync, n_layers: int) -> None:
+        self.timing, self.deadline = timing, deadline
+        self.cuda_sync, self.n_layers = cuda_sync, int(n_layers)
+
+    def _kl(self, idx, lp, tail, abls) -> torch.Tensor:
+        n = int(abls.shape[0])
+        return torch.cat([sketch_forward_kl(idx[a:a + PACKED_KL_ROW_CHUNK],
+                                            lp[a:a + PACKED_KL_ROW_CHUNK],
+                                            tail[a:a + PACKED_KL_ROW_CHUNK],
+                                            abls[a:a + PACKED_KL_ROW_CHUNK],
+                                            has_tail=self.sketches.has_tail)
+                          for a in range(0, n, PACKED_KL_ROW_CHUNK)]) if n else \
+            torch.zeros(0, dtype=torch.float32, device=abls.device)
+
+    def _accumulate(self, g: int, kl_rows: torch.Tensor, sums: list[float]) -> None:
+        """Add one group's per-position KL into the per-item weighted sums."""
+        rows, owner = self.rows[g], self.owners[g]
+        dense = scatter_rows(kl_rows, rows)
+        sel = owner >= 0
+        #: MASK BEFORE MULTIPLY (as `masked_item_means`): only owned, weighted
+        #: positions are read, so an unscored slot can never leak in, and a
+        #: scored +inf stays +inf.
+        vals = (dense[sel] * self.weights[g][sel]).double()
+        per_seg = torch.zeros(len(self.segment_items[g]), dtype=torch.float64,
+                              device=vals.device).index_add_(0, owner[sel], vals)
+        for k, v in enumerate(per_seg.tolist()):
+            sums[self.segment_items[g][k]] += v
+
+    def _primary(self, sums: list[float]) -> float:
+        per_subtype: dict[str, list[float]] = {}
+        for i, total in enumerate(sums):
+            per_subtype.setdefault(self.subtypes[i], []).append(
+                total / self.denominators[i])
+        means = {k: sum(v) / len(v) for k, v in per_subtype.items()}
+        primary, _ = domain_balanced_score(means, self.domains)
+        return primary
+
+    def _candidate(self, g: int, run) -> torch.Tensor:
+        group = self.groups[g][0]
+        ids = group.input_ids.to(self.device)
+        attn = group.attention_mask.to(self.device)
+        return run(ids, attn, self.rows[g])
+
+    @torch.no_grad()
+    def score(self, skip: frozenset[int]) -> float:
+        t = self.timing
+        t["candidate_subsets"] += 1
+        started = time.perf_counter()
+        sums = [0.0] * len(self.items)
+        for g, (group, _) in enumerate(self.groups):
+            t0 = time.perf_counter()
+            idx, lp, tail = self.sketches.sketch_rows(g, group, self.rows[g], self.adapter)
+            if self.cuda_sync:
+                self.cuda_sync()
+            t1 = time.perf_counter()
+
+            def run(ids, attn, rows):
+                if skip:
+                    with bypassed_blocks(self.model, skip):
+                        return scored_prediction_logits(self.adapter, self.model, ids, attn, rows)
+                return scored_prediction_logits(self.adapter, self.model, ids, attn, rows)
+
+            if not bool(self.rows[g].any()):
+                continue
+            abls = self._candidate(g, run)
+            if self.cuda_sync:
+                self.cuda_sync()
+            t2 = time.perf_counter()
+            kl = self._kl(idx, lp, tail, abls)
+            self._accumulate(g, kl, sums)
+            t["reference_seconds"] += t1 - t0
+            t["ablated_seconds"] += t2 - t1
+            t["ablated_forwards"] += 1
+            t["ablated_items"] += len(group.segments)
+            t["distortion_calls"] += len(group.segments)
+            t["scored_rows"] += int(self.rows[g].sum())
+            t["forward_rows"] += int(self.rows[g].numel())
+            t["distortion_seconds"] += time.perf_counter() - t2
+            del abls, kl
+        t["item_seconds"] += time.perf_counter() - started
+        return self._primary(sums)
+
+    @torch.no_grad()
+    def score_round(self, skipped: frozenset[int], candidates: list[int]) -> list[float]:
+        """Every candidate of one round from one prefix capture per sequence
+        group (`ExecutionConfig.depth_prefix_reuse`), as on the unpacked path."""
+        t = self.timing
+        sums = {c: [0.0] * len(self.items) for c in candidates}
+        t["candidate_subsets"] += len(candidates)
+        started = time.perf_counter()
+        for g, (group, _) in enumerate(self.groups):
+            t0 = time.perf_counter()
+            rows = self.rows[g]
+            if not bool(rows.any()):
+                continue
+            idx, lp, tail = self.sketches.sketch_rows(g, group, rows, self.adapter)
+            ids = group.input_ids.to(self.device)
+            attn = group.attention_mask.to(self.device)
+            with captured_block_inputs(self.model, skipped) as inputs:
+                self.adapter.final_hidden_states(self.model, ids, attn)
+            if self.cuda_sync:
+                self.cuda_sync()
+            t1 = time.perf_counter()
+            t["reference_seconds"] += t1 - t0
+            t["prefix_capture_forwards"] = t.get("prefix_capture_forwards", 0) + 1
+            for c in candidates:
+                ta = time.perf_counter()
+                if has_suffix(self.n_layers, skipped, c):
+                    with resumed_after_block(self.model, skipped, c, inputs[c]):
+                        abls = scored_prediction_logits(self.adapter, self.model, ids, attn, rows)
+                else:
+                    with bypassed_blocks(self.model, skipped | {c}):
+                        abls = scored_prediction_logits(self.adapter, self.model, ids, attn, rows)
+                if self.cuda_sync:
+                    self.cuda_sync()
+                t2 = time.perf_counter()
+                kl = self._kl(idx, lp, tail, abls)
+                self._accumulate(g, kl, sums[c])
+                t["ablated_seconds"] += t2 - ta
+                t["ablated_forwards"] += 1
+                t["ablated_items"] += len(group.segments)
+                t["distortion_calls"] += len(group.segments)
+                t["scored_rows"] += int(rows.sum())
+                t["forward_rows"] += int(rows.numel())
+                t["distortion_seconds"] += time.perf_counter() - t2
+                del abls, kl
+            del inputs
+            if self.deadline is not None:
+                self.deadline.check(
+                    f"depth.causal_kl_greedy_v1 round {len(skipped)} (packed "
+                    f"prefix reuse, {len(candidates)} candidates)")
+        t["item_seconds"] += time.perf_counter() - started
+        return [self._primary(sums[c]) for c in candidates]
+
+    def report(self) -> dict[str, Any]:
+        segments = [seg for group, _ in self.groups for seg in group.segments]
+        return {"sequences": sum(group.size for group, _ in self.groups),
+                "forwards_per_candidate": len(self.groups),
+                "segments": len(segments),
+                "fragments": sum(not seg.final for seg in segments),
+                "non_padding_tokens": sum(sum(group.lengths) for group, _ in self.groups),
+                "scored_positions": int(sum(int((w > 0).sum()) for w in self.weights)),
+                "repeated_scored_positions": self.repeated_scored,
+                "kl_row_chunk": PACKED_KL_ROW_CHUNK}
+
+
+class _PackedReferenceSketches:
+    """The intact parent's Top-K + tail sketch at each packed group's scored rows.
+
+    Keyed by the group, because under a packed context a position's reference
+    depends on the whole sequence before it, not on its item alone. Built from
+    the same group tensors the candidates are forwarded on; cached when the
+    footprint fits, recomputed per candidate otherwise -- identical values.
+    """
+
+    def __init__(self, model, rows: list[torch.Tensor], device: str, *, top_k: int) -> None:
+        self.model, self.device, self.top_k = model, device, int(top_k)
+        self.vocab = int(model.config.vocab_size)
+        k = max(1, min(self.top_k, self.vocab))
+        self.effective_top_k, self.has_tail = k, k < self.vocab
+        self.positions = int(sum(int(r.sum()) for r in rows))
+        self.estimate_bytes = self.positions * (k * 4 + k * 8) + self.positions * 4 * 3
+        self.memory_before = memory_snapshot(device)
+        self.available_bytes, self.headroom_source = _available_memory_bytes(device)
+        budget = (None if self.available_bytes is None
+                  else _ReferenceLogits.BUDGET_FRACTION * self.available_bytes)
+        self.enabled = budget is None or self.estimate_bytes <= budget
+        self.mode = "cached" if self.enabled else "recomputed"
+        self._cache: dict[int, tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = {}
+        self.hits = self.fills = self.recomputes = 0
+
+    def sketch_rows(self, g: int, batch, rows, adapter):
+        hit = self._cache.get(g)
+        if hit is not None:
+            self.hits += 1
+            return hit
+        if not bool(rows.any()):
+            #: A group with no scored row (possible only when every item in it
+            #: is placed without any of its scored positions) scores nothing.
+            k, dev = self.effective_top_k, rows.device
+            out = (torch.zeros(0, k, dtype=torch.long, device=dev),
+                   torch.zeros(0, k, dtype=torch.float32, device=dev),
+                   torch.zeros(0, dtype=torch.float32, device=dev))
+            self._cache[g] = out
+            return out
+        logits = scored_prediction_logits(
+            adapter, self.model, batch.input_ids.to(self.device),
+            batch.attention_mask.to(self.device), rows)
+        n = int(logits.shape[0])
+        sk = sketch_reference(logits, torch.zeros(n, dtype=torch.long, device=logits.device),
+                              top_k=self.top_k, chunk=512)
+        del logits
+        out = (sk.support_indices, sk.support_log_probs, sk.tail_log_prob)
+        if self.enabled:
+            self._cache[g] = out
+            self.fills += 1
+        else:
+            self.recomputes += 1
+        return out
+
+    def counters(self) -> dict[str, int]:
+        return {"reference_hits": self.hits, "reference_fills": self.fills,
+                "reference_recomputes": self.recomputes}
+
+    def decision(self) -> dict[str, Any]:
+        return {"mode": self.mode, "cached": self.enabled, "keyed_by": "packed_group",
+                "distribution_support": SUPPORT_REFERENCE_TOPK_TAIL_V1,
+                "top_k": self.effective_top_k, "scored_rows_only": True,
+                "has_tail": self.has_tail, "positions": self.positions,
+                "sketch_bytes": self.estimate_bytes,
+                "available_bytes": self.available_bytes,
+                "headroom_source": self.headroom_source,
+                "memory_before": self.memory_before}
 
 
 class _RootSketches:

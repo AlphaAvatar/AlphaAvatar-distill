@@ -1,0 +1,211 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_generation_session_summary/v1",
+ "run_id": "a_tool_generation_sr_t2507_20261105_164515",
+ "kind": "tool_generation_sr_t2507",
+ "lineage": "thinking_2507",
+ "terminal": "ALL_DONE",
+ "session_utc": [
+  "2026-11-05T16:55:55Z",
+  "2026-11-05T17:05:45Z"
+ ],
+ "identity": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+ "imported_from": [
+  "a_tool_pilot_20261104_164531",
+  "a_tool_generation_t2507_20261104_195411",
+  "a_tool_generation_t2507_20261105_064829",
+  "a_tool_generation_t2507_20261105_072112",
+  "a_tool_generation_20261105_074146",
+  "a_tool_generation_20261105_105512",
+  "a_tool_generation_sr_20261105_153741"
+ ],
+ "deadline_minutes": 46.0,
+ "device_confirmation": {
+  "admitted": true,
+  "failed": [],
+  "invocation": "tool_T2507_r1_pass0",
+  "reuses": "a_tool_generation_t2507_20261104_195411",
+  "teacher_files_seconds": 5.2,
+  "checks": {
+   "teacher_model": true,
+   "teacher_revision": true,
+   "teacher_files": true,
+   "chat_template": true,
+   "template_kwargs": true,
+   "sampling": true,
+   "stop_ids": true,
+   "vllm_lock": true,
+   "context": true,
+   "gpu_memory_utilization": true,
+   "dtype": true,
+   "engine_started_with_a_kv_cache": true,
+   "no_out_of_memory": true,
+   "generation_complete": true,
+   "memory_margin": true
+  },
+  "memory": {
+   "gpus": [
+    [
+     "NVIDIA L40S",
+     46068,
+     37763
+    ]
+   ],
+   "free_gib": [
+    8.11
+   ],
+   "samples": 89
+  },
+  "kv_cache_tokens": 195009.0
+ },
+ "invocations": [
+  {
+   "label": "tool_T2507_r1_pass0",
+   "wall_seconds": 442.4,
+   "output_tokens": 364132,
+   "output_tokens_per_second": 1196.2,
+   "engine_ready_seconds": [
+    122.3
+   ],
+   "peak_memory_used_mib": 37763
+  },
+  {
+   "label": "tool_T2507_r1_pass1",
+   "wall_seconds": 140.6,
+   "output_tokens": 68750,
+   "output_tokens_per_second": 609.5,
+   "engine_ready_seconds": [
+    16.9
+   ],
+   "peak_memory_used_mib": 37827
+  }
+ ],
+ "output_tokens": 432882,
+ "modes": {
+  "T2507": {
+   "cells": [
+    {
+     "split": "training",
+     "category": "error_recovery",
+     "unit": "supervised_tokens",
+     "target": 49258.700000000004,
+     "bound": 0,
+     "attempted": 0,
+     "units": 72874.0,
+     "admitted": 17,
+     "imported": 72,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "mcp_agent",
+     "unit": "supervised_tokens",
+     "target": 73888.05,
+     "bound": 0,
+     "attempted": 0,
+     "units": 101551.0,
+     "admitted": 36,
+     "imported": 179,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "multi_turn",
+     "unit": "supervised_tokens",
+     "target": 98517.40000000001,
+     "bound": 0,
+     "attempted": 0,
+     "units": 113880.0,
+     "admitted": 20,
+     "imported": 64,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "multiple_parallel",
+     "unit": "supervised_tokens",
+     "target": 73888.05,
+     "bound": 0,
+     "attempted": 0,
+     "units": 123617.0,
+     "admitted": 63,
+     "imported": 116,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "no_tool",
+     "unit": "supervised_tokens",
+     "target": 49258.700000000004,
+     "bound": 0,
+     "attempted": 0,
+     "units": 100510.0,
+     "admitted": 151,
+     "imported": 168,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "schema_arguments",
+     "unit": "supervised_tokens",
+     "target": 17171.0,
+     "bound": 0,
+     "group": "pivot_conversational",
+     "attempted": 0,
+     "units": 75152.0,
+     "admitted": 39,
+     "imported": 136,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "schema_arguments",
+     "unit": "supervised_tokens",
+     "target": 56717.05,
+     "bound": 169,
+     "group": "schema_synth",
+     "attempted": 169,
+     "units": 314834.0,
+     "admitted": 153,
+     "imported": 0,
+     "status": "REACHED"
+    },
+    {
+     "split": "training",
+     "category": "tool_selection",
+     "unit": "supervised_tokens",
+     "target": 73888.05,
+     "bound": 0,
+     "attempted": 0,
+     "units": 106617.0,
+     "admitted": 76,
+     "imported": 126,
+     "status": "REACHED"
+    },
+    {
+     "split": "validation",
+     "category": null,
+     "unit": "supervised_tokens",
+     "target": 12624.0,
+     "bound": 0,
+     "attempted": 0,
+     "units": 16345.0,
+     "admitted": 14,
+     "imported": 18,
+     "status": "REACHED"
+    }
+   ],
+   "deadline_stop": null
+  }
+ },
+ "cost": {
+  "all_in_usd": 0.3296,
+  "gpu_usd": 0.3235,
+  "disk_usd": 0.0061,
+  "elapsed_minutes": 17.81,
+  "price_per_hour": 1.09,
+  "authorized_usd": 2.31,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": true,
+ "authorizes": "nothing"
+}
