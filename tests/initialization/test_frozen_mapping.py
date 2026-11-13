@@ -1,6 +1,6 @@
 """The frozen mapping's builders write what the operators write, and a saved mapping is its bytes.
 
-The builders repeat four operators' surgery on GIVEN selections (`transforms/frozen_mapping.py`). If one drifted from
+The builders repeat four operators' surgery on GIVEN selections (`planning/frozen_mapping.py`). If one drifted from
 its operator, a mapping taken from a search journal would materialize a different model than the search measured and
 nothing downstream could tell. So each builder is run beside its operator on the same toy parent and the children are
 compared bit for bit; the width transform is recomputed from the statistics the width operator itself collected.
@@ -21,7 +21,7 @@ from aadistill.initialization.operators.attention.gqa.activation_importance impo
     ATTENTION_ACTIVATION_IMPORTANCE_V1,
 )
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
-from aadistill.initialization.transforms import frozen_mapping as FM  # noqa: E402
+from aadistill.initialization.planning import frozen_mapping as FM  # noqa: E402
 
 ADAPTER = get_adapter("qwen3")
 

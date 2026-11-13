@@ -224,7 +224,7 @@ def build_mapping(out: Path, work: Path, device: str, status: Status) -> dict:
     import torch
     from aadistill.initialization.planning.fixed_path import _run_steps
     from aadistill.initialization.specs.arch import get_adapter
-    from aadistill.initialization.transforms import frozen_mapping as FM
+    from aadistill.initialization.planning import frozen_mapping as FM
     from stages.teacher_modes import full_search as FS
     d, sel = design(), selection()
     s = session(work, device)

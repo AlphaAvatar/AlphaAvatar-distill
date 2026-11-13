@@ -22,7 +22,7 @@ search. The experiment is `configs/stages/stage-1/reasoning_inheritance/design.j
 | `teacher_reuse.py` | dev box, $0 | T's evaluation from `a_teacher_20261030_012648`: archive and file hashes, every unit's identity against this round's protocol, rescored with the current scorer |
 | `analysis.py` | dev box, $0 | every group rescored; per-unit correct and usable, the five structural contrasts with family-cluster bootstrap intervals, retention of T-correct items, failure types, state KL/NLL |
 
-The reusable mechanism is `src/aadistill/initialization/transforms/frozen_mapping.py` (core, no instance facts):
+The reusable mechanism is `src/aadistill/initialization/planning/frozen_mapping.py` (core, no instance facts):
 the mapping contract and builders that repeat the four operators' surgery bit for bit
 (`tests/initialization/test_frozen_mapping.py`).
 

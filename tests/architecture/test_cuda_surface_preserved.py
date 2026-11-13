@@ -2639,6 +2639,17 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "`mode` with `modes` refuses; a single-mode lineage refuses a pack that declares `modes`. `stamp` "
             "carries `modes`. Every single-mode declaration checks exactly as before. NO CUDA SURFACE.",
      }),
+    ("50ed1a4f1f0d4dfdaa1cf30436c7e1ce5bc4ebc2",
+     "Stage 1 reasoning inheritance: the frozen structural mapping (maintainer 2026-11-13)",
+     {
+        "src/aadistill/initialization/planning/frozen_mapping.py":
+            "NEW module. A mapping's data contract (selections by root block, the width transform P / scale / final "
+            "norm, a sha256 per tensor and one content digest), builders that repeat the FFN, DEPTH, WIDTH and "
+            "ATTENTION operators' child construction on given selections (bit for bit: "
+            "tests/initialization/test_frozen_mapping.py), the width transform from the width operator's own "
+            "statistics, `materialize` and block comparisons. No existing module, operator or CUDA-surface file "
+            "changes; on a GPU it runs the same tensor operations the operators run. NO CUDA SURFACE CHANGE.",
+     }),
 )
 
 
