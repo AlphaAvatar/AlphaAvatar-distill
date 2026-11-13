@@ -204,6 +204,20 @@ def stage_resume(run_id: str, src_scr: Path) -> str:
 
 # ---- the launch ------------------------------------------------------------------------------------------------------
 
+def the_authorization_is_in_the_session_commit(ctx) -> tuple[bool, str]:
+    """The pod checks out the session commit, so the artifact its setup loads must be IN that commit, byte for byte.
+    ri_diagnosis_20261113_103414 passed every other gate, then died in setup (AUTHORIZATION_MISMATCH, $0.1153): the
+    artifact was committed after the commit the bundle carried. Order: commit code, issue, commit the artifact (that
+    commit is the session commit), stage its bundle, launch."""
+    import subprocess
+    rel = str(STUDY.authorization_path(ctx.args.run_id))
+    blob = subprocess.run(["git", "show", f"{ctx.args.session_commit}:{rel}"], cwd=REPO, capture_output=True)
+    here = (REPO / rel).read_bytes() if (REPO / rel).is_file() else None
+    if blob.returncode != 0 or blob.stdout != here:
+        return False, f"{rel} is not in session commit {ctx.args.session_commit[:12]} as issued; commit it first"
+    return True, f"the authorization is in session commit {ctx.args.session_commit[:12]}"
+
+
 def launch_spec(minutes: float = 0.0, resume_from: str | None = None) -> SE.Launch:
     from aadistill.infrastructure.session import LocalAsset
     d = json.loads((REPO / DESIGN).read_text())
@@ -218,7 +232,8 @@ def launch_spec(minutes: float = 0.0, resume_from: str | None = None) -> SE.Laun
     launch = SE.Launch(
         session_kind=SESSION_KIND, authorization=RIAuthorization, teacher_model=d["teacher"]["model"],
         teacher_revision=d["teacher"]["revision"], kind=KIND, local_assets=assets, disk_gb=150,
-        relay_inputs=resume_input(resume_from), driver=DRIVER, validation_minutes=float(minutes), setup_minutes=25.0,
+        relay_inputs=resume_input(resume_from), driver=DRIVER,
+        extra_prechecks=(the_authorization_is_in_the_session_commit,), validation_minutes=float(minutes), setup_minutes=25.0,
         contingency_fraction=0.10, description="RI-S1: the frozen mapping, D/W/DW, state evaluation and eval-set-1",
         artifact_spec="configs/stages/stage-1/reasoning_inheritance/artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; every finished file is on the "

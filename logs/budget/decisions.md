@@ -16471,3 +16471,25 @@ on a paid pod.
   tagged `archive/research-teacher-modes-and-projected-residual-2026-11-11`; merge base `72492e46`; the squash
   commit names the tip. 769 cited commits resolve, 139 of them only on the branch.
 - Revisit when: the maintainer decides the volume retirement list, or opens a new study.
+
+## 2026-11-13 (UTC) — RI-S1 opened: Stage 1 structural ablation (four untrained groups), its own grant
+
+- Context: the maintainer's brief "开启新一轮推理继承研究" (research/reasoning-inheritance, base `50ed1a4f`): Stage 1
+  structural ablation of the packed search's Top-1 -- T (teacher), D (depth pruning only), W (all non-depth
+  compression only), DW (both) -- built from one frozen mapping, measured on `state_eval_hybrid@v3` and every unit of
+  eval-set-1 in both modes; no recovery training, no full search; Stage 6 redefined as recurrent depth. "本消息授权完成
+  上述 Stage 1 阶段所需的实现、GPU forward、评估和普通工程修复"; "为本轮建立独立的实验与资源记录，不能复用已关闭
+  Research A grant ... 遵守真实硬上限".
+- Decision: study RI-S1 (`scripts/stages/stage-1/reasoning_inheritance/launch.py`, `shared.study_engineering`), grant
+  `approvals/stage1_reasoning_inheritance_grant.json`: ceiling $35.00 cumulative over every attempt (the project cap's
+  remainder $35.3988, read live 2026-11-13T09:44Z, rounded down), $24.00 per session (the balance $38.41 then keeps
+  about a week of the three volumes' storage at $1.75/day), L40S at no more than $1.09/h, one GPU, project cap $1,000
+  unchanged. Study identity `cd84cc1d...` (design + frozen selection). T's evaluation is reused from
+  `a_teacher_20261030_012648` (both archives and every unit's identity verified, rescored with the current scorer).
+- Alternatives considered: reusing the closed Research A grant (forbidden by the brief and by `require_open`); a
+  ceiling above the project remainder (needs the maintainer); one session at the full ceiling (would leave the balance
+  about 2 days of volume storage).
+- Risks: W and DW are untrained; if they generate to the 40,960-token context on most items, the full evaluation may
+  not fit the ceiling. Finished units are kept (sealed parts, per-poll securing) and the remainder becomes a budget
+  decision, never a reason to shorten the context or the set. The balance needs a top-up before a second session.
+- Revisit when: the first session closes out (measured generation cost per group and mode).

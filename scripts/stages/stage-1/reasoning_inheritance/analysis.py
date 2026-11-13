@@ -279,7 +279,12 @@ def main(argv=None) -> int:
                         g2: {"n": len(v), "usable": sum(x for _, x in v),
                              "format_ok": sum(bool(r.get("format_ok")) for r, _ in v),
                              "terminated": sum(bool(r.get("terminated")) for r, _ in v)} for g2, v in by.items()}
-                    entry["units"]["eval_behavior_v0"]["metrics"] = rep["units"][f"{CAP}/eval_behavior_v0"].get("metrics")
+                    bm = rep["units"][f"{CAP}/eval_behavior_v0"].get("metrics") or {}
+                    entry["units"]["eval_behavior_v0"]["metrics"] = bm
+                    tc = ((bm.get("by_group") or {}).get("tool_calling") or {}).get("tool_call_exact_match")
+                    if tc is not None and "tool_calling" in entry["units"]["eval_behavior_v0"]:
+                        n_tc = entry["units"]["eval_behavior_v0"]["tool_calling"]["n"]
+                        entry["units"]["eval_behavior_v0"]["tool_calling"]["tool_call_exact"] = round(tc * n_tc)
                 lg = rows.get("stage3_legacy_150__items", {})
                 if lg:
                     entry["units"]["legacy_150"] = {"n": len(lg), "correct": sum(bool(r["correct"]) for r in lg.values()),

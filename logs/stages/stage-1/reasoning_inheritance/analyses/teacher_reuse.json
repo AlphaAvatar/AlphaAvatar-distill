@@ -1,0 +1,274 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.teacher_reuse/v1",
+ "run": "a_teacher_20261030_012648",
+ "modes": {
+  "H-T": {
+   "archive": {
+    "path": ".scratch/research_a/a_teacher_20261030_012648/store/teacher_eval__teacher_H-T.tgz",
+    "sha256": "7e323314916b9cf267995ba8fbd21213d7d54c2c4f767a1b46582476b9a4df62",
+    "matches_record": true
+   },
+   "descriptor": {
+    "files": 33,
+    "mismatched": [],
+    "started_utc": "2026-10-30T19:35:36Z"
+   },
+   "unit_checks": {
+    "fluid_reasoning_720__dev_v1.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true,
+     "seed_namespace": true,
+     "action_protocol": true,
+     "eval_set_file": true
+    },
+    "stage3_capability_846__answerability_paired.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__eval_behavior_v0.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__gsm8k.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__knowledge.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__math_verified.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__multihop.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__rag.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__safety_paired.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_legacy_150__items.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    }
+   },
+   "failed_checks": {},
+   "rescored_report": {
+    "path": "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/formal_report.json",
+    "sha256": "44b8f77a70cc639419fb0b5da2dab462182fe980654eb353bb981a7aa854dfab"
+   },
+   "reusable": true
+  },
+  "H-N": {
+   "archive": {
+    "path": ".scratch/research_a/a_teacher_20261030_012648/store/teacher_eval__teacher_H-N.tgz",
+    "sha256": "6f6c93ef959907155db41b659ae10cfd8b0c1e205522795b1f185f441546f637",
+    "matches_record": true
+   },
+   "descriptor": {
+    "files": 33,
+    "mismatched": [],
+    "started_utc": "2026-10-30T20:49:49Z"
+   },
+   "unit_checks": {
+    "fluid_reasoning_720__dev_v1.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true,
+     "seed_namespace": true,
+     "action_protocol": true,
+     "eval_set_file": true
+    },
+    "stage3_capability_846__answerability_paired.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__eval_behavior_v0.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__gsm8k.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__knowledge.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__math_verified.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__multihop.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__rag.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_capability_846__safety_paired.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    },
+    "stage3_legacy_150__items.summary.json": {
+     "root_revision": true,
+     "context_40960": true,
+     "decoder_nucleus_v1": true,
+     "template_switch": true,
+     "system_message": true,
+     "chat_template_sha256": true,
+     "tokenizer_sha256": true,
+     "stop_ids": true,
+     "degeneration_check_every": true
+    }
+   },
+   "failed_checks": {},
+   "rescored_report": {
+    "path": "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/formal_report.json",
+    "sha256": "066d5e6b4eaaadbb3abb3432c5367d327a65714818d8c83abf8262fef0d90b10"
+   },
+   "reusable": true
+  }
+ },
+ "runner_note": "fluid_reasoning_720 was generated by run_battery.py sha256 e650539e...; this round's runner (5cb6529d...) differs only in tool-task support (tools, env_factory, a task's own system text), engine metrics and splitting the task file on newlines only, none of which a fluid_reasoning_720 item reaches (no item carries tools or a system field, and the teacher run parsed all 720 lines). The capability runner's generation source digest (9eb5d477...) and the degeneration rule (79354082...) are unchanged.",
+ "reusable": true
+}
