@@ -1,0 +1,14 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "stage1_reasoning_inheritance",
+ "note": "One spec for success and failure; every entry may match nothing (P8.2.1: preserved when they exist, never demanded). Finished files leave the pod on every poll (launch.secure_incremental) and the checkpoints and mapping through the relay (driver.relay_upload); this archive is the teardown's last copy of the evidence directory's records and logs.",
+ "patterns_are_relative_to": "the collector's --root, <checkout>/artifacts",
+ "entries": [
+  {"artifact_class": "driver_report", "pattern": "audit/stage1_reasoning_inheritance/*/report.json", "required": false, "lifecycle": "final_required", "min_matches": 0},
+  {"artifact_class": "driver_records", "pattern": "audit/stage1_reasoning_inheritance/*/records/*.json", "required": false, "lifecycle": "final_required", "min_matches": 0},
+  {"artifact_class": "driver_state", "pattern": "audit/stage1_reasoning_inheritance/*/state/*.json", "required": false, "lifecycle": "final_required", "min_matches": 0},
+  {"artifact_class": "driver_logs", "pattern": "audit/stage1_reasoning_inheritance/*/logs/*.log", "required": false, "lifecycle": "final_required", "min_matches": 0},
+  {"artifact_class": "mapping", "pattern": "audit/stage1_reasoning_inheritance/*/mapping/*", "required": false, "lifecycle": "final_required", "min_matches": 0}
+ ],
+ "authorizes": "nothing"
+}

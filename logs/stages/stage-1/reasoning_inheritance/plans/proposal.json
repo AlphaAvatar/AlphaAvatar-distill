@@ -1,0 +1,36 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.proposal/v1",
+ "study": "RI-S1",
+ "status": "proposed",
+ "scope": "Stage 1 structural ablation and reasoning-damage analysis (design.json): rebuild the anchor search's frozen mapping, materialize D, W and DW untrained, measure state KL/NLL and every unit of eval-set-1 in both modes at 40,960 tokens of context; T's evaluation reused. No recovery training, no full search, no Stage-6 work.",
+ "kinds": [
+  "diagnosis"
+ ],
+ "ceiling_usd": 35.0,
+ "per_session_hard_cap_usd": 24.0,
+ "project_cumulative_cap_usd": 1000.0,
+ "gpus": {
+  "NVIDIA L40S": 1.09
+ },
+ "gpu_count_max": 1,
+ "basis": {
+  "live_position_2026-11-13T09:44Z": {
+   "project_committed_usd": 964.6012,
+   "project_cap_usd": 1000.0,
+   "project_remaining_usd": 35.3988,
+   "balance_usd": 38.4062,
+   "volumes_usd_per_day": 1.752,
+   "pods": 0
+  },
+  "ceiling": "the cumulative ceiling over every attempt is the project cap's remainder rounded down; the cap is not raised",
+  "per_session_hard_cap": "$24 keeps the provider balance at about 8 days of the three volumes' storage after one session ($38.41 - $24 = $14.41 at $1.75/day); a second session needs a balance top-up",
+  "card": "L40S 48 GB (AGENTS.md P8.2; the search, the teacher evaluation and every student evaluation ran on it)",
+  "estimate": {
+   "setup_minutes": 25,
+   "mapping_minutes": 25,
+   "state_eval_minutes": 10,
+   "evaluation": "measured anchor: the teacher's H-T eval-set-1 took 3.4 h and H-N 1.2 h on an L40S (a_teacher_20261030_012648). D is 28/36 of the teacher; W and DW are untrained and UNMEASURED: between about 0.5 h per mode (early degeneration stops) and tens of hours (generation to the 40,960-token context on most items). Expected first session $12-24; the full evaluation may not fit the ceiling, in which case finished units are kept and the remainder is a budget decision"
+  }
+ },
+ "authorizes": "nothing until granted"
+}

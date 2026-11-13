@@ -1,0 +1,102 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.design/v1",
+ "study_id": "stage1.reasoning_inheritance.structural_ablation",
+ "stage": 1,
+ "recorded_utc": "2026-11-13",
+ "decided_by": "maintainer brief 2026-11-13 (this round: Stage 1 structural ablation and reasoning-damage analysis; no recovery training, no new full search)",
+ "questions": [
+  "how much reasoning the current initialization loses to depth pruning alone and to all non-depth compression alone",
+  "whether applying both adds damage beyond the sum of the two losses (interaction)",
+  "whether the loss shows as wrong answers or as degeneration, protocol failure or context exhaustion",
+  "whether the evidence favours studying adjacent-layer merging next, or keeping depth and changing the other dimensions"
+ ],
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+  "lineage": "one teacher lineage (AGENTS.md P17.1): the four models, the calibration, the state-evaluation reference and the evaluation tokenizer and template are all this checkpoint's; nothing of Thinking-2507 enters"
+ },
+ "anchor": {
+  "search_run": "a_packed_search_20261105_195011",
+  "evidence_dir": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011/evidence",
+  "journal": {
+   "path": "artifacts/stages/stage-2/teacher_modes/search_sessions/a_packed_search_20261105_195011/states.jsonl",
+   "sha256": "617d1512959f4966ed4b57a6c5e7137b5b95b1e31b7b26b7266a6cac3da262e8"
+  },
+  "top1_state_id": "1f5e4b420125a345f1d190f0b8f87cad",
+  "top1_artifact_digest": "536742c54f5bdb19e436d2a7026d843684cdc1e5bfa34e2b02a0514d83fe98b6",
+  "top1_single_shard_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+  "path": [
+   ["ffn.activation_importance_v0", "calib.hybrid_d4_base@v2"],
+   ["depth.causal_kl_greedy_v1", "calib.hybrid_d4_base@v2"],
+   ["width.global_pca_v0", "calib.hybrid_d4_rh@v2"],
+   ["attention.activation_importance_v1", "calib.hybrid_d4_rh@v2"]
+  ],
+  "top1_relay": {
+   "repo": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad"
+  }
+ },
+ "groups": {
+  "T": {"label": "full teacher", "blocks": "all", "non_depth": false, "num_parameters": 4022468096,
+        "geometry": {"num_hidden_layers": 36, "hidden_size": 2560, "intermediate_size": 9728, "num_attention_heads": 32, "num_key_value_heads": 8},
+        "checkpoint": "the root teacher itself, never re-materialized"},
+  "D": {"label": "depth pruning only", "blocks": "kept", "non_depth": false, "num_parameters": 3215021568,
+        "geometry": {"num_hidden_layers": 28, "hidden_size": 2560, "intermediate_size": 9728, "num_attention_heads": 32, "num_key_value_heads": 8}},
+  "W": {"label": "all non-depth compression only (FFN, residual width, attention heads)", "blocks": "all", "non_depth": true, "num_parameters": 721897472,
+        "geometry": {"num_hidden_layers": 36, "hidden_size": 1024, "intermediate_size": 3072, "num_attention_heads": 16, "num_key_value_heads": 8}},
+  "DW": {"label": "both", "blocks": "kept", "non_depth": true, "num_parameters": 596049920,
+         "geometry": {"num_hidden_layers": 28, "hidden_size": 1024, "intermediate_size": 3072, "num_attention_heads": 16, "num_key_value_heads": 8}}
+ },
+ "mapping": {
+  "order": "FFN -> kept blocks -> residual width -> query heads, the anchor path's order (transforms/frozen_mapping.materialize)",
+  "ffn": "the journal's kept_neurons of the FFN step: every one of the 36 root blocks (FFN ran before DEPTH)",
+  "kept_blocks": "the DEPTH step's kept_layers, root numbering",
+  "width": "P, its scale and the final-norm vector recomputed ONCE from width.global_pca_v0's own statistics on the FFN -> DEPTH parent (rebuilt from the teacher and the frozen selections, gated on the journal's artifact digest), in the search's calibration, packed forward context and execution; never refitted per group",
+  "query_heads_kept_blocks": "the ATTENTION step's kept_heads, mapped from child to root numbering through kept_blocks",
+  "query_heads_removed_blocks": "attention.activation_importance_v1 on calib.hybrid_d4_rh@v2, in the same context, applied to the 36-block parent carrying the frozen FFN selection and the frozen width transform; only the removed blocks' selection is taken, frozen before any evaluation and never adjusted by a score",
+  "historical_reproduction": "the rebuilt FFN, FFN -> DEPTH, width child and DW are compared with the journal's artifact digests; a mismatch gives the snapshot a new identity, records 'historical Top-1 exact reproduction not established', and W and DW still both come from the one new snapshot"
+ },
+ "inputs": {
+  "packed_design": "configs/stages/stage-2/teacher_modes/packed_round_design.json",
+  "inputs_key": "v3",
+  "profiles_doc": "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
+  "calibration": {
+   "calib.hybrid_d4_base@v2": {"examples": 558, "tokens_before_packing": 569270},
+   "calib.hybrid_d4_rh@v2": {"examples": 388, "tokens_before_packing": 418072}
+  },
+  "state_eval": {"suite_id": "state_eval_hybrid@v3", "examples": 1366, "tokens_before_packing": 1521086,
+                 "content_sha256": "c39d0ec9a38175a8ec0b279afd54094299b9ce83260196fcbb6ae25a8c303c99",
+                 "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d"}
+ },
+ "evaluation": {
+  "eval_set": "eval-set-1",
+  "decoding": "configs/shared/evaluation/decoding/nucleus_v1.json",
+  "context": {"tokens": 40960, "rule": "every group generates up to 40,960 tokens minus its rendered prompt: the root config's max_position_embeddings, which the three children inherit; passed explicitly to both runners (--trained-context 40960), never their 8,192 default"},
+  "action_protocol": "v2",
+  "system_message": "You are a helpful Assistant.",
+  "degeneration_check_every": 256,
+  "modes": {"H-T": {"template_kwargs": {"enable_thinking": true}, "role": "primary reasoning mode"},
+            "H-N": {"template_kwargs": {"enable_thinking": false}, "role": "the same model's mode control"}},
+  "order": [["D", "H-T"], ["W", "H-T"], ["DW", "H-T"], ["D", "H-N"], ["W", "H-N"], ["DW", "H-N"]],
+  "fluid_resume": "fluid_reasoning_720 streams each finished episode; a later attempt generates only the tasks with no finished record, each under its own fixed seed (item, turn, sample), and the unit's file is the union in task order. No item is generated twice for a model and mode, and none is chosen by its outcome",
+  "teacher_reuse": {
+   "run": "a_teacher_20261030_012648",
+   "archives": {
+    "H-T": {"path": ".scratch/research_a/a_teacher_20261030_012648/store/teacher_eval__teacher_H-T.tgz", "sha256": "7e323314916b9cf267995ba8fbd21213d7d54c2c4f767a1b46582476b9a4df62"},
+    "H-N": {"path": ".scratch/research_a/a_teacher_20261030_012648/store/teacher_eval__teacher_H-N.tgz", "sha256": "6f6c93ef959907155db41b659ae10cfd8b0c1e205522795b1f185f441546f637"}
+   },
+   "rule": "reused only if every unit's recorded identity is this round's (teacher revision, mode, system prompt, tokenizer and template, eval-set file, decoder and seed namespace, context, stop ids, action protocol) and every file hashes to its descriptor; rescored with the current scorer"
+  }
+ },
+ "analysis": {
+  "bootstrap": {"resamples": 10000, "seed": 20261113, "unit": "the eval set's independence groups (fluid_reasoning_720/independence_v1.json; a paired unit's pair)"},
+  "contrasts": {"depth_alone": "T - D", "non_depth_alone": "T - W", "depth_given_non_depth": "W - DW", "non_depth_given_depth": "D - DW", "interaction": "D + W - T - DW"},
+  "exposure": "eval-set-1 is development-exposed; nothing here is an untouched test set, and no per-item result fits a merge weight, a kept block or a calibration share"
+ },
+ "products": {
+  "relay_repo": "AlphaAvatar/aadistill-artifacts",
+  "relay_prefix": "durable/stage1_reasoning_inheritance"
+ },
+ "authorizes": "nothing"
+}

@@ -1,0 +1,45 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.proposal/v1",
+ "study": "RI-S1",
+ "status": "granted",
+ "scope": "Stage 1 structural ablation and reasoning-damage analysis (design.json): rebuild the anchor search's frozen mapping, materialize D, W and DW untrained, measure state KL/NLL and every unit of eval-set-1 in both modes at 40,960 tokens of context; T's evaluation reused. No recovery training, no full search, no Stage-6 work.",
+ "kinds": [
+  "diagnosis"
+ ],
+ "ceiling_usd": 35.0,
+ "per_session_hard_cap_usd": 24.0,
+ "project_cumulative_cap_usd": 1000.0,
+ "gpus": {
+  "NVIDIA L40S": 1.09
+ },
+ "gpu_count_max": 1,
+ "basis": {
+  "live_position_2026-11-13T09:44Z": {
+   "project_committed_usd": 964.6012,
+   "project_cap_usd": 1000.0,
+   "project_remaining_usd": 35.3988,
+   "balance_usd": 38.4062,
+   "volumes_usd_per_day": 1.752,
+   "pods": 0
+  },
+  "ceiling": "the cumulative ceiling over every attempt is the project cap's remainder rounded down; the cap is not raised",
+  "per_session_hard_cap": "$24 keeps the provider balance at about 8 days of the three volumes' storage after one session ($38.41 - $24 = $14.41 at $1.75/day); a second session needs a balance top-up",
+  "card": "L40S 48 GB (AGENTS.md P8.2; the search, the teacher evaluation and every student evaluation ran on it)",
+  "estimate": {
+   "setup_minutes": 25,
+   "mapping_minutes": 25,
+   "state_eval_minutes": 10,
+   "evaluation": "measured anchor: the teacher's H-T eval-set-1 took 3.4 h and H-N 1.2 h on an L40S (a_teacher_20261030_012648). D is 28/36 of the teacher; W and DW are untrained and UNMEASURED: between about 0.5 h per mode (early degeneration stops) and tens of hours (generation to the 40,960-token context on most items). Expected first session $12-24; the full evaluation may not fit the ceiling, in which case finished units are kept and the remainder is a budget decision"
+  }
+ },
+ "granted_by": "maintainer (brief 2026-11-13)",
+ "decision": "Maintainer brief 2026-11-13, 'research/reasoning-inheritance' Stage 1: '\u672c\u6d88\u606f\u6388\u6743\u5b8c\u6210\u4e0a\u8ff0 Stage 1 \u9636\u6bb5\u6240\u9700\u7684\u5b9e\u73b0\u3001GPU forward\u3001\u8bc4\u4f30\u548c\u666e\u901a\u5de5\u7a0b\u4fee\u590d' -- the four untrained groups from one frozen mapping, their formal eval-set-1 evaluation and the analysis; '\u4e3a\u672c\u8f6e\u5efa\u7acb\u72ec\u7acb\u7684\u5b9e\u9a8c\u4e0e\u8d44\u6e90\u8bb0\u5f55\uff0c\u4e0d\u80fd\u590d\u7528\u5df2\u5173\u95ed Research A grant ... \u9075\u5b88\u771f\u5b9e\u786c\u4e0a\u9650'; not authorized: recovery training, a full search, Stage-6 work. The amounts are the real limits read live 2026-11-13T09:44Z: the ceiling is the project cap's remainder (5.40) rounded down, the cap stays $1,000, and one session is held to $24 so the balance keeps about a week of the volumes' storage.",
+ "authorizes": "RI-S1's phase only (scope): its session kinds ['diagnosis'], inside ceiling_usd cumulatively, per_session_hard_cap_usd per session and the project cap; one-use artifacts from `issue`; no other study and no follow-up",
+ "granted_utc": "2026-11-13",
+ "proposal": {
+  "path": "logs/stages/stage-1/reasoning_inheritance/plans/proposal.json",
+  "sha256": "87972c1839f4fdbab5d9c3f113b5195729817c0bd11c7a6c0acf1f4cfbc356b6"
+ },
+ "study_identity_sha256": "cd84cc1d8c36f11874a42c0446f427e65b18cd4aac4e733bbce4e894908e46ee",
+ "granted_at_commit": "50ed1a4f1f0d4dfdaa1cf30436c7e1ce5bc4ebc2"
+}
