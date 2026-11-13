@@ -286,8 +286,12 @@ recorded each unit's identity, inputs and content hash together with the exact
 reason — but nothing was preserved. Before a long experiment that will produce
 large completed artifacts, confirm that a durable large-artifact backend exists
 with room for them. Git and hub metadata may hold identities and hashes; they
-are not where the bytes go. Deleting historical objects or buying storage is a
-maintainer decision, never an autonomous repair.
+are not where the bytes go. Buying storage, and deleting any historical object
+that section 2.5's standing checkpoint-retirement authorization does not cover
+(logs, evidence, a weight with a live or declared consumer, an anchor or release
+artifact), is a maintainer decision, never an autonomous repair. A completed
+historical checkpoint whose weight bytes meet 2.5's conditions is retired under
+that standing rule, with its tombstone, and needs no separate decision.
 
 #### Keep experiment records minimal
 
@@ -1231,6 +1235,15 @@ output, or a failed training recipe; it MUST be inspected separately for valid
 reasoning, repetition, degeneration, delimiter errors, and the presence of a
 final answer.
 
+Censoring describes the LENGTH, not the answer. In length and termination
+statistics a context-limit hit is right-censored: its length is a lower bound,
+and it is reported as censored, apart from natural terminations and
+degeneration stops. In the formal score the unit's registered scorer decides as
+for every other sample: a sample without a valid final answer is not correct,
+and it stays in the denominator. A censored sample is never dropped from a
+denominator, never counted as a success, and never scored under a rule of its
+own.
+
 The complete raw generation MUST be saved for every evaluated sample.
 
 Evaluation MUST separately report natural termination, context-limit hits,
@@ -1258,7 +1271,8 @@ never changed as a performance optimization.
 | Stage 3 recovery / SFT / KD training | the same |
 | Stage 0 | not packed by rule; data a Stage-1 forward consumes is read under Stage 1's rule |
 | Stage 2 | prepares teacher-native data; builds Stage 3's packed training set |
-| Stage 4 / 5 rollout and on-policy training, Stage 6 deployment | the real context, fixed BEFORE generation; standard causal attention; rollouts are batched (padding), never packed together or re-composed after generation |
+| Stage 4 / 5 rollout and on-policy training; deployment validation | the real context, fixed BEFORE generation; standard causal attention; rollouts are batched (padding), never packed together or re-composed after generation |
+| Stage 6 (recurrent depth) | decided by its own research design and recorded as scientific identity before its first run; neither Stage 3's packing nor the deployment rule above is inherited by default |
 
 The packing is the maintainer's reference algorithm
 (`aadistill.data.sequence_packing.packing_conversation`, `truncate=True`) over a
@@ -1778,6 +1792,10 @@ Allowed status values should include:
 - released;
 - paused;
 - failed.
+
+`stage6-passed` means the Stage 6 in force when it was recorded: deployment
+validation before 2026-11-13, recurrent depth after (4.8). `released` requires
+deployment validation whatever stage a model reached.
 
 Do not list unsupported or imaginary models as supported.
 
@@ -2384,7 +2402,42 @@ Validation gate:
 
 ---
 
-### 4.8 Stage 6 — Deployment validation
+### 4.8 Stage 6 — Recurrent depth: shared-parameter repeated execution
+
+**MAINTAINER DECISION 2026-11-13.** Stage 6 is the study of **recurrent
+forward execution**: a block (or a span of blocks) whose parameters are shared
+and executed repeatedly, one recurrent iteration after another, and the
+training such a student needs. It replaces Stage 6's earlier role; deployment
+validation is kept, as an engineering duty rather than a numbered stage
+(below). There is no Stage 7.
+
+Goal: find out whether repeated execution of shared parameters recovers depth
+-- and with it reasoning -- that a compressed student lost, at a parameter count
+the deployment budget allows, and at what compute and latency cost.
+
+What a Stage-6 design must decide and record before its first run, because
+nothing is inherited by default: which blocks are shared and how many
+recurrent iterations run (fixed, or chosen per input); how the shared block is
+initialized (from which teacher blocks, under which mapping); the training data,
+its organisation and packing (P19), its objective and its teacher lineage
+(P17.1); and how compute is counted (recurrent iterations multiply FLOPs per
+token without adding parameters, so parameter-matched, FLOPs-matched and
+latency-matched comparisons are different comparisons and are reported
+separately). Its evaluation is the permanent registry's (P10.3), each
+capability apart.
+
+Default action policy: as Stage 5's -- toy implementations, unit tests and small
+local runs directly; serious training, paid GPUs or a new official recipe after
+the maintainer approves it.
+
+**History.** Records written before 2026-11-13 that name "Stage 6" mean
+deployment validation and keep that meaning; nothing is rewritten.
+
+### Deployment validation (engineering duty, at any stage)
+
+Before a checkpoint is proposed for release, or claimed to run in a target
+runtime, it passes deployment validation. This was Stage 6 until 2026-11-13; its
+requirements are unchanged.
 
 Goal: confirm that the student works in the intended runtime, target precision, and deployment environment.
 

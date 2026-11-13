@@ -24,7 +24,7 @@ compression ratios and deployment environments: the reusable core in
 `src/aadistill/` takes models, targets and budgets as inputs rather than
 hard-coding them. The work so far is a dense text baseline, distilling
 [Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507)
-into a sub-1B student. Other model families, MoE and multimodal models are
+and the hybrid [Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B) into sub-1B students. Other model families, MoE and multimodal models are
 design goals and have not been validated.
 
 ---
@@ -52,7 +52,7 @@ The first dense-model compression experiment was kicked off with this instructio
 
 > Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
 
-Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. Current state and next actions are in [`logs/state/current.md`](./logs/state/current.md).
+Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible work — including small GPU checks on hardware already available — and on paid GPU work inside a maintainer-approved budget and scope (implementation, repair and retries included); anything that would exceed that budget or scope, or is public-facing, needs the maintainer's decision first. Current state and next actions are in [`logs/state/current.md`](./logs/state/current.md).
 
 **Example prompts.** Open the repository with your agent and ask in plain language; it reads `AGENTS.md` and the experiment records before it changes anything.
 
@@ -146,7 +146,7 @@ quietly dropped, because the loss bounds what can be re-measured.
 
 Official records are stricter than ordinary experiments (AGENTS.md 3.8): exact commit, command, hardware, data and tokenizer hashes, budget, metric log, and maintainer approval.
 
-**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including every Stage 3 run in `logs/stages/stage-3/history/EXPERIMENTS.md` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and every number on this page is an attempt, not a record.
+**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including every Stage 3 run in `logs/stages/stage-3/history/EXPERIMENTS.md` — is baseline work. The **first record point** will be written once the baseline is carried through deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and every number on this page is an attempt, not a record.
 
 This applies to the Stage 0/1 initialization result recorded in the experiment logs
 ([`logs/state/experiment_index.md`](./logs/state/experiment_index.md)) as well: it is a strong,
@@ -177,9 +177,9 @@ _No records yet._
 
 _No records yet._
 
-### 🚀 Stage 6 — Deployment validation
+### 🚀 Stage 6 — Recurrent depth (shared-parameter repeated execution)
 
-_No records yet._
+_No records yet._ Stage 6 was deployment validation until 2026-11-13; deployment validation is now an engineering duty before any release ([`AGENTS.md`](./AGENTS.md) 4.8).
 
 ---
 

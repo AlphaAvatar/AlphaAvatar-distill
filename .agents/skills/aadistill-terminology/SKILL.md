@@ -22,7 +22,7 @@ Replies to the maintainer are in Chinese; dates are UTC.
 | **任务类别 / 任务数** (task categories) | how many KINDS of task: GSM8K, HotpotQA, grid_transform, a rule family... | a count of examples |
 | **打包序列** (packed sequences) | the 8,192-token training sequences turns are packed into | "block" |
 | **监督 token** (unique supervised tokens) | the generated tokens a turn trains on (CE/KD positions), counted once | "tokens" alone, or packed sequences as a data size |
-| **监督 token 曝光量** (supervised-token exposure) | unique supervised tokens x epochs | the unique count |
+| **监督 token 曝光量** (supervised-token exposure) | every supervised position the packed sequences actually train on, summed over epochs: unique supervised tokens x epochs only without packing repeats; a fragment re-read from its first token in the next sequence (P19 `prefix_restart_v1`) adds its repeated prefix, so exposure is counted from the packed sequences, never derived | the unique count |
 | **非 padding token** (non-padding tokens) | prompt/context plus supervised tokens actually in the sequences | "real / executed positions" |
 | **提示 / 上下文 token** (prompt / context tokens) | non-padding tokens that are not supervised | |
 | **推理 token / 答案 token** | supervised tokens through `</think>` / after it | |
@@ -78,7 +78,7 @@ supervised tokens, never in packed sequences.
 | **达到上下文上限** (context-limit hit) | evaluation reached the model's supported context (40,960 for the hybrid) |
 
 `truncated_at_cap` counts EVERY non-EOS stop, most of them degeneration stops: never call it "truncated at the
-context limit". Right-censored observations are reported as censored, not as wrong answers.
+context limit". A context-limit hit is right-censored in LENGTH statistics (its length is a lower bound, reported apart from natural and degeneration stops). It is not exempt from SCORING: the unit's registered scorer decides, a sample without a valid final answer is not correct and stays in the denominator (AGENTS.md P18).
 
 ## 6. Full-search data roles (three different sets)
 
