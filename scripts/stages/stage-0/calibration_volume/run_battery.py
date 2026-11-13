@@ -237,7 +237,9 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                 d = degeneration_check(st["gen"])
                 if d:
                     st["degen"], st["finish"] = d, "degeneration"
-                    eng.abort_request(out.request_id)
+                    #: a LIST: vLLM V1's LLMEngine.abort_request(request_ids: list[str]) iterates its argument,
+                    #: so a bare id string aborted nothing and the request generated on to the context limit
+                    eng.abort_request([out.request_id])
                     pending.pop(out.request_id)
                     finish(st)
         if time.time() - last_log > 60:

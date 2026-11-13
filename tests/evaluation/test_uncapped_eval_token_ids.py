@@ -85,8 +85,13 @@ class Engine:
         self.alive.append(rid)
     def has_unfinished_requests(self):
         return bool(self.alive)
-    def abort_request(self, rid):
-        self.alive.remove(rid)
+    def abort_request(self, request_ids):
+        #: vLLM V1's signature: a LIST of ids. A bare string used to be passed and aborted nothing (the engine
+        #: iterated its characters); this fake refuses one, so that defect cannot come back unseen
+        if isinstance(request_ids, str) or not isinstance(request_ids, list):
+            raise TypeError(f"abort_request takes a list of request ids, not {type(request_ids).__name__}")
+        for rid in request_ids:
+            self.alive.remove(rid)
     def step(self):
         outs = []
         for rid in list(self.alive):

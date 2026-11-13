@@ -434,7 +434,8 @@ def main() -> int:
                     d = degeneration.check(st["gen"])
                     if d:
                         st["degen"] = d
-                        eng.abort_request(out.request_id)
+                        #: a LIST (vLLM V1: abort_request(request_ids: list[str])); a bare string aborted nothing
+                        eng.abort_request([out.request_id])
                         st["finish"] = "degeneration"
                         done[out.request_id] = st
                         pending.pop(out.request_id, None)

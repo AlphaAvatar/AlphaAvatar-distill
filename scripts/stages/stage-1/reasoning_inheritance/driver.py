@@ -792,7 +792,9 @@ def evaluate(out: Path, work: Path, vllm_py: str, status: Status, attempt: str, 
         status.mark(f"EVAL_START:{name}:{kind}")
         t0 = time.time()
         run = fluid if kind == "fluid" else capability
-        res = run(pkg, unit_dir, name, mode, vllm_py, env, attempt, opts)
+        mns = (opts or {}).get("max_num_seqs")
+        unit_opts = {**(opts or {}), "max_num_seqs": (mns.get(g) if isinstance(mns, dict) else mns)}
+        res = run(pkg, unit_dir, name, mode, vllm_py, env, attempt, unit_opts)
         summary.setdefault(name, {})[kind] = {**res, "seconds": round(time.time() - t0, 1), "utc": utc()}
         write_json(out / "state" / "evaluation.json", summary)
         status.mark(f"EVAL_OK:{name}:{kind}")
@@ -876,7 +878,8 @@ def main(argv=None) -> int:
     ap.add_argument("--kinds", default="", help="only these unit kinds this run: fluid,capability")
     ap.add_argument("--modes", default="", help="only these modes this run: H-T,H-N")
     ap.add_argument("--groups", default="", help="only these groups this run: D,W,DW")
-    ap.add_argument("--max-num-seqs", type=int, default=None, help="the engines' concurrent-sequence limit")
+    ap.add_argument("--max-num-seqs", default=None,
+                    help="the engines' concurrent-sequence limit: one integer, or per group, e.g. D=7,W=6,DW=8")
     ap.add_argument("--engine-metrics", action="store_true", help="the fluid runner records engine metrics")
     ap.add_argument("--shuffle-submission", default=None,
                     help="a key: the fluid tasks reach the engine in sha256(key|task id) order (seeds unchanged)")
@@ -934,7 +937,12 @@ def main(argv=None) -> int:
                 report["phases"]["state_eval"] = {"status": "measured", "seconds": round(time.time() - t0, 1)}
         write_json(out / "state" / "report.json", report)
         if "evaluate" in phases:
-            opts = {"max_num_seqs": a.max_num_seqs, "engine_metrics": a.engine_metrics,
+            mns = a.max_num_seqs
+            if mns and "=" in mns:      #: per group, e.g. D=7,W=6,DW=8 (floor of each engine's KV cache / context)
+                mns = {k: int(v) for k, v in (x.split("=") for x in mns.split(",") if x)}
+            elif mns:
+                mns = int(mns)
+            opts = {"max_num_seqs": mns, "engine_metrics": a.engine_metrics,
                     "shuffle_submission": a.shuffle_submission,
                     "time_box_s": (a.time_box_minutes * 60 if a.time_box_minutes else None)}
             report["phases"]["evaluate"] = evaluate(

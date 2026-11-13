@@ -136,7 +136,7 @@ def main() -> int:
                     last_check = len(gen_ids)
                     degen = degeneration.check(gen_ids)
                     if degen:
-                        eng.abort_request(rid)
+                        eng.abort_request([rid])         #: a list (vLLM V1); a bare string aborted nothing
                         finish = "degeneration"
                         break
         dt = time.time() - t0

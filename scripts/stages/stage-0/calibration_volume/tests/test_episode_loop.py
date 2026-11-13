@@ -57,8 +57,11 @@ class Engine:
         out, self.queue = self.queue, []
         return out
 
-    def abort_request(self, rid):
-        pass
+    def abort_request(self, request_ids):
+        #: vLLM V1's signature: a LIST of ids. A bare string used to be passed and aborted nothing (the engine
+        #: iterated its characters); this fake refuses one, so that defect cannot come back unseen
+        if isinstance(request_ids, str) or not isinstance(request_ids, list):
+            raise TypeError(f"abort_request takes a list of request ids, not {type(request_ids).__name__}")
 
 
 def _run(tasks, reply, limit=10 ** 6, on_done=None):
@@ -193,3 +196,57 @@ def test_a_raw_unicode_line_separator_inside_a_task_does_not_split_it(tmp_path):
     p = tmp_path / "tasks.jsonl"
     p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
     assert read_tasks(p) == rows
+
+
+class StreamingEngine:
+    """Emits each request's tokens 4 at a time (unfinished outputs), as vLLM does, until it ends or is aborted."""
+
+    def __init__(self, n_tokens):
+        self.n, self.alive, self.made, self.steps_after_abort = n_tokens, {}, {}, 0
+        self.aborted = []
+
+    def add_request(self, rid, prompt, params):
+        self.alive[rid] = 0
+
+    def has_unfinished_requests(self):
+        return bool(self.alive)
+
+    def abort_request(self, request_ids):
+        if isinstance(request_ids, str) or not isinstance(request_ids, list):
+            raise TypeError("abort_request takes a list of request ids (vLLM V1)")
+        for rid in request_ids:
+            self.aborted.append(rid)
+            self.alive.pop(rid, None)
+
+    def step(self):
+        outs = []
+        for rid in list(self.alive):
+            k = self.alive[rid]
+            ids = [ord("a")] * 4
+            self.alive[rid] = k + 4
+            done = self.alive[rid] >= self.n
+            if done:
+                del self.alive[rid]
+            self.made[rid] = self.made.get(rid, 0) + 4
+            outs.append(SimpleNamespace(request_id=rid, finished=done,
+                                        outputs=[SimpleNamespace(token_ids=ids, finish_reason="length" if done else None)]))
+        return outs
+
+
+def test_a_degeneration_stop_aborts_the_request_in_the_engine():
+    """A request stopped for degeneration must leave the engine. vLLM V1 takes a LIST of ids; the runner passed a
+    bare string, which aborted nothing, so every stopped request generated on to the context limit (zombies that
+    held the KV cache and the concurrency slots; RI-S1 attempts 2-5). Stopped at 64 tokens, it is never stepped
+    again."""
+    tasks = [json.loads(l) for l in Path(DEV).read_text().splitlines()]
+    tasks = [t for t in tasks if not t["interactive"]][:3]
+    eng = StreamingEngine(n_tokens=4096)
+    eps, rounds, _ = run_episodes(
+        tasks, tok=Tok(), eng=eng, make_sampling=lambda n, seed: n, limit=10 ** 6, ctx=10 ** 6,
+        stop_ids=[EOS], mode="eval", seed_base=0, system="s", check_every=16,
+        degeneration_check=lambda ids: {"kind": "cycle"} if len(ids) >= 64 else None,
+        split_generation=split_generation, template_opens_think=template_opens_think, label="t")
+    assert rounds == len(tasks)
+    assert all(e["end"] == "degeneration" for e in eps.values())
+    assert sorted(eng.aborted) == sorted(f"{t['task_id']}::0" for t in tasks)
+    assert all(made <= 64 for made in eng.made.values()), eng.made

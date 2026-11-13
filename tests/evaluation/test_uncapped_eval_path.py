@@ -54,8 +54,13 @@ class StubEngine:
     def has_unfinished_requests(self):
         return bool(self.alive)
 
-    def abort_request(self, rid):
-        self.alive.discard(rid)
+    def abort_request(self, request_ids):
+        #: vLLM V1's signature: a LIST of ids. A bare string used to be passed and aborted nothing (the engine
+        #: iterated its characters); this fake refuses one, so that defect cannot come back unseen
+        if isinstance(request_ids, str) or not isinstance(request_ids, list):
+            raise TypeError(f"abort_request takes a list of request ids, not {type(request_ids).__name__}")
+        for rid in request_ids:
+            self.alive.discard(rid)
 
     def step(self):
         self.steps += 1
@@ -91,7 +96,7 @@ def reference_loop(engine, pending, check_every=256, degeneration_stop=True):
                 d = degeneration.check(st["gen"])
                 if d:
                     st["degen"] = d
-                    engine.abort_request(out.request_id)
+                    engine.abort_request([out.request_id])
                     st["finish"] = "degeneration"
                     done[out.request_id] = st
                     pending.pop(out.request_id, None)
@@ -120,7 +125,7 @@ def corrected_loop(engine, pending, check_every=256, degeneration_stop=True):
                 d = degeneration.check(st["gen"])
                 if d:
                     st["degen"] = d
-                    engine.abort_request(out.request_id)
+                    engine.abort_request([out.request_id])
                     st["finish"] = "degeneration"
                     done[out.request_id] = st
                     pending.pop(out.request_id, None)

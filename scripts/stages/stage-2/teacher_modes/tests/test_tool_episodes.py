@@ -61,8 +61,11 @@ class Engine:
         out, self.queue = self.queue, []
         return out
 
-    def abort_request(self, rid):
-        pass
+    def abort_request(self, request_ids):
+        #: vLLM V1's signature: a LIST of ids. A bare string used to be passed and aborted nothing (the engine
+        #: iterated its characters); this fake refuses one, so that defect cannot come back unseen
+        if isinstance(request_ids, str) or not isinstance(request_ids, list):
+            raise TypeError(f"abort_request takes a list of request ids, not {type(request_ids).__name__}")
 
 
 def run(tasks, replies):
