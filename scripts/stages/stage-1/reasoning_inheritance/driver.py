@@ -694,12 +694,31 @@ def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, e
     return rec
 
 
-def evaluate(out: Path, work: Path, vllm_py: str, status: Status, attempt: str) -> dict:
-    d = design()
+#: the order units are generated in. ``pair``: each (group, mode) of the design's order, its fluid unit then its
+#: capability units. ``mode_then_unit``: for each mode in the design's order, every group's fluid unit, then every
+#: group's capability units -- the same pairs and units, so a budget that ends early leaves the primary axis (fluid,
+#: H-T) measured for every group rather than everything for one group. The order decides nothing about a result:
+#: every item has its fixed seed, and a unit is complete or absent.
+UNIT_ORDERS = ("pair", "mode_then_unit")
+
+
+def evaluation_plan(order: str) -> list[tuple[str, str, str]]:
+    """(group, mode, unit kind) in execution order (`UNIT_ORDERS`)."""
+    pairs = [tuple(x) for x in design()["evaluation"]["order"]]
+    if order == "pair":
+        return [(g, m, k) for g, m in pairs for k in ("fluid", "capability")]
+    if order == "mode_then_unit":
+        modes = list(dict.fromkeys(m for _, m in pairs))
+        return [(g, m, k) for m in modes for k in ("fluid", "capability") for g, mm in pairs if mm == m]
+    raise DriverError(f"unit order {order!r} is not one of {UNIT_ORDERS}")
+
+
+def evaluate(out: Path, work: Path, vllm_py: str, status: Status, attempt: str, order: str = "pair") -> dict:
     env = {**os.environ, "HF_HUB_OFFLINE": "1"}
     mrec = read_json(out / "records" / "mapping.json")
     summary = read_json(out / "state" / "evaluation.json") if (out / "state" / "evaluation.json").is_file() else {}
-    for g, mode in d["evaluation"]["order"]:
+    summary["_unit_order"] = order
+    for g, mode, kind in evaluation_plan(order):
         name = f"{g}_{mode}"
         unit_dir = out / "eval" / name
         pkg = work / "packages" / g
@@ -707,14 +726,13 @@ def evaluate(out: Path, work: Path, vllm_py: str, status: Status, attempt: str) 
             pk = package(work / "groups" / g, pkg)
             pk["artifact_digest"] = mrec["groups"][g]["artifact_digest"]
             write_json(out / "eval" / f"package_{g}.json", pk)
-        label = f"{g}_{mode}"
-        status.mark(f"EVAL_START:{name}")
+        status.mark(f"EVAL_START:{name}:{kind}")
         t0 = time.time()
-        f = fluid(pkg, unit_dir, label, mode, vllm_py, env, attempt)
-        c = capability(pkg, unit_dir, label, mode, vllm_py, env, attempt)
-        summary[name] = {"fluid": f, "capability": c, "seconds": round(time.time() - t0, 1), "utc": utc()}
+        run = fluid if kind == "fluid" else capability
+        res = run(pkg, unit_dir, name, mode, vllm_py, env, attempt)
+        summary.setdefault(name, {})[kind] = {**res, "seconds": round(time.time() - t0, 1), "utc": utc()}
         write_json(out / "state" / "evaluation.json", summary)
-        status.mark(f"EVAL_OK:{name}")
+        status.mark(f"EVAL_OK:{name}:{kind}")
     return summary
 
 
@@ -790,6 +808,7 @@ def main(argv=None) -> int:
     ap.add_argument("--vllm-python", default="/opt/vllm/bin/python")
     ap.add_argument("--resume", default=None)
     ap.add_argument("--phases", default="contract,mapping,relay,state_eval,evaluate")
+    ap.add_argument("--unit-order", default="pair", choices=UNIT_ORDERS)
     ap.add_argument("--check-only", action="store_true")
     ap.add_argument("--child", default=None, help=argparse.SUPPRESS)
     a = ap.parse_args(argv)
@@ -842,7 +861,7 @@ def main(argv=None) -> int:
                 report["phases"]["state_eval"] = {"status": "measured", "seconds": round(time.time() - t0, 1)}
         write_json(out / "state" / "report.json", report)
         if "evaluate" in phases:
-            report["phases"]["evaluate"] = evaluate(out, work, a.vllm_python, status, a.run_id)
+            report["phases"]["evaluate"] = evaluate(out, work, a.vllm_python, status, a.run_id, a.unit_order)
         report["status"] = "COMPLETE"
     except BaseException as exc:  # noqa: BLE001
         report["status"] = "FAILED"
