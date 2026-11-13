@@ -1,0 +1,267 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.cost_profile/v1",
+ "units": {
+  "D_H-T": [
+   {
+    "store": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store",
+    "unit": "D_H-T",
+    "sealed": 160,
+    "runs": [
+     {
+      "attempt": "ri_diagnosis_20261113_105643",
+      "time_boxed": null,
+      "seconds": 5514.9,
+      "execution": null,
+      "tasks_requested": 720,
+      "sealed_in_run": 160,
+      "started_at_end": null,
+      "running_at_end": null,
+      "ends": {
+       "answered": 13,
+       "degeneration": 147
+      },
+      "stops": {
+       "eos": 13,
+       "degeneration": 147
+      },
+      "degeneration_kinds": {
+       "cycle": 55,
+       "low_novelty": 53,
+       "rambling": 39
+      },
+      "context_limit_hits": 0,
+      "generated_tokens": {
+       "p50": 1792,
+       "max": 4608,
+       "over_4096": 2
+      },
+      "throughput_tok_s": {
+       "first": null,
+       "last": null,
+       "min": null
+      },
+      "median_running_at_full_cache": null,
+      "median_tok_s_at_full_cache": null,
+      "samples": 0
+     }
+    ],
+    "projection": null
+   },
+   {
+    "store": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store",
+    "unit": "D_H-T",
+    "sealed": 190,
+    "runs": [
+     {
+      "attempt": "ri_diagnosis_20261113_105643",
+      "time_boxed": null,
+      "seconds": 5514.9,
+      "execution": null,
+      "tasks_requested": 720,
+      "sealed_in_run": 190,
+      "started_at_end": null,
+      "running_at_end": null,
+      "ends": {
+       "answered": 18,
+       "degeneration": 172
+      },
+      "stops": {
+       "eos": 18,
+       "degeneration": 172
+      },
+      "degeneration_kinds": {
+       "cycle": 67,
+       "low_novelty": 63,
+       "rambling": 42
+      },
+      "context_limit_hits": 0,
+      "generated_tokens": {
+       "p50": 1792,
+       "max": 5120,
+       "over_4096": 3
+      },
+      "throughput_tok_s": {
+       "first": null,
+       "last": null,
+       "min": null
+      },
+      "median_running_at_full_cache": null,
+      "median_tok_s_at_full_cache": null,
+      "samples": 0
+     },
+     {
+      "attempt": "ri_diagnosis_20261113_130551",
+      "time_boxed": true,
+      "seconds": 3000.1,
+      "execution": {
+       "max_num_seqs": 12,
+       "engine_metrics": true,
+       "time_box_s": 3000.0,
+       "shuffle_submission": "ri-s1-a3"
+      },
+      "tasks_requested": 560,
+      "sealed_in_run": 30,
+      "started_at_end": 42,
+      "running_at_end": 12,
+      "ends": {
+       "degeneration": 25,
+       "answered": 5
+      },
+      "stops": {
+       "degeneration": 25,
+       "eos": 5
+      },
+      "degeneration_kinds": {
+       "cycle": 12,
+       "low_novelty": 10,
+       "rambling": 3
+      },
+      "context_limit_hits": 0,
+      "generated_tokens": {
+       "p50": 1792,
+       "max": 5120,
+       "over_4096": 1
+      },
+      "throughput_tok_s": {
+       "first": 836.4,
+       "last": 222.1,
+       "min": 55.9
+      },
+      "median_running_at_full_cache": 9,
+      "median_tok_s_at_full_cache": 154.5,
+      "samples": 294
+     }
+    ],
+    "projection": {
+     "started": 42,
+     "long_runs": 13,
+     "long_share": 0.31,
+     "concurrency_at_full_cache": 9,
+     "full_cache_tok_s": 154.5,
+     "wave_hours": 0.66,
+     "projected_unit_gpu_hours": 16.4,
+     "projected_unit_usd": 17.9,
+     "basis": "started tasks = sealed in the run + running at the box's end; long runs = still running then or sealed past 4,096 tokens; each long run taken to the 40,960-token context at the measured full-cache rate; short runs (seconds each) neglected"
+    }
+   }
+  ],
+  "DW_H-T": [
+   {
+    "store": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store",
+    "unit": "DW_H-T",
+    "sealed": 24,
+    "runs": [
+     {
+      "attempt": "ri_diagnosis_20261113_130551",
+      "time_boxed": true,
+      "seconds": 3000.0,
+      "execution": {
+       "max_num_seqs": 12,
+       "engine_metrics": true,
+       "time_box_s": 3000.0,
+       "shuffle_submission": "ri-s1-a3"
+      },
+      "tasks_requested": 720,
+      "sealed_in_run": 24,
+      "started_at_end": 35,
+      "running_at_end": 11,
+      "ends": {
+       "degeneration": 24
+      },
+      "stops": {
+       "degeneration": 24
+      },
+      "degeneration_kinds": {
+       "cycle": 16,
+       "low_novelty": 8
+      },
+      "context_limit_hits": 0,
+      "generated_tokens": {
+       "p50": 768,
+       "max": 8448,
+       "over_4096": 1
+      },
+      "throughput_tok_s": {
+       "first": 1628.2,
+       "last": 177.8,
+       "min": 106.6
+      },
+      "median_running_at_full_cache": 11,
+      "median_tok_s_at_full_cache": 184.1,
+      "samples": 294
+     }
+    ],
+    "projection": {
+     "started": 35,
+     "long_runs": 12,
+     "long_share": 0.343,
+     "concurrency_at_full_cache": 11,
+     "full_cache_tok_s": 184.1,
+     "wave_hours": 0.68,
+     "projected_unit_gpu_hours": 15.3,
+     "projected_unit_usd": 16.6,
+     "basis": "started tasks = sealed in the run + running at the box's end; long runs = still running then or sealed past 4,096 tokens; each long run taken to the 40,960-token context at the measured full-cache rate; short runs (seconds each) neglected"
+    }
+   }
+  ],
+  "W_H-T": [
+   {
+    "store": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store",
+    "unit": "W_H-T",
+    "sealed": 24,
+    "runs": [
+     {
+      "attempt": "ri_diagnosis_20261113_130551",
+      "time_boxed": true,
+      "seconds": 3000.0,
+      "execution": {
+       "max_num_seqs": 12,
+       "engine_metrics": true,
+       "time_box_s": 3000.0,
+       "shuffle_submission": "ri-s1-a3"
+      },
+      "tasks_requested": 720,
+      "sealed_in_run": 24,
+      "started_at_end": 36,
+      "running_at_end": 12,
+      "ends": {
+       "degeneration": 24
+      },
+      "stops": {
+       "degeneration": 24
+      },
+      "degeneration_kinds": {
+       "cycle": 9,
+       "low_novelty": 15
+      },
+      "context_limit_hits": 0,
+      "generated_tokens": {
+       "p50": 768,
+       "max": 12800,
+       "over_4096": 1
+      },
+      "throughput_tok_s": {
+       "first": 1450.8,
+       "last": 249.9,
+       "min": 81.3
+      },
+      "median_running_at_full_cache": 9,
+      "median_tok_s_at_full_cache": 142.6,
+      "samples": 287
+     }
+    ],
+    "projection": {
+     "started": 36,
+     "long_runs": 13,
+     "long_share": 0.361,
+     "concurrency_at_full_cache": 9,
+     "full_cache_tok_s": 142.6,
+     "wave_hours": 0.72,
+     "projected_unit_gpu_hours": 20.7,
+     "projected_unit_usd": 22.6,
+     "basis": "started tasks = sealed in the run + running at the box's end; long runs = still running then or sealed past 4,096 tokens; each long run taken to the 40,960-token context at the measured full-cache rate; short runs (seconds each) neglected"
+    }
+   }
+  ]
+ }
+}

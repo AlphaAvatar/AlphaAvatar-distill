@@ -752,7 +752,7 @@ UNIT_ORDERS = ("pair", "mode_then_unit")
 
 
 def evaluation_plan(order: str, groups: list[str] | None = None, kinds: list[str] | None = None,
-                    modes: list[str] | None = None) -> list[tuple[str, str, str]]:
+                    modes: list[str] | None = None, only_groups: list[str] | None = None) -> list[tuple[str, str, str]]:
     """(group, mode, unit kind) in execution order (`UNIT_ORDERS`); ``groups`` reorders the groups within a mode
     (an execution order, never a selection: an omitted group keeps its design place after them), ``kinds`` keeps
     only those unit kinds for this run."""
@@ -769,18 +769,19 @@ def evaluation_plan(order: str, groups: list[str] | None = None, kinds: list[str
         plan = [(g, m, k) for m in in_order for k in ("fluid", "capability") for g, mm in pairs if mm == m]
     else:
         raise DriverError(f"unit order {order!r} is not one of {UNIT_ORDERS}")
-    return [x for x in plan if (not kinds or x[2] in kinds) and (not modes or x[1] in modes)]
+    return [x for x in plan if (not kinds or x[2] in kinds) and (not modes or x[1] in modes)
+            and (not only_groups or x[0] in only_groups)]
 
 
 def evaluate(out: Path, work: Path, vllm_py: str, status: Status, attempt: str, order: str = "pair",
              groups: list[str] | None = None, kinds: list[str] | None = None, opts: dict | None = None,
-             modes: list[str] | None = None) -> dict:
+             modes: list[str] | None = None, only_groups: list[str] | None = None) -> dict:
     env = {**os.environ, "HF_HUB_OFFLINE": "1"}
     mrec = read_json(out / "records" / "mapping.json")
     summary = read_json(out / "state" / "evaluation.json") if (out / "state" / "evaluation.json").is_file() else {}
-    summary["_execution"] = {"unit_order": order, "groups": groups, "kinds": kinds, "modes": modes, **(opts or {}),
-                             "attempt": attempt}
-    for g, mode, kind in evaluation_plan(order, groups, kinds, modes):
+    summary["_execution"] = {"unit_order": order, "groups": groups, "kinds": kinds, "modes": modes,
+                             "only_groups": only_groups, **(opts or {}), "attempt": attempt}
+    for g, mode, kind in evaluation_plan(order, groups, kinds, modes, only_groups):
         name = f"{g}_{mode}"
         unit_dir = out / "eval" / name
         pkg = work / "packages" / g
@@ -874,6 +875,7 @@ def main(argv=None) -> int:
     ap.add_argument("--group-order", default="", help="execution order of the groups within a mode, e.g. W,DW,D")
     ap.add_argument("--kinds", default="", help="only these unit kinds this run: fluid,capability")
     ap.add_argument("--modes", default="", help="only these modes this run: H-T,H-N")
+    ap.add_argument("--groups", default="", help="only these groups this run: D,W,DW")
     ap.add_argument("--max-num-seqs", type=int, default=None, help="the engines' concurrent-sequence limit")
     ap.add_argument("--engine-metrics", action="store_true", help="the fluid runner records engine metrics")
     ap.add_argument("--shuffle-submission", default=None,
@@ -939,7 +941,8 @@ def main(argv=None) -> int:
                 out, work, a.vllm_python, status, a.run_id, a.unit_order,
                 groups=[g for g in a.group_order.split(",") if g] if a.group_order else None,
                 kinds=[k for k in a.kinds.split(",") if k] if a.kinds else None, opts=opts,
-                modes=[m for m in a.modes.split(",") if m] if a.modes else None)
+                modes=[m for m in a.modes.split(",") if m] if a.modes else None,
+                only_groups=[g for g in a.groups.split(",") if g] if a.groups else None)
         ev_state = (report["phases"].get("evaluate") or {})
         report["incomplete_units"] = sorted(f"{name}:{kind}" for name, v in ev_state.items() if not name.startswith("_")
                                             for kind, r in v.items() if (r or {}).get("status") != "complete")
