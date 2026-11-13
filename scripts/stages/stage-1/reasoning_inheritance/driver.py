@@ -566,8 +566,41 @@ def sealed_records(unit_dir: Path) -> dict[str, dict]:
     return out
 
 
-def fluid(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: dict, attempt: str) -> dict:
-    """fluid_reasoning_720 with streaming and resume (module docstring). Returns the unit's record."""
+def _run_bounded(cmd: list[str], log: Path, env: dict, time_box_s: float | None, poll=None) -> tuple[int, bool]:
+    """``cmd`` in its own process group, its output in ``log``; past ``time_box_s`` the whole group is stopped.
+    Returns (exit code, stopped by the time box). ``poll()`` runs every 30 s while it lives."""
+    import signal
+    t0 = time.time()
+    with log.open("w") as lf:
+        proc = subprocess.Popen(cmd, cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT, start_new_session=True)
+        boxed = False
+        while proc.poll() is None:
+            time.sleep(30)
+            if poll is not None:
+                poll()
+            if time_box_s and time.time() - t0 > time_box_s and proc.poll() is None:
+                boxed = True
+                os.killpg(proc.pid, signal.SIGTERM)
+                try:
+                    proc.wait(timeout=120)
+                except subprocess.TimeoutExpired:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                    proc.wait()
+    return proc.returncode, boxed
+
+
+def exec_args(opts: dict) -> list[str]:
+    """The runner flags of the execution knobs (never the protocol's)."""
+    return ((["--max-num-seqs", str(opts["max_num_seqs"])] if opts.get("max_num_seqs") else []) +
+            (["--engine-metrics"] if opts.get("engine_metrics") else []))
+
+
+def fluid(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: dict, attempt: str,
+          opts: dict | None = None) -> dict:
+    """fluid_reasoning_720 with streaming and resume (module docstring). Returns the unit's record. ``opts``: the
+    execution knobs (``max_num_seqs``, ``engine_metrics``) and ``time_box_s``: a run stopped by its time box keeps
+    every sealed episode and leaves the unit incomplete, to be resumed."""
+    opts = opts or {}
     from shared import eval_sets as ES
     d = design()
     ev = d["evaluation"]
@@ -581,6 +614,10 @@ def fluid(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: d
     tid = lambda t: t["task_id"]  # noqa: E731
     done = sealed_records(unit_dir)
     todo = [t for t in tasks if tid(t) not in done]
+    if opts.get("shuffle_submission"):
+        #: the ORDER requests reach the engine (which it starts first under a concurrency limit), never an item's
+        #: seed: each item's seed is derived from its own id. A fixed key, so the order is reproducible.
+        todo.sort(key=lambda t: hashlib.sha256(f"{opts['shuffle_submission']}|{tid(t)}".encode()).hexdigest())
     runs = read_json(unit_dir / "fluid_runs.json") if (unit_dir / "fluid_runs.json").is_file() else []
     if todo:
         live = unit_dir.parent.parent / "live" / f"{unit_dir.name}.{attempt}.stream.jsonl"
@@ -594,25 +631,29 @@ def fluid(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: d
         t0 = time.time()
         log = unit_dir / "logs" / f"eval_fluid.{attempt}.log"
         log.parent.mkdir(parents=True, exist_ok=True)
-        with log.open("w") as lf:
-            rc = subprocess.run(
-                [vllm_py, "scripts/stages/stage-0/calibration_volume/run_battery.py", "--model", str(pkg),
-                 "--label", label, "--tasks", str(sub), "--mode", "eval", "--out", str(tmp_out),
-                 "--trained-context", str(ev["context"]["tokens"]), "--action-protocol", ev["action_protocol"],
-                 "--decoding", str(REPO / ev["decoding"]), "--seed-namespace", key,
-                 "--check-every", str(ev["degeneration_check_every"]), "--system", ev["system_message"],
-                 "--chat-template-kwargs", json.dumps(ev["modes"][mode]["template_kwargs"], sort_keys=True),
-                 "--stream-completed", str(live)],
-                cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
+        rc, boxed = _run_bounded(
+            [vllm_py, "scripts/stages/stage-0/calibration_volume/run_battery.py", "--model", str(pkg),
+             "--label", label, "--tasks", str(sub), "--mode", "eval", "--out", str(tmp_out),
+             "--trained-context", str(ev["context"]["tokens"]), "--action-protocol", ev["action_protocol"],
+             "--decoding", str(REPO / ev["decoding"]), "--seed-namespace", key,
+             "--check-every", str(ev["degeneration_check_every"]), "--system", ev["system_message"],
+             "--chat-template-kwargs", json.dumps(ev["modes"][mode]["template_kwargs"], sort_keys=True),
+             "--stream-completed", str(live), *exec_args(opts)], log, env, opts.get("time_box_s"))
         sealer.close()
         summary = tmp_out.with_suffix(".summary.json")
-        runs.append({"attempt": attempt, "rc": rc, "tasks_requested": len(todo), "seconds": round(time.time() - t0, 1),
+        done = sealed_records(unit_dir)
+        runs.append({"attempt": attempt, "rc": rc, "time_boxed": boxed, "tasks_requested": len(todo),
+                     "sealed_after": len(done), "seconds": round(time.time() - t0, 1),
+                     "execution": {k: opts.get(k) for k in ("max_num_seqs", "engine_metrics", "time_box_s",
+                                                             "shuffle_submission")},
+                     "submitted_order": [tid(t) for t in todo],
                      "summary": read_json(summary) if summary.is_file() else None,
                      "log": str(log.relative_to(unit_dir))})
         write_json(unit_dir / "fluid_runs.json", runs)
+        if boxed:
+            return {"status": "incomplete", "why": "time box", "sealed": len(done), "missing": len(tasks) - len(done)}
         if rc != 0:
             raise DriverError(f"run_battery exited {rc} for {label}; see {log.name}")
-        done = sealed_records(unit_dir)
     missing = [tid(t) for t in tasks if tid(t) not in done]
     if missing:
         raise DriverError(f"{label}: {len(missing)} fluid tasks have no sealed record after the run")
@@ -628,7 +669,8 @@ def fluid(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: d
     return {"status": "complete", "runs": len(runs)}
 
 
-def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: dict, attempt: str) -> dict:
+def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: dict, attempt: str,
+               opts: dict | None = None) -> dict:
     """Every stage3_capability_846 unit (TriviaQA from its verified local copy) and stage3_legacy_150, one runner call;
     a unit's files are sealed into ``generations/`` when the runner has moved past it."""
     from shared import eval_sets as ES
@@ -669,22 +711,29 @@ def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, e
         shutil.copyfile(raw / f"{k}.generations.jsonl", gens / f".{k}.partial")
         os.replace(gens / f".{k}.partial", gens / f"{k}.jsonl")
 
+    opts = opts or {}
+
+    def seal_finished() -> None:
+        #: unit i is finished once unit i+1's summary exists (the runner writes units in order)
+        for i, k in enumerate(order[:-1]):
+            if (raw / f"{order[i + 1]}.json").is_file() and (raw / f"{k}.generations.jsonl").is_file():
+                seal(k)
+
     t0 = time.time()
-    with log.open("w") as lf:
-        proc = subprocess.Popen(
-            [vllm_py, "scripts/shared/evaluation/uncapped_eval.py", "--model", str(pkg), "--label", label,
-             "--prompts", *[str(staged / f"{k}.jsonl") for k in order], "--out-dir", str(raw),
-             "--trained-context", str(ev["context"]["tokens"]), "--decoding", str(REPO / ev["decoding"]),
-             "--check-every", str(ev["degeneration_check_every"]), "--system", ev["system_message"],
-             "--chat-template-kwargs", json.dumps(ev["modes"][mode]["template_kwargs"], sort_keys=True)],
-            cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT)
-        while proc.poll() is None:
-            time.sleep(30)
-            #: unit i is finished once unit i+1's summary exists (the runner writes units in order)
-            for i, k in enumerate(order[:-1]):
-                if (raw / f"{order[i + 1]}.json").is_file() and (raw / f"{k}.generations.jsonl").is_file():
-                    seal(k)
-    rc = proc.returncode
+    rc, boxed = _run_bounded(
+        [vllm_py, "scripts/shared/evaluation/uncapped_eval.py", "--model", str(pkg), "--label", label,
+         "--prompts", *[str(staged / f"{k}.jsonl") for k in order], "--out-dir", str(raw),
+         "--trained-context", str(ev["context"]["tokens"]), "--decoding", str(REPO / ev["decoding"]),
+         "--check-every", str(ev["degeneration_check_every"]), "--system", ev["system_message"],
+         "--chat-template-kwargs", json.dumps(ev["modes"][mode]["template_kwargs"], sort_keys=True),
+         *(["--max-num-seqs", str(opts["max_num_seqs"])] if opts.get("max_num_seqs") else [])],
+        log, env, opts.get("time_box_s"), poll=seal_finished)
+    seal_finished()
+    if boxed:
+        rec.update(status="incomplete", why="time box", seconds=round(time.time() - t0, 1), attempt=attempt,
+                   sealed=sorted(k for k in order if (gens / f"{k}.jsonl").is_file()))
+        write_json(unit_dir / f"capability_run.{attempt}.json", rec)
+        return rec
     if rc != 0:
         raise DriverError(f"uncapped_eval exited {rc} for {label}; see {log.name}")
     for k in order:
@@ -702,23 +751,36 @@ def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, e
 UNIT_ORDERS = ("pair", "mode_then_unit")
 
 
-def evaluation_plan(order: str) -> list[tuple[str, str, str]]:
-    """(group, mode, unit kind) in execution order (`UNIT_ORDERS`)."""
+def evaluation_plan(order: str, groups: list[str] | None = None, kinds: list[str] | None = None,
+                    modes: list[str] | None = None) -> list[tuple[str, str, str]]:
+    """(group, mode, unit kind) in execution order (`UNIT_ORDERS`); ``groups`` reorders the groups within a mode
+    (an execution order, never a selection: an omitted group keeps its design place after them), ``kinds`` keeps
+    only those unit kinds for this run."""
     pairs = [tuple(x) for x in design()["evaluation"]["order"]]
+    if groups:
+        rank = {g: i for i, g in enumerate(groups)}
+        pairs = sorted(pairs, key=lambda p: (rank.get(p[0], len(rank)), pairs.index(p)))
+        mode_rank = list(dict.fromkeys(m for _, m in [tuple(x) for x in design()["evaluation"]["order"]]))
+        pairs = sorted(pairs, key=lambda p: mode_rank.index(p[1]))
     if order == "pair":
-        return [(g, m, k) for g, m in pairs for k in ("fluid", "capability")]
-    if order == "mode_then_unit":
-        modes = list(dict.fromkeys(m for _, m in pairs))
-        return [(g, m, k) for m in modes for k in ("fluid", "capability") for g, mm in pairs if mm == m]
-    raise DriverError(f"unit order {order!r} is not one of {UNIT_ORDERS}")
+        plan = [(g, m, k) for g, m in pairs for k in ("fluid", "capability")]
+    elif order == "mode_then_unit":
+        in_order = list(dict.fromkeys(m for _, m in pairs))
+        plan = [(g, m, k) for m in in_order for k in ("fluid", "capability") for g, mm in pairs if mm == m]
+    else:
+        raise DriverError(f"unit order {order!r} is not one of {UNIT_ORDERS}")
+    return [x for x in plan if (not kinds or x[2] in kinds) and (not modes or x[1] in modes)]
 
 
-def evaluate(out: Path, work: Path, vllm_py: str, status: Status, attempt: str, order: str = "pair") -> dict:
+def evaluate(out: Path, work: Path, vllm_py: str, status: Status, attempt: str, order: str = "pair",
+             groups: list[str] | None = None, kinds: list[str] | None = None, opts: dict | None = None,
+             modes: list[str] | None = None) -> dict:
     env = {**os.environ, "HF_HUB_OFFLINE": "1"}
     mrec = read_json(out / "records" / "mapping.json")
     summary = read_json(out / "state" / "evaluation.json") if (out / "state" / "evaluation.json").is_file() else {}
-    summary["_unit_order"] = order
-    for g, mode, kind in evaluation_plan(order):
+    summary["_execution"] = {"unit_order": order, "groups": groups, "kinds": kinds, "modes": modes, **(opts or {}),
+                             "attempt": attempt}
+    for g, mode, kind in evaluation_plan(order, groups, kinds, modes):
         name = f"{g}_{mode}"
         unit_dir = out / "eval" / name
         pkg = work / "packages" / g
@@ -729,7 +791,7 @@ def evaluate(out: Path, work: Path, vllm_py: str, status: Status, attempt: str, 
         status.mark(f"EVAL_START:{name}:{kind}")
         t0 = time.time()
         run = fluid if kind == "fluid" else capability
-        res = run(pkg, unit_dir, name, mode, vllm_py, env, attempt)
+        res = run(pkg, unit_dir, name, mode, vllm_py, env, attempt, opts)
         summary.setdefault(name, {})[kind] = {**res, "seconds": round(time.time() - t0, 1), "utc": utc()}
         write_json(out / "state" / "evaluation.json", summary)
         status.mark(f"EVAL_OK:{name}:{kind}")
@@ -809,6 +871,15 @@ def main(argv=None) -> int:
     ap.add_argument("--resume", default=None)
     ap.add_argument("--phases", default="contract,mapping,relay,state_eval,evaluate")
     ap.add_argument("--unit-order", default="pair", choices=UNIT_ORDERS)
+    ap.add_argument("--group-order", default="", help="execution order of the groups within a mode, e.g. W,DW,D")
+    ap.add_argument("--kinds", default="", help="only these unit kinds this run: fluid,capability")
+    ap.add_argument("--modes", default="", help="only these modes this run: H-T,H-N")
+    ap.add_argument("--max-num-seqs", type=int, default=None, help="the engines' concurrent-sequence limit")
+    ap.add_argument("--engine-metrics", action="store_true", help="the fluid runner records engine metrics")
+    ap.add_argument("--shuffle-submission", default=None,
+                    help="a key: the fluid tasks reach the engine in sha256(key|task id) order (seeds unchanged)")
+    ap.add_argument("--time-box-minutes", type=float, default=None,
+                    help="stop each unit's runner after this; sealed work is kept and the unit stays incomplete")
     ap.add_argument("--check-only", action="store_true")
     ap.add_argument("--child", default=None, help=argparse.SUPPRESS)
     a = ap.parse_args(argv)
@@ -861,8 +932,18 @@ def main(argv=None) -> int:
                 report["phases"]["state_eval"] = {"status": "measured", "seconds": round(time.time() - t0, 1)}
         write_json(out / "state" / "report.json", report)
         if "evaluate" in phases:
-            report["phases"]["evaluate"] = evaluate(out, work, a.vllm_python, status, a.run_id, a.unit_order)
-        report["status"] = "COMPLETE"
+            opts = {"max_num_seqs": a.max_num_seqs, "engine_metrics": a.engine_metrics,
+                    "shuffle_submission": a.shuffle_submission,
+                    "time_box_s": (a.time_box_minutes * 60 if a.time_box_minutes else None)}
+            report["phases"]["evaluate"] = evaluate(
+                out, work, a.vllm_python, status, a.run_id, a.unit_order,
+                groups=[g for g in a.group_order.split(",") if g] if a.group_order else None,
+                kinds=[k for k in a.kinds.split(",") if k] if a.kinds else None, opts=opts,
+                modes=[m for m in a.modes.split(",") if m] if a.modes else None)
+        ev_state = (report["phases"].get("evaluate") or {})
+        report["incomplete_units"] = sorted(f"{name}:{kind}" for name, v in ev_state.items() if not name.startswith("_")
+                                            for kind, r in v.items() if (r or {}).get("status") != "complete")
+        report["status"] = "COMPLETE"     #: the driver ran its plan; a time-boxed unit is listed, never hidden
     except BaseException as exc:  # noqa: BLE001
         report["status"] = "FAILED"
         report["failure"] = {"type": type(exc).__name__, "message": str(exc)[:3000],

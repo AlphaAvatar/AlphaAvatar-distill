@@ -91,7 +91,7 @@ def resume_input(spec: str | None):
     return (RelayInput(path=path, repo=MAIN_RELAY, dest=RESUME_DEST, sha256=sha),)
 
 
-def command(launch, ctx, plan, unit_order: str = "pair") -> str:
+def command(launch, ctx, plan, unit_order: str = "pair", driver_extra: str = "") -> str:
     ev, status = SE.evidence_dir(launch, ctx.args.run_id), launch.status()
     work = f"/workspace/{SESSION_KIND}_work"
     resume = ""
@@ -100,7 +100,7 @@ def command(launch, ctx, plan, unit_order: str = "pair") -> str:
     py = (f"cd {SE.POD_REPO} && HF_HUB_OFFLINE=1 PYTHONPATH={SE.POD_REPO}/src:{SE.POD_REPO}/scripts:"
           f"{SE.POD_REPO}/scripts/stages/stage-1 /opt/train/bin/python")
     cmd = (f"{DRIVER} --run-id {shlex.quote(ctx.args.run_id)} --out {ev} --work {work} --status {status} "
-           f"--device cuda --vllm-python /opt/vllm/bin/python --unit-order {unit_order} {resume}").strip()
+           f"--device cuda --vllm-python /opt/vllm/bin/python --unit-order {unit_order} {driver_extra} {resume}").strip()
     return (f"mkdir -p {ev} {work} && {py} {cmd}; "
             f"grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' {status} || "
             f"echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> {status}")
@@ -218,7 +218,8 @@ def the_authorization_is_in_the_session_commit(ctx) -> tuple[bool, str]:
     return True, f"the authorization is in session commit {ctx.args.session_commit[:12]}"
 
 
-def launch_spec(minutes: float = 0.0, resume_from: str | None = None, unit_order: str = "pair") -> SE.Launch:
+def launch_spec(minutes: float = 0.0, resume_from: str | None = None, unit_order: str = "pair",
+                driver_extra: str = "") -> SE.Launch:
     from aadistill.infrastructure.session import LocalAsset
     d = json.loads((REPO / DESIGN).read_text())
 
@@ -239,7 +240,8 @@ def launch_spec(minutes: float = 0.0, resume_from: str | None = None, unit_order
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; every finished file is on the "
                        "dev box and the checkpoints and the mapping on the relay; nothing stays on the provider"))
     import dataclasses
-    return dataclasses.replace(launch, command=functools.partial(command, launch, unit_order=unit_order),
+    return dataclasses.replace(launch, command=functools.partial(command, launch, unit_order=unit_order,
+                                                                 driver_extra=driver_extra),
                                on_poll=secure_incremental(launch), products_secured=products_secured(launch))
 
 
@@ -262,6 +264,13 @@ def main(argv=None) -> int:
         i = argv.index("--resume-from")
         resume = argv[i + 1]
         argv = argv[:i] + argv[i + 2:]
+    driver_extra = ""
+    if "--driver-extra" in argv:               #: driver execution flags (group order, kinds, knobs, time box)
+        i = argv.index("--driver-extra")
+        driver_extra = argv[i + 1]
+        argv = argv[:i] + argv[i + 2:]
+        if any(c in driver_extra for c in ";&|`$<>"):
+            raise SystemExit(f"--driver-extra {driver_extra!r}: driver flags only")
     unit_order = "pair"
     if "--unit-order" in argv:                 #: driver.UNIT_ORDERS; recorded in the artifact's conditions
         i = argv.index("--unit-order")
@@ -278,7 +287,7 @@ def main(argv=None) -> int:
         ap.add_argument("--note", default="")
         x = ap.parse_args(argv[1:])
         conditions = {"design_sha256": SE.sha256_file(REPO / DESIGN), "selection_sha256": SE.sha256_file(REPO / SELECTION),
-                      "resume_from": resume or "", "unit_order": unit_order}
+                      "resume_from": resume or "", "unit_order": unit_order, "driver_extra": driver_extra}
         try:
             path = SE.issue(STUDY, x.run_id, expected_usd=x.expected_usd, hard_cap_usd=x.hard_cap_usd,
                             dry_run=x.dry_run, out=Path(x.out) if x.out else None, note=x.note, kind=KIND,
@@ -288,7 +297,7 @@ def main(argv=None) -> int:
             return 11
         print(path)
         return 0
-    return SE.cli(STUDY, lambda: launch_spec(minutes, resume, unit_order), argv, gpu=GPU,
+    return SE.cli(STUDY, lambda: launch_spec(minutes, resume, unit_order, driver_extra), argv, gpu=GPU,
                   description=__doc__.split("\n")[0])
 
 

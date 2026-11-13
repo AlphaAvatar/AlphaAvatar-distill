@@ -342,6 +342,10 @@ def main(argv=None) -> int:
     ap.add_argument("--engine-metrics", action="store_true",
                     help="enable the engine's stats and record its metrics (preemptions, KV-cache usage peaks, "
                          "token counters) in the summary; off by default: the generation is the same either way")
+    ap.add_argument("--max-num-seqs", type=int, default=None,
+                    help="the engine's concurrent-sequence limit (vLLM max_num_seqs); omitted, the engine default. "
+                         "An execution knob: it decides how many requests share the KV cache at once (a cache "
+                         "that cannot hold them all preempts and recomputes), never what any request generates")
     ap.add_argument("--check-every", type=int, default=256)
     ap.add_argument("--system", default="You are a helpful Assistant.")
     ap.add_argument("--limit", type=int, default=None, help="first N tasks (smoke)")
@@ -423,7 +427,8 @@ def main(argv=None) -> int:
     # measurement, the data-construction session limit for generation.
     llm = LLM(model=args.model, dtype="bfloat16", max_model_len=limit,
               gpu_memory_utilization=args.gpu_mem_util, **rev,
-              **({"disable_log_stats": False} if args.engine_metrics else {}))
+              **({"disable_log_stats": False} if args.engine_metrics else {}),
+              **({"max_num_seqs": args.max_num_seqs} if args.max_num_seqs else {}))
     eng = llm.llm_engine
     init_s = round(time.time() - t0, 1)
     engine = engine_config(llm, limit, args.gpu_mem_util)

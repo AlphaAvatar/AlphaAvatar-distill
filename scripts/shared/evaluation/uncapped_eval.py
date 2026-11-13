@@ -247,6 +247,9 @@ def main() -> int:
                          "effective context is derived from this, not from the "
                          "architectural max_position_embeddings")
     ap.add_argument("--gpu-mem-util", type=float, default=0.90)
+    ap.add_argument("--max-num-seqs", type=int, default=None,
+                    help="the engine's concurrent-sequence limit (vLLM max_num_seqs); omitted, the engine default. "
+                         "An execution knob: how many requests share the KV cache at once, never what one generates")
     ap.add_argument("--check-every", type=int, default=256)
     ap.add_argument("--no-degeneration-stop", action="store_true")
     ap.add_argument("--system", default="You are a helpful Assistant.",
@@ -337,7 +340,8 @@ def main() -> int:
     t_init = time.time()
     llm = LLM(model=args.model, dtype=GENERATION_DTYPE, max_model_len=ctx,
               gpu_memory_utilization=args.gpu_mem_util,
-              **({"revision": args.revision} if args.revision else {}))
+              **({"revision": args.revision} if args.revision else {}),
+              **({"max_num_seqs": args.max_num_seqs} if args.max_num_seqs else {}))
     eng = llm.llm_engine
     init_seconds = round(time.time() - t_init, 1)
     engine_settings = engine_config(llm, ctx, args.gpu_mem_util)
