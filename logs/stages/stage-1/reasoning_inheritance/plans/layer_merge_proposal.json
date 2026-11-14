@@ -1,0 +1,59 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.proposal/v1",
+ "study": "RI-LM1",
+ "status": "proposed",
+ "recorded_utc": "2026-11-14",
+ "scope": "Stage 1 layer merging at D's fixed structure (configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json): build M-avg and M-act from the teacher on one pod (one statistics forward over calib.hybrid_d4_base@v2, the alignments, the numerical and bit-identity checks, the update diagnostics), copy both to the relay, state evaluation (diagnostic), and every unit of eval-set-1 in both modes under RI-S1's protocol; D and T reused. No recovery training, no search, no new candidate, no Stage-6 work.",
+ "kinds": [
+  "merge_evaluation"
+ ],
+ "ceiling_usd": 13.0,
+ "teardown_reserve_usd": 1.0,
+ "study_cumulative_cap_usd": 14.0,
+ "per_session_hard_cap_usd": 11.0,
+ "min_useful_attempt_usd": 2.0,
+ "project_cumulative_cap_usd": 1000.0,
+ "gpus": {
+  "NVIDIA L40S": 1.09
+ },
+ "gpu_count_max": 1,
+ "granted_by": "nobody: a proposal, not a grant",
+ "decision": "PENDING the maintainer's explicit approval",
+ "money_rules": {
+  "own_envelope": "the ceiling counts only this study's runs (study_engineering.spent filters by plan id). RI-S1 is CLOSED; its unspent $15.0446 lapsed (its grant's closed block) and funds nothing here",
+  "ceiling": "$13.00 is what sessions may draw, cumulatively over every attempt (each session's closeout all-in; an unknown cost refuses)",
+  "teardown_reserve": "$1.00 is held outside the ceiling and never issued: every artifact's hard cap plus the reserve must fit what the project cap and the provider balance leave at issue and again at launch (layer_merge_launch.reserve_problems / the_teardown_reserve_stays). It covers a teardown the provider confirms late, never a longer session",
+  "study_cumulative_cap": "ceiling + reserve = $14.00, inside the project cap's remainder",
+  "per_session_hard_cap": "$11.00: the all-in bound from the create to the hard deadline plus the watchdog's teardown time (study_engineering.all_in at the accepted price); the deadline is derived from the price, never set apart from it",
+  "budget_terminal_state": "BUDGET_EXHAUSTED when what the ceiling leaves is below min_useful_attempt_usd ($2.00: setup, the restore from the relay and at least one fluid unit of one candidate) or the next attempt's cap plus the reserve does not fit the project cap or the balance: the issuer refuses (reserve_problems), every finished unit is kept, every other one is reported not_run, the primary comparison is evaluated only if both candidates' primary unit is complete (otherwise no verdict, never a partial pooling), the closeout records the spend, and the remainder lapses at closure; a further attempt is a new maintainer decision"
+ },
+ "basis": {
+  "live_position_2026-11-14T20:54Z": {
+   "project_committed_usd": 963.2392,
+   "project_cap_usd": 1000.0,
+   "project_remaining_usd": 36.7608,
+   "balance_usd": 16.6313,
+   "pods": 0,
+   "volumes": 0
+  },
+  "card": "L40S 48 GB (AGENTS.md P8.2): RI-S1 built D and evaluated it on one; the candidates have D's structure, so D's measured memory and concurrency (max_num_seqs 7) apply",
+  "scenario_estimate": {
+   "status": "a SCENARIO estimate from RI-S1's measurements, not a measurement of these candidates",
+   "setup_minutes": 25,
+   "build_minutes": "about 45: teacher download and hashing ~5, the statistics forward over 79 packed sequences ~10, eight 9,728 x 9,728 assignments ~8 (48 s each for a hard random matrix on the dev box CPU), the checks, both builds and saves ~10, the relay upload and re-download ~10",
+   "diagnostics_and_state_eval_minutes": "about 20 (RI-S1's state evaluation of three groups took about 10)",
+   "generation_hours_per_candidate": "1.8 if it behaves like D (after the repair: thinking fluid ~40 min, thinking capability ~34, non-thinking 16 and 18) to 3.6 if it behaves like T (T's 6.29M + 0.62M output tokens at D's ~540 tokens/s at concurrency 7)",
+   "total_hours": "4.8 to 8.4",
+   "usd_at_1.09_per_hour": "about $5.3 to $9.3 with container disk; the $5-9 of REPORT section 11 rounded"
+  },
+  "why_these_caps": "$11 per session covers the high scenario with the 10% contingency and the watchdog at $1.09/h; $13 leaves one small resume attempt after a full session; the balance ($16.63) holds one session plus the reserve, so a second full session needs a top-up, which is the maintainer's"
+ },
+ "launch": {
+  "order": "commit the code; issue (one-use artifact); commit the artifact (that commit is the session commit); stage its bundle (stages.phase_c1.bundle.stage_bundle); launch",
+  "issue": "PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py issue --run-id ri_merge_<UTC yyyymmdd_hhmmss> --expected-usd 7.5 --hard-cap-usd 11",
+  "launch": "PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py launch --minutes 480 --run-id <run> --scr artifacts/stages/stage-1/reasoning_inheritance/runs/<run>/scr --session-commit <sha> --bundle aad_autoinit_<sha[:8]>.bundle --max-price 1.09 --disk-gb 150 --create-attempts 72 --create-retry-seconds 300 --poll-limit-min 620 --driver-extra '--max-num-seqs 7'",
+  "resume": "R=$(... layer_merge_launch.py stage-resume --run-id <run2> --from artifacts/stages/stage-1/reasoning_inheritance/runs/<run>/scr); then issue and launch with --resume-from $R and a fresh run id",
+  "closeout": "... layer_merge_launch.py closeout --run-id <run> --scr <scr>; then layer_merge_analysis.py"
+ },
+ "authorizes": "nothing until granted (layer_merge_launch.py grant --decision '<the maintainer's decision, quoted>' --granted-by maintainer)"
+}

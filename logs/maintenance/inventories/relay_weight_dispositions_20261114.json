@@ -1,0 +1,341 @@
+{
+ "schema": "aadistill.maintenance.relay_weight_dispositions/v1",
+ "recorded_utc": "2026-11-14",
+ "rule": "AGENTS.md 2.5 (standing): retire a weight when its experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared downstream consumer reads it, and it is not an incumbent, a release or a retained anchor. A launcher declaration counts as a consumer unless the launcher's study is closed by a recorded maintainer decision AND its issuer refuses, so it can never run again; a pending proposal is an unresolved consumer. Only the weight file is retired; configs, tokenizers, logs, evaluation files and hash lists beside it stay.",
+ "maintainer_scope": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+ "objects": {
+  "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors": {
+   "disposition": "keep",
+   "reason": "RI-S1's frozen structural mapping (registry: diagnostic, protected, never-delete); the next round's spans are the mapping's kept blocks and D is materialized from it"
+  },
+  "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "readers": {
+    "configs/stages/stage-3/e1/e1_r0860k_sb_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/p0/p0_assistant_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/p2/p2_ceheavy_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/shared/pod/autoinit_preflight_driver.py": "names E1's 0.86M CONFIGS (the permanent controls' recipe), never these weights",
+    "scripts/shared/pod/checkpoint_inventory.py": "a pod-side inventory of historical checkpoints (listing only)",
+    "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+    "scripts/stages/stage-1/recovery_continuation/compare_recovery_fingerprints.py": "closed experiment: recovery continuation (complete); a lineage check that reads relay metadata, never these bytes",
+    "scripts/stages/stage-1/recovery_continuation/verify_control_checkpoints.py": "closed experiment: recovery continuation (complete); a lineage check that reads relay metadata, never these bytes",
+    "scripts/stages/stage-3/d0/d0diag_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/d0/d0diag_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e2/e2p1_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e2/e2p1_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/p0/register_p0_real.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+   }
+  },
+  "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/resolution_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+    "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+    "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e7/e7_control_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e7/e7_fineweb_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8b/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8b/e8b_fc_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)",
+    "scripts/shared/data/finalize_eval_set_1.py": "names the dev-generation FILES these checkpoints produced (eval-set-1 construction, frozen), never the weights",
+    "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+    "scripts/stages/stage-3/e4/analyze_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e4/e4_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e4/e4_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e4/register_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e7/e7_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e7/e7_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e8b/build_e8b_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+   }
+  },
+  "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "readers": {
+    "configs/stages/stage-3/e1/e1_r1600k_sb_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e7/e7_control_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e7/e7_fineweb_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8b/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8b/e8b_dc_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8b/e8b_dp_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8b/e8b_fc_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+    "scripts/stages/stage-3/e4/analyze_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e4/e4_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e4/e4_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e4/register_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e7/e7_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e7/e7_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e8b/build_e8b_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+   }
+  },
+  "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/battery_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+    "configs/stages/stage-0/calibration_volume/resolution_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+    "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+    "configs/stages/stage-2/reasoning_data/h1pa.json": "closed experiment: H1 / H1-PA (H1 closed 2026-10-24, H1-PA complete 2026-10-25; its anchor review superseded by the maintainer 2026-11-14, decisions.md)",
+    "configs/stages/stage-2/teacher_modes/engineering_validation.json": "closed experiment: Research A (CLOSED 2026-11-11, every grant closed)",
+    "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e6b/provenance.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/shared/data/finalize_eval_set_1.py": "names the dev-generation FILES these checkpoints produced (eval-set-1 construction, frozen), never the weights",
+    "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+    "scripts/stages/stage-0/calibration_volume/analyze_dev.py": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+    "scripts/stages/stage-2/reasoning_data/h1pa_audit.py": "closed experiment: H1 / H1-PA (H1 closed 2026-10-24, H1-PA complete 2026-10-25; its anchor review superseded by the maintainer 2026-11-14, decisions.md)",
+    "scripts/stages/stage-2/teacher_modes/phase_forecast.py": "closed experiment: Research A (CLOSED 2026-11-11, every grant closed)",
+    "scripts/stages/stage-2/teacher_modes/training_plan.py": "closed experiment: Research A (CLOSED 2026-11-11, every grant closed)",
+    "scripts/stages/stage-3/e6/e6_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e8/build_e8_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+   },
+   "closed_launchers": {
+    "ae_launch": "A-E (Research A's engineering validation): grant logs/budget/approvals/teacher_modes_engineering_grant.json CLOSED 2026-11-11T09:34:55Z; study_engineering.require_open refuses every issue and launch"
+   }
+  },
+  "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "readers": {
+    "configs/stages/stage-2/reasoning_data/h1pa.json": "closed experiment: H1 / H1-PA (H1 closed 2026-10-24, H1-PA complete 2026-10-25; its anchor review superseded by the maintainer 2026-11-14, decisions.md)",
+    "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e6b/provenance.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+    "scripts/stages/stage-3/e6/e6_launch.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6/e6_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e8/build_e8_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+   }
+  },
+  "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/resolution_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+    "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+    "configs/stages/stage-3/e1/e1_ctl_r0250k_sa_pca_stepmatched.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "configs/stages/stage-3/e1/e1_r5500k_sa_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/shared/data/finalize_eval_set_1.py": "names the dev-generation FILES these checkpoints produced (eval-set-1 construction, frozen), never the weights",
+    "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+    "scripts/stages/stage-3/e6/e6_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+   }
+  },
+  "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors": {
+   "disposition": "keep",
+   "reason": "a permanent control (registry: control, protected, never-delete); declared by autoinit_continuation_launch"
+  },
+  "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors": {
+   "disposition": "keep",
+   "reason": "a permanent control (registry: control, protected, never-delete); declared by autoinit_continuation_launch"
+  },
+  "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d4_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors": {
+   "disposition": "keep",
+   "reason": "D4-Augmented's D4 Top-1: the declared input of the independent-gated study's engineering validation (igv_launch; its proposal logs/stages/stage-1/projected_residual/plans/independent_gated_engineering_proposal.json is PENDING the maintainer since 2026-10-28) and Research B's D4 Top-1 selection (configs/stages/stage-1/projected_residual/d4_top1_selection.json; B-E's grant is not closed). An unresolved consumer: kept until that proposal is decided against or Research B is closed"
+  },
+  "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d4_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/stages/stage-0/calibration_volume/probes_d4_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+   }
+  },
+  "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+   "readers": {}
+  },
+  "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "D3 structural (COMPLETE 2026-10-17, STRUCTURAL_CHANGE; D-series CLOSED): logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/closeout/outcome.json and the probes' closeout; the product's config.json and generation_config.json stay on the relay",
+   "readers": {
+    "configs/index.json": "navigation index",
+    "configs/shared/baselines/initialization_forward_baseline_v1.json": "cites the D3 closeout as terminal evidence, never the product's bytes",
+    "configs/shared/baselines/initialization_forward_baseline_v2.json": "cites the D3 closeout as terminal evidence, never the product's bytes",
+    "configs/stages/stage-1/phase_c1/authorization.json": "names phase_d3 (the experiment), not this object",
+    "scripts/index.json": "navigation index",
+    "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)",
+    "scripts/shared/pod/autoinit_preflight_setup.sh": "the D3 sessions' setup branch (D-series closed)",
+    "scripts/stages/stage-1/families/d_series/current.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/families/d_series/d2_budget.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/families/d_series/programme_closeout.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/families/d_series/shared_evaluation.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/analyze_d3_probes.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/autoinit_d3_probes_launch.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_driver.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_launch.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/closeout_d3_probes.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/closeout_d3_structural.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/d3_authorization.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/d3_budget.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/d3_design.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/d3_probes.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/extract_d3_control.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/issue_d3_authorization.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/write_d3_admission.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+    "scripts/stages/stage-1/phase_d3/write_d3_registration.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)"
+   },
+   "closed_launchers": {
+    "autoinit_d3_probes_launch": "D3 probes: the D-series CLOSED 2026-10-17 (logs/stages/stage-1/families/d_series/closeout/programme_closeout.json); refuse_closed_authority() runs first in every D-series issuer"
+   }
+  },
+  "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors": {
+   "disposition": "keep",
+   "reason": "the canonical 0.6B initialization (registry: canonical, protected, never-delete); declared by six launchers (preflight, Phase A, continuation, device canary, measurement, recovery continuation)"
+  },
+  "stage1/qwen3_0p6b_init_v0/random_baseline/model.safetensors": {
+   "disposition": "keep",
+   "reason": "the canonical initialization's random-initialization control (the `*_rand` arms' student; AGENTS.md 4.2's comparison of initialization NLL against a random initialization); the whole `stage1/qwen3_0p6b_init_v0/` prefix is protected (retire_relay_copies.PROTECTED_PREFIXES)"
+  },
+  "stage3/s1_ext_v0/step_000660/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+   "readers": {
+    "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)"
+   }
+  },
+  "stage3/s1_ffn_norm_v0/step_000660/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+   "readers": {
+    "scripts/shared/evaluation/eval_behavior.py": "a usage example in the docstring"
+   }
+  },
+  "stage3/s2_blocks_v0/step_000660/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+   "readers": {
+    "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)"
+   }
+  },
+  "stage3/s2_blocks_v1/step_002700/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+   "readers": {
+    "scripts/shared/pod/AGENTS.md": "a historical note",
+    "src/aadistill/evaluation/behavior.py": "a docstring citing a historical failure"
+   }
+  },
+  "stage3/s2v1_from_init/step_002700/model/model.safetensors": {
+   "disposition": "retire",
+   "criterion": "agents_2_5_standing_retirement",
+   "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+   "readers": {
+    "configs/stages/stage-3/s2v1_from_init.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+    "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)",
+    "scripts/shared/pod/hashes_ckpt.txt": "the hash list of the August pod setup (setup.sh / orchestrate.sh, E-series): historical"
+   }
+  }
+ }
+}

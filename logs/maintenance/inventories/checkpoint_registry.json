@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-11-14T13:12:30+00:00",
+  "created_utc": "2026-11-14T20:44:25+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -363,8 +363,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_d3_product_4f3e3eb734f4",
+        "deleted_utc": "2026-11-14T20:40:28+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (round-trip verified); the registered fixed path is the fallback",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
       "materialization": "restore the relay copy (round-trip verified); the registered fixed path is the fallback"
@@ -439,8 +444,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d1_72b76a1ca430",
+        "deleted_utc": "2026-11-14T20:37:08+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -468,8 +478,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d1_60e229ac09d8",
+        "deleted_utc": "2026-11-14T20:36:48+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -497,8 +512,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d1_4df438a839cd",
+        "deleted_utc": "2026-11-14T20:36:28+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -526,8 +546,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d1_91090067b51c",
+        "deleted_utc": "2026-11-14T20:37:29+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -555,8 +580,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d2_9af1989dc0b8",
+        "deleted_utc": "2026-11-14T20:38:10+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -584,8 +614,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d2_e2d10ba8f532",
+        "deleted_utc": "2026-11-14T20:38:50+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -613,8 +648,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d2_3b2037bc9009",
+        "deleted_utc": "2026-11-14T20:37:50+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -642,8 +682,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d2_b6a41ee85024",
+        "deleted_utc": "2026-11-14T20:38:29+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -700,8 +745,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d4_167a43f4c05b",
+        "deleted_utc": "2026-11-14T20:39:30+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -729,8 +779,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d4_0363ad220c88",
+        "deleted_utc": "2026-11-14T20:39:10+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -758,8 +813,13 @@
       "local_copies": [],
       "copies": 0,
       "all_copies_identity_verified": false,
-      "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "relay_20261115_calvol_formal_v1_d4_912205b5a106",
+        "deleted_utc": "2026-11-14T20:39:50+00:00",
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -1371,33 +1431,25 @@
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-11-14T13:11:10+00:00",
-    "n_files": 1694,
-    "total_bytes": 69745681967,
+    "queried_utc": "2026-11-14T20:42:39+00:00",
+    "n_files": 1670,
+    "total_bytes": 28021341071,
     "by_prefix": {
       "transfer": {
         "files": 706,
         "bytes": 17048179537
-      },
-      "stage0_calvol": {
-        "files": 39,
-        "bytes": 15497777373
-      },
-      "e1_scaling_20260801": {
-        "files": 312,
-        "bytes": 14536345939
-      },
-      "stage3": {
-        "files": 173,
-        "bytes": 12062445616
       },
       "permanent_controls": {
         "files": 18,
         "bytes": 4791374395
       },
       "stage1": {
+        "files": 26,
+        "bytes": 2453541326
+      },
+      "stage0_calvol": {
         "files": 27,
-        "bytes": 3645676422
+        "bytes": 1192156221
       },
       "stage3_recovery_corpus_v2": {
         "files": 9,
@@ -1407,6 +1459,10 @@
         "files": 21,
         "bytes": 359441226
       },
+      "e1_scaling_20260801": {
+        "files": 306,
+        "bytes": 230936131
+      },
       "stage2_h1": {
         "files": 106,
         "bytes": 225184504
@@ -1414,6 +1470,10 @@
       "stage0_calibration_volume": {
         "files": 5,
         "bytes": 154750248
+      },
+      "stage3": {
+        "files": 168,
+        "bytes": 141270776
       },
       "stage2_h1pa": {
         "files": 22,
@@ -2697,11 +2757,6 @@
         "sha256": null
       },
       {
-        "path": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035"
-      },
-      {
         "path": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/tokenizer.json",
         "size_bytes": 11422650,
         "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
@@ -2810,11 +2865,6 @@
         "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/generation_config.json",
         "size_bytes": 205,
         "sha256": null
-      },
-      {
-        "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697"
       },
       {
         "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer.json",
@@ -2927,11 +2977,6 @@
         "sha256": null
       },
       {
-        "path": "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "e432d57e598d57e1633392e92955c8185faab57909f75f44bc1c349db6ccf39e"
-      },
-      {
         "path": "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/tokenizer.json",
         "size_bytes": 11422650,
         "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
@@ -3042,11 +3087,6 @@
         "sha256": null
       },
       {
-        "path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3"
-      },
-      {
         "path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/tokenizer.json",
         "size_bytes": 11422650,
         "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
@@ -3137,11 +3177,6 @@
         "sha256": null
       },
       {
-        "path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5"
-      },
-      {
         "path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/tokenizer.json",
         "size_bytes": 11422650,
         "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
@@ -3190,11 +3225,6 @@
         "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/generation_config.json",
         "size_bytes": 205,
         "sha256": null
-      },
-      {
-        "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397"
       },
       {
         "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer.json",
@@ -3837,11 +3867,6 @@
         "sha256": null
       },
       {
-        "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695"
-      },
-      {
         "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -3850,11 +3875,6 @@
         "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d"
       },
       {
         "path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/config.json",
@@ -3867,11 +3887,6 @@
         "sha256": null
       },
       {
-        "path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae"
-      },
-      {
         "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -3880,11 +3895,6 @@
         "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f"
       },
       {
         "path": "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/config.json",
@@ -3897,11 +3907,6 @@
         "sha256": null
       },
       {
-        "path": "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "551e66850bd340851913b13d1dca5894de8a934b276e9853c563da03cefe80c7"
-      },
-      {
         "path": "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -3910,11 +3915,6 @@
         "path": "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "e9eba2255dbb567b9f044c0af9b2f3139c9ef227532ff85abe66e46f158f733e"
       },
       {
         "path": "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/config.json",
@@ -3927,11 +3927,6 @@
         "sha256": null
       },
       {
-        "path": "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "4da365c3d8b3dc4f391a696c78750714405bc7ef488e2dccf387331a640e6b85"
-      },
-      {
         "path": "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -3942,11 +3937,6 @@
         "sha256": null
       },
       {
-        "path": "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "34712d06301866b339b6daa9c5d43834f5fdc336ae767397adc6357f6c25176f"
-      },
-      {
         "path": "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -3955,11 +3945,6 @@
         "path": "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "5d54e3709678884a530decfb43354481da316f53604091c6d40b5f3e1bfa683a"
       },
       {
         "path": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/config.json",
@@ -3987,11 +3972,6 @@
         "sha256": null
       },
       {
-        "path": "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "a509ac31665bffbedb5374876c9b44d5ecfa6b4c642229947d82dc3b88ff383d"
-      },
-      {
         "path": "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -4002,11 +3982,6 @@
         "sha256": null
       },
       {
-        "path": "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "ac7f3885a13f9acb74e2f2014dac2d4b96fcec2655841000b46fe3d6bb207cc4"
-      },
-      {
         "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -4015,11 +3990,6 @@
         "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3"
       },
       {
         "path": "stage1/phase_d2/d2_confirmation_20261016_105802/d2_confirmation_artifacts.tar.gz",
@@ -4090,11 +4060,6 @@
         "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856"
       },
       {
         "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
@@ -5182,11 +5147,6 @@
         "sha256": null
       },
       {
-        "path": "stage3/s1_ext_v0/step_000660/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "8764e3b6a7c8652bda7a3a8c2600327a0a50de8124c0a76af42494d06fb08b47"
-      },
-      {
         "path": "stage3/s1_ext_v0/step_000660/model/tokenizer.json",
         "size_bytes": 11422650,
         "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
@@ -5215,11 +5175,6 @@
         "path": "stage3/s1_ffn_norm_v0/step_000660/model/generation_config.json",
         "size_bytes": 205,
         "sha256": null
-      },
-      {
-        "path": "stage3/s1_ffn_norm_v0/step_000660/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "dc64f244e203d607ed2ea63836400287878b26b96ebf42dc19ec70f154ace900"
       },
       {
         "path": "stage3/s1_ffn_norm_v0/step_000660/model/tokenizer.json",
@@ -5265,11 +5220,6 @@
         "path": "stage3/s2_blocks_v0/step_000660/model/generation_config.json",
         "size_bytes": 205,
         "sha256": null
-      },
-      {
-        "path": "stage3/s2_blocks_v0/step_000660/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "9d7e4311dc6ed953b16b728cc81865eed5c57c920c8642678cd09fcf6a713d1b"
       },
       {
         "path": "stage3/s2_blocks_v0/step_000660/model/tokenizer.json",
@@ -5335,11 +5285,6 @@
         "path": "stage3/s2_blocks_v1/step_002700/model/generation_config.json",
         "size_bytes": 205,
         "sha256": null
-      },
-      {
-        "path": "stage3/s2_blocks_v1/step_002700/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "f275fbfd13b43b61629f92b67a7b9586d34deeea977b6c8e197c708ecd4f591f"
       },
       {
         "path": "stage3/s2_blocks_v1/step_002700/model/tokenizer.json",
@@ -5565,11 +5510,6 @@
         "path": "stage3/s2v1_from_init/step_002700/model/generation_config.json",
         "size_bytes": 205,
         "sha256": null
-      },
-      {
-        "path": "stage3/s2v1_from_init/step_002700/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "7487cd92999af5506a28496045900e4b53a1e393a71a00c2edb0e0822143f98a"
       },
       {
         "path": "stage3/s2v1_from_init/step_002700/model/tokenizer.json",
@@ -17572,7 +17512,7 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
       "reconstructable": true,
@@ -17639,7 +17579,7 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
       "reconstructable": true,
@@ -18084,6 +18024,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18121,6 +18063,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18158,6 +18102,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18195,6 +18141,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18232,6 +18180,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18269,6 +18219,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18306,6 +18258,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18343,6 +18297,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18380,6 +18336,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18417,6 +18375,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18454,6 +18414,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18491,6 +18453,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18528,6 +18492,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18565,6 +18531,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18602,6 +18570,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -20104,13 +20074,13 @@
         "logs/index.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
         "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "logs/maintenance/storage/storage_closeout_20260831.json",
         "logs/stages/stage-1/phase_c1/runs/attempt10/governance/readiness.json",
         "logs/stages/stage-1/phase_c1/runs/attempt11/governance/readiness.json",
-        "logs/stages/stage-1/phase_c1/runs/attempt12/governance/readiness.json",
-        "logs/stages/stage-1/phase_c1/runs/attempt13/governance/readiness.json",
-        "logs/stages/stage-1/phase_c1/runs/attempt14/governance/readiness.json"
+        "logs/stages/stage-1/phase_c1/runs/attempt12/governance/readiness.json"
       ],
       "relay_path": null,
       "relay_verified": false,

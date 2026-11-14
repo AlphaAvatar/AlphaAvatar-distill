@@ -16615,3 +16615,56 @@ on a paid pod.
     D3 product 1), not audited here.
   - REPORT.md: GSM8K (D, non-thinking: 49 / 49 / 1 / 1 over 100 items), the bootstrap's "every" (11 of 12), sections 10
     and 11, corrections in section 12; LITERATURE.md: LaCo, Verma et al., MKA.
+
+## 2026-11-14 (UTC) — Third review: M-act re-stated, literature corrected, the decision rule executable, the retirement tool's copy check repaired, 24 relay weights retired, RI-LM1 prepared
+
+- Context: maintainer review of `bf577e3d` (2026-11-14 UTC): "下一轮继续按固定 D 结构的 D / M-avg / M-act 三组推进准备 …
+  本轮免费准备和符合常设条件的退役自主完成。付费启动及合入 main 仍按各自明确授权执行。" Six items: M-act's
+  interpretation, the Verma et al. correspondence, an executable statistical rule, numerical boundaries, the
+  retirement tool's copy verification and the remaining relay weights, and the next round prepared to the launch
+  point.
+- Decision:
+  - M-act: the claim that weights summing to 1 keep one block's output scale is withdrawn (convex weights guarantee
+    neither the output scale nor the span's cumulative update). M-act stays a heuristic to be tested; the attention,
+    FFN and whole-span update norms and normalized reconstruction errors on the calibration positions are diagnostics
+    only. No fit, training or candidate added.
+  - Literature: Verma et al. v2 §3.3 ties the averaged parameters and keeps every original FF execution; this round
+    removes the absorbed blocks from execution. Their Appendix A already treats SwiGLU (the gated product as the
+    feature) and the main text includes OLMo-7B; the parameter-sharing scheme is recorded as Stage 6 related work.
+  - Decision rule: a two-sided paired sign-flip test over the 558 independence groups of the 570 static items (708 is
+    the whole fluid unit's), Holm over the two candidates, the group-bootstrap percentile interval reported apart as an
+    unadjusted effect interval; rule-family intervals supplementary (`layer_merge_analysis.py`).
+  - Numerics: fixed rules for zero variance, zero importance denominators and assignment ties; positions stated
+    exactly; streaming float64 sums; fold and permutation forward equivalence (float32, 1e-4 of the block's update);
+    the 22 unchanged blocks bit for bit against D's per-tensor digests; no instance value in `src/aadistill`.
+  - Retirement: `retire_artifact.py` verifies every declared same-hash copy (exists; complete, member by member;
+    outside the deletion scope, a hard link and the same repository's LFS object included; a remote copy by the
+    object the hub serves) and refuses a verified rebuild without a recipe; it can retire one relay object.
+  - D and W: a byte-identical rebuild is not yet verified (built once, never compared), not shown impossible.
+- Alternatives considered: scipy for the assignment (not in the pinned environment; a dependency is the maintainer's
+  to add), so the same algorithm is implemented in torch and checked against brute force; subsampling the statistics
+  positions (unnecessary: ~350 TFLOP of cross products, minutes on an L40S); copying the candidates to the dev box
+  (15 GB free on a shared disk; the relay copy is durable).
+- Risks: M-act's attention alignment and importance weights are untested heuristics; the paired comparison resolves
+  about 3 pp at D's 5.6%; the dev box still holds the only copy of D, W and DW.
+- Revisit when: the maintainer decides RI-LM1's grant, or a later round needs a retired weight.
+- Done (2026-11-14 UTC, $0, no pod, no GPU):
+  - `retire_artifact.py` (`verify_copies`, relay-object mode, the recipe rule) with regressions in
+    `tests/docs/test_storage_inventory.py`; a mutation that skips a missing copy fails them.
+  - Relay audit (`audit_relay_weights.py` -> `logs/maintenance/inventories/relay_weight_audit_20261114.json`, reviewed
+    dispositions `relay_weight_dispositions_20261114.json`): 30 weight files; 24 retired under AGENTS.md 2.5 -- six E1
+    scaling students, twelve Stage-0 calibration-volume finalists, the D3 structural product, five early Stage-3
+    recoveries (38.86 GiB; tombstones `relay_20261114_*`, each written before its deletion and read back) -- and six
+    kept with their uses: the 0.6B initialization and its random-initialization control, the two permanent controls
+    (all protected), D4-Augmented's D4 Top-1 (the independent-gated proposal is pending; Research B's selection), RI-S1's
+    mapping. Relay LFS 64.16 -> 25.30 GiB; registry rebuilt (relay 1,670 files).
+  - D/W tombstones carry `byte_identical_reconstruction_note_20261114` ("not yet verified").
+  - RI-LM1 prepared: `configs/stages/stage-1/reasoning_inheritance/layer_merge/` (design, D's 310 tensor digests,
+    artifact spec), `src/aadistill/initialization/planning/layer_merge.py` (generic), `layer_merge.py`,
+    `layer_merge_driver.py`, `layer_merge_launch.py`, `layer_merge_analysis.py`, the setup branch
+    `stage1_layer_merge`, the proposal `plans/layer_merge_proposal.json` (ceiling $13.00 for sessions, $1.00 teardown
+    reserve outside it, $11.00 per session, $2.00 smallest useful attempt, BUDGET_EXHAUSTED terminal state; RI-S1's
+    lapsed $15.0446 funds nothing). Live position 2026-11-14T20:57Z: $963.24 of $1,000 committed, balance $16.63.
+  - Record dates: the first records of this round carried 2026-11-15 (the +08:00 clock) and were corrected to UTC.
+- Not done, by the brief: no paid launch, no grant written, no merge into `main`, no volume, no upload of historical
+  weights, no rebuild of D or W.

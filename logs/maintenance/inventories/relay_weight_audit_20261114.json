@@ -1,0 +1,3165 @@
+{
+ "schema": "aadistill.maintenance.relay_weight_audit/v1",
+ "collected_utc": "2026-11-14T20:30:17+00:00",
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "n_files": 1694,
+ "n_weight_files": 30,
+ "weight_bytes": 50090196008,
+ "objects": {
+  "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors": {
+   "sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+   "size_bytes": 20979888,
+   "size_gib": 0.02,
+   "same_sha256_paths": [],
+   "siblings": [
+    "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/mapping.json"
+   ],
+   "registry": [
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_105643/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_130551/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_161911/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_180718/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_193508/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    },
+    {
+     "canonical_name": "tensors.safetensors",
+     "experiment": "unknown",
+     "retention": "diagnostic",
+     "protected": true,
+     "never_delete_clause": "unclassified",
+     "status": "unreviewed",
+     "path_local": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+    }
+   ],
+   "local_copies": [
+    "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_105643/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_130551/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_161911/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_180718/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_193508/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/mapping/tensors.safetensors",
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/mapping/tensors.safetensors"
+   ],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "913433664fce0fed",
+     "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+     "stage1_reasoning_inheritance",
+     "59d504cf2f0ae250"
+    ],
+    "code": {
+     "configs/stages/stage-1/reasoning_inheritance/artifacts.json": [
+      "stage1_reasoning_inheritance"
+     ],
+     "configs/stages/stage-1/reasoning_inheritance/design.json": [
+      "stage1_reasoning_inheritance"
+     ],
+     "scripts/maintenance/consolidation/stage_attribution.py": [
+      "stage1_reasoning_inheritance"
+     ],
+     "scripts/shared/pod/autoinit_preflight_setup.sh": [
+      "stage1_reasoning_inheritance"
+     ],
+     "scripts/stages/stage-1/reasoning_inheritance/README.md": [
+      "913433664fce0fed",
+      "stage1_reasoning_inheritance"
+     ],
+     "scripts/stages/stage-1/reasoning_inheritance/launch.py": [
+      "stage1_reasoning_inheritance"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "keep",
+    "reason": "RI-S1's frozen structural mapping (registry: diagnostic, protected, never-delete); the next round's spans are the mapping's kept blocks and D is materialized from it"
+   }
+  },
+  "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors": {
+   "sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/chat_template.jinja",
+    "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/config.json",
+    "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/generation_config.json",
+    "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/tokenizer.json",
+    "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "e1_r0860k_sb_pca",
+     "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
+     "f66de5320b69aa34"
+    ],
+    "code": {
+     "configs/stages/stage-3/e1/e1_r0860k_sb_pca.json": [
+      "e1_r0860k_sb_pca"
+     ],
+     "configs/stages/stage-3/p0/p0_assistant_sb.json": [
+      "e1_r0860k_sb_pca"
+     ],
+     "configs/stages/stage-3/p2/p2_ceheavy_sb.json": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/shared/pod/autoinit_preflight_driver.py": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/shared/pod/checkpoint_inventory.py": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/shared/pod/run_env.sh": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/compare_recovery_fingerprints.py": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/verify_control_checkpoints.py": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/stages/stage-3/d0/d0diag_driver.py": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/stages/stage-3/d0/d0diag_setup.sh": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e2/e2p1_driver.py": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e2/e2p1_setup.sh": [
+      "e1_r0860k_sb_pca"
+     ],
+     "scripts/stages/stage-3/p0/register_p0_real.py": [
+      "e1_r0860k_sb_pca"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+    "readers": {
+     "configs/stages/stage-3/e1/e1_r0860k_sb_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/p0/p0_assistant_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/p2/p2_ceheavy_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/pod/autoinit_preflight_driver.py": "names E1's 0.86M CONFIGS (the permanent controls' recipe), never these weights",
+     "scripts/shared/pod/checkpoint_inventory.py": "a pod-side inventory of historical checkpoints (listing only)",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-1/recovery_continuation/compare_recovery_fingerprints.py": "closed experiment: recovery continuation (complete); a lineage check that reads relay metadata, never these bytes",
+     "scripts/stages/stage-1/recovery_continuation/verify_control_checkpoints.py": "closed experiment: recovery continuation (complete); a lineage check that reads relay metadata, never these bytes",
+     "scripts/stages/stage-3/d0/d0diag_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/d0/d0diag_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e2/e2p1_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e2/e2p1_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/p0/register_p0_real.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    }
+   }
+  },
+  "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors": {
+   "sha256": "6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/chat_template.jinja",
+    "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/config.json",
+    "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/generation_config.json",
+    "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer.json",
+    "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "e1_r1600k_sa_pca",
+     "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors",
+     "6f77676ab8fde397"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/resolution_session.json": [
+      "6f77676ab8fde397",
+      "e1_r1600k_sa_pca",
+      "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors"
+     ],
+     "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": [
+      "6f77676ab8fde397",
+      "e1_r1600k_sa_pca",
+      "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors"
+     ],
+     "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json": [
+      "e1_r1600k_sa_pca"
+     ],
+     "configs/stages/stage-3/e7/e7_control_r1600k_sa.json": [
+      "e1_r1600k_sa_pca"
+     ],
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sa.json": [
+      "e1_r1600k_sa_pca"
+     ],
+     "configs/stages/stage-3/e8b/arms.json": [
+      "6f77676ab8fde397",
+      "e1_r1600k_sa_pca"
+     ],
+     "configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json": [
+      "e1_r1600k_sa_pca"
+     ],
+     "configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json": [
+      "e1_r1600k_sa_pca"
+     ],
+     "configs/stages/stage-3/e8b/e8b_fc_r1600k_sa.json": [
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/maintenance/consolidation/stage_attribution.py": [
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/shared/data/finalize_eval_set_1.py": [
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/shared/pod/run_env.sh": [
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e4/analyze_e4.py": [
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e4/e4_driver.py": [
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e4/e4_setup.sh": [
+      "6f77676ab8fde397",
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e4/register_e4.py": [
+      "6f77676ab8fde397",
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e6/register_e6.py": [
+      "6f77676ab8fde397",
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e6b/register_e6b.py": [
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e7/e7_driver.py": [
+      "e1_r1600k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e7/e7_setup.sh": [
+      "6f77676ab8fde397"
+     ],
+     "scripts/stages/stage-3/e8b/build_e8b_configs.py": [
+      "6f77676ab8fde397",
+      "e1_r1600k_sa_pca"
+     ]
+    },
+    "tests": {
+     "tests/training/test_e8b_kd_chunk_regime.py": [
+      "e1_r1600k_sa_pca"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/resolution_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e7/e7_control_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_fc_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)",
+     "scripts/shared/data/finalize_eval_set_1.py": "names the dev-generation FILES these checkpoints produced (eval-set-1 construction, frozen), never the weights",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-3/e4/analyze_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/e4_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/e4_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/register_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e7/e7_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e7/e7_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e8b/build_e8b_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    }
+   }
+  },
+  "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/model.safetensors": {
+   "sha256": "e432d57e598d57e1633392e92955c8185faab57909f75f44bc1c349db6ccf39e",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/chat_template.jinja",
+    "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/config.json",
+    "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/generation_config.json",
+    "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/tokenizer.json",
+    "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "e1_r1600k_sb_pca",
+     "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/model.safetensors",
+     "e432d57e598d57e1"
+    ],
+    "code": {
+     "configs/stages/stage-3/e1/e1_r1600k_sb_pca.json": [
+      "e1_r1600k_sb_pca"
+     ],
+     "configs/stages/stage-3/e7/e7_control_r1600k_sb.json": [
+      "e1_r1600k_sb_pca"
+     ],
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sb.json": [
+      "e1_r1600k_sb_pca"
+     ],
+     "configs/stages/stage-3/e8b/arms.json": [
+      "e1_r1600k_sb_pca",
+      "e432d57e598d57e1"
+     ],
+     "configs/stages/stage-3/e8b/e8b_dc_r1600k_sb.json": [
+      "e1_r1600k_sb_pca"
+     ],
+     "configs/stages/stage-3/e8b/e8b_dp_r1600k_sb.json": [
+      "e1_r1600k_sb_pca"
+     ],
+     "configs/stages/stage-3/e8b/e8b_fc_r1600k_sb.json": [
+      "e1_r1600k_sb_pca"
+     ],
+     "scripts/shared/pod/run_env.sh": [
+      "e1_r1600k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e4/analyze_e4.py": [
+      "e1_r1600k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e4/e4_driver.py": [
+      "e1_r1600k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e4/e4_setup.sh": [
+      "e1_r1600k_sb_pca",
+      "e432d57e598d57e1"
+     ],
+     "scripts/stages/stage-3/e4/register_e4.py": [
+      "e1_r1600k_sb_pca",
+      "e432d57e598d57e1"
+     ],
+     "scripts/stages/stage-3/e6/register_e6.py": [
+      "e1_r1600k_sb_pca",
+      "e432d57e598d57e1"
+     ],
+     "scripts/stages/stage-3/e6b/register_e6b.py": [
+      "e1_r1600k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e7/e7_driver.py": [
+      "e1_r1600k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e7/e7_setup.sh": [
+      "e432d57e598d57e1"
+     ],
+     "scripts/stages/stage-3/e8b/build_e8b_configs.py": [
+      "e1_r1600k_sb_pca",
+      "e432d57e598d57e1"
+     ]
+    },
+    "tests": {
+     "tests/training/test_e8b_kd_chunk_regime.py": [
+      "e1_r1600k_sb_pca"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+    "readers": {
+     "configs/stages/stage-3/e1/e1_r1600k_sb_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e7/e7_control_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_dc_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_dp_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_fc_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-3/e4/analyze_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/e4_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/e4_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/register_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e7/e7_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e7/e7_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e8b/build_e8b_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    }
+   }
+  },
+  "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors": {
+   "sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/chat_template.jinja",
+    "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/config.json",
+    "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/generation_config.json",
+    "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/tokenizer.json",
+    "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [
+    {
+     "launcher": "ae_launch",
+     "file": "scripts/stages/stage-2/teacher_modes/ae_launch.py",
+     "study": {
+      "study": "A-E",
+      "grant": "logs/budget/approvals/teacher_modes_engineering_grant.json",
+      "status": "closed",
+      "closed_utc": "2026-11-11T09:34:55Z"
+     }
+    }
+   ],
+   "readers": {
+    "needles": [
+     "e1_r2960k_sa_pca",
+     "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors",
+     "3f08482c2c8e7372"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/battery_session.json": [
+      "3f08482c2c8e7372",
+      "e1_r2960k_sa_pca",
+      "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors"
+     ],
+     "configs/stages/stage-0/calibration_volume/resolution_session.json": [
+      "e1_r2960k_sa_pca"
+     ],
+     "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": [
+      "e1_r2960k_sa_pca"
+     ],
+     "configs/stages/stage-2/reasoning_data/h1pa.json": [
+      "3f08482c2c8e7372",
+      "e1_r2960k_sa_pca",
+      "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors"
+     ],
+     "configs/stages/stage-2/teacher_modes/engineering_validation.json": [
+      "3f08482c2c8e7372",
+      "e1_r2960k_sa_pca"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json": [
+      "e1_r2960k_sa_pca"
+     ],
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json": [
+      "e1_r2960k_sa_pca"
+     ],
+     "configs/stages/stage-3/e6b/provenance.json": [
+      "e1_r2960k_sa_pca"
+     ],
+     "configs/stages/stage-3/e8/arms.json": [
+      "e1_r2960k_sa_pca"
+     ],
+     "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json": [
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/shared/data/finalize_eval_set_1.py": [
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/shared/pod/run_env.sh": [
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/stages/stage-0/calibration_volume/analyze_dev.py": [
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/stages/stage-2/reasoning_data/h1pa_audit.py": [
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/stages/stage-2/teacher_modes/phase_forecast.py": [
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/stages/stage-2/teacher_modes/training_plan.py": [
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e6/e6_setup.sh": [
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e6/register_e6.py": [
+      "3f08482c2c8e7372",
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e6b/register_e6b.py": [
+      "e1_r2960k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e8/build_e8_configs.py": [
+      "e1_r2960k_sa_pca"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/battery_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-0/calibration_volume/resolution_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-2/reasoning_data/h1pa.json": "closed experiment: H1 / H1-PA (H1 closed 2026-10-24, H1-PA complete 2026-10-25; its anchor review superseded by the maintainer 2026-11-14, decisions.md)",
+     "configs/stages/stage-2/teacher_modes/engineering_validation.json": "closed experiment: Research A (CLOSED 2026-11-11, every grant closed)",
+     "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e6b/provenance.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/data/finalize_eval_set_1.py": "names the dev-generation FILES these checkpoints produced (eval-set-1 construction, frozen), never the weights",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-0/calibration_volume/analyze_dev.py": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "scripts/stages/stage-2/reasoning_data/h1pa_audit.py": "closed experiment: H1 / H1-PA (H1 closed 2026-10-24, H1-PA complete 2026-10-25; its anchor review superseded by the maintainer 2026-11-14, decisions.md)",
+     "scripts/stages/stage-2/teacher_modes/phase_forecast.py": "closed experiment: Research A (CLOSED 2026-11-11, every grant closed)",
+     "scripts/stages/stage-2/teacher_modes/training_plan.py": "closed experiment: Research A (CLOSED 2026-11-11, every grant closed)",
+     "scripts/stages/stage-3/e6/e6_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e8/build_e8_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    },
+    "closed_launchers": {
+     "ae_launch": "A-E (Research A's engineering validation): grant logs/budget/approvals/teacher_modes_engineering_grant.json CLOSED 2026-11-11T09:34:55Z; study_engineering.require_open refuses every issue and launch"
+    }
+   }
+  },
+  "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors": {
+   "sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/chat_template.jinja",
+    "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/config.json",
+    "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/generation_config.json",
+    "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/tokenizer.json",
+    "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "e1_r2960k_sb_pca",
+     "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
+     "b658fe392ab0db49"
+    ],
+    "code": {
+     "configs/stages/stage-2/reasoning_data/h1pa.json": [
+      "b658fe392ab0db49",
+      "e1_r2960k_sb_pca",
+      "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json": [
+      "e1_r2960k_sb_pca"
+     ],
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json": [
+      "e1_r2960k_sb_pca"
+     ],
+     "configs/stages/stage-3/e6b/provenance.json": [
+      "e1_r2960k_sb_pca"
+     ],
+     "configs/stages/stage-3/e8/arms.json": [
+      "e1_r2960k_sb_pca"
+     ],
+     "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json": [
+      "e1_r2960k_sb_pca"
+     ],
+     "scripts/shared/pod/run_env.sh": [
+      "e1_r2960k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e6/e6_launch.sh": [
+      "e1_r2960k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e6/e6_setup.sh": [
+      "e1_r2960k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e6/register_e6.py": [
+      "b658fe392ab0db49",
+      "e1_r2960k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e6b/register_e6b.py": [
+      "e1_r2960k_sb_pca"
+     ],
+     "scripts/stages/stage-3/e8/build_e8_configs.py": [
+      "e1_r2960k_sb_pca"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+    "readers": {
+     "configs/stages/stage-2/reasoning_data/h1pa.json": "closed experiment: H1 / H1-PA (H1 closed 2026-10-24, H1-PA complete 2026-10-25; its anchor review superseded by the maintainer 2026-11-14, decisions.md)",
+     "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e6b/provenance.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-3/e6/e6_launch.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/e6_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e8/build_e8_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    }
+   }
+  },
+  "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors": {
+   "sha256": "3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/chat_template.jinja",
+    "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/config.json",
+    "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/generation_config.json",
+    "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer.json",
+    "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "e1_r5500k_sa_pca",
+     "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors",
+     "3069b329df3edfbd"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/resolution_session.json": [
+      "3069b329df3edfbd",
+      "e1_r5500k_sa_pca",
+      "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors"
+     ],
+     "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": [
+      "3069b329df3edfbd",
+      "e1_r5500k_sa_pca",
+      "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors"
+     ],
+     "configs/stages/stage-3/e1/e1_ctl_r0250k_sa_pca_stepmatched.json": [
+      "e1_r5500k_sa_pca"
+     ],
+     "configs/stages/stage-3/e1/e1_r5500k_sa_pca.json": [
+      "e1_r5500k_sa_pca"
+     ],
+     "scripts/shared/data/finalize_eval_set_1.py": [
+      "e1_r5500k_sa_pca"
+     ],
+     "scripts/shared/pod/run_env.sh": [
+      "e1_r5500k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e6/e6_setup.sh": [
+      "e1_r5500k_sa_pca"
+     ],
+     "scripts/stages/stage-3/e6/register_e6.py": [
+      "3069b329df3edfbd",
+      "e1_r5500k_sa_pca"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/resolution_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-3/e1/e1_ctl_r0250k_sa_pca_stepmatched.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e1/e1_r5500k_sa_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/data/finalize_eval_set_1.py": "names the dev-generation FILES these checkpoints produced (eval-set-1 construction, frozen), never the weights",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-3/e6/e6_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    }
+   }
+  },
+  "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors": {
+   "sha256": "573847a730c1a4997a2fa4554ac2fe45d72633b1d8f3234c6ca72aac2ec4468f",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "permanent_controls/preflight_ctl_r0860k_sa/model/chat_template.jinja",
+    "permanent_controls/preflight_ctl_r0860k_sa/model/config.json",
+    "permanent_controls/preflight_ctl_r0860k_sa/model/generation_config.json",
+    "permanent_controls/preflight_ctl_r0860k_sa/model/tokenizer.json",
+    "permanent_controls/preflight_ctl_r0860k_sa/model/tokenizer_config.json"
+   ],
+   "registry": [
+    {
+     "canonical_name": "model",
+     "experiment": "Stage 3",
+     "retention": "control",
+     "protected": true,
+     "never_delete_clause": "permanent control — named explicitly in the retention rule",
+     "status": "active",
+     "path_local": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/model",
+     "relay_path": "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
+     "weights_sha256": "573847a730c1a4997a2fa4554ac2fe45d72633b1d8f3234c6ca72aac2ec4468f"
+    }
+   ],
+   "local_copies": [
+    "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/model"
+   ],
+   "launchers": [
+    {
+     "launcher": "autoinit_continuation_launch",
+     "file": "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py",
+     "study": null
+    }
+   ],
+   "readers": {
+    "needles": [
+     "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
+     "preflight_ctl_r0860k_sa",
+     "573847a730c1a499"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/battery_session.json": [
+      "573847a730c1a499",
+      "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
+      "preflight_ctl_r0860k_sa"
+     ],
+     "scripts/shared/pod/autoinit_preflight_driver.py": [
+      "preflight_ctl_r0860k_sa"
+     ],
+     "scripts/shared/pod/autoinit_preflight_launch.py": [
+      "preflight_ctl_r0860k_sa"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py": [
+      "preflight_ctl_r0860k_sa"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py": [
+      "preflight_ctl_r0860k_sa"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/plan.py": [
+      "preflight_ctl_r0860k_sa"
+     ]
+    },
+    "tests": {
+     "scripts/shared/tests/test_autoinit_preflight_rehearsal.py": [
+      "preflight_ctl_r0860k_sa"
+     ],
+     "scripts/stages/stage-1/continuation_b/tests/test_continuation_b_executes.py": [
+      "preflight_ctl_r0860k_sa"
+     ],
+     "scripts/stages/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py": [
+      "preflight_ctl_r0860k_sa"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py": [
+      "preflight_ctl_r0860k_sa"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "keep",
+    "reason": "a permanent control (registry: control, protected, never-delete); declared by autoinit_continuation_launch"
+   }
+  },
+  "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors": {
+   "sha256": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "permanent_controls/preflight_ctl_r0860k_sb/model/chat_template.jinja",
+    "permanent_controls/preflight_ctl_r0860k_sb/model/config.json",
+    "permanent_controls/preflight_ctl_r0860k_sb/model/generation_config.json",
+    "permanent_controls/preflight_ctl_r0860k_sb/model/tokenizer.json",
+    "permanent_controls/preflight_ctl_r0860k_sb/model/tokenizer_config.json"
+   ],
+   "registry": [
+    {
+     "canonical_name": "model",
+     "experiment": "Stage 3",
+     "retention": "control",
+     "protected": true,
+     "never_delete_clause": "permanent control — named explicitly in the retention rule",
+     "status": "active",
+     "path_local": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/model",
+     "relay_path": "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
+     "weights_sha256": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629"
+    }
+   ],
+   "local_copies": [
+    "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/model"
+   ],
+   "launchers": [
+    {
+     "launcher": "autoinit_continuation_launch",
+     "file": "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py",
+     "study": null
+    }
+   ],
+   "readers": {
+    "needles": [
+     "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
+     "preflight_ctl_r0860k_sb",
+     "4c6adcf861871690"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/battery_session.json": [
+      "4c6adcf861871690",
+      "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
+      "preflight_ctl_r0860k_sb"
+     ],
+     "scripts/shared/pod/autoinit_preflight_driver.py": [
+      "preflight_ctl_r0860k_sb"
+     ],
+     "scripts/shared/pod/autoinit_preflight_launch.py": [
+      "preflight_ctl_r0860k_sb"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py": [
+      "preflight_ctl_r0860k_sb"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py": [
+      "preflight_ctl_r0860k_sb"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/plan.py": [
+      "preflight_ctl_r0860k_sb"
+     ]
+    },
+    "tests": {
+     "scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py": [
+      "preflight_ctl_r0860k_sb"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "keep",
+    "reason": "a permanent control (registry: control, protected, never-delete); declared by autoinit_continuation_launch"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors": {
+   "sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/config.json",
+    "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "4df438a839cd1ed057c2277dfcb8922f",
+     "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+     "3d4cb00edb8cbdbf"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": [
+      "3d4cb00edb8cbdbf",
+      "4df438a839cd1ed057c2277dfcb8922f",
+      "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors": {
+   "sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/config.json",
+    "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "60e229ac09d88cf52814894ddec0e933",
+     "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors",
+     "a092bc43630df08a"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": [
+      "60e229ac09d88cf52814894ddec0e933",
+      "a092bc43630df08a",
+      "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors": {
+   "sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/config.json",
+    "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "72b76a1ca4300f1fc3b341c28738f425",
+     "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors",
+     "49bb3c56b50d9594"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": [
+      "49bb3c56b50d9594",
+      "72b76a1ca4300f1fc3b341c28738f425",
+      "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors"
+     ]
+    },
+    "tests": {
+     "scripts/stages/stage-0/calibration_volume/tests/test_top4_extension.py": [
+      "72b76a1ca4300f1fc3b341c28738f425"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors": {
+   "sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/config.json",
+    "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "91090067b51c9fd4c0aeb3824bc7f549",
+     "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors",
+     "111958717d94fd6a"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": [
+      "111958717d94fd6a",
+      "91090067b51c9fd4c0aeb3824bc7f549",
+      "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/model.safetensors": {
+   "sha256": "551e66850bd340851913b13d1dca5894de8a934b276e9853c563da03cefe80c7",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/config.json",
+    "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "3b2037bc90090ba13504fb18c1480e80",
+     "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/model.safetensors",
+     "551e66850bd34085"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": [
+      "3b2037bc90090ba13504fb18c1480e80",
+      "551e66850bd34085",
+      "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/model.safetensors": {
+   "sha256": "e9eba2255dbb567b9f044c0af9b2f3139c9ef227532ff85abe66e46f158f733e",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/config.json",
+    "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "9af1989dc0b8168908eeb77ee4d3fa47",
+     "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/model.safetensors",
+     "e9eba2255dbb567b"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": [
+      "9af1989dc0b8168908eeb77ee4d3fa47",
+      "e9eba2255dbb567b",
+      "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/model.safetensors": {
+   "sha256": "4da365c3d8b3dc4f391a696c78750714405bc7ef488e2dccf387331a640e6b85",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/config.json",
+    "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "b6a41ee85024ac3750a39ceb97fa1b5c",
+     "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/model.safetensors",
+     "4da365c3d8b3dc4f"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": [
+      "4da365c3d8b3dc4f",
+      "b6a41ee85024ac3750a39ceb97fa1b5c",
+      "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/model.safetensors": {
+   "sha256": "34712d06301866b339b6daa9c5d43834f5fdc336ae767397adc6357f6c25176f",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/config.json",
+    "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "e2d10ba8f532f95c174de290e19dcf01",
+     "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/model.safetensors",
+     "34712d06301866b3"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": [
+      "34712d06301866b3",
+      "e2d10ba8f532f95c174de290e19dcf01",
+      "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors": {
+   "sha256": "5d54e3709678884a530decfb43354481da316f53604091c6d40b5f3e1bfa683a",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/config.json",
+    "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "0363ad220c88104c0dd1e53395db4530",
+     "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors",
+     "5d54e3709678884a"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": [
+      "0363ad220c88104c0dd1e53395db4530",
+      "5d54e3709678884a",
+      "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors": {
+   "sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/config.json",
+    "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [
+    {
+     "launcher": "igv_launch",
+     "file": "scripts/stages/stage-1/projected_residual/igv_launch.py",
+     "study": {
+      "study": "independent-gated-E",
+      "grant": null,
+      "status": "proposed",
+      "proposal": "logs/stages/stage-1/projected_residual/plans/independent_gated_engineering_proposal.json"
+     }
+    }
+   ],
+   "readers": {
+    "needles": [
+     "1301deb71685aa1ca5c7b6cf2c491ac4",
+     "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+     "fc28e0dd916d1443"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4",
+      "fc28e0dd916d1443",
+      "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors"
+     ],
+     "configs/stages/stage-1/projected_residual/d4_top1_selection.json": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4",
+      "fc28e0dd916d1443"
+     ],
+     "configs/stages/stage-1/projected_residual/independent_gated_validation.json": [
+      "fc28e0dd916d1443"
+     ],
+     "configs/stages/stage-2/reasoning_data/h1pa.json": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4",
+      "fc28e0dd916d1443"
+     ],
+     "configs/stages/stage-2/teacher_modes/six_category_design.json": [
+      "fc28e0dd916d1443"
+     ],
+     "configs/stages/stage-2/teacher_modes/token_matched_design.json": [
+      "fc28e0dd916d1443"
+     ],
+     "scripts/stages/stage-1/projected_residual/export_selection.py": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4"
+     ],
+     "scripts/stages/stage-2/reasoning_data/h1_accounting.py": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4"
+     ],
+     "scripts/stages/stage-2/reasoning_data/h1pa_driver.py": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4"
+     ],
+     "scripts/stages/stage-2/reasoning_data/h1pa_validation.py": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4"
+     ],
+     "scripts/stages/stage-2/reasoning_data/p1g_driver.py": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4"
+     ],
+     "scripts/stages/stage-2/reasoning_data/restore_initialization.py": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4"
+     ],
+     "scripts/stages/stage-2/reasoning_data/unit_driver.py": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4"
+     ],
+     "scripts/stages/stage-2/teacher_modes/c1_audit.py": [
+      "fc28e0dd916d1443"
+     ]
+    },
+    "tests": {
+     "scripts/stages/stage-0/calibration_volume/tests/test_mixed_execution.py": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4"
+     ],
+     "scripts/stages/stage-1/projected_residual/tests/test_projected_residual_records.py": [
+      "1301deb71685aa1ca5c7b6cf2c491ac4"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "keep",
+    "reason": "D4-Augmented's D4 Top-1: the declared input of the independent-gated study's engineering validation (igv_launch; its proposal logs/stages/stage-1/projected_residual/plans/independent_gated_engineering_proposal.json is PENDING the maintainer since 2026-10-28) and Research B's D4 Top-1 selection (configs/stages/stage-1/projected_residual/d4_top1_selection.json; B-E's grant is not closed). An unresolved consumer: kept until that proposal is decided against or Research B is closed"
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors": {
+   "sha256": "a509ac31665bffbedb5374876c9b44d5ecfa6b4c642229947d82dc3b88ff383d",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/config.json",
+    "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "167a43f4c05b0f9653eaf216717df83c",
+     "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors",
+     "a509ac31665bffbe"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": [
+      "167a43f4c05b0f9653eaf216717df83c",
+      "a509ac31665bffbe",
+      "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors": {
+   "sha256": "ac7f3885a13f9acb74e2f2014dac2d4b96fcec2655841000b46fe3d6bb207cc4",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/config.json",
+    "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "912205b5a106bb868c43f1d24597bfcc",
+     "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors",
+     "ac7f3885a13f9acb"
+    ],
+    "code": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": [
+      "912205b5a106bb868c43f1d24597bfcc",
+      "ac7f3885a13f9acb",
+      "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    }
+   }
+  },
+  "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors": {
+   "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/config.json",
+    "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "9311dcde3cdaedbf54d506ccf7a98333",
+     "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors",
+     "4b86c1fd34a7b9d2"
+    ],
+    "code": {},
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay",
+    "readers": {}
+   }
+  },
+  "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors": {
+   "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
+    "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [
+    {
+     "launcher": "autoinit_d3_probes_launch",
+     "file": "scripts/stages/stage-1/phase_d3/autoinit_d3_probes_launch.py",
+     "study": null
+    }
+   ],
+   "readers": {
+    "needles": [
+     "4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+     "d3_structural_20261017_083554",
+     "phase_d3",
+     "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+     "a2a67b25d7ef520c"
+    ],
+    "code": {
+     "configs/index.json": [
+      "phase_d3"
+     ],
+     "configs/shared/baselines/initialization_forward_baseline_v1.json": [
+      "d3_structural_20261017_083554",
+      "phase_d3"
+     ],
+     "configs/shared/baselines/initialization_forward_baseline_v2.json": [
+      "d3_structural_20261017_083554",
+      "phase_d3"
+     ],
+     "configs/stages/stage-1/phase_c1/authorization.json": [
+      "phase_d3"
+     ],
+     "scripts/index.json": [
+      "phase_d3"
+     ],
+     "scripts/maintenance/consolidation/stage_attribution.py": [
+      "d3_structural_20261017_083554",
+      "phase_d3"
+     ],
+     "scripts/shared/pod/autoinit_preflight_setup.sh": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/families/d_series/current.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/families/d_series/d2_budget.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/families/d_series/programme_closeout.py": [
+      "d3_structural_20261017_083554",
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/families/d_series/shared_evaluation.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/analyze_d3_probes.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/autoinit_d3_probes_launch.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_driver.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_launch.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/closeout_d3_probes.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/closeout_d3_structural.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/d3_authorization.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/d3_budget.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/d3_design.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/d3_probes.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/extract_d3_control.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/issue_d3_authorization.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/write_d3_admission.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/write_d3_registration.py": [
+      "phase_d3"
+     ]
+    },
+    "tests": {
+     "scripts/stages/stage-1/families/d_series/tests/test_programme_closeout.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/families/d_series/tests/test_shared_evaluation.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/tests/probes_pod_preflight/test_probes_pod_preflight.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/tests/structural_pod_preflight/test_structural_pod_preflight.py": [
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/tests/test_d3_chain.py": [
+      "d3_structural_20261017_083554",
+      "phase_d3"
+     ],
+     "scripts/stages/stage-1/phase_d3/tests/test_d3_probes_closeout.py": [
+      "phase_d3"
+     ],
+     "tests/integration/test_session_kind_dispatch.py": [
+      "d3_structural_20261017_083554"
+     ],
+     "tests/support/session_specs.py": [
+      "d3_structural_20261017_083554"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "D3 structural (COMPLETE 2026-10-17, STRUCTURAL_CHANGE; D-series CLOSED): logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/closeout/outcome.json and the probes' closeout; the product's config.json and generation_config.json stay on the relay",
+    "readers": {
+     "configs/index.json": "navigation index",
+     "configs/shared/baselines/initialization_forward_baseline_v1.json": "cites the D3 closeout as terminal evidence, never the product's bytes",
+     "configs/shared/baselines/initialization_forward_baseline_v2.json": "cites the D3 closeout as terminal evidence, never the product's bytes",
+     "configs/stages/stage-1/phase_c1/authorization.json": "names phase_d3 (the experiment), not this object",
+     "scripts/index.json": "navigation index",
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)",
+     "scripts/shared/pod/autoinit_preflight_setup.sh": "the D3 sessions' setup branch (D-series closed)",
+     "scripts/stages/stage-1/families/d_series/current.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/families/d_series/d2_budget.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/families/d_series/programme_closeout.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/families/d_series/shared_evaluation.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/analyze_d3_probes.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/autoinit_d3_probes_launch.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_driver.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_launch.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/closeout_d3_probes.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/closeout_d3_structural.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/d3_authorization.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/d3_budget.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/d3_design.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/d3_probes.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/extract_d3_control.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/issue_d3_authorization.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/write_d3_admission.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/write_d3_registration.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)"
+    },
+    "closed_launchers": {
+     "autoinit_d3_probes_launch": "D3 probes: the D-series CLOSED 2026-10-17 (logs/stages/stage-1/families/d_series/closeout/programme_closeout.json); refuse_closed_authority() runs first in every D-series issuer"
+    }
+   }
+  },
+  "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors": {
+   "sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+    "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+    "stage1/qwen3_0p6b_init_v0/checkpoint/generation_config.json",
+    "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+    "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json"
+   ],
+   "registry": [
+    {
+     "canonical_name": "qwen3_0p6b_init_v0",
+     "experiment": "E1-E8",
+     "retention": "canonical",
+     "protected": true,
+     "never_delete_clause": "canonical initialization; named by the experiment index and by a living recovery path",
+     "status": "active",
+     "path_local": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+     "relay_path": "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+     "weights_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
+    }
+   ],
+   "local_copies": [
+    "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
+   ],
+   "launchers": [
+    {
+     "launcher": "autoinit_preflight_launch",
+     "file": "scripts/shared/pod/autoinit_preflight_launch.py",
+     "study": null
+    },
+    {
+     "launcher": "autoinit_phase_a_launch",
+     "file": "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py",
+     "study": null
+    },
+    {
+     "launcher": "autoinit_continuation_launch",
+     "file": "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py",
+     "study": null
+    },
+    {
+     "launcher": "autoinit_device_canary_launch",
+     "file": "scripts/shared/pod/autoinit_device_canary_launch.py",
+     "study": null
+    },
+    {
+     "launcher": "autoinit_measurement_launch",
+     "file": "scripts/stages/stage-1/measurement/autoinit_measurement_launch.py",
+     "study": null
+    },
+    {
+     "launcher": "autoinit_recovery_continuation_launch",
+     "file": "scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_launch.py",
+     "study": null
+    }
+   ],
+   "readers": {
+    "needles": [
+     "qwen3_0p6b_init_v0",
+     "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+     "86fbba78e8a2a324"
+    ],
+    "code": {
+     "configs/stages/stage-1/operator_ledger.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-1/phase_c3/batching_refactor_cuda.json": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-2/reasoning_data/h1pa.json": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_ctl_r0250k_sa_pca_stepmatched.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0250k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0250k_sa_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0250k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0250k_sb_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0460k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0460k_sa_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0460k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0460k_sb_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0860k_sa_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0860k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0860k_sb_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r1600k_sa_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r1600k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r1600k_sb_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sa_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sb_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r5500k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r5500k_sa_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r5500k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r5500k_sb_rand.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e2/e2_d1_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e2/e2_d1_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e3/e3_a1_frozen_attn_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e3/e3_a2_lora_attn_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e3/e3_a2_lora_attn_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e4/e4_p2_r1600k_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e7/e7_control_r1600k_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e7/e7_control_r1600k_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/p0/p0_assistant_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/p0/p0_assistant_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/p2/p2_ceheavy_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/p2/p2_ceheavy_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/recovery.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/s2v1_from_init.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/maintenance/consolidation/stage_attribution.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/data/audit_recovery_search_v2.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/data/build_eval_behavior_v0.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/data/build_state_eval_suite.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/audit_prompt_rendering.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/compare_geometry.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/eval_ppl.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/parameter_movement.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/reevaluate_stage23.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/attest_protocol.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/audit_tool_rendering.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/autoinit_device_canary.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/autoinit_preflight_driver.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/autoinit_science_inputs.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/benchmark_padding_truncation.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/checkpoint_inventory.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/hashes_ckpt.txt": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/hashes_ckpt_pca.txt": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/hashes_ckpt_rand.txt": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/run_env.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/simulate_pod_env.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/training/diagnose_loss_weights.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/validation/batch_invariance_diagnostic_remote.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/validation/dry_run_search.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-0/calibration_volume/mixed_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/phase_a_frozen.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/phase_a_search.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/plan_search.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/write_preregistration.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a3/autoinit_a3_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_b/verify_historical_probe_reuse.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/audit_skip_predicates.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/write_c1_execution_preregistration.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c3/autoinit_c3_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/compare_recovery_fingerprints.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/verify_control_checkpoints.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/reasoning_data/assets.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/reasoning_data/h1pa_audit.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/reasoning_data/h1pa_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/reasoning_data/restore_initialization.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/teacher_modes/token_admission.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/teacher_modes/training_plan.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e1/build_experiment1_configs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e2/build_experiment2_configs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e2/e2diag_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e2/e2diag_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e2/e2p1_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e2/e2p1_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/e3_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/e3_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/register_e3.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/validate_e3_arms.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/e4_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/e4_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/preflight_e4.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/register_e4.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/build_e5_arm_c.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/build_e5_arm_r.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/diagnose_e5_normalization.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/e5_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/e5_pilot.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/e5_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6/e6_launch.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6/e6_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6/register_e6.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/e6b_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/e6b_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/register_e6b.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/validate_e6b_arms.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+     ],
+     "scripts/stages/stage-3/e7/build_fineweb_kd.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e7/e7_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e7/e7_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e7/validate_e7_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8/build_and_stage_e8_init.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8/stage_e8_inputs.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+     ],
+     "scripts/stages/stage-3/e8/validate_e8_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8b/e8b_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8b/e8b_launch.py": [
+      "qwen3_0p6b_init_v0",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+     ],
+     "scripts/stages/stage-3/e8b/e8b_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8b/validate_e8b_arms.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/p0/p0asst_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/p0/register_p0_real.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/p2/p2_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/p2/p2_setup.sh": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "src/aadistill/initialization/operators/composite/stage1_sandwich.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "src/aadistill/initialization/operators/depth/positional.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "src/aadistill/initialization/specs/state.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "src/aadistill/runtime/staging_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ]
+    },
+    "tests": {
+     "scripts/maintenance/migration/tests/test_frozen_record_emissions.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/tests/test_observed_protocol_rehearsal.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/tests/test_train_stage3_path_resolution.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/continuation_b/tests/test_continuation_b_executes.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/continuation_b/tests/test_continuation_b_product_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/continuation_b/tests/test_continuation_b_stage_aware_pooling.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/tests/test_phase_a_attempt12_import.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/tests/test_phase_a_rehearsal.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_b/tests/test_phase_b_driver_and_launcher.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_c1_rope_gate_inputs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_c1_runtime_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_c1_stages_the_rope_config.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_c1_tool_prompt_rendering.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_staging_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c2_baseline_completion/tests/test_completion_execution_preflight.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c2_baseline_completion/tests/test_phase_c2_baseline_completion.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c2_full_search/tests/test_full_search_execution_preflight.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py": [
+      "qwen3_0p6b_init_v0",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/tests/test_setup_end_to_end.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/tests/test_e3_configs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/tests/test_e4_configs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6/tests/test_e6_evaluation_only.py": [
+      "86fbba78e8a2a324"
+     ],
+     "scripts/stages/stage-3/e6/tests/test_e6_registration.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/tests/test_e6b_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/tests/test_e6b_pod.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8/tests/test_e8_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8/tests/test_frozen_records.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/docs/test_log_organisation.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/initialization/test_corrections.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/initialization/test_leaf_durability.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/integration/test_pod_script_paths.py": [
+      "86fbba78e8a2a324",
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/integration/test_session_architecture.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/models/test_tokenizer_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "keep",
+    "reason": "the canonical 0.6B initialization (registry: canonical, protected, never-delete); declared by six launchers (preflight, Phase A, continuation, device canary, measurement, recovery continuation)"
+   }
+  },
+  "stage1/qwen3_0p6b_init_v0/random_baseline/model.safetensors": {
+   "sha256": "0e2e2b28cfe5dc5b9cb014e3b317d0e7d1744249b3b39c49361df53bec6b8e91",
+   "size_bytes": 1192135096,
+   "size_gib": 1.11,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage1/qwen3_0p6b_init_v0/random_baseline/chat_template.jinja",
+    "stage1/qwen3_0p6b_init_v0/random_baseline/config.json",
+    "stage1/qwen3_0p6b_init_v0/random_baseline/generation_config.json",
+    "stage1/qwen3_0p6b_init_v0/random_baseline/tokenizer.json",
+    "stage1/qwen3_0p6b_init_v0/random_baseline/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "qwen3_0p6b_init_v0",
+     "random_baseline",
+     "stage1/qwen3_0p6b_init_v0/random_baseline/model.safetensors",
+     "0e2e2b28cfe5dc5b"
+    ],
+    "code": {
+     "configs/stages/stage-1/operator_ledger.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-1/phase_c3/batching_refactor_cuda.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json": [
+      "random_baseline"
+     ],
+     "configs/stages/stage-2/reasoning_data/h1pa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_ctl_r0250k_sa_pca_stepmatched.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0250k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0250k_sa_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r0250k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0250k_sb_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r0460k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0460k_sa_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r0460k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0460k_sb_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0860k_sa_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r0860k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r0860k_sb_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r1600k_sa_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r1600k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r1600k_sb_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sa_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r2960k_sb_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r5500k_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r5500k_sa_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e1/e1_r5500k_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e1/e1_r5500k_sb_rand.json": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "configs/stages/stage-3/e2/e2_d1_sa_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e2/e2_d1_sb_pca.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e3/e3_a1_frozen_attn_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e3/e3_a2_lora_attn_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e3/e3_a2_lora_attn_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e4/e4_p2_r1600k_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e7/e7_control_r1600k_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e7/e7_control_r1600k_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/p0/p0_assistant_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/p0/p0_assistant_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/p2/p2_ceheavy_sa.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/p2/p2_ceheavy_sb.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/recovery.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "configs/stages/stage-3/s2v1_from_init.json": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/maintenance/consolidation/stage_attribution.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/data/audit_recovery_search_v2.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/data/build_eval_behavior_v0.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/data/build_state_eval_suite.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/audit_prompt_rendering.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/compare_geometry.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/eval_ppl.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/parameter_movement.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/evaluation/reevaluate_stage23.py": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "scripts/shared/pod/attest_protocol.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/audit_tool_rendering.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/autoinit_device_canary.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/autoinit_preflight_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/autoinit_science_inputs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/benchmark_padding_truncation.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/checkpoint_inventory.py": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "scripts/shared/pod/hashes_ckpt.txt": [
+      "0e2e2b28cfe5dc5b",
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "scripts/shared/pod/hashes_ckpt_pca.txt": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/pod/hashes_ckpt_rand.txt": [
+      "0e2e2b28cfe5dc5b",
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "scripts/shared/pod/run_env.sh": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "scripts/shared/pod/simulate_pod_env.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/training/diagnose_loss_weights.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/training/init_stage1.py": [
+      "random_baseline"
+     ],
+     "scripts/shared/validation/batch_invariance_diagnostic_remote.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/validation/dry_run_search.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-0/calibration_volume/mixed_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/phase_a_frozen.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/phase_a_search.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/plan_search.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/write_preregistration.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a3/autoinit_a3_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_b/verify_historical_probe_reuse.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/audit_skip_predicates.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/write_c1_execution_preregistration.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c3/autoinit_c3_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/compare_recovery_fingerprints.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/verify_control_checkpoints.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/reasoning_data/assets.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/reasoning_data/h1pa_audit.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/reasoning_data/h1pa_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/reasoning_data/restore_initialization.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/teacher_modes/token_admission.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-2/teacher_modes/training_plan.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e1/build_experiment1_configs.py": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "scripts/stages/stage-3/e2/build_experiment2_configs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e2/e2diag_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e2/e2diag_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e2/e2p1_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e2/e2p1_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/e3_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/e3_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/register_e3.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/validate_e3_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/e4_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/e4_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/preflight_e4.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/register_e4.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/build_e5_arm_c.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/build_e5_arm_r.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/diagnose_e5_normalization.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/e5_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/e5_pilot.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e5/e5_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6/e6_launch.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6/e6_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6/register_e6.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/e6b_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/e6b_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/register_e6b.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/validate_e6b_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e7/build_fineweb_kd.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e7/e7_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e7/e7_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e7/validate_e7_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8/build_and_stage_e8_init.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8/stage_e8_inputs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8/validate_e8_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8b/e8b_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8b/e8b_launch.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8b/e8b_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8b/validate_e8b_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/p0/p0asst_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/p0/register_p0_real.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/p2/p2_driver.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/p2/p2_setup.sh": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "src/aadistill/initialization/operators/composite/stage1_sandwich.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "src/aadistill/initialization/operators/depth/positional.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "src/aadistill/initialization/specs/state.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "src/aadistill/runtime/staging_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ]
+    },
+    "tests": {
+     "scripts/maintenance/migration/tests/test_frozen_record_emissions.py": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "scripts/shared/tests/test_observed_protocol_rehearsal.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/shared/tests/test_train_stage3_path_resolution.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/continuation_b/tests/test_continuation_b_executes.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/continuation_b/tests/test_continuation_b_product_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/continuation_b/tests/test_continuation_b_stage_aware_pooling.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/tests/test_phase_a_attempt12_import.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_a/tests/test_phase_a_rehearsal.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_b/tests/test_phase_b_driver_and_launcher.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_c1_rope_gate_inputs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_c1_runtime_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_c1_stages_the_rope_config.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_c1_tool_prompt_rendering.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c1/tests/test_staging_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c2_baseline_completion/tests/test_completion_execution_preflight.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c2_baseline_completion/tests/test_phase_c2_baseline_completion.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/phase_c2_full_search/tests/test_full_search_execution_preflight.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-1/recovery_continuation/tests/test_setup_end_to_end.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e3/tests/test_e3_configs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e4/tests/test_e4_configs.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6/tests/test_e6_registration.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/tests/test_e6b_arms.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e6b/tests/test_e6b_pod.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "scripts/stages/stage-3/e8/tests/test_e8_arms.py": [
+      "qwen3_0p6b_init_v0",
+      "random_baseline"
+     ],
+     "scripts/stages/stage-3/e8/tests/test_frozen_records.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/docs/test_log_organisation.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/initialization/test_corrections.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/initialization/test_leaf_durability.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/integration/test_pod_script_paths.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/integration/test_session_architecture.py": [
+      "qwen3_0p6b_init_v0"
+     ],
+     "tests/models/test_tokenizer_contract.py": [
+      "qwen3_0p6b_init_v0"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "keep",
+    "reason": "the canonical initialization's random-initialization control (the `*_rand` arms' student; AGENTS.md 4.2's comparison of initialization NLL against a random initialization); the whole `stage1/qwen3_0p6b_init_v0/` prefix is protected (retire_relay_copies.PROTECTED_PREFIXES)"
+   }
+  },
+  "stage3/s1_ext_v0/step_000660/model/model.safetensors": {
+   "sha256": "8764e3b6a7c8652bda7a3a8c2600327a0a50de8124c0a76af42494d06fb08b47",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage3/s1_ext_v0/step_000660/model/chat_template.jinja",
+    "stage3/s1_ext_v0/step_000660/model/config.json",
+    "stage3/s1_ext_v0/step_000660/model/generation_config.json",
+    "stage3/s1_ext_v0/step_000660/model/tokenizer.json",
+    "stage3/s1_ext_v0/step_000660/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "s1_ext_v0",
+     "stage3/s1_ext_v0/step_000660/model/model.safetensors",
+     "8764e3b6a7c8652b"
+    ],
+    "code": {
+     "scripts/maintenance/consolidation/stage_attribution.py": [
+      "s1_ext_v0"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+    "readers": {
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)"
+    }
+   }
+  },
+  "stage3/s1_ffn_norm_v0/step_000660/model/model.safetensors": {
+   "sha256": "dc64f244e203d607ed2ea63836400287878b26b96ebf42dc19ec70f154ace900",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage3/s1_ffn_norm_v0/step_000660/model/chat_template.jinja",
+    "stage3/s1_ffn_norm_v0/step_000660/model/config.json",
+    "stage3/s1_ffn_norm_v0/step_000660/model/generation_config.json",
+    "stage3/s1_ffn_norm_v0/step_000660/model/tokenizer.json",
+    "stage3/s1_ffn_norm_v0/step_000660/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "s1_ffn_norm_v0",
+     "stage3/s1_ffn_norm_v0/step_000660/model/model.safetensors",
+     "dc64f244e203d607"
+    ],
+    "code": {
+     "scripts/shared/evaluation/eval_behavior.py": [
+      "s1_ffn_norm_v0"
+     ]
+    },
+    "tests": {
+     "tests/evaluation/test_perf_trend.py": [
+      "s1_ffn_norm_v0"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+    "readers": {
+     "scripts/shared/evaluation/eval_behavior.py": "a usage example in the docstring"
+    }
+   }
+  },
+  "stage3/s2_blocks_v0/step_000660/model/model.safetensors": {
+   "sha256": "9d7e4311dc6ed953b16b728cc81865eed5c57c920c8642678cd09fcf6a713d1b",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage3/s2_blocks_v0/step_000660/model/chat_template.jinja",
+    "stage3/s2_blocks_v0/step_000660/model/config.json",
+    "stage3/s2_blocks_v0/step_000660/model/generation_config.json",
+    "stage3/s2_blocks_v0/step_000660/model/tokenizer.json",
+    "stage3/s2_blocks_v0/step_000660/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "s2_blocks_v0",
+     "stage3/s2_blocks_v0/step_000660/model/model.safetensors",
+     "9d7e4311dc6ed953"
+    ],
+    "code": {
+     "scripts/maintenance/consolidation/stage_attribution.py": [
+      "s2_blocks_v0"
+     ]
+    },
+    "tests": {}
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+    "readers": {
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)"
+    }
+   }
+  },
+  "stage3/s2_blocks_v1/step_002700/model/model.safetensors": {
+   "sha256": "f275fbfd13b43b61629f92b67a7b9586d34deeea977b6c8e197c708ecd4f591f",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage3/s2_blocks_v1/step_002700/model/chat_template.jinja",
+    "stage3/s2_blocks_v1/step_002700/model/config.json",
+    "stage3/s2_blocks_v1/step_002700/model/generation_config.json",
+    "stage3/s2_blocks_v1/step_002700/model/tokenizer.json",
+    "stage3/s2_blocks_v1/step_002700/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "s2_blocks_v1",
+     "stage3/s2_blocks_v1/step_002700/model/model.safetensors",
+     "f275fbfd13b43b61"
+    ],
+    "code": {
+     "scripts/shared/pod/AGENTS.md": [
+      "s2_blocks_v1"
+     ],
+     "src/aadistill/evaluation/behavior.py": [
+      "s2_blocks_v1"
+     ]
+    },
+    "tests": {
+     "tests/evaluation/test_behavior.py": [
+      "s2_blocks_v1"
+     ],
+     "tests/evaluation/test_perf_trend.py": [
+      "s2_blocks_v1"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+    "readers": {
+     "scripts/shared/pod/AGENTS.md": "a historical note",
+     "src/aadistill/evaluation/behavior.py": "a docstring citing a historical failure"
+    }
+   }
+  },
+  "stage3/s2v1_from_init/step_002700/model/model.safetensors": {
+   "sha256": "7487cd92999af5506a28496045900e4b53a1e393a71a00c2edb0e0822143f98a",
+   "size_bytes": 2384234968,
+   "size_gib": 2.22,
+   "same_sha256_paths": [],
+   "siblings": [
+    "stage3/s2v1_from_init/step_002700/model/chat_template.jinja",
+    "stage3/s2v1_from_init/step_002700/model/config.json",
+    "stage3/s2v1_from_init/step_002700/model/generation_config.json",
+    "stage3/s2v1_from_init/step_002700/model/tokenizer.json",
+    "stage3/s2v1_from_init/step_002700/model/tokenizer_config.json"
+   ],
+   "registry": [],
+   "local_copies": [],
+   "launchers": [],
+   "readers": {
+    "needles": [
+     "s2v1_from_init",
+     "stage3/s2v1_from_init/step_002700/model/model.safetensors",
+     "7487cd92999af550"
+    ],
+    "code": {
+     "configs/stages/stage-3/s2v1_from_init.json": [
+      "s2v1_from_init"
+     ],
+     "scripts/maintenance/consolidation/stage_attribution.py": [
+      "s2v1_from_init"
+     ],
+     "scripts/shared/pod/hashes_ckpt.txt": [
+      "7487cd92999af550",
+      "s2v1_from_init"
+     ]
+    },
+    "tests": {
+     "tests/evaluation/test_perf_trend.py": [
+      "s2v1_from_init"
+     ]
+    }
+   },
+   "disposition": {
+    "disposition": "retire",
+    "criterion": "agents_2_5_standing_retirement",
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md",
+    "readers": {
+     "configs/stages/stage-3/s2v1_from_init.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)",
+     "scripts/shared/pod/hashes_ckpt.txt": "the hash list of the August pod setup (setup.sh / orchestrate.sh, E-series): historical"
+    }
+   }
+  }
+ },
+ "decisions": {
+  "path": "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+  "schema": "aadistill.maintenance.relay_weight_dispositions/v1"
+ }
+}

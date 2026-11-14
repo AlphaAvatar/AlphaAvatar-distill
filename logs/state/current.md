@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-14 (UTC), RI-S1 COMPLETE and CLOSED on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); the three volumes retired; nothing running, nothing billing. The human view. Every number here has an owner
+**Updated:** 2026-11-14 (UTC), RI-S1 COMPLETE and CLOSED on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); RI-LM1 prepared and proposed, not authorized; nothing running, nothing billing. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -19,7 +19,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   state KL (D 0.65, W 6.45, DW 6.78) have range; on eval-set-1 correctness the W/DW contrasts and the interaction are
   floor-limited. eval-set-1 is development-exposed. D's losses: degeneration stops in thinking mode; in non-thinking
   mode 162 of its 308 well-formed static replies state no answer the scorer reads, 101 a wrong one, 45 are correct.
-  Corrections after review (two rounds): REPORT.md section 12 (no score changed). Teacher reuse: a missing prompt
+  Corrections after review (three rounds): REPORT.md section 12 (no score changed). Teacher reuse: a missing prompt
   field is never a match; the non-fluid prompts' content identity is derived from the commits that ran and the
   dev-box rendering of the registered items, not compared (`analyses/teacher_reuse.json` v2).
 - Engineering: vLLM V1 `abort_request` takes a list; the shared runners passed a bare id, so degeneration-stopped
@@ -32,15 +32,22 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   (`logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json`); their relay weight copies deleted
   (8.44 GiB freed). The three volumes `thprcgh7s9`, `4rhubprswo`, `am5m373kuq` deleted 10:46Z, provider-confirmed;
   the eight Stage-3 weights retired from the dev box, and A-MIX-6cat-sr-s20260801's relay copy at 13:10Z (no
-  consumer; tombstones). Evidence archives stay on the dev box and relay. Still on the relay: 29 weight files
-  (46.63 GiB) of earlier rounds, not audited here (`checkpoint_registry.json`). Tombstones now keep a recipe's kind,
-  byte identity and same-hash copies apart (`checkpoint_tombstones.json :: field_semantics_20261114`).
-- Live 2026-11-14T10:48Z (`logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json`): balance $16.63, $0.00/h,
-  0 pods, 0 volumes. Dev box 93% used, 15 GB free.
-- Next: the next round's plan (REPORT.md section 11, revised 2026-11-14): layer merging at D's fixed structure, D
-  against direct parameter averaging and aligned activation-weighted merging, fixed in advance, ~$5-9 estimated;
-  the common-budget depth/width study is separate. For the maintainer's approval; a merge into `main` is separate.
-  Not authorized: any new GPU work or recovery training.
+  consumer; tombstones). Evidence archives stay on the dev box and relay. The 29 older relay weight files were
+  then audited object by object (`logs/maintenance/inventories/relay_weight_audit_20261114.json`): 24 retired under
+  AGENTS.md 2.5 (38.86 GiB; E1 x6, Stage-0 finalists x12, the D3 product, Stage-3 s1/s2 x5), 6 kept with their uses
+  (0.6B init and its random control, two permanent controls, D4-Augmented's D4 Top-1 for the pending independent-gated
+  proposal, RI-S1's mapping). Relay LFS 25.30 GiB. Tombstones keep a recipe's kind, byte identity and same-hash
+  copies apart; D's and W's byte-identical rebuild is not yet verified (not shown impossible).
+- Live 2026-11-14T20:57Z (`shared.project_position`): balance $16.63, $0.00/h, 0 pods, 0 volumes. Dev box 93% used,
+  15 GB free.
+- Next round RI-LM1 -- PREPARED TO THE LAUNCH POINT, PROPOSED, NOT AUTHORIZED (REPORT.md section 11): layer merging
+  at D's fixed structure, D against M-avg (direct averaging) and M-act (folded, aligned, activation-weighted; a
+  heuristic), fixed in advance with the decision rule (group sign-flip test over 558 groups, Holm; group-bootstrap
+  interval apart). Design `configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json`; code
+  `layer_merge*.py` (+ core `planning/layer_merge.py`); budget draft `plans/layer_merge_proposal.json`: $13.00
+  sessions ceiling, $1.00 teardown reserve outside it, $11.00 per session, scenario $5-9 on one L40S. Live
+  2026-11-14T20:57Z: $963.24 of $1,000 committed, balance $16.63. The common-budget depth/width study is separate.
+  A grant, any GPU work, recovery training and a merge into `main` are the maintainer's.
 - Owner: `logs/budget/decisions.md` 2026-11-13 / 11-14.
 
 **RESEARCH A: CLOSED (maintainer, 2026-11-11) -- CURRENT_METHOD_NO_GO FROZEN; EVERY PAID AUTHORIZATION CLOSED; THE BRANCH SQUASH-MERGED INTO `main`. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**

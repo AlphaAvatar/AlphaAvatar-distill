@@ -1339,6 +1339,19 @@ a = RIAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 got = SE.require_on_pod(a, RIAuthorization.STUDY, os.environ['SESSION_PLAN_HASH'])
 print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "stage1_layer_merge" ]; then
+  # The Stage-1 layer-merge study (RI-LM1, `stages.reasoning_inheritance.layer_merge_launch`): its own TYPE, FORMAL,
+  # one session kind (merge_evaluation), never a dry-run artifact. The study identity (the merge design, D's digests,
+  # RI-S1's design and frozen selection) and the harness are recomputed HERE from the pod's own files.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from shared import study_engineering as SE
+from stages.reasoning_inheritance.layer_merge_launch import LMAuthorization
+a = LMAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+got = SE.require_on_pod(a, LMAuthorization.STUDY, os.environ['SESSION_PLAN_HASH'])
+print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

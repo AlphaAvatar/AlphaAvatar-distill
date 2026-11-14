@@ -10,7 +10,9 @@ retention rule protects. Each of those reads as fine and is not.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -303,6 +305,101 @@ def test_a_recipe_is_not_a_byte_identical_rebuild():
         RA.reconstruction_fields("rebuild", "rebuild", "not_verified", "", [], "reproducible_materialization")
     with pytest.raises(ValueError):
         RA.reconstruction_fields("", "copy", None, "", [], "byte_identical_duplicate")
+
+
+def test_a_verified_rebuild_needs_the_recipe_that_rebuilds():
+    """`--byte-identical verified` with no recipe, or a recipe of kind `none`, claimed a rebuild of nothing."""
+    RA = _retire_artifact()
+    crit = "agents_2_5_standing_retirement"
+    for recipe, kind in (("", "rebuild"), ("", "copy"), ("a recipe", "none")):
+        with pytest.raises(ValueError, match="recipe"):
+            RA.reconstruction_fields(recipe, kind, "verified", "the rebuild's hash matched", [], crit)
+
+
+def _members(root, files):
+    return [{"rel": "" if root is None else rel, "size_bytes": len(b), "sha256": hashlib.sha256(b).hexdigest()}
+            for rel, b in files]
+
+
+def test_a_same_hash_copy_is_checked_never_skipped(tmp_path):
+    """The check skipped a path that did not exist, compared nothing for a directory, and accepted the target
+    itself (or a path inside it) as its own surviving copy."""
+    RA = _retire_artifact()
+    target = tmp_path / "ckpt"
+    target.mkdir()
+    files = [("model.safetensors", b"weights"), ("config.json", b"{}")]
+    for rel, b in files:
+        (target / rel).write_bytes(b)
+    members = _members(target, files)
+    #: a missing copy is refused, not skipped
+    with pytest.raises(ValueError, match="nothing there"):
+        RA.verify_copies([str(tmp_path / "gone")], members, target=target)
+    #: the target, a file inside it, and a directory containing it are inside the deletion scope
+    for inside in (target, target / "model.safetensors", tmp_path):
+        with pytest.raises(ValueError, match="deletion scope"):
+            RA.verify_copies([str(inside)], members, target=target)
+    #: a directory copy is complete only when every member matches
+    copy = tmp_path / "copy"
+    copy.mkdir()
+    (copy / "model.safetensors").write_bytes(b"weights")
+    with pytest.raises(ValueError, match="config.json missing"):
+        RA.verify_copies([str(copy)], members, target=target)
+    (copy / "config.json").write_bytes(b"{ }")
+    with pytest.raises(ValueError, match="config.json differs"):
+        RA.verify_copies([str(copy)], members, target=target)
+    (copy / "config.json").write_bytes(b"{}")
+    got = RA.verify_copies([str(copy) + " (dev box)"], members, target=target)
+    assert got[0]["members"] == 2 and got[0]["note"] == "(dev box)"
+    #: a hard link is one physical copy
+    single = tmp_path / "single.safetensors"
+    single.write_bytes(b"weights")
+    link = tmp_path / "elsewhere" / "single.safetensors"
+    link.parent.mkdir()
+    os.link(single, link)
+    with pytest.raises(ValueError, match="hard link"):
+        RA.verify_copies([str(link)], _members(None, [("", b"weights")]), target=single)
+
+
+def test_a_remote_copy_is_the_object_the_hub_serves(tmp_path):
+    RA = _retire_artifact()
+    members = _members(None, [("", b"weights")])
+    sha = members[0]["sha256"]
+
+    def hub(repo, paths):
+        return {"a/model.safetensors": {"sha256": sha, "size": 7, "lfs": True},
+                "b/model.safetensors": {"sha256": "0" * 64, "size": 7, "lfs": True}}
+    assert RA.verify_copies(["hf:org/other:a/model.safetensors"], members, target=tmp_path / "t", hub=hub)
+    with pytest.raises(ValueError, match="differs"):
+        RA.verify_copies(["hf:org/other:b/model.safetensors"], members, target=tmp_path / "t", hub=hub)
+    with pytest.raises(ValueError, match="not on"):
+        RA.verify_copies(["hf:org/other:c/model.safetensors"], members, target=tmp_path / "t", hub=hub)
+    #: retiring a relay object: the same repository's file with the same sha256 is the same LFS object
+    with pytest.raises(ValueError, match="same repository"):
+        RA.verify_copies(["hf:org/relay:a/model.safetensors"], members, target_relay=("org/relay", "x"), hub=hub)
+
+
+def test_the_relay_audit_refuses_a_retirement_its_facts_contradict():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "audit_relay_weights", REPO / "scripts/maintenance/consolidation/audit_relay_weights.py")
+    AR = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(AR)
+    obj = {"registry": [], "launchers": [], "readers": {"code": {"configs/x.json": ["id"]}}, "same_sha256_paths": []}
+    ok = {"disposition": "retire", "readers": {"configs/x.json": "closed experiment"}}
+    assert AR.contradictions("p", obj, ok, {"p"}) == []
+    assert AR.contradictions("p", obj, {"disposition": "retire"}, {"p"})          # an unclassified reader
+    prot = {**obj, "registry": [{"canonical_name": "c", "retention": "control", "protected": True}]}
+    assert AR.contradictions("p", prot, ok, {"p"})
+    for status in ("granted", "proposed", None):
+        l = {**obj, "launchers": [{"launcher": "L", "study": {"status": status} if status else None}]}
+        assert AR.contradictions("p", l, ok, {"p"}), status
+    closed = {**obj, "launchers": [{"launcher": "L", "study": {"status": "closed"}}]}
+    assert AR.contradictions("p", closed, ok, {"p"}) == []
+    shared = {**obj, "same_sha256_paths": ["q"]}
+    assert AR.contradictions("p", shared, ok, {"p"}) and not AR.contradictions("p", shared, ok, {"p", "q"})
+    assert AR.fragments("e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors") == [
+        "e1_r0860k_sb_pca", "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors"]
+    assert "d1" not in AR.fragments("stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/m.bin")
 
 
 def test_tombstones_that_carry_a_byte_identity_derive_the_flag_from_it():

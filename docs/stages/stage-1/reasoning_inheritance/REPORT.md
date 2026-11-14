@@ -5,7 +5,8 @@ groups are built and verified, and D, W and DW are kept on the dev box (section 
 every registered eval-set-1 unit is generated and scored for D, W and DW in both modes, and the teacher's evaluation is
 reused after every identity check, item by item. No recovery training, no new search. Total cost $19.9554 over six
 attempts of the $35 ceiling; the unspent $15.0446 lapsed at closure (section 10). Corrections after commits
-`09b48be9` and `b191d555` are listed in section 12; section 11 is the next round's plan.
+`09b48be9`, `b191d555` and `bf577e3d` are listed in section 12; section 11 is the next round's plan,
+prepared to the launch point and not authorized.
 
 **Result in one paragraph.** Untrained, removing 8 of the 36 blocks and changing nothing else (D) takes static fluid
 reasoning from 89.6% to 5.6% in thinking mode and from 68.9% to 7.9% in non-thinking mode, and interactive episodes
@@ -565,28 +566,36 @@ on the dev box only.
   `durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz` (sha256
   `c69706526086bdf37600edd813ec2105596136abce11872a17c985344dc4c6dd`, downloaded again and re-hashed). The analysis
   binds each scored directory by content digest (`structural_ablation.json :: inputs`).
-* **Other weights on the relay (review of 2026-11-14):** Research A's last Stage-3 relay copy
+* **Other weights on the relay (reviews of 2026-11-14):** Research A's last Stage-3 relay copy
   (A-MIX-6cat-sr-s20260801, 2.22 GiB) had no consumer and was retired under AGENTS.md 2.5 (tombstone
-  `relay_20261114_stage3_sr_A-MIX-6cat-sr-s20260801`, relay commit `92f9f4fc`; its config files stay). The relay still
-  holds 29 weight files (46.63 GiB) of earlier rounds -- the Stage-0 calibration-volume finalists (13), E1 scaling
-  students (6), Stage-3 s1/s2 recoveries (5), the 0.6B initialization (2), two permanent controls and a D3 product --
-  none of RI-S1 or Research A Stage 3; they were not audited object by object in this round
-  (`logs/maintenance/inventories/checkpoint_registry.json`).
+  `relay_20261114_stage3_sr_A-MIX-6cat-sr-s20260801`, relay commit `92f9f4fc`; its config files stay). The remaining
+  weight files of earlier rounds were then audited object by object (`scripts/maintenance/consolidation/
+  audit_relay_weights.py` -> `logs/maintenance/inventories/relay_weight_audit_20261114.json`: registry protection,
+  every declaring launcher and its study's state, every code reader classified, shared LFS objects). 24 of them
+  (38.86 GiB) were retired, each tombstoned first, deleted and read back (`relay_20261114_*`): six E1 scaling students,
+  twelve Stage-0 calibration-volume finalists, the D3 structural product and five early Stage-3 recoveries -- all
+  terminal, their evaluation evidence beside them or in the logs, no open or proposed consumer. Six are kept, each for
+  a named use: the 0.6B initialization and its random-initialization control (protected anchors), the two permanent
+  controls (protected), D4-Augmented's D4 Top-1 (the declared input of the independent-gated study, whose proposal is
+  pending, and of Research B's selection), and RI-S1's frozen mapping. Relay LFS: 64.16 -> 25.30 GiB.
 * **Volumes:** the programme's three network volumes (`thprcgh7s9`, `4rhubprswo`, `am5m373kuq`; not this study's) were
   deleted on 2026-11-14 at 10:46Z. The provider read back no volume and no pod; each storage record carries what went
   and what was kept. The one small record that had looked uncopied (Research A v1 unit 6's training records) was
   already on the dev box, so no pod was needed to read a volume. Provider balance afterwards: $16.63, spend
   $0.00 per hour (`logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json`).
 
-## 11. Next round: layer merging at D's fixed structure (a plan, not an authorization)
+## 11. Next round: layer merging at D's fixed structure (RI-LM1: prepared to the launch point, not authorized)
 
-Status: a plan for the maintainer to decide. Nothing below starts a paid experiment, recovery training or a merge into
-`main`; it needs its own study, grant and pre-registration record first. Revised 2026-11-14 after review (section 12).
+Status: prepared at $0 -- design, code, tests, launch commands and a budget draft -- for the maintainer to decide.
+Nothing below starts a paid experiment, recovery training or a merge into `main`: the study `RI-LM1` holds a proposal
+(`logs/stages/stage-1/reasoning_inheritance/plans/layer_merge_proposal.json`, `status: proposed`) and no grant. The
+experiment is `configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json`. Revised after the reviews of
+2026-11-14 (section 12).
 
-**The question.** At D's final structure -- 28 blocks, hidden 2560, FFN 9728, 32 query / 8 KV heads, 3,215,021,568
-parameters, the teacher's embedding, final norm and LM head -- does initializing the blocks with information from the 8
-removed blocks do better than dropping them (D)? Only the values of six blocks change; no new depth or width
-allocation is needed first, and D is the direct-deletion control.
+**The question.** At D's structure -- 28 blocks, hidden 2560, FFN 9728, 32 query / 8 KV heads, 3,215,021,568
+parameters, the teacher's embedding, final norm and tied LM head -- does writing each span's one block from all of the
+span's teacher blocks do better on eval-set-1 than keeping the span's first block alone (D)? Only six blocks' values
+change; no new depth or width allocation is needed first, and D is the direct-deletion control.
 
 **What this round's evidence does and does not support.**
 
@@ -601,9 +610,10 @@ allocation is needed first, and D is the direct-deletion control.
   compression scheme. They do not show that depth pruning keeps reasoning better or worse than width pruning, or that
   the non-depth compression is the dominant bottleneck of every 0.6-0.7B structure (a separate study, below).
 
-**Spans (all candidates).** Each removed block merges into the nearest kept block before it, so the merged block stands
+**Spans (all candidates).** Each removed block joins the nearest kept block before it, so the merged block stands
 where its span starts and receives the span's input: the earlier-layer convention of LaCo's merge (Yang et al. 2024,
-Eq. 1) and the teacher-span-to-student-layer mapping of AGENTS.md 4.3.
+Eq. 1) and the teacher-span-to-student-layer mapping of AGENTS.md 4.3. The table is derived from the frozen
+selection's kept blocks (`layer_merge.merge_spans`) and checked against the design.
 
 | kept block (root numbering) | absorbs | span |
 | ---: | --- | --- |
@@ -614,89 +624,188 @@ Eq. 1) and the teacher-span-to-student-layer mapping of AGENTS.md 4.3.
 | 29 | 30 | [29, 30] |
 | 31 | 32 | [31, 32] |
 
-A kept block that receives two removed blocks (16, 24) combines its whole span in one step, never pairwise in sequence.
-The other 22 blocks, the embedding, the final norm and the LM head are D's, checked bit for bit.
+A kept block that receives two removed blocks (16, 24) combines its whole span in one step, never pairwise in
+sequence. The other 22 blocks, the embedding, the final norm and the LM head are D's, checked bit for bit.
 
 **Candidates (fixed with the plan; neither the list nor the decision rule changes after results are seen).**
 
 1. **D, direct deletion.** The existing checkpoint (`9de449db...`, dev box) and its sealed eval-set-1 records: not
-   rebuilt, not regenerated.
+   rebuilt, not regenerated, never moved to the pod (the pod compares against D's per-tensor digests).
 2. **M-avg, direct parameter averaging (the control).** For every tensor of a span's blocks (`input_layernorm`,
    `q/k/v/o_proj`, `q_norm`, `k_norm`, `post_attention_layernorm`, `gate/up/down_proj`; Qwen3 has no biases):
-   `theta' = (1/|span|) * sum_{l in span} theta_l`. No folding, no alignment, no rescaling; seconds on CPU. It is the
-   no-alignment ("vanilla") merge of Verma et al. (2025) and the equal-weight case of MKA's
+   `theta' = (1/|span|) * sum_{l in span} theta_l`. No folding, no alignment, no rescaling. It is the unaligned
+   ("vanilla") average of Verma et al. (2025) and the equal-weight case of MKA's
    `theta~ = alpha * theta_l + (1 - alpha) * theta_m` (Liu et al. 2024).
-   *Parameter addition is not registered.* LaCo's `theta*_l = theta_l + sum_k (theta_{l+k} - theta_l)` has no scaling:
-   on the four two-block spans it reduces to `theta_{l+1}`, i.e. keeping the removed block instead of the kept one (a
-   different deletion, not a merge), and summing every tensor doubles the RMSNorm gains and scales the attention
-   logits, with no scaling rule in a primary source.
-3. **M-act, aligned activation-weighted merging.** Per span, on the teacher's parameters:
-   * *Fold the gains (exact).* Each block's `input_layernorm` gain into its q/k/v input columns and its
-     `post_attention_layernorm` gain into its gate/up input columns (Qwen3's RMSNorm multiplies by the gain, so
-     `W (g * x_hat) = (W diag g) x_hat`); the merged block's two gains are set to 1, so tensors and structure stay.
-     `q_norm`/`k_norm` act after the projection and cannot be folded; they take the block-level weights below.
-   * *Align each absorbed block to the kept one (an exact re-parameterization; after Verma et al. 2025).* FFN: neuron i
-     is (gate row i, up row i, down column i); its feature is its output `a_i = silu(g_i . x_hat) * (u_i . x_hat)`,
-     the down projection's input (Verma et al. use the pre-activation of a non-gated MLP); the Pearson cross-correlation
-     between the two blocks' neurons on the calibration positions; the permutation maximizing
-     `sum_i C(i, pi(i))` by linear assignment (`scipy.optimize.linear_sum_assignment`, Jonker-Volgenant; 9,728 x 9,728,
-     CPU minutes per absorbed block). Attention (GQA, 8 KV groups of 4 query heads; an extension of the FFN method):
-     KV groups matched by linear assignment on the cosine similarity of their residual writes `W_o a` (2,560-d, the
-     coordinates every block shares), then query heads within matched groups the same way; q/k/v rows and `o_proj`
-     columns permuted together, head dimensions never (RoPE pairs them).
+   *Parameter addition is not registered.* LaCo's `theta*_l = theta_l + sum_k (theta_{l+k} - theta_l)` has no
+   scaling: on the four two-block spans it reduces to `theta_{l+1}`, i.e. keeping the absorbed block instead of the
+   kept one (a different deletion, not a merge), and summing every tensor doubles the RMSNorm gains, with no scaling
+   rule in a primary source.
+3. **M-act, aligned activation-weighted merging -- a heuristic initialization to be tested.** Per span, on the
+   teacher's parameters:
+   * *Fold the gains (exact in real arithmetic).* Each block's `input_layernorm` gain into its q/k/v input columns
+     and its `post_attention_layernorm` gain into its gate/up input columns (Qwen3's RMSNorm multiplies by the gain,
+     so `W (g * x_hat) = (W diag g) x_hat`); the merged block's two gains are 1. `q_norm`/`k_norm` act after the
+     projection and are not folded.
+   * *Align each absorbed block onto the span's first block (an exact re-parameterization).* FFN: neuron i is
+     (gate row i, up row i, down column i), its feature the gated product `a_i`, the down projection's input; the
+     permutation maximizing the summed Pearson cross-correlation between the two blocks' features, by linear
+     assignment. Attention (GQA, 8 KV groups of 4 query heads): KV groups matched by linear assignment on the cosine of
+     the groups' summed residual writes `sum_h W_o,h a_h` (2,560-d, the coordinates every block shares), then the
+     query heads within matched groups the same way; q/k/v rows and `o_proj` columns move together, head dimensions
+     never (RoPE pairs them).
    * *Weight by activation importance.* After alignment each FFN slot combines its span's neurons with
-     `w_{l,i} = s_{l,i} / sum_l s_{l,i}`, `s = E[|a|] * ||down column||_2` (the FFN operator's importance,
-     `project.ffn_neuron_importance`); each query-head slot with the head's realized residual-write energy
-     `mean_t ||W_o,h a_h(t)||^2` (`attention.activation_importance_v1`'s statistic); each KV group's k/v rows with its
-     four heads' summed energy; `q_norm`/`k_norm` with each block's share of total head energy. The weights sum to 1,
-     so the merged block keeps one block's output scale, as M-avg does.
-   * *Statistics.* One teacher forward over `calib.hybrid_d4_base@v2` (558 examples, 569,270 tokens before packing;
-     the profile the anchor search's FFN and DEPTH steps used; its item file is on the dev box), under Stage 1's
-     packing (seeded random order, sequential packing with truncation into 8,192-token sequences, causal attention,
-     continuous positions), at the positions that profile's statistics use; each block's statistics are taken on its
-     own input in the teacher's forward, for the 14 blocks involved. Nothing is fitted to eval-set-1 or the state
-     suite.
-   * Not part of M-act: a least-squares refit of the output projections to the span's total update (a further
-     candidate, if ever) and learnable fusion coefficients (KD training: Stage 3).
+     `w_{l,i} = s_{l,i} / sum_l s_{l,i}`, `s = E|a| * ||down column||_2` (the FFN operator's importance); each
+     query-head slot with the head's write energy `mean_t ||W_o,h a_h(t)||^2` (the attention operator's statistic);
+     each KV group's k/v rows with its four heads' summed energy; `q_norm`/`k_norm` with each block's share of total
+     head energy.
+   * *What the weights do not do.* They are convex per slot. That guarantees neither the merged block's output scale
+     nor that it reproduces the teacher span's cumulative update: a two-block span applies two residual updates in
+     sequence, the merged block one. The first version of this plan said the weights keep one block's output scale;
+     that was an assertion, not a property, and is withdrawn. The size of the merged update against the span's is
+     measured (diagnostics, below), not assumed.
+   * Not part of M-act: a least-squares refit of the output projections to the span's update, and learnable fusion
+     coefficients (KD training: Stage 3). No fitting, training or further candidate is added for this round.
 
-Lineage and identity: every value comes from `Qwen/Qwen3-4B@1cfa9a72` (downloaded on the pod at the pinned revision; D
-supplies the 22 unchanged blocks and is checked against it); the teacher's tokenizer, chat template and configs package
-each candidate as they do D. Each candidate's config equals D's and its parameter count is 3,215,021,568; its record
-carries the span table, the permutations' and statistics' digests and its artifact digest.
+**How M-act relates to the literature (corrected).** Verma, Murray and Duh (arXiv:2501.06126v2) align FF sublayers by
+the linear assignment on Pearson cross-correlation, average the aligned sublayers (`1/k`), then -- section 3.3 --
+*replace each of them with the average and tie the weights*: the model keeps executing k FF sublayers, one at each
+original position between that position's own attention sublayer, with one parameter set in memory. That reduces
+parameters, not executed depth or FLOPs. This round removes the absorbed blocks from execution (28 blocks run, D's
+depth), as LaCo and MKA do; it borrows the alignment, not the execution scheme. Their Appendix A already treats SwiGLU
+(used for OLMo-7B, section 4.5): the feature is the gated product's output and one permutation moves the up and gate
+rows and the down columns together -- exactly M-act's FFN alignment, not an extension made here. What is new here is
+merging whole blocks (attention included; the paper merges FF sublayers only and reports that attention outputs lack
+the FF outputs' similarity), the gain folding, and the importance weights; those are untested. Parameter sharing with
+repeated execution is Stage 6's subject and is recorded there as related work (`LITERATURE.md`).
+
+**Statistics (exactly).** One teacher forward over `calib.hybrid_d4_base@v2` (558 examples, 569,270 tokens before
+packing), in the anchor search's own session (its operator config hashes are checked against the journal first), at
+the FFN operator's own positions: `positions.supervised_target_v1@v1` (211,203 positions admitted before packing), under
+Stage 1's packing (seeded sha256-keyed shuffle 20261105, sequential packing with truncation into 8,192-token sequences,
+`prefix_restart_v1`, causal attention, continuous positions). That is 79 packed sequences, 644,493 non-padding tokens
+and 231,242 statistics positions (a fragment's repeated prefix counted like any placement, P19); the driver refuses
+other counts. Each block's statistics are taken on its own input in the teacher's forward, for the 14 blocks of the six
+spans. Accumulation is streaming, one packed sequence at a time: cross products in float32 of the bf16 activations
+(exact products; head writes in chunks of 1,024 positions), every sum across sequences in float64 (sum x, sum x^2,
+sum y, sum y^2 and `sum x y^T` per pair; the write Gram per pair and per block): 8 x 9,728^2 float64 = 6.1 GB of device
+memory beside the 8 GB teacher. Fixed rules:
+
+* *Zero variance:* a feature whose variance on the statistics positions is at or below 1e-12 of its mean square (or
+  whose mean square is 0) has correlation 0 with every feature; a zero-energy head set has cosine 0 (never NaN).
+* *Zero denominator:* a slot whose importance or energy is 0 in every block of its span takes the uniform weights
+  `1/|span|`; the count of such slots is recorded.
+* *Assignment and ties:* an exact maximum-weight perfect matching (`layer_merge.linear_assignment`: the shortest
+  augmenting path with dual variables of Crouse 2016, the algorithm `scipy.optimize.linear_sum_assignment`
+  implements; scipy is not in the pinned environment, so it is implemented in float64 torch, checked against brute
+  force, ~48 s for a hard random 9,728 x 9,728 matrix on the dev box CPU); among columns of equal reduced cost an
+  unassigned column first, then the lowest index.
+* The statistics the merge consumes (per block E|a| and head energies, per pair the three permutations) are saved as
+  soon as they exist (`records/merge_statistics.safetensors` and `.json`); a later attempt reuses them.
+
+**Numerical checks (the build stops on any failure; a failure is a defect of the mechanism).** Folding alone and each
+absorbed block's permutation alone are checked against the unmodified block in float32 copies of the bf16 teacher
+blocks, on every position of the first packed sequence: `||y' - y||_F / ||y - x||_F` (relative to the block's own
+update) at most 1e-4, where float32 reordering and rounding give about 1e-6. Every candidate tensor outside the six
+span blocks must equal D's per-tensor digest (`layer_merge/d_tensor_digests.json`, 310 tensors from D's checkpoint on
+the dev box), every span block must differ from D's, the configuration must be D's and the parameter count
+3,215,021,568. D itself is first rebuilt from the teacher with D's own builder and compared tensor by tensor (it is the
+base; this is a tensor identity, not a file-hash rebuild of D). Model dimensions, GQA grouping and spans are read from
+the configs and the selection; `src/aadistill` holds no instance value.
+
+**Diagnostics (explain, never select).** On the statistics positions, for each span: the teacher span's attention
+update (sum over its blocks), FFN update (sum) and whole residual update (span output minus input), against D's,
+M-avg's and M-act's one block run on the same teacher input -- RMS norms, norm ratio, cosine and normalized error
+`E|c - r|^2 / E|r|^2` per component (`records/merge_diagnostics.json`). Like state evaluation, they gate no generation
+and decide nothing.
 
 **Measurements.**
 
-* eval-set-1, every registered unit, both modes, RI-S1's protocol unchanged: the runners as at session commit
-  `8f74bc94` (after the abort repair), seeds from item, turn and sample (independent of the model, so each item pairs
-  with D's sealed record), context 40,960 with no token cap, the degeneration check every 256 tokens, concurrency
-  floor(KV cache / context). eval-set-1 stays development-exposed and is not presented as a new blind test.
+* eval-set-1, every registered unit, both modes, RI-S1's protocol unchanged (the driver refuses another: sha256
+  `5e93555e...` of RI-S1's `design.json :: evaluation`): the runners as at session commit `8f74bc94` (after the abort
+  repair), seeds from item, turn and sample (each item pairs with D's sealed record), context 40,960 with no token cap,
+  the degeneration check every 256 tokens, concurrency 7 (D's: same structure, same KV cache). Order: both
+  candidates' thinking-mode fluid unit first, then thinking-mode capability, then non-thinking, so a budget that ends
+  early leaves the primary comparison measured. Both candidates are generated whatever the state evaluation or the
+  diagnostics show. eval-set-1 stays development-exposed and is not presented as a new blind test.
 * Reported apart, never pooled: correctness per unit and axis by the registered scorers; usable rollout and its
-  components; natural termination, degeneration stops, context-limit hits; failure types (answer read and wrong, no
-  answer the scorer can read, protocol error); teacher-behaviour fidelity (think delimiters, EOS).
-* State evaluation (`state_eval_hybrid@v3`, against the root) for each candidate, as a diagnostic. It may order work
-  on the pod; it decides neither which candidate is generated (both are) nor how one is judged.
+  components; natural termination, degeneration stops, context-limit hits; failure types; teacher-behaviour fidelity.
+* State evaluation (`state_eval_hybrid@v3`, against the root) for each candidate, as a diagnostic.
 
-**Decision rule (registered with the plan).** Primary: M - D on the static fluid formal core (570 items) in thinking
-mode, for M-avg and M-act, paired by item, with 95% percentile intervals over 10,000 resamples of the registered
-independence groups (`independence_v1.json`, 708 clusters; rule-family intervals beside them). A candidate is better
-than deletion if its interval lies above 0 after Holm's correction over the two candidates, worse if it lies below 0,
-otherwise not distinguished. Secondary, reported and not decisive: the same in non-thinking mode, interactive episodes,
-each fluid axis, the supporting units, and M-act - M-avg (which differs in folding, alignment and weighting at once; a
-decomposition follows only if M-act differs from D). At D's 5.6%, about 3 pp is roughly the smallest paired difference
-an interval separates from 0 (a rough estimate from paired discordance, not a power analysis).
+**Decision rule (registered; `layer_merge_analysis.py` executes it).**
 
-**Reused, not redone.** D's checkpoint and sealed generations; T's reused evaluation; the frozen mapping's kept blocks;
-the calibration and state-suite items (dev box); eval-set-1; the RI-S1 driver's evaluation and resume paths. No corpus
-is regenerated, no baseline retrained, no valid measurement repeated.
+* *Primary comparison:* thinking mode, the static fluid formal core (570 items), M-avg - D and M-act - D, each item
+  paired with D's sealed record of the same item (all rows rescored with the current scorer).
+* *Units of independence:* the 570 items fall into 558 registered independence groups (`independence_v1.json`: six
+  groups hold 18 items, every other item is its own group). 708 is the whole fluid unit's count (720 items) and is
+  not the static comparison's.
+* *Statistic:* `delta = (1/570) sum_items (y_M - y_D)`, y the registered scorer's correctness; `d_g` the summed
+  difference of group g.
+* *Test:* two-sided paired sign-flip randomization at the group level. Under H0 the two models' labels are
+  exchangeable within every group, so each `d_g`'s sign is flipped independently with probability 1/2;
+  `T = |sum_g d_g|`; `p = (1 + #{b : |sum_g e_bg d_g| >= T}) / (1 + B)`, B = 100,000 draws of `e_bg` in {-1, +1} for
+  every group in sorted group order from `numpy.random.default_rng(20261114)`.
+* *Direction:* two-sided; the sign of `delta` says better or worse.
+* *Multiplicity:* Holm over the two candidates at alpha 0.05: p sorted ascending, adjusted
+  `p_(1) = min(1, 2 p_(1))`, `p_(2) = min(1, max(adjusted p_(1), p_(2)))`.
+* *Decision:* BETTER than deletion if the Holm-adjusted p <= 0.05 and `delta` > 0; WORSE if <= 0.05 and `delta` < 0;
+  NOT DISTINGUISHED otherwise. A candidate whose primary unit is not complete has no verdict (`not_measured`); partial
+  units are never pooled.
+* *Effect interval, beside the test and labeled as such:* the percentile 95% interval of `delta` over 10,000
+  group-bootstrap resamples (the 558 groups with replacement, `numpy.random.default_rng(20261115)`, numpy's linear
+  percentile); unadjusted for multiplicity and not the decision. The rule-family interval RI-S1 reported is computed
+  beside it as a supplement.
+* *Secondary, reported and not decisive:* the non-thinking mode, interactive episodes, each fluid axis, the supporting
+  units, M-act - M-avg (which differs in folding, alignment and weighting at once).
+* At D's 5.6%, about 3 pp is roughly the smallest paired difference this design separates from 0 (a rough figure
+  from paired discordance, not a power analysis).
 
-**Budget, estimated from RI-S1's measurements (one L40S at $1.09/h; the study's grant prices it).**
+**Reuse, storage and failure (arranged before launch).**
 
-* Setup, teacher download, the statistics forward, alignment, both merges, packaging and both state evaluations: about
-  1 h (attempt 2 built the mapping, the three groups and their state evaluations in its first ~40 minutes).
-* Generation per candidate: about 1.8 h if it behaves like D (after the repair D took ~40 min for the thinking-mode
-  fluid unit, 34 min for the thinking-mode capability units, 16 and 18 min in non-thinking mode), about 3.6 h if it
-  behaves like T (T's 6.29M + 0.62M output tokens at D's measured ~540 tokens/s at concurrency 7).
-* Total 4.6-8.2 h, about $5-9 for both candidates, plus a teardown reserve. One session, one pod, no network volume.
+* *Reused, never redone:* D's checkpoint and sealed generations; T's reused evaluation; the frozen selection and
+  mapping; the calibration and state-suite items (dev-box assets); eval-set-1; RI-S1's runners and its evaluation,
+  sealing and resume paths. No corpus is regenerated, no baseline retrained, no valid measurement repeated.
+* *Candidates (2 x 6.43 GB):* to the private relay from the pod as soon as built, under
+  `durable/stage1_reasoning_inheritance/layer_merge/<statistics sha256[:16]>/groups/{M-avg,M-act}/`, downloaded again
+  into a fresh cache and re-hashed. Before the launch the relay is asked whether it would accept both and the
+  statistics at their true sizes (`the_relay_has_room`, the LFS batch endpoint, nothing uploaded): relay LFS is
+  25.30 GiB after this round's retirements. They are not copied to the dev box by default (15 GB free on a shared
+  disk); the relay copy is their durable copy until a later consumer asks for them.
+* *Statistics and evidence:* every finished file, the statistics included, is pulled to the dev box on each poll
+  (`<scr>/store`; about 0.4 GB for a full evaluation of two models, from RI-S1's 0.37 GB for three); the statistics also
+  go to the relay with the candidates; the final store is archived to the relay at closeout (`archive-evidence`).
+* *A failed attempt* takes over the previous attempt's records -- statistics and permutations, builds, checks,
+  diagnostics, state evaluation -- and every sealed evaluation part (`driver.take_over`), restores the candidates from
+  the relay by sha256 (`driver.relay_restore`), and generates only the items with no sealed record, each under its
+  fixed seed. Nothing is rebuilt, re-collected or regenerated that a record or a sealed part holds.
+
+**Budget (a draft for the maintainer; `layer_merge_proposal.json`).**
+
+* *Scenario estimate, from RI-S1's measurements, not a measurement of these candidates:* setup 25 min; build about
+  45 min (teacher download and hashing, the statistics forward over 79 packed sequences, eight 9,728 x 9,728
+  assignments, the checks, both builds and saves, the relay copy); diagnostics and state evaluation about 20 min;
+  generation 1.8 h per candidate if it behaves like D, 3.6 h if it behaves like T. Total 4.8-8.4 h on one L40S at
+  $1.09/h: about $5-9 with container disk.
+* *Caps proposed:* sessions may draw $13.00 cumulatively over every attempt (the ceiling; each closeout's all-in, an
+  unknown cost refuses); $1.00 teardown reserve held outside the ceiling and never issued (every artifact's hard cap
+  plus the reserve must fit what the project cap and the provider balance leave, at issue and again at launch);
+  study cap $14.00; per session $11.00 all-in to the hard deadline plus the watchdog's teardown time, the deadline
+  derived from the accepted price; one L40S at no more than $1.09/h, one pod.
+* *Own envelope:* RI-S1 is closed and its unspent $15.0446 lapsed; it funds nothing here. The new study's envelope
+  counts only its own runs. Live position at 2026-11-14T20:57Z: $963.24 committed of the $1,000 project cap
+  ($36.76 left), provider balance $16.63, no pod, no volume -- one session plus the reserve fits the balance; a second
+  full session would need a top-up, which is the maintainer's.
+* *Terminal state:* BUDGET_EXHAUSTED when what the ceiling leaves is below the smallest useful attempt ($2.00: setup,
+  the restore and at least one fluid unit of one candidate) or the next cap plus the reserve does not fit: the issuer
+  refuses; every finished unit is kept and every other reported `not_run`; the primary comparison is evaluated only
+  if both candidates' primary unit is complete (otherwise no verdict); the closeout records the spend and the remainder
+  lapses at closure.
+
+**Launch, once granted** (`scripts/stages/stage-1/reasoning_inheritance/README.md` has the full commands): write the
+grant from the proposal (`layer_merge_launch.py grant --decision '<quoted>' --granted-by maintainer`); commit; `issue`
+the one-use artifact (`--expected-usd 7.5 --hard-cap-usd 11`); commit it (that commit is the session commit); stage
+its bundle; `launch --minutes 480 --max-price 1.09 --disk-gb 150 --driver-extra '--max-num-seqs 7'`; `closeout`;
+`layer_merge_analysis.py`. A $0 dry run of `issue` and `launch` against the proposal exercises every gate before any
+of it (section 12).
 
 **A separate study, not a prerequisite: depth against width at a common budget.** Which axis -- depth, FFN width,
 residual width or query heads -- loses the least reasoning per parameter needs structures at a common parameter budget,
@@ -705,12 +814,15 @@ Decomposing W (FFN only, residual width only, query heads only) can still locate
 from. Nothing here materializes a model or starts a search for that study.
 
 **Elsewhere.** Learnable fusion coefficients trained with KD: Stage 3. Shared-parameter recurrent execution and its
-training: Stage 6 (AGENTS.md 4.8), with D a natural comparison point (same width, fewer distinct blocks).
+training: Stage 6 (AGENTS.md 4.8), with Verma et al.'s align-average-tie scheme recorded as related work
+(`LITERATURE.md`) and D a natural comparison point (same width, fewer distinct blocks).
 
-References (read for this plan): LaCo, Yang et al. 2024, arXiv 2402.11187 (Eq. 1, merge into the earlier layer);
-Verma, Murray, Duh 2025, arXiv 2501.06126 (FF neuron alignment by cross-correlation, linear assignment, then uniform
-averaging; aligned beats the vanilla merge); MKA, Liu et al. 2024, arXiv 2406.16330 (weighted pair merge, alpha from a
-similarity).
+References (read for this plan; `LITERATURE.md`): LaCo, Yang et al. 2024, arXiv 2402.11187 (Eq. 1, merge into the
+earlier layer); Verma, Murray, Duh 2025, arXiv 2501.06126v2 (sections 3.2-3.3 and Appendix A: alignment by Pearson
+cross-correlation and linear assignment, the SwiGLU feature, uniform averaging, weight tying at every original
+position); MKA, Liu et al. 2024, arXiv 2406.16330 (weighted pair merge, alpha from a similarity). The
+assignment algorithm is the one `scipy.optimize.linear_sum_assignment` implements and cites (Crouse 2016,
+IEEE TAES 52(4)); that paper itself was not read, and the implementation is checked against brute force.
 
 ## 12. Corrections to the first version (2026-11-14, after commit `09b48be9`)
 
@@ -764,3 +876,43 @@ Again from the same sealed generations, with no generation, scorer or score chan
   whether it gives back the same bytes, and any same-hash copy apart; this round's entries are corrected in place
   (the eight retrains and D's and W's unverified rebuilds false, DW's rebuild verified true), the original values and
   the weights' hashes kept.
+
+### Third review (2026-11-14 UTC, after commit `bf577e3d`)
+
+No generation, scorer, score or legitimate checkpoint changed; no GPU used.
+
+* **M-act's interpretation.** The plan said the merge weights, summing to 1, keep one block's output scale. Convex
+  weights per slot guarantee neither the output scale nor the teacher span's cumulative update (a span applies two or
+  three updates in sequence, the merged block one); the assertion is withdrawn. M-act stays a heuristic initialization
+  to be tested, with update norms and normalized reconstruction errors of the attention, FFN and whole-span updates
+  measured on the calibration positions as diagnostics only (section 11). No fit, training or candidate is added.
+* **Literature.** Verma et al. v2 reread in full: section 3.3 ties the averaged parameters and keeps executing them at
+  every original FF position (parameters shared, depth kept), where this round removes the absorbed blocks from
+  execution; Appendix A already treats SwiGLU with the gated product as the feature and one permutation for up, gate
+  and down, and the main text includes OLMo-7B. `LITERATURE.md` no longer calls the SwiGLU treatment an extension made
+  here; the parameter-sharing scheme is recorded as Stage 6 related work.
+* **Decision rule.** Written as an executable definition (section 11; `layer_merge_analysis.py`): a two-sided paired
+  sign-flip test over the 558 independence groups the 570 static items fall into (708 is the whole fluid unit's),
+  its p-value, Holm over the two candidates, and the group-bootstrap percentile interval reported apart as an
+  unadjusted effect interval, never "a 95% percentile CI after Holm".
+* **Numerical boundaries.** Fixed rules for zero-variance correlations, all-zero importance denominators and
+  assignment ties; the statistics positions stated exactly (79 packed sequences, 231,242 positions) with float64
+  streaming sums; folding alone and each permutation alone checked for forward equivalence in float32 (tolerance 1e-4
+  of the block's update), the 22 unchanged blocks bit for bit against D's per-tensor digests; dimensions, GQA grouping
+  and spans read from the configs and the selection (`src/aadistill/initialization/planning/layer_merge.py` holds no
+  instance value).
+* **Retirement tool.** `retire_artifact.py`'s same-hash-copy check skipped a path that did not exist, compared
+  nothing for a directory, and did not exclude a copy inside the deletion scope. Every declared copy is now verified
+  (`verify_copies`): it exists, it matches member by member, it lies outside the deletion scope (the target, a path
+  inside it, a directory containing it, a hard link, or -- for a relay target -- the same repository's LFS object), and
+  a remote copy is checked by the object the hub serves. A verified rebuild without a recipe is refused. The tool can
+  now retire one relay object (tombstone first, exact `file_oid`, read back).
+* **Relay weights.** The 29 remaining weight files were audited object by object: 24 retired, 6 kept with their uses
+  (section 10).
+* **D and W.** Their byte-identical rebuild is *not yet verified* -- each was built once and no second build was
+  compared -- which is not the same as impossible; their tombstones say so, and nothing is rebuilt to settle it.
+* **Next round.** Prepared to the launch point (section 11): design, code, tests, launch commands, storage, and a
+  budget draft with its own ceiling, teardown reserve and terminal state; not authorized.
+* **Record dates.** This round's first records were stamped 2026-11-15 from the dev box's +08:00 clock; they are
+  corrected to UTC (2026-11-14). The 24 tombstones keep, in `id_in_relay_commit_message`, the id their relay commit
+  messages carry.

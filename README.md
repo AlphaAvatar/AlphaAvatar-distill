@@ -187,6 +187,9 @@ _No records yet._ Stage 6 was deployment validation until 2026-11-13; deployment
 
 - Muralidharan et al., *Compact Language Models via Pruning and Knowledge Distillation* (Minitron), 2024. [arXiv:2407.14679](https://arxiv.org/abs/2407.14679)
 - Gromov et al., *The Unreasonable Ineffectiveness of the Deeper Layers*, 2024. [arXiv:2403.17887](https://arxiv.org/abs/2403.17887)
+- Yang, Cao, Zhao, *LaCo: Large Language Model Pruning via Layer Collapse*, 2024. [arXiv:2402.11187](https://arxiv.org/abs/2402.11187)
+- Verma, Murray, Duh, *Merging Feed-Forward Sublayers for Compressed Transformers*, 2025. [arXiv:2501.06126](https://arxiv.org/abs/2501.06126)
+- Liu et al., *Pruning via Merging: Compressing LLMs via Manifold Alignment Based Layer Merging*, 2024. [arXiv:2406.16330](https://arxiv.org/abs/2406.16330)
 - Xia et al., *Sheared LLaMA: Accelerating Language Model Pre-training via Structured Pruning*, 2023. [arXiv:2310.06694](https://arxiv.org/abs/2310.06694)
 - Kim & Rush, *Sequence-Level Knowledge Distillation*, EMNLP 2016. [arXiv:1606.07947](https://arxiv.org/abs/1606.07947)
 - Zelikman et al., *STaR: Bootstrapping Reasoning With Reasoning*, NeurIPS 2022. [arXiv:2203.14465](https://arxiv.org/abs/2203.14465)

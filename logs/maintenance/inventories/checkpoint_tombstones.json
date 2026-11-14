@@ -46,10 +46,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 116,
-  "active": 114,
-  "active_retired_bytes": 574683402562,
-  "active_retired_human": "535.216 GiB",
+  "tombstones_total": 140,
+  "active": 138,
+  "active_retired_bytes": 616407743458,
+  "active_retired_human": "574.074 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -7798,6 +7798,11 @@
     "weights_sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
     "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
     "corrected_utc": "2026-11-14T13:10:02+00:00"
+   },
+   "byte_identical_reconstruction_note_20261114": {
+    "status": "not_verified",
+    "means": "a byte-identical rebuild is NOT YET VERIFIED: the checkpoint was materialized once (ri_diagnosis_20261113_105643) and no second build has been compared with these bytes. It is not shown impossible; the bytes survive on the dev box (same_hash_copies), and the recipe (teacher + frozen mapping) is deterministic in intent. Nothing is rebuilt to settle it (maintainer review 2026-11-14 (UTC): “D/W 的描述改为‘尚未验证同字节重建’，不用为此重新构建。”)",
+    "recorded_utc": "2026-11-14"
    }
   },
   {
@@ -7839,6 +7844,11 @@
     "weights_sha256": "64d367fe0b6613aa57d52cda3e285a5d52122fd0ecee736b0016af92fc59fb29",
     "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
     "corrected_utc": "2026-11-14T13:10:02+00:00"
+   },
+   "byte_identical_reconstruction_note_20261114": {
+    "status": "not_verified",
+    "means": "a byte-identical rebuild is NOT YET VERIFIED: the checkpoint was materialized once (ri_diagnosis_20261113_105643) and no second build has been compared with these bytes. It is not shown impossible; the bytes survive on the dev box (same_hash_copies), and the recipe (teacher + frozen mapping) is deterministic in intent. Nothing is rebuilt to settle it (maintainer review 2026-11-14 (UTC): “D/W 的描述改为‘尚未验证同字节重建’，不用为此重新构建。”)",
+    "recorded_utc": "2026-11-14"
    }
   },
   {
@@ -7952,6 +7962,2152 @@
     }
    },
    "tombstone_written_utc": "2026-11-14T13:10:02+00:00"
+  },
+  {
+   "canonical_id": "relay_20261114_e1_r0860k_sb_pca",
+   "historical_paths": [
+    "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "E1 (Stage 3 data scaling, 2026-08-01; arm e1_r0860k_sb_pca)",
+   "seed": null,
+   "scientific_role": "E1 arm e1_r0860k_sb_pca's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-3/e1/e1_r0860k_sb_pca.json",
+    "configs/stages/stage-3/p0/p0_assistant_sb.json",
+    "configs/stages/stage-3/p2/p2_ceheavy_sb.json",
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/archival_retirement_20260930.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+    "logs/shared/analyses/autoinit_control_availability.json",
+    "logs/shared/validations/micro-preflight/autoinit_micro_preflight_plan.md",
+    "logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration.json",
+    "logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration_materialized.json",
+    "logs/stages/stage-1/phase_a/results/autoinit_permanent_controls/preflight_ctl_r0860k_sb_run_manifest.json",
+    "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_fingerprint_audit.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "f66de5320b69aa34abf421a45b5d468bbbaf23d2a400750e3340873f20e40035",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-3/e1/e1_r0860k_sb_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/p0/p0_assistant_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/p2/p2_ceheavy_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/pod/autoinit_preflight_driver.py": "names E1's 0.86M CONFIGS (the permanent controls' recipe), never these weights",
+     "scripts/shared/pod/checkpoint_inventory.py": "a pod-side inventory of historical checkpoints (listing only)",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-1/recovery_continuation/compare_recovery_fingerprints.py": "closed experiment: recovery continuation (complete); a lineage check that reads relay metadata, never these bytes",
+     "scripts/stages/stage-1/recovery_continuation/verify_control_checkpoints.py": "closed experiment: recovery continuation (complete); a lineage check that reads relay metadata, never these bytes",
+     "scripts/stages/stage-3/d0/d0diag_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/d0/d0diag_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e2/e2p1_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e2/e2p1_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/p0/register_p0_real.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:e1_scaling_20260801/e1_r0860k_sb_pca/ (eval_holdout_v1.json, gen_smoke.json, run_manifest.json, train_log.jsonl, the model's config files); relay:e1_scaling_20260801/_evaluation/; logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from configs/stages/stage-3/e1/e1_r0860k_sb_pca.json (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "E1's training was $47.60 for 24 arms (a retrain: a new checkpoint, not these bytes)",
+   "frozen_results_location": "logs/stages/stage-3/e1; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:34:25+00:00",
+   "tombstone_written_utc": "2026-11-14T20:34:05+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "15958f44f8ef288d944847a4f6853f8771ef1950",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 68894720747,
+    "lfs_bytes_after": 66510485779,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_e1_r0860k_sb_pca"
+  },
+  {
+   "canonical_id": "relay_20261114_e1_r1600k_sa_pca",
+   "historical_paths": [
+    "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "E1 (Stage 3 data scaling, 2026-08-01; arm e1_r1600k_sa_pca)",
+   "seed": null,
+   "scientific_role": "E1 arm e1_r1600k_sa_pca's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/resolution_session.json",
+    "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
+    "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json",
+    "configs/stages/stage-3/e7/e7_control_r1600k_sa.json",
+    "configs/stages/stage-3/e7/e7_fineweb_r1600k_sa.json",
+    "configs/stages/stage-3/e8b/arms.json",
+    "configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json",
+    "configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json",
+    "configs/stages/stage-3/e8b/e8b_fc_r1600k_sa.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/log_inventory.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/resolution_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e7/e7_control_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_fc_r1600k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)",
+     "scripts/shared/data/finalize_eval_set_1.py": "names the dev-generation FILES these checkpoints produced (eval-set-1 construction, frozen), never the weights",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-3/e4/analyze_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/e4_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/e4_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/register_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e7/e7_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e7/e7_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e8b/build_e8b_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:e1_scaling_20260801/e1_r1600k_sa_pca/ (eval_holdout_v1.json, gen_smoke.json, run_manifest.json, train_log.jsonl, the model's config files); relay:e1_scaling_20260801/_evaluation/; logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from configs/stages/stage-3/e1/e1_r1600k_sa_pca.json (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "E1's training was $47.60 for 24 arms (a retrain: a new checkpoint, not these bytes)",
+   "frozen_results_location": "logs/stages/stage-3/e1; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:34:46+00:00",
+   "tombstone_written_utc": "2026-11-14T20:34:26+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "679138b3f205103aa438d3a59f50e361ad3e454b",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 66510485779,
+    "lfs_bytes_after": 64126250811,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_e1_r1600k_sa_pca"
+  },
+  {
+   "canonical_id": "relay_20261114_e1_r1600k_sb_pca",
+   "historical_paths": [
+    "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "E1 (Stage 3 data scaling, 2026-08-01; arm e1_r1600k_sb_pca)",
+   "seed": null,
+   "scientific_role": "E1 arm e1_r1600k_sb_pca's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "e432d57e598d57e1633392e92955c8185faab57909f75f44bc1c349db6ccf39e",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "e432d57e598d57e1633392e92955c8185faab57909f75f44bc1c349db6ccf39e"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-3/e1/e1_r1600k_sb_pca.json",
+    "configs/stages/stage-3/e7/e7_control_r1600k_sb.json",
+    "configs/stages/stage-3/e7/e7_fineweb_r1600k_sb.json",
+    "configs/stages/stage-3/e8b/arms.json",
+    "configs/stages/stage-3/e8b/e8b_dc_r1600k_sb.json",
+    "configs/stages/stage-3/e8b/e8b_dp_r1600k_sb.json",
+    "configs/stages/stage-3/e8b/e8b_fc_r1600k_sb.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+    "logs/stages/stage-3/e1/analyses/e1_test_cases.md",
+    "logs/stages/stage-3/e4/analyses/e4_registration.json",
+    "logs/stages/stage-3/e6/analyses/e6_registration.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "e432d57e598d57e1633392e92955c8185faab57909f75f44bc1c349db6ccf39e",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-3/e1/e1_r1600k_sb_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e7/e7_control_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e7/e7_fineweb_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_dc_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_dp_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8b/e8b_fc_r1600k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-3/e4/analyze_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/e4_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/e4_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e4/register_e4.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e7/e7_driver.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e7/e7_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e8b/build_e8b_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:e1_scaling_20260801/e1_r1600k_sb_pca/ (eval_holdout_v1.json, gen_smoke.json, run_manifest.json, train_log.jsonl, the model's config files); relay:e1_scaling_20260801/_evaluation/; logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from configs/stages/stage-3/e1/e1_r1600k_sb_pca.json (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "E1's training was $47.60 for 24 arms (a retrain: a new checkpoint, not these bytes)",
+   "frozen_results_location": "logs/stages/stage-3/e1; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:35:06+00:00",
+   "tombstone_written_utc": "2026-11-14T20:34:47+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "f1c86849146f0e331dafdaa51fe855d28dac4954",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 64126250811,
+    "lfs_bytes_after": 61742015843,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_e1_r1600k_sb_pca"
+  },
+  {
+   "canonical_id": "relay_20261114_e1_r2960k_sa_pca",
+   "historical_paths": [
+    "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "E1 (Stage 3 data scaling, 2026-08-01; arm e1_r2960k_sa_pca)",
+   "seed": null,
+   "scientific_role": "E1 arm e1_r2960k_sa_pca's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/battery_session.json",
+    "configs/stages/stage-0/calibration_volume/resolution_session.json",
+    "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
+    "configs/stages/stage-2/reasoning_data/h1pa.json",
+    "configs/stages/stage-2/teacher_modes/engineering_validation.json",
+    "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json",
+    "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json",
+    "configs/stages/stage-3/e6b/provenance.json",
+    "configs/stages/stage-3/e8/arms.json",
+    "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json",
+    "docs/shared/STAGE2_3_HANDOFF.md",
+    "logs/budget/applications/research_a_2026-10-29/forecast.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/log_inventory.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
+    "registry": [],
+    "launchers": [
+     {
+      "launcher": "ae_launch",
+      "file": "scripts/stages/stage-2/teacher_modes/ae_launch.py",
+      "study": {
+       "study": "A-E",
+       "grant": "logs/budget/approvals/teacher_modes_engineering_grant.json",
+       "status": "closed",
+       "closed_utc": "2026-11-11T09:34:55Z"
+      }
+     }
+    ],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/battery_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-0/calibration_volume/resolution_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-2/reasoning_data/h1pa.json": "closed experiment: H1 / H1-PA (H1 closed 2026-10-24, H1-PA complete 2026-10-25; its anchor review superseded by the maintainer 2026-11-14, decisions.md)",
+     "configs/stages/stage-2/teacher_modes/engineering_validation.json": "closed experiment: Research A (CLOSED 2026-11-11, every grant closed)",
+     "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e6b/provenance.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/data/finalize_eval_set_1.py": "names the dev-generation FILES these checkpoints produced (eval-set-1 construction, frozen), never the weights",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-0/calibration_volume/analyze_dev.py": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "scripts/stages/stage-2/reasoning_data/h1pa_audit.py": "closed experiment: H1 / H1-PA (H1 closed 2026-10-24, H1-PA complete 2026-10-25; its anchor review superseded by the maintainer 2026-11-14, decisions.md)",
+     "scripts/stages/stage-2/teacher_modes/phase_forecast.py": "closed experiment: Research A (CLOSED 2026-11-11, every grant closed)",
+     "scripts/stages/stage-2/teacher_modes/training_plan.py": "closed experiment: Research A (CLOSED 2026-11-11, every grant closed)",
+     "scripts/stages/stage-3/e6/e6_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e8/build_e8_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    },
+    "closed_launchers": {
+     "ae_launch": "A-E (Research A's engineering validation): grant logs/budget/approvals/teacher_modes_engineering_grant.json CLOSED 2026-11-11T09:34:55Z; study_engineering.require_open refuses every issue and launch"
+    },
+    "same_sha256_paths": [],
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:e1_scaling_20260801/e1_r2960k_sa_pca/ (eval_holdout_v1.json, gen_smoke.json, run_manifest.json, train_log.jsonl, the model's config files); relay:e1_scaling_20260801/_evaluation/; logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from configs/stages/stage-3/e1/e1_r2960k_sa_pca.json (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "E1's training was $47.60 for 24 arms (a retrain: a new checkpoint, not these bytes)",
+   "frozen_results_location": "logs/stages/stage-3/e1; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:35:27+00:00",
+   "tombstone_written_utc": "2026-11-14T20:35:08+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "bf06b7aa3c1f807cd5f98221759db69a272826d3",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 61742015843,
+    "lfs_bytes_after": 59357780875,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_e1_r2960k_sa_pca"
+  },
+  {
+   "canonical_id": "relay_20261114_e1_r2960k_sb_pca",
+   "historical_paths": [
+    "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "E1 (Stage 3 data scaling, 2026-08-01; arm e1_r2960k_sb_pca)",
+   "seed": null,
+   "scientific_role": "E1 arm e1_r2960k_sb_pca's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-2/reasoning_data/h1pa.json",
+    "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
+    "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json",
+    "configs/stages/stage-3/e6b/provenance.json",
+    "configs/stages/stage-3/e8/arms.json",
+    "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json",
+    "docs/shared/STAGE2_3_HANDOFF.md",
+    "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
+    "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
+    "docs/stages/stage-2/reasoning_data/H1PA.md",
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/log_inventory.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-2/reasoning_data/h1pa.json": "closed experiment: H1 / H1-PA (H1 closed 2026-10-24, H1-PA complete 2026-10-25; its anchor review superseded by the maintainer 2026-11-14, decisions.md)",
+     "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e6b/provenance.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8/arms.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-3/e6/e6_launch.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/e6_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6b/register_e6b.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e8/build_e8_configs.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:e1_scaling_20260801/e1_r2960k_sb_pca/ (eval_holdout_v1.json, gen_smoke.json, run_manifest.json, train_log.jsonl, the model's config files); relay:e1_scaling_20260801/_evaluation/; logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from configs/stages/stage-3/e1/e1_r2960k_sb_pca.json (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "E1's training was $47.60 for 24 arms (a retrain: a new checkpoint, not these bytes)",
+   "frozen_results_location": "logs/stages/stage-3/e1; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:35:46+00:00",
+   "tombstone_written_utc": "2026-11-14T20:35:29+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "066d7cc02f74c77fc77d35a38e1677cc1a19fe5d",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 59357780875,
+    "lfs_bytes_after": 56973545907,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_e1_r2960k_sb_pca"
+  },
+  {
+   "canonical_id": "relay_20261114_e1_r5500k_sa_pca",
+   "historical_paths": [
+    "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "E1 (Stage 3 data scaling, 2026-08-01; arm e1_r5500k_sa_pca)",
+   "seed": null,
+   "scientific_role": "E1 arm e1_r5500k_sa_pca's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/resolution_session.json",
+    "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
+    "configs/stages/stage-3/e1/e1_ctl_r0250k_sa_pca_stepmatched.json",
+    "configs/stages/stage-3/e1/e1_r5500k_sa_pca.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/log_inventory.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+    "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_201712/runtime/session.json",
+    "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_202715/runtime/session.json",
+    "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745/closeout/outcome.json",
+    "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745/evidence/battery.json",
+    "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745/evidence/e1_r5500k_sa_pca_dev/e1_r5500k_sa_pca_dev.summary.json",
+    "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745/evidence/e1_r5500k_sa_pca_dev/score.summary.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/resolution_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-0/calibration_volume/resolution_v2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)",
+     "configs/stages/stage-3/e1/e1_ctl_r0250k_sa_pca_stepmatched.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "configs/stages/stage-3/e1/e1_r5500k_sa_pca.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/shared/data/finalize_eval_set_1.py": "names the dev-generation FILES these checkpoints produced (eval-set-1 construction, frozen), never the weights",
+     "scripts/shared/pod/run_env.sh": "E1's own session environment (SESSION=e1_scaling, 2026-08-01): historical",
+     "scripts/stages/stage-3/e6/e6_setup.sh": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/stages/stage-3/e6/register_e6.py": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "E1 (complete, Qwen3-4B-Thinking-2507 lineage): relay e1_scaling_20260801/_evaluation/ (75 JSON summaries) and each arm's eval_holdout_v1.json / gen_smoke.json / run_manifest.json / train_log.jsonl beside the weights (kept); logs/stages/stage-3/e1; logs/state/artifact_manifests.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:e1_scaling_20260801/e1_r5500k_sa_pca/ (eval_holdout_v1.json, gen_smoke.json, run_manifest.json, train_log.jsonl, the model's config files); relay:e1_scaling_20260801/_evaluation/; logs/stages/stage-3/e1; logs/state/artifact_manifests.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from configs/stages/stage-3/e1/e1_r5500k_sa_pca.json (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "E1's training was $47.60 for 24 arms (a retrain: a new checkpoint, not these bytes)",
+   "frozen_results_location": "logs/stages/stage-3/e1; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:36:07+00:00",
+   "tombstone_written_utc": "2026-11-14T20:35:47+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "f269b8099b79345df9e1f8ab4adc4c1b7140ae76",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 56973545907,
+    "lfs_bytes_after": 54589310939,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_e1_r5500k_sa_pca"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d1_4df438a839cd",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 4df438a839cd1ed057c2277dfcb8922f (formal_v1/d1), an untrained initialization",
+   "weights_sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_rebuild_d1.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_125359/evidence/d1/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r3_4df438a8_s20260726/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r3_4df438a8_s20260726/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r3_4df438a8_s20260727/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r3_4df438a8_s20260727/recovery_products.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:36:28+00:00",
+   "tombstone_written_utc": "2026-11-14T20:36:08+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "f7129705a25704ef25636872d632113b674e1ff3",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 54589310939,
+    "lfs_bytes_after": 53397175843,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d1_4df438a839cd"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d1_60e229ac09d8",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 60e229ac09d88cf52814894ddec0e933 (formal_v1/d1), an untrained initialization",
+   "weights_sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_rebuild_d1.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_125359/evidence/d1/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r2_60e229ac_s20260726/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r2_60e229ac_s20260726/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r2_60e229ac_s20260727/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r2_60e229ac_s20260727/recovery_products.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:36:48+00:00",
+   "tombstone_written_utc": "2026-11-14T20:36:29+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "5a82416b2a5f9b59cd1aed40b6a65d093b9c6582",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 53397175843,
+    "lfs_bytes_after": 52205040747,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d1_60e229ac09d8"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d1_72b76a1ca430",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 72b76a1ca4300f1fc3b341c28738f425 (formal_v1/d1), an untrained initialization",
+   "weights_sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_rebuild_d1.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/recovery/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/recovery/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/search_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_125359/evidence/d1/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_125359/evidence/d1/recovery/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_125359/evidence/d1/search/search_record.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:37:08+00:00",
+   "tombstone_written_utc": "2026-11-14T20:36:49+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "cdedb091b6924eb6bab90d00e3f43da6a502982b",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 52205040747,
+    "lfs_bytes_after": 51012905651,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d1_72b76a1ca430"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d1_91090067b51c",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 91090067b51c9fd4c0aeb3824bc7f549 (formal_v1/d1), an untrained initialization",
+   "weights_sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_rebuild_d1.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_125359/evidence/d1/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r4_91090067_s20260726/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r4_91090067_s20260726/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r4_91090067_s20260727/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/evidence/s0v_top4_d1_r4_91090067_s20260727/recovery_products.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d1_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:37:29+00:00",
+   "tombstone_written_utc": "2026-11-14T20:37:10+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "971da017955fa69b633ffacb1f2959e746ea5a65",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 51012905651,
+    "lfs_bytes_after": 49820770555,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d1_91090067b51c"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d2_3b2037bc9009",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 3b2037bc90090ba13504fb18c1480e80 (formal_v1/d2), an untrained initialization",
+   "weights_sha256": "551e66850bd340851913b13d1dca5894de8a934b276e9853c563da03cefe80c7",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "551e66850bd340851913b13d1dca5894de8a934b276e9853c563da03cefe80c7"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r3_3b2037bc_s20260726/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r3_3b2037bc_s20260726/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r3_3b2037bc_s20260727/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r3_3b2037bc_s20260727/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/runtime/session.json",
+    "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/recovered_records/d2_retired_states.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "551e66850bd340851913b13d1dca5894de8a934b276e9853c563da03cefe80c7",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:37:50+00:00",
+   "tombstone_written_utc": "2026-11-14T20:37:31+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "5adce2e92bfbbf76ad856ad87555bcd3c3a72b4e",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 49820770555,
+    "lfs_bytes_after": 48628635459,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d2_3b2037bc9009"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d2_9af1989dc0b8",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 9af1989dc0b8168908eeb77ee4d3fa47 (formal_v1/d2), an untrained initialization",
+   "weights_sha256": "e9eba2255dbb567b9f044c0af9b2f3139c9ef227532ff85abe66e46f158f733e",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "e9eba2255dbb567b9f044c0af9b2f3139c9ef227532ff85abe66e46f158f733e"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/recovery/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/recovery/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/search_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r1_9af1989d_s20260727/recovery_config.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "e9eba2255dbb567b9f044c0af9b2f3139c9ef227532ff85abe66e46f158f733e",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:38:10+00:00",
+   "tombstone_written_utc": "2026-11-14T20:37:51+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "385001141ff7f8bc52cbb2a65393c4c593a0ff81",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 48628635459,
+    "lfs_bytes_after": 47436500363,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d2_9af1989dc0b8"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d2_b6a41ee85024",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist b6a41ee85024ac3750a39ceb97fa1b5c (formal_v1/d2), an untrained initialization",
+   "weights_sha256": "4da365c3d8b3dc4f391a696c78750714405bc7ef488e2dccf387331a640e6b85",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "4da365c3d8b3dc4f391a696c78750714405bc7ef488e2dccf387331a640e6b85"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r4_b6a41ee8_s20260726/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r4_b6a41ee8_s20260726/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r4_b6a41ee8_s20260727/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r4_b6a41ee8_s20260727/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/runtime/session.json",
+    "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/recovered_records/d2_retired_states.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "4da365c3d8b3dc4f391a696c78750714405bc7ef488e2dccf387331a640e6b85",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:38:29+00:00",
+   "tombstone_written_utc": "2026-11-14T20:38:11+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "8ef4026850c0deae78f90359a57d12e1dbe0b174",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 47436500363,
+    "lfs_bytes_after": 46244365267,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d2_b6a41ee85024"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d2_e2d10ba8f532",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist e2d10ba8f532f95c174de290e19dcf01 (formal_v1/d2), an untrained initialization",
+   "weights_sha256": "34712d06301866b339b6daa9c5d43834f5fdc336ae767397adc6357f6c25176f",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "34712d06301866b339b6daa9c5d43834f5fdc336ae767397adc6357f6c25176f"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r2_e2d10ba8_s20260726/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r2_e2d10ba8_s20260726/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r2_e2d10ba8_s20260727/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r2_e2d10ba8_s20260727/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/runtime/session.json",
+    "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/recovered_records/d2_retired_states.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "34712d06301866b339b6daa9c5d43834f5fdc336ae767397adc6357f6c25176f",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d2_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:38:50+00:00",
+   "tombstone_written_utc": "2026-11-14T20:38:31+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "56503e0878e81150fa1cd0a07757eb1b9e637d20",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 46244365267,
+    "lfs_bytes_after": 45052230171,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d2_e2d10ba8f532"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d4_0363ad220c88",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 0363ad220c88104c0dd1e53395db4530 (formal_v1/d4), an untrained initialization",
+   "weights_sha256": "5d54e3709678884a530decfb43354481da316f53604091c6d40b5f3e1bfa683a",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "5d54e3709678884a530decfb43354481da316f53604091c6d40b5f3e1bfa683a"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206/closeout/tombstone.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r3_0363ad22_s20260726/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r3_0363ad22_s20260726/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r3_0363ad22_s20260727/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r3_0363ad22_s20260727/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/runtime/session.json",
+    "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/volume_audit.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "5d54e3709678884a530decfb43354481da316f53604091c6d40b5f3e1bfa683a",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:39:10+00:00",
+   "tombstone_written_utc": "2026-11-14T20:38:51+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "afc00661f19ff93cc4310c6f49b1c09e6175646d",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 45052230171,
+    "lfs_bytes_after": 43860095075,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d4_0363ad220c88"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d4_167a43f4c05b",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 167a43f4c05b0f9653eaf216717df83c (formal_v1/d4), an untrained initialization",
+   "weights_sha256": "a509ac31665bffbedb5374876c9b44d5ecfa6b4c642229947d82dc3b88ff383d",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "a509ac31665bffbedb5374876c9b44d5ecfa6b4c642229947d82dc3b88ff383d"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206/closeout/tombstone.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r2_167a43f4_s20260726/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r2_167a43f4_s20260726/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r2_167a43f4_s20260727/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r2_167a43f4_s20260727/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/runtime/session.json",
+    "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/volume_audit.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "a509ac31665bffbedb5374876c9b44d5ecfa6b4c642229947d82dc3b88ff383d",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:39:30+00:00",
+   "tombstone_written_utc": "2026-11-14T20:39:11+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "94c6b978c97905cefbc0840f783cb5737bc05538",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 43860095075,
+    "lfs_bytes_after": 42667959979,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d4_167a43f4c05b"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_formal_v1_d4_912205b5a106",
+   "historical_paths": [
+    "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 912205b5a106bb868c43f1d24597bfcc (formal_v1/d4), an untrained initialization",
+   "weights_sha256": "ac7f3885a13f9acb74e2f2014dac2d4b96fcec2655841000b46fe3d6bb207cc4",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "ac7f3885a13f9acb74e2f2014dac2d4b96fcec2655841000b46fe3d6bb207cc4"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/finalists/finalists_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206/closeout/tombstone.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r4_912205b5_s20260726/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r4_912205b5_s20260726/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r4_912205b5_s20260727/recovery_config.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/evidence/s0v_top4_d4_r4_912205b5_s20260727/recovery_products.json",
+    "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/runtime/session.json",
+    "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/volume_audit.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "ac7f3885a13f9acb74e2f2014dac2d4b96fcec2655841000b46fe3d6bb207cc4",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-0/calibration_volume/probes_d4_session.json": "closed experiment: Stage-0 calibration volume (CLOSED 2026-10-21, logs/stages/stage-0/calibration_volume)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:39:50+00:00",
+   "tombstone_written_utc": "2026-11-14T20:39:31+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "c51da8972ef37fd87a6d28882f5263900f401cd9",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 42667959979,
+    "lfs_bytes_after": 41475824883,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_formal_v1_d4_912205b5a106"
+  },
+  {
+   "canonical_id": "relay_20261114_calvol_mixed_v2_2x_9311dcde3cda",
+   "historical_paths": [
+    "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage-0 calibration volume (CLOSED 2026-10-21)",
+   "seed": null,
+   "scientific_role": "calibration-volume finalist 9311dcde3cdaedbf54d506ccf7a98333 (mixed_v2/2x), an untrained initialization",
+   "weights_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-0/calibration_volume/analyses/mixed_result.json",
+    "logs/stages/stage-0/calibration_volume/assets/mix_top1_materialization.json",
+    "logs/stages/stage-0/calibration_volume/runs/mixr_20261026_140539/runtime/session.json",
+    "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/evidence/2x/search_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/evidence/2x/stage1_selection.json",
+    "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/evidence/2x/top1_manifest.json",
+    "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/evidence/mc1/mixed_search_record.json",
+    "logs/stages/stage-0/calibration_volume/runs/mixvol_20261026_102835/closeout/tombstone.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {},
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage-0 calibration volume (CLOSED 2026-10-21): logs/stages/stage-0/calibration_volume (finalist probes, analyses, closeout); the finalist's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-0/calibration_volume; the finalist's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying the calibration-volume search path that selected it (scripts/stages/stage-0/calibration_volume; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay of its search path (a rebuild not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-0/calibration_volume",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:40:08+00:00",
+   "tombstone_written_utc": "2026-11-14T20:39:52+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "496cd783efa6bd2015ae9ec6eafb113655eabf79",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 41475824883,
+    "lfs_bytes_after": 40283689787,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_calvol_mixed_v2_2x_9311dcde3cda"
+  },
+  {
+   "canonical_id": "relay_20261114_d3_product_4f3e3eb734f4",
+   "historical_paths": [
+    "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "D3 structural (d3_structural_20261017_083554; D-series CLOSED 2026-10-17)",
+   "seed": null,
+   "scientific_role": "D3 structural's product (STRUCTURAL_CHANGE), the probes' start point",
+   "weights_sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/budget/approvals/autoinit_d3_probes_grant.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/configs/d3_probes_d3_s1004399678.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/configs/d3_probes_d3_s396880939.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/configs/d3_probes_d3_s766527341.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/d3_probes.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/d3_probes_comparison.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/results/d3_probes_d3_s1004399678.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/results/d3_probes_d3_s396880939.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/results/d3_probes_d3_s766527341.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/training/d3_probes_d3_s1004399678/run_manifest.json",
+    "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/training/d3_probes_d3_s396880939/run_manifest.json"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+    "registry": [],
+    "launchers": [
+     {
+      "launcher": "autoinit_d3_probes_launch",
+      "file": "scripts/stages/stage-1/phase_d3/autoinit_d3_probes_launch.py",
+      "study": null
+     }
+    ],
+    "code_readers": {
+     "configs/index.json": "navigation index",
+     "configs/shared/baselines/initialization_forward_baseline_v1.json": "cites the D3 closeout as terminal evidence, never the product's bytes",
+     "configs/shared/baselines/initialization_forward_baseline_v2.json": "cites the D3 closeout as terminal evidence, never the product's bytes",
+     "configs/stages/stage-1/phase_c1/authorization.json": "names phase_d3 (the experiment), not this object",
+     "scripts/index.json": "navigation index",
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)",
+     "scripts/shared/pod/autoinit_preflight_setup.sh": "the D3 sessions' setup branch (D-series closed)",
+     "scripts/stages/stage-1/families/d_series/current.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/families/d_series/d2_budget.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/families/d_series/programme_closeout.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/families/d_series/shared_evaluation.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/analyze_d3_probes.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/autoinit_d3_probes_launch.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_driver.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_launch.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/closeout_d3_probes.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/closeout_d3_structural.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/d3_authorization.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/d3_budget.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/d3_design.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/d3_probes.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/extract_d3_control.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/issue_d3_authorization.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/write_d3_admission.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)",
+     "scripts/stages/stage-1/phase_d3/write_d3_registration.py": "closed experiment: the D-series (CLOSED 2026-10-17; every D-series issuer refuses its closed grants)"
+    },
+    "closed_launchers": {
+     "autoinit_d3_probes_launch": "D3 probes: the D-series CLOSED 2026-10-17 (logs/stages/stage-1/families/d_series/closeout/programme_closeout.json); refuse_closed_authority() runs first in every D-series issuer"
+    },
+    "same_sha256_paths": [],
+    "evidence": "D3 structural (COMPLETE 2026-10-17, STRUCTURAL_CHANGE; D-series CLOSED): logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/closeout/outcome.json and the probes' closeout; the product's config.json and generation_config.json stay on the relay"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/closeout/outcome.json; logs/stages/stage-1/phase_d3; the product's config.json and generation_config.json stay on the relay",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "rebuild by replaying D3 structural's frozen path (scripts/stages/stage-1/phase_d3; one GPU)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "one GPU replay (not verified to give back these bytes)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d3",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:40:28+00:00",
+   "tombstone_written_utc": "2026-11-14T20:40:09+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "887fc6f0b552bea6aabc75d7ad9816bda10e0342",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 40283689787,
+    "lfs_bytes_after": 39091554691,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_d3_product_4f3e3eb734f4"
+  },
+  {
+   "canonical_id": "relay_20261114_stage3_s1_ext_v0",
+   "historical_paths": [
+    "stage3/s1_ext_v0/step_000660/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage3/s1_ext_v0/step_000660/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage 3 early recovery (s1_ext_v0, July 2026)",
+   "seed": null,
+   "scientific_role": "s1_ext_v0's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "8764e3b6a7c8652bda7a3a8c2600327a0a50de8124c0a76af42494d06fb08b47",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/s1_ext_v0/step_000660/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "8764e3b6a7c8652bda7a3a8c2600327a0a50de8124c0a76af42494d06fb08b47"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/index.json",
+    "logs/stages/stage-3/README.md",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md",
+    "logs/state/artifact_manifests.md",
+    "scripts/maintenance/consolidation/stage_attribution.py"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "8764e3b6a7c8652bda7a3a8c2600327a0a50de8124c0a76af42494d06fb08b47",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:stage3/s1_ext_v0/ (console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl, hash list, the model's config and tokenizer files); relay:stage3/reference_scorecards/; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from s1_ext_v0's run_manifest.json on the relay (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "a retrain: a new checkpoint, not these bytes",
+   "frozen_results_location": "logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:40:49+00:00",
+   "tombstone_written_utc": "2026-11-14T20:40:29+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "853853eb087985ba63c416c9a32cb43cbeaf427a",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 39091554691,
+    "lfs_bytes_after": 36707319723,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_stage3_s1_ext_v0"
+  },
+  {
+   "canonical_id": "relay_20261114_stage3_s1_ffn_norm_v0",
+   "historical_paths": [
+    "stage3/s1_ffn_norm_v0/step_000660/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage3/s1_ffn_norm_v0/step_000660/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage 3 early recovery (s1_ffn_norm_v0, July 2026)",
+   "seed": null,
+   "scientific_role": "s1_ffn_norm_v0's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "dc64f244e203d607ed2ea63836400287878b26b96ebf42dc19ec70f154ace900",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/s1_ffn_norm_v0/step_000660/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "dc64f244e203d607ed2ea63836400287878b26b96ebf42dc19ec70f154ace900"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md",
+    "logs/state/artifact_manifests.md",
+    "scripts/shared/evaluation/eval_behavior.py",
+    "tests/evaluation/test_perf_trend.py"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "dc64f244e203d607ed2ea63836400287878b26b96ebf42dc19ec70f154ace900",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "scripts/shared/evaluation/eval_behavior.py": "a usage example in the docstring"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:stage3/s1_ffn_norm_v0/ (console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl, hash list, the model's config and tokenizer files); relay:stage3/reference_scorecards/; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from s1_ffn_norm_v0's run_manifest.json on the relay (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "a retrain: a new checkpoint, not these bytes",
+   "frozen_results_location": "logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:41:09+00:00",
+   "tombstone_written_utc": "2026-11-14T20:40:50+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "ad9f6cbc35b4a16dadcfcb06ca1e81eadf7306cb",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 36707319723,
+    "lfs_bytes_after": 34323084755,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_stage3_s1_ffn_norm_v0"
+  },
+  {
+   "canonical_id": "relay_20261114_stage3_s2_blocks_v0",
+   "historical_paths": [
+    "stage3/s2_blocks_v0/step_000660/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage3/s2_blocks_v0/step_000660/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage 3 early recovery (s2_blocks_v0, July 2026)",
+   "seed": null,
+   "scientific_role": "s2_blocks_v0's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "9d7e4311dc6ed953b16b728cc81865eed5c57c920c8642678cd09fcf6a713d1b",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/s2_blocks_v0/step_000660/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "9d7e4311dc6ed953b16b728cc81865eed5c57c920c8642678cd09fcf6a713d1b"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/index.json",
+    "logs/stages/stage-3/README.md",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md",
+    "logs/state/artifact_manifests.md",
+    "scripts/maintenance/consolidation/stage_attribution.py"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "9d7e4311dc6ed953b16b728cc81865eed5c57c920c8642678cd09fcf6a713d1b",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:stage3/s2_blocks_v0/ (console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl, hash list, the model's config and tokenizer files); relay:stage3/reference_scorecards/; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from s2_blocks_v0's run_manifest.json on the relay (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "a retrain: a new checkpoint, not these bytes",
+   "frozen_results_location": "logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:41:30+00:00",
+   "tombstone_written_utc": "2026-11-14T20:41:11+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "d3850c8ecca7ca635a01a194c654a61dec1fe872",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 34323084755,
+    "lfs_bytes_after": 31938849787,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_stage3_s2_blocks_v0"
+  },
+  {
+   "canonical_id": "relay_20261114_stage3_s2_blocks_v1",
+   "historical_paths": [
+    "stage3/s2_blocks_v1/step_002700/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage3/s2_blocks_v1/step_002700/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage 3 early recovery (s2_blocks_v1, July 2026)",
+   "seed": null,
+   "scientific_role": "s2_blocks_v1's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "f275fbfd13b43b61629f92b67a7b9586d34deeea977b6c8e197c708ecd4f591f",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/s2_blocks_v1/step_002700/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "f275fbfd13b43b61629f92b67a7b9586d34deeea977b6c8e197c708ecd4f591f"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/stages/stage-3/history/EXPERIMENTS.md",
+    "logs/state/artifact_manifests.md",
+    "logs/state/supported_models.md",
+    "scripts/shared/pod/AGENTS.md",
+    "src/aadistill/evaluation/behavior.py",
+    "tests/evaluation/test_behavior.py",
+    "tests/evaluation/test_perf_trend.py"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "f275fbfd13b43b61629f92b67a7b9586d34deeea977b6c8e197c708ecd4f591f",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "scripts/shared/pod/AGENTS.md": "a historical note",
+     "src/aadistill/evaluation/behavior.py": "a docstring citing a historical failure"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:stage3/s2_blocks_v1/ (console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl, hash list, the model's config and tokenizer files); relay:stage3/reference_scorecards/; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from s2_blocks_v1's run_manifest.json on the relay (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "a retrain: a new checkpoint, not these bytes",
+   "frozen_results_location": "logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:41:51+00:00",
+   "tombstone_written_utc": "2026-11-14T20:41:31+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "bc60d87d35659c2ec753954bd0ddb024e2f1ab30",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 31938849787,
+    "lfs_bytes_after": 29554614819,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_stage3_s2_blocks_v1"
+  },
+  {
+   "canonical_id": "relay_20261114_stage3_s2v1_from_init",
+   "historical_paths": [
+    "stage3/s2v1_from_init/step_002700/model/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "stage3/s2v1_from_init/step_002700/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage 3 early recovery (s2v1_from_init, July 2026)",
+   "seed": null,
+   "scientific_role": "s2v1_from_init's final checkpoint (0.6B student, Qwen3-4B-Thinking-2507 lineage)",
+   "weights_sha256": "7487cd92999af5506a28496045900e4b53a1e393a71a00c2edb0e0822143f98a",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/s2v1_from_init/step_002700/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "7487cd92999af5506a28496045900e4b53a1e393a71a00c2edb0e0822143f98a"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-3/s2v1_from_init.json",
+    "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+    "logs/stages/index.json",
+    "logs/stages/stage-3/README.md",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md",
+    "logs/stages/stage-3/history/EXPERIMENTS.md",
+    "logs/state/artifact_manifests.md",
+    "logs/state/supported_models.md",
+    "scripts/maintenance/consolidation/stage_attribution.py"
+   ],
+   "consumer_audit": {
+    "record": "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "collected_utc": "2026-11-14T20:30:17+00:00",
+    "sha256": "7487cd92999af5506a28496045900e4b53a1e393a71a00c2edb0e0822143f98a",
+    "registry": [],
+    "launchers": [],
+    "code_readers": {
+     "configs/stages/stage-3/s2v1_from_init.json": "closed experiment: Stage 3's E-series, P0/P2, D0 and early recovery runs (complete or terminated, logs/stages/index.json; Qwen3-4B-Thinking-2507 lineage, not the current teacher)",
+     "scripts/maintenance/consolidation/stage_attribution.py": "inventory tooling (stage attribution text)",
+     "scripts/shared/pod/hashes_ckpt.txt": "the hash list of the August pod setup (setup.sh / orchestrate.sh, E-series): historical"
+    },
+    "closed_launchers": null,
+    "same_sha256_paths": [],
+    "evidence": "Stage 3 early recovery (complete, July 2026, Thinking-2507 lineage): the run's console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl and artifact hash list on the relay beside the weights (kept), relay stage3/reference_scorecards/ (s1_ffn_norm_v0@660's behaviour scorecard, located), logs/stages/stage-3/history/EXPERIMENTS.md"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor",
+   "canonical_surviving_evidence": "relay:stage3/s2v1_from_init/ (console.log, eval_holdout_v1*.json, gen_smoke.json, run_manifest.json, train_log.jsonl, hash list, the model's config and tokenizer files); relay:stage3/reference_scorecards/; logs/stages/stage-3/history/EXPERIMENTS.md",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain from s2v1_from_init's run_manifest.json on the relay (a new training run)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "a retrain: a new checkpoint, not these bytes",
+   "frozen_results_location": "logs/stages/stage-3/history/EXPERIMENTS.md",
+   "maintainer_decision": "maintainer 2026-11-14 (UTC): “修复后，直接按 AGENTS.md 2.5 常设授权完成剩余 29 个权重的对象级消费者和锚点审计，退役符合条件者。受保护或存在未解决消费者的对象，列明具体用途并保留，不做整批删除，也不把全部旧权重搬回本地。”",
+   "deleted_utc": "2026-11-14T20:42:11+00:00",
+   "tombstone_written_utc": "2026-11-14T20:41:52+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "b2ebe0476aea40666dab641a4f82f013129f3c3b",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 29554614819,
+    "lfs_bytes_after": 27170379851,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   },
+   "id_in_relay_commit_message": "relay_20261115_stage3_s2v1_from_init"
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant.",

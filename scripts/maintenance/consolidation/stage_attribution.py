@@ -1615,7 +1615,8 @@ STAGE_1 = [
         stage_id="1",
         status=("COMPLETE and CLOSED 2026-11-14 (RI-S1, six attempts, $19.9554 of $35, the rest lapsed): untrained D static fluid 89.6% -> 5.6% "
                 "thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; "
-                "eval-set-1 development-exposed"),
+                "eval-set-1 development-exposed. Next round RI-LM1 (layer merging at D's structure: D / M-avg / "
+                "M-act) prepared to the launch point, PROPOSED, not authorized"),
         title="Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1)",
         question=("How much of the teacher's fluid reasoning does the current initialization lose to depth "
                   "pruning alone, to all non-depth compression alone and to both, untrained, and do the two "
@@ -1637,6 +1638,12 @@ STAGE_1 = [
             E("logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
               "where D, W, DW and the mapping are kept (the dev box only), with every hash",
               field="schema", equals="aadistill.stage1.reasoning_inheritance.local_checkpoints/v1"),
+            E("configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+              "the next round (RI-LM1): spans, candidates, statistics rules, checks, diagnostics, decision rule",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/reasoning_inheritance/plans/layer_merge_proposal.json",
+              "RI-LM1's budget draft: own ceiling, teardown reserve, per-session cap, terminal state",
+              field="status", equals="proposed"),
         ],
         external_material=[
             "docs/stages/stage-1/reasoning_inheritance/REPORT.md, LITERATURE.md -- the round's report and reading",
@@ -1648,7 +1655,8 @@ STAGE_1 = [
         decisions=["logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; "
                    "2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed; "
                    "2026-11-14: review fixes (teacher prompt check, tombstones, A-MIX relay copy, the next "
-                   "round's layer-merging plan)"],
+                   "round's layer-merging plan); 2026-11-14: third review (M-act, literature, decision rule, "
+                   "retirement tool, 24 relay weights retired, RI-LM1 prepared)"],
         canonical_log_destination="logs/stages/stage-1/reasoning_inheritance",
         classification_reason=(
             "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps "

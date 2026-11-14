@@ -1,0 +1,114 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.design/v1",
+ "study_id": "stage1.reasoning_inheritance.layer_merge",
+ "stage": 1,
+ "recorded_utc": "2026-11-14",
+ "decided_by": "the plan of docs/stages/stage-1/reasoning_inheritance/REPORT.md section 11 (maintainer reviews of 2026-11-14 UTC: candidates D / M-avg / M-act at D's fixed structure, fixed before any result). Prepared at $0; it authorizes nothing (authorizes, below)",
+ "question": "At D's structure (28 blocks, hidden 2560, FFN 9728, 32 query / 8 KV heads, 3,215,021,568 parameters), does writing each span's one block from all of the span's teacher blocks do better on eval-set-1 than keeping the span's first block alone (D, direct deletion)?",
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+  "lineage": "one teacher lineage (AGENTS.md P17.1): every candidate tensor, the calibration statistics, the state-evaluation reference and the evaluation tokenizer and chat template are this checkpoint's"
+ },
+ "base": {
+  "ri_s1_design": {"path": "configs/stages/stage-1/reasoning_inheritance/design.json", "sha256": "282dc2674d931b7e4a2eeef70b7a8b817c453e4c6a47f6befea45927904feca5"},
+  "frozen_selection": {"path": "configs/stages/stage-1/reasoning_inheritance/frozen_selection.json", "sha256": "a1b021fcf4485d29a76b52439551eb0894817dc986e206e28aae10353470ad90"},
+  "d_checkpoint": {
+   "group": "D (RI-S1): the teacher's blocks at the frozen selection's 28 kept blocks, its embedding, final norm and (tied) LM head",
+   "weights_sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
+   "config_sha256": "4583de7697649c2d0c6f6a9e063690c5d5a77651ede88dd89de6a452be170bda",
+   "artifact_digest": "08aa80972097b290a4929b563cdc6d0497a6021fb7f4bde0a39edb2624e53b68",
+   "num_parameters": 3215021568,
+   "dev_box_copy": "~/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D (logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json)",
+   "tensor_digests": "configs/stages/stage-1/reasoning_inheritance/layer_merge/d_tensor_digests.json",
+   "on_the_pod": "never moved: each candidate is built from the teacher (frozen_mapping.keep_blocks, D's own builder) and every tensor outside the six span blocks is compared with D's per-tensor digests bit for bit"
+  }
+ },
+ "spans": {
+  "rule": "each removed block joins the nearest kept block before it; the merged block stands where its span starts and receives the span's input; a run of consecutive removed blocks joins as a whole and is merged in one step, never pairwise in sequence (layer_merge.spans_from_kept_blocks on the frozen selection's kept blocks)",
+  "table": [[2, 3], [10, 11], [16, 17, 18], [24, 25, 26], [29, 30], [31, 32]],
+  "anchor": "the span's first (kept) block; every absorbed block is aligned onto it",
+  "unchanged": "the other 22 kept blocks, the embedding, the final norm and the tied LM head: D's, bit for bit"
+ },
+ "candidates": {
+  "D": {"role": "direct deletion, the control", "checkpoint": "D, not rebuilt", "evaluation": "RI-S1's sealed eval-set-1 records of D, reused, never regenerated"},
+  "M-avg": {
+   "role": "direct parameter averaging, the merge control",
+   "formula": "for every tensor of a span's blocks (q/k/v/o projections, q_norm, k_norm, gate/up/down projections, input_layernorm, post_attention_layernorm; Qwen3 has no biases): theta' = (1/|span|) * sum_{l in span} theta_l",
+   "folding": "none", "alignment": "none"
+  },
+  "M-act": {
+   "role": "aligned activation-weighted merging, a heuristic initialization to be tested",
+   "folding": "each block's input_layernorm gain into its q/k/v input columns and its post_attention_layernorm gain into its gate/up input columns (W (g * x_hat) = (W diag g) x_hat); the merged block's two gains are 1; q_norm and k_norm act after the projection and are not folded",
+   "alignment": "each absorbed block onto the span's anchor: FFN neurons (gate row, up row, down column together) by the linear assignment maximizing the summed Pearson correlation of the gated-product features (the down projection's input); KV groups (each with its 4 query heads) by the linear assignment on the cosine of the groups' summed residual writes; within each matched group the query heads by the linear assignment on the heads' write cosine; q/k/v rows and o_proj columns move together, head dimensions never",
+   "weights": "per FFN slot w_{l,i} = s_{l,i} / sum_l s_{l,i}, s = E|a_i| * ||down column i||_2 (ffn.activation_importance_v0's statistic); per query-head slot the head's write energy mean_t ||W_o,h a_h(t)||^2 (attention.activation_importance_v1's statistic); per KV-group slot its 4 heads' summed energy; q_norm / k_norm and the (unit) gains by each block's share of total head energy",
+   "what_it_is_not": "the weights are convex per slot. That guarantees neither the scale of the merged block's output nor that it reproduces the teacher span's cumulative update; both are measured (diagnostics) and neither is assumed",
+   "not_part": "no least-squares refit, no fitted coefficient, no training: learnable fusion coefficients are Stage 3's"
+  },
+  "not_registered": {
+   "parameter_addition": "LaCo's theta*_l = theta_l + sum_k (theta_{l+k} - theta_l) has no scaling: on a two-block span it equals keeping the absorbed block instead of the kept one (another deletion, not a merge); summing every tensor doubles the RMSNorm gains, and no primary source gives a scaling rule"
+  },
+  "fixed": "neither the candidate list nor the decision rule changes after any result is seen; state evaluation and the diagnostics never remove a candidate from generation"
+ },
+ "statistics": {
+  "profile_id": "calib.hybrid_d4_base@v2",
+  "positions_of_operator": "ffn.activation_importance_v0",
+  "session": "the anchor search's own session (driver.session: inputs v3, the packed forward context, the position policy), whose operator config hashes are checked against the journal before anything runs",
+  "positions": "the position policy's admitted token positions (positions.supervised_target_v1@v1) of the profile's 558 examples (569,270 tokens before packing; 211,203 admitted), under Stage 1's packing (seeded sha256-keyed shuffle 20261105, sequential packing with truncation into 8,192-token sequences, prefix_restart_v1, causal attention with continuous positions): 79 packed sequences, 644,493 non-padding tokens, 231,242 statistics positions (a fragment's repeated prefix counted like any placement, AGENTS.md P19)",
+  "expected": {"examples": 558, "packed_sequences": 79, "statistics_positions": 231242},
+  "features": {"ffn": "the down projection's input a (the gated product), every neuron", "heads": "the output projection's input per query head a_h, mapped to its residual write W_o,h a_h (2,560-d, the coordinates every block shares)"},
+  "where": "each block's statistics on its OWN input in the teacher's forward, for the 14 blocks of the six spans",
+  "accumulation": "streaming, one packed sequence at a time: cross products in float32 of the bf16 activations (exact products, float32 accumulation within the sequence; head writes in chunks of 1,024 positions), sums across sequences in float64 (PearsonMoments: sum x, sum x^2, sum y, sum y^2, sum x y^T per pair; GramMoments: write Gram per pair and per block). Device memory: 8 FFN pairs x 9,728^2 float64 = 6.1 GB beside the 8 GB teacher",
+  "zero_variance": "a feature whose variance on the statistics positions is at or below 1e-12 of its mean square (or whose mean square is 0) has correlation 0 with every feature; a head set with zero write energy has cosine 0",
+  "zero_denominator": "a slot whose importance (or energy) is 0 in every block of its span takes the uniform weights 1/|span|; the count of such slots is recorded",
+  "assignment": "exact maximum-weight perfect matching (layer_merge.linear_assignment: shortest augmenting path with duals, Crouse 2016, the algorithm of scipy.optimize.linear_sum_assignment), float64; ties: among columns of equal reduced cost an unassigned column first, then the lowest column index",
+  "persisted": "records/merge_statistics.safetensors (per block E|a| and head energies; per pair the three permutations) and records/merge_statistics.json (counts, matching quality, digests): pulled to the dev box on the next poll and copied to the relay with the candidates; a later attempt reuses them and never repeats the forward"
+ },
+ "checks": {
+  "fold_equivalence": {"what": "every span block with its gains folded, alone, against the unmodified block", "tolerance": 0.0001},
+  "permutation_equivalence": {"what": "every absorbed block with its alignment permutation alone, against the unmodified block", "tolerance": 0.0001},
+  "rule": "float32 copies of the bf16 teacher blocks on every position of the first packed sequence; error ||y' - y||_F / ||y - x||_F (relative to the block's own update; float32 reordering and rounding are about 1e-6 of it). Exceeding the tolerance is a defect of the mechanism: the build stops before any candidate is saved",
+  "unchanged_tensors": "every candidate tensor outside the six span blocks equals D's per-tensor digest (d_tensor_digests.json); every span block differs from D's in at least one tensor",
+  "structure": "each candidate's configuration is D's and its parameter count 3,215,021,568"
+ },
+ "diagnostics": {
+  "what": "on the statistics positions, for each span: the teacher span's attention update (sum of its blocks' attention outputs), FFN update (sum of their FFN outputs) and whole residual update (span output minus span input), against each of D's, M-avg's and M-act's block run on the same teacher input: RMS norms, norm ratio, cosine and normalized error E|c - r|^2 / E|r|^2 per component",
+  "role": "diagnostics, like state evaluation: they explain results; they select no candidate, gate no generation and decide nothing"
+ },
+ "state_eval": {"suite_id": "state_eval_hybrid@v3", "role": "diagnostic only; both candidates are generated whatever it shows"},
+ "evaluation": {
+  "protocol": "RI-S1's design.json :: evaluation, unchanged: eval-set-1, every registered unit, both modes, context 40,960 with no token cap, nucleus_v1, seeds from item, turn and sample (each item pairs with D's sealed record), the degeneration check every 256 tokens, the runners at session commit 8f74bc94 (after the abort repair)",
+  "protocol_sha256": "5e93555e92450057ebd4d76ad4ce31879ec298b68ea3fd4fcd22878c09540c4d",
+  "protocol_sha256_rule": "sha256 of json.dumps(RI-S1 design['evaluation'], sort_keys=True); the driver refuses another",
+  "groups": ["M-avg", "M-act"],
+  "order": [["M-avg", "H-T", "fluid"], ["M-act", "H-T", "fluid"], ["M-avg", "H-T", "capability"], ["M-act", "H-T", "capability"], ["M-avg", "H-N", "fluid"], ["M-act", "H-N", "fluid"], ["M-avg", "H-N", "capability"], ["M-act", "H-N", "capability"]],
+  "order_rule": "the primary unit of both candidates first, so a budget that ends early leaves the primary comparison measured; the order decides nothing about a result (every item has its fixed seed; a unit is complete or absent)",
+  "exposure": "eval-set-1 is development-exposed; nothing here is an untouched test set, and no per-item result fits a weight, a permutation or a span"
+ },
+ "analysis": {
+  "primary": "thinking mode (H-T), the static fluid formal core: 570 items, M-avg - D and M-act - D, each item paired with D's sealed record of the same item",
+  "units_of_independence": "the registered independence groups (fluid_reasoning_720/independence_v1.json, sha256 4e5a06d48624c14a1eb20aaa5267198b2dfd801d268b7cf13a3f67b8ef17a1c5): the 570 items fall into 558 groups (six groups hold 18 items; every other item is its own group); 708 is the whole fluid unit's count and is not used for the static comparison",
+  "statistic": "the item-weighted mean paired difference, delta = (1/570) sum_items (y_M - y_D), y the registered scorer's correctness in {0, 1}; per group g the summed difference d_g",
+  "test": "a two-sided paired sign-flip randomization test at the group level: under H0 the M and D labels are exchangeable within every group, so each d_g's sign is flipped independently with probability 1/2; T = |sum_g d_g|; p = (1 + #{b : |sum_g e_bg d_g| >= T}) / (1 + B), B = 100,000 draws of e_bg in {-1, +1} from numpy.random.default_rng(20261114); groups with d_g = 0 contribute nothing and are kept",
+  "direction": "two-sided; the sign of delta says better or worse",
+  "multiplicity": "Holm over the two candidates at alpha 0.05: sort p ascending; adjusted p_(1) = min(1, 2 p_(1)), p_(2) = min(1, max(adjusted p_(1), p_(2)))",
+  "decision": "for each candidate: BETTER than deletion if its Holm-adjusted p <= 0.05 and delta > 0; WORSE if adjusted p <= 0.05 and delta < 0; NOT DISTINGUISHED otherwise. The primary unit not complete for both candidates: no verdict (not_measured), never a partial pooling",
+  "effect_interval": "reported beside the test and labeled as such: the percentile 95% interval of delta over 10,000 group-bootstrap resamples (the 558 groups drawn with replacement, delta recomputed as the item-weighted mean; numpy.random.default_rng(20261115)); unadjusted for multiplicity and not the decision",
+  "supplementary": "the same interval resampling whole rule families (family_id), as RI-S1 reported; the non-thinking mode, the interactive episodes, each fluid axis, the supporting units, M-act - M-avg; usable rollout and its components; failure types. Reported, never decisive",
+  "resolution": "at D's 5.6% static fluid correctness, about 3 pp is roughly the smallest paired difference this design separates from 0 (a rough figure from D's paired discordance, not a power analysis)"
+ },
+ "products": {
+  "relay_repo": "AlphaAvatar/aadistill-artifacts",
+  "relay_prefix": "durable/stage1_reasoning_inheritance/layer_merge",
+  "layout": "<prefix>/<statistics sha256[:16]>/groups/{M-avg,M-act}/ (model.safetensors 6.43 GB each, config.json, generation_config.json) and .../records/merge_statistics.safetensors: uploaded from the pod as soon as built, downloaded again into a fresh cache and re-hashed",
+  "relay_room": "checked before the launch at the true sizes (runtime.hub_capacity.would_accept: two objects of 6.43 GB plus the statistics); a refusal stops the launch at $0",
+  "evidence": "every finished file is pulled to the dev box on each poll (<scr>/store, about 0.4 GB for a full evaluation of two models, from RI-S1's 0.37 GB for three)",
+  "dev_box_copy": "the two checkpoints are NOT copied to the dev box by default (15 GB free on a shared disk); the relay copy is their durable copy until a later consumer asks for them"
+ },
+ "reuse": {
+  "never_redone": "D's checkpoint and sealed generations; T's reused evaluation; the frozen selection and mapping; the calibration and state-suite items (dev box assets); eval-set-1; RI-S1's runners and the driver's evaluation and resume paths. No corpus is regenerated, no baseline retrained, no valid measurement repeated",
+  "a_failed_attempt": "takes over the previous attempt's records (statistics, permutations, builds, checks, diagnostics) and every sealed evaluation part (driver.take_over), restores the candidates from the relay by sha256 (driver.relay_restore), and generates only the items with no sealed record, each under its fixed seed"
+ },
+ "authorizes": "nothing"
+}
