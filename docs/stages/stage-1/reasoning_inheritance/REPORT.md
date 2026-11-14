@@ -912,7 +912,14 @@ No generation, scorer, score or legitimate checkpoint changed; no GPU used.
 * **D and W.** Their byte-identical rebuild is *not yet verified* -- each was built once and no second build was
   compared -- which is not the same as impossible; their tombstones say so, and nothing is rebuilt to settle it.
 * **Next round.** Prepared to the launch point (section 11): design, code, tests, launch commands, storage, and a
-  budget draft with its own ceiling, teardown reserve and terminal state; not authorized.
+  budget draft with its own ceiling, teardown reserve and terminal state; not authorized. A $0 dry run against the
+  proposal (2026-11-14T21:08Z, session commit `67c87938`): `issue --dry-run` passed every funding check; `launch
+  --dry-run` priced the session at an expected 510 min / $9.27, hard deadline 582 min / $10.57, all-in $10.80 inside
+  the $11.00 cap, and passed the provider balance and resources, the study, artifact, GPU and price, identity, bound
+  files and project-cap gates. It stopped, as a dry run must, at the two steps only a real launch takes: the
+  authorization committed as the session commit and the bundle staged on the relay. The teardown-reserve and
+  relay-room gates pass when evaluated directly (the relay would accept the two candidates and the statistics,
+  12.04 GiB). The driver's `--check-only` contract passes ($0).
 * **Record dates.** This round's first records were stamped 2026-11-15 from the dev box's +08:00 clock; they are
   corrected to UTC (2026-11-14). The 24 tombstones keep, in `id_in_relay_commit_message`, the id their relay commit
   messages carry.

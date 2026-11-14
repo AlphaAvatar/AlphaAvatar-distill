@@ -143,3 +143,19 @@ def test_the_pipeline_builds_both_candidates_on_the_toy_teacher(teacher):
             for c in ("attention", "ffn", "block"):
                 r = diag["spans"][s][m][c]
                 assert r["positions"] == 120 and r["normalized_error"] is not None and r["rms_reference"] > 0
+
+
+def test_the_teardown_reserve_and_the_budget_terminal_state_refuse():
+    from reasoning_inheritance import layer_merge_launch as L
+    g = {"teardown_reserve_usd": 1.0, "min_useful_attempt_usd": 2.0}
+    env, pos = {"remaining_usd": 13.0}, {"project_remaining_usd": 36.76, "balance_usd": 16.63}
+    assert L.reserve_problems(11.0, g, env, pos) == []
+    assert "budget is exhausted" in L.reserve_problems(1.5, g, env, pos)[0]           #: below the smallest attempt
+    assert L.reserve_problems(11.0, g, {"remaining_usd": 10.0}, pos)                  #: the ceiling's remainder
+    assert L.reserve_problems(11.0, g, env, {"project_remaining_usd": 11.5, "balance_usd": 50})   #: cap + reserve
+    assert L.reserve_problems(11.0, g, env, {"project_remaining_usd": 50, "balance_usd": 11.5})   #: the balance
+    proposal = json.loads((REPO / L.STUDY.proposal).read_text())
+    assert proposal["status"] == "proposed" and proposal["study"] == L.STUDY.key
+    assert proposal["ceiling_usd"] + proposal["teardown_reserve_usd"] == proposal["study_cumulative_cap_usd"]
+    assert proposal["per_session_hard_cap_usd"] <= proposal["ceiling_usd"]
+    assert not (REPO / L.STUDY.grant).exists()                                         #: proposed, never granted here

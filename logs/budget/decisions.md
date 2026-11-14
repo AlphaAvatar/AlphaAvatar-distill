@@ -16666,5 +16666,9 @@ on a paid pod.
     reserve outside it, $11.00 per session, $2.00 smallest useful attempt, BUDGET_EXHAUSTED terminal state; RI-S1's
     lapsed $15.0446 funds nothing). Live position 2026-11-14T20:57Z: $963.24 of $1,000 committed, balance $16.63.
   - Record dates: the first records of this round carried 2026-11-15 (the +08:00 clock) and were corrected to UTC.
+  - $0 dry run (2026-11-14T21:08Z, session commit `67c87938`): `issue --dry-run` passed every funding check;
+    `launch --dry-run` priced 510 min / $9.27 expected, hard deadline 582 min / $10.57, all-in $10.80 inside
+    $11.00, and passed every gate up to the two a real launch adds (the artifact committed as the session
+    commit, the bundle staged); the reserve and relay-room gates pass directly (12.04 GiB admitted).
 - Not done, by the brief: no paid launch, no grant written, no merge into `main`, no volume, no upload of historical
   weights, no rebuild of D or W.
