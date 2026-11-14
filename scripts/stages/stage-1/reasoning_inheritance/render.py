@@ -76,10 +76,11 @@ def unit_table(res: dict, mode: str) -> list[str]:
 def contrast_table(res: dict, mode: str) -> list[str]:
     keys = ("depth_alone (T-D)", "non_depth_alone (T-W)", "depth_given_non_depth (W-DW)",
             "non_depth_given_depth (D-DW)", "interaction (D+W-T-DW)")
-    out = [f"| {mode} | n | T | D | W | DW | " + " | ".join(keys) + " |", "| --- |" + " ---: |" * (6 + len(keys))]
+    out = [f"| {mode} | n | T | D | W | DW | " + " | ".join(keys) + " |", "| --- |" + " ---: |" * (5 + len(keys))]
     for unit, c in sorted((res.get("contrasts") or {}).get(mode, {}).items()):
         if "accuracy" not in c:
-            out.append(f"| {unit} | incomplete ({', '.join(c.get('groups_present', []))}) |" + " |" * (5 + len(keys)))
+            missing = [x for x in GROUPS if x not in c.get("groups_present", [])]
+            out.append(f"| {unit} | not yet measured for {', '.join(missing)} |" + " |" * (4 + len(keys)))
             continue
         acc = c["accuracy"]
         cells = [f"{100 * c[k]['estimate']:+.1f} [{100 * c[k]['ci95'][0]:+.1f}, {100 * c[k]['ci95'][1]:+.1f}]"
@@ -107,6 +108,23 @@ def failure_table(res: dict) -> list[str]:
             out.append(f"| {x} {mode} | {f['teacher_correct_lost']} | " +
                        " | ".join(str(f["lost_by_type"].get(t, 0)) for t in types) + " |")
     return out
+
+
+def length_table(res: dict) -> list[str]:
+    """Descriptive, post hoc (analysis.kept_by_teacher_length): T-correct static items kept, by T's own length."""
+    out, head = [], None
+    for mode, by in sorted((res.get("failure_types") or {}).items()):
+        for x, f in sorted(by.items()):
+            bins = f.get("kept_by_teacher_length") or []
+            if head is None and bins:
+                lab = [f"T {b['teacher_tokens'][0]}-{b['teacher_tokens'][1]}" if b["teacher_tokens"][1] else
+                       f"T >= {b['teacher_tokens'][0]}" for b in bins]
+                head = ["| kept / T-correct, by T's tokens | " + " | ".join(lab) + " | group's degeneration stop p25 / p50 / p75 |",
+                        "| --- |" + " ---: |" * (len(bins) + 1)]
+            d = f.get("degeneration_stop_tokens") or {}
+            out.append(f"| {x} {mode} | " + " | ".join(f"{b['kept']}/{b['teacher_correct']}" for b in bins) +
+                       f" | {d.get('p25')} / {d.get('p50')} / {d.get('p75')} (n {d.get('n')}) |")
+    return (head or []) + out
 
 
 def behaviour_table(res: dict) -> list[str]:
@@ -147,6 +165,7 @@ def main(argv=None) -> int:
         parts += [f"### Structural contrasts, {mode}", ""] + contrast_table(res, mode) + [""]
         parts += [f"### Retention, {mode}", ""] + retention_table(res, mode) + [""]
     parts += ["### Failure types", ""] + failure_table(res) + [""]
+    parts += ["### Kept by the teacher's length (descriptive, post hoc)", ""] + length_table(res) + [""]
     parts += ["### State evaluation (state_eval_hybrid@v3, against the root teacher)", ""] + state_table(res)
     print("\n".join(parts))
     return 0

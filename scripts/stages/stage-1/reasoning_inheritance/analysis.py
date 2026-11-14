@@ -153,6 +153,22 @@ def failure_type(r: dict) -> str:
     return "answered_wrong"
 
 
+TEACHER_LENGTH_BINS = ((0, 1000), (1000, 2000), (2000, 4000), (4000, 8000), (8000, None))
+
+
+def kept_by_teacher_length(t_rows: list[dict], g_rows: list[dict]) -> list[dict]:
+    """Descriptive, added after the results were seen (never a registered analysis): of the static items T answered
+    correctly, the share the group keeps, by the length of T's own generation on the item. T's length goes with the
+    item's difficulty, so this does not separate "needs a long derivation" from "is hard"."""
+    g_ok = {r["task_id"]: bool(r["correct"]) for r in g_rows}
+    t_ok = [r for r in t_rows if r["correct"] and r["task_id"] in g_ok]
+    out = []
+    for lo, hi in TEACHER_LENGTH_BINS:
+        sel = [r for r in t_ok if int(r.get("generated_tokens") or 0) >= lo and (hi is None or int(r["generated_tokens"]) < hi)]
+        out.append({"teacher_tokens": [lo, hi], "teacher_correct": len(sel), "kept": sum(g_ok[r["task_id"]] for r in sel)})
+    return out
+
+
 def bootstrap(clusters: dict, values: dict, stat, *, n: int, seed: int) -> dict:
     """Percentile interval of ``stat(sample)`` over cluster resamples; ``values[item] -> per-group 0/1``."""
     keys = sorted(clusters)
@@ -316,6 +332,10 @@ def main(argv=None) -> int:
             ft[mode][g] = {"teacher_correct_lost": len(lost),
                            "lost_by_type": dict(collections.Counter(failure_type(r) for r in lost)),
                            "all_wrong_by_type": dict(collections.Counter(failure_type(r) for r in allw))}
+            ft[mode][g]["kept_by_teacher_length"] = kept_by_teacher_length(by_g["T"], rows)
+            deg = [int(r.get("generated_tokens") or 0) for r in rows if r.get("stop_reason") == "degeneration"]
+            ft[mode][g]["degeneration_stop_tokens"] = {"n": len(deg), "p25": pct(deg, 0.25), "p50": pct(deg, 0.5),
+                                                       "p75": pct(deg, 0.75)}
     res["failure_types"] = ft
     #: state evaluation
     se = {}

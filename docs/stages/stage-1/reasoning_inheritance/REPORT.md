@@ -1,10 +1,8 @@
 # Stage 1 reasoning inheritance: structural ablation of the packed Top-1 (RI-S1)
 
-**Status: BLOCKED at the budget boundary** (2026-11-13). The frozen mapping and the four groups are built, verified and
-durable; the state evaluation is measured; the teacher's eval-set-1 evaluation is reused and rescored. The formal
-eval-set-1 evaluation of D, W and DW cannot be completed inside the study's ceiling: measured on the pod, one group's
-thinking-mode fluid unit alone projects to $17-23 on an L40S, and the full protocol to several hundred dollars. What
-is needed from the maintainer is in section 9.
+**Status: RUNNING** (2026-11-14 UTC). Attempt `ri_diagnosis_20261113_193508` has measured every thinking-mode unit
+of D, W and DW; the non-thinking-mode units are being generated. This header and sections 7, 8 and 10 are replaced
+when the attempt closes.
 
 Branch `research/reasoning-inheritance`, base `main` `50ed1a4f1f0d4dfdaa1cf30436c7e1ce5bc4ebc2` (fetched 2026-11-13,
 unchanged since the brief). Experiment: `configs/stages/stage-1/reasoning_inheritance/design.json`; code and commands:
@@ -121,30 +119,43 @@ problem gets solved.
   collapses into repetition within a few hundred tokens, and about a third of the started tasks run on without
   terminating or tripping the degeneration checks.
 
-## 8. Why the protocol does not fit the ceiling
+### Prediction recorded before any non-thinking-mode result was read (2026-11-14, ~01:30 UTC)
 
-P18 lets every sample generate to the 40,960-token context. An untrained group's long runs neither terminate nor trip
-the degeneration checks, so each one costs a full context. An L40S holds 6-11 such sequences in its KV cache and
-decodes them at 140-185 tokens/s in total once the cache is full. Measured projections for one thinking-mode fluid
-unit (`cost_profile.py`, each long run taken to the context): **W 20.7 GPU-h ($22.6), DW 15.3 GPU-h ($16.6)**; D's
-attempt-2 run made no completion in 78 minutes with 560 requests resident (preemption and recompute under a cache of
-7.5 full-context sequences), which the concurrency limit of attempt 3 removes. With six group-mode pairs, each with a
-fluid unit and about a thousand capability items, the full protocol is in the hundreds of dollars on this card. The
-study's ceiling is $35.00, of which `$X` is spent (section 10).
+In thinking mode D keeps 32 of T's 511 correct static items (6.3%, 95% cluster interval 3.1-9.6). It keeps 18 of 88
+(20.5%) where T's own generation was under 1,000 tokens and none of 71 where it was 4,000 or more, and its
+degeneration stops fall at 1,280 / 1,792 / 2,304 tokens (quartiles). Descriptive and post hoc; T's length goes with
+the item's difficulty.
 
-## 9. Decisions owed to the maintainer
+If D's loss is mainly that long autoregressive derivations break down, then in non-thinking mode, where T's static
+generations are short (median 424, p90 1,024 tokens), D keeps a clearly larger share of T's correct static items:
+**the lower end of D's non-thinking-mode retention interval lies above 6.3%**. W and DW stay at the floor in both modes
+(state-evaluation top-1 agreement 15% and 11%). Written while D's non-thinking-mode fluid unit was generating and
+before any of its output was read; it is a prediction, not a registered gate, and decides nothing.
 
-1. **Budget**: raise RI-S1's ceiling (and the project cap, $1,000, which has $33.99 left) to fund the full protocol on
-   L40S -- an order of magnitude above today's remainder; and top up the provider balance, which also funds the three
-   volumes ($1.75/day).
-2. **Card**: the workload is KV-cache and bandwidth bound; a larger, faster card (80 GB HBM) holds about 2.5x the
-   sequences at about 4x the bandwidth, roughly a third cheaper per generated token. The grant names the L40S only.
-3. **Scope or protocol for untrained Stage-1 models** (frozen science, the maintainer's alone): e.g. the thinking mode
-   first; or a registered *diagnostic* evaluation (a context cap below 40,960 recorded as `diagnostic_cap`, never a P18
-   score) with T scored post hoc at the same allowance from its saved generations. Nothing of this was done.
+## 8. Engineering finding: degeneration stops never left the engine
 
-Resume point for any of them: the mapping and groups on the relay, the sealed episodes under
-`artifacts/stages/stage-1/reasoning_inheritance/runs/*/scr/store`, and `launch.py stage-resume` (README).
+The four paid attempts before the repair were dominated by one defect in the shared runners. vLLM V1's
+`LLMEngine.abort_request(request_ids: list[str])` iterates its argument; `run_battery.py`, `uncapped_eval.py` and
+`unrestricted_pilot.py` passed a bare request id, so the engine looked up each **character** of it, found none and
+aborted nothing. Every request the degeneration check stopped was recorded correctly at the stop, and then went on
+generating, unseen, to the 40,960-token context.
+
+* **No result changes.** A record is taken at the stop and the stopped request's later output is ignored, so no
+  historical generation or score -- the teacher's included -- is affected. Batch composition was (those zombies shared
+  the batches), which is ordinary batch-level nondeterminism, not a protocol difference.
+* **The cost and the scheduling did change.** On untrained models most requests stop within a few thousand tokens,
+  so the engine filled with stopped requests running to the context: they held every concurrency slot and the KV
+  cache, real requests waited for hours, and long-running real requests were preempted near their end. The engine's
+  request count exceeded the runner's pending count by exactly the zombies (7 at concurrency 7, throughout attempt 5).
+* What looked like "a third of the tasks never end" in the time-boxed measurement (`analyses/cost_profile.json`) was
+  this; its projections ($17-23 per unit) are void, kept only as the record of what was observed.
+* Repair: `abort_request([rid])` at the three call sites; every fake engine now has V1's signature and refuses a
+  string (two had accepted one, encoding the bug); regression
+  `scripts/stages/stage-0/calibration_volume/tests/test_episode_loop.py::test_a_degeneration_stop_aborts_the_request_in_the_engine`
+  fails on the old call. The concurrency is now floor(KV cache / context) per group (D 7, W 6, DW 8 on an L40S), at
+  which an admitted request cannot be preempted.
+* After the repair D's remaining 465 thinking-mode fluid tasks finished in 26 minutes (about 20 per minute, KV cache
+  about 2% used, the engine's and the runner's counts equal).
 
 ## 10. Cost and resources
 
@@ -156,4 +167,57 @@ Resume point for any of them: the mapping and groups on the relay, the sealed ep
 
 ## 11. Next round (evidence, derivation, hypothesis kept apart)
 
-See section 11 of the final revision of this report.
+**Evidence from this round.**
+
+* Distribution (state evaluation): removing the 8 blocks alone moves the root distribution moderately (KL 0.65, top-1
+  agreement 80%); the non-depth compression alone destroys it (KL 6.45, top-1 15%); removing the blocks on top of it
+  adds 0.32 nats. Keeping the 8 blocks at the compressed width (W, 722M parameters) instead of removing them (DW, 596M)
+  buys 0.32 nats for 126M parameters.
+* Generation (descriptive, thinking mode, fluid unit): every compressed group, D included, collapses into repetition on
+  most started tasks within a few hundred to a few thousand tokens, and about a third of the tasks run on without
+  ending. Depth pruning alone, untrained, already breaks autonomous long-form reasoning on most items -- the same
+  direction as Gromov et al.'s GSM8K result for Llama-2-70B without healing (LITERATURE.md), in a different model,
+  selection and regime.
+* Formal reasoning accuracy: D's thinking-mode fluid unit is the one being completed (section 7); W, DW and every other
+  unit are not measured.
+
+**Derivation.**
+
+* With W and DW at the distribution floor (top-1 agreement 11-15%), their formal accuracies can be expected near zero
+  in both modes. The contrasts that involve them (T-W, W-DW, D-DW) and the interaction D+W-T-DW are then
+  floor-limited: the interaction would reduce to roughly A_D - A_T and say nothing about how the two compressions
+  combine. On untrained Stage-1 models a generation-based evaluation can resolve the depth axis (T vs D) only.
+* Any adjacent-layer merge acts on the depth axis, which in this mapping carries the smaller share of the distribution
+  damage (0.65 of 6.78 nats at the DW end). It cannot repair the non-depth damage that dominates DW, whatever the merge.
+
+**The three merge variants, and what each would have to overcome (to test; none is claimed to work).**
+
+1. *Direct parameter addition or averaging* of two adjacent blocks. Two residual blocks compute
+   `h + f_l(h) + f_{l+1}(h + f_l(h))`; one block with summed weights computes neither that nor the parallel
+   approximation `h + f_l(h) + f_{l+1}(h)`: RMSNorm weights differ per block and must be folded into the projections
+   first; summed query and key projections add cross terms `Q_l K_{l+1}^T` to the attention logits; SwiGLU's gate is
+   nonlinear in its weights; neurons and heads of different blocks are not aligned, so a sum mixes unrelated features;
+   and averaging only fixes the scale (a sum roughly doubles pre-activations), not the function. Cheapest to test (no
+   calibration); expected to work only where the two blocks are already nearly the identity.
+2. *Activation-weighted merging*: the merged block's projections fitted to reproduce the pair's output on calibration
+   activations (least squares per projection, or the pair's causal KL against the parent, which the DEPTH operator
+   already measures in the packed context). It handles scale and part of the alignment; the nonlinearity limits it. It
+   is measurable with no training, by the state evaluation, against outright removal on the same K.
+3. *Static learnable fusion weights* (one coefficient per matrix or per channel, trained with KD in Stage 3): few new
+   parameters, but the result is a recovery-training result, not an initialization one, so it belongs to Stage 3.
+
+**Recommendation.**
+
+* Do **not** make adjacent-layer merging the next priority on this evidence. In this mapping the larger lever is the
+  non-depth compression. The next Stage-1 step is to decompose W's damage by factor with the same frozen mapping --
+  FFN only, residual width only, query heads only, and their pairs -- each a materialization and a one-minute state
+  evaluation (well under a dollar for all), then re-allocate a fixed parameter budget toward the factor that costs the
+  least (for example more residual width, fewer FFN neurons or blocks), compared at matched parameters.
+* For untrained Stage-1 candidates, read reasoning retention first from a graded measure without a floor -- the state
+  suite's per-axis KL and NLL, or teacher-forced measures on teacher-native trajectories of a non-formal set -- and
+  keep generation-based eval-set-1 for checkpoints that generate (after recovery), subject to section 9. eval-set-1
+  is never used to choose a candidate.
+* If depth is revisited, compare activation-weighted merging with outright removal on the same K under the state
+  evaluation first; a learnable fusion follows only in Stage 3.
+* All of this is conditional on the current fixed scheme (one mapping, one budget): it does not show that depth
+  compression is better or worse than width compression at an arbitrary parameter budget.
