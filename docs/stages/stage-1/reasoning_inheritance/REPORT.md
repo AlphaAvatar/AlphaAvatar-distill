@@ -1,8 +1,19 @@
 # Stage 1 reasoning inheritance: structural ablation of the packed Top-1 (RI-S1)
 
-**Status: RUNNING** (2026-11-14 UTC). Attempt `ri_diagnosis_20261113_193508` has measured every thinking-mode unit
-of D, W and DW; the non-thinking-mode units are being generated. This header and sections 7, 8 and 10 are replaced
-when the attempt closes.
+**Status: COMPLETE** (2026-11-14 UTC). The frozen mapping and the four groups are built, verified and durable; the
+state evaluation is measured; every registered eval-set-1 unit is generated and scored for D, W and DW in both modes,
+and the teacher's evaluation is reused after every identity check. No recovery training, no new search. Total cost
+$19.9554 over six attempts (section 10).
+
+**Result in one paragraph.** Untrained, removing 8 of the 36 blocks and changing nothing else (D) takes static fluid
+reasoning from 89.6% to 5.6% in thinking mode and from 68.9% to 7.9% in non-thinking mode, and interactive episodes
+from 43.1% / 34.0% to 0. Every fluid axis falls the same way, and so does every supporting unit in thinking mode; in
+non-thinking mode D keeps more of reading from supplied evidence (RAG reading 81% -> 42%). The non-depth compression
+(W: FFN, residual width and query heads) and both together (DW) answer no item of any formal unit correctly in either
+mode (W's only correct answers are 2 of the 150 in-sample regression prompts, and it has one usable rollout in all).
+The contrasts involving W or DW, and the interaction, are therefore floor-limited and say nothing about how the two
+compressions combine; only the depth contrast T-D and the state evaluation (KL: D 0.65, W 6.45, DW 6.78 nats) have
+range. eval-set-1 is development-exposed (section 8).
 
 Branch `research/reasoning-inheritance`, base `main` `50ed1a4f1f0d4dfdaa1cf30436c7e1ce5bc4ebc2` (fetched 2026-11-13,
 unchanged since the brief). Experiment: `configs/stages/stage-1/reasoning_inheritance/design.json`; code and commands:
@@ -27,8 +38,8 @@ depth (AGENTS.md 4.8).
   `frozen_selection.json` and `--check` reproduces it byte for byte.
 * One lineage throughout: the teacher's tokenizer files, chat template (`a55ee1b1...`), generation config and stop ids
   `[151643, 151645]` package every group; calibration, state-evaluation reference and evaluation are the hybrid's.
-  Nothing of Thinking-2507 is read. H-T (`enable_thinking=True`) and H-N are separate evaluations of the same
-  checkpoint.
+  Nothing of Thinking-2507 is read. Thinking mode (`enable_thinking=True`, record key `H-T`) and non-thinking mode
+  (`H-N`) are separate evaluations of the same checkpoint.
 
 ## 3. The frozen mapping, and the historical Top-1 reproduced exactly
 
@@ -96,43 +107,282 @@ DW's value equals the search's journaled measurement. Per axis (KL): D 0.42-0.70
 DW 5.37-7.15. In distribution terms the non-depth compression accounts for almost all of the damage; removing the 8
 blocks adds 0.32 nats on top of W and costs 0.65 from T, and the two are sub-additive in KL (0.65 + 6.45 > 6.78).
 **This is not a reasoning result** (P10.2): KL and NLL say how far the next-token distribution moved, not whether a
-problem gets solved.
+problem gets solved. The state suite is also what the anchor search ranked candidates by, so DW's values are that
+selection's own criterion (in sample for it); D and W were constructed from the same mapping, not searched.
 
 ## 7. Eval-set-1
 
-* **T** (both modes): reused from `a_teacher_20261030_012648` after every check passed (archives `7e323314...`,
-  `6f6c93ef...`; every file against its descriptor; every unit's model revision, template switch, system message,
-  tokenizer and template hashes, stop ids, 40,960-token context, `nucleus_v1` and seed namespace, action protocol and
-  degeneration check), rescored with the current scorer (`analyses/teacher_reuse.json`). H-T: static fluid 511/570
-  (89.6%), interactive 62/144 episodes, fluid formal core 573/714, GSM8K 88/100. H-N: fluid formal core 442/714.
-* **D, W, DW: no unit is complete.** Generation was measured in two sessions:
+### How it was measured
 
-| group (H-T, fluid unit) | session | tasks started | sealed | how the sealed ended | still generating when stopped |
-| --- | --- | ---: | ---: | --- | ---: |
-| D | attempt 2, concurrency 256 | 720 | 160 | 147 degeneration stops (cycle 55, low novelty 53, rambling 39), 13 answers at EOS; max 4,608 tokens | 560, none finished in the last 78 min |
-| W | attempt 3, concurrency 12, 50 min | 36 | 24 | 24 degeneration stops (cycle 9, low novelty 15), median 768 tokens, one at 12,800 | 12 |
-| DW | attempt 3, concurrency 12, 50 min | 35 | 24 | 24 degeneration stops (cycle 16, low novelty 8), median 768 tokens, one at 8,448 | 11 |
-| D | attempt 3, concurrency 12, 50 min | see `analyses/cost_profile.json` | | | |
+* Every registered unit of eval-set-1, every item generated: `fluid_reasoning_720` (576 static items and 144
+  interactive episodes; the formal core is 570 static items and the 144 episodes), `stage3_capability_846` (eight
+  units, 846 prompts) and `stage3_legacy_150` (in-sample regression, never generalization): 1,716 examples per group
+  and mode, 10,296 generated for D, W and DW. The registered validity mask decides which rows enter the formal
+  numbers; scorers are the registered ones (`score_battery` protocol v2 for fluid, `eval_set_scoring` for the rest).
+* Thinking mode (`enable_thinking=True`, the primary reasoning mode) and non-thinking mode (the same checkpoint's
+  control), each a separate evaluation.
+* Decoding `nucleus_v1` (temperature 0.6, top-p 0.95, no other filter or penalty), one sample per item, the seed of
+  every request derived from base 20261024 and the item, turn and sample (independent of model, order and batch).
+  Context 40,960 tokens passed explicitly to both runners; each request may generate until EOS or the context minus
+  its prompt (P18), with no token cap. The registered degeneration check runs every 256 generated tokens; interactive
+  episodes run under action protocol v2. Template, system message, stop ids and tokenizer are the teacher's.
+* Engine: vLLM 0.27.1 on one L40S. Attempt 6 ran at concurrency floor(KV cache / context) per group (D 7, W 6, DW 8),
+  at which no admitted request can be preempted. The thinking-mode fluid units also hold items sealed earlier: D's
+  255 from attempts 2-5 (concurrency 256, 12, 12, 7), W's and DW's 24 each from attempt 3's time-boxed run
+  (concurrency 12). Every item has exactly one record, generated under its own fixed seed, and a unit is the union of
+  its sealed parts in task order (`design.json :: evaluation.fluid_resume`); an item unfinished in an earlier attempt
+  was generated again from its first token, never chosen by its outcome. Concurrency changes batch composition only
+  (bf16 batch nondeterminism), never a seed.
+* T (both modes) is reused from `a_teacher_20261030_012648` after every identity check passed and rescored with the
+  current scorers (`analyses/teacher_reuse.json`).
+* Intervals: 95% percentile intervals over 10,000 cluster-bootstrap resamples (seed 20261113): fluid items are
+  resampled by whole rule family, paired units by pair, other units by item. They cover item and family sampling,
+  not decoding variance (one sample per item).
+* Analysis: `scripts/stages/stage-1/reasoning_inheritance/analysis.py` -> `analyses/structural_ablation.json`;
+  tables below rendered from it by `render.py`.
 
-  These are **descriptive** (a time box favours what ends early); they are not scores, and no partial unit is
-  reported as one. They do show the mechanism: without recovery, all three groups' thinking-mode generation mostly
-  collapses into repetition within a few hundred tokens, and about a third of the started tasks run on without
-  terminating or tripping the degeneration checks.
+<!-- tables:begin -->
+<!-- generated by render.py from analyses/structural_ablation.json; do not edit by hand -->
 
-### Prediction recorded before any non-thinking-mode result was read (2026-11-14, ~01:30 UTC)
+### eval-set-1, H-T
 
-In thinking mode D keeps 32 of T's 511 correct static items (6.3%, 95% cluster interval 3.1-9.6). It keeps 18 of 88
-(20.5%) where T's own generation was under 1,000 tokens and none of 71 where it was 4,000 or more, and its
-degeneration stops fall at 1,280 / 1,792 / 2,304 tokens (quartiles). Descriptive and post hoc; T's length goes with
-the item's difficulty.
+| unit (H-T) | T correct | T usable | D correct | D usable | W correct | W usable | DW correct | DW usable |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| fluid formal core (714) | 573/714 (80.3%) |  | 32/714 (4.5%) |  | 0/714 (0.0%) |  | 0/714 (0.0%) |  |
+| static fluid (570) | 511/570 (89.6%) | 562/570 (98.6%) | 32/570 (5.6%) | 66/570 (11.6%) | 0/570 (0.0%) | 0/570 (0.0%) | 0/570 (0.0%) | 0/570 (0.0%) |
+| -- task-contained deduction | 189/189 (100.0%) | 189/189 (100.0%) | 26/189 (13.8%) | 38/189 (20.1%) | 0/189 (0.0%) | 0/189 (0.0%) | 0/189 (0.0%) | 0/189 (0.0%) |
+| -- inductive rule discovery | 130/142 (91.5%) | 142/142 (100.0%) | 5/142 (3.5%) | 11/142 (7.7%) | 0/142 (0.0%) | 0/142 (0.0%) | 0/142 (0.0%) | 0/142 (0.0%) |
+| -- compositional generalization | 129/144 (89.6%) | 142/144 (98.6%) | 1/144 (0.7%) | 4/144 (2.8%) | 0/144 (0.0%) | 0/144 (0.0%) | 0/144 (0.0%) | 0/144 (0.0%) |
+| -- abstract / analogical (sub-category) | 63/95 (66.3%) | 89/95 (93.7%) | 0/95 (0.0%) | 13/95 (13.7%) | 0/95 (0.0%) | 0/95 (0.0%) | 0/95 (0.0%) | 0/95 (0.0%) |
+| interactive adaptation (144 episodes: success / all turns usable) | 62/144 (43.1%) | 125/144 (86.8%) | 0/144 (0.0%) | 4/144 (2.8%) | 0/144 (0.0%) | 0/144 (0.0%) | 0/144 (0.0%) | 0/144 (0.0%) |
+| math (verified) | 85/100 (85.0%) | 98/100 (98.0%) | 5/100 (5.0%) | 6/100 (6.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) |
+| GSM8K | 88/100 (88.0%) | 100/100 (100.0%) | 0/100 (0.0%) | 4/100 (4.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) |
+| multi-hop reading (evidence given) | 79/100 (79.0%) | 99/100 (99.0%) | 6/100 (6.0%) | 11/100 (11.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) |
+| RAG reading (evidence given) | 73/100 (73.0%) | 100/100 (100.0%) | 1/100 (1.0%) | 3/100 (3.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) |
+| answerability pairs | 33/60 (55.0%) | 59/60 (98.3%) | 0/60 (0.0%) | 0/60 (0.0%) | 0/60 (0.0%) | 0/60 (0.0%) | 0/60 (0.0%) | 0/60 (0.0%) |
+| safety pairs | 22/50 (44.0%) | 50/50 (100.0%) | 0/50 (0.0%) | 2/50 (4.0%) | 0/50 (0.0%) | 0/50 (0.0%) | 0/50 (0.0%) | 0/50 (0.0%) |
+| TriviaQA (supplementary, closed-book) * | 79/150 (52.7%) | 148/150 (98.7%) | 5/150 (3.3%) | 16/150 (10.7%) | 0/150 (0.0%) | 0/150 (0.0%) | 0/150 (0.0%) | 0/150 (0.0%) |
+| tool calling (exact call match) | 4/5 (80.0%) | 5/5 (100.0%) | 2/5 (40.0%) | 4/5 (80.0%) | 0/5 (0.0%) | 0/5 (0.0%) | 0/5 (0.0%) | 0/5 (0.0%) |
+| instruction (format_ok) | 12/12 (100.0%) | 12/12 (100.0%) | 0/12 (0.0%) | 0/12 (0.0%) | 0/12 (0.0%) | 0/12 (0.0%) | 0/12 (0.0%) | 0/12 (0.0%) |
+| short realtime (format_ok) | 10/10 (100.0%) | 10/10 (100.0%) | 1/10 (10.0%) | 1/10 (10.0%) | 0/10 (0.0%) | 0/10 (0.0%) | 0/10 (0.0%) | 0/10 (0.0%) |
+| stage3_legacy_150 (in-sample regression, not generalization) | 143/150 (95.3%) |  | 57/150 (38.0%) |  | 0/150 (0.0%) |  | 0/150 (0.0%) |  |
 
-If D's loss is mainly that long autoregressive derivations break down, then in non-thinking mode, where T's static
-generations are short (median 424, p90 1,024 tokens), D keeps a clearly larger share of T's correct static items:
-**the lower end of D's non-thinking-mode retention interval lies above 6.3%**. W and DW stay at the floor in both modes
-(state-evaluation top-1 agreement 15% and 11%). Written while D's non-thinking-mode fluid unit was generating and
-before any of its output was read; it is a prediction, not a registered gate, and decides nothing.
+\* outside the formal core (supplementary).
 
-## 8. Engineering finding: degeneration stops never left the engine
+### eval-set-1, H-N
+
+| unit (H-N) | T correct | T usable | D correct | D usable | W correct | W usable | DW correct | DW usable |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| fluid formal core (714) | 442/714 (61.9%) |  | 45/714 (6.3%) |  | 0/714 (0.0%) |  | 0/714 (0.0%) |  |
+| static fluid (570) | 393/570 (68.9%) | 563/570 (98.8%) | 45/570 (7.9%) | 308/570 (54.0%) | 0/570 (0.0%) | 0/570 (0.0%) | 0/570 (0.0%) | 0/570 (0.0%) |
+| -- task-contained deduction | 161/189 (85.2%) | 188/189 (99.5%) | 31/189 (16.4%) | 104/189 (55.0%) | 0/189 (0.0%) | 0/189 (0.0%) | 0/189 (0.0%) | 0/189 (0.0%) |
+| -- inductive rule discovery | 90/142 (63.4%) | 138/142 (97.2%) | 4/142 (2.8%) | 62/142 (43.7%) | 0/142 (0.0%) | 0/142 (0.0%) | 0/142 (0.0%) | 0/142 (0.0%) |
+| -- compositional generalization | 103/144 (71.5%) | 143/144 (99.3%) | 8/144 (5.6%) | 90/144 (62.5%) | 0/144 (0.0%) | 0/144 (0.0%) | 0/144 (0.0%) | 0/144 (0.0%) |
+| -- abstract / analogical (sub-category) | 39/95 (41.1%) | 94/95 (98.9%) | 2/95 (2.1%) | 52/95 (54.7%) | 0/95 (0.0%) | 0/95 (0.0%) | 0/95 (0.0%) | 0/95 (0.0%) |
+| interactive adaptation (144 episodes: success / all turns usable) | 49/144 (34.0%) | 132/144 (91.7%) | 0/144 (0.0%) | 10/144 (6.9%) | 0/144 (0.0%) | 0/144 (0.0%) | 0/144 (0.0%) | 0/144 (0.0%) |
+| math (verified) | 76/100 (76.0%) | 97/100 (97.0%) | 9/100 (9.0%) | 26/100 (26.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) |
+| GSM8K | 38/100 (38.0%) | 100/100 (100.0%) | 0/100 (0.0%) | 50/100 (50.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) |
+| multi-hop reading (evidence given) | 75/100 (75.0%) | 100/100 (100.0%) | 28/100 (28.0%) | 44/100 (44.0%) | 0/100 (0.0%) | 1/100 (1.0%) | 0/100 (0.0%) | 0/100 (0.0%) |
+| RAG reading (evidence given) | 81/100 (81.0%) | 100/100 (100.0%) | 42/100 (42.0%) | 91/100 (91.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) | 0/100 (0.0%) |
+| answerability pairs | 33/60 (55.0%) | 60/60 (100.0%) | 19/60 (31.7%) | 48/60 (80.0%) | 0/60 (0.0%) | 0/60 (0.0%) | 0/60 (0.0%) | 0/60 (0.0%) |
+| safety pairs | 31/50 (62.0%) | 50/50 (100.0%) | 1/50 (2.0%) | 2/50 (4.0%) | 0/50 (0.0%) | 0/50 (0.0%) | 0/50 (0.0%) | 0/50 (0.0%) |
+| TriviaQA (supplementary, closed-book) * | 78/150 (52.0%) | 150/150 (100.0%) | 10/150 (6.7%) | 24/150 (16.0%) | 0/150 (0.0%) | 0/150 (0.0%) | 0/150 (0.0%) | 0/150 (0.0%) |
+| tool calling (exact call match) | 4/5 (80.0%) | 5/5 (100.0%) | 0/5 (0.0%) | 4/5 (80.0%) | 0/5 (0.0%) | 0/5 (0.0%) | 0/5 (0.0%) | 0/5 (0.0%) |
+| instruction (format_ok) | 12/12 (100.0%) | 12/12 (100.0%) | 2/12 (16.7%) | 2/12 (16.7%) | 0/12 (0.0%) | 0/12 (0.0%) | 0/12 (0.0%) | 0/12 (0.0%) |
+| short realtime (format_ok) | 10/10 (100.0%) | 10/10 (100.0%) | 5/10 (50.0%) | 5/10 (50.0%) | 0/10 (0.0%) | 0/10 (0.0%) | 0/10 (0.0%) | 0/10 (0.0%) |
+| stage3_legacy_150 (in-sample regression, not generalization) | 110/150 (73.3%) |  | 57/150 (38.0%) |  | 2/150 (1.3%) |  | 0/150 (0.0%) |  |
+
+\* outside the formal core (supplementary).
+
+### Generation behaviour
+
+| static fluid (570) | usable | correct among usable (descriptive) | natural termination | degeneration | context limit | tokens p50 | p90 | mean |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| T H-T | 98.6% | 511/562 | 98.6% | 1.4% | 0.0% | 1999 | 8403 | 3310.5 |
+| D H-T | 11.6% | 32/66 | 13.7% | 86.3% | 0.0% | 1792 | 3072 | 1887.9 |
+| W H-T | 0.0% | -- | 1.4% | 97.4% | 1.2% | 768 | 1536 | 1819.5 |
+| DW H-T | 0.0% | -- | 0.0% | 100.0% | 0.0% | 768 | 2304 | 1267.4 |
+| T H-N | 98.8% | 393/563 | 98.8% | 1.2% | 0.0% | 424 | 1024 | 547.3 |
+| D H-N | 54.0% | 45/308 | 54.0% | 46.0% | 0.0% | 763 | 1536 | 730.6 |
+| W H-N | 0.0% | -- | 0.9% | 98.1% | 1.1% | 768 | 1235 | 1568.5 |
+| DW H-N | 0.0% | -- | 0.0% | 100.0% | 0.0% | 768 | 1792 | 1164.1 |
+
+### Structural contrasts, H-T
+
+| H-T | n | T | D | W | DW | depth_alone (T-D) | non_depth_alone (T-W) | depth_given_non_depth (W-DW) | non_depth_given_depth (D-DW) | interaction (D+W-T-DW) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| fluid/abstract_analogical | 95 | 66.3 | 0.0 | 0.0 | 0.0 | +66.3 [+47.1, +86.0] | +66.3 [+46.9, +86.0] | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] | -66.3 [-86.1, -47.4] |
+| fluid/compositional_generalization | 144 | 89.6 | 0.7 | 0.0 | 0.0 | +88.9 [+80.3, +96.2] | +89.6 [+81.0, +97.0] | +0.0 [+0.0, +0.0] | +0.7 [+0.0, +2.2] | -88.9 [-96.1, -80.3] |
+| fluid/inductive_rule_discovery | 142 | 91.5 | 3.5 | 0.0 | 0.0 | +88.0 [+81.0, +94.1] | +91.5 [+85.7, +96.3] | +0.0 [+0.0, +0.0] | +3.5 [+0.0, +9.0] | -88.0 [-94.0, -81.0] |
+| fluid/interactive_adaptation | 144 | 43.1 | 0.0 | 0.0 | 0.0 | +43.1 [+26.4, +58.5] | +43.1 [+26.2, +58.6] | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] | -43.1 [-59.2, -26.1] |
+| fluid/static_all | 570 | 89.6 | 5.6 | 0.0 | 0.0 | +84.0 [+78.6, +89.0] | +89.6 [+84.2, +94.3] | +0.0 [+0.0, +0.0] | +5.6 [+2.7, +8.7] | -84.0 [-89.0, -78.6] |
+| fluid/task_contained_deduction | 189 | 100.0 | 13.8 | 0.0 | 0.0 | +86.2 [+79.2, +92.7] | +100.0 [+100.0, +100.0] | +0.0 [+0.0, +0.0] | +13.8 [+7.4, +20.8] | -86.2 [-92.6, -79.4] |
+| stage3_capability_846/answerability_paired | 60 | 55.0 | 0.0 | 0.0 | 0.0 | +55.0 [+41.7, +68.3] | +55.0 [+41.7, +66.7] | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] | -55.0 [-66.7, -41.7] |
+| stage3_capability_846/gsm8k | 100 | 88.0 | 0.0 | 0.0 | 0.0 | +88.0 [+81.0, +94.0] | +88.0 [+81.0, +94.0] | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] | -88.0 [-94.0, -81.0] |
+| stage3_capability_846/knowledge | 150 | 52.7 | 3.3 | 0.0 | 0.0 | +49.3 [+41.3, +57.3] | +52.7 [+44.7, +60.7] | +0.0 [+0.0, +0.0] | +3.3 [+0.7, +6.7] | -49.3 [-57.3, -41.3] |
+| stage3_capability_846/math_verified | 100 | 85.0 | 5.0 | 0.0 | 0.0 | +80.0 [+72.0, +88.0] | +85.0 [+78.0, +92.0] | +0.0 [+0.0, +0.0] | +5.0 [+1.0, +10.0] | -80.0 [-88.0, -72.0] |
+| stage3_capability_846/multihop | 100 | 79.0 | 6.0 | 0.0 | 0.0 | +73.0 [+64.0, +81.0] | +79.0 [+71.0, +87.0] | +0.0 [+0.0, +0.0] | +6.0 [+2.0, +11.0] | -73.0 [-82.0, -64.0] |
+| stage3_capability_846/rag | 100 | 73.0 | 1.0 | 0.0 | 0.0 | +72.0 [+63.0, +81.0] | +73.0 [+64.0, +82.0] | +0.0 [+0.0, +0.0] | +1.0 [+0.0, +3.0] | -72.0 [-80.0, -63.0] |
+| stage3_capability_846/safety_paired | 50 | 44.0 | 0.0 | 0.0 | 0.0 | +44.0 [+30.0, +58.0] | +44.0 [+30.0, +58.0] | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] | -44.0 [-58.0, -30.0] |
+
+Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families resampled).
+
+### Retention, H-T
+
+| H-T: of T's correct items | n | D keeps | W keeps | DW keeps |
+| --- | ---: | ---: | ---: | ---: |
+| fluid/abstract_analogical | 63 | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/compositional_generalization | 129 | 1 (0.8% [0.0, 2.5]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/inductive_rule_discovery | 130 | 5 (3.9% [0.0, 9.8]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/interactive_adaptation | 62 | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/static_all | 511 | 32 (6.3% [3.1, 9.6]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/task_contained_deduction | 189 | 26 (13.8% [7.2, 20.7]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/answerability_paired | 33 | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/gsm8k | 88 | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/knowledge | 79 | 5 (6.3% [1.3, 12.7]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/math_verified | 85 | 5 (5.9% [1.2, 11.8]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/multihop | 79 | 6 (7.6% [2.5, 13.9]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/rag | 73 | 1 (1.4% [0.0, 4.1]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/safety_paired | 22 | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+
+### Structural contrasts, H-N
+
+| H-N | n | T | D | W | DW | depth_alone (T-D) | non_depth_alone (T-W) | depth_given_non_depth (W-DW) | non_depth_given_depth (D-DW) | interaction (D+W-T-DW) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| fluid/abstract_analogical | 95 | 41.0 | 2.1 | 0.0 | 0.0 | +39.0 [+20.0, +60.0] | +41.0 [+22.8, +61.7] | +0.0 [+0.0, +0.0] | +2.1 [+0.0, +5.2] | -39.0 [-60.2, -20.6] |
+| fluid/compositional_generalization | 144 | 71.5 | 5.6 | 0.0 | 0.0 | +66.0 [+46.4, +83.7] | +71.5 [+50.4, +90.3] | +0.0 [+0.0, +0.0] | +5.6 [+2.1, +9.2] | -66.0 [-83.7, -46.4] |
+| fluid/inductive_rule_discovery | 142 | 63.4 | 2.8 | 0.0 | 0.0 | +60.6 [+49.2, +71.3] | +63.4 [+51.0, +74.8] | +0.0 [+0.0, +0.0] | +2.8 [+0.0, +6.3] | -60.6 [-71.1, -49.6] |
+| fluid/interactive_adaptation | 144 | 34.0 | 0.0 | 0.0 | 0.0 | +34.0 [+18.3, +52.2] | +34.0 [+18.2, +51.8] | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] | -34.0 [-52.4, -17.8] |
+| fluid/static_all | 570 | 69.0 | 7.9 | 0.0 | 0.0 | +61.1 [+53.6, +68.0] | +69.0 [+60.6, +76.6] | +0.0 [+0.0, +0.0] | +7.9 [+4.7, +11.3] | -61.1 [-68.0, -53.6] |
+| fluid/task_contained_deduction | 189 | 85.2 | 16.4 | 0.0 | 0.0 | +68.8 [+63.2, +75.0] | +85.2 [+79.2, +91.4] | +0.0 [+0.0, +0.0] | +16.4 [+9.0, +24.9] | -68.8 [-75.3, -63.2] |
+| stage3_capability_846/answerability_paired | 60 | 55.0 | 31.7 | 0.0 | 0.0 | +23.3 [+8.3, +38.3] | +55.0 [+41.7, +66.7] | +0.0 [+0.0, +0.0] | +31.7 [+20.0, +43.3] | -23.3 [-38.3, -8.3] |
+| stage3_capability_846/gsm8k | 100 | 38.0 | 0.0 | 0.0 | 0.0 | +38.0 [+29.0, +48.0] | +38.0 [+29.0, +48.0] | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] | -38.0 [-48.0, -28.0] |
+| stage3_capability_846/knowledge | 150 | 52.0 | 6.7 | 0.0 | 0.0 | +45.3 [+37.3, +53.3] | +52.0 [+44.0, +60.0] | +0.0 [+0.0, +0.0] | +6.7 [+3.3, +10.7] | -45.3 [-53.3, -37.3] |
+| stage3_capability_846/math_verified | 100 | 76.0 | 9.0 | 0.0 | 0.0 | +67.0 [+58.0, +76.0] | +76.0 [+67.0, +84.0] | +0.0 [+0.0, +0.0] | +9.0 [+4.0, +15.0] | -67.0 [-76.0, -57.0] |
+| stage3_capability_846/multihop | 100 | 75.0 | 28.0 | 0.0 | 0.0 | +47.0 [+36.0, +58.0] | +75.0 [+66.0, +83.0] | +0.0 [+0.0, +0.0] | +28.0 [+20.0, +37.0] | -47.0 [-58.0, -36.0] |
+| stage3_capability_846/rag | 100 | 81.0 | 42.0 | 0.0 | 0.0 | +39.0 [+29.0, +49.0] | +81.0 [+73.0, +88.0] | +0.0 [+0.0, +0.0] | +42.0 [+32.0, +52.0] | -39.0 [-49.0, -29.0] |
+| stage3_capability_846/safety_paired | 50 | 62.0 | 2.0 | 0.0 | 0.0 | +60.0 [+46.0, +74.0] | +62.0 [+48.0, +76.0] | +0.0 [+0.0, +0.0] | +2.0 [+0.0, +6.0] | -60.0 [-74.0, -46.0] |
+
+Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families resampled).
+
+### Retention, H-N
+
+| H-N: of T's correct items | n | D keeps | W keeps | DW keeps |
+| --- | ---: | ---: | ---: | ---: |
+| fluid/abstract_analogical | 39 | 1 (2.6% [0.0, 8.8]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/compositional_generalization | 103 | 8 (7.8% [3.4, 11.5]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/inductive_rule_discovery | 90 | 4 (4.4% [0.0, 9.5]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/interactive_adaptation | 49 | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/static_all | 393 | 44 (11.2% [7.0, 15.6]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| fluid/task_contained_deduction | 161 | 31 (19.2% [11.1, 27.7]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/answerability_paired | 33 | 14 (42.4% [27.3, 60.6]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/gsm8k | 38 | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/knowledge | 78 | 10 (12.8% [6.4, 20.5]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/math_verified | 76 | 9 (11.8% [5.3, 19.7]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/multihop | 75 | 25 (33.3% [22.7, 44.0]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/rag | 81 | 41 (50.6% [39.5, 61.7]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+| stage3_capability_846/safety_paired | 31 | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) | 0 (0.0% [0.0, 0.0]) |
+
+### Failure types
+
+| static fluid, T-correct items the group lost | lost | answered_wrong | no_valid_final_answer | degeneration | context_limit | not_terminated |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| D H-N | 349 | 185 | 0 | 164 | 0 | 0 |
+| DW H-N | 393 | 0 | 0 | 393 | 0 | 0 |
+| W H-N | 393 | 0 | 5 | 382 | 6 | 0 |
+| D H-T | 479 | 30 | 11 | 438 | 0 | 0 |
+| DW H-T | 511 | 0 | 0 | 511 | 0 | 0 |
+| W H-T | 511 | 0 | 8 | 496 | 7 | 0 |
+
+### Kept by the teacher's length (descriptive, post hoc)
+
+| kept / T-correct, by T's tokens | T 0-1000 | T 1000-2000 | T 2000-4000 | T 4000-8000 | T >= 8000 | group's degeneration stop p25 / p50 / p75 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| D H-N | 44/379 | 0/12 | 0/2 | 0/0 | 0/0 | 768 / 1024 / 1280 (n 262) |
+| DW H-N | 0/379 | 0/12 | 0/2 | 0/0 | 0/0 | 768 / 768 / 1024 (n 570) |
+| W H-N | 0/379 | 0/12 | 0/2 | 0/0 | 0/0 | 768 / 768 / 768 (n 559) |
+| D H-T | 18/88 | 10/197 | 4/155 | 0/54 | 0/17 | 1280 / 1792 / 2304 (n 492) |
+| DW H-T | 0/88 | 0/197 | 0/155 | 0/54 | 0/17 | 768 / 768 / 1280 (n 570) |
+| W H-T | 0/88 | 0/197 | 0/155 | 0/54 | 0/17 | 768 / 768 / 768 (n 555) |
+
+### State evaluation (state_eval_hybrid@v3, against the root teacher)
+
+| group | KL equal-domain mean | KL worst domain | critical-token KL | NLL pooled |
+| --- | ---: | ---: | ---: | ---: |
+| D | 0.6473 | 0.9495 | 1.3455 | 0.9408 |
+| W | 6.4528 | 7.8589 | 12.0631 | 7.1848 |
+| DW | 6.7768 | 7.9122 | 12.5671 | 7.3153 |
+
+<!-- tables:end -->
+
+### The prediction recorded before the non-thinking-mode results (2026-11-14, ~01:30 UTC; commit `e82cf7ef`)
+
+Written while D's non-thinking-mode fluid unit was generating and before any of its output was read: if D's loss is
+mainly that long derivations break down, then in non-thinking mode D keeps a clearly larger share of T's correct
+static items, *the lower end of its retention interval above thinking mode's 6.3%*.
+
+**Outcome: it holds, narrowly, and the explanation behind it does not.** D keeps 44 of T's 393 correct static items
+in non-thinking mode, 11.2% [7.0, 15.6] (thinking: 32 of 511, 6.3% [3.1, 9.6]). But on the items T answered in
+under 1,000 tokens D keeps 20.5% (18 / 88) in thinking mode and only 11.6% (44 / 379) in non-thinking mode, and in
+non-thinking mode most of what D loses is a wrong answer after a natural stop (185 of 349), not a degeneration stop
+(164). The thinking-mode length gradient is mostly which items T can solve briefly; short derivations are damaged too.
+
+## 8. What the results say, and what they do not
+
+**Depth alone (T-D), the one contrast with range.** Removing blocks 3, 11, 17, 18, 25, 26, 30 and 32 (22% of the
+depth), with every remaining parameter the teacher's, removes nearly all of the measured fluid reasoning:
+
+* static fluid: -84.0 pp [78.6, 89.0] in thinking mode, -61.1 pp [53.6, 68.0] in non-thinking mode; interactive
+  episodes -43.1 pp [26.4, 58.5] and -34.0 pp [18.3, 52.2] (D solves none of the 144 in either mode);
+* by axis, thinking mode: task-contained deduction keeps the most (100% -> 13.8%), then inductive rule discovery
+  (91.5% -> 3.5%), compositional generalization (89.6% -> 0.7%) and abstract/analogical (66.3% -> 0); in non-thinking
+  mode deduction again keeps the most (85.2% -> 16.4%), then compositional generalization (71.5% -> 5.6%), inductive
+  rule discovery (63.4% -> 2.8%) and abstract/analogical (41.1% -> 2.1%);
+* the supporting units fall as far: GSM8K 88% -> 0 and verified math 85% -> 5% (thinking), multi-hop reading 79% -> 6%
+  and RAG reading 73% -> 1% with the evidence supplied, closed-book TriviaQA 52.7% -> 3.3%;
+* D keeps essentially nothing T could not do: every item D answers correctly in thinking mode T also answers.
+* In non-thinking mode D keeps far more of reading from supplied evidence than of derivation: RAG reading 81% -> 42%
+  (half of T's correct items kept), multi-hop reading 75% -> 28%, answerability pairs 55% -> 31.7%, against GSM8K
+  38% -> 0, verified math 76% -> 9% and static fluid 68.9% -> 7.9%. In thinking mode every one of these is at 6% or
+  below. Descriptive, across mixed-domain supporting units, never read as fluid reasoning (P10.2); in direction it is
+  Gromov et al.'s split between knowledge-style QA and reasoning.
+
+**How D fails depends on the mode.** In thinking mode 86.3% of D's static rollouts end in a degeneration stop (at
+1,280 / 1,792 / 2,304 tokens, quartiles); 438 of the 479 T-correct items it loses end that way, and when D does end
+naturally it is right on 32 of 66. In non-thinking mode 54.0% of its rollouts are usable, but only 45 of those 308
+are correct (14.6%, against T's 69.8%): the loss is no longer mainly instability of long generation but wrong
+answers given in a well-formed short reply. Both are descriptive (each group finishes a different subset).
+
+**Non-depth compression (W) and both (DW): the floor.** W and DW answer no item of any formal unit correctly, in
+either mode, and produce no usable rollout (W's exceptions: 2 of the 150 in-sample regression prompts and one usable
+multi-hop rollout, both in non-thinking mode); 97-100% of their static rollouts are stopped for degeneration, mostly
+at the third check (768 tokens), and about 1% of W's run to the 40,960-token context without tripping a check
+(right-censored; incorrect under the registered scorer). Hence T-W equals T's accuracy, W-DW is zero, D-DW is D's own
+accuracy, and the interaction D+W-T-DW equals -(T-D), all by construction. These numbers are reported because the
+design registered them; **they are not measurements of an interaction**, and no claim about how depth and non-depth
+compression combine follows from them.
+
+**The graded measure.** Only the state evaluation separates W from DW: KL 6.45 vs 6.78 nats, top-1 agreement 15% vs
+11%. D sits far from both (KL 0.65, top-1 agreement 80%), and still loses 84 pp of thinking-mode accuracy: a
+moderate per-position distribution shift does not survive thousands of autoregressive tokens. (Inference, consistent
+with Gromov et al.'s unhealed GSM8K result on Llama-2-70B, LITERATURE.md; their setting differs in model, selection
+and measurement.)
+
+**Limits.**
+
+* eval-set-1 is **development-exposed**: these are not blind held-out numbers. It chose nothing here (the mapping
+  was fixed by the anchor search and frozen before any evaluation).
+* Untrained Stage-1 initializations only: nothing here says what recovery training can restore, or that a W- or
+  DW-like student is worse than D after recovery.
+* One mapping (the packed search's Top-1), one depth fraction (8 of 36), one width budget. Not a comparison of
+  depth against width compression at matched parameters (D has 3.22B parameters, W 0.72B).
+* One sample per item; intervals cover item sampling only.
+* The removed blocks' query heads in W were chosen on the 36-block parent with the original method and frozen before
+  evaluation; W is a construction from the mapping, not a searched candidate.
+* `stage3_legacy_150` is in-sample regression (training prompts of an earlier round) and is never read as
+  generalization; tool calling has 5 items.
+
+## 9. Engineering finding: degeneration stops never left the engine
 
 The four paid attempts before the repair were dominated by one defect in the shared runners. vLLM V1's
 `LLMEngine.abort_request(request_ids: list[str])` iterates its argument; `run_battery.py`, `uncapped_eval.py` and
@@ -159,65 +409,76 @@ generating, unseen, to the 40,960-token context.
 
 ## 10. Cost and resources
 
-| run | what it did | all-in |
-| --- | --- | ---: |
-| `ri_diagnosis_20261113_103414` | setup refused the artifact (not in the session commit); repaired by a $0 precheck | $0.1153 |
-| `ri_diagnosis_20261113_105643` | mapping, groups, relay copy, state evaluation; D's fluid unit stalled and was stopped | $2.2939 |
-| `ri_diagnosis_20261113_130551` | time-boxed measurement of W, DW, D (thinking mode, fluid) | see closeout |
+| attempt | what it did | minutes | all-in |
+| --- | --- | ---: | ---: |
+| `ri_diagnosis_20261113_103414` | setup refused the artifact (not in the session commit); repaired by a $0 precheck | 6.2 | $0.1153 |
+| `ri_diagnosis_20261113_105643` | mapping, groups, relay copy, state evaluation; D's fluid unit stalled (zombies) and was stopped | 123.9 | $2.2939 |
+| `ri_diagnosis_20261113_130551` | time-boxed measurement of W, DW, D (thinking mode, fluid; descriptive, no unit sealed whole) | 160.3 | $2.9665 |
+| `ri_diagnosis_20261113_161911` | D, thinking mode, fluid, concurrency 12: starved by the zombies; parts sealed | 90.9 | $1.6815 |
+| `ri_diagnosis_20261113_180718` | D, thinking mode, fluid, concurrency 7: same; parts sealed; the abort defect found | 71.4 | $1.3217 |
+| `ri_diagnosis_20261113_193508` | abort fixed; every remaining unit of D, W and DW in both modes | 625.5 | $11.5765 |
+| **total** | | | **$19.9554** |
+
+The study's ceiling was $35 (grant `logs/budget/approvals/stage1_reasoning_inheritance_grant.json`, $24 per session,
+L40S at $1.09 per hour); $15.0446 of it is unspent and no further session is planned. Closing the study (its grant's
+`closed` block) is the maintainer's act and is not done here. Every attempt is closed with the provider's
+confirmation that its pod is gone; the three retained network volumes are untouched (not this study's). The provider
+balance after the last attempt is $16.92 (2026-11-14T06:07Z, no pod), which funds those volumes ($1.75 per day) for
+about 9.7 days.
+Durable products: the mapping and the three checkpoints on the relay (section 4); every sealed generation of every
+unit (the final attempt's store, which took over the earlier attempts' sealed parts) on the dev box and on the relay at
+`durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz`, sha256
+`c69706526086bdf37600edd813ec2105596136abce11872a17c985344dc4c6dd`, downloaded again and re-hashed; the analysis
+binds each scored directory by content digest (`structural_ablation.json :: inputs`).
 
 ## 11. Next round (evidence, derivation, hypothesis kept apart)
 
 **Evidence from this round.**
 
-* Distribution (state evaluation): removing the 8 blocks alone moves the root distribution moderately (KL 0.65, top-1
-  agreement 80%); the non-depth compression alone destroys it (KL 6.45, top-1 15%); removing the blocks on top of it
-  adds 0.32 nats. Keeping the 8 blocks at the compressed width (W, 722M parameters) instead of removing them (DW, 596M)
-  buys 0.32 nats for 126M parameters.
-* Generation (descriptive, thinking mode, fluid unit): every compressed group, D included, collapses into repetition on
-  most started tasks within a few hundred to a few thousand tokens, and about a third of the tasks run on without
-  ending. Depth pruning alone, untrained, already breaks autonomous long-form reasoning on most items -- the same
-  direction as Gromov et al.'s GSM8K result for Llama-2-70B without healing (LITERATURE.md), in a different model,
-  selection and regime.
-* Formal reasoning accuracy: D's thinking-mode fluid unit is the one being completed (section 7); W, DW and every other
-  unit are not measured.
+* Generation, both modes: depth pruning alone, untrained, removes nearly all of the measured fluid reasoning (T-D
+  +84.0 / +61.1 pp static, +43.1 / +34.0 pp interactive), in short answers as well as long ones; the non-depth
+  compression alone, and both together, are at the floor on every formal unit.
+* Distribution (state evaluation): the non-depth compression moves the root distribution about ten times as far as
+  the depth pruning (KL 6.45 vs 0.65); removing the blocks on top of it adds 0.32 nats.
 
 **Derivation.**
 
-* With W and DW at the distribution floor (top-1 agreement 11-15%), their formal accuracies can be expected near zero
-  in both modes. The contrasts that involve them (T-W, W-DW, D-DW) and the interaction D+W-T-DW are then
-  floor-limited: the interaction would reduce to roughly A_D - A_T and say nothing about how the two compressions
-  combine. On untrained Stage-1 models a generation-based evaluation can resolve the depth axis (T vs D) only.
-* Any adjacent-layer merge acts on the depth axis, which in this mapping carries the smaller share of the distribution
-  damage (0.65 of 6.78 nats at the DW end). It cannot repair the non-depth damage that dominates DW, whatever the merge.
+* The depth axis is not cheap: its KL is small, its generation cost is nearly total. Any method that restores some of
+  the 8 removed blocks' function is measurable on D (28 blocks at the teacher's width), where both the state
+  evaluation and eval-set-1 have range; it is **not** measurable on DW, where the non-depth floor masks every
+  generation effect.
+* The non-depth compression is the larger distribution lever and the binding one for a 0.6-0.7B student; until its
+  damage is decomposed, no whole-student generation measurement can resolve anything in W or DW.
 
-**The three merge variants, and what each would have to overcome (to test; none is claimed to work).**
+**The three merge variants (to test; none is claimed to work).**
 
-1. *Direct parameter addition or averaging* of two adjacent blocks. Two residual blocks compute
+1. *Direct parameter addition or averaging* of a removed block into a neighbour. Two residual blocks compute
    `h + f_l(h) + f_{l+1}(h + f_l(h))`; one block with summed weights computes neither that nor the parallel
    approximation `h + f_l(h) + f_{l+1}(h)`: RMSNorm weights differ per block and must be folded into the projections
    first; summed query and key projections add cross terms `Q_l K_{l+1}^T` to the attention logits; SwiGLU's gate is
    nonlinear in its weights; neurons and heads of different blocks are not aligned, so a sum mixes unrelated features;
-   and averaging only fixes the scale (a sum roughly doubles pre-activations), not the function. Cheapest to test (no
-   calibration); expected to work only where the two blocks are already nearly the identity.
+   averaging fixes the scale only. No calibration, seconds to build: the cheap baseline.
 2. *Activation-weighted merging*: the merged block's projections fitted to reproduce the pair's output on calibration
-   activations (least squares per projection, or the pair's causal KL against the parent, which the DEPTH operator
-   already measures in the packed context). It handles scale and part of the alignment; the nonlinearity limits it. It
-   is measurable with no training, by the state evaluation, against outright removal on the same K.
-3. *Static learnable fusion weights* (one coefficient per matrix or per channel, trained with KD in Stage 3): few new
-   parameters, but the result is a recovery-training result, not an initialization one, so it belongs to Stage 3.
+   activations (least squares per projection, or the pair's causal KL against the parent in the packed context the
+   DEPTH operator already uses). Handles scale and part of the alignment; the nonlinearity limits it. No training.
+3. *Static learnable fusion weights* (one coefficient per matrix or per channel, trained with KD): few new parameters,
+   but a recovery-training result, not an initialization one, so it belongs to Stage 3.
 
 **Recommendation.**
 
-* Do **not** make adjacent-layer merging the next priority on this evidence. In this mapping the larger lever is the
-  non-depth compression. The next Stage-1 step is to decompose W's damage by factor with the same frozen mapping --
-  FFN only, residual width only, query heads only, and their pairs -- each a materialization and a one-minute state
-  evaluation (well under a dollar for all), then re-allocate a fixed parameter budget toward the factor that costs the
-  least (for example more residual width, fewer FFN neurons or blocks), compared at matched parameters.
-* For untrained Stage-1 candidates, read reasoning retention first from a graded measure without a floor -- the state
-  suite's per-axis KL and NLL, or teacher-forced measures on teacher-native trajectories of a non-formal set -- and
-  keep generation-based eval-set-1 for checkpoints that generate (after recovery), subject to section 9. eval-set-1
-  is never used to choose a candidate.
-* If depth is revisited, compare activation-weighted merging with outright removal on the same K under the state
-  evaluation first; a learnable fusion follows only in Stage 3.
-* All of this is conditional on the current fixed scheme (one mapping, one budget): it does not show that depth
-  compression is better or worse than width compression at an arbitrary parameter budget.
+1. **First, on the depth axis at full width:** build variants 1 and 2 for the 8 removed blocks on D's K and compare
+   them with outright removal (D) under the state evaluation (minutes on one GPU), then on eval-set-1's fluid unit in
+   both modes only for the variant that moves the state evaluation (eval-set-1 never chooses). Variant 2 is the main
+   candidate; variant 1 is its control. Variant 3 follows only in a Stage 3 recovery comparison against recovered D.
+2. **In parallel, at $0 to a few dollars:** decompose W's damage with the same frozen mapping -- FFN only, residual
+   width only, query heads only, and their pairs -- by state evaluation, and re-allocate a fixed parameter budget
+   toward the factor that costs least.
+3. For untrained Stage-1 candidates, read reasoning retention first from graded measures without a floor (the state
+   suite per axis, or teacher-forced measures on teacher-native trajectories of a non-formal set); keep generation on
+   eval-set-1 for candidates above the floor.
+4. Hypothesis for Stage 6 (recurrent depth, AGENTS.md 4.8): if depth carries this much of the reasoning at a small
+   KL, re-executing shared blocks may recover depth without its parameters. D is the natural comparison point:
+   same width, fewer distinct blocks. Not tested here.
+
+All of this is conditional on the fixed scheme of this round (one mapping, one budget); none of it shows depth
+compression to be better or worse than width compression at an arbitrary parameter budget.

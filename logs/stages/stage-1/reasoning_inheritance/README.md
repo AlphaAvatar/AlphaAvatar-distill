@@ -1,19 +1,21 @@
-# reasoning_inheritance (Stage 1) -- structural ablation and reasoning-damage analysis
+# reasoning_inheritance
 
-Four untrained models from one frozen mapping of the packed full search's Top-1 -- T (teacher), D (depth pruning
-only), W (all non-depth compression only), DW (both) -- on `state_eval_hybrid@v3` and every unit of eval-set-1 in both
-modes. Experiment: [`configs/stages/stage-1/reasoning_inheritance/design.json`](../../../../configs/stages/stage-1/reasoning_inheritance/design.json);
-code and commands: [`scripts/stages/stage-1/reasoning_inheritance/`](../../../../scripts/stages/stage-1/reasoning_inheritance/README.md).
+Everything this experiment produced, in one place.
 
 | area | what it holds |
 | --- | --- |
-| [`plans/`](plans/) | the study's proposal (the grant is `logs/budget/approvals/stage1_reasoning_inheritance_grant.json`) |
-| [`analyses/`](analyses/) | teacher reuse audit, the structural-ablation results, the round's report |
-| [`runs/`](runs/) | one directory per session attempt: governance, runtime, evidence, closeout |
+| [`analyses/`](analyses/) | working analyses and audits |
+| [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
+| [`runs/`](runs/) | one directory per execution attempt |
 
-Study RI-S1: ceiling $35 over every attempt, $24 per session, project cap $1,000 unchanged; L40S only.
-Heavy products (the mapping tensors, D/W/DW checkpoints) live on the private relay under
-`durable/stage1_reasoning_inheritance/<mapping digest[:16]>/`, by sha256; the dev box holds each attempt's secured
-evidence under `artifacts/stages/stage-1/reasoning_inheritance/runs/<run>/scr/store/`.
+## Runs
 
+* [`ri_diagnosis_20261113_103414`](runs/ri_diagnosis_20261113_103414/)
+* [`ri_diagnosis_20261113_105643`](runs/ri_diagnosis_20261113_105643/)
+* [`ri_diagnosis_20261113_130551`](runs/ri_diagnosis_20261113_130551/)
+* [`ri_diagnosis_20261113_161911`](runs/ri_diagnosis_20261113_161911/)
+* [`ri_diagnosis_20261113_180718`](runs/ri_diagnosis_20261113_180718/)
+* [`ri_diagnosis_20261113_193508`](runs/ri_diagnosis_20261113_193508/)
+
+Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

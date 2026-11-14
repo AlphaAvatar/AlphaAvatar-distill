@@ -24,7 +24,7 @@
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "blocker": "BLOCKED NO. Research A CLOSED 2026-11-11: CURRENT_METHOD_NO_GO frozen; the A-TM and A-E grants closed (study_engineering.require_open). Owner: PACKED_ROUND.md section 21.",
- "branch": "research/teacher-modes-and-projected-residual (kept; tag archive/research-teacher-modes-and-projected-residual-2026-11-11), squash-merged into main 2026-11-11 (base 72492e46). New work: a fresh branch from main.",
+ "branch": "research/reasoning-inheritance (from main 50ed1a4f; not merged): RI-S1 COMPLETE 2026-11-14",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 1000.0,
-  "cumulative_spend_usd": 870.6969,
+  "cumulative_spend_usd": 890.6523,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 129.3031,
+  "remaining_usd": 109.3477,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -200,7 +200,7 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 3,
-  "run": "none; last: A-MIX-6cat-sr a_train_sr_mix_20261109_193709 ($23.4143), pod deleted, provider-confirmed",
+  "run": "none; last: RI-S1 ri_diagnosis_20261113_193508 ($11.5765), pod deleted, provider-confirmed",
   "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1, the eight Stage-3 units (weights also on the dev box, re-hashed 2026-11-11); 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
  },
  "schema": "aadistill.current_state/v2",

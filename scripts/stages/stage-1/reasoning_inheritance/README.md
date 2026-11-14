@@ -18,9 +18,9 @@ search. The experiment is `configs/stages/stage-1/reasoning_inheritance/design.j
 | --- | --- | --- |
 | `selection.py` | dev box, $0 | reads the anchor journal (`617d1512...`) into `frozen_selection.json`: 36 blocks' FFN neurons, the kept blocks, the 28 kept blocks' query heads in root numbering, the width step's recorded diagnostics and every ancestor's identity; `--check` re-reads it byte for byte |
 | `driver.py` | pod | contract (config hashes vs the journal) -> mapping -> relay copy -> state evaluation -> eval-set-1; `--check-only` runs the contract at $0 |
-| `launch.py` | dev box | the RI-S1 study on `shared.study_engineering`: grant, one-use artifact, launch, closeout, `stage-resume` |
+| `launch.py` | dev box | the RI-S1 study on `shared.study_engineering`: grant, one-use artifact, launch, closeout, `stage-resume`, `archive-evidence` |
 | `teacher_reuse.py` | dev box, $0 | T's evaluation from `a_teacher_20261030_012648`: archive and file hashes, every unit's identity against this round's protocol, rescored with the current scorer |
-| `analysis.py` | dev box, $0 | every group rescored; per-unit correct and usable, the five structural contrasts with family-cluster bootstrap intervals, retention of T-correct items, failure types, state KL/NLL |
+| `analysis.py` | dev box, $0 | every group rescored; per-unit correct and usable, the five structural contrasts with family-cluster bootstrap intervals, retention of T-correct items, failure types, state KL/NLL; descriptive extras (correct among usable rollouts, T-correct items kept by T's own length), each scored directory bound by content digest |
 
 The reusable mechanism is `src/aadistill/initialization/planning/frozen_mapping.py` (core, no instance facts):
 the mapping contract and builders that repeat the four operators' surgery bit for bit
@@ -69,10 +69,19 @@ R=$(.venv/bin/python scripts/stages/stage-1/reasoning_inheritance/launch.py stag
 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/launch.py issue --resume-from $R --run-id $RUN2 ...
 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/launch.py launch --resume-from $R --run-id $RUN2 ...
 
-# analysis ($0): every attempt's store, later ones winning per unit
+# analysis ($0): every attempt's store, later ones winning per unit; tables for the report
 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/analysis.py \
     --store artifacts/stages/stage-1/reasoning_inheritance/runs/$RUN/scr/store
+.venv/bin/python scripts/stages/stage-1/reasoning_inheritance/render.py \
+    logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json
+
+# the final store as a durable archive on the relay ($0), downloaded again and re-hashed
+.venv/bin/python scripts/stages/stage-1/reasoning_inheritance/launch.py archive-evidence --run-id $RUN \
+    --from artifacts/stages/stage-1/reasoning_inheritance/runs/$RUN/scr
 ```
+
+The run that measured every unit is `ri_diagnosis_20261113_193508`; its archive is
+`durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz`.
 
 ## Resume
 

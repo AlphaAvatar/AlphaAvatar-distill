@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import hashlib
 import json
 import random
 import subprocess
@@ -48,6 +49,14 @@ CAP = "stage3_capability_846"
 STATIC_AXES = ("task_contained_deduction", "inductive_rule_discovery", "compositional_generalization",
                "abstract_analogical")
 CAP_UNITS = ("math_verified", "gsm8k", "multihop", "rag", "answerability_paired", "safety_paired", "knowledge")
+
+
+def dir_digest(d: Path) -> str:
+    """sha256 over the directory's files in name order (name, then each file's own sha256): what was scored."""
+    h = hashlib.sha256()
+    for f in sorted(p for p in d.iterdir() if p.is_file()):
+        h.update(f.name.encode() + b"\0" + hashlib.sha256(f.read_bytes()).hexdigest().encode() + b"\n")
+    return h.hexdigest()
 
 
 def jl(p: Path) -> list[dict]:
@@ -117,6 +126,8 @@ def static_summary(rows: list[dict]) -> dict:
             "accuracy": round(sum(bool(r["correct"]) for r in rows) / n, 4),
             "usable": sum(bool(r.get("usable")) for r in rows),
             "usable_rate": round(sum(bool(r.get("usable")) for r in rows) / n, 4),
+            #: descriptive: each group finishes a different subset, so this is not a matched comparison
+            "correct_given_usable": sum(bool(r["correct"]) and bool(r.get("usable")) for r in rows),
             "components": {k: round(sum(bool(r.get(k)) for r in rows) / n, 4)
                            for k in ("non_empty", "natural_termination", "no_severe_repetition", "no_context_limit",
                                      "protocol_valid")},
@@ -241,7 +252,7 @@ def main(argv=None) -> int:
                 if gd is None:
                     res["groups"][key] = {"status": "not_run"}
                     continue
-                res["inputs"][key] = str(gd)
+                res["inputs"][key] = {"generations": str(gd.resolve().relative_to(REPO)), "sha256": dir_digest(gd)}
                 fr = fluid_rows(gd, key, tmp)
                 rep, rows = unit_rows(gd, key, tmp)
                 entry: dict = {"status": "measured", "units": {}}

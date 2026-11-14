@@ -2,13 +2,14 @@
 """The Stage-1 reasoning-inheritance study's sessions: grant, one-use artifacts, launch, closeout (dev box).
 
     PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/launch.py \\
-        {issue|launch|closeout|position|grant|stage-resume} ...
+        {issue|launch|closeout|position|grant|stage-resume|archive-evidence} ...
 
     issue --run-id <run> --expected-usd <x> --hard-cap-usd <y>          the one-use artifact, every funding check
     launch --run-id <run> --scr <dir> --session-commit <sha> --bundle aad_autoinit_<8hex>.bundle --max-price 1.09 \\
         [--data-center-ids A,B] [--resume-from <relay path>@<sha256>]
     closeout --run-id <run> --scr <dir>
     stage-resume --run-id <run> --from <earlier run's scr>                upload its secured evidence to the relay ($0)
+    archive-evidence --run-id <run> --from <run's scr>                    the same archive, durable prefix, re-hashed
 
 `shared.study_engineering` is the mechanism (grant, envelope, live position, one use, the shared runner's session,
 closeout); this module is the instance: the study's bound files, its one session kind, its pod driver
@@ -181,10 +182,12 @@ def products_secured(launch):
     return check
 
 
-def stage_resume(run_id: str, src_scr: Path) -> str:
+def stage_resume(run_id: str, src_scr: Path, *, prefix: str = RELAY_TRANSFER, name: str = "resume.tgz",
+                 verify: bool = False) -> str:
     """The earlier run's secured evidence as one archive on the relay ($0, the dev box's uplink). Prints the
-    ``--resume-from`` value."""
-    from huggingface_hub import HfApi
+    ``--resume-from`` value. ``archive-evidence`` calls it with the study's durable prefix and ``verify``: the
+    archive is downloaded again into a fresh cache and re-hashed before its location is printed."""
+    from huggingface_hub import HfApi, hf_hub_download
     from shared.deployment import MAIN_RELAY
     out = Path(src_scr) / "store" / "out"
     if not (out / "records").is_dir():
@@ -196,9 +199,13 @@ def stage_resume(run_id: str, src_scr: Path) -> str:
                 if (out / sub).is_dir():
                     t.add(out / sub, arcname=sub)
         sha = hashlib.sha256(tgz.read_bytes()).hexdigest()
-        path = f"{RELAY_TRANSFER}/{run_id}/{sha[:16]}/resume.tgz"
+        path = f"{prefix}/{run_id}/{sha[:16]}/{name}"
         HfApi().upload_file(path_or_fileobj=str(tgz), path_in_repo=path, repo_id=MAIN_RELAY, repo_type="model",
-                            commit_message=f"stage1 reasoning inheritance: resume input for {run_id}")
+                            commit_message=f"stage1 reasoning inheritance: {name} for {run_id}")
+        if verify:
+            got = Path(hf_hub_download(MAIN_RELAY, path, repo_type="model", cache_dir=str(Path(tmp) / "fresh")))
+            if hashlib.sha256(got.read_bytes()).hexdigest() != sha:
+                raise SE.AuthorizationError(f"{path}: the relay copy does not hash to {sha}")
     return f"{path}@{sha}"
 
 
@@ -247,13 +254,18 @@ def launch_spec(minutes: float = 0.0, resume_from: str | None = None, unit_order
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    if argv and argv[0] == "stage-resume":
+    if argv and argv[0] in ("stage-resume", "archive-evidence"):
         import argparse
-        ap = argparse.ArgumentParser(prog="RI-S1 stage-resume")
+        ap = argparse.ArgumentParser(prog=f"RI-S1 {argv[0]}")
         ap.add_argument("--run-id", required=True)
         ap.add_argument("--from", dest="src", required=True)
         a = ap.parse_args(argv[1:])
-        print(stage_resume(a.run_id, Path(a.src)))
+        if argv[0] == "stage-resume":
+            print(stage_resume(a.run_id, Path(a.src)))
+        else:
+            d = json.loads((REPO / "configs/stages/stage-1/reasoning_inheritance/design.json").read_text())
+            print(stage_resume(a.run_id, Path(a.src), prefix=f"{d['products']['relay_prefix']}/evidence",
+                               name="evidence.tgz", verify=True))
         return 0
     minutes, resume = 0.0, None
     if "--minutes" in argv:

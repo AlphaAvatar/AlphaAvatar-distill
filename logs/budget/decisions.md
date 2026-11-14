@@ -16493,3 +16493,23 @@ on a paid pod.
   not fit the ceiling. Finished units are kept (sealed parts, per-poll securing) and the remainder becomes a budget
   decision, never a reason to shorten the context or the set. The balance needs a top-up before a second session.
 - Revisit when: the first session closes out (measured generation cost per group and mode).
+
+## 2026-11-14 (UTC) — RI-S1 complete: every unit measured in six attempts, $19.9554 of $35
+
+- Context: RI-S1 (opened 2026-11-13, above). Attempts 1-5 ($8.3789) ended before the evaluation was complete: a
+  setup refusal (the artifact was not in the session commit; repaired by a $0 precheck), then four sessions starved by
+  a shared-runner defect -- vLLM V1's `abort_request` takes a list, the runners passed a bare id, and every
+  degeneration-stopped request kept generating to the context. Records were taken at the stop, so no score anywhere
+  changed; the fix is commit `30494d3b`.
+- Decision: attempt 6 `ri_diagnosis_20261113_193508` (L40S, OC-AU-1, session commit `8f74bc94`, hard cap $23.36) took
+  over the sealed parts and generated every remaining unit of D, W and DW in both modes; ALL_DONE 05:59Z, pod deleted
+  06:02Z with the provider's confirmation, all-in $11.5765 (625.5 min). Study total $19.9554 of the $35.00 ceiling;
+  $15.0446 unspent, no further session planned, the study left open for the maintainer to close.
+- Result (`logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json`; REPORT.md): untrained, D
+  (8 of 36 blocks removed) static fluid 89.6% -> 5.6% thinking, 68.9% -> 7.9% non-thinking, interactive episodes
+  43.1% / 34.0% -> 0; W and DW answer no formal item correctly in either mode (floor-limited contrasts and
+  interaction). eval-set-1 is development-exposed.
+- Live 2026-11-14T06:07Z: balance $16.92, 0 pods, the three recorded volumes ($1.75/day, about 9.7 days). Project
+  committed rises by this study's $19.9554 (cap $1,000 unchanged).
+- Risks: the balance funds the volumes for under ten days; topping up or retiring a volume is the maintainer's.
+- Revisit when: the maintainer decides the next round (REPORT.md section 11) or closes RI-S1.

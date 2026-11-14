@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-11 (UTC), Research A CLOSED: every paid authorization closed, the research branch squash-merged into `main`. The human view. Every number here has an owner
+**Updated:** 2026-11-14 (UTC), RI-S1 COMPLETE on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); nothing running. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,27 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**RI-S1 (STAGE 1 STRUCTURAL ABLATION): COMPLETE (2026-11-14) -- EVERY UNIT MEASURED; NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
+- Branch `research/reasoning-inheritance` from `main` `50ed1a4f` (not merged). Four untrained groups from one frozen
+  mapping of the packed search's Top-1 (mapping digest `91343366...`, historical Top-1 reproduced exactly): T, D (8 of
+  36 blocks removed), W (FFN, width, query heads), DW (both); state evaluation and all of eval-set-1 in both modes.
+- Result (`logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json`; report
+  `docs/stages/stage-1/reasoning_inheritance/REPORT.md`): static fluid T 89.6% / 68.9% (thinking / non-thinking),
+  D 5.6% / 7.9%, W and DW 0 on every formal unit; interactive episodes T 43.1% / 34.0%, the rest 0. Only T-D and the
+  state KL (D 0.65, W 6.45, DW 6.78) have range; the W/DW contrasts and the interaction are floor-limited.
+  eval-set-1 is development-exposed. Descriptive, recorded before reading: D keeps a larger share in non-thinking
+  mode (11.2% [7.0, 15.6] vs 6.3%), but loses short answers too.
+- Engineering: vLLM V1 `abort_request` takes a list; the shared runners passed a bare id, so degeneration-stopped
+  requests ran on to the context (no score changed; fixed `30494d3b`).
+- Cost: six attempts $19.9554 of the $35 grant (`logs/budget/approvals/stage1_reasoning_inheritance_grant.json`),
+  every pod deleted with the provider's confirmation. Live 2026-11-14T06:07Z: balance $16.92, 0 pods, three volumes
+  at $1.75/day (~9.7 days).
+- Durable: mapping and D/W/DW checkpoints, and the evidence archive `c6970652...`, on the relay; evidence also on the
+  dev box.
+- Open, maintainer: closing RI-S1 ($15.0446 unspent); the next round (REPORT.md section 11); the balance or volume
+  retirement; a merge into `main`. Not authorized: any new GPU work.
+- Owner: `logs/budget/decisions.md` 2026-11-13 / 11-14.
 
 **RESEARCH A: CLOSED (maintainer, 2026-11-11) -- CURRENT_METHOD_NO_GO FROZEN; EVERY PAID AUTHORIZATION CLOSED; THE BRANCH SQUASH-MERGED INTO `main`. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
 - Verdict (`analyses/research_a_closeout.json`): static fluid 7.19% (A1), 10.96% (A2), 10.26% / 11.23% (A-MIX
@@ -4653,7 +4674,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$870.6969` spent of `$1000.0000`, leaving `$129.3031` |
+| project cap | `$890.6523` spent of `$1000.0000`, leaving `$109.3477` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

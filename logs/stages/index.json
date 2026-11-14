@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 34,
-  "single_stage": 34,
+  "experiment_total": 35,
+  "single_stage": 35,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -150,10 +150,10 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 4,
-    "experiments": 16,
-    "experiments_with_logs": 16,
-    "runs": 233,
-    "canonical_configs": 19,
+    "experiments": 17,
+    "experiments_with_logs": 17,
+    "runs": 239,
+    "canonical_configs": 20,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -170,6 +170,7 @@
     "configs/stages/stage-1/projected_residual/design.json",
     "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
     "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
+    "configs/stages/stage-1/reasoning_inheritance/design.json",
     "configs/stages/stage-1/source_sets.json",
     "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
     "logs/stages/stage-1/phase_c3/plans/a3_design.json",
@@ -1484,6 +1485,56 @@
    "canonical_configs": "configs/stages/stage-1/projected_residual",
    "canonical_data": null,
    "canonical_docs": "docs/stages/stage-1/projected_residual",
+   "live_state": null
+  },
+  {
+   "experiment_id": "reasoning_inheritance",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "COMPLETE 2026-11-14 (RI-S1, six attempts, $19.9554 of $35): untrained D static fluid 89.6% -> 5.6% thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; eval-set-1 development-exposed",
+   "title": "Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1)",
+   "question": "How much of the teacher's fluid reasoning does the current initialization lose to depth pruning alone, to all non-depth compression alone and to both, untrained, and do the two interact?",
+   "canonical_path": "logs/stages/stage-1/reasoning_inheritance",
+   "canonical_config": "configs/stages/stage-1/reasoning_inheritance/design.json",
+   "evidence": [
+    {
+     "path": "configs/stages/stage-1/reasoning_inheritance/design.json",
+     "says": "the four groups, the frozen-mapping rules, the evaluation and the analysis",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "configs/stages/stage-1/reasoning_inheritance/frozen_selection.json",
+     "says": "the Top-1's kept blocks, heads and FFN neurons, read from the search journal",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-1/reasoning_inheritance/analyses/teacher_reuse.json",
+     "says": "the teacher's reused evaluation, every identity checked, rescored",
+     "field": "schema",
+     "equals": "aadistill.stage1.reasoning_inheritance.teacher_reuse/v1"
+    },
+    {
+     "path": "logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json",
+     "says": "every unit per group and mode, the contrasts, retention, failure types, state KL/NLL",
+     "field": "schema",
+     "equals": "aadistill.stage1.reasoning_inheritance.structural_ablation/v1"
+    }
+   ],
+   "external_material": [
+    "docs/stages/stage-1/reasoning_inheritance/REPORT.md, LITERATURE.md -- the round's report and reading",
+    "artifacts/stages/stage-1/reasoning_inheritance/ -- each attempt's secured evidence (dev box); the mapping, checkpoints and the final evidence archive on the private relay"
+   ],
+   "decisions": [
+    "logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete"
+   ],
+   "classification_reason": "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps of the teacher before any training (AGENTS.md 4.3); eval-set-1 and the state suite are its instruments.",
+   "canonical_scripts": "scripts/stages/stage-1/reasoning_inheritance",
+   "canonical_artifacts": "artifacts/stages/stage-1/reasoning_inheritance",
+   "canonical_configs": "configs/stages/stage-1/reasoning_inheritance",
+   "canonical_data": null,
+   "canonical_docs": "docs/stages/stage-1/reasoning_inheritance",
    "live_state": null
   },
   {

@@ -128,15 +128,17 @@ def length_table(res: dict) -> list[str]:
 
 
 def behaviour_table(res: dict) -> list[str]:
-    out = ["| static fluid (570) | usable | natural termination | degeneration | context limit | tokens p50 | p90 | mean |",
-           "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
+    out = ["| static fluid (570) | usable | correct among usable (descriptive) | natural termination | degeneration | "
+           "context limit | tokens p50 | p90 | mean |",
+           "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
     for mode in MODES:
         for x in GROUPS:
             s = (g(res, x, mode).get("fluid") or {}).get("static") or {}
             if not s.get("n"):
                 continue
             t = s["generated_tokens"]
-            out.append(f"| {x} {mode} | {100 * s['usable_rate']:.1f}% | {100 * s['components']['natural_termination']:.1f}% | "
+            cu = (f"{s['correct_given_usable']}/{s['usable']}" if s.get("usable") else "--")
+            out.append(f"| {x} {mode} | {100 * s['usable_rate']:.1f}% | {cu} | {100 * s['components']['natural_termination']:.1f}% | "
                        f"{100 * s['degeneration_rate']:.1f}% | {100 * s['context_limit_rate']:.1f}% | {t['p50']} | "
                        f"{t['p90']} | {t['mean']} |")
     return out

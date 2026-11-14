@@ -1609,6 +1609,44 @@ STAGE_1 = [
             "initialization from teacher activations (AGENTS.md 4.3). Stage-3 recovery and "
             "eval-set-1 are its instruments, the rule phase_c1 declares."),
     ),
+    dict(
+        id="reasoning_inheritance",
+        kind="experiment",
+        stage_id="1",
+        status=("COMPLETE 2026-11-14 (RI-S1, six attempts, $19.9554 of $35): untrained D static fluid 89.6% -> 5.6% "
+                "thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; "
+                "eval-set-1 development-exposed"),
+        title="Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1)",
+        question=("How much of the teacher's fluid reasoning does the current initialization lose to depth "
+                  "pruning alone, to all non-depth compression alone and to both, untrained, and do the two "
+                  "interact?"),
+        canonical_config="configs/stages/stage-1/reasoning_inheritance/design.json",
+        evidence=[
+            E("configs/stages/stage-1/reasoning_inheritance/design.json",
+              "the four groups, the frozen-mapping rules, the evaluation and the analysis",
+              field="authorizes", equals="nothing"),
+            E("configs/stages/stage-1/reasoning_inheritance/frozen_selection.json",
+              "the Top-1's kept blocks, heads and FFN neurons, read from the search journal",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/reasoning_inheritance/analyses/teacher_reuse.json",
+              "the teacher's reused evaluation, every identity checked, rescored",
+              field="schema", equals="aadistill.stage1.reasoning_inheritance.teacher_reuse/v1"),
+            E("logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json",
+              "every unit per group and mode, the contrasts, retention, failure types, state KL/NLL",
+              field="schema", equals="aadistill.stage1.reasoning_inheritance.structural_ablation/v1"),
+        ],
+        external_material=[
+            "docs/stages/stage-1/reasoning_inheritance/REPORT.md, LITERATURE.md -- the round's report and reading",
+            "artifacts/stages/stage-1/reasoning_inheritance/ -- each attempt's secured evidence (dev box); the "
+            "mapping, checkpoints and the final evidence archive on the private relay",
+        ],
+        decisions=["logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete"],
+        canonical_log_destination="logs/stages/stage-1/reasoning_inheritance",
+        classification_reason=(
+            "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps "
+            "of the teacher before any training (AGENTS.md 4.3); eval-set-1 and the state suite are its "
+            "instruments."),
+    ),
 ]
 
 #: ---------------------------------------------------------------------------

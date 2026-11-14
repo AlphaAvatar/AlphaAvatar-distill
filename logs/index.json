@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 189,
+  "runs_unrecorded": 195,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -863,6 +863,11 @@
     "recorded": 0,
     "unrecorded": 15,
     "total": 15
+   },
+   "reasoning_inheritance": {
+    "recorded": 0,
+    "unrecorded": 6,
+    "total": 6
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3882,6 +3887,54 @@
    "root": "logs/stages/stage-1/projected_residual/runs/be_20261028_095332",
    "n_files": 10,
    "digest": "8d3c0d9e4538f376e0950edadb42eeba603d79f8b69b116b965eb934f3e56947",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_inheritance",
+   "run_id": "ri_diagnosis_20261113_103414",
+   "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_103414",
+   "n_files": 3,
+   "digest": "2984d504213581a578053a5c3acf131f5bdbb3be67c612af1cc01f3f349d30a2",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_inheritance",
+   "run_id": "ri_diagnosis_20261113_105643",
+   "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643",
+   "n_files": 3,
+   "digest": "24ad0e8d3b95712d6370347e806e951b8d3064b5a90fbe9647065fc8efa2f516",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_inheritance",
+   "run_id": "ri_diagnosis_20261113_130551",
+   "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551",
+   "n_files": 3,
+   "digest": "471546814ff335a271012e6c68a0807dcb3ea4bd171b4b537964d47539a6a538",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_inheritance",
+   "run_id": "ri_diagnosis_20261113_161911",
+   "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911",
+   "n_files": 3,
+   "digest": "0428cf0ab9ca37f83edc118037925c18d97143e606ffe15763c94f486bd22f06",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_inheritance",
+   "run_id": "ri_diagnosis_20261113_180718",
+   "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718",
+   "n_files": 3,
+   "digest": "f51cff60410fc320c7135c1cf9fdcd419afc2d7f2eacffd751532406ae799d3b",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_inheritance",
+   "run_id": "ri_diagnosis_20261113_193508",
+   "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508",
+   "n_files": 3,
+   "digest": "3152c125375949de69cb47884211345270096a62c6319b46c9293d61a68b3302",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {
