@@ -121,7 +121,11 @@ def tombstone(r: dict, utc: str, relay_verified: bool | None) -> dict:
                                            "reader, no session launcher declares it",
         "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, "
                                         "identities) and this tombstone",
-        "relay_hash_verified": relay_verified, "deterministic_reconstruction_possible": bool(r.get("reconstructable")),
+        "relay_hash_verified": relay_verified,
+        #: a recipe is not a byte-identical rebuild (retire_artifact.reconstruction_fields): the registry records
+        #: whether a recipe exists, so these bytes coming back is not verified unless the row says so
+        "byte_identical_reconstruction": r.get("byte_identical_reconstruction") or "not_verified",
+        "deterministic_reconstruction_possible": r.get("byte_identical_reconstruction") == "verified",
         "reconstruction_recipe": r.get("reconstruction_recipe"), "expected_reconstruction_cost": r.get("reconstruction_cost"),
         "frozen_results_location": "logs/stages/" + str(r["experiment"]).replace("phase_", "stage-1/phase_"),
         "deleted_utc": utc, "withdrawn": False, "withdrawn_reason": None, "withdrawn_utc": None}

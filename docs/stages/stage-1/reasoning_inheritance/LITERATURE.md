@@ -48,3 +48,18 @@ Read 2026-11-13 from arXiv:2403.17887 **v2** (3 March 2025), HTML text. Status: 
   hypothesis "depth is the main cause" is tested by the D/W/DW contrasts, never assumed.
 * Healing restoring next-token loss but not QA accuracy past the transition is a caution against reading state
   KL/NLL as reasoning retention -- which P10.2 already requires.
+
+# Layer- and sublayer-merging methods read for the next round's plan (2026-11-14)
+
+Read 2026-11-14 from the arXiv HTML versions named below (the merge equations verbatim; later sections partly from
+the page summary, marked). Status: `used` (they define the candidates of REPORT section 11); topic
+`depth-compression`.
+
+| reference | what was used | what differs here |
+| --- | --- | --- |
+| Yang, Cao, Zhao, *LaCo: Large Language Model Pruning via Layer Collapse*, arXiv:2402.11187v2 | Eq. 1, `theta*_l = theta_l + sum_{k=1..m} (theta_{l+k} - theta_l)`: the m layers after l are merged into the earlier layer l, attention and MLP alike, no scaling; layers chosen by a cosine-similarity threshold on calibration data | the merge direction (into the earlier kept block) is kept; the additive formula is not registered: on a two-block span it equals keeping the removed block, and it gives no scaling rule |
+| Verma, Murray, Duh, *Merging Feed-Forward Sublayers for Compressed Transformers*, arXiv:2501.06126v2 | neurons aligned by permutation: Pearson cross-correlation of features before the activation on ~10k calibration tokens, linear assignment (Jonker-Volgenant, scipy), then a uniform average of the aligned sublayers; the aligned merge is consistently better than the "vanilla" unaligned one, more so the more sublayers are merged (the reported numbers were read from the page summary, not verified) | GPT-2 / ViT / MT models, adjacent windows chosen by validation, recovery fine-tuning after; here a SwiGLU MLP (the gated product is the feature), attention heads aligned too (an extension), activation-importance weights instead of a uniform average, no fine-tuning |
+| Liu et al., *Pruning via Merging: Compressing LLMs via Manifold Alignment Based Layer Merging* (MKA), arXiv:2406.16330v2 | `theta~_c = alpha * theta_l + (1 - alpha) * theta_m`, alpha from a normalized mutual information of diffusion embeddings (Algorithm 1, verbatim); pairs need not be adjacent | the equal-weight case is M-avg; alpha here is per neuron / head from activation importance, not one similarity per pair |
+
+None of them measures free-generation reasoning of an untrained merged model; their results are MMLU-style or
+recovered-model numbers and are not carried over as a prediction.

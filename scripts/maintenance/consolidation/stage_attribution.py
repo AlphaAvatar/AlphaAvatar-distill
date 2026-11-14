@@ -1630,7 +1630,7 @@ STAGE_1 = [
               field="authorizes", equals="nothing"),
             E("logs/stages/stage-1/reasoning_inheritance/analyses/teacher_reuse.json",
               "the teacher's reused evaluation, every identity checked, rescored",
-              field="schema", equals="aadistill.stage1.reasoning_inheritance.teacher_reuse/v1"),
+              field="schema", equals="aadistill.stage1.reasoning_inheritance.teacher_reuse/v2"),
             E("logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json",
               "every unit per group and mode, the contrasts, retention, failure types, state KL/NLL",
               field="schema", equals="aadistill.stage1.reasoning_inheritance.structural_ablation/v1"),
@@ -1646,7 +1646,9 @@ STAGE_1 = [
             "teacher tokenizer, the only copy (MANIFEST.json)",
         ],
         decisions=["logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; "
-                   "2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed"],
+                   "2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed; "
+                   "2026-11-14: review fixes (teacher prompt check, tombstones, A-MIX relay copy, the next "
+                   "round's layer-merging plan)"],
         canonical_log_destination="logs/stages/stage-1/reasoning_inheritance",
         classification_reason=(
             "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps "

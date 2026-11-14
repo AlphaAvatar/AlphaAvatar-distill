@@ -269,3 +269,47 @@ def test_the_tombstone_totals_match_the_tombstones():
         x.get("size_bytes") or 0 for x in active)
     assert t["withdrawn_bytes"] == sum(
         x.get("size_bytes") or 0 for x in withdrawn)
+
+
+# --- reconstruction is three facts, not one flag ------------------------------
+
+def _retire_artifact():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "retire_artifact", REPO / "scripts/maintenance/consolidation/retire_artifact.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_a_recipe_is_not_a_byte_identical_rebuild():
+    """`deterministic_reconstruction_possible` was `bool(--reconstruction)`, so eight retrained students read as
+    deterministically rebuildable. It is now derived from a verified byte identity, never from a recipe."""
+    RA = _retire_artifact()
+    crit = "agents_2_5_standing_retirement"
+    retrain = RA.reconstruction_fields("retrain the unit from its config", "retrain", None, "", [], crit)
+    assert retrain["deterministic_reconstruction_possible"] is False
+    assert retrain["byte_identical_reconstruction"] == "not_expected"
+    assert RA.reconstruction_fields("rebuild", "rebuild", None, "", [], crit)[
+        "deterministic_reconstruction_possible"] is False
+    assert RA.reconstruction_fields("rebuild", "rebuild", "verified", "the rebuild's hash matched", [], crit)[
+        "deterministic_reconstruction_possible"] is True
+    for bad in (("a recipe", None, None, ""),                      # a recipe without its kind
+                ("retrain", "retrain", "verified", "evidence"),    # a retrain is a new checkpoint
+                ("rebuild", "rebuild", "verified", "")):           # verified needs its evidence
+        with pytest.raises(ValueError):
+            RA.reconstruction_fields(*bad, [], crit)
+    with pytest.raises(ValueError):
+        RA.reconstruction_fields("rebuild", "rebuild", "not_verified", "", [], "reproducible_materialization")
+    with pytest.raises(ValueError):
+        RA.reconstruction_fields("", "copy", None, "", [], "byte_identical_duplicate")
+
+
+def test_tombstones_that_carry_a_byte_identity_derive_the_flag_from_it():
+    for e in load(TOMBSTONES)["tombstones"]:
+        if "byte_identical_reconstruction" not in e:
+            continue      # written before 2026-11-14: see the file's field_semantics_20261114
+        assert e["deterministic_reconstruction_possible"] == (e["byte_identical_reconstruction"] == "verified"), (
+            e["canonical_id"])
+        if e.get("reconstruction_kind") == "retrain":
+            assert e["byte_identical_reconstruction"] != "verified", e["canonical_id"]

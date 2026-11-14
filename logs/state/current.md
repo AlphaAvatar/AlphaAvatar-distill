@@ -19,7 +19,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   state KL (D 0.65, W 6.45, DW 6.78) have range; on eval-set-1 correctness the W/DW contrasts and the interaction are
   floor-limited. eval-set-1 is development-exposed. D's losses: degeneration stops in thinking mode; in non-thinking
   mode 162 of its 308 well-formed static replies state no answer the scorer reads, 101 a wrong one, 45 are correct.
-  Corrections to the first version: REPORT.md section 12 (no score changed).
+  Corrections after review (two rounds): REPORT.md section 12 (no score changed). Teacher reuse: a missing prompt
+  field is never a match; the non-fluid prompts' content identity is derived from the commits that ran and the
+  dev-box rendering of the registered items, not compared (`analyses/teacher_reuse.json` v2).
 - Engineering: vLLM V1 `abort_request` takes a list; the shared runners passed a bare id, so degeneration-stopped
   requests ran on to the context (sealed records unaffected, 8,881 stops checked; fixed `30494d3b`).
 - Closed by the maintainer 2026-11-14 (the grant's `closed` block): $19.9554 of $35 over six attempts; $15.0446
@@ -29,11 +31,16 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   `~/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/`
   (`logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json`); their relay weight copies deleted
   (8.44 GiB freed). The three volumes `thprcgh7s9`, `4rhubprswo`, `am5m373kuq` deleted 10:46Z, provider-confirmed;
-  the eight Stage-3 weights retired from the dev box (tombstones). Evidence archives stay on the dev box and relay.
+  the eight Stage-3 weights retired from the dev box, and A-MIX-6cat-sr-s20260801's relay copy at 13:10Z (no
+  consumer; tombstones). Evidence archives stay on the dev box and relay. Still on the relay: 29 weight files
+  (46.63 GiB) of earlier rounds, not audited here (`checkpoint_registry.json`). Tombstones now keep a recipe's kind,
+  byte identity and same-hash copies apart (`checkpoint_tombstones.json :: field_semantics_20261114`).
 - Live 2026-11-14T10:48Z (`logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json`): balance $16.63, $0.00/h,
   0 pods, 0 volumes. Dev box 93% used, 15 GB free.
-- Next: the next round's plan (REPORT.md section 11), for the maintainer's approval; a merge into `main` is
-  separate. Not authorized: any new GPU work or recovery training.
+- Next: the next round's plan (REPORT.md section 11, revised 2026-11-14): layer merging at D's fixed structure, D
+  against direct parameter averaging and aligned activation-weighted merging, fixed in advance, ~$5-9 estimated;
+  the common-budget depth/width study is separate. For the maintainer's approval; a merge into `main` is separate.
+  Not authorized: any new GPU work or recovery training.
 - Owner: `logs/budget/decisions.md` 2026-11-13 / 11-14.
 
 **RESEARCH A: CLOSED (maintainer, 2026-11-11) -- CURRENT_METHOD_NO_GO FROZEN; EVERY PAID AUTHORIZATION CLOSED; THE BRANCH SQUASH-MERGED INTO `main`. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**

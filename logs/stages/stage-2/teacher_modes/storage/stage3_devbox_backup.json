@@ -87,5 +87,17 @@
   "kept": "each unit's receipt.json, model/config.json, model/generation_config.json and resume_identity.json; the evaluation evidence archive fadea626... (dev box and relay)",
   "other_copies": "A-MIX-6cat-sr-s20260801's relay copy (outside the decision); the volume thprcgh7s9 was deleted the same day",
   "verify_note": "stage3_backup.py --verify now reports the eight weights missing: that is this retirement, not a lost copy"
+ },
+ "relay_copy_retired_2026_11_14": {
+  "what": "A-MIX-6cat-sr-s20260801's relay copy, durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/model.safetensors (2,384,234,968 bytes, sha256 9370c470...)",
+  "correction": "retired_2026_11_14.other_copies called it 'outside the decision'. That said why it was not deleted with the volumes; it was never a reason to keep it, and the maintainer's review of 2026-11-14 asked for its consumer audit",
+  "consumer_audit": "no code reader (git grep: only a1_units.copy_final_off_volume, the writer), none of the session launchers' 39 declared relay paths, no registry row protecting it, Research A closed 2026-11-11",
+  "rule": "AGENTS.md 2.5 standing retirement",
+  "tombstone": "logs/maintenance/inventories/checkpoint_tombstones.json :: relay_20261114_stage3_sr_A-MIX-6cat-sr-s20260801 (written 13:10:02Z, before the deletion)",
+  "deleted_utc": "2026-11-14T13:10:37Z",
+  "relay_commit": "92f9f4fc603cf8db6263487d8352065297507f2d",
+  "verified": "the LFS object is gone (no oid 9370c470... in list_lfs_files), the path is not in HEAD; relay LFS 71,278,955,715 -> 68,894,720,747 bytes",
+  "kept": "the copy's config.json and generation_config.json on the relay; the unit's receipt and configs on the dev box; the evaluation evidence archive fadea626... (dev box and relay); off_volume_copy.json",
+  "now": "no copy of any of the eight Research A Stage-3 students' weights remains anywhere"
  }
 }

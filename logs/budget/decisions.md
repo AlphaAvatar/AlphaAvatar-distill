@@ -16570,3 +16570,48 @@ on a paid pod.
   study and grant).
 - Risks: none beyond the storage decision above.
 - Revisit when: the maintainer approves the next round's plan (REPORT.md section 11).
+
+## 2026-11-14 (UTC) — RI-S1 review fixes: teacher prompt check, tombstone semantics, A-MIX relay copy retired, next-round plan revised
+
+- Context: maintainer review of `b191d555` (2026-11-14): "本条授权范围是：$0 工程修正、已有证据核对、符合既有退役规则的遗留权重清理，
+  以及下一轮方案修订。RI-S1 保持 CLOSED，原未使用额度继续失效；下一轮付费实验、恢复训练和合入 main 另行决定。"
+- Decision:
+  - Teacher reuse: a prompt field absent or invalid on either side is "not recorded", never equal (`False` is a
+    value); prompt fields and prompt content identity are reported apart. The non-fluid units' content identity is
+    derived from the construction path (same registered item files, staging and rendering statements at the teacher's
+    session commit `f93d83a7` and this round's `8f74bc94`) and the registered items rendered on the dev box with the
+    teacher's verified tokenizer, and is stated as derived, not compared; the fluid unit's is verified from its text.
+    The historical records hold no prompt text or ids for the non-fluid units; that limit stays and is not a reason to
+    regenerate the teacher.
+  - Tombstones: `deterministic_reconstruction_possible` means a rebuild verified to give back the same bytes; the
+    recipe's kind (retrain / rebuild / copy) and any same-hash copy are recorded apart (`retire_artifact.py`,
+    `retire_eligible_checkpoints.py`). This round's twelve entries corrected in place with the old value kept; the 32
+    earlier entries that read true with a retrain recipe are listed in the file's `field_semantics_20261114`, not
+    rewritten.
+  - A-MIX-6cat-sr-s20260801's relay copy (`9370c470...`, 2.22 GiB) retired under AGENTS.md 2.5 after an object-level
+    consumer audit (no code reader, no launcher declaring it, no registry protection, Research A closed). "Outside the
+    decision" was never a reason to keep it.
+  - REPORT.md section 11 rewritten as the next round's plan: layer merging at D's fixed structure (28 blocks, 3.215B),
+    D the direct-deletion control, M-avg (direct parameter averaging) and M-act (aligned, activation-weighted) fixed in
+    advance with the decision rule; no state-metric gate before generation; the common-budget depth-against-width
+    study separate and not a prerequisite; estimated $5-9 on one L40S. It authorizes nothing.
+- Alternatives considered: regenerating the teacher's evaluation to record prompt ids (excluded by the brief: the
+  derivation and its limit are stated instead); keeping the A-MIX copy as "outside the decision" (no consumer).
+- Risks: the non-fluid content identity rests on the commits that ran, not on recorded prompts. The relay still holds
+  29 weight files (46.63 GiB) of earlier rounds that were not audited object by object here.
+- Revisit when: the maintainer decides the next round's plan and grant, or a retirement pass over the remaining relay
+  weights.
+- Done (2026-11-14, $0, no pod):
+  - `teacher_reuse.py` -> `analyses/teacher_reuse.json` (schema v2): both modes reusable, every check passed; every
+    non-fluid unit's recorded prompt fields equal the dev-box rendering of the registered items (T, D, W and DW); no
+    field missing; the rescored reports' content digests unchanged. Regression
+    `scripts/stages/stage-1/reasoning_inheritance/tests/test_teacher_reuse.py`.
+  - Tombstone `relay_20261114_stage3_sr_A-MIX-6cat-sr-s20260801` written 13:10:02Z; the path removed (relay commit
+    `92f9f4fc`) and the LFS object permanently deleted 13:10:37Z; read back: oid gone, path not in HEAD, configs kept;
+    relay LFS 71,278,955,715 -> 68,894,720,747 bytes. Registry rebuilt (relay 1,694 files, 64.96 GiB).
+  - Scope, exactly: RI-S1's D, W and DW relay weight copies are gone (`relay_20261114_ri_s1_*`), and so is every copy
+    of Research A's eight Stage-3 students. Still on the relay: 29 weight files of earlier rounds (Stage-0
+    calibration-volume finalists 13, E1 scaling 6, Stage-3 s1/s2 5, the 0.6B initialization 2, permanent controls 2, a
+    D3 product 1), not audited here.
+  - REPORT.md: GSM8K (D, non-thinking: 49 / 49 / 1 / 1 over 100 items), the bootstrap's "every" (11 of 12), sections 10
+    and 11, corrections in section 12; LITERATURE.md: LaCo, Verma et al., MKA.

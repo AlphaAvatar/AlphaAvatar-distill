@@ -1,6 +1,31 @@
 {
- "schema": "aadistill.stage1.reasoning_inheritance.teacher_reuse/v1",
+ "schema": "aadistill.stage1.reasoning_inheritance.teacher_reuse/v2",
  "run": "a_teacher_20261030_012648",
+ "construction_path": {
+  "teacher_session_commit": "f93d83a764d4dbecd8783db9ef8e40ecbe2a05bd",
+  "this_rounds_session_commits": [
+   "8f74bc9450c61b677ac7e1890b9978124b55a9fe"
+  ],
+  "inputs_unchanged": {
+   "8f74bc9450c61b677ac7e1890b9978124b55a9fe": {
+    "data/eval-set": true,
+    "scripts/shared/eval_sets.py": true,
+    "src/aadistill/evaluation/eval_registry.py": true,
+    "scripts/stages/stage-0/calibration_volume/dose_driver.py": true
+   }
+  },
+  "render_statements_unchanged": {
+   "8f74bc9450c61b677ac7e1890b9978124b55a9fe": true
+  },
+  "render_block_sha256": "dc119fa0fee662813dd16cad238f703f187100a4a140f219b7d2b4b71de2e158",
+  "established": true
+ },
+ "teacher_tokenizer_on_the_dev_box": {
+  "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/teacher_tokenizer",
+  "tokenizer_files_equal": true,
+  "chat_template_equal": true,
+  "used": true
+ },
  "modes": {
   "H-T": {
    "archive": {
@@ -29,8 +54,9 @@
      "eval_set_file": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true,
-     "source_prompts_equal_the_registered_items": true
+     "prompt_fields_equal_this_rounds": true,
+     "source_prompts_equal_the_registered_items": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__answerability_paired.summary.json": {
      "root_revision": true,
@@ -44,7 +70,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__eval_behavior_v0.summary.json": {
      "root_revision": true,
@@ -58,7 +86,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__gsm8k.summary.json": {
      "root_revision": true,
@@ -72,7 +102,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__knowledge.summary.json": {
      "root_revision": true,
@@ -86,7 +118,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__math_verified.summary.json": {
      "root_revision": true,
@@ -100,7 +134,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__multihop.summary.json": {
      "root_revision": true,
@@ -114,7 +150,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__rag.summary.json": {
      "root_revision": true,
@@ -128,7 +166,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__safety_paired.summary.json": {
      "root_revision": true,
@@ -142,7 +182,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_legacy_150__items.summary.json": {
      "root_revision": true,
@@ -156,7 +198,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     }
    },
    "item_checks": {
@@ -169,30 +213,82 @@
      "n_repeated": 0,
      "seeds_checked": 1272,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": {
-      "compared": 720,
-      "differ": 0
-     },
-     "prompt_measure": "first user message (text) and turn-0 prompt length in tokens",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "first_user_message",
+      "prompt_tokens"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "first_user_message",
+        "prompt_tokens"
+       ],
+       "items": 720,
        "compared": 720,
-       "differ": 0
+       "equal": 720,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "first_user_message",
+        "prompt_tokens"
+       ],
+       "items": 720,
        "compared": 720,
-       "differ": 0
+       "equal": 720,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "first_user_message",
+        "prompt_tokens"
+       ],
+       "items": 720,
        "compared": 720,
-       "differ": 0
+       "equal": 720,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "source_prompt_against_the_registered_item": {
+      "fields": [
+       "first_user_message"
+      ],
+      "items": 720,
+      "compared": 720,
+      "equal": 720,
+      "differ": 0,
+      "absent_on_the_other_side": 0,
+      "not_recorded_teacher": 0,
+      "not_recorded_other": 0,
+      "fields_missing": {},
+      "passes": true
+     },
+     "prompt_content_identity": {
+      "status": "verified_text",
+      "basis": "the first user message's text, against this round's and the registered item's"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true,
-      "source_prompts_equal_the_registered_items": true
+      "prompt_fields_equal_this_rounds": true,
+      "source_prompts_equal_the_registered_items": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__answerability_paired.summary.json": {
@@ -204,26 +300,140 @@
      "n_repeated": 0,
      "seeds_checked": 120,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
        "compared": 120,
-       "differ": 0
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
        "compared": 120,
-       "differ": 0
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
        "compared": 120,
-       "differ": 0
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "f4e780e60f5f28a353704986c3b1886d6f90fc2f5c82f763dbafc121d5a701a1",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
+       "compared": 120,
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
+       "compared": 120,
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
+       "compared": 120,
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
+       "compared": 120,
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__eval_behavior_v0.summary.json": {
@@ -235,26 +445,140 @@
      "n_repeated": 0,
      "seeds_checked": 76,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
        "compared": 76,
-       "differ": 0
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
        "compared": 76,
-       "differ": 0
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
        "compared": 76,
-       "differ": 0
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "14ee74e7d642c8fb805aefd6141f2b48ae28d711f4f6b03404a66311ab18a244",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
+       "compared": 76,
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
+       "compared": 76,
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
+       "compared": 76,
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
+       "compared": 76,
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__gsm8k.summary.json": {
@@ -266,26 +590,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "d85a0b412487c5deeecd1433e1888c83f1d9e543545346daa2952dfa32d99747",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__knowledge.summary.json": {
@@ -297,26 +735,140 @@
      "n_repeated": 0,
      "seeds_checked": 150,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "698c2b792dbb2f71f2903a2ba69cc5244bdaba0b8d28fff027742cf1a6b5cbb8",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__math_verified.summary.json": {
@@ -328,26 +880,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "5362beba8bbc2a5aa820a58f68dcd5976a6aa251e23842874312908b49b21422",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__multihop.summary.json": {
@@ -359,26 +1025,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "065f8e28698356e6ef30643db9f4c133a042c44cd91e4bb6a6262318bb78d6f5",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__rag.summary.json": {
@@ -390,26 +1170,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "876bd50cbf5fa8f1c8c28613473213954bf65b5441c0aee0e8befee2fbca4c82",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__safety_paired.summary.json": {
@@ -421,26 +1315,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "5a90cf525c4ab1f871ff34868d1b688b84a49e37edaad01620a08bfcf3a4d2d6",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_legacy_150__items.summary.json": {
@@ -452,26 +1460,140 @@
      "n_repeated": 0,
      "seeds_checked": 150,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "62b35acbc1aabd8b489972ad6c8028edec709a24409a9c5032f68a90112a1ff9",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     }
    },
@@ -479,53 +1601,62 @@
     "stage3_capability_846__answerability_paired.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__eval_behavior_v0.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__gsm8k.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__knowledge.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__math_verified.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__multihop.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__rag.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__safety_paired.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_legacy_150__items.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     }
    },
    "failed_checks": {},
    "rescored_report": {
     "path": "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/formal_report.json",
-    "sha256": "65d450945fd6d58161fc0145e826455419338b0aa8fe421ea3e0cf403d4a5212",
+    "sha256": "ff1c6e545dcb6bc43ba1c968b125fe5eaf8c3d265c521b586e58a5b09a3c42a5",
     "content_sha256_without_created_utc": "4a55713737ca2a5e5c40fb5bb8d7e7c0ab1e9f975a95c525ac4250e810822b01"
    },
    "reusable": true
@@ -557,8 +1688,9 @@
      "eval_set_file": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true,
-     "source_prompts_equal_the_registered_items": true
+     "prompt_fields_equal_this_rounds": true,
+     "source_prompts_equal_the_registered_items": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__answerability_paired.summary.json": {
      "root_revision": true,
@@ -572,7 +1704,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__eval_behavior_v0.summary.json": {
      "root_revision": true,
@@ -586,7 +1720,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__gsm8k.summary.json": {
      "root_revision": true,
@@ -600,7 +1736,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__knowledge.summary.json": {
      "root_revision": true,
@@ -614,7 +1752,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__math_verified.summary.json": {
      "root_revision": true,
@@ -628,7 +1768,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__multihop.summary.json": {
      "root_revision": true,
@@ -642,7 +1784,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__rag.summary.json": {
      "root_revision": true,
@@ -656,7 +1800,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_capability_846__safety_paired.summary.json": {
      "root_revision": true,
@@ -670,7 +1816,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     },
     "stage3_legacy_150__items.summary.json": {
      "root_revision": true,
@@ -684,7 +1832,9 @@
      "degeneration_check_every": true,
      "items_cover_the_registered_unit": true,
      "seeds_follow_the_rule": true,
-     "prompts_equal_this_rounds": true
+     "prompt_fields_equal_this_rounds": true,
+     "prompt_fields_equal_the_registered_rendering": true,
+     "prompt_content_identity_established": true
     }
    },
    "item_checks": {
@@ -697,30 +1847,82 @@
      "n_repeated": 0,
      "seeds_checked": 1592,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": {
-      "compared": 720,
-      "differ": 0
-     },
-     "prompt_measure": "first user message (text) and turn-0 prompt length in tokens",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "first_user_message",
+      "prompt_tokens"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "first_user_message",
+        "prompt_tokens"
+       ],
+       "items": 720,
        "compared": 720,
-       "differ": 0
+       "equal": 720,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "first_user_message",
+        "prompt_tokens"
+       ],
+       "items": 720,
        "compared": 720,
-       "differ": 0
+       "equal": 720,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "first_user_message",
+        "prompt_tokens"
+       ],
+       "items": 720,
        "compared": 720,
-       "differ": 0
+       "equal": 720,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "source_prompt_against_the_registered_item": {
+      "fields": [
+       "first_user_message"
+      ],
+      "items": 720,
+      "compared": 720,
+      "equal": 720,
+      "differ": 0,
+      "absent_on_the_other_side": 0,
+      "not_recorded_teacher": 0,
+      "not_recorded_other": 0,
+      "fields_missing": {},
+      "passes": true
+     },
+     "prompt_content_identity": {
+      "status": "verified_text",
+      "basis": "the first user message's text, against this round's and the registered item's"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true,
-      "source_prompts_equal_the_registered_items": true
+      "prompt_fields_equal_this_rounds": true,
+      "source_prompts_equal_the_registered_items": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__answerability_paired.summary.json": {
@@ -732,26 +1934,140 @@
      "n_repeated": 0,
      "seeds_checked": 120,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
        "compared": 120,
-       "differ": 0
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
        "compared": 120,
-       "differ": 0
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
        "compared": 120,
-       "differ": 0
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "cb1f506f214031295fae4107f55266a77dd266d5fdfbfbec1a40b80113fc6100",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
+       "compared": 120,
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
+       "compared": 120,
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
+       "compared": 120,
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 120,
+       "compared": 120,
+       "equal": 120,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__eval_behavior_v0.summary.json": {
@@ -763,26 +2079,140 @@
      "n_repeated": 0,
      "seeds_checked": 76,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
        "compared": 76,
-       "differ": 0
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
        "compared": 76,
-       "differ": 0
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
        "compared": 76,
-       "differ": 0
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "297fefd02dc6cb5f05e502784727577a91d084a75a6b3378ccc9b4fce86db9b3",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
+       "compared": 76,
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
+       "compared": 76,
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
+       "compared": 76,
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 76,
+       "compared": 76,
+       "equal": 76,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__gsm8k.summary.json": {
@@ -794,26 +2224,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "c28d05d71f9e3530d44a76cc5f45ae7c2ebc06f2f05aac47dc713bee8bada9c1",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__knowledge.summary.json": {
@@ -825,26 +2369,140 @@
      "n_repeated": 0,
      "seeds_checked": 150,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "a6ca9238631744c35e91e6de97efc60382d834f7d2d8a13c0cbaf2c61d244431",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__math_verified.summary.json": {
@@ -856,26 +2514,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "dd5496a6b55a3c0e56e969e169f2b2c6931c66c6fce1129ceab7ab383748c70e",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__multihop.summary.json": {
@@ -887,26 +2659,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "df94f7fb97c1e30ad83bbdc7096cf20d395be002df33d01bcc30b84483e117ca",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__rag.summary.json": {
@@ -918,26 +2804,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "cf457d24b25620483f6bc486f2fcd0daef78af84e4a408b30effa15ad43b60d4",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_capability_846__safety_paired.summary.json": {
@@ -949,26 +2949,140 @@
      "n_repeated": 0,
      "seeds_checked": 100,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
        "compared": 100,
-       "differ": 0
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "e1b7495f225d10563cf9ec3d5bf7b742788db84eeef7b55c9b5dc42e9f0f6061",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 100,
+       "compared": 100,
+       "equal": 100,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     },
     "stage3_legacy_150__items.summary.json": {
@@ -980,26 +3094,140 @@
      "n_repeated": 0,
      "seeds_checked": 150,
      "seeds_off_rule": 0,
-     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
-     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "seeds_not_recorded": 0,
+     "prompt_fields": [
+      "prompt_tokens",
+      "system_source",
+      "think_preopened"
+     ],
      "prompt_against_this_round": {
       "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       },
       "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
        "compared": 150,
-       "differ": 0
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
       }
+     },
+     "rendered_prompt_ids_sha256": "254e813f4e373821662ebfce1a5977ebb3db095e5a6f587373857adfcdbc673d",
+     "prompt_against_the_registered_rendering": {
+      "T": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "D": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "W": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      },
+      "DW": {
+       "fields": [
+        "prompt_tokens",
+        "system_source",
+        "think_preopened"
+       ],
+       "items": 150,
+       "compared": 150,
+       "equal": 150,
+       "differ": 0,
+       "absent_on_the_other_side": 0,
+       "not_recorded_teacher": 0,
+       "not_recorded_other": 0,
+       "fields_missing": {},
+       "passes": true
+      }
+     },
+     "prompt_content_identity": {
+      "status": "derived_not_recorded",
+      "basis": "the same registered item file and the same rendering statements at the teacher's and this round's session commits (construction_path), and every recorded prompt length, system source and think pre-opening equal to the registered item's rendering on the dev box",
+      "limit": "the records hold no prompt text or prompt ids: content identity is derived from the commits that ran, not compared; equal lengths alone would not establish it"
      },
      "checks": {
       "items_cover_the_registered_unit": true,
       "seeds_follow_the_rule": true,
-      "prompts_equal_this_rounds": true
+      "prompt_fields_equal_this_rounds": true,
+      "prompt_fields_equal_the_registered_rendering": true,
+      "prompt_content_identity_established": true
      }
     }
    },
@@ -1007,58 +3235,67 @@
     "stage3_capability_846__answerability_paired.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__eval_behavior_v0.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__gsm8k.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__knowledge.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__math_verified.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__multihop.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__rag.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_capability_846__safety_paired.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     },
     "stage3_legacy_150__items.summary.json": {
      "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
      "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
-     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+     "prompt_text_and_ids": "the records carry the prompt's length, system source and think pre-opening, never its text or token ids",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, the prompt fields against this round's and against the registered items rendered on the dev box, and the construction path at both session commits (prompt_content_identity: derived, not compared)"
     }
    },
    "failed_checks": {},
    "rescored_report": {
     "path": "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/formal_report.json",
-    "sha256": "02bccf55eca4e82b5aa658fc57115968d32afc2e393c1fb4e5480290c47f9fe5",
+    "sha256": "e5d6755da6f58b7248b6c9e0f93951ec43687f29a754f9fa66146e0ae28af986",
     "content_sha256_without_created_utc": "72f1b2840c688d6b2f669a72010ff3f2468314d47c588a712003977347db18f4"
    },
    "reusable": true
   }
  },
- "runner_note": "The teacher's runners (commit 6d0d0a7e) and this round's final attempt's (session commit 8f74bc94) differ. Fluid: run_battery.py e650539e... then, 805d3dbd... now: tool-task support (tools, env_factory, a task's own system text), engine metrics, splitting the task file on newlines only, an optional time box and submission order, the engine's max_num_seqs, and abort_request([id]) (commit 30494d3b); no fluid_reasoning_720 item carries tools or a system field, and the teacher run parsed all 720 lines. Capability: uncapped_eval.py cd4b1888... then, aef2658c... now (generation source digest 9eb5d477... then, 153e295c... now): an optional --max-num-seqs and abort_request([id]); degeneration.py (79354082...) and behavior.py are unchanged. In both, a record is taken at its stop and a stopped request's later output is dropped (`pending` no longer holds it), so the abort repair changes what the engine keeps running after a stop, not what a sealed record holds (analysis.py :: stop_record_integrity checks this on every sealed degeneration stop). It does not make a rerun reproduce the teacher's records token for token: batch composition differs (bf16 batch nondeterminism), so any regeneration is a new sample under the same seeds.",
+ "runner_note": "The teacher's runners (commit 6d0d0a7e) and this round's final attempt's (session commit 8f74bc94) differ. Fluid: run_battery.py e650539e... then, 805d3dbd... now: tool-task support (tools, env_factory, a task's own system text), engine metrics, splitting the task file on newlines only, an optional time box and submission order, the engine's max_num_seqs, and abort_request([id]) (commit 30494d3b); no fluid_reasoning_720 item carries tools or a system field, and the teacher run parsed all 720 lines. Capability: uncapped_eval.py cd4b1888... then, aef2658c... now (generation source digest 9eb5d477... then, 153e295c... now): an optional --max-num-seqs and abort_request([id]); degeneration.py (79354082...) and behavior.py are unchanged. In both, a record is taken at its stop and a stopped request's later output is dropped (`pending` no longer holds it), so the abort repair changes what the engine keeps running after a stop, not what a sealed record holds (the statements that build a non-fluid prompt are the same at both session commits: construction_path) (analysis.py :: stop_record_integrity checks this on every sealed degeneration stop). It does not make a rerun reproduce the teacher's records token for token: batch composition differs (bf16 batch nondeterminism), so any regeneration is a new sample under the same seeds.",
  "reusable": true
 }

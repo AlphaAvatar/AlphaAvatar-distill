@@ -137,7 +137,7 @@ copied here.
 ## Decisions
 
 * logs/budget/decisions.md -- 2026-10-27: the next research programme (Research A and B) opened at $0
-* logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; 2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed
+* logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; 2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed; 2026-11-14: review fixes (teacher prompt check, tombstones, A-MIX relay copy, the next round's layer-merging plan)
 
 ## Current status
 

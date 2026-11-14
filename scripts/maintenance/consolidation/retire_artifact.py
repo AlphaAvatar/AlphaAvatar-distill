@@ -30,6 +30,18 @@ out here rather than left to judgement at the keyboard:
                                   AGENTS.md 2.5: terminal, evidence and hashes
                                   durable, no consumer, not an anchor
 
+How the bytes could come back is three separate facts, never one flag:
+
+    --reconstruction / --reconstruction-kind
+                     a recipe and what it is: `retrain` (a new training run: new weights, not these bytes),
+                     `rebuild` (a computation from preserved inputs), `copy` (fetch a surviving copy) or `none`
+    --byte-identical whether the recipe gives back THESE bytes: `verified` (shown by an earlier rebuild whose hash
+                     matched; `--byte-identical-evidence` says where), `not_verified`, or `not_expected` (a retrain)
+    --same-hash-copy where a byte-identical copy survives (a local one is re-hashed)
+
+`deterministic_reconstruction_possible` is derived: true only when `--byte-identical verified`. Until 2026-11-14 it
+was `bool(--reconstruction)`, so any recipe -- a retrain included -- read as a deterministic rebuild.
+
 Refusals, which are the point of the tool:
 
   * the path is `protected` in logs/maintenance/inventories/checkpoint_registry.json, or carries a
@@ -38,7 +50,10 @@ Refusals, which are the point of the tool:
     clause it lifted (`protection_lifted`);
   * `--canonical` names something that does not exist;
   * a criterion of `byte_identical_duplicate` when the survivor's bytes differ;
-  * a criterion of `verified_stale_cache` without `--relay-verified`.
+  * a criterion of `verified_stale_cache` without `--relay-verified`;
+  * a recipe without its kind, `--byte-identical verified` without evidence or for a retrain, a
+    `reproducible_materialization` whose rebuild is not verified byte-identical, a `byte_identical_duplicate`
+    without a same-hash copy, and a local same-hash copy whose bytes differ.
 """
 
 from __future__ import annotations
@@ -101,6 +116,39 @@ def manifest(root: Path) -> tuple[list[dict], int]:
     return out, total
 
 
+RECONSTRUCTION_KINDS = ("retrain", "rebuild", "copy", "none")
+BYTE_IDENTICAL = ("verified", "not_verified", "not_expected")
+
+
+def reconstruction_fields(recipe: str, kind: str | None, byte_identical: str | None, evidence: str,
+                          copies: list[str], criterion: str, sha256: str | None = None) -> dict:
+    """The tombstone's reconstruction fields, kept apart: a recipe and its kind, whether it gives back these bytes,
+    and where a same-hash copy survives. Raises ValueError on an inconsistent combination."""
+    if recipe and not kind:
+        raise ValueError("--reconstruction needs --reconstruction-kind (retrain, rebuild, copy or none)")
+    kind = kind or "none"
+    if byte_identical is None:
+        byte_identical = "not_expected" if kind == "retrain" else "not_verified"
+    if byte_identical == "verified" and not evidence.strip():
+        raise ValueError("--byte-identical verified needs --byte-identical-evidence: the rebuild whose hash matched")
+    if byte_identical == "verified" and kind == "retrain":
+        raise ValueError("a retrain does not give back the same bytes; it is a new checkpoint")
+    if criterion == "reproducible_materialization" and byte_identical != "verified":
+        raise ValueError("reproducible_materialization needs a rebuild verified byte-identical")
+    if criterion == "byte_identical_duplicate" and not copies:
+        raise ValueError("byte_identical_duplicate needs --same-hash-copy")
+    for c in copies:
+        p = absolute(c.split(" ")[0])
+        if sha256 and p.is_file() and sha256_file(p) != sha256:
+            raise ValueError(f"--same-hash-copy {c} does not hash to {sha256}")
+    return {"reconstruction_recipe": recipe or None, "reconstruction_kind": kind,
+            "byte_identical_reconstruction": byte_identical,
+            "byte_identical_evidence": evidence.strip() or None,
+            "same_hash_copies": copies,
+            #: derived, never set from the presence of a recipe
+            "deterministic_reconstruction_possible": byte_identical == "verified"}
+
+
 def registry_guard(rel: str) -> tuple[bool, str, dict | None]:
     if not REGISTRY.is_file():
         return True, "no registry to check against", None
@@ -148,7 +196,15 @@ def main() -> int:
                          "record that carries the same fact")
     ap.add_argument("--frozen-results", default="",
                     help="where the conclusion that depended on this lives now")
-    ap.add_argument("--reconstruction", default="")
+    ap.add_argument("--reconstruction", default="", help="the recipe")
+    ap.add_argument("--reconstruction-kind", choices=RECONSTRUCTION_KINDS, default=None)
+    ap.add_argument("--byte-identical", choices=BYTE_IDENTICAL, default=None,
+                    help="whether the recipe gives back these bytes (default: not_expected for a retrain, "
+                         "else not_verified)")
+    ap.add_argument("--byte-identical-evidence", default="",
+                    help="the earlier rebuild whose hash matched (required with --byte-identical verified)")
+    ap.add_argument("--same-hash-copy", action="append", default=[],
+                    help="where a byte-identical copy survives (repeatable; a local one is re-hashed)")
     ap.add_argument("--reconstruction-cost", default="")
     ap.add_argument("--relay-path", default="")
     ap.add_argument("--relay-verified", action="store_true",
@@ -195,6 +251,13 @@ def main() -> int:
         return 2
 
     files, total = manifest(target)
+    try:
+        recon = reconstruction_fields(args.reconstruction, args.reconstruction_kind, args.byte_identical,
+                                      args.byte_identical_evidence, args.same_hash_copy, args.criterion,
+                                      files[0]["sha256"] if len(files) == 1 else None)
+    except ValueError as e:
+        print(f"REFUSED: {e}", file=sys.stderr)
+        return 2
     entry = {
         "canonical_id": args.id,
         "historical_paths": [rel],
@@ -218,8 +281,7 @@ def main() -> int:
         "reason_physical_weights_deleted": args.reason,
         "canonical_surviving_evidence": args.canonical,
         "relay_hash_verified": bool(args.relay_verified),
-        "deterministic_reconstruction_possible": bool(args.reconstruction),
-        "reconstruction_recipe": args.reconstruction or None,
+        **recon,
         "expected_reconstruction_cost": args.reconstruction_cost or None,
         "frozen_results_location": args.frozen_results or None,
         **({"protection_lifted": {**guard, "maintainer_decision": args.maintainer_decision.strip()}}

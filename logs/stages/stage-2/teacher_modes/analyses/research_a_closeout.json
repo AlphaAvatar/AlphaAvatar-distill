@@ -177,5 +177,10 @@
   "remainders": "A-TM $21.7557 and A-E $2.7911 lapse: not carried forward, not refunded, not transferred",
   "integration": "the research branch is squash-merged into main under the same decision (section 4)",
   "storage": "the three volumes are kept unchanged; no retirement and no relay upload is authorized by this decision"
+ },
+ "copies_after_2026_11_14": {
+  "students": "no weight copy of any of the eight students remains: the volume thprcgh7s9 deleted 2026-11-14T10:46Z, the dev-box copies retired the same day (tombstones devbox_20261114_stage3_sr_<unit>), and A-MIX-6cat-sr-s20260801's relay copy retired at 13:10Z (tombstone relay_20261114_stage3_sr_A-MIX-6cat-sr-s20260801)",
+  "kept": "every unit's receipt, configs and resume identity, the evaluation evidence archives (dev box and relay), and the results above; the verdict does not depend on the weights",
+  "record": "logs/stages/stage-2/teacher_modes/storage/stage3_devbox_backup.json"
  }
 }

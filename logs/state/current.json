@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer: the next round's plan (RI-S1 REPORT.md section 11; no paid run before approval); a merge into main; Research B's teacher (pending).",
+ "next": "Maintainer: the next round's plan (RI-S1 REPORT.md section 11: layer merging at D's structure; no paid run before approval); a merge into main; Research B's teacher (pending).",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -222,7 +222,7 @@
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",
-  "hf_private_headroom_gib": "relay 66.38 GiB after 2026-11-14 (decisions.md)",
+  "hf_private_headroom_gib": "relay 64.16 GiB LFS after 2026-11-14 13:10Z (decisions.md)",
   "roots": {
    "artifacts": "/home/ecs-user/aad-artifacts",
    "git": "/home/ecs-user/AlphaAvatar-distill"

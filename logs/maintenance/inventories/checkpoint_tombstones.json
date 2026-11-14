@@ -2,10 +2,15 @@
  "schema": "aadistill.tombstone/v2",
  "fields": [
   "architecture",
+  "byte_identical_evidence",
+  "byte_identical_reconstruction",
   "canonical_id",
   "canonical_surviving_evidence",
   "config_sha256",
+  "consumer_audit",
+  "correction_20261114",
   "deleted_utc",
+  "deletion",
   "deletion_criterion",
   "deletion_criterion_meaning",
   "deterministic_reconstruction_possible",
@@ -20,16 +25,19 @@
   "other_copies",
   "protection_lifted",
   "reason_physical_weights_deleted",
+  "reconstruction_kind",
   "reconstruction_recipe",
   "references_at_deletion",
   "relay_hash_verified",
   "relay_path",
   "retention_tier",
+  "same_hash_copies",
   "scientific_role",
   "seed",
   "size_bytes",
   "size_human",
   "store",
+  "tombstone_written_utc",
   "weights_sha256",
   "withdrawn",
   "withdrawn_reason",
@@ -38,10 +46,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 115,
-  "active": 113,
-  "active_retired_bytes": 572299167594,
-  "active_retired_human": "532.995 GiB",
+  "tombstones_total": 116,
+  "active": 114,
+  "active_retired_bytes": 574683402562,
+  "active_retired_human": "535.216 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -7276,11 +7284,23 @@
    "reason_physical_weights_deleted": "maintainer 2026-11-14: necessary checkpoints only on the dev box; this terminal Research A student has no consumer (Research A closed 2026-11-11, grants closed), its evaluation evidence is durable (archive fadea626 on the dev box and the relay) and its hashes are in its receipt and units record; dev-box disk 98% used before RI-S1's D/W/DW come down",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A-MIX-6cat-sr-s20260726/receipt.json; /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
    "relay_hash_verified": false,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "retrain the unit from the packed Top-1 (b74dede8, kept) with its frozen pack and config (scripts/stages/stage-2/teacher_modes, a new study)",
    "expected_reconstruction_cost": "$23.41 for both seeds (retraining, not bit-reproducible)",
    "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json; docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
-   "deleted_utc": "2026-11-14T10:26:08+00:00"
+   "deleted_utc": "2026-11-14T10:26:08+00:00",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "03cbb97de783a9b2af60cfc9d43540f6ee2bb5eb08d0d5c686945491080dfad5",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "devbox_20261114_stage3_sr_A-MIX-6cat-sr-s20260801",
@@ -7329,11 +7349,25 @@
    "reason_physical_weights_deleted": "maintainer 2026-11-14: necessary checkpoints only on the dev box; this terminal Research A student has no consumer (Research A closed 2026-11-11, grants closed), its evaluation evidence is durable (archive fadea626 on the dev box and the relay) and its hashes are in its receipt and units record; dev-box disk 98% used before RI-S1's D/W/DW come down",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A-MIX-6cat-sr-s20260801/receipt.json; /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
    "relay_hash_verified": false,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "retrain the unit from the packed Top-1 (b74dede8, kept) with its frozen pack and config (scripts/stages/stage-2/teacher_modes, a new study)",
    "expected_reconstruction_cost": "$23.41 for both seeds (retraining, not bit-reproducible)",
    "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json; docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
-   "deleted_utc": "2026-11-14T10:26:19+00:00"
+   "deleted_utc": "2026-11-14T10:26:19+00:00",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [
+    "relay durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/model.safetensors (itself retired 2026-11-14, tombstone relay_20261114_stage3_sr_A-MIX-6cat-sr-s20260801)"
+   ],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "devbox_20261114_stage3_sr_A1-6cat-sr-s20260726",
@@ -7382,11 +7416,23 @@
    "reason_physical_weights_deleted": "maintainer 2026-11-14: necessary checkpoints only on the dev box; this terminal Research A student has no consumer (Research A closed 2026-11-11, grants closed), its evaluation evidence is durable (archive fadea626 on the dev box and the relay) and its hashes are in its receipt and units record; dev-box disk 98% used before RI-S1's D/W/DW come down",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260726/receipt.json; /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
    "relay_hash_verified": false,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "retrain the unit from the packed Top-1 (b74dede8, kept) with its frozen pack and config (scripts/stages/stage-2/teacher_modes, a new study)",
    "expected_reconstruction_cost": "$7.76 for both seeds (retraining, not bit-reproducible)",
    "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json; docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
-   "deleted_utc": "2026-11-14T10:26:29+00:00"
+   "deleted_utc": "2026-11-14T10:26:29+00:00",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "devbox_20261114_stage3_sr_A1-6cat-sr-s20260801",
@@ -7435,11 +7481,23 @@
    "reason_physical_weights_deleted": "maintainer 2026-11-14: necessary checkpoints only on the dev box; this terminal Research A student has no consumer (Research A closed 2026-11-11, grants closed), its evaluation evidence is durable (archive fadea626 on the dev box and the relay) and its hashes are in its receipt and units record; dev-box disk 98% used before RI-S1's D/W/DW come down",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260801/receipt.json; /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
    "relay_hash_verified": false,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "retrain the unit from the packed Top-1 (b74dede8, kept) with its frozen pack and config (scripts/stages/stage-2/teacher_modes, a new study)",
    "expected_reconstruction_cost": "$7.76 for both seeds (retraining, not bit-reproducible)",
    "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json; docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
-   "deleted_utc": "2026-11-14T10:26:39+00:00"
+   "deleted_utc": "2026-11-14T10:26:39+00:00",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "devbox_20261114_stage3_sr_A2-6cat-sr-s20260726",
@@ -7488,11 +7546,23 @@
    "reason_physical_weights_deleted": "maintainer 2026-11-14: necessary checkpoints only on the dev box; this terminal Research A student has no consumer (Research A closed 2026-11-11, grants closed), its evaluation evidence is durable (archive fadea626 on the dev box and the relay) and its hashes are in its receipt and units record; dev-box disk 98% used before RI-S1's D/W/DW come down",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260726/receipt.json; /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
    "relay_hash_verified": false,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "retrain the unit from the packed Top-1 (b74dede8, kept) with its frozen pack and config (scripts/stages/stage-2/teacher_modes, a new study)",
    "expected_reconstruction_cost": "$15.61 for both seeds (retraining, not bit-reproducible)",
    "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json; docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
-   "deleted_utc": "2026-11-14T10:26:50+00:00"
+   "deleted_utc": "2026-11-14T10:26:50+00:00",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "5e26ab61fab82ee988d042a98b8e467a284fd5682fa7de9dabc54623ed2606d4",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "devbox_20261114_stage3_sr_A2-6cat-sr-s20260801",
@@ -7541,11 +7611,23 @@
    "reason_physical_weights_deleted": "maintainer 2026-11-14: necessary checkpoints only on the dev box; this terminal Research A student has no consumer (Research A closed 2026-11-11, grants closed), its evaluation evidence is durable (archive fadea626 on the dev box and the relay) and its hashes are in its receipt and units record; dev-box disk 98% used before RI-S1's D/W/DW come down",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260801/receipt.json; /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
    "relay_hash_verified": false,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "retrain the unit from the packed Top-1 (b74dede8, kept) with its frozen pack and config (scripts/stages/stage-2/teacher_modes, a new study)",
    "expected_reconstruction_cost": "$15.61 for both seeds (retraining, not bit-reproducible)",
    "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json; docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
-   "deleted_utc": "2026-11-14T10:27:00+00:00"
+   "deleted_utc": "2026-11-14T10:27:00+00:00",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "236425e5739bc71ba3661cda9e0ef9f1e02cb7c155eeb714a3c4f8686f2a2df6",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "devbox_20261114_stage3_sr_C1-6cat-sr-s20260726",
@@ -7594,11 +7676,23 @@
    "reason_physical_weights_deleted": "maintainer 2026-11-14: necessary checkpoints only on the dev box; this terminal Research A student has no consumer (Research A closed 2026-11-11, grants closed), its evaluation evidence is durable (archive fadea626 on the dev box and the relay) and its hashes are in its receipt and units record; dev-box disk 98% used before RI-S1's D/W/DW come down",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260726/receipt.json; /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
    "relay_hash_verified": false,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "retrain the unit from the packed Top-1 (b74dede8, kept) with its frozen pack and config (scripts/stages/stage-2/teacher_modes, a new study)",
    "expected_reconstruction_cost": "$7.43 for both seeds (retraining, not bit-reproducible)",
    "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json; docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
-   "deleted_utc": "2026-11-14T10:27:10+00:00"
+   "deleted_utc": "2026-11-14T10:27:10+00:00",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "devbox_20261114_stage3_sr_C1-6cat-sr-s20260801",
@@ -7647,11 +7741,23 @@
    "reason_physical_weights_deleted": "maintainer 2026-11-14: necessary checkpoints only on the dev box; this terminal Research A student has no consumer (Research A closed 2026-11-11, grants closed), its evaluation evidence is durable (archive fadea626 on the dev box and the relay) and its hashes are in its receipt and units record; dev-box disk 98% used before RI-S1's D/W/DW come down",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260801/receipt.json; /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
    "relay_hash_verified": false,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "retrain the unit from the packed Top-1 (b74dede8, kept) with its frozen pack and config (scripts/stages/stage-2/teacher_modes, a new study)",
    "expected_reconstruction_cost": "$7.43 for both seeds (retraining, not bit-reproducible)",
    "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json; docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
-   "deleted_utc": "2026-11-14T10:27:21+00:00"
+   "deleted_utc": "2026-11-14T10:27:21+00:00",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "a24f887370c62bde491576174128b6a2438051b9cba148c836d4709688c3d057",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "relay_20261114_ri_s1_D",
@@ -7673,12 +7779,26 @@
    "reason_physical_weights_deleted": "the maintainer kept the necessary checkpoints on the dev box only and had their remote weight copies removed; the local copy was pulled from this object and re-hashed file by file (pull_receipt.json), its artifact digest recomputed",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D/model.safetensors (sha256 equal); logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
    "relay_hash_verified": true,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "rebuild from the teacher and the frozen mapping (driver.py's mapping and groups steps on one GPU; the mapping stays on the relay and the dev box)",
    "expected_reconstruction_cost": "one L40S for about 30 minutes (attempt 2 built the mapping and the three groups in its first ~40 min)",
    "frozen_results_location": "logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json; docs/stages/stage-1/reasoning_inheritance/REPORT.md",
    "maintainer_decision": "2026-11-14 maintainer: \"完成本地迁移后，按'仅本地保留必要 checkpoint'清理对应的远端权重中转副本；轻量证据、manifest 和删除记录保留\" (logs/budget/decisions.md :: 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only)",
-   "deleted_utc": "2026-11-14T10:49:03+00:00"
+   "deleted_utc": "2026-11-14T10:49:03+00:00",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": "built once (attempt ri_diagnosis_20261113_105643); its blocks, embedding and final norm were checked equal to the teacher's bit for bit, but no second build was hashed against this file",
+   "same_hash_copies": [
+    "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D/model.safetensors"
+   ],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "relay_20261114_ri_s1_W",
@@ -7700,12 +7820,26 @@
    "reason_physical_weights_deleted": "the maintainer kept the necessary checkpoints on the dev box only and had their remote weight copies removed; the local copy was pulled from this object and re-hashed file by file (pull_receipt.json), its artifact digest recomputed",
    "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W/model.safetensors (sha256 equal); logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
    "relay_hash_verified": true,
-   "deterministic_reconstruction_possible": true,
+   "deterministic_reconstruction_possible": false,
    "reconstruction_recipe": "rebuild from the teacher and the frozen mapping (driver.py's mapping and groups steps on one GPU; the mapping stays on the relay and the dev box)",
    "expected_reconstruction_cost": "one L40S for about 30 minutes (attempt 2 built the mapping and the three groups in its first ~40 min)",
    "frozen_results_location": "logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json; docs/stages/stage-1/reasoning_inheritance/REPORT.md",
    "maintainer_decision": "2026-11-14 maintainer: \"完成本地迁移后，按'仅本地保留必要 checkpoint'清理对应的远端权重中转副本；轻量证据、manifest 和删除记录保留\" (logs/budget/decisions.md :: 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only)",
-   "deleted_utc": "2026-11-14T10:49:03+00:00"
+   "deleted_utc": "2026-11-14T10:49:03+00:00",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": "built once (attempt ri_diagnosis_20261113_105643); its 28 kept blocks, embedding and final norm were checked equal to DW's bit for bit, but no second build was hashed against this file",
+   "same_hash_copies": [
+    "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W/model.safetensors"
+   ],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": false,
+    "weights_sha256": "64d367fe0b6613aa57d52cda3e285a5d52122fd0ecee736b0016af92fc59fb29",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
   },
   {
    "canonical_id": "relay_20261114_ri_s1_DW_packed_top1",
@@ -7732,8 +7866,131 @@
    "expected_reconstruction_cost": "one L40S for about 30 minutes (attempt 2 built the mapping and the three groups in its first ~40 min)",
    "frozen_results_location": "logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json; docs/stages/stage-1/reasoning_inheritance/REPORT.md",
    "maintainer_decision": "2026-11-14 maintainer: \"完成本地迁移后，按'仅本地保留必要 checkpoint'清理对应的远端权重中转副本；轻量证据、manifest 和删除记录保留\" (logs/budget/decisions.md :: 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only)",
-   "deleted_utc": "2026-11-14T10:49:03+00:00"
+   "deleted_utc": "2026-11-14T10:49:03+00:00",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "verified",
+   "byte_identical_evidence": "RI-S1 rebuilt DW from the teacher and the frozen mapping and its single shard hashed to b74dede8..., the packed search's own Top-1 1f5e4b42 (docs/stages/stage-1/reasoning_inheritance/REPORT.md section 3): two materializations, the same bytes",
+   "same_hash_copies": [
+    "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW/model.safetensors"
+   ],
+   "correction_20261114": {
+    "field": "deterministic_reconstruction_possible",
+    "was": true,
+    "now": true,
+    "weights_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+    "why": "until 2026-11-14 retire_artifact.py set deterministic_reconstruction_possible = bool(--reconstruction), so any recipe, a retrain included, read as a deterministic rebuild; it now means a rebuild verified to give back these bytes (byte_identical_reconstruction == 'verified'), with the recipe's kind and any same-hash copy recorded apart (maintainer review 2026-11-14)",
+    "corrected_utc": "2026-11-14T13:10:02+00:00"
+   }
+  },
+  {
+   "canonical_id": "relay_20261114_stage3_sr_A-MIX-6cat-sr-s20260801",
+   "historical_paths": [
+    "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Research A Stage 3 (a_train_sr_mix_20261109_193709)",
+   "seed": null,
+   "scientific_role": "Research A Stage-3 student A-MIX-6cat-sr-s20260801, final step 9701 (closed CURRENT_METHOD_NO_GO): the relay copy, the last copy of these bytes after the dev-box and volume copies were retired",
+   "weights_sha256": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/stages/stage-2/teacher_modes/analyses/research_a_closeout.json",
+    "logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/A-MIX-6cat-sr_units.json",
+    "logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json",
+    "logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/units/A-MIX-6cat-sr-s20260801/off_volume_copy.json",
+    "logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/runtime/session.json",
+    "logs/stages/stage-2/teacher_modes/storage/stage3_devbox_backup.json"
+   ],
+   "consumer_audit": {
+    "code_readers": "none: git grep over src, configs and scripts finds only teacher_modes/a1_units.py :: copy_final_off_volume (the writer that uploaded it) and a test of that upload path",
+    "session_launchers": "none of the 39 relay paths the current session launchers declare (retire_eligible_checkpoints.declared_relay_paths) is under durable/stage3_sr",
+    "registry": "no checkpoint row protects it (it appears only in the relay listing)",
+    "experiment": "Research A closed 2026-11-11 (grants closed, study_engineering.require_open refuses); not an incumbent, a release or a retained anchor; no declared next-round consumer (RI next round reuses D)",
+    "relay_listing": "one LFS object with this oid, at this one path (list_lfs_files 2026-11-14T13:09:14Z)"
+   },
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "AGENTS.md 2.5 standing retirement: terminal (Research A closed), evaluation evidence durable, hashes preserved, no active or declared consumer, not an anchor. stage3_devbox_backup.json had left it 'outside the decision' of the volume retirement; that named why it was not deleted with the volumes, not a reason to keep it (maintainer review 2026-11-14)",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A-MIX-6cat-sr-s20260801/receipt.json; /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; relay durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/units/A-MIX-6cat-sr-s20260801/off_volume_copy.json; the copy's config.json and generation_config.json stay on the relay beside it",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "retrain the unit from the packed Top-1 (b74dede8, kept) with its frozen pack and config (scripts/stages/stage-2/teacher_modes, a new study)",
+   "reconstruction_kind": "retrain",
+   "byte_identical_reconstruction": "not_expected",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "$23.41 for both seeds (a retrain: a new checkpoint, not these bytes)",
+   "frozen_results_location": "logs/stages/stage-2/teacher_modes/analyses/mixed_result.json; logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/evidence_archive.json; docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
+   "maintainer_decision": "2026-11-14 maintainer: \"按对象身份核对是否存在真实的 active/declared consumer、保留锚点或其他有效引用：如果没有，按 AGENTS.md 2.5 的常设授权完成退役，先写墓碑、保留证据，再删除权重并核对结果\"",
+   "deleted_utc": "2026-11-14T13:10:37+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "92f9f4fc603cf8db6263487d8352065297507f2d",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 71278955715,
+    "lfs_bytes_after": 68894720747,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false,
+     "config_json_and_generation_config_json_kept": true
+    }
+   },
+   "tombstone_written_utc": "2026-11-14T13:10:02+00:00"
   }
  ],
- "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant."
+ "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant.",
+ "field_semantics_20261114": {
+  "deterministic_reconstruction_possible": "true only when byte_identical_reconstruction == 'verified': a rebuild shown to give back these bytes. The recipe's kind (retrain / rebuild / copy / none) and any surviving same-hash copy are recorded apart (reconstruction_kind, same_hash_copies).",
+  "earlier_entries": "Before 2026-11-14 retire_artifact.py set the field from the presence of a recipe, and retire_eligible_checkpoints.py from the registry's `reconstructable` (a recipe exists). In entries without byte_identical_reconstruction it therefore means 'a recipe exists' unless the recipe itself names a byte-exact replay or a copy; 32 of them carry true with a retrain recipe. They are not rewritten; this round's twelve entries carry the corrected fields (correction_20261114 where a value was set before).",
+  "retrain_entries_reading_true": [
+   "e1_r0860k_sa_pca",
+   "e1_r0860k_sb_pca",
+   "e1_r2960k_sb_rand",
+   "e1_r5500k_sb_pca",
+   "e1_r5500k_sb_rand",
+   "e1_ctl_r0250k_sa_pca_stepmatched",
+   "e1_r0250k_sa_pca",
+   "e1_r0250k_sa_rand",
+   "e1_r0250k_sb_pca",
+   "e1_r0250k_sb_rand",
+   "e1_r0460k_sa_pca",
+   "e1_r0460k_sa_rand",
+   "e1_r0460k_sb_pca",
+   "e1_r0460k_sb_rand",
+   "e1_r0860k_sa_rand",
+   "e1_r0860k_sb_rand",
+   "e1_r1600k_sa_rand",
+   "e1_r1600k_sb_rand",
+   "e1_r2960k_sa_rand",
+   "e1_r5500k_sa_rand",
+   "devbox_20261109_ctl_sa_trainer_state",
+   "devbox_20261109_ctl_sb_trainer_state",
+   "devbox_20261110_e4_p2_r1600k_sa",
+   "devbox_20261110_e6b_p2_r2960k_sa",
+   "devbox_20261110_e7_control_r1600k_sa",
+   "devbox_20261110_e7_fineweb_r1600k_sa",
+   "devbox_20261110_p2_ceheavy_sa",
+   "devbox_20261110_e4_p2_r1600k_sb",
+   "devbox_20261110_e6b_p2_r2960k_sb",
+   "devbox_20261110_e7_control_r1600k_sb",
+   "devbox_20261110_e7_fineweb_r1600k_sb",
+   "devbox_20261110_p2_ceheavy_sb"
+  ]
+ }
 }

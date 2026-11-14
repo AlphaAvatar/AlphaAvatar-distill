@@ -4,8 +4,8 @@
 groups are built and verified, and D, W and DW are kept on the dev box (section 4); the state evaluation is measured;
 every registered eval-set-1 unit is generated and scored for D, W and DW in both modes, and the teacher's evaluation is
 reused after every identity check, item by item. No recovery training, no new search. Total cost $19.9554 over six
-attempts of the $35 ceiling; the unspent $15.0446 lapsed at closure (section 10). Corrections to the first version
-(commit `09b48be9`) are listed in section 12.
+attempts of the $35 ceiling; the unspent $15.0446 lapsed at closure (section 10). Corrections after commits
+`09b48be9` and `b191d555` are listed in section 12; section 11 is the next round's plan.
 
 **Result in one paragraph.** Untrained, removing 8 of the 36 blocks and changing nothing else (D) takes static fluid
 reasoning from 89.6% to 5.6% in thinking mode and from 68.9% to 7.9% in non-thinking mode, and interactive episodes
@@ -148,18 +148,27 @@ selection's own criterion (in sample for it); D and W were constructed from the 
   template switch, system message, tokenizer and chat template, stop ids, degeneration check; for the fluid unit also
   its item file and seed namespace), and every unit is checked item by item: its records cover the registered unit
   exactly (none missing, extra or repeated); every request's seed is the decoding protocol's rule (1,272 and 1,592
-  fluid turns, 996 capability and legacy requests per mode); and every prompt equals this round's D, W and DW for the
-  same item. For the fluid unit that is the first user message as text (also equal to the registered item's) and the
-  prompt length; the other units' records carry no prompt text and their summaries name only a pod path for the prompt
-  file (`not_recorded`), so for them it is the prompt length in tokens, the system source and the think pre-opening: a
-  length match, not a byte identity.
+  fluid turns, 996 capability and legacy requests per mode); and every item's prompt fields equal this round's D, W
+  and DW for the same item. A field absent or invalid on either side counts as not recorded, never as equal (none
+  was). The prompt's fields and its content are kept apart:
+  * fluid unit: the records carry the prompt's text, and the first user message equals this round's and the
+    registered item's -- **content verified**;
+  * every other unit: the records carry only the prompt's length, system source and think pre-opening (no text, no
+    token ids) and the summaries only a pod path for the prompt file (`not_recorded`). Content identity is **derived,
+    not compared**: the teacher's session commit (`f93d83a7`) and this round's (`8f74bc94`) have the same registered
+    item files, staging code and rendering statements (`teacher_reuse.json :: construction_path`), and rendering
+    every registered item on the dev box with the teacher's verified tokenizer reproduces every recorded prompt
+    length, system source and think pre-opening, the teacher's and D's, W's and DW's. Equal lengths alone would not
+    establish it.
 * Intervals: 95% percentile intervals over 10,000 cluster-bootstrap resamples (seed 20261113): fluid items are
   resampled by whole rule family (86 clusters), paired units by pair, other units by item. The design registered the
   eval set's independence groups for the fluid unit instead (`independence_v1.json`: only the six groups of renamed
   knights-and-knaves puzzles are merged, 708 clusters). The family clustering was chosen when the analysis was
   written; the registration is left as it was, and both are computed (table "Fluid intervals under the registered
-  independence grouping"): the estimates are the same, the family intervals are the wider on every T-D contrast, and
-  the retention intervals differ in both directions. They cover item and family sampling, not decoding variance (one
+  independence grouping"): the estimates are the same; the family intervals are the wider on 11 of the 12 fluid
+  T-D contrasts, but not on non-thinking-mode task-contained deduction (independence groups [+61.9, +75.4], families
+  [+63.2, +75.0]); the retention intervals differ in both directions. The family clustering is a post-hoc analysis
+  choice; the independence grouping is the registered one. They cover item and family sampling, not decoding variance (one
   sample per item).
 * Analysis: `scripts/stages/stage-1/reasoning_inheritance/analysis.py` -> `analyses/structural_ablation.json`;
   tables below rendered from it by `render.py`.
@@ -446,9 +455,13 @@ depth), with every remaining parameter the teacher's, removes nearly all of the 
 * In non-thinking mode D keeps far more of reading from supplied evidence than of derivation: RAG reading 81% -> 42%
   (half of T's correct items kept), multi-hop reading 75% -> 28%, answerability pairs 55% -> 31.7%, against GSM8K
   38% -> 0, verified math 76% -> 9% and static fluid 68.9% -> 7.9%. In thinking mode every one of these is at 6% or
-  below. GSM8K's 0 in non-thinking mode is mostly extraction: 49 of D's 50 well-formed replies state no final answer
-  the registered scorer reads; of the other 50 rows, 49 are degeneration stops and one breaks the think protocol. T's own non-thinking GSM8K has 55 of 100
-  such replies, which is why T is at 38% there; the unit measures answer format as well as arithmetic in this mode. Descriptive, across mixed-domain supporting units, never read as fluid reasoning (P10.2); in direction it is
+  below. D's GSM8K 0 in non-thinking mode, over all 100 items: 49 state no final answer the registered scorer can
+  read, 49 are degeneration stops, 1 gives an answer read and wrong, 1 breaks the think protocol. Only within the 50
+  well-formed replies is it 49 of 50 without a readable answer, so over the unit the failure is half degeneration and
+  half no readable answer, not mainly extraction. A reply without a readable answer is shown neither wrong nor right;
+  the registered scorer counts it as not correct. T's own non-thinking GSM8K has 55 of 100 replies without a readable
+  answer, which is why T is at 38% there; in this mode the unit measures answer format as well as arithmetic.
+  Descriptive, across mixed-domain supporting units, never read as fluid reasoning (P10.2); in direction it is
   Gromov et al.'s split between knowledge-style QA and reasoning.
 
 **How D fails depends on the mode.** In thinking mode 86.3% of D's static rollouts end in a degeneration stop (at
@@ -552,67 +565,152 @@ on the dev box only.
   `durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz` (sha256
   `c69706526086bdf37600edd813ec2105596136abce11872a17c985344dc4c6dd`, downloaded again and re-hashed). The analysis
   binds each scored directory by content digest (`structural_ablation.json :: inputs`).
+* **Other weights on the relay (review of 2026-11-14):** Research A's last Stage-3 relay copy
+  (A-MIX-6cat-sr-s20260801, 2.22 GiB) had no consumer and was retired under AGENTS.md 2.5 (tombstone
+  `relay_20261114_stage3_sr_A-MIX-6cat-sr-s20260801`, relay commit `92f9f4fc`; its config files stay). The relay still
+  holds 29 weight files (46.63 GiB) of earlier rounds -- the Stage-0 calibration-volume finalists (13), E1 scaling
+  students (6), Stage-3 s1/s2 recoveries (5), the 0.6B initialization (2), two permanent controls and a D3 product --
+  none of RI-S1 or Research A Stage 3; they were not audited object by object in this round
+  (`logs/maintenance/inventories/checkpoint_registry.json`).
 * **Volumes:** the programme's three network volumes (`thprcgh7s9`, `4rhubprswo`, `am5m373kuq`; not this study's) were
   deleted on 2026-11-14 at 10:46Z. The provider read back no volume and no pod; each storage record carries what went
   and what was kept. The one small record that had looked uncopied (Research A v1 unit 6's training records) was
   already on the dev box, so no pod was needed to read a volume. Provider balance afterwards: $16.63, spend
   $0.00 per hour (`logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json`).
 
-## 11. Next round (evidence, derivation, hypothesis kept apart)
+## 11. Next round: layer merging at D's fixed structure (a plan, not an authorization)
 
-Status: a recommendation for the next round's plan, not an authorization. Nothing below starts a paid experiment or
-recovery training until the maintainer approves a plan with its own study and grant.
+Status: a plan for the maintainer to decide. Nothing below starts a paid experiment, recovery training or a merge into
+`main`; it needs its own study, grant and pre-registration record first. Revised 2026-11-14 after review (section 12).
 
-**Evidence from this round.**
+**The question.** At D's final structure -- 28 blocks, hidden 2560, FFN 9728, 32 query / 8 KV heads, 3,215,021,568
+parameters, the teacher's embedding, final norm and LM head -- does initializing the blocks with information from the 8
+removed blocks do better than dropping them (D)? Only the values of six blocks change; no new depth or width
+allocation is needed first, and D is the direct-deletion control.
 
-* Generation, both modes: depth pruning alone, untrained, removes nearly all of the measured fluid reasoning (T-D
-  +84.0 / +61.1 pp static, +43.1 / +34.0 pp interactive), in short answers as well as long ones; the non-depth
-  compression alone, and both together, are at the floor on every formal unit.
-* Distribution (state evaluation): the non-depth compression moves the root distribution about ten times as far as
-  the depth pruning (KL 6.45 vs 0.65); removing the blocks on top of it adds 0.32 nats.
+**What this round's evidence does and does not support.**
 
-**Derivation.**
+* Generation: removing 8 of 36 blocks, nothing else changed, takes static fluid from 89.6% to 5.6% (thinking) and
+  from 68.9% to 7.9% (non-thinking), interactive episodes to 0. D sits above 0 and far below T in both modes, so a
+  merge that helps or hurts can be measured on eval-set-1.
+* State evaluation and teacher-forced NLL/KL measure how far the next-token distribution moved on reference
+  trajectories (distribution and trajectory fidelity). They are diagnostics, not a measured reasoning retention: D's
+  KL of 0.65 sits beside an 84 pp generation loss, so a lower mean KL does not by itself mean better reasoning, and an
+  unchanged one does not rule a merge out.
+* D, W and DW have different parameter counts (3.215B, 0.722B, 0.596B). They describe the damage of this one fixed
+  compression scheme. They do not show that depth pruning keeps reasoning better or worse than width pruning, or that
+  the non-depth compression is the dominant bottleneck of every 0.6-0.7B structure (a separate study, below).
 
-* The depth axis is not cheap: its KL is small, its generation cost is nearly total. A method that restores some of the
-  8 removed blocks' function can be measured on D (28 blocks at the teacher's width), where both the state evaluation
-  and eval-set-1 have range. On DW, eval-set-1 correctness registers only an improvement large enough to lift DW off
-  the floor; a smaller one is still measurable there by graded measures (the state evaluation per axis,
-  teacher-forced measures), not by generation accuracy.
-* The non-depth compression moves the distribution furthest and binds a 0.6-0.7B student; until its damage is
-  decomposed, eval-set-1 correctness cannot tell W- or DW-like students apart while they stay at the floor.
+**Spans (all candidates).** Each removed block merges into the nearest kept block before it, so the merged block stands
+where its span starts and receives the span's input: the earlier-layer convention of LaCo's merge (Yang et al. 2024,
+Eq. 1) and the teacher-span-to-student-layer mapping of AGENTS.md 4.3.
 
-**The three merge variants (to test; none is claimed to work).**
+| kept block (root numbering) | absorbs | span |
+| ---: | --- | --- |
+| 2 | 3 | [2, 3] |
+| 10 | 11 | [10, 11] |
+| 16 | 17, 18 (consecutive) | [16, 17, 18] |
+| 24 | 25, 26 (consecutive) | [24, 25, 26] |
+| 29 | 30 | [29, 30] |
+| 31 | 32 | [31, 32] |
 
-1. *Direct parameter addition or averaging* of a removed block into a neighbour. Two residual blocks compute
-   `h + f_l(h) + f_{l+1}(h + f_l(h))`; one block with summed weights computes neither that nor the parallel
-   approximation `h + f_l(h) + f_{l+1}(h)`: RMSNorm weights differ per block and must be folded into the projections
-   first; summed query and key projections add cross terms `Q_l K_{l+1}^T` to the attention logits; SwiGLU's gate is
-   nonlinear in its weights; neurons and heads of different blocks are not aligned, so a sum mixes unrelated features;
-   averaging fixes the scale only. No calibration, seconds to build: the cheap baseline.
-2. *Activation-weighted merging*: the merged block's projections fitted to reproduce the pair's output on calibration
-   activations (least squares per projection, or the pair's causal KL against the parent in the packed context the
-   DEPTH operator already uses). Handles scale and part of the alignment; the nonlinearity limits it. No training.
-3. *Static learnable fusion weights* (one coefficient per matrix or per channel, trained with KD): few new parameters,
-   but a recovery-training result, not an initialization one, so it belongs to Stage 3.
+A kept block that receives two removed blocks (16, 24) combines its whole span in one step, never pairwise in sequence.
+The other 22 blocks, the embedding, the final norm and the LM head are D's, checked bit for bit.
 
-**Recommendation.**
+**Candidates (fixed with the plan; neither the list nor the decision rule changes after results are seen).**
 
-1. **First, on the depth axis at full width:** build variants 1 and 2 for the 8 removed blocks on D's K and compare
-   them with outright removal (D) under the state evaluation (minutes on one GPU), then on eval-set-1's fluid unit in
-   both modes only for the variant that moves the state evaluation (eval-set-1 never chooses). Variant 2 is the main
-   candidate; variant 1 is its control. Variant 3 follows only in a Stage 3 recovery comparison against recovered D.
-2. **In parallel, at $0 to a few dollars:** decompose W's damage with the same frozen mapping -- FFN only, residual
-   width only, query heads only, and their pairs -- by state evaluation, and re-allocate a fixed parameter budget
-   toward the factor that costs least.
-3. For untrained Stage-1 candidates, read reasoning retention first from graded measures without a floor (the state
-   suite per axis, or teacher-forced measures on teacher-native trajectories of a non-formal set); keep generation on
-   eval-set-1 for candidates above the floor.
-4. Hypothesis for Stage 6 (recurrent depth, AGENTS.md 4.8): if depth carries this much of the reasoning at a small
-   KL, re-executing shared blocks may recover depth without its parameters. D is the natural comparison point:
-   same width, fewer distinct blocks. Not tested here.
+1. **D, direct deletion.** The existing checkpoint (`9de449db...`, dev box) and its sealed eval-set-1 records: not
+   rebuilt, not regenerated.
+2. **M-avg, direct parameter averaging (the control).** For every tensor of a span's blocks (`input_layernorm`,
+   `q/k/v/o_proj`, `q_norm`, `k_norm`, `post_attention_layernorm`, `gate/up/down_proj`; Qwen3 has no biases):
+   `theta' = (1/|span|) * sum_{l in span} theta_l`. No folding, no alignment, no rescaling; seconds on CPU. It is the
+   no-alignment ("vanilla") merge of Verma et al. (2025) and the equal-weight case of MKA's
+   `theta~ = alpha * theta_l + (1 - alpha) * theta_m` (Liu et al. 2024).
+   *Parameter addition is not registered.* LaCo's `theta*_l = theta_l + sum_k (theta_{l+k} - theta_l)` has no scaling:
+   on the four two-block spans it reduces to `theta_{l+1}`, i.e. keeping the removed block instead of the kept one (a
+   different deletion, not a merge), and summing every tensor doubles the RMSNorm gains and scales the attention
+   logits, with no scaling rule in a primary source.
+3. **M-act, aligned activation-weighted merging.** Per span, on the teacher's parameters:
+   * *Fold the gains (exact).* Each block's `input_layernorm` gain into its q/k/v input columns and its
+     `post_attention_layernorm` gain into its gate/up input columns (Qwen3's RMSNorm multiplies by the gain, so
+     `W (g * x_hat) = (W diag g) x_hat`); the merged block's two gains are set to 1, so tensors and structure stay.
+     `q_norm`/`k_norm` act after the projection and cannot be folded; they take the block-level weights below.
+   * *Align each absorbed block to the kept one (an exact re-parameterization; after Verma et al. 2025).* FFN: neuron i
+     is (gate row i, up row i, down column i); its feature is its output `a_i = silu(g_i . x_hat) * (u_i . x_hat)`,
+     the down projection's input (Verma et al. use the pre-activation of a non-gated MLP); the Pearson cross-correlation
+     between the two blocks' neurons on the calibration positions; the permutation maximizing
+     `sum_i C(i, pi(i))` by linear assignment (`scipy.optimize.linear_sum_assignment`, Jonker-Volgenant; 9,728 x 9,728,
+     CPU minutes per absorbed block). Attention (GQA, 8 KV groups of 4 query heads; an extension of the FFN method):
+     KV groups matched by linear assignment on the cosine similarity of their residual writes `W_o a` (2,560-d, the
+     coordinates every block shares), then query heads within matched groups the same way; q/k/v rows and `o_proj`
+     columns permuted together, head dimensions never (RoPE pairs them).
+   * *Weight by activation importance.* After alignment each FFN slot combines its span's neurons with
+     `w_{l,i} = s_{l,i} / sum_l s_{l,i}`, `s = E[|a|] * ||down column||_2` (the FFN operator's importance,
+     `project.ffn_neuron_importance`); each query-head slot with the head's realized residual-write energy
+     `mean_t ||W_o,h a_h(t)||^2` (`attention.activation_importance_v1`'s statistic); each KV group's k/v rows with its
+     four heads' summed energy; `q_norm`/`k_norm` with each block's share of total head energy. The weights sum to 1,
+     so the merged block keeps one block's output scale, as M-avg does.
+   * *Statistics.* One teacher forward over `calib.hybrid_d4_base@v2` (558 examples, 569,270 tokens before packing;
+     the profile the anchor search's FFN and DEPTH steps used; its item file is on the dev box), under Stage 1's
+     packing (seeded random order, sequential packing with truncation into 8,192-token sequences, causal attention,
+     continuous positions), at the positions that profile's statistics use; each block's statistics are taken on its
+     own input in the teacher's forward, for the 14 blocks involved. Nothing is fitted to eval-set-1 or the state
+     suite.
+   * Not part of M-act: a least-squares refit of the output projections to the span's total update (a further
+     candidate, if ever) and learnable fusion coefficients (KD training: Stage 3).
 
-All of this is conditional on the fixed scheme of this round (one mapping, one budget); none of it shows depth
-compression to be better or worse than width compression at an arbitrary parameter budget.
+Lineage and identity: every value comes from `Qwen/Qwen3-4B@1cfa9a72` (downloaded on the pod at the pinned revision; D
+supplies the 22 unchanged blocks and is checked against it); the teacher's tokenizer, chat template and configs package
+each candidate as they do D. Each candidate's config equals D's and its parameter count is 3,215,021,568; its record
+carries the span table, the permutations' and statistics' digests and its artifact digest.
+
+**Measurements.**
+
+* eval-set-1, every registered unit, both modes, RI-S1's protocol unchanged: the runners as at session commit
+  `8f74bc94` (after the abort repair), seeds from item, turn and sample (independent of the model, so each item pairs
+  with D's sealed record), context 40,960 with no token cap, the degeneration check every 256 tokens, concurrency
+  floor(KV cache / context). eval-set-1 stays development-exposed and is not presented as a new blind test.
+* Reported apart, never pooled: correctness per unit and axis by the registered scorers; usable rollout and its
+  components; natural termination, degeneration stops, context-limit hits; failure types (answer read and wrong, no
+  answer the scorer can read, protocol error); teacher-behaviour fidelity (think delimiters, EOS).
+* State evaluation (`state_eval_hybrid@v3`, against the root) for each candidate, as a diagnostic. It may order work
+  on the pod; it decides neither which candidate is generated (both are) nor how one is judged.
+
+**Decision rule (registered with the plan).** Primary: M - D on the static fluid formal core (570 items) in thinking
+mode, for M-avg and M-act, paired by item, with 95% percentile intervals over 10,000 resamples of the registered
+independence groups (`independence_v1.json`, 708 clusters; rule-family intervals beside them). A candidate is better
+than deletion if its interval lies above 0 after Holm's correction over the two candidates, worse if it lies below 0,
+otherwise not distinguished. Secondary, reported and not decisive: the same in non-thinking mode, interactive episodes,
+each fluid axis, the supporting units, and M-act - M-avg (which differs in folding, alignment and weighting at once; a
+decomposition follows only if M-act differs from D). At D's 5.6%, about 3 pp is roughly the smallest paired difference
+an interval separates from 0 (a rough estimate from paired discordance, not a power analysis).
+
+**Reused, not redone.** D's checkpoint and sealed generations; T's reused evaluation; the frozen mapping's kept blocks;
+the calibration and state-suite items (dev box); eval-set-1; the RI-S1 driver's evaluation and resume paths. No corpus
+is regenerated, no baseline retrained, no valid measurement repeated.
+
+**Budget, estimated from RI-S1's measurements (one L40S at $1.09/h; the study's grant prices it).**
+
+* Setup, teacher download, the statistics forward, alignment, both merges, packaging and both state evaluations: about
+  1 h (attempt 2 built the mapping, the three groups and their state evaluations in its first ~40 minutes).
+* Generation per candidate: about 1.8 h if it behaves like D (after the repair D took ~40 min for the thinking-mode
+  fluid unit, 34 min for the thinking-mode capability units, 16 and 18 min in non-thinking mode), about 3.6 h if it
+  behaves like T (T's 6.29M + 0.62M output tokens at D's measured ~540 tokens/s at concurrency 7).
+* Total 4.6-8.2 h, about $5-9 for both candidates, plus a teardown reserve. One session, one pod, no network volume.
+
+**A separate study, not a prerequisite: depth against width at a common budget.** Which axis -- depth, FFN width,
+residual width or query heads -- loses the least reasoning per parameter needs structures at a common parameter budget,
+with parameters, training and inference compute, and deployment latency reported apart. D, W and DW cannot answer it.
+Decomposing W (FFN only, residual width only, query heads only) can still locate where this scheme's damage comes
+from. Nothing here materializes a model or starts a search for that study.
+
+**Elsewhere.** Learnable fusion coefficients trained with KD: Stage 3. Shared-parameter recurrent execution and its
+training: Stage 6 (AGENTS.md 4.8), with D a natural comparison point (same width, fewer distinct blocks).
+
+References (read for this plan): LaCo, Yang et al. 2024, arXiv 2402.11187 (Eq. 1, merge into the earlier layer);
+Verma, Murray, Duh 2025, arXiv 2501.06126 (FF neuron alignment by cross-correlation, linear assignment, then uniform
+averaging; aligned beats the vanilla merge); MKA, Liu et al. 2024, arXiv 2406.16330 (weighted pair merge, alpha from a
+similarity).
 
 ## 12. Corrections to the first version (2026-11-14, after commit `09b48be9`)
 
@@ -643,3 +741,26 @@ earlier tables is reproduced, the inputs bound by the same content digests), and
 * Storage and closure (section 10): the checkpoints moved from the relay to the dev box, the volumes are retired, and
   the study is closed.
 
+### Second review (2026-11-14, after commit `b191d555`)
+
+Again from the same sealed generations, with no generation, scorer or score changed and no GPU used.
+
+* Teacher reuse, non-fluid units: the prompt comparison compared `(prompt_tokens, system_source, think_preopened)`
+  tuples, so two records that both lacked the fields compared equal and passed. Every field is now validated on both
+  sides (`False` is a value; an absent or invalid field is not recorded and never equal), the prompt's fields and its
+  content are reported apart, and the content identity of the non-fluid prompts is stated as derived (same item
+  files, staging and rendering statements at both session commits; the registered items rendered on the dev box
+  reproduce every recorded field), never as compared. Regression: `scripts/stages/stage-1/reasoning_inheritance/tests/`.
+  On the sealed records no field was missing and every check passes; T stays reusable, its rescored content unchanged.
+* D's non-thinking GSM8K: over all 100 items, 49 without a readable answer, 49 degeneration stops, 1 answer read and
+  wrong, 1 protocol error. The first correction's "mostly extraction" described only the 50 well-formed replies.
+* Bootstrap: the family intervals are the wider on 11 of the 12 fluid T-D contrasts, not on every one
+  (non-thinking-mode deduction is the exception).
+* Section 11 is rewritten: no state-metric gate before generation (the state evaluation is a diagnostic, never called
+  reasoning retention); the next round is a layer-merging comparison at D's fixed structure with two candidates fixed
+  in advance; the depth-against-width comparison at a common budget is a separate study, not a prerequisite.
+* Tombstones: `retire_artifact.py` set `deterministic_reconstruction_possible` from the presence of a recipe, so the
+  eight retrained Stage-3 students read as deterministically rebuildable. The tool now records the recipe's kind,
+  whether it gives back the same bytes, and any same-hash copy apart; this round's entries are corrected in place
+  (the eight retrains and D's and W's unverified rebuilds false, DW's rebuild verified true), the original values and
+  the weights' hashes kept.

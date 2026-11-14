@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-11-14T10:52:38+00:00",
+  "created_utc": "2026-11-14T13:12:30+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -1345,7 +1345,7 @@
     "n_weight_files": 58,
     "total_bytes": 20418736755,
     "total_human": "19.016 GiB",
-    "artifacts_tree_bytes": 21308388582,
+    "artifacts_tree_bytes": 21309594684,
     "external_store_tree_bytes": 24637304698,
     "by_store": {
       "external_store": {
@@ -1371,9 +1371,9 @@
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-11-14T10:51:20+00:00",
-    "n_files": 1695,
-    "total_bytes": 72129916935,
+    "queried_utc": "2026-11-14T13:11:10+00:00",
+    "n_files": 1694,
+    "total_bytes": 69745681967,
     "by_prefix": {
       "transfer": {
         "files": 706,
@@ -1399,13 +1399,13 @@
         "files": 27,
         "bytes": 3645676422
       },
-      "durable": {
-        "files": 22,
-        "bytes": 2743676194
-      },
       "stage3_recovery_corpus_v2": {
         "files": 9,
         "bytes": 1015033375
+      },
+      "durable": {
+        "files": 21,
+        "bytes": 359441226
       },
       "stage2_h1": {
         "files": 106,
@@ -1720,11 +1720,6 @@
         "path": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858"
       },
       {
         "path": "durable/stage3_sr/evidence/a_train_sr_a1_20261107_104149/stage3_units_evidence.tgz",
@@ -10278,6 +10273,28 @@
       "note": null
     },
     {
+      "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+      "size_bytes": 603051,
+      "members": [
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/legacy_150.prompts.jsonl"
+      ],
+      "reclaimable_bytes": 7839663,
+      "note": null
+    },
+    {
       "sha256": "300979df958de3b1f3081fe5f85b2d03954513ef478da67549c9e5d02496ab3f",
       "size_bytes": 7679511,
       "members": [
@@ -10375,26 +10392,6 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_105512/unpacked/tool_H-N_r1_pass1.part0001.jsonl"
       ],
       "reclaimable_bytes": 6652634,
-      "note": null
-    },
-    {
-      "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
-      "size_bytes": 603051,
-      "members": [
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/legacy_150.prompts.jsonl"
-      ],
-      "reclaimable_bytes": 6633561,
       "note": null
     },
     {
@@ -17636,9 +17633,9 @@
         "logs/budget/decisions.md",
         "logs/budget/ledger.md",
         "logs/maintenance/inventories/architecture_inventory.json",
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "logs/stages/index.json",
-        "logs/stages/stage-1/README.md"
+        "logs/maintenance/storage/storage_measurements.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -18086,6 +18083,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18122,6 +18120,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18158,6 +18157,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18194,6 +18194,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18230,6 +18231,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18266,6 +18268,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18302,6 +18305,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18338,6 +18342,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18374,6 +18379,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18410,6 +18416,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18446,6 +18453,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18482,6 +18490,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18518,6 +18527,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18554,6 +18564,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18590,6 +18601,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
