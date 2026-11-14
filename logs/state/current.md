@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-14 (UTC), RI-S1 COMPLETE on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); nothing running. The human view. Every number here has an owner
+**Updated:** 2026-11-14 (UTC), RI-S1 COMPLETE and CLOSED on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); the three volumes retired; nothing running, nothing billing. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,25 +9,31 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RI-S1 (STAGE 1 STRUCTURAL ABLATION): COMPLETE (2026-11-14) -- EVERY UNIT MEASURED; NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
+**RI-S1 (STAGE 1 STRUCTURAL ABLATION): COMPLETE AND CLOSED (2026-11-14) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Branch `research/reasoning-inheritance` from `main` `50ed1a4f` (not merged). Four untrained groups from one frozen
   mapping of the packed search's Top-1 (mapping digest `91343366...`, historical Top-1 reproduced exactly): T, D (8 of
   36 blocks removed), W (FFN, width, query heads), DW (both); state evaluation and all of eval-set-1 in both modes.
 - Result (`logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json`; report
   `docs/stages/stage-1/reasoning_inheritance/REPORT.md`): static fluid T 89.6% / 68.9% (thinking / non-thinking),
   D 5.6% / 7.9%, W and DW 0 on every formal unit; interactive episodes T 43.1% / 34.0%, the rest 0. Only T-D and the
-  state KL (D 0.65, W 6.45, DW 6.78) have range; the W/DW contrasts and the interaction are floor-limited.
-  eval-set-1 is development-exposed. Descriptive, recorded before reading: D keeps a larger share in non-thinking
-  mode (11.2% [7.0, 15.6] vs 6.3%), but loses short answers too.
+  state KL (D 0.65, W 6.45, DW 6.78) have range; on eval-set-1 correctness the W/DW contrasts and the interaction are
+  floor-limited. eval-set-1 is development-exposed. D's losses: degeneration stops in thinking mode; in non-thinking
+  mode 162 of its 308 well-formed static replies state no answer the scorer reads, 101 a wrong one, 45 are correct.
+  Corrections to the first version: REPORT.md section 12 (no score changed).
 - Engineering: vLLM V1 `abort_request` takes a list; the shared runners passed a bare id, so degeneration-stopped
-  requests ran on to the context (no score changed; fixed `30494d3b`).
-- Cost: six attempts $19.9554 of the $35 grant (`logs/budget/approvals/stage1_reasoning_inheritance_grant.json`),
-  every pod deleted with the provider's confirmation. Live 2026-11-14T06:07Z: balance $16.92, 0 pods, three volumes
-  at $1.75/day (~9.7 days).
-- Durable: mapping and D/W/DW checkpoints, and the evidence archive `c6970652...`, on the relay; evidence also on the
-  dev box.
-- Open, maintainer: closing RI-S1 ($15.0446 unspent); the next round (REPORT.md section 11); the balance or volume
-  retirement; a merge into `main`. Not authorized: any new GPU work.
+  requests ran on to the context (sealed records unaffected, 8,881 stops checked; fixed `30494d3b`).
+- Closed by the maintainer 2026-11-14 (the grant's `closed` block): $19.9554 of $35 over six attempts; $15.0446
+  lapsed. `require_open` refuses RI-S1 issue and launch.
+- Storage (maintainer 2026-11-14, `logs/budget/decisions.md`): D, W and DW (DW = the packed Top-1), the mapping,
+  the teacher tokenizer / template and source records on the dev box only,
+  `~/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/`
+  (`logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json`); their relay weight copies deleted
+  (8.44 GiB freed). The three volumes `thprcgh7s9`, `4rhubprswo`, `am5m373kuq` deleted 10:46Z, provider-confirmed;
+  the eight Stage-3 weights retired from the dev box (tombstones). Evidence archives stay on the dev box and relay.
+- Live 2026-11-14T10:48Z (`logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json`): balance $16.63, $0.00/h,
+  0 pods, 0 volumes. Dev box 93% used, 15 GB free.
+- Next: the next round's plan (REPORT.md section 11), for the maintainer's approval; a merge into `main` is
+  separate. Not authorized: any new GPU work or recovery training.
 - Owner: `logs/budget/decisions.md` 2026-11-13 / 11-14.
 
 **RESEARCH A: CLOSED (maintainer, 2026-11-11) -- CURRENT_METHOD_NO_GO FROZEN; EVERY PAID AUTHORIZATION CLOSED; THE BRANCH SQUASH-MERGED INTO `main`. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**

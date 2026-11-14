@@ -403,7 +403,11 @@ def position(repo_root: Path = REPO, *, snapshot: dict | None = None, now: datet
         raise AuthorizationError(f"the provider account holds pods {live_pods}: at most one billing pod, the one "
                                  "being created; reconcile first")
     live_vols = [x.get("id") for x in acct.get("network_volumes") or []]
-    foreign = [x for x in live_vols if x not in by_id or by_id[x]["deleted"] is not None]
+
+    def gone_by(v: dict) -> bool:
+        #: a volume a later record says was deleted was still live at this snapshot's time
+        return v["deleted"] is not None and v["deleted"] <= now
+    foreign = [x for x in live_vols if x not in by_id or gone_by(by_id[x])]
     if foreign:
         raise AuthorizationError(f"the provider account holds network volumes {foreign} no live record owns")
     vol_rows = sorted(snap["networkvolumes"], key=lambda r: r["startDate"])
@@ -415,7 +419,7 @@ def position(repo_root: Path = REPO, *, snapshot: dict | None = None, now: datet
         storage.append({"volume": vid, "record": v["record"], "basis": "reserved", "obligation_usd": v["reserved_usd"],
                         "netted_posted_usd": n["netted_usd"], "future_usd": round(future, 4), "netting": n["days"]})
     for v in records:
-        if v["deleted"] is not None and (now - v["deleted"]).total_seconds() / 3600 < POSTING_WINDOW_HOURS:
+        if gone_by(v) and (now - v["deleted"]).total_seconds() / 3600 < POSTING_WINDOW_HOURS:
             usd = float(v["actual_usd"] if v["actual_usd"] is not None else v["reserved_usd"])
             storage.append({"volume": v["volume"], "record": v["record"], "basis": "deleted inside the posting window",
                             "obligation_usd": usd, "netted_posted_usd": 0.0, "future_usd": round(usd, 4)})

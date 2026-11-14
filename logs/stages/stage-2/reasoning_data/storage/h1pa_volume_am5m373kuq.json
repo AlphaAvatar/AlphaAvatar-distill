@@ -95,7 +95,7 @@
   "not_recommended": "migrating now: no consumer needs the bytes elsewhere, a migration costs a pod and a transfer, and no destination with room has been confirmed",
   "cost_of_keeping": "$2.10/month; reserved through 2026-12-24"
  },
- "actual_usd": null,
+ "actual_usd": 2.2937,
  "authorizes": "nothing",
  "contents_after_mc2": {
   "recorded_utc": "2026-10-27T00:00:00Z",
@@ -133,5 +133,73 @@
    "booked_in": "Research A phase envelope (logs/budget/applications/research_a_2026-10-29/forecast.json :: hard_caps_usd.storage)",
    "consumer": "Research A recovery: the six units' save points, checkpoints and evaluations under <mount>/teacher_modes, beside the teacher session's shards and the common initialization"
   }
- ]
+ ],
+ "retirement": {
+  "status": "DELETED",
+  "decided_by": "maintainer 2026-11-14 (brief 'RI-S1 的四组测量完成状态可以接受。本轮先完成以下收尾'), section 1: '我已决定退役全部三个保留卷：4rhubprswo、am5m373kuq、thprcgh7s9。必要 checkpoint 仅在开发机本地磁盘保留。' (logs/budget/decisions.md :: 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only)",
+  "rule": "the maintainer's decision above; AGENTS.md 2.5 for the weights without a consumer; logs and evidence are never deleted (their copies are listed under preserved)",
+  "members_basis": "DERIVED from the records of every run that attached the volume (logs/stages/stage-2/teacher_modes/storage/volume_retirement_proposal_20261110.json :: volumes.am5m373kuq); the volume was never listed whole, so a file no session recorded is lost unseen",
+  "members": [
+   {
+    "item": "h1pa/D4-Augmented-s* and D4-Original-s* final weights; mixed_v2/Mix-Augmented-s* final weights",
+    "category": "1 (declared anchors) / W0 once the reviews close",
+    "size": "6 x 2,384,236,592 B = 14.3 GB"
+   },
+   {
+    "item": "teacher_modes/units/{H-T-S,H-N-S,H-T-C}-s* (Research A v1) final weights, common_initialization c4f66815...",
+    "category": "W0",
+    "size": "~15.5 GB est."
+   },
+   {
+    "item": "unit 6 (H-T-C-s20260801) save points step_000200 / step_000231",
+    "category": "3",
+    "size": "~11.8 GB est."
+   },
+   {
+    "item": "teacher and supplement generation shards (74 + 413 and 89 + 390 items)",
+    "category": "4 (copied)",
+    "size": "~2.85 GB"
+   },
+   {
+    "item": "H1-PA and MC2 per-unit evaluation evidence",
+    "category": "4 (copied)",
+    "size": "<= 0.41 GB"
+   },
+   {
+    "item": "recovery units 1-5 reports, logs, generations",
+    "category": "4 (copied)",
+    "size": "11.5 MB"
+   },
+   {
+    "item": "unit 6's train_log.jsonl, run manifests, checkpoint descriptor",
+    "category": "4",
+    "size": "<1 MB est."
+   }
+  ],
+  "preserved": {
+   "Research A v1 unit 6 (H-T-C-s20260801): train_log.jsonl, run_manifest.json, train_inputs.json, training and checkpoint descriptors, attempts.jsonl": "pulled from the volume by a_supplement_20261031_092108 and a_supplement_20261031_144618 (session.json :: v1_small), identical in both (tree digest d6f78bad...); ~/aad-artifacts/research_a/scratch_evidence_20261110/a_supplement_20261031_144618/store/v1_small/units/H-T-C-s20260801/; the descriptor's artifact digest 2d892de3... and weights digest 989d2481... equal maintainer_stop.json's",
+   "teacher and supplement generation shards": "~/aad-artifacts/research_a/scratch_evidence_20261110/",
+   "H1-PA and MC2 per-unit evaluation evidence": "relay stage2_h1pa/units/evidence/ and artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/; ~/aad-artifacts/stage0_calvol/mixr_20261026_140539/store/",
+   "recovery units 1-5 reports, logs, generations": "~/aad-artifacts/research_a/scratch_evidence_20261110/"
+  },
+  "lost_with_the_volume": [
+   "H1-PA's D4-Augmented / D4-Original and the mixed calibration's Mix-Augmented final weights (six; their declared anchor role ends with this decision)",
+   "Research A v1's six units' final weights and the common initialization c4f66815...",
+   "unit 6's save points step_000200 / step_000231"
+  ],
+  "consumers_moved": "none reads the volume: the launchers that attached it belong to closed studies (Research A, H1-PA, the mixed calibration); the only artifacts with a live consumer (RI-S1's D, W, DW, the packed Top-1 being DW) are on the dev box",
+  "deleted_utc": "2026-11-14T10:46:43Z",
+  "provider_confirmation": {
+   "delete": "runpodctl 3.0.1 network-volume delete am5m373kuq -> {\"deleted\": true, \"id\": \"am5m373kuq\"} at 2026-11-14T10:46:43Z",
+   "read_back_2026-11-14T10:46:47Z": "network-volume list -> []; network-volume get am5m373kuq -> 404 not_found; pod list -> []"
+  },
+  "actual_usd_basis": {
+   "posted_usd": 2.289583,
+   "posted_rows": 22,
+   "posted_through_utc": "2026-11-14T10:00+00:00",
+   "accrual_to_deletion_usd": 0.004163,
+   "accrual_rule": "the volume's own posted daily rate x the hours between its last posted row and the deletion (est.)",
+   "snapshot": "logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json"
+  }
+ }
 }

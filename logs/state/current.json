@@ -24,7 +24,7 @@
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "blocker": "BLOCKED NO. Research A CLOSED 2026-11-11: CURRENT_METHOD_NO_GO frozen; the A-TM and A-E grants closed (study_engineering.require_open). Owner: PACKED_ROUND.md section 21.",
- "branch": "research/reasoning-inheritance (from main 50ed1a4f; not merged): RI-S1 COMPLETE 2026-11-14",
+ "branch": "research/reasoning-inheritance (from main 50ed1a4f; not merged): RI-S1 COMPLETE and CLOSED 2026-11-14",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer: the volume retirement list, the relay upload of seven student weights, H1-PA's and the mixed calibration's reviews; Research B's teacher (pending). Owner: logs/budget/decisions.md 2026-11-11.",
+ "next": "Maintainer: the next round's plan (RI-S1 REPORT.md section 11; no paid run before approval); a merge into main; Research B's teacher (pending).",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -199,9 +199,9 @@
  "running": {
   "paid_compute": false,
   "pods": 0,
-  "network_volumes": 3,
+  "network_volumes": 0,
   "run": "none; last: RI-S1 ri_diagnosis_20261113_193508 ($11.5765), pod deleted, provider-confirmed",
-  "volume": "thprcgh7s9 (350 GB, US-TX-3): the packed search, its Top-1, the eight Stage-3 units (weights also on the dev box, re-hashed 2026-11-11); 4rhubprswo: the v2 Top-1, protected; am5m373kuq: the archive"
+  "volume": "none: all three deleted 2026-11-14T10:46Z (maintainer), provider-confirmed; balance $16.63, $0.00/h"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
@@ -222,11 +222,12 @@
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",
-  "hf_private_headroom_gib": "about 20 of the account's 100 GB after the 2026-11-10 retirement (relay 65.51 GiB); owner PACKED_ROUND.md section 19",
+  "hf_private_headroom_gib": "relay 66.38 GiB after 2026-11-14 (decisions.md)",
   "roots": {
    "artifacts": "/home/ecs-user/aad-artifacts",
    "git": "/home/ecs-user/AlphaAvatar-distill"
-  }
+  },
+  "kept_checkpoints": "RI-S1 D, W, DW (= packed Top-1), mapping: dev box only (logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json)"
  },
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "test_suites": {

@@ -16513,3 +16513,60 @@ on a paid pod.
   committed rises by this study's $19.9554 (cap $1,000 unchanged).
 - Risks: the balance funds the volumes for under ten days; topping up or retiring a volume is the maintainer's.
 - Revisit when: the maintainer decides the next round (REPORT.md section 11) or closes RI-S1.
+
+## 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only
+
+- Context: maintainer brief "RI-S1 的四组测量完成状态可以接受。本轮先完成以下收尾" (2026-11-14, review of `09b48be9`),
+  section 1: "我已决定退役全部三个保留卷：`4rhubprswo`、`am5m373kuq`、`thprcgh7s9`。必要 checkpoint 仅在开发机本地
+  磁盘保留。不要再把充值、继续保卷或重新上传所有历史权重作为待我选择的方案。已有消费者需要的产物迁移到本地；历史
+  '保留云卷直到有两份副本'等要求，按本次决定更新。" Section 2: "先清理已有合法证据且没有后续消费者的历史 checkpoint、
+  已关闭训练的 optimizer/resume state、重复缓存，为必要产物留足空间。不要删除新实验 checkpoint 来腾空间" and "完成本地
+  迁移后，按'仅本地保留必要 checkpoint'清理对应的远端权重中转副本；轻量证据、manifest 和删除记录保留。"
+- Decision: the kept set is RI-S1's D, W and DW (DW is the packed Top-1 `1f5e4b42`, the same bytes `b74dede8...`,
+  one local canonical copy), the frozen mapping (P, norms, FFN / head / layer indices), configs, the teacher's
+  tokenizer and chat template, descriptors and source records, under `~/aad-artifacts/stage1_reasoning_inheritance/`.
+  Everything else on the three volumes and every other weight without a consumer is retired under AGENTS.md 2.5 with
+  this decision lifting the registry's protection: the volume retirement proposal of 2026-11-10
+  (`logs/stages/stage-2/teacher_modes/storage/volume_retirement_proposal_20261110.json`) is superseded where it asked
+  for a relay upload of the Stage-3 weights before `thprcgh7s9` goes, for H1-PA's and the mixed calibration's anchor
+  reviews before `am5m373kuq` goes, and for a verified copy of the v2 Top-1 before `4rhubprswo` goes.
+- Alternatives considered: topping up the balance and keeping the volumes, or re-uploading the historical weights to
+  the relay (both excluded by the brief).
+- Risks: the dev box holds the only copy of the kept checkpoints (one disk); every retired weight can come back only
+  by re-materialization or retraining, never bit-exactly guaranteed.
+- Revisit when: a later round needs a retired weight, or a second store for the kept set is funded.
+- Done (2026-11-14, $0, no pod):
+  - Room first: the eight Stage-3 students' final weights (Research A, closed; 17.76 GiB) retired from the dev box
+    under AGENTS.md 2.5 with this decision lifting the registry's protection (`retire_artifact.py`, tombstones
+    `devbox_20261114_stage3_sr_*`); their receipts, configs, resume identities and evaluation evidence (archive
+    `fadea626...`, dev box and relay) stay. A-MIX-6cat-sr-s20260801's relay copy is outside this decision and stays.
+  - Kept set pulled from the relay into `~/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/`, every file
+    re-hashed against the products record and each group's artifact digest recomputed equal; the teacher's tokenizer,
+    chat template and configs copied beside them (equal to `teacher_identity.json`); `MANIFEST.json` `4be21033...`;
+    record `logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json`.
+  - Volume evidence: Research A v1 unit 6's train log, run manifest, train inputs and descriptors were already on the
+    dev box (pulled by both supplement sessions, identical); nothing else on the volumes was an only copy of evidence
+    (`volume_retirement_proposal_20261110.json`, corrected there).
+  - Volumes deleted 10:46:42-43Z (`runpodctl network-volume delete`, read back 404 each, list empty, no pod); each
+    storage record carries a `retirement` block (`DELETED`, members, preserved, lost, actual cost: thprcgh7s9
+    $7.0362, 4rhubprswo $10.5411, am5m373kuq $2.2937). Snapshot `provider/runpod_billing_v2_2026-11-14T1048Z.json`:
+    balance $16.63, spend $0.00/h, no pod, no volume.
+  - Relay: the four weight paths removed (commit `599a1300`) and the three LFS objects (D `9de449db...`, W
+    `64d367fe...`, DW = packed Top-1 `b74dede8...`) permanently deleted after tombstones `relay_20261114_ri_s1_*`:
+    74.827 -> 66.384 GiB. The mapping, the group configs and every evidence archive stay.
+
+## 2026-11-14 (UTC) — RI-S1 closed: $19.9554 of $35; the unspent $15.0446 lapses
+
+- Context: maintainer brief of 2026-11-14 (review of `09b48be9`), section 5: "关闭 RI-S1 study，记录累计实际费用 $19.9554、
+  原上限 $35，未使用的 $15.0446 授权额度失效，不自动转给下一轮。" and "本条授权当前收尾、必要迁出和退役；下一轮研究先形成明确
+  方案，不启动新的付费科学实验或恢复训练。"
+- Decision: the grant `approvals/stage1_reasoning_inheritance_grant.json` carries a `closed` block (spent $19.9554 over
+  six runs by `study_engineering.spent`, none unknown; unspent $15.0446 lapses, not carried, refunded or transferred;
+  closeout cost $0). `study_engineering.require_open` refuses any issue or launch of RI-S1 from now on.
+- Report corrections at the same time (REPORT.md section 12): failure types split by what the registered scorer read
+  (no score changes), teacher reuse checked item by item, the abort repair's claim limited to the sealed records, the
+  bootstrap grouping stated against the registration, wording on KL and on the floor tightened.
+- Alternatives considered: keeping the study open for the next round (excluded: the next round needs its own plan,
+  study and grant).
+- Risks: none beyond the storage decision above.
+- Revisit when: the maintainer approves the next round's plan (REPORT.md section 11).

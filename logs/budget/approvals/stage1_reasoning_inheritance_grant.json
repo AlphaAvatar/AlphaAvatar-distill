@@ -41,5 +41,36 @@
   "sha256": "87972c1839f4fdbab5d9c3f113b5195729817c0bd11c7a6c0acf1f4cfbc356b6"
  },
  "study_identity_sha256": "cd84cc1d8c36f11874a42c0446f427e65b18cd4aac4e733bbce4e894908e46ee",
- "granted_at_commit": "50ed1a4f1f0d4dfdaa1cf30436c7e1ce5bc4ebc2"
+ "granted_at_commit": "50ed1a4f1f0d4dfdaa1cf30436c7e1ce5bc4ebc2",
+ "closed": {
+  "status": "CLOSED",
+  "utc": "2026-11-14T10:52:02Z",
+  "by": "the maintainer",
+  "decision": "maintainer 2026-11-14 (UTC), 'RI-S1 \u7684\u56db\u7ec4\u6d4b\u91cf\u5b8c\u6210\u72b6\u6001\u53ef\u4ee5\u63a5\u53d7\u3002\u672c\u8f6e\u5148\u5b8c\u6210\u4ee5\u4e0b\u6536\u5c3e' (review of 09b48be9), section 5: \u300c\u5173\u95ed RI-S1 study\uff0c\u8bb0\u5f55\u7d2f\u8ba1\u5b9e\u9645\u8d39\u7528 $19.9554\u3001\u539f\u4e0a\u9650 $35\uff0c\u672a\u4f7f\u7528\u7684 $15.0446 \u6388\u6743\u989d\u5ea6\u5931\u6548\uff0c\u4e0d\u81ea\u52a8\u8f6c\u7ed9\u4e0b\u4e00\u8f6e\u3002\u300d and \u300c\u672c\u6761\u6388\u6743\u5f53\u524d\u6536\u5c3e\u3001\u5fc5\u8981\u8fc1\u51fa\u548c\u9000\u5f79\uff1b\u4e0b\u4e00\u8f6e\u7814\u7a76\u5148\u5f62\u6210\u660e\u786e\u65b9\u6848\uff0c\u4e0d\u542f\u52a8\u65b0\u7684\u4ed8\u8d39\u79d1\u5b66\u5b9e\u9a8c\u6216\u6062\u590d\u8bad\u7ec3\u3002\u300d",
+  "source": "the maintainer's written instruction of 2026-11-14 (UTC); written into this grant by the agent on that instruction",
+  "scope": "every session kind of RI-S1, none excepted: ['diagnosis']",
+  "enforced_by": "scripts/shared/study_engineering.py :: require_open (in grant, in launch_main before an artifact, the bundle or the provider is read, and as the runner's first precheck)",
+  "spent_usd": 19.9554,
+  "by_run_usd": {
+   "ri_diagnosis_20261113_103414": 0.1153,
+   "ri_diagnosis_20261113_105643": 2.2939,
+   "ri_diagnosis_20261113_130551": 2.9665,
+   "ri_diagnosis_20261113_161911": 1.6815,
+   "ri_diagnosis_20261113_180718": 1.3217,
+   "ri_diagnosis_20261113_193508": 11.5765
+  },
+  "_spent": "study_engineering.spent at closure: every session's closeout all-in, 6 runs, none unknown",
+  "ceiling_usd": 35.0,
+  "unspent_usd": 15.0446,
+  "remainder": "the unspent $15.0446 of the $35.00 ceiling lapses: it is not carried forward, not refunded to any pool and not transferred to any study; the next round needs its own study and the maintainer's grant",
+  "closeout_cost_usd": 0.0,
+  "_closeout_cost": "the closeout (checkpoints pulled from the relay, the volumes and the relay weight copies retired, records) ran on the dev box and the provider API: no pod, no new resource",
+  "historical": "every field above is unchanged (grant_before_closure); each earlier artifact, use and amount keeps the validity it had at its time",
+  "grant_before_closure": {
+   "commit": "09b48be9906ddd97f31f1062da9a7608bac90cdb",
+   "sha256": "71839a58df181ac1d0a5ba502fc657172b10bc7a6894ec3bc932af137da0eb8f"
+  },
+  "science": "COMPLETE (docs/stages/stage-1/reasoning_inheritance/REPORT.md; analyses/structural_ablation.json)",
+  "still_available": "read-only work: reports, rescoring of saved generations, archives and identity reviews (study_engineering.grant_record reads this grant open or closed)"
+ }
 }

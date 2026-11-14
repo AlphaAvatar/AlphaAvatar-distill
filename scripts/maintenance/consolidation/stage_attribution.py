@@ -1613,7 +1613,7 @@ STAGE_1 = [
         id="reasoning_inheritance",
         kind="experiment",
         stage_id="1",
-        status=("COMPLETE 2026-11-14 (RI-S1, six attempts, $19.9554 of $35): untrained D static fluid 89.6% -> 5.6% "
+        status=("COMPLETE and CLOSED 2026-11-14 (RI-S1, six attempts, $19.9554 of $35, the rest lapsed): untrained D static fluid 89.6% -> 5.6% "
                 "thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; "
                 "eval-set-1 development-exposed"),
         title="Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1)",
@@ -1634,13 +1634,19 @@ STAGE_1 = [
             E("logs/stages/stage-1/reasoning_inheritance/analyses/structural_ablation.json",
               "every unit per group and mode, the contrasts, retention, failure types, state KL/NLL",
               field="schema", equals="aadistill.stage1.reasoning_inheritance.structural_ablation/v1"),
+            E("logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+              "where D, W, DW and the mapping are kept (the dev box only), with every hash",
+              field="schema", equals="aadistill.stage1.reasoning_inheritance.local_checkpoints/v1"),
         ],
         external_material=[
             "docs/stages/stage-1/reasoning_inheritance/REPORT.md, LITERATURE.md -- the round's report and reading",
             "artifacts/stages/stage-1/reasoning_inheritance/ -- each attempt's secured evidence (dev box); the "
-            "mapping, checkpoints and the final evidence archive on the private relay",
+            "mapping and the final evidence archive also on the private relay",
+            "~/aad-artifacts/stage1_reasoning_inheritance/ -- D, W, DW (= the packed Top-1), the mapping and the "
+            "teacher tokenizer, the only copy (MANIFEST.json)",
         ],
-        decisions=["logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete"],
+        decisions=["logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; "
+                   "2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed"],
         canonical_log_destination="logs/stages/stage-1/reasoning_inheritance",
         classification_reason=(
             "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps "

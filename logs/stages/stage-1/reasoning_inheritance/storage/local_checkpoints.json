@@ -1,0 +1,108 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.local_checkpoints/v1",
+ "written_utc": "2026-11-14T10:50:39+00:00",
+ "decided_by": "maintainer 2026-11-14: '必要 checkpoint 仅在开发机本地磁盘保留' (logs/budget/decisions.md :: 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only)",
+ "root": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed",
+ "manifest": {
+  "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/MANIFEST.json",
+  "sha256": "4be210336e9c29eeb458d2b6acd32e4c962a0685190202044dabe63db44f2c0b"
+ },
+ "kept": {
+  "D": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D",
+   "bytes": 6430078848,
+   "sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
+   "artifact_digest": "08aa80972097b290a4929b563cdc6d0497a6021fb7f4bde0a39edb2624e53b68",
+   "num_parameters": 3215021568,
+   "consumer": "the next round's depth-axis comparison (REPORT.md section 11, recommendation 1): outright removal of the 8 blocks, the control for the merged variants built on its kept blocks K"
+  },
+  "W": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W",
+   "bytes": 1443840376,
+   "sha256": "64d367fe0b6613aa57d52cda3e285a5d52122fd0ecee736b0016af92fc59fb29",
+   "artifact_digest": "78d263b24d46b1028f85e1d378bc41cd83953c43927ab5e16e95d2dd79661514",
+   "num_parameters": 721897472,
+   "consumer": "the next round's decomposition of the non-depth damage (recommendation 2): the full non-depth comparison point"
+  },
+  "DW": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW",
+   "bytes": 1192135096,
+   "sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+   "artifact_digest": "536742c54f5bdb19e436d2a7026d843684cdc1e5bfa34e2b02a0514d83fe98b6",
+   "num_parameters": 596049920,
+   "consumer": "the current full initialization baseline: the packed full search's Top-1 1f5e4b42, the reference a Stage-1 candidate is compared with",
+   "also_is": {
+    "packed_top1_state": "1f5e4b420125a345f1d190f0b8f87cad",
+    "search_run": "a_packed_search_20261105_195011",
+    "rule": "the same bytes (b74dede8...); this is the one canonical local copy for both names, no second copy is kept"
+   }
+  }
+ },
+ "mapping": {
+  "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/mapping",
+  "files": {
+   "mapping/mapping.json": {
+    "bytes": 968617,
+    "sha256": "00d28a0da73c4b88b629ff96089aeaeda8e70d5f47527fb7c3cb41e8391867c8"
+   },
+   "mapping/tensors.safetensors": {
+    "bytes": 20979888,
+    "sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+   }
+  }
+ },
+ "teacher_tokenizer": {
+  "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/teacher_tokenizer",
+  "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+  "every_file_equal": true,
+  "chat_template_equal": true
+ },
+ "records": {
+  "records/design.json": {
+   "bytes": 8022,
+   "sha256": "282dc2674d931b7e4a2eeef70b7a8b817c453e4c6a47f6befea45927904feca5"
+  },
+  "records/frozen_selection.json": {
+   "bytes": 665011,
+   "sha256": "a1b021fcf4485d29a76b52439551eb0894817dc986e206e28aae10353470ad90"
+  },
+  "records/identities_recomputed.json": {
+   "bytes": 691,
+   "sha256": "977846fbb2addf936e640e9e140386646d79f1bb1d78f02088d84c4708cb7c72"
+  },
+  "records/mapping_progress.json": {
+   "bytes": 18457,
+   "sha256": "6b37e201e48750a43bdd50cbcf827fee9cb2143ac791fb4338fb44ac9d284ae3"
+  },
+  "records/mapping_record.json": {
+   "bytes": 22594,
+   "sha256": "cafca6fabf1b7036d88d73e891628d17e1d6ce7dd413d1dc972ecf360492da70"
+  },
+  "records/products.json": {
+   "bytes": 1924,
+   "sha256": "f6eb462f8f58f6b177e11945fa0d77bae99e0180469277ec395e47f6818b640c"
+  },
+  "records/state_eval.json": {
+   "bytes": 22953,
+   "sha256": "2efba2f8812c8af5c4cf537c04d877207c0fae4f4428737bf33c6a77fdb64c2d"
+  }
+ },
+ "evidence_elsewhere": {
+  "generations, rows, reports of every unit": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store (dev box) and the relay archive durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz (c6970652...)",
+  "the teacher's reused evaluation": "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/ (unpacked from .scratch/research_a/a_teacher_20261030_012648/store)"
+ },
+ "logical_references": {
+  "packed Top-1 1f5e4b42 (b74dede8...)": [
+   "configs/stages/stage-1/reasoning_inheritance/design.json :: anchor",
+   "configs/stages/stage-1/reasoning_inheritance/frozen_selection.json",
+   "configs/stages/stage-2/teacher_modes/packed_round_design.json",
+   "logs/stages/stage-2/teacher_modes/storage/packed_search_volume_thprcgh7s9.json"
+  ],
+  "rule": "those records keep the identities and locations they were written with; this record is where the bytes are now (groups.DW), and logs/maintenance/inventories/checkpoint_registry.json lists the local path"
+ },
+ "retired_copies": {
+  "relay": "tombstones relay_20261114_ri_s1_D, relay_20261114_ri_s1_W, relay_20261114_ri_s1_DW_packed_top1 (logs/maintenance/inventories/checkpoint_tombstones.json); relay commit 599a1300 removed the four paths, then the three LFS objects were permanently deleted (8.443 GiB freed)",
+  "volumes": "thprcgh7s9's search_packed/top1 (the packed Top-1) went with the volume on 2026-11-14"
+ },
+ "authorizes": "nothing: keeping the bytes is not permission to reuse them in a formal attempt (AGENTS.md P8.2.1)"
+}

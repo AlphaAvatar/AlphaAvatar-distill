@@ -5,6 +5,12 @@ search's Top-1, measured on the state suite and on every unit of eval-set-1 in b
 search. The experiment is `configs/stages/stage-1/reasoning_inheritance/design.json`; evidence lives in
 `logs/stages/stage-1/reasoning_inheritance/`.
 
+**Status: COMPLETE, study CLOSED (2026-11-14).** `launch.py issue` / `launch` refuse (`study_engineering.require_open`);
+the $0 scripts below still run. D, W and DW are on the dev box only,
+`~/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/` (`storage/local_checkpoints.json`); their relay weight
+copies were deleted, so `driver.relay_restore` (the resume path) can no longer fetch them. A new study that needs them
+reads the dev-box copy or rebuilds them from the mapping, which stays on the relay and the dev box.
+
 | group | depth | hidden | FFN | Q / KV heads | parameters |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | T: full teacher (Qwen/Qwen3-4B @ `1cfa9a72`) | 36 | 2560 | 9728 | 32 / 8 | 4,022,468,096 |
@@ -19,8 +25,9 @@ search. The experiment is `configs/stages/stage-1/reasoning_inheritance/design.j
 | `selection.py` | dev box, $0 | reads the anchor journal (`617d1512...`) into `frozen_selection.json`: 36 blocks' FFN neurons, the kept blocks, the 28 kept blocks' query heads in root numbering, the width step's recorded diagnostics and every ancestor's identity; `--check` re-reads it byte for byte |
 | `driver.py` | pod | contract (config hashes vs the journal) -> mapping -> relay copy -> state evaluation -> eval-set-1; `--check-only` runs the contract at $0 |
 | `launch.py` | dev box | the RI-S1 study on `shared.study_engineering`: grant, one-use artifact, launch, closeout, `stage-resume`, `archive-evidence` |
-| `teacher_reuse.py` | dev box, $0 | T's evaluation from `a_teacher_20261030_012648`: archive and file hashes, every unit's identity against this round's protocol, rescored with the current scorer |
-| `analysis.py` | dev box, $0 | every group rescored; per-unit correct and usable, the five structural contrasts with family-cluster bootstrap intervals, retention of T-correct items, failure types, state KL/NLL; descriptive extras (correct among usable rollouts, T-correct items kept by T's own length), each scored directory bound by content digest |
+| `teacher_reuse.py` | dev box, $0 | T's evaluation from `a_teacher_20261030_012648`: archive and file hashes, every unit's identity against this round's protocol, then item by item (coverage of the registered unit, every seed against the decoding rule, every prompt against this round's groups, `--store`); fields the teacher's records never carried are listed as `not_recorded`, never passed; rescored with the current scorer |
+| `analysis.py` | dev box, $0 | every group rescored; per-unit correct and usable, the five structural contrasts with family-cluster bootstrap intervals (and the registered independence grouping beside them), retention of T-correct items, what every unscored row ended as (answer read and wrong, no answer the scorer can read, protocol error, degeneration stop, context limit), the sealed degeneration stops checked for continuation, state KL/NLL; descriptive extras (correct among usable rollouts, T-correct items kept by T's own length), each scored directory bound by content digest |
+| `render.py` | dev box, $0 | the report's tables from `analyses/structural_ablation.json` |
 
 The reusable mechanism is `src/aadistill/initialization/planning/frozen_mapping.py` (core, no instance facts):
 the mapping contract and builders that repeat the four operators' surgery bit for bit
@@ -53,7 +60,8 @@ export PYTHONPATH=src:scripts:scripts/stages/stage-1
 # $0 checks
 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/selection.py --check
 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/driver.py --check-only --out /tmp/ri/out --work /tmp/ri/work --status /tmp/ri/st
-.venv/bin/python scripts/stages/stage-1/reasoning_inheritance/teacher_reuse.py
+.venv/bin/python scripts/stages/stage-1/reasoning_inheritance/teacher_reuse.py \
+    --store artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store
 
 # a session (one-use artifact, then the launch; the bundle is staged with stages.phase_c1.bundle.stage_bundle)
 RUN=ri_diagnosis_$(date -u +%Y%m%d_%H%M%S); C=$(git rev-parse HEAD)
@@ -81,7 +89,8 @@ R=$(.venv/bin/python scripts/stages/stage-1/reasoning_inheritance/launch.py stag
 ```
 
 The run that measured every unit is `ri_diagnosis_20261113_193508`; its archive is
-`durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz`.
+`durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz`. The
+session commands above are historical (the study is closed).
 
 ## Resume
 

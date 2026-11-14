@@ -1,9 +1,11 @@
 # Stage 1 reasoning inheritance: structural ablation of the packed Top-1 (RI-S1)
 
-**Status: COMPLETE** (2026-11-14 UTC). The frozen mapping and the four groups are built, verified and durable; the
-state evaluation is measured; every registered eval-set-1 unit is generated and scored for D, W and DW in both modes,
-and the teacher's evaluation is reused after every identity check. No recovery training, no new search. Total cost
-$19.9554 over six attempts (section 10).
+**Status: COMPLETE; study CLOSED** (2026-11-14 UTC, closed by the maintainer). The frozen mapping and the four
+groups are built and verified, and D, W and DW are kept on the dev box (section 4); the state evaluation is measured;
+every registered eval-set-1 unit is generated and scored for D, W and DW in both modes, and the teacher's evaluation is
+reused after every identity check, item by item. No recovery training, no new search. Total cost $19.9554 over six
+attempts of the $35 ceiling; the unspent $15.0446 lapsed at closure (section 10). Corrections to the first version
+(commit `09b48be9`) are listed in section 12.
 
 **Result in one paragraph.** Untrained, removing 8 of the 36 blocks and changing nothing else (D) takes static fluid
 reasoning from 89.6% to 5.6% in thinking mode and from 68.9% to 7.9% in non-thinking mode, and interactive episodes
@@ -11,9 +13,11 @@ from 43.1% / 34.0% to 0. Every fluid axis falls the same way, and so does every 
 non-thinking mode D keeps more of reading from supplied evidence (RAG reading 81% -> 42%). The non-depth compression
 (W: FFN, residual width and query heads) and both together (DW) answer no item of any formal unit correctly in either
 mode (W's only correct answers are 2 of the 150 in-sample regression prompts, and it has one usable rollout in all).
-The contrasts involving W or DW, and the interaction, are therefore floor-limited and say nothing about how the two
-compressions combine; only the depth contrast T-D and the state evaluation (KL: D 0.65, W 6.45, DW 6.78 nats) have
-range. eval-set-1 is development-exposed (section 8).
+The contrasts involving W or DW, and the interaction, are therefore floor-limited: on eval-set-1 correctness they
+cannot show how the two compressions combine. Only the depth contrast T-D and the state evaluation (KL: D 0.65,
+W 6.45, DW 6.78 nats) have range. D loses mostly to degeneration stops in thinking mode; in non-thinking mode about half
+of its well-formed replies state no final answer the registered scorer can read (section 8). eval-set-1 is
+development-exposed (section 8).
 
 Branch `research/reasoning-inheritance`, base `main` `50ed1a4f1f0d4dfdaa1cf30436c7e1ce5bc4ebc2` (fetched 2026-11-13,
 unchanged since the brief). Experiment: `configs/stages/stage-1/reasoning_inheritance/design.json`; code and commands:
@@ -74,8 +78,12 @@ depth (AGENTS.md 4.8).
 
 Checks (all passed): D's blocks are T's blocks K bit for bit and its embedding and final norm are T's; W's 28 kept
 blocks and its embedding and final norm are DW's bit for bit; parameter counts equal the design's. None is trained.
-Durable copy: private relay `AlphaAvatar/aadistill-artifacts`, `durable/stage1_reasoning_inheritance/913433664fce0fed/`
-(mapping and the three checkpoints, 8.46 GiB), downloaded again and re-hashed.
+Where they are (2026-11-14): on the dev box only, `~/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/`
+(the three checkpoints, the mapping, the teacher's tokenizer and chat template, the source records and a
+`MANIFEST.json`; `logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json` is the record). They were
+pulled from the relay copy the attempts uploaded, every file re-hashed against it and each group's artifact digest
+recomputed; the relay's weight copies were then deleted by the maintainer's decision (the mapping and the evidence stay
+on the relay). DW is the packed Top-1's own bytes (`b74dede8...`): one local copy serves both.
 
 ## 5. Data and execution volumes
 
@@ -104,8 +112,10 @@ the teacher reference recomputed. Random order `sha256_keyed_v1` seed 20261105, 
 | DW | 6.7768 | 7.9122 | 12.5671 | 7.3153 | 0.109 |
 
 DW's value equals the search's journaled measurement. Per axis (KL): D 0.42-0.70 on the four fluid axes, W 4.77-6.89,
-DW 5.37-7.15. In distribution terms the non-depth compression accounts for almost all of the damage; removing the 8
-blocks adds 0.32 nats on top of W and costs 0.65 from T, and the two are sub-additive in KL (0.65 + 6.45 > 6.78).
+DW 5.37-7.15. The non-depth compression moves the next-token distribution about ten times as far as the depth pruning
+(6.45 vs 0.65 nats); removing the 8 blocks adds 0.32 nats on top of W. KL is not additive over the two compressions
+(0.65 + 6.45 > 6.78), so these values rank how far each group's distribution moved; they do not apportion the damage
+between the compressions, and D's small KL sits beside an almost total loss of generation accuracy (section 8).
 **This is not a reasoning result** (P10.2): KL and NLL say how far the next-token distribution moved, not whether a
 problem gets solved. The state suite is also what the anchor search ranked candidates by, so DW's values are that
 selection's own criterion (in sample for it); D and W were constructed from the same mapping, not searched.
@@ -133,11 +143,24 @@ selection's own criterion (in sample for it); D and W were constructed from the 
   its sealed parts in task order (`design.json :: evaluation.fluid_resume`); an item unfinished in an earlier attempt
   was generated again from its first token, never chosen by its outcome. Concurrency changes batch composition only
   (bf16 batch nondeterminism), never a seed.
-* T (both modes) is reused from `a_teacher_20261030_012648` after every identity check passed and rescored with the
-  current scorers (`analyses/teacher_reuse.json`).
+* T (both modes) is reused from `a_teacher_20261030_012648` and rescored with the current scorers
+  (`analyses/teacher_reuse.json`). Each unit's recorded identity matches this round's (root revision, context, decoder,
+  template switch, system message, tokenizer and chat template, stop ids, degeneration check; for the fluid unit also
+  its item file and seed namespace), and every unit is checked item by item: its records cover the registered unit
+  exactly (none missing, extra or repeated); every request's seed is the decoding protocol's rule (1,272 and 1,592
+  fluid turns, 996 capability and legacy requests per mode); and every prompt equals this round's D, W and DW for the
+  same item. For the fluid unit that is the first user message as text (also equal to the registered item's) and the
+  prompt length; the other units' records carry no prompt text and their summaries name only a pod path for the prompt
+  file (`not_recorded`), so for them it is the prompt length in tokens, the system source and the think pre-opening: a
+  length match, not a byte identity.
 * Intervals: 95% percentile intervals over 10,000 cluster-bootstrap resamples (seed 20261113): fluid items are
-  resampled by whole rule family, paired units by pair, other units by item. They cover item and family sampling,
-  not decoding variance (one sample per item).
+  resampled by whole rule family (86 clusters), paired units by pair, other units by item. The design registered the
+  eval set's independence groups for the fluid unit instead (`independence_v1.json`: only the six groups of renamed
+  knights-and-knaves puzzles are merged, 708 clusters). The family clustering was chosen when the analysis was
+  written; the registration is left as it was, and both are computed (table "Fluid intervals under the registered
+  independence grouping"): the estimates are the same, the family intervals are the wider on every T-D contrast, and
+  the retention intervals differ in both directions. They cover item and family sampling, not decoding variance (one
+  sample per item).
 * Analysis: `scripts/stages/stage-1/reasoning_inheritance/analysis.py` -> `analyses/structural_ablation.json`;
   tables below rendered from it by `render.py`.
 
@@ -196,16 +219,16 @@ selection's own criterion (in sample for it); D and W were constructed from the 
 
 ### Generation behaviour
 
-| static fluid (570) | usable | correct among usable (descriptive) | natural termination | degeneration | context limit | tokens p50 | p90 | mean |
+| static fluid (570) | natural termination (EOS) | usable | correct among usable (descriptive) | degeneration | context limit | tokens p50 | p90 | mean |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| T H-T | 98.6% | 511/562 | 98.6% | 1.4% | 0.0% | 1999 | 8403 | 3310.5 |
-| D H-T | 11.6% | 32/66 | 13.7% | 86.3% | 0.0% | 1792 | 3072 | 1887.9 |
-| W H-T | 0.0% | -- | 1.4% | 97.4% | 1.2% | 768 | 1536 | 1819.5 |
-| DW H-T | 0.0% | -- | 0.0% | 100.0% | 0.0% | 768 | 2304 | 1267.4 |
-| T H-N | 98.8% | 393/563 | 98.8% | 1.2% | 0.0% | 424 | 1024 | 547.3 |
-| D H-N | 54.0% | 45/308 | 54.0% | 46.0% | 0.0% | 763 | 1536 | 730.6 |
-| W H-N | 0.0% | -- | 0.9% | 98.1% | 1.1% | 768 | 1235 | 1568.5 |
-| DW H-N | 0.0% | -- | 0.0% | 100.0% | 0.0% | 768 | 1792 | 1164.1 |
+| T H-T | 562 (98.6%) | 562 (98.6%) | 511/562 | 1.4% | 0.0% | 1999 | 8403 | 3310.5 |
+| D H-T | 78 (13.7%) | 66 (11.6%) | 32/66 | 86.3% | 0.0% | 1792 | 3072 | 1887.9 |
+| W H-T | 8 (1.4%) | 0 (0.0%) | -- | 97.4% | 1.2% | 768 | 1536 | 1819.5 |
+| DW H-T | 0 (0.0%) | 0 (0.0%) | -- | 100.0% | 0.0% | 768 | 2304 | 1267.4 |
+| T H-N | 563 (98.8%) | 563 (98.8%) | 393/563 | 1.2% | 0.0% | 424 | 1024 | 547.3 |
+| D H-N | 308 (54.0%) | 308 (54.0%) | 45/308 | 46.0% | 0.0% | 763 | 1536 | 730.6 |
+| W H-N | 5 (0.9%) | 0 (0.0%) | -- | 98.1% | 1.1% | 768 | 1235 | 1568.5 |
+| DW H-N | 0 (0.0%) | 0 (0.0%) | -- | 100.0% | 0.0% | 768 | 1792 | 1164.1 |
 
 ### Structural contrasts, H-T
 
@@ -225,7 +248,7 @@ selection's own criterion (in sample for it); D and W were constructed from the 
 | stage3_capability_846/rag | 100 | 73.0 | 1.0 | 0.0 | 0.0 | +72.0 [+63.0, +81.0] | +73.0 [+64.0, +82.0] | +0.0 [+0.0, +0.0] | +1.0 [+0.0, +3.0] | -72.0 [-80.0, -63.0] |
 | stage3_capability_846/safety_paired | 50 | 44.0 | 0.0 | 0.0 | 0.0 | +44.0 [+30.0, +58.0] | +44.0 [+30.0, +58.0] | +0.0 [+0.0, +0.0] | +0.0 [+0.0, +0.0] | -44.0 [-58.0, -30.0] |
 
-Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families resampled).
+Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families resampled, not the registered independence groups; both are compared below).
 
 ### Retention, H-T
 
@@ -263,7 +286,7 @@ Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families r
 | stage3_capability_846/rag | 100 | 81.0 | 42.0 | 0.0 | 0.0 | +39.0 [+29.0, +49.0] | +81.0 [+73.0, +88.0] | +0.0 [+0.0, +0.0] | +42.0 [+32.0, +52.0] | -39.0 [-49.0, -29.0] |
 | stage3_capability_846/safety_paired | 50 | 62.0 | 2.0 | 0.0 | 0.0 | +60.0 [+46.0, +74.0] | +62.0 [+48.0, +76.0] | +0.0 [+0.0, +0.0] | +2.0 [+0.0, +6.0] | -60.0 [-74.0, -46.0] |
 
-Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families resampled).
+Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families resampled, not the registered independence groups; both are compared below).
 
 ### Retention, H-N
 
@@ -285,14 +308,83 @@ Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families r
 
 ### Failure types
 
-| static fluid, T-correct items the group lost | lost | answered_wrong | no_valid_final_answer | degeneration | context_limit | not_terminated |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| D H-N | 349 | 185 | 0 | 164 | 0 | 0 |
-| DW H-N | 393 | 0 | 0 | 393 | 0 | 0 |
-| W H-N | 393 | 0 | 5 | 382 | 6 | 0 |
-| D H-T | 479 | 30 | 11 | 438 | 0 | 0 |
-| DW H-T | 511 | 0 | 0 | 511 | 0 | 0 |
-| W H-T | 511 | 0 | 8 | 496 | 7 | 0 |
+| static fluid, T-correct items the group lost | lost | answer read, wrong | no answer the scorer can read | protocol error | degeneration stop | context limit | other non-EOS stop |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| D H-N | 349 | 67 | 118 | 0 | 164 | 0 | 0 |
+| DW H-N | 393 | 0 | 0 | 0 | 393 | 0 | 0 |
+| W H-N | 393 | 0 | 0 | 5 | 382 | 6 | 0 |
+| D H-T | 479 | 26 | 4 | 11 | 438 | 0 | 0 |
+| DW H-T | 511 | 0 | 0 | 0 | 511 | 0 | 0 |
+| W H-T | 511 | 0 | 0 | 8 | 496 | 7 | 0 |
+
+### What every row ended as (T and D)
+
+| unit | group, mode | n | correct | answer read, wrong | no answer the scorer can read | protocol error | degeneration stop | context limit | other non-EOS stop |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| static fluid (570) | T H-T | 570 | 511 | 51 | 0 | 0 | 8 | 0 | 0 |
+| static fluid (570) | T H-N | 570 | 393 | 170 | 0 | 0 | 7 | 0 | 0 |
+| static fluid (570) | D H-T | 570 | 32 | 30 | 4 | 12 | 492 | 0 | 0 |
+| static fluid (570) | D H-N | 570 | 45 | 101 | 162 | 0 | 262 | 0 | 0 |
+| math (verified) | T H-T | 100 | 85 | 13 | 0 | 0 | 2 | 0 | 0 |
+| math (verified) | T H-N | 100 | 76 | 21 | 0 | 0 | 3 | 0 | 0 |
+| math (verified) | D H-T | 100 | 5 | 1 | 0 | 0 | 94 | 0 | 0 |
+| math (verified) | D H-N | 100 | 9 | 9 | 8 | 0 | 74 | 0 | 0 |
+| GSM8K | T H-T | 100 | 88 | 11 | 1 | 0 | 0 | 0 | 0 |
+| GSM8K | T H-N | 100 | 38 | 7 | 55 | 0 | 0 | 0 | 0 |
+| GSM8K | D H-T | 100 | 0 | 1 | 3 | 0 | 96 | 0 | 0 |
+| GSM8K | D H-N | 100 | 0 | 1 | 49 | 1 | 49 | 0 | 0 |
+| multi-hop reading (evidence given) | T H-T | 100 | 79 | 20 | 0 | 0 | 1 | 0 | 0 |
+| multi-hop reading (evidence given) | T H-N | 100 | 75 | 25 | 0 | 0 | 0 | 0 | 0 |
+| multi-hop reading (evidence given) | D H-T | 100 | 6 | 5 | 0 | 39 | 50 | 0 | 0 |
+| multi-hop reading (evidence given) | D H-N | 100 | 28 | 16 | 0 | 2 | 54 | 0 | 0 |
+| RAG reading (evidence given) | T H-T | 100 | 73 | 27 | 0 | 0 | 0 | 0 | 0 |
+| RAG reading (evidence given) | T H-N | 100 | 81 | 19 | 0 | 0 | 0 | 0 | 0 |
+| RAG reading (evidence given) | D H-T | 100 | 1 | 2 | 0 | 90 | 7 | 0 | 0 |
+| RAG reading (evidence given) | D H-N | 100 | 42 | 49 | 0 | 1 | 8 | 0 | 0 |
+| answerability pairs | T H-T | 120 | 87 | 32 | 0 | 0 | 1 | 0 | 0 |
+| answerability pairs | T H-N | 120 | 90 | 30 | 0 | 0 | 0 | 0 | 0 |
+| answerability pairs | D H-T | 120 | 5 | 0 | 0 | 103 | 12 | 0 | 0 |
+| answerability pairs | D H-N | 120 | 63 | 43 | 0 | 1 | 13 | 0 | 0 |
+| safety pairs | T H-T | 100 | 72 | 28 | 0 | 0 | 0 | 0 | 0 |
+| safety pairs | T H-N | 100 | 81 | 19 | 0 | 0 | 0 | 0 | 0 |
+| safety pairs | D H-T | 100 | 5 | 7 | 0 | 0 | 88 | 0 | 0 |
+| safety pairs | D H-N | 100 | 9 | 14 | 0 | 8 | 69 | 0 | 0 |
+| TriviaQA (supplementary, closed-book) | T H-T | 150 | 79 | 69 | 0 | 0 | 2 | 0 | 0 |
+| TriviaQA (supplementary, closed-book) | T H-N | 150 | 78 | 72 | 0 | 0 | 0 | 0 | 0 |
+| TriviaQA (supplementary, closed-book) | D H-T | 150 | 5 | 11 | 0 | 0 | 134 | 0 | 0 |
+| TriviaQA (supplementary, closed-book) | D H-N | 150 | 10 | 14 | 0 | 0 | 126 | 0 | 0 |
+
+Rows, not pairs, for the paired units. "Answer read, wrong" includes the behaviour units' wrong behaviours (echoed the passage, answered an unanswerable question, refused an answerable or benign one, complied with an unsafe one). Descriptive; the formal score is the registered scorer's and unchanged.
+
+### Degeneration-stopped records as sealed
+
+| group, mode | degeneration stops (turns) | saved ids = recorded length | stopped at a check | inside the allowance |
+| --- | ---: | ---: | ---: | ---: |
+| T H-T | 33 | 33 | 33 | 33 |
+| D H-T | 1239 | 1239 | 1239 | 1239 |
+| W H-T | 1641 | 1641 | 1641 | 1641 |
+| DW H-T | 1715 | 1715 | 1715 | 1715 |
+| T H-N | 22 | 22 | 22 | 22 |
+| D H-N | 865 | 865 | 865 | 865 |
+| W H-N | 1652 | 1652 | 1652 | 1652 |
+| DW H-N | 1714 | 1714 | 1714 | 1714 |
+
+### Fluid intervals under the registered independence grouping
+
+| fluid, T-D (pp) / D keeps of T-correct | mode | rule families (reported) | independence groups (registered) | retention, families | retention, independence groups |
+| --- | --- | ---: | ---: | ---: | ---: |
+| fluid/abstract_analogical | H-T | +66.3 [+47.1, +86.0] | +66.3 [+56.8, +75.8] | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] |
+| fluid/compositional_generalization | H-T | +88.9 [+80.3, +96.2] | +88.9 [+83.3, +93.8] | 0.8 [0.0, 2.5] | 0.8 [0.0, 2.3] |
+| fluid/inductive_rule_discovery | H-T | +88.0 [+81.0, +94.1] | +88.0 [+82.4, +93.0] | 3.9 [0.0, 9.8] | 3.9 [0.8, 7.7] |
+| fluid/interactive_adaptation | H-T | +43.1 [+26.4, +58.5] | +43.1 [+34.7, +51.4] | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] |
+| fluid/static_all | H-T | +84.0 [+78.6, +89.0] | +84.0 [+81.0, +87.0] | 6.3 [3.1, 9.6] | 6.3 [4.3, 8.4] |
+| fluid/task_contained_deduction | H-T | +86.2 [+79.2, +92.7] | +86.2 [+81.0, +91.1] | 13.8 [7.2, 20.7] | 13.8 [8.9, 18.9] |
+| fluid/abstract_analogical | H-N | +39.0 [+20.0, +60.0] | +39.0 [+29.5, +49.5] | 2.6 [0.0, 8.8] | 2.6 [0.0, 7.7] |
+| fluid/compositional_generalization | H-N | +66.0 [+46.4, +83.7] | +66.0 [+58.3, +73.6] | 7.8 [3.4, 11.5] | 7.8 [2.9, 13.6] |
+| fluid/inductive_rule_discovery | H-N | +60.6 [+49.2, +71.3] | +60.6 [+52.1, +68.3] | 4.4 [0.0, 9.5] | 4.4 [1.1, 8.9] |
+| fluid/interactive_adaptation | H-N | +34.0 [+18.3, +52.2] | +34.0 [+26.4, +41.7] | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] |
+| fluid/static_all | H-N | +61.1 [+53.6, +68.0] | +61.1 [+56.9, +65.1] | 11.2 [7.0, 15.6] | 11.2 [8.2, 14.4] |
+| fluid/task_contained_deduction | H-N | +68.8 [+63.2, +75.0] | +68.8 [+61.9, +75.4] | 19.2 [11.1, 27.7] | 19.2 [13.3, 25.5] |
 
 ### Kept by the teacher's length (descriptive, post hoc)
 
@@ -321,11 +413,19 @@ Written while D's non-thinking-mode fluid unit was generating and before any of 
 mainly that long derivations break down, then in non-thinking mode D keeps a clearly larger share of T's correct
 static items, *the lower end of its retention interval above thinking mode's 6.3%*.
 
-**Outcome: it holds, narrowly, and the explanation behind it does not.** D keeps 44 of T's 393 correct static items
-in non-thinking mode, 11.2% [7.0, 15.6] (thinking: 32 of 511, 6.3% [3.1, 9.6]). But on the items T answered in
-under 1,000 tokens D keeps 20.5% (18 / 88) in thinking mode and only 11.6% (44 / 379) in non-thinking mode, and in
-non-thinking mode most of what D loses is a wrong answer after a natural stop (185 of 349), not a degeneration stop
-(164). The thinking-mode length gradient is mostly which items T can solve briefly; short derivations are damaged too.
+**Outcome: the registered criterion is met, narrowly; the explanation is supported only in part.** D keeps 44 of T's
+393 correct static items in non-thinking mode, 11.2% [7.0, 15.6] (thinking: 32 of 511, 6.3% [3.1, 9.6]); under the
+registered independence grouping 11.2% [8.2, 14.4] against 6.3% [4.3, 8.4]. The criterion compares one mode's
+interval with the other mode's point estimate, as the prediction was written. It is **not** a paired significance test
+across modes, and none was run (the modes' T-correct sets differ: 393 and 511 items).
+
+As for the explanation: on the items T answered in under 1,000 tokens D keeps 20.5% (18 / 88) in thinking mode and only
+11.6% (44 / 379) in non-thinking mode. In non-thinking mode fewer than half of the T-correct items D loses end in a
+degeneration stop (164 of 349); the other 185 end naturally and well-formed, 118 with no final answer the registered
+scorer can read and 67 with an answer read and wrong. So instability of long generation does not explain all of the
+damage, short derivations are damaged too, and the thinking-mode length gradient partly reflects which items T solves
+briefly. That long-generation instability is part of the damage is not excluded: in thinking mode 438 of D's 479
+losses are degeneration stops.
 
 ## 8. What the results say, and what they do not
 
@@ -339,19 +439,28 @@ depth), with every remaining parameter the teacher's, removes nearly all of the 
   mode deduction again keeps the most (85.2% -> 16.4%), then compositional generalization (71.5% -> 5.6%), inductive
   rule discovery (63.4% -> 2.8%) and abstract/analogical (41.1% -> 2.1%);
 * the supporting units fall as far: GSM8K 88% -> 0 and verified math 85% -> 5% (thinking), multi-hop reading 79% -> 6%
-  and RAG reading 73% -> 1% with the evidence supplied, closed-book TriviaQA 52.7% -> 3.3%;
+  and RAG reading 73% -> 1% with the evidence supplied, closed-book TriviaQA 52.7% -> 3.3%. In thinking mode the math
+  units are lost to degeneration stops (94 and 96 of 100), the reading units largely to broken think delimiters
+  (RAG 90 of 100, answerability 103 of 120 rows, multi-hop 39 of 100), a protocol error rather than a wrong answer;
 * D keeps essentially nothing T could not do: every item D answers correctly in thinking mode T also answers.
 * In non-thinking mode D keeps far more of reading from supplied evidence than of derivation: RAG reading 81% -> 42%
   (half of T's correct items kept), multi-hop reading 75% -> 28%, answerability pairs 55% -> 31.7%, against GSM8K
   38% -> 0, verified math 76% -> 9% and static fluid 68.9% -> 7.9%. In thinking mode every one of these is at 6% or
-  below. Descriptive, across mixed-domain supporting units, never read as fluid reasoning (P10.2); in direction it is
+  below. GSM8K's 0 in non-thinking mode is mostly extraction: 49 of D's 50 well-formed replies state no final answer
+  the registered scorer reads; of the other 50 rows, 49 are degeneration stops and one breaks the think protocol. T's own non-thinking GSM8K has 55 of 100
+  such replies, which is why T is at 38% there; the unit measures answer format as well as arithmetic in this mode. Descriptive, across mixed-domain supporting units, never read as fluid reasoning (P10.2); in direction it is
   Gromov et al.'s split between knowledge-style QA and reasoning.
 
 **How D fails depends on the mode.** In thinking mode 86.3% of D's static rollouts end in a degeneration stop (at
-1,280 / 1,792 / 2,304 tokens, quartiles); 438 of the 479 T-correct items it loses end that way, and when D does end
-naturally it is right on 32 of 66. In non-thinking mode 54.0% of its rollouts are usable, but only 45 of those 308
-are correct (14.6%, against T's 69.8%): the loss is no longer mainly instability of long generation but wrong
-answers given in a well-formed short reply. Both are descriptive (each group finishes a different subset).
+1,280 / 1,792 / 2,304 tokens, quartiles), and 438 of the 479 T-correct items it loses end that way. 78 rollouts end
+naturally (EOS); 12 of those break the think protocol, so 66 are usable, and 32 of the 66 are correct (30 give an
+answer read and wrong, 4 no final answer the scorer reads). In non-thinking mode all 308 natural terminations are
+usable (54.0%) and 45 are correct (14.6%, against T's 69.8%); of the other 263, 162 state no final answer the
+registered scorer can read (no `\boxed{}`) and 101 give an answer read and wrong. So in non-thinking mode the loss is
+no longer mainly degeneration, and it is not mainly wrong answers either: more of D's well-formed replies fail to
+state a scorable answer than state a wrong one. Whether those replies hold a correct result in another form is not
+measured; the formal score is the registered scorer's and is unchanged. All of this is descriptive (each group
+finishes a different subset).
 
 **Non-depth compression (W) and both (DW): the floor.** W and DW answer no item of any formal unit correctly, in
 either mode, and produce no usable rollout (W's exceptions: 2 of the 150 in-sample regression prompts and one usable
@@ -363,10 +472,11 @@ design registered them; **they are not measurements of an interaction**, and no 
 compression combine follows from them.
 
 **The graded measure.** Only the state evaluation separates W from DW: KL 6.45 vs 6.78 nats, top-1 agreement 15% vs
-11%. D sits far from both (KL 0.65, top-1 agreement 80%), and still loses 84 pp of thinking-mode accuracy: a
-moderate per-position distribution shift does not survive thousands of autoregressive tokens. (Inference, consistent
-with Gromov et al.'s unhealed GSM8K result on Llama-2-70B, LITERATURE.md; their setting differs in model, selection
-and measurement.)
+11%. D sits far from both (KL 0.65, top-1 agreement 80%), and still loses 84 pp of thinking-mode accuracy. One reading
+is that a moderate per-position shift compounds over thousands of autoregressive tokens; it fits the thinking-mode
+degeneration stops, but not the whole loss, since D also fails short non-thinking replies (above). (Inference,
+consistent with Gromov et al.'s unhealed GSM8K result on Llama-2-70B, LITERATURE.md; their setting differs in model,
+selection and measurement.)
 
 **Limits.**
 
@@ -390,9 +500,14 @@ The four paid attempts before the repair were dominated by one defect in the sha
 aborted nothing. Every request the degeneration check stopped was recorded correctly at the stop, and then went on
 generating, unseen, to the 40,960-token context.
 
-* **No result changes.** A record is taken at the stop and the stopped request's later output is ignored, so no
-  historical generation or score -- the teacher's included -- is affected. Batch composition was (those zombies shared
-  the batches), which is ordinary batch-level nondeterminism, not a protocol difference.
+* **What it did not change, and how far that goes.** A record is taken at the stop and the stopped request's later
+  output is dropped (the runner no longer holds the request). The sealed records show no sign of a continuation: every
+  one of the 8,881 degeneration-stopped records of this round and of the teacher's evaluation holds exactly as many
+  output token ids as its recorded length, stopped exactly at a check and inside its allowance (table
+  "Degeneration-stopped records as sealed"). What the defect did change is batch composition (the zombies shared the
+  batches), and so, through bf16 batch nondeterminism, which tokens other requests sampled. This does not show that a
+  rerun before and after the repair would agree sample by sample or score by score: a rerun is a new sample under the
+  same seeds, and none was made.
 * **The cost and the scheduling did change.** On untrained models most requests stop within a few thousand tokens,
   so the engine filled with stopped requests running to the context: they held every concurrency slot and the KV
   cache, real requests waited for hours, and long-running real requests were preempted near their end. The engine's
@@ -420,18 +535,33 @@ generating, unseen, to the 40,960-token context.
 | **total** | | | **$19.9554** |
 
 The study's ceiling was $35 (grant `logs/budget/approvals/stage1_reasoning_inheritance_grant.json`, $24 per session,
-L40S at $1.09 per hour); $15.0446 of it is unspent and no further session is planned. Closing the study (its grant's
-`closed` block) is the maintainer's act and is not done here. Every attempt is closed with the provider's
-confirmation that its pod is gone; the three retained network volumes are untouched (not this study's). The provider
-balance after the last attempt is $16.92 (2026-11-14T06:07Z, no pod), which funds those volumes ($1.75 per day) for
-about 9.7 days.
-Durable products: the mapping and the three checkpoints on the relay (section 4); every sealed generation of every
-unit (the final attempt's store, which took over the earlier attempts' sealed parts) on the dev box and on the relay at
-`durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz`, sha256
-`c69706526086bdf37600edd813ec2105596136abce11872a17c985344dc4c6dd`, downloaded again and re-hashed; the analysis
-binds each scored directory by content digest (`structural_ablation.json :: inputs`).
+L40S at $1.09 per hour). **The maintainer closed RI-S1 on 2026-11-14** (the grant's `closed` block): $19.9554 spent,
+and the unspent $15.0446 lapsed; it is not carried to the next round, which needs its own study and grant.
+`study_engineering.require_open` now refuses any issue or launch of RI-S1. Every attempt is closed with the provider's
+confirmation that its pod is gone. The closeout itself cost $0: no pod was created (below).
+
+Storage, by the maintainer's decision of 2026-11-14 (`logs/budget/decisions.md`): the necessary checkpoints are kept
+on the dev box only.
+
+* **Kept, on the dev box:** D, W and DW (DW is also the packed Top-1), the mapping, the teacher's tokenizer, chat
+  template and configs, and the source records, under `~/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/`
+  (record `logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json`). One physical copy, on one disk.
+* **Relay:** the weight copies were permanently deleted after the local copy was verified (tombstones
+  `relay_20261114_ri_s1_*`, 8.44 GiB freed). The mapping, the group configs and the evidence stay there: every sealed
+  generation of every unit is in the final attempt's store on the dev box and in
+  `durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz` (sha256
+  `c69706526086bdf37600edd813ec2105596136abce11872a17c985344dc4c6dd`, downloaded again and re-hashed). The analysis
+  binds each scored directory by content digest (`structural_ablation.json :: inputs`).
+* **Volumes:** the programme's three network volumes (`thprcgh7s9`, `4rhubprswo`, `am5m373kuq`; not this study's) were
+  deleted on 2026-11-14 at 10:46Z. The provider read back no volume and no pod; each storage record carries what went
+  and what was kept. The one small record that had looked uncopied (Research A v1 unit 6's training records) was
+  already on the dev box, so no pod was needed to read a volume. Provider balance afterwards: $16.63, spend
+  $0.00 per hour (`logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json`).
 
 ## 11. Next round (evidence, derivation, hypothesis kept apart)
+
+Status: a recommendation for the next round's plan, not an authorization. Nothing below starts a paid experiment or
+recovery training until the maintainer approves a plan with its own study and grant.
 
 **Evidence from this round.**
 
@@ -443,12 +573,13 @@ binds each scored directory by content digest (`structural_ablation.json :: inpu
 
 **Derivation.**
 
-* The depth axis is not cheap: its KL is small, its generation cost is nearly total. Any method that restores some of
-  the 8 removed blocks' function is measurable on D (28 blocks at the teacher's width), where both the state
-  evaluation and eval-set-1 have range; it is **not** measurable on DW, where the non-depth floor masks every
-  generation effect.
-* The non-depth compression is the larger distribution lever and the binding one for a 0.6-0.7B student; until its
-  damage is decomposed, no whole-student generation measurement can resolve anything in W or DW.
+* The depth axis is not cheap: its KL is small, its generation cost is nearly total. A method that restores some of the
+  8 removed blocks' function can be measured on D (28 blocks at the teacher's width), where both the state evaluation
+  and eval-set-1 have range. On DW, eval-set-1 correctness registers only an improvement large enough to lift DW off
+  the floor; a smaller one is still measurable there by graded measures (the state evaluation per axis,
+  teacher-forced measures), not by generation accuracy.
+* The non-depth compression moves the distribution furthest and binds a 0.6-0.7B student; until its damage is
+  decomposed, eval-set-1 correctness cannot tell W- or DW-like students apart while they stay at the floor.
 
 **The three merge variants (to test; none is claimed to work).**
 
@@ -482,3 +613,33 @@ binds each scored directory by content digest (`structural_ablation.json :: inpu
 
 All of this is conditional on the fixed scheme of this round (one mapping, one budget); none of it shows depth
 compression to be better or worse than width compression at an arbitrary parameter budget.
+
+## 12. Corrections to the first version (2026-11-14, after commit `09b48be9`)
+
+Re-aggregated from the same sealed generations: no generation, scorer or score changed (every number of the
+earlier tables is reproduced, the inputs bound by the same content digests), and no GPU was used.
+
+* D in thinking mode: 32 / 66 is correct among **usable** rollouts. It is not 32 of 66 natural terminations: D ends
+  naturally 78 times, and 12 of those break the think protocol.
+* D in non-thinking mode: of its 308 usable static replies, 45 are correct, 101 give an answer read and wrong, and 162
+  state no final answer the registered scorer can read. The first version called the 263 unscored replies "wrong
+  answers given in a well-formed short reply". The failure types now separate an answer read and wrong, no answer
+  the scorer can read, a protocol error, a degeneration stop and the context limit, for the static fluid unit and for
+  every capability unit (table "What every row ended as").
+* The prediction's explanation: "long derivations break down" is now stated within the evidence. Long-generation
+  instability does not explain all of the damage, and it is not excluded as part of it. The criterion compared an
+  interval with a point estimate; it is not a cross-mode significance test.
+* The abort repair: the claim is limited to the sealed records (no continuation found in any of the 8,881
+  degeneration stops). It no longer reads as a guarantee that a rerun before and after the repair would reproduce
+  each sample and score.
+* Teacher reuse: the capability units' checks had silently skipped the item-file and seed fields, which their
+  summaries do not carry. Every unit is now checked item by item (coverage, every seed against the rule, every
+  prompt against this round's), and what was never recorded is listed as such. The runner note now describes the
+  runners as they were, after the abort repair (`teacher_reuse.json :: runner_note`).
+* Bootstrap: the intervals resample rule families, while the design registered the independence groups. The
+  registration is unchanged, and both are now reported.
+* Wording: KL no longer "accounts for almost all of the damage", and W/DW are no longer called unmeasurable for any
+  improvement. Eval-set-1 correctness is floor-limited there; graded measures are not.
+* Storage and closure (section 10): the checkpoints moved from the relay to the dev box, the volumes are retired, and
+  the study is closed.
+

@@ -79,5 +79,13 @@
   },
   "relay_weights": "A-MIX-6cat-sr-s20260801 only; the other seven are on the dev box alone (their upload is a later $0 storage closeout)",
   "for": "the maintainer's 2026-11-11 'Research A 最终关闭与 Squash Merge Main', section 5"
+ },
+ "retired_2026_11_14": {
+  "what": "every unit's model/model.safetensors on the dev box (eight files, 17.76 GiB)",
+  "rule": "AGENTS.md 2.5 with the maintainer's decision of 2026-11-14 lifting the registry's protection (logs/budget/decisions.md :: All three volumes retired; necessary checkpoints kept on the dev box only)",
+  "tombstones": "logs/maintenance/inventories/checkpoint_tombstones.json :: devbox_20261114_stage3_sr_<unit> (each weight's sha256 and size)",
+  "kept": "each unit's receipt.json, model/config.json, model/generation_config.json and resume_identity.json; the evaluation evidence archive fadea626... (dev box and relay)",
+  "other_copies": "A-MIX-6cat-sr-s20260801's relay copy (outside the decision); the volume thprcgh7s9 was deleted the same day",
+  "verify_note": "stage3_backup.py --verify now reports the eight weights missing: that is this retirement, not a lost copy"
  }
 }

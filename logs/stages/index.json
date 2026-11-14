@@ -1491,7 +1491,7 @@
    "experiment_id": "reasoning_inheritance",
    "stage_id": "1",
    "classification": "experiment",
-   "status": "COMPLETE 2026-11-14 (RI-S1, six attempts, $19.9554 of $35): untrained D static fluid 89.6% -> 5.6% thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; eval-set-1 development-exposed",
+   "status": "COMPLETE and CLOSED 2026-11-14 (RI-S1, six attempts, $19.9554 of $35, the rest lapsed): untrained D static fluid 89.6% -> 5.6% thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; eval-set-1 development-exposed",
    "title": "Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1)",
    "question": "How much of the teacher's fluid reasoning does the current initialization lose to depth pruning alone, to all non-depth compression alone and to both, untrained, and do the two interact?",
    "canonical_path": "logs/stages/stage-1/reasoning_inheritance",
@@ -1520,14 +1520,21 @@
      "says": "every unit per group and mode, the contrasts, retention, failure types, state KL/NLL",
      "field": "schema",
      "equals": "aadistill.stage1.reasoning_inheritance.structural_ablation/v1"
+    },
+    {
+     "path": "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+     "says": "where D, W, DW and the mapping are kept (the dev box only), with every hash",
+     "field": "schema",
+     "equals": "aadistill.stage1.reasoning_inheritance.local_checkpoints/v1"
     }
    ],
    "external_material": [
     "docs/stages/stage-1/reasoning_inheritance/REPORT.md, LITERATURE.md -- the round's report and reading",
-    "artifacts/stages/stage-1/reasoning_inheritance/ -- each attempt's secured evidence (dev box); the mapping, checkpoints and the final evidence archive on the private relay"
+    "artifacts/stages/stage-1/reasoning_inheritance/ -- each attempt's secured evidence (dev box); the mapping and the final evidence archive also on the private relay",
+    "~/aad-artifacts/stage1_reasoning_inheritance/ -- D, W, DW (= the packed Top-1), the mapping and the teacher tokenizer, the only copy (MANIFEST.json)"
    ],
    "decisions": [
-    "logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete"
+    "logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; 2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed"
    ],
    "classification_reason": "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps of the teacher before any training (AGENTS.md 4.3); eval-set-1 and the state suite are its instruments.",
    "canonical_scripts": "scripts/stages/stage-1/reasoning_inheritance",

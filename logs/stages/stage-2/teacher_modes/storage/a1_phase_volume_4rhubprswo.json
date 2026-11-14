@@ -6,7 +6,7 @@
  "size_gb": 350,
  "created_utc": "2026-11-01T12:55:01Z",
  "reserved_usd": 26.68,
- "actual_usd": null,
+ "actual_usd": 10.5411,
  "decided_by": "maintainer 2026-11-01 'Research A v2: Execute A1 First': 优先新建 350 GB Volume，保留完整 Full Search State 和 Journal",
  "purpose": "the A1 phase: the inputs session's shards, the hybrid full search's states and journal (prune_weights false), the Top-1, A1's save points and checkpoints",
  "price": "$0.07 per GB-month: $0.82/day (the bills have run up to 17% over the rate); the reserve is 14 days",
@@ -21,5 +21,73 @@
    "by": "maintainer 2026-11-07, Stage 3 authorization, section IV",
    "covers": "14 more days at $0.07 per GB-month for 350 GB"
   }
- ]
+ ],
+ "retirement": {
+  "status": "DELETED",
+  "decided_by": "maintainer 2026-11-14 (brief 'RI-S1 的四组测量完成状态可以接受。本轮先完成以下收尾'), section 1: '我已决定退役全部三个保留卷：4rhubprswo、am5m373kuq、thprcgh7s9。必要 checkpoint 仅在开发机本地磁盘保留。' (logs/budget/decisions.md :: 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only)",
+  "rule": "the maintainer's decision above; AGENTS.md 2.5 for the weights without a consumer; logs and evidence are never deleted (their copies are listed under preserved)",
+  "members_basis": "DERIVED from the records of every run that attached the volume (logs/stages/stage-2/teacher_modes/storage/volume_retirement_proposal_20261110.json :: volumes.4rhubprswo); the volume was never listed whole, so a file no session recorded is lost unseen",
+  "members": [
+   {
+    "item": "search_a1/search/states: 93 states of the closed hybrid D4 full search (a_search_20261101_153803)",
+    "category": "2",
+    "size": "~274 GB est."
+   },
+   {
+    "item": "search_a1/top1: the v2 Top-1 159e73be (model.safetensors 3459b9c9..., artifact ab8ffb0d...)",
+    "category": "W0",
+    "size": "1.19 GB"
+   },
+   {
+    "item": "v2_units/A1-s20260726|s20260801 final weights 1f3e5eea..., 06c12901... (+ evaluation package copies)",
+    "category": "W0",
+    "size": "4 x 2384234968 B = 9.54 GB"
+   },
+   {
+    "item": "v2_units/A1-*/trainer_state.pt, resume_identity.json",
+    "category": "3",
+    "size": "~7.0 GB est."
+   },
+   {
+    "item": "the inputs session's 11 sealed shards",
+    "category": "4 (copied)",
+    "size": "22.9 MB"
+   },
+   {
+    "item": "the A1 pack (blocks.npz 32a87943...)",
+    "category": "5",
+    "size": "~93 MB"
+   },
+   {
+    "item": "A1's train logs and evaluation (generations, rows, reports)",
+    "category": "4 (copied)",
+    "size": "158 MB"
+   }
+  ],
+  "preserved": {
+   "the hybrid D4 search's journal and evidence": "search_evidence.tgz ebc81e9f... and ~/aad-artifacts/research_a/scratch_evidence_20261110/",
+   "the inputs session's 11 sealed shards": "~/aad-artifacts/research_a/scratch_evidence_20261110/ (hard links of .scratch/research_a/a_inputs_20261101_125916/store)",
+   "A1's train logs and evaluation": "~/aad-artifacts/research_a/a_train_a1_20261102_184122/a1_evidence/",
+   "the A1 pack": "artifacts/stages/stage-2/teacher_modes/packs_tm/A1"
+  },
+  "lost_with_the_volume": [
+   "93 states of the closed hybrid D4 full search",
+   "the v2 Top-1 159e73be (model.safetensors 3459b9c9...; re-materializable only by a GPU replay of the journal, not guaranteed bit-exact)",
+   "Research A v1's A1 final weights 1f3e5eea..., 06c12901... and their trainer states"
+  ],
+  "consumers_moved": "none reads the volume: the launchers that attached it belong to closed studies (Research A, H1-PA, the mixed calibration); the only artifacts with a live consumer (RI-S1's D, W, DW, the packed Top-1 being DW) are on the dev box",
+  "deleted_utc": "2026-11-14T10:46:42Z",
+  "provider_confirmation": {
+   "delete": "runpodctl 3.0.1 network-volume delete 4rhubprswo -> {\"deleted\": true, \"id\": \"4rhubprswo\"} at 2026-11-14T10:46:42Z",
+   "read_back_2026-11-14T10:46:47Z": "network-volume list -> []; network-volume get 4rhubprswo -> 404 not_found; pod list -> []"
+  },
+  "actual_usd_basis": {
+   "posted_usd": 10.514583,
+   "posted_rows": 14,
+   "posted_through_utc": "2026-11-14T10:00+00:00",
+   "accrual_to_deletion_usd": 0.026485,
+   "accrual_rule": "the volume's own posted daily rate x the hours between its last posted row and the deletion (est.)",
+   "snapshot": "logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json"
+  }
+ }
 }

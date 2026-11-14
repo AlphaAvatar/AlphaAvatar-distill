@@ -87,7 +87,7 @@ What each one asked of this stage.
 | `phase_c2` — Phase C2 — ATTENTION-aware composition/order re-search | With that ATTENTION operator now fixed, does re-optimizing the operator order and ATTENTION's calibration profile beat the frozen C1 treatment? | [`phase_c2/`](phase_c2/) | planned — space implemented and priced, NOT authorized |
 | `phase_c2_baseline_completion` — Phase C2 baseline completion — the B side of B→C | What does the frozen C1 treatment baseline B score on the same state_eval suite the five selected Search-1 candidates were measured on -- so that the B→C comparison Attempt 4 collected its ranking to ask can finally be computed? | [`phase_c2_baseline_completion/`](phase_c2_baseline_completion/) | granted — attempt5 grant committed, NOT yet authorized |
 | `projected_residual` — Full-width residual stream with per-layer trainable PCA (Research B) | Keeping the teacher's 2,560-wide residual stream, embedding and head and computing each layer's attention and FFN in a 1,024-wide space reached through a trainable per-layer PCA projection, does a student recover better fluid-reasoning correctness than D4-Augmented under its teacher, data, recipe and evaluation? | [`projected_residual/`](projected_residual/) | $0 READY 2026-10-27, NOT AUTHORIZED: the 900M full-width-residual student (902,911,488 parameters, per-layer trainable PCA projections), its initializer, exact counters and folded evaluation route implemented and host-validated; design and decision rule drafted, frozen only on the maintainer's approval; B-E engineering validation ($3.00 cap) and B1 formal ($21.00 cap) applied for. 600M reserved |
-| `reasoning_inheritance` — Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1) | How much of the teacher's fluid reasoning does the current initialization lose to depth pruning alone, to all non-depth compression alone and to both, untrained, and do the two interact? | [`reasoning_inheritance/`](reasoning_inheritance/) | COMPLETE 2026-11-14 (RI-S1, six attempts, $19.9554 of $35): untrained D static fluid 89.6% -> 5.6% thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; eval-set-1 development-exposed |
+| `reasoning_inheritance` — Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1) | How much of the teacher's fluid reasoning does the current initialization lose to depth pruning alone, to all non-depth compression alone and to both, untrained, and do the two interact? | [`reasoning_inheritance/`](reasoning_inheritance/) | COMPLETE and CLOSED 2026-11-14 (RI-S1, six attempts, $19.9554 of $35, the rest lapsed): untrained D static fluid 89.6% -> 5.6% thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; eval-set-1 development-exposed |
 
 ## Runs
 
@@ -137,7 +137,7 @@ copied here.
 ## Decisions
 
 * logs/budget/decisions.md -- 2026-10-27: the next research programme (Research A and B) opened at $0
-* logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete
+* logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; 2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed
 
 ## Current status
 

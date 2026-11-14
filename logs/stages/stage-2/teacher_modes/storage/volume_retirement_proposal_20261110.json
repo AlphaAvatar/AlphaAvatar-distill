@@ -241,5 +241,16 @@
   "TOKEN_MATCHED.md says the teacher cache is on the volume; setup sets HF_HOME=/root/.cache"
  ],
  "caveat": "the grant's phase_a1 block has no closed marker, so kind train_a1 could still be issued; closing it is part of this round's closeout",
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "executed": {
+  "utc": "2026-11-14T10:46:43Z",
+  "by": "the maintainer's decision of 2026-11-14 (logs/budget/decisions.md :: 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only)",
+  "what": "all three volumes deleted, provider-confirmed (each storage record's retirement block)",
+  "superseded_here": [
+   "thprcgh7s9: no relay upload of the seven Stage-3 weights first; their dev-box copies were retired too (AGENTS.md 2.5, tombstones devbox_20261114_stage3_sr_*)",
+   "4rhubprswo: retired without a rescue, as recommended",
+   "am5m373kuq: retired without the H1-PA / mixed-calibration review step; unit 6's records were found already on the dev box (pulled by both supplement sessions), so no pod was needed"
+  ],
+  "correction": "this proposal listed unit 6's train log, run manifests and checkpoint descriptor as having no copy; a_supplement_20261031_092108 and a_supplement_20261031_144618 had pulled them (session.json :: v1_small), and they are in ~/aad-artifacts/research_a/scratch_evidence_20261110/"
+ }
 }

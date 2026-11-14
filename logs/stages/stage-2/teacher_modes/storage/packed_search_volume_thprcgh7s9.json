@@ -6,7 +6,7 @@
  "size_gb": 350,
  "created_utc": "2026-11-05T19:40:35Z",
  "reserved_usd": 26.68,
- "actual_usd": null,
+ "actual_usd": 7.0362,
  "decided_by": "maintainer 2026-11-05 'AlphaAvatar-distill — Packed Full Search 正式授权', sections II and IV: '为一块约 350 GB Network Volume 预留最多 $13.34' ... '先根据实际 L40S 可用区域选择数据中心，再创建对应的新 Network Volume。不固定 EUR-IS-2'",
  "purpose": "research_a_packed_hybrid_full_search (kind packed_search): BeamSearch's journal (search_packed/search/states.jsonl), every state's checkpoint (prune_weights false), the statistics caches, the search record and evidence, and the Top-1 (search_packed/top1) -- everything a replacement session resumes from",
  "price": "$0.07 per GB-month: $0.82/day (the bills have run up to 17% over the rate); the reserve is 14 days, as booked for 4rhubprswo",
@@ -88,5 +88,68 @@
   "keep_condition": "the brief's condition (keep until all eight students' Dev Box copies are hash-verified) is met at 2026-11-10T16:05Z; the 2026-11-10 brief authorizes no volume deletion",
   "retirement_advice": "enter the next explicit retirement decision: the remaining unique bytes are search-state evidence and closed trainer state; retiring it needs a maintainer decision on the search states (AGENTS.md 2.5 tombstones first) and saves $0.82/day",
   "provider_balance_2026_11_10T1727Z_usd": 43.13
+ },
+ "retirement": {
+  "status": "DELETED",
+  "decided_by": "maintainer 2026-11-14 (brief 'RI-S1 的四组测量完成状态可以接受。本轮先完成以下收尾'), section 1: '我已决定退役全部三个保留卷：4rhubprswo、am5m373kuq、thprcgh7s9。必要 checkpoint 仅在开发机本地磁盘保留。' (logs/budget/decisions.md :: 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only)",
+  "rule": "the maintainer's decision above; AGENTS.md 2.5 for the weights without a consumer; logs and evidence are never deleted (their copies are listed under preserved)",
+  "members_basis": "DERIVED from the records of every run that attached the volume (logs/stages/stage-2/teacher_modes/storage/volume_retirement_proposal_20261110.json :: volumes.thprcgh7s9); the volume was never listed whole, so a file no session recorded is lost unseen",
+  "members": [
+   {
+    "item": "search_packed/search/states: 92 non-winning states of the closed packed full search (prune_weights false)",
+    "category": "2",
+    "size": "270.6 GB (journal)"
+   },
+   {
+    "item": "search_packed/top1: the packed Top-1 1f5e4b42 (b74dede8...)",
+    "category": "5",
+    "size": "1.19 GB"
+   },
+   {
+    "item": "stage3_sr/<8 units>/train/checkpoints/<final>/trainer_state.pt (+ resume_identity.json)",
+    "category": "3",
+    "size": "8 x ~3.52 GB = ~28.2 GB est."
+   },
+   {
+    "item": "stage3_sr/<8 units> final model weights (+ evaluation package copies)",
+    "category": "5",
+    "size": "8 x 2.22 GiB (+ six full package copies for the -sr units; A-MIX packages are hard links)"
+   },
+   {
+    "item": "stage3_sr/<8 units> evaluation generations, rows, formal reports, train logs",
+    "category": "4 (copied)",
+    "size": "~1 GB"
+   },
+   {
+    "item": "the teacher's HF cache",
+    "category": "5",
+    "size": "0"
+   }
+  ],
+  "preserved": {
+   "the packed Top-1 1f5e4b42 (b74dede8...)": "the dev box, as RI-S1's DW: ~/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW (one canonical copy; logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json)",
+   "the packed search's journal, selection and evidence": "artifacts/stages/stage-2/teacher_modes/search_sessions/a_packed_search_20261105_195011/ (states.jsonl 617d1512...) and the relay archive d781ab9a...",
+   "the eight Stage-3 units' train logs, configs, generations, rows and formal reports": "evidence archive fadea626... on the dev box (extracted) and the relay; C1's c0901fbb...",
+   "the eight Stage-3 final weights": "none: their dev-box copies were retired the same day under AGENTS.md 2.5 (tombstones devbox_20261114_stage3_sr_*); A-MIX-6cat-sr-s20260801's relay copy remains"
+  },
+  "lost_with_the_volume": [
+   "92 non-winning states of the closed packed search (recoverable only by re-running it, ~$28)",
+   "the eight Stage-3 trainer states (no exact continuation of any of the eight trainings)",
+   "the eight Stage-3 final weights and their evaluation-package copies (retraining A1 $7.76, A2 $15.61, C1 $7.43, A-MIX $23.41, not bit-reproducible)"
+  ],
+  "consumers_moved": "none reads the volume: the launchers that attached it belong to closed studies (Research A, H1-PA, the mixed calibration); the only artifacts with a live consumer (RI-S1's D, W, DW, the packed Top-1 being DW) are on the dev box",
+  "deleted_utc": "2026-11-14T10:46:42Z",
+  "provider_confirmation": {
+   "delete": "runpodctl 3.0.1 network-volume delete thprcgh7s9 -> {\"deleted\": true, \"id\": \"thprcgh7s9\"} at 2026-11-14T10:46:42Z",
+   "read_back_2026-11-14T10:46:47Z": "network-volume list -> []; network-volume get thprcgh7s9 -> 404 not_found; pod list -> []"
+  },
+  "actual_usd_basis": {
+   "posted_usd": 7.009722,
+   "posted_rows": 10,
+   "posted_through_utc": "2026-11-14T10:00+00:00",
+   "accrual_to_deletion_usd": 0.026485,
+   "accrual_rule": "the volume's own posted daily rate x the hours between its last posted row and the deletion (est.)",
+   "snapshot": "logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json"
+  }
  }
 }

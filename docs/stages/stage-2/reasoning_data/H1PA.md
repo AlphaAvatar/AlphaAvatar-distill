@@ -1060,3 +1060,11 @@ What the table shows:
   - A migration to the relay is not recommended: there is no consumer, and
     HF private headroom is ~2 GB.
 - The two PCA-Original checkpoints are E1's, on the relay, untouched.
+
+## Storage (2026-11-14, appended)
+
+The text above is unchanged. The volume `am5m373kuq` was deleted on 2026-11-14 by the maintainer's decision
+(`logs/budget/decisions.md :: All three volumes retired; necessary checkpoints kept on the dev box only`). The final
+weights on it went with it, and their role as declared anchors ended with that decision. Every unit's evaluation
+evidence stays where this report says it is; `logs/stages/stage-2/reasoning_data/storage/h1pa_volume_am5m373kuq.json ::
+retirement` lists what went and what stayed.

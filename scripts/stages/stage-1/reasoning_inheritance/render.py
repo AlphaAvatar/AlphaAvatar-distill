@@ -87,7 +87,8 @@ def contrast_table(res: dict, mode: str) -> list[str]:
                  for k in keys]
         out.append(f"| {unit} | {c['n_items']} | " + " | ".join(f"{100 * acc[x]:.1f}" for x in GROUPS) + " | "
                    + " | ".join(cells) + " |")
-    return out + ["", "Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families resampled)."]
+    return out + ["", "Percentage points; 95% cluster-bootstrap intervals (fluid: whole rule families resampled, not "
+                      "the registered independence groups; both are compared below)."]
 
 
 def retention_table(res: dict, mode: str) -> list[str]:
@@ -99,14 +100,74 @@ def retention_table(res: dict, mode: str) -> list[str]:
     return out
 
 
+FAIL = ("answered_wrong", "no_extractable_answer", "protocol_invalid", "degeneration", "context_limit",
+        "not_terminated")
+FAIL_HEAD = ("answer read, wrong", "no answer the scorer can read", "protocol error", "degeneration stop",
+             "context limit", "other non-EOS stop")
+
+
 def failure_table(res: dict) -> list[str]:
-    types = ("answered_wrong", "no_valid_final_answer", "degeneration", "context_limit", "not_terminated")
-    out = ["| static fluid, T-correct items the group lost | lost | " + " | ".join(types) + " |",
-           "| --- | ---: |" + " ---: |" * len(types)]
+    out = ["| static fluid, T-correct items the group lost | lost | " + " | ".join(FAIL_HEAD) + " |",
+           "| --- | ---: |" + " ---: |" * len(FAIL)]
     for mode, by in sorted((res.get("failure_types") or {}).items()):
         for x, f in sorted(by.items()):
             out.append(f"| {x} {mode} | {f['teacher_correct_lost']} | " +
-                       " | ".join(str(f["lost_by_type"].get(t, 0)) for t in types) + " |")
+                       " | ".join(str(f["lost_by_type"].get(t, 0)) for t in FAIL) + " |")
+    return out
+
+
+def outcome_table(res: dict) -> list[str]:
+    """Every formal row of the static fluid unit and of each capability unit, by what it ended as (T and D: W and DW
+    end in a degeneration stop or the context limit on all but a handful of rows; their counts are in the JSON)."""
+    out = ["| unit | group, mode | n | correct | " + " | ".join(FAIL_HEAD) + " |",
+           "| --- | --- | ---: | ---: |" + " ---: |" * len(FAIL)]
+    labels = (("static fluid (570)", None),) + tuple((lab, u) for u, lab, _ in UNITS)
+    for lab, u in labels:
+        for x in ("T", "D"):
+            for mode in MODES:
+                e = g(res, x, mode)
+                oc = (((e.get("fluid") or {}).get("static") or {}).get("outcomes") if u is None else
+                      (((e.get("units") or {}).get(u) or {}).get("outcomes_by_row")))
+                if not oc:
+                    continue
+                n = sum(oc.values())
+                out.append(f"| {lab} | {x} {mode} | {n} | {oc.get('correct', 0)} | " +
+                           " | ".join(str(oc.get(t, 0)) for t in FAIL) + " |")
+    return out + ["", "Rows, not pairs, for the paired units. \"Answer read, wrong\" includes the behaviour units' wrong "
+                      "behaviours (echoed the passage, answered an unanswerable question, refused an answerable or "
+                      "benign one, complied with an unsafe one). Descriptive; the formal score is the registered "
+                      "scorer's and unchanged."]
+
+
+def integrity_table(res: dict) -> list[str]:
+    out = ["| group, mode | degeneration stops (turns) | saved ids = recorded length | stopped at a check | "
+           "inside the allowance |", "| --- | ---: | ---: | ---: | ---: |"]
+    for mode in MODES:
+        for x in GROUPS:
+            c = g(res, x, mode).get("stop_records") or {}
+            if c:
+                out.append(f"| {x} {mode} | {c.get('degeneration_stops', 0)} | {c.get('ids_equal_recorded_length', 0)} | "
+                           f"{c.get('at_a_check', 0)} | {c.get('inside_allowance', 0)} |")
+    return out
+
+
+def registered_grouping_table(res: dict) -> list[str]:
+    """T-D and D's retention on the fluid axes under the two clusterings (analysis.py :: bootstrap_grouping)."""
+    out = ["| fluid, T-D (pp) / D keeps of T-correct | mode | rule families (reported) | independence groups "
+           "(registered) | retention, families | retention, independence groups |",
+           "| --- | --- | ---: | ---: | ---: | ---: |"]
+    for mode in MODES:
+        for unit, r in sorted(((res.get("contrasts_registered_grouping") or {}).get(mode) or {}).items()):
+            fam_c = res["contrasts"][mode][unit]["depth_alone (T-D)"]
+            reg_c = r["contrasts"]["depth_alone (T-D)"]
+            fam_r, reg_r = res["retention"][mode][unit].get("D"), r["retention"].get("D")
+
+            def iv(b, scale=100, sign=True):
+                f = "+.1f" if sign else ".1f"
+                return (f"{scale * b['estimate']:{f}} [{scale * b['ci95'][0]:{f}}, {scale * b['ci95'][1]:{f}}]"
+                        if b else "--")
+            out.append(f"| {unit} | {mode} | {iv(fam_c)} | {iv(reg_c)} | {iv(fam_r, sign=False)} | "
+                       f"{iv(reg_r, sign=False)} |")
     return out
 
 
@@ -128,8 +189,8 @@ def length_table(res: dict) -> list[str]:
 
 
 def behaviour_table(res: dict) -> list[str]:
-    out = ["| static fluid (570) | usable | correct among usable (descriptive) | natural termination | degeneration | "
-           "context limit | tokens p50 | p90 | mean |",
+    out = ["| static fluid (570) | natural termination (EOS) | usable | correct among usable (descriptive) | "
+           "degeneration | context limit | tokens p50 | p90 | mean |",
            "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
     for mode in MODES:
         for x in GROUPS:
@@ -138,7 +199,9 @@ def behaviour_table(res: dict) -> list[str]:
                 continue
             t = s["generated_tokens"]
             cu = (f"{s['correct_given_usable']}/{s['usable']}" if s.get("usable") else "--")
-            out.append(f"| {x} {mode} | {100 * s['usable_rate']:.1f}% | {cu} | {100 * s['components']['natural_termination']:.1f}% | "
+            nat = round(s["components"]["natural_termination"] * s["n"])
+            out.append(f"| {x} {mode} | {nat} ({100 * s['components']['natural_termination']:.1f}%) | "
+                       f"{s['usable']} ({100 * s['usable_rate']:.1f}%) | {cu} | "
                        f"{100 * s['degeneration_rate']:.1f}% | {100 * s['context_limit_rate']:.1f}% | {t['p50']} | "
                        f"{t['p90']} | {t['mean']} |")
     return out
@@ -167,6 +230,9 @@ def main(argv=None) -> int:
         parts += [f"### Structural contrasts, {mode}", ""] + contrast_table(res, mode) + [""]
         parts += [f"### Retention, {mode}", ""] + retention_table(res, mode) + [""]
     parts += ["### Failure types", ""] + failure_table(res) + [""]
+    parts += ["### What every row ended as (T and D)", ""] + outcome_table(res) + [""]
+    parts += ["### Degeneration-stopped records as sealed", ""] + integrity_table(res) + [""]
+    parts += ["### Fluid intervals under the registered independence grouping", ""] + registered_grouping_table(res) + [""]
     parts += ["### Kept by the teacher's length (descriptive, post hoc)", ""] + length_table(res) + [""]
     parts += ["### State evaluation (state_eval_hybrid@v3, against the root teacher)", ""] + state_table(res)
     print("\n".join(parts))

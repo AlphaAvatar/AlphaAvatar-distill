@@ -1901,3 +1901,14 @@ PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher
 PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.mixed_analysis \
     --units <extracted stage3_sr> --single-units /home/ecs-user/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/extracted
 ```
+
+## Storage after Research A (2026-11-14, appended)
+
+The text above is unchanged; this records where things are now. By the maintainer's decision of 2026-11-14
+(`logs/budget/decisions.md :: All three volumes retired; necessary checkpoints kept on the dev box only`), the volumes
+`thprcgh7s9`, `4rhubprswo` and `am5m373kuq` were deleted, with the provider's confirmation. Each storage record carries
+a `retirement` block saying what went and what stayed. The eight Stage-3 students' final weights were retired from the
+dev box under AGENTS.md 2.5 (tombstones `devbox_20261114_stage3_sr_*`); their receipts, configs and evaluation evidence
+(`fadea626...`) stay, and A-MIX-6cat-sr-s20260801's relay copy remains. The packed Top-1 `1f5e4b42` (`b74dede8...`) is
+kept on the dev box as Stage 1 RI-S1's DW, one canonical copy
+(`logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json`), and its relay copy was deleted.

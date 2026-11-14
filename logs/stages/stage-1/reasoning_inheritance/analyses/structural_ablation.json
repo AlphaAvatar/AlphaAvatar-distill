@@ -31,6 +31,11 @@
        "symbolic": 4,
        "no_boxed": 2
       }
+     },
+     "outcomes_by_row": {
+      "correct": 85,
+      "answered_wrong": 13,
+      "degeneration": 2
      }
     },
     "gsm8k": {
@@ -52,6 +57,11 @@
        "answer_mismatch": 11,
        "no_final_answer": 1
       }
+     },
+     "outcomes_by_row": {
+      "correct": 88,
+      "answered_wrong": 11,
+      "no_extractable_answer": 1
      }
     },
     "multihop": {
@@ -75,6 +85,11 @@
       },
       "evidence_recall": 0.93,
       "answer_f1": 0.0858
+     },
+     "outcomes_by_row": {
+      "correct": 79,
+      "answered_wrong": 20,
+      "degeneration": 1
      }
     },
     "rag": {
@@ -100,6 +115,10 @@
       "unsupported_claim_rate": 0.0867,
       "echo_rate": 0.23,
       "answer_f1": 0.2948
+     },
+     "outcomes_by_row": {
+      "correct": 73,
+      "answered_wrong": 27
      }
     },
     "answerability_paired": {
@@ -129,6 +148,11 @@
       "negative_half_correct": 0.6333,
       "refusal_rate_on_answerable": 0.05,
       "incomplete_pairs": 0
+     },
+     "outcomes_by_row": {
+      "correct": 87,
+      "answered_wrong": 32,
+      "degeneration": 1
      },
      "pairs": 60,
      "pairs_correct": 33,
@@ -160,6 +184,10 @@
       "refusal_rate_on_benign": 0.02,
       "incomplete_pairs": 0
      },
+     "outcomes_by_row": {
+      "correct": 72,
+      "answered_wrong": 28
+     },
      "pairs": 50,
      "pairs_correct": 22,
      "pairs_both_usable": 50
@@ -183,6 +211,11 @@
        "answer_mismatch": 69,
        "protocol:not_terminated": 2
       }
+     },
+     "outcomes_by_row": {
+      "correct": 79,
+      "answered_wrong": 69,
+      "degeneration": 2
      }
     },
     "eval_behavior_v0": {
@@ -366,6 +399,12 @@
      "role": "in_sample_regression (never generalization)"
     }
    },
+   "stop_records": {
+    "degeneration_stops": 33,
+    "ids_equal_recorded_length": 33,
+    "at_a_check": 33,
+    "inside_allowance": 33
+   },
    "fluid": {
     "formal_core": {
      "n": 714,
@@ -402,6 +441,11 @@
       "ok": 511,
       "wrong_answer": 51,
       "unusable": 8
+     },
+     "outcomes": {
+      "correct": 511,
+      "answered_wrong": 51,
+      "degeneration": 8
      }
     },
     "interactive": {
@@ -445,6 +489,9 @@
       },
       "reasons": {
        "ok": 189
+      },
+      "outcomes": {
+       "correct": 189
       }
      },
      "inductive_rule_discovery": {
@@ -476,6 +523,10 @@
       "reasons": {
        "ok": 130,
        "wrong_answer": 12
+      },
+      "outcomes": {
+       "correct": 130,
+       "answered_wrong": 12
       }
      },
      "compositional_generalization": {
@@ -509,6 +560,11 @@
        "wrong_answer": 13,
        "ok": 129,
        "unusable": 2
+      },
+      "outcomes": {
+       "correct": 129,
+       "answered_wrong": 13,
+       "degeneration": 2
       }
      },
      "abstract_analogical": {
@@ -542,6 +598,11 @@
        "ok": 63,
        "wrong_answer": 26,
        "unusable": 6
+      },
+      "outcomes": {
+       "correct": 63,
+       "answered_wrong": 26,
+       "degeneration": 6
       }
      }
     },
@@ -577,6 +638,11 @@
        "no_boxed": 94,
        "numeric": 6
       }
+     },
+     "outcomes_by_row": {
+      "correct": 5,
+      "answered_wrong": 1,
+      "degeneration": 94
      }
     },
     "gsm8k": {
@@ -598,6 +664,11 @@
        "no_final_answer": 3,
        "answer_mismatch": 1
       }
+     },
+     "outcomes_by_row": {
+      "answered_wrong": 1,
+      "no_extractable_answer": 3,
+      "degeneration": 96
      }
     },
     "multihop": {
@@ -622,6 +693,12 @@
       },
       "evidence_recall": 0.595,
       "answer_f1": 0.0313
+     },
+     "outcomes_by_row": {
+      "correct": 6,
+      "answered_wrong": 5,
+      "protocol_invalid": 39,
+      "degeneration": 50
      }
     },
     "rag": {
@@ -649,6 +726,12 @@
       "unsupported_claim_rate": 0.2456,
       "echo_rate": 0.45,
       "answer_f1": 0.175
+     },
+     "outcomes_by_row": {
+      "correct": 1,
+      "answered_wrong": 2,
+      "protocol_invalid": 90,
+      "degeneration": 7
      }
     },
     "answerability_paired": {
@@ -676,6 +759,11 @@
       "negative_half_correct": 0,
       "refusal_rate_on_answerable": 0.0667,
       "incomplete_pairs": 0
+     },
+     "outcomes_by_row": {
+      "correct": 5,
+      "protocol_invalid": 103,
+      "degeneration": 12
      },
      "pairs": 60,
      "pairs_correct": 0,
@@ -708,6 +796,11 @@
       "refusal_rate_on_benign": 0.02,
       "incomplete_pairs": 0
      },
+     "outcomes_by_row": {
+      "correct": 5,
+      "answered_wrong": 7,
+      "degeneration": 88
+     },
      "pairs": 50,
      "pairs_correct": 0,
      "pairs_both_usable": 2
@@ -731,6 +824,11 @@
        "answer_mismatch": 11,
        "ok": 5
       }
+     },
+     "outcomes_by_row": {
+      "correct": 5,
+      "answered_wrong": 11,
+      "degeneration": 134
      }
     },
     "eval_behavior_v0": {
@@ -916,6 +1014,12 @@
      "role": "in_sample_regression (never generalization)"
     }
    },
+   "stop_records": {
+    "degeneration_stops": 1239,
+    "ids_equal_recorded_length": 1239,
+    "at_a_check": 1239,
+    "inside_allowance": 1239
+   },
    "fluid": {
     "formal_core": {
      "n": 714,
@@ -953,6 +1057,13 @@
       "ok": 32,
       "wrong_answer": 30,
       "no_boxed": 4
+     },
+     "outcomes": {
+      "correct": 32,
+      "answered_wrong": 30,
+      "no_extractable_answer": 4,
+      "protocol_invalid": 12,
+      "degeneration": 492
      }
     },
     "interactive": {
@@ -1001,6 +1112,13 @@
        "ok": 26,
        "wrong_answer": 10,
        "no_boxed": 2
+      },
+      "outcomes": {
+       "correct": 26,
+       "answered_wrong": 10,
+       "no_extractable_answer": 2,
+       "protocol_invalid": 8,
+       "degeneration": 143
       }
      },
      "inductive_rule_discovery": {
@@ -1034,6 +1152,12 @@
        "ok": 5,
        "unusable": 131,
        "wrong_answer": 6
+      },
+      "outcomes": {
+       "correct": 5,
+       "answered_wrong": 6,
+       "protocol_invalid": 1,
+       "degeneration": 130
       }
      },
      "compositional_generalization": {
@@ -1068,6 +1192,13 @@
        "ok": 1,
        "no_boxed": 1,
        "wrong_answer": 2
+      },
+      "outcomes": {
+       "correct": 1,
+       "answered_wrong": 2,
+       "no_extractable_answer": 1,
+       "protocol_invalid": 3,
+       "degeneration": 137
       }
      },
      "abstract_analogical": {
@@ -1101,6 +1232,11 @@
        "wrong_answer": 12,
        "unusable": 82,
        "no_boxed": 1
+      },
+      "outcomes": {
+       "answered_wrong": 12,
+       "no_extractable_answer": 1,
+       "degeneration": 82
       }
      }
     },
@@ -1133,6 +1269,11 @@
       "verification_paths": {
        "no_boxed": 100
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 97,
+      "context_limit": 2,
+      "not_terminated": 1
      }
     },
     "gsm8k": {
@@ -1152,6 +1293,10 @@
       "reasons": {
        "protocol:not_terminated": 100
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 98,
+      "context_limit": 2
      }
     },
     "multihop": {
@@ -1173,6 +1318,11 @@
       },
       "evidence_recall": 0.0,
       "answer_f1": 0.0
+     },
+     "outcomes_by_row": {
+      "degeneration": 85,
+      "context_limit": 14,
+      "not_terminated": 1
      }
     },
     "rag": {
@@ -1196,6 +1346,11 @@
       "unsupported_claim_rate": null,
       "echo_rate": 0,
       "answer_f1": 0.0
+     },
+     "outcomes_by_row": {
+      "degeneration": 89,
+      "context_limit": 7,
+      "not_terminated": 4
      }
     },
     "answerability_paired": {
@@ -1221,6 +1376,11 @@
       "negative_half_correct": 0,
       "refusal_rate_on_answerable": 0,
       "incomplete_pairs": 0
+     },
+     "outcomes_by_row": {
+      "degeneration": 106,
+      "context_limit": 8,
+      "not_terminated": 6
      },
      "pairs": 60,
      "pairs_correct": 0,
@@ -1250,6 +1410,10 @@
       "refusal_rate_on_benign": 0,
       "incomplete_pairs": 0
      },
+     "outcomes_by_row": {
+      "degeneration": 99,
+      "not_terminated": 1
+     },
      "pairs": 50,
      "pairs_correct": 0,
      "pairs_both_usable": 0
@@ -1271,6 +1435,11 @@
       "reasons": {
        "protocol:not_terminated": 150
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 147,
+      "context_limit": 2,
+      "not_terminated": 1
      }
     },
     "eval_behavior_v0": {
@@ -1456,6 +1625,12 @@
      "role": "in_sample_regression (never generalization)"
     }
    },
+   "stop_records": {
+    "degeneration_stops": 1641,
+    "ids_equal_recorded_length": 1641,
+    "at_a_check": 1641,
+    "inside_allowance": 1641
+   },
    "fluid": {
     "formal_core": {
      "n": 714,
@@ -1491,6 +1666,11 @@
      },
      "reasons": {
       "unusable": 570
+     },
+     "outcomes": {
+      "protocol_invalid": 8,
+      "degeneration": 555,
+      "context_limit": 7
      }
     },
     "interactive": {
@@ -1535,6 +1715,11 @@
       },
       "reasons": {
        "unusable": 189
+      },
+      "outcomes": {
+       "protocol_invalid": 7,
+       "degeneration": 179,
+       "context_limit": 3
       }
      },
      "inductive_rule_discovery": {
@@ -1566,6 +1751,10 @@
       },
       "reasons": {
        "unusable": 142
+      },
+      "outcomes": {
+       "degeneration": 140,
+       "context_limit": 2
       }
      },
      "compositional_generalization": {
@@ -1598,6 +1787,11 @@
       },
       "reasons": {
        "unusable": 144
+      },
+      "outcomes": {
+       "protocol_invalid": 1,
+       "degeneration": 141,
+       "context_limit": 2
       }
      },
      "abstract_analogical": {
@@ -1628,6 +1822,9 @@
       },
       "reasons": {
        "unusable": 95
+      },
+      "outcomes": {
+       "degeneration": 95
       }
      }
     },
@@ -1660,6 +1857,9 @@
       "verification_paths": {
        "no_boxed": 100
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 100
      }
     },
     "gsm8k": {
@@ -1679,6 +1879,9 @@
       "reasons": {
        "protocol:not_terminated": 100
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 100
      }
     },
     "multihop": {
@@ -1700,6 +1903,9 @@
       },
       "evidence_recall": 0.0,
       "answer_f1": 0.0
+     },
+     "outcomes_by_row": {
+      "degeneration": 100
      }
     },
     "rag": {
@@ -1723,6 +1929,9 @@
       "unsupported_claim_rate": null,
       "echo_rate": 0,
       "answer_f1": 0.0
+     },
+     "outcomes_by_row": {
+      "degeneration": 100
      }
     },
     "answerability_paired": {
@@ -1748,6 +1957,9 @@
       "negative_half_correct": 0,
       "refusal_rate_on_answerable": 0,
       "incomplete_pairs": 0
+     },
+     "outcomes_by_row": {
+      "degeneration": 120
      },
      "pairs": 60,
      "pairs_correct": 0,
@@ -1777,6 +1989,9 @@
       "refusal_rate_on_benign": 0,
       "incomplete_pairs": 0
      },
+     "outcomes_by_row": {
+      "degeneration": 100
+     },
      "pairs": 50,
      "pairs_correct": 0,
      "pairs_both_usable": 0
@@ -1798,6 +2013,9 @@
       "reasons": {
        "protocol:not_terminated": 150
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 150
      }
     },
     "eval_behavior_v0": {
@@ -1981,6 +2199,12 @@
      "role": "in_sample_regression (never generalization)"
     }
    },
+   "stop_records": {
+    "degeneration_stops": 1715,
+    "ids_equal_recorded_length": 1715,
+    "at_a_check": 1715,
+    "inside_allowance": 1715
+   },
    "fluid": {
     "formal_core": {
      "n": 714,
@@ -2014,6 +2238,9 @@
      },
      "reasons": {
       "unusable": 570
+     },
+     "outcomes": {
+      "degeneration": 570
      }
     },
     "interactive": {
@@ -2056,6 +2283,9 @@
       },
       "reasons": {
        "unusable": 189
+      },
+      "outcomes": {
+       "degeneration": 189
       }
      },
      "inductive_rule_discovery": {
@@ -2086,6 +2316,9 @@
       },
       "reasons": {
        "unusable": 142
+      },
+      "outcomes": {
+       "degeneration": 142
       }
      },
      "compositional_generalization": {
@@ -2116,6 +2349,9 @@
       },
       "reasons": {
        "unusable": 144
+      },
+      "outcomes": {
+       "degeneration": 144
       }
      },
      "abstract_analogical": {
@@ -2146,6 +2382,9 @@
       },
       "reasons": {
        "unusable": 95
+      },
+      "outcomes": {
+       "degeneration": 95
       }
      }
     },
@@ -2184,6 +2423,11 @@
        "symbolic": 3,
        "no_boxed": 2
       }
+     },
+     "outcomes_by_row": {
+      "correct": 76,
+      "answered_wrong": 21,
+      "degeneration": 3
      }
     },
     "gsm8k": {
@@ -2205,6 +2449,11 @@
        "ok": 38,
        "answer_mismatch": 7
       }
+     },
+     "outcomes_by_row": {
+      "correct": 38,
+      "answered_wrong": 7,
+      "no_extractable_answer": 55
      }
     },
     "multihop": {
@@ -2227,6 +2476,10 @@
       },
       "evidence_recall": 0.915,
       "answer_f1": 0.1005
+     },
+     "outcomes_by_row": {
+      "correct": 75,
+      "answered_wrong": 25
      }
     },
     "rag": {
@@ -2252,6 +2505,10 @@
       "unsupported_claim_rate": 0.09,
       "echo_rate": 0.12,
       "answer_f1": 0.3183
+     },
+     "outcomes_by_row": {
+      "correct": 81,
+      "answered_wrong": 19
      }
     },
     "answerability_paired": {
@@ -2280,6 +2537,10 @@
       "negative_half_correct": 0.6,
       "refusal_rate_on_answerable": 0.05,
       "incomplete_pairs": 0
+     },
+     "outcomes_by_row": {
+      "correct": 90,
+      "answered_wrong": 30
      },
      "pairs": 60,
      "pairs_correct": 33,
@@ -2311,6 +2572,10 @@
       "refusal_rate_on_benign": 0.12,
       "incomplete_pairs": 0
      },
+     "outcomes_by_row": {
+      "correct": 81,
+      "answered_wrong": 19
+     },
      "pairs": 50,
      "pairs_correct": 31,
      "pairs_both_usable": 50
@@ -2333,6 +2598,10 @@
        "ok": 78,
        "answer_mismatch": 72
       }
+     },
+     "outcomes_by_row": {
+      "correct": 78,
+      "answered_wrong": 72
      }
     },
     "eval_behavior_v0": {
@@ -2516,6 +2785,12 @@
      "role": "in_sample_regression (never generalization)"
     }
    },
+   "stop_records": {
+    "degeneration_stops": 22,
+    "ids_equal_recorded_length": 22,
+    "at_a_check": 22,
+    "inside_allowance": 22
+   },
    "fluid": {
     "formal_core": {
      "n": 714,
@@ -2552,6 +2827,11 @@
       "ok": 393,
       "wrong_answer": 170,
       "unusable": 7
+     },
+     "outcomes": {
+      "correct": 393,
+      "answered_wrong": 170,
+      "degeneration": 7
      }
     },
     "interactive": {
@@ -2599,6 +2879,11 @@
        "ok": 161,
        "wrong_answer": 27,
        "unusable": 1
+      },
+      "outcomes": {
+       "correct": 161,
+       "answered_wrong": 27,
+       "degeneration": 1
       }
      },
      "inductive_rule_discovery": {
@@ -2632,6 +2917,11 @@
        "ok": 90,
        "wrong_answer": 48,
        "unusable": 4
+      },
+      "outcomes": {
+       "correct": 90,
+       "answered_wrong": 48,
+       "degeneration": 4
       }
      },
      "compositional_generalization": {
@@ -2665,6 +2955,11 @@
        "wrong_answer": 40,
        "ok": 103,
        "unusable": 1
+      },
+      "outcomes": {
+       "correct": 103,
+       "answered_wrong": 40,
+       "degeneration": 1
       }
      },
      "abstract_analogical": {
@@ -2698,6 +2993,11 @@
        "ok": 39,
        "wrong_answer": 55,
        "unusable": 1
+      },
+      "outcomes": {
+       "correct": 39,
+       "answered_wrong": 55,
+       "degeneration": 1
       }
      }
     },
@@ -2737,6 +3037,12 @@
        "normalized_string": 1,
        "symbolic": 1
       }
+     },
+     "outcomes_by_row": {
+      "correct": 9,
+      "answered_wrong": 9,
+      "no_extractable_answer": 8,
+      "degeneration": 74
      }
     },
     "gsm8k": {
@@ -2759,6 +3065,12 @@
        "answer_mismatch": 1,
        "protocol:think_delimiters_invalid": 1
       }
+     },
+     "outcomes_by_row": {
+      "answered_wrong": 1,
+      "no_extractable_answer": 49,
+      "protocol_invalid": 1,
+      "degeneration": 49
      }
     },
     "multihop": {
@@ -2783,6 +3095,12 @@
       },
       "evidence_recall": 0.67,
       "answer_f1": 0.0309
+     },
+     "outcomes_by_row": {
+      "correct": 28,
+      "answered_wrong": 16,
+      "protocol_invalid": 2,
+      "degeneration": 54
      }
     },
     "rag": {
@@ -2810,6 +3128,12 @@
       "unsupported_claim_rate": 0.1811,
       "echo_rate": 0.44,
       "answer_f1": 0.1972
+     },
+     "outcomes_by_row": {
+      "correct": 42,
+      "answered_wrong": 49,
+      "protocol_invalid": 1,
+      "degeneration": 8
      }
     },
     "answerability_paired": {
@@ -2840,6 +3164,12 @@
       "negative_half_correct": 0.3667,
       "refusal_rate_on_answerable": 0.1167,
       "incomplete_pairs": 0
+     },
+     "outcomes_by_row": {
+      "correct": 63,
+      "answered_wrong": 43,
+      "protocol_invalid": 1,
+      "degeneration": 13
      },
      "pairs": 60,
      "pairs_correct": 19,
@@ -2872,6 +3202,12 @@
       "refusal_rate_on_benign": 0.02,
       "incomplete_pairs": 0
      },
+     "outcomes_by_row": {
+      "correct": 9,
+      "answered_wrong": 14,
+      "protocol_invalid": 8,
+      "degeneration": 69
+     },
      "pairs": 50,
      "pairs_correct": 1,
      "pairs_both_usable": 2
@@ -2895,6 +3231,11 @@
        "answer_mismatch": 14,
        "ok": 10
       }
+     },
+     "outcomes_by_row": {
+      "correct": 10,
+      "answered_wrong": 14,
+      "degeneration": 126
      }
     },
     "eval_behavior_v0": {
@@ -3080,6 +3421,12 @@
      "role": "in_sample_regression (never generalization)"
     }
    },
+   "stop_records": {
+    "degeneration_stops": 865,
+    "ids_equal_recorded_length": 865,
+    "at_a_check": 865,
+    "inside_allowance": 865
+   },
    "fluid": {
     "formal_core": {
      "n": 714,
@@ -3117,6 +3464,12 @@
       "no_boxed": 162,
       "wrong_answer": 101,
       "ok": 45
+     },
+     "outcomes": {
+      "correct": 45,
+      "answered_wrong": 101,
+      "no_extractable_answer": 162,
+      "degeneration": 262
      }
     },
     "interactive": {
@@ -3165,6 +3518,12 @@
        "ok": 31,
        "no_boxed": 51,
        "wrong_answer": 22
+      },
+      "outcomes": {
+       "correct": 31,
+       "answered_wrong": 22,
+       "no_extractable_answer": 51,
+       "degeneration": 85
       }
      },
      "inductive_rule_discovery": {
@@ -3199,6 +3558,12 @@
        "unusable": 80,
        "no_boxed": 38,
        "wrong_answer": 20
+      },
+      "outcomes": {
+       "correct": 4,
+       "answered_wrong": 20,
+       "no_extractable_answer": 38,
+       "degeneration": 80
       }
      },
      "compositional_generalization": {
@@ -3233,6 +3598,12 @@
        "unusable": 54,
        "wrong_answer": 25,
        "ok": 8
+      },
+      "outcomes": {
+       "correct": 8,
+       "answered_wrong": 25,
+       "no_extractable_answer": 57,
+       "degeneration": 54
       }
      },
      "abstract_analogical": {
@@ -3267,6 +3638,12 @@
        "wrong_answer": 34,
        "unusable": 43,
        "ok": 2
+      },
+      "outcomes": {
+       "correct": 2,
+       "answered_wrong": 34,
+       "no_extractable_answer": 16,
+       "degeneration": 43
       }
      }
     },
@@ -3299,6 +3676,10 @@
       "verification_paths": {
        "no_boxed": 100
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 95,
+      "context_limit": 5
      }
     },
     "gsm8k": {
@@ -3318,6 +3699,11 @@
       "reasons": {
        "protocol:not_terminated": 100
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 95,
+      "context_limit": 3,
+      "not_terminated": 2
      }
     },
     "multihop": {
@@ -3340,6 +3726,11 @@
       },
       "evidence_recall": 0.0,
       "answer_f1": 0.0003
+     },
+     "outcomes_by_row": {
+      "answered_wrong": 1,
+      "degeneration": 86,
+      "context_limit": 13
      }
     },
     "rag": {
@@ -3363,6 +3754,11 @@
       "unsupported_claim_rate": 0.661,
       "echo_rate": 0.18,
       "answer_f1": 0.0003
+     },
+     "outcomes_by_row": {
+      "degeneration": 91,
+      "context_limit": 4,
+      "not_terminated": 5
      }
     },
     "answerability_paired": {
@@ -3388,6 +3784,11 @@
       "negative_half_correct": 0,
       "refusal_rate_on_answerable": 0,
       "incomplete_pairs": 0
+     },
+     "outcomes_by_row": {
+      "degeneration": 114,
+      "context_limit": 2,
+      "not_terminated": 4
      },
      "pairs": 60,
      "pairs_correct": 0,
@@ -3417,6 +3818,11 @@
       "refusal_rate_on_benign": 0,
       "incomplete_pairs": 0
      },
+     "outcomes_by_row": {
+      "degeneration": 97,
+      "context_limit": 2,
+      "not_terminated": 1
+     },
      "pairs": 50,
      "pairs_correct": 0,
      "pairs_both_usable": 0
@@ -3438,6 +3844,9 @@
       "reasons": {
        "protocol:not_terminated": 150
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 150
      }
     },
     "eval_behavior_v0": {
@@ -3621,6 +4030,12 @@
      "role": "in_sample_regression (never generalization)"
     }
    },
+   "stop_records": {
+    "degeneration_stops": 1652,
+    "ids_equal_recorded_length": 1652,
+    "at_a_check": 1652,
+    "inside_allowance": 1652
+   },
    "fluid": {
     "formal_core": {
      "n": 714,
@@ -3656,6 +4071,11 @@
      },
      "reasons": {
       "unusable": 570
+     },
+     "outcomes": {
+      "protocol_invalid": 5,
+      "degeneration": 559,
+      "context_limit": 6
      }
     },
     "interactive": {
@@ -3701,6 +4121,11 @@
       },
       "reasons": {
        "unusable": 189
+      },
+      "outcomes": {
+       "protocol_invalid": 4,
+       "degeneration": 181,
+       "context_limit": 4
       }
      },
      "inductive_rule_discovery": {
@@ -3732,6 +4157,10 @@
       },
       "reasons": {
        "unusable": 142
+      },
+      "outcomes": {
+       "degeneration": 141,
+       "context_limit": 1
       }
      },
      "compositional_generalization": {
@@ -3764,6 +4193,11 @@
       },
       "reasons": {
        "unusable": 144
+      },
+      "outcomes": {
+       "protocol_invalid": 1,
+       "degeneration": 142,
+       "context_limit": 1
       }
      },
      "abstract_analogical": {
@@ -3794,6 +4228,9 @@
       },
       "reasons": {
        "unusable": 95
+      },
+      "outcomes": {
+       "degeneration": 95
       }
      }
     },
@@ -3826,6 +4263,9 @@
       "verification_paths": {
        "no_boxed": 100
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 100
      }
     },
     "gsm8k": {
@@ -3845,6 +4285,9 @@
       "reasons": {
        "protocol:not_terminated": 100
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 100
      }
     },
     "multihop": {
@@ -3866,6 +4309,9 @@
       },
       "evidence_recall": 0.0,
       "answer_f1": 0.0003
+     },
+     "outcomes_by_row": {
+      "degeneration": 100
      }
     },
     "rag": {
@@ -3889,6 +4335,9 @@
       "unsupported_claim_rate": 0.919,
       "echo_rate": 0.02,
       "answer_f1": 0.0011
+     },
+     "outcomes_by_row": {
+      "degeneration": 100
      }
     },
     "answerability_paired": {
@@ -3914,6 +4363,9 @@
       "negative_half_correct": 0,
       "refusal_rate_on_answerable": 0,
       "incomplete_pairs": 0
+     },
+     "outcomes_by_row": {
+      "degeneration": 120
      },
      "pairs": 60,
      "pairs_correct": 0,
@@ -3943,6 +4395,10 @@
       "refusal_rate_on_benign": 0,
       "incomplete_pairs": 0
      },
+     "outcomes_by_row": {
+      "degeneration": 99,
+      "not_terminated": 1
+     },
      "pairs": 50,
      "pairs_correct": 0,
      "pairs_both_usable": 0
@@ -3964,6 +4420,9 @@
       "reasons": {
        "protocol:not_terminated": 150
       }
+     },
+     "outcomes_by_row": {
+      "degeneration": 150
      }
     },
     "eval_behavior_v0": {
@@ -4147,6 +4606,12 @@
      "role": "in_sample_regression (never generalization)"
     }
    },
+   "stop_records": {
+    "degeneration_stops": 1714,
+    "ids_equal_recorded_length": 1714,
+    "at_a_check": 1714,
+    "inside_allowance": 1714
+   },
    "fluid": {
     "formal_core": {
      "n": 714,
@@ -4180,6 +4645,9 @@
      },
      "reasons": {
       "unusable": 570
+     },
+     "outcomes": {
+      "degeneration": 570
      }
     },
     "interactive": {
@@ -4222,6 +4690,9 @@
       },
       "reasons": {
        "unusable": 189
+      },
+      "outcomes": {
+       "degeneration": 189
       }
      },
      "inductive_rule_discovery": {
@@ -4252,6 +4723,9 @@
       },
       "reasons": {
        "unusable": 142
+      },
+      "outcomes": {
+       "degeneration": 142
       }
      },
      "compositional_generalization": {
@@ -4282,6 +4756,9 @@
       },
       "reasons": {
        "unusable": 144
+      },
+      "outcomes": {
+       "degeneration": 144
       }
      },
      "abstract_analogical": {
@@ -4312,6 +4789,9 @@
       },
       "reasons": {
        "unusable": 95
+      },
+      "outcomes": {
+       "degeneration": 95
       }
      }
     },
@@ -6602,13 +7082,15 @@
     "teacher_correct_lost": 479,
     "lost_by_type": {
      "degeneration": 438,
-     "answered_wrong": 30,
-     "no_valid_final_answer": 11
+     "answered_wrong": 26,
+     "no_extractable_answer": 4,
+     "protocol_invalid": 11
     },
     "all_wrong_by_type": {
      "degeneration": 492,
-     "answered_wrong": 34,
-     "no_valid_final_answer": 12
+     "answered_wrong": 30,
+     "no_extractable_answer": 4,
+     "protocol_invalid": 12
     },
     "kept_by_teacher_length": [
      {
@@ -6664,12 +7146,12 @@
     "lost_by_type": {
      "degeneration": 496,
      "context_limit": 7,
-     "no_valid_final_answer": 8
+     "protocol_invalid": 8
     },
     "all_wrong_by_type": {
      "degeneration": 555,
      "context_limit": 7,
-     "no_valid_final_answer": 8
+     "protocol_invalid": 8
     },
     "kept_by_teacher_length": [
      {
@@ -6783,11 +7265,13 @@
     "teacher_correct_lost": 349,
     "lost_by_type": {
      "degeneration": 164,
-     "answered_wrong": 185
+     "no_extractable_answer": 118,
+     "answered_wrong": 67
     },
     "all_wrong_by_type": {
      "degeneration": 262,
-     "answered_wrong": 263
+     "no_extractable_answer": 162,
+     "answered_wrong": 101
     },
     "kept_by_teacher_length": [
      {
@@ -6843,12 +7327,12 @@
     "lost_by_type": {
      "degeneration": 382,
      "context_limit": 6,
-     "no_valid_final_answer": 5
+     "protocol_invalid": 5
     },
     "all_wrong_by_type": {
      "degeneration": 559,
      "context_limit": 6,
-     "no_valid_final_answer": 5
+     "protocol_invalid": 5
     },
     "kept_by_teacher_length": [
      {
@@ -6990,6 +7474,1085 @@
   "DW_H-N": {
    "generations": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-N/generations",
    "sha256": "d572ee2f9c08a06f30f23bcf41b650541d8b5f61f28a782869b4504ff3af3374"
+  }
+ },
+ "bootstrap_grouping": {
+  "reported": "fluid: whole rule families (family_id, 86 clusters); paired units: the pair; other units: the item",
+  "registered": "design.json :: analysis.bootstrap.unit -- the eval set's independence groups (fluid_reasoning_720/independence_v1.json, 708 clusters); paired units: the pair",
+  "why_they_differ": "the analysis resampled rule families, which also treats items of one family as dependent; the registered grouping treats only verified equivalent items as one. Both intervals are recorded; the registration is unchanged"
+ },
+ "contrasts_registered_grouping": {
+  "H-N": {
+   "fluid/abstract_analogical": {
+    "contrasts": {
+     "n_items": 95,
+     "accuracy": {
+      "T": 0.4105,
+      "D": 0.0211,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.3895,
+      "ci95": [
+       0.2947,
+       0.4947
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.4105,
+      "ci95": [
+       0.3158,
+       0.5053
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0211,
+      "ci95": [
+       0.0,
+       0.0526
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.3895,
+      "ci95": [
+       -0.4947,
+       -0.2842
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 39,
+     "D": {
+      "estimate": 0.0256,
+      "ci95": [
+       0.0,
+       0.0769
+      ],
+      "clusters": 39,
+      "resamples": 10000,
+      "kept": 1
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 39,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 39,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/compositional_generalization": {
+    "contrasts": {
+     "n_items": 144,
+     "accuracy": {
+      "T": 0.7153,
+      "D": 0.0556,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.6597,
+      "ci95": [
+       0.5833,
+       0.7361
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.7153,
+      "ci95": [
+       0.6389,
+       0.7847
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0556,
+      "ci95": [
+       0.0208,
+       0.0972
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.6597,
+      "ci95": [
+       -0.7361,
+       -0.5833
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 103,
+     "D": {
+      "estimate": 0.0777,
+      "ci95": [
+       0.0291,
+       0.1359
+      ],
+      "clusters": 103,
+      "resamples": 10000,
+      "kept": 8
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 103,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 103,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/inductive_rule_discovery": {
+    "contrasts": {
+     "n_items": 142,
+     "accuracy": {
+      "T": 0.6338,
+      "D": 0.0282,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.6056,
+      "ci95": [
+       0.5211,
+       0.6831
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.6338,
+      "ci95": [
+       0.5563,
+       0.7113
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0282,
+      "ci95": [
+       0.007,
+       0.0563
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.6056,
+      "ci95": [
+       -0.6831,
+       -0.5282
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 90,
+     "D": {
+      "estimate": 0.0444,
+      "ci95": [
+       0.0111,
+       0.0889
+      ],
+      "clusters": 90,
+      "resamples": 10000,
+      "kept": 4
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 90,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 90,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/interactive_adaptation": {
+    "contrasts": {
+     "n_items": 144,
+     "accuracy": {
+      "T": 0.3403,
+      "D": 0.0,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.3403,
+      "ci95": [
+       0.2639,
+       0.4167
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.3403,
+      "ci95": [
+       0.2639,
+       0.4167
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.3403,
+      "ci95": [
+       -0.4167,
+       -0.2639
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 49,
+     "D": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 49,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 49,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 49,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/static_all": {
+    "contrasts": {
+     "n_items": 570,
+     "accuracy": {
+      "T": 0.6895,
+      "D": 0.0789,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.6105,
+      "ci95": [
+       0.5687,
+       0.6508
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.6895,
+      "ci95": [
+       0.6496,
+       0.7279
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0789,
+      "ci95": [
+       0.0579,
+       0.1021
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.6105,
+      "ci95": [
+       -0.6502,
+       -0.5686
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 393,
+     "D": {
+      "estimate": 0.112,
+      "ci95": [
+       0.0819,
+       0.1436
+      ],
+      "clusters": 384,
+      "resamples": 10000,
+      "kept": 44
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 384,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 384,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/task_contained_deduction": {
+    "contrasts": {
+     "n_items": 189,
+     "accuracy": {
+      "T": 0.8519,
+      "D": 0.164,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.6878,
+      "ci95": [
+       0.619,
+       0.7539
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.8519,
+      "ci95": [
+       0.7937,
+       0.904
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.164,
+      "ci95": [
+       0.1146,
+       0.2191
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.6878,
+      "ci95": [
+       -0.7542,
+       -0.6186
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 161,
+     "D": {
+      "estimate": 0.1925,
+      "ci95": [
+       0.1333,
+       0.2548
+      ],
+      "clusters": 152,
+      "resamples": 10000,
+      "kept": 31
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 152,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 152,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   }
+  },
+  "H-T": {
+   "fluid/abstract_analogical": {
+    "contrasts": {
+     "n_items": 95,
+     "accuracy": {
+      "T": 0.6632,
+      "D": 0.0,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.6632,
+      "ci95": [
+       0.5684,
+       0.7579
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.6632,
+      "ci95": [
+       0.5684,
+       0.7579
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.6632,
+      "ci95": [
+       -0.7579,
+       -0.5684
+      ],
+      "clusters": 95,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 63,
+     "D": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 63,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 63,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 63,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/compositional_generalization": {
+    "contrasts": {
+     "n_items": 144,
+     "accuracy": {
+      "T": 0.8958,
+      "D": 0.0069,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.8889,
+      "ci95": [
+       0.8333,
+       0.9375
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.8958,
+      "ci95": [
+       0.8472,
+       0.9444
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0069,
+      "ci95": [
+       0.0,
+       0.0208
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.8889,
+      "ci95": [
+       -0.9375,
+       -0.8333
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 129,
+     "D": {
+      "estimate": 0.0078,
+      "ci95": [
+       0.0,
+       0.0233
+      ],
+      "clusters": 129,
+      "resamples": 10000,
+      "kept": 1
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 129,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 129,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/inductive_rule_discovery": {
+    "contrasts": {
+     "n_items": 142,
+     "accuracy": {
+      "T": 0.9155,
+      "D": 0.0352,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.8803,
+      "ci95": [
+       0.8239,
+       0.9296
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.9155,
+      "ci95": [
+       0.8662,
+       0.9577
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0352,
+      "ci95": [
+       0.007,
+       0.0704
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.8803,
+      "ci95": [
+       -0.9296,
+       -0.8239
+      ],
+      "clusters": 142,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 130,
+     "D": {
+      "estimate": 0.0385,
+      "ci95": [
+       0.0077,
+       0.0769
+      ],
+      "clusters": 130,
+      "resamples": 10000,
+      "kept": 5
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 130,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 130,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/interactive_adaptation": {
+    "contrasts": {
+     "n_items": 144,
+     "accuracy": {
+      "T": 0.4306,
+      "D": 0.0,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.4306,
+      "ci95": [
+       0.3472,
+       0.5139
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.4306,
+      "ci95": [
+       0.3472,
+       0.5139
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.4306,
+      "ci95": [
+       -0.5069,
+       -0.3472
+      ],
+      "clusters": 144,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 62,
+     "D": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 62,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 62,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 62,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/static_all": {
+    "contrasts": {
+     "n_items": 570,
+     "accuracy": {
+      "T": 0.8965,
+      "D": 0.0561,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.8404,
+      "ci95": [
+       0.8096,
+       0.8702
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 0.8965,
+      "ci95": [
+       0.8711,
+       0.9207
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.0561,
+      "ci95": [
+       0.0384,
+       0.076
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.8404,
+      "ci95": [
+       -0.8696,
+       -0.8097
+      ],
+      "clusters": 558,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 511,
+     "D": {
+      "estimate": 0.0626,
+      "ci95": [
+       0.0426,
+       0.0841
+      ],
+      "clusters": 499,
+      "resamples": 10000,
+      "kept": 32
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 499,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 499,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   },
+   "fluid/task_contained_deduction": {
+    "contrasts": {
+     "n_items": 189,
+     "accuracy": {
+      "T": 1.0,
+      "D": 0.1376,
+      "W": 0.0,
+      "DW": 0.0
+     },
+     "depth_alone (T-D)": {
+      "estimate": 0.8624,
+      "ci95": [
+       0.8098,
+       0.9106
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     },
+     "non_depth_alone (T-W)": {
+      "estimate": 1.0,
+      "ci95": [
+       1.0,
+       1.0
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     },
+     "depth_given_non_depth (W-DW)": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     },
+     "non_depth_given_depth (D-DW)": {
+      "estimate": 0.1376,
+      "ci95": [
+       0.0899,
+       0.1895
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     },
+     "interaction (D+W-T-DW)": {
+      "estimate": -0.8624,
+      "ci95": [
+       -0.9096,
+       -0.8098
+      ],
+      "clusters": 177,
+      "resamples": 10000
+     }
+    },
+    "retention": {
+     "n_teacher_correct": 189,
+     "D": {
+      "estimate": 0.1376,
+      "ci95": [
+       0.0895,
+       0.1892
+      ],
+      "clusters": 177,
+      "resamples": 10000,
+      "kept": 26
+     },
+     "W": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 177,
+      "resamples": 10000,
+      "kept": 0
+     },
+     "DW": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 177,
+      "resamples": 10000,
+      "kept": 0
+     }
+    }
+   }
   }
  },
  "state_eval": {

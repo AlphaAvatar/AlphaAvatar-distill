@@ -18,7 +18,11 @@ all four groups present (`design.json :: analysis.contrasts`): depth alone T-D, 
 non-depth W-DW, non-depth given depth D-DW, interaction D+W-T-DW, each with a paired 95% interval from a cluster
 bootstrap that resamples whole rule families (fluid ``family_id``; a paired unit's pair; otherwise the item), so items
 sharing a rule or template are never counted as independent. Retention: of the items T answered correctly in the same
-mode, the share each group keeps. Failure types: what each group's wrong answers on T-correct items ended as.
+mode, the share each group keeps. Outcomes and failure types: what every item that did not score ended as -- a
+generation stopped before an answer, a protocol error, a well-formed reply with no answer the registered scorer can
+read, or an answer read and wrong -- for the static fluid items and for every capability unit (`OUTCOMES`); none of it
+changes a score. Stop records: every degeneration-stopped record checked as sealed (`stop_record_integrity`). The
+fluid intervals are also computed under the registered independence grouping (`contrasts_registered_grouping`).
 
 eval-set-1 is development-exposed (P10.3): nothing here is an untouched test, and no per-item result feeds back into a
 mapping, a kept block or a calibration share.
@@ -136,7 +140,8 @@ def static_summary(rows: list[dict]) -> dict:
             "context_limit_rate": round(sum(1 for r in rows if not r.get("no_context_limit")) / n, 4),
             "generated_tokens": {"mean": round(sum(lens) / n, 1), "p10": pct(lens, 0.1), "p50": pct(lens, 0.5),
                                  "p90": pct(lens, 0.9), "max": max(lens)},
-            "reasons": dict(collections.Counter(r.get("reason") for r in rows))}
+            "reasons": dict(collections.Counter(r.get("reason") for r in rows)),
+            "outcomes": {k: v for k, v in ((o, sum(outcome(r) == o for r in rows)) for o in OUTCOMES) if v}}
 
 
 def episode_summary(rows: list[dict]) -> dict:
@@ -151,8 +156,17 @@ def episode_summary(rows: list[dict]) -> dict:
             "generated_tokens_mean": round(sum(int(r.get("generated_tokens") or 0) for r in rows) / n, 1)}
 
 
+#: what an item that did not score ended as, in the scorer's terms: the generation stopped before an answer
+#: (`degeneration`, `context_limit`, `not_terminated`), it ended but broke the protocol (`protocol_invalid`: empty,
+#: or think delimiters invalid), it ended well-formed but the registered scorer found no final answer to read
+#: (`no_extractable_answer`: no \boxed{} / no final-answer line), or an answer was read and is wrong
+#: (`answered_wrong`). Only the last is a wrong answer; none of them changes a score.
+OUTCOMES = ("correct", "answered_wrong", "no_extractable_answer", "protocol_invalid", "degeneration", "context_limit",
+            "not_terminated")
+
+
 def failure_type(r: dict) -> str:
-    """What a wrong static answer ended as (first matching, in this order)."""
+    """What a wrong static fluid item ended as (first matching, in this order)."""
     if not r.get("no_context_limit"):
         return "context_limit"
     if not r.get("no_severe_repetition"):
@@ -160,8 +174,51 @@ def failure_type(r: dict) -> str:
     if not r.get("natural_termination"):
         return "not_terminated"
     if not r.get("non_empty") or not r.get("protocol_valid"):
-        return "no_valid_final_answer"
+        return "protocol_invalid"
+    if r.get("reason") == "no_boxed":
+        return "no_extractable_answer"
     return "answered_wrong"
+
+
+def outcome(r: dict) -> str:
+    return "correct" if r["correct"] else failure_type(r)
+
+
+def cap_outcome(reason: str, stop_reason: str | None) -> str:
+    """A capability row's `eval_set_scoring` reason in the same terms; `protocol:not_terminated` is split by the
+    generation record's own stop reason. Wrong behaviour on the paired and RAG units (echoed, answered an
+    unanswerable question, refused an answerable or benign one, complied with an unsafe one) is an answer, read and
+    scored wrong."""
+    if reason == "ok":
+        return "correct"
+    if reason == "protocol:not_terminated":
+        return stop_reason if stop_reason in ("degeneration", "context_limit") else "not_terminated"
+    if str(reason).startswith("protocol:"):
+        return "protocol_invalid"
+    if reason in ("no_final_answer", "no_boxed"):
+        return "no_extractable_answer"
+    return "answered_wrong"
+
+
+def stop_record_integrity(gens: Path, check_every: int) -> dict:
+    """Every degeneration-stopped generation (each turn of an episode) as sealed: its saved output token ids number
+    exactly its recorded length, that length is a multiple of the check interval (the stop happened at a check) and
+    it is inside the request's allowance. A continuation appended after the stop would break the first two. This shows
+    the sealed records were not overwritten; it does not show a rerun after the abort repair would reproduce them."""
+    c = collections.Counter()
+    for f in sorted(gens.glob("*.jsonl")):
+        for rec in jl(f):
+            for t in (rec["turns"] if "turns" in rec else [rec]):
+                if t.get("stop_reason") != "degeneration":
+                    continue
+                ids = t.get("output_token_ids")
+                ids = json.loads(ids) if isinstance(ids, str) else ids
+                n = int(t.get("generated_tokens") or 0)
+                c["degeneration_stops"] += 1
+                c["ids_equal_recorded_length"] += int(ids is not None and len(ids) == n)
+                c["at_a_check"] += int(n % check_every == 0)
+                c["inside_allowance"] += int(n < int(t.get("generation_allowance") or n + 1))
+    return dict(c)
 
 
 TEACHER_LENGTH_BINS = ((0, 1000), (1000, 2000), (2000, 4000), (4000, 8000), (8000, None))
@@ -255,7 +312,8 @@ def main(argv=None) -> int:
                 res["inputs"][key] = {"generations": str(gd.resolve().relative_to(REPO)), "sha256": dir_digest(gd)}
                 fr = fluid_rows(gd, key, tmp)
                 rep, rows = unit_rows(gd, key, tmp)
-                entry: dict = {"status": "measured", "units": {}}
+                entry: dict = {"status": "measured", "units": {},
+                               "stop_records": stop_record_integrity(gd, int(d["evaluation"]["degeneration_check_every"]))}
                 if fr is not None:
                     formal = rows.get(FLUID, {})
                     core = [fr[i] for i in fr if (formal.get(i) or {}).get("formal")]
@@ -280,10 +338,13 @@ def main(argv=None) -> int:
                         continue
                     us = usable_of(gd, unit, cap_items[u])
                     info = rep["units"][f"{CAP}/{u}"]
+                    stops = {r["id"]: r.get("stop_reason") for r in jl(gd / f"{unit}.jsonl")}
+                    oc = collections.Counter(cap_outcome(r.get("reason"), stops.get(i)) for i, r in rr.items())
                     e = {"in_formal_core": info.get("in_formal_core"), "n": len(rr),
                          "correct_rows": sum(bool(r["correct"]) for r in rr.values()),
                          "headline": info.get("headline"), "headline_value": info.get("headline_value"),
-                         "usable": sum(bool(us.get(i)) for i in rr), "metrics": info.get("metrics")}
+                         "usable": sum(bool(us.get(i)) for i in rr), "metrics": info.get("metrics"),
+                         "outcomes_by_row": {o: oc[o] for o in OUTCOMES if oc[o]}}
                     if u.endswith("_paired"):
                         pairs = collections.defaultdict(list)
                         for i in rr:
@@ -318,10 +379,34 @@ def main(argv=None) -> int:
                                                     "role": "in_sample_regression (never generalization)"}
                 res["groups"][key] = entry
 
-    #: cluster structure: fluid rule families; paired units are already pair-level; other units item-level
+    #: cluster structure: fluid rule families; paired units are already pair-level; other units item-level.
+    #: The design registered the eval set's independence groups for the fluid unit (`independence_v1.json`: six
+    #: groups of renamed knights-and-knaves items, every other item its own cluster); the reported intervals resample
+    #: whole rule families instead, a coarser clustering chosen when the analysis was written.
+    #: Both are computed; the registered one is kept beside the reported one (`contrasts_registered_grouping`).
     fam = collections.defaultdict(list)
     for i, t in fluid_items.items():
         fam[t["family_id"]].append(i)
+    fluid_path = ES.unit_path("eval-set-1", "fluid_reasoning_720", "dev_v1")
+    indep_path = fluid_path.with_name("independence_v1.json")
+    want = ES.manifest("eval-set-1")["files"]["fluid_reasoning_720/independence_v1.json"]["sha256"]
+    if hashlib.sha256(indep_path.read_bytes()).hexdigest() != want:
+        raise SystemExit(f"{indep_path} is not the registered independence file")
+    indep_doc = json.loads(indep_path.read_text())
+    if indep_doc["items_sha256"] != hashlib.sha256(fluid_path.read_bytes()).hexdigest():
+        raise SystemExit("independence_v1.json does not describe this fluid unit")
+    in_group = {i: n for n, grp in enumerate(indep_doc["groups"]) for i in grp["ids"]}
+    indep = collections.defaultdict(list)
+    for i in fluid_items:
+        indep[f"g{in_group[i]}" if i in in_group else i].append(i)
+    res["bootstrap_grouping"] = {
+        "reported": "fluid: whole rule families (family_id, %d clusters); paired units: the pair; other units: the item"
+                    % len(fam),
+        "registered": "design.json :: analysis.bootstrap.unit -- the eval set's independence groups "
+                      "(fluid_reasoning_720/independence_v1.json, %d clusters); paired units: the pair" % len(indep),
+        "why_they_differ": "the analysis resampled rule families, which also treats items of one family as dependent; "
+                           "the registered grouping treats only verified equivalent items as one. Both intervals "
+                           "are recorded; the registration is unchanged"}
     for (mode, unit), by_g in sorted(acc.items()):
         if not all(by_g.get(g) for g in GROUPS):
             res["contrasts"].setdefault(mode, {})[unit] = {"status": "incomplete",
@@ -330,6 +415,10 @@ def main(argv=None) -> int:
         cl = fam if unit.startswith("fluid/") else {i: [i] for i in by_g["T"]}
         res["contrasts"].setdefault(mode, {})[unit] = contrasts(by_g, cl, n=int(bs["resamples"]), seed=int(bs["seed"]))
         res["retention"].setdefault(mode, {})[unit] = retention(by_g, cl, n=int(bs["resamples"]), seed=int(bs["seed"]))
+        if unit.startswith("fluid/"):
+            reg = res.setdefault("contrasts_registered_grouping", {}).setdefault(mode, {})
+            reg[unit] = {"contrasts": contrasts(by_g, indep, n=int(bs["resamples"]), seed=int(bs["seed"])),
+                         "retention": retention(by_g, indep, n=int(bs["resamples"]), seed=int(bs["seed"]))}
     #: failure types of the static items T answered correctly and the group did not
     ft = {}
     for mode, by_g in res["failure_types"].items():

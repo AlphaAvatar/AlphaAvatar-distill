@@ -26,7 +26,11 @@
      "degeneration_check_every": true,
      "seed_namespace": true,
      "action_protocol": true,
-     "eval_set_file": true
+     "eval_set_file": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true,
+     "source_prompts_equal_the_registered_items": true
     },
     "stage3_capability_846__answerability_paired.summary.json": {
      "root_revision": true,
@@ -37,7 +41,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__eval_behavior_v0.summary.json": {
      "root_revision": true,
@@ -48,7 +55,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__gsm8k.summary.json": {
      "root_revision": true,
@@ -59,7 +69,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__knowledge.summary.json": {
      "root_revision": true,
@@ -70,7 +83,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__math_verified.summary.json": {
      "root_revision": true,
@@ -81,7 +97,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__multihop.summary.json": {
      "root_revision": true,
@@ -92,7 +111,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__rag.summary.json": {
      "root_revision": true,
@@ -103,7 +125,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__safety_paired.summary.json": {
      "root_revision": true,
@@ -114,7 +139,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_legacy_150__items.summary.json": {
      "root_revision": true,
@@ -125,13 +153,380 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
+    }
+   },
+   "item_checks": {
+    "fluid_reasoning_720__dev_v1.summary.json": {
+     "registered": 720,
+     "records": 720,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 1272,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": {
+      "compared": 720,
+      "differ": 0
+     },
+     "prompt_measure": "first user message (text) and turn-0 prompt length in tokens",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 720,
+       "differ": 0
+      },
+      "W": {
+       "compared": 720,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 720,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true,
+      "source_prompts_equal_the_registered_items": true
+     }
+    },
+    "stage3_capability_846__answerability_paired.summary.json": {
+     "registered": 120,
+     "records": 120,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 120,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 120,
+       "differ": 0
+      },
+      "W": {
+       "compared": 120,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 120,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__eval_behavior_v0.summary.json": {
+     "registered": 76,
+     "records": 76,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 76,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 76,
+       "differ": 0
+      },
+      "W": {
+       "compared": 76,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 76,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__gsm8k.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__knowledge.summary.json": {
+     "registered": 150,
+     "records": 150,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 150,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 150,
+       "differ": 0
+      },
+      "W": {
+       "compared": 150,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 150,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__math_verified.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__multihop.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__rag.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__safety_paired.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_legacy_150__items.summary.json": {
+     "registered": 150,
+     "records": 150,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 150,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 150,
+       "differ": 0
+      },
+      "W": {
+       "compared": 150,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 150,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    }
+   },
+   "not_recorded": {
+    "stage3_capability_846__answerability_paired.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__eval_behavior_v0.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__gsm8k.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__knowledge.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__math_verified.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__multihop.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__rag.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__safety_paired.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_legacy_150__items.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
     }
    },
    "failed_checks": {},
    "rescored_report": {
     "path": "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/formal_report.json",
-    "sha256": "44b8f77a70cc639419fb0b5da2dab462182fe980654eb353bb981a7aa854dfab"
+    "sha256": "65d450945fd6d58161fc0145e826455419338b0aa8fe421ea3e0cf403d4a5212",
+    "content_sha256_without_created_utc": "4a55713737ca2a5e5c40fb5bb8d7e7c0ab1e9f975a95c525ac4250e810822b01"
    },
    "reusable": true
   },
@@ -159,7 +554,11 @@
      "degeneration_check_every": true,
      "seed_namespace": true,
      "action_protocol": true,
-     "eval_set_file": true
+     "eval_set_file": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true,
+     "source_prompts_equal_the_registered_items": true
     },
     "stage3_capability_846__answerability_paired.summary.json": {
      "root_revision": true,
@@ -170,7 +569,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__eval_behavior_v0.summary.json": {
      "root_revision": true,
@@ -181,7 +583,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__gsm8k.summary.json": {
      "root_revision": true,
@@ -192,7 +597,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__knowledge.summary.json": {
      "root_revision": true,
@@ -203,7 +611,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__math_verified.summary.json": {
      "root_revision": true,
@@ -214,7 +625,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__multihop.summary.json": {
      "root_revision": true,
@@ -225,7 +639,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__rag.summary.json": {
      "root_revision": true,
@@ -236,7 +653,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_capability_846__safety_paired.summary.json": {
      "root_revision": true,
@@ -247,7 +667,10 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
     },
     "stage3_legacy_150__items.summary.json": {
      "root_revision": true,
@@ -258,17 +681,384 @@
      "chat_template_sha256": true,
      "tokenizer_sha256": true,
      "stop_ids": true,
-     "degeneration_check_every": true
+     "degeneration_check_every": true,
+     "items_cover_the_registered_unit": true,
+     "seeds_follow_the_rule": true,
+     "prompts_equal_this_rounds": true
+    }
+   },
+   "item_checks": {
+    "fluid_reasoning_720__dev_v1.summary.json": {
+     "registered": 720,
+     "records": 720,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 1592,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": {
+      "compared": 720,
+      "differ": 0
+     },
+     "prompt_measure": "first user message (text) and turn-0 prompt length in tokens",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 720,
+       "differ": 0
+      },
+      "W": {
+       "compared": 720,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 720,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true,
+      "source_prompts_equal_the_registered_items": true
+     }
+    },
+    "stage3_capability_846__answerability_paired.summary.json": {
+     "registered": 120,
+     "records": 120,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 120,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 120,
+       "differ": 0
+      },
+      "W": {
+       "compared": 120,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 120,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__eval_behavior_v0.summary.json": {
+     "registered": 76,
+     "records": 76,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 76,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 76,
+       "differ": 0
+      },
+      "W": {
+       "compared": 76,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 76,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__gsm8k.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__knowledge.summary.json": {
+     "registered": 150,
+     "records": 150,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 150,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 150,
+       "differ": 0
+      },
+      "W": {
+       "compared": 150,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 150,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__math_verified.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__multihop.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__rag.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_capability_846__safety_paired.summary.json": {
+     "registered": 100,
+     "records": 100,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 100,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 100,
+       "differ": 0
+      },
+      "W": {
+       "compared": 100,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 100,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    },
+    "stage3_legacy_150__items.summary.json": {
+     "registered": 150,
+     "records": 150,
+     "missing": [],
+     "n_missing": 0,
+     "n_extra": 0,
+     "n_repeated": 0,
+     "seeds_checked": 150,
+     "seeds_off_rule": 0,
+     "source_prompt_against_the_registered_item": "not recorded: these records carry no prompt text; the unit's prompts were the registered item file, and the comparison with this round stands in for it",
+     "prompt_measure": "prompt length in tokens, system source, think pre-opening (a length match, not a byte identity)",
+     "prompt_against_this_round": {
+      "D": {
+       "compared": 150,
+       "differ": 0
+      },
+      "W": {
+       "compared": 150,
+       "differ": 0
+      },
+      "DW": {
+       "compared": 150,
+       "differ": 0
+      }
+     },
+     "checks": {
+      "items_cover_the_registered_unit": true,
+      "seeds_follow_the_rule": true,
+      "prompts_equal_this_rounds": true
+     }
+    }
+   },
+   "not_recorded": {
+    "stage3_capability_846__answerability_paired.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__eval_behavior_v0.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__gsm8k.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__knowledge.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__math_verified.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__multihop.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__rag.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_capability_846__safety_paired.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
+    },
+    "stage3_legacy_150__items.summary.json": {
+     "eval_set_file": "the summary names only the pod path of its prompt file, no hash",
+     "seed_namespace": "the summary carries the seed rule, not a per-unit namespace field",
+     "stands_in": "item_checks: coverage of the registered unit, every seed recomputed, every prompt compared with this round's"
     }
    },
    "failed_checks": {},
    "rescored_report": {
     "path": "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/formal_report.json",
-    "sha256": "066d5e6b4eaaadbb3abb3432c5367d327a65714818d8c83abf8262fef0d90b10"
+    "sha256": "02bccf55eca4e82b5aa658fc57115968d32afc2e393c1fb4e5480290c47f9fe5",
+    "content_sha256_without_created_utc": "72f1b2840c688d6b2f669a72010ff3f2468314d47c588a712003977347db18f4"
    },
    "reusable": true
   }
  },
- "runner_note": "fluid_reasoning_720 was generated by run_battery.py sha256 e650539e...; this round's runner (5cb6529d...) differs only in tool-task support (tools, env_factory, a task's own system text), engine metrics and splitting the task file on newlines only, none of which a fluid_reasoning_720 item reaches (no item carries tools or a system field, and the teacher run parsed all 720 lines). The capability runner's generation source digest (9eb5d477...) and the degeneration rule (79354082...) are unchanged.",
+ "runner_note": "The teacher's runners (commit 6d0d0a7e) and this round's final attempt's (session commit 8f74bc94) differ. Fluid: run_battery.py e650539e... then, 805d3dbd... now: tool-task support (tools, env_factory, a task's own system text), engine metrics, splitting the task file on newlines only, an optional time box and submission order, the engine's max_num_seqs, and abort_request([id]) (commit 30494d3b); no fluid_reasoning_720 item carries tools or a system field, and the teacher run parsed all 720 lines. Capability: uncapped_eval.py cd4b1888... then, aef2658c... now (generation source digest 9eb5d477... then, 153e295c... now): an optional --max-num-seqs and abort_request([id]); degeneration.py (79354082...) and behavior.py are unchanged. In both, a record is taken at its stop and a stopped request's later output is dropped (`pending` no longer holds it), so the abort repair changes what the engine keeps running after a stop, not what a sealed record holds (analysis.py :: stop_record_integrity checks this on every sealed degeneration stop). It does not make a rerun reproduce the teacher's records token for token: batch composition differs (bf16 batch nondeterminism), so any regeneration is a new sample under the same seeds.",
  "reusable": true
 }

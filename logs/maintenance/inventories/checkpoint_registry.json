@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-11-10T15:38:36+00:00",
+  "created_utc": "2026-11-14T10:52:38+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -1341,43 +1341,43 @@
     }
   },
   "local": {
-    "n_units": 61,
-    "n_weight_files": 46,
-    "total_bytes": 27721866414,
-    "total_human": "25.818 GiB",
-    "artifacts_tree_bytes": 20407810613,
-    "external_store_tree_bytes": 27724754719,
+    "n_units": 73,
+    "n_weight_files": 58,
+    "total_bytes": 20418736755,
+    "total_human": "19.016 GiB",
+    "artifacts_tree_bytes": 21308388582,
+    "external_store_tree_bytes": 24637304698,
     "by_store": {
       "external_store": {
-        "units": 35,
-        "bytes": 24305884074
+        "units": 33,
+        "bytes": 16709035983
       },
       "repo_artifacts": {
-        "units": 26,
-        "bytes": 3415982340
+        "units": 40,
+        "bytes": 3709700772
       }
     },
     "proposed_disposition": {
-      "keep": 12,
+      "keep": 15,
       "retire": 2,
-      "review": 47
+      "review": 56
     },
     "proposed_disposition_bytes": {
-      "keep": 9518953196,
+      "keep": 18585012564,
       "retire": 67747076,
-      "review": 18135166142
+      "review": 1765977115
     }
   },
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-11-10T15:36:18+00:00",
-    "n_files": 1673,
-    "total_bytes": 70337305200,
+    "queried_utc": "2026-11-14T10:51:20+00:00",
+    "n_files": 1695,
+    "total_bytes": 72129916935,
     "by_prefix": {
       "transfer": {
-        "files": 696,
-        "bytes": 16632967693
+        "files": 706,
+        "bytes": 17048179537
       },
       "stage0_calvol": {
         "files": 39,
@@ -1400,8 +1400,8 @@
         "bytes": 3645676422
       },
       "durable": {
-        "files": 10,
-        "bytes": 1366276747
+        "files": 22,
+        "bytes": 2743676194
       },
       "stage3_recovery_corpus_v2": {
         "files": 9,
@@ -1473,7 +1473,7 @@
       },
       ".gitattributes": {
         "files": 1,
-        "bytes": 59655
+        "bytes": 60099
       },
       "c1_preserved_probes": {
         "files": 18,
@@ -1488,7 +1488,7 @@
     "files": [
       {
         "path": ".gitattributes",
-        "size_bytes": 59655,
+        "size_bytes": 60099,
         "sha256": null
       },
       {
@@ -1662,14 +1662,69 @@
         "sha256": null
       },
       {
-        "path": "durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d"
-      },
-      {
         "path": "durable/packed_full_search/research_a_packed_hybrid_full_search/evidence/a_packed_search_20261105_195011/search_evidence.tgz",
         "size_bytes": 21396795,
         "sha256": "d781ab9a10b64d06187e67c41d525fb40d5e781b1ffb4b900edc6aa3ee7b16da"
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/913433664fce0fed/groups/D/config.json",
+        "size_bytes": 1418,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/913433664fce0fed/groups/D/generation_config.json",
+        "size_bytes": 206,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/913433664fce0fed/groups/DW/config.json",
+        "size_bytes": 1418,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/913433664fce0fed/groups/DW/generation_config.json",
+        "size_bytes": 206,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/913433664fce0fed/groups/W/config.json",
+        "size_bytes": 1594,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/913433664fce0fed/groups/W/generation_config.json",
+        "size_bytes": 206,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/mapping.json",
+        "size_bytes": 968617,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+        "size_bytes": 20979888,
+        "sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05"
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz",
+        "size_bytes": 52450012,
+        "sha256": "c69706526086bdf37600edd813ec2105596136abce11872a17c985344dc4c6dd"
+      },
+      {
+        "path": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/config.json",
+        "size_bytes": 1417,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/generation_config.json",
+        "size_bytes": 206,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/model.safetensors",
+        "size_bytes": 2384234968,
+        "sha256": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858"
       },
       {
         "path": "durable/stage3_sr/evidence/a_train_sr_a1_20261107_104149/stage3_units_evidence.tgz",
@@ -1685,6 +1740,11 @@
         "path": "durable/stage3_sr/evidence/a_train_sr_c1_20261108_104542/stage3_units_evidence.tgz",
         "size_bytes": 72910107,
         "sha256": "c0901fbb629d6e7f55d52c5fc905a49292b4b11dfef2a05c32703e1129217ec8"
+      },
+      {
+        "path": "durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
+        "size_bytes": 110894387,
+        "sha256": "fadea6263ed99ed9bbdfbc4646b195bde62bb48fcc17b03804eb55a1e7ed1417"
       },
       {
         "path": "durable/tool_generation_sessions/a_tool_generation_sr_20261105_153741/tool_generation_hybrid.tgz",
@@ -5802,6 +5862,11 @@
         "sha256": "c81e1fdb014619b20b54c818b2771370cd21005ccde60d17b5e7e2494899ab6b"
       },
       {
+        "path": "transfer/aad_autoinit_11471236.bundle",
+        "size_bytes": 55401805,
+        "sha256": "0dedc4f1b108af40708f06f7ad5e1e650555cb062d66ac7ffb74e9db28ba84e9"
+      },
+      {
         "path": "transfer/aad_autoinit_12989d68.bundle",
         "size_bytes": 23012853,
         "sha256": "56372de7cd574755925fe4f5904957ac575aa465cccc54f4d728f28433d329c1"
@@ -5920,6 +5985,11 @@
         "path": "transfer/aad_autoinit_2547b42f.bundle",
         "size_bytes": 18683222,
         "sha256": "4deb7b32069c72246beeb9d7b7754cf7602d07038ab8b82e2f0c05241e8fd972"
+      },
+      {
+        "path": "transfer/aad_autoinit_255e7c08.bundle",
+        "size_bytes": 55418481,
+        "sha256": "2ef10acf4f9bb332808b709a421e09518e0262f3070f52344793c886130450d1"
       },
       {
         "path": "transfer/aad_autoinit_26fd4cc9.bundle",
@@ -6262,6 +6332,11 @@
         "sha256": "af8b67f87eba7fc7e30aa8c9a636b6e810111ad7aa2a29f4a4713a3defe90460"
       },
       {
+        "path": "transfer/aad_autoinit_5ebbe890.bundle",
+        "size_bytes": 55336434,
+        "sha256": "7567956469d4a2e676be80f670afca58b0b2ddf55448eb11974912d6f63cd3b2"
+      },
+      {
         "path": "transfer/aad_autoinit_623275da.bundle",
         "size_bytes": 18394206,
         "sha256": "1514e8e56b0b8f986909055f912db95e4795b5930f006c49453fc9fc16d2cd8b"
@@ -6572,9 +6647,19 @@
         "sha256": "18f315570f680a626f57f62b6bcb559c21380dcdc9b57e55390e7d348d580f81"
       },
       {
+        "path": "transfer/aad_autoinit_8e716005.bundle",
+        "size_bytes": 55232476,
+        "sha256": "b4f08536eb762b2af20c84e8f19c1de7df120685d8303662bd394c9ddafd8ca9"
+      },
+      {
         "path": "transfer/aad_autoinit_8e8f1441.bundle",
         "size_bytes": 38313981,
         "sha256": "112e207fe8c030d1cd7cbd41f3c809f94a1aeb915c3d23d9e8dbb2fc4d561779"
+      },
+      {
+        "path": "transfer/aad_autoinit_8f74bc94.bundle",
+        "size_bytes": 55301637,
+        "sha256": "4db252f70a07f7e33edbe03f5c45a8b5ddc00cb671e2a56a4cec49bb8b9f0967"
       },
       {
         "path": "transfer/aad_autoinit_917b57fd.bundle",
@@ -6720,6 +6805,11 @@
         "path": "transfer/aad_autoinit_a90f4512.bundle",
         "size_bytes": 18498256,
         "sha256": "a5aa8f76aca1a7c1f644be10400710bda463c869a5106e09dea5ef61d328ca03"
+      },
+      {
+        "path": "transfer/aad_autoinit_a9937e15.bundle",
+        "size_bytes": 55270711,
+        "sha256": "f96be641f712a5b6bd24d82b75859499501da89419a6af4684e6e68fb7cb6b5a"
       },
       {
         "path": "transfer/aad_autoinit_a9f868e6.bundle",
@@ -7595,6 +7685,26 @@
         "path": "transfer/repo_e2p1g_20260803.bundle",
         "size_bytes": 1612229,
         "sha256": "eeb76d110b44df391f7c266141ccbee239faddc4455e2e3c516a0a812fd704a7"
+      },
+      {
+        "path": "transfer/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551/46cf7bfddeba30c3/resume.tgz",
+        "size_bytes": 20563107,
+        "sha256": "46cf7bfddeba30c3d487a987dd68c7f6362c68f67f06c5916cc39dec0f6db5bf"
+      },
+      {
+        "path": "transfer/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911/840bf687563c862e/resume.tgz",
+        "size_bytes": 20812251,
+        "sha256": "840bf687563c862e343c11fc58699e72b65448f1a7063efa05ed82fb8a16f086"
+      },
+      {
+        "path": "transfer/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718/ad8531eb5a1370f1/resume.tgz",
+        "size_bytes": 20906051,
+        "sha256": "ad8531eb5a1370f1769b9455e49087dfe4d88b54b04829c6cbd6e8ce095c6ad2"
+      },
+      {
+        "path": "transfer/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/166f7fc1a4ab920b/resume.tgz",
+        "size_bytes": 20968891,
+        "sha256": "166f7fc1a4ab920b214f503e493cfb453bfa42aaf20db70881c265a4c4bce91c"
       },
       {
         "path": "transfer/stage2_data_20260726.tar.zst",
@@ -10103,6 +10213,28 @@
       "note": null
     },
     {
+      "sha256": "00d28a0da73c4b88b629ff96089aeaeda8e70d5f47527fb7c3cb41e8391867c8",
+      "size_bytes": 968617,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_105643/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_130551/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_161911/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_180718/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_193508/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/mapping/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/mapping/mapping.json"
+      ],
+      "reclaimable_bytes": 12592021,
+      "note": null
+    },
+    {
       "sha256": "61ea4b2240d9eb054f1b4c583985daa8164b6ce87611631c0854b8ed142a57f6",
       "size_bytes": 10593947,
       "members": [
@@ -10120,6 +10252,19 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/unpacked/tool_H-N_r1_pass0.seg0.input.jsonl"
       ],
       "reclaimable_bytes": 9902875,
+      "note": null
+    },
+    {
+      "sha256": "c8923ab77a2a9546944fdfa0b6ee1e8729590d71530eb862f3e5b8398da70389",
+      "size_bytes": 2422885,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/eval/D_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0000.jsonl"
+      ],
+      "reclaimable_bytes": 9691540,
       "note": null
     },
     {
@@ -10230,6 +10375,26 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_105512/unpacked/tool_H-N_r1_pass1.part0001.jsonl"
       ],
       "reclaimable_bytes": 6652634,
+      "note": null
+    },
+    {
+      "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+      "size_bytes": 603051,
+      "members": [
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/legacy_150.prompts.jsonl"
+      ],
+      "reclaimable_bytes": 6633561,
       "note": null
     },
     {
@@ -10440,6 +10605,19 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked/tool_H-N_r1_pass0.part0073.jsonl"
       ],
       "reclaimable_bytes": 4940802,
+      "note": null
+    },
+    {
+      "sha256": "a7380ead0681d7622485c025f8a99008d4c6af5e1fc458d8fb3c39fe0b413281",
+      "size_bytes": 1229322,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/eval/D_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0001.jsonl"
+      ],
+      "reclaimable_bytes": 4917288,
       "note": null
     },
     {
@@ -11462,20 +11640,6 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked/tool_H-T_r1_pass0.part0013.jsonl"
       ],
       "reclaimable_bytes": 3019380,
-      "note": null
-    },
-    {
-      "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
-      "size_bytes": 603051,
-      "members": [
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_legacy_150__items.jsonl"
-      ],
-      "reclaimable_bytes": 3015255,
       "note": null
     },
     {
@@ -12933,6 +13097,18 @@
       "note": null
     },
     {
+      "sha256": "18f8d60b2d6b5402d2e9e5a4a93497e19a794d471d9a23189160e2ee518c1339",
+      "size_bytes": 300365,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0003.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0003.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0003.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0003.jsonl"
+      ],
+      "reclaimable_bytes": 901095,
+      "note": null
+    },
+    {
       "sha256": "f943c3aff61a8081ac985449f16acd8badbbbb22dc56ae892bf88af1cb012f9e",
       "size_bytes": 440592,
       "members": [
@@ -13041,6 +13217,18 @@
       "note": null
     },
     {
+      "sha256": "61225f6caf864f60908d8f36ae28585fafb291d3d28afabfb227e97595801701",
+      "size_bytes": 233706,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0006.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0006.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0006.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0006.jsonl"
+      ],
+      "reclaimable_bytes": 701118,
+      "note": null
+    },
+    {
       "sha256": "563a90c18311bc069e5c078abef986581abff1bd60b7a5ea77d1d77f881258d4",
       "size_bytes": 336118,
       "members": [
@@ -13116,6 +13304,18 @@
       "note": null
     },
     {
+      "sha256": "eba98a64cd82ba51d1d57f2a2f2ccd91032cb4c94f8b82987ae0a977312b2913",
+      "size_bytes": 201797,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/DW_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/DW_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/DW_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/parts/part_0000.jsonl"
+      ],
+      "reclaimable_bytes": 605391,
+      "note": null
+    },
+    {
       "sha256": "e5a654e6b7cc00637a0235e71f13115680350ba0b8841c0e4d022bf47627497c",
       "size_bytes": 300696,
       "members": [
@@ -13182,6 +13382,18 @@
       "note": null
     },
     {
+      "sha256": "a54b0a5302eb890591e48cd1af5b617f097998a7ee6ec8d7d9942b1ee01c2459",
+      "size_bytes": 179684,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/W_H-T/parts/part_0004.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/W_H-T/parts/part_0004.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/W_H-T/parts/part_0004.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/parts/part_0004.jsonl"
+      ],
+      "reclaimable_bytes": 539052,
+      "note": null
+    },
+    {
       "sha256": "e435988b9125c697611a2464312622ca5e8cff0b3419d4408ab65dc915a67060",
       "size_bytes": 269310,
       "members": [
@@ -13215,6 +13427,17 @@
       "note": null
     },
     {
+      "sha256": "a64c13b70a34cf79b5b8402caab440a5b8c60f9ce1cc62d45fe2ac8bdef2c472",
+      "size_bytes": 247585,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0012.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0012.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0012.jsonl"
+      ],
+      "reclaimable_bytes": 495170,
+      "note": null
+    },
+    {
       "sha256": "75f29e6898ee064d3ef9faf407d1fe272cec866edcf56ee51dd5d37d1c936a6e",
       "size_bytes": 490188,
       "members": [
@@ -13232,6 +13455,18 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked/tool_H-N_r1_pass0.part0082.jsonl"
       ],
       "reclaimable_bytes": 483905,
+      "note": null
+    },
+    {
+      "sha256": "b7831e0734fc4124f28b58865f92e41acedf933e3c07b8253d34d0bf96108ea6",
+      "size_bytes": 158733,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/W_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/W_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/W_H-T/parts/part_0000.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/parts/part_0000.jsonl"
+      ],
+      "reclaimable_bytes": 476199,
       "note": null
     },
     {
@@ -13267,6 +13502,19 @@
       "note": null
     },
     {
+      "sha256": "8e1af6781a93dd3cf66a6ebc8de366743388ba8667d7f7615aaaebe495e159b1",
+      "size_bytes": 104948,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/eval/D_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0002.jsonl"
+      ],
+      "reclaimable_bytes": 419792,
+      "note": null
+    },
+    {
       "sha256": "84c170fbca12c606901f19bffbace405325e577deb079270fe0d431da53a53fe",
       "size_bytes": 207719,
       "members": [
@@ -13275,6 +13523,30 @@
         "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/generations/stage3_capability_846__eval_behavior_v0.jsonl"
       ],
       "reclaimable_bytes": 415438,
+      "note": null
+    },
+    {
+      "sha256": "3bb39f85d012bcf84255b089f4ebdbcaab79dded3771c821f3a2970b4435a126",
+      "size_bytes": 135772,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/DW_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/DW_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/DW_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/parts/part_0001.jsonl"
+      ],
+      "reclaimable_bytes": 407316,
+      "note": null
+    },
+    {
+      "sha256": "a47ff96e84044253dd772a92d01afbd8ca8709f446292967ec1554b4cf03f284",
+      "size_bytes": 134524,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/DW_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/DW_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/DW_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/parts/part_0002.jsonl"
+      ],
+      "reclaimable_bytes": 403572,
       "note": null
     },
     {
@@ -13310,6 +13582,61 @@
       "note": null
     },
     {
+      "sha256": "2efba2f8812c8af5c4cf537c04d877207c0fae4f4428737bf33c6a77fdb64c2d",
+      "size_bytes": 22953,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_105643/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_130551/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_161911/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_180718/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_193508/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/records/state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/records/state_eval.json"
+      ],
+      "reclaimable_bytes": 298389,
+      "note": null
+    },
+    {
+      "sha256": "cafca6fabf1b7036d88d73e891628d17e1d6ce7dd413d1dc972ecf360492da70",
+      "size_bytes": 22594,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_105643/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_130551/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_161911/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_180718/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_193508/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/records/mapping.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/records/mapping.json"
+      ],
+      "reclaimable_bytes": 293722,
+      "note": null
+    },
+    {
+      "sha256": "bb3ccb7226ef839b1f9332c88fb69a6934aaf24b003f141ff64a2ae7cf4a5069",
+      "size_bytes": 146574,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0018.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0018.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0018.jsonl"
+      ],
+      "reclaimable_bytes": 293148,
+      "note": null
+    },
+    {
       "sha256": "96e211883a20c9db87bde2b06e8f3a66e91e1c82f6aaffc06a04db366dc8e539",
       "size_bytes": 140275,
       "members": [
@@ -13331,6 +13658,17 @@
       "note": null
     },
     {
+      "sha256": "f821628bc13f0e97479873c2a28c4c2bae30f9d0287c0b1105b7925b0d238b29",
+      "size_bytes": 126942,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0014.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0014.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0014.jsonl"
+      ],
+      "reclaimable_bytes": 253884,
+      "note": null
+    },
+    {
       "sha256": "40bc8707393923a8ded5c9e282f1f0453f490eb66424c68c3f9de1ade564dec7",
       "size_bytes": 246460,
       "members": [
@@ -13338,6 +13676,63 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261104_195411/unpacked/tool_T2507_r2_pass0.part0001.jsonl"
       ],
       "reclaimable_bytes": 246460,
+      "note": null
+    },
+    {
+      "sha256": "f2bdab76e9defcbd713cab8fc11baa8a6911121ee14b296fd1075e7e8d8109b4",
+      "size_bytes": 120590,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_161911.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_161911.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_161911.log"
+      ],
+      "reclaimable_bytes": 241180,
+      "note": null
+    },
+    {
+      "sha256": "6b37e201e48750a43bdd50cbcf827fee9cb2143ac791fb4338fb44ac9d284ae3",
+      "size_bytes": 18457,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_105643/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_130551/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_161911/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_180718/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_193508/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/records/mapping_progress.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/records/mapping_progress.json"
+      ],
+      "reclaimable_bytes": 239941,
+      "note": null
+    },
+    {
+      "sha256": "b5b9454f370780f3e29198a9a3b9169a49b4eef16e0f4a777fa1f2887eab9965",
+      "size_bytes": 79415,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/DW_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/DW_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/DW_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log"
+      ],
+      "reclaimable_bytes": 238245,
+      "note": null
+    },
+    {
+      "sha256": "da077e087a04013c8b03f0fc76cdb25f0b5d498453eb07616508d3bfc716f5e3",
+      "size_bytes": 79359,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log"
+      ],
+      "reclaimable_bytes": 238077,
       "note": null
     },
     {
@@ -13353,6 +13748,41 @@
       "note": null
     },
     {
+      "sha256": "e62b89e9f0ed78b2e9147fc4eac5b8b280780ec7aa8b79fb88ea675977729e65",
+      "size_bytes": 77677,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/W_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/W_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/W_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/logs/eval_fluid.ri_diagnosis_20261113_130551.log"
+      ],
+      "reclaimable_bytes": 233031,
+      "note": null
+    },
+    {
+      "sha256": "7657b1f5226bd85b81cac9f0c21a52172ed20f40e8bad71167355239ae0c9637",
+      "size_bytes": 116426,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0013.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0013.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0013.jsonl"
+      ],
+      "reclaimable_bytes": 232852,
+      "note": null
+    },
+    {
+      "sha256": "9107b6c83a490855dcdaec2611c8ce15571bb88fc1b3890917d7badf340fa691",
+      "size_bytes": 76925,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/W_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/W_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/W_H-T/parts/part_0001.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/parts/part_0001.jsonl"
+      ],
+      "reclaimable_bytes": 230775,
+      "note": null
+    },
+    {
       "sha256": "fbca84779e7faf2d916609efe9ed1f63ec3102c8ab682fb3beb10666e1e1e647",
       "size_bytes": 219573,
       "members": [
@@ -13360,6 +13790,16 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261105_072112/unpacked/tool_T2507_r1_pass0.seg0.input.jsonl"
       ],
       "reclaimable_bytes": 219573,
+      "note": null
+    },
+    {
+      "sha256": "123b2c3ef5f42317c294e40927a5a58c02a4a8956dbd2a9d15f62d0a5ed083f3",
+      "size_bytes": 214059,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0026.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0026.jsonl"
+      ],
+      "reclaimable_bytes": 214059,
       "note": null
     },
     {
@@ -13428,6 +13868,18 @@
       "note": null
     },
     {
+      "sha256": "4e4e57c42e11c73f9be57171df132a2637e2782d2d2c14386df955dacb81bc6b",
+      "size_bytes": 61036,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0008.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0008.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0008.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0008.jsonl"
+      ],
+      "reclaimable_bytes": 183108,
+      "note": null
+    },
+    {
       "sha256": "1a0907284a4076e4bb9a17fb2f0735b87fa6cb5bc04b5c463f6228f3ff12f10a",
       "size_bytes": 13914,
       "members": [
@@ -13447,6 +13899,61 @@
         "artifacts/audit/three_mode/P2-ceheavy-sb/forced/forced.per_sample.jsonl"
       ],
       "reclaimable_bytes": 180882,
+      "note": null
+    },
+    {
+      "sha256": "e77c4e7eb10edd64066765dfa7189fd2710ea2a7a7a6eb39ddf9919b67efc469",
+      "size_bytes": 59597,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0007.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0007.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0007.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0007.jsonl"
+      ],
+      "reclaimable_bytes": 178791,
+      "note": null
+    },
+    {
+      "sha256": "04c7ae9beb35ab6e90242ddc4068de0f92ede4aafaace0b4eae3a51a2041d470",
+      "size_bytes": 59240,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0004.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0004.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0004.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0004.jsonl"
+      ],
+      "reclaimable_bytes": 177720,
+      "note": null
+    },
+    {
+      "sha256": "d5db3a0f9305438da0705d5b8d87876190c5f43d9f358efd442aa4dd5a51d295",
+      "size_bytes": 173990,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0023.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0023.jsonl"
+      ],
+      "reclaimable_bytes": 173990,
+      "note": null
+    },
+    {
+      "sha256": "327b582834dd4d194789d1af6ace094e8946e6c36eb6b011fe6ed84e00479a37",
+      "size_bytes": 143244,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0025.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0025.jsonl"
+      ],
+      "reclaimable_bytes": 143244,
+      "note": null
+    },
+    {
+      "sha256": "e18a4e66253648a6817a5fc27532a67c05ff9e7415722a4fd80652bd4d667053",
+      "size_bytes": 69115,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0016.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0016.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0016.jsonl"
+      ],
+      "reclaimable_bytes": 138230,
       "note": null
     },
     {
@@ -13477,6 +13984,17 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261104_195411/unpacked/device_admission/inputs/admission_T2507.jsonl"
       ],
       "reclaimable_bytes": 124324,
+      "note": null
+    },
+    {
+      "sha256": "b8029a0989e82ec5fe105a55aa05380ebe0bca49fc710449e9a915dd9f375366",
+      "size_bytes": 58744,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0015.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0015.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0015.jsonl"
+      ],
+      "reclaimable_bytes": 117488,
       "note": null
     },
     {
@@ -13523,6 +14041,20 @@
       "note": null
     },
     {
+      "sha256": "83212efbbbaad8571a2096c8f29633d64e37559364ab5d5a125403ac214451ae",
+      "size_bytes": 19838,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/DW_H-T/fluid_runs.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/W_H-T/fluid_runs.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/DW_H-T/fluid_runs.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/W_H-T/fluid_runs.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/DW_H-T/fluid_runs.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/W_H-T/fluid_runs.json"
+      ],
+      "reclaimable_bytes": 99190,
+      "note": null
+    },
+    {
       "sha256": "907b728a510b48f6d3822688ac23e64b1db1d830443efa02565f5f7d84670059",
       "size_bytes": 48994,
       "members": [
@@ -13553,6 +14085,16 @@
         "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/recovery/train_log.jsonl"
       ],
       "reclaimable_bytes": 97936,
+      "note": null
+    },
+    {
+      "sha256": "29bd692146ee7adc8b6d4bcb2d45f1597f6fb5722760ae148485b57c3867e273",
+      "size_bytes": 91185,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_180718.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_180718.log"
+      ],
+      "reclaimable_bytes": 91185,
       "note": null
     },
     {
@@ -13596,6 +14138,29 @@
       "note": null
     },
     {
+      "sha256": "e8f517e8e0d6214f6e6e14d4262bebbe045c616e367b869f836fec6237ec48b6",
+      "size_bytes": 42351,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0021.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0021.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0021.jsonl"
+      ],
+      "reclaimable_bytes": 84702,
+      "note": null
+    },
+    {
+      "sha256": "923493c848e1c6e504362bc1d3b53275ba178a45fac851b753ec771f39bb6491",
+      "size_bytes": 27927,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0009.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0009.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0009.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0009.jsonl"
+      ],
+      "reclaimable_bytes": 83781,
+      "note": null
+    },
+    {
       "sha256": "f47326d58f6c2179fed81fdf6e839f58aa41c9b34b212bff5172f7c5768f7d95",
       "size_bytes": 16305,
       "members": [
@@ -13610,6 +14175,62 @@
       "note": null
     },
     {
+      "sha256": "3260a4e2ee10d209a5082369898207cca6c136ee96331a23ac503ab2ab6595e2",
+      "size_bytes": 26801,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0010.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0010.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0010.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0010.jsonl"
+      ],
+      "reclaimable_bytes": 80403,
+      "note": null
+    },
+    {
+      "sha256": "a341d7cd84ad3176906186dd8d3a7df9abd9895e7439e622bf9fae803c0fc64b",
+      "size_bytes": 19663,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_105643.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_105643.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_105643.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_105643.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/logs/eval_fluid.ri_diagnosis_20261113_105643.log"
+      ],
+      "reclaimable_bytes": 78652,
+      "note": null
+    },
+    {
+      "sha256": "849ab2a8ab7077851053b59af53d2d4a2f723ed24d087bdac9240a82976bf952",
+      "size_bytes": 76293,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/fluid_reasoning_720__dev_v1.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/fluid_reasoning_720__dev_v1.rows.jsonl"
+      ],
+      "reclaimable_bytes": 76293,
+      "note": null
+    },
+    {
+      "sha256": "adf6aedfbf0c519e6c49bc2b9c1cab08ddd0c675d477bc8b43c46dee49da8484",
+      "size_bytes": 37732,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0020.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0020.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0020.jsonl"
+      ],
+      "reclaimable_bytes": 75464,
+      "note": null
+    },
+    {
+      "sha256": "537ad56f4b23efc7aa9776339c4bb64a7593e45d6e1e08a1ae494c816bea3873",
+      "size_bytes": 74299,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/fluid_reasoning_720__dev_v1.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/fluid_reasoning_720__dev_v1.rows.jsonl"
+      ],
+      "reclaimable_bytes": 74299,
+      "note": null
+    },
+    {
       "sha256": "d42931c06e3a9b0e7003d87c6cba85c452458f149ab97e8a7d1fea5d5c803591",
       "size_bytes": 73696,
       "members": [
@@ -13617,6 +14238,16 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_162909/unpacked/tool_H-N_r1_pass1.part0000.jsonl"
       ],
       "reclaimable_bytes": 73696,
+      "note": null
+    },
+    {
+      "sha256": "cb30f678cc2b23ab99b397f58fb3191949e662dea863d22509da207e035ffd75",
+      "size_bytes": 73287,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0024.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0024.jsonl"
+      ],
+      "reclaimable_bytes": 73287,
       "note": null
     },
     {
@@ -13729,6 +14360,50 @@
       "note": null
     },
     {
+      "sha256": "18d9eb933c451472823479bc5012acfe4d8b56d518b83f9e3e1f0efb5e9aa540",
+      "size_bytes": 31618,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0019.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0019.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0019.jsonl"
+      ],
+      "reclaimable_bytes": 63236,
+      "note": null
+    },
+    {
+      "sha256": "44c049400754adebe772fc5597b2988d27fc7aefdba30c061e7aae0b2e6c3a49",
+      "size_bytes": 31325,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0017.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0017.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0017.jsonl"
+      ],
+      "reclaimable_bytes": 62650,
+      "note": null
+    },
+    {
+      "sha256": "5cf30ee1d939adab668246a5627a032f11e2775781716f42332c12ea8e094dbb",
+      "size_bytes": 20850,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0011.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0011.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0011.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0011.jsonl"
+      ],
+      "reclaimable_bytes": 62550,
+      "note": null
+    },
+    {
+      "sha256": "4beabbb4bf97e466d0ec1d00039c9039e0df5d618a31149611fa74757d139c6a",
+      "size_bytes": 59077,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_105643/logs/relay.ri_diagnosis_20261113_105643.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/logs/relay.ri_diagnosis_20261113_105643.log"
+      ],
+      "reclaimable_bytes": 59077,
+      "note": null
+    },
+    {
       "sha256": "a1b2ad73d052d74eba489d6482e1605ac04c62255d8c335469d0c8c5bdd34342",
       "size_bytes": 58151,
       "members": [
@@ -13826,6 +14501,30 @@
       "note": null
     },
     {
+      "sha256": "02e94bd949c26fd745462007df4998de9673816ede0a97f240f02b9fba4f336d",
+      "size_bytes": 14023,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/W_H-T/parts/part_0005.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/W_H-T/parts/part_0005.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/W_H-T/parts/part_0005.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/parts/part_0005.jsonl"
+      ],
+      "reclaimable_bytes": 42069,
+      "note": null
+    },
+    {
+      "sha256": "c548c84b14e409eee3430a8bf5e63cb624784148e6c4f4d32fb4b185156a4209",
+      "size_bytes": 13954,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/DW_H-T/parts/part_0003.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/DW_H-T/parts/part_0003.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/DW_H-T/parts/part_0003.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/parts/part_0003.jsonl"
+      ],
+      "reclaimable_bytes": 41862,
+      "note": null
+    },
+    {
       "sha256": "b294133dea81c3afb07cd8f8cd9636f02a15259704d377e6b1f37a79c62a69f2",
       "size_bytes": 41715,
       "members": [
@@ -13843,6 +14542,30 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked/tool_H-T_r1_pass0.seg0.log"
       ],
       "reclaimable_bytes": 41479,
+      "note": null
+    },
+    {
+      "sha256": "7f2e44b53c8d778a59be77c1b9582ec89f63ac047ef9c18a83931657fb07bf37",
+      "size_bytes": 12980,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/W_H-T/parts/part_0006.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/W_H-T/parts/part_0006.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/W_H-T/parts/part_0006.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/parts/part_0006.jsonl"
+      ],
+      "reclaimable_bytes": 38940,
+      "note": null
+    },
+    {
+      "sha256": "bf9dc9bc0819d8e9c1bea3432de54c077a8e7ebee11793ca33e65bdfe7658be0",
+      "size_bytes": 12692,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/DW_H-T/parts/part_0004.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/DW_H-T/parts/part_0004.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/DW_H-T/parts/part_0004.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/parts/part_0004.jsonl"
+      ],
+      "reclaimable_bytes": 38076,
       "note": null
     },
     {
@@ -14169,6 +14892,65 @@
       "note": null
     },
     {
+      "sha256": "4e17acbccd38ac423a505e7900bc8a11317ae20bed9df070fb65944cf4df83d6",
+      "size_bytes": 10663,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/DW_H-T/parts/part_0005.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/DW_H-T/parts/part_0005.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/DW_H-T/parts/part_0005.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/parts/part_0005.jsonl"
+      ],
+      "reclaimable_bytes": 31989,
+      "note": null
+    },
+    {
+      "sha256": "b80d6024df8e651adc212c6f597647523ca4ee8791d77c59217cddf11e261e46",
+      "size_bytes": 10367,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/W_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/W_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/W_H-T/parts/part_0002.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/parts/part_0002.jsonl"
+      ],
+      "reclaimable_bytes": 31101,
+      "note": null
+    },
+    {
+      "sha256": "d6d19010fe288f1352e8f03ae5291ff4c5939b89068896db8738bd074f2b338b",
+      "size_bytes": 10249,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/report.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/state/report.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/report.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/state/report.json"
+      ],
+      "reclaimable_bytes": 30747,
+      "note": null
+    },
+    {
+      "sha256": "f5f14d367c9b91a4f4a1fc2509fa526faa43229713800c31500a83b8344675d9",
+      "size_bytes": 9586,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/W_H-T/parts/part_0003.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/W_H-T/parts/part_0003.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/W_H-T/parts/part_0003.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/parts/part_0003.jsonl"
+      ],
+      "reclaimable_bytes": 28758,
+      "note": null
+    },
+    {
+      "sha256": "34152a1526a49597f2e7c806c19cb54cb85ab3924c2b198eba436a529184a5cf",
+      "size_bytes": 14329,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0022.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0022.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0022.jsonl"
+      ],
+      "reclaimable_bytes": 28658,
+      "note": null
+    },
+    {
       "sha256": "3656a22238252397ebbdd1705fb581b8bf0f8c14a4759ca28f9d4468f278fddf",
       "size_bytes": 13942,
       "members": [
@@ -14232,6 +15014,16 @@
       "note": null
     },
     {
+      "sha256": "ee932b63ed9c7c637ba10a1c4437219d7e93cde2b41e2325462fe35b6258afec",
+      "size_bytes": 27323,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/stage3_capability_846__eval_behavior_v0.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/stage3_capability_846__eval_behavior_v0.rows.jsonl"
+      ],
+      "reclaimable_bytes": 27323,
+      "note": null
+    },
+    {
       "sha256": "8003e519b5215936b752b177136359d164dadb6b94f0fae5c1e19f7ccd8cc7b3",
       "size_bytes": 27319,
       "members": [
@@ -14249,6 +15041,16 @@
         "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__eval_behavior_v0.rows.jsonl"
       ],
       "reclaimable_bytes": 27293,
+      "note": null
+    },
+    {
+      "sha256": "b24a706149efe5e5489045ee628a4412ce48cead26524b5a60aa3060565221aa",
+      "size_bytes": 27249,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/stage3_capability_846__eval_behavior_v0.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/stage3_capability_846__eval_behavior_v0.rows.jsonl"
+      ],
+      "reclaimable_bytes": 27249,
       "note": null
     },
     {
@@ -14640,6 +15442,18 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked/tool_H-T_r2_pass0.seg0.log"
       ],
       "reclaimable_bytes": 17715,
+      "note": null
+    },
+    {
+      "sha256": "c60cbea1f44d944e132814e690f8750ede3adbbb8419bdab779a665618e2f4a9",
+      "size_bytes": 5890,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/eval/D_H-T/parts/part_0005.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/eval/D_H-T/parts/part_0005.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/eval/D_H-T/parts/part_0005.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0005.jsonl"
+      ],
+      "reclaimable_bytes": 17670,
       "note": null
     },
     {
@@ -15546,6 +16360,16 @@
       "note": null
     },
     {
+      "sha256": "f876faa73ed3c593c8ffaf8b1d72f20da53391128a9668e4f2c5c343346e5a17",
+      "size_bytes": 13805,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/stage3_capability_846__answerability_paired.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/stage3_capability_846__answerability_paired.rows.jsonl"
+      ],
+      "reclaimable_bytes": 13805,
+      "note": null
+    },
+    {
       "sha256": "2bc93ca026880675ef925b0d1aaae810bacc86005e1ad748b5cbcb45da7e8388",
       "size_bytes": 13802,
       "members": [
@@ -15563,6 +16387,16 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/unpacked/tool_H-N_r2_pass0.seg0.log"
       ],
       "reclaimable_bytes": 13785,
+      "note": null
+    },
+    {
+      "sha256": "fe0e29d534919725d329b2b8c577008391e3a1c614213698e9b7004a0d3bf044",
+      "size_bytes": 13773,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/stage3_capability_846__answerability_paired.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/stage3_capability_846__answerability_paired.rows.jsonl"
+      ],
+      "reclaimable_bytes": 13773,
       "note": null
     },
     {
@@ -15654,6 +16488,26 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/unpacked/tool_H-T_r2_pass0.part0000.jsonl"
       ],
       "reclaimable_bytes": 12396,
+      "note": null
+    },
+    {
+      "sha256": "e020903d3add1ce6e7535d2dd636ac9ae041edba9fccfb4a258db258c82fcabc",
+      "size_bytes": 12134,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/stage3_capability_846__knowledge.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/stage3_capability_846__knowledge.rows.jsonl"
+      ],
+      "reclaimable_bytes": 12134,
+      "note": null
+    },
+    {
+      "sha256": "39b37fdee0f8a39bb318925933340d0e168b845e9dee92baa67464473cccc88d",
+      "size_bytes": 12132,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/stage3_capability_846__knowledge.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/stage3_capability_846__knowledge.rows.jsonl"
+      ],
+      "reclaimable_bytes": 12132,
       "note": null
     },
     {
@@ -16050,6 +16904,76 @@
       "note": null
     },
     {
+      "sha256": "35ee6d41747cab32a7cf5bc013eaf79bafd69ca232ee97c6218c14624858d52b",
+      "size_bytes": 9850,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/stage3_capability_846__multihop.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/stage3_capability_846__multihop.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9850,
+      "note": null
+    },
+    {
+      "sha256": "6075b9413340e9aabcc3b0bd1b61a593532ece1d70e001e0123bf642eca9587c",
+      "size_bytes": 9836,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/stage3_capability_846__math_verified.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/stage3_capability_846__math_verified.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9836,
+      "note": null
+    },
+    {
+      "sha256": "d93782c06e480f6eaf55878c1f66e7484b95b1d94e6242d0476ce73207e9f484",
+      "size_bytes": 9802,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/stage3_capability_846__multihop.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/stage3_capability_846__multihop.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9802,
+      "note": null
+    },
+    {
+      "sha256": "571f5d6e17765827155e4a09130bc07c32f72a9a8180c898836734436a8a9313",
+      "size_bytes": 9702,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/stage3_capability_846__math_verified.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/stage3_capability_846__math_verified.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9702,
+      "note": null
+    },
+    {
+      "sha256": "c46f8729c653c54091e91563731819ed1d34cf69fa47da89634e8865e9ae6922",
+      "size_bytes": 9571,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/stage3_capability_846__rag.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/stage3_capability_846__rag.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9571,
+      "note": null
+    },
+    {
+      "sha256": "c8dc090afcdd08150eec70ac2cf4defa40696254243a576e305f9ec2def4d492",
+      "size_bytes": 9558,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/stage3_capability_846__rag.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/stage3_capability_846__rag.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9558,
+      "note": null
+    },
+    {
+      "sha256": "7752098d9760c50f15f87c6e23fa2631304cb414bd7d13144bcc0245a17e3760",
+      "size_bytes": 9407,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/stage3_capability_846__safety_paired.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/stage3_capability_846__safety_paired.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9407,
+      "note": null
+    },
+    {
       "sha256": "7131b4cb0a4aaed64b10ecd0c1858c18c4e559e8604e660507b191747df02909",
       "size_bytes": 9322,
       "members": [
@@ -16110,6 +17034,46 @@
       "note": null
     },
     {
+      "sha256": "1a4b3b132199e57823e671f16787a4a02519c291e43bc21032f8c23c6ef082d7",
+      "size_bytes": 9206,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/stage3_capability_846__safety_paired.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/stage3_capability_846__safety_paired.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9206,
+      "note": null
+    },
+    {
+      "sha256": "b99836e6ca3da8d7175baa817bcc0ebdafb41f354375d4ef6f14e4ff569ce287",
+      "size_bytes": 9150,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/stage3_legacy_150__items.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/stage3_legacy_150__items.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9150,
+      "note": null
+    },
+    {
+      "sha256": "0709e4affcec097f6c49749fa61a178f36dd355565f6b514007255c81d401ebc",
+      "size_bytes": 9117,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/stage3_legacy_150__items.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/stage3_legacy_150__items.rows.jsonl"
+      ],
+      "reclaimable_bytes": 9117,
+      "note": null
+    },
+    {
+      "sha256": "6c29d4e868e7d5754a6b3aee569b7cd46ab4737aa21dbdbf37796c933431e647",
+      "size_bytes": 8468,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/rows/stage3_capability_846__gsm8k.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/unpacked/evaluation/rows/stage3_capability_846__gsm8k.rows.jsonl"
+      ],
+      "reclaimable_bytes": 8468,
+      "note": null
+    },
+    {
       "sha256": "82e43ca1e79cbf64b1776f90bcad75f93f2e3f31bb75a8b16920728ac0bf5769",
       "size_bytes": 8357,
       "members": [
@@ -16130,6 +17094,16 @@
       "note": null
     },
     {
+      "sha256": "565a2de78b2e8221c2ae4626ae81b73b2dd0894f953a98617cd9e855cd7be41e",
+      "size_bytes": 7768,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/rows/stage3_capability_846__gsm8k.rows.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/unpacked/evaluation/rows/stage3_capability_846__gsm8k.rows.jsonl"
+      ],
+      "reclaimable_bytes": 7768,
+      "note": null
+    },
+    {
       "sha256": "425bfe6c8a774fec573bd90ce19ec748161fcc6c1dd3f93035b03164ff53eec2",
       "size_bytes": 7202,
       "members": [
@@ -16137,6 +17111,16 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_t2507_20261105_164515/unpacked/tool_session.json"
       ],
       "reclaimable_bytes": 7202,
+      "note": null
+    },
+    {
+      "sha256": "a6af6fe2c812d27bf1c60032390f8389447ed8bfa6a9e4ba5a8062d164906aef",
+      "size_bytes": 6811,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/state/evaluation.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/state/evaluation.json"
+      ],
+      "reclaimable_bytes": 6811,
       "note": null
     },
     {
@@ -16252,6 +17236,57 @@
   ],
   "checkpoints": [
     {
+      "canonical_name": "D",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D/model.safetensors"
+      ],
+      "experiment": "RI-S1",
+      "role": "D: depth pruning only (blocks 3 11 17 18 25 26 30 32 removed), untrained",
+      "retention": "control",
+      "status": "active",
+      "retention_reason": "outright removal, the control of the next round's adjacent-layer merge variants",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 2560,
+        "intermediate_size": 9728,
+        "num_attention_heads": 32,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 6430080472,
+      "size_human": "5.988 GiB",
+      "weights_sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
+      "config_sha256": "4583de7697649c2d0c6f6a9e063690c5d5a77651ede88dd89de6a452be170bda",
+      "referenced_by": [
+        "README.md",
+        "configs/maintenance/architecture/core_boundary_baseline.json",
+        "configs/shared/baselines/initialization_forward_baseline_v1.json",
+        "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/datasets/assets.json",
+        "configs/shared/infrastructure/artifact_store.json",
+        "configs/shared/infrastructure/pod_image.json",
+        "configs/shared/infrastructure/provider_cli.json",
+        "configs/shared/infrastructure/provider_storage_pricing.json",
+        "configs/shared/pod/micro_preflight/authorization.json",
+        "configs/shared/pod/preflight/harness.json",
+        "configs/shared/pod/preflight/preflight_artifacts_failed.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "driver.py's groups step from the teacher and the frozen mapping (its kept blocks K)",
+      "reconstruction_cost": "one L40S, a few minutes",
+      "never_delete_clause": "the only copy (relay copy retired 2026-11-14); a declared consumer in the next round",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
       "canonical_name": "model",
       "kind": "checkpoint",
       "store": "external_store",
@@ -16354,363 +17389,6 @@
       "disposition": "keep"
     },
     {
-      "canonical_name": "model",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260726/step_001892/model",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260726/step_001892/model/model.safetensors"
-      ],
-      "experiment": "unknown",
-      "role": "unclassified",
-      "retention": "diagnostic",
-      "status": "unreviewed",
-      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2384236592,
-      "size_human": "2.220 GiB",
-      "weights_sha256": "ed98d6e677421573713c96e9edd05d6b182d99fa60ab6dab9907d84b080df0cf",
-      "config_sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
-      "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": false,
-      "reconstruction_recipe": null,
-      "reconstruction_cost": null,
-      "never_delete_clause": "unclassified",
-      "protected": true,
-      "disposition": "review"
-    },
-    {
-      "canonical_name": "model",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260801/step_001892/model",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/C1-6cat-sr-s20260801/step_001892/model/model.safetensors"
-      ],
-      "experiment": "unknown",
-      "role": "unclassified",
-      "retention": "diagnostic",
-      "status": "unreviewed",
-      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2384236592,
-      "size_human": "2.220 GiB",
-      "weights_sha256": "a24f887370c62bde491576174128b6a2438051b9cba148c836d4709688c3d057",
-      "config_sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
-      "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": false,
-      "reconstruction_recipe": null,
-      "reconstruction_cost": null,
-      "never_delete_clause": "unclassified",
-      "protected": true,
-      "disposition": "review"
-    },
-    {
-      "canonical_name": "model",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A-MIX-6cat-sr-s20260726/step_009701/model",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A-MIX-6cat-sr-s20260726/step_009701/model/model.safetensors"
-      ],
-      "experiment": "unknown",
-      "role": "unclassified",
-      "retention": "diagnostic",
-      "status": "unreviewed",
-      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2384236591,
-      "size_human": "2.220 GiB",
-      "weights_sha256": "03cbb97de783a9b2af60cfc9d43540f6ee2bb5eb08d0d5c686945491080dfad5",
-      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
-      "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": false,
-      "reconstruction_recipe": null,
-      "reconstruction_cost": null,
-      "never_delete_clause": "unclassified",
-      "protected": true,
-      "disposition": "review"
-    },
-    {
-      "canonical_name": "model",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260726/step_002145/model",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260726/step_002145/model/model.safetensors"
-      ],
-      "experiment": "unknown",
-      "role": "unclassified",
-      "retention": "diagnostic",
-      "status": "unreviewed",
-      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2384236591,
-      "size_human": "2.220 GiB",
-      "weights_sha256": "e0745469c9fbb53a0c76ee6e83589e9a38def4ad6383f3b492d8f2a5001d7354",
-      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
-      "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": false,
-      "reconstruction_recipe": null,
-      "reconstruction_cost": null,
-      "never_delete_clause": "unclassified",
-      "protected": true,
-      "disposition": "review"
-    },
-    {
-      "canonical_name": "model",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260801/step_002145/model",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A1-6cat-sr-s20260801/step_002145/model/model.safetensors"
-      ],
-      "experiment": "unknown",
-      "role": "unclassified",
-      "retention": "diagnostic",
-      "status": "unreviewed",
-      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2384236591,
-      "size_human": "2.220 GiB",
-      "weights_sha256": "06595d35abcca7c716cbd3cac2127d98746f264bf7f1afaab8272c181a8b5811",
-      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
-      "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": false,
-      "reconstruction_recipe": null,
-      "reconstruction_cost": null,
-      "never_delete_clause": "unclassified",
-      "protected": true,
-      "disposition": "review"
-    },
-    {
-      "canonical_name": "model",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260726/step_007571/model",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260726/step_007571/model/model.safetensors"
-      ],
-      "experiment": "unknown",
-      "role": "unclassified",
-      "retention": "diagnostic",
-      "status": "unreviewed",
-      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2384236591,
-      "size_human": "2.220 GiB",
-      "weights_sha256": "5e26ab61fab82ee988d042a98b8e467a284fd5682fa7de9dabc54623ed2606d4",
-      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
-      "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": false,
-      "reconstruction_recipe": null,
-      "reconstruction_cost": null,
-      "never_delete_clause": "unclassified",
-      "protected": true,
-      "disposition": "review"
-    },
-    {
-      "canonical_name": "model",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260801/step_007571/model",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/stage3_sr/final_weights/A2-6cat-sr-s20260801/step_007571/model/model.safetensors"
-      ],
-      "experiment": "unknown",
-      "role": "unclassified",
-      "retention": "diagnostic",
-      "status": "unreviewed",
-      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 2384236591,
-      "size_human": "2.220 GiB",
-      "weights_sha256": "236425e5739bc71ba3661cda9e0ef9f1e02cb7c155eeb714a3c4f8686f2a2df6",
-      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
-      "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": false,
-      "reconstruction_recipe": null,
-      "reconstruction_cost": null,
-      "never_delete_clause": "unclassified",
-      "protected": true,
-      "disposition": "review"
-    },
-    {
       "canonical_name": "activation_stats.safetensors",
       "kind": "tensor_file",
       "store": "repo_artifacts",
@@ -16736,11 +17414,11 @@
         "logs/maintenance/cleanup/autoinit_relay_retention_20260822.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/maintenance/storage/devbox_cleanup_20261110_eseries.json",
         "logs/maintenance/storage/storage_closeout_20260831.json",
         "logs/maintenance/storage/storage_measurements.json",
         "logs/stages/stage-3/e8/analyses/e8_relay_manifest.json",
-        "logs/stages/stage-3/e8/plans/e8_preregistration.md",
-        "scripts/shared/training/collect_stage0.py"
+        "logs/stages/stage-3/e8/plans/e8_preregistration.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -16751,6 +17429,57 @@
       "reconstruction_recipe": "a full teacher statistics pass over the pinned corpus",
       "reconstruction_cost": "paid GPU (teacher inference)",
       "never_delete_clause": "living recovery path: the reconstruction recipe of four tombstoned checkpoints reads it",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "W",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W/model.safetensors"
+      ],
+      "experiment": "RI-S1",
+      "role": "W: all non-depth compression on 36 blocks, untrained",
+      "retention": "control",
+      "status": "active",
+      "retention_reason": "the full non-depth comparison point of the next round's decomposition",
+      "architecture": {
+        "num_hidden_layers": 36,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 1443842176,
+      "size_human": "1.345 GiB",
+      "weights_sha256": "64d367fe0b6613aa57d52cda3e285a5d52122fd0ecee736b0016af92fc59fb29",
+      "config_sha256": "f59d4789234ecffbf350f5911e6281142b1db03b5395107ac1677ba9600fbf3b",
+      "referenced_by": [
+        "README.md",
+        "configs/maintenance/architecture/core_boundary_baseline.json",
+        "configs/shared/baselines/initialization_forward_baseline_v1.json",
+        "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/selection.json",
+        "configs/shared/infrastructure/artifact_store.json",
+        "configs/shared/infrastructure/provider_cli.json",
+        "configs/shared/validation/cuda_engineering.json",
+        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
+        "configs/stages/stage-0/calibration_volume/mixed_design.json",
+        "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+        "configs/stages/stage-0/calibration_volume/probes_d1_session.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "driver.py's mapping and groups steps from the teacher and the frozen mapping",
+      "reconstruction_cost": "one L40S, about 30 min",
+      "never_delete_clause": "the only copy (relay copy retired 2026-11-14); a declared consumer in the next round",
       "protected": true,
       "disposition": "keep"
     },
@@ -16846,7 +17575,7 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "durable/packed_full_search/research_a_packed_hybrid_full_search/1f5e4b420125a345f1d190f0b8f87cad/model.safetensors",
+      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
       "reconstructable": true,
@@ -16871,6 +17600,57 @@
         ]
       },
       "identity_verified": true
+    },
+    {
+      "canonical_name": "DW",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW/model.safetensors"
+      ],
+      "experiment": "RI-S1",
+      "role": "DW: the packed full search's Top-1 1f5e4b42 (the same bytes), untrained",
+      "retention": "canonical",
+      "status": "active",
+      "retention_reason": "the current full initialization baseline; one canonical local copy for both names",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 1192136720,
+      "size_human": "1.110 GiB",
+      "weights_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+      "config_sha256": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+      "referenced_by": [
+        "configs/stages/stage-1/reasoning_inheritance/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/LITERATURE.md",
+        "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
+        "docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md",
+        "logs/budget/approvals/stage1_reasoning_inheritance_grant.json",
+        "logs/budget/decisions.md",
+        "logs/budget/ledger.md",
+        "logs/maintenance/inventories/architecture_inventory.json",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/index.json",
+        "logs/stages/stage-1/README.md"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "driver.py's mapping and groups steps from the teacher and the frozen mapping (kept beside it)",
+      "reconstruction_cost": "one L40S, about 30 min",
+      "never_delete_clause": "the only copy (relay and volume copies retired 2026-11-14); a declared consumer in the next round",
+      "protected": true,
+      "disposition": "keep"
     },
     {
       "canonical_name": "e5",
@@ -16938,11 +17718,11 @@
         "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json",
         "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
         "configs/stages/stage-1/projected_residual/independent_gated_design.json",
+        "configs/stages/stage-1/reasoning_inheritance/design.json",
         "configs/stages/stage-2/reasoning_data/external_modules.json",
         "configs/stages/stage-2/reasoning_data/h1_units.json",
         "configs/stages/stage-2/reasoning_data/h1pa.json",
-        "configs/stages/stage-2/reasoning_data/sources.json",
-        "configs/stages/stage-2/teacher_modes/engineering_validation.json"
+        "configs/stages/stage-2/reasoning_data/sources.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -17286,6 +18066,546 @@
       "never_delete_clause": "the family manifest pins these exact bytes",
       "protected": true,
       "disposition": "keep"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_105643/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_105643/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_105643/scr/store/out/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_130551/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_130551/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_130551/scr/store/out/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_161911/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_161911/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_161911/scr/store/out/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_180718/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_180718/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_180718/scr/store/out/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_193508/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/.resume_ri_diagnosis_20261113_193508/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/extracted/audit/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/mapping/tensors.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
     },
     {
       "canonical_name": "e1_r2960k_sb_pca",
@@ -18700,6 +20020,57 @@
       "disposition": "review"
     },
     {
+      "canonical_name": "top1",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/research_a/scratch_evidence_20261110/a_search_20261101_153803/store/search_a1/top1",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/research_a/scratch_evidence_20261110/a_search_20261101_153803/store/search_a1/top1/model.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 5768792,
+      "size_human": "0.005 GiB",
+      "weights_sha256": "cdf09e53d56757842bf7252b210500b54b7a17a968ada42f97f9e19959f85e9a",
+      "config_sha256": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+      "referenced_by": [
+        "configs/stages/stage-0/calibration_volume/mixed_recovery.json",
+        "configs/stages/stage-0/calibration_volume/mixed_search_session.json",
+        "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
+        "configs/stages/stage-1/projected_residual/design.json",
+        "configs/stages/stage-1/projected_residual/engineering_validation.json",
+        "configs/stages/stage-1/projected_residual/independent_gated_design.json",
+        "configs/stages/stage-1/projected_residual/independent_gated_validation.json",
+        "configs/stages/stage-1/reasoning_inheritance/design.json",
+        "configs/stages/stage-1/reasoning_inheritance/frozen_selection.json",
+        "configs/stages/stage-2/reasoning_data/h1_units.json",
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
+        "configs/stages/stage-2/teacher_modes/design.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
       "canonical_name": "e2p1",
       "kind": "artifact_tree",
       "store": "external_store",
@@ -18810,8 +20181,8 @@
         "configs/stages/stage-1/phase_d1/d1_replay_artifacts.json",
         "configs/stages/stage-1/phase_d1/d1_search_artifacts.json",
         "configs/stages/stage-1/phase_d2/d2_search_artifacts.json",
-        "configs/stages/stage-1/recovery_continuation/continuation_artifacts.json",
-        "configs/stages/stage-2/teacher_modes/full_search_proposal.json"
+        "configs/stages/stage-1/reasoning_inheritance/design.json",
+        "configs/stages/stage-1/recovery_continuation/continuation_artifacts.json"
       ],
       "relay_path": null,
       "relay_verified": false,

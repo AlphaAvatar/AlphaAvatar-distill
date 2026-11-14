@@ -85,6 +85,29 @@ D_SERIES_CLOSED = (
 #: path suffix -> classification. `disposition` is the proposal a deletion pass
 #: reads; `never_delete` records which clause of the retention rule protects it.
 CLASSIFY: dict[str, dict] = {
+    #: RI-S1's kept checkpoints (DW before D: "groups/D" is a substring of "groups/DW"). The dev box is their only
+    #: store (maintainer 2026-11-14); logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json.
+    "stage1_reasoning_inheritance/913433664fce0fed/groups/DW": dict(
+        experiment="RI-S1", role="DW: the packed full search's Top-1 1f5e4b42 (the same bytes), untrained",
+        retention="canonical", status="active",
+        why="the current full initialization baseline; one canonical local copy for both names",
+        never_delete="the only copy (relay and volume copies retired 2026-11-14); a declared consumer in the next round",
+        reconstruction="driver.py's mapping and groups steps from the teacher and the frozen mapping (kept beside it)",
+        reconstruction_cost="one L40S, about 30 min", disposition="keep"),
+    "stage1_reasoning_inheritance/913433664fce0fed/groups/W": dict(
+        experiment="RI-S1", role="W: all non-depth compression on 36 blocks, untrained",
+        retention="control", status="active",
+        why="the full non-depth comparison point of the next round's decomposition",
+        never_delete="the only copy (relay copy retired 2026-11-14); a declared consumer in the next round",
+        reconstruction="driver.py's mapping and groups steps from the teacher and the frozen mapping",
+        reconstruction_cost="one L40S, about 30 min", disposition="keep"),
+    "stage1_reasoning_inheritance/913433664fce0fed/groups/D": dict(
+        experiment="RI-S1", role="D: depth pruning only (blocks 3 11 17 18 25 26 30 32 removed), untrained",
+        retention="control", status="active",
+        why="outright removal, the control of the next round's adjacent-layer merge variants",
+        never_delete="the only copy (relay copy retired 2026-11-14); a declared consumer in the next round",
+        reconstruction="driver.py's groups step from the teacher and the frozen mapping (its kept blocks K)",
+        reconstruction_cost="one L40S, a few minutes", disposition="keep"),
     "stages/stage-1/qwen3_0p6b_init_v0/checkpoint": dict(
         experiment="E1-E8", role="positional Stage-1 initialization (FP lineage)",
         retention="canonical", status="active",
