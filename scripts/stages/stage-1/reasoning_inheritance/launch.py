@@ -182,23 +182,38 @@ def products_secured(launch):
     return check
 
 
-def stage_resume(run_id: str, src_scr: Path, *, prefix: str = RELAY_TRANSFER, name: str = "resume.tgz",
-                 verify: bool = False) -> str:
-    """The earlier run's secured evidence as one archive on the relay ($0, the dev box's uplink). Prints the
-    ``--resume-from`` value. ``archive-evidence`` calls it with the study's durable prefix and ``verify``: the
-    archive is downloaded again into a fresh cache and re-hashed before its location is printed."""
-    from huggingface_hub import HfApi, hf_hub_download
-    from shared.deployment import MAIN_RELAY
+def resume_archive(src_scr: Path, tgz: Path, extra: tuple[str, ...] = ()) -> Path:
+    """The earlier run's secured ``mapping``, ``records`` and ``eval``, plus the ``extra`` files (paths relative to
+    the store's ``out``), as one gzip tar."""
     out = Path(src_scr) / "store" / "out"
     if not (out / "records").is_dir():
         raise SE.AuthorizationError(f"{out} holds no secured records to resume from")
+    with tarfile.open(tgz, "w:gz") as t:
+        for sub in ("mapping", "records", "eval"):
+            if (out / sub).is_dir():
+                t.add(out / sub, arcname=sub)
+        for rel in extra:
+            if not (out / rel).is_file():
+                raise SE.AuthorizationError(f"{out / rel}: no such file to carry")
+            t.add(out / rel, arcname=rel)
+    return tgz
+
+
+def stage_resume(run_id: str, src_scr: Path, *, prefix: str = RELAY_TRANSFER, name: str = "resume.tgz",
+                 verify: bool = False, extra: tuple[str, ...] = ()) -> str:
+    """The earlier run's secured evidence as one archive on the relay ($0, the dev box's uplink). Prints the
+    ``--resume-from`` value. ``archive-evidence`` calls it with the study's durable prefix and ``verify``: the
+    archive is downloaded again into a fresh cache and re-hashed before its location is printed. ``extra``: further
+    files of the store a caller's next attempt needs (`resume_archive`)."""
+    from huggingface_hub import HfApi, hf_hub_download
+    from shared.deployment import MAIN_RELAY
     with tempfile.TemporaryDirectory() as tmp:
-        tgz = Path(tmp) / "resume.tgz"
-        with tarfile.open(tgz, "w:gz") as t:
-            for sub in ("mapping", "records", "eval"):
-                if (out / sub).is_dir():
-                    t.add(out / sub, arcname=sub)
-        sha = hashlib.sha256(tgz.read_bytes()).hexdigest()
+        tgz = resume_archive(Path(src_scr), Path(tmp) / "resume.tgz", extra)
+        h = hashlib.sha256()
+        with open(tgz, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 24), b""):
+                h.update(chunk)
+        sha = h.hexdigest()
         path = f"{prefix}/{run_id}/{sha[:16]}/{name}"
         HfApi().upload_file(path_or_fileobj=str(tgz), path_in_repo=path, repo_id=MAIN_RELAY, repo_type="model",
                             commit_message=f"stage1 reasoning inheritance: {name} for {run_id}")

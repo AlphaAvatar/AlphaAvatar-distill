@@ -1012,3 +1012,19 @@ No generation, scorer, score, candidate or sealed result changed; no GPU used, $
   as a surviving copy; such a member is now refused (`verify_copies` checks every member's resolved path and inode
   against the whole deletion scope). No historical audit was reopened.
 
+### Before the launch (2026-11-15 UTC, maintainer review of `34b0fd3a`)
+
+The maintainer accepted the fourth review and granted RI-LM1 on the proposal's terms, after three fixes:
+
+* **A failed check is never reused.** `statistics_and_checks` reused an earlier fold and permutation check on its
+  identity alone, so a failed check of the same identity would have passed a later attempt. Now (`passed_checks`) a
+  record is reused only when `passed is True`; a failed one is kept as evidence under `superseded/<attempt>/` and the
+  check is run again; anything but `True` stops the build.
+* **A built but not yet durable delta crosses attempts.** Neither `stage-resume` nor `take_over` carried `products/`,
+  so a candidate whose relay copy failed after a verified build would have been merged again. `stage-resume` now
+  carries every such delta whose pulled copy re-hashes to its record (`carried_deltas`), `take_over` takes
+  `products/`, and the next attempt redoes only the relay copy.
+* **A restored delta lands where its record says.** The relay's delta, re-hashed, is renamed into
+  `out / rec["delta"]["path"]` rather than left in the scratch directory, so the poll pulls it and `retain` keeps it;
+  `retain` turns a re-pulled copy of a delta already kept into a link to the same file.
+

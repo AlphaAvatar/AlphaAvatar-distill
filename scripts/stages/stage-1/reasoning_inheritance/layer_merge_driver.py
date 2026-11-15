@@ -35,7 +35,9 @@ own child process so the memory is released between them:
 * ``evaluate``: eval-set-1, every unit, in the design's order, through RI-S1's runners (`driver.fluid`,
   `driver.capability`, `driver.package`) under RI-S1's protocol.
 
-``--resume <archive>`` takes over a previous attempt's records and sealed parts (`driver.take_over`). Nothing taken
+``--resume <archive>`` takes over a previous attempt's records, sealed parts and any built candidate's delta that was
+not yet durable (`driver.take_over`; `layer_merge_launch.py stage-resume` carries it), so only the unfinished relay
+copy is redone, never the merge. Nothing taken
 over is used for being there: each product is reused only when its recorded identity is this attempt's (teacher, data,
 packing and positions, statistics and merge method and the code that computes them, D, the checkpoint, the evaluation
 protocol); one that is not is moved to ``superseded/<attempt>/`` with the reason and redone. An engineering change that
@@ -282,15 +284,32 @@ def statistics_and_checks(out: Path, s, adapter, teacher, spans, d: dict, ids: d
             "statistics_seconds": secs, "alignment_seconds": round(time.time() - t2, 1),
             "producer_run": attempt, "utc": RI.utc()})
         status.mark("STATISTICS_SAVED")
-    if admitted(out, "records/merge_checks.json", ids["checks"], attempt) is None:
-        tol = float(d["checks"]["fold_equivalence"]["tolerance"])
-        eq = LMX.equivalence_checks(adapter, teacher, spans, stats, next(iter(batches())), tol)
-        RI.write_json(out / "records" / "merge_checks.json", {**eq, "identity": ids["checks"], "producer_run": attempt})
-        if not eq["passed"]:
-            raise DriverError(f"folding or a permutation changes a block's forward: worst {eq['worst']:.2e} > {tol}, "
-                              f"non-finite {eq['non_finite']}")
-        status.mark("EQUIVALENCE_OK")
+    tol = float(d["checks"]["fold_equivalence"]["tolerance"])
+    passed_checks(out, ids, attempt, status,
+                  lambda: LMX.equivalence_checks(adapter, teacher, spans, stats, next(iter(batches())), tol))
     return stats
+
+
+def passed_checks(out: Path, ids: dict, attempt: str, status, run) -> dict:
+    """The fold and permutation checks, PASSED. An earlier attempt's record is reused only when it has this attempt's
+    identity AND ``passed is True``: the same identity says what was checked, never that it held. A failed record of
+    the same identity is kept as evidence (``superseded/<attempt>/``) and the check is run again (``run()``); whatever
+    this run finds is written, and anything but ``passed is True`` stops the build."""
+    rel = "records/merge_checks.json"
+    rec = admitted(out, rel, ids["checks"], attempt)
+    if rec is not None and rec.get("passed") is True:
+        return rec
+    if rec is not None:
+        supersede(out, [rel], attempt, f"the recorded check of this identity did not pass (passed = "
+                                       f"{rec.get('passed')!r}, worst {rec.get('worst')}, non-finite "
+                                       f"{rec.get('non_finite')}): kept as evidence, the check is run again")
+    eq = run()
+    RI.write_json(out / rel, {**eq, "identity": ids["checks"], "producer_run": attempt})
+    if eq.get("passed") is not True:
+        raise DriverError(f"folding or a permutation changes a block's forward: worst {eq.get('worst')} > "
+                          f"{eq.get('tolerance')}, non-finite {eq.get('non_finite')}")
+    status.mark("EQUIVALENCE_OK")
+    return eq
 
 
 def build(out: Path, work: Path, device: str, status, g: str, attempt: str) -> dict:
@@ -436,6 +455,34 @@ def checkpoint_ready(work: Path, g: str, rec: dict, family: str) -> bool:
     return ident.artifact_digest == rec["checkpoint"]["artifact_digest"]
 
 
+def relay_download(rec: dict, cache: Path) -> Path:
+    from huggingface_hub import hf_hub_download
+    token = RI.POD_TOKEN.read_text().strip() if RI.POD_TOKEN.is_file() else None
+    rel = rec["relay"]
+    return Path(hf_hub_download(rel["relay"], rel["delta_path"], repo_type="model", token=token, cache_dir=str(cache)))
+
+
+def fetch_delta(out: Path, work: Path, g: str, rec: dict, download) -> tuple[Path, str]:
+    """The candidate's delta at the path its record declares (``out / rec["delta"]["path"]``): this attempt's file when
+    it re-hashes; otherwise the relay's, re-hashed and then renamed into that path (never left only in the scratch),
+    so the poll pulls it, ``retain`` keeps it and a later restore finds it."""
+    dp = out / rec["delta"]["path"]
+    want = rec["delta"]["sha256"]
+    if dp.is_file() and sha(dp) == want:
+        return dp, "this attempt's delta file"
+    cache = work / "hf_relay"
+    got = Path(download(rec, cache))
+    dp.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dp.with_name(f".{dp.name}.partial")
+    shutil.copyfile(got, tmp)
+    shutil.rmtree(cache, ignore_errors=True)
+    if sha(tmp) != want:
+        tmp.unlink(missing_ok=True)
+        raise DriverError(f"{g}: the relay's delta does not hash to the record's {want[:12]}")
+    os.replace(tmp, dp)
+    return dp, f"{rec['relay']['relay']}:{rec['relay']['delta_path']}"
+
+
 def restore(out: Path, work: Path, device: str, g: str, attempt: str) -> dict:
     """D rebuilt from the teacher (checked against D's digests) with the delta written into it -- this attempt's file
     when it re-hashes, else the relay's; the saved checkpoint must give the recorded artifact digest."""
@@ -445,21 +492,7 @@ def restore(out: Path, work: Path, device: str, g: str, attempt: str) -> dict:
     from stages.teacher_modes import full_search as FS
     rec = RI.read_json(out / "records" / "candidates" / f"{g}.json")
     sel, ids = RI.selection(), ids_of(out)
-    dp = out / rec["delta"]["path"]
-    source = "this attempt's delta file"
-    if not (dp.is_file() and sha(dp) == rec["delta"]["sha256"]):
-        from huggingface_hub import hf_hub_download
-        token = RI.POD_TOKEN.read_text().strip() if RI.POD_TOKEN.is_file() else None
-        rel = rec["relay"]
-        got = Path(hf_hub_download(rel["relay"], rel["delta_path"], repo_type="model", token=token,
-                                   cache_dir=str(work / "hf_relay")))
-        dp = work / "deltas" / g / "delta.safetensors"
-        dp.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(got, dp)
-        shutil.rmtree(work / "hf_relay", ignore_errors=True)
-        source = f"{rel['relay']}:{rel['delta_path']}"
-        if sha(dp) != rec["delta"]["sha256"]:
-            raise DriverError(f"{g}: the relay's delta does not hash to the record's {rec['delta']['sha256'][:12]}")
+    dp, source = fetch_delta(out, work, g, rec, relay_download)
     teacher, _root = FS.load_root(device)
     adapter = get_adapter(ids["family"])
     base_check = check_base(adapter, teacher, sel, RI.read_json(LMX.DIGESTS)["tensors"])
@@ -705,7 +738,9 @@ def main(argv=None) -> int:
     phases = [p for p in a.phases.split(",") if p]
     try:
         if a.resume:
-            report["resume"] = RI.take_over(Path(a.resume), out, a.run_id)
+            #: products: a built candidate's delta that was not yet durable when the earlier attempt ended (stage-resume
+            #: carries it); `candidate_state` re-hashes it against its record before it is used
+            report["resume"] = RI.take_over(Path(a.resume), out, a.run_id, subdirs=("records", "eval", "products"))
         t0 = time.time()
         report["phases"]["contract"] = {**contract(out, work), "seconds": round(time.time() - t0, 1)}
         RI.write_json(out / "state" / "report.json", report)

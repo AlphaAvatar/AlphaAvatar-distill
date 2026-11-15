@@ -160,6 +160,31 @@ def the_relay_has_room(ctx) -> tuple[bool, str]:
     return v.accepted, f"the relay would accept the two deltas and the statistics: {v}"
 
 
+def carried_deltas(src_scr: Path) -> list[str]:
+    """What a later attempt needs beyond the records: the delta of every candidate an earlier attempt BUILT and
+    verified (reconstruction equal) but did not make durable -- a relay upload or its read-back failed -- whose pulled
+    copy re-hashes to its record. The next attempt then redoes only the relay copy, never the merge. A durable
+    candidate's delta is not carried: the pod restores it from the relay."""
+    import hashlib
+    out = Path(src_scr) / "store" / "out"
+    keep = []
+    for rp in sorted((out / "records" / "candidates").glob("*.json")):
+        rec = json.loads(rp.read_text())
+        if rec.get("status") != "built" or not (rec.get("reconstruction") or {}).get("equal"):
+            continue
+        rel = (rec.get("delta") or {}).get("path")
+        dp = out / rel if rel else None
+        if dp is None or not dp.is_file():
+            continue
+        h = hashlib.sha256()
+        with open(dp, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 24), b""):
+                h.update(chunk)
+        if h.hexdigest() == rec["delta"]["sha256"]:
+            keep.append(rel)
+    return keep
+
+
 # ---- the dev-box copy of each candidate: D (kept, protected) + its delta ------------------------------------------
 
 def retain(run_id: str, src_scr: Path, *, store: Path = LOCAL_STORE, record: Path = REPO / LOCAL_RECORD,
@@ -221,6 +246,11 @@ def retain(run_id: str, src_scr: Path, *, store: Path = LOCAL_STORE, record: Pat
             os.link(dp, dest)
         elif sha(dest) != rec["delta"]["sha256"]:
             raise SE.AuthorizationError(f"{dest} exists and is not this delta")
+        elif dest.stat().st_ino != dp.stat().st_ino:
+            #: a later attempt restored the same delta and its poll pulled it again: keep one physical copy
+            tmp = dp.with_name(f".{dp.name}.link")
+            os.link(dest, tmp)
+            os.replace(tmp, dp)
         doc["candidates"][g] = {
             "path": str(dest), "sha256": rec["delta"]["sha256"], "bytes": rec["delta"]["bytes"],
             "tensors": rec["delta"]["tensors"], "artifact_digest": rec["checkpoint"]["artifact_digest"],
@@ -283,7 +313,10 @@ def main(argv=None) -> int:
         ap.add_argument("--from", dest="src", required=True)
         a = ap.parse_args(argv[1:])
         if argv[0] == "stage-resume":
-            print(RIL.stage_resume(a.run_id, Path(a.src), prefix=RELAY_TRANSFER))
+            extra = carried_deltas(Path(a.src))
+            if extra:
+                print(f"carrying {len(extra)} built, not yet durable delta(s): {', '.join(extra)}", file=sys.stderr)
+            print(RIL.stage_resume(a.run_id, Path(a.src), prefix=RELAY_TRANSFER, extra=tuple(extra)))
         else:
             d = json.loads((REPO / DESIGN).read_text())
             print(RIL.stage_resume(a.run_id, Path(a.src), prefix=f"{d['products']['relay_prefix']}/evidence",

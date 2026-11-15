@@ -472,3 +472,116 @@ def test_retain_checks_the_pulled_delta_against_ds_local_copy(teacher, tmp_path)
     with pytest.raises(Exception, match="is not D"):
         L.retain("run1", tmp_path / "scr", store=tmp_path / "keep3", record=tmp_path / "local3.json",
                  d_checkpoint=d_dir, d_identity={**ident, "weights_sha256": "0" * 64})
+
+
+# ---- pre-launch fixes (maintainer review of 34b0fd3a) --------------------------------------------------------------------
+
+def test_a_failed_check_is_never_reused_and_is_run_again(tmp_path):
+    """The same identity says what was checked, never that it held: a failed record is kept as evidence and the check
+    re-run; only ``passed is True`` is reused."""
+    RI = LMD.RI
+    out = tmp_path / "out"
+    ids = {"checks": LMD.identity("checks", statistics="s")}
+    status = RI.Status(tmp_path / "st")
+    calls = []
+
+    def run(passed):
+        def f():
+            calls.append(passed)
+            return {"passed": passed, "worst": 1e-6 if passed else 5e-3, "tolerance": 1e-4, "non_finite": []}
+        return f
+    with pytest.raises(LMD.DriverError, match="changes a block's forward"):
+        LMD.passed_checks(out, ids, "att1", status, run(False))
+    assert RI.read_json(out / "records" / "merge_checks.json")["passed"] is False      #: the failure is recorded
+    #: attempt 2, same identity: the failed record is not accepted -- kept as evidence, the check run again
+    assert LMD.passed_checks(out, ids, "att2", status, run(True))["passed"] is True
+    moved = out / "superseded" / "att2"
+    assert RI.read_json(moved / "records" / "merge_checks.json")["passed"] is False
+    assert "did not pass" in RI.read_json(moved / "why.json")[0]["why"]
+    #: attempt 3: the passed record is reused, nothing is run
+    assert LMD.passed_checks(out, ids, "att3", status, run(False))["passed"] is True and calls == [False, True]
+    #: anything but True is not a pass
+    RI.write_json(out / "records" / "merge_checks.json", {"passed": "true", "identity": ids["checks"]})
+    with pytest.raises(LMD.DriverError):
+        LMD.passed_checks(out, ids, "att4", status, run(None))
+
+
+def test_a_built_not_yet_durable_delta_crosses_to_the_next_attempt(tmp_path):
+    """A relay upload or its read-back failed after the build: the dev box's pulled delta goes into the next attempt's
+    resume archive and is taken over, so only the relay copy is redone, never the merge."""
+    RI = LMD.RI
+    from reasoning_inheritance import layer_merge_launch as L
+    from stages.reasoning_inheritance import launch as RIL
+    scr = tmp_path / "scr"
+    out = scr / "store" / "out"
+    dp = out / "products" / "M-avg" / "delta.safetensors"
+    dp.parent.mkdir(parents=True)
+    dp.write_bytes(b"verified delta bytes")
+    built = {"identity": {"sha256": "a" * 64}, "status": "built", "reconstruction": {"equal": True},
+             "delta": {"path": "products/M-avg/delta.safetensors", "sha256": RI.sha256_file(dp)}}
+    RI.write_json(out / "records" / "candidates" / "M-avg.json", built)
+    RI.write_json(out / "records" / "candidates" / "M-act.json",
+                  {"identity": {"sha256": "b" * 64}, "status": "durable", "relay": {"verified": True},
+                   "delta": {"path": "products/M-act/delta.safetensors", "sha256": "0" * 64}})
+    extra = L.carried_deltas(scr)
+    assert extra == ["products/M-avg/delta.safetensors"]          #: a durable one comes back from the relay instead
+    tgz = RIL.resume_archive(scr, tmp_path / "resume.tgz", tuple(extra))
+    for subdirs, want in ((("records", "eval"), "absent"), (("records", "eval", "products"), "built")):
+        nxt = tmp_path / f"next_{len(subdirs)}" / "out"
+        RI.take_over(tgz, nxt, "att2", subdirs=subdirs)
+        _ids(nxt, {"M-avg": "a" * 64, "M-act": "b" * 64})
+        assert LMD.candidate_state(nxt, "M-avg", "att2") == want   #: without products the build would be redone
+        assert LMD.candidate_state(nxt, "M-act", "att2") == "durable"
+    #: a pulled copy that does not re-hash is not carried
+    dp.write_bytes(b"torn")
+    assert L.carried_deltas(scr) == []
+
+
+@torch.no_grad()
+def test_a_restored_delta_lands_where_its_record_says_and_is_retained(teacher, tmp_path):
+    """The relay's delta, verified, is renamed into ``out / rec["delta"]["path"]`` (the poll pulls it, ``retain``
+    keeps it), never left only in the scratch; a re-pulled copy of a delta already kept becomes the same file."""
+    from safetensors.torch import save_file
+    from reasoning_inheritance import layer_merge_launch as L
+    RI = LMD.RI
+    sel = {"n_root_blocks": 6, "kept_blocks": [0, 1, 3, 5]}
+    spans = [s for s in LMX.LM.spans_from_kept_blocks(6, sel["kept_blocks"]) if len(s) > 1]
+    d = FM.keep_blocks(ADAPTER, teacher, sel["kept_blocks"])
+    d_dir = tmp_path / "D"
+    RI._save(ADAPTER, d, d_dir)
+    digests = {n: FM.tensor_sha256(t) for n, t in d.state_dict().items() if n != "lm_head.weight"}
+    model, _ = LMX.build_candidate(ADAPTER, teacher, sel, spans, "M-avg", None, digests, seed=0)
+    delta = LMX.candidate_delta(sel, spans, model)
+    relay_copy = tmp_path / "relay" / "delta.safetensors"
+    relay_copy.parent.mkdir()
+    save_file(delta, str(relay_copy))
+    rec = {"identity": {"sha256": "e" * 64}, "status": "durable", "reconstruction": {"equal": True},
+           "checkpoint": {"artifact_digest": "f" * 64},
+           "relay": {"relay": "org/relay", "delta_path": "x/M-avg/eeee/delta.safetensors", "verified": True},
+           "delta": {"path": "products/M-avg/delta.safetensors", "sha256": RI.sha256_file(relay_copy),
+                     "bytes": relay_copy.stat().st_size, "tensors": len(delta),
+                     "tensor_digests": LMX.candidate_tensor_digests(model, sorted(delta))}}
+    ident = {"weights_sha256": RI.sha256_file(d_dir / "model.safetensors"), "artifact_digest": "d" * 64}
+
+    def download(r, cache):
+        cache.mkdir(parents=True, exist_ok=True)
+        (cache / "blob").write_bytes(relay_copy.read_bytes())
+        return cache / "blob"
+    kept = None
+    for run in ("att1", "att2"):                     #: two attempts each restore the durable candidate
+        out = tmp_path / run / "scr" / "store" / "out"
+        RI.write_json(out / "records" / "candidates" / "M-avg.json", rec)
+        dp, src = LMD.fetch_delta(out, tmp_path / run / "work", "M-avg", rec, download)
+        assert dp == out / rec["delta"]["path"] and src == "org/relay:x/M-avg/eeee/delta.safetensors"
+        assert not (tmp_path / run / "work" / "deltas").exists() and RI.sha256_file(dp) == rec["delta"]["sha256"]
+        assert LMD.fetch_delta(out, tmp_path / run / "work", "M-avg", rec, None)[1] == "this attempt's delta file"
+        doc = L.retain(run, tmp_path / run / "scr", store=tmp_path / "keep", record=tmp_path / "local.json",
+                       d_checkpoint=d_dir, d_identity=ident)
+        kept = Path(doc["candidates"]["M-avg"]["path"])
+        assert kept.stat().st_ino == dp.stat().st_ino         #: one physical copy, however many attempts pulled it
+    #: a relay copy that does not re-hash leaves nothing at the declared path
+    out = tmp_path / "att3" / "out"
+    relay_copy.write_bytes(b"corrupt")
+    with pytest.raises(LMD.DriverError, match="does not hash"):
+        LMD.fetch_delta(out, tmp_path / "att3" / "work", "M-avg", rec, download)
+    assert not (out / rec["delta"]["path"]).exists() and kept.is_file()

@@ -899,9 +899,10 @@ def evaluate(out: Path, work: Path, vllm_py: str, status: Status, attempt: str, 
 
 # ---- resume ---------------------------------------------------------------------------------------------------------
 
-def take_over(resume: Path, out: Path, attempt: str) -> dict:
+def take_over(resume: Path, out: Path, attempt: str, subdirs: tuple[str, ...] = ("mapping", "records", "eval")) -> dict:
     """A previous attempt's secured evidence into this attempt's output: the mapping, its records, the state
-    evaluation and every sealed evaluation file (never a live stream); returns what was taken."""
+    evaluation and every sealed evaluation file (never a live stream), and any other ``subdirs`` a caller's archive
+    carries; returns what was taken."""
     taken = []
     if resume.is_file():                   #: `launch.py stage-resume`'s archive, staged by setup from the relay
         import tarfile
@@ -910,7 +911,7 @@ def take_over(resume: Path, out: Path, attempt: str) -> dict:
         with tarfile.open(resume) as t:
             t.extractall(unpacked, filter="data")
         resume = unpacked
-    for sub in ("mapping", "records", "eval"):
+    for sub in subdirs:
         src = resume / sub
         if not src.is_dir():
             continue
