@@ -104,10 +104,21 @@ CLASSIFY: dict[str, dict] = {
     "stage1_reasoning_inheritance/913433664fce0fed/groups/D": dict(
         experiment="RI-S1", role="D: depth pruning only (blocks 3 11 17 18 25 26 30 32 removed), untrained",
         retention="control", status="active",
-        why="outright removal, the control of the next round's adjacent-layer merge variants",
-        never_delete="the only copy (relay copy retired 2026-11-14); a declared consumer in the next round",
+        why="outright removal, the control of the next round's adjacent-layer merge variants, and the BASE of their "
+            "dev-box copies: each RI-LM1 candidate is kept as D plus its span-block delta "
+            "(logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json)",
+        never_delete="the only copy (relay copy retired 2026-11-14); a declared consumer in the next round; every "
+                     "RI-LM1 delta needs it to be a checkpoint",
         reconstruction="driver.py's groups step from the teacher and the frozen mapping (its kept blocks K)",
         reconstruction_cost="one L40S, a few minutes", disposition="keep"),
+    #: RI-LM1's candidates, each kept as its span-block delta over D (layer_merge_launch.py retain)
+    "aad-artifacts/stage1_layer_merge/": dict(
+        experiment="RI-LM1", role="a layer-merge candidate's six span blocks; with D's dev-box copy, the candidate",
+        retention="canonical", status="active",
+        why="the dev-box copy of a candidate under evaluation (D + delta, verified byte for byte on the pod)",
+        never_delete="a candidate of an open study; its relay copy is not its only copy, and neither is this",
+        reconstruction="layer_merge_driver.py build from the teacher and the run's statistics",
+        reconstruction_cost="one L40S, about 10 min with the statistics kept", disposition="keep"),
     "stages/stage-1/qwen3_0p6b_init_v0/checkpoint": dict(
         experiment="E1-E8", role="positional Stage-1 initialization (FP lineage)",
         retention="canonical", status="active",

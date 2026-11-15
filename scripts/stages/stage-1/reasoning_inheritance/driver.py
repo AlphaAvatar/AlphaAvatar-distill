@@ -26,8 +26,8 @@ each its own child process so the GPU is released between them:
 * ``state_eval`` -- KL and NLL against the root teacher on ``state_eval_hybrid@v3`` (the search's evaluator).
 * ``evaluate`` -- eval-set-1, every unit, for each (group, mode) of ``design.evaluation.order`` at 40,960 tokens of
   context with ``nucleus_v1``; the fluid unit streams each finished episode into ``live/`` and seals complete lines into
-  immutable parts, so a later attempt generates only what is missing; a capability unit is sealed when the runner
-  moves past it. T is never generated: its evaluation is reused from ``a_teacher_20261030_012648`` on the dev box.
+  immutable parts, so a later attempt generates only what is missing; a capability unit streams each finished sample
+  the same way and is sealed the moment the runner has written it (`capability`). T is never generated: its evaluation is reused from ``a_teacher_20261030_012648`` on the dev box.
 
 ``--resume <dir>`` is a previous attempt's secured evidence: its mapping, checkpoint records, state evaluation and
 sealed evaluation parts are taken over (the checkpoints themselves are downloaded from the relay and re-hashed),
@@ -669,14 +669,55 @@ def fluid(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: d
     return {"status": "complete", "runs": len(runs)}
 
 
+def capability_sealed(unit_dir: Path, key: str, registered: list[str], seed_of) -> dict[str, dict]:
+    """Every sample of capability unit ``key`` a sealed part holds (``parts/<key>/part_NNNN.jsonl``), by id. A sample
+    is taken only by its identity: its id is one of the unit's registered items, it is sealed once, and its seed is
+    the one the decoding rule gives that item in that unit (``seed_of(id)``); anything else is a defect, refused."""
+    reg = set(registered)
+    out: dict[str, dict] = {}
+    for p in sorted((unit_dir / "parts" / key).glob("part_*.jsonl")):
+        for line in p.read_text(encoding="utf-8").split("\n"):
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            i = r.get("id")
+            if i not in reg:
+                raise DriverError(f"{unit_dir.name}/{key}: sealed sample {i!r} is not a registered item")
+            if i in out:
+                raise DriverError(f"{unit_dir.name}/{key}: {i} is sealed twice")
+            if seed_of is not None and r.get("sampling_seed") != seed_of(i):
+                raise DriverError(f"{unit_dir.name}/{key}: {i} carries seed {r.get('sampling_seed')}, the rule gives "
+                                  f"{seed_of(i)}")
+            out[i] = r
+    return out
+
+
+def _jsonl_ids(path: Path, field: str = "id") -> list[str]:
+    return [json.loads(l)[field] for l in path.read_text(encoding="utf-8").split("\n") if l.strip()]
+
+
 def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: dict, attempt: str,
                opts: dict | None = None) -> dict:
-    """Every stage3_capability_846 unit (TriviaQA from its verified local copy) and stage3_legacy_150, one runner call;
-    a unit's files are sealed into ``generations/`` when the runner has moved past it."""
+    """Every stage3_capability_846 unit (TriviaQA from its verified local copy) and stage3_legacy_150, one runner call.
+
+    * Each finished sample is streamed by the runner (``uncapped_eval --stream-completed``) and sealed into immutable
+      parts (``parts/<unit>/part_NNNN.jsonl``) every `SEAL_EVERY_S`, so a stopped run leaves every finished sample.
+    * A unit is sealed into ``generations/`` the moment the runner's summary for it exists: the runner writes a unit's
+      generations, then its summary, each whole and renamed into place, so the summary marks a complete unit (the
+      sealer no longer waits for the next unit to start).
+    * A later attempt takes every sealed sample by identity (`capability_sealed`: registered id, once, the seed the
+      decoding rule gives it) and generates only each unit's samples that have none. The seed of an item derives from
+      the unit and the item (`decoding.request_seed`), so a run over the missing items asks the engine exactly what
+      the whole unit would have asked for them. The unit's file is then the union, in the runner's order (by id).
+
+    The generation protocol and the scorer are untouched: the same runner flags, and the scorer reads only
+    ``generations/<unit>.jsonl``."""
     from shared import eval_sets as ES
+    from shared.evaluation import decoding as DEC
     from stages.calibration_volume.dose_driver import legacy_prompts
     d = design()
     ev = d["evaluation"]
+    protocol = DEC.load(REPO / ev["decoding"])
     m = ES.manifest(ev["eval_set"])
     gens = unit_dir / "generations"
     gens.mkdir(parents=True, exist_ok=True)
@@ -692,52 +733,107 @@ def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, e
     rec = {"withheld": withheld, "units": sorted(todo), "missing_at_start": sorted(missing)}
     if not missing:
         return {**rec, "status": "complete"}
-    staged = unit_dir.parent.parent / "live" / f"{unit_dir.name}.{attempt}.cap_in"
-    raw = unit_dir.parent.parent / "live" / f"{unit_dir.name}.{attempt}.cap_out"
-    shutil.rmtree(staged, ignore_errors=True)
-    shutil.rmtree(raw, ignore_errors=True)
-    staged.mkdir(parents=True)
-    order = sorted(missing)
-    for k in order:
-        shutil.copyfile(missing[k], staged / f"{k}.jsonl")
-    log = unit_dir / "logs" / f"eval_capability.{attempt}.log"
-    log.parent.mkdir(parents=True, exist_ok=True)
+    registered = {k: _jsonl_ids(p) for k, p in missing.items()}
+    prior = {k: capability_sealed(unit_dir, k, registered[k], lambda i, _k=k: DEC.request_seed(protocol, _k, i))
+             for k in missing}
 
-    def seal(k: str) -> None:
+    def write_unit(k: str, run_dir: Path | None, staged_ids: list[str]) -> None:
+        """Seal unit ``k``: the sealed samples of earlier attempts and this run's (``run_dir``) -- exactly the
+        registered items, each once -- into ``generations/``, atomically."""
         if (gens / f"{k}.jsonl").is_file():
             return
-        shutil.copyfile(raw / f"{k}.json", gens / f".{k}.summary.partial")
+        got = {}
+        if run_dir is not None:
+            got = {r["id"]: r for r in (json.loads(l) for l in (run_dir / f"{k}.generations.jsonl")
+                                         .read_text(encoding="utf-8").split("\n") if l.strip())}
+            if sorted(got) != sorted(staged_ids):
+                raise DriverError(f"{label}/{k}: the run holds {len(got)} samples, {len(staged_ids)} were asked for")
+        both = set(got) & set(prior[k])
+        union = {**prior[k], **got}
+        if both or sorted(union) != sorted(registered[k]):
+            raise DriverError(f"{label}/{k}: sealed + generated is not the registered unit ({len(union)} of "
+                              f"{len(registered[k])}, {len(both)} twice)")
+        if not prior[k]:
+            #: generated whole in one run: the runner's files as they are
+            shutil.copyfile(run_dir / f"{k}.generations.jsonl", gens / f".{k}.partial")
+            shutil.copyfile(run_dir / f"{k}.json", gens / f".{k}.summary.partial")
+        else:
+            (gens / f".{k}.partial").write_text("".join(json.dumps(union[i], ensure_ascii=False) + "\n"
+                                                        for i in sorted(union)), encoding="utf-8")
+            (gens / f".{k}.summary.partial").write_text(json.dumps({
+                "composition": "the samples sealed by earlier attempts (parts/<unit>/) and this run's, each "
+                               "registered item once, in the runner's order (by id)",
+                "n_samples": len(union), "sealed_before": len(prior[k]), "generated_now": len(got),
+                "attempt": attempt, "run_summary": (read_json(run_dir / f"{k}.json") if run_dir is not None else None)},
+                indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
         os.replace(gens / f".{k}.summary.partial", gens / f"{k}.summary.json")
-        shutil.copyfile(raw / f"{k}.generations.jsonl", gens / f".{k}.partial")
         os.replace(gens / f".{k}.partial", gens / f"{k}.jsonl")
 
+    for k in [k for k in missing if set(prior[k]) == set(registered[k])]:
+        write_unit(k, None, [])                       #: every sample already sealed: nothing to generate
+        del missing[k]
+    rec["sealed_samples_taken"] = {k: len(v) for k, v in prior.items() if v}
+    if not missing:
+        return {**rec, "status": "complete"}
+
+    live = unit_dir.parent.parent / "live"
+    staged = live / f"{unit_dir.name}.{attempt}.cap_in"
+    raw = live / f"{unit_dir.name}.{attempt}.cap_out"
+    stream = live / f"{unit_dir.name}.{attempt}.cap_stream"
+    for x in (staged, raw, stream):
+        shutil.rmtree(x, ignore_errors=True)
+    staged.mkdir(parents=True)
+    order = sorted(missing)
+    staged_ids = {}
+    for k in order:
+        lines = [l for l in missing[k].read_text(encoding="utf-8").split("\n") if l.strip()]
+        keep = [l for l in lines if json.loads(l)["id"] not in prior[k]]
+        staged_ids[k] = [json.loads(l)["id"] for l in keep]
+        #: the staged file keeps the unit's name: the runner derives each item's seed from it
+        (staged / f"{k}.jsonl").write_text("".join(l + "\n" for l in keep), encoding="utf-8")
+    log = unit_dir / "logs" / f"eval_capability.{attempt}.log"
+    log.parent.mkdir(parents=True, exist_ok=True)
+    sealers = {k: Sealer(stream / f"{k}.stream.jsonl", unit_dir / "parts" / k) for k in order}
+    for x in sealers.values():
+        x.start()
     opts = opts or {}
 
-    def seal_finished() -> None:
-        #: unit i is finished once unit i+1's summary exists (the runner writes units in order)
-        for i, k in enumerate(order[:-1]):
-            if (raw / f"{order[i + 1]}.json").is_file() and (raw / f"{k}.generations.jsonl").is_file():
-                seal(k)
+    def seal_finished(final: bool = False) -> None:
+        for k in order:
+            if (raw / f"{k}.json").is_file() and not (gens / f"{k}.jsonl").is_file():
+                try:
+                    write_unit(k, raw, staged_ids[k])
+                except (DriverError, OSError, ValueError):
+                    if final:
+                        raise
 
     t0 = time.time()
-    rc, boxed = _run_bounded(
-        [vllm_py, "scripts/shared/evaluation/uncapped_eval.py", "--model", str(pkg), "--label", label,
-         "--prompts", *[str(staged / f"{k}.jsonl") for k in order], "--out-dir", str(raw),
-         "--trained-context", str(ev["context"]["tokens"]), "--decoding", str(REPO / ev["decoding"]),
-         "--check-every", str(ev["degeneration_check_every"]), "--system", ev["system_message"],
-         "--chat-template-kwargs", json.dumps(ev["modes"][mode]["template_kwargs"], sort_keys=True),
-         *(["--max-num-seqs", str(opts["max_num_seqs"])] if opts.get("max_num_seqs") else [])],
-        log, env, opts.get("time_box_s"), poll=seal_finished)
-    seal_finished()
+    try:
+        rc, boxed = _run_bounded(
+            [vllm_py, "scripts/shared/evaluation/uncapped_eval.py", "--model", str(pkg), "--label", label,
+             "--prompts", *[str(staged / f"{k}.jsonl") for k in order], "--out-dir", str(raw),
+             "--stream-completed", str(stream),
+             "--trained-context", str(ev["context"]["tokens"]), "--decoding", str(REPO / ev["decoding"]),
+             "--check-every", str(ev["degeneration_check_every"]), "--system", ev["system_message"],
+             "--chat-template-kwargs", json.dumps(ev["modes"][mode]["template_kwargs"], sort_keys=True),
+             *(["--max-num-seqs", str(opts["max_num_seqs"])] if opts.get("max_num_seqs") else [])],
+            log, env, opts.get("time_box_s"), poll=seal_finished)
+    finally:
+        for x in sealers.values():
+            x.close()
+    seal_finished(final=True)
+    sealed_units = sorted(k for k in todo if (gens / f"{k}.jsonl").is_file())
     if boxed:
         rec.update(status="incomplete", why="time box", seconds=round(time.time() - t0, 1), attempt=attempt,
-                   sealed=sorted(k for k in order if (gens / f"{k}.jsonl").is_file()))
+                   sealed=sealed_units)
         write_json(unit_dir / f"capability_run.{attempt}.json", rec)
         return rec
     if rc != 0:
+        rec.update(status="failed", rc=rc, attempt=attempt, sealed=sealed_units)
+        write_json(unit_dir / f"capability_run.{attempt}.json", rec)
         raise DriverError(f"uncapped_eval exited {rc} for {label}; see {log.name}")
     for k in order:
-        seal(k)
+        write_unit(k, raw, staged_ids[k])
     rec.update(status="complete", seconds=round(time.time() - t0, 1), attempt=attempt)
     write_json(unit_dir / f"capability_run.{attempt}.json", rec)
     return rec

@@ -269,6 +269,11 @@ def main() -> int:
                     help="a decoding protocol file (configs/shared/evaluation/decoding/); "
                          "omitted, the frozen greedy SAMPLING above is used unchanged")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--stream-completed", default=None,
+                    help="a directory: each finished sample's record (the line the generations file will hold) is "
+                         "appended to <dir>/<prompts stem>.stream.jsonl the moment it finishes, one complete flushed "
+                         "line, so a run that stops early leaves every finished sample behind. Additive: nothing "
+                         "generated, sampled or scored changes")
     ap.add_argument("--gpu-sample-every", type=int, default=200,
                     help="scheduler steps between nvidia-smi samples")
     ap.add_argument("--diagnostics", action="store_true",
@@ -348,8 +353,57 @@ def main() -> int:
     print(f"[{args.label}] engine ready in {init_seconds}s: {engine_settings}",
           flush=True)
 
+    def make_record(st: dict, stem: str) -> dict:
+        """One sample's record, built when its request ends (`seconds`: from its submission to that moment)."""
+        s_ = st["sample"]
+        gen = st["gen"]
+        dt = time.time() - st["t0"]
+        hit_ctx = len(gen) >= st["allowance"]
+        ended_stop = bool(gen) and gen[-1] in stop_ids
+        raw = tok.decode(gen, skip_special_tokens=False)
+        reason = ("eos" if ended_stop else
+                  "degeneration" if st["degen"] else
+                  "context_limit" if hit_ctx else st["finish"] or "unknown")
+        rec = {
+            "id": s_["id"], "label": args.label, "group": s_.get("group"),
+            "source": s_.get("source"), "prompt_tokens": len(st["p_ids"]),
+            "system_source": st["system_source"],
+            "think_preopened": st["think_preopened"], "think_state": st["think_state"],
+            "context_len": ctx, "context_resolution": ctx_info,
+            "generation_allowance": st["allowance"],
+            "generated_tokens": len(gen), "stop_reason": reason,
+            "degeneration_triggered": st["degen"] is not None,
+            "degeneration_kind": (st["degen"] or {}).get("kind"),
+            "natural_termination": reason == "eos",
+            "context_limit_reached": reason == "context_limit",
+            # Neither a context hit nor a degeneration abort observed the
+            # model's own stopping decision, so both are right-censored.
+            "right_censored": reason in ("context_limit", "degeneration"),
+            "degeneration": st["degen"], "vllm_finish_reason": st["finish"],
+            "ttft_seconds": round(st["ttft"], 3) if st["ttft"] else None,
+            "seconds": round(dt, 2), "raw": raw,
+        }
+        if protocol:
+            rec["sampling_seed"] = st["seed"]
+            rec["output_token_ids"] = list(gen)
+        if stream_dir is not None:
+            with open(stream_dir / f"{stem}.stream.jsonl", "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                fh.flush()
+        return rec
+
+    def write_atomic(path: Path, text: str) -> None:
+        tmp = path.with_name(f".{path.name}.partial")
+        tmp.write_text(text, encoding="utf-8")
+        os.replace(tmp, path)
+
+    stream_dir = Path(args.stream_completed) if args.stream_completed else None
+    if stream_dir is not None:
+        stream_dir.mkdir(parents=True, exist_ok=True)
+
     results = []
     for prompts_path in args.prompts:
+        stem = Path(prompts_path).stem
         samples = [json.loads(l)
                    for l in Path(prompts_path).read_text().splitlines() if l.strip()]
         pending = {}
@@ -387,7 +441,7 @@ def main() -> int:
             params = SamplingParams(max_tokens=allowance, stop_token_ids=stop_ids,
                                     **sampling_used, **({"seed": seed} if protocol else {}))
             eng.add_request(rid, {"prompt_token_ids": p_ids}, params)
-            pending[rid] = {"sample": s, "p_ids": p_ids, "allowance": allowance, "seed": seed,
+            pending[rid] = {"sample": s, "rid": rid, "p_ids": p_ids, "allowance": allowance, "seed": seed,
                             "system_source": ("sample" if has_system
                                               else ("default" if inject
                                                     else "none")),
@@ -424,6 +478,7 @@ def main() -> int:
                 if out.finished:
                     st["gen"] = list(out.outputs[0].token_ids)
                     st["finish"] = out.outputs[0].finish_reason
+                    st["record"] = make_record(st, stem)
                     done[out.request_id] = st
                     pending.pop(out.request_id, None)
                     continue
@@ -437,6 +492,7 @@ def main() -> int:
                         #: a LIST (vLLM V1: abort_request(request_ids: list[str])); a bare string aborted nothing
                         eng.abort_request([out.request_id])
                         st["finish"] = "degeneration"
+                        st["record"] = make_record(st, stem)
                         done[out.request_id] = st
                         pending.pop(out.request_id, None)
         done.update(pending)
@@ -444,42 +500,12 @@ def main() -> int:
 
         records, scored = [], []
         for rid, st in done.items():
-            s_ = st["sample"]
-            gen = st["gen"]
-            dt = time.time() - st["t0"]
-            hit_ctx = len(gen) >= st["allowance"]
-            ended_stop = bool(gen) and gen[-1] in stop_ids
-            raw = tok.decode(gen, skip_special_tokens=False)
-            reason = ("eos" if ended_stop else
-                      "degeneration" if st["degen"] else
-                      "context_limit" if hit_ctx else st["finish"] or "unknown")
-            rec = {
-                "id": s_["id"], "label": args.label, "group": s_.get("group"),
-                "source": s_.get("source"), "prompt_tokens": len(st["p_ids"]),
-                "system_source": st["system_source"],
-                "think_preopened": st["think_preopened"], "think_state": st["think_state"],
-                "context_len": ctx, "context_resolution": ctx_info,
-                "generation_allowance": st["allowance"],
-                "generated_tokens": len(gen), "stop_reason": reason,
-                "degeneration_triggered": st["degen"] is not None,
-                "degeneration_kind": (st["degen"] or {}).get("kind"),
-                "natural_termination": reason == "eos",
-                "context_limit_reached": reason == "context_limit",
-                # Neither a context hit nor a degeneration abort observed the
-                # model's own stopping decision, so both are right-censored.
-                "right_censored": reason in ("context_limit", "degeneration"),
-                "degeneration": st["degen"], "vllm_finish_reason": st["finish"],
-                "ttft_seconds": round(st["ttft"], 3) if st["ttft"] else None,
-                "seconds": round(dt, 2), "raw": raw,
-            }
-            if protocol:
-                rec["sampling_seed"] = st["seed"]
-                rec["output_token_ids"] = list(gen)
+            rec = st.get("record") or make_record(st, stem)
             records.append(rec)
             # `hit_cap` marks a censored generation for the scorer. Under P18 the
             # only cap is the real context, so it is set from that, never from a
             # chosen token budget.
-            scored.append(score_sample(s_, raw, hit_cap=rec["context_limit_reached"]))
+            scored.append(score_sample(st["sample"], rec["raw"], hit_cap=rec["context_limit_reached"]))
 
         records.sort(key=lambda r: r["id"])
         n = len(records)
@@ -581,10 +607,11 @@ def main() -> int:
         out = (Path(args.out) if args.out
                else Path(args.out_dir) / f"{Path(prompts_path).stem}.json")
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps(summary, indent=1, ensure_ascii=False))
-        with open(out.with_suffix(".generations.jsonl"), "w") as f:
-            for r in records:
-                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        #: the generations first, then the summary, each written whole and renamed into place: a reader that sees a
+        #: unit's summary sees all of its generations (the summary is the unit's completion marker)
+        write_atomic(out.with_suffix(".generations.jsonl"),
+                     "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in records))
+        write_atomic(out, json.dumps(summary, indent=1, ensure_ascii=False))
         results.append(summary)
         t = summary["throughput"]
         print(f"[{args.label}] {Path(prompts_path).stem}: {n} prompts, "

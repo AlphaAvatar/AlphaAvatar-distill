@@ -323,7 +323,8 @@ def _members(root, files):
 
 def test_a_same_hash_copy_is_checked_never_skipped(tmp_path):
     """The check skipped a path that did not exist, compared nothing for a directory, and accepted the target
-    itself (or a path inside it) as its own surviving copy."""
+    itself (or a path inside it) as its own surviving copy; a directory copy's member linked (hard or symbolic) to a
+    file of the target is the target's bytes too."""
     RA = _retire_artifact()
     target = tmp_path / "ckpt"
     target.mkdir()
@@ -358,6 +359,29 @@ def test_a_same_hash_copy_is_checked_never_skipped(tmp_path):
     os.link(single, link)
     with pytest.raises(ValueError, match="hard link"):
         RA.verify_copies([str(link)], _members(None, [("", b"weights")]), target=single)
+    #: a directory copy whose member is a symbolic link into the target is the target's bytes
+    sym = tmp_path / "symcopy"
+    sym.mkdir()
+    (sym / "config.json").write_bytes(b"{}")
+    (sym / "model.safetensors").symlink_to(target / "model.safetensors")
+    with pytest.raises(ValueError, match="symbolic link"):
+        RA.verify_copies([str(sym)], members, target=target)
+    #: ... and so is a member linked to ANOTHER file of the target that holds the same bytes
+    dup = tmp_path / "dup"
+    dup.mkdir()
+    for rel in ("a.bin", "b.bin"):
+        (dup / rel).write_bytes(b"same")
+    dmem = _members(dup, [("a.bin", b"same"), ("b.bin", b"same")])
+    other = tmp_path / "dupcopy"
+    other.mkdir()
+    os.link(dup / "b.bin", other / "a.bin")
+    (other / "b.bin").write_bytes(b"same")
+    with pytest.raises(ValueError, match="a.bin is a hard link"):
+        RA.verify_copies([str(other)], dmem, target=dup)
+    #: a symbolic link to bytes OUTSIDE the scope is a copy
+    (sym / "model.safetensors").unlink()
+    (sym / "model.safetensors").symlink_to(copy / "model.safetensors")
+    assert RA.verify_copies([str(sym)], members, target=target)[0]["members"] == 2
 
 
 def test_a_remote_copy_is_the_object_the_hub_serves(tmp_path):

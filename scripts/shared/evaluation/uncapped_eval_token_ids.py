@@ -84,6 +84,10 @@ class _Hook:
 
     def __init__(self, main_code) -> None:
         self.main_code = main_code
+        #: the generator decodes a finished request in `make_record`, a function nested in `main` (each record is built,
+        #: and streamed, when its request ends); that code object lives among `main`'s constants
+        self.record_code = next((c for c in main_code.co_consts
+                                 if hasattr(c, "co_name") and c.co_name == "make_record"), None)
         self.rows: dict[tuple[str, str], dict[str, Any]] = {}
         self.calls = 0
         self.errors: list[str] = []
@@ -97,14 +101,16 @@ class _Hook:
             try:
                 frame = sys._getframe(1)
                 local = frame.f_locals
-                if frame.f_code is self.main_code and local.get("gen") is ids:
+                site = frame.f_code is self.main_code or (self.record_code is not None
+                                                          and frame.f_code is self.record_code)
+                if site and local.get("gen") is ids:
                     self.calls += 1
-                    stem = Path(local["prompts_path"]).stem
+                    stem = local["stem"] if "stem" in local else Path(local["prompts_path"]).stem
                     key = (stem, str(local["s_"]["id"]))
                     if key in self.rows:
                         self.errors.append(f"{key}: decoded twice")
                     self.rows[key] = {
-                        "id": key[1], "request_id": local["rid"],
+                        "id": key[1], "request_id": local["rid"] if "rid" in local else local["st"]["rid"],
                         "prompt_token_ids": [int(t) for t in local["st"]["p_ids"]],
                         "output_token_ids": [int(t) for t in ids],
                         "raw_sha256": _sha(text)}

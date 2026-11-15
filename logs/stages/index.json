@@ -1546,7 +1546,7 @@
     "~/aad-artifacts/stage1_reasoning_inheritance/ -- D, W, DW (= the packed Top-1), the mapping and the teacher tokenizer, the only copy (MANIFEST.json)"
    ],
    "decisions": [
-    "logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; 2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed; 2026-11-14: review fixes (teacher prompt check, tombstones, A-MIX relay copy, the next round's layer-merging plan); 2026-11-14: third review (M-act, literature, decision rule, retirement tool, 24 relay weights retired, RI-LM1 prepared)"
+    "logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; 2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed; 2026-11-14: review fixes (teacher prompt check, tombstones, A-MIX relay copy, the next round's layer-merging plan); 2026-11-14: third review (M-act, literature, decision rule, retirement tool, 24 relay weights retired, RI-LM1 prepared); 2026-11-15: fourth review (Holm over both registered comparisons, per-candidate durability, capability sealing, reuse by identity, centered Pearson moments, candidates kept as D + delta)"
    ],
    "classification_reason": "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps of the teacher before any training (AGENTS.md 4.3); eval-set-1 and the state suite are its instruments.",
    "canonical_scripts": "scripts/stages/stage-1/reasoning_inheritance",

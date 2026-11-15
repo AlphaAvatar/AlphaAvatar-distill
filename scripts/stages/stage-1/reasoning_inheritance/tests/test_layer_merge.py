@@ -1,14 +1,19 @@
-"""The layer-merge round (RI-LM1): its design's pins, its decision rule, and the pod pipeline on the tiny real Qwen3.
+"""The layer-merge round (RI-LM1): its design's pins, its decision rule, the pod pipeline on the tiny real Qwen3, and
+what makes a failed attempt cheap.
 
 The pod runs `layer_merge.collect_statistics -> alignments -> equivalence_checks -> build_candidate -> diagnostics` on
 the 4B teacher; every one of them runs here end to end on the toy teacher (six blocks, spans (1, 2) and (3, 4)), so a
-defect in the pipeline's own logic is found at $0 rather than on a pod. CUDA numerics and the real model's memory are
-the pod's to show.
+defect in the pipeline's own logic is found at $0 rather than on a pod. Beside them: Holm over both registered
+comparisons; a candidate as D plus its span-block delta, byte for byte; reuse only under a product's identity; a
+capability unit sealed the moment it is written, with a stand-in runner that keeps the real runner's write order
+(checked against its source); the dev-box retention of the deltas. CUDA numerics and the real model's memory are the
+pod's to show.
 """
 from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -18,6 +23,7 @@ import torch
 
 from reasoning_inheritance import layer_merge as LMX
 from reasoning_inheritance import layer_merge_analysis as LA
+from stages.reasoning_inheritance import layer_merge_driver as LMD
 from aadistill.initialization.planning import frozen_mapping as FM
 from aadistill.initialization.specs.arch import get_adapter
 
@@ -62,22 +68,50 @@ def test_the_sign_flip_test_and_holm_are_the_registered_definitions():
     assert LA.verdict(0.05, 0.2) == "NOT_DISTINGUISHED"
 
 
-def test_decide_pairs_by_group_reports_the_interval_apart_and_refuses_an_incomplete_unit():
+def _toy_groups():
     groups = {f"g{i}": [f"i{2 * i}", f"i{2 * i + 1}"] if i < 3 else [f"i{100 + i}"] for i in range(60)}
     items = [i for v in groups.values() for i in v]
+    return groups, items
+
+
+def test_holm_runs_over_both_registered_comparisons_or_there_is_no_verdict():
+    """The family is the two registered comparisons, always: a candidate that is not measured never shrinks Holm's m
+    to one, and while either primary unit is incomplete neither candidate gets a test or a verdict."""
+    groups, items = _toy_groups()
     y_d = {i: 0 for i in items}
     better = {i: (1 if k % 3 == 0 else 0) for k, i in enumerate(items)}
     out = LA.decide({"M-avg": better, "M-act": None}, y_d, groups)
-    assert out["M-act"]["verdict"] == "not_measured"
+    assert out["_family"] == {"comparisons": ["M-avg - D", "M-act - D"], "holm_m": 2,
+                              "complete": {"M-avg": True, "M-act": False}, "formal": False,
+                              "status": "descriptive_only"}
+    assert out["M-act"]["verdict"] == "not_measured" and out["M-act"]["items_present"] == 0
     m = out["M-avg"]
+    assert m["verdict"] == "descriptive_only" and "test" not in m and "p_holm" not in m
     assert m["n_groups"] == 60 and m["n_items"] == len(items) == 63
     assert m["delta"] == pytest.approx(sum(better.values()) / 63)
-    assert m["verdict"] == "BETTER" and m["p_holm"] == m["test"]["p_two_sided"]   #: one measured: Holm over one
     assert m["effect_interval"]["label"].startswith("effect interval, unadjusted")
     lo, hi = m["effect_interval"]["ci95_percentile"]
     assert lo <= m["delta"] <= hi
+    #: one registered item without a record leaves the unit incomplete
+    part = dict(y_d)
+    part.pop(items[5])
+    out = LA.decide({"M-avg": better, "M-act": part}, y_d, groups)
+    assert out["M-act"]["items_present"] == 62 and out["_family"]["status"] == "descriptive_only"
+    #: both complete: tests, and Holm over two
+    out = LA.decide({"M-avg": better, "M-act": dict(y_d)}, y_d, groups)
+    assert out["_family"]["status"] == "formal"
+    pa, pb = out["M-avg"]["test"]["p_two_sided"], out["M-act"]["test"]["p_two_sided"]
+    assert pb == 1.0 and out["M-avg"]["p_holm"] == pytest.approx(min(1.0, 2 * pa)) and out["M-act"]["p_holm"] == 1.0
+    assert out["M-avg"]["verdict"] == "BETTER" and out["M-act"]["verdict"] == "NOT_DISTINGUISHED"
+    with pytest.raises(ValueError):
+        LA.decide({"M-avg": better, "M-act": better}, {"i0": 0}, groups)    #: D must cover every registered item
     with pytest.raises(ValueError):
         LA.group_differences({"i0": 1}, y_d, groups)
+
+
+def test_the_primary_items_are_the_registered_570_in_558_groups():
+    ids = LA.registered_primary_items()
+    assert len(ids) == 570 and len(LA.independence_groups(ids)) == 558
 
 
 # ---- the pipeline on the toy teacher --------------------------------------------------------------------------------
@@ -147,6 +181,7 @@ def test_the_pipeline_builds_both_candidates_on_the_toy_teacher(teacher):
 
 def test_the_teardown_reserve_and_the_budget_terminal_state_refuse():
     from reasoning_inheritance import layer_merge_launch as L
+    assert L.relay_object_sizes() == [1_211_169_792 + 2**20] * 2 + [64 * 2**20]       #: two deltas, the statistics
     g = {"teardown_reserve_usd": 1.0, "min_useful_attempt_usd": 2.0}
     env, pos = {"remaining_usd": 13.0}, {"project_remaining_usd": 36.76, "balance_usd": 16.63}
     assert L.reserve_problems(11.0, g, env, pos) == []
@@ -159,3 +194,281 @@ def test_the_teardown_reserve_and_the_budget_terminal_state_refuse():
     assert proposal["ceiling_usd"] + proposal["teardown_reserve_usd"] == proposal["study_cumulative_cap_usd"]
     assert proposal["per_session_hard_cap_usd"] <= proposal["ceiling_usd"]
     assert not (REPO / L.STUDY.grant).exists()                                         #: proposed, never granted here
+
+
+# ---- a candidate as D plus its span blocks; the checks refuse non-finite errors ----------------------------------------
+
+@torch.no_grad()
+def test_d_plus_the_delta_is_the_candidate_byte_for_byte(teacher, tmp_path):
+    """The lossless storage: D (keep_blocks of the teacher) with the delta FILE's tensors written in is the candidate,
+    tensor for tensor and as the saved artifact (the pod verifies exactly this before a candidate counts as built)."""
+    from safetensors.torch import load_file, save_file
+    RI = LMD.RI
+    sel = {"n_root_blocks": 6, "kept_blocks": [0, 1, 3, 5]}
+    spans = [s for s in LMX.LM.spans_from_kept_blocks(6, sel["kept_blocks"]) if len(s) > 1]
+    d = FM.keep_blocks(ADAPTER, teacher, sel["kept_blocks"])
+    digests = {n: FM.tensor_sha256(t) for n, t in d.state_dict().items() if n != "lm_head.weight"}
+    model, _ = LMX.build_candidate(ADAPTER, teacher, sel, spans, "M-avg", None, digests, seed=0)
+    delta = LMX.candidate_delta(sel, spans, model)
+    assert sorted({int(n.split(".")[2]) for n in delta}) == [1, 2] and len(delta) == 2 * 11
+    save_file(delta, str(tmp_path / "delta.safetensors"))
+    base = FM.keep_blocks(ADAPTER, teacher, sel["kept_blocks"])
+    LMX.apply_delta(base, load_file(str(tmp_path / "delta.safetensors")))
+    want = {n: FM.tensor_sha256(t) for n, t in model.state_dict().items()}
+    assert {n: FM.tensor_sha256(t) for n, t in base.state_dict().items()} == want
+    a, b = RI._save(ADAPTER, model, tmp_path / "cand"), RI._save(ADAPTER, base, tmp_path / "rebuilt")
+    assert a.artifact_digest == b.artifact_digest and a.shards[0].sha256 == b.shards[0].sha256
+    bad = dict(delta)
+    k = next(iter(bad))
+    bad[k] = bad[k].to(torch.float64)
+    with pytest.raises(LMX.MergeError, match="does not fit D"):
+        LMX.apply_delta(FM.keep_blocks(ADAPTER, teacher, sel["kept_blocks"]), bad)
+
+
+@torch.no_grad()
+def test_a_non_finite_equivalence_error_fails_the_check(teacher):
+    import copy
+    sel_kept = [0, 1, 3, 5]
+    spans = [s for s in LMX.LM.spans_from_kept_blocks(6, sel_kept) if len(s) > 1]
+    n_q, n_kv, _ = ADAPTER.head_groups(ADAPTER.spec_of(teacher))
+    batches = _batches()
+    st = LMX.collect_statistics(ADAPTER, teacher, spans, batches, None, chunk=16)
+    stats = LMX.statistics_tensors(st, LMX.alignments(st, n_q, n_kv))
+    broken = copy.deepcopy(teacher)
+    ADAPTER.blocks(broken)[2].mlp.down_proj.weight[0, 0] = float("nan")
+    eq = LMX.equivalence_checks(ADAPTER, broken, spans, stats, next(iter(batches())), 1e-4)
+    assert not eq["passed"] and eq["non_finite"] and all(x.startswith(("2:", "3:", "4:")) for x in eq["non_finite"])
+
+
+def test_the_code_identity_ignores_comments_and_docstrings_but_not_statements(tmp_path, monkeypatch):
+    import importlib
+    import sys as _sys
+    bodies = {"a": 'def f(x):\n    """one."""\n    return x + 1\n',
+              "b": '# a comment\n\n\ndef f(x):\n    """another docstring."""\n    # inside\n    return x + 1\n',
+              "c": 'def f(x):\n    return x + 2\n'}
+    monkeypatch.syspath_prepend(str(tmp_path))
+    got = {}
+    for k, body in bodies.items():
+        (tmp_path / f"cid_{k}.py").write_text(body)
+    importlib.invalidate_caches()
+    for k in bodies:
+        mod = importlib.import_module(f"cid_{k}")
+        got[k] = next(iter(LMX.code_identity(mod.f)["objects"].values()))
+        _sys.modules.pop(f"cid_{k}", None)
+    assert got["a"] == got["b"] != got["c"]
+
+
+# ---- the driver reuses a product only under this attempt's identity ----------------------------------------------------
+
+def _ids(out: Path, cand_sha: dict) -> None:
+    LMD.RI.write_json(out / "state" / "identities.json",
+                      {"candidates": {g: {"kind": "candidate", "sha256": h} for g, h in cand_sha.items()}})
+
+
+def test_a_candidate_is_reused_only_under_this_attempts_identity(tmp_path):
+    RI = LMD.RI
+    out = tmp_path / "out"
+    _ids(out, {"M-avg": "a" * 64, "M-act": "b" * 64})
+    dp = out / "products" / "M-avg" / "delta.safetensors"
+    dp.parent.mkdir(parents=True)
+    dp.write_bytes(b"delta")
+    rec = {"identity": {"sha256": "a" * 64}, "status": "durable", "relay": {"verified": True},
+           "delta": {"path": "products/M-avg/delta.safetensors", "sha256": RI.sha256_file(dp)}}
+    RI.write_json(out / "records" / "candidates" / "M-avg.json", rec)
+    assert LMD.candidate_state(out, "M-avg", "att2") == "durable"
+    RI.write_json(out / "records" / "candidates" / "M-avg.json", {**rec, "status": "built", "relay": None})
+    assert LMD.candidate_state(out, "M-avg", "att2") == "built"           #: only the relay step is left
+    #: another identity (say the merge code changed): superseded with the reason, never used
+    RI.write_json(out / "records" / "candidates" / "M-avg.json", {**rec, "identity": {"sha256": "c" * 64}})
+    assert LMD.candidate_state(out, "M-avg", "att3") == "absent"
+    assert not (out / "records" / "candidates" / "M-avg.json").exists() and not dp.exists()
+    moved = out / "superseded" / "att3"
+    assert (moved / "records" / "candidates" / "M-avg.json").is_file() and (moved / "products" / "M-avg").is_dir()
+    assert "is not this attempt's" in RI.read_json(moved / "why.json")[0]["why"]
+    #: built, but the delta is gone (the next pod's evidence directory starts without it): rebuilt, not trusted
+    RI.write_json(out / "records" / "candidates" / "M-act.json",
+                  {"identity": {"sha256": "b" * 64}, "status": "built",
+                   "delta": {"path": "products/M-act/delta.safetensors", "sha256": "0" * 64}})
+    assert LMD.candidate_state(out, "M-act", "att4") == "absent"
+
+
+def test_sealed_evaluation_work_is_taken_only_under_its_identity(tmp_path):
+    out = tmp_path / "out"
+    unit = out / "eval" / "M-avg_H-T"
+    (unit / "parts").mkdir(parents=True)
+    (unit / "parts" / "part_0000.jsonl").write_text('{"task_id": "x"}\n')
+    want = LMD.identity("evaluation_unit", candidate="d1", mode="H-T")
+    assert LMD.admit_unit(out, unit, want, "att1") == "superseded"      #: sealed work with no identity
+    assert not (unit / "parts").exists() and (out / "superseded" / "att1" / "eval" / "M-avg_H-T" / "parts").is_dir()
+    (unit / "parts").mkdir()
+    (unit / "parts" / "part_0000.jsonl").write_text('{"task_id": "y"}\n')
+    assert LMD.admit_unit(out, unit, want, "att2") == "taken"
+    assert (unit / "parts" / "part_0000.jsonl").is_file()
+    other = LMD.identity("evaluation_unit", candidate="d2", mode="H-T")
+    assert LMD.admit_unit(out, unit, other, "att3") == "superseded"
+
+
+def test_the_identities_are_computed_from_the_design_session_and_code(tmp_path):
+    ids = LMD.identities(tmp_path / "work", "cpu")
+    st, cand = ids["statistics"], ids["candidates"]
+    assert st["parts"]["data"]["positions"]["policy"].startswith("positions.supervised_target_v1")
+    assert cand["M-act"]["parts"]["statistics"] == st["sha256"] and "statistics" not in cand["M-avg"]["parts"]
+    assert ids["evaluation"]["parts"]["protocol_sha256"] == LMX.design()["evaluation"]["protocol_sha256"]
+
+
+# ---- capability units: sealed the moment they are written; a later attempt generates only what is missing ----------
+
+FAKE_RUNNER = r"""#!{python}
+import json, os, sys, time
+from pathlib import Path
+sys.path[:0] = ["src", "scripts"]
+from shared.evaluation import decoding as DEC
+a = sys.argv[2:]
+def val(f):
+    return a[a.index(f) + 1]
+prompts = a[a.index("--prompts") + 1:a.index("--out-dir")]
+raw, stream = Path(val("--out-dir")), Path(val("--stream-completed"))
+proto = DEC.load(val("--decoding"))
+raw.mkdir(parents=True, exist_ok=True)
+stream.mkdir(parents=True, exist_ok=True)
+log = Path(os.environ["FAKE_LOG"])
+fail_after = int(os.environ.get("FAKE_FAIL_AFTER", "-1"))
+done = 0
+for pth in prompts:
+    stem = Path(pth).stem
+    ids = [json.loads(l)["id"] for l in Path(pth).read_text().split("\n") if l.strip()]
+    with log.open("a") as fh:
+        fh.write(json.dumps({"unit": stem, "ids": ids}) + "\n")
+    recs = []
+    for i in sorted(ids):
+        r = {"id": i, "label": "x", "raw": "ok", "stop_reason": "eos", "sampling_seed": DEC.request_seed(proto, stem, i)}
+        recs.append(r)
+        with open(stream / f"{stem}.stream.jsonl", "a") as fh:
+            fh.write(json.dumps(r) + "\n")
+        done += 1
+        if done == fail_after:
+            sys.exit(3)
+    g = raw / f"{stem}.generations.jsonl"
+    g.with_name("." + g.name).write_text("".join(json.dumps(r) + "\n" for r in recs)); os.replace(g.with_name("." + g.name), g)
+    s = raw / f"{stem}.json"
+    s.with_name("." + s.name).write_text(json.dumps({"n_samples": len(recs)})); os.replace(s.with_name("." + s.name), s)
+    #: the driver must seal this unit before the runner starts the next one
+    gens = raw.parent.parent / "eval" / raw.name.split(".")[0] / "generations" / f"{stem}.jsonl"
+    t0 = time.time()
+    while not gens.is_file() and time.time() - t0 < 20:
+        time.sleep(0.05)
+    with log.open("a") as fh:
+        fh.write(json.dumps({"unit": stem, "sealed_before_next": gens.is_file()}) + "\n")
+"""
+
+
+def test_a_capability_unit_is_sealed_when_written_and_a_retry_generates_only_missing_samples(tmp_path, monkeypatch):
+    import os
+    import time as _time
+    RI = LMD.RI
+    from shared import eval_sets as ES
+    from stages.calibration_volume import dose_driver
+    units = {"stage3_capability_846__u1": [f"a{k:02d}" for k in range(5)],
+             "stage3_capability_846__u2": [f"b{k:02d}" for k in range(4)]}
+    files = {}
+    for k, ids in units.items():
+        f = tmp_path / "set" / f"{k.split('__')[1]}.jsonl"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text("".join(json.dumps({"id": i, "messages": []}) + "\n" for i in ids))
+        files[k.split("__")[1]] = f
+    monkeypatch.setattr(ES, "manifest", lambda *_a, **_k: {"components": {"stage3_capability_846": {
+        "units": {"u1": {}, "u2": {}}}}})
+    monkeypatch.setattr(ES, "unit_path", lambda _s, _c, u: files[u])
+
+    def legacy(dest):
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text("".join(json.dumps({"id": f"l{k}", "messages": []}) + "\n" for k in range(3)))
+        return dest
+    monkeypatch.setattr(dose_driver, "legacy_prompts", legacy)
+    real_sleep = _time.sleep
+    monkeypatch.setattr(RI.time, "sleep", lambda s: real_sleep(min(s, 0.1)))       #: the runner poll, sped up
+    runner = tmp_path / "fake_vllm"
+    runner.write_text(FAKE_RUNNER.replace("{python}", sys.executable))
+    runner.chmod(0o755)
+    log = tmp_path / "runs.jsonl"
+    unit_dir = tmp_path / "out" / "eval" / "M-avg_H-T"
+    env = {**os.environ, "FAKE_LOG": str(log), "FAKE_FAIL_AFTER": "7"}
+    #: attempt 1 fails after 7 samples: u1 (5) is complete and sealed; 2 of u2's are streamed
+    with pytest.raises(RI.DriverError, match="exited 3"):
+        RI.capability(tmp_path / "pkg", unit_dir, "M-avg_H-T", "H-T", str(runner), env, "att1")
+    gens = unit_dir / "generations"
+    assert (gens / "stage3_capability_846__u1.jsonl").is_file()
+    assert not (gens / "stage3_capability_846__u2.jsonl").is_file()
+    runs = [json.loads(l) for l in log.read_text().split("\n") if l.strip()]
+    assert {"unit": "stage3_capability_846__u1", "sealed_before_next": True} in runs
+    sealed = RI.capability_sealed(unit_dir, "stage3_capability_846__u2", units["stage3_capability_846__u2"], None)
+    assert sorted(sealed) == ["b00", "b01"]
+    #: attempt 2 asks only for what has no sealed record
+    log.unlink()
+    env["FAKE_FAIL_AFTER"] = "-1"
+    res = RI.capability(tmp_path / "pkg", unit_dir, "M-avg_H-T", "H-T", str(runner), env, "att2")
+    assert res["status"] == "complete" and res["sealed_samples_taken"] == {"stage3_capability_846__u2": 2}
+    asked = {r["unit"]: r["ids"] for r in (json.loads(l) for l in log.read_text().split("\n") if l.strip())
+             if "ids" in r}
+    assert asked == {"stage3_capability_846__u2": ["b02", "b03"], "stage3_legacy_150__items": ["l0", "l1", "l2"]}
+    u2 = [json.loads(l) for l in (gens / "stage3_capability_846__u2.jsonl").read_text().split("\n") if l.strip()]
+    assert [r["id"] for r in u2] == units["stage3_capability_846__u2"]
+    assert RI.read_json(gens / "stage3_capability_846__u2.summary.json")["sealed_before"] == 2
+    #: a sealed sample whose seed is not the rule's is refused, never taken
+    p0 = sorted((unit_dir / "parts" / "stage3_capability_846__u2").glob("part_*.jsonl"))[0]
+    bad = [json.loads(l) for l in p0.read_text().split("\n") if l.strip()]
+    bad[0]["sampling_seed"] = 1
+    p0.write_text("".join(json.dumps(r) + "\n" for r in bad))
+    with pytest.raises(RI.DriverError, match="seed"):
+        RI.capability_sealed(unit_dir, "stage3_capability_846__u2", units["stage3_capability_846__u2"],
+                             lambda i: -1)
+
+
+def test_the_runner_writes_a_units_generations_before_its_summary():
+    """What the sealer relies on, in the real runner: generations, then the summary, each renamed into place."""
+    src = (REPO / "scripts/shared/evaluation/uncapped_eval.py").read_text()
+    g = src.index('write_atomic(out.with_suffix(".generations.jsonl")')
+    assert g < src.index("write_atomic(out, json.dumps(summary") and "--stream-completed" in src
+    assert "out.write_text(json.dumps(summary" not in src
+
+
+# ---- the dev box keeps D plus each candidate's delta --------------------------------------------------------------------
+
+@torch.no_grad()
+def test_retain_checks_the_pulled_delta_against_ds_local_copy(teacher, tmp_path):
+    from safetensors.torch import save_file
+    from reasoning_inheritance import layer_merge_launch as L
+    RI = LMD.RI
+    sel = {"n_root_blocks": 6, "kept_blocks": [0, 1, 3, 5]}
+    spans = [s for s in LMX.LM.spans_from_kept_blocks(6, sel["kept_blocks"]) if len(s) > 1]
+    d = FM.keep_blocks(ADAPTER, teacher, sel["kept_blocks"])
+    d_dir = tmp_path / "D"
+    RI._save(ADAPTER, d, d_dir)
+    digests = {n: FM.tensor_sha256(t) for n, t in d.state_dict().items() if n != "lm_head.weight"}
+    model, _ = LMX.build_candidate(ADAPTER, teacher, sel, spans, "M-avg", None, digests, seed=0)
+    delta = LMX.candidate_delta(sel, spans, model)
+    out = tmp_path / "scr" / "store" / "out"
+    dp = out / "products" / "M-avg" / "delta.safetensors"
+    dp.parent.mkdir(parents=True)
+    save_file(delta, str(dp))
+    rec = {"identity": {"sha256": "e" * 64}, "status": "durable", "reconstruction": {"equal": True},
+           "checkpoint": {"artifact_digest": "f" * 64}, "relay": {"delta_path": "x/delta.safetensors"},
+           "delta": {"path": "products/M-avg/delta.safetensors", "sha256": RI.sha256_file(dp),
+                     "bytes": dp.stat().st_size, "tensors": len(delta),
+                     "tensor_digests": LMX.candidate_tensor_digests(model, sorted(delta))}}
+    RI.write_json(out / "records" / "candidates" / "M-avg.json", rec)
+    ident = {"weights_sha256": RI.sha256_file(d_dir / "model.safetensors"), "artifact_digest": "d" * 64}
+    doc = L.retain("run1", tmp_path / "scr", store=tmp_path / "keep", record=tmp_path / "local.json",
+                   d_checkpoint=d_dir, d_identity=ident)
+    kept = Path(doc["candidates"]["M-avg"]["path"])
+    assert kept.is_file() and kept.stat().st_ino == dp.stat().st_ino     #: one physical copy
+    assert doc["base"]["weights_sha256"] == ident["weights_sha256"] and "M-act" not in doc["candidates"]
+    #: a delta that is not the candidate's tensors is refused
+    rec["delta"]["tensor_digests"] = {n: "0" * 64 for n in rec["delta"]["tensor_digests"]}
+    RI.write_json(out / "records" / "candidates" / "M-avg.json", rec)
+    with pytest.raises(Exception, match="not the candidate's tensor"):
+        L.retain("run1", tmp_path / "scr", store=tmp_path / "keep2", record=tmp_path / "local2.json",
+                 d_checkpoint=d_dir, d_identity=ident)
+    with pytest.raises(Exception, match="is not D"):
+        L.retain("run1", tmp_path / "scr", store=tmp_path / "keep3", record=tmp_path / "local3.json",
+                 d_checkpoint=d_dir, d_identity={**ident, "weights_sha256": "0" * 64})

@@ -40,13 +40,13 @@
   "scenario_estimate": {
    "status": "a SCENARIO estimate from RI-S1's measurements, not a measurement of these candidates",
    "setup_minutes": 25,
-   "build_minutes": "about 45: teacher download and hashing ~5, the statistics forward over 79 packed sequences ~10, eight 9,728 x 9,728 assignments ~8 (48 s each for a hard random matrix on the dev box CPU), the checks, both builds and saves ~10, the relay upload and re-download ~10",
+   "build_minutes": "about 45: teacher download and hashing ~5, the statistics forward over 79 packed sequences ~10, eight 9,728 x 9,728 assignments ~8 (48 s each for a hard random matrix on the dev box CPU), the checks, each candidate built, saved and its reconstruction from D and its delta checked ~14, the two 1.13 GiB deltas to the relay and back ~4 (the first version moved two 6.43 GB checkpoints)",
    "diagnostics_and_state_eval_minutes": "about 20 (RI-S1's state evaluation of three groups took about 10)",
    "generation_hours_per_candidate": "1.8 if it behaves like D (after the repair: thinking fluid ~40 min, thinking capability ~34, non-thinking 16 and 18) to 3.6 if it behaves like T (T's 6.29M + 0.62M output tokens at D's ~540 tokens/s at concurrency 7)",
    "total_hours": "4.8 to 8.4",
    "usd_at_1.09_per_hour": "about $5.3 to $9.3 with container disk; the $5-9 of REPORT section 11 rounded"
   },
-  "why_these_caps": "$11 per session covers the high scenario with the 10% contingency and the watchdog at $1.09/h; $13 leaves one small resume attempt after a full session; the balance ($16.63) holds one session plus the reserve, so a second full session needs a top-up, which is the maintainer's"
+  "why_these_caps": "$11 per session covers the high scenario with the 10% contingency and the watchdog at $1.09/h; $13 leaves one small resume attempt after a full session. The balance ($16.63) already covers the whole proposal: the $13 sessions may draw plus the $1 reserve, $14. What bounds a second session is the ceiling, not the balance: after one full session at the expected $9.27 the ceiling leaves $3.73, so a second $11 session does not fit, and a top-up would not change that; only a changed grant would, which is the maintainer's (corrected 2026-11-15: the first text said a second full session needed a top-up)"
  },
  "launch": {
   "order": "commit the code; issue (one-use artifact); commit the artifact (that commit is the session commit); stage its bundle (stages.phase_c1.bundle.stage_bundle); launch",

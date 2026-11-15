@@ -71,6 +71,45 @@ def test_pearson_moments_stream_to_numpys_correlation_and_zero_variance_is_zero(
     assert (c[3] == 0).all() and m.zero_variance()[0].tolist() == [False, False, False, True, False]
 
 
+def _naive_float32_correlation(x: torch.Tensor) -> torch.Tensor:
+    """The first version's arithmetic: E[xy] - E[x]E[y] with the cross products summed in float32."""
+    n = x.shape[0]
+    x64 = x.to(torch.float64)
+    mx = x64.mean(0)
+    vx = ((x64 * x64).sum(0) / n - mx * mx).clamp_min(0.0)
+    cov = (x.float().T @ x.float()).to(torch.float64) / n - mx[:, None] * mx[None, :]
+    return cov / (vx.sqrt()[:, None] * vx.sqrt()[None, :])
+
+
+def test_pearson_keeps_a_near_constant_bf16_feature():
+    """A feature exactly representable in bf16 whose spread is small against its mean (1000 + 4 b, b ~ Bernoulli(0.01),
+    the next bf16 value after 1000 is 1004): its autocorrelation is 1. The uncentered float32 sums read 0.14 or 1.10;
+    the centered, pairwise-merged moments match numpy's float64 to rounding, streamed in uneven chunks, one of them
+    constant (a chunk with zero within-chunk variance must still merge exactly)."""
+    g = torch.Generator().manual_seed(0)
+    n = 8192
+    b1 = (torch.rand(n, generator=g) < 0.01).double()
+    b2 = (torch.rand(n, generator=g) < 0.01).double()
+    b1[:600] = 0.0                                    #: the first chunk below is constant in feature 0
+    cols = [1000.0 + 4.0 * b1, 1000.0 + 4.0 * b2, torch.randn(n, generator=g, dtype=torch.float64)]
+    x = torch.stack(cols, 1).to(torch.bfloat16)
+    assert torch.equal(x[:, :2].double(), torch.stack(cols[:2], 1))      #: bf16-exact
+    ref = np.corrcoef(x.double().numpy().T)
+    naive = _naive_float32_correlation(x)
+    assert abs(float(naive[0, 0]) - 1.0) > 0.05       #: the counterexample bites the old arithmetic (1.10 here)
+    #: the merge arithmetic with a float64 product: numpy to rounding; with the pod's float32 product: the float32
+    #: accumulation of centered products, about 1e-6
+    for dtype, tol in ((torch.float64, 1e-12), (torch.float32, 1e-5)):
+        m = LM.PearsonMoments(3, 3, matmul_dtype=dtype)
+        for lo, hi in ((0, 600), (600, 601), (601, 4000), (4000, n)):
+            m.add(x[lo:hi], x[lo:hi])
+        c = m.correlation().numpy()
+        np.testing.assert_allclose(c, ref, atol=tol)
+        assert not m.zero_variance()[0].any()
+    with pytest.raises(LM.LayerMergeError, match="non-finite"):
+        LM.PearsonMoments(1, 1).add(torch.tensor([[float("nan")]]), torch.tensor([[1.0]]))
+
+
 def test_gram_cosine_and_group_sums():
     a = torch.randn(50, 4, 6, dtype=torch.float64)
     m = LM.GramMoments(4, 4)

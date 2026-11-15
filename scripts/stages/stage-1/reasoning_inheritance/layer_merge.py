@@ -23,9 +23,13 @@ residual update against the teacher span's, on the same positions).
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
+import inspect
 import json
+import math
 import sys
+import textwrap
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -373,6 +377,71 @@ def build_candidate(adapter, teacher, sel: dict, spans, method: str, stats, dige
     return model, rec
 
 
+# ---- a candidate as D plus its span blocks (lossless) ----------------------------------------------------------------
+
+def span_tensor_names(sel: dict, spans, state_dict) -> list[str]:
+    """The candidate's tensors that differ from D by construction: every tensor of the blocks the spans rewrite."""
+    heads = {child_index(sel, s[0]) for s in spans}
+    names = sorted(n for n in state_dict if n.startswith("model.layers.") and int(n.split(".")[2]) in heads)
+    if not names:
+        raise MergeError("no tensor of a span block in the state dict")
+    return names
+
+
+def candidate_delta(sel: dict, spans, model) -> dict[str, torch.Tensor]:
+    """The span blocks' tensors of a built candidate, contiguous on the host: with D's tensors, the whole candidate."""
+    sd = model.state_dict()
+    return {n: sd[n].detach().to("cpu").contiguous() for n in span_tensor_names(sel, spans, sd)}
+
+
+@torch.no_grad()
+def apply_delta(base, delta: dict[str, torch.Tensor]) -> None:
+    """Write a candidate's span-block tensors into D (in place). Every name must be one of D's, at D's dtype and shape:
+    a delta is a replacement of whole tensors, never an addition or a cast."""
+    sd = base.state_dict()
+    bad = [n for n, t in delta.items() if n not in sd or sd[n].dtype != t.dtype or tuple(sd[n].shape) != tuple(t.shape)]
+    if bad:
+        raise MergeError(f"the delta does not fit D: {bad[:4]}")
+    for n, t in delta.items():
+        sd[n].copy_(t.to(sd[n].device))
+
+
+def candidate_tensor_digests(model, names) -> dict[str, str]:
+    from aadistill.initialization.planning.frozen_mapping import tensor_sha256
+    sd = model.state_dict()
+    return {n: tensor_sha256(sd[n]) for n in names}
+
+
+def code_identity(*objs) -> dict:
+    """What computes a product, as code: each function's or class's source parsed, its docstrings dropped and dumped
+    without positions (`ast.dump`), so a comment, a docstring or a moved line elsewhere in the file changes nothing,
+    and a changed statement does. A later attempt reuses a product only under the same code identity."""
+    out = {}
+    for o in objs:
+        tree = ast.parse(textwrap.dedent(inspect.getsource(o)))
+        for node in ast.walk(tree):
+            body = getattr(node, "body", None)
+            if (isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)) and body
+                    and isinstance(body[0], ast.Expr) and isinstance(getattr(body[0], "value", None), ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                node.body = body[1:] or [ast.Pass()]
+        out[f"{o.__module__}.{o.__qualname__}"] = hashlib.sha256(
+            ast.dump(tree, include_attributes=False).encode()).hexdigest()
+    return {"objects": out, "sha256": hashlib.sha256(json.dumps(out, sort_keys=True).encode()).hexdigest(),
+            "rule": "sha256 of ast.dump (no positions, docstrings dropped) of each object's source"}
+
+
+#: the code each product is computed by (`code_identity`)
+def statistics_code():
+    return (LM.PearsonMoments, LM.GramMoments, LM.group_sum, LM.linear_assignment, calibration, valid_rows, forward,
+            head_writes, collect_statistics, alignments, statistics_tensors)
+
+
+def candidate_code():
+    return (LM.block_tensors, LM._params, LM.fold_norm_gains, LM.permute_block, LM.query_head_order, LM.head_rows,
+            LM.convex_weights, LM.MergeWeights, LM.merge_blocks, LM.write_block, merged_tensors, build_candidate)
+
+
 # ---- numerical checks: folding alone, each permutation alone -------------------------------------------------------
 
 def _cast_kwargs(kwargs: dict, dtype) -> dict:
@@ -421,7 +490,7 @@ def equivalence_checks(adapter, teacher, spans, stats, packed, tolerance: float)
     blocks = adapter.blocks(teacher)
     involved = sorted({b for s in spans for b in s})
     cap = capture_block_inputs(teacher, adapter, involved, packed)
-    out, worst = {}, 0.0
+    out, worst, bad = {}, 0.0, []
     for s in spans:
         for k, b in enumerate(s):
             h, kw, _ = cap[b]
@@ -445,10 +514,13 @@ def equivalence_checks(adapter, teacher, spans, stats, packed, tolerance: float)
                 del pb
             del ref_blk
             out[str(b)] = rec
-            worst = max(worst, *rec.values())
-    return {"tolerance": tolerance, "worst": worst, "passed": worst <= tolerance, "blocks": out,
-            "positions": int(cap[involved[0]][0].shape[1]), "precision": "float32 copies of the bf16 teacher blocks",
-            "rule": "||y' - y||_F / ||y - x||_F over every position of the first packed sequence"}
+            bad.extend(f"{b}:{k}" for k, v in rec.items() if not math.isfinite(v))
+            worst = max([worst, *(v for v in rec.values() if math.isfinite(v))])
+    return {"tolerance": tolerance, "worst": worst, "non_finite": bad, "passed": not bad and worst <= tolerance,
+            "blocks": out, "positions": int(cap[involved[0]][0].shape[1]),
+            "precision": "float32 copies of the bf16 teacher blocks",
+            "rule": "||y' - y||_F / ||y - x||_F over every position of the first packed sequence; a non-finite error "
+                    "(NaN or inf, in the output or in the block's own update) fails the check, whatever the others"}
 
 
 # ---- diagnostics: residual updates against the teacher span's -------------------------------------------------------

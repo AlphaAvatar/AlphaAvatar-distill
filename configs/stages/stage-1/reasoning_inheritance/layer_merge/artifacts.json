@@ -1,7 +1,7 @@
 {
  "spec": "aadistill.artifact_spec/v1",
  "session": "stage1_layer_merge",
- "note": "One spec for success and failure; every entry may match nothing (P8.2.1: preserved when they exist, never demanded). Finished files leave the pod on every poll (launch.secure_incremental) and the candidates and statistics through the relay (layer_merge_driver.relay_upload); this archive is the teardown's last copy of the evidence directory's records and logs.",
+ "note": "One spec for success and failure; every entry may match nothing (P8.2.1: preserved when they exist, never demanded). Finished files leave the pod on every poll (launch.secure_incremental), each candidate's span-block delta included, and the deltas and statistics also through the relay (layer_merge_driver.relay_upload); this archive is the teardown's last copy of the evidence directory's records and logs.",
  "patterns_are_relative_to": "the collector's --root, <checkout>/artifacts",
  "entries": [
   {"artifact_class": "driver_report", "pattern": "audit/stage1_layer_merge/*/report.json", "required": false, "lifecycle": "final_required", "min_matches": 0},

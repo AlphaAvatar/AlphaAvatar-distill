@@ -1656,7 +1656,9 @@ STAGE_1 = [
                    "2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed; "
                    "2026-11-14: review fixes (teacher prompt check, tombstones, A-MIX relay copy, the next "
                    "round's layer-merging plan); 2026-11-14: third review (M-act, literature, decision rule, "
-                   "retirement tool, 24 relay weights retired, RI-LM1 prepared)"],
+                   "retirement tool, 24 relay weights retired, RI-LM1 prepared); 2026-11-15: fourth review (Holm "
+                   "over both registered comparisons, per-candidate durability, capability sealing, reuse by "
+                   "identity, centered Pearson moments, candidates kept as D + delta)"],
         canonical_log_destination="logs/stages/stage-1/reasoning_inheritance",
         classification_reason=(
             "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps "

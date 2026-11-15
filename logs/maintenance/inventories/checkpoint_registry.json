@@ -17184,7 +17184,7 @@
       "role": "D: depth pruning only (blocks 3 11 17 18 25 26 30 32 removed), untrained",
       "retention": "control",
       "status": "active",
-      "retention_reason": "outright removal, the control of the next round's adjacent-layer merge variants",
+      "retention_reason": "outright removal, the control of the next round's adjacent-layer merge variants, and the BASE of their dev-box copies: each RI-LM1 candidate is kept as D plus its span-block delta (logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json)",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 2560,
@@ -17219,7 +17219,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "driver.py's groups step from the teacher and the frozen mapping (its kept blocks K)",
       "reconstruction_cost": "one L40S, a few minutes",
-      "never_delete_clause": "the only copy (relay copy retired 2026-11-14); a declared consumer in the next round",
+      "never_delete_clause": "the only copy (relay copy retired 2026-11-14); a declared consumer in the next round; every RI-LM1 delta needs it to be a checkpoint",
       "protected": true,
       "disposition": "keep"
     },

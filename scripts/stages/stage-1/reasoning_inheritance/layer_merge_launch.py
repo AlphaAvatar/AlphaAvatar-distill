@@ -3,7 +3,7 @@
 
     PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python \\
         scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py \\
-        {issue|launch|closeout|position|grant|stage-resume|archive-evidence} ...
+        {issue|launch|closeout|position|grant|stage-resume|archive-evidence|retain} ...
 
 `shared.study_engineering` is the mechanism; this module is the instance. RI-S1 is CLOSED and its unspent allowance
 lapsed: this study has its own proposal (``logs/stages/stage-1/reasoning_inheritance/plans/layer_merge_proposal.json``,
@@ -15,11 +15,13 @@ Beyond the mechanism's gates, two of this round's own, both read at $0 before th
 
 * `the_teardown_reserve_stays` -- the proposal's ``teardown_reserve_usd`` is held outside every session's hard cap: the
   artifact's cap plus the reserve must fit what the envelope, the project cap and the provider balance leave;
-* `the_relay_has_room` -- the private relay would accept the two candidates and the statistics at their true sizes
-  (`aadistill.runtime.hub_capacity.would_accept`; nothing is uploaded).
+* `the_relay_has_room` -- the private relay would accept the two candidates' deltas and the statistics at their true
+  sizes (`relay_object_sizes`, from the design; `aadistill.runtime.hub_capacity.would_accept`; nothing is uploaded).
 
-Finished work leaves the pod as RI-S1's did (`launch.secure_incremental` on every poll; the candidates and statistics
-through the relay from the pod). A later attempt resumes from `stage-resume`'s archive.
+Finished work leaves the pod as RI-S1's did (`launch.secure_incremental` on every poll -- each candidate's delta
+included, so the dev box holds D plus every finished candidate's delta; the deltas and statistics also through the
+relay from the pod). `retain` verifies the pulled deltas against D's dev-box copy and keeps them in the out-of-tree
+store. A later attempt resumes from `stage-resume`'s archive (records and evaluations, never a delta).
 """
 from __future__ import annotations
 
@@ -47,9 +49,18 @@ DIGESTS = "configs/stages/stage-1/reasoning_inheritance/layer_merge/d_tensor_dig
 DRIVER = "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py"
 RESUME_DEST = "artifacts/stages/stage-1/reasoning_inheritance/layer_merge_resume"
 RELAY_TRANSFER = "transfer/stage1_layer_merge"
-#: the two candidates' weight files (D's size: the same structure) and the statistics, for the relay-room check
-CANDIDATE_BYTES = 6_430_078_848
+#: what the relay receives: one delta per candidate (the design's span-block tensor bytes, plus a header bound) and
+#: the statistics
+DELTA_HEADER_BYTES_MAX = 2**20
 STATISTICS_BYTES_MAX = 64 * 2**20
+LOCAL_STORE = Path("~/aad-artifacts/stage1_layer_merge").expanduser()
+LOCAL_RECORD = LOGS / "storage/layer_merge_local.json"
+
+
+def relay_object_sizes(design: dict | None = None) -> list[int]:
+    d = design or json.loads((REPO / DESIGN).read_text())
+    per = int(d["products"]["delta_tensor_bytes"]) + DELTA_HEADER_BYTES_MAX
+    return [per] * len(d["evaluation"]["groups"]) + [STATISTICS_BYTES_MAX]
 
 STUDY = SE.Study(
     key="RI-LM1", plan_id="stage1.reasoning_inheritance.layer_merge", logs=LOGS,
@@ -144,9 +155,82 @@ def the_relay_has_room(ctx) -> tuple[bool, str]:
     tok = Path(os.path.expanduser("~/.cache/huggingface/token"))
     if not tok.is_file():
         return False, "no hub token on the dev box to ask the relay"
-    v = would_accept(MAIN_RELAY, [CANDIDATE_BYTES, CANDIDATE_BYTES, STATISTICS_BYTES_MAX], tok.read_text().strip())
+    v = would_accept(MAIN_RELAY, relay_object_sizes(), tok.read_text().strip())
     ctx.evidence["relay_room"] = str(v)
-    return v.accepted, f"the relay would accept the candidates and statistics: {v}"
+    return v.accepted, f"the relay would accept the two deltas and the statistics: {v}"
+
+
+# ---- the dev-box copy of each candidate: D (kept, protected) + its delta ------------------------------------------
+
+def retain(run_id: str, src_scr: Path, *, store: Path = LOCAL_STORE, record: Path = REPO / LOCAL_RECORD,
+           d_checkpoint: Path | None = None, d_identity: dict | None = None) -> dict:
+    """Each durable candidate's pulled delta (``<scr>/store/out/products/<g>/delta.safetensors``) kept on the dev box
+    beside D ($0): the delta re-hashed against its record; D's local file hashed against D's identity; the candidate's
+    span tensors rebuilt from them (``layer_merge.apply_delta`` on D's tensors) and compared with the pod's per-tensor
+    digests; then hard-linked into the out-of-tree store (one physical copy) and recorded. The file-level
+    reconstruction (D + delta -> the candidate's artifact digest) was verified on the pod before the candidate was
+    made durable; this shows the dev box holds the same inputs to it."""
+    import hashlib
+    from safetensors import safe_open
+    from aadistill.initialization.planning.frozen_mapping import tensor_sha256
+    d = json.loads((REPO / DESIGN).read_text())
+    base = d_identity or d["base"]["d_checkpoint"]
+    d_dir = Path(d_checkpoint or Path(d["base"]["d_checkpoint"]["dev_box_copy"].split(" ")[0]).expanduser())
+    d_file = d_dir / "model.safetensors"
+
+    def sha(p: Path) -> str:
+        h = hashlib.sha256()
+        with open(p, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 24), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    if sha(d_file) != base["weights_sha256"]:
+        raise SE.AuthorizationError(f"{d_file} is not D ({base['weights_sha256'][:12]})")
+    out = Path(src_scr) / "store" / "out"
+    doc = json.loads(record.read_text()) if record.is_file() else {
+        "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.local/v1",
+        "rule": "each candidate is D's dev-box copy (protected, the base) plus its delta; D + delta -> the candidate "
+                "was verified byte for byte on the pod (records/candidates/<g>.json :: reconstruction)",
+        "base": {"path": str(d_dir), "weights_sha256": base["weights_sha256"],
+                 "artifact_digest": base["artifact_digest"],
+                 "dependency": "every delta below needs this file; it is protected in the checkpoint registry"},
+        "candidates": {}}
+    for g in d["evaluation"]["groups"]:
+        rp = out / "records" / "candidates" / f"{g}.json"
+        if not rp.is_file():
+            continue
+        rec = json.loads(rp.read_text())
+        if rec.get("status") != "durable" or not (rec.get("reconstruction") or {}).get("equal"):
+            continue
+        dp = out / rec["delta"]["path"]
+        if not dp.is_file() or sha(dp) != rec["delta"]["sha256"]:
+            raise SE.AuthorizationError(f"{dp}: missing or not the recorded delta {rec['delta']['sha256'][:12]}")
+        names = sorted(rec["delta"]["tensor_digests"])
+        with safe_open(str(dp), framework="pt") as h, safe_open(str(d_file), framework="pt") as hd:
+            if sorted(h.keys()) != names:
+                raise SE.AuthorizationError(f"{g}: the delta's tensors are not the recorded ones")
+            for n in names:
+                t, td = h.get_tensor(n), hd.get_tensor(n)
+                if t.dtype != td.dtype or tuple(t.shape) != tuple(td.shape):
+                    raise SE.AuthorizationError(f"{g}: {n} does not fit D")
+                if tensor_sha256(t) != rec["delta"]["tensor_digests"][n]:
+                    raise SE.AuthorizationError(f"{g}: {n} is not the candidate's tensor")
+        dest = store / g / rec["identity"]["sha256"][:16] / "delta.safetensors"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if not dest.exists():
+            os.link(dp, dest)
+        elif sha(dest) != rec["delta"]["sha256"]:
+            raise SE.AuthorizationError(f"{dest} exists and is not this delta")
+        doc["candidates"][g] = {
+            "path": str(dest), "sha256": rec["delta"]["sha256"], "bytes": rec["delta"]["bytes"],
+            "tensors": rec["delta"]["tensors"], "artifact_digest": rec["checkpoint"]["artifact_digest"],
+            "identity_sha256": rec["identity"]["sha256"], "relay": rec["relay"]["delta_path"],
+            "producer_run": rec.get("producer_run"), "retained_from_run": run_id,
+            "checked": "delta re-hashed; every span tensor from the delta equals the pod's digest and fits D's shape "
+                       "and dtype; D's local file is D"}
+    record.parent.mkdir(parents=True, exist_ok=True)
+    record.write_text(json.dumps(doc, indent=1) + "\n")
+    return doc
 
 
 def launch_spec(minutes: float = 0.0, resume_from: str | None = None, driver_extra: str = "") -> SE.Launch:
@@ -183,6 +267,15 @@ def _pop(argv: list[str], flag: str) -> tuple[list[str], str | None]:
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "retain":
+        import argparse
+        ap = argparse.ArgumentParser(prog="RI-LM1 retain")
+        ap.add_argument("--run-id", required=True)
+        ap.add_argument("--from", dest="src", required=True, help="the run's <scr> directory")
+        a = ap.parse_args(argv[1:])
+        doc = retain(a.run_id, Path(a.src))
+        print(json.dumps({g: v["path"] for g, v in doc["candidates"].items()}))
+        return 0
     if argv and argv[0] in ("stage-resume", "archive-evidence"):
         import argparse
         ap = argparse.ArgumentParser(prog=f"RI-LM1 {argv[0]}")

@@ -15,9 +15,10 @@ argument.
   `scipy.optimize.linear_sum_assignment` implements), in float64 torch so it runs where the statistics are. Tie rule:
   among columns of equal reduced cost an unassigned column first, then the lowest column index -- deterministic for a
   given matrix.
-* `PearsonMoments`: streaming float64 sums for the Pearson cross-correlation between two feature sets on the same
-  positions. A feature whose variance is zero on those positions (relative variance at or below `ZERO_VARIANCE_REL`)
-  has correlation 0 with every feature: its correlation is undefined, and 0 is "no evidence", never a match.
+* `PearsonMoments`: the Pearson cross-correlation between two feature sets on the same positions, streamed from
+  centered float64 moments merged call by call (Chan, Golub and LeVeque's pairwise update). A feature whose variance is
+  zero on those positions (relative variance at or below `ZERO_VARIANCE_REL`) has correlation 0 with every feature: its
+  correlation is undefined, and 0 is "no evidence", never a match.
 * `fold_norm_gains`: an RMSNorm gain moved into the linears that read its output (``W (g * x_hat) = (W diag g) x_hat``)
   and the gain set to one -- exact in real arithmetic; the per-head q/k sub-norms act after the projection and are not
   folded.
@@ -39,10 +40,15 @@ from dataclasses import dataclass, field
 
 import torch
 
-#: a feature counts as having zero variance when its variance is at or below this fraction of its mean square (float64
-#: cancellation in ``E[x^2] - E[x]^2`` leaves about 1e-16 relative; 1e-12 is far above it and far below any feature a
-#: correlation could rest on)
+#: a feature counts as having zero variance when its variance is at or below this fraction of its mean square (the
+#: centered float64 moments leave a truly constant feature at exactly 0 and a real one at its variance; 1e-12 is far
+#: below any feature a correlation could rest on)
 ZERO_VARIANCE_REL = 1e-12
+
+#: |correlation| above 1 + this is a defect (inconsistent moments) and is refused; below it, the excess is the float32
+#: accumulation of the centered cross product (relative error about sqrt(n) * 6e-8 typically, n * 6e-8 at worst for a
+#: sequence of n positions), left as it is -- never clamped
+CORRELATION_BOUND_SLACK = 1e-3
 
 FFN_IN_ROLES = ("gate", "up")
 ATTN_IN_ROLES = ("q", "k", "v")
@@ -131,68 +137,103 @@ def linear_assignment(score: torch.Tensor) -> torch.Tensor:
 
 @dataclass
 class PearsonMoments:
-    """Sums for ``corr(x_i, y_j)`` over positions, x: ``[T, n_x]``, y: ``[T, n_y]`` on the SAME positions.
+    """Streaming Pearson cross-correlation ``corr(x_i, y_j)`` over positions, x: ``[T, n_x]``, y: ``[T, n_y]`` on the
+    SAME positions, from CENTERED moments.
 
-    ``matmul_dtype`` is the dtype of the per-call cross product (float32 by default: inputs that are bf16 activations
-    are represented exactly, and the products accumulate in float32 within one call); every sum across calls is
-    float64."""
+    The state is the count, the means, the centered second moments ``M2 = sum (x - mean)^2`` and the centered cross
+    moment ``C = sum (x - mean_x)(y - mean_y)^T``, all float64. Each call is centered on its own mean (computed in
+    float64), its cross product taken on the centered values, and merged into the state with the pairwise update of
+    Chan, Golub and LeVeque (1979): ``C = C_a + C_b + (n_a n_b / n) d_x d_y^T`` with ``d`` the difference of the two
+    means. Nothing subtracts two large uncentered sums, so a feature whose spread is small against its mean keeps its
+    variance and its correlations (``E[xy] - E[x]E[y]`` on float32 sums did not: a bf16-exact feature at 1000 +/- 4
+    read an autocorrelation of 0.14).
+
+    ``matmul_dtype`` is the dtype of the per-call centered cross product (float32 by default: the centered values are
+    small, so the products and their in-call sums keep float32's relative precision); the exact float64 correction for
+    the rounding of the centered values to that dtype is applied. On a GPU the float32 product must run at full
+    precision (``torch.get_float32_matmul_precision() == "highest"``, no TF32): anything else is refused."""
     n_x: int
     n_y: int
     device: str | torch.device = "cpu"
     matmul_dtype: torch.dtype = torch.float32
     count: int = 0
-    sx: torch.Tensor = field(init=False)
-    sy: torch.Tensor = field(init=False)
-    sxx: torch.Tensor = field(init=False)
-    syy: torch.Tensor = field(init=False)
-    sxy: torch.Tensor = field(init=False)
+    mean_x: torch.Tensor = field(init=False)
+    mean_y: torch.Tensor = field(init=False)
+    m2_x: torch.Tensor = field(init=False)
+    m2_y: torch.Tensor = field(init=False)
+    cross: torch.Tensor = field(init=False)
 
     def __post_init__(self) -> None:
         z = lambda *s: torch.zeros(*s, dtype=torch.float64, device=self.device)  # noqa: E731
-        self.sx, self.sy, self.sxx, self.syy = z(self.n_x), z(self.n_y), z(self.n_x), z(self.n_y)
-        self.sxy = z(self.n_x, self.n_y)
+        self.mean_x, self.mean_y, self.m2_x, self.m2_y = z(self.n_x), z(self.n_y), z(self.n_x), z(self.n_y)
+        self.cross = z(self.n_x, self.n_y)
 
     @torch.no_grad()
     def add(self, x: torch.Tensor, y: torch.Tensor) -> None:
         if x.shape[0] != y.shape[0] or x.shape[1] != self.n_x or y.shape[1] != self.n_y:
             raise LayerMergeError(f"PearsonMoments: shapes {tuple(x.shape)} / {tuple(y.shape)} for {self.n_x} x "
                                   f"{self.n_y} on shared positions")
-        if x.shape[0] == 0:
+        nb = int(x.shape[0])
+        if nb == 0:
             return
         x64, y64 = x.to(self.device, torch.float64), y.to(self.device, torch.float64)
-        self.sx += x64.sum(0)
-        self.sy += y64.sum(0)
-        self.sxx += (x64 * x64).sum(0)
-        self.syy += (y64 * y64).sum(0)
-        xm, ym = x.to(self.device, self.matmul_dtype), y.to(self.device, self.matmul_dtype)
-        self.sxy += (xm.T @ ym).to(torch.float64)
-        self.count += int(x.shape[0])
+        if not (torch.isfinite(x64).all() and torch.isfinite(y64).all()):
+            raise LayerMergeError("PearsonMoments: a non-finite activation")
+        mb_x, mb_y = x64.mean(0), y64.mean(0)
+        xc64, yc64 = x64 - mb_x, y64 - mb_y
+        m2b_x, m2b_y = (xc64 * xc64).sum(0), (yc64 * yc64).sum(0)
+        if self.matmul_dtype == torch.float64:
+            cb = xc64.T @ yc64
+        else:
+            if xc64.is_cuda and self.matmul_dtype == torch.float32 and torch.get_float32_matmul_precision() != "highest":
+                raise LayerMergeError("PearsonMoments: float32 matmul precision is "
+                                      f"{torch.get_float32_matmul_precision()!r} (TF32); the cross product needs 'highest'")
+            xc, yc = xc64.to(self.matmul_dtype), yc64.to(self.matmul_dtype)
+            #: sum (xc - xc_bar)(yc - yc_bar)^T = xc^T yc - n xc_bar yc_bar^T: the rounding of the centered values to
+            #: the matmul dtype moves their means off zero by a little; this removes it exactly
+            sxc, syc = xc.to(torch.float64).sum(0), yc.to(torch.float64).sum(0)
+            cb = (xc.T @ yc).to(torch.float64) - torch.outer(sxc, syc) / nb
+        del xc64, yc64
+        na = self.count
+        n = na + nb
+        dx, dy = mb_x - self.mean_x, mb_y - self.mean_y
+        f = (na * nb) / n
+        self.cross += cb + f * torch.outer(dx, dy)
+        self.m2_x += m2b_x + f * dx * dx
+        self.m2_y += m2b_y + f * dy * dy
+        self.mean_x += dx * (nb / n)
+        self.mean_y += dy * (nb / n)
+        self.count = n
 
     def zero_variance(self) -> tuple[torch.Tensor, torch.Tensor]:
-        """Boolean masks of the x and y features with zero variance (module docstring)."""
+        """Boolean masks of the x and y features with zero variance: variance at or below `ZERO_VARIANCE_REL` of the
+        mean square, or a mean square of 0."""
+        if self.count == 0:
+            raise LayerMergeError("PearsonMoments: no positions")
         out = []
-        for s, ss in ((self.sx, self.sxx), (self.sy, self.syy)):
-            mean, msq = s / self.count, ss / self.count
-            var = (msq - mean * mean).clamp_min(0.0)
+        for mean, m2 in ((self.mean_x, self.m2_x), (self.mean_y, self.m2_y)):
+            var = m2 / self.count
+            msq = var + mean * mean
             out.append((var <= ZERO_VARIANCE_REL * msq) | (msq == 0))
         return out[0], out[1]
 
     def correlation(self) -> torch.Tensor:
-        """``[n_x, n_y]`` Pearson correlations; a zero-variance feature's row or column is 0."""
+        """``[n_x, n_y]`` Pearson correlations; a zero-variance feature's row or column is 0. A non-finite value, or
+        one outside [-1, 1] by more than `CORRELATION_BOUND_SLACK`, is a defect and is refused; nothing is clamped."""
         if self.count < 2:
             raise LayerMergeError("PearsonMoments: fewer than two positions")
-        n = float(self.count)
-        mx, my = self.sx / n, self.sy / n
-        vx = (self.sxx / n - mx * mx).clamp_min(0.0)
-        vy = (self.syy / n - my * my).clamp_min(0.0)
-        cov = self.sxy / n - mx[:, None] * my[None, :]
         zx, zy = self.zero_variance()
-        sx = torch.where(zx, torch.ones_like(vx), vx.sqrt())
-        sy = torch.where(zy, torch.ones_like(vy), vy.sqrt())
-        c = cov / (sx[:, None] * sy[None, :])
+        sx = torch.where(zx, torch.ones_like(self.m2_x), self.m2_x.sqrt())
+        sy = torch.where(zy, torch.ones_like(self.m2_y), self.m2_y.sqrt())
+        c = self.cross / (sx[:, None] * sy[None, :])
         c[zx, :] = 0.0
         c[:, zy] = 0.0
-        return c.clamp(-1.0, 1.0)
+        if not bool(torch.isfinite(c).all()):
+            raise LayerMergeError("PearsonMoments: a non-finite correlation")
+        worst = float(c.abs().max()) if c.numel() else 0.0
+        if worst > 1.0 + CORRELATION_BOUND_SLACK:
+            raise LayerMergeError(f"PearsonMoments: |correlation| {worst} > 1 (the moments are inconsistent)")
+        return c
 
 
 @dataclass

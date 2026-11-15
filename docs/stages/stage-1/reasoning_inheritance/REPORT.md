@@ -5,7 +5,7 @@ groups are built and verified, and D, W and DW are kept on the dev box (section 
 every registered eval-set-1 unit is generated and scored for D, W and DW in both modes, and the teacher's evaluation is
 reused after every identity check, item by item. No recovery training, no new search. Total cost $19.9554 over six
 attempts of the $35 ceiling; the unspent $15.0446 lapsed at closure (section 10). Corrections after commits
-`09b48be9`, `b191d555` and `bf577e3d` are listed in section 12; section 11 is the next round's plan,
+`09b48be9`, `b191d555`, `bf577e3d` and `d9a429f8` are listed in section 12; section 11 is the next round's plan,
 prepared to the launch point and not authorized.
 
 **Result in one paragraph.** Untrained, removing 8 of the 36 blocks and changing nothing else (D) takes static fluid
@@ -685,10 +685,14 @@ Stage 1's packing (seeded sha256-keyed shuffle 20261105, sequential packing with
 `prefix_restart_v1`, causal attention, continuous positions). That is 79 packed sequences, 644,493 non-padding tokens
 and 231,242 statistics positions (a fragment's repeated prefix counted like any placement, P19); the driver refuses
 other counts. Each block's statistics are taken on its own input in the teacher's forward, for the 14 blocks of the six
-spans. Accumulation is streaming, one packed sequence at a time: cross products in float32 of the bf16 activations
-(exact products; head writes in chunks of 1,024 positions), every sum across sequences in float64 (sum x, sum x^2,
-sum y, sum y^2 and `sum x y^T` per pair; the write Gram per pair and per block): 8 x 9,728^2 float64 = 6.1 GB of device
-memory beside the 8 GB teacher. Fixed rules:
+spans. Accumulation is streaming, one packed sequence at a time, from centered moments (`PearsonMoments`): each
+sequence's activations are centered on their own float64 mean, the centered cross product is taken in float32 at full
+precision (no TF32) with the exact float64 correction for rounding the centered values, and the sequence is merged
+into float64 means, centered second moments and centered cross moments by Chan, Golub and LeVeque's pairwise update.
+No difference of two large uncentered sums is taken (the first version's `E[xy] - E[x]E[y]` on float32 sums read a
+bf16-exact feature at 1000 +/- 4 at an autocorrelation of 0.14 instead of 1; that case is now a regression). Head
+writes stay a Gram of uncentered writes (a cosine), float32 per chunk of 1,024 positions and float64 across. 8 x
+9,728^2 float64 = 6.1 GB of device memory beside the 8 GB teacher. Fixed rules:
 
 * *Zero variance:* a feature whose variance on the statistics positions is at or below 1e-12 of its mean square (or
   whose mean square is 0) has correlation 0 with every feature; a zero-energy head set has cosine 0 (never NaN).
@@ -705,7 +709,9 @@ memory beside the 8 GB teacher. Fixed rules:
 **Numerical checks (the build stops on any failure; a failure is a defect of the mechanism).** Folding alone and each
 absorbed block's permutation alone are checked against the unmodified block in float32 copies of the bf16 teacher
 blocks, on every position of the first packed sequence: `||y' - y||_F / ||y - x||_F` (relative to the block's own
-update) at most 1e-4, where float32 reordering and rounding give about 1e-6. Every candidate tensor outside the six
+update) at most 1e-4, where float32 reordering and rounding give about 1e-6; a non-finite error (NaN or inf) fails
+the check whatever the others are, and a non-finite activation or correlation stops the statistics. Every candidate
+tensor outside the six
 span blocks must equal D's per-tensor digest (`layer_merge/d_tensor_digests.json`, 310 tensors from D's checkpoint on
 the dev box), every span block must differ from D's, the configuration must be D's and the parameter count
 3,215,021,568. D itself is first rebuilt from the teacher with D's own builder and compared tensor by tensor (it is the
@@ -745,11 +751,16 @@ and decide nothing.
   `T = |sum_g d_g|`; `p = (1 + #{b : |sum_g e_bg d_g| >= T}) / (1 + B)`, B = 100,000 draws of `e_bg` in {-1, +1} for
   every group in sorted group order from `numpy.random.default_rng(20261114)`.
 * *Direction:* two-sided; the sign of `delta` says better or worse.
-* *Multiplicity:* Holm over the two candidates at alpha 0.05: p sorted ascending, adjusted
-  `p_(1) = min(1, 2 p_(1))`, `p_(2) = min(1, max(adjusted p_(1), p_(2)))`.
-* *Decision:* BETTER than deletion if the Holm-adjusted p <= 0.05 and `delta` > 0; WORSE if <= 0.05 and `delta` < 0;
-  NOT DISTINGUISHED otherwise. A candidate whose primary unit is not complete has no verdict (`not_measured`); partial
-  units are never pooled.
+* *Items:* the 570 are the registered ones -- the fluid unit's formal core (its validity and core masks) minus the
+  interactive episodes, from the eval set alone, pinned in the design by count and sha256 (`40293ab1...`). A primary
+  unit is complete when its records cover every one of them; D's sealed records must.
+* *Multiplicity:* Holm over the two registered comparisons at alpha 0.05, m = 2 always (never shrunk to the
+  candidates that happen to be measured): p sorted ascending, adjusted `p_(1) = min(1, 2 p_(1))`,
+  `p_(2) = min(1, max(adjusted p_(1), p_(2)))`.
+* *Decision:* only when both candidates' primary units are complete: BETTER than deletion if the Holm-adjusted
+  p <= 0.05 and `delta` > 0; WORSE if <= 0.05 and `delta` < 0; NOT DISTINGUISHED otherwise. If either is not complete
+  there is no test and no verdict for either: a measured candidate is reported descriptively (`delta`, accuracy, the
+  unadjusted interval; `descriptive_only`), the other `not_measured`; partial units are never pooled.
 * *Effect interval, beside the test and labeled as such:* the percentile 95% interval of `delta` over 10,000
   group-bootstrap resamples (the 558 groups with replacement, `numpy.random.default_rng(20261115)`, numpy's linear
   percentile); unadjusted for multiplicity and not the decision. The rule-family interval RI-S1 reported is computed
@@ -764,25 +775,47 @@ and decide nothing.
 * *Reused, never redone:* D's checkpoint and sealed generations; T's reused evaluation; the frozen selection and
   mapping; the calibration and state-suite items (dev-box assets); eval-set-1; RI-S1's runners and its evaluation,
   sealing and resume paths. No corpus is regenerated, no baseline retrained, no valid measurement repeated.
-* *Candidates (2 x 6.43 GB):* to the private relay from the pod as soon as built, under
-  `durable/stage1_reasoning_inheritance/layer_merge/<statistics sha256[:16]>/groups/{M-avg,M-act}/`, downloaded again
-  into a fresh cache and re-hashed. Before the launch the relay is asked whether it would accept both and the
-  statistics at their true sizes (`the_relay_has_room`, the LFS batch endpoint, nothing uploaded): relay LFS is
-  25.30 GiB after this round's retirements. They are not copied to the dev box by default (15 GB free on a shared
-  disk); the relay copy is their durable copy until a later consumer asks for them.
-* *Statistics and evidence:* every finished file, the statistics included, is pulled to the dev box on each poll
-  (`<scr>/store`; about 0.4 GB for a full evaluation of two models, from RI-S1's 0.37 GB for three); the statistics also
-  go to the relay with the candidates; the final store is archived to the relay at closeout (`archive-evidence`).
-* *A failed attempt* takes over the previous attempt's records -- statistics and permutations, builds, checks,
-  diagnostics, state evaluation -- and every sealed evaluation part (`driver.take_over`), restores the candidates from
-  the relay by sha256 (`driver.relay_restore`), and generates only the items with no sealed record, each under its
-  fixed seed. Nothing is rebuilt, re-collected or regenerated that a record or a sealed part holds.
+* *One candidate at a time.* Each is built, saved, made durable and registered before the next is built
+  (`records/candidates/<g>.json`: `built`, then `durable`), so a failure while M-act is built keeps M-avg.
+* *A candidate is stored losslessly as D plus its span blocks.* Its six span blocks' 66 tensors (1.13 GiB,
+  `products/<g>/delta.safetensors`) with D's tensors are the candidate. On the pod, D is rebuilt from the teacher
+  (checked against D's 310 tensor digests), the delta FILE read back into it and saved by the same writer, and the
+  result must give the candidate's artifact digest before the candidate counts as built. The delta (and, for M-act,
+  the statistics) then goes to the private relay
+  (`durable/stage1_reasoning_inheritance/layer_merge/<g>/<candidate identity[:16]>/`), downloaded again into a fresh
+  cache and re-hashed. Before the launch the relay is asked whether it would accept both deltas and the statistics at
+  their true sizes (`the_relay_has_room`; relay LFS is 25.30 GiB after this round's retirements).
+* *Kept on the dev box, not only on the relay.* The deltas sit in the evidence directory, so every poll pulls them to
+  the dev box with the rest (2.3 GiB for both). D's dev-box copy is their base and stays protected in the checkpoint
+  registry (its consumer now includes these deltas). `layer_merge_launch.py retain` re-hashes each pulled delta,
+  rebuilds the candidate's span tensors from D's local file and the delta and compares them with the pod's per-tensor
+  digests, then hard-links the delta into the out-of-tree store (`~/aad-artifacts/stage1_layer_merge/`) and records it
+  (`storage/layer_merge_local.json`). No 6.43 GB checkpoint is stored twice; the dev box has 15 GB free.
+* *Statistics and evidence:* every finished file is pulled to the dev box on each poll (`<scr>/store`; records and
+  evaluations about 0.4 GB for two models, from RI-S1's 0.37 GB for three); the resume and evidence archives carry
+  records and evaluations only, never a delta; the final store is archived to the relay at closeout
+  (`archive-evidence`).
+* *A failed attempt* takes over the previous attempt's records and every sealed evaluation part (`driver.take_over`),
+  and reuses each product only when its recorded identity is this attempt's (`layer_merge_driver.identities`): the
+  teacher; the calibration data, its packing and its positions; the statistics and merge method and the code that
+  computes them (each function's syntax tree, so a comment or an unrelated edit changes nothing); D; the candidate's
+  artifact digest; the evaluation protocol. Reused that way: the statistics and alignments, the checks, each durable
+  candidate (restored from D and its delta, never rebuilt), the diagnostics, each candidate's state evaluation, and
+  per candidate and mode every sealed fluid episode and every sealed capability sample. A product of another identity
+  is moved to `superseded/<attempt>/` with the reason and redone; the whole commit is never required to match.
+* *Capability units are sealed as they finish.* The runner now writes a unit's generations, then its summary, each
+  whole and renamed into place, and streams every finished sample; the driver seals a unit the moment its summary
+  exists (it used to wait for the next unit's) and seals streamed samples into parts every two minutes. A later attempt
+  takes each sealed sample by id and by the seed the decoding rule gives it and generates only the missing ones; the
+  seed derives from the unit and the item, so a run over the missing items asks the engine exactly what the whole unit
+  would. The generation protocol and the scorer are unchanged.
 
 **Budget (a draft for the maintainer; `layer_merge_proposal.json`).**
 
 * *Scenario estimate, from RI-S1's measurements, not a measurement of these candidates:* setup 25 min; build about
   45 min (teacher download and hashing, the statistics forward over 79 packed sequences, eight 9,728 x 9,728
-  assignments, the checks, both builds and saves, the relay copy); diagnostics and state evaluation about 20 min;
+  assignments, the checks, both builds and saves with their reconstruction checks, the two 1.13 GiB deltas to the
+  relay); diagnostics and state evaluation about 20 min;
   generation 1.8 h per candidate if it behaves like D, 3.6 h if it behaves like T. Total 4.8-8.4 h on one L40S at
   $1.09/h: about $5-9 with container disk.
 * *Caps proposed:* sessions may draw $13.00 cumulatively over every attempt (the ceiling; each closeout's all-in, an
@@ -792,8 +825,10 @@ and decide nothing.
   derived from the accepted price; one L40S at no more than $1.09/h, one pod.
 * *Own envelope:* RI-S1 is closed and its unspent $15.0446 lapsed; it funds nothing here. The new study's envelope
   counts only its own runs. Live position at 2026-11-14T20:57Z: $963.24 committed of the $1,000 project cap
-  ($36.76 left), provider balance $16.63, no pod, no volume -- one session plus the reserve fits the balance; a second
-  full session would need a top-up, which is the maintainer's.
+  ($36.76 left), provider balance $16.63, no pod, no volume. The balance already covers the whole proposal: the $13.00
+  sessions may draw plus the $1.00 reserve, $14.00. What bounds a second session is the ceiling, not the balance:
+  after one full session at the expected $9.27 the ceiling leaves $3.73, so a second $11.00 session does not fit it,
+  and a top-up would not change that; it would need the grant changed, which is the maintainer's.
 * *Terminal state:* BUDGET_EXHAUSTED when what the ceiling leaves is below the smallest useful attempt ($2.00: setup,
   the restore and at least one fluid unit of one candidate) or the next cap plus the reserve does not fit: the issuer
   refuses; every finished unit is kept and every other reported `not_run`; the primary comparison is evaluated only
@@ -804,7 +839,7 @@ and decide nothing.
 grant from the proposal (`layer_merge_launch.py grant --decision '<quoted>' --granted-by maintainer`); commit; `issue`
 the one-use artifact (`--expected-usd 7.5 --hard-cap-usd 11`); commit it (that commit is the session commit); stage
 its bundle; `launch --minutes 480 --max-price 1.09 --disk-gb 150 --driver-extra '--max-num-seqs 7'`; `closeout`;
-`layer_merge_analysis.py`. A $0 dry run of `issue` and `launch` against the proposal exercises every gate before any
+`retain` (the pulled deltas checked against D's dev-box copy and kept); `layer_merge_analysis.py`. A $0 dry run of `issue` and `launch` against the proposal exercises every gate before any
 of it (section 12).
 
 **A separate study, not a prerequisite: depth against width at a common budget.** Which axis -- depth, FFN width,
@@ -923,3 +958,57 @@ No generation, scorer, score or legitimate checkpoint changed; no GPU used.
 * **Record dates.** This round's first records were stamped 2026-11-15 from the dev box's +08:00 clock; they are
   corrected to UTC (2026-11-14). The 24 tombstones keep, in `id_in_relay_commit_message`, the id their relay commit
   messages carry.
+
+### Fourth review (2026-11-15 UTC, after commit `d9a429f8`)
+
+No generation, scorer, score, candidate or sealed result changed; no GPU used, $0.
+
+* **The Holm family and completeness.** `layer_merge_analysis.py` ran Holm over the candidates that happened to be
+  complete, so an unfinished M-act made M-avg's Holm a correction over one. Holm now runs over the two registered
+  comparisons always (m = 2). Formal verdicts exist only when both primary units are complete; otherwise a measured
+  candidate is reported descriptively (`descriptive_only`: delta, accuracy, the unadjusted interval, no test) and the
+  other `not_measured`. Completeness is checked against the 570 registered items (derived from the eval set and its
+  masks, pinned in the design by count and sha256), never against what a store holds; D's sealed records must cover
+  them. On D's real records: D as both candidates gives `formal`, delta 0, p 1, NOT DISTINGUISHED; D as one candidate
+  gives `descriptive_only`.
+* **Per-candidate durability.** The driver built both candidates and only then copied them to the relay, so a failure
+  while building M-act lost M-avg too. Each candidate is now built, saved, its reconstruction checked, made durable on
+  the relay and registered (`records/candidates/<g>.json`) before the next is built; a later attempt restores a
+  durable candidate rather than rebuilding it, and reuses the statistics, the checks, the diagnostics and each
+  candidate's state evaluation.
+* **Capability sealing.** A capability unit was sealed only once the runner had written the NEXT unit's summary
+  (the runner wrote a unit's summary before its generations), so the last unit, and any unit a failure interrupted,
+  waited or was lost, and finished samples of an interrupted unit were never kept. The runner now writes a unit's
+  generations, then its summary, each renamed into place, and streams every finished sample
+  (`uncapped_eval.py --stream-completed`, additive); `driver.capability` seals a unit the moment its summary exists,
+  seals streamed samples into parts, and on a later attempt takes each sealed sample by id and by the seed the
+  decoding rule gives it, generating only the missing ones. The generation protocol and the scorer are unchanged
+  (the runner's source digest moves; no record pins it, and the protocol's fields are what comparisons check).
+* **Reuse by identity, not by commit.** Every product carries an identity (the teacher; the calibration data, its
+  packing and its positions; the statistics and merge method and the syntax trees of the functions that compute them;
+  D; the candidate's artifact digest; the evaluation protocol), and an earlier attempt's product is reused only under
+  this attempt's identity; one of another identity is moved to `superseded/<attempt>/` with the reason. An engineering
+  change outside every identity keeps them all.
+* **Pearson numerics.** The cross-correlation was `E[xy] - E[x]E[y]` over float32 sums of uncentered products, which
+  cancels catastrophically for a feature whose spread is small against its mean: a bf16-exact feature at 1000 +/- 4
+  read an autocorrelation of 0.14 (or 1.10). The moments are now centered per sequence in float64 and merged by Chan,
+  Golub and LeVeque's pairwise update; the float32 product runs at full precision (TF32 refused) with an exact
+  correction for rounding the centered values; a non-finite activation or correlation is refused, and |r| beyond
+  1 + 1e-3 is refused rather than clamped. That counterexample is a regression (numpy to 1e-12 with a float64 product,
+  1e-5 with the pod's float32 product, while the old arithmetic is off by more than 0.05). The equivalence checks now
+  fail on any non-finite error (Python's `max` dropped a NaN beside a finite value).
+* **Local retention.** The plan kept the candidates only on the relay. Each candidate is now stored losslessly as D
+  plus its span blocks (`products/<g>/delta.safetensors`, 1.13 GiB): on the pod, D rebuilt from the teacher with the
+  delta file read back into it must give the candidate's artifact digest before the candidate counts as built. The
+  deltas are pulled to the dev box on every poll (2.3 GiB for both; 15 GB free), `retain` checks each against D's
+  dev-box copy tensor by tensor and keeps it in the out-of-tree store, and D -- their base -- stays protected, its
+  registry entry and local record now naming that dependency. The relay is asked for room for the two deltas instead
+  of two 6.43 GB checkpoints.
+* **Budget statement.** Section 11 said a second full session would need a top-up. The $16.63 balance already covers
+  the whole proposal ($13.00 for sessions plus the $1.00 reserve); what bounds a second session is the ceiling: after
+  a full session at the expected $9.27 it leaves $3.73, so a second $11.00 session needs a changed grant, which a
+  top-up does not give. No grant is written.
+* **Retirement tool.** A directory copy whose member was a symbolic or hard link to another file of the target passed
+  as a surviving copy; such a member is now refused (`verify_copies` checks every member's resolved path and inode
+  against the whole deletion scope). No historical audit was reopened.
+

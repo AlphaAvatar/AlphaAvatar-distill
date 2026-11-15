@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-14 (UTC), RI-S1 COMPLETE and CLOSED on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); RI-LM1 prepared and proposed, not authorized; nothing running, nothing billing. The human view. Every number here has an owner
+**Updated:** 2026-11-15 (UTC), RI-S1 COMPLETE and CLOSED on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); RI-LM1 prepared and proposed (fourth review's fixes in), not authorized; nothing running, nothing billing. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -42,13 +42,18 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   15 GB free.
 - Next round RI-LM1 -- PREPARED TO THE LAUNCH POINT, PROPOSED, NOT AUTHORIZED (REPORT.md section 11): layer merging
   at D's fixed structure, D against M-avg (direct averaging) and M-act (folded, aligned, activation-weighted; a
-  heuristic), fixed in advance with the decision rule (group sign-flip test over 558 groups, Holm; group-bootstrap
-  interval apart). Design `configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json`; code
-  `layer_merge*.py` (+ core `planning/layer_merge.py`); budget draft `plans/layer_merge_proposal.json`: $13.00
-  sessions ceiling, $1.00 teardown reserve outside it, $11.00 per session, scenario $5-9 on one L40S. Live
-  2026-11-14T20:57Z: $963.24 of $1,000 committed, balance $16.63. The common-budget depth/width study is separate.
-  A grant, any GPU work, recovery training and a merge into `main` are the maintainer's.
-- Owner: `logs/budget/decisions.md` 2026-11-13 / 11-14.
+  heuristic), fixed in advance with the decision rule (group sign-flip test over the 570 registered items in 558
+  groups, Holm over both registered comparisons, verdicts only when both primary units are complete; group-bootstrap
+  interval apart). Each candidate is built, its reconstruction from D and its span-block delta verified, made durable
+  on the relay and registered before the next; the deltas (1.13 GiB each) are pulled to the dev box beside D, which is
+  their protected base (`retain`); a later attempt reuses every product only under its identity. Design
+  `configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json`; code `layer_merge*.py` (+ core
+  `planning/layer_merge.py`); budget draft `plans/layer_merge_proposal.json`: $13.00 sessions ceiling, $1.00 teardown
+  reserve outside it, $11.00 per session, scenario $5-9 on one L40S. Live 2026-11-14T20:57Z: $963.24 of $1,000
+  committed, balance $16.63 -- it covers the whole proposal ($14.00); a second full $11.00 session would exceed the
+  ceiling and needs a changed grant, not a top-up. The common-budget depth/width study is separate. A grant, any GPU
+  work, recovery training and a merge into `main` are the maintainer's.
+- Owner: `logs/budget/decisions.md` 2026-11-13 / 11-14 / 11-15.
 
 **RESEARCH A: CLOSED (maintainer, 2026-11-11) -- CURRENT_METHOD_NO_GO FROZEN; EVERY PAID AUTHORIZATION CLOSED; THE BRANCH SQUASH-MERGED INTO `main`. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
 - Verdict (`analyses/research_a_closeout.json`): static fluid 7.19% (A1), 10.96% (A2), 10.26% / 11.23% (A-MIX

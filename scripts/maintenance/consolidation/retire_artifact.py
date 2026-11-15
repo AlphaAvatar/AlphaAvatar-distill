@@ -214,6 +214,13 @@ def verify_copies(specs: list[str], members: list[dict], *, target: Path | None 
     ValueError naming every copy that fails."""
     out, bad = [], []
     single = len(members) == 1 and members[0]["rel"] == ""
+    #: every file of the deletion scope, by (device, inode): a copy member that IS one of them -- a hard link, or a
+    #: symbolic link (stat follows it) -- is the same physical bytes, whichever member it stands in for
+    scope: set[tuple[int, int]] = set()
+    if target is not None and target.exists():
+        for x in ([target] if target.is_file() else [y for y in target.rglob("*") if y.is_file()]):
+            st = x.stat()
+            scope.add((st.st_dev, st.st_ino))
     for spec in specs:
         c = parse_copy(spec)
         why = []
@@ -223,8 +230,8 @@ def verify_copies(specs: list[str], members: list[dict], *, target: Path | None 
                 bad.append(f"{spec}: nothing there")
                 continue
             rp = p.resolve()
+            tr = target.resolve() if target is not None else None
             if target is not None:
-                tr = target.resolve()
                 if rp == tr or tr in rp.parents or rp in tr.parents:
                     bad.append(f"{spec}: inside the deletion scope of {target}")
                     continue
@@ -234,9 +241,13 @@ def verify_copies(specs: list[str], members: list[dict], *, target: Path | None 
                     why.append(f"{m['rel'] or f.name} missing")
                     continue
                 if target is not None:
-                    t = target if single else target / m["rel"]
-                    if t.exists() and f.stat().st_ino == t.stat().st_ino and f.stat().st_dev == t.stat().st_dev:
-                        why.append(f"{m['rel'] or f.name} is a hard link to the target (one physical copy)")
+                    fr, st = f.resolve(), f.stat()
+                    if fr == tr or tr in fr.parents:
+                        why.append(f"{m['rel'] or f.name} resolves into the deletion scope ({fr}) through a "
+                                   "symbolic link")
+                        continue
+                    if (st.st_dev, st.st_ino) in scope:
+                        why.append(f"{m['rel'] or f.name} is a hard link to a file of the target (one physical copy)")
                         continue
                 if f.stat().st_size != m["size_bytes"] or sha256_file(f) != m["sha256"]:
                     why.append(f"{m['rel'] or f.name} differs")

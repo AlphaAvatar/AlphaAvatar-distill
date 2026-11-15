@@ -23,15 +23,15 @@ reads the dev-box copy or rebuilds them from the mapping, which stays on the rel
 | file | runs on | what it does |
 | --- | --- | --- |
 | `selection.py` | dev box, $0 | reads the anchor journal (`617d1512...`) into `frozen_selection.json`: 36 blocks' FFN neurons, the kept blocks, the 28 kept blocks' query heads in root numbering, the width step's recorded diagnostics and every ancestor's identity; `--check` re-reads it byte for byte |
-| `driver.py` | pod | contract (config hashes vs the journal) -> mapping -> relay copy -> state evaluation -> eval-set-1; `--check-only` runs the contract at $0 |
+| `driver.py` | pod | contract (config hashes vs the journal) -> mapping -> relay copy -> state evaluation -> eval-set-1; `--check-only` runs the contract at $0. Its runners `fluid` and `capability` serve RI-LM1 too: a capability unit is sealed the moment the runner has written it, each finished sample is streamed and sealed, and a later attempt generates only the samples with no sealed record (by id and seed) |
 | `launch.py` | dev box | the RI-S1 study on `shared.study_engineering`: grant, one-use artifact, launch, closeout, `stage-resume`, `archive-evidence` |
 | `teacher_reuse.py` | dev box, $0 | T's evaluation from `a_teacher_20261030_012648`: archive and file hashes, every unit's identity against this round's protocol, then item by item (coverage of the registered unit, every seed against the decoding rule, every prompt's fields against this round's groups, `--store`, and the non-fluid units' fields against the registered items rendered with the teacher's verified tokenizer, `--tokenizer`); a field absent or invalid on either side is `not recorded`, never equal; prompt content identity reported apart (fluid: verified from the text; the rest: derived from the construction path at both session commits, never from equal lengths); rescored with the current scorer; regression `tests/test_teacher_reuse.py` |
 | `analysis.py` | dev box, $0 | every group rescored; per-unit correct and usable, the five structural contrasts with family-cluster bootstrap intervals (and the registered independence grouping beside them), retention of T-correct items, what every unscored row ended as (answer read and wrong, no answer the scorer can read, protocol error, degeneration stop, context limit), the sealed degeneration stops checked for continuation, state KL/NLL; descriptive extras (correct among usable rollouts, T-correct items kept by T's own length), each scored directory bound by content digest |
 | `render.py` | dev box, $0 | the report's tables from `analyses/structural_ablation.json` |
 | `layer_merge.py` | pod (and dev box, $0) | the next round's instance of `aadistill.initialization.planning.layer_merge`: spans from the frozen selection, the statistics forward at the FFN operator's positions, the alignments, M-avg / M-act, the fold and permutation equivalence checks, the bit checks against D's digests, the update diagnostics; `digests` (D's per-tensor digests, $0) and `spans` |
-| `layer_merge_driver.py` | pod | RI-LM1: contract -> build (D rebuilt and compared, statistics, checks, both candidates) -> relay copy -> diagnostics -> state evaluation -> eval-set-1 through RI-S1's runners; `--check-only` runs the contract at $0 |
-| `layer_merge_launch.py` | dev box | the RI-LM1 study on `shared.study_engineering` (proposal only, no grant): `issue` (with the teardown-reserve and budget-terminal checks), `launch` (with the relay-room check), `closeout`, `position`, `grant`, `stage-resume`, `archive-evidence` |
-| `layer_merge_analysis.py` | dev box, $0 | the registered decision rule: the group sign-flip test, Holm, the group-bootstrap effect interval, the rule-family supplement |
+| `layer_merge_driver.py` | pod | RI-LM1: contract (and every product's identity) -> per candidate, one after the other: build (D rebuilt and compared; M-act: statistics, alignments, checks), save, its span-block delta, the reconstruction D + delta -> its artifact digest, relay copy, `durable` -> restore as needed -> diagnostics -> state evaluation -> eval-set-1 through RI-S1's runners; a product is reused only under this attempt's identity, else superseded; `--check-only` runs the contract at $0 |
+| `layer_merge_launch.py` | dev box | the RI-LM1 study on `shared.study_engineering` (proposal only, no grant): `issue` (with the teardown-reserve and budget-terminal checks), `launch` (with the relay-room check for the two deltas), `closeout`, `retain` (each pulled delta checked against D's dev-box copy and kept in `~/aad-artifacts/stage1_layer_merge/`), `position`, `grant`, `stage-resume`, `archive-evidence` |
+| `layer_merge_analysis.py` | dev box, $0 | the registered decision rule over the 570 registered items: the group sign-flip test, Holm over both registered comparisons, verdicts only when both primary units are complete (else `descriptive_only`), the group-bootstrap effect interval, the rule-family supplement |
 
 The reusable mechanism is `src/aadistill/initialization/planning/frozen_mapping.py` (core, no instance facts):
 the mapping contract and builders that repeat the four operators' surgery bit for bit
@@ -131,8 +131,12 @@ git add -A && git commit -m "RI-LM1 session commit: one-use authorization for $R
     --poll-limit-min 620 --driver-extra '--max-num-seqs 7'
 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py closeout --run-id $RUN \
     --scr artifacts/stages/stage-1/reasoning_inheritance/runs/$RUN/scr
+# each durable candidate's pulled delta, checked against D's dev-box copy and kept beside it ($0)
+.venv/bin/python scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py retain --run-id $RUN \
+    --from artifacts/stages/stage-1/reasoning_inheritance/runs/$RUN/scr
 
-# a later attempt: the earlier attempt's records and sealed parts, the candidates restored from the relay
+# a later attempt: the earlier attempt's records and sealed parts (reused only under this attempt's identity), each
+# durable candidate restored from D and its delta, never rebuilt
 R=$(.venv/bin/python scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py stage-resume --run-id $RUN2 \
       --from artifacts/stages/stage-1/reasoning_inheritance/runs/$RUN/scr)
 #   issue and launch $RUN2 with --resume-from $R

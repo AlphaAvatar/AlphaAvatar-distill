@@ -16672,3 +16672,49 @@ on a paid pod.
     commit, the bundle staged); the reserve and relay-room gates pass directly (12.04 GiB admitted).
 - Not done, by the brief: no paid launch, no grant written, no merge into `main`, no volume, no upload of historical
   weights, no rebuild of D or W.
+
+## 2026-11-15 (UTC) — Fourth review: Holm over both registered comparisons, per-candidate durability, capability sealing, reuse by identity, centered Pearson moments, candidates kept as D + delta
+
+- Context: the maintainer reviewed `d9a429f8` (direction unchanged: D / M-avg / M-act at D's structure, state
+  evaluation diagnostic only, both candidates generated in full; the 24 relay retirements accepted) and asked for
+  these fixes before any launch, autonomously and at $0; not a grant, not a merge. Quoted: "按已登记的两个主比较执行；
+  两候选主单元未完整完成时，只报告描述性结果，不给正式 BETTER/WORSE 判定"; "每个候选独立完成构建、保存、验证、转存与登记后，
+  再进入下一候选"; "完整单元写出后立即原子封存，不等待下一单元的 summary"; "不要用整个 commit 必须相同来强迫重建";
+  "用中心化协方差和稳定的跨批累积处理……不要用提高阈值或 clamp 掩盖问题"; "新 checkpoint 不能默认长期只留 relay";
+  "第二个完整 $11 session 若超过累计上限，需要调整 grant，充值本身不能解除上限。当前仍不签发 grant".
+- Decision (implemented):
+  - Analysis: Holm over the two registered comparisons, m = 2 always; verdicts only when both primary units cover the
+    570 registered items (count and sha256 `40293ab1...` pinned in the design, derived from the eval set and its
+    masks); otherwise `descriptive_only` for a measured candidate and `not_measured` for the other. D's records must
+    cover the 570.
+  - Driver: one candidate at a time -- build, save, span-block delta, reconstruction (D rebuilt + the delta file ->
+    the candidate's artifact digest), relay copy re-hashed, `records/candidates/<g>.json` durable -- then the next.
+    Every product carries an identity (teacher; calibration data, packing, positions; statistics and merge method
+    and the syntax trees of the code computing them; D; artifact digests; evaluation protocol) and is reused only
+    under this attempt's; another identity is superseded with its reason, never deleted.
+  - Capability: the runner writes a unit's generations, then its summary, atomically, and streams finished samples
+    (`--stream-completed`, additive); the driver seals a unit at its own summary and seals streamed samples; a later
+    attempt takes sealed samples by id and seed and generates only the missing ones. Protocol and scorer unchanged.
+  - Numerics: Pearson from centered float64 moments merged by Chan, Golub and LeVeque's update (float32 centered
+    product at full precision, TF32 refused, exact rounding correction); non-finite inputs and correlations refused,
+    |r| > 1 + 1e-3 refused, nothing clamped; a bf16-exact 1000 +/- 4 feature is the regression. Equivalence checks
+    fail on any non-finite error.
+  - Storage: candidates kept on the dev box as D (protected; its registry entry and local record name the dependency)
+    plus each pulled 1.13 GiB delta (`layer_merge_launch.py retain`); the relay-room check asks for the two deltas.
+  - Budget statement corrected: the $16.63 balance covers $13.00 + $1.00; after a full session at the expected $9.27
+    the ceiling leaves $3.73, so a second $11.00 session needs a changed grant, not a top-up.
+  - `retire_artifact.py`: a directory copy whose member links (hard or symbolic) to any file of the target is refused.
+- Alternatives considered: per-unit runner invocations for capability (an engine start per unit, ~10 units); keeping
+  full checkpoints on the dev box (12.9 GB of 15 GB free); keying reuse to the commit (rebuilds on any edit); a
+  manually bumped method version (forgettable) instead of the code's syntax trees.
+- Risks: the capability runner's source digest moves (no record pins it; comparisons check protocol fields); D's
+  dev-box copy is now also the base of both candidates' local copies; the span-block delta is restored on the pod
+  from D rebuilt off the teacher, so a change in that rebuild would refuse the restore (the candidate is then rebuilt
+  from the kept statistics).
+- Revisit when: the maintainer decides RI-LM1's grant.
+- Done (2026-11-15 UTC, $0, no pod, no GPU): code, design, proposal text, REPORT.md section 11 and section 12's
+  fourth review, README, the checkpoint registry's D entry, `storage/local_checkpoints.json`; regressions in
+  `scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py`, `tests/initialization/test_layer_merge.py`,
+  `tests/docs/test_storage_inventory.py`. The analysis on D's real records: D as both candidates `formal`, delta 0,
+  p 1; D as one `descriptive_only`.
+- Not done, by the brief: no grant, no paid launch, no merge into `main`, no new GPU canary, no historical re-audit.

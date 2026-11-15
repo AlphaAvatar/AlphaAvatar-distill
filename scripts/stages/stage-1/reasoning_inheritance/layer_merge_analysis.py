@@ -14,13 +14,19 @@ groups:
 
 * the statistic: delta = (1/570) sum_items (y_M - y_D); d_g, the summed difference of group g;
 * the test (`sign_flip_test`): two-sided, paired sign-flip randomization at the group level, B = 100,000;
-* Holm over the two candidates (`holm`); BETTER / WORSE / NOT DISTINGUISHED at an adjusted 0.05;
+* Holm over the TWO registered comparisons (`holm`, m = 2 always); BETTER / WORSE / NOT DISTINGUISHED at an adjusted
+  0.05;
 * beside it, labeled as an unadjusted effect interval and never the decision: the percentile 95% interval over
   10,000 group-bootstrap resamples (`group_bootstrap`), and the rule-family interval RI-S1 reported.
 
-A candidate whose primary unit is not complete has no verdict (`not_measured`); nothing is pooled. Everything else --
-non-thinking mode, interactive episodes, each axis, the supporting units, M-act - M-avg -- is reported, never decisive.
-eval-set-1 is development-exposed: nothing here is an untouched test.
+The items are the REGISTERED ones (`registered_primary_items`: the unit's formal core minus its interactive episodes,
+from the eval set and its masks, pinned by count and sha256 in the design), never whatever a store happens to hold.
+A primary unit is complete when its records cover every one of them; D's must. Formal verdicts exist only when both
+candidates' primary units are complete: otherwise each measured candidate is reported descriptively (its delta and
+the unadjusted interval, no test, no verdict), the other `not_measured`, and the family is never shrunk to the
+candidates that happen to be measured. Nothing is pooled. Everything else -- non-thinking mode, interactive episodes,
+each axis, the supporting units, M-act - M-avg -- is reported, never decisive. eval-set-1 is development-exposed:
+nothing here is an untouched test.
 """
 from __future__ import annotations
 
@@ -107,30 +113,67 @@ def verdict(delta: float, p_adjusted: float, alpha: float = ALPHA) -> str:
     return "NOT_DISTINGUISHED"
 
 
-def decide(y: dict[str, dict], y_d: dict, groups: dict[str, list[str]]) -> dict:
-    """The registered decision for every candidate whose primary unit is complete (`y[name]` covers every item);
-    the rest are `not_measured`."""
-    out, p = {}, {}
+def decide(y: dict[str, dict | None], y_d: dict, groups: dict[str, list[str]],
+           family: tuple[str, ...] = CANDIDATES) -> dict:
+    """The registered decision. ``family``: the registered comparisons (each candidate - D); Holm runs over all of
+    them, so its m never shrinks. ``groups`` hold exactly the registered items. A candidate's primary unit is
+    complete when ``y[name]`` covers every one; D's must. Only when every comparison of the family is complete are
+    there tests and verdicts; otherwise every measured candidate is described (delta, accuracy, the unadjusted
+    effect interval: no test, no verdict) and the rest are ``not_measured``."""
     items = [i for v in groups.values() for i in v]
-    for name, ym in y.items():
-        if ym is None or any(i not in ym for i in items):
-            out[name] = {"verdict": "not_measured", "why": "the primary unit is not complete for this candidate"}
+    if any(i not in y_d for i in items):
+        raise ValueError("D's records do not cover the registered primary items")
+    complete = {name: y.get(name) is not None and all(i in y[name] for i in items) for name in family}
+    formal = all(complete.values())
+    out: dict = {"_family": {"comparisons": [f"{c} - D" for c in family], "holm_m": len(family),
+                             "complete": complete, "formal": formal,
+                             "status": "formal" if formal else "descriptive_only"}}
+    p = {}
+    for name in family:
+        ym = y.get(name)
+        if not complete[name]:
+            out[name] = {"verdict": "not_measured", "why": "the primary unit is not complete for this candidate",
+                         "items_present": 0 if ym is None else sum(i in ym for i in items), "items_registered": len(items)}
             continue
         keys, d, n = group_differences(ym, y_d, groups)
-        t = sign_flip_test(d)
         out[name] = {"n_items": int(n.sum()), "n_groups": len(keys), "delta": float(d.sum() / n.sum()),
                      "accuracy": {"candidate": sum(int(ym[i]) for i in items) / len(items),
                                   "D": sum(int(y_d[i]) for i in items) / len(items)},
-                     "test": t, "effect_interval": group_bootstrap(d, n)}
-        p[name] = t["p_two_sided"]
-    adj = holm(p)
-    for name, pa in adj.items():
-        out[name]["p_holm"] = pa
-        out[name]["verdict"] = verdict(out[name]["delta"], pa)
+                     "effect_interval": group_bootstrap(d, n)}
+        if formal:
+            out[name]["test"] = sign_flip_test(d)
+            p[name] = out[name]["test"]["p_two_sided"]
+        else:
+            out[name]["verdict"] = "descriptive_only"
+            out[name]["why"] = ("the other registered comparison's primary unit is not complete: no test and no "
+                                "verdict (the Holm family is never shrunk to the measured candidates)")
+    if formal:
+        adj = holm(p)
+        for name, pa in adj.items():
+            out[name]["p_holm"] = pa
+            out[name]["verdict"] = verdict(out[name]["delta"], pa)
     return out
 
 
 # ---- reading the records ---------------------------------------------------------------------------------------------
+
+def registered_primary_items() -> list[str]:
+    """The primary comparison's items, from the registered set alone: the fluid unit's formal core (the set's validity
+    and core masks, `eval_set_scoring.unit_masks`) minus its interactive episodes; refused unless they are the count
+    and sha256 the design registered."""
+    import shared.evaluation.eval_set_scoring as S
+    from shared import eval_sets as ES
+    want = json.loads(DESIGN.read_text())["analysis"]["primary_items"]
+    comp = ES.manifest("eval-set-1")["components"]["fluid_reasoning_720"]
+    mask = S.unit_masks("eval-set-1", "fluid_reasoning_720", comp)["dev_v1"]
+    tasks = {t["task_id"]: t for t in ES.items("eval-set-1", "fluid_reasoning_720", "dev_v1")}
+    ids = sorted(i for i in set(tasks) - set(mask["exclude"]) if not tasks[i]["interactive"])
+    got = hashlib.sha256(("\n".join(ids) + "\n").encode()).hexdigest()
+    if len(ids) != int(want["n"]) or got != want["sha256"]:
+        raise SystemExit(f"the registered primary items are {len(ids)} / {got[:12]}, the design pins "
+                         f"{want['n']} / {want['sha256'][:12]}")
+    return ids
+
 
 def independence_groups(items: list[str]) -> dict[str, list[str]]:
     from shared import eval_sets as ES
@@ -199,8 +242,13 @@ def main(argv=None) -> int:
         d_ht = rows.get(("D", "H-T"))
         if d_ht is None:
             raise SystemExit("D's thinking-mode fluid records are not in --d-store")
-        groups = independence_groups(sorted(d_ht[0]))
-        res["primary"] = {"mode": "H-T", "unit": "fluid static formal core", "n_items": len(d_ht[0]),
+        items = registered_primary_items()
+        lost = [i for i in items if i not in d_ht[0]]
+        if lost:
+            raise SystemExit(f"D's sealed records lack {len(lost)} registered primary items ({lost[:3]})")
+        groups = independence_groups(items)
+        res["primary"] = {"mode": "H-T", "unit": "fluid static formal core", "n_items": len(items),
+                          "items_sha256": json.loads(DESIGN.read_text())["analysis"]["primary_items"]["sha256"],
                           "n_groups": len(groups),
                           "comparisons": decide({c: (rows[(c, "H-T")] or (None,))[0] for c in CANDIDATES}, d_ht[0],
                                                 groups)}
@@ -228,7 +276,8 @@ def main(argv=None) -> int:
                 res["secondary"].setdefault(mode, {})[c] = entry
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(res, indent=1, default=str) + "\n")
-    print(json.dumps({c: res["primary"]["comparisons"][c].get("verdict") for c in CANDIDATES}))
+    print(json.dumps({"status": res["primary"]["comparisons"]["_family"]["status"],
+                      **{c: res["primary"]["comparisons"][c].get("verdict") for c in CANDIDATES}}))
     return 0
 
 

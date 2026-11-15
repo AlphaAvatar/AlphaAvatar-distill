@@ -14,7 +14,7 @@
    "sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
    "artifact_digest": "08aa80972097b290a4929b563cdc6d0497a6021fb7f4bde0a39edb2624e53b68",
    "num_parameters": 3215021568,
-   "consumer": "the next round's depth-axis comparison (REPORT.md section 11, recommendation 1): outright removal of the 8 blocks, the control for the merged variants built on its kept blocks K"
+   "consumer": "the next round's depth-axis comparison (REPORT.md section 11, recommendation 1): outright removal of the 8 blocks, the control for the merged variants built on its kept blocks K; and the BASE of their dev-box copies (each RI-LM1 candidate is kept as D plus its span-block delta, storage/layer_merge_local.json): deleting D would leave every delta without its checkpoint"
   },
   "W": {
    "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W",

@@ -2650,6 +2650,19 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "statistics, `materialize` and block comparisons. No existing module, operator or CUDA-surface file "
             "changes; on a GPU it runs the same tensor operations the operators run. NO CUDA SURFACE CHANGE.",
      }),
+    ("d9a429f8d2ca0b80686b7d376cce7558c940a617",
+     "RI-LM1 layer merging: the generic merge arithmetic, and its Pearson moments centered (maintainer 2026-11-15)",
+     {
+        "src/aadistill/initialization/planning/layer_merge.py":
+            "NEW module (67c87938, undeclared until this round: the previous round's architecture check ran while it "
+            "was untracked). Spans from kept blocks, an exact linear assignment, streaming Pearson and Gram moments, "
+            "RMSNorm-gain folding, GQA-aware permutation, per-slot convex merging, update moments; every instance "
+            "fact is an argument. This round: `PearsonMoments` from centered float64 moments merged by Chan, Golub "
+            "and LeVeque's update (the uncentered E[xy] - E[x]E[y] cancelled for a near-constant feature), TF32 and "
+            "non-finite values refused, |r| beyond 1 + CORRELATION_BOUND_SLACK refused instead of clamped "
+            "(tests/initialization/test_layer_merge.py). No existing module, operator or CUDA-surface file changes. "
+            "NO CUDA SURFACE CHANGE.",
+     }),
 )
 
 
