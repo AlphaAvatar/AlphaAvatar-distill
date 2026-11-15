@@ -312,6 +312,18 @@ def passed_checks(out: Path, ids: dict, attempt: str, status, run) -> dict:
     return eq
 
 
+def config_against_d(ckpt: Path, d: dict) -> dict:
+    """The candidate's ``config.json`` FILE hash against D's (the design's ``config_sha256`` is the sha256 of D's
+    file, as `layer_merge.digests_command` records it). Not `identify_checkpoint`'s ``config_sha256``: that one hashes
+    the parsed config as canonical JSON (`sha256_json`), another quantity (D's: 715daf5f..., file 4583de76...).
+    Comparing the two read every candidate as "not D's configuration" (ri_merge_20261115_103303)."""
+    f = ckpt / "config.json"
+    got = sha(f)
+    want = d["base"]["d_checkpoint"]["config_sha256"]
+    return {"file_sha256": got, "d_file_sha256": want, "equal": got == want,
+            **({} if got == want else {"candidate_config": json.loads(f.read_text())})}
+
+
 def build(out: Path, work: Path, device: str, status, g: str, attempt: str) -> dict:
     """One candidate: built, checked, saved; its delta written; the reconstruction from D and the delta FILE required
     to give its artifact digest; ``records/candidates/<g>.json`` (status ``built``)."""
@@ -345,9 +357,11 @@ def build(out: Path, work: Path, device: str, status, g: str, attempt: str) -> d
     ident = RI._save(adapter, model, work / "groups" / g)
     rec["build"] = crec
     rec["checkpoint"] = RI._ident_record(ident)
-    rec["config_equals_D"] = ident.config_sha256 == d["base"]["d_checkpoint"]["config_sha256"]
-    if not rec["config_equals_D"]:
-        raise DriverError(f"{g}: the configuration is not D's")
+    rec["config"] = config_against_d(work / "groups" / g, d)
+    if not rec["config"]["equal"]:
+        RI.write_json(out / "records" / "candidates" / f"{g}.failed_build.json", rec)
+        raise DriverError(f"{g}: config.json hashes to {rec['config']['file_sha256'][:12]}, D's to "
+                          f"{rec['config']['d_file_sha256'][:12]} (the candidate's config is in the record)")
     delta = LMX.candidate_delta(sel, spans, model)
     tdig = LMX.candidate_tensor_digests(model, sorted(delta))
     del model

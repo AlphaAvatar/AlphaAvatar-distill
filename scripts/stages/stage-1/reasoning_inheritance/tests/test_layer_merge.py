@@ -589,3 +589,24 @@ def test_a_restored_delta_lands_where_its_record_says_and_is_retained(teacher, t
     with pytest.raises(LMD.DriverError, match="does not hash"):
         LMD.fetch_delta(out, tmp_path / "att3" / "work", "M-avg", rec, download)
     assert not (out / rec["delta"]["path"]).exists() and kept.is_file()
+
+
+@torch.no_grad()
+def test_the_configuration_check_compares_file_hashes(teacher, tmp_path):
+    """ri_merge_20261115_103303 died here: the design's D ``config_sha256`` is a FILE hash, `identify_checkpoint`'s
+    ``config_sha256`` a canonical-JSON hash of the parsed config. The check compares the candidate's file with D's."""
+    from aadistill.infrastructure.manifest import sha256_json
+    RI = LMD.RI
+    sel = {"n_root_blocks": 6, "kept_blocks": [0, 1, 3, 5]}
+    spans = [s for s in LMX.LM.spans_from_kept_blocks(6, sel["kept_blocks"]) if len(s) > 1]
+    d = FM.keep_blocks(ADAPTER, teacher, sel["kept_blocks"])
+    d_ident = RI._save(ADAPTER, d, tmp_path / "D")
+    d_file = RI.sha256_file(tmp_path / "D" / "config.json")
+    assert d_ident.config_sha256 == sha256_json(json.loads((tmp_path / "D" / "config.json").read_text())) != d_file
+    digests = {n: FM.tensor_sha256(t) for n, t in d.state_dict().items() if n != "lm_head.weight"}
+    model, _ = LMX.build_candidate(ADAPTER, teacher, sel, spans, "M-avg", None, digests, seed=0)
+    RI._save(ADAPTER, model, tmp_path / "cand")
+    design = {"base": {"d_checkpoint": {"config_sha256": d_file}}}
+    assert LMD.config_against_d(tmp_path / "cand", design)["equal"]
+    bad = LMD.config_against_d(tmp_path / "cand", {"base": {"d_checkpoint": {"config_sha256": d_ident.config_sha256}}})
+    assert not bad["equal"] and bad["candidate_config"]["num_hidden_layers"] == 4
