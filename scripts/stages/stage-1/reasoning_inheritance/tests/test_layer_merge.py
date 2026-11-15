@@ -193,7 +193,11 @@ def test_the_teardown_reserve_and_the_budget_terminal_state_refuse():
     assert proposal["status"] == "proposed" and proposal["study"] == L.STUDY.key
     assert proposal["ceiling_usd"] + proposal["teardown_reserve_usd"] == proposal["study_cumulative_cap_usd"]
     assert proposal["per_session_hard_cap_usd"] <= proposal["ceiling_usd"]
-    assert not (REPO / L.STUDY.grant).exists()                                         #: proposed, never granted here
+    grant = json.loads((REPO / L.STUDY.grant).read_text())                             #: granted 2026-11-15
+    assert grant["status"] == "granted" and grant["granted_by"] == "maintainer" and "批准 RI-LM1" in grant["decision"]
+    for k in ("ceiling_usd", "teardown_reserve_usd", "study_cumulative_cap_usd", "per_session_hard_cap_usd",
+              "min_useful_attempt_usd"):
+        assert grant[k] == proposal[k]                                                 #: the proposal's terms
 
 
 # ---- a candidate as D plus its span blocks; the checks refuse non-finite errors ----------------------------------------

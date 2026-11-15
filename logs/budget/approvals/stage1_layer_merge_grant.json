@@ -1,0 +1,66 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.proposal/v1",
+ "study": "RI-LM1",
+ "status": "granted",
+ "recorded_utc": "2026-11-14",
+ "scope": "Stage 1 layer merging at D's fixed structure (configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json): build M-avg and M-act from the teacher on one pod (one statistics forward over calib.hybrid_d4_base@v2, the alignments, the numerical and bit-identity checks, the update diagnostics), copy both to the relay, state evaluation (diagnostic), and every unit of eval-set-1 in both modes under RI-S1's protocol; D and T reused. No recovery training, no search, no new candidate, no Stage-6 work.",
+ "kinds": [
+  "merge_evaluation"
+ ],
+ "ceiling_usd": 13.0,
+ "teardown_reserve_usd": 1.0,
+ "study_cumulative_cap_usd": 14.0,
+ "per_session_hard_cap_usd": 11.0,
+ "min_useful_attempt_usd": 2.0,
+ "project_cumulative_cap_usd": 1000.0,
+ "gpus": {
+  "NVIDIA L40S": 1.09
+ },
+ "gpu_count_max": 1,
+ "granted_by": "maintainer",
+ "decision": "2026-11-15 (UTC), review of 34b0fd3a: \u6279\u51c6 RI-LM1 \u6309\u73b0\u6709\u8349\u6848\u6267\u884c\uff1a\u5168\u90e8 session \u7d2f\u8ba1\u4e0a\u9650 $13.00\uff1b\u53e6\u7559 $1.00 \u5173\u95ed\u8d44\u6e90\u9884\u7559\uff0c\u603b\u989d $14.00\uff1b\u5355 session \u786c\u4e0a\u9650 $11.00\uff1b\u4f7f\u7528\u5355\u5f20 L40S\uff0c\u9075\u5faa\u5f53\u524d\u4ef7\u683c\u4e0e\u9879\u76ee\u603b\u9884\u7b97\u7ea6\u675f\uff1b\u4e0d\u8f6c\u7528 RI-S1 \u5df2\u5931\u6548\u7684\u989d\u5ea6\uff0c\u4e0d\u81ea\u52a8\u5145\u503c\u6216\u63d0\u9ad8\u9884\u7b97\u3002\u6b63\u5f0f\u542f\u52a8\u524d\uff0c\u5148\u96c6\u4e2d\u4fee\u590d\u4ee5\u4e0b\u4e09\u4e2a\u5df2\u5b9a\u4f4d\u7684\u95ee\u9898 [...] \u4ee5\u4e0a\u4fee\u6b63\u548c\u9a8c\u8bc1\u5b8c\u6210\uff0c\u8bb0\u5f55\u4e0e\u4ee3\u7801\u4e00\u81f4\u5e76\u63d0\u4ea4\u540e\uff0c\u5373\u53ef\u5728\u672c\u6761\u6388\u6743\u8303\u56f4\u5185\u7b7e\u53d1 grant \u548c\u542f\u52a8\u3002\u672c\u6761\u4e0d\u6279\u51c6\u5408\u5165 main\u3002",
+ "money_rules": {
+  "own_envelope": "the ceiling counts only this study's runs (study_engineering.spent filters by plan id). RI-S1 is CLOSED; its unspent $15.0446 lapsed (its grant's closed block) and funds nothing here",
+  "ceiling": "$13.00 is what sessions may draw, cumulatively over every attempt (each session's closeout all-in; an unknown cost refuses)",
+  "teardown_reserve": "$1.00 is held outside the ceiling and never issued: every artifact's hard cap plus the reserve must fit what the project cap and the provider balance leave at issue and again at launch (layer_merge_launch.reserve_problems / the_teardown_reserve_stays). It covers a teardown the provider confirms late, never a longer session",
+  "study_cumulative_cap": "ceiling + reserve = $14.00, inside the project cap's remainder",
+  "per_session_hard_cap": "$11.00: the all-in bound from the create to the hard deadline plus the watchdog's teardown time (study_engineering.all_in at the accepted price); the deadline is derived from the price, never set apart from it",
+  "budget_terminal_state": "BUDGET_EXHAUSTED when what the ceiling leaves is below min_useful_attempt_usd ($2.00: setup, the restore from the relay and at least one fluid unit of one candidate) or the next attempt's cap plus the reserve does not fit the project cap or the balance: the issuer refuses (reserve_problems), every finished unit is kept, every other one is reported not_run, the primary comparison is evaluated only if both candidates' primary unit is complete (otherwise no verdict, never a partial pooling), the closeout records the spend, and the remainder lapses at closure; a further attempt is a new maintainer decision"
+ },
+ "basis": {
+  "live_position_2026-11-14T20:54Z": {
+   "project_committed_usd": 963.2392,
+   "project_cap_usd": 1000.0,
+   "project_remaining_usd": 36.7608,
+   "balance_usd": 16.6313,
+   "pods": 0,
+   "volumes": 0
+  },
+  "card": "L40S 48 GB (AGENTS.md P8.2): RI-S1 built D and evaluated it on one; the candidates have D's structure, so D's measured memory and concurrency (max_num_seqs 7) apply",
+  "scenario_estimate": {
+   "status": "a SCENARIO estimate from RI-S1's measurements, not a measurement of these candidates",
+   "setup_minutes": 25,
+   "build_minutes": "about 45: teacher download and hashing ~5, the statistics forward over 79 packed sequences ~10, eight 9,728 x 9,728 assignments ~8 (48 s each for a hard random matrix on the dev box CPU), the checks, each candidate built, saved and its reconstruction from D and its delta checked ~14, the two 1.13 GiB deltas to the relay and back ~4 (the first version moved two 6.43 GB checkpoints)",
+   "diagnostics_and_state_eval_minutes": "about 20 (RI-S1's state evaluation of three groups took about 10)",
+   "generation_hours_per_candidate": "1.8 if it behaves like D (after the repair: thinking fluid ~40 min, thinking capability ~34, non-thinking 16 and 18) to 3.6 if it behaves like T (T's 6.29M + 0.62M output tokens at D's ~540 tokens/s at concurrency 7)",
+   "total_hours": "4.8 to 8.4",
+   "usd_at_1.09_per_hour": "about $5.3 to $9.3 with container disk; the $5-9 of REPORT section 11 rounded"
+  },
+  "why_these_caps": "$11 per session covers the high scenario with the 10% contingency and the watchdog at $1.09/h; $13 leaves one small resume attempt after a full session. The balance ($16.63) already covers the whole proposal: the $13 sessions may draw plus the $1 reserve, $14. What bounds a second session is the ceiling, not the balance: after one full session at the expected $9.27 the ceiling leaves $3.73, so a second $11 session does not fit, and a top-up would not change that; only a changed grant would, which is the maintainer's (corrected 2026-11-15: the first text said a second full session needed a top-up)"
+ },
+ "launch": {
+  "order": "commit the code; issue (one-use artifact); commit the artifact (that commit is the session commit); stage its bundle (stages.phase_c1.bundle.stage_bundle); launch",
+  "issue": "PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py issue --run-id ri_merge_<UTC yyyymmdd_hhmmss> --expected-usd 7.5 --hard-cap-usd 11",
+  "launch": "PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py launch --minutes 480 --run-id <run> --scr artifacts/stages/stage-1/reasoning_inheritance/runs/<run>/scr --session-commit <sha> --bundle aad_autoinit_<sha[:8]>.bundle --max-price 1.09 --disk-gb 150 --create-attempts 72 --create-retry-seconds 300 --poll-limit-min 620 --driver-extra '--max-num-seqs 7'",
+  "resume": "R=$(... layer_merge_launch.py stage-resume --run-id <run2> --from artifacts/stages/stage-1/reasoning_inheritance/runs/<run>/scr); then issue and launch with --resume-from $R and a fresh run id",
+  "closeout": "... layer_merge_launch.py closeout --run-id <run> --scr <scr>; then layer_merge_analysis.py"
+ },
+ "authorizes": "RI-LM1's phase only (scope): its session kinds ['merge_evaluation'], inside ceiling_usd cumulatively, per_session_hard_cap_usd per session and the project cap; one-use artifacts from `issue`; no other study and no follow-up",
+ "granted_utc": "2026-11-15",
+ "proposal": {
+  "path": "logs/stages/stage-1/reasoning_inheritance/plans/layer_merge_proposal.json",
+  "sha256": "2dc654c1c788227be2afb40ad91bc4c587f2e7ab746fa41143e2558326a48b53"
+ },
+ "study_identity_sha256": "6ea06f82e3b2cf4a80b31664c9b8a1a034c59399bef8d4be62946e7a27f01a5a",
+ "granted_at_commit": "c9cac11fe1757d3d0ca8d2629d563447c48ebb88"
+}

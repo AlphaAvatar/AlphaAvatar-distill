@@ -16718,3 +16718,21 @@ on a paid pod.
   `tests/docs/test_storage_inventory.py`. The analysis on D's real records: D as both candidates `formal`, delta 0,
   p 1; D as one `descriptive_only`.
 - Not done, by the brief: no grant, no paid launch, no merge into `main`, no new GPU canary, no historical re-audit.
+
+## 2026-11-15 (UTC) — Maintainer: RI-LM1 granted on the proposal's terms; three pre-launch fixes
+
+- Context: review of `34b0fd3a` accepted Holm, Pearson, capability streaming and resume, and the D + delta local
+  storage. Quoted: "批准 RI-LM1 按现有草案执行：全部 session 累计上限 $13.00；另留 $1.00 关闭资源预留，总额 $14.00；单
+  session 硬上限 $11.00；使用单张 L40S，遵循当前价格与项目总预算约束；不转用 RI-S1 已失效的额度，不自动充值或提高预算。"
+  Before the launch, three fixes; after them "即可在本条授权范围内签发 grant 和启动". Not a merge into `main`.
+- Decision: the grant `logs/budget/approvals/stage1_layer_merge_grant.json` (written from the proposal at
+  `c9cac11f`: sessions $13.00 cumulative, $1.00 teardown reserve outside it, $14.00 in all, $11.00 per session, $2.00
+  smallest useful attempt, one L40S at no more than $1.09/h). Fixed first (`c9cac11f`): a failed fold/permutation
+  check is never reused (`passed_checks`); a built, verified, not yet durable delta crosses attempts (`carried_deltas`,
+  `resume_archive`, `take_over(subdirs)`); a restored delta is renamed into its recorded path (`fetch_delta`).
+- Terminal duties set by the maintainer: local retention verified (D the protected base, each candidate's delta
+  checked); after the study's terminal state and that verification, the relay's weight deltas of this round are
+  retired (statistics, evaluation evidence and deletion records kept); teardown, cost reconciliation, report.
+- Stop only for: all registered work done; the budget exhausted or too small for a useful recovery attempt; a real
+  blocker outside this authorization. An incomplete primary comparison gets no formal verdict.
+- Revisit when: the study reaches a terminal state.
