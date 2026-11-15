@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 195,
+  "runs_unrecorded": 197,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -866,8 +866,8 @@
    },
    "reasoning_inheritance": {
     "recorded": 0,
-    "unrecorded": 6,
-    "total": 6
+    "unrecorded": 8,
+    "total": 8
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3935,6 +3935,22 @@
    "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508",
    "n_files": 3,
    "digest": "3152c125375949de69cb47884211345270096a62c6319b46c9293d61a68b3302",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_inheritance",
+   "run_id": "ri_merge_20261115_103303",
+   "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_103303",
+   "n_files": 3,
+   "digest": "7a1a94b723ef018150e804f22d2752bd15bf4be12e59d5a2d6d13e0df98665bc",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_inheritance",
+   "run_id": "ri_merge_20261115_104816",
+   "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816",
+   "n_files": 3,
+   "digest": "b90a4932ea4a4cf05a1672c09925302ed30010d2d9eac906ed516ec470c27ada",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {

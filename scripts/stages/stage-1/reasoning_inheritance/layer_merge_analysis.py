@@ -211,6 +211,23 @@ def static_core(gd: Path, label: str, tmp: Path) -> tuple[dict, dict] | None:
             {r["task_id"]: int(bool(r["correct"])) for r in core if r["interactive"]})
 
 
+def unit_headlines(gd: Path, label: str) -> dict:
+    """Every registered unit's headline as the registered scorer reports it (`eval_set_scoring.report`), with the
+    termination rates it carries: descriptive, reported beside the decision and never part of it."""
+    import shared.evaluation.eval_set_scoring as S
+    rep = S.report(gd, label, {}, "eval-set-1")
+    out = {}
+    for unit, v in rep["units"].items():
+        m = v.get("metrics") or {}
+        head = v.get("headline")
+        val = v.get("rate") if head == "correct" and "rate" in v else (m.get(head) if head else None)
+        out[unit] = {"status": v.get("status"), "n": v.get("n"), "in_formal_core": v.get("in_formal_core"),
+                     "headline": head, "value": val,
+                     "natural_termination_rate": m.get("natural_termination_rate"),
+                     "degeneration_rate": m.get("degeneration_rate")}
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--d-store", action="append", default=[], help="RI-S1 stores holding D's sealed records")
@@ -274,6 +291,14 @@ def main(argv=None) -> int:
                                        cl, acc, lambda s: sum(acc["M"][i] - acc["D"][i] for i in s) / len(s),
                                        n=10_000, seed=20261113)}
                 res["secondary"].setdefault(mode, {})[c] = entry
+        #: every registered unit, per model and mode, by the registered scorer: reported, never decisive
+        res["supporting"] = {"label": "every registered unit's headline by eval_set_scoring.report; descriptive, "
+                                      "never decisive (design.json :: analysis.supplementary)", "by_mode": {}}
+        for mode in MODES:
+            for name in ("D", *CANDIDATES):
+                gd = gens(name, mode, d_stores if name == "D" else stores)
+                if gd is not None:
+                    res["supporting"]["by_mode"].setdefault(mode, {})[name] = unit_headlines(gd, f"{name}_{mode}")
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(res, indent=1, default=str) + "\n")
     print(json.dumps({"status": res["primary"]["comparisons"]["_family"]["status"],

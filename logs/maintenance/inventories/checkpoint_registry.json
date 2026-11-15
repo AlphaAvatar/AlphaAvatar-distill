@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-11-14T20:44:25+00:00",
+  "created_utc": "2026-11-15T14:25:21+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -365,9 +365,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_d3_product_4f3e3eb734f4",
+        "canonical_id": "relay_20261114_d3_product_4f3e3eb734f4",
         "deleted_utc": "2026-11-14T20:40:28+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (round-trip verified); the registered fixed path is the fallback",
@@ -446,9 +446,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d1_72b76a1ca430",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d1_72b76a1ca430",
         "deleted_utc": "2026-11-14T20:37:08+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -480,9 +480,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d1_60e229ac09d8",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d1_60e229ac09d8",
         "deleted_utc": "2026-11-14T20:36:48+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -514,9 +514,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d1_4df438a839cd",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d1_4df438a839cd",
         "deleted_utc": "2026-11-14T20:36:28+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -548,9 +548,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d1_91090067b51c",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d1_91090067b51c",
         "deleted_utc": "2026-11-14T20:37:29+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -582,9 +582,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d2_9af1989dc0b8",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d2_9af1989dc0b8",
         "deleted_utc": "2026-11-14T20:38:10+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -616,9 +616,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d2_e2d10ba8f532",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d2_e2d10ba8f532",
         "deleted_utc": "2026-11-14T20:38:50+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -650,9 +650,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d2_3b2037bc9009",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d2_3b2037bc9009",
         "deleted_utc": "2026-11-14T20:37:50+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -684,9 +684,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d2_b6a41ee85024",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d2_b6a41ee85024",
         "deleted_utc": "2026-11-14T20:38:29+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -747,9 +747,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d4_167a43f4c05b",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d4_167a43f4c05b",
         "deleted_utc": "2026-11-14T20:39:30+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -781,9 +781,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d4_0363ad220c88",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d4_0363ad220c88",
         "deleted_utc": "2026-11-14T20:39:10+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -815,9 +815,9 @@
       "all_copies_identity_verified": false,
       "tombstone": {
         "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "canonical_id": "relay_20261115_calvol_formal_v1_d4_912205b5a106",
+        "canonical_id": "relay_20261114_calvol_formal_v1_d4_912205b5a106",
         "deleted_utc": "2026-11-14T20:39:50+00:00",
-        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-15 (logs/maintenance/inventories/relay_weight_audit_20261115.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
+        "reason": "AGENTS.md 2.5 standing retirement after the object-level audit of 2026-11-14 (UTC) (logs/maintenance/inventories/relay_weight_audit_20261114.json): terminal, evaluation evidence durable, hashes preserved, no active or declared consumer (every code reader classified; any declaring launcher's study closed and its issuer refusing), not an incumbent, release or retained anchor"
       },
       "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (sha256-pinned)",
@@ -1401,43 +1401,43 @@
     }
   },
   "local": {
-    "n_units": 73,
-    "n_weight_files": 58,
-    "total_bytes": 20418736755,
-    "total_human": "19.016 GiB",
-    "artifacts_tree_bytes": 21309594684,
-    "external_store_tree_bytes": 24637304698,
+    "n_units": 79,
+    "n_weight_files": 64,
+    "total_bytes": 25266892611,
+    "total_human": "23.532 GiB",
+    "artifacts_tree_bytes": 23890986053,
+    "external_store_tree_bytes": 27059659994,
     "by_store": {
       "external_store": {
-        "units": 33,
-        "bytes": 16709035983
+        "units": 35,
+        "bytes": 19131391279
       },
       "repo_artifacts": {
-        "units": 40,
-        "bytes": 3709700772
+        "units": 44,
+        "bytes": 6135501332
       }
     },
     "proposed_disposition": {
-      "keep": 15,
+      "keep": 17,
       "retire": 2,
-      "review": 56
+      "review": 60
     },
     "proposed_disposition_bytes": {
-      "keep": 18585012564,
+      "keep": 21007367860,
       "retire": 67747076,
-      "review": 1765977115
+      "review": 4191777675
     }
   },
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-11-14T20:42:39+00:00",
-    "n_files": 1670,
-    "total_bytes": 28021341071,
+    "queried_utc": "2026-11-15T14:23:32+00:00",
+    "n_files": 1674,
+    "total_bytes": 28143752905,
     "by_prefix": {
       "transfer": {
-        "files": 706,
-        "bytes": 17048179537
+        "files": 708,
+        "bytes": 17159347545
       },
       "permanent_controls": {
         "files": 18,
@@ -1456,8 +1456,8 @@
         "bytes": 1015033375
       },
       "durable": {
-        "files": 21,
-        "bytes": 359441226
+        "files": 23,
+        "bytes": 370684904
       },
       "e1_scaling_20260801": {
         "files": 306,
@@ -1533,7 +1533,7 @@
       },
       ".gitattributes": {
         "files": 1,
-        "bytes": 60099
+        "bytes": 60247
       },
       "c1_preserved_probes": {
         "files": 18,
@@ -1548,7 +1548,7 @@
     "files": [
       {
         "path": ".gitattributes",
-        "size_bytes": 60099,
+        "size_bytes": 60247,
         "sha256": null
       },
       {
@@ -1770,6 +1770,16 @@
         "path": "durable/stage1_reasoning_inheritance/evidence/ri_diagnosis_20261113_193508/c69706526086bdf3/evidence.tgz",
         "size_bytes": 52450012,
         "sha256": "c69706526086bdf37600edd813ec2105596136abce11872a17c985344dc4c6dd"
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/layer_merge/evidence/ri_merge_20261115_104816/d8b200f2dd71eb56/evidence.tgz",
+        "size_bytes": 9521046,
+        "sha256": "d8b200f2dd71eb566e6776ba8a0c4faba073fa456f71ab3b33413e7ae683714e"
+      },
+      {
+        "path": "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors",
+        "size_bytes": 1722632,
+        "sha256": "22c2cd71b77fda0a1888e867646b56643ecb53575f32f06f0ff5db663e44f983"
       },
       {
         "path": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/config.json",
@@ -7072,6 +7082,11 @@
         "sha256": "d07ab6b59d3f9e7f800a48e2c08000a71df71f8fddc7c955a7a9b16107b24595"
       },
       {
+        "path": "transfer/aad_autoinit_da594726.bundle",
+        "size_bytes": 55588535,
+        "sha256": "594efe4f0d0518d23036ce71e8f38dd0f905b8f524309495f341f47d5823cd48"
+      },
+      {
         "path": "transfer/aad_autoinit_db480621.bundle",
         "size_bytes": 38320295,
         "sha256": "87563486418e1406da4e85f53579eca9d203177b39686992f757cbb90f30df7a"
@@ -7255,6 +7270,11 @@
         "path": "transfer/aad_autoinit_f95f3a6e.bundle",
         "size_bytes": 18303637,
         "sha256": "b91c34dfc212c31eea0a917246ff02a789ae25462cdad6ae16e3eec4698eda81"
+      },
+      {
+        "path": "transfer/aad_autoinit_f9759dc6.bundle",
+        "size_bytes": 55579473,
+        "sha256": "5a26a2cc3e68042b76b2a4e2f91c2aac5822577e1ef87a6c17501828112b2c02"
       },
       {
         "path": "transfer/aad_autoinit_fa73aa8d.bundle",
@@ -10180,6 +10200,32 @@
       "note": null
     },
     {
+      "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+      "size_bytes": 603051,
+      "members": [
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-act_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-act_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-avg_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-avg_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/legacy_150.prompts.jsonl"
+      ],
+      "reclaimable_bytes": 10251867,
+      "note": null
+    },
+    {
       "sha256": "0e2aaa30bb226f8b8cc8d92031a07ee8b07d83cac95d43ba284db60ac04c9a8c",
       "size_bytes": 9902875,
       "members": [
@@ -10210,28 +10256,6 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked/tool_H-N_r4_pass1.part0002.jsonl"
       ],
       "reclaimable_bytes": 8404223,
-      "note": null
-    },
-    {
-      "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
-      "size_bytes": 603051,
-      "members": [
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/legacy_150.prompts.jsonl"
-      ],
-      "reclaimable_bytes": 7839663,
       "note": null
     },
     {
@@ -14888,6 +14912,18 @@
       "note": null
     },
     {
+      "sha256": "92d3088a64bd07e277f4e8bb20a77a10c1232b32044a54e06d6b3994f652403b",
+      "size_bytes": 9349,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/report.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/state/report.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/report.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/state/report.json"
+      ],
+      "reclaimable_bytes": 28047,
+      "note": null
+    },
+    {
       "sha256": "3656a22238252397ebbdd1705fb581b8bf0f8c14a4759ca28f9d4468f278fddf",
       "size_bytes": 13942,
       "members": [
@@ -15013,6 +15049,16 @@
       "note": null
     },
     {
+      "sha256": "8a1efd090782ef782d918e4c0381a7f5512d77b2a38daf8dd1d2f4ac917075f7",
+      "size_bytes": 26316,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/logs/relay.M-act.ri_merge_20261115_104816.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/logs/relay.M-act.ri_merge_20261115_104816.log"
+      ],
+      "reclaimable_bytes": 26316,
+      "note": null
+    },
+    {
       "sha256": "7944d28f2bc0a33f00c30bf8439342bc0df828c8ccff3441e0040f5b113284a9",
       "size_bytes": 25049,
       "members": [
@@ -15034,6 +15080,16 @@
         "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/search_unit/search_record.json"
       ],
       "reclaimable_bytes": 24815,
+      "note": null
+    },
+    {
+      "sha256": "e2ad5eb818136f07ea7af4591dab0b1e8d05701726f287666cccfbf71acc148d",
+      "size_bytes": 23249,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/logs/relay.M-avg.ri_merge_20261115_104816.log",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/logs/relay.M-avg.ri_merge_20261115_104816.log"
+      ],
+      "reclaimable_bytes": 23249,
       "note": null
     },
     {
@@ -15090,6 +15146,18 @@
         "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/generations/stage3_capability_846__eval_behavior_v0.summary.json"
       ],
       "reclaimable_bytes": 22344,
+      "note": null
+    },
+    {
+      "sha256": "5630689f9f1b9245a26b066b3fbddaaf937a979d74f27e7a94c779376e07a4fc",
+      "size_bytes": 7441,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_103303/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_103303/state/identities.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_103303/scr/store/out/state/identities.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/state/identities.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/state/identities.json"
+      ],
+      "reclaimable_bytes": 22323,
       "note": null
     },
     {
@@ -15491,6 +15559,16 @@
         "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r3_3b2037bc_s20260726/eval_fluid.log"
       ],
       "reclaimable_bytes": 16411,
+      "note": null
+    },
+    {
+      "sha256": "3685634439ba4690ec90527f1ba95e52586d445f64c73a6d312e4ed86d34536b",
+      "size_bytes": 16398,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/records/merge_state_eval.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/records/merge_state_eval.json"
+      ],
+      "reclaimable_bytes": 16398,
       "note": null
     },
     {
@@ -15976,6 +16054,16 @@
       "note": null
     },
     {
+      "sha256": "59d85a3fceaa6dbfa5f61db5a1863c577759aad5176a483d16347dde22778e3b",
+      "size_bytes": 14805,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/records/merge_diagnostics.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/records/merge_diagnostics.json"
+      ],
+      "reclaimable_bytes": 14805,
+      "note": null
+    },
+    {
       "sha256": "113122d1b880051f18a7f1fc778573e28647d80c69be1376256d73ecd1414a32",
       "size_bytes": 14705,
       "members": [
@@ -16374,6 +16462,18 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/unpacked/tool_H-T_r2_pass0.seg0.log"
       ],
       "reclaimable_bytes": 13736,
+      "note": null
+    },
+    {
+      "sha256": "a7f32704a2e02a4b98ccd6235d839e9b259e2abc9d8ff112a01effc6d4a768eb",
+      "size_bytes": 4504,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_103303/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_103303/report.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_103303/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_103303/state/report.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_103303/scr/store/out/report.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_103303/scr/store/out/state/report.json"
+      ],
+      "reclaimable_bytes": 13512,
       "note": null
     },
     {
@@ -17021,6 +17121,16 @@
       "note": null
     },
     {
+      "sha256": "fe86046976a7313017645b49bd93f419d3fde4297b4a6a0bc03a9b0c8f999608",
+      "size_bytes": 8249,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/records/merge_statistics.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/records/merge_statistics.json"
+      ],
+      "reclaimable_bytes": 8249,
+      "note": null
+    },
+    {
       "sha256": "eaed9cffc107920ffe467d5d7c38be524c1118238db810af16bfc301a1763f55",
       "size_bytes": 7931,
       "members": [
@@ -17138,6 +17248,16 @@
         "artifacts/stages/stage-0/calibration_volume/dose_d1_20261019_125359/extracted/audit/stage0_calvol_dose/d1/dose_record.json"
       ],
       "reclaimable_bytes": 4999,
+      "note": null
+    },
+    {
+      "sha256": "35a7fd617525fe7a2d73fa10491d40ebc42bac9a7497689834adeacc787d56d4",
+      "size_bytes": 4794,
+      "members": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/state/evaluation.json",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/state/evaluation.json"
+      ],
+      "reclaimable_bytes": 4794,
       "note": null
     },
     {
@@ -17421,6 +17541,162 @@
       "disposition": "keep"
     },
     {
+      "canonical_name": "delta.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-act/delta.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-act/delta.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 1211177648,
+      "size_human": "1.128 GiB",
+      "weights_sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e",
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+        "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+        "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+        "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "delta.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-avg/delta.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-avg/delta.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 1211177648,
+      "size_human": "1.128 GiB",
+      "weights_sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a",
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+        "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+        "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+        "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "delta.safetensors",
+      "kind": "tensor_file",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors"
+      ],
+      "experiment": "RI-LM1",
+      "role": "a layer-merge candidate's six span blocks; with D's dev-box copy, the candidate",
+      "retention": "canonical",
+      "status": "active",
+      "retention_reason": "the dev-box copy of a candidate under evaluation (D + delta, verified byte for byte on the pod)",
+      "architecture": {},
+      "size_bytes": 1211177648,
+      "size_human": "1.128 GiB",
+      "weights_sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e",
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+        "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+        "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+        "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "layer_merge_driver.py build from the teacher and the run's statistics",
+      "reconstruction_cost": "one L40S, about 10 min with the statistics kept",
+      "never_delete_clause": "a candidate of an open study; its relay copy is not its only copy, and neither is this",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "delta.safetensors",
+      "kind": "tensor_file",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors"
+      ],
+      "experiment": "RI-LM1",
+      "role": "a layer-merge candidate's six span blocks; with D's dev-box copy, the candidate",
+      "retention": "canonical",
+      "status": "active",
+      "retention_reason": "the dev-box copy of a candidate under evaluation (D + delta, verified byte for byte on the pod)",
+      "architecture": {},
+      "size_bytes": 1211177648,
+      "size_human": "1.128 GiB",
+      "weights_sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a",
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+        "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+        "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+        "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "layer_merge_driver.py build from the teacher and the run's statistics",
+      "reconstruction_cost": "one L40S, about 10 min with the statistics kept",
+      "never_delete_clause": "a candidate of an open study; its relay copy is not its only copy, and neither is this",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
       "canonical_name": "qwen3_0p6b_init_v0",
       "kind": "checkpoint",
       "store": "repo_artifacts",
@@ -17656,10 +17932,10 @@
         "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
         "configs/stages/stage-1/projected_residual/independent_gated_design.json",
         "configs/stages/stage-1/reasoning_inheritance/design.json",
+        "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
         "configs/stages/stage-2/reasoning_data/external_modules.json",
         "configs/stages/stage-2/reasoning_data/h1_units.json",
-        "configs/stages/stage-2/reasoning_data/h1pa.json",
-        "configs/stages/stage-2/reasoning_data/sources.json"
+        "configs/stages/stage-2/reasoning_data/h1pa.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -17902,11 +18178,11 @@
         "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
         "configs/stages/stage-1/phase_a/preflight_plan.json",
         "configs/stages/stage-1/projected_residual/engineering_validation.json",
+        "configs/stages/stage-1/reasoning_inheritance/layer_merge/d_tensor_digests.json",
         "configs/stages/stage-2/reasoning_data/h1pa.json",
         "configs/stages/stage-2/teacher_modes/full_search_proposal.json",
         "configs/stages/stage-2/teacher_modes/teacher_identity.json",
-        "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json",
-        "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json"
+        "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -18024,8 +18300,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18063,8 +18339,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18102,8 +18378,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18141,8 +18417,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18180,8 +18456,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18219,8 +18495,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18258,8 +18534,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18297,8 +18573,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18336,8 +18612,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18375,8 +18651,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18414,8 +18690,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18453,8 +18729,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18492,8 +18768,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18531,8 +18807,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -18570,8 +18846,8 @@
       "config_sha256": null,
       "referenced_by": [
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
@@ -20053,6 +20329,74 @@
       "disposition": "review"
     },
     {
+      "canonical_name": "merge_statistics.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/records/merge_statistics.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/extracted/audit/stage1_layer_merge/ri_merge_20261115_104816/records/merge_statistics.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 1722632,
+      "size_human": "0.002 GiB",
+      "weights_sha256": "22c2cd71b77fda0a1888e867646b56643ecb53575f32f06f0ff5db663e44f983",
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/REPORT.md"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "merge_statistics.safetensors",
+      "kind": "tensor_file",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/records/merge_statistics.safetensors",
+      "weight_files": [
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/records/merge_statistics.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 1722632,
+      "size_human": "0.002 GiB",
+      "weights_sha256": "22c2cd71b77fda0a1888e867646b56643ecb53575f32f06f0ff5db663e44f983",
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/REPORT.md"
+      ],
+      "relay_path": "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
       "canonical_name": "e2p1",
       "kind": "artifact_tree",
       "store": "external_store",
@@ -20074,8 +20418,8 @@
         "logs/index.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
-        "logs/maintenance/inventories/relay_weight_audit_20261115.json",
-        "logs/maintenance/inventories/relay_weight_dispositions_20261115.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "logs/maintenance/storage/storage_closeout_20260831.json",
         "logs/stages/stage-1/phase_c1/runs/attempt10/governance/readiness.json",
@@ -20164,7 +20508,7 @@
         "configs/stages/stage-1/phase_d1/d1_search_artifacts.json",
         "configs/stages/stage-1/phase_d2/d2_search_artifacts.json",
         "configs/stages/stage-1/reasoning_inheritance/design.json",
-        "configs/stages/stage-1/recovery_continuation/continuation_artifacts.json"
+        "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json"
       ],
       "relay_path": null,
       "relay_verified": false,

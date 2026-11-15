@@ -46,10 +46,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 140,
-  "active": 138,
-  "active_retired_bytes": 616407743458,
-  "active_retired_human": "574.074 GiB",
+  "tombstones_total": 142,
+  "active": 140,
+  "active_retired_bytes": 618830098754,
+  "active_retired_human": "576.330 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -10108,6 +10108,141 @@
     }
    },
    "id_in_relay_commit_message": "relay_20261115_stage3_s2v1_from_init"
+  },
+  {
+   "canonical_id": "relay_20261115_rilm1_M-avg_delta",
+   "historical_paths": [
+    "durable/stage1_reasoning_inheritance/layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_reasoning_inheritance/layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "RI-LM1",
+   "seed": null,
+   "scientific_role": "M-avg's span-block delta (66 tensors; with D, the candidate)",
+   "weights_sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1211177648,
+   "size_human": "1.13 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "durable/stage1_reasoning_inheritance/layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+     "size_bytes": 1211177648,
+     "sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+    "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+    "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "reason_physical_weights_deleted": "RI-LM1 is terminal (every registered unit measured; closed 2026-11-15T14:22Z in its grant) and its local retention is verified (layer_merge_launch retain: the dev-box delta re-hashed, every span tensor equal to the pod's digest, D's dev-box copy is D and protected). The maintainer, 2026-11-15: relay only for transfer during the runs and their recovery; after the terminal state and the local verification, retire this round's remote weight deltas, keep the statistics, the evaluation evidence and the deletion records",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "copy the dev-box delta (/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors); D + the delta -> the candidate's artifact digest (layer_merge_driver.restore, verified on the pod at build)",
+   "reconstruction_kind": "copy",
+   "byte_identical_reconstruction": "verified",
+   "byte_identical_evidence": "verify_copies re-hashed the dev-box copy (size and sha256 equal to the relay object); storage/layer_merge_local.json",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+     "kind": "local",
+     "verified": "every member's size and sha256 match",
+     "members": 1
+    }
+   ],
+   "deterministic_reconstruction_possible": true,
+   "expected_reconstruction_cost": "$0 (a local copy)",
+   "frozen_results_location": "logs/stages/stage-1/reasoning_inheritance/analyses/layer_merge.json; durable/stage1_reasoning_inheritance/layer_merge/evidence/ri_merge_20261115_104816/d8b200f2dd71eb56/evidence.tgz",
+   "deleted_utc": "2026-11-15T14:22:52+00:00",
+   "tombstone_written_utc": "2026-11-15T14:22:35+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "eff2b5294b60d3eeb284d84a17b14f4bf76fc5ab",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 29715146833,
+    "lfs_bytes_after": 28503969185,
+    "freed_bytes": 1211177648,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   }
+  },
+  {
+   "canonical_id": "relay_20261115_rilm1_M-act_delta",
+   "historical_paths": [
+    "durable/stage1_reasoning_inheritance/layer_merge/M-act/c7fd518bffd470bb/delta.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_reasoning_inheritance/layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "RI-LM1",
+   "seed": null,
+   "scientific_role": "M-act's span-block delta (66 tensors; with D, the candidate)",
+   "weights_sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1211177648,
+   "size_human": "1.13 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "durable/stage1_reasoning_inheritance/layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+     "size_bytes": 1211177648,
+     "sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+    "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "reason_physical_weights_deleted": "RI-LM1 is terminal (every registered unit measured; closed 2026-11-15T14:22Z in its grant) and its local retention is verified (layer_merge_launch retain: the dev-box delta re-hashed, every span tensor equal to the pod's digest, D's dev-box copy is D and protected). The maintainer, 2026-11-15: relay only for transfer during the runs and their recovery; after the terminal state and the local verification, retire this round's remote weight deltas, keep the statistics, the evaluation evidence and the deletion records",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "copy the dev-box delta (/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors); D + the delta -> the candidate's artifact digest (layer_merge_driver.restore, verified on the pod at build)",
+   "reconstruction_kind": "copy",
+   "byte_identical_reconstruction": "verified",
+   "byte_identical_evidence": "verify_copies re-hashed the dev-box copy (size and sha256 equal to the relay object); storage/layer_merge_local.json",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+     "kind": "local",
+     "verified": "every member's size and sha256 match",
+     "members": 1
+    }
+   ],
+   "deterministic_reconstruction_possible": true,
+   "expected_reconstruction_cost": "$0 (a local copy)",
+   "frozen_results_location": "logs/stages/stage-1/reasoning_inheritance/analyses/layer_merge.json; durable/stage1_reasoning_inheritance/layer_merge/evidence/ri_merge_20261115_104816/d8b200f2dd71eb56/evidence.tgz",
+   "deleted_utc": "2026-11-15T14:23:14+00:00",
+   "tombstone_written_utc": "2026-11-15T14:22:58+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "507de1b4f03903a62fc4f42307ca94d51e950e37",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 28503969185,
+    "lfs_bytes_after": 27292791537,
+    "freed_bytes": 1211177648,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   }
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant.",

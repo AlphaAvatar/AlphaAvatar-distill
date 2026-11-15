@@ -16736,3 +16736,29 @@ on a paid pod.
 - Stop only for: all registered work done; the budget exhausted or too small for a useful recovery attempt; a real
   blocker outside this authorization. An incomplete primary comparison gets no formal verdict.
 - Revisit when: the study reaches a terminal state.
+
+## 2026-11-15 (UTC) — RI-LM1 executed and CLOSED: both training-free merges are WORSE than deletion; $4.0989 of $13
+
+- Context: the grant above; two attempts on one L40S at $1.09/h.
+- Result (registered rule, `logs/stages/stage-1/reasoning_inheritance/analyses/layer_merge.json`): thinking-mode
+  static fluid formal core, 570 registered items in 558 groups, paired with D's sealed records: M-avg 0/570 (0.00%),
+  M-act 2/570 (0.35%), D 32/570 (5.61%); delta -5.61 pp and -5.26 pp; group sign-flip p 1.0e-5 each, Holm over the
+  two registered comparisons 2.0e-5 each; both WORSE (formal: both primary units complete). Unadjusted group-bootstrap
+  intervals [-7.58, -3.82] and [-7.23, -3.48] pp. Non-thinking mode (D 7.89%, M-avg 0.00%, M-act 1.58%), the
+  interactive episodes and every supporting unit point the same way (descriptive). Diagnostics: in every span D's
+  kept block reproduces the teacher span's update more closely than either merge (normalized error D 0.06-0.55,
+  M-act 0.50-0.76, M-avg 0.78-0.97); state KL D 0.647 < M-act 0.733 < M-avg 1.067.
+- Runs: `ri_merge_20261115_103303` ($0.2147, RUN_FAILED: the configuration check compared a canonical-JSON hash with
+  a file hash; fixed in `config_against_d`, regression added, design untouched) and `ri_merge_20261115_104816`
+  ($3.8842, ALL_DONE, every unit). Provider balance $16.6313 -> $12.5693 (-$4.0620) against $4.0989 booked; no pod,
+  no volume.
+- Terminal duties: local retention verified (`storage/layer_merge_local.json`: D the protected base; each delta
+  re-hashed and its 66 span tensors equal to the pod's digests; hard-linked, one physical copy); evidence archived to
+  the relay and re-hashed (`durable/stage1_reasoning_inheritance/layer_merge/evidence/ri_merge_20261115_104816/
+  d8b200f2dd71eb56/evidence.tgz`); the two relay deltas retired (`relay_20261115_rilm1_{M-avg,M-act}_delta`,
+  `byte_identical_duplicate` against the verified dev-box copies; LFS objects read back absent); the statistics kept
+  on the relay; the checkpoint registry rebuilt; the grant's `closed` block written (unspent $8.9011 and the $1.00
+  reserve lapse).
+- Not done: no merge into `main` (the maintainer's); no follow-up study.
+- Revisit when: the maintainer decides what follows (Stage 3 learned fusion, Stage 6 recurrent depth, or the
+  separate depth/width study).

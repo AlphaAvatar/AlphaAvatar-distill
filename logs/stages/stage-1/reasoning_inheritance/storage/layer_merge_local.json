@@ -1,0 +1,36 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.local/v1",
+ "rule": "each candidate is D's dev-box copy (protected, the base) plus its delta; D + delta -> the candidate was verified byte for byte on the pod (records/candidates/<g>.json :: reconstruction)",
+ "base": {
+  "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D",
+  "weights_sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
+  "artifact_digest": "08aa80972097b290a4929b563cdc6d0497a6021fb7f4bde0a39edb2624e53b68",
+  "dependency": "every delta below needs this file; it is protected in the checkpoint registry"
+ },
+ "candidates": {
+  "M-avg": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+   "sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a",
+   "bytes": 1211177648,
+   "tensors": 66,
+   "artifact_digest": "33a5d1921602e2beb125b96ae9adc45936c9b31fa47811fd22e4dda60d430466",
+   "identity_sha256": "d99cfae88c12c2b4ec8f2e096c97c5c7322adc402fa2253e833cf7451bb924b5",
+   "relay": "durable/stage1_reasoning_inheritance/layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+   "producer_run": "ri_merge_20261115_104816",
+   "retained_from_run": "ri_merge_20261115_104816",
+   "checked": "delta re-hashed; every span tensor from the delta equals the pod's digest and fits D's shape and dtype; D's local file is D"
+  },
+  "M-act": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+   "sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e",
+   "bytes": 1211177648,
+   "tensors": 66,
+   "artifact_digest": "bf90ab92ff653c02ec833412da1725afa608375de3a2d97662e09f1d4fe883fd",
+   "identity_sha256": "c7fd518bffd470bb24db93ff35c2a611da5c76d4dc5939124f3feb8220a1069d",
+   "relay": "durable/stage1_reasoning_inheritance/layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+   "producer_run": "ri_merge_20261115_104816",
+   "retained_from_run": "ri_merge_20261115_104816",
+   "checked": "delta re-hashed; every span tensor from the delta equals the pod's digest and fits D's shape and dtype; D's local file is D"
+  }
+ }
+}

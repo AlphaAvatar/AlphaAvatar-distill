@@ -152,7 +152,7 @@
     "pipeline_activity": 4,
     "experiments": 17,
     "experiments_with_logs": 17,
-    "runs": 239,
+    "runs": 241,
     "canonical_configs": 20,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
@@ -1491,7 +1491,7 @@
    "experiment_id": "reasoning_inheritance",
    "stage_id": "1",
    "classification": "experiment",
-   "status": "COMPLETE and CLOSED 2026-11-14 (RI-S1, six attempts, $19.9554 of $35, the rest lapsed): untrained D static fluid 89.6% -> 5.6% thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; eval-set-1 development-exposed. Next round RI-LM1 (layer merging at D's structure: D / M-avg / M-act) prepared to the launch point, PROPOSED, not authorized",
+   "status": "COMPLETE and CLOSED 2026-11-14 (RI-S1, six attempts, $19.9554 of $35, the rest lapsed): untrained D static fluid 89.6% -> 5.6% thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; eval-set-1 development-exposed. RI-LM1 (layer merging at D's structure) COMPLETE and CLOSED 2026-11-15 ($4.0989 of $13): M-avg 0.00% and M-act 0.35% static fluid (thinking) against D's 5.61%, both WORSE than deletion (Holm p 2e-5)",
    "title": "Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1)",
    "question": "How much of the teacher's fluid reasoning does the current initialization lose to depth pruning alone, to all non-depth compression alone and to both, untrained, and do the two interact?",
    "canonical_path": "logs/stages/stage-1/reasoning_inheritance",
@@ -1538,15 +1538,29 @@
      "says": "RI-LM1's budget draft: own ceiling, teardown reserve, per-session cap, terminal state",
      "field": "status",
      "equals": "proposed"
+    },
+    {
+     "path": "logs/stages/stage-1/reasoning_inheritance/analyses/layer_merge.json",
+     "says": "RI-LM1's registered decision (formal: both WORSE), the secondary units, the supporting units",
+     "field": "schema",
+     "equals": "aadistill.stage1.reasoning_inheritance.layer_merge.analysis/v1"
+    },
+    {
+     "path": "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+     "says": "where RI-LM1's candidates are kept: D (the base) plus each verified span-block delta, the dev box",
+     "field": "schema",
+     "equals": "aadistill.stage1.reasoning_inheritance.layer_merge.local/v1"
     }
    ],
    "external_material": [
     "docs/stages/stage-1/reasoning_inheritance/REPORT.md, LITERATURE.md -- the round's report and reading",
+    "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md -- RI-LM1's report",
+    "~/aad-artifacts/stage1_layer_merge/ -- RI-LM1's span-block deltas (with D, the candidates)",
     "artifacts/stages/stage-1/reasoning_inheritance/ -- each attempt's secured evidence (dev box); the mapping and the final evidence archive also on the private relay",
     "~/aad-artifacts/stage1_reasoning_inheritance/ -- D, W, DW (= the packed Top-1), the mapping and the teacher tokenizer, the only copy (MANIFEST.json)"
    ],
    "decisions": [
-    "logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; 2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed; 2026-11-14: review fixes (teacher prompt check, tombstones, A-MIX relay copy, the next round's layer-merging plan); 2026-11-14: third review (M-act, literature, decision rule, retirement tool, 24 relay weights retired, RI-LM1 prepared); 2026-11-15: fourth review (Holm over both registered comparisons, per-candidate durability, capability sealing, reuse by identity, centered Pearson moments, candidates kept as D + delta)"
+    "logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; 2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed; 2026-11-14: review fixes (teacher prompt check, tombstones, A-MIX relay copy, the next round's layer-merging plan); 2026-11-14: third review (M-act, literature, decision rule, retirement tool, 24 relay weights retired, RI-LM1 prepared); 2026-11-15: fourth review (Holm over both registered comparisons, per-candidate durability, capability sealing, reuse by identity, centered Pearson moments, candidates kept as D + delta); 2026-11-15: RI-LM1 granted, executed, closed (both merges WORSE than deletion; relay deltas retired)"
    ],
    "classification_reason": "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps of the teacher before any training (AGENTS.md 4.3); eval-set-1 and the state suite are its instruments.",
    "canonical_scripts": "scripts/stages/stage-1/reasoning_inheritance",

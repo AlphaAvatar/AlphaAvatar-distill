@@ -6,7 +6,7 @@ every registered eval-set-1 unit is generated and scored for D, W and DW in both
 reused after every identity check, item by item. No recovery training, no new search. Total cost $19.9554 over six
 attempts of the $35 ceiling; the unspent $15.0446 lapsed at closure (section 10). Corrections after commits
 `09b48be9`, `b191d555`, `bf577e3d` and `d9a429f8` are listed in section 12; section 11 is the next round's plan,
-prepared to the launch point and not authorized.
+executed and closed on 2026-11-15 ([`LAYER_MERGE_REPORT.md`](LAYER_MERGE_REPORT.md)).
 
 **Result in one paragraph.** Untrained, removing 8 of the 36 blocks and changing nothing else (D) takes static fluid
 reasoning from 89.6% to 5.6% in thinking mode and from 68.9% to 7.9% in non-thinking mode, and interactive episodes
@@ -584,7 +584,11 @@ on the dev box only.
   already on the dev box, so no pod was needed to read a volume. Provider balance afterwards: $16.63, spend
   $0.00 per hour (`logs/budget/provider/runpod_billing_v2_2026-11-14T1048Z.json`).
 
-## 11. Next round: layer merging at D's fixed structure (RI-LM1: prepared to the launch point, not authorized)
+## 11. Next round: layer merging at D's fixed structure (RI-LM1: the plan as registered)
+
+**Executed 2026-11-15 (UTC) and CLOSED: [`LAYER_MERGE_REPORT.md`](LAYER_MERGE_REPORT.md).** Both merges are WORSE than
+deletion on the primary comparison (M-avg 0.00%, M-act 0.35%, D 5.61%; Holm p = 2e-5 each); two attempts, $4.0989.
+This section is the plan as it was fixed before the result.
 
 Status: prepared at $0 -- design, code, tests, launch commands and a budget draft -- for the maintainer to decide.
 Nothing below starts a paid experiment, recovery training or a merge into `main`: the study `RI-LM1` holds a proposal

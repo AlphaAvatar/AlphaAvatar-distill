@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-15 (UTC), RI-S1 COMPLETE and CLOSED on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); RI-LM1 prepared and proposed (fourth review's fixes in), not authorized; nothing running, nothing billing. The human view. Every number here has an owner
+**Updated:** 2026-11-15 (UTC), RI-S1 and RI-LM1 COMPLETE and CLOSED on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); nothing running, nothing billing. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -38,21 +38,16 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   (0.6B init and its random control, two permanent controls, D4-Augmented's D4 Top-1 for the pending independent-gated
   proposal, RI-S1's mapping). Relay LFS 25.30 GiB. Tombstones keep a recipe's kind, byte identity and same-hash
   copies apart; D's and W's byte-identical rebuild is not yet verified (not shown impossible).
-- Live 2026-11-14T20:57Z (`shared.project_position`): balance $16.63, $0.00/h, 0 pods, 0 volumes. Dev box 93% used,
-  15 GB free.
-- Next round RI-LM1 -- PREPARED TO THE LAUNCH POINT, PROPOSED, NOT AUTHORIZED (REPORT.md section 11): layer merging
-  at D's fixed structure, D against M-avg (direct averaging) and M-act (folded, aligned, activation-weighted; a
-  heuristic), fixed in advance with the decision rule (group sign-flip test over the 570 registered items in 558
-  groups, Holm over both registered comparisons, verdicts only when both primary units are complete; group-bootstrap
-  interval apart). Each candidate is built, its reconstruction from D and its span-block delta verified, made durable
-  on the relay and registered before the next; the deltas (1.13 GiB each) are pulled to the dev box beside D, which is
-  their protected base (`retain`); a later attempt reuses every product only under its identity. Design
-  `configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json`; code `layer_merge*.py` (+ core
-  `planning/layer_merge.py`); budget draft `plans/layer_merge_proposal.json`: $13.00 sessions ceiling, $1.00 teardown
-  reserve outside it, $11.00 per session, scenario $5-9 on one L40S. Live 2026-11-14T20:57Z: $963.24 of $1,000
-  committed, balance $16.63 -- it covers the whole proposal ($14.00); a second full $11.00 session would exceed the
-  ceiling and needs a changed grant, not a top-up. The common-budget depth/width study is separate. A grant, any GPU
-  work, recovery training and a merge into `main` are the maintainer's.
+- Dev box 95% used, 11 GB free (2026-11-15, after the two RI-LM1 deltas, 2.3 GiB).
+- RI-LM1 (layer merging at D's fixed structure) -- COMPLETE and CLOSED 2026-11-15
+  (`docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md`): both training-free merges are WORSE than
+  deletion on the registered primary comparison (thinking-mode static fluid: M-avg 0.00%, M-act 0.35%, D 5.61%; Holm
+  p 2e-5 each); every other unit points the same way (descriptive). Two attempts, $4.0989 of the $13.00 ceiling, the
+  rest lapses. Kept on the dev box: D (protected) plus each candidate's verified span-block delta
+  (`storage/layer_merge_local.json`); the relay deltas retired, the statistics and the evidence archive kept.
+- Live 2026-11-15T14:19Z (`shared.project_position`): balance $12.57, $966.19 of $1,000 committed, $0.00/h, 0 pods,
+  0 volumes. A merge into `main` and
+  any follow-up study are the maintainer's.
 - Owner: `logs/budget/decisions.md` 2026-11-13 / 11-14 / 11-15.
 
 **RESEARCH A: CLOSED (maintainer, 2026-11-11) -- CURRENT_METHOD_NO_GO FROZEN; EVERY PAID AUTHORIZATION CLOSED; THE BRANCH SQUASH-MERGED INTO `main`. NOTHING RUNNING; NOTHING BILLING BUT THE THREE VOLUMES.**
@@ -4699,7 +4694,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$890.6523` spent of `$1000.0000`, leaving `$109.3477` |
+| project cap | `$894.7512` spent of `$1000.0000`, leaving `$105.2488` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

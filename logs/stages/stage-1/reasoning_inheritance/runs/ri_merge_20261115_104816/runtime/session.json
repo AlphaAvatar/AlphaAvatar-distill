@@ -1,0 +1,1621 @@
+{
+  "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.authorization_session/v1",
+  "provider_cli": {
+    "path": "/home/ecs-user/.local/bin/runpodctl",
+    "version": "runpodctl 3.0.1-551d6a4",
+    "pod_create_terminate_after": false
+  },
+  "session_id": "stage1_layer_merge-merge_evaluation",
+  "session_spec": {
+    "session_id": "stage1_layer_merge-merge_evaluation",
+    "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.authorization_session/v1",
+    "description": "RI-LM1: M-avg and M-act at D's structure, their checks, diagnostics, state evaluation and eval-set-1",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/governance/authorization.json",
+    "authorization_type": "EngineeringAuthorization.load",
+    "plan_id": "stage1.reasoning_inheritance.layer_merge",
+    "plan_hash": "6ea06f82e3b2cf4a80b31664c9b8a1a034c59399bef8d4be62946e7a27f01a5a",
+    "status_path": "/workspace/stage1_layer_merge.status",
+    "run_log_path": "/workspace/stage1_layer_merge_run.log",
+    "driver_job_id": "stage1_layer_merge_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage1_layer_merge",
+      "evidence_filename": "report.json",
+      "archive_basename": "stage1_layer_merge",
+      "spec_success": "configs/stages/stage-1/reasoning_inheritance/layer_merge/artifacts.json",
+      "spec_failed": "configs/stages/stage-1/reasoning_inheritance/layer_merge/artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage1_layer_merge",
+        "TEACHER_MODEL": "Qwen/Qwen3-4B"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION",
+        "TEACHER_MODEL"
+      ],
+      "relay_inputs": [],
+      "local_assets": [
+        "calibration_v3:artifacts/stages/stage-2/teacher_modes",
+        "state_eval_hybrid_v3:artifacts/stages/stage-2/teacher_modes",
+        "battery_v2:artifacts/stages/stage-3/eval"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 10,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-11-15T10:49:02+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 510 min $9.27 \u00b7 soft $10.39 \u00b7 hard $10.57 (authorized $11.00)"
+    },
+    {
+      "utc": "2026-11-15T10:49:02+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-11-15T10:49:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $16.4204 against the $10.5730 this session must be able to fund"
+    },
+    {
+      "utc": "2026-11-15T10:49:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account resources OK: the provider account holds only the 0 resource(s) the records account for"
+    },
+    {
+      "utc": "2026-11-15T10:49:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "RI-LM1 is open"
+    },
+    {
+      "utc": "2026-11-15T10:49:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "a RI-LM1 merge_evaluation artifact, unused"
+    },
+    {
+      "utc": "2026-11-15T10:49:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "utc": "2026-11-15T10:49:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "all-in $10.7954 over 583.25 min, inside $11.00"
+    },
+    {
+      "utc": "2026-11-15T10:49:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "study identity 6ea06f82e3b2 is the authorized one"
+    },
+    {
+      "utc": "2026-11-15T10:49:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "every bound file is in the session commit"
+    },
+    {
+      "utc": "2026-11-15T10:49:05+00:00",
+      "elapsed_min": 0.0,
+      "msg": "$11.00 inside the envelope ($12.7853) and the $36.5461 the project cap leaves now"
+    },
+    {
+      "utc": "2026-11-15T10:49:05+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the authorization is in session commit f9759dc68720"
+    },
+    {
+      "utc": "2026-11-15T10:49:05+00:00",
+      "elapsed_min": 0.0,
+      "msg": "$11.00 + the $1.0 teardown reserve fit"
+    },
+    {
+      "utc": "2026-11-15T10:49:06+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the relay would accept the two deltas and the statistics: 3 object(s), 2.32 GiB: ACCEPTED (200) 3/3 granted an upload action"
+    },
+    {
+      "utc": "2026-11-15T10:49:06+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 0 relay inputs (), 3 local assets"
+    },
+    {
+      "utc": "2026-11-15T10:49:09+00:00",
+      "elapsed_min": 0.04,
+      "msg": "watchdog detached \u2014 hard 582 min = $10.57"
+    },
+    {
+      "utc": "2026-11-15T10:49:09+00:00",
+      "elapsed_min": 0.04,
+      "msg": "created 04g62nhvdp8y9v at $1.09/h in an unread datacenter"
+    },
+    {
+      "utc": "2026-11-15T10:50:02+00:00",
+      "elapsed_min": 0.93,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-11-15T10:51:07+00:00",
+      "elapsed_min": 2.01,
+      "msg": "TCP 22 at 202.181.159.239:17244 after 2.0 min"
+    },
+    {
+      "utc": "2026-11-15T10:51:10+00:00",
+      "elapsed_min": 2.05,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-11-15T10:52:15+00:00",
+      "elapsed_min": 3.14,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-11-15T10:52:15+00:00",
+      "elapsed_min": 3.14,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-11-15T10:54:25+00:00",
+      "elapsed_min": 5.31,
+      "msg": "draw 1: setup complete \u2014 $0.10"
+    },
+    {
+      "utc": "2026-11-15T10:54:30+00:00",
+      "elapsed_min": 5.4,
+      "msg": "driver detached, pid 2262, confirmed by descriptor_probe \u2014 $0.10"
+    },
+    {
+      "utc": "2026-11-15T10:55:41+00:00",
+      "elapsed_min": 6.57,
+      "msg": "  2026-11-15T10:55:24Z MARKER:D_REBUILT_EQUAL:M-avg \u2014 $0.12"
+    },
+    {
+      "utc": "2026-11-15T10:55:55+00:00",
+      "elapsed_min": 6.81,
+      "msg": "secured 3 file(s) (3 held)"
+    },
+    {
+      "utc": "2026-11-15T10:57:08+00:00",
+      "elapsed_min": 8.03,
+      "msg": "  2026-11-15T10:56:59Z MARKER:BUILT:M-avg \u2014 $0.15"
+    },
+    {
+      "utc": "2026-11-15T11:00:43+00:00",
+      "elapsed_min": 11.61,
+      "msg": "secured 4 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-15T11:01:56+00:00",
+      "elapsed_min": 12.83,
+      "msg": "  2026-11-15T10:58:12Z MARKER:D_REBUILT_EQUAL:M-act \u2014 $0.23"
+    },
+    {
+      "utc": "2026-11-15T11:02:10+00:00",
+      "elapsed_min": 13.06,
+      "msg": "secured 4 file(s) (7 held)"
+    },
+    {
+      "utc": "2026-11-15T11:24:22+00:00",
+      "elapsed_min": 35.26,
+      "msg": "  2026-11-15T11:23:57Z MARKER:EQUIVALENCE_OK \u2014 $0.64"
+    },
+    {
+      "utc": "2026-11-15T11:24:37+00:00",
+      "elapsed_min": 35.52,
+      "msg": "secured 4 file(s) (10 held)"
+    },
+    {
+      "utc": "2026-11-15T11:25:51+00:00",
+      "elapsed_min": 36.74,
+      "msg": "  2026-11-15T11:25:38Z MARKER:BUILT:M-act \u2014 $0.67"
+    },
+    {
+      "utc": "2026-11-15T11:29:24+00:00",
+      "elapsed_min": 40.29,
+      "msg": "secured 4 file(s) (13 held)"
+    },
+    {
+      "utc": "2026-11-15T11:30:37+00:00",
+      "elapsed_min": 41.51,
+      "msg": "  2026-11-15T11:27:51Z MARKER:DIAGNOSTICS_OK \u2014 $0.75"
+    },
+    {
+      "utc": "2026-11-15T11:30:51+00:00",
+      "elapsed_min": 41.73,
+      "msg": "secured 5 file(s) (16 held)"
+    },
+    {
+      "utc": "2026-11-15T11:33:36+00:00",
+      "elapsed_min": 44.5,
+      "msg": "secured 2 file(s) (17 held)"
+    },
+    {
+      "utc": "2026-11-15T11:34:50+00:00",
+      "elapsed_min": 45.73,
+      "msg": "  2026-11-15T11:34:03Z MARKER:EVAL_START:M-avg_H-T:fluid \u2014 $0.83"
+    },
+    {
+      "utc": "2026-11-15T11:35:03+00:00",
+      "elapsed_min": 45.95,
+      "msg": "secured 6 file(s) (20 held)"
+    },
+    {
+      "utc": "2026-11-15T11:36:30+00:00",
+      "elapsed_min": 47.39,
+      "msg": "secured 2 file(s) (21 held)"
+    },
+    {
+      "utc": "2026-11-15T11:37:56+00:00",
+      "elapsed_min": 48.83,
+      "msg": "secured 1 file(s) (21 held)"
+    },
+    {
+      "utc": "2026-11-15T11:39:24+00:00",
+      "elapsed_min": 50.3,
+      "msg": "secured 2 file(s) (22 held)"
+    },
+    {
+      "utc": "2026-11-15T11:40:52+00:00",
+      "elapsed_min": 51.77,
+      "msg": "secured 2 file(s) (23 held)"
+    },
+    {
+      "utc": "2026-11-15T11:42:21+00:00",
+      "elapsed_min": 53.25,
+      "msg": "secured 2 file(s) (24 held)"
+    },
+    {
+      "utc": "2026-11-15T11:43:51+00:00",
+      "elapsed_min": 54.74,
+      "msg": "secured 1 file(s) (24 held)"
+    },
+    {
+      "utc": "2026-11-15T11:45:21+00:00",
+      "elapsed_min": 56.24,
+      "msg": "secured 2 file(s) (25 held)"
+    },
+    {
+      "utc": "2026-11-15T11:46:47+00:00",
+      "elapsed_min": 57.68,
+      "msg": "secured 2 file(s) (26 held)"
+    },
+    {
+      "utc": "2026-11-15T11:48:17+00:00",
+      "elapsed_min": 59.18,
+      "msg": "secured 2 file(s) (27 held)"
+    },
+    {
+      "utc": "2026-11-15T11:49:48+00:00",
+      "elapsed_min": 60.69,
+      "msg": "secured 1 file(s) (27 held)"
+    },
+    {
+      "utc": "2026-11-15T11:51:18+00:00",
+      "elapsed_min": 62.2,
+      "msg": "secured 2 file(s) (28 held)"
+    },
+    {
+      "utc": "2026-11-15T11:52:32+00:00",
+      "elapsed_min": 63.42,
+      "msg": "  2026-11-15T11:51:33Z MARKER:EVAL_START:M-act_H-T:fluid \u2014 $1.15"
+    },
+    {
+      "utc": "2026-11-15T11:52:46+00:00",
+      "elapsed_min": 63.66,
+      "msg": "secured 9 file(s) (36 held)"
+    },
+    {
+      "utc": "2026-11-15T11:54:13+00:00",
+      "elapsed_min": 65.1,
+      "msg": "secured 2 file(s) (37 held)"
+    },
+    {
+      "utc": "2026-11-15T11:55:39+00:00",
+      "elapsed_min": 66.54,
+      "msg": "secured 1 file(s) (37 held)"
+    },
+    {
+      "utc": "2026-11-15T11:57:09+00:00",
+      "elapsed_min": 68.05,
+      "msg": "secured 2 file(s) (38 held)"
+    },
+    {
+      "utc": "2026-11-15T11:58:39+00:00",
+      "elapsed_min": 69.55,
+      "msg": "secured 2 file(s) (39 held)"
+    },
+    {
+      "utc": "2026-11-15T12:00:10+00:00",
+      "elapsed_min": 71.05,
+      "msg": "secured 2 file(s) (40 held)"
+    },
+    {
+      "utc": "2026-11-15T12:01:43+00:00",
+      "elapsed_min": 72.61,
+      "msg": "secured 1 file(s) (40 held)"
+    },
+    {
+      "utc": "2026-11-15T12:03:12+00:00",
+      "elapsed_min": 74.09,
+      "msg": "secured 2 file(s) (41 held)"
+    },
+    {
+      "utc": "2026-11-15T12:04:40+00:00",
+      "elapsed_min": 75.55,
+      "msg": "secured 2 file(s) (42 held)"
+    },
+    {
+      "utc": "2026-11-15T12:06:07+00:00",
+      "elapsed_min": 77.01,
+      "msg": "secured 2 file(s) (43 held)"
+    },
+    {
+      "utc": "2026-11-15T12:07:35+00:00",
+      "elapsed_min": 78.48,
+      "msg": "secured 1 file(s) (43 held)"
+    },
+    {
+      "utc": "2026-11-15T12:09:04+00:00",
+      "elapsed_min": 79.96,
+      "msg": "secured 2 file(s) (44 held)"
+    },
+    {
+      "utc": "2026-11-15T12:10:32+00:00",
+      "elapsed_min": 81.42,
+      "msg": "secured 2 file(s) (45 held)"
+    },
+    {
+      "utc": "2026-11-15T12:11:45+00:00",
+      "elapsed_min": 82.64,
+      "msg": "  2026-11-15T12:11:03Z MARKER:EVAL_START:M-avg_H-T:capability \u2014 $1.50"
+    },
+    {
+      "utc": "2026-11-15T12:12:00+00:00",
+      "elapsed_min": 82.9,
+      "msg": "secured 8 file(s) (51 held)"
+    },
+    {
+      "utc": "2026-11-15T12:13:34+00:00",
+      "elapsed_min": 84.45,
+      "msg": "secured 1 file(s) (52 held)"
+    },
+    {
+      "utc": "2026-11-15T12:15:02+00:00",
+      "elapsed_min": 85.93,
+      "msg": "secured 3 file(s) (54 held)"
+    },
+    {
+      "utc": "2026-11-15T12:16:39+00:00",
+      "elapsed_min": 87.54,
+      "msg": "secured 5 file(s) (58 held)"
+    },
+    {
+      "utc": "2026-11-15T12:18:13+00:00",
+      "elapsed_min": 89.11,
+      "msg": "secured 5 file(s) (62 held)"
+    },
+    {
+      "utc": "2026-11-15T12:19:40+00:00",
+      "elapsed_min": 90.56,
+      "msg": "secured 2 file(s) (64 held)"
+    },
+    {
+      "utc": "2026-11-15T12:21:10+00:00",
+      "elapsed_min": 92.07,
+      "msg": "secured 1 file(s) (64 held)"
+    },
+    {
+      "utc": "2026-11-15T12:22:37+00:00",
+      "elapsed_min": 93.51,
+      "msg": "secured 4 file(s) (68 held)"
+    },
+    {
+      "utc": "2026-11-15T12:24:04+00:00",
+      "elapsed_min": 94.95,
+      "msg": "secured 5 file(s) (72 held)"
+    },
+    {
+      "utc": "2026-11-15T12:25:31+00:00",
+      "elapsed_min": 96.4,
+      "msg": "secured 2 file(s) (73 held)"
+    },
+    {
+      "utc": "2026-11-15T12:27:07+00:00",
+      "elapsed_min": 98.0,
+      "msg": "secured 2 file(s) (75 held)"
+    },
+    {
+      "utc": "2026-11-15T12:28:35+00:00",
+      "elapsed_min": 99.47,
+      "msg": "secured 5 file(s) (79 held)"
+    },
+    {
+      "utc": "2026-11-15T12:30:04+00:00",
+      "elapsed_min": 100.95,
+      "msg": "secured 5 file(s) (83 held)"
+    },
+    {
+      "utc": "2026-11-15T12:31:30+00:00",
+      "elapsed_min": 102.39,
+      "msg": "secured 2 file(s) (85 held)"
+    },
+    {
+      "utc": "2026-11-15T12:34:02+00:00",
+      "elapsed_min": 104.92,
+      "msg": "  2026-11-15T12:33:04Z MARKER:EVAL_START:M-act_H-T:capability \u2014 $1.91"
+    },
+    {
+      "utc": "2026-11-15T12:34:18+00:00",
+      "elapsed_min": 105.19,
+      "msg": "secured 8 file(s) (91 held)"
+    },
+    {
+      "utc": "2026-11-15T12:35:45+00:00",
+      "elapsed_min": 106.64,
+      "msg": "secured 1 file(s) (92 held)"
+    },
+    {
+      "utc": "2026-11-15T12:37:14+00:00",
+      "elapsed_min": 108.13,
+      "msg": "secured 5 file(s) (96 held)"
+    },
+    {
+      "utc": "2026-11-15T12:38:41+00:00",
+      "elapsed_min": 109.57,
+      "msg": "secured 3 file(s) (98 held)"
+    },
+    {
+      "utc": "2026-11-15T12:40:10+00:00",
+      "elapsed_min": 111.06,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-15T12:41:40+00:00",
+      "elapsed_min": 112.56,
+      "msg": "secured 5 file(s) (104 held)"
+    },
+    {
+      "utc": "2026-11-15T12:44:26+00:00",
+      "elapsed_min": 115.33,
+      "msg": "secured 4 file(s) (107 held)"
+    },
+    {
+      "utc": "2026-11-15T12:45:55+00:00",
+      "elapsed_min": 116.81,
+      "msg": "secured 2 file(s) (109 held)"
+    },
+    {
+      "utc": "2026-11-15T12:47:22+00:00",
+      "elapsed_min": 118.26,
+      "msg": "secured 5 file(s) (113 held)"
+    },
+    {
+      "utc": "2026-11-15T12:48:49+00:00",
+      "elapsed_min": 119.7,
+      "msg": "secured 1 file(s) (113 held)"
+    },
+    {
+      "utc": "2026-11-15T12:50:15+00:00",
+      "elapsed_min": 121.15,
+      "msg": "secured 4 file(s) (117 held)"
+    },
+    {
+      "utc": "2026-11-15T12:51:50+00:00",
+      "elapsed_min": 122.73,
+      "msg": "secured 5 file(s) (121 held)"
+    },
+    {
+      "utc": "2026-11-15T12:53:20+00:00",
+      "elapsed_min": 124.23,
+      "msg": "secured 1 file(s) (122 held)"
+    },
+    {
+      "utc": "2026-11-15T12:54:47+00:00",
+      "elapsed_min": 125.67,
+      "msg": "secured 3 file(s) (124 held)"
+    },
+    {
+      "utc": "2026-11-15T12:56:18+00:00",
+      "elapsed_min": 127.19,
+      "msg": "secured 2 file(s) (126 held)"
+    },
+    {
+      "utc": "2026-11-15T12:57:31+00:00",
+      "elapsed_min": 128.41,
+      "msg": "  2026-11-15T12:57:04Z MARKER:EVAL_START:M-avg_H-N:fluid \u2014 $2.33"
+    },
+    {
+      "utc": "2026-11-15T12:57:45+00:00",
+      "elapsed_min": 128.64,
+      "msg": "secured 8 file(s) (132 held)"
+    },
+    {
+      "utc": "2026-11-15T12:59:14+00:00",
+      "elapsed_min": 130.13,
+      "msg": "secured 1 file(s) (132 held)"
+    },
+    {
+      "utc": "2026-11-15T13:00:48+00:00",
+      "elapsed_min": 131.7,
+      "msg": "secured 2 file(s) (133 held)"
+    },
+    {
+      "utc": "2026-11-15T13:02:15+00:00",
+      "elapsed_min": 133.15,
+      "msg": "secured 2 file(s) (134 held)"
+    },
+    {
+      "utc": "2026-11-15T13:03:43+00:00",
+      "elapsed_min": 134.61,
+      "msg": "secured 2 file(s) (135 held)"
+    },
+    {
+      "utc": "2026-11-15T13:05:12+00:00",
+      "elapsed_min": 136.09,
+      "msg": "secured 1 file(s) (135 held)"
+    },
+    {
+      "utc": "2026-11-15T13:06:41+00:00",
+      "elapsed_min": 137.58,
+      "msg": "secured 2 file(s) (136 held)"
+    },
+    {
+      "utc": "2026-11-15T13:08:13+00:00",
+      "elapsed_min": 139.11,
+      "msg": "secured 2 file(s) (137 held)"
+    },
+    {
+      "utc": "2026-11-15T13:09:42+00:00",
+      "elapsed_min": 140.58,
+      "msg": "secured 2 file(s) (138 held)"
+    },
+    {
+      "utc": "2026-11-15T13:11:08+00:00",
+      "elapsed_min": 142.03,
+      "msg": "secured 1 file(s) (138 held)"
+    },
+    {
+      "utc": "2026-11-15T13:12:38+00:00",
+      "elapsed_min": 143.52,
+      "msg": "secured 2 file(s) (139 held)"
+    },
+    {
+      "utc": "2026-11-15T13:13:54+00:00",
+      "elapsed_min": 144.79,
+      "msg": "  2026-11-15T13:13:04Z MARKER:EVAL_START:M-act_H-N:fluid \u2014 $2.63"
+    },
+    {
+      "utc": "2026-11-15T13:14:10+00:00",
+      "elapsed_min": 145.06,
+      "msg": "secured 8 file(s) (145 held)"
+    },
+    {
+      "utc": "2026-11-15T13:15:39+00:00",
+      "elapsed_min": 146.55,
+      "msg": "secured 2 file(s) (146 held)"
+    },
+    {
+      "utc": "2026-11-15T13:17:08+00:00",
+      "elapsed_min": 148.02,
+      "msg": "secured 1 file(s) (146 held)"
+    },
+    {
+      "utc": "2026-11-15T13:18:40+00:00",
+      "elapsed_min": 149.55,
+      "msg": "secured 2 file(s) (147 held)"
+    },
+    {
+      "utc": "2026-11-15T13:20:11+00:00",
+      "elapsed_min": 151.07,
+      "msg": "secured 2 file(s) (148 held)"
+    },
+    {
+      "utc": "2026-11-15T13:21:38+00:00",
+      "elapsed_min": 152.52,
+      "msg": "secured 2 file(s) (149 held)"
+    },
+    {
+      "utc": "2026-11-15T13:23:09+00:00",
+      "elapsed_min": 154.05,
+      "msg": "secured 1 file(s) (149 held)"
+    },
+    {
+      "utc": "2026-11-15T13:24:36+00:00",
+      "elapsed_min": 155.49,
+      "msg": "secured 2 file(s) (150 held)"
+    },
+    {
+      "utc": "2026-11-15T13:26:06+00:00",
+      "elapsed_min": 156.99,
+      "msg": "secured 2 file(s) (151 held)"
+    },
+    {
+      "utc": "2026-11-15T13:27:33+00:00",
+      "elapsed_min": 158.44,
+      "msg": "secured 2 file(s) (152 held)"
+    },
+    {
+      "utc": "2026-11-15T13:29:00+00:00",
+      "elapsed_min": 159.89,
+      "msg": "secured 1 file(s) (152 held)"
+    },
+    {
+      "utc": "2026-11-15T13:30:32+00:00",
+      "elapsed_min": 161.42,
+      "msg": "secured 2 file(s) (153 held)"
+    },
+    {
+      "utc": "2026-11-15T13:31:45+00:00",
+      "elapsed_min": 162.65,
+      "msg": "  2026-11-15T13:30:34Z MARKER:EVAL_START:M-avg_H-N:capability \u2014 $2.95"
+    },
+    {
+      "utc": "2026-11-15T13:32:01+00:00",
+      "elapsed_min": 162.91,
+      "msg": "secured 8 file(s) (159 held)"
+    },
+    {
+      "utc": "2026-11-15T13:33:30+00:00",
+      "elapsed_min": 164.39,
+      "msg": "secured 2 file(s) (160 held)"
+    },
+    {
+      "utc": "2026-11-15T13:35:00+00:00",
+      "elapsed_min": 165.89,
+      "msg": "secured 5 file(s) (164 held)"
+    },
+    {
+      "utc": "2026-11-15T13:36:28+00:00",
+      "elapsed_min": 167.36,
+      "msg": "secured 2 file(s) (166 held)"
+    },
+    {
+      "utc": "2026-11-15T13:38:03+00:00",
+      "elapsed_min": 168.94,
+      "msg": "secured 5 file(s) (170 held)"
+    },
+    {
+      "utc": "2026-11-15T13:39:36+00:00",
+      "elapsed_min": 170.48,
+      "msg": "secured 2 file(s) (172 held)"
+    },
+    {
+      "utc": "2026-11-15T13:41:05+00:00",
+      "elapsed_min": 171.97,
+      "msg": "secured 5 file(s) (176 held)"
+    },
+    {
+      "utc": "2026-11-15T13:43:52+00:00",
+      "elapsed_min": 174.76,
+      "msg": "secured 4 file(s) (179 held)"
+    },
+    {
+      "utc": "2026-11-15T13:45:23+00:00",
+      "elapsed_min": 176.27,
+      "msg": "secured 4 file(s) (182 held)"
+    },
+    {
+      "utc": "2026-11-15T13:46:50+00:00",
+      "elapsed_min": 177.72,
+      "msg": "secured 2 file(s) (184 held)"
+    },
+    {
+      "utc": "2026-11-15T13:48:24+00:00",
+      "elapsed_min": 179.29,
+      "msg": "secured 3 file(s) (186 held)"
+    },
+    {
+      "utc": "2026-11-15T13:49:52+00:00",
+      "elapsed_min": 180.75,
+      "msg": "secured 5 file(s) (190 held)"
+    },
+    {
+      "utc": "2026-11-15T13:51:19+00:00",
+      "elapsed_min": 182.21,
+      "msg": "secured 2 file(s) (192 held)"
+    },
+    {
+      "utc": "2026-11-15T13:52:46+00:00",
+      "elapsed_min": 183.66,
+      "msg": "secured 8 file(s) (198 held)"
+    },
+    {
+      "utc": "2026-11-15T13:54:00+00:00",
+      "elapsed_min": 184.9,
+      "msg": "  2026-11-15T13:52:35Z MARKER:EVAL_START:M-act_H-N:capability \u2014 $3.36"
+    },
+    {
+      "utc": "2026-11-15T13:54:16+00:00",
+      "elapsed_min": 185.16,
+      "msg": "secured 1 file(s) (198 held)"
+    },
+    {
+      "utc": "2026-11-15T13:55:45+00:00",
+      "elapsed_min": 186.65,
+      "msg": "secured 4 file(s) (201 held)"
+    },
+    {
+      "utc": "2026-11-15T13:57:15+00:00",
+      "elapsed_min": 188.14,
+      "msg": "secured 3 file(s) (203 held)"
+    },
+    {
+      "utc": "2026-11-15T13:58:45+00:00",
+      "elapsed_min": 189.64,
+      "msg": "secured 4 file(s) (207 held)"
+    },
+    {
+      "utc": "2026-11-15T14:00:15+00:00",
+      "elapsed_min": 191.14,
+      "msg": "secured 3 file(s) (209 held)"
+    },
+    {
+      "utc": "2026-11-15T14:01:48+00:00",
+      "elapsed_min": 192.69,
+      "msg": "secured 2 file(s) (211 held)"
+    },
+    {
+      "utc": "2026-11-15T14:03:16+00:00",
+      "elapsed_min": 194.16,
+      "msg": "secured 4 file(s) (214 held)"
+    },
+    {
+      "utc": "2026-11-15T14:04:50+00:00",
+      "elapsed_min": 195.73,
+      "msg": "secured 2 file(s) (216 held)"
+    },
+    {
+      "utc": "2026-11-15T14:06:17+00:00",
+      "elapsed_min": 197.18,
+      "msg": "secured 3 file(s) (218 held)"
+    },
+    {
+      "utc": "2026-11-15T14:07:45+00:00",
+      "elapsed_min": 198.64,
+      "msg": "secured 2 file(s) (220 held)"
+    },
+    {
+      "utc": "2026-11-15T14:09:19+00:00",
+      "elapsed_min": 200.2,
+      "msg": "secured 5 file(s) (224 held)"
+    },
+    {
+      "utc": "2026-11-15T14:10:49+00:00",
+      "elapsed_min": 201.71,
+      "msg": "secured 5 file(s) (228 held)"
+    },
+    {
+      "utc": "2026-11-15T14:13:41+00:00",
+      "elapsed_min": 204.58,
+      "msg": "secured 5 file(s) (232 held)"
+    },
+    {
+      "utc": "2026-11-15T14:15:11+00:00",
+      "elapsed_min": 206.07,
+      "msg": "secured 1 file(s) (233 held)"
+    },
+    {
+      "utc": "2026-11-15T14:16:25+00:00",
+      "elapsed_min": 207.3,
+      "msg": "  2026-11-15T14:16:05Z MARKER:ALL_DONE \u2014 $3.77"
+    },
+    {
+      "utc": "2026-11-15T14:16:25+00:00",
+      "elapsed_min": 207.3,
+      "msg": "polling ended: ALL_DONE \u2014 $3.77"
+    },
+    {
+      "utc": "2026-11-15T14:18:19+00:00",
+      "elapsed_min": 209.2,
+      "msg": "  manifest rc=0\n15 file(s) across 5 class(es) -> /workspace/manifest.json\n  final_required: 15 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-11-15T14:18:46+00:00",
+      "elapsed_min": 209.67,
+      "msg": "secured 8 file(s) (238 held)"
+    },
+    {
+      "utc": "2026-11-15T14:18:46+00:00",
+      "elapsed_min": 209.67,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-11-15T14:18:46+00:00",
+      "elapsed_min": 209.67,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-11-15T14:18:58+00:00",
+      "elapsed_min": 209.85,
+      "msg": "pod deleted \u2014 209.9 min, $3.81; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.authorization/v1",
+    "authorization_id": "stage1.reasoning_inheritance.layer_merge.ri_merge_20261115_104816",
+    "version": 1,
+    "granted_utc": "2026-11-15T10:48:19+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "stage1.reasoning_inheritance.layer_merge",
+    "study_identity_sha256": "6ea06f82e3b2cf4a80b31664c9b8a1a034c59399bef8d4be62946e7a27f01a5a",
+    "expected_usd": 9.27,
+    "hard_cap_usd": 11.0,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "design_sha256": "cd908d958e392c73e8857b10bc93badcb60d436ba974703c5ec9c30ee0d616a1",
+      "digests_sha256": "8018e87d0d976c0ec96d52bec1262c3c27c89516bf9755bf45e4817a48268edd",
+      "resume_from": "",
+      "driver_extra": "--max-num-seqs 7",
+      "kind": "merge_evaluation",
+      "study": "RI-LM1",
+      "dry_run": "false",
+      "grant": "logs/budget/approvals/stage1_layer_merge_grant.json",
+      "grant_sha256": "318242f462c756f45b742b974d5b317ece745cb84286ced7d1ceba29bf21191b",
+      "gpus": "{\"NVIDIA L40S\": 1.09}",
+      "gpu_count_max": "1",
+      "envelope": "{\"ceiling_usd\": 13.0, \"spent_usd\": 0.2147, \"remaining_usd\": 12.7853, \"runs\": [{\"run_id\": \"ri_merge_20261115_103303\", \"usd\": 0.2147}]}",
+      "live_position": "{\"fetched_utc\": \"2026-11-15T10:48:18+00:00\", \"provider_billed_usd\": 943.3682, \"committed_usd\": 963.4539, \"project_cap_usd\": 1000.0, \"project_remaining_usd\": 36.5461, \"account_pods\": [], \"account_volumes\": [], \"balance_usd\": 16.4203909631, \"spend_per_hour\": 0.0, \"rule\": \"shared.project_position: mixed_governance.position + engineering-campaign subruns\", \"unposted_sessions\": 1, \"campaign_unposted\": 0, \"campaign_teardown_confirmed_by\": {\"subrun record\": 25, \"reconciliation\": 30}}"
+    },
+    "scope_note": "RI-LM1 attempt 2: attempt 1 stopped on a wrong configuration check (fixed); both candidates, every registered unit",
+    "authorizes_engineering_validation": false,
+    "authorizes_formal": true,
+    "authorizes_training": false,
+    "authorizes_evaluation": true,
+    "authorizes_teacher_generation": false,
+    "authorizes_paid_storage": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "e4e82a0f2b692f5320adbd60c75cf21dd6dc3fc43e426e193e9219913480449a",
+    "harness_source_files": [
+      "src/aadistill/__init__.py",
+      "src/aadistill/data/__init__.py",
+      "src/aadistill/data/cleaning.py",
+      "src/aadistill/data/code_exec.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/diversity.py",
+      "src/aadistill/data/e5_pack.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/mixture.py",
+      "src/aadistill/data/nested_ladder.py",
+      "src/aadistill/data/paired_corpus.py",
+      "src/aadistill/data/prefix_split.py",
+      "src/aadistill/data/recovery.py",
+      "src/aadistill/data/sequence_packing.py",
+      "src/aadistill/data/sessions.py",
+      "src/aadistill/data/target_policy.py",
+      "src/aadistill/data/target_quality.py",
+      "src/aadistill/data/token_documents.py",
+      "src/aadistill/data/tool_calls.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/eval_registry.py",
+      "src/aadistill/evaluation/function_error.py",
+      "src/aadistill/evaluation/general_text.py",
+      "src/aadistill/evaluation/init_nll.py",
+      "src/aadistill/evaluation/isolation.py",
+      "src/aadistill/evaluation/oracle_reasoning.py",
+      "src/aadistill/evaluation/paired_stats.py",
+      "src/aadistill/evaluation/protocol_field.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/__init__.py",
+      "src/aadistill/governance/artifact_manifest.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/governance/post_freeze.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/source_identity.py",
+      "src/aadistill/infrastructure/transfer.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/__init__.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/families.py",
+      "src/aadistill/initialization/adapters/projected_residual.py",
+      "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/calibration/__init__.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/__init__.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/frozen_mapping.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/layer_merge.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_import.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/__init__.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/kl_reference.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/__init__.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/identity_collapse.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/__init__.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/reweight.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/__init__.py",
+      "src/aadistill/initialization/transforms/nll_gate.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/projected_residual.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/__init__.py",
+      "src/aadistill/models/cost_model.py",
+      "src/aadistill/models/quant.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/rollout/__init__.py",
+      "src/aadistill/rollout/engines.py",
+      "src/aadistill/rollout/generate.py",
+      "src/aadistill/rollout/snapshots.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/durable_store.py",
+      "src/aadistill/runtime/hub_capacity.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/setup_steps.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/__init__.py",
+      "src/aadistill/training/accounting.py",
+      "src/aadistill/training/lineage.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/topk_kd.py",
+      "src/aadistill/training/train.py",
+      "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+      "scripts/stages/stage-1/reasoning_inheritance/layer_merge.py",
+      "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+      "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+      "scripts/stages/stage-1/reasoning_inheritance/launch.py",
+      "scripts/stages/stage-1/reasoning_inheritance/selection.py",
+      "scripts/stages/stage-1/reasoning_inheritance/__init__.py",
+      "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+      "scripts/stages/stage-2/teacher_modes/full_search.py",
+      "scripts/stages/stage-2/teacher_modes/hybrid_state_eval.py",
+      "scripts/stages/stage-2/teacher_modes/packed_inputs.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "scripts/shared/evaluation/decoding.py",
+      "scripts/shared/evaluation/eval_set_scoring.py",
+      "scripts/shared/eval_sets.py",
+      "scripts/shared/forward_baseline.py",
+      "scripts/shared/pod/teacher_cache.py"
+    ],
+    "per_launch_hard_usd": 11.0,
+    "provenance_commit": "1a81634aafcdc8feed1a256c1a867d093222e314",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the study identity and the harness on disk, is not a dry run, has not been used, and its hard cap covers the planned all-in bound and fits the project cap as the provider bills it at launch; setup re-checks the binding on the pod; one artifact funds one run inside the grant's envelope",
+    "authorization_sha256": "753f8cd6375383c445ca094d1f6ac6a046d996d281bf1d95336e023eaf5ffeff"
+  },
+  "session_plan_hash": "6ea06f82e3b2cf4a80b31664c9b8a1a034c59399bef8d4be62946e7a27f01a5a",
+  "harness_source_digest": "e4e82a0f2b692f5320adbd60c75cf21dd6dc3fc43e426e193e9219913480449a",
+  "harness_source_files": [
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/evaluation/decoding.py",
+    "scripts/shared/evaluation/eval_set_scoring.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/forward_baseline.py",
+    "scripts/shared/pod/teacher_cache.py",
+    "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-1/reasoning_inheritance/__init__.py",
+    "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/selection.py",
+    "scripts/stages/stage-2/teacher_modes/full_search.py",
+    "scripts/stages/stage-2/teacher_modes/hybrid_state_eval.py",
+    "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+    "scripts/stages/stage-2/teacher_modes/packed_inputs.py",
+    "src/aadistill/__init__.py",
+    "src/aadistill/data/__init__.py",
+    "src/aadistill/data/cleaning.py",
+    "src/aadistill/data/code_exec.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/diversity.py",
+    "src/aadistill/data/e5_pack.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/mixture.py",
+    "src/aadistill/data/nested_ladder.py",
+    "src/aadistill/data/paired_corpus.py",
+    "src/aadistill/data/prefix_split.py",
+    "src/aadistill/data/recovery.py",
+    "src/aadistill/data/sequence_packing.py",
+    "src/aadistill/data/sessions.py",
+    "src/aadistill/data/target_policy.py",
+    "src/aadistill/data/target_quality.py",
+    "src/aadistill/data/token_documents.py",
+    "src/aadistill/data/tool_calls.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/function_error.py",
+    "src/aadistill/evaluation/general_text.py",
+    "src/aadistill/evaluation/init_nll.py",
+    "src/aadistill/evaluation/isolation.py",
+    "src/aadistill/evaluation/oracle_reasoning.py",
+    "src/aadistill/evaluation/paired_stats.py",
+    "src/aadistill/evaluation/protocol_field.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/__init__.py",
+    "src/aadistill/governance/artifact_manifest.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/governance/post_freeze.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/source_identity.py",
+    "src/aadistill/infrastructure/transfer.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/__init__.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/families.py",
+    "src/aadistill/initialization/adapters/projected_residual.py",
+    "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/calibration/__init__.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/__init__.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/frozen_mapping.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/layer_merge.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_import.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/__init__.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/kl_reference.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/__init__.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/identity_collapse.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/__init__.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/reweight.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/__init__.py",
+    "src/aadistill/initialization/transforms/nll_gate.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/projected_residual.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/__init__.py",
+    "src/aadistill/models/cost_model.py",
+    "src/aadistill/models/quant.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/rollout/__init__.py",
+    "src/aadistill/rollout/engines.py",
+    "src/aadistill/rollout/generate.py",
+    "src/aadistill/rollout/snapshots.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/durable_store.py",
+    "src/aadistill/runtime/hub_capacity.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/setup_steps.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/__init__.py",
+    "src/aadistill/training/accounting.py",
+    "src/aadistill/training/lineage.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/topk_kd.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 11.0,
+    "expected_minutes": 510.0,
+    "soft_stop_minutes": 572.0,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 582.0,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: the validation is one phase (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 25.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 5.0
+      },
+      {
+        "name": "RI-LM1_merge_evaluation",
+        "minutes": 480.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "closeout_and_teardown",
+        "minutes": 11.0
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 11.0,
+    "expected_usd": 9.265,
+    "soft_stop_usd": 10.3913,
+    "artifact_recovery_reserve_usd": 0.1817,
+    "hard_terminate_usd": 10.573
+  },
+  "quoted_price_per_hour": 1.09,
+  "gpu_count": 1,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 16.4203909631,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 10.573,
+    "ok": true,
+    "why": "the provider account holds $16.4204 against the $10.5730 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "account_resources": {
+    "checked": true,
+    "known": true,
+    "pods": [],
+    "network_volumes": [],
+    "error": null,
+    "accounted": [],
+    "unaccounted": [],
+    "ok": true,
+    "why": "the provider account holds only the 0 resource(s) the records account for"
+  },
+  "prechecks": [
+    {
+      "check": "the_study_is_open",
+      "ok": true,
+      "message": "RI-LM1 is open"
+    },
+    {
+      "check": "the_artifact_is_this_studys_and_unused",
+      "ok": true,
+      "message": "a RI-LM1 merge_evaluation artifact, unused"
+    },
+    {
+      "check": "the_gpu_and_price_are_the_grants",
+      "ok": true,
+      "message": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "check": "all_in_within_cap",
+      "ok": true,
+      "message": "all-in $10.7954 over 583.25 min, inside $11.00"
+    },
+    {
+      "check": "the_study_identity_is_the_authorized_one",
+      "ok": true,
+      "message": "study identity 6ea06f82e3b2 is the authorized one"
+    },
+    {
+      "check": "bound_files_are_in_the_session_commit",
+      "ok": true,
+      "message": "every bound file is in the session commit"
+    },
+    {
+      "check": "the_project_cap_holds_now",
+      "ok": true,
+      "message": "$11.00 inside the envelope ($12.7853) and the $36.5461 the project cap leaves now"
+    },
+    {
+      "check": "the_authorization_is_in_the_session_commit",
+      "ok": true,
+      "message": "the authorization is in session commit f9759dc68720"
+    },
+    {
+      "check": "the_teardown_reserve_stays",
+      "ok": true,
+      "message": "$11.00 + the $1.0 teardown reserve fit"
+    },
+    {
+      "check": "the_relay_has_room",
+      "ok": true,
+      "message": "the relay would accept the two deltas and the statistics: 3 object(s), 2.32 GiB: ACCEPTED (200) 3/3 granted an upload action"
+    }
+  ],
+  "all_in_bound": {
+    "billable_minutes": 583.25,
+    "price_per_hour": 1.09,
+    "container_disk_gb": 150,
+    "gpu_usd": 10.5957,
+    "disk_usd": 0.1996,
+    "all_in_usd": 10.7954,
+    "highest_price_inside_cap": 1.11
+  },
+  "live_position": {
+    "fetched_utc": "2026-11-15T10:49:04+00:00",
+    "provider_billed_usd": 943.3682,
+    "committed_usd": 963.4539,
+    "project_cap_usd": 1000.0,
+    "project_remaining_usd": 36.5461,
+    "account_pods": [],
+    "account_volumes": [],
+    "balance_usd": 16.4203909631,
+    "spend_per_hour": 0.0,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 1,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+      "subrun record": 25,
+      "reconciliation": 30
+    }
+  },
+  "envelope": {
+    "ceiling_usd": 13.0,
+    "spent_usd": 0.2147,
+    "remaining_usd": 12.7853,
+    "runs": [
+      {
+        "run_id": "ri_merge_20261115_103303",
+        "usd": 0.2147
+      },
+      {
+        "run_id": "ri_merge_20261115_104816",
+        "usd": 0.0
+      }
+    ]
+  },
+  "relay_room": "3 object(s), 2.32 GiB: ACCEPTED (200) 3/3 granted an upload action",
+  "precheck": {
+    "relay_needed": [],
+    "relay_missing": [],
+    "relay_repos": {},
+    "relay_repo_files_listed": {},
+    "local_assets": [
+      "artifacts/stages/stage-2/teacher_modes/calibration_v3",
+      "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3",
+      "artifacts/stages/stage-3/eval/battery_v2"
+    ],
+    "local_missing": []
+  },
+  "acquisition": {
+    "create_attempts": 72,
+    "create_retry_seconds": 300.0,
+    "attempts": [
+      {
+        "draw": 1,
+        "attempt": 1,
+        "request": "d1a16224b6",
+        "placement": [],
+        "request_utc": "2026-11-15T10:49:06+00:00",
+        "terminate_after_utc": "2026-11-15T20:31:06Z",
+        "outcome": "created",
+        "pod_id": "04g62nhvdp8y9v"
+      }
+    ]
+  },
+  "pod_id": "04g62nhvdp8y9v",
+  "actual_price_per_hour": 1.09,
+  "pod_record": {
+    "dataCenterId": null,
+    "createdAt": "2026-11-15T10:49:07.004Z",
+    "costPerHr": null,
+    "cost": 1.09,
+    "machineId": null,
+    "name": "aadistill-stage1_layer_merge-merge_evaluation-d1a16224b6"
+  },
+  "start": {
+    "basis": "provider createdAt",
+    "request_utc": "2026-11-15T10:49:06+00:00",
+    "provider_created_utc": "2026-11-15T10:49:07.004Z",
+    "start_epoch": 1794739747.004
+  },
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/AlphaAvatar-distill/artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/watchdog_04g62nhvdp8y9v.jsonl"
+  ],
+  "watchdog_owns_pod": "04g62nhvdp8y9v",
+  "billed_window_deadline_utc": "2026-11-15T20:31:07Z",
+  "terminate_after_utc": null,
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_f9759dc6.bundle",
+    "SESSION_ASSETS": "calibration_v3:artifacts/stages/stage-2/teacher_modes,state_eval_hybrid_v3:artifacts/stages/stage-2/teacher_modes,battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/governance/authorization.json",
+    "SESSION_COMMIT": "f9759dc687206990289f90d31291a215504b804c",
+    "SESSION_KIND": "stage1_layer_merge",
+    "SESSION_PLAN_HASH": "6ea06f82e3b2cf4a80b31664c9b8a1a034c59399bef8d4be62946e7a27f01a5a",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage1_layer_merge.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_MODEL": "Qwen/Qwen3-4B",
+    "TEACHER_REVISION": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage1_layer_merge_driver",
+    "pid": 2262,
+    "workdir": "/workspace/aad",
+    "command": "mkdir -p /workspace/aad/artifacts/audit/stage1_layer_merge/ri_merge_20261115_104816 /workspace/stage1_layer_merge_work && cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts:/workspace/aad/scripts/stages/stage-1 /opt/train/bin/python scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py --run-id ri_merge_20261115_104816 --out /workspace/aad/artifacts/audit/stage1_layer_merge/ri_merge_20261115_104816 --work /workspace/stage1_layer_merge_work --status /workspace/stage1_layer_merge.status --device cuda --vllm-python /opt/vllm/bin/python --max-num-seqs 7; grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' /workspace/stage1_layer_merge.status || echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> /workspace/stage1_layer_merge.status",
+    "log_path": "/workspace/stage1_layer_merge_run.log",
+    "status_path": "/workspace/stage1_layer_merge.status",
+    "pid_path": "/workspace/jobs/stage1_layer_merge_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage1_layer_merge_driver.job.json",
+    "exit_path": "/workspace/jobs/stage1_layer_merge_driver.exit",
+    "started_utc": "2026-11-15T10:54:27Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "secure_rounds": 113,
+  "secured_files": {
+    "files": 238,
+    "pending": 0,
+    "last_round_ok": true,
+    "last_round_files": 8
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "every finished file is on the dev box (238 files)"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 15,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 209.85,
+    "actual_usd": 3.8123,
+    "extra_resources_usd": 0,
+    "authorized_usd": 11.0,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-11-15T14:18:58+00:00"
+}

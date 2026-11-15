@@ -1615,8 +1615,9 @@ STAGE_1 = [
         stage_id="1",
         status=("COMPLETE and CLOSED 2026-11-14 (RI-S1, six attempts, $19.9554 of $35, the rest lapsed): untrained D static fluid 89.6% -> 5.6% "
                 "thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; "
-                "eval-set-1 development-exposed. Next round RI-LM1 (layer merging at D's structure: D / M-avg / "
-                "M-act) prepared to the launch point, PROPOSED, not authorized"),
+                "eval-set-1 development-exposed. RI-LM1 (layer merging at D's structure) COMPLETE and CLOSED "
+                "2026-11-15 ($4.0989 of $13): M-avg 0.00% and M-act 0.35% static fluid (thinking) against D's 5.61%, "
+                "both WORSE than deletion (Holm p 2e-5)"),
         title="Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1)",
         question=("How much of the teacher's fluid reasoning does the current initialization lose to depth "
                   "pruning alone, to all non-depth compression alone and to both, untrained, and do the two "
@@ -1644,9 +1645,17 @@ STAGE_1 = [
             E("logs/stages/stage-1/reasoning_inheritance/plans/layer_merge_proposal.json",
               "RI-LM1's budget draft: own ceiling, teardown reserve, per-session cap, terminal state",
               field="status", equals="proposed"),
+            E("logs/stages/stage-1/reasoning_inheritance/analyses/layer_merge.json",
+              "RI-LM1's registered decision (formal: both WORSE), the secondary units, the supporting units",
+              field="schema", equals="aadistill.stage1.reasoning_inheritance.layer_merge.analysis/v1"),
+            E("logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+              "where RI-LM1's candidates are kept: D (the base) plus each verified span-block delta, the dev box",
+              field="schema", equals="aadistill.stage1.reasoning_inheritance.layer_merge.local/v1"),
         ],
         external_material=[
             "docs/stages/stage-1/reasoning_inheritance/REPORT.md, LITERATURE.md -- the round's report and reading",
+            "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md -- RI-LM1's report",
+            "~/aad-artifacts/stage1_layer_merge/ -- RI-LM1's span-block deltas (with D, the candidates)",
             "artifacts/stages/stage-1/reasoning_inheritance/ -- each attempt's secured evidence (dev box); the "
             "mapping and the final evidence archive also on the private relay",
             "~/aad-artifacts/stage1_reasoning_inheritance/ -- D, W, DW (= the packed Top-1), the mapping and the "
@@ -1658,7 +1667,8 @@ STAGE_1 = [
                    "round's layer-merging plan); 2026-11-14: third review (M-act, literature, decision rule, "
                    "retirement tool, 24 relay weights retired, RI-LM1 prepared); 2026-11-15: fourth review (Holm "
                    "over both registered comparisons, per-candidate durability, capability sealing, reuse by "
-                   "identity, centered Pearson moments, candidates kept as D + delta)"],
+                   "identity, centered Pearson moments, candidates kept as D + delta); 2026-11-15: RI-LM1 granted, "
+                   "executed, closed (both merges WORSE than deletion; relay deltas retired)"],
         canonical_log_destination="logs/stages/stage-1/reasoning_inheritance",
         classification_reason=(
             "Stage 1 by subject: what the structural initialization of the packed search's Top-1 keeps "

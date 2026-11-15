@@ -1,0 +1,784 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.analysis/v1",
+ "eval_set": "eval-set-1 (development-exposed; not an untouched test)",
+ "rule": "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json :: analysis",
+ "inputs": {
+  "D_H-T": {
+   "generations": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/generations",
+   "sha256": "b9a33c02f3aab5cbd87e5a8ba718f57589463359f3f8696fa7b2265d0a8f73f8"
+  },
+  "M-avg_H-T": {
+   "generations": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-avg_H-T/generations",
+   "sha256": "3973244594866782e1f62bf6c091384e61a0ca5811702083b636d1933ce6276b"
+  },
+  "M-act_H-T": {
+   "generations": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-act_H-T/generations",
+   "sha256": "3fc85f02dd0c1dec0bdae6341d9745b30f552856dc6ae28c3b06296fe0eda9b9"
+  },
+  "D_H-N": {
+   "generations": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-N/generations",
+   "sha256": "b8f6b4cd512cc9ab04e614ae9fa45779ac546837d4b1ae2b9ce84c0ba2cd5c76"
+  },
+  "M-avg_H-N": {
+   "generations": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-avg_H-N/generations",
+   "sha256": "13411456b302090fe7da6c21a94e09545b37f45e7d16d81c77387b4d74cb109f"
+  },
+  "M-act_H-N": {
+   "generations": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-act_H-N/generations",
+   "sha256": "d460e26a2f13d554bdfd4503bb7a3ba1a7c46bc6df3f763999a817be26046fa4"
+  }
+ },
+ "primary": {
+  "mode": "H-T",
+  "unit": "fluid static formal core",
+  "n_items": 570,
+  "items_sha256": "40293ab158372c1eca07c308ed791e8f3f83f99e749fdfc3d603286d5cdbb051",
+  "n_groups": 558,
+  "comparisons": {
+   "_family": {
+    "comparisons": [
+     "M-avg - D",
+     "M-act - D"
+    ],
+    "holm_m": 2,
+    "complete": {
+     "M-avg": true,
+     "M-act": true
+    },
+    "formal": true,
+    "status": "formal"
+   },
+   "M-avg": {
+    "n_items": 570,
+    "n_groups": 558,
+    "delta": -0.056140350877192984,
+    "accuracy": {
+     "candidate": 0.0,
+     "D": 0.056140350877192984
+    },
+    "effect_interval": {
+     "estimate": -0.056140350877192984,
+     "ci95_percentile": [
+      -0.07583774250440917,
+      -0.038192789572501475
+     ],
+     "draws": 10000,
+     "seed": 20261115,
+     "groups": 558,
+     "label": "effect interval, unadjusted for multiplicity; not the decision"
+    },
+    "test": {
+     "statistic_abs_sum": 32,
+     "draws": 100000,
+     "seed": 20261114,
+     "exceed_or_equal": 0,
+     "p_two_sided": 9.99990000099999e-06,
+     "nonzero_groups": 32
+    },
+    "p_holm": 1.999980000199998e-05,
+    "verdict": "WORSE"
+   },
+   "M-act": {
+    "n_items": 570,
+    "n_groups": 558,
+    "delta": -0.05263157894736842,
+    "accuracy": {
+     "candidate": 0.0035087719298245615,
+     "D": 0.056140350877192984
+    },
+    "effect_interval": {
+     "estimate": -0.05263157894736842,
+     "ci95_percentile": [
+      -0.07231040564373897,
+      -0.03484320557491289
+     ],
+     "draws": 10000,
+     "seed": 20261115,
+     "groups": 558,
+     "label": "effect interval, unadjusted for multiplicity; not the decision"
+    },
+    "test": {
+     "statistic_abs_sum": 30,
+     "draws": 100000,
+     "seed": 20261114,
+     "exceed_or_equal": 0,
+     "p_two_sided": 9.99990000099999e-06,
+     "nonzero_groups": 32
+    },
+    "p_holm": 1.999980000199998e-05,
+    "verdict": "WORSE"
+   }
+  }
+ },
+ "secondary": {
+  "H-T": {
+   "M-avg": {
+    "static": {
+     "n": 570,
+     "rule_family_interval": {
+      "estimate": -0.0561,
+      "ci95": [
+       -0.0864,
+       -0.028
+      ],
+      "clusters": 76,
+      "resamples": 10000
+     }
+    },
+    "interactive": {
+     "n": 144,
+     "rule_family_interval": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 10,
+      "resamples": 10000
+     }
+    }
+   },
+   "M-act": {
+    "static": {
+     "n": 570,
+     "rule_family_interval": {
+      "estimate": -0.0526,
+      "ci95": [
+       -0.0807,
+       -0.0263
+      ],
+      "clusters": 76,
+      "resamples": 10000
+     }
+    },
+    "interactive": {
+     "n": 144,
+     "rule_family_interval": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 10,
+      "resamples": 10000
+     }
+    }
+   }
+  },
+  "H-N": {
+   "M-avg": {
+    "static": {
+     "n": 570,
+     "rule_family_interval": {
+      "estimate": -0.0789,
+      "ci95": [
+       -0.1129,
+       -0.0472
+      ],
+      "clusters": 76,
+      "resamples": 10000
+     }
+    },
+    "interactive": {
+     "n": 144,
+     "rule_family_interval": {
+      "estimate": 0.0,
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "clusters": 10,
+      "resamples": 10000
+     }
+    }
+   },
+   "M-act": {
+    "static": {
+     "n": 570,
+     "rule_family_interval": {
+      "estimate": -0.0632,
+      "ci95": [
+       -0.0903,
+       -0.0367
+      ],
+      "clusters": 76,
+      "resamples": 10000
+     }
+    },
+    "interactive": {
+     "n": 144,
+     "rule_family_interval": {
+      "estimate": 0.0069,
+      "ci95": [
+       0.0,
+       0.0204
+      ],
+      "clusters": 10,
+      "resamples": 10000
+     }
+    }
+   }
+  }
+ },
+ "supporting": {
+  "label": "every registered unit's headline by eval_set_scoring.report; descriptive, never decisive (design.json :: analysis.supplementary)",
+  "by_mode": {
+   "H-T": {
+    "D": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0448,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.05,
+      "natural_termination_rate": 0.06,
+      "degeneration_rate": 0.94
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.04,
+      "degeneration_rate": 0.96
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.06,
+      "natural_termination_rate": 0.5,
+      "degeneration_rate": 0.5
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.01,
+      "natural_termination_rate": 0.93,
+      "degeneration_rate": 0.07
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.9,
+      "degeneration_rate": 0.1
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.12,
+      "degeneration_rate": 0.88
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0.0333,
+      "natural_termination_rate": 0.1067,
+      "degeneration_rate": 0.8933
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.38,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    },
+    "M-avg": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.01,
+      "degeneration_rate": 0.99
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.03,
+      "degeneration_rate": 0.97
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.07,
+      "degeneration_rate": 0.93
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.09,
+      "degeneration_rate": 0.91
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.1,
+      "degeneration_rate": 0.9
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.01,
+      "degeneration_rate": 0.99
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.1867,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    },
+    "M-act": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0028,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.04,
+      "natural_termination_rate": 0.09,
+      "degeneration_rate": 0.91
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.02,
+      "natural_termination_rate": 0.06,
+      "degeneration_rate": 0.94
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.0917,
+      "degeneration_rate": 0.9083
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.04,
+      "degeneration_rate": 0.96
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.02,
+      "degeneration_rate": 0.98
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.2333,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    }
+   },
+   "H-N": {
+    "D": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.063,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.09,
+      "natural_termination_rate": 0.26,
+      "degeneration_rate": 0.74
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.51,
+      "degeneration_rate": 0.49
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.28,
+      "natural_termination_rate": 0.46,
+      "degeneration_rate": 0.54
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.42,
+      "natural_termination_rate": 0.92,
+      "degeneration_rate": 0.08
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0.3167,
+      "natural_termination_rate": 0.8917,
+      "degeneration_rate": 0.1083
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0.02,
+      "natural_termination_rate": 0.31,
+      "degeneration_rate": 0.69
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0.0667,
+      "natural_termination_rate": 0.16,
+      "degeneration_rate": 0.84
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.38,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    },
+    "M-avg": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.01,
+      "degeneration_rate": 0.99
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.01,
+      "degeneration_rate": 0.99
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.01,
+      "natural_termination_rate": 0.01,
+      "degeneration_rate": 0.99
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.05,
+      "natural_termination_rate": 0.15,
+      "degeneration_rate": 0.85
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.1167,
+      "degeneration_rate": 0.8833
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.01,
+      "degeneration_rate": 0.99
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.1733,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    },
+    "M-act": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.014,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.08,
+      "degeneration_rate": 0.92
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.18,
+      "degeneration_rate": 0.82
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.02,
+      "natural_termination_rate": 0.13,
+      "degeneration_rate": 0.87
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.03,
+      "degeneration_rate": 0.97
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.0583,
+      "degeneration_rate": 0.9417
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.02,
+      "degeneration_rate": 0.98
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0.0067,
+      "natural_termination_rate": 0.02,
+      "degeneration_rate": 0.98
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.2533,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    }
+   }
+  }
+ }
+}

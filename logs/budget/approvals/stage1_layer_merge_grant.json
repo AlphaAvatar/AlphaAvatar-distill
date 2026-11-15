@@ -62,5 +62,32 @@
   "sha256": "2dc654c1c788227be2afb40ad91bc4c587f2e7ab746fa41143e2558326a48b53"
  },
  "study_identity_sha256": "6ea06f82e3b2cf4a80b31664c9b8a1a034c59399bef8d4be62946e7a27f01a5a",
- "granted_at_commit": "c9cac11fe1757d3d0ca8d2629d563447c48ebb88"
+ "granted_at_commit": "c9cac11fe1757d3d0ca8d2629d563447c48ebb88",
+ "closed": {
+  "status": "CLOSED",
+  "terminal_state": "COMPLETE: every registered unit of both candidates measured; the primary comparison formal",
+  "utc": "2026-11-15T14:22:19Z",
+  "by": "the agent, on the maintainer's grant",
+  "decision": "maintainer 2026-11-15 (UTC), review of 34b0fd3a: \u300c\u7ec8\u6b62\u6761\u4ef6\u4ec5\u4e3a\uff1a\u5168\u90e8\u767b\u8bb0\u5de5\u4f5c\u5b8c\u6210\uff1b\u9884\u7b97\u8017\u5c3d\u6216\u4e0d\u8db3\u4ee5\u6267\u884c\u6709\u6548\u6062\u590d attempt\uff1b\u6216\u8005\u51fa\u73b0\u65e0\u6cd5\u5728\u672c\u6388\u6743\u8303\u56f4\u5185\u89e3\u51b3\u7684\u771f\u5b9e\u963b\u585e\u3002\u300d and \u300cstudy \u8fdb\u5165\u7ec8\u6001\u4e14\u672c\u5730\u4fdd\u7559\u9a8c\u8bc1\u5b8c\u6210\u540e\uff0c\u9000\u5f79\u672c\u8f6e\u8fdc\u7aef\u6743\u91cd\u589e\u91cf\u526f\u672c\uff0c\u4fdd\u7559\u7edf\u8ba1\u91cf\u3001\u8bc4\u6d4b\u8bc1\u636e\u4e0e\u5220\u9664\u8bb0\u5f55\u3002\u300d",
+  "source": "the grant's own terminal condition (all registered work done), reached by ri_merge_20261115_104816 (driver report COMPLETE, incomplete_units []); written into this grant by the agent",
+  "scope": "every session kind of RI-LM1, none excepted: ['merge_evaluation']",
+  "enforced_by": "scripts/shared/study_engineering.py :: require_open",
+  "spent_usd": 4.0989,
+  "by_run_usd": {
+   "ri_merge_20261115_103303": 0.2147,
+   "ri_merge_20261115_104816": 3.8842
+  },
+  "_spent": "study_engineering.spent at closure: every session's closeout all-in, 2 runs, none unknown",
+  "ceiling_usd": 13.0,
+  "unspent_usd": 8.9011,
+  "teardown_reserve_usd": 1.0,
+  "remainder": "the unspent $8.9011 of the $13.00 ceiling and the $1.00 teardown reserve lapse: not carried forward, not transferred to any study; a further execution needs a new study and the maintainer's grant",
+  "provider_reconciliation": "balance $16.6313 at 2026-11-15T10:32Z before the first create, $12.5693 at 14:19Z after the last teardown (-$4.0620) against $4.0989 booked all-in; 0 pods, 0 volumes",
+  "closeout_cost_usd": 0.0,
+  "_closeout_cost": "the closeout (analysis, local retention, evidence archive, relay delta retirement, records) ran on the dev box and the hub API: no pod, no new resource",
+  "historical": "every field above is unchanged (grant_before_closure); each earlier artifact keeps the validity it had at its time",
+  "grant_before_closure": {
+   "sha256": "318242f462c756f45b742b974d5b317ece745cb84286ced7d1ceba29bf21191b"
+  }
+ }
 }

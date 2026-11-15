@@ -1,0 +1,42 @@
+{
+ "schema": "aadistill.stage1.reasoning_inheritance.layer_merge.authorization_outcome/v1",
+ "run_id": "ri_merge_20261115_104816",
+ "study": "RI-LM1",
+ "recorded_utc": "2026-11-15T14:19:23+00:00",
+ "status": "COMPLETE",
+ "validation_passed": null,
+ "validation": "not applicable: this kind defines no verdict (Launch.verdict is None); completion is status, from the secured products or the verified evidence",
+ "products_secured": {
+  "ok": true,
+  "why": "every finished file is on the dev box (238 files)"
+ },
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "provider_resource_created": true,
+ "evidence": null,
+ "verdict_rederived": null,
+ "money": {
+  "all_in_usd": 3.8842,
+  "gpu_usd": 3.8123,
+  "disk_usd": 0.0718,
+  "elapsed_minutes": 209.85,
+  "price_per_hour": 1.09,
+  "authorized_usd": 11.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [],
+  "error": null,
+  "accounted": [],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 0 resource(s) the records account for"
+ },
+ "kind": "merge_evaluation",
+ "scientific_use": true,
+ "authorizes": "nothing"
+}
