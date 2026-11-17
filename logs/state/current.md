@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-17 (UTC), TPI1 (teacher-parent initialization) GRANTED and RUNNING (training session), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); one L40S pod billing (TPI1 training). The human view. Every number here has an owner
+**Updated:** 2026-11-17 (UTC), TPI1 (teacher-parent initialization) GRANTED and RUNNING (training session), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); one L40S pod billing (TPI1 training, replacement session). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**TPI1 (STAGE 1 TEACHER-PARENT INITIALIZATION): GRANTED 2026-11-17; INIT COMPLETE; TRAINING SESSION RUNNING (pod `d46wi0dt91xmzj`, L40S $1.09/h, from 15:06Z).**
+**TPI1 (STAGE 1 TEACHER-PARENT INITIALIZATION): GRANTED 2026-11-17; INIT COMPLETE; TRAINING RUNNING in the replacement session `tpi_train_20261117_180111` (pod `tdxvznkx54lc4q`, L40S $1.09/h, from 18:03Z).**
 - Design `configs/stages/stage-1/teacher_parent_initialization/design.json`; `docs/stages/stage-1/teacher_parent_initialization/README.md`.
   A_teacher_parent (every selection on the original teacher; the residual PCA from the teacher's statistics at the
   kept layers) against B_packed_top1 (A-MIX-6cat-sr, reused) after the same Stage-3 recipe, two seeds, both modes.
@@ -17,7 +17,10 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   the replayed root width state equal their journal digests); A `0474006c...` (weights `9120eb2e...`), 596,049,920
   parameters; state KL 19.58 (B's leaf 6.78), diagnostic only. Kept on the dev box (`storage/local_retention.json`)
   and the relay. `tpi_train_20261117_145734` aborted at $0 (cap check at the $1.11/h ceiling); relaunched as
-  `tpi_train_20261117_145939` at $1.09/h, hard cap $28.00.
+  `tpi_train_20261117_145939` at $1.09/h, which lost its container to the provider at step 2540 of seed 20260726
+  (DRIVER_UNKNOWN, $3.0779; `runs/tpi_train_20261117_145939/evidence/failure.json`). The replacement resumed the
+  verified step_002208 save point (same sequences per step, losses within ~1e-3); hard deadline 1260 min ($22.88).
+  Spent $3.4996 before it; ceiling $31.50.
 - Grant `logs/budget/approvals/stage1_teacher_parent_init_grant.json`: $31.50 sessions + $1.00 reserve. The two
   permanent controls' dev-box copies retired (relay copies kept, tombstones).
 - Owner: `logs/budget/decisions.md` 2026-11-17.
