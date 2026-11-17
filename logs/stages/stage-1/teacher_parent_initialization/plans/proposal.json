@@ -1,0 +1,56 @@
+{
+ "schema": "aadistill.stage1.teacher_parent_initialization.proposal/v1",
+ "study": "TPI1",
+ "status": "proposed",
+ "recorded_utc": "2026-11-17",
+ "scope": "Stage 1 teacher-parent initialization at the fixed 596M structure (configs/stages/stage-1/teacher_parent_initialization/design.json): one A_teacher_parent initialization from the teacher-parent selections and the teacher's statistics re-aggregated at the kept layers (session teacher_parent_init), then its two seeds trained with the A-MIX-6cat-sr recipe and each evaluated on all of eval-set-1 in both modes (session teacher_parent_train); B_packed_top1's sealed A-MIX evidence reused, never retrained. No search, no other arm, no Stage 4-6 work, no network volume.",
+ "kinds": {
+  "teacher_parent_init": {
+   "per_session_hard_cap_usd": 2.0,
+   "expected_usd": 0.9,
+   "driver_minutes": 45,
+   "basis": "setup (measured 10-20 min) + the teacher's load and three selection gates (~5 min) + the statistics replay (the journal's root width state: 172 s) + build, save, reload (~2 min) + state evaluation (~6 min) + relay copies of ~3.2 GB (~3 min)"
+  },
+  "teacher_parent_train": {
+   "per_session_hard_cap_usd": 28.0,
+   "expected_usd": 24.3,
+   "driver_minutes": 1380,
+   "unit_deadline_hours": 10.0,
+   "basis": "A-MIX-6cat-sr measured on the same card, model shape, pack and recipe (a_train_sr_mix_20261109_193709): 32,322 / 32,394 s training per seed (median 3.21 s per optimizer step, 9,701 steps), evaluation 3,992 / 4,005 s thinking and 1,153 / 1,390 s non-thinking, 20.9 h driver, 21.3 h and $23.4143 all-in at $1.09/h; plus ~2% for the save-point copies to the relay and ~6 min for the two final copies. The training deadline per seed is the measured time + 11%; the evaluation time is A's own and may differ from B's (bounded by the 8,192-token context)"
+  }
+ },
+ "ceiling_usd": 31.5,
+ "teardown_reserve_usd": 1.0,
+ "study_cumulative_cap_usd": 32.5,
+ "per_session_hard_cap_usd": 28.0,
+ "min_useful_attempt_usd": 1.5,
+ "project_cumulative_cap_usd": 1000.0,
+ "gpus": {"NVIDIA L40S": 1.11},
+ "gpu_count_max": 1,
+ "expected_total_usd": 25.2,
+ "position_at_proposal": {
+  "fetched_utc": "2026-11-17T09:46:41+00:00",
+  "provider_billed_usd": 947.4611,
+  "committed_usd": 967.3321,
+  "project_cap_usd": 1000.0,
+  "project_remaining_usd": 32.6679,
+  "balance_usd": 12.5384,
+  "balance_note": "the maintainer reported a top-up to about $60 on 2026-11-17; read again at issue and launch (the issuer and the launcher refuse a cap plus reserve the balance does not cover)",
+  "account_pods": 0,
+  "account_volumes": 0
+ },
+ "granted_by": "nobody: a proposal, not a grant",
+ "decision": "PENDING the maintainer's explicit approval",
+ "money_rules": {
+  "own_envelope": "the ceiling counts only this study's runs (study_engineering.spent filters by plan id). RI-S1, RI-LM1 and Research A are CLOSED; their unspent allowances lapsed and fund nothing here; a provider top-up is not a grant",
+  "ceiling": "$31.50 is what sessions may draw, cumulatively over every attempt and both kinds (each session's closeout all-in; an unknown cost refuses)",
+  "teardown_reserve": "$1.00 held outside the ceiling and never issued: each artifact's hard cap plus the reserve must fit what the project cap and the provider balance leave, at issue and again at launch (layer_merge_launch.reserve_problems)",
+  "study_cumulative_cap": "ceiling + reserve = $32.50, inside the $32.67 the $1,000 project cap leaves; the project cap is not raised",
+  "per_session_hard_cap": "init $2.00, train $28.00: the all-in bound from the create to the hard deadline plus the watchdog's teardown at the accepted price; the deadline is derived from the price",
+  "recovery": "expected $25.20 leaves ~$6.30 under the ceiling: one resumed training attempt (setup, the restore of the latest save point from the relay -- at most one hour of steps lost -- and the remaining work) fits; a session that runs to its full cap does not leave room for another, and the study then ends BUDGET_EXHAUSTED with every finished unit kept",
+  "budget_terminal_state": "BUDGET_EXHAUSTED when what the ceiling leaves is below min_useful_attempt_usd ($1.50: an init attempt; a resumed training attempt needs at least ~$3 -- setup, the save-point restore and one hour of steps -- and its cap is set from the remaining work) or the next cap plus the reserve does not fit the project cap or the balance: the issuer refuses, every finished unit is kept, every other one is reported not_run"
+ },
+ "hardware": "one NVIDIA L40S (48 GB) per session, secure cloud, at most $1.11/h; A-MIX peaked at 17.5 GB allocated in training, the packed search at 36.2 GB: no A100 (no measured L40S out-of-memory)",
+ "storage": "no network volume. The relay holds the round's weights while it runs (the init 1.2 GB, statistics 1.9 GB, at most two save points of ~5.9 GB per unit at once, two finals of 2.4 GB); probed 2026-11-17: a 37 GiB object would be accepted. The dev box keeps the init, its statistics and both finals at the terminal state (~7.1 GB; 5.5 GB free on 2026-11-17: see the retention plan in the report)",
+ "authorizes": "nothing: a proposal; the grant is the maintainer's (launch.py grant --decision '<quoted>' --granted-by maintainer)"
+}

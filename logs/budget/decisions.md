@@ -16762,3 +16762,36 @@ on a paid pod.
 - Not done: no merge into `main` (the maintainer's); no follow-up study.
 - Revisit when: the maintainer decides what follows (Stage 3 learned fusion, Stage 6 recurrent depth, or the
   separate depth/width study).
+
+## 2026-11-17 (UTC) — TPI1 (teacher-parent initialization) prepared at $0; its grant is the maintainer's
+
+- Context: the maintainer's brief of 2026-11-17 opens the new round's first experiment. At the fixed 596M structure,
+  the fixed operators and calibration profiles and the fixed Stage-3 recipe, it compares A_teacher_parent (every
+  selection on the original teacher; the residual PCA re-aggregated from the teacher's per-point statistics at the kept
+  layers) with B_packed_top1 (the packed Top-1, whose two A-MIX-6cat-sr seeds are trained and evaluated). Stage 1 owns
+  it; the training's execution stage stays `stage3_recovery`. No merge into `main`.
+- Decision (prepared, nothing paid): the design `configs/stages/stage-1/teacher_parent_initialization/design.json`.
+  - A's FFN(base), DEPTH(base) and ATTENTION(rh) selections are the packed search's teacher-level states. They are
+    read into `selection.json`, and the DEPTH record is checked round by round: greedy accumulation, every remaining
+    layer scored against the unbypassed teacher, the lowest chosen.
+  - The teacher's per-point residual statistics were never stored. The pod replays the root RESIDUAL_WIDTH(rh) state,
+    gated bit for bit on its journal digest, with the statistics retained; A's P comes from points sorted({0, *K}) +
+    [36], weighted 9 / 1 / 8.
+  - A is built from one frozen mapping. The two training units are derived from A-MIX's plan, changing only the
+    declared fields. Evaluation uses B's protocol exactly (context resolved to 8,192, as B's was), resumable by sample.
+  - The analysis is registered: thinking-mode static fluid A - B pooled over both seeds, group sign-flip, fixed
+    sequence to the non-thinking mode.
+  - B's sealed evidence is audited complete and bound; its rescore reproduces A-MIX's 10.26%.
+- Budget: proposal `logs/stages/stage-1/teacher_parent_initialization/plans/proposal.json`. Sessions $31.50 plus a
+  $1.00 reserve, $32.50 in all, inside the $32.67 the $1,000 project cap leaves. Per-session caps: init $2.00, training
+  $28.00. Expected ~$25.20, from A-MIX's measured 20.9 h on the same card and recipe. No closed study's allowance
+  carries over, and a top-up is not a grant. Live 2026-11-17: balance $62.54 (the maintainer topped up), $967.33
+  committed, 0 pods, 0 volumes.
+- Alternatives considered: one session (init and training together). Rejected, because the lineage gate needs the
+  initialization's provenance record committed before training (`training_plan.admit`). A network volume: none, by
+  the maintainer's 2026-11-14 rule; save points and finals go to the relay instead (probed: 37 GiB accepted).
+- Risks:
+  - A training session that runs to its cap leaves no room for another attempt within the ceiling.
+  - The dev box has 5.5 GB free, and the terminal local retention needs ~7 GB. There are no dead weights under 2.5;
+    the options need a maintainer decision.
+- Revisit when: the maintainer grants, changes or declines the proposal.

@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-15 (UTC), RI-S1 and RI-LM1 COMPLETE and CLOSED on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); nothing running, nothing billing. The human view. Every number here has an owner
+**Updated:** 2026-11-17 (UTC), TPI1 (teacher-parent initialization) PREPARED at $0, awaiting its grant, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); nothing running, nothing billing. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,21 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**TPI1 (STAGE 1 TEACHER-PARENT INITIALIZATION): PREPARED AT $0 (2026-11-17), NOT GRANTED -- NOTHING RUNNING; NOTHING BILLING.**
+- The first experiment of the new round (`configs/stages/stage-1/teacher_parent_initialization/design.json`;
+  `docs/stages/stage-1/teacher_parent_initialization/README.md`): A_teacher_parent (every selection on the original
+  teacher; the residual PCA from the teacher's statistics re-aggregated at the kept layers) against B_packed_top1 (the
+  packed Top-1, already trained and evaluated as A-MIX-6cat-sr) after the same Stage-3 recipe, two seeds, both modes.
+- A's FFN, DEPTH and ATTENTION selections are the packed search's teacher-level states (`selection.json`); only the
+  teacher's per-point residual statistics (one ~3-min replay, gated on the journal's digest) and A's build are computed
+  on the pod. B's sealed evidence audited complete and bound (`audit/b_evidence.json`); the analysis registered.
+- Proposal `logs/stages/stage-1/teacher_parent_initialization/plans/proposal.json`: $31.50 sessions + $1.00 reserve,
+  init cap $2.00, training cap $28.00, expected ~$25.20; fits the $32.67 the $1,000 project cap leaves. A grant is the
+  maintainer's. Live 2026-11-17: balance $62.54 (topped up), $967.33 committed, 0 pods, 0 volumes.
+- Dev box 5.5 GB free: the round's local retention (~7 GB) needs room; no dead weights under AGENTS.md 2.5
+  (the audit's options are in the round's report / reply).
+- Owner: `logs/budget/decisions.md` 2026-11-17.
 
 **RI-S1 (STAGE 1 STRUCTURAL ABLATION): COMPLETE AND CLOSED (2026-11-14) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Branch `research/reasoning-inheritance` from `main` `50ed1a4f` (not merged). Four untrained groups from one frozen

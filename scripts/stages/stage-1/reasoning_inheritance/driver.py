@@ -596,14 +596,14 @@ def exec_args(opts: dict) -> list[str]:
 
 
 def fluid(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: dict, attempt: str,
-          opts: dict | None = None) -> dict:
+          opts: dict | None = None, ev: dict | None = None) -> dict:
     """fluid_reasoning_720 with streaming and resume (module docstring). Returns the unit's record. ``opts``: the
     execution knobs (``max_num_seqs``, ``engine_metrics``) and ``time_box_s``: a run stopped by its time box keeps
-    every sealed episode and leaves the unit incomplete, to be resumed."""
+    every sealed episode and leaves the unit incomplete, to be resumed. ``ev``: the generation protocol (this
+    design's ``evaluation`` block by default; another study passes its own in the same shape)."""
     opts = opts or {}
     from shared import eval_sets as ES
-    d = design()
-    ev = d["evaluation"]
+    ev = design()["evaluation"] if ev is None else ev
     tasks_path = ES.unit_path(ev["eval_set"], "fluid_reasoning_720", "dev_v1")
     #: split on "\n" only, as run_battery.read_tasks does (an item may carry a raw U+2028)
     tasks = [json.loads(l) for l in tasks_path.read_text(encoding="utf-8").split("\n") if l.strip()]
@@ -697,7 +697,7 @@ def _jsonl_ids(path: Path, field: str = "id") -> list[str]:
 
 
 def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: dict, attempt: str,
-               opts: dict | None = None) -> dict:
+               opts: dict | None = None, ev: dict | None = None) -> dict:
     """Every stage3_capability_846 unit (TriviaQA from its verified local copy) and stage3_legacy_150, one runner call.
 
     * Each finished sample is streamed by the runner (``uncapped_eval --stream-completed``) and sealed into immutable
@@ -715,8 +715,7 @@ def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, e
     from shared import eval_sets as ES
     from shared.evaluation import decoding as DEC
     from stages.calibration_volume.dose_driver import legacy_prompts
-    d = design()
-    ev = d["evaluation"]
+    ev = design()["evaluation"] if ev is None else ev
     protocol = DEC.load(REPO / ev["decoding"])
     m = ES.manifest(ev["eval_set"])
     gens = unit_dir / "generations"

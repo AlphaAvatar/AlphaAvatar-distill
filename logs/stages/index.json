@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 35,
-  "single_stage": 35,
+  "experiment_total": 36,
+  "single_stage": 36,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -150,10 +150,10 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 4,
-    "experiments": 17,
-    "experiments_with_logs": 17,
+    "experiments": 18,
+    "experiments_with_logs": 18,
     "runs": 241,
-    "canonical_configs": 20,
+    "canonical_configs": 21,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -172,6 +172,7 @@
     "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
     "configs/stages/stage-1/reasoning_inheritance/design.json",
     "configs/stages/stage-1/source_sets.json",
+    "configs/stages/stage-1/teacher_parent_initialization/design.json",
     "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
     "logs/stages/stage-1/phase_c3/plans/a3_design.json",
     "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json",
@@ -1568,6 +1569,56 @@
    "canonical_configs": "configs/stages/stage-1/reasoning_inheritance",
    "canonical_data": null,
    "canonical_docs": "docs/stages/stage-1/reasoning_inheritance",
+   "live_state": null
+  },
+  {
+   "experiment_id": "teacher_parent_initialization",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "PREPARED 2026-11-17 at $0 (study TPI1): A_teacher_parent's selections read from the packed search's teacher-level states, its PCA rule, both drivers, the registered A - B analysis and B's evidence audit; proposal $31.50 + $1.00 reserve, not granted",
+   "title": "Teacher-parent initialization vs the packed Top-1 after the same Stage-3 recovery (TPI1)",
+   "question": "Does initializing the fixed 596M student from selections made on the original teacher, with the residual PCA re-aggregated from the teacher's statistics at the kept layers, recover more fluid reasoning after the A-MIX Stage-3 recipe than the packed Top-1?",
+   "canonical_path": "logs/stages/stage-1/teacher_parent_initialization",
+   "canonical_config": "configs/stages/stage-1/teacher_parent_initialization/design.json",
+   "evidence": [
+    {
+     "path": "configs/stages/stage-1/teacher_parent_initialization/design.json",
+     "says": "the two arms, A's selection sources, the PCA point rule, the build order, the training derivation, B's protocol and the registered analysis",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "configs/stages/stage-1/teacher_parent_initialization/selection.json",
+     "says": "A's FFN, DEPTH and ATTENTION selections and the width gate, read from the journal's teacher-level states",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-1/teacher_parent_initialization/audit/b_evidence.json",
+     "says": "B's sealed A-MIX evidence: complete, every protocol field and identity bound",
+     "field": "schema",
+     "equals": "aadistill.stage1.teacher_parent_initialization.b_evidence/v1"
+    },
+    {
+     "path": "logs/stages/stage-1/teacher_parent_initialization/plans/proposal.json",
+     "says": "TPI1's budget draft: ceiling, teardown reserve, per-kind caps, terminal state",
+     "field": "status",
+     "equals": "proposed"
+    }
+   ],
+   "external_material": [
+    "docs/stages/stage-1/teacher_parent_initialization/README.md -- the round's design and how to run it",
+    "~/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/extracted/ -- B's sealed generations (A-MIX)"
+   ],
+   "decisions": [
+    "logs/budget/decisions.md -- 2026-11-17: TPI1 prepared at $0 (first experiment of the new round)"
+   ],
+   "classification_reason": "Stage 1 by subject: the structural initialization method (which parent each operator selects on, and the PCA's points) is what is compared (AGENTS.md 4.3); the Stage-3 recovery (execution stage stage3_recovery) and eval-set-1 are its fixed instruments.",
+   "canonical_scripts": "scripts/stages/stage-1/teacher_parent_initialization",
+   "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/teacher_parent_initialization",
+   "canonical_data": null,
+   "canonical_docs": "docs/stages/stage-1/teacher_parent_initialization",
    "live_state": null
   },
   {

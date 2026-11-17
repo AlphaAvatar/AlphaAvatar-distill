@@ -88,6 +88,7 @@ What each one asked of this stage.
 | `phase_c2_baseline_completion` — Phase C2 baseline completion — the B side of B→C | What does the frozen C1 treatment baseline B score on the same state_eval suite the five selected Search-1 candidates were measured on -- so that the B→C comparison Attempt 4 collected its ranking to ask can finally be computed? | [`phase_c2_baseline_completion/`](phase_c2_baseline_completion/) | granted — attempt5 grant committed, NOT yet authorized |
 | `projected_residual` — Full-width residual stream with per-layer trainable PCA (Research B) | Keeping the teacher's 2,560-wide residual stream, embedding and head and computing each layer's attention and FFN in a 1,024-wide space reached through a trainable per-layer PCA projection, does a student recover better fluid-reasoning correctness than D4-Augmented under its teacher, data, recipe and evaluation? | [`projected_residual/`](projected_residual/) | $0 READY 2026-10-27, NOT AUTHORIZED: the 900M full-width-residual student (902,911,488 parameters, per-layer trainable PCA projections), its initializer, exact counters and folded evaluation route implemented and host-validated; design and decision rule drafted, frozen only on the maintainer's approval; B-E engineering validation ($3.00 cap) and B1 formal ($21.00 cap) applied for. 600M reserved |
 | `reasoning_inheritance` — Structural ablation of the packed Top-1: depth only, non-depth only, both (RI-S1) | How much of the teacher's fluid reasoning does the current initialization lose to depth pruning alone, to all non-depth compression alone and to both, untrained, and do the two interact? | [`reasoning_inheritance/`](reasoning_inheritance/) | COMPLETE and CLOSED 2026-11-14 (RI-S1, six attempts, $19.9554 of $35, the rest lapsed): untrained D static fluid 89.6% -> 5.6% thinking / 68.9% -> 7.9% non-thinking; W and DW at the floor on every formal unit; eval-set-1 development-exposed. RI-LM1 (layer merging at D's structure) COMPLETE and CLOSED 2026-11-15 ($4.0989 of $13): M-avg 0.00% and M-act 0.35% static fluid (thinking) against D's 5.61%, both WORSE than deletion (Holm p 2e-5) |
+| `teacher_parent_initialization` — Teacher-parent initialization vs the packed Top-1 after the same Stage-3 recovery (TPI1) | Does initializing the fixed 596M student from selections made on the original teacher, with the residual PCA re-aggregated from the teacher's statistics at the kept layers, recover more fluid reasoning after the A-MIX Stage-3 recipe than the packed Top-1? | [`teacher_parent_initialization/`](teacher_parent_initialization/) | PREPARED 2026-11-17 at $0 (study TPI1): A_teacher_parent's selections read from the packed search's teacher-level states, its PCA rule, both drivers, the registered A - B analysis and B's evidence audit; proposal $31.50 + $1.00 reserve, not granted |
 
 ## Runs
 
@@ -116,6 +117,7 @@ the config path and hash it ran under.
 * `configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json`
 * `configs/stages/stage-1/reasoning_inheritance/design.json`
 * `configs/stages/stage-1/source_sets.json`
+* `configs/stages/stage-1/teacher_parent_initialization/design.json`
 * `logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json`
 * `logs/stages/stage-1/phase_c3/plans/a3_design.json`
 * `logs/stages/stage-1/phase_c3/plans/c3_preregistration.json`
@@ -138,6 +140,7 @@ copied here.
 
 * logs/budget/decisions.md -- 2026-10-27: the next research programme (Research A and B) opened at $0
 * logs/budget/decisions.md -- 2026-11-13: RI-S1 opened; 2026-11-14: RI-S1 complete; 2026-11-14: volumes retired, checkpoints on the dev box only; 2026-11-14: RI-S1 closed; 2026-11-14: review fixes (teacher prompt check, tombstones, A-MIX relay copy, the next round's layer-merging plan); 2026-11-14: third review (M-act, literature, decision rule, retirement tool, 24 relay weights retired, RI-LM1 prepared); 2026-11-15: fourth review (Holm over both registered comparisons, per-candidate durability, capability sealing, reuse by identity, centered Pearson moments, candidates kept as D + delta); 2026-11-15: RI-LM1 granted, executed, closed (both merges WORSE than deletion; relay deltas retired)
+* logs/budget/decisions.md -- 2026-11-17: TPI1 prepared at $0 (first experiment of the new round)
 
 ## Current status
 

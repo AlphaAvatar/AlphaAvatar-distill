@@ -1675,6 +1675,44 @@ STAGE_1 = [
             "of the teacher before any training (AGENTS.md 4.3); eval-set-1 and the state suite are its "
             "instruments."),
     ),
+    dict(
+        id="teacher_parent_initialization",
+        kind="experiment",
+        stage_id="1",
+        status=("PREPARED 2026-11-17 at $0 (study TPI1): A_teacher_parent's selections read from the packed search's "
+                "teacher-level states, its PCA rule, both drivers, the registered A - B analysis and B's evidence "
+                "audit; proposal $31.50 + $1.00 reserve, not granted"),
+        title="Teacher-parent initialization vs the packed Top-1 after the same Stage-3 recovery (TPI1)",
+        question=("Does initializing the fixed 596M student from selections made on the original teacher, with the "
+                  "residual PCA re-aggregated from the teacher's statistics at the kept layers, recover more fluid "
+                  "reasoning after the A-MIX Stage-3 recipe than the packed Top-1?"),
+        canonical_config="configs/stages/stage-1/teacher_parent_initialization/design.json",
+        evidence=[
+            E("configs/stages/stage-1/teacher_parent_initialization/design.json",
+              "the two arms, A's selection sources, the PCA point rule, the build order, the training derivation, "
+              "B's protocol and the registered analysis",
+              field="authorizes", equals="nothing"),
+            E("configs/stages/stage-1/teacher_parent_initialization/selection.json",
+              "A's FFN, DEPTH and ATTENTION selections and the width gate, read from the journal's teacher-level states",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/teacher_parent_initialization/audit/b_evidence.json",
+              "B's sealed A-MIX evidence: complete, every protocol field and identity bound",
+              field="schema", equals="aadistill.stage1.teacher_parent_initialization.b_evidence/v1"),
+            E("logs/stages/stage-1/teacher_parent_initialization/plans/proposal.json",
+              "TPI1's budget draft: ceiling, teardown reserve, per-kind caps, terminal state",
+              field="status", equals="proposed"),
+        ],
+        external_material=[
+            "docs/stages/stage-1/teacher_parent_initialization/README.md -- the round's design and how to run it",
+            "~/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/extracted/ -- B's sealed generations (A-MIX)",
+        ],
+        decisions=["logs/budget/decisions.md -- 2026-11-17: TPI1 prepared at $0 (first experiment of the new round)"],
+        canonical_log_destination="logs/stages/stage-1/teacher_parent_initialization",
+        classification_reason=(
+            "Stage 1 by subject: the structural initialization method (which parent each operator selects on, and "
+            "the PCA's points) is what is compared (AGENTS.md 4.3); the Stage-3 recovery (execution stage "
+            "stage3_recovery) and eval-set-1 are its fixed instruments."),
+    ),
 ]
 
 #: ---------------------------------------------------------------------------

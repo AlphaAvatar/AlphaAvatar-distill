@@ -1,0 +1,116 @@
+{
+ "schema": "aadistill.stage1.teacher_parent_initialization.design/v1",
+ "study_id": "stage1.teacher_parent_initialization",
+ "experiment": "teacher_parent_initialization",
+ "stage": 1,
+ "training_execution_stage": "stage3_recovery",
+ "recorded_utc": "2026-11-17",
+ "decided_by": "maintainer brief 2026-11-17 (UTC): the first experiment of the new round -- at the fixed 596M structure, the fixed operators and their calibration profiles and the fixed Stage-3 recipe, compare A_teacher_parent (every selection made on the original teacher; the residual PCA re-aggregated from the teacher's per-point statistics at this round's kept layers) with B_packed_top1 (the packed Top-1, whose two A-MIX-6cat-sr seeds are already trained and evaluated)",
+ "question": "whether initializing the fixed 596M student from selections made on the original teacher, with the residual PCA conditioned on the teacher's kept layers, recovers more fluid reasoning after the same Stage-3 recovery than the packed Top-1, whose later operators selected on already-compressed parents",
+ "attribution": "A differs from B in every operator's parent at once (FFN identical; DEPTH, ATTENTION and the width statistics on the teacher instead of on the compressed intermediate) and in the PCA's point set: a difference is the A recipe's, never one change's",
+ "scope_excluded": ["the ~2B three-way compression study", "compression-threshold search", "A/C or intermediate recovery", "layer merging, learned fusion, span losses", "Stage 4, 5, 6", "another teacher, structure or calibration recipe", "retraining B"],
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192",
+  "identity": {"path": "configs/stages/stage-2/teacher_modes/teacher_identity.json", "sha256": "624027db1f8608f9637a72ef77e82e30c2a8b1b4c1ebd513422f89bbdeba7b7f"},
+  "lineage": "the hybrid Qwen3-4B, NOT Qwen3-4B-Thinking-2507 (AGENTS.md P17.1): selection, calibration, statistics, training data, the online KD teacher, tokenizer, chat template and configuration all derive from this one checkpoint"
+ },
+ "target": {
+  "geometry": {"num_hidden_layers": 28, "hidden_size": 1024, "intermediate_size": 3072, "num_attention_heads": 16, "num_key_value_heads": 8, "head_dim": 128, "vocab_size": 151936, "tie_word_embeddings": true},
+  "num_parameters": 596049920
+ },
+ "source_search": {
+  "run": "a_packed_search_20261105_195011",
+  "journal": {"path": "artifacts/stages/stage-2/teacher_modes/search_sessions/a_packed_search_20261105_195011/states.jsonl", "sha256": "617d1512959f4966ed4b57a6c5e7137b5b95b1e31b7b26b7266a6cac3da262e8"},
+  "search_record": {"path": "logs/stages/stage-2/teacher_modes/runs/a_packed_search_20261105_195011/evidence/search_record.json", "sha256": "c427f9eed30c25c1959d1b21dfb66efeaeaf3f2dddac59a0a0abc04e79ab6548"},
+  "root_state_id": "aea5f9991cf3812b24e16ea994c3ea8f",
+  "root_materialization_id": "92756f9b491d8ea6ffe5f0617838cd20",
+  "numerical_execution_fingerprint": "1dcaad69f40d5356f049c78e201f14dc2ace7f5650a3fd62c0260cb4c173b768",
+  "seed": 20260815,
+  "note": "the search's first level applied every operator under both profiles to the root teacher itself; those states' recorded selections are this arm's FFN, DEPTH and ATTENTION selections, and its RESIDUAL_WIDTH(rh) state is the reproduction gate for the teacher statistics pass"
+ },
+ "arms": {
+  "A_teacher_parent": {
+   "label": "every selection on the original teacher; the residual PCA from the teacher's statistics re-aggregated at this round's kept layers",
+   "selection": {
+    "FFN": {"impl_id": "ffn.activation_importance_v0", "profile_id": "calib.hybrid_d4_base@v2", "parent": "the root teacher", "state_id": "3f74303972b2a0834f1dc9c024de44e5", "reuse": "the journal's kept_neurons: the same state is B's first step (B's FFN ran first, on the teacher)"},
+    "DEPTH": {"impl_id": "depth.causal_kl_greedy_v1", "profile_id": "calib.hybrid_d4_base@v2", "parent": "the root teacher", "state_id": "fede45dbe125bec0ec457d5a827d0027", "semantics": "parent_state: the reference is the complete, unbypassed teacher, computed once; each candidate bypasses its accumulated layer set on that teacher; greedy 36 -> 28 over 8 rounds (36 + 35 + ... + 29 = 260 candidate subsets), never rescored against a pruned reference and never top-8 of single-layer scores", "reuse": "the journal's kept_layers / removal_order; B's mask is NOT used (B's DEPTH ran on the FFN-compressed parent)"},
+    "ATTENTION": {"impl_id": "attention.activation_importance_v1", "profile_id": "calib.hybrid_d4_rh@v2", "parent": "the root teacher", "state_id": "87ee62059aa27519ff4643dec02300f4", "semantics": "the full teacher's head activations and output projections, the operator's GQA group constraint; kept_heads of all 36 root blocks, the kept blocks' taken at build", "reuse": "the journal's kept_heads"},
+    "RESIDUAL_WIDTH": {"impl_id": "width.global_pca_v0", "profile_id": "calib.hybrid_d4_rh@v2", "parent": "the root teacher", "state_id": "02b3319640a0043a77ed5a3ca4e07afc", "role": "not a selection: the reproduction gate of the statistics pass", "statistics": "width.global_pca_v0's own residual statistics on the root teacher (uncentered second moments, same positions, packing, forward context and execution), collected on the pod by replaying the journal's root RESIDUAL_WIDTH(rh) state (state 02b3319640a0043a77ed5a3ca4e07afc, config hash pinned) with the statistics retained; the replayed child must equal that state's artifact digest bit for bit, which proves the pass reproduces the search's statistics", "reproduction_state": {"state_id": "02b3319640a0043a77ed5a3ca4e07afc", "stats_tokens": 236939, "identity": "selection.json :: states.RESIDUAL_WIDTH"}}
+   },
+   "width_points": {
+    "rule": "K = DEPTH's kept root layers, L_T = the teacher's layer count; layer_points = sorted({0, *K}); points = layer_points + [L_T]. Residual point i < L_T is the input of root layer i (point 0 the embedding output, kept even if layer 0 were removed); point L_T is the teacher's post-final-RMSNorm output, never the student's last index and never the last block's unnormalized output. Duplicates are removed; the count is derived, never typed",
+    "weights": {"embedding_output_point": 9.0, "post_final_norm_point": 8.0, "every_other_point": 1.0},
+    "unchanged": "trace-normalized uncentered moments, the weighted average, the eigendecomposition, scale sqrt(d_parent / d_child) and the final-norm least squares (width_transform_from_statistics), here on the teacher's post-norm moment and the teacher's final norm",
+    "never": "B's P or B's final-norm vector; a forward of a depth-pruned model; any other change to the PCA"
+   },
+   "build": {
+    "order": ["FFN", "DEPTH", "RESIDUAL_WIDTH", "ATTENTION"],
+    "mechanism": "aadistill.initialization.planning.frozen_mapping: one FrozenMapping keyed by ROOT block indices (FFN neurons of all 36 blocks, kept blocks K, the width transform, query heads of all 36 blocks), saved with every tensor's sha256, materialized from the saved copy onto the teacher with blocks = kept; nothing is re-selected or re-measured during the build",
+    "gates": "the teacher's shards verified; the rebuilt FFN child, DEPTH child and ATTENTION child (each a pure selection on the teacher) equal their journal states' artifact digests bit for bit; the replayed root width child equals its state's digest; geometry and parameter count equal the target; the reloaded checkpoint's forward is finite",
+    "identity": "A's own artifact digest and weights sha256; it is never required to match B's"
+   },
+   "state_evaluation": "diagnostic only, never a gate: state_eval_hybrid@v3 against the root teacher, with the search's own evaluator and measurement protocol (b760ab7ec7ab4b557dc4eb971801835d), beside B's recorded leaf values"
+  },
+  "B_packed_top1": {
+   "label": "the packed Top-1 (FFN -> DEPTH -> RESIDUAL_WIDTH -> ATTENTION, each later operator on the compressed parent), as trained in A-MIX-6cat-sr",
+   "initialization": {"state_id": "1f5e4b420125a345f1d190f0b8f87cad", "artifact_digest": "536742c54f5bdb19e436d2a7026d843684cdc1e5bfa34e2b02a0514d83fe98b6", "model_safetensors_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d", "selection": "configs/stages/stage-1/reasoning_inheritance/frozen_selection.json"},
+   "trained": {"run": "a_train_sr_mix_20261109_193709", "plan": {"path": "logs/stages/stage-2/teacher_modes/plans/mixed_training_plan.json", "sha256": "6632bdbc7f68f7ad5d77cb712609bfbc9efa76d3ee4246f332acf08715b7ded1"}, "units_record": {"path": "logs/stages/stage-2/teacher_modes/runs/a_train_sr_mix_20261109_193709/evidence/A-MIX-6cat-sr_units.json", "sha256": "0f859e0596b64e2d56da2dbe607294c98c5bb8212c0cf5a2fa8bcb749360dad6"}, "final_weights_sha256": {"20260726": "03cbb97de783a9b2af60cfc9d43540f6ee2bb5eb08d0d5c686945491080dfad5", "20260801": "9370c47025392256506422037ff1eec2b58e1bb7f3a2ae06c5966e6ed5b1a858"}},
+   "evidence": {"archive": {"relay_path": "durable/stage3_sr/evidence/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz", "sha256": "fadea6263ed99ed9bbdfbc4646b195bde62bb48fcc17b03804eb55a1e7ed1417"}, "dev_box_extracted": "~/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/extracted", "generations": "<extracted>/A-MIX-6cat-sr-s<seed>/evaluation_{thinking,non_thinking}/generations"},
+   "reuse": "B is never retrained and its records are never rewritten: its sealed per-item generations are rescored with the same scorer and paired with A's by seed, mode and item (`analysis.py`); its weights were retired 2026-11-14, which does not affect this"
+  }
+ },
+ "session": {
+  "packed_design": {"path": "configs/stages/stage-2/teacher_modes/packed_round_design.json", "sha256": "6c3a776e15ef2679137c7de060dd73420ee3c25d209c72b7e08cfc8c2b22b47c"},
+  "inputs_key": "v3",
+  "profiles_doc": {"path": "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json", "sha256": "87fb310d0e66ddab0a17f1e37e8196c67b50a62d5c49c79becaaa8181665467b"},
+  "forward_context": {"attention": "causal_continuous_positions_v1", "materialization": "prefix_restart_v1", "packing": "sequential_truncate_v1", "sequence_length": 8192, "shuffle": "sha256_keyed_v1", "shuffle_seed": 20261105, "truncate": true},
+  "rule": "the packed search's own session (stages.teacher_modes.packed_full_search.build_session, inputs v3): calibration items, packed forward context (AGENTS.md P19), position policy supervised_target_v1, Top-200 support, execution; each replayed step's operator config hash pinned to the journal's"
+ },
+ "training": {
+  "derived_from": {"path": "logs/stages/stage-2/teacher_modes/plans/mixed_training_plan.json", "sha256": "6632bdbc7f68f7ad5d77cb712609bfbc9efa76d3ee4246f332acf08715b7ded1"},
+  "changed_fields": ["unit", "arm", "config.run_name", "config.student_path", "config.out_dir", "config.lineage.initialization"],
+  "unchanged": "every other field of each A-MIX-6cat-sr unit config, compared field by field (`plan.py`): stage stage3_recovery; seeds 20260726 and 20260801 in that order; 9,701 optimizer steps, 3 epochs of 6,467 packed sequences of 8,192 tokens; batch size 2, micro-batch size 1, 2 gradient accumulation steps; fp32 parameters with bf16 autocast and gradient checkpointing; the teacher in bf16 as the online KD teacher; CE 0.25 + KD 1.0, temperature 1.0, assistant scope, Top-200 + tail; AdamW lr 5e-5, weight decay 0.01, betas (0.9, 0.95), eps 1e-8, clip 1.0; 485 warmup steps, cosine to 0.1; the same trainable patterns (embedding / tied head frozen); cross_context packing (sequential, truncation allowed, standard causal attention); the same pack, tokenizer and save points (every 1,104 steps, keep 1)",
+  "data": "the A-MIX-6cat-sr pack as frozen: 11,862,564 unique supervised tokens before packing (thinking 5,935,809 / non-thinking 5,926,755), 6,467 packed sequences; no Stage-2 data is regenerated",
+  "units": ["A_teacher_parent-s20260726", "A_teacher_parent-s20260801"]
+ },
+ "evaluation": {
+  "rule": "B's protocol exactly, so every A record pairs with B's record of the same seed, mode and item",
+  "eval_set": "eval-set-1",
+  "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+  "decoding": {"path": "configs/shared/evaluation/decoding/nucleus_v1.json", "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"},
+  "context": {"tokens": 8192, "rule": "the runners' trained-context resolution (uncapped_eval.resolve_context, `trained_block_len`): a Stage-3 student trained only on 8,192-token packed sequences runs at min(8,192, architectural context); every sample generates until EOS or that context minus its rendered prompt, the same rule and value B was generated under (A-MIX's evaluation_spec)"},
+  "action_protocol": "v2",
+  "system_message": "You are a helpful Assistant.",
+  "degeneration_check_every": 256,
+  "modes": {"H-T": {"template_kwargs": {"enable_thinking": true}, "dir": "evaluation_thinking", "role": "primary"}, "H-N": {"template_kwargs": {"enable_thinking": false}, "dir": "evaluation_non_thinking", "role": "key secondary"}},
+  "package": "the hybrid's tokenizer files (tokenizer.json, tokenizer_config.json pinned by teacher_identity.json), as A-MIX",
+  "resume": "each finished sample is streamed and sealed (reasoning_inheritance.driver.fluid / capability with this protocol passed in): a later attempt generates only the samples without a sealed record, each under the seed its item derives; nothing is generated twice and nothing is chosen by outcome",
+  "every_item": "every item of every unit, in both modes, for both seeds"
+ },
+ "analysis": {
+  "registered_before": "any A initialization, training or evaluation result exists (this file is committed before the first session)",
+  "primary": "thinking mode (H-T), static fluid formal core: A_teacher_parent - B_packed_top1, pooled over the two training seeds; each record paired with B's record of the same seed and item",
+  "key_secondary": "non-thinking mode (H-N), the same comparison",
+  "primary_items": {"n": 570, "sha256": "40293ab158372c1eca07c308ed791e8f3f83f99e749fdfc3d603286d5cdbb051", "rule": "fluid_reasoning_720/dev_v1 minus the set's formal-core exclusions (eval_set_scoring.unit_masks) minus the interactive episodes; sha256 over the sorted task ids each followed by a newline"},
+  "units_of_independence": {"file": "fluid_reasoning_720/independence_v1.json", "sha256": "4e5a06d48624c14a1eb20aaa5267198b2dfd801d268b7cf13a3f67b8ef17a1c5", "groups": 558, "rule": "an item and its other-seed copy are never two independent observations: a group holds its items under both seeds"},
+  "statistic": "delta = (1 / (2 x 570)) sum_seeds sum_items (y_A - y_B), y the registered scorer's correctness in {0, 1}; per group g, d_g = sum over the group's items and both seeds of (y_A - y_B), n_g = 2 |g|",
+  "test": "two-sided paired sign-flip randomization at the group level: each d_g's sign flipped independently with probability 1/2; T = |sum_g d_g|; p = (1 + #{b : |sum_g e_bg d_g| >= T}) / (1 + B), B = 100,000, numpy.random.default_rng(20261117)",
+  "effect_interval": "percentile 95% interval of sum d / sum n over 10,000 group resamples, numpy.random.default_rng(20261118); reported beside the test, not the decision",
+  "multiplicity": "fixed sequence: the primary at alpha 0.05; the key secondary is tested at alpha 0.05 only if the primary rejects, and is descriptive otherwise; every other number is descriptive",
+  "decision": "only when A's records of BOTH seeds cover all 570 registered items in the mode (B's do): A_BETTER if p <= 0.05 and delta > 0, A_WORSE if p <= 0.05 and delta < 0, NOT_DISTINGUISHED otherwise (not equivalence). An incomplete mode is descriptive_only (no test, no verdict); never a partial pooling",
+  "per_seed": "each seed's A - B delta and its own group-bootstrap interval, and whether the two seeds agree in sign: descriptive; two training seeds bound what can be said about training randomness, and the test's uncertainty is the items', not the seeds'",
+  "descriptive": ["the interactive episodes of fluid_reasoning_720 (144, formal core), per mode", "the static fluid core by reasoning axis (task-contained deduction, inductive rule discovery, compositional generalization, abstract/analogical)", "every supporting unit's registered headline, per mode and seed", "terminations apart from correctness: natural termination, degeneration stop, context-limit hit (right-censored length), answer-extraction failure, protocol validity", "state evaluation KL (diagnostic)", "training loss and validation curves", "measured cost and time"],
+  "exposure": "eval-set-1 is development-exposed: nothing here is a never-seen blind result; the legacy in-sample unit is never read as generalization",
+  "not_reused": "the mixed-vs-A1/A2 NO_GO thresholds and labels, and RI-LM1's Holm family, are other questions' rules"
+ },
+ "storage": {
+  "durable": "the relay (AlphaAvatar/aadistill-artifacts, private), under durable/stage1_teacher_parent_init/: A's init checkpoint, mapping and teacher statistics the moment they are built and verified; each unit's latest save point (weights + trainer state) rolling, the previous one permanently deleted after the next verifies; each final model before its evaluation; the evidence archive at closeout",
+  "local": "~/aad-artifacts/stage1_teacher_parent_init/: A's init, its mapping and statistics, both final trained weights, the evidence; registered in the checkpoint registry",
+  "terminal": "after the study's terminal state and local verification: the relay's weight copies of this round are retired with tombstones (save points first); statistics, evidence and deletion records stay; no network volume is used"
+ },
+ "budget": {"proposal": "logs/stages/stage-1/teacher_parent_initialization/plans/proposal.json", "grant": "logs/budget/approvals/stage1_teacher_parent_init_grant.json"},
+ "authorizes": "nothing"
+}
