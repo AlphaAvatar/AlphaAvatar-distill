@@ -16795,3 +16795,24 @@ on a paid pod.
   - The dev box has 5.5 GB free, and the terminal local retention needs ~7 GB. There are no dead weights under 2.5;
     the options need a maintainer decision.
 - Revisit when: the maintainer grants, changes or declines the proposal.
+
+## 2026-11-17 (UTC) — TPI1 granted on the proposal's terms; the two permanent controls' dev-box copies retired
+
+- Context: the maintainer answered the two questions put with the prepared round.
+- Decision 1 (grant): "Approve draft (Recommended)". The grant `logs/budget/approvals/stage1_teacher_parent_init_grant.json`
+  was written from the proposal at `fed04669` (study identity `5fd99503...`):
+  - sessions $31.50 cumulative, plus a $1.00 teardown reserve outside it, $32.50 in all;
+  - per-session caps of init $2.00 and training $28.00;
+  - one L40S at <= $1.11/h, no network volume;
+  - inside the current $1,000 project cap, which is not raised;
+  - nothing carried over from a closed study.
+- Decision 2 (local room): "Retire the two controls (Recommended)". The dev-box copies of
+  `preflight_ctl_r0860k_{sa,sb}/step_001023/model/model.safetensors` (2 x 2,384,234,968 B) were deleted under
+  `verified_stale_cache`:
+  - each was first hashed against its relay copy (`permanent_controls/preflight_ctl_r0860k_{sa,sb}/model/model.safetensors`,
+    LFS sha256 `573847a7...` / `4c6adcf8...`, equal);
+  - the relay copies stay canonical; the configs and tokenizer files stay on the dev box;
+  - tombstones `devbox_20261117_preflight_ctl_r0860k_{sa,sb}_local`.
+  `/` went from 5.5 GB free to 12 GB free. A local consumer of those paths (a closed Stage-3 launcher) now fetches from
+  the relay.
+- Revisit when: TPI1 reaches a terminal state.

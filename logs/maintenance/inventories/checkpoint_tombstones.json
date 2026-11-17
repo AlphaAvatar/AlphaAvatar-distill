@@ -46,10 +46,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 142,
-  "active": 140,
-  "active_retired_bytes": 618830098754,
-  "active_retired_human": "576.330 GiB",
+  "tombstones_total": 144,
+  "active": 142,
+  "active_retired_bytes": 623598568690,
+  "active_retired_human": "580.771 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -10242,6 +10242,142 @@
      "oid_left": [],
      "path_in_head": false
     }
+   }
+  },
+  {
+   "canonical_id": "devbox_20261117_preflight_ctl_r0860k_sa_local",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/model/model.safetensors"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage 3",
+   "seed": null,
+   "scientific_role": "permanent control, dev-box copy of the weights",
+   "weights_sha256": "573847a730c1a4997a2fa4554ac2fe45d72633b1d8f3234c6ca72aac2ec4468f",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "573847a730c1a4997a2fa4554ac2fe45d72633b1d8f3234c6ca72aac2ec4468f"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/battery_session.json",
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/log_inventory.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/maintenance/storage/devbox_cleanup_20261110_eseries.json",
+    "logs/shared/validations/micro-preflight/autoinit_preflight_session.json",
+    "logs/shared/validations/micro-preflight/runs/autoinit_preflight_run4/manifest.json",
+    "logs/shared/validations/micro-preflight/runs/autoinit_preflight_run4/preflight_evidence.json",
+    "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345/runtime/session.json",
+    "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_storage.md",
+    "logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration_materialized.json",
+    "logs/stages/stage-1/phase_a/results/autoinit_permanent_controls/README.md",
+    "logs/stages/stage-1/phase_a/results/autoinit_permanent_controls/preflight_ctl_r0860k_sa_probe_identity.json"
+   ],
+   "deletion_criterion": "verified_stale_cache",
+   "deletion_criterion_meaning": "a stale local cache whose canonical remote artifact has been hash-verified",
+   "reason_physical_weights_deleted": "local room for TPI1's checkpoints; the verified relay copy stays canonical",
+   "canonical_surviving_evidence": "relay:permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": null,
+   "reconstruction_kind": "none",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": null,
+   "frozen_results_location": null,
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/model",
+    "retention": "control",
+    "never_delete_clause": "permanent control — named explicitly in the retention rule",
+    "retention_reason": "one of the two permanent controls Stage 3 completed on; the frozen thresholds were materialized against them",
+    "maintainer_decision": "2026-11-17 (UTC), maintainer's answer to the disk-room question for TPI1: 'Retire the two controls (Recommended)' -- 'Delete the dev-box copies of the two permanent Stage-3 controls (preflight_ctl_r0860k_sa/sb, 2 x 2.40 GB = 4.8 GB). Their verified relay copies remain the canonical copy.'"
+   },
+   "deleted_utc": "2026-11-17T14:20:11+00:00",
+   "tombstone_written_utc": "2026-11-17T14:20:10+00:00",
+   "deletion": {
+    "status": "DELETED"
+   }
+  },
+  {
+   "canonical_id": "devbox_20261117_preflight_ctl_r0860k_sb_local",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/model/model.safetensors"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "Stage 3",
+   "seed": null,
+   "scientific_role": "permanent control, dev-box copy of the weights",
+   "weights_sha256": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-0/calibration_volume/battery_session.json",
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/inventories/log_inventory.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+    "logs/shared/validations/micro-preflight/autoinit_preflight_session.json",
+    "logs/shared/validations/micro-preflight/runs/autoinit_preflight_run4/manifest.json",
+    "logs/shared/validations/micro-preflight/runs/autoinit_preflight_run4/preflight_evidence.json",
+    "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345/runtime/session.json",
+    "logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration_materialized.json",
+    "logs/stages/stage-1/phase_a/results/autoinit_permanent_controls/preflight_ctl_r0860k_sb_probe_identity.json",
+    "logs/stages/stage-1/phase_a/results/autoinit_permanent_controls/preflight_ctl_r0860k_sb_run_completion.json",
+    "logs/stages/stage-1/phase_a/results/autoinit_permanent_controls/preflight_ctl_r0860k_sb_run_manifest.json",
+    "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/continuation_evidence.json"
+   ],
+   "deletion_criterion": "verified_stale_cache",
+   "deletion_criterion_meaning": "a stale local cache whose canonical remote artifact has been hash-verified",
+   "reason_physical_weights_deleted": "local room for TPI1's checkpoints; the verified relay copy stays canonical",
+   "canonical_surviving_evidence": "relay:permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": null,
+   "reconstruction_kind": "none",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": null,
+   "frozen_results_location": null,
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/model",
+    "retention": "control",
+    "never_delete_clause": "permanent control — named explicitly in the retention rule",
+    "retention_reason": "one of the two permanent controls Stage 3 completed on; the frozen thresholds were materialized against them",
+    "maintainer_decision": "2026-11-17 (UTC), maintainer's answer to the disk-room question for TPI1: 'Retire the two controls (Recommended)' -- 'Delete the dev-box copies of the two permanent Stage-3 controls (preflight_ctl_r0860k_sa/sb, 2 x 2.40 GB = 4.8 GB). Their verified relay copies remain the canonical copy.'"
+   },
+   "deleted_utc": "2026-11-17T14:20:13+00:00",
+   "tombstone_written_utc": "2026-11-17T14:20:13+00:00",
+   "deletion": {
+    "status": "DELETED"
    }
   }
  ],
