@@ -1,0 +1,73 @@
+{
+ "schema": "aadistill.stage1.teacher_parent_initialization.driver_report/v1",
+ "run_id": "tpi_init_20261117_142049",
+ "started_utc": "2026-11-17T14:37:57Z",
+ "contract": {
+  "design_sha256": "423eb41222af704d647becb0aba6146a5d5109ea3df8c122c69bc044fd9c51dd",
+  "selection_sha256": "c523a6d1dd18e7cafb52a81060336144c04de2791a1cb2acdf7bc742c52601f8",
+  "selection_reproduced_from_journal": null,
+  "session": {
+   "config_hash": "457d5adbe0696631a168c038afd14122d49d6c0fd1ca363115a27b99d026fea5",
+   "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+   "forward_context": {
+    "packing": "sequential_truncate_v1",
+    "truncate": true,
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261105
+   },
+   "profiles": {
+    "calib.hybrid_d4_base@v2": "d835fad13756d21cf5a2e5cc66c7c9b7badbf251133aa13c53ab033056b2fb45",
+    "calib.hybrid_d4_rh@v2": "6a20196d550d0f1c7570faf5b84366fb0e5e1404fa6b82cc40c24129b1efa590"
+   }
+  },
+  "config_hashes": [
+   {
+    "step": "FFN",
+    "impl_id": "ffn.activation_importance_v0",
+    "profile_id": "calib.hybrid_d4_base@v2",
+    "derived": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "journal": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "matches": true
+   },
+   {
+    "step": "DEPTH",
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "profile_id": "calib.hybrid_d4_base@v2",
+    "derived": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "journal": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "matches": true
+   },
+   {
+    "step": "ATTENTION",
+    "impl_id": "attention.activation_importance_v1",
+    "profile_id": "calib.hybrid_d4_rh@v2",
+    "derived": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "journal": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "matches": true
+   },
+   {
+    "step": "RESIDUAL_WIDTH",
+    "impl_id": "width.global_pca_v0",
+    "profile_id": "calib.hybrid_d4_rh@v2",
+    "derived": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "journal": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "matches": true
+   }
+  ]
+ },
+ "init_record": {
+  "selected_rows": [
+   {
+    "state_id": "A_teacher_parent/01e63327e3d02b2f5fb451dba7054a49",
+    "path": "FFN(base) -> DEPTH(base) -> RESIDUAL_WIDTH(rh, teacher statistics at K) -> ATTENTION(rh), every selection on the teacher",
+    "artifact_digest": "0474006c43ff268f36d6b745895f08a36077d8446008d2127853fa46a9fc74a5",
+    "single_shard_sha256": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea"
+   }
+  ]
+ },
+ "finished_utc": "2026-11-17T14:52:23Z",
+ "terminal": "ALL_DONE"
+}

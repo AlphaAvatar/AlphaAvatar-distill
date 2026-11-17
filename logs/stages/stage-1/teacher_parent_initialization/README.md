@@ -7,11 +7,11 @@ Everything this experiment produced, in one place.
 | [`analyses/`](analyses/) | working analyses and audits |
 | [`audit/`](audit/) | material |
 | [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
-| runs | registered from components; see the index |
+| [`runs/`](runs/) | one directory per execution attempt |
 
 ## Runs
 
-* none recorded
+* [`tpi_init_20261117_142049`](runs/tpi_init_20261117_142049/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

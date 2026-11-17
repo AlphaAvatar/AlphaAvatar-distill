@@ -232,7 +232,7 @@ def evaluate(model_dir: Path, ev_dir: Path, label: str, mode: str, vllm_py: str,
     """Every eval-set-1 unit in ``mode``, resumable by sample, then the formal report (`eval_set_scoring.report`)."""
     from stages.reasoning_inheritance import driver as RID
     import shared.evaluation.eval_set_scoring as S
-    env = {**os.environ, "HF_HUB_OFFLINE": "1", "PYTHONPATH": "src:scripts:scripts/stages/stage-1"}
+    env = {**os.environ, "HF_HUB_OFFLINE": "1"}       #: the driver's own (absolute) PYTHONPATH, as RI-LM1's
     ev = protocol()
     pkg = work / "packages" / f"{label}_{mode}"
     rec = {"package": package(model_dir, pkg)}

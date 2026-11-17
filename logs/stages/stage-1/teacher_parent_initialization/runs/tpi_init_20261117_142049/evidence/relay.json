@@ -1,0 +1,76 @@
+{
+ "init": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f",
+  "files_sha256": {
+   "init/model.safetensors": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea",
+   "init/config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b"
+  },
+  "bytes": {
+   "init/model.safetensors": 1192135096,
+   "init/config.json": 1418
+  },
+  "quota": "2 object(s), 1.11 GiB: ACCEPTED (200) 2/2 granted an upload action",
+  "uploaded": [
+   "init/config.json",
+   "init/model.safetensors"
+  ],
+  "upload_seconds": 9.6,
+  "downloaded_sha256": {
+   "init/config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+   "init/model.safetensors": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea"
+  },
+  "verified": true,
+  "verify_seconds": 4.2,
+  "utc": "2026-11-17T14:52:00Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+ },
+ "mapping": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f",
+  "files_sha256": {
+   "mapping/mapping.json": "26c2ad1966a6029a52a1a2400b79d9ebac79cc4483e95ff875f35813975d269f",
+   "mapping/tensors.safetensors": "aae2e9b853a541d458667434b763b058a33029624526d4e531eb19d48f38f286"
+  },
+  "bytes": {
+   "mapping/mapping.json": 968220,
+   "mapping/tensors.safetensors": 20979888
+  },
+  "quota": "2 object(s), 0.02 GiB: ACCEPTED (200) 2/2 granted an upload action",
+  "uploaded": [
+   "mapping/mapping.json",
+   "mapping/tensors.safetensors"
+  ],
+  "upload_seconds": 2.4,
+  "downloaded_sha256": {
+   "mapping/mapping.json": "26c2ad1966a6029a52a1a2400b79d9ebac79cc4483e95ff875f35813975d269f",
+   "mapping/tensors.safetensors": "aae2e9b853a541d458667434b763b058a33029624526d4e531eb19d48f38f286"
+  },
+  "verified": true,
+  "verify_seconds": 1.1,
+  "utc": "2026-11-17T14:52:04Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+ },
+ "statistics": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f",
+  "files_sha256": {
+   "teacher_residual_statistics.safetensors": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb"
+  },
+  "bytes": {
+   "teacher_residual_statistics.safetensors": 1947442680
+  },
+  "quota": "1 object(s), 1.81 GiB: ACCEPTED (200) 1/1 granted an upload action",
+  "uploaded": [
+   "teacher_residual_statistics.safetensors"
+  ],
+  "upload_seconds": 11.2,
+  "downloaded_sha256": {
+   "teacher_residual_statistics.safetensors": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb"
+  },
+  "verified": true,
+  "verify_seconds": 5.7,
+  "utc": "2026-11-17T14:52:23Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+ }
+}

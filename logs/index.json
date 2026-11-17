@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 197,
+  "runs_unrecorded": 198,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -878,6 +878,11 @@
     "recorded": 0,
     "unrecorded": 36,
     "total": 36
+   },
+   "teacher_parent_initialization": {
+    "recorded": 0,
+    "unrecorded": 1,
+    "total": 1
    }
   },
   "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
@@ -3951,6 +3956,14 @@
    "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816",
    "n_files": 3,
    "digest": "b90a4932ea4a4cf05a1672c09925302ed30010d2d9eac906ed516ec470c27ada",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_parent_initialization",
+   "run_id": "tpi_init_20261117_142049",
+   "root": "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049",
+   "n_files": 7,
+   "digest": "bbd4cc7f15bc52a12af7401eec3d79b908929e5c57d747d385d6c37f74d4b1c0",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {

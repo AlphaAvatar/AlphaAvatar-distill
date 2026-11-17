@@ -1,0 +1,447 @@
+{
+ "schema": "aadistill.stage1.teacher_parent_initialization.init_record/v1",
+ "status": "COMPLETE",
+ "arm": "A_teacher_parent",
+ "run_id": "tpi_init_20261117_142049",
+ "root_teacher": {
+  "verified": [
+   "model-00001-of-00003.safetensors",
+   "model-00002-of-00003.safetensors",
+   "model-00003-of-00003.safetensors"
+  ],
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192"
+ },
+ "commit": {
+  "selected_rows": [
+   {
+    "state_id": "A_teacher_parent/01e63327e3d02b2f5fb451dba7054a49",
+    "path": "FFN(base) -> DEPTH(base) -> RESIDUAL_WIDTH(rh, teacher statistics at K) -> ATTENTION(rh), every selection on the teacher",
+    "artifact_digest": "0474006c43ff268f36d6b745895f08a36077d8446008d2127853fa46a9fc74a5",
+    "single_shard_sha256": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea"
+   }
+  ]
+ },
+ "checkpoint": {
+  "artifact_digest": "0474006c43ff268f36d6b745895f08a36077d8446008d2127853fa46a9fc74a5",
+  "config_sha256": "5d81f65557ba4513c4b1b81230f54644c07f0cd25602fc4a6baf9b42717f0dde",
+  "shards": [
+   {
+    "filename": "model.safetensors",
+    "sha256": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea",
+    "size_bytes": 1192135096
+   }
+  ],
+  "num_parameters": 596049920,
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "root_blocks": [
+   0,
+   1,
+   4,
+   5,
+   6,
+   7,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   21,
+   22,
+   23,
+   24,
+   25,
+   27,
+   29,
+   31,
+   33,
+   34,
+   35
+  ],
+  "geometry": {
+   "num_hidden_layers": 28,
+   "hidden_size": 1024,
+   "intermediate_size": 3072,
+   "num_attention_heads": 16,
+   "num_key_value_heads": 8,
+   "head_dim": 128,
+   "vocab_size": 151936,
+   "tie_word_embeddings": true
+  },
+  "geometry_matches_target": true,
+  "num_parameters_counted": 596049920,
+  "num_parameters_match_target": true,
+  "order": [
+   "FFN",
+   "DEPTH",
+   "RESIDUAL_WIDTH",
+   "ATTENTION"
+  ],
+  "reload_forward_finite": true
+ },
+ "gates": {
+  "FFN": {
+   "artifact_digest": "e2c3cabb51322545805418d65a9be203119eb25ee5b12f468a636c99a3c9f31f",
+   "journal_state": "3f74303972b2a0834f1dc9c024de44e5",
+   "journal_artifact_digest": "e2c3cabb51322545805418d65a9be203119eb25ee5b12f468a636c99a3c9f31f",
+   "equal": true
+  },
+  "DEPTH": {
+   "artifact_digest": "35028ec9a73c4e7e4ddc3afbd122c5db3a6a2b46cfb2df9a7c721a12497c0237",
+   "journal_state": "fede45dbe125bec0ec457d5a827d0027",
+   "journal_artifact_digest": "35028ec9a73c4e7e4ddc3afbd122c5db3a6a2b46cfb2df9a7c721a12497c0237",
+   "equal": true
+  },
+  "ATTENTION": {
+   "artifact_digest": "2ccbe236195b98016a8b52c2e8a3d82591baec835cbdeaba37c32e020066bb8d",
+   "journal_state": "87ee62059aa27519ff4643dec02300f4",
+   "journal_artifact_digest": "2ccbe236195b98016a8b52c2e8a3d82591baec835cbdeaba37c32e020066bb8d",
+   "equal": true
+  },
+  "RESIDUAL_WIDTH": {
+   "artifact_digest": "998172e203ebd4fe94bdc2855ca072204eba2c953269719948d2feb1f16da1b5",
+   "journal_state": "02b3319640a0043a77ed5a3ca4e07afc",
+   "journal_artifact_digest": "998172e203ebd4fe94bdc2855ca072204eba2c953269719948d2feb1f16da1b5",
+   "equal": true
+  }
+ },
+ "statistics_reproduction": {
+  "recomputed": {
+   "energy_captured_frac": 0.9246420215957857,
+   "top_eigenvalue": 0.2669729308976218,
+   "min_kept_eigenvalue": 8.849853922146791e-05
+  },
+  "recorded": {
+   "energy_captured_frac": 0.9246420215957857,
+   "top_eigenvalue": 0.2669729308976218,
+   "min_kept_eigenvalue": 8.849853922146791e-05
+  },
+  "equal": true
+ },
+ "statistics": {
+  "file": "teacher_residual_statistics.safetensors",
+  "sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb",
+  "bytes": 1947442680,
+  "tensors": {
+   "ffn_abs_sum": {
+    "shape": [
+     36,
+     9728
+    ],
+    "dtype": "torch.float64"
+   },
+   "ffn_sq_sum": {
+    "shape": [
+     36,
+     9728
+    ],
+    "dtype": "torch.float64"
+   },
+   "residual_count": {
+    "shape": [
+     1
+    ],
+    "dtype": "torch.int64"
+   },
+   "residual_sqsum": {
+    "shape": [
+     37,
+     2560,
+     2560
+    ],
+    "dtype": "torch.float64"
+   },
+   "residual_sum": {
+    "shape": [
+     37,
+     2560
+    ],
+    "dtype": "torch.float64"
+   },
+   "token_counts": {
+    "shape": [
+     151936
+    ],
+    "dtype": "torch.int64"
+   }
+  },
+  "parent": "the root teacher",
+  "profile_id": "calib.hybrid_d4_rh@v2",
+  "operator": "width.global_pca_v0",
+  "config_hash": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+  "stats_tokens": 236939,
+  "points": "0..36: inputs of root layers 0..35, then the post-final-norm output"
+ },
+ "width_transform": {
+  "points": [
+   0,
+   1,
+   4,
+   5,
+   6,
+   7,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   21,
+   22,
+   23,
+   24,
+   25,
+   27,
+   29,
+   31,
+   33,
+   34,
+   35,
+   36
+  ],
+  "point_weights": [
+   9.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   8.0
+  ],
+  "post_norm_point": 36,
+  "scale": 1.5811388300841898,
+  "diagnostics": {
+   "energy_captured_frac": 0.9256407190726579,
+   "top_eigenvalue": 0.24766756972500142,
+   "min_kept_eigenvalue": 8.876145504398781e-05,
+   "orthonormality_error": 5.551115123125783e-15,
+   "point_weights": [
+    9.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    8.0
+   ],
+   "points": [
+    0,
+    1,
+    4,
+    5,
+    6,
+    7,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    21,
+    22,
+    23,
+    24,
+    25,
+    27,
+    29,
+    31,
+    33,
+    34,
+    35,
+    36
+   ]
+  },
+  "rule": "K = DEPTH's kept root layers, L_T = the teacher's layer count; layer_points = sorted({0, *K}); points = layer_points + [L_T]. Residual point i < L_T is the input of root layer i (point 0 the embedding output, kept even if layer 0 were removed); point L_T is the teacher's post-final-RMSNorm output, never the student's last index and never the last block's unnormalized output. Duplicates are removed; the count is derived, never typed"
+ },
+ "mapping": {
+  "content_digest": "01e63327e3d02b2f5fb451dba7054a49e2c408aba8e0a724873050e4545655cd",
+  "files_sha256": {
+   "mapping.json": "26c2ad1966a6029a52a1a2400b79d9ebac79cc4483e95ff875f35813975d269f",
+   "tensors.safetensors": "aae2e9b853a541d458667434b763b058a33029624526d4e531eb19d48f38f286"
+  }
+ },
+ "state_evaluation": {
+  "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+  "suite": "state_eval_hybrid",
+  "values": {
+   "state.teacher_kl.equal_domain_mean": 19.57527969675089,
+   "state.teacher_kl.worst_domain": 22.481781312595555,
+   "state.teacher_kl.token_mean": 21.082208413986958,
+   "state.reverse_kl.token_mean": 26.938815407786684,
+   "state.nll.pooled_all_domains": 21.233542244402173,
+   "state.nll.teacher_reference_pooled": 0.20392156168380815,
+   "state.nll_delta_vs_teacher_pooled": 21.029620682718363,
+   "state.top1_agreement": 0.07666651047679089,
+   "state.teacher_kl.abstract_analogical": 14.81989359314238,
+   "state.teacher_kl.compositional_generalization": 19.70927706222846,
+   "state.teacher_kl.inductive_rule_discovery": 18.9175387679319,
+   "state.teacher_kl.task_contained_deduction": 21.94790774785615,
+   "state.teacher_kl.supporting": 22.481781312595555,
+   "state.nll.abstract_analogical": 14.936156678188233,
+   "state.nll.compositional_generalization": 19.839830313704105,
+   "state.nll.inductive_rule_discovery": 19.107532960270433,
+   "state.nll.task_contained_deduction": 22.088700016393663,
+   "state.nll.supporting": 22.61765928923332,
+   "state.critical_token_kl.assistant": 21.082208413986958,
+   "state.critical_token_kl.eos": 32.455595188486456,
+   "state.critical_token_kl.final_answer": 21.20508079065189,
+   "state.critical_token_kl.reasoning": 20.866212247044647,
+   "state.critical_token_kl.think_close": 42.49610722111721,
+   "state.critical_token_kl.tool_call_close": 43.4345654296875,
+   "state.critical_token_kl.tool_call_open": 41.96901232910156,
+   "state.critical_token_kl.group.H-N": 33.84340867280008,
+   "state.critical_token_kl.group.H-N.final_answer": 20.973655360498313,
+   "state.critical_token_kl.group.H-N.eos": 31.65316476410318,
+   "state.critical_token_kl.group.H-N.tool_call_open": 40.02331994285046,
+   "state.critical_token_kl.group.H-N.tool_call_close": 42.72349462374835,
+   "state.critical_token_kl.group.H-T": 37.88626034754121,
+   "state.critical_token_kl.group.H-T.think_close": 42.49610722111721,
+   "state.critical_token_kl.group.H-T.final_answer": 21.965461841942293,
+   "state.critical_token_kl.group.H-T.eos": 36.07300331131105,
+   "state.critical_token_kl.group.H-T.tool_call_open": 44.527237503616895,
+   "state.critical_token_kl.group.H-T.tool_call_close": 44.36949185971861,
+   "state.critical_token_kl": 35.864834510170645
+  },
+  "seconds": 175.8,
+  "role": "diagnostic only"
+ },
+ "relay": {
+  "init": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f",
+   "files_sha256": {
+    "init/model.safetensors": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea",
+    "init/config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b"
+   },
+   "bytes": {
+    "init/model.safetensors": 1192135096,
+    "init/config.json": 1418
+   },
+   "quota": "2 object(s), 1.11 GiB: ACCEPTED (200) 2/2 granted an upload action",
+   "uploaded": [
+    "init/config.json",
+    "init/model.safetensors"
+   ],
+   "upload_seconds": 9.6,
+   "downloaded_sha256": {
+    "init/config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+    "init/model.safetensors": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea"
+   },
+   "verified": true,
+   "verify_seconds": 4.2,
+   "utc": "2026-11-17T14:52:00Z",
+   "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+  },
+  "mapping": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f",
+   "files_sha256": {
+    "mapping/mapping.json": "26c2ad1966a6029a52a1a2400b79d9ebac79cc4483e95ff875f35813975d269f",
+    "mapping/tensors.safetensors": "aae2e9b853a541d458667434b763b058a33029624526d4e531eb19d48f38f286"
+   },
+   "bytes": {
+    "mapping/mapping.json": 968220,
+    "mapping/tensors.safetensors": 20979888
+   },
+   "quota": "2 object(s), 0.02 GiB: ACCEPTED (200) 2/2 granted an upload action",
+   "uploaded": [
+    "mapping/mapping.json",
+    "mapping/tensors.safetensors"
+   ],
+   "upload_seconds": 2.4,
+   "downloaded_sha256": {
+    "mapping/mapping.json": "26c2ad1966a6029a52a1a2400b79d9ebac79cc4483e95ff875f35813975d269f",
+    "mapping/tensors.safetensors": "aae2e9b853a541d458667434b763b058a33029624526d4e531eb19d48f38f286"
+   },
+   "verified": true,
+   "verify_seconds": 1.1,
+   "utc": "2026-11-17T14:52:04Z",
+   "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+  },
+  "statistics": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f",
+   "files_sha256": {
+    "teacher_residual_statistics.safetensors": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb"
+   },
+   "bytes": {
+    "teacher_residual_statistics.safetensors": 1947442680
+   },
+   "quota": "1 object(s), 1.81 GiB: ACCEPTED (200) 1/1 granted an upload action",
+   "uploaded": [
+    "teacher_residual_statistics.safetensors"
+   ],
+   "upload_seconds": 11.2,
+   "downloaded_sha256": {
+    "teacher_residual_statistics.safetensors": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb"
+   },
+   "verified": true,
+   "verify_seconds": 5.7,
+   "utc": "2026-11-17T14:52:23Z",
+   "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+  }
+ },
+ "design_sha256": "423eb41222af704d647becb0aba6146a5d5109ea3df8c122c69bc044fd9c51dd",
+ "selection_sha256": "c523a6d1dd18e7cafb52a81060336144c04de2791a1cb2acdf7bc742c52601f8",
+ "finished_utc": "2026-11-17T14:52:23Z"
+}
