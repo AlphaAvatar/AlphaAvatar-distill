@@ -176,6 +176,10 @@ def restore_savepoint(ev_unit: Path, out_dir: Path) -> dict | None:
     if not got.get("verified"):
         raise DriverError(f"save point {rec['tag']} did not restore: {str(got)[:500]}")
     (out_dir / "checkpoints" / "latest.txt").write_text(rec["tag"] + "\n")
+    #: the trainer appends its log across resumes (`resume_loaded`, then the steps after the save point); on a
+    #: replacement pod that log is the one the previous attempt secured, or the mirror would overwrite it with the tail
+    if (ev_unit / "train" / "train_log.jsonl").is_file() and not (out_dir / "train_log.jsonl").is_file():
+        shutil.copyfile(ev_unit / "train" / "train_log.jsonl", out_dir / "train_log.jsonl")
     return {"tag": rec["tag"], "from": got.get("from"), "utc": utc()}
 
 

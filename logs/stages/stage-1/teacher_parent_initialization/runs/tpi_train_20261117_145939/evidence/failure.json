@@ -1,0 +1,19 @@
+{
+ "schema": "aadistill.stage1.teacher_parent_initialization.failure/v1",
+ "run_id": "tpi_train_20261117_145939",
+ "recorded_utc": "2026-11-17T18:20:00Z",
+ "terminal": "DRIVER_UNKNOWN (launcher rc 11), pod d46wi0dt91xmzj deleted 17:52:28Z, provider confirms it gone",
+ "what_was_observed": [
+  "training of A_teacher_parent-s20260726 ran normally from 15:12:22Z: the last logged step is 2540 of 9701 at 17:34:14Z (loss 0.887, 3.45 s/step, 17.47 GB GPU memory allocated, unchanged since step 1); validation at step 2424: CE 0.896, KD 0.753",
+  "save points step_001104 and step_002208 were copied to the relay and verified (downloaded again and re-hashed); step_001104 was then permanently deleted there (lfs_left empty); step_002208 is the unit's durable resume point",
+  "from 17:35:31Z the launcher's reads of the pod's log and status failed, and the driver's descriptor probe went unanswered for 825 s; at 17:50:49Z the pod answered again and the driver was not running and had written no exit file",
+  "the driver's own command wrapper appends MARKER:RUN_FAILED when the driver exits for any reason; the status file pulled at teardown has no such line and no driver traceback exists: every process of the job died at once",
+  "at 17:51-17:52Z the pod's files were intact (the collector's manifest read them, rc 0)"
+ ],
+ "classification": "provider-side loss of the running container (unreachable for ~15 min, every process gone, the container disk kept), not a failure of the workload: nothing the session runs was active at 17:34 beyond training itself (no save point, no validation, no relay transfer); the same recipe on the same card and pack ran 2 x 9 h in A-MIX without one; host memory is not logged, so an out-of-memory kill of the whole container cannot be excluded, but an out-of-memory kill of the trainer alone would have left the wrapper to write RUN_FAILED",
+ "failure_signature": "None (transient): `aadistill.infrastructure.failure_signature.signature_of` over the launcher log; the same-failure gate permits the ordinary retry",
+ "work_lost": "steps 2209-2540 (332 optimizer steps, ~18 min); they are a discarded branch, never pooled: the next attempt resumes the verified step_002208 save point (weights, AdamW state, step, consumed sequences, CPU and CUDA RNG), as the design's recovery contract requires",
+ "repair": "train_driver.restore_savepoint now seeds the pod's train_log.jsonl from the secured one before the trainer resumes, so the trainer appends to the unit's whole log (resume_loaded, then the steps after the save point) as on one disk; restore_final already did this. Not the cause of the loss; it keeps the unit's training curve in one log",
+ "cost": {"all_in_usd": 3.0779, "elapsed_minutes": 166.29, "price_per_hour": 1.09},
+ "next": "a fresh run identity with --resume-from this session's secured evidence (launch.py stage-resume)"
+}

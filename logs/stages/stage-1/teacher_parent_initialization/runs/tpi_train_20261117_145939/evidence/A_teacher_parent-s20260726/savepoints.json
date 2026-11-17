@@ -1,0 +1,98 @@
+[
+ {
+  "tag": "step_001104",
+  "step": 1104,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "7bc235ac8ef886b4232077cd75cd3a5db6136df885c4f661bfa974d32305a530",
+   "trainer_state.pt": "5586256919549310e9b4dcca253b4d3b9b31a2ec90e52b6d89c16d77fea9145f",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 43.6,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "7bc235ac8ef886b4232077cd75cd3a5db6136df885c4f661bfa974d32305a530",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "5586256919549310e9b4dcca253b4d3b9b31a2ec90e52b6d89c16d77fea9145f"
+  },
+  "verified": true,
+  "verify_seconds": 27.0,
+  "utc": "2026-11-17T16:15:37Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_001104",
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/model/config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/model/generation_config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/model/model.safetensors",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/resume_identity.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-17T17:17:33Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_002208",
+  "step": 2208,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_002208",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "d1d85242d02701a95900797a3d523da4566d79a24a066a778c465ae35aef0455",
+   "trainer_state.pt": "f17bd94491c7c1888649e0cfd7d6d1f00d9e9c3840efb1a3eddd8ebe83082aff",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 48.9,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "d1d85242d02701a95900797a3d523da4566d79a24a066a778c465ae35aef0455",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "f17bd94491c7c1888649e0cfd7d6d1f00d9e9c3840efb1a3eddd8ebe83082aff"
+  },
+  "verified": true,
+  "verify_seconds": 46.1,
+  "utc": "2026-11-17T17:17:17Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_002208"
+ }
+]

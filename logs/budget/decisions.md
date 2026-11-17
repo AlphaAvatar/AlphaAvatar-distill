@@ -16816,3 +16816,25 @@ on a paid pod.
   `/` went from 5.5 GB free to 12 GB free. A local consumer of those paths (a closed Stage-3 launcher) now fetches from
   the relay.
 - Revisit when: TPI1 reaches a terminal state.
+
+## 2026-11-17 (UTC) — TPI1 training session lost to the provider at step 2540; resumed under a fresh run identity
+
+- Context: `tpi_train_20261117_145939` (pod `d46wi0dt91xmzj`, $1.09/h) trained `A_teacher_parent-s20260726` normally
+  to step 2540 of 9701. From 17:35Z the pod stopped answering for ~15 min. When it answered again, every process of
+  the job was gone, with no traceback and no `RUN_FAILED` line from the command wrapper. The launcher ended
+  `DRIVER_UNKNOWN`, deleted the pod, and the provider confirms it is gone: 166.3 min, $3.0779 all-in.
+  The diagnosis is in `logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/evidence/failure.json`.
+- Decision: classified as a provider-side loss of the running container, not a workload failure. The failure
+  signature is `None` (transient). A replacement session, `tpi_train_20261117_180111`, resumes the verified
+  `step_002208` save point from the relay (weights, AdamW state, step, consumed sequences, RNG), per the design's
+  recovery contract. Steps 2209-2540 are a discarded branch and are never pooled.
+  - Repair (not the cause): `restore_savepoint` now seeds the trainer's log, so one unit has one log across resumes.
+  - Money: $3.4996 spent of the $31.50 ceiling, $28.0004 left. The replacement's cap is $28.00, the training kind's
+    cap, expected ~$21.5 for ~19.3 h of remaining work. A deadline of about 1,500 min leaves ~29% margin. The project
+    cap and the $1.00 reserve still fit ($50.16 project remaining, $59.88 balance).
+- Alternatives considered: a tighter cap to keep a remainder for one more attempt. Rejected: the cap is billed only
+  if the run uses it. A remainder under the $1.50 minimum useful attempt would fund nothing, while the full cap keeps
+  the deadline margin the evaluations of an untested model may need.
+- Risks: a second loss after ~6 h would leave roughly $6-7, which is not enough for the remaining work. The study
+  would then end BUDGET_EXHAUSTED, with every secured unit kept.
+- Revisit when: the replacement session ends.

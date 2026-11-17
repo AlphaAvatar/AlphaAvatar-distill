@@ -144,6 +144,28 @@ def test_the_mirror_keeps_one_save_point_and_never_the_final(tmp_path, monkeypat
     assert m.mirror_once() is None                                  #: the final step goes out as final.json
 
 
+def test_a_replacement_pod_resumes_the_latest_save_point_with_the_units_whole_log(tmp_path, monkeypatch):
+    got = []
+
+    def fake(op, payload, timeout_s=3600):
+        got.append(payload["record"]["tag"])
+        Path(payload["dest"]).mkdir(parents=True)                 #: `relay.get` writes the files under dest
+        return {"verified": True, "from": "r"}
+    from stages.teacher_parent_initialization import relay as R
+    monkeypatch.setattr(R, "run_online", fake)
+    ev, out = tmp_path / "ev", tmp_path / "train"
+    (ev / "train").mkdir(parents=True)
+    (ev / "train" / "train_log.jsonl").write_text('{"event": "train_step", "step": 2540}\n')
+    (ev / "savepoints.json").write_text(json.dumps([
+        {"tag": "step_001104", "step": 1104, "verified": True, "removed": {"verified": True}},
+        {"tag": "step_002208", "step": 2208, "verified": True}]))
+    rec = TD.restore_savepoint(ev, out)
+    assert got == ["step_002208"] and rec["tag"] == "step_002208"
+    assert (out / "checkpoints" / "latest.txt").read_text().strip() == "step_002208"
+    #: the trainer appends to the secured log (`resume_loaded`, then step 2209 on), never starts a tail-only one
+    assert (out / "train_log.jsonl").read_text() == (ev / "train" / "train_log.jsonl").read_text()
+
+
 def test_the_train_kind_binds_the_plan_and_its_init_record(tmp_path):
     for rel in (L.DESIGN, L.SELECTION):
         (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)

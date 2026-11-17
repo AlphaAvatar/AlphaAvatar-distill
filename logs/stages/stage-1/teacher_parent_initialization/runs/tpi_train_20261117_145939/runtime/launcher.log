@@ -1,0 +1,57 @@
+launcher start 2026-11-17T15:01:01Z pid 1651611
+bundle OK: transfer/aad_autoinit_cc4248bd.bundle on the relay
+[15:01:01] budget: expected 1410 min $25.62 · soft $27.09 · hard $27.27 (authorized $28.00)
+[15:01:02] NVIDIA L40S $1.09/h, stock None
+[15:01:02] account funds OK: the provider account holds $62.1208 against the $27.2682 this session must be able to fund
+[15:01:03] account resources OK: the provider account holds only the 0 resource(s) the records account for
+[15:01:03] TPI1 is open
+[15:01:03] a TPI1 teacher_parent_train artifact, unused
+[15:01:03] 1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted
+[15:01:03] all-in $27.8050 over 1502.25 min, inside $28.00
+[15:01:03] study identity 5fd99503f190 is the authorized one
+[15:01:03] every bound file is in the session commit
+[15:01:05] $28.00 inside the envelope ($31.0783) and the $52.1172 the project cap leaves now
+[15:01:05] the authorization is in session commit cc4248bd86df
+[15:01:05] $28.00 + the $1.0 teardown reserve fit
+[15:01:08] the relay would accept the teacher_parent_train session's bytes: 4 object(s), 16.21 GiB: ACCEPTED (200) 4/4 granted an upload action
+[15:01:08] the artifact binds this tree's ['design_sha256', 'init_record_sha256', 'plan_sha256', 'selection_sha256']
+[15:01:08] A's initialization is on the relay with its recorded hashes
+[15:01:10] precheck OK: 3 relay inputs (3 from AlphaAvatar/aadistill-artifacts), 1 local assets
+[15:01:10] attempt 1 (any datacenter): capacity — {"error":"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.","code":"bad_request","status":400}
+[15:06:13] watchdog detached — hard 1501 min = $27.27
+[15:06:13] created d46wi0dt91xmzj at $1.09/h in an unread datacenter
+[15:07:07]   starting (60s) — $0.02
+[15:08:12]   starting (120s) — $0.04
+[15:08:44] TCP 22 at 202.181.159.224:17417 after 2.5 min
+[15:08:46] draw 1: ssh reachable — $0.05
+[15:09:07] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[15:09:07] draw 1: running setup
+[15:11:57] draw 1: setup complete — $0.10
+[15:12:02] driver detached, pid 2501, confirmed by descriptor_probe — $0.11
+[15:13:12]   2026-11-17T15:12:22Z MARKER:TRAIN_START:A_teacher_parent-s20260726 — $0.13
+[17:35:31]   relay errors: ['/workspace/stage1_teacher_parent_run.log', '/workspace/stage1_teacher_parent.status']
+[17:35:43]   driver unanswered for 0 s on a billing pod; still looking
+[17:36:53]   relay errors: ['/workspace/stage1_teacher_parent_run.log', '/workspace/stage1_teacher_parent.status']
+[17:37:06]   driver unanswered for 82 s on a billing pod; still looking
+[17:39:36]   relay errors: ['/workspace/stage1_teacher_parent_run.log', '/workspace/stage1_teacher_parent.status']
+[17:40:12]   driver unanswered for 268 s on a billing pod; still looking
+[17:41:38]   driver unanswered for 355 s on a billing pod; still looking
+[17:42:56]   driver unanswered for 433 s on a billing pod; still looking
+[17:44:15]   driver unanswered for 511 s on a billing pod; still looking
+[17:45:33]   driver unanswered for 590 s on a billing pod; still looking
+[17:46:52]   driver unanswered for 668 s on a billing pod; still looking
+[17:48:10]   driver unanswered for 746 s on a billing pod; still looking
+[17:49:28]   driver unanswered for 825 s on a billing pod; still looking
+[17:50:49] driver no longer running: UNKNOWN
+[17:50:49] polling ended: DRIVER_UNKNOWN — $2.99
+[17:52:01]   manifest rc=0
+5 file(s) across 3 class(es) -> /workspace/manifest.json
+  final_required: 5 · mutable_snapshot: 0 · final_streams_quiescent: True
+[17:52:17]   RECORDED: PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK
+[17:52:17] teardown gate: allowed=True failed=training_complete · PRODUCTS_UNSECURED/ARTIFACT_LOSS_RISK
+[17:52:17] deleting pod (gate passed after DRIVER_UNKNOWN with PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK)
+[17:52:28] pod deleted — 166.3 min, $3.02; provider confirms gone: True
+
+stage1_teacher_parent-teacher_parent_train INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/runtime/session.json. 
+{"all_in_usd": 3.0779, "gpu_usd": 3.0209, "disk_usd": 0.0569, "elapsed_minutes": 166.29, "price_per_hour": 1.09, "authorized_usd": 28.0, "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"}
+launcher exit rc=11 2026-11-17T17:52:29Z
