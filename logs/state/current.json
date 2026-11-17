@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer: TPI1's grant (plans/proposal.json, $31.50 + $1.00); then init session, plan.py, training session (docs/stages/stage-1/teacher_parent_initialization/README.md). A merge into main is the maintainer's.",
+ "next": "TPI1: training + evaluation (both seeds, both modes), then analysis.py, retention, relay weight retirement, REPORT.md. A merge into main is the maintainer's.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -197,11 +197,11 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": false,
-  "pods": 0,
+  "paid_compute": true,
+  "pods": 1,
   "network_volumes": 0,
-  "run": "none; TPI1 prepared, not granted; last run RI-LM1 ri_merge_20261115_104816",
-  "volume": "none since 2026-11-14T10:46Z (maintainer); balance $62.54 (2026-11-17T10Z), $0.00/h"
+  "run": "TPI1 tpi_train_20261117_145939 on d46wi0dt91xmzj (L40S $1.09/h, hard cap $28.00, watchdog 1501 min); init tpi_init_20261117_142049 COMPLETE $0.4217",
+  "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
