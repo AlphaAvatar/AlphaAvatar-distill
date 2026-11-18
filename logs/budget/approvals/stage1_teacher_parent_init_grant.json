@@ -61,5 +61,34 @@
   "sha256": "ebf45bf8df6432266e01e78eaa94d962ff8cbd020943e73fe2967ced5db8d3af"
  },
  "study_identity_sha256": "5fd99503f190fd559bb9661bfb995967dce15c45e7fb43a63d7ba2929567eae9",
- "granted_at_commit": "fed046694bc249ac28001f385d8713af5eb1fc87"
+ "granted_at_commit": "fed046694bc249ac28001f385d8713af5eb1fc87",
+ "closed": {
+  "status": "CLOSED",
+  "terminal_state": "COMPLETE: every registered unit measured (both seeds, both modes, all of eval-set-1); the primary comparison formal (H-T NOT_DISTINGUISHED, delta +1.40 pp, p 0.195); the key secondary descriptive under the fixed sequence",
+  "utc": "2026-11-18T11:55:00Z",
+  "by": "the agent, on the maintainer's grant",
+  "decision": "maintainer 2026-11-17 (UTC), the TPI1 brief: terminal states COMPLETE (REPORT.md written, committed and pushed), BLOCKED_BUDGET, BUDGET_EXHAUSTED, BLOCKED_SCIENTIFIC_IDENTITY or BLOCKED_RESOURCE_SAFETY; 'Do not return a progress report as the final response. Continue tool execution until a listed terminal condition is reached.'; at the terminal state, keep the needed checkpoints locally and retire remote duplicate weights; '本条不授权合入 main。'",
+  "source": "the grant's own terminal condition (all registered work done), reached by tpi_train_20261117_180111 (ALL_DONE, closeout COMPLETE, 232 files secured); written into this grant by the agent",
+  "scope": "every session kind of TPI1, none excepted: ['teacher_parent_init', 'teacher_parent_train']",
+  "enforced_by": "scripts/shared/study_engineering.py :: require_open",
+  "spent_usd": 23.1321,
+  "by_run_usd": {
+   "tpi_init_20261117_142049": 0.4217,
+   "tpi_train_20261117_145734": 0.0,
+   "tpi_train_20261117_145939": 3.0779,
+   "tpi_train_20261117_180111": 19.6325
+  },
+  "_spent": "study_engineering.spent at closure: every session's closeout all-in, 4 runs, none unknown",
+  "ceiling_usd": 31.5,
+  "unspent_usd": 8.3679,
+  "teardown_reserve_usd": 1.0,
+  "remainder": "the unspent $8.3679 of the $31.50 ceiling and the $1.00 teardown reserve lapse: not carried forward, not transferred to any study; a further execution needs a new study and the maintainer's grant",
+  "provider_reconciliation": "balance $62.5384 at 2026-11-17T14:21:57Z before the first create, $40.2437 at 2026-11-18T11:51:33Z after the last teardown (-$22.2947) against $23.1321 booked all-in (the booked figure includes container disk the provider may not have posted yet); 0 pods, 0 volumes",
+  "closeout_cost_usd": 0.0,
+  "_closeout_cost": "the closeout (analysis, local retention, evidence archive, relay weight retirement, records) ran on the dev box and the hub API: no pod, no new resource",
+  "historical": "every field above is unchanged (grant_before_closure); each earlier artifact keeps the validity it had at its time",
+  "grant_before_closure": {
+   "sha256": "aae896ff1c569fa8ad6138716575ab8e6f21ab8d2d4e42c53a93087f9d008856"
+  }
+ }
 }

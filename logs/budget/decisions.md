@@ -16838,3 +16838,39 @@ on a paid pod.
 - Risks: a second loss after ~6 h would leave roughly $6-7, which is not enough for the remaining work. The study
   would then end BUDGET_EXHAUSTED, with every secured unit kept.
 - Revisit when: the replacement session ends.
+
+## 2026-11-18 (UTC) — TPI1 COMPLETE and closed: the primary comparison does not distinguish the arms
+
+- Context: the replacement session `tpi_train_20261117_180111` (pod `tdxvznkx54lc4q`, $1.09/h) ran from 2026-11-17
+  18:03Z to 2026-11-18 11:44Z: 1,060.7 min, $19.6325 all-in, ALL_DONE, the pod deleted, the provider confirms it gone.
+  - Seed 20260726 resumed the verified `step_002208` save point and trained to step 9701.
+  - Seed 20260801 trained from step 0 to step 9701 (33,054 s).
+  - Both seeds were evaluated on all of eval-set-1 in both modes, under B's protocol, every unit complete.
+  - The registered analysis (`logs/stages/stage-1/teacher_parent_initialization/analyses/teacher_parent.json`,
+    status `formal`): thinking-mode static fluid formal core, both seeds pooled, A 11.67% vs B 10.26%, +1.40 pp,
+    p = 0.195, group-bootstrap interval [−0.53, +3.45] pp: **NOT_DISTINGUISHED** (not equivalence).
+  - The non-thinking key secondary is not tested under the fixed sequence: +2.37 pp, descriptive.
+  - Both seeds agree in sign in both modes. A starts far worse (step-0 validation CE 22.09 vs 7.32) and ends with a
+    lower validation CE in both seeds (0.721 / 0.717 vs 0.749 / 0.746).
+- Decision: the study reached its terminal condition COMPLETE (report:
+  `docs/stages/stage-1/teacher_parent_initialization/REPORT.md`). Its grant carries a `closed` block (written by
+  the agent on the grant's own terminal condition), so `require_open` refuses any further TPI1 session.
+  - Money: $23.1321 spent of the $31.50 ceiling, over 4 runs: $0.4217 + $0 + $3.0779 + $19.6325.
+  - The unspent $8.3679 and the $1.00 reserve lapse.
+  - Provider balance: $62.5384 before the first create, $40.2437 after the last teardown. 0 pods, 0 volumes.
+- Storage, as the brief asks ("keep the needed checkpoints locally and retire remote duplicate weights"):
+  - `launch.py retain` put both finals on the dev box (`~/aad-artifacts/stage1_teacher_parent_init/`), each re-hashed
+    against the relay record the pod verified. The init, mapping and statistics were already there.
+  - The relay copies of the three weight files (the init `9120eb2e…` and the finals `1a02ba42…` and `19396052…`, 5.55
+    GiB) were then permanently deleted behind tombstones `relay_20261118_tpi1_*` (`retire_artifact.py`,
+    `byte_identical_duplicate`).
+  - The mapping, the teacher's statistics, the configs and the session's evidence archive (`f9cdf22c…`) stay on
+    the relay. No save point remains.
+  - `relay.get` now moves its downloaded blob instead of copying it, so a 2.2 GiB fetch needs one copy's space (the
+    dev box had 8.1 GB free).
+- Alternatives considered: keeping the finals on the relay as a second copy. Rejected: the brief asks for the remote
+  duplicates to be retired, and the dev-box copies are verified.
+- Risks: the dev box now holds the only copy of A's weights, with ~3.5 GB free on `/`, a disk shared with another
+  project. The evidence a decision needs (generations, rows, reports) is also on the relay.
+- Revisit when: a later round consumes A's weights, or the maintainer reviews the round (a merge into `main` is the
+  maintainer's).

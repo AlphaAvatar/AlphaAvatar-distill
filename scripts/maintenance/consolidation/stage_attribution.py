@@ -1679,9 +1679,10 @@ STAGE_1 = [
         id="teacher_parent_initialization",
         kind="experiment",
         stage_id="1",
-        status=("PREPARED 2026-11-17 at $0 (study TPI1): A_teacher_parent's selections read from the packed search's "
-                "teacher-level states, its PCA rule, both drivers, the registered A - B analysis and B's evidence "
-                "audit; proposal $31.50 + $1.00 reserve, not granted"),
+        status=("COMPLETE and CLOSED 2026-11-18 (study TPI1, $23.1321 of $31.50): both seeds trained and evaluated on "
+                "all of eval-set-1 in both modes; the registered primary (thinking-mode static fluid core, A - B "
+                "pooled over both seeds) NOT_DISTINGUISHED, +1.40 pp, p 0.195, interval [-0.53, +3.45] pp; "
+                "non-thinking +2.37 pp, descriptive under the fixed sequence"),
         title="Teacher-parent initialization vs the packed Top-1 after the same Stage-3 recovery (TPI1)",
         question=("Does initializing the fixed 596M student from selections made on the original teacher, with the "
                   "residual PCA re-aggregated from the teacher's statistics at the kept layers, recover more fluid "
@@ -1701,12 +1702,27 @@ STAGE_1 = [
             E("logs/stages/stage-1/teacher_parent_initialization/plans/proposal.json",
               "TPI1's budget draft: ceiling, teardown reserve, per-kind caps, terminal state",
               field="status", equals="proposed"),
+            E("logs/stages/stage-1/teacher_parent_initialization/analyses/teacher_parent.json",
+              "the registered A - B decision (formal: H-T NOT_DISTINGUISHED), per seed, axes, interactive, "
+              "terminations, supporting units",
+              field="status", equals="formal"),
+            E("logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/evidence_archive.json",
+              "the training session's whole evidence archive (sha256, dev-box and relay copies) and the files committed",
+              field="schema", equals="aadistill.stage1.teacher_parent_initialization.evidence_archive/v1"),
+            E("logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
+              "where A's init, mapping, statistics and both finals are kept (the dev box), with every hash",
+              field="schema", equals="aadistill.stage1.teacher_parent_initialization.local/v1"),
         ],
         external_material=[
             "docs/stages/stage-1/teacher_parent_initialization/README.md -- the round's design and how to run it",
+            "docs/stages/stage-1/teacher_parent_initialization/REPORT.md -- the round's report",
             "~/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/extracted/ -- B's sealed generations (A-MIX)",
+            "~/aad-artifacts/stage1_teacher_parent_init/ -- A's init, mapping, statistics, both finals (the only copy "
+            "of the weights) and the training session's evidence archive (also on the private relay)",
         ],
-        decisions=["logs/budget/decisions.md -- 2026-11-17: TPI1 prepared at $0 (first experiment of the new round)"],
+        decisions=["logs/budget/decisions.md -- 2026-11-17: TPI1 prepared at $0 (first experiment of the new round); "
+                   "2026-11-17: granted; 2026-11-17: training session lost to the provider, resumed; 2026-11-18: "
+                   "COMPLETE and closed (primary NOT_DISTINGUISHED; relay weight copies retired)"],
         canonical_log_destination="logs/stages/stage-1/teacher_parent_initialization",
         classification_reason=(
             "Stage 1 by subject: the structural initialization method (which parent each operator selects on, and "

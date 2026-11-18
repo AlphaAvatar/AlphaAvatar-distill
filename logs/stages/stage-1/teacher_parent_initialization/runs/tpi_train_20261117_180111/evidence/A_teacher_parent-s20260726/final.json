@@ -1,0 +1,30 @@
+{
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82",
+ "files_sha256": {
+  "model.safetensors": "1a02ba42945d8a82350ce8e23fbfbe630c79cb095a27d2e9775140aa8a00af80",
+  "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+  "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0"
+ },
+ "bytes": {
+  "model.safetensors": 2384234968,
+  "config.json": 1417,
+  "generation_config.json": 143
+ },
+ "quota": "3 object(s), 2.22 GiB: ACCEPTED (200) 3/3 granted an upload action",
+ "uploaded": [
+  "config.json",
+  "generation_config.json",
+  "model.safetensors"
+ ],
+ "upload_seconds": 15.9,
+ "downloaded_sha256": {
+  "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+  "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+  "model.safetensors": "1a02ba42945d8a82350ce8e23fbfbe630c79cb095a27d2e9775140aa8a00af80"
+ },
+ "verified": true,
+ "verify_seconds": 7.2,
+ "utc": "2026-11-18T01:16:09Z",
+ "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+}

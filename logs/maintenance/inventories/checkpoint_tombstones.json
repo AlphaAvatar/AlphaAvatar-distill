@@ -46,10 +46,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 144,
-  "active": 142,
-  "active_retired_bytes": 623598568690,
-  "active_retired_human": "580.771 GiB",
+  "tombstones_total": 147,
+  "active": 145,
+  "active_retired_bytes": 629559173722,
+  "active_retired_human": "586.323 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -10378,6 +10378,215 @@
    "tombstone_written_utc": "2026-11-17T14:20:13+00:00",
    "deletion": {
     "status": "DELETED"
+   }
+  },
+  {
+   "canonical_id": "relay_20261118_tpi1_A_teacher_parent-s20260726_final",
+   "historical_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "TPI1",
+   "seed": null,
+   "scientific_role": "A_teacher_parent seed 20260726, final weights after the A-MIX-6cat-sr Stage-3 recovery (step 9701, fp32)",
+   "weights_sha256": "1a02ba42945d8a82350ce8e23fbfbe630c79cb095a27d2e9775140aa8a00af80",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "1a02ba42945d8a82350ce8e23fbfbe630c79cb095a27d2e9775140aa8a00af80"
+    }
+   ],
+   "references_at_deletion": [
+    "docs/stages/stage-1/teacher_parent_initialization/REPORT.md",
+    "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/A_teacher_parent-s20260726/final.json",
+    "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/report.json",
+    "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/units.json",
+    "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json"
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "reason_physical_weights_deleted": "TPI1 is terminal (every registered unit measured; the primary comparison formal; closed 2026-11-18T11:55:00Z in its grant) and its local retention is verified (launch.py retain: each file fetched from the relay record the pod verified and re-hashed; storage/local_retention.json). The maintainer's TPI1 brief, 2026-11-17: at the terminal state keep the needed checkpoints locally and retire remote duplicate weights. No consumer: every reader of the prefix (train_driver restore, launch.py stage-resume / the_initialization_is_durable) runs only under an issued TPI1 artifact, which require_open now refuses",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260726/final/1a02ba42945d8a82/model.safetensors",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "copy the dev-box file (/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260726/final/1a02ba42945d8a82/model.safetensors)",
+   "reconstruction_kind": "copy",
+   "byte_identical_reconstruction": "verified",
+   "byte_identical_evidence": "relay.get re-hashed the dev-box copy against the record the pod verified; storage/local_retention.json; re-hashed again by verify_copies",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260726/final/1a02ba42945d8a82/model.safetensors",
+     "kind": "local",
+     "verified": "every member's size and sha256 match",
+     "members": 1
+    }
+   ],
+   "deterministic_reconstruction_possible": true,
+   "expected_reconstruction_cost": "$0 (a local copy)",
+   "frozen_results_location": "logs/stages/stage-1/teacher_parent_initialization/analyses/teacher_parent.json; durable/stage1_teacher_parent_init/evidence/tpi_train_20261117_180111/units_evidence.tgz",
+   "deleted_utc": "2026-11-18T11:53:04+00:00",
+   "tombstone_written_utc": "2026-11-18T11:52:48+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "e3bcaa7b468c477ce5850df6d4b107560ffe6d16",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 35474496970,
+    "lfs_bytes_after": 33090262002,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   }
+  },
+  {
+   "canonical_id": "relay_20261118_tpi1_A_teacher_parent-s20260801_final",
+   "historical_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260801/final/193960520c006de5/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260801/final/193960520c006de5/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "TPI1",
+   "seed": null,
+   "scientific_role": "A_teacher_parent seed 20260801, final weights after the A-MIX-6cat-sr Stage-3 recovery (step 9701, fp32)",
+   "weights_sha256": "193960520c006de5fd66aafbb882f83feabc936c48966bb5ce2b38ac5c9f87b9",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 2384234968,
+   "size_human": "2.22 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260801/final/193960520c006de5/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "193960520c006de5fd66aafbb882f83feabc936c48966bb5ce2b38ac5c9f87b9"
+    }
+   ],
+   "references_at_deletion": [
+    "docs/stages/stage-1/teacher_parent_initialization/REPORT.md",
+    "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/A_teacher_parent-s20260801/final.json",
+    "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/report.json",
+    "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/units.json",
+    "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json"
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "reason_physical_weights_deleted": "TPI1 is terminal (every registered unit measured; the primary comparison formal; closed 2026-11-18T11:55:00Z in its grant) and its local retention is verified (launch.py retain: each file fetched from the relay record the pod verified and re-hashed; storage/local_retention.json). The maintainer's TPI1 brief, 2026-11-17: at the terminal state keep the needed checkpoints locally and retire remote duplicate weights. No consumer: every reader of the prefix (train_driver restore, launch.py stage-resume / the_initialization_is_durable) runs only under an issued TPI1 artifact, which require_open now refuses",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260801/final/193960520c006de5/model.safetensors",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "copy the dev-box file (/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260801/final/193960520c006de5/model.safetensors)",
+   "reconstruction_kind": "copy",
+   "byte_identical_reconstruction": "verified",
+   "byte_identical_evidence": "relay.get re-hashed the dev-box copy against the record the pod verified; storage/local_retention.json; re-hashed again by verify_copies",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260801/final/193960520c006de5/model.safetensors",
+     "kind": "local",
+     "verified": "every member's size and sha256 match",
+     "members": 1
+    }
+   ],
+   "deterministic_reconstruction_possible": true,
+   "expected_reconstruction_cost": "$0 (a local copy)",
+   "frozen_results_location": "logs/stages/stage-1/teacher_parent_initialization/analyses/teacher_parent.json; durable/stage1_teacher_parent_init/evidence/tpi_train_20261117_180111/units_evidence.tgz",
+   "deleted_utc": "2026-11-18T11:53:23+00:00",
+   "tombstone_written_utc": "2026-11-18T11:53:07+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "04f506dbacdddb588a78de66ee319a2eec41bb60",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 33090262002,
+    "lfs_bytes_after": 30706027034,
+    "freed_bytes": 2384234968,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
+   }
+  },
+  {
+   "canonical_id": "relay_20261118_tpi1_A_teacher_parent_init",
+   "historical_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/init/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/init/model.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "TPI1",
+   "seed": null,
+   "scientific_role": "A_teacher_parent's initialization (bf16, artifact 0474006c...), the input of both training seeds",
+   "weights_sha256": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/init/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea"
+    }
+   ],
+   "references_at_deletion": [
+    "README.md",
+    "configs/shared/baselines/initialization_forward_baseline_v1.json",
+    "configs/shared/baselines/initialization_forward_baseline_v2.json",
+    "configs/shared/baselines/selection.json",
+    "configs/shared/pod/device_canary_artifacts.json",
+    "configs/shared/pod/micro_preflight/authorization.json",
+    "configs/shared/pod/preflight/harness.json",
+    "configs/shared/pod/preflight/preflight_artifacts.json",
+    "configs/shared/pod/preflight/preflight_artifacts_failed.json",
+    "configs/shared/validation/cuda_engineering.json",
+    "configs/shared/validation/cuda_engineering_deployment.json",
+    "configs/stages/stage-0/calibration_volume/battery_session.json",
+    "configs/stages/stage-0/calibration_volume/mixed_design.json",
+    "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+    "configs/stages/stage-0/calibration_volume/mixed_recovery.json",
+    "configs/stages/stage-0/calibration_volume/mixed_search_session.json"
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "reason_physical_weights_deleted": "TPI1 is terminal (every registered unit measured; the primary comparison formal; closed 2026-11-18T11:55:00Z in its grant) and its local retention is verified (launch.py retain: each file fetched from the relay record the pod verified and re-hashed; storage/local_retention.json). The maintainer's TPI1 brief, 2026-11-17: at the terminal state keep the needed checkpoints locally and retire remote duplicate weights. No consumer: every reader of the prefix (train_driver restore, launch.py stage-resume / the_initialization_is_durable) runs only under an issued TPI1 artifact, which require_open now refuses",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/init/01e63327e3d02b2f/init/model.safetensors",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "copy the dev-box file (/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/init/01e63327e3d02b2f/init/model.safetensors)",
+   "reconstruction_kind": "copy",
+   "byte_identical_reconstruction": "verified",
+   "byte_identical_evidence": "relay.get re-hashed the dev-box copy against the record the pod verified; storage/local_retention.json; re-hashed again by verify_copies",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/init/01e63327e3d02b2f/init/model.safetensors",
+     "kind": "local",
+     "verified": "every member's size and sha256 match",
+     "members": 1
+    }
+   ],
+   "deterministic_reconstruction_possible": true,
+   "expected_reconstruction_cost": "$0 (a local copy)",
+   "frozen_results_location": "logs/stages/stage-1/teacher_parent_initialization/analyses/teacher_parent.json; durable/stage1_teacher_parent_init/evidence/tpi_train_20261117_180111/units_evidence.tgz",
+   "deleted_utc": "2026-11-18T11:53:45+00:00",
+   "tombstone_written_utc": "2026-11-18T11:53:29+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "0af726a4d70154f549619f5b519a356f584d27a6",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 30706027034,
+    "lfs_bytes_after": 29513891938,
+    "freed_bytes": 1192135096,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
    }
   }
  ],

@@ -56,6 +56,48 @@
     "utc": "2026-11-17T15:01:42Z"
    },
    "checked": "every file re-hashed against the relay record the pod verified"
+  },
+  "A_teacher_parent-s20260726/final": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260726/final/1a02ba42945d8a82",
+   "files_sha256": {
+    "model.safetensors": "1a02ba42945d8a82350ce8e23fbfbe630c79cb095a27d2e9775140aa8a00af80",
+    "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0"
+   },
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82",
+   "producer_run": "tpi_train_20261117_180111",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82",
+    "files": {
+     "config.json": "downloaded",
+     "generation_config.json": "downloaded",
+     "model.safetensors": "downloaded"
+    },
+    "utc": "2026-11-18T11:48:49Z"
+   },
+   "checked": "every file re-hashed against the relay record the pod verified"
+  },
+  "A_teacher_parent-s20260801/final": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260801/final/193960520c006de5",
+   "files_sha256": {
+    "model.safetensors": "193960520c006de5fd66aafbb882f83feabc936c48966bb5ce2b38ac5c9f87b9",
+    "config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0"
+   },
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260801/final/193960520c006de5",
+   "producer_run": "tpi_train_20261117_180111",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260801/final/193960520c006de5",
+    "files": {
+     "config.json": "downloaded",
+     "generation_config.json": "downloaded",
+     "model.safetensors": "downloaded"
+    },
+    "utc": "2026-11-18T11:51:38Z"
+   },
+   "checked": "every file re-hashed against the relay record the pod verified"
   }
  }
 }

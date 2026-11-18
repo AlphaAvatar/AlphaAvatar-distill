@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-11-15T14:25:21+00:00",
+  "created_utc": "2026-11-18T11:56:34+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -1401,16 +1401,16 @@
     }
   },
   "local": {
-    "n_units": 79,
-    "n_weight_files": 64,
-    "total_bytes": 25266892611,
-    "total_human": "23.532 GiB",
-    "artifacts_tree_bytes": 23890986053,
-    "external_store_tree_bytes": 27059659994,
+    "n_units": 82,
+    "n_weight_files": 67,
+    "total_bytes": 28404596781,
+    "total_human": "26.454 GiB",
+    "artifacts_tree_bytes": 24361188928,
+    "external_store_tree_bytes": 30493950990,
     "by_store": {
       "external_store": {
-        "units": 35,
-        "bytes": 19131391279
+        "units": 38,
+        "bytes": 22269095449
       },
       "repo_artifacts": {
         "units": 44,
@@ -1418,12 +1418,12 @@
       }
     },
     "proposed_disposition": {
-      "keep": 17,
+      "keep": 20,
       "retire": 2,
       "review": 60
     },
     "proposed_disposition_bytes": {
-      "keep": 21007367860,
+      "keep": 24145072030,
       "retire": 67747076,
       "review": 4191777675
     }
@@ -1431,13 +1431,13 @@
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-11-15T14:23:32+00:00",
-    "n_files": 1674,
-    "total_bytes": 28143752905,
+    "queried_utc": "2026-11-18T11:54:22+00:00",
+    "n_files": 1688,
+    "total_bytes": 30365826360,
     "by_prefix": {
       "transfer": {
-        "files": 708,
-        "bytes": 17159347545
+        "files": 713,
+        "bytes": 17383044030
       },
       "permanent_controls": {
         "files": 18,
@@ -1447,6 +1447,10 @@
         "files": 26,
         "bytes": 2453541326
       },
+      "durable": {
+        "files": 32,
+        "bytes": 2369061578
+      },
       "stage0_calvol": {
         "files": 27,
         "bytes": 1192156221
@@ -1454,10 +1458,6 @@
       "stage3_recovery_corpus_v2": {
         "files": 9,
         "bytes": 1015033375
-      },
-      "durable": {
-        "files": 23,
-        "bytes": 370684904
       },
       "e1_scaling_20260801": {
         "files": 306,
@@ -1533,7 +1533,7 @@
       },
       ".gitattributes": {
         "files": 1,
-        "bytes": 60247
+        "bytes": 60543
       },
       "c1_preserved_probes": {
         "files": 18,
@@ -1548,7 +1548,7 @@
     "files": [
       {
         "path": ".gitattributes",
-        "size_bytes": 60247,
+        "size_bytes": 60543,
         "sha256": null
       },
       {
@@ -1780,6 +1780,51 @@
         "path": "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors",
         "size_bytes": 1722632,
         "sha256": "22c2cd71b77fda0a1888e867646b56643ecb53575f32f06f0ff5db663e44f983"
+      },
+      {
+        "path": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82/config.json",
+        "size_bytes": 1417,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82/generation_config.json",
+        "size_bytes": 143,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260801/final/193960520c006de5/config.json",
+        "size_bytes": 1417,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260801/final/193960520c006de5/generation_config.json",
+        "size_bytes": 143,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/init/config.json",
+        "size_bytes": 1418,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/mapping/mapping.json",
+        "size_bytes": 968220,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/mapping/tensors.safetensors",
+        "size_bytes": 20979888,
+        "sha256": "aae2e9b853a541d458667434b763b058a33029624526d4e531eb19d48f38f286"
+      },
+      {
+        "path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+        "size_bytes": 1947442680,
+        "sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb"
+      },
+      {
+        "path": "durable/stage1_teacher_parent_init/evidence/tpi_train_20261117_180111/units_evidence.tgz",
+        "size_bytes": 28981348,
+        "sha256": "f9cdf22cc2b5fb160ab1a0c816754c8ad0106fd46232b7994fca4fbc66ef3666"
       },
       {
         "path": "durable/stage3_sr/A-MIX-6cat-sr-s20260801/9370c47025392256/config.json",
@@ -6827,6 +6872,11 @@
         "sha256": "1eeb0a5105ebd12d12aeef6482b60a7bca8de2ce4ed4d2f5c59a0695db9b30dc"
       },
       {
+        "path": "transfer/aad_autoinit_b222f427.bundle",
+        "size_bytes": 55872862,
+        "sha256": "ac846f232c32fe2c71af9e2eceb3d99f8096a9610d0516406c745142413a280d"
+      },
+      {
         "path": "transfer/aad_autoinit_b2a25a14.bundle",
         "size_bytes": 18376745,
         "sha256": "66eb069669f66837a5dffe7ac0429d03efbc6fe9df547f5e6275003a907934f1"
@@ -6840,6 +6890,11 @@
         "path": "transfer/aad_autoinit_b3659623.bundle",
         "size_bytes": 34832490,
         "sha256": "66643ce24e82d08aca99223e33e566a2c3d30e1d70b9a64f35a580879b6432b3"
+      },
+      {
+        "path": "transfer/aad_autoinit_b4d48ea9.bundle",
+        "size_bytes": 55894952,
+        "sha256": "ff77d44395f6306f12aec1ce78e94ef51aacfa410b8501980aa38e5e8d3fdb75"
       },
       {
         "path": "transfer/aad_autoinit_b5f8f5aa.bundle",
@@ -6990,6 +7045,11 @@
         "path": "transfer/aad_autoinit_cb656a9a.bundle",
         "size_bytes": 22948516,
         "sha256": "b9d01d4a811103b5be7a4bc5db893a4cfa4e0e5ea5dd7a52f5fbd2b1c6e399b3"
+      },
+      {
+        "path": "transfer/aad_autoinit_cc4248bd.bundle",
+        "size_bytes": 55902581,
+        "sha256": "6fe52ba0e58781b08151f734b42de0211a2d66f659b80cd9c9ad92006c99e37d"
       },
       {
         "path": "transfer/aad_autoinit_cc5f7aea.bundle",
@@ -7175,6 +7235,11 @@
         "path": "transfer/aad_autoinit_e7d0daf1.bundle",
         "size_bytes": 22873795,
         "sha256": "78035259b9272dc9bf13b59b8af7b412757aeb92a3eaf0f85b1fe1daa118e6a6"
+      },
+      {
+        "path": "transfer/aad_autoinit_e8dc921d.bundle",
+        "size_bytes": 55999506,
+        "sha256": "d9eb4453f71ffa66e24db0d4da0c4c5b7828c99d647080b5f91991b862c055f5"
       },
       {
         "path": "transfer/aad_autoinit_ea754349.bundle",
@@ -7660,6 +7725,11 @@
         "path": "transfer/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508/166f7fc1a4ab920b/resume.tgz",
         "size_bytes": 20968891,
         "sha256": "166f7fc1a4ab920b214f503e493cfb453bfa42aaf20db70881c265a4c4bce91c"
+      },
+      {
+        "path": "transfer/stage1_teacher_parent/tpi_train_20261117_180111/resume_tpi_train_20261117_180111.tgz",
+        "size_bytes": 26584,
+        "sha256": "b2ceb2fff2c68f0786768dcb9527ec41f3320d7a2bcafcc995da20e9d112a60f"
       },
       {
         "path": "transfer/stage2_data_20260726.tar.zst",
@@ -10168,6 +10238,36 @@
       "note": null
     },
     {
+      "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+      "size_bytes": 603051,
+      "members": [
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-act_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-act_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-avg_H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-avg_H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/evaluation_non_thinking/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/evaluation_thinking/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/evaluation_non_thinking/legacy_150.prompts.jsonl",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/evaluation_thinking/legacy_150.prompts.jsonl"
+      ],
+      "reclaimable_bytes": 12664071,
+      "note": null
+    },
+    {
       "sha256": "00d28a0da73c4b88b629ff96089aeaeda8e70d5f47527fb7c3cb41e8391867c8",
       "size_bytes": 968617,
       "members": [
@@ -10197,32 +10297,6 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked/tool_H-N_r1_pass1.part0047.jsonl"
       ],
       "reclaimable_bytes": 10593947,
-      "note": null
-    },
-    {
-      "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
-      "size_bytes": 603051,
-      "members": [
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/DW_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/W_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-act_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-act_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-avg_H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/eval/M-avg_H-T/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-N/legacy_150.prompts.jsonl",
-        "artifacts/stages/stage-1/reasoning_inheritance/teacher_eval/H-T/legacy_150.prompts.jsonl"
-      ],
-      "reclaimable_bytes": 10251867,
       "note": null
     },
     {
@@ -13310,6 +13384,16 @@
       "note": null
     },
     {
+      "sha256": "29e2707d766abc4faf22e3722a06276ecbd28a47fec4c02c5cbe0c64b8e85370",
+      "size_bytes": 569250,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260726/train/train_log.jsonl",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/train/train_log.jsonl"
+      ],
+      "reclaimable_bytes": 569250,
+      "note": null
+    },
+    {
       "sha256": "42a0e3b3690c68e9a37d5d849c92fbd1a515ee7bd9562d85367ca212687dddef",
       "size_bytes": 278501,
       "members": [
@@ -13340,6 +13424,16 @@
         "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d4/generations/stage3_capability_846__rag.jsonl"
       ],
       "reclaimable_bytes": 553030,
+      "note": null
+    },
+    {
+      "sha256": "a331fbcab90f9bf44cb6ca42611e6d5d80c9de68295a8abd793a17d12d49ee6e",
+      "size_bytes": 545174,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260801/train/train_log.jsonl",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/train/train_log.jsonl"
+      ],
+      "reclaimable_bytes": 545174,
       "note": null
     },
     {
@@ -13595,6 +13689,17 @@
         "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_diagnosis_20261113_193508/scr/store/out/eval/D_H-T/parts/part_0018.jsonl"
       ],
       "reclaimable_bytes": 293148,
+      "note": null
+    },
+    {
+      "sha256": "f2a88747083058c47f77804b1e15c07fc1e6c41e82d75e16413dd1a0e60fab7f",
+      "size_bytes": 146333,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_145939/A_teacher_parent-s20260726/train/train_log.jsonl",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/scr/store/out/A_teacher_parent-s20260726/train/train_log.jsonl",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/.resume/A_teacher_parent-s20260726/train/train_log.jsonl"
+      ],
+      "reclaimable_bytes": 292666,
       "note": null
     },
     {
@@ -14242,6 +14347,16 @@
       "note": null
     },
     {
+      "sha256": "921a6c22ff8068c633d17627d5eb7fbe9bc7e3a80cfc1a340156e942e9d33f12",
+      "size_bytes": 72433,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260801/train/train_stdout.tail.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/train/train_stdout.tail.log"
+      ],
+      "reclaimable_bytes": 72433,
+      "note": null
+    },
+    {
       "sha256": "3a6348010890f8a9d089cdef75394125bab62695e9e0cc0d36bf9099686a7c41",
       "size_bytes": 24001,
       "members": [
@@ -14375,6 +14490,16 @@
       "note": null
     },
     {
+      "sha256": "9394740e40c11c7dd1fe329e3399afe56aea5b30e340d5185c0e6e0efbc30cd8",
+      "size_bytes": 56089,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260726/train/train_stdout.tail.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/train/train_stdout.tail.log"
+      ],
+      "reclaimable_bytes": 56089,
+      "note": null
+    },
+    {
       "sha256": "12f5e5e260cccbe7daa39c1f1dd26d9a163617a085628744a125c2626e0842d0",
       "size_bytes": 53665,
       "members": [
@@ -14503,6 +14628,17 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked/tool_H-T_r1_pass0.seg0.log"
       ],
       "reclaimable_bytes": 41479,
+      "note": null
+    },
+    {
+      "sha256": "77f3cf0f638a7104d86a3dea05262a7e115a1cdd60505af91710cc9e97e91b66",
+      "size_bytes": 19523,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_145939/A_teacher_parent-s20260726/train/train_stdout.tail.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/scr/store/out/A_teacher_parent-s20260726/train/train_stdout.tail.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/.resume/A_teacher_parent-s20260726/train/train_stdout.tail.log"
+      ],
+      "reclaimable_bytes": 39046,
       "note": null
     },
     {
@@ -15181,6 +15317,26 @@
       "note": null
     },
     {
+      "sha256": "14c1cf315cddb1cfaa5070c0f85f4b1be41e51db33775682e5be0ccda15a6594",
+      "size_bytes": 21575,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260801/savepoints.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/savepoints.json"
+      ],
+      "reclaimable_bytes": 21575,
+      "note": null
+    },
+    {
+      "sha256": "e655ffce51924e2785388ab576dac058c6e4174b0be35e50cdb97b7f8bf2491f",
+      "size_bytes": 21571,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260726/savepoints.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/savepoints.json"
+      ],
+      "reclaimable_bytes": 21571,
+      "note": null
+    },
+    {
       "sha256": "6b75300a2dd77b692311e7564da8a2c145677b7abc06d7ff4ddb09ec2bc628be",
       "size_bytes": 21413,
       "members": [
@@ -15294,6 +15450,17 @@
       "note": null
     },
     {
+      "sha256": "2b8268e89031b6ef63ad3bd33b8b2be0078725b4c2748b5c5144a4b4eed7e350",
+      "size_bytes": 9932,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/report.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/report.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/units.json"
+      ],
+      "reclaimable_bytes": 19864,
+      "note": null
+    },
+    {
       "sha256": "aa3adf7d5d5962e26913411e2feb9ae2ef60d2df8c0dc9e82ea60114b2981ea5",
       "size_bytes": 19392,
       "members": [
@@ -15331,6 +15498,19 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/unpacked/tool_H-T_r2_pass1.part0000.jsonl"
       ],
       "reclaimable_bytes": 18971,
+      "note": null
+    },
+    {
+      "sha256": "5ef7317d9d140b919f0432b39636dea34b81dcd8d61e1dc3f6dadfadd6da359d",
+      "size_bytes": 4679,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_145939/A_teacher_parent-s20260726/train/config.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/scr/store/out/A_teacher_parent-s20260726/train/config.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/.resume/A_teacher_parent-s20260726/train/config.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260726/train/config.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/train/config.json"
+      ],
+      "reclaimable_bytes": 18716,
       "note": null
     },
     {
@@ -15629,6 +15809,16 @@
         "artifacts/stages/stage-0/calibration_volume/probes_d1_20261020_093955/s0v_top4_d1_r3_4df438a8_s20260727/eval_fluid.log"
       ],
       "reclaimable_bytes": 15729,
+      "note": null
+    },
+    {
+      "sha256": "c48e8937231a7f886eec26c70a3d7962426560555706baad4c178d33187a5835",
+      "size_bytes": 15717,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260801/evaluation_thinking/logs/eval_fluid.tpi_train_20261117_180111.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/evaluation_thinking/logs/eval_fluid.tpi_train_20261117_180111.log"
+      ],
+      "reclaimable_bytes": 15717,
       "note": null
     },
     {
@@ -16004,6 +16194,16 @@
       "note": null
     },
     {
+      "sha256": "e394e25319507c57e90fdcb418b1da3babf6dbb7f56475e34774ffa158f0ee26",
+      "size_bytes": 15040,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260726/evaluation_thinking/logs/eval_fluid.tpi_train_20261117_180111.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/evaluation_thinking/logs/eval_fluid.tpi_train_20261117_180111.log"
+      ],
+      "reclaimable_bytes": 15040,
+      "note": null
+    },
+    {
       "sha256": "c0fd5c73df07b4e3dcd4956efd30536883f7cbce4d3e65bada4b254c05df2185",
       "size_bytes": 14951,
       "members": [
@@ -16114,6 +16314,16 @@
       "note": null
     },
     {
+      "sha256": "1a52f15d898b20601b78306bd59ad454a10f2f44d86e450652392636cff81c70",
+      "size_bytes": 14578,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260801/evaluation_thinking/logs/eval_capability.tpi_train_20261117_180111.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/evaluation_thinking/logs/eval_capability.tpi_train_20261117_180111.log"
+      ],
+      "reclaimable_bytes": 14578,
+      "note": null
+    },
+    {
       "sha256": "4ccf6805b19fea5121ae45c6a4ef16b038194d4c50902de707dce548ac7ae6ee",
       "size_bytes": 14550,
       "members": [
@@ -16124,6 +16334,16 @@
       "note": null
     },
     {
+      "sha256": "cac8b3ccd7510b9404bab5aec15673eb0250a4a2d2c95a402221c6d81e77b410",
+      "size_bytes": 14540,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260726/evaluation_thinking/logs/eval_capability.tpi_train_20261117_180111.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/evaluation_thinking/logs/eval_capability.tpi_train_20261117_180111.log"
+      ],
+      "reclaimable_bytes": 14540,
+      "note": null
+    },
+    {
       "sha256": "d221a6a94d0924fcd21c3d7bb3fbd89f5d7f0e32c10769087daf4471491d2f67",
       "size_bytes": 14478,
       "members": [
@@ -16131,6 +16351,16 @@
         "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d1/dose_out/mirror.log"
       ],
       "reclaimable_bytes": 14478,
+      "note": null
+    },
+    {
+      "sha256": "df55ab73e8133ca43015e5c4b921e25dfe90c2589de6fdf19c75c1f085d52e2a",
+      "size_bytes": 14464,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260801/evaluation_non_thinking/logs/eval_capability.tpi_train_20261117_180111.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/evaluation_non_thinking/logs/eval_capability.tpi_train_20261117_180111.log"
+      ],
+      "reclaimable_bytes": 14464,
       "note": null
     },
     {
@@ -16151,6 +16381,16 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked/tool_H-T_r3_pass0.seg0.log"
       ],
       "reclaimable_bytes": 14427,
+      "note": null
+    },
+    {
+      "sha256": "b54fc9a83ee343a386678a9b8970b02502fe7e8cdd9af170ee41d28ec76d5fbc",
+      "size_bytes": 14422,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260726/evaluation_non_thinking/logs/eval_capability.tpi_train_20261117_180111.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/evaluation_non_thinking/logs/eval_capability.tpi_train_20261117_180111.log"
+      ],
+      "reclaimable_bytes": 14422,
       "note": null
     },
     {
@@ -16465,6 +16705,26 @@
       "note": null
     },
     {
+      "sha256": "a5e18ed7f3f5d3250d567dcfaafbeab06eb5c4204f4d9805204a075f6c31fa00",
+      "size_bytes": 13658,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260801/evaluation_non_thinking/logs/eval_fluid.tpi_train_20261117_180111.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/evaluation_non_thinking/logs/eval_fluid.tpi_train_20261117_180111.log"
+      ],
+      "reclaimable_bytes": 13658,
+      "note": null
+    },
+    {
+      "sha256": "d554251e0ab0b168e31b94f45ac4ff2a8025d15e6ce4af92eb1b9f89e21e4f8c",
+      "size_bytes": 13607,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260726/evaluation_non_thinking/logs/eval_fluid.tpi_train_20261117_180111.log",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260726/evaluation_non_thinking/logs/eval_fluid.tpi_train_20261117_180111.log"
+      ],
+      "reclaimable_bytes": 13607,
+      "note": null
+    },
+    {
       "sha256": "a7f32704a2e02a4b98ccd6235d839e9b259e2abc9d8ff112a01effc6d4a768eb",
       "size_bytes": 4504,
       "members": [
@@ -16525,6 +16785,16 @@
         "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/unpacked/tool_H-T_r2_pass0.part0000.jsonl"
       ],
       "reclaimable_bytes": 12396,
+      "note": null
+    },
+    {
+      "sha256": "5a8c7dd39239c364f6a461afca999c7329001f6231849a4dfc7bb8c99c29183f",
+      "size_bytes": 12389,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/scr/store/extracted/audit/stage1_teacher_parent/tpi_init_20261117_142049/init_record.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/scr/store/out/init_record.json"
+      ],
+      "reclaimable_bytes": 12389,
       "note": null
     },
     {
@@ -16698,6 +16968,16 @@
         "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638/files/stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__math_verified.rows.jsonl"
       ],
       "reclaimable_bytes": 10924,
+      "note": null
+    },
+    {
+      "sha256": "f296e61270d4141b4d723557bd473a22a114c23fdd97a18e1361cc2c7a1eb4b8",
+      "size_bytes": 10704,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/scr/store/extracted/audit/stage1_teacher_parent/tpi_init_20261117_142049/records/build.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/scr/store/out/records/build.json"
+      ],
+      "reclaimable_bytes": 10704,
       "note": null
     },
     {
@@ -17091,6 +17371,17 @@
       "note": null
     },
     {
+      "sha256": "8deeab8fbb025ae0d6f66be71e466f4ac1287cac597617ce2146e2c47fe92aa3",
+      "size_bytes": 4564,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_145939/A_teacher_parent-s20260726/savepoints.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939/scr/store/out/A_teacher_parent-s20260726/savepoints.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/.resume/A_teacher_parent-s20260726/savepoints.json"
+      ],
+      "reclaimable_bytes": 9128,
+      "note": null
+    },
+    {
       "sha256": "0709e4affcec097f6c49749fa61a178f36dd355565f6b514007255c81d401ebc",
       "size_bytes": 9117,
       "members": [
@@ -17261,6 +17552,16 @@
       "note": null
     },
     {
+      "sha256": "14c24d28666ac9cb64314eef709de0a6a4cd620d184f367f230c9bf7e75fb2ae",
+      "size_bytes": 4679,
+      "members": [
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/extracted/audit/stage1_teacher_parent/tpi_train_20261117_180111/A_teacher_parent-s20260801/train/config.json",
+        "artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/store/out/A_teacher_parent-s20260801/train/config.json"
+      ],
+      "reclaimable_bytes": 4679,
+      "note": null
+    },
+    {
       "sha256": "ae4b873cc0f4c85048e03c1bdd1dd67ca8c2adf44b43be4f28417eb97f14f8c0",
       "size_bytes": 4529,
       "members": [
@@ -17344,18 +17645,18 @@
       "disposition": "keep"
     },
     {
-      "canonical_name": "model",
+      "canonical_name": "1a02ba42945d8a82",
       "kind": "checkpoint",
       "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/model",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260726/final/1a02ba42945d8a82",
       "weight_files": [
-        "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sa/step_001023/model/model.safetensors"
+        "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260726/final/1a02ba42945d8a82/model.safetensors"
       ],
-      "experiment": "Stage 3",
-      "role": "permanent control (0.86M rung)",
-      "retention": "control",
+      "experiment": "TPI1",
+      "role": "A_teacher_parent's final weights of one training seed (A-MIX-6cat-sr, step 9701, fp32)",
+      "retention": "canonical",
       "status": "active",
-      "retention_reason": "one of the two permanent controls Stage 3 completed on; the frozen thresholds were materialized against them",
+      "retention_reason": "the measured endpoint of a completed study (analyses/teacher_parent.json: H-T NOT_DISTINGUISHED)",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -17364,49 +17665,43 @@
         "num_key_value_heads": 8,
         "vocab_size": 151936
       },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "573847a730c1a4997a2fa4554ac2fe45d72633b1d8f3234c6ca72aac2ec4468f",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "size_bytes": 2384236528,
+      "size_human": "2.220 GiB",
+      "weights_sha256": "1a02ba42945d8a82350ce8e23fbfbe630c79cb095a27d2e9775140aa8a00af80",
+      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
       "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
+        "docs/stages/stage-1/teacher_parent_initialization/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/A_teacher_parent-s20260726/final.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/report.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/units.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json"
       ],
-      "relay_path": "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
-      "relay_verified": true,
-      "relay_same_size_unverified": null,
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
       "relay_mirror_verification": null,
-      "canonical_location": "relay + local",
+      "canonical_location": "local only (no second copy)",
       "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run; the model is also on the relay at permanent_controls/, the optimizer state is not",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "permanent control \u2014 named explicitly in the retention rule",
+      "reconstruction_recipe": "retrain: launch.py --kind teacher_parent_train from the init (new weights, not these bytes)",
+      "reconstruction_cost": "one L40S, about 9.2 h per seed",
+      "never_delete_clause": "the only copy (relay copy retired 2026-11-18); the endpoint the report's evaluations measured",
       "protected": true,
       "disposition": "keep"
     },
     {
-      "canonical_name": "model",
+      "canonical_name": "193960520c006de5",
       "kind": "checkpoint",
       "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/model",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260801/final/193960520c006de5",
       "weight_files": [
-        "/home/ecs-user/aad-artifacts/autoinit/preflight_ctl_r0860k_sb/step_001023/model/model.safetensors"
+        "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s20260801/final/193960520c006de5/model.safetensors"
       ],
-      "experiment": "Stage 3",
-      "role": "permanent control (0.86M rung)",
-      "retention": "control",
+      "experiment": "TPI1",
+      "role": "A_teacher_parent's final weights of one training seed (A-MIX-6cat-sr, step 9701, fp32)",
+      "retention": "canonical",
       "status": "active",
-      "retention_reason": "one of the two permanent controls Stage 3 completed on; the frozen thresholds were materialized against them",
+      "retention_reason": "the measured endpoint of a completed study (analyses/teacher_parent.json: H-T NOT_DISTINGUISHED)",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -17415,33 +17710,27 @@
         "num_key_value_heads": 8,
         "vocab_size": 151936
       },
-      "size_bytes": 2395663984,
-      "size_human": "2.231 GiB",
-      "weights_sha256": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629",
-      "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+      "size_bytes": 2384236528,
+      "size_human": "2.220 GiB",
+      "weights_sha256": "193960520c006de5fd66aafbb882f83feabc936c48966bb5ce2b38ac5c9f87b9",
+      "config_sha256": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
       "referenced_by": [
-        "README.md",
-        "configs/shared/evaluation/decoding/nucleus_v1.json",
-        "configs/shared/validation/cuda_engineering.json",
-        "configs/stages/stage-0/calibration_volume/audit_inputs.json",
-        "configs/stages/stage-0/calibration_volume/battery_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_session.json",
-        "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
-        "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json"
+        "docs/stages/stage-1/teacher_parent_initialization/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/A_teacher_parent-s20260801/final.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/report.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/units.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json"
       ],
-      "relay_path": "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
-      "relay_verified": true,
-      "relay_same_size_unverified": null,
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
       "relay_mirror_verification": null,
-      "canonical_location": "relay + local",
+      "canonical_location": "local only (no second copy)",
       "reconstructable": true,
-      "reconstruction_recipe": "a paid recovery run; the model is also on the relay at permanent_controls/, the optimizer state is not",
-      "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "permanent control \u2014 named explicitly in the retention rule",
+      "reconstruction_recipe": "retrain: launch.py --kind teacher_parent_train from the init (new weights, not these bytes)",
+      "reconstruction_cost": "one L40S, about 9.2 h per seed",
+      "never_delete_clause": "the only copy (relay copy retired 2026-11-18); the endpoint the report's evaluations measured",
       "protected": true,
       "disposition": "keep"
     },
@@ -17479,13 +17768,50 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": null,
+      "relay_same_size_unverified": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
       "reconstructable": true,
       "reconstruction_recipe": "a full teacher statistics pass over the pinned corpus",
       "reconstruction_cost": "paid GPU (teacher inference)",
       "never_delete_clause": "living recovery path: the reconstruction recipe of four tombstoned checkpoints reads it",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "teacher_residual_statistics.safetensors",
+      "kind": "tensor_file",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/statistics/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/statistics/01e63327e3d02b2f/teacher_residual_statistics.safetensors"
+      ],
+      "experiment": "TPI1",
+      "role": "A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's residual statistics",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from",
+      "architecture": {},
+      "size_bytes": 1947442680,
+      "size_human": "1.814 GiB",
+      "weights_sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
+        "scripts/stages/stage-1/teacher_parent_initialization/init_driver.py"
+      ],
+      "relay_path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": true,
+      "reconstruction_recipe": "init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for bit against the journal)",
+      "reconstruction_cost": "one L40S, about 25 min",
+      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay",
       "protected": true,
       "disposition": "keep"
     },
@@ -17560,7 +17886,9 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
         "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
         "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
@@ -17599,7 +17927,9 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
         "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
         "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
@@ -17638,7 +17968,9 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
         "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
         "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
@@ -17677,7 +18009,9 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+        "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
         "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
         "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
@@ -17862,6 +18196,57 @@
       "reconstruction_recipe": "driver.py's mapping and groups steps from the teacher and the frozen mapping (kept beside it)",
       "reconstruction_cost": "one L40S, about 30 min",
       "never_delete_clause": "the only copy (relay and volume copies retired 2026-11-14); a declared consumer in the next round",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "init",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/init/01e63327e3d02b2f/init",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/init/01e63327e3d02b2f/init/model.safetensors"
+      ],
+      "experiment": "TPI1",
+      "role": "A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's residual statistics",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 1192136514,
+      "size_human": "1.110 GiB",
+      "weights_sha256": "9120eb2e7d49a3a7f7a6d6153712617787f714b43429e4242a1d0ccbbfc0d3ea",
+      "config_sha256": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+      "referenced_by": [
+        "README.md",
+        "configs/shared/baselines/initialization_forward_baseline_v1.json",
+        "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/selection.json",
+        "configs/shared/pod/device_canary_artifacts.json",
+        "configs/shared/pod/micro_preflight/authorization.json",
+        "configs/shared/pod/preflight/harness.json",
+        "configs/shared/pod/preflight/preflight_artifacts.json",
+        "configs/shared/pod/preflight/preflight_artifacts_failed.json",
+        "configs/shared/validation/cuda_engineering.json",
+        "configs/shared/validation/cuda_engineering_deployment.json",
+        "configs/stages/stage-0/calibration_volume/battery_session.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for bit against the journal)",
+      "reconstruction_cost": "one L40S, about 25 min",
+      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay",
       "protected": true,
       "disposition": "keep"
     },
@@ -18303,6 +18688,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18342,6 +18731,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18381,6 +18774,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18420,6 +18817,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18459,6 +18860,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18498,6 +18903,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18537,6 +18946,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18576,6 +18989,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18615,6 +19032,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18654,6 +19075,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18693,6 +19118,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18732,6 +19161,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18771,6 +19204,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18810,6 +19247,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18849,6 +19290,10 @@
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
         "scripts/stages/stage-1/reasoning_inheritance/README.md",
         "scripts/stages/stage-1/reasoning_inheritance/driver.py",
         "src/aadistill/initialization/planning/frozen_mapping.py"
@@ -18864,6 +19309,49 @@
       "never_delete_clause": "unclassified",
       "protected": true,
       "disposition": "review"
+    },
+    {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/mapping/01e63327e3d02b2f/mapping/tensors.safetensors",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/mapping/01e63327e3d02b2f/mapping/tensors.safetensors"
+      ],
+      "experiment": "TPI1",
+      "role": "A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's residual statistics",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from",
+      "architecture": {},
+      "size_bytes": 20979888,
+      "size_human": "0.020 GiB",
+      "weights_sha256": "aae2e9b853a541d458667434b763b058a33029624526d4e531eb19d48f38f286",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
+        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
+        "scripts/stages/stage-1/reasoning_inheritance/README.md",
+        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+        "src/aadistill/initialization/planning/frozen_mapping.py"
+      ],
+      "relay_path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": true,
+      "reconstruction_recipe": "init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for bit against the journal)",
+      "reconstruction_cost": "one L40S, about 25 min",
+      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay",
+      "protected": true,
+      "disposition": "keep"
     },
     {
       "canonical_name": "e1_r2960k_sb_pca",
@@ -20312,9 +20800,9 @@
         "configs/stages/stage-1/projected_residual/independent_gated_validation.json",
         "configs/stages/stage-1/reasoning_inheritance/design.json",
         "configs/stages/stage-1/reasoning_inheritance/frozen_selection.json",
-        "configs/stages/stage-2/reasoning_data/h1_units.json",
-        "configs/stages/stage-2/reasoning_data/h1pa.json",
-        "configs/stages/stage-2/teacher_modes/design.json"
+        "configs/stages/stage-1/teacher_parent_initialization/README.md",
+        "configs/stages/stage-1/teacher_parent_initialization/design.json",
+        "configs/stages/stage-2/reasoning_data/h1_units.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -20348,7 +20836,9 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
-        "docs/stages/stage-1/reasoning_inheritance/REPORT.md"
+        "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
+        "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_registry.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors",
       "relay_verified": true,
@@ -20382,7 +20872,9 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
-        "docs/stages/stage-1/reasoning_inheritance/REPORT.md"
+        "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
+        "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_registry.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors",
       "relay_verified": true,

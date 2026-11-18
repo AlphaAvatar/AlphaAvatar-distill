@@ -111,6 +111,26 @@ CLASSIFY: dict[str, dict] = {
                      "RI-LM1 delta needs it to be a checkpoint",
         reconstruction="driver.py's groups step from the teacher and the frozen mapping (its kept blocks K)",
         reconstruction_cost="one L40S, a few minutes", disposition="keep"),
+    #: TPI1's products on the dev box (launch.py retain; logs/stages/stage-1/teacher_parent_initialization/storage/
+    #: local_retention.json). The relay copies of the three weight files were retired 2026-11-18 (tombstones
+    #: relay_20261118_tpi1_*); the mapping and the statistics are also on the relay.
+    "aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s": dict(
+        experiment="TPI1", role="A_teacher_parent's final weights of one training seed (A-MIX-6cat-sr, step 9701, fp32)",
+        retention="canonical", status="active",
+        why="the measured endpoint of a completed study (analyses/teacher_parent.json: H-T NOT_DISTINGUISHED)",
+        never_delete="the only copy (relay copy retired 2026-11-18); the endpoint the report's evaluations measured",
+        reconstruction="retrain: launch.py --kind teacher_parent_train from the init (new weights, not these bytes)",
+        reconstruction_cost="one L40S, about 9.2 h per seed", disposition="keep"),
+    "aad-artifacts/stage1_teacher_parent_init/init/": dict(
+        experiment="TPI1", role="A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's "
+                                "residual statistics",
+        retention="reproducibility_required", status="active",
+        why="the input of both TPI1 training seeds; the statistics are what the width PCA was built from",
+        never_delete="the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on "
+                     "the relay",
+        reconstruction="init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for "
+                       "bit against the journal)",
+        reconstruction_cost="one L40S, about 25 min", disposition="keep"),
     #: RI-LM1's candidates, each kept as its span-block delta over D (layer_merge_launch.py retain)
     "aad-artifacts/stage1_layer_merge/": dict(
         experiment="RI-LM1", role="a layer-merge candidate's six span blocks; with D's dev-box copy, the candidate",

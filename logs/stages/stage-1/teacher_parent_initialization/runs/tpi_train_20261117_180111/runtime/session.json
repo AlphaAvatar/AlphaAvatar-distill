@@ -1,0 +1,4340 @@
+{
+  "schema": "aadistill.stage1.teacher_parent_initialization.authorization_session/v1",
+  "provider_cli": {
+    "path": "/home/ecs-user/.local/bin/runpodctl",
+    "version": "runpodctl 3.0.1-551d6a4",
+    "pod_create_terminate_after": false
+  },
+  "session_id": "stage1_teacher_parent-teacher_parent_train",
+  "session_spec": {
+    "session_id": "stage1_teacher_parent-teacher_parent_train",
+    "schema": "aadistill.stage1.teacher_parent_initialization.authorization_session/v1",
+    "description": "TPI1: A_teacher_parent's two seeds trained (A-MIX recipe) and evaluated in both modes",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/governance/authorization.json",
+    "authorization_type": "EngineeringAuthorization.load",
+    "plan_id": "stage1.teacher_parent_initialization",
+    "plan_hash": "5fd99503f190fd559bb9661bfb995967dce15c45e7fb43a63d7ba2929567eae9",
+    "status_path": "/workspace/stage1_teacher_parent.status",
+    "run_log_path": "/workspace/stage1_teacher_parent_run.log",
+    "driver_job_id": "stage1_teacher_parent_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage1_teacher_parent",
+      "evidence_filename": "report.json",
+      "archive_basename": "stage1_teacher_parent",
+      "spec_success": "configs/stages/stage-1/teacher_parent_initialization/artifacts.json",
+      "spec_failed": "configs/stages/stage-1/teacher_parent_initialization/artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage1_teacher_parent",
+        "TEACHER_MODEL": "Qwen/Qwen3-4B"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION",
+        "TEACHER_MODEL"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage3_sr/A-MIX-6cat-sr/4c794692a1d6072c/blocks.npz",
+          "dest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr",
+          "sha256": "4c794692a1d6072ced81c2192aa3493b14dab9a6904132a44645c93107cdbfee",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage3_sr/A-MIX-6cat-sr/aaa6fcb0b708f766/ladder.json",
+          "dest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr",
+          "sha256": "aaa6fcb0b708f7665c4e7b4f9c8fe94666f024425075984ecf90250b735d0519",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage3_sr/A-MIX-6cat-sr/63ad3c7fbc8dd2ca/audit.jsonl",
+          "dest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr",
+          "sha256": "63ad3c7fbc8dd2ca2ee4992565f4f85f79184487dea15c512f41a9d40fb0b598",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage1_teacher_parent/tpi_train_20261117_180111/resume_tpi_train_20261117_180111.tgz",
+          "dest": "artifacts/stages/stage-1/teacher_parent_initialization/resume",
+          "sha256": "b2ceb2fff2c68f0786768dcb9527ec41f3320d7a2bcafcc995da20e9d112a60f",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "battery_v2:artifacts/stages/stage-3/eval"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 12,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-11-17T18:03:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 1180 min $21.44 \u00b7 soft $22.70 \u00b7 hard $22.88 (authorized $28.00)"
+    },
+    {
+      "utc": "2026-11-17T18:03:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock None"
+    },
+    {
+      "utc": "2026-11-17T18:03:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $59.8780 against the $22.8809 this session must be able to fund"
+    },
+    {
+      "utc": "2026-11-17T18:03:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account resources OK: the provider account holds only the 0 resource(s) the records account for"
+    },
+    {
+      "utc": "2026-11-17T18:03:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "TPI1 is open"
+    },
+    {
+      "utc": "2026-11-17T18:03:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "a TPI1 teacher_parent_train artifact, unused"
+    },
+    {
+      "utc": "2026-11-17T18:03:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "utc": "2026-11-17T18:03:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "all-in $23.3351 over 1260.75 min, inside $28.00"
+    },
+    {
+      "utc": "2026-11-17T18:03:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "study identity 5fd99503f190 is the authorized one"
+    },
+    {
+      "utc": "2026-11-17T18:03:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "every bound file is in the session commit"
+    },
+    {
+      "utc": "2026-11-17T18:03:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "$28.00 inside the envelope ($28.0004) and the $50.1583 the project cap leaves now"
+    },
+    {
+      "utc": "2026-11-17T18:03:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the authorization is in session commit e8dc921d22b2"
+    },
+    {
+      "utc": "2026-11-17T18:03:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "$28.00 + the $1.0 teardown reserve fit"
+    },
+    {
+      "utc": "2026-11-17T18:03:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the relay would accept the teacher_parent_train session's bytes: 4 object(s), 16.21 GiB: ACCEPTED (200) 4/4 granted an upload action"
+    },
+    {
+      "utc": "2026-11-17T18:03:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the artifact binds this tree's ['design_sha256', 'init_record_sha256', 'plan_sha256', 'selection_sha256']"
+    },
+    {
+      "utc": "2026-11-17T18:03:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "A's initialization is on the relay with its recorded hashes"
+    },
+    {
+      "utc": "2026-11-17T18:03:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 4 relay inputs (4 from AlphaAvatar/aadistill-artifacts), 1 local assets"
+    },
+    {
+      "utc": "2026-11-17T18:03:28+00:00",
+      "elapsed_min": 0.03,
+      "msg": "watchdog detached \u2014 hard 1260 min = $22.88"
+    },
+    {
+      "utc": "2026-11-17T18:03:28+00:00",
+      "elapsed_min": 0.03,
+      "msg": "created tdxvznkx54lc4q at $1.09/h in US-TX-4"
+    },
+    {
+      "utc": "2026-11-17T18:04:22+00:00",
+      "elapsed_min": 0.93,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-11-17T18:05:26+00:00",
+      "elapsed_min": 1.98,
+      "msg": "  starting (120s) \u2014 $0.04"
+    },
+    {
+      "utc": "2026-11-17T18:06:29+00:00",
+      "elapsed_min": 3.05,
+      "msg": "  starting (180s) \u2014 $0.06"
+    },
+    {
+      "utc": "2026-11-17T18:06:50+00:00",
+      "elapsed_min": 3.4,
+      "msg": "TCP 22 at 195.26.232.131:52409 after 3.4 min"
+    },
+    {
+      "utc": "2026-11-17T18:06:53+00:00",
+      "elapsed_min": 3.45,
+      "msg": "draw 1: ssh reachable \u2014 $0.06"
+    },
+    {
+      "utc": "2026-11-17T18:07:19+00:00",
+      "elapsed_min": 3.88,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.112.07"
+    },
+    {
+      "utc": "2026-11-17T18:07:19+00:00",
+      "elapsed_min": 3.88,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-11-17T18:09:44+00:00",
+      "elapsed_min": 6.28,
+      "msg": "draw 1: setup complete \u2014 $0.11"
+    },
+    {
+      "utc": "2026-11-17T18:09:49+00:00",
+      "elapsed_min": 6.38,
+      "msg": "driver detached, pid 2182, confirmed by descriptor_probe \u2014 $0.12"
+    },
+    {
+      "utc": "2026-11-17T18:11:01+00:00",
+      "elapsed_min": 7.58,
+      "msg": "  2026-11-17T18:10:20Z MARKER:TRAIN_START:A_teacher_parent-s20260726 \u2014 $0.14"
+    },
+    {
+      "utc": "2026-11-17T18:11:16+00:00",
+      "elapsed_min": 7.83,
+      "msg": "secured 6 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:12:47+00:00",
+      "elapsed_min": 9.35,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:14:18+00:00",
+      "elapsed_min": 10.85,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:15:47+00:00",
+      "elapsed_min": 12.34,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:17:17+00:00",
+      "elapsed_min": 13.85,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:18:48+00:00",
+      "elapsed_min": 15.36,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:20:19+00:00",
+      "elapsed_min": 16.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:21:49+00:00",
+      "elapsed_min": 18.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:23:19+00:00",
+      "elapsed_min": 19.88,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:24:50+00:00",
+      "elapsed_min": 21.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:26:20+00:00",
+      "elapsed_min": 22.89,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:27:50+00:00",
+      "elapsed_min": 24.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:29:21+00:00",
+      "elapsed_min": 25.91,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:30:52+00:00",
+      "elapsed_min": 27.42,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:32:21+00:00",
+      "elapsed_min": 28.91,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:33:52+00:00",
+      "elapsed_min": 30.43,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:35:23+00:00",
+      "elapsed_min": 31.94,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:36:53+00:00",
+      "elapsed_min": 33.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:38:24+00:00",
+      "elapsed_min": 34.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:39:54+00:00",
+      "elapsed_min": 36.46,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:41:25+00:00",
+      "elapsed_min": 37.97,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:42:54+00:00",
+      "elapsed_min": 39.46,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:44:25+00:00",
+      "elapsed_min": 40.97,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:45:56+00:00",
+      "elapsed_min": 42.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:47:26+00:00",
+      "elapsed_min": 43.99,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:48:57+00:00",
+      "elapsed_min": 45.5,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:50:27+00:00",
+      "elapsed_min": 47.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:51:58+00:00",
+      "elapsed_min": 48.53,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:53:29+00:00",
+      "elapsed_min": 50.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:55:00+00:00",
+      "elapsed_min": 51.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:56:31+00:00",
+      "elapsed_min": 53.07,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:58:02+00:00",
+      "elapsed_min": 54.59,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T18:59:33+00:00",
+      "elapsed_min": 56.11,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:01:04+00:00",
+      "elapsed_min": 57.63,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:02:44+00:00",
+      "elapsed_min": 59.29,
+      "msg": "  relay errors: ['/workspace/aad/artifacts/audit/stage1_teacher_parent/report.json']"
+    },
+    {
+      "utc": "2026-11-17T19:03:03+00:00",
+      "elapsed_min": 59.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:04:34+00:00",
+      "elapsed_min": 61.12,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:06:05+00:00",
+      "elapsed_min": 62.64,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:07:35+00:00",
+      "elapsed_min": 64.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:09:06+00:00",
+      "elapsed_min": 65.66,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:10:39+00:00",
+      "elapsed_min": 67.2,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:12:10+00:00",
+      "elapsed_min": 68.72,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:13:41+00:00",
+      "elapsed_min": 70.24,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:15:11+00:00",
+      "elapsed_min": 71.74,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:16:41+00:00",
+      "elapsed_min": 73.24,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:18:12+00:00",
+      "elapsed_min": 74.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:19:42+00:00",
+      "elapsed_min": 76.26,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:21:13+00:00",
+      "elapsed_min": 77.78,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:22:44+00:00",
+      "elapsed_min": 79.3,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:24:15+00:00",
+      "elapsed_min": 80.81,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:25:46+00:00",
+      "elapsed_min": 82.32,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:27:17+00:00",
+      "elapsed_min": 83.84,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:28:48+00:00",
+      "elapsed_min": 85.36,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:30:18+00:00",
+      "elapsed_min": 86.86,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:31:49+00:00",
+      "elapsed_min": 88.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:33:19+00:00",
+      "elapsed_min": 89.88,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:34:49+00:00",
+      "elapsed_min": 91.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:36:20+00:00",
+      "elapsed_min": 92.88,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:37:50+00:00",
+      "elapsed_min": 94.4,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:39:21+00:00",
+      "elapsed_min": 95.91,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:40:51+00:00",
+      "elapsed_min": 97.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:42:22+00:00",
+      "elapsed_min": 98.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:43:54+00:00",
+      "elapsed_min": 100.45,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:45:24+00:00",
+      "elapsed_min": 101.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:46:57+00:00",
+      "elapsed_min": 103.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:48:29+00:00",
+      "elapsed_min": 105.04,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:49:59+00:00",
+      "elapsed_min": 106.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:51:30+00:00",
+      "elapsed_min": 108.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:53:00+00:00",
+      "elapsed_min": 109.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:54:31+00:00",
+      "elapsed_min": 111.08,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:56:01+00:00",
+      "elapsed_min": 112.58,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:57:32+00:00",
+      "elapsed_min": 114.09,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T19:59:03+00:00",
+      "elapsed_min": 115.61,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:00:34+00:00",
+      "elapsed_min": 117.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:02:05+00:00",
+      "elapsed_min": 118.64,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:03:35+00:00",
+      "elapsed_min": 120.14,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:05:06+00:00",
+      "elapsed_min": 121.65,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:06:36+00:00",
+      "elapsed_min": 123.16,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:08:07+00:00",
+      "elapsed_min": 124.68,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:09:38+00:00",
+      "elapsed_min": 126.19,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:11:09+00:00",
+      "elapsed_min": 127.71,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:12:41+00:00",
+      "elapsed_min": 129.24,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:14:12+00:00",
+      "elapsed_min": 130.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:15:43+00:00",
+      "elapsed_min": 132.27,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:17:14+00:00",
+      "elapsed_min": 133.79,
+      "msg": "secured 3 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:18:44+00:00",
+      "elapsed_min": 135.29,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:20:16+00:00",
+      "elapsed_min": 136.82,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:21:46+00:00",
+      "elapsed_min": 138.33,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:23:17+00:00",
+      "elapsed_min": 139.84,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:24:48+00:00",
+      "elapsed_min": 141.36,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:26:19+00:00",
+      "elapsed_min": 142.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:27:50+00:00",
+      "elapsed_min": 144.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:29:20+00:00",
+      "elapsed_min": 145.89,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:30:51+00:00",
+      "elapsed_min": 147.4,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:32:49+00:00",
+      "elapsed_min": 149.37,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:34:19+00:00",
+      "elapsed_min": 150.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:35:49+00:00",
+      "elapsed_min": 152.37,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:37:20+00:00",
+      "elapsed_min": 153.88,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:38:50+00:00",
+      "elapsed_min": 155.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:40:20+00:00",
+      "elapsed_min": 156.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:41:51+00:00",
+      "elapsed_min": 158.4,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:43:21+00:00",
+      "elapsed_min": 159.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:44:51+00:00",
+      "elapsed_min": 161.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:46:21+00:00",
+      "elapsed_min": 162.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:47:51+00:00",
+      "elapsed_min": 164.42,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:49:22+00:00",
+      "elapsed_min": 165.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:50:52+00:00",
+      "elapsed_min": 167.42,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:52:23+00:00",
+      "elapsed_min": 168.94,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:53:54+00:00",
+      "elapsed_min": 170.45,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:55:24+00:00",
+      "elapsed_min": 171.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:56:55+00:00",
+      "elapsed_min": 173.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:58:26+00:00",
+      "elapsed_min": 174.99,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T20:59:57+00:00",
+      "elapsed_min": 176.5,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:01:27+00:00",
+      "elapsed_min": 178.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:02:58+00:00",
+      "elapsed_min": 179.53,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:04:28+00:00",
+      "elapsed_min": 181.03,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:05:58+00:00",
+      "elapsed_min": 182.53,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:07:56+00:00",
+      "elapsed_min": 184.49,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:09:26+00:00",
+      "elapsed_min": 186.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:10:57+00:00",
+      "elapsed_min": 187.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:12:27+00:00",
+      "elapsed_min": 189.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:13:57+00:00",
+      "elapsed_min": 190.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:15:27+00:00",
+      "elapsed_min": 192.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:16:57+00:00",
+      "elapsed_min": 193.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:18:28+00:00",
+      "elapsed_min": 195.03,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:19:59+00:00",
+      "elapsed_min": 196.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:21:30+00:00",
+      "elapsed_min": 198.06,
+      "msg": "secured 3 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:23:01+00:00",
+      "elapsed_min": 199.57,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:24:31+00:00",
+      "elapsed_min": 201.08,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:26:02+00:00",
+      "elapsed_min": 202.59,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:27:32+00:00",
+      "elapsed_min": 204.1,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:29:04+00:00",
+      "elapsed_min": 205.63,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:30:34+00:00",
+      "elapsed_min": 207.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:32:05+00:00",
+      "elapsed_min": 208.65,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:33:37+00:00",
+      "elapsed_min": 210.17,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:35:07+00:00",
+      "elapsed_min": 211.68,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:36:37+00:00",
+      "elapsed_min": 213.18,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:38:08+00:00",
+      "elapsed_min": 214.68,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:39:38+00:00",
+      "elapsed_min": 216.2,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:41:09+00:00",
+      "elapsed_min": 217.71,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:42:39+00:00",
+      "elapsed_min": 219.21,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:44:10+00:00",
+      "elapsed_min": 220.72,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:45:40+00:00",
+      "elapsed_min": 222.23,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:47:11+00:00",
+      "elapsed_min": 223.74,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:48:42+00:00",
+      "elapsed_min": 225.26,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:50:13+00:00",
+      "elapsed_min": 226.77,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:51:43+00:00",
+      "elapsed_min": 228.28,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:53:14+00:00",
+      "elapsed_min": 229.78,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:54:44+00:00",
+      "elapsed_min": 231.3,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:56:15+00:00",
+      "elapsed_min": 232.81,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:57:47+00:00",
+      "elapsed_min": 234.34,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T21:59:17+00:00",
+      "elapsed_min": 235.85,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:00:48+00:00",
+      "elapsed_min": 237.36,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:02:18+00:00",
+      "elapsed_min": 238.85,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:03:49+00:00",
+      "elapsed_min": 240.37,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:05:19+00:00",
+      "elapsed_min": 241.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:06:49+00:00",
+      "elapsed_min": 243.37,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:08:19+00:00",
+      "elapsed_min": 244.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:09:49+00:00",
+      "elapsed_min": 246.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:11:20+00:00",
+      "elapsed_min": 247.89,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:12:50+00:00",
+      "elapsed_min": 249.4,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:14:21+00:00",
+      "elapsed_min": 250.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:15:51+00:00",
+      "elapsed_min": 252.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:17:22+00:00",
+      "elapsed_min": 253.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:18:53+00:00",
+      "elapsed_min": 255.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:20:23+00:00",
+      "elapsed_min": 256.95,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:21:54+00:00",
+      "elapsed_min": 258.46,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:23:25+00:00",
+      "elapsed_min": 259.97,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:24:55+00:00",
+      "elapsed_min": 261.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:26:26+00:00",
+      "elapsed_min": 263.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:27:57+00:00",
+      "elapsed_min": 264.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:29:27+00:00",
+      "elapsed_min": 266.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:30:58+00:00",
+      "elapsed_min": 267.52,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:32:29+00:00",
+      "elapsed_min": 269.04,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:34:00+00:00",
+      "elapsed_min": 270.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:35:31+00:00",
+      "elapsed_min": 272.07,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:37:02+00:00",
+      "elapsed_min": 273.58,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:38:32+00:00",
+      "elapsed_min": 275.08,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:40:02+00:00",
+      "elapsed_min": 276.59,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:41:32+00:00",
+      "elapsed_min": 278.1,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:43:03+00:00",
+      "elapsed_min": 279.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:44:33+00:00",
+      "elapsed_min": 281.11,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:46:04+00:00",
+      "elapsed_min": 282.63,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:47:35+00:00",
+      "elapsed_min": 284.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:49:06+00:00",
+      "elapsed_min": 285.65,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:50:37+00:00",
+      "elapsed_min": 287.17,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:52:07+00:00",
+      "elapsed_min": 288.67,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:53:37+00:00",
+      "elapsed_min": 290.18,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:55:08+00:00",
+      "elapsed_min": 291.69,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:56:39+00:00",
+      "elapsed_min": 293.2,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T22:59:31+00:00",
+      "elapsed_min": 296.08,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:01:01+00:00",
+      "elapsed_min": 297.58,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:02:31+00:00",
+      "elapsed_min": 299.08,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:04:02+00:00",
+      "elapsed_min": 300.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:05:33+00:00",
+      "elapsed_min": 302.11,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:07:04+00:00",
+      "elapsed_min": 303.63,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:08:35+00:00",
+      "elapsed_min": 305.14,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:10:05+00:00",
+      "elapsed_min": 306.64,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:11:35+00:00",
+      "elapsed_min": 308.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:13:05+00:00",
+      "elapsed_min": 309.65,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:14:36+00:00",
+      "elapsed_min": 311.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:16:06+00:00",
+      "elapsed_min": 312.66,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:17:37+00:00",
+      "elapsed_min": 314.17,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:19:08+00:00",
+      "elapsed_min": 315.68,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:20:38+00:00",
+      "elapsed_min": 317.19,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:22:09+00:00",
+      "elapsed_min": 318.71,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:23:40+00:00",
+      "elapsed_min": 320.22,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:25:10+00:00",
+      "elapsed_min": 321.73,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:26:42+00:00",
+      "elapsed_min": 323.25,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:28:12+00:00",
+      "elapsed_min": 324.76,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:29:43+00:00",
+      "elapsed_min": 326.27,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:31:14+00:00",
+      "elapsed_min": 327.79,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:32:44+00:00",
+      "elapsed_min": 329.29,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:34:14+00:00",
+      "elapsed_min": 330.79,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:35:45+00:00",
+      "elapsed_min": 332.3,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:37:16+00:00",
+      "elapsed_min": 333.82,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:38:47+00:00",
+      "elapsed_min": 335.34,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:40:17+00:00",
+      "elapsed_min": 336.84,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:41:47+00:00",
+      "elapsed_min": 338.35,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:43:17+00:00",
+      "elapsed_min": 339.85,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:44:48+00:00",
+      "elapsed_min": 341.35,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:46:18+00:00",
+      "elapsed_min": 342.86,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:47:49+00:00",
+      "elapsed_min": 344.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:49:19+00:00",
+      "elapsed_min": 345.88,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:50:50+00:00",
+      "elapsed_min": 347.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:52:20+00:00",
+      "elapsed_min": 348.89,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:53:51+00:00",
+      "elapsed_min": 350.4,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:55:22+00:00",
+      "elapsed_min": 351.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:56:52+00:00",
+      "elapsed_min": 353.42,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:58:23+00:00",
+      "elapsed_min": 354.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-17T23:59:54+00:00",
+      "elapsed_min": 356.46,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:01:25+00:00",
+      "elapsed_min": 357.97,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:02:55+00:00",
+      "elapsed_min": 359.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:04:26+00:00",
+      "elapsed_min": 360.99,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:05:57+00:00",
+      "elapsed_min": 362.5,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:07:28+00:00",
+      "elapsed_min": 364.02,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:08:58+00:00",
+      "elapsed_min": 365.53,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:10:30+00:00",
+      "elapsed_min": 367.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:12:00+00:00",
+      "elapsed_min": 368.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:13:31+00:00",
+      "elapsed_min": 370.07,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:15:01+00:00",
+      "elapsed_min": 371.57,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:16:32+00:00",
+      "elapsed_min": 373.09,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:18:03+00:00",
+      "elapsed_min": 374.61,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:19:34+00:00",
+      "elapsed_min": 376.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:21:04+00:00",
+      "elapsed_min": 377.63,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:22:35+00:00",
+      "elapsed_min": 379.14,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:24:05+00:00",
+      "elapsed_min": 380.64,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:25:36+00:00",
+      "elapsed_min": 382.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:27:06+00:00",
+      "elapsed_min": 383.66,
+      "msg": "secured 3 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:30:24+00:00",
+      "elapsed_min": 386.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:31:55+00:00",
+      "elapsed_min": 388.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:33:26+00:00",
+      "elapsed_min": 389.99,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:34:56+00:00",
+      "elapsed_min": 391.5,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:36:27+00:00",
+      "elapsed_min": 393.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:37:57+00:00",
+      "elapsed_min": 394.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:39:27+00:00",
+      "elapsed_min": 396.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:40:58+00:00",
+      "elapsed_min": 397.53,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:42:29+00:00",
+      "elapsed_min": 399.04,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:44:00+00:00",
+      "elapsed_min": 400.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:45:30+00:00",
+      "elapsed_min": 402.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:47:01+00:00",
+      "elapsed_min": 403.57,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:48:32+00:00",
+      "elapsed_min": 405.09,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:50:02+00:00",
+      "elapsed_min": 406.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:51:33+00:00",
+      "elapsed_min": 408.12,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:53:04+00:00",
+      "elapsed_min": 409.62,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:54:35+00:00",
+      "elapsed_min": 411.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:56:05+00:00",
+      "elapsed_min": 412.65,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:57:36+00:00",
+      "elapsed_min": 414.16,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T00:59:06+00:00",
+      "elapsed_min": 415.66,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:00:37+00:00",
+      "elapsed_min": 417.18,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:02:08+00:00",
+      "elapsed_min": 418.69,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:03:38+00:00",
+      "elapsed_min": 420.2,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:05:09+00:00",
+      "elapsed_min": 421.71,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:06:40+00:00",
+      "elapsed_min": 423.22,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:08:11+00:00",
+      "elapsed_min": 424.74,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:09:41+00:00",
+      "elapsed_min": 426.24,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:11:12+00:00",
+      "elapsed_min": 427.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:12:43+00:00",
+      "elapsed_min": 429.27,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:14:13+00:00",
+      "elapsed_min": 430.78,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:15:44+00:00",
+      "elapsed_min": 432.29,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-18T01:16:58+00:00",
+      "elapsed_min": 433.53,
+      "msg": "  2026-11-18T01:16:24Z MARKER:EVAL_START:A_teacher_parent-s20260726:thinking \u2014 $7.88"
+    },
+    {
+      "utc": "2026-11-18T01:17:14+00:00",
+      "elapsed_min": 433.79,
+      "msg": "secured 9 file(s) (10 held)"
+    },
+    {
+      "utc": "2026-11-18T01:18:44+00:00",
+      "elapsed_min": 435.3,
+      "msg": "secured 1 file(s) (10 held)"
+    },
+    {
+      "utc": "2026-11-18T01:20:15+00:00",
+      "elapsed_min": 436.81,
+      "msg": "secured 1 file(s) (10 held)"
+    },
+    {
+      "utc": "2026-11-18T01:21:46+00:00",
+      "elapsed_min": 438.33,
+      "msg": "secured 2 file(s) (11 held)"
+    },
+    {
+      "utc": "2026-11-18T01:23:18+00:00",
+      "elapsed_min": 439.86,
+      "msg": "secured 2 file(s) (12 held)"
+    },
+    {
+      "utc": "2026-11-18T01:24:50+00:00",
+      "elapsed_min": 441.38,
+      "msg": "secured 2 file(s) (13 held)"
+    },
+    {
+      "utc": "2026-11-18T01:26:20+00:00",
+      "elapsed_min": 442.89,
+      "msg": "secured 1 file(s) (13 held)"
+    },
+    {
+      "utc": "2026-11-18T01:27:51+00:00",
+      "elapsed_min": 444.41,
+      "msg": "secured 2 file(s) (14 held)"
+    },
+    {
+      "utc": "2026-11-18T01:29:23+00:00",
+      "elapsed_min": 445.94,
+      "msg": "secured 2 file(s) (15 held)"
+    },
+    {
+      "utc": "2026-11-18T01:30:55+00:00",
+      "elapsed_min": 447.47,
+      "msg": "secured 2 file(s) (16 held)"
+    },
+    {
+      "utc": "2026-11-18T01:32:26+00:00",
+      "elapsed_min": 448.98,
+      "msg": "secured 1 file(s) (16 held)"
+    },
+    {
+      "utc": "2026-11-18T01:33:57+00:00",
+      "elapsed_min": 450.5,
+      "msg": "secured 2 file(s) (17 held)"
+    },
+    {
+      "utc": "2026-11-18T01:35:28+00:00",
+      "elapsed_min": 452.03,
+      "msg": "secured 2 file(s) (18 held)"
+    },
+    {
+      "utc": "2026-11-18T01:37:00+00:00",
+      "elapsed_min": 453.55,
+      "msg": "secured 2 file(s) (19 held)"
+    },
+    {
+      "utc": "2026-11-18T01:38:32+00:00",
+      "elapsed_min": 455.1,
+      "msg": "secured 7 file(s) (25 held)"
+    },
+    {
+      "utc": "2026-11-18T01:40:05+00:00",
+      "elapsed_min": 456.64,
+      "msg": "secured 11 file(s) (35 held)"
+    },
+    {
+      "utc": "2026-11-18T01:41:36+00:00",
+      "elapsed_min": 458.16,
+      "msg": "secured 3 file(s) (37 held)"
+    },
+    {
+      "utc": "2026-11-18T01:43:07+00:00",
+      "elapsed_min": 459.68,
+      "msg": "secured 7 file(s) (43 held)"
+    },
+    {
+      "utc": "2026-11-18T01:44:40+00:00",
+      "elapsed_min": 461.22,
+      "msg": "secured 10 file(s) (52 held)"
+    },
+    {
+      "utc": "2026-11-18T01:45:55+00:00",
+      "elapsed_min": 462.47,
+      "msg": "  2026-11-18T01:44:32Z MARKER:EVAL_START:A_teacher_parent-s20260726:non_thinking \u2014 $8.40"
+    },
+    {
+      "utc": "2026-11-18T01:46:11+00:00",
+      "elapsed_min": 462.74,
+      "msg": "secured 19 file(s) (69 held)"
+    },
+    {
+      "utc": "2026-11-18T01:47:42+00:00",
+      "elapsed_min": 464.26,
+      "msg": "secured 2 file(s) (70 held)"
+    },
+    {
+      "utc": "2026-11-18T01:49:14+00:00",
+      "elapsed_min": 465.79,
+      "msg": "secured 9 file(s) (78 held)"
+    },
+    {
+      "utc": "2026-11-18T01:50:29+00:00",
+      "elapsed_min": 467.04,
+      "msg": "  2026-11-18T01:50:13Z MARKER:TRAIN_START:A_teacher_parent-s20260801 \u2014 $8.48"
+    },
+    {
+      "utc": "2026-11-18T01:50:46+00:00",
+      "elapsed_min": 467.33,
+      "msg": "secured 40 file(s) (115 held)"
+    },
+    {
+      "utc": "2026-11-18T01:52:17+00:00",
+      "elapsed_min": 468.84,
+      "msg": "secured 3 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T01:53:47+00:00",
+      "elapsed_min": 470.35,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T01:55:18+00:00",
+      "elapsed_min": 471.85,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T01:56:48+00:00",
+      "elapsed_min": 473.36,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T01:58:18+00:00",
+      "elapsed_min": 474.86,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T01:59:48+00:00",
+      "elapsed_min": 476.37,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:01:19+00:00",
+      "elapsed_min": 477.87,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:02:49+00:00",
+      "elapsed_min": 479.38,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:04:19+00:00",
+      "elapsed_min": 480.88,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:05:50+00:00",
+      "elapsed_min": 482.39,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:07:20+00:00",
+      "elapsed_min": 483.9,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:08:50+00:00",
+      "elapsed_min": 485.4,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:10:22+00:00",
+      "elapsed_min": 486.93,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:11:52+00:00",
+      "elapsed_min": 488.43,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:13:23+00:00",
+      "elapsed_min": 489.93,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:14:53+00:00",
+      "elapsed_min": 491.44,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:16:22+00:00",
+      "elapsed_min": 492.93,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:17:52+00:00",
+      "elapsed_min": 494.43,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:19:22+00:00",
+      "elapsed_min": 495.93,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:20:52+00:00",
+      "elapsed_min": 497.43,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:22:23+00:00",
+      "elapsed_min": 498.94,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:23:53+00:00",
+      "elapsed_min": 500.44,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:25:24+00:00",
+      "elapsed_min": 501.96,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:26:55+00:00",
+      "elapsed_min": 503.47,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:28:25+00:00",
+      "elapsed_min": 504.98,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:29:56+00:00",
+      "elapsed_min": 506.49,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:31:26+00:00",
+      "elapsed_min": 508.0,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:32:56+00:00",
+      "elapsed_min": 509.5,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:34:26+00:00",
+      "elapsed_min": 511.0,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:35:57+00:00",
+      "elapsed_min": 512.5,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:37:27+00:00",
+      "elapsed_min": 514.01,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:38:58+00:00",
+      "elapsed_min": 515.52,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:40:28+00:00",
+      "elapsed_min": 517.02,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:41:57+00:00",
+      "elapsed_min": 518.51,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:43:27+00:00",
+      "elapsed_min": 520.01,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:44:57+00:00",
+      "elapsed_min": 521.51,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:46:28+00:00",
+      "elapsed_min": 523.02,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:47:58+00:00",
+      "elapsed_min": 524.52,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:49:28+00:00",
+      "elapsed_min": 526.03,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:50:58+00:00",
+      "elapsed_min": 527.53,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:52:29+00:00",
+      "elapsed_min": 529.04,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:53:59+00:00",
+      "elapsed_min": 530.55,
+      "msg": "secured 2 file(s) (118 held)"
+    },
+    {
+      "utc": "2026-11-18T02:55:30+00:00",
+      "elapsed_min": 532.06,
+      "msg": "secured 3 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T02:57:01+00:00",
+      "elapsed_min": 533.57,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T02:58:32+00:00",
+      "elapsed_min": 535.09,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:00:02+00:00",
+      "elapsed_min": 536.6,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:01:34+00:00",
+      "elapsed_min": 538.13,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:03:04+00:00",
+      "elapsed_min": 539.63,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:04:35+00:00",
+      "elapsed_min": 541.15,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:06:05+00:00",
+      "elapsed_min": 542.64,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:07:36+00:00",
+      "elapsed_min": 544.15,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:09:06+00:00",
+      "elapsed_min": 545.66,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:10:36+00:00",
+      "elapsed_min": 547.15,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:12:07+00:00",
+      "elapsed_min": 548.67,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:13:37+00:00",
+      "elapsed_min": 550.17,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:15:07+00:00",
+      "elapsed_min": 551.68,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:16:37+00:00",
+      "elapsed_min": 553.17,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:18:08+00:00",
+      "elapsed_min": 554.68,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:19:37+00:00",
+      "elapsed_min": 556.18,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:21:08+00:00",
+      "elapsed_min": 557.69,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:22:38+00:00",
+      "elapsed_min": 559.18,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:24:08+00:00",
+      "elapsed_min": 560.69,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:25:38+00:00",
+      "elapsed_min": 562.2,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:27:09+00:00",
+      "elapsed_min": 563.7,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:28:39+00:00",
+      "elapsed_min": 565.2,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:30:09+00:00",
+      "elapsed_min": 566.71,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:31:40+00:00",
+      "elapsed_min": 568.22,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:33:10+00:00",
+      "elapsed_min": 569.72,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:34:41+00:00",
+      "elapsed_min": 571.24,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:36:11+00:00",
+      "elapsed_min": 572.75,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:37:41+00:00",
+      "elapsed_min": 574.24,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:39:11+00:00",
+      "elapsed_min": 575.74,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:40:41+00:00",
+      "elapsed_min": 577.25,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:42:12+00:00",
+      "elapsed_min": 578.75,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:43:42+00:00",
+      "elapsed_min": 580.26,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:45:13+00:00",
+      "elapsed_min": 581.77,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:46:43+00:00",
+      "elapsed_min": 583.28,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:48:13+00:00",
+      "elapsed_min": 584.78,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:49:44+00:00",
+      "elapsed_min": 586.29,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:51:14+00:00",
+      "elapsed_min": 587.8,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:52:45+00:00",
+      "elapsed_min": 589.31,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:54:15+00:00",
+      "elapsed_min": 590.81,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:55:45+00:00",
+      "elapsed_min": 592.32,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:57:15+00:00",
+      "elapsed_min": 593.81,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T03:58:46+00:00",
+      "elapsed_min": 595.33,
+      "msg": "secured 3 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:00:17+00:00",
+      "elapsed_min": 596.84,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:01:48+00:00",
+      "elapsed_min": 598.35,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:03:24+00:00",
+      "elapsed_min": 599.96,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:04:55+00:00",
+      "elapsed_min": 601.48,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:06:25+00:00",
+      "elapsed_min": 602.97,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:08:10+00:00",
+      "elapsed_min": 604.73,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:09:40+00:00",
+      "elapsed_min": 606.23,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:11:11+00:00",
+      "elapsed_min": 607.73,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:12:41+00:00",
+      "elapsed_min": 609.24,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:14:12+00:00",
+      "elapsed_min": 610.75,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:15:42+00:00",
+      "elapsed_min": 612.26,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:17:12+00:00",
+      "elapsed_min": 613.76,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:18:43+00:00",
+      "elapsed_min": 615.27,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:20:14+00:00",
+      "elapsed_min": 616.79,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:21:45+00:00",
+      "elapsed_min": 618.3,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:23:15+00:00",
+      "elapsed_min": 619.81,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:24:46+00:00",
+      "elapsed_min": 621.32,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:26:16+00:00",
+      "elapsed_min": 622.83,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:27:47+00:00",
+      "elapsed_min": 624.34,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:29:18+00:00",
+      "elapsed_min": 625.86,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:30:48+00:00",
+      "elapsed_min": 627.36,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:32:18+00:00",
+      "elapsed_min": 628.86,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:33:48+00:00",
+      "elapsed_min": 630.36,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:35:19+00:00",
+      "elapsed_min": 631.87,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:36:50+00:00",
+      "elapsed_min": 633.39,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:38:20+00:00",
+      "elapsed_min": 634.89,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:39:50+00:00",
+      "elapsed_min": 636.4,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:41:22+00:00",
+      "elapsed_min": 637.92,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:42:52+00:00",
+      "elapsed_min": 639.43,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:44:22+00:00",
+      "elapsed_min": 640.93,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:45:54+00:00",
+      "elapsed_min": 642.45,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:47:24+00:00",
+      "elapsed_min": 643.96,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:48:55+00:00",
+      "elapsed_min": 645.47,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:50:25+00:00",
+      "elapsed_min": 646.97,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:51:55+00:00",
+      "elapsed_min": 648.48,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:53:27+00:00",
+      "elapsed_min": 650.0,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:55:02+00:00",
+      "elapsed_min": 651.6,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:56:37+00:00",
+      "elapsed_min": 653.17,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:58:08+00:00",
+      "elapsed_min": 654.69,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T04:59:38+00:00",
+      "elapsed_min": 656.19,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:01:09+00:00",
+      "elapsed_min": 657.7,
+      "msg": "secured 3 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:02:39+00:00",
+      "elapsed_min": 659.22,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:04:10+00:00",
+      "elapsed_min": 660.73,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:05:41+00:00",
+      "elapsed_min": 662.24,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:07:12+00:00",
+      "elapsed_min": 663.75,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:08:43+00:00",
+      "elapsed_min": 665.27,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:10:13+00:00",
+      "elapsed_min": 666.77,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:11:43+00:00",
+      "elapsed_min": 668.28,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:13:14+00:00",
+      "elapsed_min": 669.79,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:14:44+00:00",
+      "elapsed_min": 671.29,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:16:15+00:00",
+      "elapsed_min": 672.81,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:19:07+00:00",
+      "elapsed_min": 675.67,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:20:37+00:00",
+      "elapsed_min": 677.18,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:22:08+00:00",
+      "elapsed_min": 678.69,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:23:38+00:00",
+      "elapsed_min": 680.2,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:25:10+00:00",
+      "elapsed_min": 681.72,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:26:40+00:00",
+      "elapsed_min": 683.23,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:28:11+00:00",
+      "elapsed_min": 684.73,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:29:41+00:00",
+      "elapsed_min": 686.25,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:31:12+00:00",
+      "elapsed_min": 687.76,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:32:43+00:00",
+      "elapsed_min": 689.27,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:34:13+00:00",
+      "elapsed_min": 690.77,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:35:51+00:00",
+      "elapsed_min": 692.4,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:37:23+00:00",
+      "elapsed_min": 693.94,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:38:53+00:00",
+      "elapsed_min": 695.44,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:40:24+00:00",
+      "elapsed_min": 696.95,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:41:54+00:00",
+      "elapsed_min": 698.45,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:43:24+00:00",
+      "elapsed_min": 699.96,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:44:54+00:00",
+      "elapsed_min": 701.46,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:46:24+00:00",
+      "elapsed_min": 702.96,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:47:55+00:00",
+      "elapsed_min": 704.47,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:49:30+00:00",
+      "elapsed_min": 706.05,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:51:03+00:00",
+      "elapsed_min": 707.61,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:52:34+00:00",
+      "elapsed_min": 709.12,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:54:04+00:00",
+      "elapsed_min": 710.63,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:55:34+00:00",
+      "elapsed_min": 712.13,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:57:05+00:00",
+      "elapsed_min": 713.64,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T05:58:35+00:00",
+      "elapsed_min": 715.14,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:00:06+00:00",
+      "elapsed_min": 716.65,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:01:36+00:00",
+      "elapsed_min": 718.16,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:23:45+00:00",
+      "elapsed_min": 740.31,
+      "msg": "secured 1 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:25:16+00:00",
+      "elapsed_min": 741.83,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:26:47+00:00",
+      "elapsed_min": 743.34,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:28:18+00:00",
+      "elapsed_min": 744.85,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:29:48+00:00",
+      "elapsed_min": 746.36,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:31:18+00:00",
+      "elapsed_min": 747.87,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:32:49+00:00",
+      "elapsed_min": 749.38,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:34:19+00:00",
+      "elapsed_min": 750.88,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:35:50+00:00",
+      "elapsed_min": 752.38,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:37:20+00:00",
+      "elapsed_min": 753.89,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:38:50+00:00",
+      "elapsed_min": 755.39,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:40:20+00:00",
+      "elapsed_min": 756.9,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:41:51+00:00",
+      "elapsed_min": 758.41,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:43:21+00:00",
+      "elapsed_min": 759.91,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:44:52+00:00",
+      "elapsed_min": 761.42,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:46:21+00:00",
+      "elapsed_min": 762.91,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:47:53+00:00",
+      "elapsed_min": 764.44,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:49:24+00:00",
+      "elapsed_min": 765.95,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:50:54+00:00",
+      "elapsed_min": 767.46,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:52:25+00:00",
+      "elapsed_min": 768.97,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:53:55+00:00",
+      "elapsed_min": 770.48,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:55:26+00:00",
+      "elapsed_min": 771.99,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:56:56+00:00",
+      "elapsed_min": 773.49,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:58:27+00:00",
+      "elapsed_min": 775.01,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T06:59:58+00:00",
+      "elapsed_min": 776.52,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:01:28+00:00",
+      "elapsed_min": 778.03,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:02:59+00:00",
+      "elapsed_min": 779.55,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:04:30+00:00",
+      "elapsed_min": 781.06,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:43:00+00:00",
+      "elapsed_min": 819.55,
+      "msg": "secured 1 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:44:31+00:00",
+      "elapsed_min": 821.07,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:46:02+00:00",
+      "elapsed_min": 822.59,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:47:32+00:00",
+      "elapsed_min": 824.1,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:49:03+00:00",
+      "elapsed_min": 825.61,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:50:33+00:00",
+      "elapsed_min": 827.11,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:52:04+00:00",
+      "elapsed_min": 828.63,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:53:35+00:00",
+      "elapsed_min": 830.15,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:55:07+00:00",
+      "elapsed_min": 831.67,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:56:38+00:00",
+      "elapsed_min": 833.19,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:58:09+00:00",
+      "elapsed_min": 834.71,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T07:59:40+00:00",
+      "elapsed_min": 836.22,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:01:11+00:00",
+      "elapsed_min": 837.74,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:02:42+00:00",
+      "elapsed_min": 839.26,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:04:13+00:00",
+      "elapsed_min": 840.77,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:05:43+00:00",
+      "elapsed_min": 842.28,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:07:14+00:00",
+      "elapsed_min": 843.79,
+      "msg": "secured 3 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:08:45+00:00",
+      "elapsed_min": 845.3,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:10:15+00:00",
+      "elapsed_min": 846.81,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:11:46+00:00",
+      "elapsed_min": 848.32,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:13:16+00:00",
+      "elapsed_min": 849.83,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:14:47+00:00",
+      "elapsed_min": 851.34,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:16:18+00:00",
+      "elapsed_min": 852.85,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:17:48+00:00",
+      "elapsed_min": 854.36,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:19:19+00:00",
+      "elapsed_min": 855.87,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:20:49+00:00",
+      "elapsed_min": 857.38,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:22:20+00:00",
+      "elapsed_min": 858.89,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:23:50+00:00",
+      "elapsed_min": 860.4,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:25:21+00:00",
+      "elapsed_min": 861.9,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:26:51+00:00",
+      "elapsed_min": 863.41,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:28:22+00:00",
+      "elapsed_min": 864.92,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:29:52+00:00",
+      "elapsed_min": 866.43,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:31:23+00:00",
+      "elapsed_min": 867.93,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:33:06+00:00",
+      "elapsed_min": 869.66,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:34:48+00:00",
+      "elapsed_min": 871.35,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:36:18+00:00",
+      "elapsed_min": 872.85,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:37:49+00:00",
+      "elapsed_min": 874.37,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:39:19+00:00",
+      "elapsed_min": 875.88,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:40:59+00:00",
+      "elapsed_min": 877.53,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:42:30+00:00",
+      "elapsed_min": 879.06,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:44:00+00:00",
+      "elapsed_min": 880.56,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:45:29+00:00",
+      "elapsed_min": 882.05,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:47:00+00:00",
+      "elapsed_min": 883.57,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:48:31+00:00",
+      "elapsed_min": 885.08,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:50:02+00:00",
+      "elapsed_min": 886.59,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:51:32+00:00",
+      "elapsed_min": 888.09,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:53:04+00:00",
+      "elapsed_min": 889.62,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:54:34+00:00",
+      "elapsed_min": 891.13,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:56:06+00:00",
+      "elapsed_min": 892.66,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:57:37+00:00",
+      "elapsed_min": 894.18,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T08:59:08+00:00",
+      "elapsed_min": 895.69,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:00:40+00:00",
+      "elapsed_min": 897.22,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:02:11+00:00",
+      "elapsed_min": 898.74,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:03:41+00:00",
+      "elapsed_min": 900.23,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:05:11+00:00",
+      "elapsed_min": 901.75,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:06:43+00:00",
+      "elapsed_min": 903.27,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:08:13+00:00",
+      "elapsed_min": 904.77,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:09:43+00:00",
+      "elapsed_min": 906.28,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:12:36+00:00",
+      "elapsed_min": 909.16,
+      "msg": "secured 1 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:14:07+00:00",
+      "elapsed_min": 910.67,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:15:37+00:00",
+      "elapsed_min": 912.17,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:17:08+00:00",
+      "elapsed_min": 913.69,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:18:38+00:00",
+      "elapsed_min": 915.2,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:20:09+00:00",
+      "elapsed_min": 916.71,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:21:40+00:00",
+      "elapsed_min": 918.23,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:23:11+00:00",
+      "elapsed_min": 919.74,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:24:42+00:00",
+      "elapsed_min": 921.26,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:26:13+00:00",
+      "elapsed_min": 922.78,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:27:44+00:00",
+      "elapsed_min": 924.29,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:29:15+00:00",
+      "elapsed_min": 925.81,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:30:46+00:00",
+      "elapsed_min": 927.33,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:32:19+00:00",
+      "elapsed_min": 928.87,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:33:51+00:00",
+      "elapsed_min": 930.4,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:35:22+00:00",
+      "elapsed_min": 931.93,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:36:54+00:00",
+      "elapsed_min": 933.45,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:38:24+00:00",
+      "elapsed_min": 934.96,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:39:55+00:00",
+      "elapsed_min": 936.48,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:41:30+00:00",
+      "elapsed_min": 938.05,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:43:03+00:00",
+      "elapsed_min": 939.62,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:44:35+00:00",
+      "elapsed_min": 941.15,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:46:08+00:00",
+      "elapsed_min": 942.69,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:47:40+00:00",
+      "elapsed_min": 944.22,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:49:12+00:00",
+      "elapsed_min": 945.76,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:50:44+00:00",
+      "elapsed_min": 947.29,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:52:16+00:00",
+      "elapsed_min": 948.82,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:53:47+00:00",
+      "elapsed_min": 950.34,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:55:19+00:00",
+      "elapsed_min": 951.87,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:56:50+00:00",
+      "elapsed_min": 953.39,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:58:22+00:00",
+      "elapsed_min": 954.92,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T09:59:53+00:00",
+      "elapsed_min": 956.44,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:01:25+00:00",
+      "elapsed_min": 957.97,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:02:56+00:00",
+      "elapsed_min": 959.49,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:04:28+00:00",
+      "elapsed_min": 961.02,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:06:00+00:00",
+      "elapsed_min": 962.55,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:07:33+00:00",
+      "elapsed_min": 964.11,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:09:05+00:00",
+      "elapsed_min": 965.65,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:10:40+00:00",
+      "elapsed_min": 967.22,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:12:11+00:00",
+      "elapsed_min": 968.74,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:13:44+00:00",
+      "elapsed_min": 970.3,
+      "msg": "secured 1 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:15:17+00:00",
+      "elapsed_min": 971.84,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:16:48+00:00",
+      "elapsed_min": 973.36,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:18:21+00:00",
+      "elapsed_min": 974.91,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:19:54+00:00",
+      "elapsed_min": 976.46,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:21:29+00:00",
+      "elapsed_min": 978.03,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:23:00+00:00",
+      "elapsed_min": 979.56,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:24:32+00:00",
+      "elapsed_min": 981.09,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:26:04+00:00",
+      "elapsed_min": 982.62,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:27:36+00:00",
+      "elapsed_min": 984.16,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:29:10+00:00",
+      "elapsed_min": 985.72,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:30:46+00:00",
+      "elapsed_min": 987.32,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:32:22+00:00",
+      "elapsed_min": 988.93,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:33:58+00:00",
+      "elapsed_min": 990.52,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:35:32+00:00",
+      "elapsed_min": 992.09,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:37:05+00:00",
+      "elapsed_min": 993.64,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:38:42+00:00",
+      "elapsed_min": 995.25,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:40:16+00:00",
+      "elapsed_min": 996.82,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:41:53+00:00",
+      "elapsed_min": 998.45,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:43:33+00:00",
+      "elapsed_min": 1000.1,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:45:08+00:00",
+      "elapsed_min": 1001.7,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:46:48+00:00",
+      "elapsed_min": 1003.36,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:48:27+00:00",
+      "elapsed_min": 1005.02,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:50:08+00:00",
+      "elapsed_min": 1006.7,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:51:49+00:00",
+      "elapsed_min": 1008.38,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:53:31+00:00",
+      "elapsed_min": 1010.07,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:55:07+00:00",
+      "elapsed_min": 1011.67,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:56:42+00:00",
+      "elapsed_min": 1013.25,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:58:19+00:00",
+      "elapsed_min": 1014.88,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T10:59:56+00:00",
+      "elapsed_min": 1016.49,
+      "msg": "secured 2 file(s) (119 held)"
+    },
+    {
+      "utc": "2026-11-18T11:01:36+00:00",
+      "elapsed_min": 1018.17,
+      "msg": "secured 5 file(s) (120 held)"
+    },
+    {
+      "utc": "2026-11-18T11:02:56+00:00",
+      "elapsed_min": 1019.49,
+      "msg": "  2026-11-18T11:02:04Z MARKER:EVAL_START:A_teacher_parent-s20260801:thinking \u2014 $18.52"
+    },
+    {
+      "utc": "2026-11-18T11:03:13+00:00",
+      "elapsed_min": 1019.78,
+      "msg": "secured 6 file(s) (123 held)"
+    },
+    {
+      "utc": "2026-11-18T11:04:52+00:00",
+      "elapsed_min": 1021.43,
+      "msg": "secured 2 file(s) (124 held)"
+    },
+    {
+      "utc": "2026-11-18T11:06:29+00:00",
+      "elapsed_min": 1023.04,
+      "msg": "secured 2 file(s) (125 held)"
+    },
+    {
+      "utc": "2026-11-18T11:08:01+00:00",
+      "elapsed_min": 1024.57,
+      "msg": "secured 1 file(s) (125 held)"
+    },
+    {
+      "utc": "2026-11-18T11:09:36+00:00",
+      "elapsed_min": 1026.15,
+      "msg": "secured 2 file(s) (126 held)"
+    },
+    {
+      "utc": "2026-11-18T11:11:09+00:00",
+      "elapsed_min": 1027.71,
+      "msg": "secured 2 file(s) (127 held)"
+    },
+    {
+      "utc": "2026-11-18T11:12:45+00:00",
+      "elapsed_min": 1029.31,
+      "msg": "secured 2 file(s) (128 held)"
+    },
+    {
+      "utc": "2026-11-18T11:14:19+00:00",
+      "elapsed_min": 1030.87,
+      "msg": "secured 1 file(s) (128 held)"
+    },
+    {
+      "utc": "2026-11-18T11:15:53+00:00",
+      "elapsed_min": 1032.44,
+      "msg": "secured 2 file(s) (129 held)"
+    },
+    {
+      "utc": "2026-11-18T11:17:26+00:00",
+      "elapsed_min": 1033.99,
+      "msg": "secured 2 file(s) (130 held)"
+    },
+    {
+      "utc": "2026-11-18T11:19:51+00:00",
+      "elapsed_min": 1036.41,
+      "msg": "secured 2 file(s) (131 held)"
+    },
+    {
+      "utc": "2026-11-18T11:21:55+00:00",
+      "elapsed_min": 1038.48,
+      "msg": "secured 2 file(s) (132 held)"
+    },
+    {
+      "utc": "2026-11-18T11:23:31+00:00",
+      "elapsed_min": 1040.08,
+      "msg": "secured 2 file(s) (133 held)"
+    },
+    {
+      "utc": "2026-11-18T11:25:06+00:00",
+      "elapsed_min": 1041.65,
+      "msg": "secured 2 file(s) (134 held)"
+    },
+    {
+      "utc": "2026-11-18T11:26:40+00:00",
+      "elapsed_min": 1043.22,
+      "msg": "secured 2 file(s) (135 held)"
+    },
+    {
+      "utc": "2026-11-18T11:28:14+00:00",
+      "elapsed_min": 1044.79,
+      "msg": "secured 9 file(s) (143 held)"
+    },
+    {
+      "utc": "2026-11-18T11:29:48+00:00",
+      "elapsed_min": 1046.36,
+      "msg": "secured 9 file(s) (151 held)"
+    },
+    {
+      "utc": "2026-11-18T11:31:23+00:00",
+      "elapsed_min": 1047.95,
+      "msg": "secured 4 file(s) (155 held)"
+    },
+    {
+      "utc": "2026-11-18T11:33:03+00:00",
+      "elapsed_min": 1049.6,
+      "msg": "secured 11 file(s) (165 held)"
+    },
+    {
+      "utc": "2026-11-18T11:34:42+00:00",
+      "elapsed_min": 1051.25,
+      "msg": "secured 3 file(s) (167 held)"
+    },
+    {
+      "utc": "2026-11-18T11:36:02+00:00",
+      "elapsed_min": 1052.59,
+      "msg": "  2026-11-18T11:34:42Z MARKER:EVAL_START:A_teacher_parent-s20260801:non_thinking \u2014 $19.12"
+    },
+    {
+      "utc": "2026-11-18T11:36:29+00:00",
+      "elapsed_min": 1053.04,
+      "msg": "secured 21 file(s) (185 held)"
+    },
+    {
+      "utc": "2026-11-18T11:38:10+00:00",
+      "elapsed_min": 1054.73,
+      "msg": "secured 2 file(s) (186 held)"
+    },
+    {
+      "utc": "2026-11-18T11:39:55+00:00",
+      "elapsed_min": 1056.48,
+      "msg": "secured 8 file(s) (193 held)"
+    },
+    {
+      "utc": "2026-11-18T11:41:39+00:00",
+      "elapsed_min": 1058.21,
+      "msg": "secured 42 file(s) (232 held)"
+    },
+    {
+      "utc": "2026-11-18T11:41:49+00:00",
+      "elapsed_min": 1058.37,
+      "msg": "  2026-11-18T11:41:20Z MARKER:ALL_DONE \u2014 $19.23 (written as the driver exited)"
+    },
+    {
+      "utc": "2026-11-18T11:41:49+00:00",
+      "elapsed_min": 1058.37,
+      "msg": "polling ended: ALL_DONE \u2014 $19.23"
+    },
+    {
+      "utc": "2026-11-18T11:43:29+00:00",
+      "elapsed_min": 1060.04,
+      "msg": "  manifest rc=0\n28 file(s) across 4 class(es) -> /workspace/manifest.json\n  final_required: 28 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-11-18T11:43:57+00:00",
+      "elapsed_min": 1060.5,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-11-18T11:43:57+00:00",
+      "elapsed_min": 1060.5,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-11-18T11:44:09+00:00",
+      "elapsed_min": 1060.7,
+      "msg": "pod deleted \u2014 1060.7 min, $19.27; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage1.teacher_parent_initialization.authorization/v1",
+    "authorization_id": "stage1.teacher_parent_initialization.tpi_train_20261117_180111",
+    "version": 1,
+    "granted_utc": "2026-11-17T18:01:36+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "stage1.teacher_parent_initialization",
+    "study_identity_sha256": "5fd99503f190fd559bb9661bfb995967dce15c45e7fb43a63d7ba2929567eae9",
+    "expected_usd": 21.5,
+    "hard_cap_usd": 28.0,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "design_sha256": "423eb41222af704d647becb0aba6146a5d5109ea3df8c122c69bc044fd9c51dd",
+      "selection_sha256": "c523a6d1dd18e7cafb52a81060336144c04de2791a1cb2acdf7bc742c52601f8",
+      "plan_sha256": "c8b8c3e793fcab7dd7ba7a5b430448eb7055e5101b8293ef1f269192a3d3b75e",
+      "init_record_sha256": "5a8c7dd39239c364f6a461afca999c7329001f6231849a4dfc7bb8c99c29183f",
+      "resume_from": "transfer/stage1_teacher_parent/tpi_train_20261117_180111/resume_tpi_train_20261117_180111.tgz@b2ceb2fff2c68f0786768dcb9527ec41f3320d7a2bcafcc995da20e9d112a60f",
+      "kind": "teacher_parent_train",
+      "study": "TPI1",
+      "dry_run": "false",
+      "grant": "logs/budget/approvals/stage1_teacher_parent_init_grant.json",
+      "grant_sha256": "aae896ff1c569fa8ad6138716575ab8e6f21ab8d2d4e42c53a93087f9d008856",
+      "gpus": "{\"NVIDIA L40S\": 1.11}",
+      "gpu_count_max": "1",
+      "envelope": "{\"ceiling_usd\": 31.5, \"spent_usd\": 3.4996, \"remaining_usd\": 28.0004, \"runs\": [{\"run_id\": \"tpi_init_20261117_142049\", \"usd\": 0.4217}, {\"run_id\": \"tpi_train_20261117_145734\", \"usd\": 0.0}, {\"run_id\": \"tpi_train_20261117_145939\", \"usd\": 3.0779}]}",
+      "live_position": "{\"fetched_utc\": \"2026-11-17T18:01:35+00:00\", \"provider_billed_usd\": 949.8417, \"committed_usd\": 949.8417, \"project_cap_usd\": 1000.0, \"project_remaining_usd\": 50.1583, \"account_pods\": [], \"account_volumes\": [], \"balance_usd\": 59.8779620352, \"spend_per_hour\": 0.0, \"rule\": \"shared.project_position: mixed_governance.position + engineering-campaign subruns\", \"unposted_sessions\": 0, \"campaign_unposted\": 0, \"campaign_teardown_confirmed_by\": {\"subrun record\": 25, \"reconciliation\": 30}}"
+    },
+    "scope_note": "replacement for tpi_train_20261117_145939 (DRIVER_UNKNOWN: provider-side loss of the running container at step 2540; evidence/failure.json): resumes A_teacher_parent-s20260726 from the verified step_002208 save point, then the remaining work",
+    "authorizes_engineering_validation": false,
+    "authorizes_formal": true,
+    "authorizes_training": true,
+    "authorizes_evaluation": true,
+    "authorizes_teacher_generation": false,
+    "authorizes_paid_storage": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "bd86ede03c2f700b082da30dcf02e9a9c19e664f478b3fe7205972bfdb50e6ae",
+    "harness_source_files": [
+      "src/aadistill/__init__.py",
+      "src/aadistill/data/__init__.py",
+      "src/aadistill/data/cleaning.py",
+      "src/aadistill/data/code_exec.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/diversity.py",
+      "src/aadistill/data/e5_pack.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/mixture.py",
+      "src/aadistill/data/nested_ladder.py",
+      "src/aadistill/data/paired_corpus.py",
+      "src/aadistill/data/prefix_split.py",
+      "src/aadistill/data/recovery.py",
+      "src/aadistill/data/sequence_packing.py",
+      "src/aadistill/data/sessions.py",
+      "src/aadistill/data/target_policy.py",
+      "src/aadistill/data/target_quality.py",
+      "src/aadistill/data/token_documents.py",
+      "src/aadistill/data/tool_calls.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/eval_registry.py",
+      "src/aadistill/evaluation/function_error.py",
+      "src/aadistill/evaluation/general_text.py",
+      "src/aadistill/evaluation/init_nll.py",
+      "src/aadistill/evaluation/isolation.py",
+      "src/aadistill/evaluation/oracle_reasoning.py",
+      "src/aadistill/evaluation/paired_stats.py",
+      "src/aadistill/evaluation/protocol_field.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/__init__.py",
+      "src/aadistill/governance/artifact_manifest.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/governance/post_freeze.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/source_identity.py",
+      "src/aadistill/infrastructure/transfer.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/__init__.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/families.py",
+      "src/aadistill/initialization/adapters/projected_residual.py",
+      "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/calibration/__init__.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/__init__.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/frozen_mapping.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/layer_merge.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_import.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/__init__.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/kl_reference.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/__init__.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/identity_collapse.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/__init__.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/reweight.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/__init__.py",
+      "src/aadistill/initialization/transforms/nll_gate.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/projected_residual.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/__init__.py",
+      "src/aadistill/models/cost_model.py",
+      "src/aadistill/models/quant.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/rollout/__init__.py",
+      "src/aadistill/rollout/engines.py",
+      "src/aadistill/rollout/generate.py",
+      "src/aadistill/rollout/snapshots.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/durable_store.py",
+      "src/aadistill/runtime/hub_capacity.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/setup_steps.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/__init__.py",
+      "src/aadistill/training/accounting.py",
+      "src/aadistill/training/lineage.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/topk_kd.py",
+      "src/aadistill/training/train.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/__init__.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/init_driver.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/train_driver.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/relay.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/plan.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/selection.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/launch.py",
+      "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+      "scripts/stages/stage-1/reasoning_inheritance/selection.py",
+      "scripts/stages/stage-1/reasoning_inheritance/launch.py",
+      "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+      "scripts/stages/stage-2/teacher_modes/a1_units.py",
+      "scripts/stages/stage-2/teacher_modes/training_plan.py",
+      "scripts/stages/stage-2/teacher_modes/packed_training_plan.py",
+      "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+      "scripts/stages/stage-2/teacher_modes/full_search.py",
+      "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "scripts/shared/evaluation/eval_set_scoring.py",
+      "scripts/shared/training/train_stage3.py",
+      "scripts/shared/training/initialization_provenance.py",
+      "scripts/shared/study_engineering.py"
+    ],
+    "per_launch_hard_usd": 28.0,
+    "provenance_commit": "7e1ee200e098b4c7eed834031b5c4569bdb8b087",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the study identity and the harness on disk, is not a dry run, has not been used, and its hard cap covers the planned all-in bound and fits the project cap as the provider bills it at launch; setup re-checks the binding on the pod; one artifact funds one run inside the grant's envelope",
+    "authorization_sha256": "9cf5076b4bb62939135cc0abf725c950fdaeb6006443c834a47bc84208375a6f"
+  },
+  "session_plan_hash": "5fd99503f190fd559bb9661bfb995967dce15c45e7fb43a63d7ba2929567eae9",
+  "harness_source_digest": "bd86ede03c2f700b082da30dcf02e9a9c19e664f478b3fe7205972bfdb50e6ae",
+  "harness_source_files": [
+    "scripts/shared/evaluation/eval_set_scoring.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/study_engineering.py",
+    "scripts/shared/training/initialization_provenance.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/selection.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/__init__.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/init_driver.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/launch.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/plan.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/relay.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/selection.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/train_driver.py",
+    "scripts/stages/stage-2/teacher_modes/a1_units.py",
+    "scripts/stages/stage-2/teacher_modes/full_search.py",
+    "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+    "scripts/stages/stage-2/teacher_modes/packed_training_plan.py",
+    "scripts/stages/stage-2/teacher_modes/training_plan.py",
+    "src/aadistill/__init__.py",
+    "src/aadistill/data/__init__.py",
+    "src/aadistill/data/cleaning.py",
+    "src/aadistill/data/code_exec.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/diversity.py",
+    "src/aadistill/data/e5_pack.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/mixture.py",
+    "src/aadistill/data/nested_ladder.py",
+    "src/aadistill/data/paired_corpus.py",
+    "src/aadistill/data/prefix_split.py",
+    "src/aadistill/data/recovery.py",
+    "src/aadistill/data/sequence_packing.py",
+    "src/aadistill/data/sessions.py",
+    "src/aadistill/data/target_policy.py",
+    "src/aadistill/data/target_quality.py",
+    "src/aadistill/data/token_documents.py",
+    "src/aadistill/data/tool_calls.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/function_error.py",
+    "src/aadistill/evaluation/general_text.py",
+    "src/aadistill/evaluation/init_nll.py",
+    "src/aadistill/evaluation/isolation.py",
+    "src/aadistill/evaluation/oracle_reasoning.py",
+    "src/aadistill/evaluation/paired_stats.py",
+    "src/aadistill/evaluation/protocol_field.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/__init__.py",
+    "src/aadistill/governance/artifact_manifest.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/governance/post_freeze.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/source_identity.py",
+    "src/aadistill/infrastructure/transfer.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/__init__.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/families.py",
+    "src/aadistill/initialization/adapters/projected_residual.py",
+    "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/calibration/__init__.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/__init__.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/frozen_mapping.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/layer_merge.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_import.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/__init__.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/kl_reference.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/__init__.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/identity_collapse.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/__init__.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/reweight.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/__init__.py",
+    "src/aadistill/initialization/transforms/nll_gate.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/projected_residual.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/__init__.py",
+    "src/aadistill/models/cost_model.py",
+    "src/aadistill/models/quant.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/rollout/__init__.py",
+    "src/aadistill/rollout/engines.py",
+    "src/aadistill/rollout/generate.py",
+    "src/aadistill/rollout/snapshots.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/durable_store.py",
+    "src/aadistill/runtime/hub_capacity.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/setup_steps.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/__init__.py",
+    "src/aadistill/training/accounting.py",
+    "src/aadistill/training/lineage.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/topk_kd.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 28.0,
+    "expected_minutes": 1180.0,
+    "soft_stop_minutes": 1249.5,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 1259.5,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: the validation is one phase (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 25.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 5.0
+      },
+      {
+        "name": "TPI1_teacher_parent_train",
+        "minutes": 1150.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "closeout_and_teardown",
+        "minutes": 10.5
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 10.5,
+    "expected_usd": 21.4367,
+    "soft_stop_usd": 22.6992,
+    "artifact_recovery_reserve_usd": 0.1817,
+    "hard_terminate_usd": 22.8809
+  },
+  "quoted_price_per_hour": 1.09,
+  "gpu_count": 1,
+  "stock_status": null,
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 59.8779620352,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 22.8809,
+    "ok": true,
+    "why": "the provider account holds $59.8780 against the $22.8809 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "account_resources": {
+    "checked": true,
+    "known": true,
+    "pods": [],
+    "network_volumes": [],
+    "error": null,
+    "accounted": [],
+    "unaccounted": [],
+    "ok": true,
+    "why": "the provider account holds only the 0 resource(s) the records account for"
+  },
+  "prechecks": [
+    {
+      "check": "the_study_is_open",
+      "ok": true,
+      "message": "TPI1 is open"
+    },
+    {
+      "check": "the_artifact_is_this_studys_and_unused",
+      "ok": true,
+      "message": "a TPI1 teacher_parent_train artifact, unused"
+    },
+    {
+      "check": "the_gpu_and_price_are_the_grants",
+      "ok": true,
+      "message": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "check": "all_in_within_cap",
+      "ok": true,
+      "message": "all-in $23.3351 over 1260.75 min, inside $28.00"
+    },
+    {
+      "check": "the_study_identity_is_the_authorized_one",
+      "ok": true,
+      "message": "study identity 5fd99503f190 is the authorized one"
+    },
+    {
+      "check": "bound_files_are_in_the_session_commit",
+      "ok": true,
+      "message": "every bound file is in the session commit"
+    },
+    {
+      "check": "the_project_cap_holds_now",
+      "ok": true,
+      "message": "$28.00 inside the envelope ($28.0004) and the $50.1583 the project cap leaves now"
+    },
+    {
+      "check": "the_authorization_is_in_the_session_commit",
+      "ok": true,
+      "message": "the authorization is in session commit e8dc921d22b2"
+    },
+    {
+      "check": "the_teardown_reserve_stays",
+      "ok": true,
+      "message": "$28.00 + the $1.0 teardown reserve fit"
+    },
+    {
+      "check": "the_relay_has_room",
+      "ok": true,
+      "message": "the relay would accept the teacher_parent_train session's bytes: 4 object(s), 16.21 GiB: ACCEPTED (200) 4/4 granted an upload action"
+    },
+    {
+      "check": "the_kind_records_are_the_bound_ones",
+      "ok": true,
+      "message": "the artifact binds this tree's ['design_sha256', 'init_record_sha256', 'plan_sha256', 'selection_sha256']"
+    },
+    {
+      "check": "the_initialization_is_durable",
+      "ok": true,
+      "message": "A's initialization is on the relay with its recorded hashes"
+    }
+  ],
+  "all_in_bound": {
+    "billable_minutes": 1260.75,
+    "price_per_hour": 1.09,
+    "container_disk_gb": 150,
+    "gpu_usd": 22.9036,
+    "disk_usd": 0.4315,
+    "all_in_usd": 23.3351,
+    "highest_price_inside_cap": 1.31
+  },
+  "live_position": {
+    "fetched_utc": "2026-11-17T18:03:21+00:00",
+    "provider_billed_usd": 949.8417,
+    "committed_usd": 949.8417,
+    "project_cap_usd": 1000.0,
+    "project_remaining_usd": 50.1583,
+    "account_pods": [],
+    "account_volumes": [],
+    "balance_usd": 59.8779620352,
+    "spend_per_hour": 0.0,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 0,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+      "subrun record": 25,
+      "reconciliation": 30
+    }
+  },
+  "envelope": {
+    "ceiling_usd": 31.5,
+    "spent_usd": 3.4996,
+    "remaining_usd": 28.0004,
+    "runs": [
+      {
+        "run_id": "tpi_init_20261117_142049",
+        "usd": 0.4217
+      },
+      {
+        "run_id": "tpi_train_20261117_145734",
+        "usd": 0.0
+      },
+      {
+        "run_id": "tpi_train_20261117_145939",
+        "usd": 3.0779
+      },
+      {
+        "run_id": "tpi_train_20261117_180111",
+        "usd": 0.0
+      }
+    ]
+  },
+  "relay_room": "4 object(s), 16.21 GiB: ACCEPTED (200) 4/4 granted an upload action",
+  "precheck": {
+    "relay_needed": [
+      "transfer/stage3_sr/A-MIX-6cat-sr/4c794692a1d6072c/blocks.npz",
+      "transfer/stage3_sr/A-MIX-6cat-sr/aaa6fcb0b708f766/ladder.json",
+      "transfer/stage3_sr/A-MIX-6cat-sr/63ad3c7fbc8dd2ca/audit.jsonl",
+      "transfer/stage1_teacher_parent/tpi_train_20261117_180111/resume_tpi_train_20261117_180111.tgz"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 4
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1689
+    },
+    "local_assets": [
+      "artifacts/stages/stage-3/eval/battery_v2"
+    ],
+    "local_missing": []
+  },
+  "acquisition": {
+    "create_attempts": 72,
+    "create_retry_seconds": 300.0,
+    "attempts": [
+      {
+        "draw": 1,
+        "attempt": 1,
+        "request": "d1a134cce8",
+        "placement": [],
+        "request_utc": "2026-11-17T18:03:26+00:00",
+        "terminate_after_utc": "2026-11-18T15:02:56Z",
+        "outcome": "created",
+        "pod_id": "tdxvznkx54lc4q"
+      }
+    ]
+  },
+  "pod_id": "tdxvznkx54lc4q",
+  "actual_price_per_hour": 1.09,
+  "pod_record": {
+    "dataCenterId": "US-TX-4",
+    "createdAt": "2026-11-17T18:03:27.025Z",
+    "costPerHr": null,
+    "cost": 1.09,
+    "machineId": null,
+    "name": "aadistill-stage1_teacher_parent-teacher_parent_train-d1a134cce8"
+  },
+  "start": {
+    "basis": "provider createdAt",
+    "request_utc": "2026-11-17T18:03:26+00:00",
+    "provider_created_utc": "2026-11-17T18:03:27.025Z",
+    "start_epoch": 1794938607.025
+  },
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/AlphaAvatar-distill/artifacts/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/scr/watchdog_tdxvznkx54lc4q.jsonl"
+  ],
+  "watchdog_owns_pod": "tdxvznkx54lc4q",
+  "billed_window_deadline_utc": "2026-11-18T15:02:57Z",
+  "terminate_after_utc": null,
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.112.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.112.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_e8dc921d.bundle",
+    "SESSION_ASSETS": "battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/governance/authorization.json",
+    "SESSION_COMMIT": "e8dc921d22b2d451272ced174bc86e006be8b583",
+    "SESSION_KIND": "stage1_teacher_parent",
+    "SESSION_PLAN_HASH": "5fd99503f190fd559bb9661bfb995967dce15c45e7fb43a63d7ba2929567eae9",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr\",\"path\":\"transfer/stage3_sr/A-MIX-6cat-sr/4c794692a1d6072c/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"4c794692a1d6072ced81c2192aa3493b14dab9a6904132a44645c93107cdbfee\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr\",\"path\":\"transfer/stage3_sr/A-MIX-6cat-sr/aaa6fcb0b708f766/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"aaa6fcb0b708f7665c4e7b4f9c8fe94666f024425075984ecf90250b735d0519\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr\",\"path\":\"transfer/stage3_sr/A-MIX-6cat-sr/63ad3c7fbc8dd2ca/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"63ad3c7fbc8dd2ca2ee4992565f4f85f79184487dea15c512f41a9d40fb0b598\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/teacher_parent_initialization/resume\",\"path\":\"transfer/stage1_teacher_parent/tpi_train_20261117_180111/resume_tpi_train_20261117_180111.tgz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"b2ceb2fff2c68f0786768dcb9527ec41f3320d7a2bcafcc995da20e9d112a60f\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage1_teacher_parent.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_MODEL": "Qwen/Qwen3-4B",
+    "TEACHER_REVISION": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage1_teacher_parent_driver",
+    "pid": 2182,
+    "workdir": "/workspace/aad",
+    "command": "mkdir -p /workspace/aad/artifacts/audit/stage1_teacher_parent/tpi_train_20261117_180111 && cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts:/workspace/aad/scripts/stages/stage-1:/workspace/aad/scripts/stages/stage-0/calibration_volume /opt/train/bin/python scripts/stages/stage-1/teacher_parent_initialization/train_driver.py --authorization /workspace/aad/logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/governance/authorization.json --out /workspace/aad/artifacts/audit/stage1_teacher_parent/tpi_train_20261117_180111 --status /workspace/stage1_teacher_parent.status --unit-deadline-hours 10.0 --vllm-python /opt/vllm/bin/python --attempt tpi_train_20261117_180111 --resume /workspace/aad/artifacts/stages/stage-1/teacher_parent_initialization/resume/resume_tpi_train_20261117_180111.tgz; grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' /workspace/stage1_teacher_parent.status || echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> /workspace/stage1_teacher_parent.status",
+    "log_path": "/workspace/stage1_teacher_parent_run.log",
+    "status_path": "/workspace/stage1_teacher_parent.status",
+    "pid_path": "/workspace/jobs/stage1_teacher_parent_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage1_teacher_parent_driver.job.json",
+    "exit_path": "/workspace/jobs/stage1_teacher_parent_driver.exit",
+    "started_utc": "2026-11-17T18:09:47Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "secure_rounds": 648,
+  "secured_files": {
+    "files": 232,
+    "pending": 0
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "every finished file is on the dev box (232 files)"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 28,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 1060.7,
+    "actual_usd": 19.2694,
+    "extra_resources_usd": 0,
+    "authorized_usd": 28.0,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-11-18T11:44:09+00:00"
+}

@@ -1,0 +1,442 @@
+[
+ {
+  "tag": "step_001104",
+  "step": 1104,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "7bc235ac8ef886b4232077cd75cd3a5db6136df885c4f661bfa974d32305a530",
+   "trainer_state.pt": "5586256919549310e9b4dcca253b4d3b9b31a2ec90e52b6d89c16d77fea9145f",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 43.6,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "7bc235ac8ef886b4232077cd75cd3a5db6136df885c4f661bfa974d32305a530",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "5586256919549310e9b4dcca253b4d3b9b31a2ec90e52b6d89c16d77fea9145f"
+  },
+  "verified": true,
+  "verify_seconds": 27.0,
+  "utc": "2026-11-17T16:15:37Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_001104",
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/model/config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/model/generation_config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/model/model.safetensors",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/resume_identity.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_001104/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-17T17:17:33Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_002208",
+  "step": 2208,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_002208",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "d1d85242d02701a95900797a3d523da4566d79a24a066a778c465ae35aef0455",
+   "trainer_state.pt": "f17bd94491c7c1888649e0cfd7d6d1f00d9e9c3840efb1a3eddd8ebe83082aff",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 48.9,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "d1d85242d02701a95900797a3d523da4566d79a24a066a778c465ae35aef0455",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "f17bd94491c7c1888649e0cfd7d6d1f00d9e9c3840efb1a3eddd8ebe83082aff"
+  },
+  "verified": true,
+  "verify_seconds": 46.1,
+  "utc": "2026-11-17T17:17:17Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_002208",
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_002208/model/config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_002208/model/generation_config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_002208/model/model.safetensors",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_002208/resume_identity.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_002208/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-17T19:14:35Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_003312",
+  "step": 3312,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_003312",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "12ec6cf1cf0d13338fdedfa3221bbffff387b43e98c36e470c84729878a608b8",
+   "trainer_state.pt": "1346d427bcc29215f00afb8a2f42df9dde21886595f53d0db942da3dea185930",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 38.2,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "12ec6cf1cf0d13338fdedfa3221bbffff387b43e98c36e470c84729878a608b8",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "1346d427bcc29215f00afb8a2f42df9dde21886595f53d0db942da3dea185930"
+  },
+  "verified": true,
+  "verify_seconds": 15.9,
+  "utc": "2026-11-17T19:14:20Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_003312",
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_003312/model/config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_003312/model/generation_config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_003312/model/model.safetensors",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_003312/resume_identity.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_003312/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-17T20:16:51Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_004416",
+  "step": 4416,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_004416",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "0a0b583d4ff722ad365f5ee74db65fd64d906af7b0106d0455b876979dfa788a",
+   "trainer_state.pt": "9850b15c332fa98a0ca5f4045d8d1e27a001556f333615c06b1ffbd034e66185",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 36.8,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "0a0b583d4ff722ad365f5ee74db65fd64d906af7b0106d0455b876979dfa788a",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "9850b15c332fa98a0ca5f4045d8d1e27a001556f333615c06b1ffbd034e66185"
+  },
+  "verified": true,
+  "verify_seconds": 18.0,
+  "utc": "2026-11-17T20:16:36Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_004416",
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_004416/model/config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_004416/model/generation_config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_004416/model/model.safetensors",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_004416/resume_identity.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_004416/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-17T21:20:09Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_005520",
+  "step": 5520,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_005520",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "931c4d7b3e93824be3855a90a1e703781eb65566ce18d7a1d6679d0fec34491f",
+   "trainer_state.pt": "8ec24d90c0f0293575172ba1bd610c6f89ddc90647a4f1c6595fa10b2b057c99",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 39.0,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "931c4d7b3e93824be3855a90a1e703781eb65566ce18d7a1d6679d0fec34491f",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "8ec24d90c0f0293575172ba1bd610c6f89ddc90647a4f1c6595fa10b2b057c99"
+  },
+  "verified": true,
+  "verify_seconds": 17.9,
+  "utc": "2026-11-17T21:19:54Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_005520",
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_005520/model/config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_005520/model/generation_config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_005520/model/model.safetensors",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_005520/resume_identity.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_005520/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-17T22:22:24Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_006624",
+  "step": 6624,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_006624",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "3b94f41e47e965757f24e12dee2274904daf3f6b4e1755f73f8b6dc2e59a36c9",
+   "trainer_state.pt": "e6c76d2ab5d429fcce9453a7e523e9a455e197cc410f60545ccc8e204b9ee79d",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 37.7,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "3b94f41e47e965757f24e12dee2274904daf3f6b4e1755f73f8b6dc2e59a36c9",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "e6c76d2ab5d429fcce9453a7e523e9a455e197cc410f60545ccc8e204b9ee79d"
+  },
+  "verified": true,
+  "verify_seconds": 16.3,
+  "utc": "2026-11-17T22:22:09Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_006624",
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_006624/model/config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_006624/model/generation_config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_006624/model/model.safetensors",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_006624/resume_identity.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_006624/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-17T23:24:39Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_007728",
+  "step": 7728,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_007728",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "ae7aa73db5af2bad31df1a6918dd6180d702b1465b238228e95db0dba091aaf6",
+   "trainer_state.pt": "2980dbc44cbb1e29a953dfd98b15bb31454156854de61001526e39dd90b238f7",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 37.9,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "ae7aa73db5af2bad31df1a6918dd6180d702b1465b238228e95db0dba091aaf6",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "2980dbc44cbb1e29a953dfd98b15bb31454156854de61001526e39dd90b238f7"
+  },
+  "verified": true,
+  "verify_seconds": 15.3,
+  "utc": "2026-11-17T23:24:24Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_007728",
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_007728/model/config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_007728/model/generation_config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_007728/model/model.safetensors",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_007728/resume_identity.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_007728/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-18T00:26:54Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_008832",
+  "step": 8832,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_008832",
+  "files_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "fef5ff87a4d80a95a336b010a30f17a4a6f9f5e300cbe778a3f0ba64942e9c66",
+   "trainer_state.pt": "df0c0d1bf3de61e38e60fa030f94dd29513a63e0cc2947f9ed861d2955fd3255",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5"
+  },
+  "bytes": {
+   "model/config.json": 1417,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 2384234968,
+   "trainer_state.pt": 3524024487,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 5.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 37.6,
+  "downloaded_sha256": {
+   "model/config.json": "8ca53ea22690669733d2c6d83b8e4888b59d2aeed342a5dc43ffe341f5ec9516",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "fef5ff87a4d80a95a336b010a30f17a4a6f9f5e300cbe778a3f0ba64942e9c66",
+   "resume_identity.json": "0066db3b739e5a612f51390773982741be2b1096912f3a0c13ee794f0fef0db5",
+   "trainer_state.pt": "df0c0d1bf3de61e38e60fa030f94dd29513a63e0cc2947f9ed861d2955fd3255"
+  },
+  "verified": true,
+  "verify_seconds": 17.1,
+  "utc": "2026-11-18T00:26:40Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_008832",
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_008832/model/config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_008832/model/generation_config.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_008832/model/model.safetensors",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_008832/resume_identity.json",
+    "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_008832/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-18T01:16:24Z",
+   "verified": true
+  }
+ }
+]

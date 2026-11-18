@@ -1,0 +1,296 @@
+{
+ "schema": "aadistill.stage1.teacher_parent_initialization.units/v1",
+ "started_utc": "2026-11-17T18:09:47Z",
+ "attempt": "tpi_train_20261117_180111",
+ "units": {
+  "A_teacher_parent-s20260726": {
+   "restored_savepoint": {
+    "tag": "step_002208",
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/savepoints/step_002208",
+    "utc": "2026-11-17T18:10:06Z"
+   },
+   "state_at_start": "resume",
+   "init": {
+    "path": "/workspace/teacher_parent/init",
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/init",
+    "utc": "2026-11-17T18:10:12Z"
+   },
+   "admitted_utc": "2026-11-17T18:10:20Z",
+   "resume_from": "step_002208",
+   "train_rc": 0,
+   "train_seconds": 25520.8,
+   "telemetry": {
+    "logged_steps": 1004,
+    "median_seconds_per_step": 3.27,
+    "p95_seconds_per_step": 3.7,
+    "kd_positions_per_step_median": 3541.5,
+    "peak_gpu_mem_gb": 17.47,
+    "peak_gpu_mem_reserved_gb": 19.15,
+    "save_points": [
+     1104,
+     2208,
+     3312,
+     4416,
+     5520,
+     6624,
+     7728,
+     8832,
+     9701
+    ],
+    "resumed_at": [
+     2208
+    ],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "1a02ba42945d8a82350ce8e23fbfbe630c79cb095a27d2e9775140aa8a00af80",
+   "final_relay": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82",
+    "verified": true
+   },
+   "evaluations": {
+    "thinking": {
+     "package": {
+      "model_dir": "/workspace/teacher_parent/units/A_teacher_parent-s20260726/train/checkpoints/step_009701/model",
+      "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+      "sidecar_sha256": {
+       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101"
+      }
+     },
+     "fluid": {
+      "status": "complete",
+      "runs": 1
+     },
+     "capability": {
+      "withheld": [],
+      "units": [
+       "stage3_capability_846__answerability_paired",
+       "stage3_capability_846__eval_behavior_v0",
+       "stage3_capability_846__gsm8k",
+       "stage3_capability_846__knowledge",
+       "stage3_capability_846__math_verified",
+       "stage3_capability_846__multihop",
+       "stage3_capability_846__rag",
+       "stage3_capability_846__safety_paired",
+       "stage3_legacy_150__items"
+      ],
+      "missing_at_start": [
+       "stage3_capability_846__answerability_paired",
+       "stage3_capability_846__eval_behavior_v0",
+       "stage3_capability_846__gsm8k",
+       "stage3_capability_846__knowledge",
+       "stage3_capability_846__math_verified",
+       "stage3_capability_846__multihop",
+       "stage3_capability_846__rag",
+       "stage3_capability_846__safety_paired",
+       "stage3_legacy_150__items"
+      ],
+      "sealed_samples_taken": {},
+      "status": "complete",
+      "seconds": 420.2,
+      "attempt": "tpi_train_20261117_180111"
+     },
+     "eval_seconds": 1688.4,
+     "template": {
+      "enable_thinking": true
+     }
+    },
+    "non_thinking": {
+     "package": {
+      "model_dir": "/workspace/teacher_parent/units/A_teacher_parent-s20260726/train/checkpoints/step_009701/model",
+      "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+      "sidecar_sha256": {
+       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101"
+      }
+     },
+     "fluid": {
+      "status": "complete",
+      "runs": 1
+     },
+     "capability": {
+      "withheld": [],
+      "units": [
+       "stage3_capability_846__answerability_paired",
+       "stage3_capability_846__eval_behavior_v0",
+       "stage3_capability_846__gsm8k",
+       "stage3_capability_846__knowledge",
+       "stage3_capability_846__math_verified",
+       "stage3_capability_846__multihop",
+       "stage3_capability_846__rag",
+       "stage3_capability_846__safety_paired",
+       "stage3_legacy_150__items"
+      ],
+      "missing_at_start": [
+       "stage3_capability_846__answerability_paired",
+       "stage3_capability_846__eval_behavior_v0",
+       "stage3_capability_846__gsm8k",
+       "stage3_capability_846__knowledge",
+       "stage3_capability_846__math_verified",
+       "stage3_capability_846__multihop",
+       "stage3_capability_846__rag",
+       "stage3_capability_846__safety_paired",
+       "stage3_legacy_150__items"
+      ],
+      "sealed_samples_taken": {},
+      "status": "complete",
+      "seconds": 120.1,
+      "attempt": "tpi_train_20261117_180111"
+     },
+     "eval_seconds": 337.1,
+     "template": {
+      "enable_thinking": false
+     }
+    }
+   }
+  },
+  "A_teacher_parent-s20260801": {
+   "state_at_start": "fresh",
+   "admitted_utc": "2026-11-18T01:50:13Z",
+   "train_rc": 0,
+   "train_seconds": 33068.2,
+   "telemetry": {
+    "logged_steps": 970,
+    "median_seconds_per_step": 3.29,
+    "p95_seconds_per_step": 3.69,
+    "kd_positions_per_step_median": 3585.5,
+    "peak_gpu_mem_gb": 17.47,
+    "peak_gpu_mem_reserved_gb": 18.55,
+    "save_points": [
+     1104,
+     2208,
+     3312,
+     4416,
+     5520,
+     6624,
+     7728,
+     8832,
+     9701
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "final_model_safetensors_sha256": "193960520c006de5fd66aafbb882f83feabc936c48966bb5ce2b38ac5c9f87b9",
+   "final_relay": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260801/final/193960520c006de5",
+    "verified": true
+   },
+   "evaluations": {
+    "thinking": {
+     "package": {
+      "model_dir": "/workspace/teacher_parent/units/A_teacher_parent-s20260801/train/checkpoints/step_009701/model",
+      "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+      "sidecar_sha256": {
+       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101"
+      }
+     },
+     "fluid": {
+      "status": "complete",
+      "runs": 1
+     },
+     "capability": {
+      "withheld": [],
+      "units": [
+       "stage3_capability_846__answerability_paired",
+       "stage3_capability_846__eval_behavior_v0",
+       "stage3_capability_846__gsm8k",
+       "stage3_capability_846__knowledge",
+       "stage3_capability_846__math_verified",
+       "stage3_capability_846__multihop",
+       "stage3_capability_846__rag",
+       "stage3_capability_846__safety_paired",
+       "stage3_legacy_150__items"
+      ],
+      "missing_at_start": [
+       "stage3_capability_846__answerability_paired",
+       "stage3_capability_846__eval_behavior_v0",
+       "stage3_capability_846__gsm8k",
+       "stage3_capability_846__knowledge",
+       "stage3_capability_846__math_verified",
+       "stage3_capability_846__multihop",
+       "stage3_capability_846__rag",
+       "stage3_capability_846__safety_paired",
+       "stage3_legacy_150__items"
+      ],
+      "sealed_samples_taken": {},
+      "status": "complete",
+      "seconds": 480.2,
+      "attempt": "tpi_train_20261117_180111"
+     },
+     "eval_seconds": 1958.5,
+     "template": {
+      "enable_thinking": true
+     }
+    },
+    "non_thinking": {
+     "package": {
+      "model_dir": "/workspace/teacher_parent/units/A_teacher_parent-s20260801/train/checkpoints/step_009701/model",
+      "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+      "sidecar_sha256": {
+       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101"
+      }
+     },
+     "fluid": {
+      "status": "complete",
+      "runs": 1
+     },
+     "capability": {
+      "withheld": [],
+      "units": [
+       "stage3_capability_846__answerability_paired",
+       "stage3_capability_846__eval_behavior_v0",
+       "stage3_capability_846__gsm8k",
+       "stage3_capability_846__knowledge",
+       "stage3_capability_846__math_verified",
+       "stage3_capability_846__multihop",
+       "stage3_capability_846__rag",
+       "stage3_capability_846__safety_paired",
+       "stage3_legacy_150__items"
+      ],
+      "missing_at_start": [
+       "stage3_capability_846__answerability_paired",
+       "stage3_capability_846__eval_behavior_v0",
+       "stage3_capability_846__gsm8k",
+       "stage3_capability_846__knowledge",
+       "stage3_capability_846__math_verified",
+       "stage3_capability_846__multihop",
+       "stage3_capability_846__rag",
+       "stage3_capability_846__safety_paired",
+       "stage3_legacy_150__items"
+      ],
+      "sealed_samples_taken": {},
+      "status": "complete",
+      "seconds": 120.1,
+      "attempt": "tpi_train_20261117_180111"
+     },
+     "eval_seconds": 397.3,
+     "template": {
+      "enable_thinking": false
+     }
+    }
+   }
+  }
+ },
+ "authorization": "stage1.teacher_parent_initialization.tpi_train_20261117_180111",
+ "resumed_from": {
+  "from": "/workspace/aad/artifacts/audit/stage1_teacher_parent/.resume",
+  "files": 6,
+  "utc": "2026-11-17T18:09:47Z"
+ },
+ "tokenizer": {
+  "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+  "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+  "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+  "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+ },
+ "finished_utc": "2026-11-18T11:41:20Z",
+ "terminal": "ALL_DONE"
+}

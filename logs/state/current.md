@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-17 (UTC), TPI1 (teacher-parent initialization) GRANTED and RUNNING (training session), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`); one L40S pod billing (TPI1 training, replacement session). The human view. Every number here has an owner
+**Updated:** 2026-11-18 (UTC), TPI1 (teacher-parent initialization) COMPLETE and CLOSED, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,21 +9,26 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**TPI1 (STAGE 1 TEACHER-PARENT INITIALIZATION): GRANTED 2026-11-17; INIT COMPLETE; TRAINING RUNNING in the replacement session `tpi_train_20261117_180111` (pod `tdxvznkx54lc4q`, L40S $1.09/h, from 18:03Z).**
-- Design `configs/stages/stage-1/teacher_parent_initialization/design.json`; `docs/stages/stage-1/teacher_parent_initialization/README.md`.
-  A_teacher_parent (every selection on the original teacher; the residual PCA from the teacher's statistics at the
-  kept layers) against B_packed_top1 (A-MIX-6cat-sr, reused) after the same Stage-3 recipe, two seeds, both modes.
-- Init `tpi_init_20261117_142049` COMPLETE ($0.4217): every gate bit for bit (FFN / DEPTH / ATTENTION children and
-  the replayed root width state equal their journal digests); A `0474006c...` (weights `9120eb2e...`), 596,049,920
-  parameters; state KL 19.58 (B's leaf 6.78), diagnostic only. Kept on the dev box (`storage/local_retention.json`)
-  and the relay. `tpi_train_20261117_145734` aborted at $0 (cap check at the $1.11/h ceiling); relaunched as
-  `tpi_train_20261117_145939` at $1.09/h, which lost its container to the provider at step 2540 of seed 20260726
-  (DRIVER_UNKNOWN, $3.0779; `runs/tpi_train_20261117_145939/evidence/failure.json`). The replacement resumed the
-  verified step_002208 save point (same sequences per step, losses within ~1e-3); hard deadline 1260 min ($22.88).
-  Spent $3.4996 before it; ceiling $31.50.
-- Grant `logs/budget/approvals/stage1_teacher_parent_init_grant.json`: $31.50 sessions + $1.00 reserve. The two
-  permanent controls' dev-box copies retired (relay copies kept, tombstones).
-- Owner: `logs/budget/decisions.md` 2026-11-17.
+**TPI1 (STAGE 1 TEACHER-PARENT INITIALIZATION): COMPLETE AND CLOSED (2026-11-18) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
+- Design `configs/stages/stage-1/teacher_parent_initialization/design.json`; report
+  `docs/stages/stage-1/teacher_parent_initialization/REPORT.md`. A_teacher_parent (every selection on the original
+  teacher; the residual PCA from the teacher's statistics at the kept layers) against B_packed_top1 (A-MIX-6cat-sr,
+  reused) after the same Stage-3 recipe, two seeds, both modes, all of eval-set-1.
+- Result (`logs/stages/stage-1/teacher_parent_initialization/analyses/teacher_parent.json`, formal): thinking-mode
+  static fluid core, both seeds pooled, A 11.67% vs B 10.26%, +1.40 pp, p 0.195, interval [-0.53, +3.45] pp:
+  NOT_DISTINGUISHED (not equivalence). Non-thinking +2.37 pp, descriptive (fixed sequence). Both seeds agree in sign.
+  A starts far worse (step-0 validation CE 22.09 vs 7.32; state KL 19.58 vs 6.78) and ends lower in validation CE in
+  both seeds. eval-set-1 is development-exposed.
+- Runs: init `tpi_init_20261117_142049` ($0.4217); `tpi_train_20261117_145734` aborted at $0;
+  `tpi_train_20261117_145939` lost to the provider at step 2540 ($3.0779; `evidence/failure.json`);
+  `tpi_train_20261117_180111` resumed the verified step_002208 save point and completed both seeds ($19.6325).
+- Closed on the grant's own terminal condition (`logs/budget/approvals/stage1_teacher_parent_init_grant.json ::
+  closed`): $23.1321 of $31.50; $8.3679 and the $1.00 reserve lapse. `require_open` refuses TPI1 issue and launch.
+- Storage: A's init, mapping, statistics and both finals on the dev box only for the weights
+  (`~/aad-artifacts/stage1_teacher_parent_init/`, `storage/local_retention.json`); the relay weight copies retired
+  2026-11-18 (tombstones `relay_20261118_tpi1_*`); mapping, statistics and the evidence archive also on the relay.
+- Next: the maintainer's review of the round; a merge into `main` is the maintainer's.
+- Owner: `logs/budget/decisions.md` 2026-11-18.
 
 **RI-S1 (STAGE 1 STRUCTURAL ABLATION): COMPLETE AND CLOSED (2026-11-14) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Branch `research/reasoning-inheritance` from `main` `50ed1a4f` (not merged). Four untrained groups from one frozen
@@ -4710,7 +4715,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$895.1729` spent of `$1000.0000`, leaving `$104.8271` |
+| project cap | `$917.8833` spent of `$1000.0000`, leaving `$82.1167` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

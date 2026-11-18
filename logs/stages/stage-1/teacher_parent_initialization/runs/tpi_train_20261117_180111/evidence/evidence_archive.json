@@ -1,0 +1,59 @@
+{
+ "schema": "aadistill.stage1.teacher_parent_initialization.evidence_archive/v1",
+ "run_id": "tpi_train_20261117_180111",
+ "arm": "A_teacher_parent",
+ "archive": {
+  "name": "units_evidence.tgz",
+  "sha256": "f9cdf22cc2b5fb160ab1a0c816754c8ad0106fd46232b7994fca4fbc66ef3666",
+  "bytes": 28981348,
+  "dev_box_copy": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/tpi_train_20261117_180111/units_evidence.tgz",
+  "dev_box_extracted": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/tpi_train_20261117_180111/extracted",
+  "bytes_by_unit_dir": {
+   "A_teacher_parent-s20260726": 112799617,
+   "A_teacher_parent-s20260801": 130959745
+  },
+  "contents": "the session's secured <scr>/store/out tree: units.json, the driver report, each unit's save-point and final-weight relay records, train logs and configs, and every evaluation's generations, rows, parts, logs and formal report (no weights)",
+  "relay_copy": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "path": "durable/stage1_teacher_parent_init/evidence/tpi_train_20261117_180111/units_evidence.tgz",
+   "sha256": "f9cdf22cc2b5fb160ab1a0c816754c8ad0106fd46232b7994fca4fbc66ef3666",
+   "verified": true,
+   "rule": "uploaded from the dev box's copy, downloaded again into a fresh cache and re-hashed (relay.put)",
+   "utc": "2026-11-18T11:48:28Z"
+  }
+ },
+ "committed_here": {
+  "units.json": "2b8268e89031b6ef63ad3bd33b8b2be0078725b4c2748b5c5144a4b4eed7e350",
+  "report.json": "2b8268e89031b6ef63ad3bd33b8b2be0078725b4c2748b5c5144a4b4eed7e350",
+  "driver.status": "357bc6cbb1908ff5cdd715e22afd9bc8d86bdd68000282c545f47d7069f4ae6f",
+  "A_teacher_parent-s20260726/savepoints.json": "e655ffce51924e2785388ab576dac058c6e4174b0be35e50cdb97b7f8bf2491f",
+  "A_teacher_parent-s20260726/final.json": "0bf869252ab9874c5f8529ce8d5dedcc691e6841daacfbd6b522529b3e4315ce",
+  "A_teacher_parent-s20260726/train/config.json": "5ef7317d9d140b919f0432b39636dea34b81dcd8d61e1dc3f6dadfadd6da359d",
+  "A_teacher_parent-s20260726/train/train_log.jsonl": "29e2707d766abc4faf22e3722a06276ecbd28a47fec4c02c5cbe0c64b8e85370",
+  "A_teacher_parent-s20260726/train/run_completion_resume_step009701.json": "5495ec617cf28405d81af77d0c9dce53d05548c72ee30a1e022da784ab7bd2ed",
+  "A_teacher_parent-s20260726/train/train_stdout.tail.log": "9394740e40c11c7dd1fe329e3399afe56aea5b30e340d5185c0e6e0efbc30cd8",
+  "A_teacher_parent-s20260726/evaluation_thinking/formal_report.json": "c77711ee0f92b55b09c0f285a3b9dac9718220a016078f66b4b7f224db9e6024",
+  "A_teacher_parent-s20260726/evaluation_thinking/package.json": "264cb281ef2dbe167205ee245bfd36370e7a82909bad25dd39904fe2ee9af5cc",
+  "A_teacher_parent-s20260726/evaluation_thinking/fluid_runs.json": "77c0974b120e0f8dd4336beb8ec42112ebdd37f5b8561c610babe085c12d4ade",
+  "A_teacher_parent-s20260726/evaluation_non_thinking/formal_report.json": "a58fc68abd940348d85b100ad8266ca6ef7077b80b05faec812574a5f2200eca",
+  "A_teacher_parent-s20260726/evaluation_non_thinking/package.json": "264cb281ef2dbe167205ee245bfd36370e7a82909bad25dd39904fe2ee9af5cc",
+  "A_teacher_parent-s20260726/evaluation_non_thinking/fluid_runs.json": "acbd8ec0e5673757d9f1dccd6490607c888461b5d03ff974d77406d37b329f5c",
+  "A_teacher_parent-s20260801/savepoints.json": "14c1cf315cddb1cfaa5070c0f85f4b1be41e51db33775682e5be0ccda15a6594",
+  "A_teacher_parent-s20260801/final.json": "cecf6f199bc0031e2a3266a8c2646ea063387d75b5629a05541b725e768e24a8",
+  "A_teacher_parent-s20260801/train/config.json": "14c24d28666ac9cb64314eef709de0a6a4cd620d184f367f230c9bf7e75fb2ae",
+  "A_teacher_parent-s20260801/train/train_log.jsonl": "a331fbcab90f9bf44cb6ca42611e6d5d80c9de68295a8abd793a17d12d49ee6e",
+  "A_teacher_parent-s20260801/train/run_completion.json": "90564f10b7c8fb409192daf037491c42ae989705091a705109507eaada61fe33",
+  "A_teacher_parent-s20260801/train/train_stdout.tail.log": "921a6c22ff8068c633d17627d5eb7fbe9bc7e3a80cfc1a340156e942e9d33f12",
+  "A_teacher_parent-s20260801/evaluation_thinking/formal_report.json": "cd939c1982a5e5313235cd8be658eff1b2cb939f8480414de4b1228c49c434a6",
+  "A_teacher_parent-s20260801/evaluation_thinking/package.json": "caa56db1f43ed5ba42995220173ca9bcc4413a757e78251f1c322ac5fc8eb140",
+  "A_teacher_parent-s20260801/evaluation_thinking/fluid_runs.json": "4b1fc4d646d294a183e0852b17e471ee7af63fa60d50d40fc3bae3f5c22714b4",
+  "A_teacher_parent-s20260801/evaluation_non_thinking/formal_report.json": "c5e845a64e9875e928678fe183c86e63f9cf20f2a9d34a1a84a493e9cd051384",
+  "A_teacher_parent-s20260801/evaluation_non_thinking/package.json": "caa56db1f43ed5ba42995220173ca9bcc4413a757e78251f1c322ac5fc8eb140",
+  "A_teacher_parent-s20260801/evaluation_non_thinking/fluid_runs.json": "f8259e10c829fb3e360f6a83c2529370bed7113e620a34de9affda2c86c113ce"
+ },
+ "analysis": {
+  "path": "logs/stages/stage-1/teacher_parent_initialization/analyses/teacher_parent.json",
+  "a_root": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/tpi_train_20261117_180111/extracted",
+  "note": "the registered analysis was run on the extracted archive; the digests of every A generations directory equal those of the session's <scr>/store/out copy"
+ }
+}

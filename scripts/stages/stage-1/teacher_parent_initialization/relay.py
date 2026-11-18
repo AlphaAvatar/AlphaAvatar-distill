@@ -101,7 +101,9 @@ def get(record: dict, dest: Path, *, only: tuple[str, ...] | None = None, token_
         cache = Path(dest) / ".hf_relay"
         src = Path(hf_hub_download(repo, f"{base}/{k}", repo_type="model", token=token, cache_dir=str(cache)))
         tmp = target.with_name(f".{target.name}.partial")
-        shutil.copyfile(src, tmp)
+        #: the cache sits under dest and is removed below, so its blob is moved, not copied: one copy of a 2.2 GiB
+        #: final on the disk at a time, not two (the dev box's free space, 2026-11-18)
+        shutil.move(os.path.realpath(src), tmp)
         got = sha256_file(tmp)
         if got != want:
             tmp.unlink(missing_ok=True)

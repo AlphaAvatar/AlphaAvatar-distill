@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 1000.0,
-  "cumulative_spend_usd": 895.1729,
+  "cumulative_spend_usd": 917.8833,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 104.8271,
+  "remaining_usd": 82.1167,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "TPI1: training + evaluation (both seeds, both modes), then analysis.py, retention, relay weight retirement, REPORT.md. A merge into main is the maintainer's.",
+ "next": "TPI1 COMPLETE and CLOSED 2026-11-18 (H-T NOT_DISTINGUISHED, +1.40 pp, p 0.195; docs/stages/stage-1/teacher_parent_initialization/REPORT.md). Nothing is authorized next; a merge into main is the maintainer's.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -153,7 +153,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
@@ -197,10 +197,10 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": true,
-  "pods": 1,
+  "paid_compute": false,
+  "pods": 0,
   "network_volumes": 0,
-  "run": "TPI1 tpi_train_20261117_180111 on tdxvznkx54lc4q (L40S $1.09/h, resumes seed 20260726 at step 2208; hard cap $28.00, watchdog 1260 min); tpi_train_20261117_145939 lost to the provider ($3.0779); init COMPLETE $0.4217",
+  "run": "none; last: TPI1 tpi_train_20261117_180111 ($19.6325, ALL_DONE), pod deleted, provider-confirmed",
   "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",

@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 198,
+  "runs_unrecorded": 201,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -881,8 +881,8 @@
    },
    "teacher_parent_initialization": {
     "recorded": 0,
-    "unrecorded": 1,
-    "total": 1
+    "unrecorded": 4,
+    "total": 4
    }
   },
   "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
@@ -3964,6 +3964,30 @@
    "root": "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049",
    "n_files": 7,
    "digest": "bbd4cc7f15bc52a12af7401eec3d79b908929e5c57d747d385d6c37f74d4b1c0",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_parent_initialization",
+   "run_id": "tpi_train_20261117_145734",
+   "root": "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145734",
+   "n_files": 3,
+   "digest": "4f77c127105c67048f8bba7bb4c505aa01e207bbd72cb4b9c8e4d280b92eb567",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "teacher_parent_initialization",
+   "run_id": "tpi_train_20261117_145939",
+   "root": "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_145939",
+   "n_files": 10,
+   "digest": "cfecf9981a4bdfb3427de5d6870e6fde03d51af1787424bd1e27ef1c25e2993b",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "teacher_parent_initialization",
+   "run_id": "tpi_train_20261117_180111",
+   "root": "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111",
+   "n_files": 33,
+   "digest": "564ccb7019a6c41964e7b4e860cb5d8c9fefef6971010fb6fbbb088ca16f2348",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {
