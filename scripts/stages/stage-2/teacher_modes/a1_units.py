@@ -95,11 +95,46 @@ def evaluations_of(u: dict, arm: str, unit_dir: Path) -> list[dict]:
     return [{"mode": None, "template": ARM_TEMPLATE[arm], "dir": "evaluation", "path": Path(unit_dir) / "evaluation"}]
 
 
+def completion_records(out_dir: Path) -> list[Path]:
+    """The trainer's completion records in ``out_dir`` (`train_stage3.py`): ``run_completion.json`` for a run that
+    started at step 0, ``run_completion_resume_step<NNNNNN>.json`` for one that resumed from a save point."""
+    d = Path(out_dir)
+    return [p for p in [d / "run_completion.json", *sorted(d.glob("run_completion_resume_step*.json"))] if p.is_file()]
+
+
+class CompletionError(RuntimeError):
+    pass
+
+
+def completion(out_dir: Path, *, config: dict, steps: int) -> tuple[Path, dict]:
+    """The completion record of a run that finished ``config``: written under that config's hash (the trainer's
+    ``config_sha256``, `sha256_json`), at step ``steps`` of ``steps`` planned, with every step completed. Raises
+    `CompletionError` naming what disagrees; a record of another config or an unfinished run is never a completion."""
+    from aadistill.infrastructure.manifest import sha256_json
+    found = completion_records(out_dir)
+    if not found:
+        raise CompletionError(f"{out_dir}: no completion record")
+    want, probs = sha256_json(config), {}
+    for p in sorted(found, key=lambda x: -int(json.loads(x.read_text()).get("final_step") or -1)):
+        rec = json.loads(p.read_text())
+        bad = [m for m, ok in (
+            (f"config_sha256 {str(rec.get('config_sha256'))[:12]} != the plan's {want[:12]}",
+             rec.get("config_sha256") == want),
+            (f"final_step {rec.get('final_step')} != {steps}", rec.get("final_step") == int(steps)),
+            (f"planned_total_steps {rec.get('planned_total_steps')} != {steps}",
+             rec.get("planned_total_steps") == int(steps)),
+            ("completed_all_steps is not true", rec.get("completed_all_steps") is True)) if not ok]
+        if not bad:
+            return p, rec
+        probs[p.name] = bad
+    raise CompletionError(f"{out_dir}: no completion record of this config's {steps} steps: {probs}")
+
+
 def state(out_dir: Path, eval_dir: Path | list[Path]) -> str:
     dirs = eval_dir if isinstance(eval_dir, list) else [eval_dir]
     if all((d / "formal_report.json").is_file() for d in dirs):
         return "done"
-    if (out_dir / "run_completion.json").is_file() or list(out_dir.glob("run_completion_resume_step*.json")):
+    if completion_records(out_dir):
         return "trained"
     if (out_dir / "checkpoints" / "latest.txt").is_file():
         return "resume"

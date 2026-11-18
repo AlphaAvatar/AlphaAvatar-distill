@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 36,
-  "single_stage": 36,
+  "experiment_total": 37,
+  "single_stage": 37,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -150,10 +150,10 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 4,
-    "experiments": 18,
-    "experiments_with_logs": 18,
+    "experiments": 19,
+    "experiments_with_logs": 19,
     "runs": 245,
-    "canonical_configs": 21,
+    "canonical_configs": 22,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -171,6 +171,7 @@
     "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
     "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
     "configs/stages/stage-1/reasoning_inheritance/design.json",
+    "configs/stages/stage-1/single_operator_budget/design.json",
     "configs/stages/stage-1/source_sets.json",
     "configs/stages/stage-1/teacher_parent_initialization/design.json",
     "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
@@ -1575,7 +1576,7 @@
    "experiment_id": "teacher_parent_initialization",
    "stage_id": "1",
    "classification": "experiment",
-   "status": "COMPLETE and CLOSED 2026-11-18 (study TPI1, $23.1321 of $31.50): both seeds trained and evaluated on all of eval-set-1 in both modes; the registered primary (thinking-mode static fluid core, A - B pooled over both seeds) NOT_DISTINGUISHED, +1.40 pp, p 0.195, interval [-0.53, +3.45] pp; non-thinking +2.37 pp, descriptive under the fixed sequence",
+   "status": "COMPLETE and CLOSED 2026-11-18 (study TPI1, $23.1321 of $31.50): both seeds trained and evaluated on all of eval-set-1 in both modes; the registered primary (thinking-mode static fluid core, A - B pooled over both seeds) NOT_DISTINGUISHED, +1.40 pp, p 0.195, interval [-0.53, +3.45] pp; non-thinking +2.37 pp, descriptive under the fixed sequence. Since 2026-11-18 (maintainer) A's method is the reasoning-inheritance research's default baseline, B a historical reference",
    "title": "Teacher-parent initialization vs the packed Top-1 after the same Stage-3 recovery (TPI1)",
    "question": "Does initializing the fixed 596M student from selections made on the original teacher, with the residual PCA re-aggregated from the teacher's statistics at the kept layers, recover more fluid reasoning after the A-MIX Stage-3 recipe than the packed Top-1?",
    "canonical_path": "logs/stages/stage-1/teacher_parent_initialization",
@@ -1631,7 +1632,7 @@
     "~/aad-artifacts/stage1_teacher_parent_init/ -- A's init, mapping, statistics, both finals (the only copy of the weights) and the training session's evidence archive (also on the private relay)"
    ],
    "decisions": [
-    "logs/budget/decisions.md -- 2026-11-17: TPI1 prepared at $0 (first experiment of the new round); 2026-11-17: granted; 2026-11-17: training session lost to the provider, resumed; 2026-11-18: COMPLETE and closed (primary NOT_DISTINGUISHED; relay weight copies retired)"
+    "logs/budget/decisions.md -- 2026-11-17: TPI1 prepared at $0 (first experiment of the new round); 2026-11-17: granted; 2026-11-17: training session lost to the provider, resumed; 2026-11-18: COMPLETE and closed (primary NOT_DISTINGUISHED; relay weight copies retired); 2026-11-18: A becomes the research's default baseline (driver repairs and the protocol re-check, $0)"
    ],
    "classification_reason": "Stage 1 by subject: the structural initialization method (which parent each operator selects on, and the PCA's points) is what is compared (AGENTS.md 4.3); the Stage-3 recovery (execution stage stage3_recovery) and eval-set-1 are its fixed instruments.",
    "canonical_scripts": "scripts/stages/stage-1/teacher_parent_initialization",
@@ -1639,6 +1640,56 @@
    "canonical_configs": "configs/stages/stage-1/teacher_parent_initialization",
    "canonical_data": null,
    "canonical_docs": "docs/stages/stage-1/teacher_parent_initialization",
+   "live_state": null
+  },
+  {
+   "experiment_id": "single_operator_budget",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "PROPOSED at $0 (study SOB1, 2026-11-18; nothing authorized, no run): three ~2.0B structures (N ~ 2) from the real implementation, A's method, the registered analysis and a budget draft for review",
+   "title": "Single-operator compression at the same parameter budget: depth only vs FFN + attention only vs residual width only (SOB1)",
+   "question": "From the same ~4B teacher compressed to about the same real parameter count, how much fluid reasoning does compressing only depth, only the FFN and attention, or only the residual width lose, and after the same Stage-3 recovery which keeps more?",
+   "canonical_path": "logs/stages/stage-1/single_operator_budget",
+   "canonical_config": "configs/stages/stage-1/single_operator_budget/design.json",
+   "evidence": [
+    {
+     "path": "configs/stages/stage-1/single_operator_budget/design.json",
+     "says": "the arms' geometries, A's operators, profiles, reused selections and gates, the recovery, evaluation before and after recovery, the registered three-pair analysis, the cost model",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-1/single_operator_budget/plans/structures.json",
+     "says": "the three structures from transformers' Qwen3 on the meta device: per-module counts, N, legality, checkpoint sizes, FLOPs and a memory estimate",
+     "field": "schema",
+     "equals": "aadistill.stage1.single_operator_budget.structures/v1"
+    },
+    {
+     "path": "logs/stages/stage-1/single_operator_budget/plans/proposal.json",
+     "says": "the budget draft per component and phase, and the storage each phase needs",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json",
+     "says": "the project position, the relay's headroom and the dev box's free space as read on 2026-11-18",
+     "field": "schema",
+     "equals": "aadistill.stage1.single_operator_budget.resource_snapshot/v1"
+    }
+   ],
+   "external_material": [
+    "docs/stages/stage-1/single_operator_budget/README.md -- the design for review",
+    "docs/stages/stage-1/reasoning_inheritance/README.md -- the research index and the baseline decision"
+   ],
+   "decisions": [
+    "logs/budget/decisions.md -- 2026-11-18: A becomes the research's default baseline"
+   ],
+   "classification_reason": "Stage 1 by subject: which structural compression operator to apply at a parameter budget, and the initialization it gives (AGENTS.md 4.3); the Stage-3 recovery (execution stage stage3_recovery) and eval-set-1 are its fixed instruments.",
+   "canonical_scripts": "scripts/stages/stage-1/single_operator_budget",
+   "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/single_operator_budget",
+   "canonical_data": null,
+   "canonical_docs": "docs/stages/stage-1/single_operator_budget",
    "live_state": null
   },
   {

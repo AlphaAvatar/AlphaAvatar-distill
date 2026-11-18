@@ -16,10 +16,16 @@ three durability duties a network volume used to cover:
 * A's initialization is fetched from its verified relay copy and re-hashed before admission;
 * every save point the trainer completes (``checkpoints/latest.txt`` names it last) is copied to the relay by a
   watcher thread -- weights, trainer state (AdamW, step, consumed sequences, RNG) and resume identity -- downloaded
-  again and re-hashed; the unit's previous save point is then permanently deleted from the relay. The records are
-  ``<out>/<unit>/savepoints.json``, pulled by the poll, so a replacement session (``--resume``) restores the latest
-  one and the trainer resumes it (``--resume latest``): never a retrain of finished steps;
-* the final weights go to the relay (`final.json`) before the unit's evaluation starts.
+  again and re-hashed. The records are ``<out>/<unit>/savepoints.json``, pulled by the poll, so a replacement
+  session (``--resume``) restores the latest one and the trainer resumes it (``--resume latest``): never a retrain of
+  finished steps. The unit's previous save point is permanently deleted from the relay only after the new one HANDS
+  OFF (`handoff`): its record is put beside its files (`relay.POINTER`) and the relay listing a replacement reads is
+  confirmed to name it as the latest. A pod lost anywhere in the rotation leaves at least one listed save point, and
+  `restore_savepoint` takes the latest one the relay still holds, whether or not the dev box ever saw its record;
+* the final weights go to the relay (`final.json`), with the trainer's completion record, before the unit's
+  evaluation starts, and hand off the same way before any save point is retired. A replacement pod restores them
+  (`restore_final`) only when that completion record -- under either name the trainer writes -- is this unit's
+  config finished to its last step, then runs only the evaluations without a formal report.
 
 Evaluation is B's protocol exactly (`design.json :: evaluation`): the package built as A-MIX built it (the hybrid's
 tokenizer files), then `reasoning_inheritance.driver.fluid` / `capability` with this design's protocol passed in --
@@ -99,6 +105,45 @@ def savepoint_files(ckpt: Path) -> dict[str, Path]:
     return files
 
 
+def _pointer_body(rec: dict) -> dict:
+    return {k: v for k, v in rec.items() if k not in ("handoff", "removed", "downloaded_sha256")}
+
+
+def handoff(rec: dict, scratch: Path, listing: str, message: str, *, newest: bool) -> dict:
+    """Make ``rec`` findable off the pod before anything it supersedes is deleted: ``rec`` itself is put beside its
+    files as `relay.POINTER` (uploaded, downloaded again, re-hashed), then the relay listing a replacement attempt
+    restores from (``listing``) is read back and must name ``rec`` with its files present -- and, for a save point
+    (``newest``), as the latest one. Only a verified handoff lets the caller remove the previous record."""
+    from stages.teacher_parent_initialization import relay as R
+    scratch.mkdir(parents=True, exist_ok=True)
+    tmp = scratch / f".pointer_{os.getpid()}_{time.time_ns()}.json"
+    tmp.write_text(json.dumps(_pointer_body(rec), indent=1, sort_keys=True, default=str) + "\n")
+    try:
+        ptr = R.run_online("put", {"files": {R.POINTER: str(tmp)}, "prefix": rec["prefix"], "scratch": str(scratch),
+                                   "message": f"{message}: its record"})
+    finally:
+        tmp.unlink(missing_ok=True)
+    out = {"pointer": {k: ptr.get(k) for k in ("prefix", "files_sha256", "verified", "utc", "error", "refused")}}
+    if not ptr.get("verified"):
+        return {**out, "verified": False, "why": "the record's own copy on the relay did not verify"}
+    listed = R.run_online("records", {"prefix": listing})
+    present = [r["record"] for r in listed.get("records", []) if r.get("present")]
+    mine = [r for r in present if r.get("prefix") == rec["prefix"] and r.get("files_sha256") == rec["files_sha256"]]
+    later = [r for r in present if newest and int(r.get("step", -1)) > int(rec.get("step", -1))]
+    ok = bool(listed.get("verified")) and bool(mine) and not later
+    return {**out, "listing": listing, "listed_present": len(present), "verified": ok, "utc": utc(),
+            "why": None if ok else ("the relay listing could not be read" if not listed.get("verified") else
+                                    "the listing does not name this record with its files" if not mine else
+                                    "the listing names a later save point")}
+
+
+def with_pointer(rec: dict) -> dict:
+    """The record whose removal also deletes its pointer (a record written before pointers existed has none)."""
+    from stages.teacher_parent_initialization import relay as R
+    ptr = ((rec.get("handoff") or {}).get("pointer") or {}).get("files_sha256") or {}
+    return {**rec, "files_sha256": {**rec["files_sha256"], **({R.POINTER: ptr[R.POINTER]} if R.POINTER in ptr else {})}}
+
+
 class SavepointMirror(threading.Thread):
     """Copies each save point the trainer completes to the relay, then removes the unit's previous one there."""
 
@@ -128,12 +173,18 @@ class SavepointMirror(threading.Thread):
                                    "message": f"{self.unit}: save point {tag}"})
         rec = {"tag": tag, "step": step, **res, "latest_txt": tag}
         recs.append(rec)
-        if rec.get("verified"):
-            for old in recs[:-1]:
-                if old.get("verified") and not old.get("removed"):
-                    old["removed"] = R.run_online("remove", {"record": old, "message": f"{self.unit}: {old['tag']} "
-                                                             f"superseded by {tag}"})
+        write_json(self.path, recs)             #: what the poll pulls, before anything on the relay is deleted
+        if not rec.get("verified"):
+            return rec
+        rec["handoff"] = handoff(rec, self.out_dir, f"{self.prefix}/savepoints", f"{self.unit}: {tag}", newest=True)
         write_json(self.path, recs)
+        if not rec["handoff"]["verified"]:
+            return rec                          #: the previous save point stays until one hands off
+        for old in recs[:-1]:
+            if old.get("verified") and not old.get("removed"):
+                old["removed"] = R.run_online("remove", {"record": with_pointer(old), "message": f"{self.unit}: "
+                                                         f"{old['tag']} superseded by {tag}"})
+                write_json(self.path, recs)
         return rec
 
     def copy_small(self) -> None:
@@ -163,14 +214,29 @@ class SavepointMirror(threading.Thread):
         self.copy_small()
 
 
-def restore_savepoint(ev_unit: Path, out_dir: Path) -> dict | None:
-    """The latest verified, unremoved save point of the unit's records into ``out_dir/checkpoints``; None if none."""
+def restore_savepoint(ev_unit: Path, out_dir: Path, prefix: str | None = None) -> dict | None:
+    """The latest save point into ``out_dir/checkpoints``; None if none. Candidates are the unit's verified,
+    unremoved records in the evidence and, with ``prefix``, the pointers the relay lists under ``<prefix>/savepoints``
+    with their files present (a rotation whose records the lost pod never handed to the dev box). A save point is
+    removed only after a later one handed off (`handoff`), so the latest candidate is one the relay holds; when the
+    listing cannot be read, the evidence's records are used as they are and a missing file refuses the restore."""
     from stages.teacher_parent_initialization import relay as R
     p = ev_unit / "savepoints.json"
-    recs = [r for r in (read_json(p) if p.is_file() else []) if r.get("verified") and not r.get("removed")]
-    if not recs:
+    local = [r for r in (read_json(p) if p.is_file() else []) if r.get("verified") and not r.get("removed")]
+    found = "evidence"
+    cands = {r["tag"]: r for r in local}
+    if prefix:
+        listed = R.run_online("records", {"prefix": f"{prefix}/savepoints"})
+        if listed.get("verified"):
+            for x in listed.get("records", []):
+                if x.get("present") and x["record"].get("verified"):
+                    cands.setdefault(x["record"]["tag"], x["record"])
+            found = "evidence and relay listing"
+        else:
+            found = f"evidence (the relay listing was unreadable: {str(listed.get('error'))[:200]})"
+    if not cands:
         return None
-    rec = max(recs, key=lambda r: r["step"])
+    rec = max(cands.values(), key=lambda r: r["step"])
     ckpt = out_dir / "checkpoints" / rec["tag"]
     got = R.run_online("get", {"record": rec, "dest": str(ckpt)}, timeout_s=3600)
     if not got.get("verified"):
@@ -180,25 +246,67 @@ def restore_savepoint(ev_unit: Path, out_dir: Path) -> dict | None:
     #: replacement pod that log is the one the previous attempt secured, or the mirror would overwrite it with the tail
     if (ev_unit / "train" / "train_log.jsonl").is_file() and not (out_dir / "train_log.jsonl").is_file():
         shutil.copyfile(ev_unit / "train" / "train_log.jsonl", out_dir / "train_log.jsonl")
-    return {"tag": rec["tag"], "from": got.get("from"), "utc": utc()}
+    return {"tag": rec["tag"], "step": rec["step"], "from": got.get("from"), "found": found, "utc": utc()}
 
 
-def restore_final(ev_unit: Path, out_dir: Path, steps: int) -> dict | None:
-    """A trained unit's final weights from their verified relay copy, and its completion record from the evidence."""
+def final_record(ev_unit: Path, prefix: str | None) -> tuple[dict, str] | None:
+    """The unit's verified final-weights record: the evidence's ``final.json``, else the one pointer the relay lists
+    under ``<prefix>/final`` with its files present (written there before any save point was retired)."""
     from stages.teacher_parent_initialization import relay as R
     p = ev_unit / "final.json"
     rec = read_json(p) if p.is_file() else None
-    done = ev_unit / "train" / "run_completion.json"
-    if not (rec and rec.get("verified") and done.is_file()):
+    if rec and rec.get("verified"):
+        return rec, "evidence"
+    if not prefix:
         return None
+    listed = R.run_online("records", {"prefix": f"{prefix}/final"})
+    if not listed.get("verified"):
+        raise DriverError(f"{ev_unit.name}: no final.json and the relay listing is unreadable: "
+                          f"{str(listed.get('error'))[:300]}")
+    there = [x["record"] for x in listed["records"] if x.get("present") and x["record"].get("verified")]
+    if len(there) > 1:
+        raise DriverError(f"{ev_unit.name}: the relay lists {len(there)} final weights: {[r['prefix'] for r in there]}")
+    return (there[0], "relay listing") if there else None
+
+
+def restore_final(ev_unit: Path, out_dir: Path, cfg: dict, prefix: str | None = None) -> dict | None:
+    """A trained unit's final weights from their verified relay copy; None when the unit has none. The completion
+    record is the trainer's own, under either of its names (`a1_units.completion_records`: a resumed run writes
+    ``run_completion_resume_step<N>.json``), from the evidence or the final's relay copy, and must be this config's
+    finished run (`a1_units.completion`: the config hash, the planned and completed steps); the weights are refused
+    unless they hash to the record. A final whose completion does not check out stops the unit: it is never adopted
+    and never silently retrained."""
+    from stages.teacher_modes import a1_units as AU
+    from stages.teacher_parent_initialization import relay as R
+    steps = int(cfg["schedule"]["total_steps"])
+    hit = final_record(ev_unit, prefix)
+    if hit is None:
+        return None
+    rec, found = hit
+    if found != "evidence":
+        write_json(ev_unit / "final.json", rec)
+    train = ev_unit / "train"
+    carried = sorted(k for k in rec["files_sha256"] if k.startswith("run_completion"))
+    if not AU.completion_records(train) and carried:
+        got = R.run_online("get", {"record": rec, "dest": str(train), "only": carried}, timeout_s=600)
+        if not got.get("verified"):
+            raise DriverError(f"the final's completion record did not restore: {str(got)[:500]}")
+    try:
+        done, crec = AU.completion(train, config=cfg, steps=steps)
+    except AU.CompletionError as exc:
+        raise DriverError(f"{ev_unit.name}: final weights are recorded but no completion of this unit's training "
+                          f"checks out: {exc}") from exc
     model = out_dir / "checkpoints" / f"step_{steps:06d}" / "model"
-    got = R.run_online("get", {"record": rec, "dest": str(model)}, timeout_s=3600)
+    only = [n for n in AU.FINAL_FILES if n in rec["files_sha256"]]
+    got = R.run_online("get", {"record": rec, "dest": str(model), "only": only}, timeout_s=3600)
     if not got.get("verified"):
         raise DriverError(f"the final weights did not restore: {str(got)[:500]}")
-    shutil.copyfile(done, out_dir / "run_completion.json")
-    if (ev_unit / "train" / "train_log.jsonl").is_file() and not (out_dir / "train_log.jsonl").is_file():
-        shutil.copyfile(ev_unit / "train" / "train_log.jsonl", out_dir / "train_log.jsonl")
-    return {"from": got.get("from"), "utc": utc()}
+    shutil.copyfile(done, out_dir / done.name)            #: its own name: `a1_units.state` reads either
+    if (train / "train_log.jsonl").is_file() and not (out_dir / "train_log.jsonl").is_file():
+        shutil.copyfile(train / "train_log.jsonl", out_dir / "train_log.jsonl")
+    return {"from": got.get("from"), "found": found, "completion": done.name, "final_step": crec["final_step"],
+            "config_sha256": crec["config_sha256"], "model_safetensors_sha256": rec["files_sha256"]["model.safetensors"],
+            "utc": utc()}
 
 
 def fetch_init(u: dict) -> dict:
@@ -330,12 +438,13 @@ def main(argv=None) -> int:
             steps = int(cfg["schedule"]["total_steps"])
             evals = [{**e, "path": ev_unit / e["dir"]} for e in u["evaluations"]]
             st = AU.state(out_dir, [e["path"] for e in evals])
+            unit_prefix = f"{R.ROOT_PREFIX}/{PL.ARM}/{name}"
             if st == "fresh":                   #: a replacement pod: the final weights, else the latest save point
-                got = restore_final(ev_unit, out_dir, steps)
+                got = restore_final(ev_unit, out_dir, cfg, unit_prefix)
                 if got:
                     row["restored_final"] = got
                 else:
-                    got = restore_savepoint(ev_unit, out_dir)
+                    got = restore_savepoint(ev_unit, out_dir, unit_prefix)
                     if got:
                         row["restored_savepoint"] = got
                 st = AU.state(out_dir, [e["path"] for e in evals])
@@ -356,7 +465,7 @@ def main(argv=None) -> int:
                 if st == "resume":
                     row["resume_from"] = (out_dir / "checkpoints" / "latest.txt").read_text().strip()
                 save()
-                mirror = SavepointMirror(name, out_dir, ev_unit, steps, f"{R.ROOT_PREFIX}/{PL.ARM}/{name}")
+                mirror = SavepointMirror(name, out_dir, ev_unit, steps, unit_prefix)
                 mirror.start()
                 mark(f"TRAIN_START:{name}")
                 t0 = time.time()
@@ -374,25 +483,37 @@ def main(argv=None) -> int:
                     raise DriverError(f"{name}: the trainer logged {row['telemetry'].get('context_strategies')}")
                 mark(f"TRAINED:{name}")
             model_dir = AU.final_model(out_dir, steps)
+            try:
+                done, _ = AU.completion(out_dir, config=cfg, steps=steps)
+            except AU.CompletionError as exc:
+                raise DriverError(f"{name}: {exc}") from exc
+            row["completion_record"] = done.name
             row["final_model_safetensors_sha256"] = R.sha256_file(model_dir / "model.safetensors")
             fin = ev_unit / "final.json"
             prev = read_json(fin) if fin.is_file() else {}
             if not (prev.get("verified") and prev["files_sha256"].get("model.safetensors")
                     == row["final_model_safetensors_sha256"]):
                 files = {n: str(model_dir / n) for n in AU.FINAL_FILES if (model_dir / n).is_file()}
+                files[done.name] = str(done)    #: the training's completion travels with its weights
                 prev = R.run_online("put", {"files": files, "scratch": str(out_dir),
-                                            "prefix": f"{R.ROOT_PREFIX}/{PL.ARM}/{name}/final/"
-                                                      f"{row['final_model_safetensors_sha256'][:16]}",
+                                            "prefix": f"{unit_prefix}/final/{row['final_model_safetensors_sha256'][:16]}",
                                             "message": f"{name}: final weights"})
                 write_json(fin, prev)
                 if not prev.get("verified"):
                     raise DriverError(f"{name}: the final weights' relay copy did not verify: {str(prev)[:500]}")
-                for sp in [r for r in SavepointMirror(name, out_dir, ev_unit, steps, "").records()
-                           if r.get("verified") and not r.get("removed")]:
-                    sp["removed"] = R.run_online("remove", {"record": sp, "message": f"{name}: {sp['tag']} superseded "
-                                                            "by the verified final weights"})
-                    recs = [x if x["tag"] != sp["tag"] else sp for x in read_json(ev_unit / "savepoints.json")]
-                    write_json(ev_unit / "savepoints.json", recs)
+            if not (prev.get("handoff") or {}).get("verified"):
+                prev["handoff"] = handoff(prev, out_dir, f"{unit_prefix}/final", f"{name}: final weights", newest=False)
+                write_json(fin, prev)
+            if prev["handoff"]["verified"]:     #: a replacement attempt finds the final: the save points can go
+                sp_path = ev_unit / "savepoints.json"
+                recs = read_json(sp_path) if sp_path.is_file() else []
+                for sp in recs:
+                    if sp.get("verified") and not sp.get("removed"):
+                        sp["removed"] = R.run_online("remove", {"record": with_pointer(sp), "message": f"{name}: "
+                                                                f"{sp['tag']} superseded by the verified final weights"})
+                        write_json(sp_path, recs)
+            else:
+                row["save_points_kept"] = prev["handoff"].get("why")
             row["final_relay"] = {k: prev.get(k) for k in ("relay", "prefix", "verified")}
             save()
             mark(f"FINAL_DURABLE:{name}")

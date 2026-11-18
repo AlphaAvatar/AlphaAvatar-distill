@@ -106,9 +106,32 @@ def test_the_protocol_check_reads_compositions_and_flags_a_changed_decoding():
     bad["runs"][0]["summary"]["identity"]["decoding_protocol"]["sha256"] = "f" * 64
     probs = BE.protocol_problems({BE.FLUID: bad}, want)
     assert probs and all("decoding_sha256" in p for p in probs)
-    #: a unit whose protocol was not recorded is not B's
-    assert BE.protocol_problems({"stage3_capability_846__gsm8k": {"composition": "x", "run_summary": None}},
-                                want) == ["stage3_capability_846__gsm8k: no runner summary recorded"]
+    #: a unit whose protocol was not recorded is not B's -- nor one checked against an empty registered protocol
+    probs = BE.protocol_problems({"stage3_capability_846__gsm8k": {"composition": "x", "run_summary": None}}, want)
+    assert "stage3_capability_846__gsm8k: no runner summary recorded" in probs
+    assert "stage3_capability_846__gsm8k: the registered protocol has no decoding_sha256" in probs
+
+
+def test_complete_generations_with_a_missing_or_empty_protocol_are_never_consistent():
+    s = _b_fluid_summary()
+    want = BE.mode_protocol({BE.FLUID: BE.protocol_fields(s, BE.FLUID)})
+    assert BE.protocol_check({BE.FLUID: s}, want, generated=(BE.FLUID,)) == {"differs": [], "missing": []}
+    #: the records are there, the summary is not
+    chk = BE.protocol_check({}, want, generated=(BE.FLUID,))
+    assert chk["missing"] == [f"{BE.FLUID}: generations present, no summary recorded"] and not chk["differs"]
+    #: a key field recorded empty on both sides is missing, not equal
+    blank = copy.deepcopy(s)
+    blank["identity"]["chat_template_sha256"] = ""
+    w2 = copy.deepcopy(want)
+    w2["fluid"]["chat_template_sha256"] = ""
+    chk = BE.protocol_check({BE.FLUID: blank}, w2)
+    assert f"{BE.FLUID}: the registered protocol has no chat_template_sha256" in chk["missing"]
+    assert f"{BE.FLUID}[run 0]: chat_template_sha256 not recorded" in chk["missing"]
+    #: no registered protocol at all
+    chk = BE.protocol_check({BE.FLUID: s}, {"fluid": {}, "capability": {}})
+    assert len(chk["missing"]) == len(BE.KEY_FIELDS["fluid"]) and not chk["differs"]
+    #: an empty template-kwargs dict is a value
+    assert not BE.empty({}, "chat_template_kwargs") and BE.empty({}, "sampling") and BE.empty(None, "stop_ids")
 
 
 def test_a_missing_summary_field_is_not_recorded_never_a_pass():

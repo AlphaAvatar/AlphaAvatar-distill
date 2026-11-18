@@ -115,15 +115,10 @@ def test_the_evaluation_protocol_is_b_s():
 
 
 def test_the_mirror_keeps_one_save_point_and_never_the_final(tmp_path, monkeypatch):
-    calls = []
-
-    def fake(op, payload, timeout_s=3600):
-        calls.append((op, payload.get("prefix") or payload["record"]["prefix"]))
-        if op == "put":
-            return {"verified": True, "relay": "r", "prefix": payload["prefix"],
-                    "files_sha256": {k: "x" for k in payload["files"]}}
-        return {"verified": True, "verified_absent": True}
     from stages.teacher_parent_initialization import relay as R
+    from .test_takeover import FakeRelay
+    fake = FakeRelay()
+    calls = fake.calls
     monkeypatch.setattr(R, "run_online", fake)
     out, ev = tmp_path / "train", tmp_path / "ev"
     m = TD.SavepointMirror("u", out, ev, total_steps=3000, prefix="durable/u")

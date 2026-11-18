@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-18 (UTC), TPI1 (teacher-parent initialization) COMPLETE and CLOSED, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
+**Updated:** 2026-11-18 (UTC), TPI1 closed out (A is the default baseline; driver repairs pushed) and SOB1 PROPOSED at $0, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,21 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PROPOSED AT $0 -- NOTHING AUTHORIZED, NO RUN.**
+- Design `configs/stages/stage-1/single_operator_budget/design.json`; for review
+  `docs/stages/stage-1/single_operator_budget/README.md`. Depth only (16 layers), FFN + attention only (FFN 3840,
+  16 / 8 heads) and residual width only (1280), each about 2.0B parameters (`plans/structures.json`), built with A's
+  method, then A's recovery; evaluated before (40,960) and after (8,192) recovery; three registered pairwise
+  comparisons (Holm, serial gatekeeping).
+- Budget draft `logs/stages/stage-1/single_operator_budget/plans/proposal.json`: phase 1 (the three initializations
+  and their damage) fits what the project cap leaves; phase 2 (recovery, both seeds) does not and needs a cap
+  decision. Storage of the six fp32 finals needs a decision (relay headroom about 60 GiB, dev box 3.7 GB free).
+- Decisions owed by the maintainer: `docs/stages/stage-1/single_operator_budget/README.md` section 9.
+
+**Baseline (maintainer, 2026-11-18):** TPI1's A (teacher-parent initialization) is the reasoning-inheritance research's
+default baseline; B a historical reference (`docs/stages/stage-1/reasoning_inheritance/README.md`; decisions.md
+2026-11-18).
 
 **TPI1 (STAGE 1 TEACHER-PARENT INITIALIZATION): COMPLETE AND CLOSED (2026-11-18) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Design `configs/stages/stage-1/teacher_parent_initialization/design.json`; report
@@ -27,7 +42,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 - Storage: A's init, mapping, statistics and both finals on the dev box only for the weights
   (`~/aad-artifacts/stage1_teacher_parent_init/`, `storage/local_retention.json`); the relay weight copies retired
   2026-11-18 (tombstones `relay_20261118_tpi1_*`); mapping, statistics and the evidence archive also on the relay.
-- Next: the maintainer's review of the round; a merge into `main` is the maintainer's.
+- After closeout ($0): `restore_final` reads the resumed completion record, save points and finals hand off on
+  the relay before any deletion, the protocol check records missing fields; re-check of all four cells agrees item
+  by item (REPORT section 10). A merge into `main` is the maintainer's.
 - Owner: `logs/budget/decisions.md` 2026-11-18.
 
 **RI-S1 (STAGE 1 STRUCTURAL ABLATION): COMPLETE AND CLOSED (2026-11-14) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**

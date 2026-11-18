@@ -1,0 +1,231 @@
+{
+ "authorizes": "nothing",
+ "components": {
+  "init_session": {
+   "depth": {
+    "candidate_subsets": 530,
+    "hours_bound": 4.61,
+    "hours_expected": 3.41,
+    "rule": "rounds 1-8 at the journal's measured 7,074 s; rounds 9-20 at 27.2 s per candidate x remaining / 32.5 (expected) or x 1 (bound), the bound x 1.15"
+   },
+   "hours_bound": 5.74,
+   "hours_expected": 4.45,
+   "other_operators_and_builds_hours": 0.62,
+   "usd_bound": 6.37,
+   "usd_expected": 4.94
+  },
+  "post_recovery_evaluation": {
+   "hours_bound": 18.0,
+   "hours_expected": 7.32,
+   "units": 6,
+   "usd_bound": 19.99,
+   "usd_expected": 8.13
+  },
+  "pre_recovery_evaluation": {
+   "hours_bound": 10.8,
+   "hours_expected": 5.4,
+   "models": 3,
+   "usd_bound": 11.99,
+   "usd_expected": 6.0
+  },
+  "teacher_at_8192_optional": {
+   "hours_bound": 3.6,
+   "hours_expected": 2.5,
+   "usd_bound": 4.0,
+   "usd_expected": 2.78
+  },
+  "training": {
+   "hours_bound": 118.98,
+   "hours_expected": 94.56,
+   "per_arm_per_seed": {
+    "depth_only": {
+     "hours_bound": 19.51,
+     "hours_expected": 14.62,
+     "seconds_per_step_bound": 7.241,
+     "seconds_per_step_expected": 5.426
+    },
+    "ffn_attention": {
+     "hours_bound": 19.6,
+     "hours_expected": 14.94,
+     "seconds_per_step_bound": 7.275,
+     "seconds_per_step_expected": 5.545
+    },
+    "residual_width": {
+     "hours_bound": 20.38,
+     "hours_expected": 17.72,
+     "seconds_per_step_bound": 7.564,
+     "seconds_per_step_expected": 6.577
+    }
+   },
+   "units": 6,
+   "usd_bound": 132.13,
+   "usd_expected": 105.01
+  },
+  "training_session_setup": {
+   "hours_bound": 2.5,
+   "hours_expected": 2.5,
+   "sessions": 6,
+   "usd_bound": 2.78,
+   "usd_expected": 2.78
+  }
+ },
+ "design_sha256": "f805112d2ad5c43bf3b3e2a6d9550bfb982cc1ad932d27a778597796d1239e12",
+ "memory_gib": {
+  "depth_only": {
+   "checkpointed_inputs_gib": 1.25,
+   "conservative_peak_allocated_gib": 40.46,
+   "conservative_peak_reserved_gib": 42.14,
+   "expected_peak_allocated_gib": 36.21,
+   "l40s_gib": 44.99,
+   "l40s_margin_conservative_reserved_gib": 2.85,
+   "rest_from_tpi1_gib": 1.96,
+   "rest_scale_conservative": 3.167,
+   "rule": "derived from TPI1's measured peak, not measured at this size; the first optimizer steps of the first unit measure it (the trainer's gpu_mem_gb / gpu_mem_reserved_gb)",
+   "static_gib": 33.01
+  },
+  "ffn_attention": {
+   "checkpointed_inputs_gib": 2.81,
+   "conservative_peak_allocated_gib": 38.46,
+   "conservative_peak_reserved_gib": 40.14,
+   "expected_peak_allocated_gib": 37.97,
+   "l40s_gib": 44.99,
+   "l40s_margin_conservative_reserved_gib": 4.84,
+   "rest_from_tpi1_gib": 1.96,
+   "rest_scale_conservative": 1.25,
+   "rule": "derived from TPI1's measured peak, not measured at this size; the first optimizer steps of the first unit measure it (the trainer's gpu_mem_gb / gpu_mem_reserved_gb)",
+   "static_gib": 33.2
+  },
+  "residual_width": {
+   "checkpointed_inputs_gib": 1.41,
+   "conservative_peak_allocated_gib": 42.9,
+   "conservative_peak_reserved_gib": 44.58,
+   "expected_peak_allocated_gib": 38.65,
+   "l40s_gib": 44.99,
+   "l40s_margin_conservative_reserved_gib": 0.41,
+   "rest_from_tpi1_gib": 1.96,
+   "rest_scale_conservative": 3.167,
+   "rule": "derived from TPI1's measured peak, not measured at this size; the first optimizer steps of the first unit measure it (the trainer's gpu_mem_gb / gpu_mem_reserved_gb)",
+   "static_gib": 35.29
+  }
+ },
+ "options": {
+  "full_two_seeds": {
+   "components": [
+    "init_session",
+    "pre_recovery_evaluation",
+    "training",
+    "post_recovery_evaluation",
+    "training_session_setup"
+   ],
+   "fits_project_remaining_now": false,
+   "gpu_hours_bound": 156.0,
+   "gpu_hours_expected": 114.2,
+   "usd_bound": 173.27,
+   "usd_bound_plus_reserve": 174.27,
+   "usd_expected": 126.86
+  },
+  "full_two_seeds_with_teacher_at_8192": {
+   "components": [
+    "init_session",
+    "pre_recovery_evaluation",
+    "training",
+    "post_recovery_evaluation",
+    "training_session_setup",
+    "teacher_at_8192_optional"
+   ],
+   "fits_project_remaining_now": false,
+   "gpu_hours_bound": 159.6,
+   "gpu_hours_expected": 116.7,
+   "usd_bound": 177.27,
+   "usd_bound_plus_reserve": 178.27,
+   "usd_expected": 129.63
+  },
+  "phase_1_initialization_and_damage": {
+   "components": [
+    "init_session",
+    "pre_recovery_evaluation"
+   ],
+   "fits_project_remaining_now": true,
+   "gpu_hours_bound": 16.5,
+   "gpu_hours_expected": 9.9,
+   "usd_bound": 18.37,
+   "usd_bound_plus_reserve": 19.37,
+   "usd_expected": 10.94
+  },
+  "phase_2_recovery_one_seed": {
+   "components": [
+    "training",
+    "post_recovery_evaluation",
+    "training_session_setup"
+   ],
+   "fits_project_remaining_now": false,
+   "gpu_hours_bound": 69.7,
+   "gpu_hours_expected": 52.2,
+   "usd_bound": 77.45,
+   "usd_bound_plus_reserve": 78.45,
+   "usd_expected": 57.96
+  },
+  "phase_2_recovery_two_seeds": {
+   "components": [
+    "training",
+    "post_recovery_evaluation",
+    "training_session_setup"
+   ],
+   "fits_project_remaining_now": false,
+   "gpu_hours_bound": 139.5,
+   "gpu_hours_expected": 104.4,
+   "usd_bound": 154.9,
+   "usd_bound_plus_reserve": 155.9,
+   "usd_expected": 115.92
+  }
+ },
+ "project_position": {
+  "account_pods": 0,
+  "account_volumes": 0,
+  "balance_usd": 40.2437,
+  "committed_usd": 969.7558,
+  "fetched_utc": "2026-11-18T19:33:14+00:00",
+  "project_cap_usd": 1000.0,
+  "project_remaining_usd": 30.2442,
+  "source": "shared.study_engineering.live_position (provider billing, read-only)"
+ },
+ "resource_snapshot_sha256": "92e9b51f58b6bf1ee9504bbd5c5774012000b77ffafc4d95e7c8679d0f79a27f",
+ "schema": "aadistill.stage1.single_operator_budget.proposal/v1",
+ "status": "proposed: a draft for the maintainer; no amount here is approved, and the project cap is not raised by it",
+ "storage": {
+  "dev_box_free_bytes": 3658616832,
+  "finals_fit_dev_box": false,
+  "per_arm_bytes": {
+   "depth_only": {
+    "final_fp32": 8015407104,
+    "init_bf16": 4007703552,
+    "rule": "derived: 2P / 4P / 4P + 8T (module docstring)",
+    "save_point": 20934572032
+   },
+   "ffn_attention": {
+    "final_fp32": 8068265984,
+    "init_bf16": 4034132992,
+    "rule": "derived: 2P / 4P / 4P + 8T (module docstring)",
+    "save_point": 21093148672
+   },
+   "residual_width": {
+    "final_fp32": 8044954624,
+    "init_bf16": 4022477312,
+    "rule": "derived: 2P / 4P / 4P + 8T (module docstring)",
+    "save_point": 22579039232
+   }
+  },
+  "phase_1_fits_relay": true,
+  "phase_1_relay_peak_bytes": 12064313856,
+  "phase_2_fits_relay_if_finals_accumulate": false,
+  "phase_2_fits_relay_if_finals_leave": true,
+  "phase_2_relay_peak_bytes_finals_accumulate": 97464240640,
+  "phase_2_relay_peak_bytes_finals_leave_after_evaluation": 57222392320,
+  "relay_headroom_bytes": 64499671367,
+  "rule": "a save point is deleted only after the next one hands off (TPI1's driver), so a rotation holds two; a final is uploaded while its unit's last save point still exists",
+  "six_finals_bytes": 48257255424,
+  "three_inits_bytes": 12064313856
+ },
+ "structures_sha256": "fe0d70d11558277512a9669079e99ba1f4c011d1563327a897ec29120a26b369",
+ "usd_per_hour_all_in": 1.1105
+}

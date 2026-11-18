@@ -15,8 +15,11 @@ here with the current registered scorers -- the fluid unit by ``score_battery.py
 ``eval_set_scoring.report`` -- so A and B are scored by one implementation; B's own formal reports are not read.
 
 Pairing and identity. Each A record is paired with B's record of the same seed, mode and item. Before a mode's fluid
-comparison can be formal, A's fluid unit must carry B's generation protocol (`b_evidence.protocol_problems` against
-``audit/b_evidence.json :: protocol_to_match``) and cover every registered item in both seeds. A capability unit whose
+comparison can be formal, A's fluid unit must carry B's generation protocol (`b_evidence.protocol_check` against
+``audit/b_evidence.json :: protocol_to_match``: nothing differs AND nothing is missing -- complete generations whose
+summary or key fields are absent or empty are ``missing``, never consistent), every record must agree with it item by
+item (`item_protocol`: the seed rule, the context, the think state, the stop id, the system message, B's paired prompt
+length and seed), and it must cover every registered item in both seeds. A capability unit whose
 protocol differs is reported and its headline flagged; it does not enter the decision, which is the fluid unit's.
 
 Decision (registered). Per mode: delta = (1 / (2 x 570)) sum over both seeds and the 570 registered static items of
@@ -134,7 +137,8 @@ def decide(y_a: dict, y_b: dict, groups: dict, seeds: list, *, primary: str, sec
             continue
         if protocol_ok.get(m) is False:
             out[m] = {"status": "descriptive_only", **comparison(ya, y_b[m], groups, seeds, test=False),
-                      "why": "A's fluid unit does not carry B's generation protocol (see protocol_identity)"}
+                      "why": "A's fluid unit is not shown to carry B's generation protocol (protocol_identity: "
+                             "differs, missing or a record disagrees)"}
     prim = out.get(primary)
     if prim is None:
         out[primary] = {"status": "formal", "role": "primary",
@@ -263,14 +267,112 @@ def a_summaries(gd: Path) -> dict[str, dict]:
     return {p.name.removesuffix(".summary.json"): json.loads(p.read_text()) for p in sorted(gd.glob("*.summary.json"))}
 
 
-def protocol_identity(gd: Path, want: dict) -> dict:
-    """A's sealed units against B's protocol (`b_evidence.protocol_problems`), and every registered unit's
-    completeness."""
-    problems = BE.protocol_problems(a_summaries(gd), want)
-    comp = BE.completeness(gd, BE.registered_units())
-    fluid_bad = [p for p in problems if p.startswith(BE.FLUID)]
-    return {"fluid_protocol_is_B": not fluid_bad and comp.get(BE.FLUID, {}).get("complete", False),
-            "problems": problems, "incomplete_units": sorted(k for k, v in comp.items() if not v["complete"])}
+def seed_of(base: int, key: str) -> int:
+    """The decoding protocol's per-sample seed (``seed_rule``: int.from_bytes(sha256('<base>|<key>')[:8]) % 2**63)."""
+    return int.from_bytes(hashlib.sha256(f"{base}|{key}".encode()).digest()[:8], "big") % 2 ** 63
+
+
+#: what each record shows about its own generation protocol, and what only a unit's summary can show
+ITEM_LEVEL = {
+    "sampling_seed": "every turn's seed is the seed rule's for <namespace>|<item>|<turn>|0 (verifies the base, the key, "
+                     "the namespace and one sample per item)",
+    "context": "every turn's prompt tokens + generation allowance = the registered context (capability: context_len too)",
+    "think_state": "every turn's rendered prompt has the mode's think state (the template's enable_thinking)",
+    "stop_id": "every naturally terminated turn ends with a registered stop id",
+    "system_message": "fluid: the record's system turn is the registered message; capability: the record's "
+                      "system_source (the runner default, whose text is the summary's, or the item's own system "
+                      "turn) is B's for the same item",
+    "paired_with_B": "turn 0's prompt tokens and seed equal B's record of the same item (same rendered prompt length, "
+                     "same seed)",
+}
+UNIT_LEVEL = ("decoding_protocol_id", "decoding_sha256", "sampling (temperature, top_p, top_k, min_p, penalties)",
+              "chat_template_sha256", "tokenizer_sha256", "degeneration_check_every", "action_protocol (fluid)",
+              "protocol / degeneration_stop / max_tokens_rule (capability)", "tasks_sha256 (fluid)",
+              "engine and library versions (reported, not a condition)")
+
+
+def item_protocol(gd: Path, gd_b: Path | None, key: str, ref: dict, think_state: str) -> dict:
+    """`ITEM_LEVEL`, record by record, for one unit: per check the records/turns checked and those that disagree
+    (first few). A check whose registered value is missing is ``unverifiable``, never passed."""
+    f = gd / f"{key}.jsonl"
+    if not f.is_file():
+        return {"present": False}
+    fluid = key == BE.FLUID
+    base, ctx, stops = ref.get("seed_rule_base"), ref.get("resolved_context"), ref.get("stop_ids")
+    namespace = ref.get("seed_namespace") if fluid else key
+    b_rows = {}
+    if gd_b is not None and (gd_b / f"{key}.jsonl").is_file():
+        b_rows = {str(r.get("task_id") if fluid else r.get("id")): r for r in BE.jl(gd_b / f"{key}.jsonl")}
+    out = {c: {"checked": 0, "disagree": 0, "first": []} for c in ITEM_LEVEL}
+    need = {"sampling_seed": (base, namespace), "context": (ctx,), "stop_id": (stops,),
+            "system_message": (ref.get("system_message"),) if fluid else (), "think_state": (think_state,)}
+    unverifiable = sorted(c for c, vals in need.items() if any(BE.empty(v, c) for v in vals))
+
+    def check(name, ok, where):
+        if name in unverifiable:
+            return
+        out[name]["checked"] += 1
+        if not ok:
+            out[name]["disagree"] += 1
+            if len(out[name]["first"]) < 3:
+                out[name]["first"].append(where)
+    for r in BE.jl(f):
+        iid = str(r.get("task_id") if fluid else r.get("id"))
+        turns = r.get("turns") if fluid else [{**r, "turn": 0, "seed": r.get("sampling_seed")}]
+        for t in turns or []:
+            w = f"{iid}#{t.get('turn')}"
+            check("sampling_seed", t.get("seed") == seed_of(base, f"{namespace}|{iid}|{t.get('turn')}|0"), w)
+            check("context", t.get("prompt_tokens", 0) + t.get("generation_allowance", -1) == ctx
+                  and (fluid or r.get("context_len") == ctx), w)
+            check("think_state", t.get("think_state") == think_state, w)
+            if t.get("natural_termination"):
+                ids = t.get("output_token_ids") or []
+                check("stop_id", bool(ids) and ids[-1] in (stops or []), w)
+        b = b_rows.get(iid)
+        check("system_message", ((r.get("messages") or [{}])[0] == {"role": "system", "content": ref.get("system_message")})
+              if fluid else (not BE.empty(r.get("system_source"), "system_source")
+                             and (b is None or r.get("system_source") == b.get("system_source"))), iid)
+        if b is not None and turns:
+            bt = (b.get("turns") or [{}])[0] if fluid else {**b, "seed": b.get("sampling_seed")}
+            check("paired_with_B", turns[0].get("prompt_tokens") == bt.get("prompt_tokens")
+                  and turns[0].get("seed") == bt.get("seed"), iid)
+    return {"present": True, "checks": out, "unverifiable": unverifiable,
+            "agrees": not unverifiable and all(v["disagree"] == 0 for v in out.values())
+            and all(out[c]["checked"] > 0 for c in ("sampling_seed", "context", "think_state", "system_message"))}
+
+
+def protocol_identity(gd: Path, want: dict, gd_b: Path | None = None, think_state: str | None = None) -> dict:
+    """A's sealed units against B's registered protocol: unit by unit (`b_evidence.protocol_check`: what differs and
+    what is missing), record by record (`item_protocol`), and every registered unit's completeness. The fluid unit is
+    B's protocol only when it is complete, nothing differs, nothing is missing and every record agrees; complete
+    generations with a missing or empty protocol are ``missing``, never consistent."""
+    units = BE.registered_units()
+    comp = BE.completeness(gd, units)
+    generated = tuple(k for k, v in comp.items() if v.get("present"))
+    chk = BE.protocol_check(a_summaries(gd), want, generated=generated)
+    per_item = {}
+    for key in generated:
+        kind = BE.kind_of(key)
+        ref = (dict(want.get("fluid") or {}) if kind == "fluid" else
+               {**(want.get("capability") or {}), **(want.get("capability_per_unit", {}).get(key) or {})})
+        per_item[key] = item_protocol(gd, gd_b, key, ref, think_state) if think_state else {"present": True,
+                                                                                          "not_checked": True}
+    fluid = BE.FLUID
+    f_diff = [p for p in chk["differs"] if p.startswith(fluid)]
+    f_miss = [p for p in chk["missing"] if p.startswith(fluid)]
+    f_item = per_item.get(fluid, {})
+    item_disagrees = any(v["disagree"] for v in (f_item.get("checks") or {}).values())
+    if not comp.get(fluid, {}).get("complete", False):
+        status = "incomplete"
+    elif f_diff or item_disagrees:
+        status = "differs"
+    elif f_miss or not f_item.get("agrees"):        #: unverifiable, unchecked or nothing to check: not shown equal
+        status = "missing"
+    else:
+        status = "consistent"
+    return {"fluid_protocol_is_B": status == "consistent", "fluid_status": status,
+            "problems": chk["differs"], "missing": chk["missing"], "per_item": per_item,
+            "incomplete_units": sorted(k for k, v in comp.items() if not v["complete"])}
 
 
 def load_b_evidence() -> dict:
@@ -317,7 +419,8 @@ def analyse(a_roots: list[Path], tmp: Path) -> dict:
             else:
                 y_a[m][s] = correctness(a["static"])
                 inter_a[s] = correctness(a["interactive"])
-                proto[m][str(s)] = protocol_identity(gd, bev["protocol_to_match"][m])
+                proto[m][str(s)] = protocol_identity(gd, bev["protocol_to_match"][m], BE.b_gens(d, s, m),
+                                                     think_states()[mv["dir"]])
                 ok = ok and proto[m][str(s)]["fluid_protocol_is_B"]
             descr[m]["by_seed"][str(s)] = {
                 "static_by_axis": by_axis(None if a is None else a["static"], b["static"]),
@@ -346,7 +449,12 @@ def analyse(a_roots: list[Path], tmp: Path) -> dict:
                            "groups": len(groups), "seeds": [int(s) for s in seeds]},
             "inputs": {"a_roots": [str(r) for r in a_roots], "scored": scored},
             "status": status if status == "formal" else ("not_measured" if y_a[primary] is None else status),
-            "decision": decision, "per_seed": seeds_view, "protocol_identity": proto, "descriptive": descr,
+            "decision": decision, "per_seed": seeds_view, "protocol_identity": proto,
+            "protocol_fields": {"item_level": ITEM_LEVEL, "unit_level_only": list(UNIT_LEVEL),
+                                "rule": "item-level fields are checked on every A record (and against B's record of "
+                                        "the same item); unit-level fields exist only in the units' summaries and are "
+                                        "compared there (b_evidence.protocol_check); a missing one is never a match"},
+            "descriptive": descr,
             "exposure": d["analysis"]["exposure"],
             "reading": _reading(decision, primary, secondary)}
 
@@ -356,9 +464,17 @@ def _episodes(rows: list[dict]) -> dict:
     return RA.episode_summary(rows)
 
 
+def think_states() -> dict[str, str]:
+    """The think state each evaluation directory's rendered prompts carry (the training plan's evaluations)."""
+    plan = json.loads((REPO / "logs/stages/stage-1/teacher_parent_initialization/plans/training_plan.json").read_text())
+    return {e["dir"]: e["think_state"] for u in plan["units"] for e in u["evaluations"]}
+
+
 def _flag(headlines: dict, proto: dict) -> dict:
-    """A's unit headlines, each marked when its unit's protocol is not B's (reported, never pooled)."""
-    bad = {p.split(":", 1)[0].split("[", 1)[0] for p in proto.get("problems", [])}
+    """A's unit headlines, each marked when its unit's protocol is not shown to be B's (reported, never pooled)."""
+    bad = {p.split(":", 1)[0].split("[", 1)[0] for p in proto.get("problems", []) + proto.get("missing", [])}
+    bad |= {k for k, v in (proto.get("per_item") or {}).items() if v.get("present") and not v.get("not_checked")
+            and not v.get("agrees")}
     return {u: {**v, "protocol_is_B": u.replace("/", "__") not in bad} for u, v in headlines.items()}
 
 

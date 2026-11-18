@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "TPI1 COMPLETE and CLOSED 2026-11-18 (H-T NOT_DISTINGUISHED, +1.40 pp, p 0.195; docs/stages/stage-1/teacher_parent_initialization/REPORT.md). Nothing is authorized next; a merge into main is the maintainer's.",
+ "next": "SOB1 PROPOSED at $0 (docs/stages/stage-1/single_operator_budget/README.md): the maintainer's review of the design, the budget draft (plans/proposal.json) and section 9's decisions; nothing is authorized. TPI1 closed; A is the default baseline. A merge into main is the maintainer's.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -153,7 +153,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
@@ -200,7 +200,7 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 0,
-  "run": "none; last: TPI1 tpi_train_20261117_180111 ($19.6325, ALL_DONE), pod deleted, provider-confirmed",
+  "run": "none; last: TPI1 tpi_train_20261117_180111 ($19.6325, ALL_DONE), pod deleted, provider-confirmed; SOB1 has no run",
   "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",

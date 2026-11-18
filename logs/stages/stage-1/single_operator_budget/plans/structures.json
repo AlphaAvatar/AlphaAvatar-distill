@@ -1,0 +1,407 @@
+{
+ "a_596m_reference": {
+  "n": 6.7485,
+  "num_parameters": 596049920,
+  "rule": "TPI1's A: its geometry instantiates to its recorded count, the check of this method",
+  "trainable_parameters": 440467456,
+  "training_flops_per_token": {
+   "with_attention": 18364858368.0,
+   "without_attention": 12190089216
+  }
+ },
+ "arms": {
+  "depth_only": {
+   "build": [
+    "DEPTH"
+   ],
+   "changed_from_teacher": {
+    "attention.k_norm": [
+     4608,
+     2048
+    ],
+    "attention.k_proj": [
+     94371840,
+     41943040
+    ],
+    "attention.o_proj": [
+     377487360,
+     167772160
+    ],
+    "attention.q_norm": [
+     4608,
+     2048
+    ],
+    "attention.q_proj": [
+     377487360,
+     167772160
+    ],
+    "attention.v_proj": [
+     94371840,
+     41943040
+    ],
+    "block RMSNorms": [
+     184320,
+     81920
+    ],
+    "ffn.down_proj": [
+     896532480,
+     398458880
+    ],
+    "ffn.gate_proj": [
+     896532480,
+     398458880
+    ],
+    "ffn.up_proj": [
+     896532480,
+     398458880
+    ]
+   },
+   "checkpoint_bytes": {
+    "final_fp32": 8015407104,
+    "init_bf16": 4007703552,
+    "rule": "derived: 2P / 4P / 4P + 8T (module docstring)",
+    "save_point": 20934572032
+   },
+   "deviation_from_target": -0.00367,
+   "forward_flops_per_token": {
+    "attention": 1073872896.0,
+    "head": 777912320,
+    "linear": 3229614080
+   },
+   "geometry": {
+    "head_dim": 128,
+    "hidden_size": 2560,
+    "intermediate_size": 9728,
+    "num_attention_heads": 32,
+    "num_hidden_layers": 16,
+    "num_key_value_heads": 8,
+    "tie_word_embeddings": true,
+    "vocab_size": 151936
+   },
+   "label": "depth only",
+   "memory": {
+    "checkpointed_inputs_gib": 1.25,
+    "conservative_peak_allocated_gib": 40.46,
+    "conservative_peak_reserved_gib": 42.14,
+    "expected_peak_allocated_gib": 36.21,
+    "l40s_gib": 44.99,
+    "l40s_margin_conservative_reserved_gib": 2.85,
+    "rest_from_tpi1_gib": 1.96,
+    "rest_scale_conservative": 3.167,
+    "rule": "derived from TPI1's measured peak, not measured at this size; the first optimizer steps of the first unit measure it (the trainer's gpu_mem_gb / gpu_mem_reserved_gb)",
+    "static_gib": 33.01
+   },
+   "modules": {
+    "attention.k_norm": 2048,
+    "attention.k_proj": 41943040,
+    "attention.o_proj": 167772160,
+    "attention.q_norm": 2048,
+    "attention.q_proj": 167772160,
+    "attention.v_proj": 41943040,
+    "block RMSNorms": 81920,
+    "embedding (tied head)": 388956160,
+    "ffn.down_proj": 398458880,
+    "ffn.gate_proj": 398458880,
+    "ffn.up_proj": 398458880,
+    "final RMSNorm": 2560
+   },
+   "n": 2.00737,
+   "num_parameters": 2003851776,
+   "trainable_parameters": 1614895616,
+   "training_flops_per_token": {
+    "with_attention": 29230530560.0,
+    "without_attention": 22518824960
+   },
+   "training_flops_ratio_to_tpi1": {
+    "with_attention": 1.5917,
+    "without_attention": 1.8473
+   }
+  },
+  "ffn_attention": {
+   "build": [
+    "FFN",
+    "ATTENTION"
+   ],
+   "changed_from_teacher": {
+    "attention.o_proj": [
+     377487360,
+     188743680
+    ],
+    "attention.q_proj": [
+     377487360,
+     188743680
+    ],
+    "ffn.down_proj": [
+     896532480,
+     353894400
+    ],
+    "ffn.gate_proj": [
+     896532480,
+     353894400
+    ],
+    "ffn.up_proj": [
+     896532480,
+     353894400
+    ]
+   },
+   "checkpoint_bytes": {
+    "final_fp32": 8068265984,
+    "init_bf16": 4034132992,
+    "rule": "derived: 2P / 4P / 4P + 8T (module docstring)",
+    "save_point": 21093148672
+   },
+   "deviation_from_target": 0.0029,
+   "forward_flops_per_token": {
+    "attention": 1208107008.0,
+    "head": 777912320,
+    "linear": 3255828480
+   },
+   "geometry": {
+    "head_dim": 128,
+    "hidden_size": 2560,
+    "intermediate_size": 3840,
+    "num_attention_heads": 16,
+    "num_hidden_layers": 36,
+    "num_key_value_heads": 8,
+    "tie_word_embeddings": true,
+    "vocab_size": 151936
+   },
+   "label": "FFN + attention only",
+   "memory": {
+    "checkpointed_inputs_gib": 2.81,
+    "conservative_peak_allocated_gib": 38.46,
+    "conservative_peak_reserved_gib": 40.14,
+    "expected_peak_allocated_gib": 37.97,
+    "l40s_gib": 44.99,
+    "l40s_margin_conservative_reserved_gib": 4.84,
+    "rest_from_tpi1_gib": 1.96,
+    "rest_scale_conservative": 1.25,
+    "rule": "derived from TPI1's measured peak, not measured at this size; the first optimizer steps of the first unit measure it (the trainer's gpu_mem_gb / gpu_mem_reserved_gb)",
+    "static_gib": 33.2
+   },
+   "modules": {
+    "attention.k_norm": 4608,
+    "attention.k_proj": 94371840,
+    "attention.o_proj": 188743680,
+    "attention.q_norm": 4608,
+    "attention.q_proj": 188743680,
+    "attention.v_proj": 94371840,
+    "block RMSNorms": 184320,
+    "embedding (tied head)": 388956160,
+    "ffn.down_proj": 353894400,
+    "ffn.gate_proj": 353894400,
+    "ffn.up_proj": 353894400,
+    "final RMSNorm": 2560
+   },
+   "n": 1.99422,
+   "num_parameters": 2017066496,
+   "trainable_parameters": 1628110336,
+   "training_flops_per_token": {
+    "with_attention": 29872324608.0,
+    "without_attention": 22623682560
+   },
+   "training_flops_ratio_to_tpi1": {
+    "with_attention": 1.6266,
+    "without_attention": 1.8559
+   }
+  },
+  "residual_width": {
+   "build": [
+    "RESIDUAL_WIDTH"
+   ],
+   "changed_from_teacher": {
+    "attention.k_proj": [
+     94371840,
+     47185920
+    ],
+    "attention.o_proj": [
+     377487360,
+     188743680
+    ],
+    "attention.q_proj": [
+     377487360,
+     188743680
+    ],
+    "attention.v_proj": [
+     94371840,
+     47185920
+    ],
+    "block RMSNorms": [
+     184320,
+     92160
+    ],
+    "embedding (tied head)": [
+     388956160,
+     194478080
+    ],
+    "ffn.down_proj": [
+     896532480,
+     448266240
+    ],
+    "ffn.gate_proj": [
+     896532480,
+     448266240
+    ],
+    "ffn.up_proj": [
+     896532480,
+     448266240
+    ],
+    "final RMSNorm": [
+     2560,
+     1280
+    ]
+   },
+   "checkpoint_bytes": {
+    "final_fp32": 8044954624,
+    "init_bf16": 4022477312,
+    "rule": "derived: 2P / 4P / 4P + 8T (module docstring)",
+    "save_point": 22579039232
+   },
+   "deviation_from_target": 0.0,
+   "forward_flops_per_token": {
+    "attention": 2416214016.0,
+    "head": 388956160,
+    "linear": 3633315840
+   },
+   "geometry": {
+    "head_dim": 128,
+    "hidden_size": 1280,
+    "intermediate_size": 9728,
+    "num_attention_heads": 32,
+    "num_hidden_layers": 36,
+    "num_key_value_heads": 8,
+    "tie_word_embeddings": true,
+    "vocab_size": 151936
+   },
+   "label": "residual width only",
+   "memory": {
+    "checkpointed_inputs_gib": 1.41,
+    "conservative_peak_allocated_gib": 42.9,
+    "conservative_peak_reserved_gib": 44.58,
+    "expected_peak_allocated_gib": 38.65,
+    "l40s_gib": 44.99,
+    "l40s_margin_conservative_reserved_gib": 0.41,
+    "rest_from_tpi1_gib": 1.96,
+    "rest_scale_conservative": 3.167,
+    "rule": "derived from TPI1's measured peak, not measured at this size; the first optimizer steps of the first unit measure it (the trainer's gpu_mem_gb / gpu_mem_reserved_gb)",
+    "static_gib": 35.29
+   },
+   "modules": {
+    "attention.k_norm": 4608,
+    "attention.k_proj": 47185920,
+    "attention.o_proj": 188743680,
+    "attention.q_norm": 4608,
+    "attention.q_proj": 188743680,
+    "attention.v_proj": 47185920,
+    "block RMSNorms": 92160,
+    "embedding (tied head)": 194478080,
+    "ffn.down_proj": 448266240,
+    "ffn.gate_proj": 448266240,
+    "ffn.up_proj": 448266240,
+    "final RMSNorm": 1280
+   },
+   "n": 2.0,
+   "num_parameters": 2011238656,
+   "trainable_parameters": 1816760576,
+   "training_flops_per_token": {
+    "with_attention": 35436789760.0,
+    "without_attention": 23355719680
+   },
+   "training_flops_ratio_to_tpi1": {
+    "with_attention": 1.9296,
+    "without_attention": 1.916
+   }
+  }
+ },
+ "depth_neighbours": {
+  "15": 1902920960,
+  "16": 2003851776,
+  "17": 2104782592
+ },
+ "design_sha256": "f805112d2ad5c43bf3b3e2a6d9550bfb982cc1ad932d27a778597796d1239e12",
+ "ffn_attention_alternatives": [
+  {
+   "attention_params_retained": 0.4,
+   "deviation_from_target": -0.00297,
+   "ffn_params_retained": 0.4605,
+   "intermediate_size": 4480,
+   "num_attention_heads": 8,
+   "num_key_value_heads": 8,
+   "num_parameters": 2005270016
+  },
+  {
+   "attention_params_retained": 0.6,
+   "deviation_from_target": 0.0029,
+   "ffn_params_retained": 0.3947,
+   "intermediate_size": 3840,
+   "num_attention_heads": 16,
+   "num_key_value_heads": 8,
+   "num_parameters": 2017066496
+  },
+  {
+   "attention_params_retained": 0.8,
+   "deviation_from_target": 0.00877,
+   "ffn_params_retained": 0.3289,
+   "intermediate_size": 3200,
+   "num_attention_heads": 24,
+   "num_key_value_heads": 8,
+   "num_parameters": 2028862976
+  }
+ ],
+ "implementation": "transformers.Qwen3ForCausalLM on the meta device, from the teacher's pinned config.json",
+ "mean_attention_context": 4096.5,
+ "schema": "aadistill.stage1.single_operator_budget.structures/v1",
+ "spread": {
+  "max_minus_min": 13214720,
+  "pairs": {
+   "depth_only - ffn_attention": -13214720,
+   "depth_only - residual_width": -7386880,
+   "ffn_attention - residual_width": 5827840
+  },
+  "relative_to_target": 0.00657
+ },
+ "target": {
+  "n": 2.0,
+  "num_parameters": 2011234048
+ },
+ "teacher": {
+  "config_sha256": "8ba006f74fecfaaeb392872a60f4a480e7ec9860153d2e1b769ec81f9a147f8a",
+  "geometry": {
+   "head_dim": 128,
+   "hidden_size": 2560,
+   "intermediate_size": 9728,
+   "num_attention_heads": 32,
+   "num_hidden_layers": 36,
+   "num_key_value_heads": 8,
+   "tie_word_embeddings": true,
+   "vocab_size": 151936
+  },
+  "modules": {
+   "attention.k_norm": 4608,
+   "attention.k_proj": 94371840,
+   "attention.o_proj": 377487360,
+   "attention.q_norm": 4608,
+   "attention.q_proj": 377487360,
+   "attention.v_proj": 94371840,
+   "block RMSNorms": 184320,
+   "embedding (tied head)": 388956160,
+   "ffn.down_proj": 896532480,
+   "ffn.gate_proj": 896532480,
+   "ffn.up_proj": 896532480,
+   "final RMSNorm": 2560
+  },
+  "num_parameters": 4022468096
+ },
+ "tpi1_measured": {
+  "all_in_rule": "seed 20260801's train_seconds (trained from step 0 in one session: validation, save points and logging included) over its 9,701 steps",
+  "all_in_seconds_per_step": 3.4087,
+  "median_seconds_per_step": [
+   3.27,
+   3.29
+  ],
+  "peak_allocated_gib": 17.47,
+  "peak_reserved_gib": 19.15,
+  "sequence_length": 8192,
+  "source": "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_train_20261117_180111/evidence/units.json"
+ }
+}

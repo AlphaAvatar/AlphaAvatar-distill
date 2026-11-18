@@ -37,15 +37,75 @@
    "live_state": null
   },
   {
+   "logical_id": "projected_residual",
+   "kind": "experiment",
+   "stage_id": "1",
+   "scripts": "scripts/stages/stage-1/projected_residual",
+   "logs": "logs/stages/stage-1/projected_residual",
+   "artifacts": null,
+   "configs": "configs/stages/stage-1/projected_residual",
+   "data": null,
+   "docs": "docs/stages/stage-1/projected_residual",
+   "live_state": null
+  },
+  {
+   "logical_id": "reasoning_inheritance",
+   "kind": "experiment",
+   "stage_id": "1",
+   "scripts": "scripts/stages/stage-1/reasoning_inheritance",
+   "logs": "logs/stages/stage-1/reasoning_inheritance",
+   "artifacts": "artifacts/stages/stage-1/reasoning_inheritance",
+   "configs": "configs/stages/stage-1/reasoning_inheritance",
+   "data": null,
+   "docs": "docs/stages/stage-1/reasoning_inheritance",
+   "live_state": null
+  },
+  {
+   "logical_id": "teacher_parent_initialization",
+   "kind": "experiment",
+   "stage_id": "1",
+   "scripts": "scripts/stages/stage-1/teacher_parent_initialization",
+   "logs": "logs/stages/stage-1/teacher_parent_initialization",
+   "artifacts": "artifacts/stages/stage-1/teacher_parent_initialization",
+   "configs": "configs/stages/stage-1/teacher_parent_initialization",
+   "data": null,
+   "docs": "docs/stages/stage-1/teacher_parent_initialization",
+   "live_state": null
+  },
+  {
+   "logical_id": "single_operator_budget",
+   "kind": "experiment",
+   "stage_id": "1",
+   "scripts": "scripts/stages/stage-1/single_operator_budget",
+   "logs": "logs/stages/stage-1/single_operator_budget",
+   "artifacts": null,
+   "configs": "configs/stages/stage-1/single_operator_budget",
+   "data": null,
+   "docs": "docs/stages/stage-1/single_operator_budget",
+   "live_state": null
+  },
+  {
    "logical_id": "reasoning_data",
    "kind": "experiment",
    "stage_id": "2",
    "scripts": "scripts/stages/stage-2/reasoning_data",
    "logs": "logs/stages/stage-2/reasoning_data",
-   "artifacts": null,
+   "artifacts": "artifacts/stages/stage-2/reasoning_data",
    "configs": "configs/stages/stage-2/reasoning_data",
    "data": "data/stages/stage-2/reasoning_data",
    "docs": "docs/stages/stage-2/reasoning_data",
+   "live_state": null
+  },
+  {
+   "logical_id": "teacher_modes",
+   "kind": "experiment",
+   "stage_id": "2",
+   "scripts": "scripts/stages/stage-2/teacher_modes",
+   "logs": "logs/stages/stage-2/teacher_modes",
+   "artifacts": "artifacts/stages/stage-2/teacher_modes",
+   "configs": "configs/stages/stage-2/teacher_modes",
+   "data": "data/stages/stage-2/teacher_modes",
+   "docs": "docs/stages/stage-2/teacher_modes",
    "live_state": null
   }
  ]

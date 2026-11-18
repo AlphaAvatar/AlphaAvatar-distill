@@ -84,3 +84,38 @@ a shared block from several teacher blocks (alignment before averaging) and a re
 after recovery training, at equal parameters but not equal compute: k executions keep the FLOPs of the k sublayers.
 A Stage-6 design records its own parameter-, FLOPs- and latency-matched comparisons (AGENTS.md 4.8); nothing here
 starts one.
+
+# Minitron: depth against width at a matched parameter count, after distillation (read for SOB1)
+
+Read 2026-11-18 (UTC) from the arXiv HTML of Sreenivas et al., *LLM Pruning and Distillation in Practice: The
+Minitron Approach*, arXiv:2408.11796 **v4** (body through section 6). Status: `used` (it frames SOB1's hypothesis and
+its FFN + attention split); topics `depth-compression`, `ffn-pruning`. Its companion, Muralidharan et al.,
+arXiv:2407.14679v2, was read through section 4.1. Its depth-vs-width table reports only LM loss after about 1.8B
+tokens, and its parameter counts are not shown matched, so nothing is taken from it here.
+
+* **What it shows (2408.11796v4).**
+  * *Setup.* Llama 3.1 8B (32 layers, hidden 4096, MLP 14336, 32 / 8 heads) was pruned two ways to 4.5B
+    parameters (about 1.8x):
+    * width: hidden 3072, MLP 9216, all heads kept;
+    * depth: 16 of the 32 layers removed as one contiguous block, chosen by Winogrande accuracy
+      rather than LM loss.
+    * Both were then distilled with logit-only forward KL on 94B tokens (context 8192).
+  * *Base models (Table 1).* Width beat depth on every benchmark reported: GSM8K 41.2 vs 16.8, MMLU 60.5 vs 58.7,
+    ARC-C 55.6 vs 52.6, HellaSwag 76.1 vs 73.2, MBPP 32.4 vs 30.7.
+  * *Instruct models (Table 2).* Width won GSM8K 79.8 vs 71.1, HumanEval, MBPP, IFEval and MT-Bench; depth won MMLU,
+    GPQA and BFCLv2.
+  * *Other findings.* The paper says the width model starts from a lower loss and stays ahead (section 4,
+    Figure 7). It reports stronger width-pruned accuracy when attention heads are kept and other dimensions pruned
+    (Insight 3), without head-pruning ablation numbers in the text read.
+* **What SOB1 takes from it.**
+  * *The hypothesis.* "Depth first at N ≤ 2" is to be tested against published evidence that went the other way
+    at about 1.8x.
+  * *The split.* One reason for the FFN + attention split: keep most attention, prune mostly the MLP.
+* **Where SOB1 differs.**
+  * *Teacher.* A 4B hybrid thinking teacher.
+  * *Selection.* Non-contiguous greedy layer removal by causal KL, and activation-importance FFN, head and PCA width
+    selections.
+  * *Recovery size.* About 0.16B tokens processed in recovery, about 1/600 of theirs.
+  * *Measurement.* Free-generation fluid reasoning on eval-set-1 instead of benchmark scores.
+  * *No compression-ratio claim.* The paper makes no statement about depth against width as a function of the
+    compression ratio.

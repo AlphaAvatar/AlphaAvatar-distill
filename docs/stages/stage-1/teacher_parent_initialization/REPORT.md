@@ -4,7 +4,13 @@ Stage 1 owns this round; the training execution stage is `stage3_recovery`. The 
 [`README.md`](README.md); the evidence is in
 [`logs/stages/stage-1/teacher_parent_initialization/`](../../../../logs/stages/stage-1/teacher_parent_initialization/).
 Recorded 2026-11-18 (UTC). Terminal state: **COMPLETE** (every registered unit measured, the primary comparison
-formal).
+formal). Revised later on 2026-11-18 (UTC): wording of sections 1, 3, 4 and 5, the protocol re-check (section 10), and the
+maintainer's baseline decision (section 10), with no change to any number.
+
+**Baseline decision (maintainer, 2026-11-18 UTC).** From now on the reasoning-inheritance research uses A
+(`A_teacher_parent`, teacher-parent initialization) as its default baseline. B (`B_packed_top1`, Research A's packed
+Top-1) is kept as a historical reference. The decision rests on the measured differences below; TPI1's own verdict is
+unchanged: COMPLETE / NOT_DISTINGUISHED, with the non-thinking result descriptive as registered.
 
 ## 1. Result
 
@@ -30,7 +36,9 @@ per arm):
 * eval-set-1 is development-exposed: nothing here is a never-seen blind result.
 
 The formal output is [`analyses/teacher_parent.json`](../../../../logs/stages/stage-1/teacher_parent_initialization/analyses/teacher_parent.json)
-(`analysis.py`, `status: formal`; every A record's protocol equals B's, no unit incomplete).
+(`analysis.py`, `status: formal`; no unit incomplete). A's fluid unit carries B's generation protocol in all four
+seed × mode cells: no field differs and none is missing in the units' summaries, and every record agrees item by
+item. Section 10 lists which fields were checked per record and which only per unit.
 
 Any difference between the arms belongs to the whole A recipe: every selection made on the teacher, and the residual
 PCA re-aggregated from the teacher's statistics at the kept layers. It is never attributable to one of those changes.
@@ -74,8 +82,9 @@ Validation is the recipe's fixed 64 packed sequences, teacher-forced (a diagnost
 * By step 1,212 (the first validation after the 485 warmup steps) A is below B, and it stays below at every later
   validation in both seeds. It ends 0.028 / 0.029 lower in CE and 0.028 / 0.029 lower in KD.
 * AGENTS.md 4.2 warns that initialization NLL is not recovered behaviour. Here the step-0 ranking reversed after
-  training: the initialization that is much worse at step 0 trains to a lower validation loss and is not worse on
-  eval-set-1.
+  training: the initialization that is much worse at step 0 trains to a lower validation loss. On eval-set-1 its
+  thinking-mode static fluid accuracy differs from B's by +1.40 pp (95% interval [−0.53, +3.45] pp, not
+  distinguished), and its non-thinking accuracy by +2.37 pp ([+0.61, +4.23] pp, descriptive).
 
 Every unit has one log across resumes (`evidence/A_teacher_parent-s<seed>/train/train_log.jsonl`). Seed 20260726's
 log holds, before its `resume_loaded` event, the lost session's steps 2,209–2,540 (a discarded branch, never pooled;
@@ -102,15 +111,20 @@ B's thinking-mode 10.35% / 10.18% reproduce A-MIX's 10.26% (B's own audit).
 
 ### By reasoning axis (static formal core, both seeds pooled; descriptive)
 
-| axis | n | A thinking | B thinking | A non-thinking | B non-thinking |
-| --- | --- | --- | --- | --- | --- |
-| task-contained deduction | 378 | 23.54% (89) | 21.69% (82) | 26.72% (101) | 24.87% (94) |
-| inductive rule discovery | 284 | 3.52% (10) | 1.76% (5) | 5.28% (15) | 2.11% (6) |
-| compositional generalization | 288 | 11.81% (34) | 9.72% (28) | 12.85% (37) | 8.68% (25) |
-| abstract / analogical (sub-category) | 190 | 0.00% (0) | 1.05% (2) | 1.05% (2) | 1.58% (3) |
+Items are the distinct questions; independence groups are what the registered test resamples (an item and its other
+seed's copy are one unit); records are the answers, one per item and seed. Accuracy is correct records over records.
 
-The counts per axis are small, especially for inductive rule discovery and abstract / analogical, so no axis is read
-on its own.
+| axis | items | independence groups | records (2 seeds) | A thinking | B thinking | A non-thinking | B non-thinking |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| task-contained deduction | 189 | 177 | 378 | 23.54% (89) | 21.69% (82) | 26.72% (101) | 24.87% (94) |
+| inductive rule discovery | 142 | 142 | 284 | 3.52% (10) | 1.76% (5) | 5.28% (15) | 2.11% (6) |
+| compositional generalization | 144 | 144 | 288 | 11.81% (34) | 9.72% (28) | 12.85% (37) | 8.68% (25) |
+| abstract / analogical (sub-category) | 95 | 95 | 190 | 0.00% (0) | 1.05% (2) | 1.05% (2) | 1.58% (3) |
+| static formal core | 570 | 558 | 1,140 | 11.67% (133) | 10.26% (117) | 13.60% (155) | 11.23% (128) |
+
+The four rows are disjoint (abstract / analogical items belong to none of the three axes above), and no
+independence group spans two of them. The counts per axis are small, especially for inductive rule discovery and
+abstract / analogical, so no axis is read on its own.
 
 ### Interactive adaptation and planning (144 episodes per seed, formal core; descriptive)
 
@@ -154,13 +168,13 @@ All values are percentages. `eval_behavior_v0` (65) has no registered correctnes
 
 ## 5. What the results say, and what they do not
 
-* **They say:** under the fixed structure and the A-MIX recipe, initializing from teacher-level selections with
-  teacher statistics does not measurably change thinking-mode static fluid accuracy against the packed Top-1. The
-  estimate is +1.40 pp in each seed. It does not reach the registered threshold, and the plausible range runs from
-  about −0.5 to +3.5 pp.
-* **They say:** a much worse initialization by teacher-forced measures (step-0 CE 22 vs 7, state KL 19.6 vs 6.8) is
-  not a worse student after this recovery. On validation CE and KD it is slightly better from step 1,212 on, in both
-  seeds.
+* **They say:** under the fixed structure and the A-MIX recipe, the registered test does not distinguish
+  initializing from teacher-level selections with teacher statistics from the packed Top-1 in thinking-mode static
+  fluid accuracy. The difference is +1.40 pp in each seed and pooled, 95% interval [−0.53, +3.45] pp, p = 0.195.
+  In non-thinking mode it is +2.37 pp, [+0.61, +4.23] pp, untested (descriptive).
+* **They say:** an initialization much worse by teacher-forced measures (step-0 CE 22 vs 7, state KL 19.6 vs 6.8)
+  ends this recovery with a validation CE 0.028 / 0.029 lower and a KD 0.028 / 0.029 lower than B's, lower at every
+  validation from step 1,212 on, in both seeds. These are diagnostics, not a capability result.
 * **They do not say:** that the arms are equivalent; that the non-thinking +2.37 pp is real (untested under the
   registered sequence); that either change inside A is responsible; that the result holds for another recipe, a longer
   recovery or a held-out blind set. Absolute fluid accuracy for both arms is low (10–14%).
@@ -259,3 +273,38 @@ This reproduces `analyses/teacher_parent.json` from the archived A generations a
 from it are in `runs/tpi_train_20261117_180111/evidence/evidence_archive.json`. The executables are the session
 commit `e8dc921d` (the bundle `aad_autoinit_e8dc921d.bundle`), and the commands are in [`README.md`](README.md)
 section 5.
+
+## 10. After closeout (2026-11-18 UTC, $0)
+
+**Protocol re-check.** `analysis.py` now separates what a record shows about its own generation protocol from what
+only a unit's summary shows, and treats a missing value as missing, never as agreement:
+
+* Unit-level (`b_evidence.protocol_check`, against `audit/b_evidence.json :: protocol_to_match`): the decoding
+  protocol id and sha256, the sampling parameters, the chat-template and tokenizer sha256, the degeneration check
+  interval, the action protocol and task file (fluid), and the capability runner's protocol, degeneration stop and
+  max-tokens rule. A unit whose records exist but whose summary is absent, or whose key field is absent or empty on
+  either side, is `missing`. Result: in all four seed × mode cells, nothing differs and nothing is missing.
+* Item-level (`analysis.item_protocol`, every record of every registered unit, and against B's record of the same
+  item): each turn's seed is the seed rule's for its item and turn (8,560 turns), prompt tokens plus allowance equal
+  the 8,192 context (8,560), each rendered prompt has the mode's think state (8,560), each naturally terminated turn
+  ends with the registered stop id (7,201), the system message or source is B's (6,864 records), and turn 0's prompt
+  length and seed equal B's (6,864 records). Result: no disagreement.
+* The decision, the per-seed numbers and every descriptive number reproduce unchanged from the archive.
+
+**Driver repairs** (`train_driver.py`; regression `tests/test_takeover.py`). None of these changed a TPI1 result, but
+each could have cost a later round its finished work:
+
+* *Final-weights takeover.* `restore_final` read only `run_completion.json`, while a resumed run's trainer writes
+  `run_completion_resume_step<N>.json` (seed 20260726 wrote `run_completion_resume_step009701.json`). A replacement
+  attempt would have found no completion, no save point (all retired) and retrained the unit from step 0. It now reads
+  the record under either name (`a1_units.completion`), requires the unit's config hash, 9,701 of 9,701 steps and
+  `completed_all_steps`, restores weights only when they hash to the final's record, and runs only the evaluations
+  without a formal report. The final's relay copy now carries its completion record.
+* *Save-point rotation.* The previous save point was deleted as soon as the next one verified, while the record of
+  the new one lived only on the pod until the next poll. A pod lost in that window would have left the dev box naming
+  a deleted save point. Now each save point (and each final) first puts its own record beside its files on the relay
+  and confirms that the listing a replacement reads names it as the latest; only then is the previous one deleted.
+  The interruption test loses the pod at each of five points of a rotation, and after the final retired the save
+  points; every replacement restores the latest save point the relay holds, or the final, and trains nothing twice.
+* *Protocol check.* As above.
+

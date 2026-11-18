@@ -1,0 +1,39 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.resource_snapshot/v1",
+ "rule": "read once while preparing the proposal; every figure is read again at issue and at launch, and none of them authorizes anything",
+ "project_position": {
+  "fetched_utc": "2026-11-18T19:33:14+00:00",
+  "source": "shared.study_engineering.live_position (provider billing, read-only)",
+  "project_cap_usd": 1000.0,
+  "committed_usd": 969.7558,
+  "project_remaining_usd": 30.2442,
+  "balance_usd": 40.2437,
+  "account_pods": 0,
+  "account_volumes": 0
+ },
+ "relay": {
+  "probed_utc": "2026-11-18T19:41Z",
+  "repo": "AlphaAvatar/aadistill-artifacts",
+  "source": "aadistill.runtime.hub_capacity.would_accept (the LFS batch endpoint: no bytes moved), bisected",
+  "headroom_gib": [
+   60.07,
+   60.1
+  ],
+  "artifacts_repo_lfs_gib": 27.49,
+  "refused": "60.76 GiB (three inits + two save points + one final): 'Private storage limit reached'",
+  "note": "the limit is account-wide"
+ },
+ "dev_box": {
+  "read_utc": "2026-11-18T19:45Z",
+  "filesystem": "/",
+  "size_bytes": 210978394112,
+  "used_bytes": 198512357376,
+  "free_bytes": 3658616832,
+  "this_project_gib": {
+   "repository": 29,
+   "aad_artifacts": 23,
+   "aad_scratch": 2.3
+  },
+  "note": "shared with another project's files (about 50 GiB outside this project)"
+ }
+}

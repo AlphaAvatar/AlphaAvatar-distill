@@ -1637,28 +1637,1547 @@
    ]
   }
  },
+ "protocol_fields": {
+  "item_level": {
+   "context": "every turn's prompt tokens + generation allowance = the registered context (capability: context_len too)",
+   "paired_with_B": "turn 0's prompt tokens and seed equal B's record of the same item (same rendered prompt length, same seed)",
+   "sampling_seed": "every turn's seed is the seed rule's for <namespace>|<item>|<turn>|0 (verifies the base, the key, the namespace and one sample per item)",
+   "stop_id": "every naturally terminated turn ends with a registered stop id",
+   "system_message": "fluid: the record's system turn is the registered message; capability: the record's system_source (the runner default, whose text is the summary's, or the item's own system turn) is B's for the same item",
+   "think_state": "every turn's rendered prompt has the mode's think state (the template's enable_thinking)"
+  },
+  "rule": "item-level fields are checked on every A record (and against B's record of the same item); unit-level fields exist only in the units' summaries and are compared there (b_evidence.protocol_check); a missing one is never a match",
+  "unit_level_only": [
+   "decoding_protocol_id",
+   "decoding_sha256",
+   "sampling (temperature, top_p, top_k, min_p, penalties)",
+   "chat_template_sha256",
+   "tokenizer_sha256",
+   "degeneration_check_every",
+   "action_protocol (fluid)",
+   "protocol / degeneration_stop / max_tokens_rule (capability)",
+   "tasks_sha256 (fluid)",
+   "engine and library versions (reported, not a condition)"
+  ]
+ },
  "protocol_identity": {
   "H-N": {
    "20260726": {
     "fluid_protocol_is_B": true,
+    "fluid_status": "consistent",
     "incomplete_units": [],
+    "missing": [],
+    "per_item": {
+     "fluid_reasoning_720__dev_v1": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 1463,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 720,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 1463,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 1344,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 720,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 1463,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__answerability_paired": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__eval_behavior_v0": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 67,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__gsm8k": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 98,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__knowledge": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 142,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__math_verified": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 87,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__multihop": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__rag": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__safety_paired": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 79,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_legacy_150__items": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 142,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     }
+    },
     "problems": []
    },
    "20260801": {
     "fluid_protocol_is_B": true,
+    "fluid_status": "consistent",
     "incomplete_units": [],
+    "missing": [],
+    "per_item": {
+     "fluid_reasoning_720__dev_v1": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 1496,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 720,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 1496,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 1387,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 720,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 1496,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__answerability_paired": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__eval_behavior_v0": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 69,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__gsm8k": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__knowledge": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 140,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__math_verified": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 83,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__multihop": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__rag": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__safety_paired": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 83,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_legacy_150__items": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 146,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     }
+    },
     "problems": []
    }
   },
   "H-T": {
    "20260726": {
     "fluid_protocol_is_B": true,
+    "fluid_status": "consistent",
     "incomplete_units": [],
+    "missing": [],
+    "per_item": {
+     "fluid_reasoning_720__dev_v1": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 785,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 720,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 785,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 489,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 720,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 785,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__answerability_paired": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 114,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__eval_behavior_v0": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 64,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__gsm8k": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 90,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__knowledge": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 106,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__math_verified": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 48,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__multihop": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 90,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__rag": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 92,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__safety_paired": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 63,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_legacy_150__items": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 130,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     }
+    },
     "problems": []
    },
    "20260801": {
     "fluid_protocol_is_B": true,
+    "fluid_status": "consistent",
     "incomplete_units": [],
+    "missing": [],
+    "per_item": {
+     "fluid_reasoning_720__dev_v1": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 832,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 720,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 832,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 526,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 720,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 832,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__answerability_paired": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 116,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 120,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__eval_behavior_v0": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 60,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 76,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__gsm8k": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 89,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__knowledge": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__math_verified": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 58,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__multihop": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 91,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__rag": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 98,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_capability_846__safety_paired": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 39,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 100,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     },
+     "stage3_legacy_150__items": {
+      "agrees": true,
+      "checks": {
+       "context": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "paired_with_B": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "sampling_seed": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "stop_id": {
+        "checked": 131,
+        "disagree": 0,
+        "first": []
+       },
+       "system_message": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       },
+       "think_state": {
+        "checked": 150,
+        "disagree": 0,
+        "first": []
+       }
+      },
+      "present": true,
+      "unverifiable": []
+     }
+    },
     "problems": []
    }
   }

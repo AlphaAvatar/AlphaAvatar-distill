@@ -1,0 +1,421 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.design/v1",
+ "study_id": "SOB1",
+ "experiment": "single_operator_budget",
+ "stage": "stage-1",
+ "training_execution_stage": "stage3_recovery",
+ "recorded_utc": "2026-11-18T20:00:00Z",
+ "status": "proposed: written for the maintainer's review of the design and the budget; authorizes nothing, and no paid search, recovery training or generation runs until a grant exists",
+ "branch": "research/reasoning-inheritance (each round its own study, configs, logs, tests and report; not merged to main)",
+ "question": "From the same ~4B teacher, compressed to about the same real parameter count, how much fluid reasoning does compressing ONLY depth, ONLY the FFN and attention, or ONLY the residual width lose, and after the same Stage-3 recovery which of the three keeps more?",
+ "budget_point": {
+  "n_target": 2.0,
+  "definition": "N = P_teacher / P_student, total parameters of the real Qwen3 implementation with the tied embedding counted once (transformers Qwen3ForCausalLM on the meta device; structures.py)",
+  "role": "the first candidate switching point; a single budget point speaks only for its neighbourhood",
+  "later": "past the candidate threshold, category A (joint compression, then recovery) and category C (compression and recovery in stages) get their own same-endpoint controls, as separate rounds"
+ },
+ "hypothesis": {
+  "statement": "at N <= 2, depth compression keeps more fluid reasoning than FFN + attention or residual-width compression at the same parameter count",
+  "status": "a hypothesis to test, not an assumption; nothing here selects a recipe by it",
+  "prior_evidence_against": "Minitron (Sreenivas et al., arXiv:2408.11796v4, Table 1): Llama 3.1 8B pruned to 4.5B (about 1.8x) and distilled on 94B tokens; the width-pruned model (hidden 3072, MLP 9216, all 32 / 8 heads kept) beat the depth-pruned one (16 of 32 layers) on every base benchmark reported, GSM8K 41.2 vs 16.8. A different teacher, data scale (94B vs about 0.16B tokens here) and metric; see docs/stages/stage-1/single_operator_budget/README.md"
+ },
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192",
+  "identity": {
+   "path": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+   "sha256": "624027db1f8608f9637a72ef77e82e30c2a8b1b4c1ebd513422f89bbdeba7b7f"
+  },
+  "lineage": "the hybrid Qwen3-4B, NOT Qwen3-4B-Thinking-2507 (AGENTS.md P17.1): selection, calibration, statistics, training data, the online KD teacher, tokenizer, chat template and configuration all derive from this one checkpoint",
+  "config_sha256": "8ba006f74fecfaaeb392872a60f4a480e7ec9860153d2e1b769ec81f9a147f8a",
+  "num_parameters": 4022468096
+ },
+ "baseline": {
+  "rule": "maintainer 2026-11-18: TPI1's A (A_teacher_parent, teacher-parent initialization) is the reasoning-inheritance research's default baseline; Research A's B (B_packed_top1) stays a historical reference",
+  "what_is_reused": "A's initialization METHOD: every selection made on the original teacher with the operator, profile and selection rule A used, and every width transform from the teacher's own statistics. A's 596M weights are a historical baseline only on their own structure; no arm here starts from them",
+  "a_reference": {
+   "report": "docs/stages/stage-1/teacher_parent_initialization/REPORT.md",
+   "analysis": "logs/stages/stage-1/teacher_parent_initialization/analyses/teacher_parent.json",
+   "structure": "596,049,920 parameters (N 6.75): 28 layers, width 1024, FFN 3072, 16 / 8 heads",
+   "role": "reported beside the arms as context; never an arm of the registered comparison"
+  }
+ },
+ "operators": {
+  "rule": "A's: each operator's implementation and calibration profile as A used it, run on the unmodified teacher; a selection already recorded on the teacher is reused when its target is this round's, and every rebuild must equal its recorded digest",
+  "FFN": {
+   "impl_id": "ffn.activation_importance_v0",
+   "profile_id": "calib.hybrid_d4_base@v2",
+   "legal": "any intermediate size up to 9,728 (per-block top-k of E[|a|] x ||down column||); this round uses multiples of 128"
+  },
+  "DEPTH": {
+   "impl_id": "depth.causal_kl_greedy_v1",
+   "profile_id": "calib.hybrid_d4_base@v2",
+   "legal": "any layer count; greedy removal, each round scoring every remaining layer against the unbypassed teacher (reference parent_state)"
+  },
+  "ATTENTION": {
+   "impl_id": "attention.activation_importance_v1",
+   "profile_id": "calib.hybrid_d4_rh@v2",
+   "legal": "query heads a multiple of the 8 KV heads (8, 16, 24 or 32); KV heads, head_dim 128 and the GQA grouping are preserved by the operator's contract (refuse_unless_reducible_within_groups)"
+  },
+  "RESIDUAL_WIDTH": {
+   "impl_id": "width.global_pca_v0",
+   "profile_id": "calib.hybrid_d4_rh@v2",
+   "legal": "any hidden size (the result equals the target exactly); this round uses multiples of 128",
+   "points": "A's rule with every layer kept: K = 0..35, points = sorted({0, *K}) + [36] = all 37 residual points, weights 9 (embedding output) / 1 / 8 (post-final-norm)"
+  }
+ },
+ "calibration": {
+  "rule": "the packed search's own session inputs (v3), as TPI1: random shuffle -> sequential packing -> truncation -> standard causal attention over 8,192-token sequences (AGENTS.md P19)",
+  "forward_context": {
+   "attention": "causal_continuous_positions_v1",
+   "materialization": "prefix_restart_v1",
+   "packing": "sequential_truncate_v1",
+   "sequence_length": 8192,
+   "shuffle": "sha256_keyed_v1",
+   "shuffle_seed": 20261105,
+   "truncate": true
+  },
+  "profiles_doc": {
+   "path": "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
+   "sha256": "87fb310d0e66ddab0a17f1e37e8196c67b50a62d5c49c79becaaa8181665467b"
+  },
+  "before_packing": {
+   "calib.hybrid_d4_base@v2": {
+    "items": 558,
+    "cells": 28,
+    "unique_scored_positions": 211203,
+    "used_by": [
+     "FFN",
+     "DEPTH"
+    ]
+   },
+   "calib.hybrid_d4_rh@v2": {
+    "items": 388,
+    "cells": 28,
+    "unique_scored_positions": 213361,
+    "used_by": [
+     "ATTENTION",
+     "RESIDUAL_WIDTH"
+    ]
+   }
+  },
+  "after_packing": {
+   "calib.hybrid_d4_base@v2": {
+    "packed_sequences": 79,
+    "source": "the journal's DEPTH reference_fills"
+   },
+   "calib.hybrid_d4_rh@v2": {
+    "packed_sequences": 58,
+    "non_padding_tokens": 236939,
+    "scored_positions": 213361,
+    "executed_positions": 476466,
+    "source": "the journal's ATTENTION trace"
+   }
+  }
+ },
+ "arms": {
+  "depth_only": {
+   "label": "depth only",
+   "geometry": {
+    "num_hidden_layers": 16
+   },
+   "unchanged": [
+    "hidden_size",
+    "intermediate_size",
+    "num_attention_heads",
+    "num_key_value_heads",
+    "head_dim"
+   ],
+   "build": [
+    "DEPTH"
+   ],
+   "selection": {
+    "DEPTH": "NEW: the operator on the teacher, greedy 36 -> 16 over 20 rounds (36 + 35 + ... + 17 = 530 candidate subsets)",
+    "gate": "rounds 1-8 must remove [2, 32, 3, 26, 30, 8, 20, 28], the journal's 36 -> 28 order on the same teacher, profile and reference (state fede45dbe125bec0ec457d5a827d0027); a different order stops the session before any build"
+   },
+   "not_this_arm": "RI-S1's D (28 layers, 3,215,021,568 parameters, N 1.25) is cited as an existing measurement of depth damage, never used as this arm"
+  },
+  "ffn_attention": {
+   "label": "FFN + attention only",
+   "geometry": {
+    "intermediate_size": 3840,
+    "num_attention_heads": 16
+   },
+   "unchanged": [
+    "num_hidden_layers",
+    "hidden_size",
+    "num_key_value_heads",
+    "head_dim"
+   ],
+   "build": [
+    "FFN",
+    "ATTENTION"
+   ],
+   "selection": {
+    "FFN": "NEW: the operator on the teacher at 3,840 neurons per block; gate: the same run's top-3,072 selection must equal the journal's FFN state on the teacher (3f74303972b2a0834f1dc9c024de44e5, A's FFN)",
+    "ATTENTION": "REUSED: the journal's kept_heads on the teacher at 16 / 8 (state 87ee62059aa27519ff4643dec02300f4, A's ATTENTION); the rebuild must equal its digest"
+   },
+   "split": {
+    "registered": "16 / 8 heads with FFN 3,840 (draft; the maintainer decides)",
+    "why": [
+     "16 / 8 is A's own attention operating point: the 596M target's heads and the ATTENTION selection already recorded on the teacher",
+     "the operator keeps all 8 KV heads, so query heads move in steps of 8; 16 is the middle step",
+     "Minitron (arXiv:2408.11796v4, Insight 3) reports stronger width-pruned accuracy when attention heads are kept and the other dimensions pruned; here the MLP takes most of the reduction"
+    ],
+    "alternatives": "structures.json :: ffn_attention_alternatives: 8 / 8 with FFN 4,480 (closest to equal retention of the two modules' parameters); 24 / 8 with FFN 3,200",
+    "numbers": "structures.json :: arms.ffn_attention (modules, changed_from_teacher) and ffn_attention_alternatives"
+   }
+  },
+  "residual_width": {
+   "label": "residual width only",
+   "geometry": {
+    "hidden_size": 1280
+   },
+   "unchanged": [
+    "num_hidden_layers",
+    "intermediate_size",
+    "num_attention_heads",
+    "num_key_value_heads",
+    "head_dim"
+   ],
+   "build": [
+    "RESIDUAL_WIDTH"
+   ],
+   "selection": {
+    "RESIDUAL_WIDTH": "NEW at 1,280 from the teacher statistics TPI1 collected and verified (relay durable/stage1_teacher_parent_init/.../statistics, sha256 e4145e38..., 37 points); no new forward pass. Gate: the same statistics at 1,024 must rebuild the journal's RESIDUAL_WIDTH state on the teacher (02b3319640a0043a77ed5a3ca4e07afc) bit for bit"
+   },
+   "coupled": "the embedding (tied head), q/k/v/o, gate/up/down and every RMSNorm change with the hidden size (structures.json :: modules)"
+  }
+ },
+ "lineage": "one teacher lineage end to end (AGENTS.md P17.1): the teacher above for calibration, selection, statistics, the training data (the A-MIX-6cat-sr pack, generated by it), the online KD teacher, the tokenizer, chat template and configuration",
+ "training": {
+  "derived_from": {
+   "path": "logs/stages/stage-1/teacher_parent_initialization/plans/training_plan.json",
+   "rule": "A's units (themselves A-MIX-6cat-sr's) with only the initialization and its paths changed"
+  },
+  "changed_fields": [
+   "unit",
+   "arm",
+   "config.run_name",
+   "config.student_path",
+   "config.out_dir",
+   "config.lineage.initialization"
+  ],
+  "same_for_every_arm": "the pack, data proportions and order, seeds, packing, pre-packing token budget, steps, batch size, optimizer, schedule, losses, KD support, trainable patterns and save-point cadence: tpi1 training block :: unchanged",
+  "recipe": "every other field of each A-MIX-6cat-sr unit config, compared field by field (`plan.py`): stage stage3_recovery; seeds 20260726 and 20260801 in that order; 9,701 optimizer steps, 3 epochs of 6,467 packed sequences of 8,192 tokens; batch size 2, micro-batch size 1, 2 gradient accumulation steps; fp32 parameters with bf16 autocast and gradient checkpointing; the teacher in bf16 as the online KD teacher; CE 0.25 + KD 1.0, temperature 1.0, assistant scope, Top-200 + tail; AdamW lr 5e-5, weight decay 0.01, betas (0.9, 0.95), eps 1e-8, clip 1.0; 485 warmup steps, cosine to 0.1; the same trainable patterns (embedding / tied head frozen); cross_context packing (sequential, truncation allowed, standard causal attention); the same pack, tokenizer and save points (every 1,104 steps, keep 1)",
+  "data": {
+   "before_packing": {
+    "examples": 45363,
+    "turns": 56408,
+    "unique_supervised_tokens": 11862564,
+    "reasoning_tokens": 4945744,
+    "answer_tokens": 6916820,
+    "tool_calling_tokens": 995341,
+    "thinking_unique_supervised_tokens": 5935809,
+    "non_thinking_unique_supervised_tokens": 5926755
+   },
+   "after_packing": {
+    "packed_sequences": 6467,
+    "sequence_length": 8192,
+    "epochs": 3,
+    "optimizer_steps": 9701,
+    "kd_positions_per_step_median_measured": [
+     3541.5,
+     3585.5
+    ],
+    "note": "supervised-token exposure is counted from the trainer's log (sum of kd_positions), never derived"
+   },
+   "source": "logs/stages/stage-2/teacher_modes/plans/mixed_training_plan.json :: units[*].data"
+  },
+  "seeds": [
+   20260726,
+   20260801
+  ],
+  "unit": "one arm x one seed"
+ },
+ "evaluation": {
+  "set": "eval-set-1 (development-exposed: no result here is a never-seen blind one)",
+  "every_item": "every item of every unit, in both modes, for every model evaluated",
+  "pre_recovery": {
+   "models": "each arm's initialization, untrained",
+   "protocol": {
+    "eval_set": "eval-set-1",
+    "decoding": "configs/shared/evaluation/decoding/nucleus_v1.json",
+    "context": {
+     "tokens": 40960,
+     "rule": "every group generates up to 40,960 tokens minus its rendered prompt: the root config's max_position_embeddings, which the three children inherit; passed explicitly to both runners (--trained-context 40960), never their 8,192 default"
+    },
+    "action_protocol": "v2",
+    "system_message": "You are a helpful Assistant.",
+    "degeneration_check_every": 256,
+    "modes": {
+     "H-T": {
+      "template_kwargs": {
+       "enable_thinking": true
+      },
+      "role": "primary reasoning mode"
+     },
+     "H-N": {
+      "template_kwargs": {
+       "enable_thinking": false
+      },
+      "role": "the same model's mode control"
+     }
+    }
+   },
+   "why_this_context": "an untrained student's supported context is the architecture's 40,960 (the root config, which every arm inherits), RI-S1's protocol; it makes initialization damage comparable with the teacher's reference and RI-S1's D",
+   "teacher_reference": {
+    "run": "a_teacher_20261030_012648",
+    "archives": {
+     "H-T": {
+      "path": ".scratch/research_a/a_teacher_20261030_012648/store/teacher_eval__teacher_H-T.tgz",
+      "sha256": "7e323314916b9cf267995ba8fbd21213d7d54c2c4f767a1b46582476b9a4df62"
+     },
+     "H-N": {
+      "path": ".scratch/research_a/a_teacher_20261030_012648/store/teacher_eval__teacher_H-N.tgz",
+      "sha256": "6f6c93ef959907155db41b659ae10cfd8b0c1e205522795b1f185f441546f637"
+     }
+    },
+    "rule": "reused only if every unit's recorded identity is this round's (teacher revision, mode, system prompt, tokenizer and template, eval-set file, decoder and seed namespace, context, stop ids, action protocol) and every file hashes to its descriptor; rescored with the current scorer"
+   }
+  },
+  "post_recovery": {
+   "models": "each arm x seed after recovery",
+   "protocol": {
+    "eval_set": "eval-set-1",
+    "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+    "decoding": {
+     "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+     "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+    },
+    "context": {
+     "tokens": 8192,
+     "rule": "the runners' trained-context resolution (uncapped_eval.resolve_context, `trained_block_len`): a Stage-3 student trained only on 8,192-token packed sequences runs at min(8,192, architectural context); every sample generates until EOS or that context minus its rendered prompt, the same rule and value B was generated under (A-MIX's evaluation_spec)"
+    },
+    "action_protocol": "v2",
+    "system_message": "You are a helpful Assistant.",
+    "degeneration_check_every": 256,
+    "modes": {
+     "H-T": {
+      "template_kwargs": {
+       "enable_thinking": true
+      },
+      "dir": "evaluation_thinking",
+      "role": "primary"
+     },
+     "H-N": {
+      "template_kwargs": {
+       "enable_thinking": false
+      },
+      "dir": "evaluation_non_thinking",
+      "role": "key secondary"
+     }
+    },
+    "package": "the hybrid's tokenizer files (tokenizer.json, tokenizer_config.json pinned by teacher_identity.json), as A-MIX",
+    "resume": "each finished sample is streamed and sealed (reasoning_inheritance.driver.fluid / capability with this protocol passed in): a later attempt generates only the samples without a sealed record, each under the seed its item derives; nothing is generated twice and nothing is chosen by outcome"
+   },
+   "why_this_context": "a Stage-3 student trained only on 8,192-token packed sequences runs at min(8,192, architectural context): TPI1's and B's protocol, so A's 596M records stand beside these as context",
+   "teacher_at_8192": "optional (a maintainer decision, priced in the proposal): the teacher once in both modes at 8,192, the matched reference for damage after recovery"
+  }
+ },
+ "analysis": {
+  "registered_before": "any arm's initialization, training or evaluation exists",
+  "primary": "thinking mode (H-T), static fluid formal core, after the same recovery: the three pairwise differences between arms, pooled over the two training seeds; each record paired with the other arm's record of the same seed and item",
+  "key_secondary": "non-thinking mode (H-N), the same three comparisons",
+  "comparisons": [
+   [
+    "depth_only",
+    "ffn_attention"
+   ],
+   [
+    "depth_only",
+    "residual_width"
+   ],
+   [
+    "ffn_attention",
+    "residual_width"
+   ]
+  ],
+  "primary_items": {
+   "n": 570,
+   "sha256": "40293ab158372c1eca07c308ed791e8f3f83f99e749fdfc3d603286d5cdbb051",
+   "rule": "fluid_reasoning_720/dev_v1 minus the set's formal-core exclusions (eval_set_scoring.unit_masks) minus the interactive episodes; sha256 over the sorted task ids each followed by a newline"
+  },
+  "units_of_independence": {
+   "file": "fluid_reasoning_720/independence_v1.json",
+   "sha256": "4e5a06d48624c14a1eb20aaa5267198b2dfd801d268b7cf13a3f67b8ef17a1c5",
+   "groups": 558,
+   "rule": "an item and its other-seed copy are never two independent observations: a group holds its items under both seeds"
+  },
+  "statistic": "per pair (X, Y): delta = (1 / (2 x 570)) sum_seeds sum_items (y_X - y_Y); per group g, d_g sums both seeds' differences of the group's items, n_g = 2 |g|",
+  "test": "per pair, TPI1's two-sided group-level paired sign-flip test, B = 100,000, numpy default_rng(20261119)",
+  "effect_interval": "per pair, the percentile 95% group-bootstrap interval of sum d / sum n, 10,000 resamples, default_rng(20261120); reported beside the test, not the decision",
+  "multiplicity": "family 1 (primary): the three thinking-mode pairs, Holm at family-wise alpha 0.05. Family 2 (key secondary): the three non-thinking pairs, Holm at 0.05, tested only if family 1 rejects all three (serial gatekeeping, which keeps the family-wise error of all six at 0.05); otherwise every non-thinking pair is descriptive",
+  "decision": "per pair, only when both arms' records of both seeds cover all 570 items in the mode: X_BETTER / Y_BETTER when Holm-adjusted p <= 0.05, NOT_DISTINGUISHED otherwise (not equivalence); an incomplete pair is descriptive_only, never partially pooled. No ranking or pooled score is defined beyond the three pairwise verdicts",
+  "descriptive": [
+   "each seed's pairwise deltas and intervals, and whether the seeds agree in sign",
+   "initialization damage: each untrained arm against the teacher's reference and the three pairs, at 40,960, both modes (no test)",
+   "recovery: each arm after against before; the contexts differ (8,192 vs 40,960) and this is said wherever it is shown",
+   "the static core by reasoning axis (items, independence groups and records apart), the interactive episodes, every supporting unit's registered headline, per mode and seed",
+   "terminations apart from correctness: natural termination, degeneration stop, context-limit hit (right-censored length), protocol validity, generated length",
+   "A's 596M (TPI1) beside the arms, as context only",
+   "diagnostics: step-0 and validation CE / KD, the init session's state evaluation KL against the teacher, training curves",
+   "measured compute: optimizer-step seconds, GPU memory, FLOPs per token, cost (parameter-matched here; FLOPs and latency are not matched and are reported apart)"
+  ],
+  "exposure": "eval-set-1 is development-exposed: nothing here is a never-seen blind result; the legacy in-sample unit is never read as generalization"
+ },
+ "storage": {
+  "plan": "docs/stages/stage-1/single_operator_budget/README.md section 6",
+  "sizes": "logs/stages/stage-1/single_operator_budget/plans/structures.json :: checkpoint_bytes"
+ },
+ "budget": {
+  "proposal": "logs/stages/stage-1/single_operator_budget/plans/proposal.json",
+  "grant": null
+ },
+ "authorizes": "nothing",
+ "cost_model": {
+  "status": "estimates for the maintainer's review, not measurements of these arms",
+  "gpu": {
+   "type": "NVIDIA L40S",
+   "count": 1,
+   "usd_per_hour": 1.09,
+   "basis": "the accepted price of every TPI1 and RI-S1 session; read again at issue",
+   "alternative_if_measured_oom": "an 80 GB GPU only after the first optimizer steps of a unit run out of memory on the L40S with the protocol-neutral settings (a smaller loss.kd_chunk, PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True) (AGENTS.md P8.2; the L40S-first rule)"
+  },
+  "container_disk": {
+   "gb": 150,
+   "usd_per_gb_month": 0.1,
+   "hours_per_month": 730
+  },
+  "session_setup_minutes": 25,
+  "training": {
+   "basis": "TPI1's measured all-in seconds per optimizer step (seed 20260801: 33,068 s / 9,701 steps, validation and save points included) x each arm's training-FLOPs ratio to A's 596M (structures.json)",
+   "expected": "the ratio with attention FLOPs",
+   "bound": "the larger of the two ratios x 1.15"
+  },
+  "init_session": {
+   "basis": "the packed search's own operator times on the teacher, L40S (journal wall seconds): DEPTH 36 -> 28 7,074 s over 260 candidate subsets, FFN 185 s, ATTENTION 85 s, RESIDUAL_WIDTH 172 s; TPI1's init session 22.8 min",
+   "depth_rounds_9_to_20": "the 270 further candidates at the journal's 27.0 s per candidate x remaining layers / 32.5 (expected) or unscaled (bound)",
+   "builds_relay_state_evaluation_minutes": 30,
+   "bound_factor": 1.15
+  },
+  "pre_recovery_evaluation": {
+   "basis": "RI-S1, one L40S, 40,960 tokens, all of eval-set-1 in both modes: 1.8 h per candidate that behaves like its untrained D (3.2B), 3.6 h if it behaves like the teacher; RI-LM1's untrained merges 17-24 min per unit",
+   "expected_hours_per_arm": 1.8,
+   "bound_hours_per_arm": 3.6
+  },
+  "post_recovery_evaluation": {
+   "basis": "TPI1's A (596M) at 8,192 tokens: 2,025-2,356 s per unit (both modes); B's 1.45 h. A 2B student decodes slower and the 36-layer arms hold fewer full-context requests in the KV cache",
+   "expected_hours_per_unit": 1.22,
+   "bound_hours_per_unit": 3.0
+  },
+  "teacher_at_8192": {
+   "expected_hours": 2.5,
+   "bound_hours": 3.6,
+   "status": "optional"
+  },
+  "teardown_reserve_usd": 1.0
+ }
+}

@@ -1682,7 +1682,8 @@ STAGE_1 = [
         status=("COMPLETE and CLOSED 2026-11-18 (study TPI1, $23.1321 of $31.50): both seeds trained and evaluated on "
                 "all of eval-set-1 in both modes; the registered primary (thinking-mode static fluid core, A - B "
                 "pooled over both seeds) NOT_DISTINGUISHED, +1.40 pp, p 0.195, interval [-0.53, +3.45] pp; "
-                "non-thinking +2.37 pp, descriptive under the fixed sequence"),
+                "non-thinking +2.37 pp, descriptive under the fixed sequence. Since 2026-11-18 (maintainer) A's method "
+                "is the reasoning-inheritance research's default baseline, B a historical reference"),
         title="Teacher-parent initialization vs the packed Top-1 after the same Stage-3 recovery (TPI1)",
         question=("Does initializing the fixed 596M student from selections made on the original teacher, with the "
                   "residual PCA re-aggregated from the teacher's statistics at the kept layers, recover more fluid "
@@ -1722,12 +1723,52 @@ STAGE_1 = [
         ],
         decisions=["logs/budget/decisions.md -- 2026-11-17: TPI1 prepared at $0 (first experiment of the new round); "
                    "2026-11-17: granted; 2026-11-17: training session lost to the provider, resumed; 2026-11-18: "
-                   "COMPLETE and closed (primary NOT_DISTINGUISHED; relay weight copies retired)"],
+                   "COMPLETE and closed (primary NOT_DISTINGUISHED; relay weight copies retired); 2026-11-18: A "
+                   "becomes the research's default baseline (driver repairs and the protocol re-check, $0)"],
         canonical_log_destination="logs/stages/stage-1/teacher_parent_initialization",
         classification_reason=(
             "Stage 1 by subject: the structural initialization method (which parent each operator selects on, and "
             "the PCA's points) is what is compared (AGENTS.md 4.3); the Stage-3 recovery (execution stage "
             "stage3_recovery) and eval-set-1 are its fixed instruments."),
+    ),
+    dict(
+        id="single_operator_budget",
+        kind="experiment",
+        stage_id="1",
+        status=("PROPOSED at $0 (study SOB1, 2026-11-18; nothing authorized, no run): three ~2.0B structures (N ~ 2) "
+                "from the real implementation, A's method, the registered analysis and a budget draft for review"),
+        title="Single-operator compression at the same parameter budget: depth only vs FFN + attention only vs "
+              "residual width only (SOB1)",
+        question=("From the same ~4B teacher compressed to about the same real parameter count, how much fluid "
+                  "reasoning does compressing only depth, only the FFN and attention, or only the residual width lose, "
+                  "and after the same Stage-3 recovery which keeps more?"),
+        canonical_config="configs/stages/stage-1/single_operator_budget/design.json",
+        evidence=[
+            E("configs/stages/stage-1/single_operator_budget/design.json",
+              "the arms' geometries, A's operators, profiles, reused selections and gates, the recovery, evaluation "
+              "before and after recovery, the registered three-pair analysis, the cost model",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/single_operator_budget/plans/structures.json",
+              "the three structures from transformers' Qwen3 on the meta device: per-module counts, N, legality, "
+              "checkpoint sizes, FLOPs and a memory estimate",
+              field="schema", equals="aadistill.stage1.single_operator_budget.structures/v1"),
+            E("logs/stages/stage-1/single_operator_budget/plans/proposal.json",
+              "the budget draft per component and phase, and the storage each phase needs",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json",
+              "the project position, the relay's headroom and the dev box's free space as read on 2026-11-18",
+              field="schema", equals="aadistill.stage1.single_operator_budget.resource_snapshot/v1"),
+        ],
+        external_material=[
+            "docs/stages/stage-1/single_operator_budget/README.md -- the design for review",
+            "docs/stages/stage-1/reasoning_inheritance/README.md -- the research index and the baseline decision",
+        ],
+        decisions=["logs/budget/decisions.md -- 2026-11-18: A becomes the research's default baseline"],
+        canonical_log_destination="logs/stages/stage-1/single_operator_budget",
+        classification_reason=(
+            "Stage 1 by subject: which structural compression operator to apply at a parameter budget, and the "
+            "initialization it gives (AGENTS.md 4.3); the Stage-3 recovery (execution stage stage3_recovery) and "
+            "eval-set-1 are its fixed instruments."),
     ),
 ]
 

@@ -42,10 +42,22 @@
    "stage_id": "2",
    "scripts": "scripts/stages/stage-2/reasoning_data",
    "logs": "logs/stages/stage-2/reasoning_data",
-   "artifacts": null,
+   "artifacts": "artifacts/stages/stage-2/reasoning_data",
    "configs": "configs/stages/stage-2/reasoning_data",
    "data": "data/stages/stage-2/reasoning_data",
    "docs": "docs/stages/stage-2/reasoning_data",
+   "live_state": null
+  },
+  {
+   "logical_id": "teacher_modes",
+   "kind": "experiment",
+   "stage_id": "2",
+   "scripts": "scripts/stages/stage-2/teacher_modes",
+   "logs": "logs/stages/stage-2/teacher_modes",
+   "artifacts": "artifacts/stages/stage-2/teacher_modes",
+   "configs": "configs/stages/stage-2/teacher_modes",
+   "data": "data/stages/stage-2/teacher_modes",
+   "docs": "docs/stages/stage-2/teacher_modes",
    "live_state": null
   }
  ]

@@ -1,5 +1,6 @@
 """The round's durable copies on the private relay: put (quota-checked, re-downloaded and re-hashed), get (re-hashed),
-and the permanent removal of a superseded save point. Every call is online and runs in its own process when the
+the permanent removal of a superseded save point, and the listing of the records' own copies (`records`: what a
+replacement attempt restores from when the lost pod's evidence never reached the dev box). Every call is online and runs in its own process when the
 caller's process has ``HF_HUB_OFFLINE=1`` set (huggingface_hub reads it at import): `run_online`.
 
 A record is ``{"relay", "prefix", "files_sha256": {rel: sha}, "bytes": {rel: n}, "verified", ...}``; `get` refuses a
@@ -134,6 +135,35 @@ def remove(record: dict, *, message: str, token_file: Path | None = None) -> dic
             "verified_absent": not left, "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 
 
+#: a durable record's own copy beside its files (``<record prefix>/record.json``): how a later attempt finds a save
+#: point or a final when the pod that wrote it was lost before the dev box pulled its evidence
+POINTER = "record.json"
+
+
+def records(prefix: str, *, relay: str | None = None, token_file: Path | None = None) -> dict:
+    """Every pointer (`POINTER`) under ``prefix``: the record it holds, and whether each file it names is on the relay
+    (``present``) -- the listing a replacement attempt restores from."""
+    from huggingface_hub import HfApi, hf_hub_download
+    from huggingface_hub.errors import EntryNotFoundError
+    repo, token = _repo(relay), _token(token_file)
+    api = HfApi(token=token)
+    try:
+        paths = {i.path for i in api.list_repo_tree(repo, path_in_repo=prefix, recursive=True, repo_type="model")
+                 if not hasattr(i, "tree_id")}
+    except EntryNotFoundError:
+        paths = set()
+    out = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for p in sorted(x for x in paths if x.rsplit("/", 1)[-1] == POINTER):
+            rec = json.loads(Path(hf_hub_download(repo, p, repo_type="model", token=token, cache_dir=f"{tmp}/hf",
+                                                  force_download=True)).read_text())
+            missing = [k for k in rec.get("files_sha256", {}) if f"{rec.get('prefix')}/{k}" not in paths]
+            out.append({"pointer": p, "record": rec, "present": bool(rec.get("files_sha256")) and not missing,
+                        "missing": missing})
+    return {"relay": repo, "prefix": prefix, "records": out, "verified": True,
+            "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+
+
 def run_online(op: str, payload: dict, timeout_s: float = 3600) -> dict:
     """`put` / `get` / `remove` in a child process with the hub online; one JSON line back. Never raises: a failure is
     ``{"verified": False, "error": ...}``."""
@@ -163,6 +193,8 @@ def _main(argv: list[str]) -> int:
         elif op == "remove":
             out = remove(payload["record"], message=payload["message"])
             out["verified"] = out["verified_absent"]
+        elif op == "records":
+            out = records(payload["prefix"])
         else:
             raise RelayError(f"unknown op {op!r}")
     except Exception as exc:  # noqa: BLE001

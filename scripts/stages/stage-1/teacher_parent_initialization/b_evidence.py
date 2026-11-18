@@ -217,29 +217,75 @@ def runner_summaries(summary: dict) -> list[dict]:
     return [summary]
 
 
-def protocol_problems(a_summaries: dict[str, dict], want: dict) -> list[str]:
-    """A's sealed unit summaries (key -> summary) against one mode's ``protocol_to_match``: every runner summary each
-    stands on must carry B's protocol. The fluid unit's task file is compared on the sealed summary (a resumed run
-    submits only the missing tasks, so its own file is a subset); a capability unit's seed namespace is derived from
-    its prompt file's stem, as B's. A unit with no runner summary is a problem: an unrecorded protocol is not B's."""
-    bad = []
+#: the generation-protocol fields a unit's comparability rests on, per unit kind, in `protocol_fields`' names. A key
+#: field that the registered protocol or a unit's summary lacks, or holds empty, is MISSING -- recorded as such and
+#: never counted as agreeing. (A capability unit's seed namespace is derived from its file stem, not recorded: the
+#: per-item seed check in `analysis.item_protocol` is what verifies it.)
+_COMMON = ("decoding_protocol_id", "decoding_sha256", "sampling", "samples_per_item", "seed_rule_base",
+           "seed_rule_key", "seed_rule_derivation", "resolved_context", "context_source", "trained_context",
+           "system_message", "chat_template_sha256", "chat_template_kwargs", "tokenizer_sha256", "stop_ids",
+           "degeneration_check_every")
+KEY_FIELDS = {"fluid": _COMMON + ("action_protocol", "seed_namespace", "tasks_sha256"),
+              "capability": _COMMON + ("protocol", "degeneration_stop", "max_tokens_rule")}
+#: a template called with no keyword arguments records {}: a value, not an absence
+EMPTY_OK = frozenset({"chat_template_kwargs"})
+
+
+def empty(value, field: str) -> bool:
+    """Not recorded, or recorded with nothing in it."""
+    if value is None or (isinstance(value, str) and value in ("", NOT_RECORDED)):
+        return True
+    return value in ([], {}) and field not in EMPTY_OK
+
+
+def kind_of(key: str) -> str:
+    return "fluid" if key == FLUID else "capability"
+
+
+def protocol_check(a_summaries: dict[str, dict], want: dict, *, generated: tuple[str, ...] = ()) -> dict:
+    """A's sealed unit summaries (key -> summary) against one mode's registered ``protocol_to_match``, field by
+    field: ``differs`` (both sides recorded, unequal) and ``missing`` (what could not be checked). Missing is: a unit
+    in ``generated`` (its records exist) without a summary; a summary without a runner summary; a key field
+    (`KEY_FIELDS`) that the registered protocol or a runner summary lacks or holds empty. Only a unit with neither is
+    the registered protocol. The fluid unit's task file is compared on the sealed summary (a resumed run submits only
+    the missing tasks, so its own file is a subset); a capability unit's seed namespace is derived, as B's."""
+    differs, missing = [], []
+    for key in sorted(set(generated) - set(a_summaries)):
+        missing.append(f"{key}: generations present, no summary recorded")
     for key, summary in sorted(a_summaries.items()):
-        if key == FLUID:
-            ref = dict(want.get("fluid") or {})
-            tasks = ref.pop("tasks_sha256", None)
+        kind = kind_of(key)
+        ref = (dict(want.get("fluid") or {}) if kind == "fluid" else
+               {**(want.get("capability") or {}), **(want.get("capability_per_unit", {}).get(key) or {})})
+        lacks = [f for f in KEY_FIELDS[kind] if empty(ref.get(f), f)]
+        missing += [f"{key}: the registered protocol has no {f}" for f in lacks]
+        runs = runner_summaries(summary)
+        if kind == "fluid":
             got_tasks = summary.get("tasks_sha256") if "composition" in summary else \
                 protocol_fields(summary, key).get("tasks_sha256")
-            if tasks is not None and got_tasks != tasks:
-                bad.append(f"{key}: tasks_sha256 {got_tasks!r} != {tasks!r}")
-        else:
-            ref = {**(want.get("capability") or {}), **(want.get("capability_per_unit", {}).get(key) or {})}
-        runs = runner_summaries(summary)
+            if empty(got_tasks, "tasks_sha256"):
+                missing.append(f"{key}: tasks_sha256 not recorded")
+            elif "tasks_sha256" not in lacks and got_tasks != ref["tasks_sha256"]:
+                differs.append(f"{key}: tasks_sha256 {got_tasks!r} != {ref['tasks_sha256']!r}")
         if not runs:
-            bad.append(f"{key}: no runner summary recorded")
+            missing.append(f"{key}: no runner summary recorded")
         for i, run in enumerate(runs):
             got = protocol_fields(run, key)
-            bad += [f"{key}[run {i}]: {p}" for p in compare(got, ref)]
-    return bad
+            for f in KEY_FIELDS[kind]:
+                if f == "tasks_sha256":
+                    continue
+                if empty(got.get(f), f):
+                    missing.append(f"{key}[run {i}]: {f} not recorded")
+                elif f not in lacks and got[f] != ref[f]:
+                    differs.append(f"{key}[run {i}]: {f}: {got[f]!r} != {ref[f]!r}")
+            extra = {k: v for k, v in ref.items() if k not in KEY_FIELDS[kind] and k != "seed_namespace"}
+            differs += [f"{key}[run {i}]: {p}" for p in compare(got, extra)]
+    return {"differs": differs, "missing": missing}
+
+
+def protocol_problems(a_summaries: dict[str, dict], want: dict, *, generated: tuple[str, ...] = ()) -> list[str]:
+    """`protocol_check`'s differences and missing fields together: anything in it means "not shown to be B's"."""
+    chk = protocol_check(a_summaries, want, generated=generated)
+    return chk["differs"] + chk["missing"]
 
 
 def audit(d: dict | None = None) -> dict:

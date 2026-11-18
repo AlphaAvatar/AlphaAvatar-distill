@@ -16874,3 +16874,33 @@ on a paid pod.
   project. The evidence a decision needs (generations, rows, reports) is also on the relay.
 - Revisit when: a later round consumes A's weights, or the maintainer reviews the round (a merge into `main` is the
   maintainer's).
+
+## 2026-11-18 (UTC) — Teacher-parent initialization (TPI1's A) becomes the reasoning-inheritance research's default baseline
+
+- Context: TPI1 closed COMPLETE / NOT_DISTINGUISHED. At the same 596M structure and recovery recipe, A against B:
+  thinking-mode static fluid +1.40 pp (95% interval [−0.53, +3.45], p 0.195), non-thinking +2.37 pp
+  ([+0.61, +4.23], descriptive under the fixed sequence). Both seeds agree in sign.
+- Decision (maintainer): from now on A (`A_teacher_parent`) is the default baseline; B (`B_packed_top1`) is kept as a
+  historical reference.
+  - A new round reuses A's *method*: every selection on the original teacher with A's operator, profile and selection
+    rule, and every width transform from the teacher's statistics.
+  - A's 596M weights are a baseline only on their own structure.
+  - TPI1's verdict and the descriptive status of its non-thinking result are unchanged; the report's wording that
+    implied non-inferiority now gives the differences and intervals.
+  - Recorded in `docs/stages/stage-1/reasoning_inheritance/README.md` (the research index) and in the next round's
+    design (`configs/stages/stage-1/single_operator_budget/design.json :: baseline`).
+- Same session ($0): TPI1's driver repairs.
+  - `restore_final` now reads the trainer's completion record under either name, and requires the unit's config
+    hash and its finished steps.
+  - Save points and finals hand off on the relay before anything is deleted.
+  - The protocol check records missing fields as missing.
+  - Item-level re-check of all four seed × mode cells: no disagreement. The decision reproduces unchanged.
+  - Regressions: `scripts/stages/stage-1/teacher_parent_initialization/tests/`.
+- Alternatives considered: keeping B as the baseline (its search path is the one the packed search optimized), or
+  naming no baseline until a difference is distinguished. The maintainer chose A on the measured direction.
+- Expected upside: one initialization method that does not depend on a search path, so later rounds at other
+  structures build their own initialization the same way.
+- Risks: the primary difference is not distinguished, so the choice rests on direction, not on a finding. The
+  interval still allows A to be about 0.5 pp worse.
+- Revisit when: a round distinguishes A's method from another at the same structure and recipe, or a new structure
+  shows the method fails to build.

@@ -4,7 +4,7 @@ Stage 1 owns this round, and the training execution stage is `stage3_recovery`. 
 [`design.json`](../../../../configs/stages/stage-1/teacher_parent_initialization/design.json), the code is in
 [`scripts/stages/stage-1/teacher_parent_initialization/`](../../../../scripts/stages/stage-1/teacher_parent_initialization/README.md),
 and the evidence is in [`logs/stages/stage-1/teacher_parent_initialization/`](../../../../logs/stages/stage-1/teacher_parent_initialization/).
-The final report is [`REPORT.md`](REPORT.md) (COMPLETE 2026-11-18: the primary comparison NOT_DISTINGUISHED).
+The final report is [`REPORT.md`](REPORT.md) (COMPLETE 2026-11-18: the primary comparison NOT_DISTINGUISHED). Since 2026-11-18 (maintainer) A is the reasoning-inheritance research's default baseline and B a historical reference ([research index](../reasoning_inheritance/README.md)).
 
 The project's target is fluid reasoning and adaptive problem-solving. That is the ability, faced with a problem never
 seen before, to use the information the task itself supplies to find the rules, abstract, deduce and generalize, and
