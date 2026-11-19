@@ -37,8 +37,7 @@ SNAPSHOT = PLANS / "resource_snapshot.json"
 SCHEMA = "aadistill.stage1.single_operator_budget.proposal/v2"
 GIB = 2 ** 30
 #: the session's fixed reserves as `study_engineering.session_spec` builds them (minutes), and its contingency
-SESSION = {"setup": 25.0, "transfer": 5.0, "closeout": 10.0, "artifact_recovery": 10.0, "watchdog": 1.25,
-           "contingency_fraction": 0.05}
+SESSION = {"setup": 25.0, "transfer": 5.0, "closeout": 10.0, "artifact_recovery": 10.0, "contingency_fraction": 0.05}
 #: the highest L40S price a session may accept (the proposal's ``gpus``); the accepted price has been $1.09
 MAX_PRICE = 1.11
 
@@ -58,12 +57,18 @@ def rate(cm: dict) -> float:
 
 
 def hard_cap(driver_minutes: float, cm: dict) -> dict:
-    """The most one session bills (module docstring), ceiled to the cent, and its minutes."""
+    """The most one session bills, as `study_engineering`'s runner prices it (module docstring): the contingency on
+    setup, transfer and the driver alike, the closeout reserve with it, then the artifact-recovery reserve and the
+    watchdog's minutes, at the highest admitted price plus the container disk at `study_engineering.all_in`'s rate
+    (a 30.4375-day month); ceiled to the cent. The 2026-11-19 dry run refused the first version, which left the
+    contingency off setup and transfer ($22.53 against the runner's $22.5485)."""
+    from shared.study_engineering import DISK_USD_PER_GB_MONTH, TERMINATION_MINUTES
     f = 1.0 + SESSION["contingency_fraction"]
-    minutes = (SESSION["setup"] + SESSION["transfer"] + driver_minutes * f + SESSION["closeout"] * f
-               + SESSION["artifact_recovery"] + SESSION["watchdog"])
-    usd = minutes / 60 * (MAX_PRICE + disk_rate(cm))
-    return {"driver_minutes": round(driver_minutes, 1), "billable_minutes": round(minutes, 1),
+    minutes = ((SESSION["setup"] + SESSION["transfer"] + driver_minutes) * f + SESSION["closeout"] * f
+               + SESSION["artifact_recovery"] + TERMINATION_MINUTES)
+    disk_h = cm["container_disk"]["gb"] * DISK_USD_PER_GB_MONTH / (24 * 30.4375)
+    usd = math.ceil(minutes / 60 * (MAX_PRICE + disk_h) * 1e4) / 1e4
+    return {"driver_minutes": round(driver_minutes, 1), "billable_minutes": round(minutes, 2),
             "usd": math.ceil(usd * 100) / 100}
 
 

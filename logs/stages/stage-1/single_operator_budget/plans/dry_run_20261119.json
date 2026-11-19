@@ -1,0 +1,115 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.dry_run/v1",
+ "utc": "2026-11-19T07:41Z",
+ "cost_usd": 0.0,
+ "provider_resource_created": false,
+ "session_commit": "f56b72c0b815",
+ "rule": "everything up to the create, for real, with nothing created: the phase-1 driver's contract on the dev box, the budget check against the live position, a dry-run artifact (outside the run directory), the runner's pre-provider gates and this study's prechecks",
+ "driver_check_only": {
+  "command": "phase1_driver.py --check-only",
+  "terminal": "CONTRACT_OK",
+  "operator_config_hashes_match_the_journal": [
+   true,
+   true,
+   true,
+   true
+  ],
+  "tpi1_selection_reproduced": true,
+  "sob1_selection_reproduced": true
+ },
+ "budget_check": {
+  "command": "launch.py budget --kind sob1_phase1",
+  "fundable": true,
+  "phase_2": "refused: the proposal names no cap for sob1_train"
+ },
+ "issue_dry_run": {
+  "authorization_id": "stage1.single_operator_budget.sob1_phase1_dryrun",
+  "hard_cap_usd": 22.55,
+  "expected_usd": 10.2,
+  "dry_run": "true",
+  "kind": "sob1_phase1",
+  "refusals_checked": [
+   "a hard cap above the kind's cap",
+   "a sob1_train artifact (no cap proposed)",
+   "a non-dry-run artifact without a grant"
+  ]
+ },
+ "launch_dry_run": {
+  "budget_plan": {
+   "price_per_hour": 1.11,
+   "authorized_usd": 22.55,
+   "expected_minutes": 1119.0,
+   "hard_terminate_minutes": 1195.45,
+   "hard_terminate_usd": 22.1158
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock": "Low",
+  "account_balance_ok": true,
+  "account_resources_ok": true,
+  "runner_prechecks": [
+   {
+    "check": "the_study_is_open",
+    "ok": true,
+    "message": "SOB1 is open"
+   },
+   {
+    "check": "the_artifact_is_this_studys_and_unused",
+    "ok": true,
+    "message": "a SOB1 sob1_phase1 artifact, unused"
+   },
+   {
+    "check": "the_gpu_and_price_are_the_grants",
+    "ok": true,
+    "message": "1 x NVIDIA L40S at no more than $1.11/h for the pod, as granted"
+   },
+   {
+    "check": "all_in_within_cap",
+    "ok": true,
+    "message": "all-in $22.5485 over 1196.7 min, inside $22.55"
+   },
+   {
+    "check": "the_study_identity_is_the_authorized_one",
+    "ok": true,
+    "message": "study identity db8ca7175da7 is the authorized one"
+   },
+   {
+    "check": "bound_files_are_in_the_session_commit",
+    "ok": true,
+    "message": "every bound file is in the session commit"
+   },
+   {
+    "check": "the_project_cap_holds_now",
+    "ok": true,
+    "message": "$22.55 inside the envelope ($22.55) and the $30.2442 the project cap leaves now"
+   },
+   {
+    "check": "the_authorization_is_in_the_session_commit",
+    "ok": false,
+    "message": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_dryrun/governance/authorization.json is not in session commit f56b72c0b815 as issued; commit it first"
+   }
+  ],
+  "stopped_at": "the_authorization_is_in_the_session_commit: by design for a dry-run artifact (only an issued artifact committed as the session commit passes)",
+  "bundle": "the relay holds no transfer/aad_autoinit_f56b72c0.bundle; stage it first"
+ },
+ "study_prechecks_called_directly": {
+  "the_teardown_reserve_stays": {
+   "ok": true,
+   "message": "$22.55 + the $1.0 teardown reserve fit"
+  },
+  "the_relay_has_room": {
+   "ok": true,
+   "message": "the relay would accept the sob1_phase1 session's bytes: 6 object(s), 11.42 GiB: ACCEPTED (200) 6/6 granted an upload action"
+  },
+  "the_kind_records_are_the_bound_ones": {
+   "ok": true,
+   "message": "the artifact binds this tree's ['design_sha256', 'selection_sha256', 'structures_sha256']"
+  },
+  "the_initialization_is_durable": {
+   "ok": true,
+   "message": "not a training session"
+  }
+ },
+ "defect_found_and_fixed": "the first launch dry run refused all_in_within_cap: the proposal's hard cap (2.53) left the contingency off setup and transfer; the runner's all-in at .11/h is 2.5485. proposal.hard_cap now prices as the runner does: 2.55 (test_the_hard_cap_is_the_runners_all_in)",
+ "not_exercised": "staging the bundle and the real create: they follow the maintainer's grant",
+ "authorizes": "nothing"
+}

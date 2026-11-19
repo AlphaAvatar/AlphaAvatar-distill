@@ -21,9 +21,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 - Code: `scripts/stages/stage-1/single_operator_budget/` (phase1_driver, train_driver, plan, launch with `budget`,
   analysis); core: DEPTH resume (`OperatorContext.resume_state`), the trainer's memory probe
   (`AADISTILL_MEMORY_PROBE_STEPS`); TPI1's train driver: listing retries, handoff-only retries, byte-sized copy
-  times and a session-deadline reserve. $0 dry run: driver check-only, budget check and a dry-run artifact passed.
-- Budget (`plans/proposal.json`): phase 1 one session, $10.20 expected, $22.53 hard cap + $1.00 reserve (fits the
-  $30.24 left); phase 2 a draft only: both seeds $114.70 expected, caps $185.78 + $1.
+  times and a session-deadline reserve. $0 dry run (`plans/dry_run_20261119.json`): driver check-only, budget, a dry-run artifact and every pre-provider gate passed up to the session-commit check a dry-run artifact cannot pass; it caught and fixed a hard cap $0.02 under the runner's all-in.
+- Budget (`plans/proposal.json`): phase 1 one session, $10.20 expected, $22.55 hard cap + $1.00 reserve (fits the
+  $30.24 left); phase 2 a draft only: both seeds $114.70 expected, caps $185.87 + $1.
 - Dev box: seven historical checkpoints retired 2026-11-19 (RI-S1 D/W/DW, RI-LM1's two deltas; tombstones
   `devbox_20261119_*`, `logs/maintenance/storage/devbox_cleanup_20261119.json`): 3.23 -> 13.93 GiB free. Phase 1's
   11.24 GiB fits; phase 2's six finals (44.94 GiB) are 42.25 GiB short.
@@ -684,7 +684,7 @@ cancelled and unexecuted).
 on an admitted AU host, every identity equal to the protocol's.
 - **Verdict.** Δ vs B −0.0106, one-sided UCB −0.0016 < SESOI 0.01; 0 of 3
   seeds positive. The usable guardrail passed (+0.067).
-- **Cost.** $5.0260; D2's measured total is $23.5354.
+- **Cost.** $5.0260; D2's measured total is $23.5554.
 - **Budget.** Project remaining $100.4494; the D3 plus fresh-confirmation
   reservation holds with $34.00 to spare.
 - **Next.** D3 as redefined above.

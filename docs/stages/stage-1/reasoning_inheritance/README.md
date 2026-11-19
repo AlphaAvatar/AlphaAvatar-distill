@@ -32,7 +32,7 @@ What "baseline" means for a new round:
 | RI-S1 | untrained: depth pruning alone (D), all non-depth compression alone (W), both (DW) | COMPLETE, closed 2026-11-14, $19.96 | [`REPORT.md`](REPORT.md) |
 | RI-LM1 | layer merging at D's structure instead of deletion | COMPLETE, closed 2026-11-15, $4.10: both merges worse than deletion | [`LAYER_MERGE_REPORT.md`](LAYER_MERGE_REPORT.md) |
 | TPI1 | teacher-parent initialization (A) against the packed Top-1 (B) after the same recovery, 596M | COMPLETE, closed 2026-11-18, $23.13: NOT_DISTINGUISHED, +1.40 pp | [`../teacher_parent_initialization/REPORT.md`](../teacher_parent_initialization/REPORT.md) |
-| **SOB1** (next) | at N ≈ 2 (about 2.0B parameters): depth only vs FFN + attention only vs residual width only, A's method, before and after the same recovery, every model at 8,192 tokens | **prepared, $0** (protocol fixed 2026-11-19): code, budget and a $0 dry run done; phase 1 proposed ($10.20 expected, $22.53 cap + $1 reserve), phase 2 a separate draft | [`../single_operator_budget/README.md`](../single_operator_budget/README.md) |
+| **SOB1** (next) | at N ≈ 2 (about 2.0B parameters): depth only vs FFN + attention only vs residual width only, A's method, before and after the same recovery, every model at 8,192 tokens | **prepared, $0** (protocol fixed 2026-11-19): code, budget and a $0 dry run done; phase 1 proposed ($10.20 expected, $22.55 cap + $1 reserve), phase 2 a separate draft | [`../single_operator_budget/README.md`](../single_operator_budget/README.md) |
 
 Literature read for these rounds: [`LITERATURE.md`](LITERATURE.md). Evidence lives under
 `logs/stages/stage-1/{reasoning_inheritance,teacher_parent_initialization,single_operator_budget}/`.

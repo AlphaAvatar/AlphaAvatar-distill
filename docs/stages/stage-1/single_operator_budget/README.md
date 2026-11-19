@@ -12,6 +12,7 @@ Branch `research/reasoning-inheritance`, not merged to `main`.
 | [`plans/structures.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/structures.json) | the three structures from the real implementation (`structures.py`) |
 | [`plans/proposal.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/proposal.json) | phase 1's proposal (ceiling, per-session hard cap, teardown reserve) and phase 2's separate draft (`proposal.py`) |
 | [`plans/resource_snapshot.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json) | the project position, the relay's headroom and the dev box's free space as read on 2026-11-19 |
+| [`plans/dry_run_20261119.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119.json) | the $0 dry run of phase 1: everything up to the create, nothing created |
 | `scripts/stages/stage-1/single_operator_budget/` | `phase1_driver.py` (the three builds and the phase-1 evaluations), `train_driver.py` (TPI1's, with this study's plan), `plan.py` (one arm's training plan), `launch.py` (sessions, budget check, retention), `analysis.py` (the decision rule), `common.py`, `tests/` |
 
 ## 1. Question and hypothesis
@@ -193,10 +194,10 @@ and watchdog reserves. Every figure is an estimate; the basis is `design.json ::
 | teacher at 8,192 | 2.81 (4.2) | 6.16M capped output tokens at its measured 608.8 tokens/s |
 | **session** | **9.19 GPU h, $10.20 expected** | |
 
-* **Hard cap $22.53** (ceiling of the study's proposal: one session; a replacement attempt takes over every arm whose
+* **Hard cap $22.55** (ceiling of the study's proposal: one session; a replacement attempt takes over every arm whose
   init verified and every sealed sample, within what the ceiling leaves).
 * **Teardown reserve $1.00**, outside the ceiling.
-* **Total $23.53.** The live position on 2026-11-19 06:49Z: $30.2442 left under the $1,000 project cap; balance
+* **Total $23.55.** The live position on 2026-11-19 06:49Z: $30.2442 left under the $1,000 project cap; balance
   $40.24; no pod, no volume. `launch.py budget --kind sob1_phase1`: fundable.
 
 **Phase 2 (a draft for the maintainer, proposes no cap; `proposal.json :: phase_2_draft`).** One session per arm,
@@ -204,10 +205,10 @@ both seeds, in the order residual width, depth, FFN + attention.
 
 | session | training h per seed, expected (bound) | driver h, expected (bound) | USD expected | hard cap |
 | --- | ---: | ---: | ---: | ---: |
-| residual width only | 17.7 (20.4) | 37.9 (52.6) | 42.59 | 63.40 |
-| depth only | 14.6 (19.5) | 31.7 (50.6) | 35.70 | 61.06 |
-| FFN + attention only | 14.9 (19.6) | 32.4 (50.8) | 36.41 | 61.32 |
-| **both seeds** | | | **114.70** | **185.78 (+ $1 reserve)** |
+| residual width only | 17.7 (20.4) | 37.9 (52.6) | 42.59 | 63.43 |
+| depth only | 14.6 (19.5) | 31.7 (50.6) | 35.70 | 61.09 |
+| FFN + attention only | 14.9 (19.6) | 32.4 (50.8) | 36.41 | 61.35 |
+| **both seeds** | | | **114.70** | **185.87 (+ $1 reserve)** |
 | one seed (20260726) | | | 58.06 | |
 
 The bound includes each unit's post-recovery evaluation (1.22 h, bound 3.0 h). It also includes the floor-rate copies
@@ -261,18 +262,38 @@ freed)**. Kept, with their reasons in that record:
 ```text
 launch.py budget --kind sob1_phase1                                      # $0: fundable now?
 launch.py grant --decision '<the maintainer's words>' --granted-by maintainer
-launch.py issue --kind sob1_phase1 --run-id <id> --expected-usd 10.20 --hard-cap-usd 22.53
+launch.py issue --kind sob1_phase1 --run-id <id> --expected-usd 10.20 --hard-cap-usd 22.55
 git commit <the authorization> (the session commit) ; stage the bundle at that commit
 launch.py launch --kind sob1_phase1 --run-id <id> --session-commit <c> --bundle <b> --scr <s> --max-price 1.11 --disk-gb 150
 launch.py retain --kind sob1_phase1 --run-id <id> --from <s>             # the three inits onto the dev box
 plan.py --arm <arm> --init-record <its committed init_record.json> --write    # per arm, before phase 2
 ```
 
+**The $0 dry run (2026-11-19, session commit `f56b72c0`; `plans/dry_run_20261119.json`).** Nothing was created.
+
+* The driver's `--check-only` passed: the session derives the journal's four operator config hashes, and both
+  selection records reproduce.
+* `budget`: phase 1 fundable; phase 2 refused (no cap proposed).
+* `issue --dry-run`: an artifact outside the run directory. A cap above the kind's, a `sob1_train` artifact, and a
+  real artifact without a grant were each refused.
+* `launch --dry-run`, the runner's gates:
+  * the plan at $1.11/h, $22.5485 all-in, inside $22.55;
+  * the live L40S quote $1.09/h (stock low);
+  * account funds and resources;
+  * study identity, bound files and the project cap.
+* It stopped where a dry-run artifact must stop: the authorization is not in the session commit. This study's other
+  four gates, called directly, passed: the reserve; the relay would accept 11.42 GiB; the bound records; not a
+  training session.
+* **It found one defect**, now fixed: the proposal's first cap ($22.53) left the 5% contingency off setup and
+  transfer, and the runner refused it. The cap is now priced as the runner prices it (test
+  `test_the_hard_cap_is_the_runners_all_in`).
+* Not exercised: staging the bundle and the create. They follow a grant.
+
 ## 10. Decisions for the maintainer
 
-1. Grant phase 1: a $22.53 hard cap for one `sob1_phase1` session (expected $10.20), plus the $1.00 teardown
+1. Grant phase 1: a $22.55 hard cap for one `sob1_phase1` session (expected $10.20), plus the $1.00 teardown
    reserve, inside the $30.24 the project cap leaves.
-2. Phase 2's budget: both seeds expected $114.70, hard caps $185.78 + $1 (one seed: $58.06 expected). This needs a
+2. Phase 2's budget: both seeds expected $114.70, hard caps $185.87 + $1 (one seed: $58.06 expected). This needs a
    project-cap decision; nothing here assumes it.
 3. Phase 2's storage: the six fp32 finals (44.94 GiB) do not fit the dev box (42.25 GiB short after phase 1) or
    accumulate on the relay. Either add storage, or retire each final from the relay once its evaluation evidence is

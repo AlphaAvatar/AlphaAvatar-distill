@@ -1737,7 +1737,7 @@ STAGE_1 = [
         stage_id="1",
         status=("PREPARED at $0 (study SOB1; protocol fixed by the maintainer 2026-11-19; nothing authorized, no run): "
                 "three ~2.0B structures (N ~ 2), A's method on the teacher, DEPTH resumed from the recorded search's "
-                "round 9, every evaluation at 8,192 tokens, phase 1 proposed ($22.53 cap), phase 2 a separate draft"),
+                "round 9, every evaluation at 8,192 tokens, phase 1 proposed ($22.55 cap), phase 2 a separate draft"),
         title="Single-operator compression at the same parameter budget: depth only vs FFN + attention only vs "
               "residual width only (SOB1)",
         question=("From the same ~4B teacher compressed to about the same real parameter count, how much fluid "
@@ -1761,6 +1761,10 @@ STAGE_1 = [
               "phase 1's proposal (ceiling, per-session hard cap, teardown reserve) and phase 2's draft, with the "
               "storage each phase needs",
               field="status", equals="proposed"),
+            E("logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119.json",
+              "the $0 dry run of phase 1: the driver's contract, the budget check, a dry-run artifact, the runner's "
+              "and the study's pre-provider gates; nothing created",
+              field="provider_resource_created", equals=False),
             E("logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json",
               "the project position, the relay's headroom and the dev box's free space as read on 2026-11-19",
               field="schema", equals="aadistill.stage1.single_operator_budget.resource_snapshot/v1"),

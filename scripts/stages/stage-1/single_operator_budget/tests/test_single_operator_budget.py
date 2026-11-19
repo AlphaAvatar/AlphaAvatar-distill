@@ -282,3 +282,18 @@ def test_the_launcher_binds_the_kinds_records_and_funds_phase_2_with_nothing():
     body = setup.split('"$SESSION_KIND" = "stage1_single_operator"', 1)[1].split("elif [", 1)[0]
     assert "from stages.single_operator_budget.launch import Authorization, kind_conditions" in body
     assert 'mark "AUTHORIZATION_MISMATCH"; exit 98' in body
+
+
+def test_the_hard_cap_is_the_runners_all_in():
+    """The 2026-11-19 dry run refused a $22.53 cap the runner priced at $22.5485: the proposal's cap is now the
+    runner's all-in (`study_engineering.all_in` over the plan's hard deadline) at the highest admitted price."""
+    import types
+    from shared import study_engineering as SE
+    cm = DESIGN["cost_model"]
+    for driver in (60.0, 1089.0, 3155.2):
+        f = 1 + PR.SESSION["contingency_fraction"]
+        plan = types.SimpleNamespace(hard_terminate_minutes=(PR.SESSION["setup"] + PR.SESSION["transfer"] + driver) * f
+                                     + PR.SESSION["closeout"] * f + PR.SESSION["artifact_recovery"])
+        runner = SE.all_in(plan, PR.MAX_PRICE, cm["container_disk"]["gb"])["all_in_usd"]
+        cap = PR.hard_cap(driver, cm)["usd"]
+        assert runner <= cap < runner + 0.01, (driver, runner, cap)

@@ -1,6 +1,6 @@
 {
  "authorizes": "nothing: a proposal; the grant is the maintainer's",
- "ceiling_usd": 22.53,
+ "ceiling_usd": 22.55,
  "decision": "PENDING the maintainer's explicit approval",
  "design_sha256": "9e23c345eca1dd4bd8c40aeca173ff9e654cbc17f1273193b1e915e7bb9c0319",
  "expected_total_usd": 10.2,
@@ -15,7 +15,7 @@
    "basis": "phase_1.components (design.json :: cost_model)",
    "driver_minutes": 1089.0,
    "expected_usd": 10.2,
-   "per_session_hard_cap_usd": 22.53
+   "per_session_hard_cap_usd": 22.55
   },
   "sob1_train": {
    "expected_usd": null,
@@ -61,15 +61,15 @@
    "static_gib": 35.29
   }
  },
- "min_useful_attempt_usd": 2.17,
+ "min_useful_attempt_usd": 2.2,
  "money_rules": {
-  "ceiling": "$22.53: phase 1's one session at its hard cap, cumulatively over every attempt",
+  "ceiling": "$22.55: phase 1's one session at its hard cap, cumulatively over every attempt",
   "own_envelope": "the ceiling counts only this study's runs; TPI1, RI-S1, RI-LM1 and Research A are CLOSED and fund nothing here; a provider top-up is not a grant",
   "project_cap": "the $1,000 project cap is not raised by this proposal",
   "resume": "a replacement attempt takes over every arm whose init record verified and every sealed sample; its cap is what the ceiling leaves",
   "teardown_reserve": "$1.00 held outside the ceiling and never issued: each artifact's hard cap plus the reserve must fit what the project cap and the provider balance leave, at issue and at launch (layer_merge_launch.reserve_problems)"
  },
- "per_session_hard_cap_usd": 22.53,
+ "per_session_hard_cap_usd": 22.55,
  "phase_1": {
   "components": {
    "builds": {
@@ -118,11 +118,11 @@
   "driver_hours_expected": 8.77,
   "gpu_hours_expected": 9.19,
   "hard_cap": {
-   "billable_minutes": 1195.2,
+   "billable_minutes": 1196.7,
    "driver_minutes": 1089.0,
-   "usd": 22.53
+   "usd": 22.55
   },
-  "hard_cap_plus_reserve_usd": 23.53,
+  "hard_cap_plus_reserve_usd": 23.55,
   "session_kind": "sob1_phase1",
   "sessions": 1,
   "teardown_reserve_usd": 1.0,
@@ -145,9 +145,9 @@
      "hours_expected": 0.021
     },
     "hard_cap": {
-     "billable_minutes": 3240.2,
+     "billable_minutes": 3241.74,
      "driver_minutes": 3036.7,
-     "usd": 61.06
+     "usd": 61.09
     },
     "init_fetch": {
      "bytes": 4007703552,
@@ -182,9 +182,9 @@
      "hours_expected": 0.021
     },
     "hard_cap": {
-     "billable_minutes": 3254.0,
+     "billable_minutes": 3255.54,
      "driver_minutes": 3049.8,
-     "usd": 61.32
+     "usd": 61.35
     },
     "init_fetch": {
      "bytes": 4034132992,
@@ -219,9 +219,9 @@
      "hours_expected": 0.021
     },
     "hard_cap": {
-     "billable_minutes": 3364.7,
+     "billable_minutes": 3366.17,
      "driver_minutes": 3155.2,
-     "usd": 63.4
+     "usd": 63.43
     },
     "init_fetch": {
      "bytes": 4022477312,
@@ -252,8 +252,8 @@
   "sessions": 3,
   "status": "a draft for the maintainer: no cap here is proposed for a grant, and the project cap is not raised",
   "usd_expected_two_seeds": 114.7,
-  "usd_hard_caps_plus_reserve": 186.78,
-  "usd_hard_caps_two_seeds": 185.78
+  "usd_hard_caps_plus_reserve": 186.87,
+  "usd_hard_caps_two_seeds": 185.87
  },
  "position_at_proposal": {
   "account_pods": 0,
@@ -311,7 +311,7 @@
  },
  "structures_sha256": "47dba9aec922379d775a59af887c5fe68354b784ba3039d31c2b0f5f8d9b5fe6",
  "study": "SOB1",
- "study_cumulative_cap_usd": 23.53,
+ "study_cumulative_cap_usd": 23.55,
  "teardown_reserve_usd": 1.0,
  "usd_per_hour_all_in": 1.1105
 }
