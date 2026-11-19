@@ -216,6 +216,15 @@ class OperatorContext:
     #: (`depth.causal_kl_greedy_v1`: its committed round records); `execute`
     #: refuses it everywhere else.
     resume_state: Any = None
+    #: AN OBSERVER OF THIS INVOCATION'S COMMITTED UNITS OF WORK, called with
+    #: each one as it commits (`depth.causal_kl_greedy_v1`: every round record,
+    #: the shape `resume_state` takes back), so a caller can make finished work
+    #: durable before the invocation ends. EXECUTION ONLY, like `resume_state`:
+    #: never hashed. Its return value is ignored; an exception it raises stops
+    #: the invocation rather than steering it. Only implementations declaring
+    #: `reports_progress` take one; `execute` refuses it everywhere else, so a
+    #: caller never believes it is persisting work an operator never reports.
+    on_progress: Any = None
 
     def cached_stats(self, collect):
         """Statistics for this parent under this profile, collected at most once."""
@@ -291,6 +300,10 @@ class OperatorImplementation(ABC):
     #: completed work (`OperatorContext.resume_state`). Not part of
     #: `signature()`: resuming changes how much is recomputed, never what.
     accepts_resume_state: bool = False
+    #: Whether this implementation hands each committed unit of work to
+    #: `OperatorContext.on_progress`. Not part of `signature()`: observing
+    #: changes nothing that is computed.
+    reports_progress: bool = False
     deterministic: bool = True
     requires_seed: bool = False
     produces: tuple[str, ...] = ()
@@ -367,6 +380,10 @@ class OperatorImplementation(ABC):
             raise ContractViolation(
                 f"{self.impl_id}: handed a resume state, and this "
                 "implementation cannot continue an earlier invocation")
+        if ctx.on_progress is not None and not self.reports_progress:
+            raise ContractViolation(
+                f"{self.impl_id}: handed a progress observer, and this "
+                "implementation reports no committed units of work")
         before = ctx.adapter.spec_of(ctx.model)
         if not before.matches(ctx.parent_spec):
             raise ContractViolation(

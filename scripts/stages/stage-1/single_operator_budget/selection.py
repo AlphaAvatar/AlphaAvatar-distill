@@ -19,9 +19,14 @@ holds is reused, and what is new is computed on the pod against a gate this reco
 * **FFN + attention** -- the attention heads are the journal's ``kept_heads`` at 16 / 8 on the teacher (TPI1's
   selection, gate: their child's digest); the FFN at 3,840 is new: the operator on the teacher under the journal's
   config hash, gated by the same run at 3,072 equalling the journal's FFN state (its digest).
-* **residual width** -- the journal's root RESIDUAL_WIDTH state replayed on the teacher with its statistics retained
-  (TPI1's procedure and gate: the child's digest, the 37-point diagnostics), then the projection at 1,280 from those
-  statistics over all 37 residual points, weights 9 / 1 / 8.
+* **residual width** -- the teacher residual statistics TPI1 already paid for, loaded from its sealed file
+  (``teacher_residual_statistics.safetensors``) instead of a second teacher forward: TPI1's committed init record says
+  the pass that produced them passed both of TPI1's gates (the replayed RESIDUAL_WIDTH child equal to the journal
+  state's digest, P at 1,024 over all 37 points reproducing the recorded diagnostics), and this record binds that init
+  record by sha256 and copies from it the file's sha256, bytes, tensor layout, statistics positions (tokens) and
+  relay location. On the pod the file is checked against all of them and P at 1,024 recomputed from it must
+  reproduce the recorded diagnostics; then P at 1,280 from the same statistics over all 37 residual points, weights
+  9 / 1 / 8.
 
 ``--check`` refuses a committed record that a fresh read does not reproduce byte for byte.
 """
@@ -44,6 +49,8 @@ DESIGN = REPO / "configs/stages/stage-1/single_operator_budget/design.json"
 OUT = REPO / "configs/stages/stage-1/single_operator_budget/selection.json"
 TPI1_SELECTION = REPO / "configs/stages/stage-1/teacher_parent_initialization/selection.json"
 TPI1_DESIGN = REPO / "configs/stages/stage-1/teacher_parent_initialization/design.json"
+#: TPI1's committed init record: the gates its statistics pass passed, and the sealed file's identity and relay copy
+TPI1_INIT_RECORD = REPO / "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json"
 SCHEMA = "aadistill.stage1.single_operator_budget.selection/v1"
 #: what a resumed round needs from the journal, per round, and what the step must carry
 ROUND_FIELDS = ("round", "removed_before", "chosen", "chosen_score", "n_candidates", "table")
@@ -112,6 +119,41 @@ def resume_checks(row: dict, step: dict, *, design: dict, tpi1_design: dict, tpi
                                   "the whole search from round 1 (a step or trace field is missing)"
                                   if any(m.startswith(("step.", "trace.")) for m in missing)
                                   else f"from round {first_bad + 1}: the rounds before it resume")}
+
+
+def sealed_statistics(n_root: int, width_config_hash: str) -> dict:
+    """The sealed teacher statistics, from TPI1's committed init record: refused unless that record is COMPLETE, its
+    RESIDUAL_WIDTH and diagnostics gates passed, the statistics are the RESIDUAL_WIDTH operator's under the journal's
+    config hash, hold 37 residual points (the 36 layer inputs and the post-final-norm output) and the file has a
+    verified relay copy."""
+    rec = json.loads(TPI1_INIT_RECORD.read_text())
+    st, gates = rec.get("statistics") or {}, rec.get("gates") or {}
+    relay = (rec.get("relay") or {}).get("statistics") or {}
+    name = st.get("file")
+    shape = ((st.get("tensors") or {}).get("residual_sum") or {}).get("shape")
+    bad = [w for w, ok in (
+        ("the record is not COMPLETE", rec.get("status") == "COMPLETE"),
+        ("its RESIDUAL_WIDTH gate did not pass", (gates.get("RESIDUAL_WIDTH") or {}).get("equal") is True),
+        ("its 37-point diagnostics did not reproduce", (rec.get("statistics_reproduction") or {}).get("equal") is True),
+        ("the statistics are not RESIDUAL_WIDTH's under the journal's config hash",
+         st.get("config_hash") == width_config_hash),
+        (f"the statistics do not hold {n_root + 1} residual points", shape == [n_root + 1, shape and shape[-1]]),
+        ("the relay copy is not verified at the recorded sha256",
+         relay.get("verified") is True and (relay.get("files_sha256") or {}).get(name) == st.get("sha256")))
+        if not ok]
+    if bad:
+        raise SelectionError(f"{TPI1_INIT_RECORD.name}: the sealed statistics cannot be reused: {bad}")
+    return {"file": name, "sha256": st["sha256"], "bytes": int(st["bytes"]), "tensors": st["tensors"],
+            "stats_tokens": int(st["stats_tokens"]), "points": st["points"], "profile_id": st["profile_id"],
+            "operator": st["operator"], "config_hash": st["config_hash"],
+            "relay": {"repo": relay["relay"], "path": f"{relay['prefix']}/{name}"},
+            "tpi1_init_record": {"path": str(TPI1_INIT_RECORD.relative_to(REPO)), "sha256": sha256_file(TPI1_INIT_RECORD),
+                                 "run_id": rec["run_id"]},
+            "tpi1_gates": {"RESIDUAL_WIDTH": gates["RESIDUAL_WIDTH"],
+                           "statistics_reproduction": rec["statistics_reproduction"]},
+            "rule": "loaded on the pod in place of a second teacher statistics pass; its sha256, tensor layout and "
+                    "residual_count (the statistics positions) must equal these values and P at 1,024 recomputed "
+                    "from it must reproduce the recorded diagnostics before P at 1,280 is built"}
 
 
 def extract(root: Path = REPO) -> dict:
@@ -184,10 +226,10 @@ def extract(root: Path = REPO) -> dict:
                      "artifact_digest": ts["width"]["reproduction_gate"]["artifact_digest"],
                      "all_points_diagnostics": ts["width"]["reproduction_gate"]["all_points_diagnostics"],
                      "config_hash": ts["steps"]["RESIDUAL_WIDTH"]["config_hash"],
-                     "rule": "TPI1's: the journal's root RESIDUAL_WIDTH(rh) replayed on the teacher with its statistics "
-                             "retained equals the state's digest, and P at 1,024 over all 37 points recomputed from the "
-                             "retained statistics reproduces the recorded diagnostics"},
-            "tpi1_statistics_sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb"},
+                     "rule": "P at 1,024 over all 37 points recomputed from the sealed statistics reproduces the "
+                             "recorded diagnostics; the digest gate is TPI1's, passed by the pass that produced "
+                             "the file (statistics.tpi1_gates)"},
+            "statistics": sealed_statistics(n_root, ts["steps"]["RESIDUAL_WIDTH"]["config_hash"])},
         "authorizes": "nothing",
     }
 

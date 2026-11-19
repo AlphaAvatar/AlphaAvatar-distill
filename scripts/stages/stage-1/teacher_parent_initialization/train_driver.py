@@ -513,6 +513,12 @@ def evaluate(model_dir: Path, ev_dir: Path, label: str, mode: str, vllm_py: str,
 
 # ---- the state machine ----------------------------------------------------------------------------------------------------
 
+def is_live(rel: Path) -> bool:
+    """A stream still being written: anything under a ``live/`` directory at ANY depth (the evaluation runners write
+    theirs beside the units they serve: ``<unit dir>/../../live``, which is ``evaluation/live`` in SOB1's layout)."""
+    return "live" in Path(rel).parts[:-1]
+
+
 def take_over(resume: Path, out: Path) -> dict:
     """A previous attempt's secured evidence into this attempt's ``out``: save-point and final records, the trainer's
     small files, every sealed evaluation file (never a live stream); returns what was taken."""
@@ -526,7 +532,7 @@ def take_over(resume: Path, out: Path) -> dict:
     taken = []
     for p in sorted(resume.rglob("*")):
         rel = p.relative_to(resume)
-        if not p.is_file() or p.name.startswith(".") or rel.parts[0] == "live":
+        if not p.is_file() or p.name.startswith(".") or is_live(rel):
             continue
         dest = out / rel
         if dest.exists():

@@ -16934,3 +16934,45 @@ on a paid pod.
 - Risks: an 8,192-token context censors long thinking-mode generations of the teacher and the untrained arms
   (right-censored, reported apart).
 - Revisit when: phase 1's measurements exist, or the maintainer reviews phase 2's budget.
+
+## 2026-11-19 (UTC) — SOB1 completion on real artifacts, reuse of paid compute, dev-box peak, phase-1 comparison
+
+- Context: the maintainer reviewed `5622c573` (SOB1's $0 preparation and dry run). Phase 1 stays: the three
+  structures, the original teacher, 8,192 tokens, both modes, every registered item; expected $10.20, a proposed
+  $22.55 hard cap and the $1 teardown reserve. The grant is issued after these corrections are reviewed.
+- Decision (maintainer, 2026-11-19, summarized; the brief is the source): $0 corrections only.
+  - Completion is checked on the real artifacts of all eight sets (three arms and the teacher, two modes): item
+    coverage, repeats, generation records, the protocol summary and model identity against the registered manifest.
+    A `{}` report, missing items or a missing summary are taken over from the sealed records and only the missing
+    part is produced. The remote listing is retried; at closeout the evidence hashes are checked against the final
+    listing. Local retention is complete only when all three initializations are on the disk with equal hashes;
+    partial results are kept for the next takeover. Regressions: an empty report, a failed remote listing, a missing
+    arm's weights.
+  - Paid compute is reused: the residual-width arm loads TPI1's sealed `teacher_residual_statistics.safetensors`
+    (registered hash and statistics positions checked) for its 1,280 PCA; DEPTH keeps rounds 1-8 and the round-8
+    anchor, persists each of rounds 9-20 as it completes and resumes from the latest verified round.
+  - The dev box's space is accounted at the real landing paths, at the peak where evidence, temporary downloads and
+    archives coexist; the `evaluation/live/` path is excluded from sync and resume archives; the launch check runs on
+    the filesystem that meets the actual requirement. Closed checkpoints with complete evidence and no consumer may be
+    retired (tombstone first); A's only copy, this round's three inits and resume dependencies are kept.
+  - Phase 1 writes a three-arm comparison from the final sealed records (teacher and arm accuracy, the item-paired
+    teacher-minus-arm difference in pp with its interval, thinking and non-thinking apart). Generation evaluation
+    builds prompts per item; random sequential packing is for calibration and training. All three arms are kept
+    until after recovery.
+  - Phase 2 is decided separately: two seeds and the recipe stay; the six finals' storage (about 44.94 GiB) is solved
+    before the training budget; the L40S memory is recorded on the residual-width arm's first four formal optimizer
+    steps (online KD, backward, AdamW update).
+- Done ($0): `completion.py` (the five conditions, the smallest repair), the driver's per-set loop and phase check,
+  `analysis.phase1_table`; the width build loads the sealed statistics (a relay input at the sha256 TPI1's committed
+  init record gives); core `OperatorContext.on_progress` and `resume_state.anchors` (DEPTH rounds persisted to
+  `depth_only/records/depth_rounds.json`); the listing retried and never read as empty, `final_hash_check`, `live/`
+  excluded at any depth; `retain` complete only with every arm re-hashed on the disk; `disk.py` and the launch's
+  `the_dev_box_has_room`. No checkpoint met 2.5's conditions this time (0 B freed; `e5` holds no weights). The test
+  suite's simulator runs use their own floor (`AAD_TEST_PODSIM_MIN_FREE_GIB`): they move a synthetic tree of a few KB.
+- Revised phase 1 (proposed, not approved): expected $10.21, hard cap $22.92 (the statistics' floor-rate download and
+  the completion checks), teardown reserve $1.00, total $23.92.
+- Alternatives considered: re-running the width statistics pass (rejected: the maintainer asked to reuse the paid
+  pass; it also saves 3 min expected); judging a set complete by its report file (rejected: a `{}` report passed).
+- Risks: the statistics' download at the 2.6 MB/s floor is 16 min; a unit whose runner summary was lost is generated
+  again (its records kept as superseded evidence).
+- Revisit when: the maintainer reviews the corrections and the phase-1 grant.

@@ -125,9 +125,12 @@ CLASSIFY: dict[str, dict] = {
         experiment="TPI1", role="A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's "
                                 "residual statistics",
         retention="reproducibility_required", status="active",
-        why="the input of both TPI1 training seeds; the statistics are what the width PCA was built from",
+        why="the input of both TPI1 training seeds; the statistics are what the width PCA was built from, and SOB1 "
+            "phase 1's residual-width build reads them again (configs/stages/stage-1/single_operator_budget/"
+            "selection.json :: residual_width.statistics: the relay copy, sha256 e4145e38...) in place of a second "
+            "teacher statistics pass",
         never_delete="the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on "
-                     "the relay",
+                     "the relay, and the statistics' relay copy is a declared input of SOB1 phase 1 (keep it there)",
         reconstruction="init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for "
                        "bit against the journal)",
         reconstruction_cost="one L40S, about 25 min", disposition="keep"),

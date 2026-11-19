@@ -140,3 +140,55 @@ def test_only_an_operator_that_can_continue_takes_a_resume_state(model):
     with pytest.raises(ContractViolation, match="cannot continue"):
         FFNActivationImportanceV0().execute(ctx)
     assert "resume_state" not in _ctx(model, 2, True, {"rounds": []}).config
+
+
+class _Interrupted(RuntimeError):
+    pass
+
+
+@pytest.mark.parametrize("reuse", [False, True], ids=["per_candidate", "prefix_reuse"])
+def test_each_committed_round_is_observed_and_an_interrupted_search_resumes_from_it(model, reuse):
+    """`OperatorContext.on_progress` receives every round record as it commits (the records `resume_state` takes
+    back). A search interrupted after its third round resumes from an earlier search's first round plus the three
+    observed ones, re-scoring both anchors, and computes the whole search's state."""
+    whole = _run(model, 2, reuse)
+    seen = []
+    ctx = _ctx(model, 2, reuse)
+    ctx.on_progress = seen.append
+    causal_kl_greedy.DepthCausalKLGreedyV1().execute(ctx)
+    assert seen == whole.artifacts["search_rounds"]          #: every round, as committed, nothing else
+
+    earlier = _run(model, 5, reuse).artifacts["search_rounds"]   #: "the journal": one round
+    got = []
+
+    def stop_after_three(r):
+        got.append(r)
+        if len(got) == 2:
+            raise _Interrupted("the pod went away")
+    ctx = _ctx(model, 2, reuse, {"rounds": copy.deepcopy(earlier), "source": "toy journal"})
+    ctx.on_progress = stop_after_three
+    with pytest.raises(_Interrupted):
+        causal_kl_greedy.DepthCausalKLGreedyV1().execute(ctx)
+    assert [r["round"] for r in got] == [1, 2]
+    resumed = _run(model, 2, reuse, {"rounds": copy.deepcopy(earlier + got), "anchors": [0], "source": "toy"})
+    assert resumed.trace == whole.trace
+    assert _state_dict_equal(resumed.model, whole.model)
+    anchors = resumed.artifacts["resume"]["anchors"]
+    assert [a["round"] for a in anchors] == [0, 2] and all(a["abs_delta"] == 0.0 for a in anchors)
+    #: a tampered anchor that is not the last round is refused too
+    bad = copy.deepcopy(earlier + got)
+    bad[0]["chosen_score"] += 1e-9
+    for t in bad[0]["table"]:
+        if t["candidate"] == bad[0]["chosen"]:
+            t["score"] = bad[0]["chosen_score"]
+    with pytest.raises(OperatorError, match="round 0's chosen subset"):
+        _run(model, 2, reuse, {"rounds": bad, "anchors": [0]})
+
+
+def test_only_an_operator_that_reports_progress_takes_an_observer(model):
+    from aadistill.initialization.operators.ffn.dense.activation_importance import FFNActivationImportanceV0
+    ctx = _ctx(model, 6, True)
+    ctx.target_spec = ArchSpec.of("qwen3", {**GEOMETRY, "intermediate_size": 32})
+    ctx.on_progress = lambda r: None
+    with pytest.raises(ContractViolation, match="reports no committed units"):
+        FFNActivationImportanceV0().execute(ctx)

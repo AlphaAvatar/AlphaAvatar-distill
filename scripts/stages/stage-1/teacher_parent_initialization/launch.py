@@ -253,14 +253,15 @@ def launch_spec(kind: str, minutes: float = 0.0, resume_from: str | None = None)
 # ---- resume and retention ($0, dev box) -------------------------------------------------------------------------------
 
 def resume_archive(src_scr: Path, tgz: Path) -> Path:
-    """The earlier run's secured evidence (``<scr>/store/out``, never a live stream) as one gzip tar."""
+    """The earlier run's secured evidence (``<scr>/store/out``, never a live stream, at any depth) as one gzip tar."""
+    from stages.teacher_parent_initialization import train_driver as TD
     out = Path(src_scr) / "store" / "out"
     if not out.is_dir():
         raise SE.AuthorizationError(f"{out} holds no secured evidence to resume from")
     with tarfile.open(tgz, "w:gz") as t:
         for p in sorted(out.rglob("*")):
             rel = p.relative_to(out)
-            if p.is_file() and rel.parts[0] != "live" and not p.name.startswith("."):
+            if p.is_file() and not TD.is_live(rel) and not p.name.startswith("."):
                 t.add(p, arcname=str(rel))
     return tgz
 

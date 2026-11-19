@@ -1735,9 +1735,11 @@ STAGE_1 = [
         id="single_operator_budget",
         kind="experiment",
         stage_id="1",
-        status=("PREPARED at $0 (study SOB1; protocol fixed by the maintainer 2026-11-19; nothing authorized, no run): "
-                "three ~2.0B structures (N ~ 2), A's method on the teacher, DEPTH resumed from the recorded search's "
-                "round 9, every evaluation at 8,192 tokens, phase 1 proposed ($22.55 cap), phase 2 a separate draft"),
+        status=("PREPARED at $0 (study SOB1; protocol fixed and corrected by the maintainer 2026-11-19; nothing "
+                "authorized, no run): three ~2.0B structures (N ~ 2), A's method on the teacher, the width arm on "
+                "TPI1's sealed statistics, DEPTH resumed from the recorded search's round 9 and persisted per round, "
+                "every evaluation at 8,192 tokens and complete only on its files, phase 1 proposed ($22.92 cap), "
+                "phase 2 a separate draft"),
         title="Single-operator compression at the same parameter budget: depth only vs FFN + attention only vs "
               "residual width only (SOB1)",
         question=("From the same ~4B teacher compressed to about the same real parameter count, how much fluid "
@@ -1765,6 +1767,14 @@ STAGE_1 = [
               "the $0 dry run of phase 1: the driver's contract, the budget check, a dry-run artifact, the runner's "
               "and the study's pre-provider gates; nothing created",
               field="provider_resource_created", equals=False),
+            E("logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119b.json",
+              "the second $0 dry run of phase 1, after the corrections: the driver's contract, the budget check, a "
+              "dry-run artifact, the runner's and the study's pre-provider gates (the dev box's room included); "
+              "nothing created",
+              field="provider_resource_created", equals=False),
+            E("logs/stages/stage-1/single_operator_budget/plans/disk_peak.json",
+              "where phase 1's bytes land on the dev box and the bound peak when they coexist (disk.py)",
+              field="schema", equals="aadistill.stage1.single_operator_budget.disk_peak/v1"),
             E("logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json",
               "the project position, the relay's headroom and the dev box's free space as read on 2026-11-19",
               field="schema", equals="aadistill.stage1.single_operator_budget.resource_snapshot/v1"),

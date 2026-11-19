@@ -14,12 +14,22 @@ group bootstrap), only the multiplicity is new: three pairwise comparisons per m
 * Per arm, descriptive only (`arm_report`): the initialization damage (untrained vs teacher), the recovery (recovered
   vs untrained) and the remaining gap (recovered vs teacher), all at 8,192 tokens, with group-bootstrap intervals.
 
-The reader of the generations is not here yet: it is TPI1's (`rescore`, `correctness`), applied per arm, when there
-are records to read.
+The reader of the generations is TPI1's (`rescore`, `correctness`), applied per set. Phase 1's comparison
+(`phase1_table`, ``analysis.py phase1-table --evidence <dir>``) reads the eight sealed sets once phase 1 is complete on
+its files: per mode and arm, the teacher's and the arm's accuracy and the paired teacher-minus-arm difference with its
+interval -- descriptive, eliminating nothing.
 """
 from __future__ import annotations
 
-from stages.teacher_parent_initialization import analysis as TA
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[4]
+for _p in ("src", "scripts", "scripts/stages/stage-1"):
+    if str(REPO / _p) not in sys.path:
+        sys.path.insert(0, str(REPO / _p))
+
+from stages.teacher_parent_initialization import analysis as TA  # noqa: E402
 
 ALPHA = 0.05
 TEST_SEED, BOOT_SEED = 20261119, 20261120
@@ -152,3 +162,149 @@ def arm_report(pre: dict | None, post: dict | None, teacher: dict | None, groups
     out["remaining_gap"] = (_paired(post, {s: teacher for s in seeds}, groups, seeds) if post_ok and full(teacher)
                             else "not_available")
     return out
+
+
+# ---- phase 1: the teacher against each untrained arm, from the sealed records ------------------------------------------
+
+TABLE_SCHEMA = "aadistill.stage1.single_operator_budget.phase1_comparison/v1"
+TABLE_ROLE = ("descriptive only: the teacher minus each untrained arm, item by item, under one protocol; no arm is "
+              "ranked, eliminated or kept by it -- all three go to recovery and are compared after it")
+
+
+def _set_reading(gd, label: str, tmp) -> dict:
+    """One set's per-item correctness (the registered scorer's rows): the static fluid formal core, the interactive
+    episodes, every supporting unit's formal rows, and the headlines."""
+    from stages.reasoning_inheritance import analysis as RA
+    r = TA.rescore(gd, label, tmp)
+    _rep, rows = RA.unit_rows(gd, label, tmp)
+    units = {u: {i: int(bool(x.get("correct"))) for i, x in v.items() if x.get("formal") and "correct" in x}
+             for u, v in rows.items() if u != RA.FLUID}
+    return {"static": TA.correctness(r["static"]), "interactive": TA.correctness(r["interactive"]), "units": units,
+            "headlines": r["headlines"], "digest": r["digest"]}
+
+
+def _pp(x):
+    return None if x is None else round(100.0 * float(x), 2)
+
+
+def _teacher_minus(teacher: dict, arm: dict, items: list[str], groups: dict) -> dict:
+    """Teacher minus arm over ``items`` paired by item (one generation each), with the group-bootstrap interval."""
+    res = _paired({0: teacher}, {0: arm}, groups, [0])
+    lo, hi = res["effect_interval"]["ci95_percentile"]
+    return {"n_items": len(items), "n_groups": len(groups), "teacher_accuracy_pct": _pp(res["accuracy"][0]),
+            "arm_accuracy_pct": _pp(res["accuracy"][1]), "teacher_minus_arm_pp": _pp(res["delta"]),
+            "ci95_pp": [_pp(lo), _pp(hi)], "interval": res["effect_interval"]["label"]}
+
+
+def phase1_table(out, tmp) -> dict:
+    """From the final sealed records of phase 1 (an evidence directory: the pod's or the dev box's copy), per mode
+    and per arm: the teacher's and the arm's accuracy and the paired teacher-minus-arm difference in percentage
+    points with its 95% group-bootstrap interval -- the static fluid formal core (the registered 570 items, grouped by
+    the registered units of independence) first, then the interactive episodes and every supporting unit with a
+    per-item correctness, each apart. Refused unless phase 1 is complete on its files (`completion.phase`)."""
+    from stages.single_operator_budget import common as C
+    from stages.single_operator_budget import completion as CP
+    out, tmp = Path(out), Path(tmp)
+    done = CP.phase(out)
+    if not done["complete"]:
+        raise ValueError(f"phase 1 is not complete on its files ({done['n_complete']} of {done['n_sets']} sets, "
+                         f"inits {done['inits']['problems']}, modes {done['modes']}): no comparison is read")
+    d = C.design()
+    primary = TA.registered_items(d)
+    groups = TA.independence_groups(primary, d)
+    arms = [t for t in d["phase_1"]["evaluation_order"] if t != CP.TEACHER]
+    doc = {"schema": TABLE_SCHEMA, "role": TABLE_ROLE, "context_tokens": d["evaluation"]["protocol"]["context"]["tokens"],
+           "eval_set": d["evaluation"]["protocol"]["eval_set"], "modes": {}, "completion": {
+               k: done[k] for k in ("complete", "n_complete", "n_sets")},
+           "sets": {k: v["protocol_digest"] for k, v in done["sets"].items()}}
+    for mode, sub in C.mode_dirs().items():
+        read = {t: _set_reading(CP.ev_dir(out, t, mode) / "generations",
+                                t if t == CP.TEACHER else f"{t}_untrained", tmp / f"{t}_{mode}")
+                for t in [CP.TEACHER, *arms]}
+        if sorted(read[CP.TEACHER]["static"]) != sorted(primary):
+            raise ValueError(f"{mode}: the teacher's static core is not the registered {len(primary)} items")
+        rows = {}
+        for a in arms:
+            if sorted(read[a]["static"]) != sorted(primary):
+                raise ValueError(f"{mode}: {a}'s static core is not the registered {len(primary)} items")
+            inter = sorted(set(read[CP.TEACHER]["interactive"]) & set(read[a]["interactive"]))
+            row = {"primary_static_fluid_core": _teacher_minus(read[CP.TEACHER]["static"], read[a]["static"],
+                                                               primary, groups),
+                   "interactive_episodes": _teacher_minus(read[CP.TEACHER]["interactive"], read[a]["interactive"],
+                                                          inter, {i: [i] for i in inter}) if inter else None,
+                   "supporting_units": {}}
+            for u in sorted(read[CP.TEACHER]["units"]):
+                t_u, a_u = read[CP.TEACHER]["units"][u], read[a]["units"].get(u, {})
+                ids = sorted(set(t_u) & set(a_u))
+                head = (read[CP.TEACHER]["headlines"].get(u.replace("__", "/", 1)) or {}).get("headline")
+                if ids:
+                    row["supporting_units"][u] = {
+                        **_teacher_minus(t_u, a_u, ids, {i: [i] for i in ids}), "registered_headline": head,
+                        "reading": ("per-item correctness, the unit's registered headline" if head == "correct" else
+                                    f"per-item correctness; the unit's registered headline is {head} (in the "
+                                    "headlines beside this table), not this")}
+            rows[a] = row
+        doc["modes"][mode] = {"dir": sub, "teacher_headlines": read[CP.TEACHER]["headlines"],
+                              "arm_headlines": {a: read[a]["headlines"] for a in arms}, "arms": rows,
+                              "scored_digests": {t: v["digest"] for t, v in read.items()}}
+    return doc
+
+
+ARM_WORDS = {"residual_width": "仅残差宽度 (width 1280)", "ffn_attention": "仅 FFN + 注意力 (FFN 3840, 16Q/8KV)",
+             "depth_only": "仅深度 (16 layers)"}
+MODE_WORDS = {"H-T": "思考模式", "H-N": "非思考模式"}
+
+
+def render_table(doc: dict) -> str:
+    """The comparison as Markdown: one table per mode, the primary core first."""
+    out = [f"# SOB1 phase 1: teacher vs each untrained arm ({doc['context_tokens']:,} tokens, {doc['eval_set']})", "",
+           f"_{doc['role']}_", ""]
+    for mode, m in doc["modes"].items():
+        out += [f"## {MODE_WORDS.get(mode, mode)} ({mode})", "",
+                "| arm | items (groups) | teacher % | arm % | teacher − arm, pp | 95% interval, pp |",
+                "| --- | ---: | ---: | ---: | ---: | --- |"]
+        for a, r in m["arms"].items():
+            p = r["primary_static_fluid_core"]
+            out.append(f"| {ARM_WORDS.get(a, a)} | {p['n_items']} ({p['n_groups']}) | {p['teacher_accuracy_pct']} | "
+                       f"{p['arm_accuracy_pct']} | {p['teacher_minus_arm_pp']} | {p['ci95_pp'][0]} to {p['ci95_pp'][1]} |")
+        out += ["", "Static fluid formal core (primary items). Interactive episodes and supporting units, each apart:", "",
+                "| arm | unit | items | teacher % | arm % | teacher − arm, pp | 95% interval, pp |",
+                "| --- | --- | ---: | ---: | ---: | ---: | --- |"]
+        for a, r in m["arms"].items():
+            extra = ([("interactive episodes", r["interactive_episodes"])] if r["interactive_episodes"] else []) + \
+                list(r["supporting_units"].items())
+            for u, p in extra:
+                mark = " ¹" if p.get("registered_headline") not in (None, "correct") else ""
+                out.append(f"| {ARM_WORDS.get(a, a)} | {u}{mark} | {p['n_items']} | {p['teacher_accuracy_pct']} | "
+                           f"{p['arm_accuracy_pct']} | {p['teacher_minus_arm_pp']} | {p['ci95_pp'][0]} to "
+                           f"{p['ci95_pp'][1]} |")
+        out += ["", "¹ per-item correctness; the unit's registered headline is its pair accuracy, reported in each "
+                "set's formal report and in comparison.json :: headlines. The behaviour set has no correctness "
+                "headline and is not in this table. Intervals: 95% percentile bootstrap over the registered units "
+                "of independence (the primary core) or over items, unadjusted for multiplicity.", ""]
+    return "\n".join(out) + "\n"
+
+
+def main(argv=None) -> int:
+    import argparse
+    import json
+    import tempfile
+    ap = argparse.ArgumentParser(description="SOB1 analysis: phase 1's comparison table from sealed records")
+    ap.add_argument("command", choices=("phase1-table",))
+    ap.add_argument("--evidence", required=True, help="an evidence directory (the pod's out or <scr>/store/out)")
+    ap.add_argument("--write", default=None, help="a directory for comparison.json and comparison.md")
+    a = ap.parse_args(argv)
+    with tempfile.TemporaryDirectory() as tmp:
+        doc = phase1_table(Path(a.evidence), Path(tmp))
+    md = render_table(doc)
+    if a.write:
+        w = Path(a.write)
+        w.mkdir(parents=True, exist_ok=True)
+        (w / "comparison.json").write_text(json.dumps(doc, indent=1) + "\n")
+        (w / "comparison.md").write_text(md)
+    print(md)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

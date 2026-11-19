@@ -134,7 +134,8 @@
    "selection": {
     "DEPTH": "RESUMED: the journal's 36 -> 28 search (state fede45dbe125bec0ec457d5a827d0027) continued from round 9 to 16 layers: 28 + 27 + ... + 17 = 270 new candidate subsets, every one against the unbypassed teacher (selection.json :: depth_only)",
     "gate": "the operator checks the eight committed rounds against the greedy rule, re-scores round 8's chosen subset (must equal 0.5305385485267972 exactly) and continues; rounds 1-8 must remain [2, 32, 3, 26, 30, 8, 20, 28]; the config hash is the journal's (58c86cde...)",
-    "resume_checks": "selection.json :: depth_only.resume_checks (reference, teacher, operator, items / positions / packing, execution, greedy rule and tie rule, removal order: all match; nothing missing)"
+    "resume_checks": "selection.json :: depth_only.resume_checks (reference, teacher, operator, items / positions / packing, execution, greedy rule and tie rule, removal order: all match; nothing missing)",
+    "persistence": "each of rounds 9-20 (its choice and every candidate's score) is written to depth_only/records/depth_rounds.json the moment the operator commits it (OperatorContext.on_progress); a later attempt resumes from the journal's eight rounds plus the persisted ones, re-scoring round 8's chosen subset AND the latest persisted round's exactly, so an interruption loses at most the round in progress"
    },
    "not_this_arm": "RI-S1's D (28 layers, 3,215,021,568 parameters, N 1.25) is cited as an existing measurement of depth damage, never used as this arm"
   },
@@ -185,8 +186,8 @@
     "RESIDUAL_WIDTH"
    ],
    "selection": {
-    "RESIDUAL_WIDTH": "NEW at 1,280: the journal's root RESIDUAL_WIDTH(rh) state (02b3319640a0043a77ed5a3ca4e07afc) replayed on the teacher with its statistics retained (TPI1's procedure, about 3 min); P at 1,280 from those statistics over all 37 residual points, weights 9 / 1 / 8",
-    "gate": "the replayed child equals the state's digest bit for bit, and P at 1,024 over the 37 points recomputed from the retained statistics reproduces the recorded diagnostics (TPI1's two gates); the statistics' sha256 against TPI1's kept file (e4145e38...) is recorded as evidence"
+    "RESIDUAL_WIDTH": "NEW at 1,280, from statistics already paid for: TPI1's sealed teacher residual statistics -- the statistics of the journal's root RESIDUAL_WIDTH(rh) state (02b3319640a0043a77ed5a3ca4e07afc) as TPI1 replayed it on the teacher (teacher_residual_statistics.safetensors, sha256 e4145e38..., 37 points x 2,560, 236,939 statistics positions; selection.json :: residual_width.statistics, derived from TPI1's committed init record), loaded on the pod in place of a second teacher statistics pass; P at 1,280 from them over all 37 residual points, weights 9 / 1 / 8",
+    "gate": "the file's sha256, every tensor's name, shape and dtype and its statistics positions (residual_count) equal the record's, and P at 1,024 over the 37 points recomputed from it reproduces the recorded diagnostics; the digest gate (the replayed RESIDUAL_WIDTH child equal to the journal state's digest) is TPI1's, passed by the pass that produced the file (statistics.tpi1_gates)"
    },
    "coupled": "the embedding (tied head), q/k/v/o, gate/up/down and every RMSNorm change with the hidden size (structures.json :: modules)"
   }
@@ -306,14 +307,16 @@
       "enable_thinking": true
      },
      "dir": "evaluation_thinking",
-     "role": "primary"
+     "role": "primary",
+     "think_state": "self_opening"
     },
     "H-N": {
      "template_kwargs": {
       "enable_thinking": false
      },
      "dir": "evaluation_non_thinking",
-     "role": "key secondary"
+     "role": "key secondary",
+     "think_state": "preclosed"
     }
    },
    "package": {
@@ -327,7 +330,8 @@
     ],
     "what": "the model's weights and config linked, the teacher's tokenizer files and generation config copied and hashed against teacher_identity.json -- one rule for every model evaluated (common.package), as RI-S1 packaged its groups"
    },
-   "resume": "each finished sample is streamed and sealed (reasoning_inheritance.driver.fluid / capability with this protocol passed in): a later attempt generates only the samples without a sealed record, each under the seed its item derives; nothing is generated twice and nothing is chosen by outcome"
+   "resume": "each finished sample is streamed and sealed (reasoning_inheritance.driver.fluid / capability with this protocol passed in): a later attempt generates only the samples without a sealed record, each under the seed its item derives; nothing is generated twice and nothing is chosen by outcome",
+   "think_state_rule": "the think state every rendered prompt of the mode carries, as the A-MIX plan's evaluations declare it (training_plan.json :: evaluations[].think_state): thinking self_opening, non-thinking preclosed; checked record by record (completion.py)"
   },
   "models": {
    "pre_recovery": "each arm's initialization, untrained (phase 1)",
@@ -404,9 +408,10 @@
   "pod_root": "/workspace/single_operator",
   "local_store": "~/aad-artifacts/stage1_single_operator_budget",
   "local_landing": {
-   "phase_1": "<arm>/init/<mapping digest[:16]>/ (three bf16 initializations, 11.24 GiB), fetched from the relay record the pod verified and re-hashed (launch.py retain)",
+   "phase_1": "<arm>/init/<mapping digest[:16]>/ and <arm>/mapping/<digest16>/ (three bf16 initializations 12,064,313,856 B and their mappings), fetched from the relay record the pod verified and re-hashed on the disk (launch.py retain)",
    "phase_2": "<arm>-s<seed>/final/<sha256[:16]>/ (six fp32 finals, 44.94 GiB)"
-  }
+  },
+  "dev_box_peak": "logs/stages/stage-1/single_operator_budget/plans/disk_peak.json (disk.py): evidence, the pull archive in flight, the teardown collector's archive and its extracted copy, a resume archive, then the retained initializations and mappings; the launch checks the free bytes of the filesystem the session's --scr and the local store are on (the_dev_box_has_room)"
  },
  "budget": {
   "proposal": "logs/stages/stage-1/single_operator_budget/plans/proposal.json",
@@ -437,10 +442,21 @@
    "basis": "the packed search's own operator times on the teacher, L40S (journal wall seconds): DEPTH 36 -> 28 7,074 s over 260 candidate subsets (27.2 s each at 32.5 layers remaining on average), FFN 185 s, ATTENTION 85 s, RESIDUAL_WIDTH 172 s; TPI1's init session (one arm: teacher load, gates, statistics, build, state evaluation, relay) 22.8 min",
    "depth_rounds_9_to_20": "270 candidate subsets (28 + ... + 17) plus round 8's re-score: 27.2 s per candidate x remaining layers / 32.5 (expected) or unscaled (bound)",
    "ffn_3072_and_3840": "one statistics pass (185 s) and two selections, sharing it",
-   "residual_width_replay_seconds": 172,
    "per_arm_build_state_evaluation_minutes": 12,
    "teacher_load_minutes_per_arm": 2,
-   "bound_factor": 1.15
+   "bound_factor": 1.15,
+   "residual_width_statistics": {
+    "rule": "no teacher statistics pass (the journal's replay was 172 s): TPI1's sealed file is downloaded by setup and loaded here; its time is priced into the driver so the session's hard deadline covers it",
+    "bytes": 1947442680,
+    "load_seconds": 20,
+    "expected": "bytes at transfer.expected_download_bytes_per_second",
+    "bound": "bytes at training.durability's download floor x its margin"
+   },
+   "completion_checks_and_comparison_minutes": {
+    "expected": 3,
+    "bound": 6,
+    "basis": "measured on the dev box: one completion check of a set, its formal report rescored, 1.0 s (non-thinking) to 3.0 s (thinking) on TPI1's A records at 8,192; about 40 checks over the eight sets (start, after generating, after rescoring, the phase check) and the comparison table's rescoring"
+   }
   },
   "pre_recovery_evaluation": {
    "basis": "RI-S1's untrained D / W / DW generations (40,960) capped at 8,192 minus each prompt: 3.54M, 4.52M and 3.67M output tokens over both modes; the teacher decoded 608.8 tokens/s (4B, 40,960, fluid unit); a ~2B arm decodes faster and holds more 8,192-token requests in the KV cache",
@@ -463,6 +479,28 @@
    "rule": "each copy's time from its bytes: expected at TPI1's median rates (upload 156 MB/s, verifying download 330 MB/s), bound at training.durability's floors (120 MB/s, 2.6 MB/s) x its margin",
    "expected_upload_bytes_per_second": 156000000.0,
    "expected_download_bytes_per_second": 330000000.0
+  },
+  "dev_box_disk": {
+   "rule": "every byte a phase-1 session brings to the dev box, at its landing path, summed where they coexist (disk.py): the evidence pulled on every poll, one pull's archive in flight, the teardown collector's archive and its extracted copy, a resume archive (failure path), then the three initializations and mappings retained from the relay; the peak is at the end of retention",
+   "bytes_per_generated_token": 32.65,
+   "_bytes_per_generated_token": "measured: every file of TPI1's four A evaluation directories at 8,192 tokens (parts, generations, rows, logs, records) over their generated tokens: 23.84 / 23.96 (thinking) and 32.60 / 32.65 (non-thinking) bytes per token; the largest is used for every model and mode",
+   "archive_ratio": 8.41,
+   "_archive_ratio": "measured: TPI1's units_evidence.tgz, 28,981,348 B for 243,779,226 B extracted",
+   "records_share": 0.0028,
+   "_records_share": "measured: the JSON records and logs of those directories, 686,083 of 242,455,120 B (what the teardown collector archives, artifacts.json)",
+   "tokens": {
+    "teacher": 6158586,
+    "untrained_proxies": [
+     3540000,
+     4520000,
+     3670000
+    ],
+    "_source": "cost_model.teacher_at_8192 and pre_recovery_evaluation: the teacher's 40,960 records and RI-S1's untrained D / W / DW records, each capped at 8,192 minus its prompt, both modes"
+   },
+   "bound_margin": 1.25,
+   "_bound": "expected: the teacher's tokens plus the three proxies; bound: every model at max(teacher, proxies) x 1.25",
+   "mapping_bytes_per_arm": 22000000,
+   "_mapping_bytes_per_arm": "TPI1's mapping: mapping.json 968,220 B + tensors.safetensors 20,979,888 B, rounded up"
   }
  },
  "decided": {
@@ -475,7 +513,17 @@
    "every evaluation (untrained arms, recovered arms, the teacher) at 8,192 tokens with the same items, both modes, decoder and scorer; an identity-matched teacher record is reused, what is missing is phase 1's; the 40,960 results stay as historical reference",
    "Holm over the three thinking-mode pairs with m = 3; a formal verdict only when all three arms x both registered seeds are complete; partial results are descriptive",
    "initial KL, CE and generation scores eliminate nothing"
-  ]
+  ],
+  "fixed_2": {
+   "by": "maintainer 2026-11-19 (UTC), second brief",
+   "fixed": [
+    "phase 1's completion is checked on the real files of all eight sets (coverage, repeats, generation records, protocol summary, model identity); a {} report, missing items or a missing summary are taken over from the sealed records and only the missing part is produced; the remote listing is retried and the final listing's hashes are checked at closeout; local retention is complete only with all three initializations on the disk and their hashes equal",
+    "the residual-width arm loads TPI1's sealed teacher residual statistics (registered hash and statistics positions checked) and computes the 1,280 PCA from them; depth keeps the first eight rounds' reuse and the round-8 anchor, persists each of rounds 9-20 as it completes and resumes from the latest verified round",
+    "the dev box's space is accounted at the real landing paths, at the peak where evidence, temporary downloads and archives coexist",
+    "phase 1 writes a three-arm comparison from the final sealed records: teacher and arm accuracy and the item-paired teacher-minus-arm difference with its interval, thinking and non-thinking apart; generation evaluation builds prompts per item, random sequential packing is for calibration and training; all three arms are kept until after recovery",
+    "phase 2 is decided separately: the two-seed design and the recipe stay; the storage of the six finals (about 44.94 GiB) is solved before the training budget; the L40S memory is recorded on the residual-width arm's first four formal optimizer steps (online KD, backward, AdamW update)"
+   ]
+  }
  },
  "phase_1": {
   "session_kind": "sob1_phase1",
@@ -491,7 +539,25 @@
    "teacher"
   ],
   "why": "the cheapest builds first, so two arms are durable before the 270-candidate depth search; every arm is evaluated before the teacher",
-  "driver": "scripts/stages/stage-1/single_operator_budget/phase1_driver.py"
+  "driver": "scripts/stages/stage-1/single_operator_budget/phase1_driver.py",
+  "inputs": {
+   "teacher_residual_statistics": {
+    "dest": "artifacts/stages/stage-1/single_operator_budget/inputs",
+    "what": "TPI1's sealed teacher residual statistics (selection.json :: residual_width.statistics: relay object, sha256, tensor layout, statistics positions)",
+    "consumer": "the residual-width build: P at 1,024 (the diagnostics gate) and P at 1,280, with no teacher statistics pass on this pod",
+    "staged_by": "setup, from the relay at hub speed, verified by its sha256 (launch.py :: launch_spec relay_inputs)"
+   }
+  },
+  "completion": {
+   "rule": "phase 1 is done only on its files (completion.py): the three initializations durable (COMPLETE init records, every relay copy verified), and each of the eight evaluation sets (three untrained arms and the teacher, both modes) complete against the registered manifest -- item coverage and repeats (every registered unit of eval-set-1, every item once), generation records (raw output and termination, and the per-record protocol: seed rule, 8,192 context, the mode's think state, stop id, system message), the protocol summary (every unit's runner summary, every key field recorded and equal to the registered value), the formal report (rescored from these generations; a {} or stale report is a missing part), and model identity (every package an attempt built names the arm's init-record weights or the teacher identity's shards); and the four sets of each mode share one protocol digest",
+   "takeover": "a set an earlier attempt completed is taken as it is; otherwise the smallest repair from the sealed records: a {} or stale report rescored, a generations file with missing, extra or repeated items given to the sealed parts and superseded so only the missing items are generated, a unit whose protocol or model cannot be shown generated again under the same per-item seeds (earlier records kept under superseded/<attempt>/, never pooled); two different records for one item are refused",
+   "dev_box": "the poll's listing is retried and an unreadable one leaves pending unknown, never 0; at teardown every file of the pod's final listing is checked by sha256 against the dev box's copy (reasoning_inheritance.launch.final_hash_check); closeout re-checks completion on that copy (closeout/phase1_completion.json); local retention is COMPLETE only when every arm's initialization and mapping is on the dev box's disk with the record's sha256 (launch.py retain), partial products recorded for the next retain"
+  },
+  "comparison": {
+   "what": "from the final sealed records (analysis.py phase1_table, written to comparison/ on the pod and re-derivable on the dev box at $0): per mode (thinking and non-thinking apart) and per arm, the teacher's and the untrained arm's accuracy and the item-paired teacher-minus-arm difference in percentage points with its 95% group-bootstrap interval -- the static fluid formal core first (the registered 570 items, the registered units of independence), then the interactive episodes and every supporting unit with per-item correctness, each apart",
+   "role": "descriptive: no arm is ranked, eliminated or kept by it; all three go to recovery and are compared after it"
+  },
+  "prompts_and_packing": "evaluation builds each item's prompt on its own (the runners render every item through the chat template, batched, never packed); random-order sequential packing is the calibration's and the training's (P19), never the evaluation's"
  },
  "phase_2": {
   "session_kind": "sob1_train",

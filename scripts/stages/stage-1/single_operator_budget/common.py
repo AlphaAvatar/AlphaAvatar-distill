@@ -55,6 +55,15 @@ def protocol() -> dict:
             "package": ev["package"]["rule"]}
 
 
+def statistics_input() -> dict:
+    """Where the residual-width build reads the sealed teacher statistics on the pod, and the relay object setup
+    stages there (`selection.json :: residual_width.statistics`, verified by its sha256)."""
+    st = read_json(SELECTION)["residual_width"]["statistics"]
+    dest = design()["phase_1"]["inputs"]["teacher_residual_statistics"]["dest"]
+    return {"repo": st["relay"]["repo"], "path": st["relay"]["path"], "sha256": st["sha256"], "bytes": st["bytes"],
+            "dest": dest, "file": st["file"], "local": REPO / dest / st["file"]}
+
+
 def mode_dirs() -> dict[str, str]:
     return {m: v["dir"] for m, v in design()["evaluation"]["protocol"]["modes"].items()}
 
@@ -85,5 +94,8 @@ def package(model_dir: Path, dest: Path) -> dict:
             raise SOB1Error(f"the teacher's {n} hashes to {got[:12]}, the identity pins {ident['files_sha256'][n][:12]}")
         shutil.copyfile(snap / n, dest / n)
         side[n] = got
+    #: the weights these generations come from, by content (completion.py checks them against the init record or the
+    #: teacher identity)
+    weights = {n: sha256_file(dest / n) for n in linked if n.endswith(".safetensors")}
     return {"model_dir": str(model_dir), "rule": rule["rule"], "linked": linked, "sidecars": side,
-            "teacher_snapshot": str(snap)}
+            "teacher_snapshot": str(snap), "weights_sha256": weights}

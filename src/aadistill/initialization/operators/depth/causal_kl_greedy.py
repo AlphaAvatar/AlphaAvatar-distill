@@ -122,8 +122,14 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
     #: 0: DEPTH KL scores are bit-identical across sessions at a fixed
     #: execution) -- the evidence that THIS scorer wrote them. The search then
     #: continues from the next round against the same intact-parent reference,
-    #: so the result is the state a whole invocation computes.
+    #: so the result is the state a whole invocation computes. ``anchors``
+    #: (optional): the indices of further replayed rounds whose chosen subsets
+    #: are re-scored the same way, e.g. the round an earlier search committed
+    #: AND the latest round this search's own earlier attempt committed.
     accepts_resume_state = True
+    #: Each round record is handed to `OperatorContext.on_progress` the moment
+    #: it commits -- the record `resume_state` takes back.
+    reports_progress = True
     deterministic = True
     requires_seed = False
     produces = ("depth_map", "search_rounds")
@@ -868,6 +874,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                   f"{r['chosen']} score {r['chosen_score']:.6f}; runner-up "
                   f"{ranked[1]['candidate'] if len(ranked) > 1 else None} "
                   f"margin {margin:.3e}", flush=True)
+            if ctx.on_progress is not None:
+                ctx.on_progress(dict(r))
 
         resumed = None
         completed = None
@@ -990,20 +998,26 @@ def _resume_rounds(state, *, n_layers: int, n_remove: int, rescore, impl_id: str
     if bad:
         raise OperatorError(f"{impl_id}: the resumed rounds are not greedy round records: " + "; ".join(bad))
     tol = float(state.get("tolerance", 0.0))
-    last = rounds[-1]
-    t0 = time.perf_counter()
-    got = float(rescore(list(last["removed_before"]), int(last["chosen"])))
-    want = float(last["chosen_score"])
-    delta = abs(got - want)
+    last_i = len(rounds) - 1
+    anchors = sorted({int(a) for a in (state.get("anchors") or ())} | {last_i})
+    if anchors[0] < 0 or anchors[-1] > last_i:
+        raise OperatorError(f"{impl_id}: anchors {anchors} name rounds outside the {len(rounds)} resumed")
+    checked = []
+    for i in anchors:
+        rec = rounds[i]
+        t0 = time.perf_counter()
+        got = float(rescore(list(rec["removed_before"]), int(rec["chosen"])))
+        want = float(rec["chosen_score"])
+        delta = abs(got - want)
+        checked.append({"round": i, "removed_before": list(rec["removed_before"]), "candidate": int(rec["chosen"]),
+                        "recorded": want, "rescored": got, "abs_delta": delta, "tolerance": tol,
+                        "seconds": round(time.perf_counter() - t0, 3)})
+        if not math.isfinite(got) or delta > tol:
+            raise OperatorError(
+                f"{impl_id}: round {i}'s chosen subset scores {got!r} here and {want!r} in the resumed record "
+                f"(|delta| {delta:.3e} > {tol}); these records were not written by this scorer")
     evidence = {"rounds_replayed": len(rounds), "removal_order_replayed": [int(r["chosen"]) for r in rounds],
-                "rescored": {"round": len(rounds) - 1, "removed_before": list(last["removed_before"]),
-                             "candidate": int(last["chosen"]), "recorded": want, "rescored": got,
-                             "abs_delta": delta, "tolerance": tol, "seconds": round(time.perf_counter() - t0, 3)},
-                "source": state.get("source")}
-    if not math.isfinite(got) or delta > tol:
-        raise OperatorError(
-            f"{impl_id}: round {len(rounds) - 1}'s chosen subset scores {got!r} here and {want!r} in the resumed "
-            f"record (|delta| {delta:.3e} > {tol}); these records were not written by this scorer")
+                "rescored": checked[-1], "anchors": checked, "source": state.get("source")}
     return rounds, evidence
 
 

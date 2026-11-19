@@ -109,7 +109,8 @@
    "message": "not a training session"
   }
  },
- "defect_found_and_fixed": "the first launch dry run refused all_in_within_cap: the proposal's hard cap (2.53) left the contingency off setup and transfer; the runner's all-in at .11/h is 2.5485. proposal.hard_cap now prices as the runner does: 2.55 (test_the_hard_cap_is_the_runners_all_in)",
+ "defect_found_and_fixed": "the first launch dry run refused all_in_within_cap: the proposal's hard cap ($22.53) left the contingency off setup and transfer; the runner's all-in at $1.11/h is $22.5485. proposal.hard_cap now prices as the runner does: $22.55 (test_the_hard_cap_is_the_runners_all_in)",
  "not_exercised": "staging the bundle and the real create: they follow the maintainer's grant",
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "_corrected": "2026-11-19 (UTC): the text of defect_found_and_fixed was garbled when written (a shell expanded '$2' in '$22.53', '$22.5485' and '$22.55', and '$1' in '$1.11'); the figures above are the ones the dry run printed. Nothing measured changed."
 }

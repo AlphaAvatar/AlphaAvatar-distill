@@ -17,7 +17,8 @@ closeout); this module is the instance: the study's bound files, its one session
 (``logs/budget/approvals/stage1_reasoning_inheritance_grant.json``), never here.
 
 FINISHED WORK LEAVES THE POD AS IT IS WRITTEN. The driver writes every finished file atomically under its evidence
-directory (``live/`` holds the streams still being written and is never pulled); each poll lists the directory, tars
+directory (``live/``, at any depth, holds the streams still being written and is never pulled); each poll lists the
+directory (an unreadable listing is retried and then leaves "pending" unknown, never 0), tars
 the files the dev box does not yet hold at that size, pulls the archive, checks its sha256 and unpacks it under
 ``<scr>/store/out``. The checkpoints and the mapping go to the private relay from the pod and are re-hashed there
 (`driver.relay_upload`). A later attempt resumes from that copy: `stage-resume` packs the store and uploads it at $0;
@@ -114,8 +115,54 @@ def _pulled_index(st: Path) -> dict:
     return json.loads(p.read_text()) if p.is_file() else {}
 
 
+#: every finished file of the evidence directory: never a stream still being written (``live/`` at ANY depth -- the
+#: evaluation runners write theirs beside the units they serve) and never a ``.``-prefixed temporary
+FIND = "find . -type f ! -path '*/live/*' ! -name '.*'"
+LISTED, NO_DIR = "__AAD_LISTING_COMPLETE__", "__AAD_NO_EVIDENCE_DIR__"
+LISTING_TRIES, LISTING_TIMEOUT_S = 3, 120
+
+
+def list_remote(ctx, ev: str, *, hashes: bool = False, tries: int = LISTING_TRIES, sleep=None) -> dict | None:
+    """The pod's evidence directory: ``{name: size}`` (or ``{name: sha256}`` with ``hashes``); ``{}`` when the
+    directory does not exist yet. A listing that cannot be read -- a timeout, a transport error, a non-zero exit, an
+    answer without its completion marker -- is retried ``tries`` times and is then None: never an empty listing, so
+    an unreadable pod never reads as "nothing pending"."""
+    import time
+    sleep = time.sleep if sleep is None else sleep
+    body = (f"{FIND} -print0 | xargs -0 -r sha256sum" if hashes else f"{FIND} -printf '%P\\t%s\\n'")
+    cmd = (f"if test -d {ev}; then cd {ev} && {body} && echo {LISTED}; else echo {NO_DIR}; fi")
+    why = None
+    for i in range(tries):
+        try:
+            res = ctx.target.run(cmd, timeout=LISTING_TIMEOUT_S * (4 if hashes else 1))
+            out, rc = getattr(res, "stdout", "") or "", getattr(res, "returncode", None)
+        except Exception as exc:  # noqa: BLE001
+            out, rc, why = "", None, f"{type(exc).__name__}: {str(exc)[:200]}"
+        lines = out.splitlines()
+        if rc == 0 and lines and lines[-1].strip() == NO_DIR:
+            return {}
+        if rc == 0 and lines and lines[-1].strip() == LISTED:
+            got = {}
+            for line in lines[:-1]:
+                if hashes:
+                    digest, _, name = line.partition("  ")
+                    if len(digest) == 64 and name:
+                        got[name.removeprefix("./")] = digest
+                else:
+                    name, _, size = line.rpartition("\t")
+                    if name and size.isdigit():
+                        got[name] = int(size)
+            return got
+        why = why or f"exit {rc}, {len(out)} B, no completion marker"
+        if i + 1 < tries:
+            sleep(10 * (i + 1))
+    ctx.evidence.setdefault("listing_errors", []).append(f"{why} (after {tries} tries)")
+    return None
+
+
 def secure_incremental(launch):
-    """on_poll (module docstring). Idempotent; never raises."""
+    """on_poll (module docstring). Idempotent; never raises. An unreadable listing leaves ``pending`` unknown (None),
+    never 0."""
     def on_poll(ctx) -> None:
         try:
             if ctx.target is None:
@@ -124,17 +171,15 @@ def secure_incremental(launch):
             (st / "out").mkdir(parents=True, exist_ok=True)
             SE._scp(ctx, launch.status(), st / "driver.status", limit_s=120)
             ev = SE.evidence_dir(launch, ctx.args.run_id)
-            res = ctx.target.run(f"test -d {ev} && cd {ev} && find . -type f ! -path './live/*' ! -name '.*' "
-                                 f"-printf '%P\\t%s\\n'", timeout=120)
-            listing = {}
-            for line in (getattr(res, "stdout", "") or "").splitlines():
-                name, _, size = line.rpartition("\t")
-                if name and size.isdigit():
-                    listing[name] = int(size)
+            listing = list_remote(ctx, ev)
             have = _pulled_index(st)
+            if listing is None:
+                ctx.evidence["secured_files"] = {"files": len(have), "pending": None,
+                                                 "listing": "unreadable: nothing is known to be secured"}
+                return
             new = sorted(n for n, s in listing.items() if have.get(n) != s)
             if not new:
-                ctx.evidence["secured_files"] = {"files": len(have), "pending": 0}
+                ctx.evidence["secured_files"] = {"files": len(have), "pending": 0, "listed": len(listing)}
                 return
             n = int(ctx.evidence.get("secure_rounds", 0)) + 1
             lst, tgz = f"/workspace/ri_pull_{n}.list", f"/workspace/ri_pull_{n}.tgz"
@@ -152,8 +197,9 @@ def secure_incremental(launch):
                 for name in new:
                     have[name] = listing[name]
                 (st / "pulled.json").write_text(json.dumps(have, indent=0, sort_keys=True) + "\n")
-                dest.unlink()
                 ctx.target.run(f"rm -f {tgz} {lst}", timeout=60)
+            if dest.is_file():
+                dest.unlink()                #: a failed pull's archive is not kept beside the evidence
             ctx.evidence["secure_rounds"] = n
             ctx.evidence["secured_files"] = {"files": len(have), "pending": len(listing) - len(have),
                                              "last_round_ok": ok, "last_round_files": len(new)}
@@ -162,6 +208,36 @@ def secure_incremental(launch):
         except Exception as exc:  # noqa: BLE001
             ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
     return on_poll
+
+
+def final_hash_check(launch, ctx) -> dict:
+    """At closeout: the pod's FINAL listing with every file's sha256 against the dev box's copy (``<scr>/store/out``).
+    A file the dev box lacks or holds with other bytes is pulled again (its index entry dropped) and checked once more;
+    the result is ``verified`` only when every listed file matches."""
+    st = SE.store(ctx)
+    ev = SE.evidence_dir(launch, ctx.args.run_id)
+    out: dict = {"utc": None}
+    for attempt in range(2):
+        listing = list_remote(ctx, ev, hashes=True)
+        if listing is None:
+            out.update(verified=False, why="the final listing could not be read")
+            break
+        local = {n: (hashlib.sha256((st / "out" / n).read_bytes()).hexdigest() if (st / "out" / n).is_file() else None)
+                 for n in listing}
+        bad = sorted(n for n, h in listing.items() if local[n] != h)
+        out.update(files=len(listing), mismatched=[n for n in bad if local[n] is not None][:20],
+                   missing_here=[n for n in bad if local[n] is None][:20], n_bad=len(bad), verified=not bad)
+        if not bad or attempt == 1:
+            break
+        have = _pulled_index(st)
+        for n in bad:
+            have.pop(n, None)
+        (st / "pulled.json").write_text(json.dumps(have, indent=0, sort_keys=True) + "\n")
+        secure_incremental(launch)(ctx)
+    import datetime as _dt
+    out["utc"] = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ctx.evidence["final_listing"] = out
+    return out
 
 
 def products_secured(launch):
@@ -176,9 +252,14 @@ def products_secured(launch):
         status = (st / "driver.status").read_text() if (st / "driver.status").is_file() else ""
         sec = ctx.evidence.get("secured_files") or {}
         done = "MARKER:ALL_DONE" in status
-        ok = done and sec.get("pending") == 0 and (st / "out" / "report.json").is_file()
-        return ok, (f"every finished file is on the dev box ({sec.get('files')} files)" if ok else
-                    f"not all finished work is secured (driver done: {done}, pending: {sec.get('pending')})")
+        fin = final_hash_check(launch, ctx) if sec.get("pending") == 0 else {"verified": False}
+        ok = done and sec.get("pending") == 0 and fin.get("verified") and (st / "out" / "report.json").is_file()
+        final = ("verified" if fin.get("verified") else fin.get("why") or f"{fin.get('n_bad')} files differ")
+        why = (f"every finished file is on the dev box ({sec.get('files')} files, each sha256 equal to the pod's "
+               f"final listing)" if ok else
+               f"not all finished work is secured (driver done: {done}, pending: {sec.get('pending')}, final "
+               f"listing: {final})")
+        return ok, why
     return check
 
 

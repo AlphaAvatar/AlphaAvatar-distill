@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-19 (UTC), SOB1 PREPARED at $0 (protocol fixed by the maintainer; phase-1 code, plans, budget and a $0 dry run; dev-box checkpoints retired), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
+**Updated:** 2026-11-19 (UTC), SOB1 PREPARED at $0 and corrected (completion on real artifacts, sealed statistics reused, DEPTH persisted per round, dev-box peak, phase-1 comparison; a second $0 dry run), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -10,23 +10,24 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PREPARED AT $0 -- NOTHING AUTHORIZED, NO RUN.**
-- Protocol fixed by the maintainer 2026-11-19 (`logs/budget/decisions.md`). Design
-  `configs/stages/stage-1/single_operator_budget/design.json`; for review `docs/stages/stage-1/single_operator_budget/README.md`.
-  Depth only (16 layers), FFN + attention only (FFN 3840, 16 / 8 heads), residual width only (1280), each about 2.0B
-  (`plans/structures.json`), built on the original teacher with A's operators. DEPTH resumes the journal's 36 -> 28
-  search from round 9 (270 new candidate subsets; `selection.json :: depth_only.resume_checks` all true). Research A's
-  recovery recipe unchanged; every model (untrained arms, the teacher, recovered arms) evaluated at 8,192 tokens --
-  no identity-matched teacher record exists, so the teacher is phase 1's. Holm with m = 3; formal only with all three
-  arms x both seeds complete; nothing eliminates an arm.
-- Code: `scripts/stages/stage-1/single_operator_budget/` (phase1_driver, train_driver, plan, launch with `budget`,
-  analysis); core: DEPTH resume (`OperatorContext.resume_state`), the trainer's memory probe
-  (`AADISTILL_MEMORY_PROBE_STEPS`); TPI1's train driver: listing retries, handoff-only retries, byte-sized copy
-  times and a session-deadline reserve. $0 dry run (`plans/dry_run_20261119.json`): driver check-only, budget, a dry-run artifact and every pre-provider gate passed up to the session-commit check a dry-run artifact cannot pass; it caught and fixed a hard cap $0.02 under the runner's all-in.
-- Budget (`plans/proposal.json`): phase 1 one session, $10.20 expected, $22.55 hard cap + $1.00 reserve (fits the
+- Protocol fixed by the maintainer 2026-11-19 and corrected the same day (`logs/budget/decisions.md`, two entries).
+  Design `configs/stages/stage-1/single_operator_budget/design.json`; for review
+  `docs/stages/stage-1/single_operator_budget/README.md`. Depth only (16 layers), FFN + attention only (FFN 3840,
+  16 / 8 heads), residual width only (1280), each about 2.0B (`plans/structures.json`), on the original teacher with
+  A's operators. The width arm loads TPI1's sealed teacher statistics (`selection.json :: residual_width.statistics`);
+  DEPTH resumes the journal's 36 -> 28 search from round 9 (270 new candidate subsets) and persists each round
+  (`depth_only/records/depth_rounds.json`). Every model evaluated at 8,192 tokens; a set is complete only on its files
+  (`completion.py`); phase 1 writes the teacher-minus-arm comparison (`analysis.py phase1-table`). Holm with m = 3;
+  formal only with all three arms x both seeds complete; nothing eliminates an arm.
+- Code: `scripts/stages/stage-1/single_operator_budget/` (phase1_driver, completion, analysis, disk, train_driver,
+  plan, launch with `budget` / `closeout` / `retain`); core: DEPTH resume with anchors and `OperatorContext.on_progress`,
+  the trainer's memory probe; shared poll: an unreadable listing is retried and never read as empty, the final listing
+  is hash-checked, `live/` excluded at any depth. Dry runs: `plans/dry_run_20261119.json`, `plans/dry_run_20261119b.json`.
+- Budget (`plans/proposal.json`): phase 1 one session, $10.21 expected, $22.92 hard cap + $1.00 reserve (fits the
   $30.24 left); phase 2 a draft only: both seeds $114.70 expected, caps $185.87 + $1.
-- Dev box: seven historical checkpoints retired 2026-11-19 (RI-S1 D/W/DW, RI-LM1's two deltas; tombstones
-  `devbox_20261119_*`, `logs/maintenance/storage/devbox_cleanup_20261119.json`): 3.23 -> 13.93 GiB free. Phase 1's
-  11.24 GiB fits; phase 2's six finals (44.94 GiB) are 42.25 GiB short.
+- Dev box: `plans/disk_peak.json`: phase 1's bound peak 12.35 GiB at the real landing paths (evidence, archives,
+  three inits and mappings); no further checkpoint was eligible for retirement. Phase 2's finals do not fit
+  (one arm's two need 14.98 GiB).
 - Decisions owed: `docs/stages/stage-1/single_operator_budget/README.md` section 10.
 
 **Baseline (maintainer, 2026-11-18):** TPI1's A (teacher-parent initialization) is the reasoning-inheritance research's

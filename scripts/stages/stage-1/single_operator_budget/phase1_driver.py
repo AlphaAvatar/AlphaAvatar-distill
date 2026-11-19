@@ -15,15 +15,20 @@ evaluated on all of eval-set-1 in both modes at 8,192 tokens, each finished samp
 Building (`design.json :: phase_1.build_order`; one GPU child process per arm, the teacher loaded in each, every shard
 hashed), always on the unmodified teacher under the packed search's own session (inputs v3; `selection.json`):
 
-* **residual width only** -- the journal's root RESIDUAL_WIDTH(rh) replayed with its statistics retained; its child
-  must equal the state's digest and P at 1,024 over all 37 points must reproduce the recorded diagnostics (TPI1's
-  gates); then P at 1,280 from the same statistics over all 37 points, weights 9 / 1 / 8;
+* **residual width only** -- no teacher statistics pass: TPI1's sealed teacher statistics
+  (``teacher_residual_statistics.safetensors``, staged by setup from the relay) are loaded and checked against
+  `selection.json :: residual_width.statistics` (sha256, every tensor's layout, the statistics positions); the pass
+  that produced them passed TPI1's digest gate. P at 1,024 over all 37 points recomputed from them must reproduce the
+  recorded diagnostics; then P at 1,280 from the same statistics over all 37 points, weights 9 / 1 / 8;
 * **FFN + attention only** -- the FFN operator at 3,072 (must build the journal's FFN state bit for bit) and at 3,840
   sharing one statistics pass, both under the journal's config hash; the journal's 16 / 8 heads (their child must
   equal the ATTENTION state's digest);
 * **depth only** -- the DEPTH operator 36 -> 16 under the journal's config hash, resuming its eight committed rounds
-  (`selection.json :: depth_only.rounds`): the operator re-checks them, re-scores round 8's chosen subset exactly and
-  scores rounds 9-20 (270 candidate subsets) against the unbypassed teacher; rounds 1-8 must equal the journal's order.
+  (`selection.json :: depth_only.rounds`) and every round an earlier attempt of this study persisted: the operator
+  re-checks them, re-scores round 8's chosen subset and the latest persisted round's exactly, and scores the rest of
+  rounds 9-20 (270 candidate subsets in all) against the unbypassed teacher; rounds 1-8 must equal the journal's order.
+  Each new round (its choice and every candidate's score) is written to ``depth_only/records/depth_rounds.json`` the
+  moment it commits, so an interrupted session resumes from its latest verified round.
 
 Each arm: one `FrozenMapping` keyed by root indices, saved and loaded back, materialized onto the teacher (FFN ->
 blocks -> width -> heads), geometry and parameter count against `structures.json`, reloaded with a finite forward,
@@ -31,13 +36,18 @@ state evaluation against the teacher (diagnostic only), then the checkpoint and 
 and re-hashed) and the arm's ``<arm>/init_record.json``. A gate that fails stops the session before anything is built
 on it.
 
-Evaluating (`phase_1.evaluation_order`): each untrained arm (its checkpoint on this pod, else fetched from its init
-record's relay copy and re-hashed) and the teacher (the pinned snapshot), through one package rule
-(`common.package`) and the runners with the registered protocol (`common.protocol`, 8,192 tokens) -- TPI1's
-`train_driver.evaluate`. A sample already sealed is never generated again; a mode with a formal report is skipped.
+Evaluating (`phase_1.evaluation_order`): eight sets, each untrained arm (its checkpoint on this pod, else fetched from
+its init record's relay copy and re-hashed) and the teacher (the pinned snapshot) in both modes, through one package
+rule (`common.package`, which records the weights' sha256) and the runners with the registered protocol
+(`common.protocol`, 8,192 tokens). A set is complete only on its files (`completion.check`: item coverage, repeats,
+generation records, protocol summary, the formal report, model identity); one an earlier attempt completed is taken
+as it is, otherwise the smallest repair -- a ``{}`` or stale report rescored, missing items generated from the
+sealed records onward, a unit whose protocol or model cannot be shown generated again -- and checked again. Phase 1
+ends ALL_DONE only when the three inits are durable, the eight sets are complete and each mode's four sets share one
+protocol (`completion.phase`); then the comparison (`analysis.phase1_table`) is written to ``comparison/``.
 
 ``--resume``: a previous attempt's secured evidence: an arm whose init record's relay copies verified exists and is
-not rebuilt; sealed samples are kept.
+not rebuilt; its persisted DEPTH rounds and sealed samples are kept.
 """
 from __future__ import annotations
 
@@ -95,12 +105,13 @@ def fixed_spec(s, step: dict, target, device: str, label: str, expected_digest: 
         distribution_support=s.config.distribution_support, forward_context=s.config.forward_context)
 
 
-def run_step(spec, adapter, teacher, root_sha: str, work: Path, s, cache, resume=None):
+def run_step(spec, adapter, teacher, root_sha: str, work: Path, s, cache, resume=None, observer=None):
     from aadistill.initialization.planning.fixed_path import _run_steps
     (res,) = _run_steps(spec, adapter=adapter, model=teacher, indices=[0], parent_spec=adapter.spec_of(teacher),
                         parent_digest=root_sha, workdir=work, repo_root=str(REPO), stats_cache=cache,
                         calibration_items=None, on_step=None, deadline=None, execution=s.execution,
-                        resume_states=None if resume is None else {0: resume})
+                        resume_states=None if resume is None else {0: resume},
+                        progress_observers=None if observer is None else {0: observer})
     return res
 
 
@@ -112,21 +123,42 @@ def gate(rec: dict, name: str, got: str, want: str) -> None:
 
 # ---- the three builds --------------------------------------------------------------------------------------------------
 
+def load_statistics(path: Path, want: dict) -> tuple[dict, dict]:
+    """The sealed teacher statistics (`selection.json :: residual_width.statistics`): refused unless the file's sha256,
+    every tensor's name, shape and dtype, and its statistics positions (``residual_count``) are the recorded ones.
+    Returns the state and the checks."""
+    from safetensors.torch import load_file
+    if not path.is_file():
+        raise DriverError(f"{path} is not on this pod: setup stages it from {want['relay']['path']}")
+    got = sha256_file(path)
+    if got != want["sha256"]:
+        raise DriverError(f"{path.name} hashes to {got[:12]}, the sealed statistics are {want['sha256'][:12]}")
+    state = load_file(str(path), device="cpu")
+    layout = {k: {"shape": list(v.shape), "dtype": str(v.dtype)} for k, v in sorted(state.items())}
+    count = int(state["residual_count"].reshape(-1)[0].item()) if "residual_count" in state else None
+    checks = {"sha256": got, "sha256_equal": True, "layout_equal": layout == want["tensors"],
+              "residual_count": count, "positions_equal": count == int(want["stats_tokens"]),
+              "points": int(state["residual_sum"].shape[0]) if "residual_sum" in state else None}
+    if not (checks["layout_equal"] and checks["positions_equal"]):
+        raise DriverError(f"{path.name} is not the sealed statistics' layout and positions: {checks}")
+    return state, checks
+
+
 def select_residual_width(rec, s, adapter, teacher, root_sha, work, device):
+    """No teacher statistics pass: TPI1's sealed statistics (the pass that passed TPI1's digest gate) are loaded,
+    checked (`load_statistics`) and must reproduce the recorded 37-point diagnostics at 1,024 before P at 1,280."""
     import torch
     from aadistill.initialization.planning import frozen_mapping as FM
-    from stages.teacher_parent_initialization import init_driver as TI
-    sel, ts = selection()["residual_width"], tpi1_selection()
+    sel = selection()["residual_width"]
     n_root = selection()["n_root_blocks"]
-    cache = FM.RetainingStatsCache()
     t0 = time.time()
-    res = run_step(TI.replay_spec(s, ts, device), adapter, teacher, root_sha, work / "width_replay", s, cache)
-    rec["statistics_seconds"] = round(time.time() - t0, 1)
-    gate(rec, "RESIDUAL_WIDTH", res.identity.artifact_digest, sel["gate"]["artifact_digest"])
-    shutil.rmtree(work / "width_replay", ignore_errors=True)
-    if len(cache.retained) != 1:
-        raise DriverError(f"the statistics pass left {len(cache.retained)} states, not one")
-    state = next(iter(cache.retained.values()))
+    state, checks = load_statistics(C.statistics_input()["local"], sel["statistics"])
+    rec["statistics"] = {"source": "loaded: TPI1's sealed teacher statistics (no teacher forward here)",
+                         "relay": sel["statistics"]["relay"], "tpi1_init_record": sel["statistics"]["tpi1_init_record"],
+                         **checks, "load_seconds": round(time.time() - t0, 1)}
+    if checks["points"] != n_root + 1 or max(sel["points"]) >= checks["points"] or sel["post_norm_point"] != n_root:
+        raise DriverError(f"the statistics hold {checks['points']} points; the selection reads {sel['points']} "
+                          f"and the post-norm point {sel['post_norm_point']}")
     diag = sel["gate"]["all_points_diagnostics"]
     w1024 = FM.width_transform_from_statistics(
         state, d_child=1024, points=sel["points"], point_weights=diag["point_weights"],
@@ -135,16 +167,11 @@ def select_residual_width(rec, s, adapter, teacher, root_sha, work, device):
     rec["statistics_reproduction"] = {"recomputed": {k: w1024.diagnostics.get(k) for k in keys},
                                       "recorded": {k: diag[k] for k in keys},
                                       "equal": all(w1024.diagnostics.get(k) == diag[k] for k in keys)}
+    rec["gates"]["STATISTICS_DIAGNOSTICS_1024"] = dict(rec["statistics_reproduction"])
     if not rec["statistics_reproduction"]["equal"]:
-        raise DriverError(f"the retained statistics do not reproduce the 37-point diagnostics: "
+        raise DriverError(f"the sealed statistics do not reproduce the 37-point diagnostics: "
                           f"{rec['statistics_reproduction']}")
     del w1024
-    #: evidence beside the gates: the retained statistics against the bytes TPI1 kept (not a gate: the digest gate and
-    #: the diagnostics above already identify the pass)
-    tmp = work / "statistics_check.safetensors"
-    rec["statistics"] = {k: v for k, v in TI.save_statistics(state, tmp).items() if k != "tensors"}
-    rec["statistics"]["equals_tpi1_bytes"] = rec["statistics"]["sha256"] == sel["tpi1_statistics_sha256"]
-    tmp.unlink(missing_ok=True)
     transform = FM.width_transform_from_statistics(
         state, d_child=int(sel["hidden_size"]), points=sel["points"], point_weights=sel["point_weights"],
         final_norm_weight=adapter.final_norm(teacher).weight, post_norm_point=sel["post_norm_point"], device=device)
@@ -152,7 +179,6 @@ def select_residual_width(rec, s, adapter, teacher, root_sha, work, device):
                               "point_weights": sel["point_weights"], "post_norm_point": sel["post_norm_point"],
                               "scale": transform.scale, "diagnostics": dict(transform.diagnostics)}
     del state
-    cache.retained.clear()
     torch.cuda.empty_cache()
     return {"kept_blocks": tuple(range(n_root)), "width": transform}, "all"
 
@@ -194,19 +220,65 @@ def select_ffn_attention(rec, s, adapter, teacher, root_sha, work, device):
             "query_heads": {b: tuple(heads[b]) for b in range(n_root)}}, "all"
 
 
-def select_depth(rec, s, adapter, teacher, root_sha, work, device):
+DEPTH_ROUNDS = "depth_rounds.json"
+
+
+def depth_rounds_path(out: Path) -> Path:
+    return out / "depth_only" / "records" / DEPTH_ROUNDS
+
+
+def persisted_rounds(out: Path, step: dict, journal: list[dict]) -> list[dict]:
+    """The rounds after the journal's that an earlier attempt of this study committed (`persist_round`), refused unless
+    they were written for this step (operator, profile, config hash) and continue the journal's rounds without a gap."""
+    p = depth_rounds_path(out)
+    if not p.is_file():
+        return []
+    doc = read_json(p)
+    if doc.get("step") != {k: step[k] for k in ("impl_id", "profile_id", "config_hash")}:
+        raise DriverError(f"{p.name} was written for another step: {doc.get('step')}")
+    rounds = [r["record"] for r in doc.get("rounds") or []]
+    want = list(range(len(journal), len(journal) + len(rounds)))
+    if [int(r["round"]) for r in rounds] != want:
+        raise DriverError(f"{p.name} holds rounds {[r.get('round') for r in rounds]}, not {want} after the journal's")
+    return rounds
+
+
+def persist_round(out: Path, step: dict, run_id: str, record: dict) -> None:
+    """One committed DEPTH round (its choice and every candidate's score), appended atomically to the evidence
+    directory the moment the operator commits it: the dev box pulls it on its next poll and a later attempt resumes
+    from it (`persisted_rounds`)."""
+    p = depth_rounds_path(out)
+    doc = read_json(p) if p.is_file() else {
+        "schema": "aadistill.stage1.single_operator_budget.depth_rounds/v1",
+        "step": {k: step[k] for k in ("impl_id", "profile_id", "config_hash")}, "rounds": []}
+    doc["rounds"].append({"attempt": run_id, "utc": utc(), "record": record})
+    write_json(p, doc)
+
+
+def select_depth(rec, s, adapter, teacher, root_sha, work, device, out: Path | None = None, run_id: str = "check"):
+    """DEPTH 36 -> 16, resuming the journal's eight rounds (round 8's chosen subset re-scored exactly) and every round
+    an earlier attempt of this study persisted (the latest of them re-scored exactly too); each new round is persisted
+    as it commits (`persist_round`)."""
     sel = selection()["depth_only"]
     keep = int(sel["resume"]["target_layers"])
     base = adapter.spec_of(teacher)
+    journal = sel["rounds"]
+    own = persisted_rounds(out, sel["step"], journal) if out is not None else []
+    rec["depth_resume"] = {"journal_rounds": len(journal), "persisted_rounds": len(own),
+                           "anchors": sorted({len(journal) - 1, len(journal) + len(own) - 1})}
     t0 = time.time()
     r = run_step(fixed_spec(s, sel["step"], base.replace(num_hidden_layers=keep), device, "depth_36_to_16"),
                  adapter, teacher, root_sha, work / "depth", s, None,
-                 resume={"rounds": sel["rounds"], "source": f"journal state {sel['state_id']}"})
+                 resume={"rounds": journal + own, "anchors": [len(journal) - 1],
+                         "source": f"journal state {sel['state_id']}" + (f" + {len(own)} rounds this study persisted"
+                                                                       if own else "")},
+                 observer=None if out is None else (lambda r_: persist_round(out, sel["step"], run_id, r_)))
     rec["depth_seconds"] = round(time.time() - t0, 1)
     order = [int(x) for x in r.trace["removal_order"]]
-    replayed = [int(x["chosen"]) for x in sel["rounds"]]
+    replayed = [int(x["chosen"]) for x in journal]
     rec["depth"] = {"removal_order": order, "kept_layers": [int(x) for x in r.trace["kept_layers"]],
                     "first_rounds_are_the_journal": order[:len(replayed)] == replayed,
+                    "persisted_rounds_resumed": len(own),
                     "local_metrics": r.local_metrics, "result_spec_hash": r.result_spec_hash,
                     "child_artifact_digest": r.identity.artifact_digest,
                     "search_rounds": r.selection.get("search_rounds"), "packing": r.trace.get("packing")}
@@ -240,7 +312,8 @@ def build(arm: str, out: Path, work: Path, device: str, status: Status, run_id: 
         raise DriverError("the loaded teacher is not the design's root")
     root_sha = rec["root"]["root_teacher_sha256"]
     aw = work / arm
-    parts, blocks = SELECT[arm](rec, s, adapter, teacher, root_sha, aw, device)
+    extra = {"out": out, "run_id": run_id} if arm == "depth_only" else {}
+    parts, blocks = SELECT[arm](rec, s, adapter, teacher, root_sha, aw, device, **extra)
     write_json(progress, rec)
     status.mark(f"SELECTED:{arm}")
     n_root = selection()["n_root_blocks"]
@@ -376,21 +449,52 @@ def model_for(target: str, out: Path, work: Path) -> Path:
     return dest
 
 
+def evaluate_set(target: str, mode: str, out: Path, work: Path, vllm_py: str, attempt: str, status: Status) -> dict:
+    """One set (one model x one mode) to completion, on its files (`completion.check`): a set an earlier attempt
+    completed is taken as it is; otherwise the smallest repair (`completion.repair`), the runners over only what no
+    sealed record holds (`reasoning_inheritance.driver.fluid` / `capability` with the registered protocol), the formal
+    report rescored from the generations, and the check again. Two rounds at most; a set still incomplete stops the
+    session with its problems (its sealed records stay for the next attempt)."""
+    from stages.reasoning_inheritance import driver as RID
+    from stages.single_operator_budget import completion as CP
+    d = CP.ev_dir(out, target, mode)
+    label = TEACHER if target == TEACHER else f"{target}_untrained"
+    st = CP.check(d, target, mode, out, label=label)
+    row = {"at_start": {"complete": st["complete"], "problems": st["problems"]}}
+    if st["complete"]:
+        CP.write(d, st)
+        return {**row, "status": "complete", "generated": False}
+    env = {**os.environ, "HF_HUB_OFFLINE": "1"}
+    ev = C.protocol()
+    for rnd in (1, 2):
+        row.setdefault("repairs", []).append(CP.repair(d, st, attempt))
+        if CP.needs_generation(d):
+            model_dir = model_for(target, out, work)
+            pkg = work / "packages" / f"{label}_{mode}"
+            entry = {"attempt": attempt, "utc": utc(), "target": target, "mode": mode, **C.package(model_dir, pkg)}
+            write_json(d / CP.PACKAGES, CP.packages(d) + [entry])   #: before anything is generated
+            status.mark(f"EVAL_GENERATE:{target}:{mode}:{rnd}")
+            row.setdefault("runs", []).append({
+                "fluid": RID.fluid(pkg, d, label, mode, vllm_py, env, attempt, None, ev),
+                "capability": RID.capability(pkg, d, label, mode, vllm_py, env, attempt, None, ev)})
+        st = CP.check(d, target, mode, out, label=label)
+        CP.rescore(d, st)                       #: a stale or {} report is replaced by these generations' own
+        st = CP.check(d, target, mode, out, label=label)
+        if st["complete"]:
+            break
+    CP.write(d, st)
+    if not st["complete"]:
+        raise DriverError(f"{target}/{mode} is not complete after {rnd} repair rounds: {st['problems']}")
+    return {**row, "status": "complete", "generated": bool(row.get("runs"))}
+
+
 def evaluate_targets(out: Path, work: Path, vllm_py: str, attempt: str, status: Status, report: dict) -> None:
-    from stages.teacher_parent_initialization import train_driver as TD
-    ev, dirs = C.protocol(), C.mode_dirs()
     for target in phase()["evaluation_order"]:
         row = report["evaluations"].setdefault(target, {})
-        for mode, sub in dirs.items():
-            ev_dir = out / "evaluation" / target / sub
-            if (ev_dir / "formal_report.json").is_file():
-                row.setdefault(mode, {"skipped": "a formal report exists (an earlier attempt)"})
-                continue
-            model_dir = model_for(target, out, work)
-            label = TEACHER if target == TEACHER else f"{target}_untrained"
+        for mode in C.mode_dirs():
             status.mark(f"EVAL_START:{target}:{mode}")
             t0 = time.time()
-            row[mode] = {**TD.evaluate(model_dir, ev_dir, label, mode, vllm_py, attempt, work / "eval", ev, C.package),
+            row[mode] = {**evaluate_set(target, mode, out, work, vllm_py, attempt, status),
                          "eval_seconds": round(time.time() - t0, 1)}
             write_json(out / "report.json", report)
             status.mark(f"EVAL_DONE:{target}:{mode}")
@@ -462,6 +566,24 @@ def main(argv=None) -> int:
             write_json(out / "report.json", report)
         status.mark("INITS_DURABLE")
         evaluate_targets(out, work, a.vllm_python, a.run_id, status, report)
+        from stages.single_operator_budget import completion as CP
+        report["completion"] = CP.phase(out, write_records=True)
+        write_json(out / "report.json", report)
+        if not report["completion"]["complete"]:
+            raise DriverError(f"phase 1 is not complete on its files: {report['completion']['n_complete']} of "
+                              f"{report['completion']['n_sets']} sets, inits {report['completion']['inits']}, "
+                              f"modes {report['completion']['modes']}")
+        status.mark("PHASE1_COMPLETE")
+        try:                                     #: a derived product: a failure here is recorded, re-derivable at $0
+            from stages.single_operator_budget import analysis as SA
+            table = SA.phase1_table(out, work / "comparison")
+            write_json(out / "comparison" / "comparison.json", table)
+            (out / "comparison" / "comparison.md").write_text(SA.render_table(table))
+            report["comparison"] = {"json": "comparison/comparison.json", "markdown": "comparison/comparison.md"}
+            status.mark("COMPARISON_WRITTEN")
+        except Exception as exc:  # noqa: BLE001
+            report["comparison"] = {"error": f"{type(exc).__name__}: {str(exc)[:1500]}",
+                                    "rederive": "analysis.py phase1-table --evidence <the secured copy>"}
     except BaseException as exc:  # noqa: BLE001
         ok = False
         report["error"] = {"error": repr(exc)[:2000], "traceback": traceback.format_exc()[-6000:]}

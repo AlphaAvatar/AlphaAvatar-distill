@@ -127,15 +127,25 @@ def build(design: dict | None = None) -> dict:
     dep = depth_hours(cm, s["teacher"]["geometry"]["num_hidden_layers"],
                       s["arms"]["depth_only"]["geometry"]["num_hidden_layers"],
                       sel["depth_only"]["resume"]["rounds_replayed"])
-    other_s = 185.0 + ic["residual_width_replay_seconds"] + 85.0           #: FFN pass, width replay, attention gate
+    other_s = 185.0 + 85.0                         #: the FFN statistics pass and the attention gate (journal seconds)
+    rw = ic["residual_width_statistics"]
+    stats = {"bytes": rw["bytes"],
+             "hours_expected": round((rw["bytes"] / cm["transfer"]["expected_download_bytes_per_second"]
+                                      + rw["load_seconds"]) / 3600, 3),
+             "hours_bound": round((rw["bytes"] / dur["download_floor_bytes_per_second"] * dur["transfer_margin"]
+                                   + rw["load_seconds"]) / 3600, 3),
+             "rule": rw["rule"]}
+    checks = ic["completion_checks_and_comparison_minutes"]
     per_arm_h = (ic["per_arm_build_state_evaluation_minutes"] + ic["teacher_load_minutes_per_arm"]) / 60
     inits_bytes = sum(v["init_bf16"] for v in sizes.values())
     relay_init = transfer_hours(inits_bytes, cm, dur)
     builds = {"hours_expected": round(dep["hours_expected"] + other_s / 3600 + len(arms) * per_arm_h
-                                      + relay_init["hours_expected"], 2),
+                                      + relay_init["hours_expected"] + stats["hours_expected"]
+                                      + checks["expected"] / 60, 2),
               "hours_bound": round(dep["hours_bound"] + (other_s / 3600 + len(arms) * per_arm_h) * ic["bound_factor"]
-                                   + relay_init["hours_bound"], 2),
-              "depth": dep, "relay_copies_of_the_inits": relay_init,
+                                   + relay_init["hours_bound"] + stats["hours_bound"] + checks["bound"] / 60, 2),
+              "depth": dep, "relay_copies_of_the_inits": relay_init, "residual_width_statistics": stats,
+              "completion_checks_and_comparison_minutes": checks,
               "other_operators_seconds": other_s, "per_arm_build_and_state_evaluation_hours": round(per_arm_h, 3)}
     pre, teach, post = cm["pre_recovery_evaluation"], cm["teacher_at_8192"], cm["post_recovery_evaluation"]
     p1 = {"builds": builds,

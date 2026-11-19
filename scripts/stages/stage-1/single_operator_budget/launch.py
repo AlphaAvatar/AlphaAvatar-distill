@@ -25,7 +25,14 @@ Two session kinds, one L40S each, on the container disk (no network volume):
 Gates read at $0 before the create, beyond the mechanism's: the authorization is in the session commit; the cap plus
 the teardown reserve fit (`layer_merge_launch.reserve_problems`); the relay would accept the kind's bytes at their true
 sizes; the artifact's bound records are this tree's; for a training session, the plan is the derivation and the
-arm's initialization is on the relay with its hashes.
+arm's initialization is on the relay with its hashes; the dev box's filesystem(s) under ``--scr`` and the local store
+hold the session's bound peak (`disk.check_room`).
+
+Finished files leave the pod on every poll (`reasoning_inheritance.launch.secure_incremental`: an unreadable listing is
+retried and leaves "pending" unknown, never 0); at teardown every file of the pod's final listing is checked by sha256
+against the dev box's copy (`final_hash_check`). ``closeout`` then re-checks phase 1's completion on that copy
+(`completion.phase`) and ``retain`` brings EVERY arm's initialization and mapping home, re-hashed on the disk, before
+the local retention is recorded COMPLETE.
 """
 from __future__ import annotations
 
@@ -67,8 +74,12 @@ STUDY = SE.Study(
     identity_files=(DESIGN, SELECTION, STRUCTURES),
     scripts=(f"{HERE}/__init__.py", f"{HERE}/common.py", f"{HERE}/phase1_driver.py", f"{HERE}/train_driver.py",
              f"{HERE}/plan.py", f"{HERE}/selection.py", f"{HERE}/structures.py", f"{HERE}/launch.py",
+             f"{HERE}/completion.py", f"{HERE}/analysis.py", f"{HERE}/disk.py",
              f"{TPI}/__init__.py", f"{TPI}/init_driver.py", f"{TPI}/train_driver.py", f"{TPI}/relay.py",
-             f"{TPI}/plan.py", f"{TPI}/selection.py", f"{TPI}/launch.py",
+             f"{TPI}/plan.py", f"{TPI}/selection.py", f"{TPI}/launch.py", f"{TPI}/analysis.py", f"{TPI}/b_evidence.py",
+             "scripts/stages/stage-1/reasoning_inheritance/analysis.py",
+             "scripts/stages/stage-1/reasoning_inheritance/layer_merge_analysis.py",
+             "scripts/stages/stage-0/calibration_volume/score_battery.py",
              "scripts/stages/stage-1/reasoning_inheritance/driver.py",
              "scripts/stages/stage-1/reasoning_inheritance/selection.py",
              "scripts/stages/stage-1/reasoning_inheritance/launch.py",
@@ -210,6 +221,27 @@ def the_initialization_is_durable(ctx) -> tuple[bool, str]:
             f"{arm}'s initialization is not on the relay as recorded: {bad}")
 
 
+def statistics_input():
+    """The residual-width build's input: TPI1's sealed teacher statistics, staged by setup and verified there by the
+    sha256 `selection.json` derives from TPI1's committed init record (no teacher statistics pass on the pod)."""
+    from aadistill.infrastructure.session import RelayInput
+    st = C.statistics_input()
+    return RelayInput(path=st["path"], repo=st["repo"], dest=st["dest"], sha256=st["sha256"])
+
+
+def the_dev_box_has_room(ctx) -> tuple[bool, str]:
+    """Where this session's bytes land on the dev box (``--scr`` and the local store), against the free bytes of the
+    filesystem each is on: the bound peak of `disk.plan` (evidence, archives, then the retained weights)."""
+    from stages.single_operator_budget import disk as DK
+    scr = getattr(ctx.args, "scr", None) or str(C.local_store() / ctx.args.run_id)
+    room = DK.check_room(_kind(ctx), _arm(ctx), scr)
+    ctx.evidence["dev_box_room"] = room
+    fs = "; ".join(f"{e['read_at']}: {e['free_bytes'] / DK.GIB:.2f} GiB free for {e['bound_bytes'] / DK.GIB:.2f} GiB "
+                   f"(margin {e['margin_gib']} GiB)" for e in room["filesystems"])
+    return room["fits"], (f"the dev box holds the session's bound peak: {fs}" if room["fits"] else
+                          f"the dev box cannot hold what this session brings back: {fs}")
+
+
 def resume_input(spec: str | None):
     if not spec:
         return ()
@@ -265,7 +297,7 @@ def launch_spec(kind: str, minutes: float = 0.0, resume_from: str | None = None,
         assets = (asset("artifacts/stages/stage-2/teacher_modes/calibration_v3"),
                   asset("artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3"),
                   asset("artifacts/stages/stage-3/eval/battery_v2"))      #: the verified TriviaQA copy
-        relay = ()
+        relay = (statistics_input(),)                     #: TPI1's sealed teacher statistics, at hub speed
         desc = ("SOB1 phase 1: three ~2B initializations from the teacher (A's operators), then the untrained arms "
                 "and the teacher on eval-set-1 at 8,192 tokens")
     else:
@@ -280,7 +312,7 @@ def launch_spec(kind: str, minutes: float = 0.0, resume_from: str | None = None,
         teacher_revision=d["teacher"]["revision"], kind=kind, local_assets=assets, disk_gb=150,
         relay_inputs=relay, driver=DRIVERS[kind],
         extra_prechecks=(the_authorization_is_in_the_session_commit, the_teardown_reserve_stays, the_relay_has_room,
-                         the_kind_records_are_the_bound_ones, the_initialization_is_durable),
+                         the_kind_records_are_the_bound_ones, the_initialization_is_durable, the_dev_box_has_room),
         validation_minutes=float(minutes or driver_minutes(kind, arm)), setup_minutes=25.0, contingency_fraction=0.05,
         description=desc, artifact_spec="configs/stages/stage-1/single_operator_budget/artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; every finished file is on the "
@@ -327,32 +359,91 @@ def stage_resume(run_id: str, src_scr: Path) -> str:
     return f"{prefix}/{tgz.name}@{res['files_sha256'][tgz.name]}"
 
 
-def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, record: Path = REPO / LOCAL_RECORD) -> dict:
-    """Each durable product of a finished session onto the dev box ($0 GPU): fetched from its verified relay record,
-    re-hashed, placed in the out-of-tree store and recorded (`relay.get`). Phase 1: each arm's initialization (its
-    mapping stays on the relay); a training session: each unit's final weights."""
+def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, record: Path = REPO / LOCAL_RECORD,
+           getter=None, arm: str | None = None) -> dict:
+    """Each durable product of a finished session onto the dev box ($0 GPU), from its verified relay record, into the
+    out-of-tree store (`relay.get`; ``getter`` for a test). Phase 1: EVERY arm's initialization and mapping; a
+    training session: both seeds' final weights. Each file is hashed again here, on the disk, against the record the
+    pod verified -- never taken from the fetch's own answer. The record is ``COMPLETE`` only when every product is on
+    the dev box with its sha256; an arm without an init record, a fetch that fails, a filesystem without room or a file
+    whose bytes differ leaves it ``INCOMPLETE``, naming what is missing. Verified products are recorded either way,
+    so a later retain fetches only the rest."""
+    import shutil
     from stages.teacher_parent_initialization import relay as R
-    store = store or C.local_store()
+    getter = getter or R.get
+    store = Path(store or C.local_store())
     out = Path(src_scr) / "store" / "out"
     doc = json.loads(record.read_text()) if record.is_file() else {
         "schema": "aadistill.stage1.single_operator_budget.local/v1", "store": str(store), "products": {}}
-    todo = {}
+    want, missing = {}, {}
     if kind == PHASE1_KIND:
-        for ir in sorted(out.glob("*/init_record.json")):
-            rec = json.loads(ir.read_text())["relay"]["init"]
-            todo[f"{ir.parent.name}/init"] = rec
+        for a in C.design()["phase_1"]["build_order"]:
+            p = out / a / "init_record.json"
+            ir = json.loads(p.read_text()) if p.is_file() else None
+            if ir is None:
+                missing[f"{a}/init"] = missing[f"{a}/mapping"] = "no init record in the secured evidence"
+                continue
+            for name in ("init", "mapping"):
+                rec = (ir.get("relay") or {}).get(name)
+                if ir.get("status") != "COMPLETE" or not (rec or {}).get("verified"):
+                    missing[f"{a}/{name}"] = "the init record is not COMPLETE or its relay copy is unverified"
+                else:
+                    want[f"{a}/{name}"] = rec
     else:
-        for fin in sorted(out.glob("*/final.json")):
-            todo[f"{fin.parent.name}/final"] = json.loads(fin.read_text())
-    for key, rec in todo.items():
+        seeds = C.design()["training"]["seeds"]
+        for sd in seeds:
+            name = f"{arm}-s{int(sd)}"
+            fin = out / name / "final.json"
+            rec = json.loads(fin.read_text()) if fin.is_file() else None
+            if not (rec or {}).get("verified"):
+                missing[f"{name}/final"] = "no verified final record in the secured evidence"
+            else:
+                want[f"{name}/final"] = rec
+    for key, rec in want.items():
         dest = store / key / rec["prefix"].rsplit("/", 1)[-1]
-        got = R.get(rec, dest)
-        doc["products"][key] = {"path": str(dest), "files_sha256": rec["files_sha256"], "relay": rec["relay"],
-                                "prefix": rec["prefix"], "producer_run": run_id, "fetched": got,
-                                "checked": "every file re-hashed against the relay record the pod verified"}
+        paths = {k: dest / k for k in rec["files_sha256"]}
+        prev = doc["products"].get(key) or {}
+        if prev.get("verified") and all(p.is_file() and SE.sha256_file(p) == rec["files_sha256"][k]
+                                        for k, p in paths.items()):
+            continue                                          #: on the dev box already, re-hashed: nothing fetched
+        need = sum(int(v) for k, v in (rec.get("bytes") or {}).items() if not paths[k].is_file())
+        dest.mkdir(parents=True, exist_ok=True)
+        if shutil.disk_usage(dest).free < need:
+            missing[key] = f"no room: {need} B to fetch, {shutil.disk_usage(dest).free} B free at {dest}"
+            continue
+        try:
+            got = getter(rec, dest)
+        except Exception as exc:  # noqa: BLE001
+            got = {"error": f"{type(exc).__name__}: {str(exc)[:300]}"}
+        on_disk = {k: (SE.sha256_file(p) if p.is_file() else None) for k, p in paths.items()}
+        ok = on_disk == rec["files_sha256"]
+        doc["products"][key] = {"path": str(dest), "files_sha256": rec["files_sha256"], "files_on_disk_sha256": on_disk,
+                                "verified": ok, "relay": rec["relay"], "prefix": rec["prefix"], "producer_run": run_id,
+                                "fetched": got, "checked": "every file re-hashed on the dev box's disk against the "
+                                                           "relay record the pod verified"}
+        if not ok:
+            missing[key] = got.get("error") or "the bytes on the disk are not the record's"
+    doc.update(status="COMPLETE" if not missing else "INCOMPLETE", missing=missing,
+               expected_products=sorted(set(want) | set(missing)), last_run=run_id,
+               checked_utc=__import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()))
     record.parent.mkdir(parents=True, exist_ok=True)
     record.write_text(json.dumps(doc, indent=1) + "\n")
     return doc
+
+
+def closeout(run_id: str, scr: Path, kind: str, arm: str | None = None) -> dict:
+    """The mechanism's closeout, then phase 1's completion checked again on the dev box's copy of the evidence
+    (`completion.phase`: three initializations durable, eight sets complete on their files, one protocol per mode),
+    recorded beside the outcome."""
+    out = SE.closeout(STUDY, launch_spec(kind, arm=arm), run_id, Path(scr))
+    if kind == PHASE1_KIND and (Path(scr) / "store" / "out").is_dir():
+        from stages.single_operator_budget import completion as CP
+        doc = {**CP.phase(Path(scr) / "store" / "out"), "run_id": run_id, "checked_on": "the dev box's secured copy"}
+        dest = REPO / STUDY.run_dir(run_id) / "closeout" / "phase1_completion.json"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(doc, indent=1) + "\n")
+        out["phase1_completion"] = {k: doc[k] for k in ("complete", "n_complete", "n_sets", "inits", "modes")}
+    return out
 
 
 def _pop(argv: list[str], flag: str) -> tuple[list[str], str | None]:
@@ -385,8 +476,17 @@ def main(argv=None) -> int:
         a = ap.parse_args(argv[1:])
         if argv[0] == "stage-resume":
             print(stage_resume(a.run_id, Path(a.src)))
-        else:
-            print(json.dumps({k: v["path"] for k, v in retain(kind, a.run_id, Path(a.src))["products"].items()}))
+            return 0
+        doc = retain(kind, a.run_id, Path(a.src), arm=arm)
+        print(json.dumps({"status": doc["status"], "missing": doc["missing"],
+                          "products": {k: v["path"] for k, v in doc["products"].items()}}, indent=1))
+        return 0 if doc["status"] == "COMPLETE" else 12
+    if argv and argv[0] == "closeout":
+        ap = argparse.ArgumentParser(prog="SOB1 closeout")
+        ap.add_argument("--run-id", required=True)
+        ap.add_argument("--scr", required=True)
+        a = ap.parse_args(argv[1:])
+        print(json.dumps(closeout(a.run_id, Path(a.scr), kind, arm), indent=1, default=str))
         return 0
     if argv and argv[0] in ("issue", "launch"):
         try:

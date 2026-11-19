@@ -1,7 +1,7 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-11-19T07:07:53+00:00",
-  "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
+  "created_utc": "2026-11-19T10:13:07+00:00",
+  "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
   "deletion_rule": "a checkpoint may be deleted only if it is not protected, no never_delete clause applies, its scientific status is recorded elsewhere, its hash is in this registry, and a tombstone is written to logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -1431,7 +1431,7 @@
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-11-19T07:06:33+00:00",
+    "queried_utc": "2026-11-19T10:11:47+00:00",
     "n_files": 1688,
     "total_bytes": 30365826360,
     "by_prefix": {
@@ -17742,18 +17742,21 @@
       "role": "A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's residual statistics",
       "retention": "reproducibility_required",
       "status": "active",
-      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from",
+      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from, and SOB1 phase 1's residual-width build reads them again (configs/stages/stage-1/single_operator_budget/selection.json :: residual_width.statistics: the relay copy, sha256 e4145e38...) in place of a second teacher statistics pass",
       "architecture": {},
       "size_bytes": 1947442680,
       "size_human": "1.814 GiB",
       "weights_sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/selection.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
         "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
         "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
         "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
+        "scripts/stages/stage-1/single_operator_budget/phase1_driver.py",
+        "scripts/stages/stage-1/single_operator_budget/selection.py",
         "scripts/stages/stage-1/teacher_parent_initialization/init_driver.py"
       ],
       "relay_path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
@@ -17764,7 +17767,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for bit against the journal)",
       "reconstruction_cost": "one L40S, about 25 min",
-      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay",
+      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay, and the statistics' relay copy is a declared input of SOB1 phase 1 (keep it there)",
       "protected": true,
       "disposition": "keep"
     },
@@ -17898,7 +17901,7 @@
       "role": "A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's residual statistics",
       "retention": "reproducibility_required",
       "status": "active",
-      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from",
+      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from, and SOB1 phase 1's residual-width build reads them again (configs/stages/stage-1/single_operator_budget/selection.json :: residual_width.statistics: the relay copy, sha256 e4145e38...) in place of a second teacher statistics pass",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -17933,7 +17936,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for bit against the journal)",
       "reconstruction_cost": "one L40S, about 25 min",
-      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay",
+      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay, and the statistics' relay copy is a declared input of SOB1 phase 1 (keep it there)",
       "protected": true,
       "disposition": "keep"
     },
@@ -18371,6 +18374,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18414,6 +18418,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18457,6 +18462,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18500,6 +18506,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18543,6 +18550,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18586,6 +18594,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18629,6 +18638,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18672,6 +18682,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18715,6 +18726,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18758,6 +18770,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18801,6 +18814,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18844,6 +18858,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18887,6 +18902,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18930,6 +18946,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -18973,6 +18990,7 @@
       "weights_sha256": "59d504cf2f0ae250b396db30e25699836197843c4c632dd31b566cb455106b05",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -19009,13 +19027,14 @@
       "role": "A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's residual statistics",
       "retention": "reproducibility_required",
       "status": "active",
-      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from",
+      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from, and SOB1 phase 1's residual-width build reads them again (configs/stages/stage-1/single_operator_budget/selection.json :: residual_width.statistics: the relay copy, sha256 e4145e38...) in place of a second teacher statistics pass",
       "architecture": {},
       "size_bytes": 20979888,
       "size_human": "0.020 GiB",
       "weights_sha256": "aae2e9b853a541d458667434b763b058a33029624526d4e531eb19d48f38f286",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
@@ -19036,7 +19055,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for bit against the journal)",
       "reconstruction_cost": "one L40S, about 25 min",
-      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay",
+      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay, and the statistics' relay copy is a declared input of SOB1 phase 1 (keep it there)",
       "protected": true,
       "disposition": "keep"
     },

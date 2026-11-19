@@ -1,9 +1,10 @@
 # Single-operator compression at the same parameter budget (SOB1)
 
 Stage 1 owns this round; its training is `stage3_recovery`. Status: **prepared at $0, ready for review**. The
-maintainer fixed the protocol on 2026-11-19 (UTC) (`logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol
-fixed ...`). Nothing here is authorized: no paid pod, phase or formal experiment runs until the maintainer grants it.
-Branch `research/reasoning-inheritance`, not merged to `main`.
+maintainer fixed the protocol on 2026-11-19 (UTC) and corrected the preparation the same day (`logs/budget/decisions.md
+:: 2026-11-19 (UTC) — SOB1 protocol fixed ...` and `... SOB1 completion on real artifacts ...`). Nothing here is
+authorized: no paid pod, phase or formal experiment runs until the maintainer grants it. Branch
+`research/reasoning-inheritance`, not merged to `main`.
 
 | file | what it is |
 | --- | --- |
@@ -12,8 +13,9 @@ Branch `research/reasoning-inheritance`, not merged to `main`.
 | [`plans/structures.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/structures.json) | the three structures from the real implementation (`structures.py`) |
 | [`plans/proposal.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/proposal.json) | phase 1's proposal (ceiling, per-session hard cap, teardown reserve) and phase 2's separate draft (`proposal.py`) |
 | [`plans/resource_snapshot.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json) | the project position, the relay's headroom and the dev box's free space as read on 2026-11-19 |
-| [`plans/dry_run_20261119.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119.json) | the $0 dry run of phase 1: everything up to the create, nothing created |
-| `scripts/stages/stage-1/single_operator_budget/` | `phase1_driver.py` (the three builds and the phase-1 evaluations), `train_driver.py` (TPI1's, with this study's plan), `plan.py` (one arm's training plan), `launch.py` (sessions, budget check, retention), `analysis.py` (the decision rule), `common.py`, `tests/` |
+| [`plans/disk_peak.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/disk_peak.json) | where phase 1's bytes land on the dev box and the peak when they coexist (`disk.py`) |
+| [`plans/dry_run_20261119.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119.json), [`plans/dry_run_20261119b.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119b.json) | the $0 dry runs of phase 1: everything up to the create, nothing created |
+| `scripts/stages/stage-1/single_operator_budget/` | `phase1_driver.py` (the three builds and the phase-1 evaluations), `completion.py` (an evaluation set is complete only on its files), `train_driver.py` (TPI1's, with this study's plan), `plan.py` (one arm's training plan), `launch.py` (sessions, budget check, closeout, retention), `analysis.py` (the decision rule and phase 1's comparison table), `disk.py` (the dev box's landing paths and peak), `common.py`, `tests/` |
 
 ## 1. Question and hypothesis
 
@@ -66,9 +68,9 @@ under the packed search's own session (inputs v3), every operator config hash pi
 
 | arm | what is reused | what is new | gate before anything is built on it |
 | --- | --- | --- | --- |
-| residual width | TPI1's procedure | the journal's root RESIDUAL_WIDTH(rh) replayed with its statistics retained (about 3 min); P at 1,280 over all 37 residual points, weights 9 / 1 / 8 | the replayed child equals state `02b33196…`'s digest; P at 1,024 recomputed from the statistics reproduces the recorded 37-point diagnostics. The statistics' sha256 against TPI1's kept file is recorded as evidence |
+| residual width | **TPI1's sealed teacher residual statistics** (`teacher_residual_statistics.safetensors`, sha256 `e4145e38…`, 37 points × 2,560, 236,939 statistics positions), staged from the relay; no second teacher statistics pass | P at 1,280 from them over all 37 residual points, weights 9 / 1 / 8 | the file's sha256, every tensor's layout and its statistics positions equal `selection.json :: residual_width.statistics` (derived from TPI1's committed init record, whose RESIDUAL_WIDTH digest gate and diagnostics gate passed); P at 1,024 recomputed from it reproduces the recorded 37-point diagnostics |
 | FFN + attention | the journal's 16 / 8 `kept_heads` on the teacher (A's ATTENTION) | the FFN operator at 3,840, sharing one statistics pass with a run at 3,072 | the 3,072 run builds the journal's FFN state `3f743039…` bit for bit; the head child equals `87ee6205…` |
-| depth | **the journal's 36 → 28 search, rounds 1-8** (state `fede45db…`, 260 candidate subsets) | rounds 9-20: 28 + 27 + … + 17 = **270 candidate subsets**, each against the unbypassed teacher | the operator re-checks the eight rounds, re-scores round 8's chosen subset (must equal 0.5305385485267972 exactly) and continues; rounds 1-8 must stay `[2, 32, 3, 26, 30, 8, 20, 28]` |
+| depth | **the journal's 36 → 28 search, rounds 1-8** (state `fede45db…`, 260 candidate subsets) | rounds 9-20: 28 + 27 + … + 17 = **270 candidate subsets**, each against the unbypassed teacher; **each round persisted the moment it commits** | the operator re-checks the eight rounds, re-scores round 8's chosen subset (must equal 0.5305385485267972 exactly) and continues; rounds 1-8 must stay `[2, 32, 3, 26, 30, 8, 20, 28]` |
 
 **Why the depth search can resume** (`selection.json :: depth_only.resume_checks`, all true, no field missing):
 
@@ -86,6 +88,13 @@ Every round's full table (each candidate's score) is kept, so the operator can c
 the record names it and the first round that must be scored again (`minimal_recompute`). The resume is a core
 capability (`OperatorContext.resume_state`, execution only, never hashed: a resumed search computes the state a whole
 one does; `tests/initialization/test_depth_resume.py`).
+
+**Rounds 9-20 are durable one by one.** The operator hands each committed round record (its choice and every
+candidate's score) to `OperatorContext.on_progress` (core, execution only, refused by an operator that reports
+nothing); the driver writes it atomically to `depth_only/records/depth_rounds.json`, which the next poll pulls to the
+dev box. A later attempt resumes from the journal's eight rounds plus every persisted round (written for the same
+step, contiguous after round 8), re-scoring round 8's chosen subset **and** the latest persisted round's exactly
+(`resume_state.anchors`). An interruption loses at most the round in progress (17-28 candidates, at most ~13 min).
 
 Each arm then: one frozen mapping keyed by root indices, saved and loaded back, materialized onto the teacher;
 geometry and parameter count against `structures.json`; a finite forward after reload; state evaluation against the
@@ -159,6 +168,46 @@ are at 40,960 tokens. Its other generations are training-data sessions, not eval
 samples' turns reach the limit) and 0.62M in non-thinking mode. The 40,960 records stay as historical reference and
 are never pooled with these.
 
+**Prompts and packing.** Evaluation builds each item's prompt on its own: the runners render every item through the
+chat template and batch requests, never packing them. Random-order sequential packing is the calibration's and the
+training's (AGENTS.md P19), never the evaluation's.
+
+**A set is complete only on its files** (`completion.py`). Phase 1 has eight sets: the three untrained arms and the
+teacher, each in both modes. Each is checked against the registered manifest:
+
+| condition | what is checked |
+| --- | --- |
+| item coverage, repeats | every registered unit of eval-set-1 has its generations file with every registered item exactly once (the set's own item files, 1,716 items) |
+| generation records | each turn carries its raw output and the termination fields the scorers read; record by record, its seed is the seed rule's for its unit, item and turn, prompt plus allowance is 8,192, the rendered prompt has the mode's think state (`self_opening` / `preclosed`), a natural stop ends with the stop id, the fluid system turn is the registered message |
+| protocol summary | every unit's summary and runner summaries; every key field recorded and equal to the registered value (decoding protocol and its seed rule, 8,192 context, system message, chat template and tokenizer, template kwargs, degeneration interval, action protocol, task file). The set's protocol digest is recorded; the four sets of a mode must share it |
+| formal report | rescored from these generations; a `{}` or stale report is a missing part |
+| model identity | every package an attempt built for the set (`packages.json`, written before anything is generated) names the arm's init-record weights or the teacher identity's three shards |
+
+A set an earlier attempt completed is taken as it is. Otherwise the smallest repair, from the sealed records:
+
+* a `{}` or stale report is rescored, and nothing is generated;
+* a generations file with missing, extra or repeated items gives its valid records to the sealed parts and is
+  superseded, so only the missing items are generated;
+* a unit whose protocol or model cannot be shown is generated again under the same per-item seeds. Its earlier records
+  stay under `superseded/<attempt>/` as evidence and are never pooled.
+
+Two different records for one item are refused. Phase 1 ends `ALL_DONE` only when the three inits are durable, the
+eight sets are complete and each mode's sets share one protocol (`completion.phase`). Checked on TPI1's four real A
+sets at 8,192, coverage, records, protocol and the report all pass, and the two seeds share one protocol digest per
+mode; model identity is missing there because TPI1 did not record the weights' hashes.
+
+**Phase 1's comparison** (`analysis.py phase1-table`, written to `comparison/` on the pod and re-derivable on the dev
+box at $0) reads the final sealed records once phase 1 is complete. Per mode (thinking and non-thinking apart) and per
+arm, it gives the teacher's and the untrained arm's accuracy and the item-paired **teacher − arm** difference in
+percentage points with its 95% interval:
+
+* first the static fluid formal core (570 items, 95% bootstrap over the 558 registered units of independence);
+* then the interactive episodes and every supporting unit with per-item correctness, each apart. A paired set's rows
+  are per-item correctness; its registered headline, pair accuracy, stands beside the table.
+
+It is descriptive: no arm is ranked, eliminated or kept by it, and all three go to recovery. Its code path was run on
+real records (TPI1's A sets laid out as eight sets, identity synthesized): complete 8 of 8 in 27 s, the table in 35 s.
+
 **Reported per arm**, both modes, descriptive (`analysis.arm_report`):
 
 * initialization damage: the untrained arm against the teacher, plus its state-evaluation KL / NLL and step-0 CE / KD;
@@ -189,16 +238,19 @@ and watchdog reserves. Every figure is an estimate; the basis is `design.json ::
 
 | component | hours expected (bound) | basis |
 | --- | ---: | --- |
-| builds | 2.30 (4.95) | DEPTH rounds 9-20 1.45 h (2.36 h) at the journal's 27.2 s per candidate; FFN, width replay, attention gate about 7 min; three arms' build and state evaluation 42 min; three inits to the relay 0.03 h (1.65 h at the 2.6 MB/s floor) |
+| builds | 2.31 (5.26) | DEPTH rounds 9-20 1.45 h (2.36 h) at the journal's 27.2 s per candidate; the FFN statistics pass and attention gate 4.5 min; **no width statistics pass**: TPI1's sealed statistics, 1.81 GiB, 0.007 h at the median rate (0.27 h at the 2.6 MB/s floor × 1.25); three arms' build and state evaluation 42 min; three inits to the relay 0.03 h (1.65 h at the floor); completion checks and the comparison 3 min (6) |
 | untrained arms at 8,192, three | 3.66 (9.0) | RI-S1's untrained D / W / DW capped at 8,192: 3.5-4.5M output tokens each over both modes |
 | teacher at 8,192 | 2.81 (4.2) | 6.16M capped output tokens at its measured 608.8 tokens/s |
-| **session** | **9.19 GPU h, $10.20 expected** | |
+| **session** | **9.20 GPU h, $10.21 expected** | |
 
-* **Hard cap $22.55** (ceiling of the study's proposal: one session; a replacement attempt takes over every arm whose
-  init verified and every sealed sample, within what the ceiling leaves).
+* **Hard cap $22.92** (was $22.55). Reusing the statistics saves the 172 s replay (3 min expected). The bound grows by
+  the statistics' floor-rate download (16 min) and the completion checks (6 min), priced into the driver so the
+  session's hard deadline covers them.
 * **Teardown reserve $1.00**, outside the ceiling.
-* **Total $23.55.** The live position on 2026-11-19 06:49Z: $30.2442 left under the $1,000 project cap; balance
+* **Total $23.92.** The live position on 2026-11-19 06:49Z: $30.2442 left under the $1,000 project cap; balance
   $40.24; no pod, no volume. `launch.py budget --kind sob1_phase1`: fundable.
+* One session's ceiling; a replacement attempt takes over every arm whose init verified, every persisted DEPTH round
+  and every sealed sample, within what the ceiling leaves.
 
 **Phase 2 (a draft for the maintainer, proposes no cap; `proposal.json :: phase_2_draft`).** One session per arm,
 both seeds, in the order residual width, depth, FFN + attention.
@@ -233,11 +285,51 @@ freed)**. Kept, with their reasons in that record:
 * D1's reference initialization and the 0.6B canonical initialization (registry-protected);
 * other projects' files.
 
-| | bytes | where | fits |
-| --- | ---: | --- | --- |
-| phase 1: three bf16 initializations | 11.24 GiB | relay; dev box `~/aad-artifacts/stage1_single_operator_budget/<arm>/init/<digest>/` | yes (relay 60.08 GiB headroom; dev box 13.93 GiB, 2.69 GiB left after) |
-| phase 2: two save points at once + the inits | 53.29 GiB peak on the relay | relay | yes, if each final leaves the relay after its evaluation |
-| phase 2: six fp32 finals | 44.94 GiB | dev box `<arm>-s<seed>/final/<sha>/` | **no: 42.25 GiB short** after phase 1; 90.77 GiB if they accumulated on the relay |
+**Second audit (2026-11-19, the corrected brief).** No further checkpoint met AGENTS.md 2.5's conditions, so
+nothing more was retired (0 B freed). Every weight left in this project's stores has a recorded reason:
+
+* A's initialization and both finals: the baseline's only copies;
+* the teacher statistics: a declared input of this phase (the residual-width build reads their relay copy;
+  `checkpoint_registry.json` now names SOB1 as their consumer);
+* the Stage-0 activation cache, D1's reference initialization and the 0.6B canonical initialization: registry-protected;
+* `~/aad-artifacts/e5` (0.90 GiB, "unreviewed") holds no weight file, only side archives and logs. It is evidence, not
+  a checkpoint, so 2.5 does not cover it.
+
+**The dev box's peak at the real landing paths** (`disk.py`, `plans/disk_peak.json`; every rate measured on TPI1's
+records: 32.65 B per generated token at most, archives 8.41× smaller, records and logs 0.28%):
+
+| item | path | bound | expected |
+| --- | --- | ---: | ---: |
+| evidence pulled on every poll (generations and sealed parts) | `<scr>/store/out` | 0.94 GiB | 0.54 GiB |
+| one pull's archive in flight (deleted once unpacked; not at the peak) | `<scr>/store/pull_<n>.tgz` | 0.03 GiB | |
+| teardown collector archive + its extracted copy | `<scr>/store/` | 0.005 GiB | |
+| resume archive (failure path) | `<scr>/resume_<run>.tgz` | 0.11 GiB | 0 |
+| three bf16 initializations | `~/aad-artifacts/stage1_single_operator_budget/<arm>/init/<digest16>/` | 11.24 GiB | 11.24 GiB |
+| three mappings | `.../<arm>/mapping/<digest16>/` | 0.06 GiB | 0.06 GiB |
+| **peak (end of retention)** | one filesystem (`/`) | **12.35 GiB** | **11.84 GiB** |
+
+The evidence bound takes every model at the teacher's capped volume (6.16M tokens) × 1.25. A file `relay.get` is
+fetching sits in the store's own cache and is moved, not copied, so it is never held twice. The launch checks the
+free bytes of the filesystem the session's `--scr` and the local store are on (`the_dev_box_has_room`): 14.72 GiB
+free when this was written, a 2.37 GiB margin. Phase 2 is refused by the same check: one arm's two fp32 finals need
+14.98 GiB, and the six need 44.94 GiB.
+
+**Fixed: streams under `evaluation/live/`.** The runners write their live streams beside the units they serve,
+`<unit>/../../live`, which is `evaluation/live/` in this layout. The poll's listing, `take_over` and the resume archive
+excluded only a top-level `live/`, so they would have pulled, archived and carried growing streams. All three now
+exclude a `live/` directory at any depth (`train_driver.is_live`, `FIND`).
+
+**Fixed: the remote listing and the final hashes.** An unreadable listing (a timeout, a transport error, a non-zero
+exit, an answer without its completion marker) is retried three times. If it still cannot be read, `pending` is
+unknown, never 0, so the products cannot read as secured. Before, a failed `find` read as an empty listing and
+"nothing pending". At teardown, every file of the pod's final listing is checked by sha256 against the dev box's copy;
+a missing or different file is pulled again and checked once more (`final_hash_check`). `closeout` then re-checks
+phase 1's completion on that copy (`closeout/phase1_completion.json`).
+
+**Fixed: local retention.** `retain` is COMPLETE only when every arm's initialization and mapping is on the dev box's
+disk with the init record's sha256, re-hashed there, not taken from the fetch's answer. A missing init record, a
+failed fetch, a filesystem without room or different bytes leave it INCOMPLETE, naming what is missing (exit 12). The
+verified products stay recorded, so the next retain fetches only the rest.
 
 **Takeover.** TPI1's train driver, with this round's two repairs:
 
@@ -254,8 +346,9 @@ freed)**. Kept, with their reasons in that record:
     point's floor-rate verify is up to 2.4 h);
   * an old save point is retired only after the new one hands off;
   * regressions: `test_takeover.py`.
-* *Evaluation:* each finished sample is sealed as it is written. A later attempt generates only the items, per unit
-  and seed, without a sealed record, each under the seed its item derives.
+* *Evaluation:* each finished sample is sealed as it is written. A later attempt takes over every complete set as it
+  is, and for the rest generates only the items, per unit and seed, without a sealed record, each under the seed its
+  item derives (the completion check above decides which).
 
 ## 9. Launch path (phase 1)
 
@@ -291,10 +384,11 @@ plan.py --arm <arm> --init-record <its committed init_record.json> --write    # 
 
 ## 10. Decisions for the maintainer
 
-1. Grant phase 1: a $22.55 hard cap for one `sob1_phase1` session (expected $10.20), plus the $1.00 teardown
-   reserve, inside the $30.24 the project cap leaves.
-2. Phase 2's budget: both seeds expected $114.70, hard caps $185.87 + $1 (one seed: $58.06 expected). This needs a
-   project-cap decision; nothing here assumes it.
-3. Phase 2's storage: the six fp32 finals (44.94 GiB) do not fit the dev box (42.25 GiB short after phase 1) or
-   accumulate on the relay. Either add storage, or retire each final from the relay once its evaluation evidence is
-   durable (a unit retrained later then costs about $16-23).
+1. Grant phase 1: a $22.92 hard cap for one `sob1_phase1` session (expected $10.21), plus the $1.00 teardown
+   reserve ($23.92), inside the $30.24 the project cap leaves. The cap rose from $22.55 by the sealed statistics'
+   floor-rate download and the completion checks.
+2. Phase 2 (decided separately): the two seeds and the recipe stay. The storage of the six fp32 finals (44.94 GiB)
+   comes first: the dev box holds none of an arm's two (14.98 GiB against about 14.7 GiB free) and the relay cannot
+   accumulate them. Then the budget: both seeds expected $114.70, hard caps $185.87 + $1 (one seed: $58.06 expected),
+   which needs a project-cap decision; nothing here assumes it. Its first session records the L40S memory on the
+   residual-width arm's first four formal optimizer steps (online KD, backward, AdamW update).

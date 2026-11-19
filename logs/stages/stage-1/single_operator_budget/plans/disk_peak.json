@@ -1,0 +1,154 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.disk_peak/v1",
+ "kind": "sob1_phase1",
+ "arm": null,
+ "scr": "<scr>",
+ "local_store": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget",
+ "items": [
+  {
+   "item": "evidence",
+   "path": "<scr>/store/out",
+   "when": "pulled on every poll, kept",
+   "bytes_bound": 1005389164,
+   "bytes_expected": 584062332,
+   "consumer": "the completion check, the phase-1 comparison table, the analysis",
+   "present_during": [
+    "session",
+    "retain"
+   ]
+  },
+  {
+   "item": "pull archive in flight",
+   "path": "<scr>/store/pull_<n>.tgz",
+   "when": "one poll, deleted once unpacked",
+   "bytes_bound": 29886717,
+   "bytes_expected": 7471679,
+   "consumer": "the poll's unpack",
+   "present_during": [
+    "session"
+   ]
+  },
+  {
+   "item": "teardown collector archive + its extracted copy",
+   "path": "<scr>/store/<archive>, <scr>/store/extracted",
+   "when": "teardown, kept",
+   "bytes_bound": 5630179,
+   "bytes_expected": 3270749,
+   "consumer": "the runner's local hash verification",
+   "present_during": [
+    "session",
+    "retain"
+   ]
+  },
+  {
+   "item": "resume archive",
+   "path": "<scr>/resume_<run>.tgz",
+   "when": "only when a session must be resumed",
+   "bytes_bound": 119546868,
+   "bytes_expected": 0,
+   "consumer": "stage-resume's upload",
+   "present_during": [
+    "retain"
+   ]
+  },
+  {
+   "item": "residual_width initialization",
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/init/<digest16>/",
+   "when": "retain, after closeout",
+   "bytes_bound": 4022477312,
+   "bytes_expected": 4022477312,
+   "consumer": "the durable local copy (phase 2 reads the relay's)",
+   "present_during": [
+    "retain"
+   ]
+  },
+  {
+   "item": "residual_width mapping",
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/mapping/<digest16>/",
+   "when": "retain, after closeout",
+   "bytes_bound": 22000000,
+   "bytes_expected": 22000000,
+   "consumer": "the durable local copy of the selection",
+   "present_during": [
+    "retain"
+   ]
+  },
+  {
+   "item": "ffn_attention initialization",
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/init/<digest16>/",
+   "when": "retain, after closeout",
+   "bytes_bound": 4034132992,
+   "bytes_expected": 4034132992,
+   "consumer": "the durable local copy (phase 2 reads the relay's)",
+   "present_during": [
+    "retain"
+   ]
+  },
+  {
+   "item": "ffn_attention mapping",
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/mapping/<digest16>/",
+   "when": "retain, after closeout",
+   "bytes_bound": 22000000,
+   "bytes_expected": 22000000,
+   "consumer": "the durable local copy of the selection",
+   "present_during": [
+    "retain"
+   ]
+  },
+  {
+   "item": "depth_only initialization",
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only/init/<digest16>/",
+   "when": "retain, after closeout",
+   "bytes_bound": 4007703552,
+   "bytes_expected": 4007703552,
+   "consumer": "the durable local copy (phase 2 reads the relay's)",
+   "present_during": [
+    "retain"
+   ]
+  },
+  {
+   "item": "depth_only mapping",
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only/mapping/<digest16>/",
+   "when": "retain, after closeout",
+   "bytes_bound": 22000000,
+   "bytes_expected": 22000000,
+   "consumer": "the durable local copy of the selection",
+   "present_during": [
+    "retain"
+   ]
+  }
+ ],
+ "by_phase": {
+  "session": {
+   "bound": 1040906060,
+   "expected": 594804760
+  },
+  "retain": {
+   "bound": 13260880067,
+   "expected": 12717646937
+  }
+ },
+ "peak_phase": "retain",
+ "peak_bytes": {
+  "bound": 13260880067,
+  "expected": 12717646937
+ },
+ "peak_gib": {
+  "bound": 12.35,
+  "expected": 11.84
+ },
+ "evidence": {
+  "tokens": {
+   "expected": 17888586,
+   "bound": 30792930.0
+  },
+  "per_model_bound_tokens": 7698232.5,
+  "raw": {
+   "expected": 584062332.9,
+   "bound": 1005389164.5
+  },
+  "per_model_raw_bound": 251347291.125
+ },
+ "inputs": "design.json :: cost_model.dev_box_disk",
+ "authorizes": "nothing"
+}

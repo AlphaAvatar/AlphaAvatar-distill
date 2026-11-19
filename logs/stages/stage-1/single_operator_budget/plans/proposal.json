@@ -1,9 +1,9 @@
 {
  "authorizes": "nothing: a proposal; the grant is the maintainer's",
- "ceiling_usd": 22.55,
+ "ceiling_usd": 22.92,
  "decision": "PENDING the maintainer's explicit approval",
- "design_sha256": "9e23c345eca1dd4bd8c40aeca173ff9e654cbc17f1273193b1e915e7bb9c0319",
- "expected_total_usd": 10.2,
+ "design_sha256": "3e3b722b0e1f147f03173efb8ff1a490e1925d582a0a660b82a4000aaf92b512",
+ "expected_total_usd": 10.21,
  "gpu_count_max": 1,
  "gpus": {
   "NVIDIA L40S": 1.11
@@ -13,9 +13,9 @@
  "kinds": {
   "sob1_phase1": {
    "basis": "phase_1.components (design.json :: cost_model)",
-   "driver_minutes": 1089.0,
-   "expected_usd": 10.2,
-   "per_session_hard_cap_usd": 22.55
+   "driver_minutes": 1107.6,
+   "expected_usd": 10.21,
+   "per_session_hard_cap_usd": 22.92
   },
   "sob1_train": {
    "expected_usd": null,
@@ -63,16 +63,21 @@
  },
  "min_useful_attempt_usd": 2.2,
  "money_rules": {
-  "ceiling": "$22.55: phase 1's one session at its hard cap, cumulatively over every attempt",
+  "ceiling": "$22.92: phase 1's one session at its hard cap, cumulatively over every attempt",
   "own_envelope": "the ceiling counts only this study's runs; TPI1, RI-S1, RI-LM1 and Research A are CLOSED and fund nothing here; a provider top-up is not a grant",
   "project_cap": "the $1,000 project cap is not raised by this proposal",
   "resume": "a replacement attempt takes over every arm whose init record verified and every sealed sample; its cap is what the ceiling leaves",
   "teardown_reserve": "$1.00 held outside the ceiling and never issued: each artifact's hard cap plus the reserve must fit what the project cap and the provider balance leave, at issue and at launch (layer_merge_launch.reserve_problems)"
  },
- "per_session_hard_cap_usd": 22.55,
+ "per_session_hard_cap_usd": 22.92,
  "phase_1": {
   "components": {
    "builds": {
+    "completion_checks_and_comparison_minutes": {
+     "basis": "measured on the dev box: one completion check of a set, its formal report rescored, 1.0 s (non-thinking) to 3.0 s (thinking) on TPI1's A records at 8,192; about 40 checks over the eight sets (start, after generating, after rescoring, the phase check) and the comparison table's rescoring",
+     "bound": 6,
+     "expected": 3
+    },
     "depth": {
      "candidate_subsets_new": 270,
      "candidates_per_new_round": [
@@ -93,14 +98,20 @@
      "hours_expected": 1.45,
      "rule": "rounds 9-20 at the journal's 27.2 s per candidate x remaining / 32.5 (expected) or x 1 (bound) plus round 8's re-score, the bound x 1.15"
     },
-    "hours_bound": 4.95,
-    "hours_expected": 2.3,
-    "other_operators_seconds": 442.0,
+    "hours_bound": 5.26,
+    "hours_expected": 2.31,
+    "other_operators_seconds": 270.0,
     "per_arm_build_and_state_evaluation_hours": 0.233,
     "relay_copies_of_the_inits": {
      "bytes": 12064313856,
      "hours_bound": 1.646,
      "hours_expected": 0.032
+    },
+    "residual_width_statistics": {
+     "bytes": 1947442680,
+     "hours_bound": 0.266,
+     "hours_expected": 0.007,
+     "rule": "no teacher statistics pass (the journal's replay was 172 s): TPI1's sealed file is downloaded by setup and loaded here; its time is priced into the driver so the session's hard deadline covers it"
     }
    },
    "pre_recovery_evaluation": {
@@ -114,19 +125,19 @@
     "models": 1
    }
   },
-  "driver_hours_bound": 18.15,
-  "driver_hours_expected": 8.77,
-  "gpu_hours_expected": 9.19,
+  "driver_hours_bound": 18.46,
+  "driver_hours_expected": 8.78,
+  "gpu_hours_expected": 9.2,
   "hard_cap": {
-   "billable_minutes": 1196.7,
-   "driver_minutes": 1089.0,
-   "usd": 22.55
+   "billable_minutes": 1216.23,
+   "driver_minutes": 1107.6,
+   "usd": 22.92
   },
-  "hard_cap_plus_reserve_usd": 23.55,
+  "hard_cap_plus_reserve_usd": 23.92,
   "session_kind": "sob1_phase1",
   "sessions": 1,
   "teardown_reserve_usd": 1.0,
-  "usd_expected": 10.2
+  "usd_expected": 10.21
  },
  "phase_2_draft": {
   "one_seed_usd_expected": 58.06,
@@ -270,7 +281,7 @@
  "resource_snapshot_sha256": "5ff869bf4e34196ec036fd1aee5f9a19ccd31107289fe868ce223c2783abaa1d",
  "schema": "aadistill.stage1.single_operator_budget.proposal/v2",
  "scope": "phase 1 of SOB1 only (configs/stages/stage-1/single_operator_budget/design.json): one sob1_phase1 session builds the three ~2B initializations from the original teacher with A's operators (depth only resumed from the recorded search's round 9) and evaluates each untrained arm and the teacher on all of eval-set-1 in both modes at 8,192 tokens. No training, no other arm, no network volume. Phase 2 (recovery training and its evaluation) is a separate draft below and proposes no cap",
- "selection_sha256": "1f60dd956c240d49abd540777b7e523c9dcce84ed7e608a840f5d15e6a910ea1",
+ "selection_sha256": "6dfced62437b1967371b4cec03037f321abd8ce560e948a7ab71459a7de8d101",
  "status": "proposed",
  "storage": {
   "dev_box_free_after_phase_1_bytes": 2894945792,
@@ -309,9 +320,9 @@
   "relay_headroom_bytes": 64510408785,
   "rule": "a save point is deleted only after the next one hands off, so a rotation holds two; a final is uploaded while its unit's last save point still exists; the dev box keeps the inits (phase 1) and would keep the finals after their evaluation (phase 2)"
  },
- "structures_sha256": "47dba9aec922379d775a59af887c5fe68354b784ba3039d31c2b0f5f8d9b5fe6",
+ "structures_sha256": "23c0e6888cb9453fe46472e0c4571e2914fbfe24d82af02d35bfdee52b1b49d0",
  "study": "SOB1",
- "study_cumulative_cap_usd": 23.55,
+ "study_cumulative_cap_usd": 23.92,
  "teardown_reserve_usd": 1.0,
  "usd_per_hour_all_in": 1.1105
 }
