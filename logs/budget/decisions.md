@@ -16977,13 +16977,13 @@ on a paid pod.
   again (its records kept as superseded evidence).
 - Revisit when: the maintainer reviews the corrections and the phase-1 grant.
 
-## 2026-11-20 (UTC) — SOB1: one product manifest per arm, part provenance before a merge, phase 1's completion on both closeout paths
+## 2026-11-19 (UTC) — SOB1, second correction: one product manifest per arm, part provenance before a merge, phase 1's completion on both closeout paths
 
 - Context: the maintainer reviewed the corrections (`8012d22e`, `06d9fd39`, `8b85bb62`). Phase 1 keeps its design;
   its budget is prepared at $10.21 expected, a $22.92 session hard cap and the $1.00 teardown reserve. Three $0 fixes
   come before the grant; the reused PCA statistics, the journal's DEPTH rounds and TPI1's baseline stay as they are;
   phase 2's training budget and durable storage are decided separately.
-- Decision (maintainer, 2026-11-20, summarized; the brief is the source):
+- Decision (maintainer, 2026-11-19, the second brief that day, summarized; the brief is the source):
   - The build's mapping files follow `frozen_mapping.save`'s returned record: every arm needs `mapping.json`, only
     an arm that declares a width projection needs the tensor file; build, upload, restore and local `retain` share
     that list. Regression: three small mappings through the real save, reload, hash manifest and takeover, both arms

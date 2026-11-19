@@ -348,7 +348,7 @@ def _cap_run_summary(pr: dict) -> dict:
 
 
 def _part(d: Path, key: str, gen: str | None, rows: list[dict], n: int = 0) -> Path:
-    """A sealed part as the runners' sealer names it (``part_NNNN.<generation>.jsonl``; untagged: before 2026-11-20)."""
+    """A sealed part as the runners' sealer names it (``part_NNNN.<generation>.jsonl``; untagged: before SOB1's second correction)."""
     from stages.teacher_parent_initialization import b_evidence as BE
     root = d / "parts" if key == BE.FLUID else d / "parts" / key
     root.mkdir(parents=True, exist_ok=True)
@@ -472,7 +472,7 @@ def test_two_different_records_for_one_item_are_refused(tmp_path):
 
 
 def test_an_old_models_partial_answers_are_isolated_and_the_new_attempt_generates_only_the_rest(tmp_path, monkeypatch):
-    """Counter-example (maintainer 2026-11-20): an attempt that evaluated the WRONG weights stopped with only
+    """Counter-example (maintainer 2026-11-19, second brief): an attempt that evaluated the WRONG weights stopped with only
     ``parts/`` (no generations file yet); an earlier generation of the right weights sealed a few items; one part
     predates generation tags. The new attempt loads the right model: before anything is merged, every part's
     generation (weights, mode, protocol) and records are checked; the wrong and the unverifiable parts are isolated,

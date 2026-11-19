@@ -268,5 +268,5 @@
   },
   "provider_resource_created": false
  },
- "_corrected": "2026-11-20: 'rule' read 'the second /bin/bash dry run' -- a $0 expanded by an unquoted shell heredoc when this record was written; restored to $0. Nothing measured changed."
+ "_corrected": "2026-11-19 (second correction): 'rule' read 'the second /bin/bash dry run' -- a $0 expanded by an unquoted shell heredoc when this record was written; restored to $0. Nothing measured changed."
 }

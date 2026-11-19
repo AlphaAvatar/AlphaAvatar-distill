@@ -516,7 +516,7 @@ def package(model_dir: Path, dest: Path) -> dict:
     return {"model_dir": str(model_dir), "sidecars": side, "teacher_snapshot": str(snap)}
 
 
-#: a sealed part's file name: its number, then (since 2026-11-20) the generation that sealed it
+#: a sealed part's file name: its number, then (since SOB1's second correction, 2026-11-19) the generation that sealed it
 PART_NAME = re.compile(r"^part_(\d{4,})(?:\.([A-Za-z0-9_-]+))?\.jsonl$")
 
 

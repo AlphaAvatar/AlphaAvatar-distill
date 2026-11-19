@@ -101,7 +101,7 @@ geometry and parameter count against `structures.json`; a finite forward after r
 teacher (diagnostic only); the checkpoint and mapping to the relay, downloaded again and re-hashed; the arm's
 `init_record.json`.
 
-**One manifest per arm (fixed 2026-11-20).** The mapping's files come from `frozen_mapping.save`'s own record
+**One manifest per arm (fixed in the second correction, 2026-11-19).** The mapping's files come from `frozen_mapping.save`'s own record
 (`common.mapping_manifest`): `mapping.json` always, and `tensors.safetensors` only when the record holds a width
 projection, which must be exactly when the design declares one (the residual-width arm). The checkpoint's are
 `model.safetensors` and `config.json`. Before, the build hashed both mapping files for every arm, so the FFN +
@@ -351,7 +351,7 @@ relay list that is empty or not the manifest, a failed fetch, a filesystem witho
 INCOMPLETE, naming what is missing (exit 12). The verified products stay recorded, so the next retain fetches only
 the rest.
 
-**Fixed (2026-11-20): phase 1's completion on both closeout paths.** The shared closeout runs a study's own check
+**Fixed (second correction, 2026-11-19): phase 1's completion on both closeout paths.** The shared closeout runs a study's own check
 after the outcome's money, teardown and reconciliation record is written (`Launch.completion_check`), so the formal
 `launch`, which closes out after teardown, and a manual `closeout` run the same `phase1_completion`. Before, only the
 manual path re-checked phase 1. Phase 1 is recorded COMPLETE (`closeout/phase1_completion.json`) only when the eight

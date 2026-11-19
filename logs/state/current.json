@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "SOB1 PREPARED at $0, corrected 2026-11-19 and 2026-11-20 (docs/stages/stage-1/single_operator_budget/README.md): the maintainer decides phase 1's grant ($22.92 cap + $1 reserve, plans/proposal.json), phase 2's storage, then its budget (section 10); nothing is authorized. A merge into main is the maintainer's.",
+ "next": "SOB1 PREPARED at $0, corrected twice 2026-11-19 (docs/stages/stage-1/single_operator_budget/README.md): the maintainer decides phase 1's grant ($22.92 cap + $1 reserve, plans/proposal.json), phase 2's storage, then its budget (section 10); nothing is authorized. A merge into main is the maintainer's.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
