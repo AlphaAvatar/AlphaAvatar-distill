@@ -1772,6 +1772,10 @@ STAGE_1 = [
               "dry-run artifact, the runner's and the study's pre-provider gates (the dev box's room included); "
               "nothing created",
               field="provider_resource_created", equals=False),
+            E("logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119c.json",
+              "the third $0 dry run of phase 1, after the second correction (one product manifest per arm, part "
+              "provenance, phase 1's completion on both closeout paths); nothing created",
+              field="provider_resource_created", equals=False),
             E("logs/stages/stage-1/single_operator_budget/plans/disk_peak.json",
               "where phase 1's bytes land on the dev box and the bound peak when they coexist (disk.py)",
               field="schema", equals="aadistill.stage1.single_operator_budget.disk_peak/v1"),

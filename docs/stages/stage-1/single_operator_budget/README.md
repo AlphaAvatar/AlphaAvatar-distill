@@ -14,7 +14,7 @@ authorized: no paid pod, phase or formal experiment runs until the maintainer gr
 | [`plans/proposal.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/proposal.json) | phase 1's proposal (ceiling, per-session hard cap, teardown reserve) and phase 2's separate draft (`proposal.py`) |
 | [`plans/resource_snapshot.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json) | the project position, the relay's headroom and the dev box's free space as read on 2026-11-19 |
 | [`plans/disk_peak.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/disk_peak.json) | where phase 1's bytes land on the dev box and the peak when they coexist (`disk.py`) |
-| [`plans/dry_run_20261119.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119.json), [`plans/dry_run_20261119b.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119b.json) | the $0 dry runs of phase 1: everything up to the create, nothing created |
+| [`plans/dry_run_20261119.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119.json), [`plans/dry_run_20261119b.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119b.json), [`plans/dry_run_20261119c.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119c.json) | the $0 dry runs of phase 1: everything up to the create, nothing created |
 | `scripts/stages/stage-1/single_operator_budget/` | `phase1_driver.py` (the three builds and the phase-1 evaluations), `completion.py` (an evaluation set is complete only on its files), `train_driver.py` (TPI1's, with this study's plan), `plan.py` (one arm's training plan), `launch.py` (sessions, budget check, closeout, retention), `analysis.py` (the decision rule and phase 1's comparison table), `disk.py` (the dev box's landing paths and peak), `common.py`, `tests/` |
 
 ## 1. Question and hypothesis
@@ -393,6 +393,23 @@ launch.py retain --kind sob1_phase1 --run-id <id> --from <s>             # every
 analysis.py phase1-table --evidence <s>/store/out --write <dir>          # the comparison, re-derived at $0
 plan.py --arm <arm> --init-record <its committed init_record.json> --write    # per arm, before phase 2
 ```
+
+**The third $0 dry run (2026-11-19 19:11Z on `8fa9f84c`, after the second correction; first run at 19:10Z on
+`ee2ffc6b` with the same results; `plans/dry_run_20261119c.json`).** Nothing was created.
+
+* The driver's `--check-only`: CONTRACT_OK; the four operator config hashes are the journal's (FFN, DEPTH, ATTENTION,
+  RESIDUAL_WIDTH) and both selection records reproduce.
+* `budget`: phase 1 fundable ($22.92 + $1 inside the $30.2442 left; balance $40.24); phase 2 refused (no cap).
+* `issue --dry-run` at $10.21 / $22.92: an artifact outside the run directory; a cap above the kind's, a `sob1_train`
+  artifact and a real artifact without a grant were each refused.
+* `launch --dry-run`: every runner gate passed (the plan at $1.11/h, all-in $22.9165 inside $22.92, hard stop $22.48;
+  the live L40S quote $1.09/h, stock low; account funds $40.24 against $22.48 and no unaccounted resources; study
+  identity `0e79cde9836a`; bound files; the project cap). It stopped where a dry-run artifact must: the authorization
+  is not in the session commit.
+* This study's five gates passed: the reserve; the relay would accept 11.42 GiB; the bound records; not a training
+  session; the dev box holds the bound peak (18.77 GiB free for 12.35 GiB, margin 6.41 GiB).
+* The phase-1 launch spec carries `phase1_completion` as its closeout check; its one relay input is the sealed
+  statistics at sha256 `e4145e38…`.
 
 **The second $0 dry run (2026-11-19 10:23Z on `8012d22e`, run again at 10:35Z on `06d9fd39` after the digest fix,
 with the same result; `plans/dry_run_20261119b.json`).** Nothing was created.

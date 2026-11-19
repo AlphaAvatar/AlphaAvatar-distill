@@ -1689,6 +1689,12 @@
      "equals": false
     },
     {
+     "path": "logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119c.json",
+     "says": "the third $0 dry run of phase 1, after the second correction (one product manifest per arm, part provenance, phase 1's completion on both closeout paths); nothing created",
+     "field": "provider_resource_created",
+     "equals": false
+    },
+    {
      "path": "logs/stages/stage-1/single_operator_budget/plans/disk_peak.json",
      "says": "where phase 1's bytes land on the dev box and the bound peak when they coexist (disk.py)",
      "field": "schema",

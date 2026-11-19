@@ -25,7 +25,8 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 - Code: `scripts/stages/stage-1/single_operator_budget/` (phase1_driver, completion, analysis, disk, train_driver,
   plan, launch with `budget` / `closeout` / `retain`); core: DEPTH resume with anchors and `OperatorContext.on_progress`,
   the trainer's memory probe; shared poll: an unreadable listing is retried and never read as empty, the final listing
-  is hash-checked, `live/` excluded at any depth. Dry runs: `plans/dry_run_20261119.json`, `plans/dry_run_20261119b.json`.
+  is hash-checked, `live/` excluded at any depth. Dry runs: `plans/dry_run_20261119.json`, `plans/dry_run_20261119b.json`,
+  `plans/dry_run_20261119c.json` (the third, on `8fa9f84c`).
 - Budget (`plans/proposal.json`): phase 1 one session, $10.21 expected, $22.92 hard cap + $1.00 reserve (fits the
   $30.24 left); phase 2 a draft only: both seeds $114.70 expected, caps $185.87 + $1.
 - Dev box: `plans/disk_peak.json`: phase 1's bound peak 12.35 GiB at the real landing paths (evidence, archives,
