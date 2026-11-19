@@ -29,6 +29,7 @@ from __future__ import annotations
 import functools
 import hashlib
 import json
+import os
 import shlex
 import sys
 import tarfile
@@ -201,7 +202,11 @@ def secure_incremental(launch):
             if dest.is_file():
                 dest.unlink()                #: a failed pull's archive is not kept beside the evidence
             ctx.evidence["secure_rounds"] = n
-            ctx.evidence["secured_files"] = {"files": len(have), "pending": len(listing) - len(have),
+            #: pending counts the LISTING's files not yet held as listed: a file the pod has since moved (an isolated
+            #: part into superseded/) stays in the index until the final listing withdraws it, and must not offset one
+            #: still to pull
+            ctx.evidence["secured_files"] = {"files": len(have),
+                                             "pending": sum(1 for k, v in listing.items() if have.get(k) != v),
                                              "last_round_ok": ok, "last_round_files": len(new)}
             if ok:
                 ctx.say(f"secured {len(new)} file(s) ({len(have)} held)")
@@ -210,8 +215,47 @@ def secure_incremental(launch):
     return on_poll
 
 
+def withdraw_moved(st: Path, listing: dict[str, str]) -> list[dict]:
+    """After the pod's FINAL listing is read (``{name: sha256}``): every file this session pulled (``pulled.json``)
+    that the listing no longer holds at its path leaves the dev box's active tree, its bytes kept. The pod moves a
+    file only into ``superseded/`` (an isolated part, a generations file composed again): where the listing holds
+    the same bytes there, the dev box's copy goes to that path (or, already pulled there, the active duplicate is
+    removed); otherwise it goes under ``superseded/_withdrawn_on_pod/``. So a part the pod isolated never counts in
+    the dev box's completion check or rides a resume archive into the next attempt. Returns what moved."""
+    out, have, moved = st / "out", _pulled_index(st), []
+    there: dict[str, list[str]] = {}
+    for name, digest in listing.items():
+        if "superseded" in Path(name).parts:
+            there.setdefault(digest, []).append(name)
+    for name in sorted(n for n in have if n not in listing):
+        src = out / name
+        rec = {"path": name}
+        if src.is_file():
+            digest = hashlib.sha256(src.read_bytes()).hexdigest()
+            cand = sorted((m for m in there.get(digest, []) if Path(m).name == Path(name).name),
+                          key=lambda m: -len(os.path.commonprefix([m, name])))
+            dest_rel = cand[0] if cand else str(Path("superseded") / "_withdrawn_on_pod" / name)
+            dest = out / dest_rel
+            if dest.is_file() and hashlib.sha256(dest.read_bytes()).hexdigest() == digest:
+                src.unlink()
+                rec.update(action="removed: the pod's superseded copy is on the dev box", kept_at=dest_rel)
+            else:
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                os.replace(src, dest)
+                rec.update(action="moved", kept_at=dest_rel)
+            rec["sha256"] = digest
+        else:
+            rec["action"] = "not on the dev box"
+        have.pop(name, None)
+        moved.append(rec)
+    if moved:
+        (st / "pulled.json").write_text(json.dumps(have, indent=0, sort_keys=True) + "\n")
+    return moved
+
+
 def final_hash_check(launch, ctx) -> dict:
-    """At closeout: the pod's FINAL listing with every file's sha256 against the dev box's copy (``<scr>/store/out``).
+    """At closeout: the pod's FINAL listing with every file's sha256 against the dev box's copy (``<scr>/store/out``),
+    once every pulled file the pod has since moved is withdrawn from the dev box's active tree (`withdraw_moved`).
     A file the dev box lacks or holds with other bytes is pulled again (its index entry dropped) and checked once more;
     the result is ``verified`` only when every listed file matches."""
     st = SE.store(ctx)
@@ -222,6 +266,8 @@ def final_hash_check(launch, ctx) -> dict:
         if listing is None:
             out.update(verified=False, why="the final listing could not be read")
             break
+        withdrawn = withdraw_moved(st, listing)
+        out["withdrawn"] = out.get("withdrawn", []) + withdrawn
         local = {n: (hashlib.sha256((st / "out" / n).read_bytes()).hexdigest() if (st / "out" / n).is_file() else None)
                  for n in listing}
         bad = sorted(n for n, h in listing.items() if local[n] != h)

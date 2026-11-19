@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-19 (UTC), SOB1 PREPARED at $0 and corrected twice that day (first: completion on real artifacts, sealed statistics reused, DEPTH persisted per round, dev-box peak, phase-1 comparison; second: one product manifest per arm, part provenance checked before a merge, phase 1's completion on both closeout paths; a third $0 dry run), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
+**Updated:** 2026-11-19 (UTC), SOB1 phase 1 APPROVED by the maintainer (one L40S, $22.92 cumulative cap + $1.00 reserve) after a third $0 correction (generation ids name target and mode, record labels checked, pod-side moves withdrawn on the dev box); SOB1 PREPARED at $0 and corrected twice that day (first: completion on real artifacts, sealed statistics reused, DEPTH persisted per round, dev-box peak, phase-1 comparison; second: one product manifest per arm, part provenance checked before a merge, phase 1's completion on both closeout paths; a third $0 dry run), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.

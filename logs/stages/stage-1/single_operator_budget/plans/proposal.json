@@ -2,7 +2,7 @@
  "authorizes": "nothing: a proposal; the grant is the maintainer's",
  "ceiling_usd": 22.92,
  "decision": "PENDING the maintainer's explicit approval",
- "design_sha256": "b4bdfd019a7659b034923f76bc7de84b8eacce177dc630a93fef10876c6df9cd",
+ "design_sha256": "35432bc6b0af88fa41dbb46db7200233297cc8b18d252452a1546ede59ab60de",
  "expected_total_usd": 10.21,
  "gpu_count_max": 1,
  "gpus": {
@@ -320,7 +320,7 @@
   "relay_headroom_bytes": 64510408785,
   "rule": "a save point is deleted only after the next one hands off, so a rotation holds two; a final is uploaded while its unit's last save point still exists; the dev box keeps the inits (phase 1) and would keep the finals after their evaluation (phase 2)"
  },
- "structures_sha256": "4393c1f4ba24327d428fec63b339bf707922e59df5d4a40064be784f868eb13b",
+ "structures_sha256": "2c7ac8cafea2601a79e3d2dc951e9df9dc9f9d2ed8c5b7a77d8f9f36bb6681c6",
  "study": "SOB1",
  "study_cumulative_cap_usd": 23.92,
  "teardown_reserve_usd": 1.0,

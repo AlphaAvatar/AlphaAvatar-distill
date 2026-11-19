@@ -323,18 +323,19 @@ def _proto(mode: str) -> dict:
     return {"w": w, "base": cap["seed_rule_base"], "ctx": ctx, "ts": ts, "flu": flu, "common": common}
 
 
-def _row(key: str, i: str, pr: dict, raw: str = "<think>x</think>\n\nx") -> dict:
-    """One record a runner seals for item ``i`` of unit ``key`` under the registered protocol."""
+def _row(key: str, i: str, pr: dict, raw: str = "<think>x</think>\n\nx", label: str = "teacher") -> dict:
+    """One record a runner seals for item ``i`` of unit ``key`` under the registered protocol, with the runner's
+    ``label``."""
     from stages.teacher_parent_initialization import b_evidence as BE
     turn = {"raw": raw, "stop_reason": "eos", "natural_termination": True, "degeneration_triggered": False,
             "context_limit_reached": False, "generated_tokens": 1, "output_token_ids": [151645], "prompt_tokens": 10,
             "generation_allowance": pr["ctx"] - 10, "think_state": pr["ts"]}
     if key == BE.FLUID:
-        return {"task_id": i, "label": "synthetic", "end": "answered",
+        return {"task_id": i, "label": label, "end": "answered",
                 "messages": [{"role": "system", "content": pr["flu"]["system_message"]}],
                 "turns": [{**turn, "turn": 0, "answer": "x", "seed": _seed_of(pr["base"], f"{key}|{i}|0|0")}]}
-    return {**turn, "id": i, "sampling_seed": _seed_of(pr["base"], f"{key}|{i}|0|0"), "context_len": pr["ctx"],
-            "system_source": "default"}
+    return {**turn, "id": i, "label": label, "sampling_seed": _seed_of(pr["base"], f"{key}|{i}|0|0"),
+            "context_len": pr["ctx"], "system_source": "default"}
 
 
 def _fluid_run_summary(pr: dict, key: str) -> dict:
@@ -359,7 +360,7 @@ def _part(d: Path, key: str, gen: str | None, rows: list[dict], n: int = 0) -> P
 
 def _entry(gen: str, target: str, mode: str, weights) -> dict:
     from stages.single_operator_budget import completion as CP
-    return {"generation": gen, "attempt": gen.rsplit("-g", 1)[0], "target": target, "mode": mode,
+    return {"generation": gen, "attempt": gen.split("-")[0], "target": target, "mode": mode,
             "protocol_sha256": CP.protocol_sha256(mode), "weights_sha256": weights, "parts_at_start": {}}
 
 
@@ -370,11 +371,11 @@ def _complete_set(d: Path, mode: str, weights: dict | None, attempt: str = "a1",
     with its runner fields."""
     from stages.single_operator_budget import completion as CP
     from stages.teacher_parent_initialization import b_evidence as BE
-    pr, gen = _proto(mode), f"{attempt}-g1"
+    pr, gen = _proto(mode), CP.generation_id(attempt, target, mode, 1)
     gens = d / "generations"
     gens.mkdir(parents=True, exist_ok=True)
     for key, (_field, ids) in BE.registered_units().items():
-        rows = [_row(key, i, pr) for i in ids]
+        rows = [_row(key, i, pr, label=CP.label_of(target)) for i in ids]
         if key == BE.FLUID:
             summ = {"composition": "test", "tasks_sha256": pr["flu"]["tasks_sha256"],
                     "runs": [{"attempt": gen, "summary": _fluid_run_summary(pr, key)}]}
@@ -464,11 +465,46 @@ def test_two_different_records_for_one_item_are_refused(tmp_path):
                                                             + rows[1:]))
     st = CP.check(d, "teacher", "H-T", out)
     assert st["units"][key]["records_no_proven_part_holds"] == 1 and st["units"][key]["action"] == "recompose"
-    _part(d, key, "a1-g1", [{**rows[0], "raw": "another answer"}], n=1)
+    _part(d, key, CP.generation_id("a1", "teacher", "H-T", 1), [{**rows[0], "raw": "another answer"}], n=1)
     st = CP.check(d, "teacher", "H-T", out)
     assert st["sealed_twice"] == [f"{key}/{rows[0]['id']}"]
     with pytest.raises(CP.CompletionError, match="sealed twice"):
         CP.repair(d, st, "a2-g1")
+
+
+def _engine(pr: dict, asked: dict):
+    """A synthetic engine behind the runners' real merge (`reasoning_inheritance.driver._run_bounded`): run_battery /
+    uncapped_eval answer every item asked for, with the ``--label`` given, streamed as it finishes, then the run's
+    files."""
+    from stages.teacher_parent_initialization import b_evidence as BE
+    fl = BE.FLUID
+
+    def engine(cmd, log, env, time_box_s, poll=None):
+        log.write_text("synthetic\n")
+        arg = lambda f: cmd[cmd.index(f) + 1]  # noqa: E731
+        if any("run_battery.py" in c for c in cmd):
+            ids = [json.loads(x)["task_id"] for x in Path(arg("--tasks")).read_text().splitlines() if x.strip()]
+            asked[fl] = ids
+            Path(arg("--stream-completed")).write_text("".join(json.dumps(_row(fl, i, pr, label=arg("--label"))) + "\n"
+                                                               for i in ids))
+            o = Path(arg("--out"))
+            o.write_text("")
+            o.with_suffix(".summary.json").write_text(json.dumps(_fluid_run_summary(pr, fl)))
+            return 0, False
+        files = cmd[cmd.index("--prompts") + 1:cmd.index("--out-dir")]
+        raw, stream = Path(arg("--out-dir")), Path(arg("--stream-completed"))
+        raw.mkdir(parents=True, exist_ok=True)
+        stream.mkdir(parents=True, exist_ok=True)
+        for f in files:
+            k = Path(f).stem
+            ids = [json.loads(x)["id"] for x in Path(f).read_text().splitlines() if x.strip()]
+            asked[k] = ids
+            body = "".join(json.dumps(_row(k, i, pr, label=arg("--label"))) + "\n" for i in ids)
+            (stream / f"{k}.stream.jsonl").write_text(body)
+            (raw / f"{k}.generations.jsonl").write_text(body)
+            (raw / f"{k}.json").write_text(json.dumps(_cap_run_summary(pr)))
+        return 0, False
+    return engine
 
 
 def test_an_old_models_partial_answers_are_isolated_and_the_new_attempt_generates_only_the_rest(tmp_path, monkeypatch):
@@ -488,45 +524,21 @@ def test_an_old_models_partial_answers_are_isolated_and_the_new_attempt_generate
     pr, units = _proto(mode), BE.registered_units()
     right = CP.expected_weights("teacher", out)
     fl, gsm, rag = BE.FLUID, "stage3_capability_846__gsm8k", "stage3_capability_846__rag"
+    G = lambda a: CP.generation_id(a, "teacher", mode, 1)  # noqa: E731
     kept = {fl: units[fl][1][:3], gsm: units[gsm][1][:4]}
-    _part(d, fl, "a0-g1", [_row(fl, i, pr) for i in kept[fl]])
-    _part(d, gsm, "a0-g1", [_row(gsm, i, pr) for i in kept[gsm]])
-    _part(d, fl, "a1-g1", [_row(fl, i, pr, raw="OLD MODEL") for i in units[fl][1][3:8]], n=1)
-    _part(d, gsm, "a1-g1", [_row(gsm, i, pr, raw="OLD MODEL") for i in units[gsm][1][4:14]], n=1)
+    _part(d, fl, G("a0"), [_row(fl, i, pr) for i in kept[fl]])
+    _part(d, gsm, G("a0"), [_row(gsm, i, pr) for i in kept[gsm]])
+    _part(d, fl, G("a1"), [_row(fl, i, pr, raw="OLD MODEL") for i in units[fl][1][3:8]], n=1)
+    _part(d, gsm, G("a1"), [_row(gsm, i, pr, raw="OLD MODEL") for i in units[gsm][1][4:14]], n=1)
     _part(d, rag, None, [_row(rag, i, pr, raw="OLD MODEL") for i in units[rag][1][:2]])
-    (d / CP.PACKAGES).write_text(json.dumps([_entry("a0-g1", "teacher", mode, right),
-                                             _entry("a1-g1", "teacher", mode, {"model.safetensors": "1" * 64})]))
+    (d / CP.PACKAGES).write_text(json.dumps([_entry(G("a0"), "teacher", mode, right),
+                                             _entry(G("a1"), "teacher", mode, {"model.safetensors": "1" * 64})]))
     st = CP.check(d, "teacher", mode, out, label="teacher")
     why = {rel: v["why"] for rel, v in st["parts"].items() if not v["proven"]}
     assert len(why) == 3 and sum("other weights" in w for w in why.values()) == 2
     assert any("names no generation" in w for w in why.values())
     asked = {}
-
-    def engine(cmd, log, env, time_box_s, poll=None):
-        """run_battery / uncapped_eval: every item asked for, streamed as it finishes, then the run's files."""
-        log.write_text("synthetic\n")
-        arg = lambda f: cmd[cmd.index(f) + 1]  # noqa: E731
-        if any("run_battery.py" in c for c in cmd):
-            ids = [json.loads(x)["task_id"] for x in Path(arg("--tasks")).read_text().splitlines() if x.strip()]
-            asked[fl] = ids
-            Path(arg("--stream-completed")).write_text("".join(json.dumps(_row(fl, i, pr)) + "\n" for i in ids))
-            o = Path(arg("--out"))
-            o.write_text("")
-            o.with_suffix(".summary.json").write_text(json.dumps(_fluid_run_summary(pr, fl)))
-            return 0, False
-        files = cmd[cmd.index("--prompts") + 1:cmd.index("--out-dir")]
-        raw, stream = Path(arg("--out-dir")), Path(arg("--stream-completed"))
-        raw.mkdir(parents=True, exist_ok=True)
-        stream.mkdir(parents=True, exist_ok=True)
-        for f in files:
-            k = Path(f).stem
-            ids = [json.loads(x)["id"] for x in Path(f).read_text().splitlines() if x.strip()]
-            asked[k] = ids
-            body = "".join(json.dumps(_row(k, i, pr)) + "\n" for i in ids)
-            (stream / f"{k}.stream.jsonl").write_text(body)
-            (raw / f"{k}.generations.jsonl").write_text(body)
-            (raw / f"{k}.json").write_text(json.dumps(_cap_run_summary(pr)))
-        return 0, False
+    engine = _engine(pr, asked)
     monkeypatch.setattr(RID, "_run_bounded", engine)
     monkeypatch.setattr(P1, "model_for", lambda *a, **k: tmp_path / "model")
     monkeypatch.setattr(P1.C, "package", lambda model_dir, dest: {"weights_sha256": right, "linked": []})
@@ -538,13 +550,80 @@ def test_an_old_models_partial_answers_are_isolated_and_the_new_attempt_generate
     for key in units:
         text = (d / "generations" / f"{key}.jsonl").read_text()
         assert "OLD MODEL" not in text
-    iso = json.loads((d / CP.SUPERSEDED / "a2-g1" / "isolated_parts.json").read_text())
+    iso = json.loads((d / CP.SUPERSEDED / G("a2") / "isolated_parts.json").read_text())
     assert sorted(iso) == sorted(why)
-    assert all((d / CP.SUPERSEDED / "a2-g1" / rel).is_file() for rel in iso)
+    assert all((d / CP.SUPERSEDED / G("a2") / rel).is_file() for rel in iso)
     fin = CP.check(d, "teacher", mode, out, label="teacher")
-    assert fin["complete"] and {v["generation"] for v in fin["parts"].values()} == {"a0-g1", "a2-g1"}
-    assert [e["generation"] for e in CP.packages(d)] == ["a0-g1", "a1-g1", "a2-g1"]
-    assert CP.packages(d)[-1]["parts_at_start"] and all(".a0-g1." in r for r in CP.packages(d)[-1]["parts_at_start"])
+    assert fin["complete"] and {v["generation"] for v in fin["parts"].values()} == {G("a0"), G("a2")}
+    assert [e["generation"] for e in CP.packages(d)] == [G("a0"), G("a1"), G("a2")]
+    assert CP.packages(d)[-1]["parts_at_start"] and all(f".{G('a0')}." in r for r in CP.packages(d)[-1]["parts_at_start"])
+
+
+def _real_parts_or_skip() -> Path:
+    """TPI1's sealed thinking-mode parts of its A arm at 8,192 (real runner records), if this machine holds them."""
+    import glob
+    import os
+    hits = sorted(glob.glob(os.path.expanduser(
+        "~/aad-artifacts/stage1_teacher_parent_init/*/extracted/A_teacher_parent-s*/evaluation_thinking/parts")))
+    if not hits:
+        pytest.skip("TPI1's sealed evaluation parts (real runner records) are an artifact outside git")
+    return Path(hits[0])
+
+
+def test_a_residual_width_part_filed_in_the_depth_only_set_is_isolated_and_only_missing_items_are_generated(
+        tmp_path, monkeypatch):
+    """Item 1 (maintainer 2026-11-19, third brief), on real runner records: the residual-width arm's parts (its
+    generation id, its label, even its package record) land in the depth-only arm's thinking-mode set; a part named
+    for depth only holds residual-width records; a depth-only part of the other mode is there too. Each is isolated
+    by what it says about itself -- the generation id's target and mode, each record's runner ``label`` -- while the
+    depth-only parts are reused and only the items none holds are generated."""
+    _eval_set_or_skip()
+    real = _real_parts_or_skip()
+    from stages.reasoning_inheritance import driver as RID
+    from stages.single_operator_budget import completion as CP
+    from stages.single_operator_budget import phase1_driver as P1
+    from stages.teacher_parent_initialization import b_evidence as BE
+    out, mode, fl, gsm = tmp_path / "out", "H-T", BE.FLUID, "stage3_capability_846__gsm8k"
+    for a in ("depth_only", "residual_width"):
+        _durable_init_record(out, a)
+    d = CP.ev_dir(out, "depth_only", mode)
+    R = [json.loads(x) for x in (real / "part_0000.jsonl").read_text(encoding="utf-8").split("\n") if x.strip()]
+    Q = [json.loads(x) for x in (real / gsm / "part_0000.jsonl").read_text(encoding="utf-8").split("\n") if x.strip()]
+    lab = lambda rows, a: [{**r, "label": CP.label_of(a)} for r in rows]  # noqa: E731
+    gd, gr = CP.generation_id("a1", "depth_only", mode, 1), CP.generation_id("a1", "residual_width", mode, 1)
+    _part(d, fl, gd, lab(R[:4], "depth_only"))
+    _part(d, gsm, gd, lab(Q[:5], "depth_only"))
+    _part(d, fl, gr, lab(R[4:9], "residual_width"), n=1)                     #: the misfiled residual-width parts
+    _part(d, gsm, gr, lab(Q[5:12], "residual_width"), n=1)
+    _part(d, gsm, gd, lab(Q[12:14], "residual_width"), n=2)                  #: right name, another arm's records
+    _part(d, fl, CP.generation_id("a1", "depth_only", "H-N", 1), lab(R[9:10], "depth_only"), n=2)
+    w = {a: CP.expected_weights(a, out) for a in ("depth_only", "residual_width")}
+    (d / CP.PACKAGES).write_text(json.dumps([_entry(gd, "depth_only", mode, w["depth_only"]),
+                                             _entry(gr, "residual_width", mode, w["residual_width"])]))
+    st = CP.check(d, "depth_only", mode, out, label=CP.label_of("depth_only"))
+    why = {rel: v["why"] for rel, v in st["parts"].items() if not v["proven"]}
+    assert len(why) == 4 and sum("residual_width/H-T's" in x for x in why.values()) == 2
+    assert sum("depth_only/H-N's" in x for x in why.values()) == 1
+    assert sum("runner label ['residual_width_untrained']" in x for x in why.values()) == 1
+    assert sorted(v["records"] for v in st["parts"].values() if v["proven"]) == [4, 5]
+    asked = {}
+    monkeypatch.setattr(RID, "_run_bounded", _engine(_proto(mode), asked))
+    monkeypatch.setattr(P1, "model_for", lambda *a, **k: tmp_path / "model")
+    monkeypatch.setattr(P1.C, "package", lambda model_dir, dest: {"weights_sha256": w["depth_only"], "linked": []})
+    row = P1.evaluate_set("depth_only", mode, out, tmp_path / "w", "vllm", "a2", RID.Status(tmp_path / "st"))
+    assert row["status"] == "complete"
+    units = BE.registered_units()
+    assert asked[fl] == [i for i in units[fl][1] if i not in {r["task_id"] for r in R[:4]}]
+    assert asked[gsm] == [i for i in units[gsm][1] if i not in {r["id"] for r in Q[:5]}]
+    rows = {k: [json.loads(x) for x in (d / "generations" / f"{k}.jsonl").read_text(encoding="utf-8").split("\n")
+                if x.strip()] for k in (fl, gsm)}
+    assert {r["label"] for k in rows for r in rows[k]} == {"depth_only_untrained"}
+    kept = {r["task_id"]: r for r in rows[fl]}
+    assert all(kept[r["task_id"]] == {**r, "label": "depth_only_untrained"} for r in R[:4])   #: reused unchanged
+    fin = CP.check(d, "depth_only", mode, out, label=CP.label_of("depth_only"))
+    assert fin["complete"] and gr not in {v["generation"] for v in fin["parts"].values()}
+    assert len(json.loads((d / CP.SUPERSEDED / CP.generation_id("a2", "depth_only", mode, 1)
+                           / "isolated_parts.json").read_text())) == 4
 
 
 class _Shell:
@@ -622,6 +701,80 @@ def test_an_unreadable_remote_listing_is_retried_and_never_reads_as_nothing_pend
     (store / "report.json").write_text("tampered\n")
     fin = RIL.final_hash_check(launch, ctx)                   #: re-pulled, then equal again
     assert fin["verified"] and (store / "report.json").read_text() == "{}\n"
+
+
+def _local_scp(pod: Path):
+    import shutil
+
+    def scp(c, remote, dest, limit_s=0):
+        src = Path(remote.replace("/workspace", str(pod / "workspace")))
+        if not src.exists():
+            src = Path(remote)
+        if src.is_file():
+            Path(dest).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(src, dest)
+            return 0
+        return 1
+    return scp
+
+
+def test_a_part_pulled_then_isolated_on_the_pod_leaves_the_dev_boxs_active_tree_and_every_resume(tmp_path, monkeypatch):
+    """Item 2 (maintainer 2026-11-19, third brief): pull first, isolate on the pod, then take over. The dev box pulled
+    a part the pod then isolated into ``superseded/``; after the final listing is read, the dev box's active copy is
+    withdrawn (its bytes kept where the pod keeps them), so it is in neither the dev box's completion check nor the
+    resume archive nor the next attempt's takeover. The poll's ``pending`` also stays honest when the pod has moved a
+    pulled file (it read -1 before, so the products could never read as secured)."""
+    _eval_set_or_skip()
+    import tarfile
+    import time
+    from stages.reasoning_inheritance import launch as RIL
+    from stages.single_operator_budget import completion as CP
+    from stages.single_operator_budget import phase1_driver as P1
+    from stages.teacher_parent_initialization import b_evidence as BE
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+    L, launch, ctx, ev = _poll_ctx(tmp_path, fail=0)
+    monkeypatch.setattr(L.SE, "evidence_dir", lambda la, run: str(ev))
+    monkeypatch.setattr(L.SE, "_scp", _local_scp(tmp_path / "pod"))
+    monkeypatch.setattr(RIL.SE, "_scp", _local_scp(tmp_path / "pod"))
+    mode, fl, gsm = "H-T", BE.FLUID, "stage3_capability_846__gsm8k"
+    pr, units = _proto(mode), BE.registered_units()
+    G = lambda a: CP.generation_id(a, "teacher", mode, 1)  # noqa: E731
+    d = CP.ev_dir(ev, "teacher", mode)
+    _part(d, fl, G("a1"), [_row(fl, i, pr) for i in units[fl][1][:3]])
+    _part(d, gsm, G("a1"), [_row(gsm, i, pr) for i in units[gsm][1][:4]])
+    _part(d, fl, G("a0"), [_row(fl, i, pr, raw="OLD") for i in units[fl][1][3:6]], n=1)
+    _part(d, gsm, G("a0"), [_row(gsm, i, pr, raw="OLD") for i in units[gsm][1][4:9]], n=1)
+    (d / CP.PACKAGES).write_text(json.dumps([_entry(G("a1"), "teacher", mode, CP.expected_weights("teacher", ev)),
+                                             _entry(G("a0"), "teacher", mode, {"model.safetensors": "1" * 64})]))
+    RIL.secure_incremental(launch)(ctx)                       #: 1. pulled: both parts are on the dev box
+    store = Path(ctx.args.scr) / "store" / "out"
+    rel = lambda p: str(p.relative_to(ev))  # noqa: E731
+    wrong = sorted(rel(p) for p in d.rglob(f"part_*.{G('a0')}.jsonl"))
+    assert len(wrong) == 2 and all((store / w).is_file() for w in wrong)
+    st = CP.check(d, "teacher", mode, ev)                     #: 2. the next attempt isolates them on the pod
+    CP.repair(d, st, G("a2"))
+    assert not any((ev / w).exists() for w in wrong)
+    RIL.secure_incremental(launch)(ctx)                       #: the superseded copies are pulled; nothing pending
+    assert ctx.evidence["secured_files"]["pending"] == 0
+    moved = [rel(p) for p in (d / CP.SUPERSEDED).rglob("part_*.jsonl")]
+    (store / [m for m in moved if gsm in m][0]).unlink()     #: one superseded copy not on the dev box yet
+    fin = RIL.final_hash_check(launch, ctx)
+    assert fin["verified"] and sorted(x["path"] for x in fin["withdrawn"]) == wrong
+    assert {x["action"].split(":")[0] for x in fin["withdrawn"]} == {"moved", "removed"}
+    assert not any((store / w).exists() for w in wrong) and all((store / m).is_file() for m in moved)
+    dev = CP.ev_dir(store, "teacher", mode)                   #: 3. the dev box's completion check never sees them
+    prov = CP.provenance(dev, "teacher", mode, store)
+    assert prov["parts"] and all(v["proven"] for v in prov["parts"].values())
+    assert sorted(prov["proven_records"][fl]) == sorted(units[fl][1][:3])
+    tgz = L.resume_archive(Path(ctx.args.scr), tmp_path / "resume.tgz")        #: 4. nor a resume
+    with tarfile.open(tgz) as t:
+        names = set(t.getnames())
+    assert not names & set(wrong) and set(moved) <= names
+    out2 = tmp_path / "next" / "out"
+    P1.take_over(tgz, out2)
+    nd = CP.ev_dir(out2, "teacher", mode)
+    assert all(G("a1") in r for r in CP.part_inventory(nd)) and len(CP.part_inventory(nd)) == 2
+    assert all(v["proven"] for v in CP.provenance(nd, "teacher", mode, out2)["parts"].values())
 
 
 def _product_bodies(a: str) -> dict[str, bytes]:
@@ -909,7 +1062,12 @@ def test_phase_1_completes_only_with_eight_sets_and_three_inits_and_its_table_re
     assert p["n_items"] == DESIGN["analysis"]["primary_items"]["n"] == 570 and p["n_groups"] == 558
     assert p["teacher_minus_arm_pp"] == 0.0 and p["teacher_accuracy_pct"] == p["arm_accuracy_pct"]
     md = SA.render_table(doc)
-    assert "思考模式" in md and "非思考模式" in md and "teacher − arm, pp" in md
+    assert "思考模式" in md and "非思考模式" in md and "teacher − arm, pp" in md and "degeneration stop" in md
+    term = doc["modes"]["H-T"]["terminations"]
+    assert set(term) == {"teacher", "residual_width", "ffn_attention", "depth_only"}
+    assert term["teacher"]["primary_static_fluid_core"] == {"turns": 570, "natural_termination": 570,
+                                                             "degeneration_stop": 0, "context_limit_hit": 0,
+                                                             "other_stop": 0}
     #: the init record names other weights: the arm's sets are no longer complete
     a = "ffn_attention"
     _durable_init_record(out, a, bodies={**_product_bodies(a), "init/model.safetensors": b"other weights"})

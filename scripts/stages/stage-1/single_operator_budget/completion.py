@@ -18,11 +18,13 @@ complete only when all of these hold (`check`):
 * **formal report** -- ``formal_report.json`` is the scorer's report of exactly these generations (rescored here, $0):
   a ``{}`` or stale report is a missing part, every unit must be measured with nothing missing;
 * **model identity (provenance)** -- every sealed part (``parts/part_NNNN.<generation>.jsonl``, fluid;
-  ``parts/<unit>/...``, capability) names the generation that sealed it, and that generation's package record
+  ``parts/<unit>/...``, capability) names the generation that sealed it, an id that itself names the attempt, the
+  target, the mode and the round (`generation_id`), all of them this set's; that generation's package record
   (``packages.json``, appended before anything is generated) names the expected weights (the arm's committed init
   record's ``model.safetensors`` sha256, or the teacher identity's three shards), this target and mode, and the
-  registered protocol (`protocol_sha256`); every record the part holds is a registered item, well formed, under the
-  per-record protocol (seed rule, context, the mode's think state, a teacher EOS id, the system turn). This holds
+  registered protocol (`protocol_sha256`); every record the part holds carries the runner label of this target
+  (`label_of`), is a registered item, well formed, under the per-record protocol (seed rule, context, the mode's
+  think state, a teacher EOS id, the system turn). This holds
   whether or not a generations file exists yet: an attempt stopped with only ``parts/`` is checked the same way. And
   every record of every generations file is one a proven part holds.
 
@@ -81,6 +83,31 @@ def ev_dir(out: Path, target: str, mode: str) -> Path:
 
 def targets() -> list[str]:
     return list(C.design()["phase_1"]["evaluation_order"])
+
+
+def label_of(target: str) -> str:
+    """The label the runners are given for ``target`` (``--label``) and write into every record they seal."""
+    return TEACHER if target == TEACHER else f"{target}_untrained"
+
+
+#: a generation's id: ``<attempt>-<target>-<mode>-g<round>``; the attempt (a run id) and the target hold no ``-``
+ID_PART = re.compile(r"^[A-Za-z0-9_]+$")
+
+
+def generation_id(attempt: str, target: str, mode: str, rnd: int) -> str:
+    """One generation round of one set: the attempt, the target model, the think mode and the round, in the part
+    names the runners seal (`reasoning_inheritance.driver.Sealer` tag)."""
+    if not (ID_PART.match(attempt) and ID_PART.match(target)) or not re.fullmatch(r"[A-Za-z0-9-]+", mode):
+        raise CompletionError(f"a generation id needs a run id and target without '-': {attempt!r}, {target!r}, {mode!r}")
+    return f"{attempt}-{target}-{mode}-g{int(rnd)}"
+
+
+def parse_generation(gen: str) -> dict | None:
+    """``generation_id``'s fields back, or None for an id of another shape (an earlier form, or none)."""
+    bits = (gen or "").split("-")
+    if len(bits) < 4 or not re.fullmatch(r"g\d+", bits[-1]) or not all(map(ID_PART.match, bits[:2])):
+        return None
+    return {"attempt": bits[0], "target": bits[1], "mode": "-".join(bits[2:-1]), "round": int(bits[-1][1:])}
 
 
 # ---- the registered protocol ------------------------------------------------------------------------------------------
@@ -211,6 +238,11 @@ def part_inventory(d: Path) -> dict[str, str]:
 def _generation_problem(e: dict | None, gen: str | None, target: str, mode: str, weights, proto: str) -> str | None:
     if gen is None:
         return "the part names no generation (sealed before parts carried one)"
+    g = parse_generation(gen)
+    if g is None:
+        return f"generation {gen} does not name its attempt, target, mode and round"
+    if (g["target"], g["mode"]) != (target, mode):
+        return f"generation {gen} is {g['target']}/{g['mode']}'s, not {target}/{mode}'s"
     if e is None:
         return f"no package record names generation {gen}"
     if weights is None:
@@ -243,6 +275,9 @@ def provenance(d: Path, target: str, mode: str, out: Path) -> dict:
         why = _generation_problem(entries.get(gen), gen, target, mode, weights, proto)
         field, ids = units[key]
         got = [str(r.get(field) if field in r else r.get("id")) for r in rows]
+        labels = sorted({str(r.get("label")) for r in rows})
+        if why is None and labels != [label_of(target)]:
+            why = f"its records carry the runner label {labels[:3]}, not {label_of(target)!r}"
         if why is None and (not rows or set(got) - set(ids)):
             why = f"holds {sorted(set(got) - set(ids))[:3] or 'no'} records of registered items"
         if why is None and _wellformed(key, rows):
@@ -501,7 +536,7 @@ def phase(out: Path, *, write_records: bool = False) -> dict:
     sets = {}
     for t in targets():
         for m in C.mode_dirs():
-            st = check(ev_dir(out, t, m), t, m, out, label=t if t == TEACHER else f"{t}_untrained")
+            st = check(ev_dir(out, t, m), t, m, out, label=label_of(t))
             if write_records and ev_dir(out, t, m).is_dir():
                 write(ev_dir(out, t, m), st)
             sets[(t, m)] = st

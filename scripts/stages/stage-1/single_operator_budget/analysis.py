@@ -187,6 +187,31 @@ def _pp(x):
     return None if x is None else round(100.0 * float(x), 2)
 
 
+def terminations(gd, primary) -> dict:
+    """How each turn of one set ended, counted from its generations (AGENTS.md P18: reported apart, never a score):
+    natural terminations, degeneration stops (the engine's check stopped the turn), context-limit hits
+    (right-censored) and the rest, for the static fluid core (``primary``) and for the whole set."""
+    import json
+    from stages.teacher_parent_initialization import b_evidence as BE
+    keys = ("turns", "natural_termination", "degeneration_stop", "context_limit_hit", "other_stop")
+    core, every = dict.fromkeys(keys, 0), dict.fromkeys(keys, 0)
+    want = set(primary)
+    for key in BE.registered_units():
+        f = Path(gd) / f"{key}.jsonl"
+        for line in f.read_text(encoding="utf-8").split("\n") if f.is_file() else ():
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            for t in (r.get("turns") or []) if key == BE.FLUID else [r]:
+                kind = ("natural_termination" if t.get("natural_termination") else
+                        "degeneration_stop" if t.get("degeneration_triggered") else
+                        "context_limit_hit" if t.get("context_limit_reached") else "other_stop")
+                for c in ([core, every] if key == BE.FLUID and str(r.get("task_id")) in want else [every]):
+                    c["turns"] += 1
+                    c[kind] += 1
+    return {"primary_static_fluid_core": core, "whole_set": every}
+
+
 def _teacher_minus(teacher: dict, arm: dict, items: list[str], groups: dict) -> dict:
     """Teacher minus arm over ``items`` paired by item (one generation each), with the group-bootstrap interval."""
     res = _paired({0: teacher}, {0: arm}, groups, [0])
@@ -218,8 +243,7 @@ def phase1_table(out, tmp) -> dict:
                k: done[k] for k in ("complete", "n_complete", "n_sets")},
            "sets": {k: v["protocol_digest"] for k, v in done["sets"].items()}}
     for mode, sub in C.mode_dirs().items():
-        read = {t: _set_reading(CP.ev_dir(out, t, mode) / "generations",
-                                t if t == CP.TEACHER else f"{t}_untrained", tmp / f"{t}_{mode}")
+        read = {t: _set_reading(CP.ev_dir(out, t, mode) / "generations", CP.label_of(t), tmp / f"{t}_{mode}")
                 for t in [CP.TEACHER, *arms]}
         if sorted(read[CP.TEACHER]["static"]) != sorted(primary):
             raise ValueError(f"{mode}: the teacher's static core is not the registered {len(primary)} items")
@@ -244,7 +268,9 @@ def phase1_table(out, tmp) -> dict:
                                     f"per-item correctness; the unit's registered headline is {head} (in the "
                                     "headlines beside this table), not this")}
             rows[a] = row
-        doc["modes"][mode] = {"dir": sub, "teacher_headlines": read[CP.TEACHER]["headlines"],
+        doc["modes"][mode] = {"dir": sub, "terminations": {t: terminations(CP.ev_dir(out, t, mode) / "generations",
+                                                                         primary) for t in [CP.TEACHER, *arms]},
+                              "teacher_headlines": read[CP.TEACHER]["headlines"],
                               "arm_headlines": {a: read[a]["headlines"] for a in arms}, "arms": rows,
                               "scored_digests": {t: v["digest"] for t, v in read.items()}}
     return doc
@@ -282,6 +308,16 @@ def render_table(doc: dict) -> str:
                 "set's formal report and in comparison.json :: headlines. The behaviour set has no correctness "
                 "headline and is not in this table. Intervals: 95% percentile bootstrap over the registered units "
                 "of independence (the primary core) or over items, unadjusted for multiplicity.", ""]
+        out += ["How the turns ended (counts; a degeneration stop is the engine's repetition check, a context-limit "
+                "hit is right-censored; reported apart, never a score):", "",
+                "| model | core turns | natural | degeneration stop | context limit | set turns | natural | "
+                "degeneration stop | context limit |", "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"]
+        for t, v in m.get("terminations", {}).items():
+            c, w = v["primary_static_fluid_core"], v["whole_set"]
+            out.append(f"| {ARM_WORDS.get(t, '教师 (teacher)' if t == 'teacher' else t)} | {c['turns']} | "
+                       f"{c['natural_termination']} | {c['degeneration_stop']} | {c['context_limit_hit']} | {w['turns']} | "
+                       f"{w['natural_termination']} | {w['degeneration_stop']} | {w['context_limit_hit']} |")
+        out.append("")
     return "\n".join(out) + "\n"
 
 

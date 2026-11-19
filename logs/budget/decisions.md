@@ -17025,3 +17025,33 @@ on a paid pod.
 - Risks: a unit whose last sample was sealed in the seconds before its runner summary was written has no runner
   summary and is generated again (the runners process units one at a time, so this window is one unit's last write).
 - Revisit when: the maintainer reviews this round and the phase-1 grant.
+
+## 2026-11-19 (UTC) — SOB1 phase 1 approved; two $0 corrections before the grant
+
+- Context: the maintainer reviewed `ee2ffc6b`, `8fa9f84c` and `c4ae2551` (the second correction and its dry run).
+- Decision (maintainer, 2026-11-19, the third brief that day, summarized; the brief is the source): SOB1 phase 1 is
+  approved: one L40S, expected $10.21, a $22.92 hard cap cumulative over every attempt, plus $1.00 kept for closing
+  resources only; the live balance, price and landing space are re-read at issue and launch; recoverable failures
+  are repaired inside what remains, taking over verified checkpoints, DEPTH rounds and per-item results first. Before
+  the grant, two $0 corrections, verified together, then the final dry run and the launch:
+  - a generation id names the attempt, the target model, the think mode and the round; on takeover of fluid and
+    capability parts, every record's runner `label` is checked against the expected target; regression on real
+    record formats: the residual-width arm's parts filed in the depth-only arm's set are isolated, the right parts
+    reused, only missing items generated;
+  - after the final listing is read, the dev box's synced active files are reconciled: a part the pod moved into
+    `superseded/` leaves the dev box's active tree too, its evidence kept; regression: pull, isolate, take over --
+    the old part enters neither the completion count nor the next resume.
+  - The final report gives, per mode, the static fluid core's 570 items: the teacher's and each arm's accuracy, the
+    teacher-minus-arm difference in pp with its interval, and each arm's degeneration stops; scientific completion is
+    `study_completion.status` with the three arms' local weight and mapping records; actual cost and the pod's
+    teardown. If the cumulative budget runs out, every resumable product is kept and the completed scope reported.
+    The approval covers SOB1 phase 1 only: phase 2's storage, Stage 3 recovery budget and the merge into main are
+    separate decisions.
+- Done ($0): `completion.generation_id` (`<attempt>-<target>-<mode>-g<n>`) and `parse_generation`; a part whose id
+  names another target or mode, or whose records carry another runner label (`label_of`), is isolated.
+  `reasoning_inheritance.launch.withdraw_moved` runs inside `final_hash_check` once the final listing is read; the
+  poll's `pending` counts the listing's files not yet held (a pod-side move drove the old formula below 0, so the
+  products could never read as secured). The phase-1 table counts each set's terminations (natural, degeneration
+  stop, context-limit hit) for the 570-item core and the whole set. The design's `phase_1.completion` texts follow;
+  `structures.json` and `proposal.json` regenerated for the hash only.
+- Revisit when: phase 1 closes.

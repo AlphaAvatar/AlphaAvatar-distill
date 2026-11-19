@@ -191,7 +191,7 @@ teacher, each in both modes. Each is checked against the registered manifest:
 | generation records | each turn carries its raw output and the termination fields the scorers read; record by record, its seed is the seed rule's for its unit, item and turn, prompt plus allowance is 8,192, the rendered prompt has the mode's think state (`self_opening` / `preclosed`), a natural stop ends with the stop id, the fluid system turn is the registered message |
 | protocol summary | every unit's summary and runner summaries; every key field recorded and equal to the registered value (decoding protocol and its seed rule, 8,192 context, system message, chat template and tokenizer, template kwargs, degeneration interval, action protocol, task file). The set's protocol digest is recorded; the four sets of a mode must share it |
 | formal report | rescored from these generations; a `{}` or stale report is a missing part |
-| model identity (provenance) | every sealed part names the generation that sealed it (`part_NNNN.<generation>.jsonl`); that generation's package record (`packages.json`, written before anything is generated) names the arm's init-record weights or the teacher identity's three shards, this target and mode, and the registered protocol (`protocol_sha256`); the part's own records are registered items under the per-record protocol (a teacher EOS id ends a natural stop). Checked whether or not a generations file exists, so an attempt stopped with only `parts/` is checked the same way. Every generations record must be one a proven part holds |
+| model identity (provenance) | every sealed part names the generation that sealed it (`part_NNNN.<generation>.jsonl`), an id naming the attempt, the target model, the think mode and the round (`<attempt>-<target>-<mode>-g<n>`), which must be this set's; that generation's package record (`packages.json`, written before anything is generated) names the arm's init-record weights or the teacher identity's three shards, this target and mode, and the registered protocol (`protocol_sha256`); each of the part's records carries the runner label of this target (`label_of`: `<arm>_untrained` or `teacher`) and is a registered item under the per-record protocol (a teacher EOS id ends a natural stop). Checked whether or not a generations file exists, so an attempt stopped with only `parts/` is checked the same way. Every generations record must be one a proven part holds |
 
 A set an earlier attempt completed is taken as it is. Otherwise the smallest repair, before anything is merged:
 
@@ -204,14 +204,19 @@ A set an earlier attempt completed is taken as it is. Otherwise the smallest rep
   seeds;
 * a unit whose runner protocol cannot be shown (no runner summary, or a field that differs) is generated again.
 
-The same item sealed twice in proven parts is refused. Each generation round has its own id (`<attempt>-g<n>`), and
+The same item sealed twice in proven parts is refused. Each generation round has its own id
+(`<attempt>-<target>-<mode>-g<n>`), and
 the runners tag every part they seal with it (`reasoning_inheritance.driver.Sealer`, which also numbers a new part
 past the highest, not by count, so a gap left by an isolated part never overwrites a kept one). Phase 1 ends
 `ALL_DONE` only when the three inits are durable, the eight sets are complete and each mode's sets share one protocol
 (`completion.phase`). The counter-example regression: a generation of other weights left partial answers in `parts/`
 with no generations file, an earlier generation of the right weights sealed a few items, one part carries no
 generation; the new attempt isolates the wrong and the untagged parts, reuses the proven ones and generates only the
-rest, through the runners' real merge with a synthetic engine. Checked on TPI1's four real A
+rest, through the runners' real merge with a synthetic engine. A second regression runs on real runner records (TPI1's
+sealed thinking-mode parts at 8,192, relabeled): the residual-width arm's parts filed in the depth-only arm's set,
+a depth-only-named part holding residual-width records and a depth-only part of the other mode are each isolated by
+what they say about themselves (the id's target and mode, each record's label); the depth-only parts are reused and
+only the items none holds are generated. Checked on TPI1's four real A
 sets at 8,192, coverage, records, protocol and the report all pass, and the two seeds share one protocol digest per
 mode; model identity is missing there because TPI1 did not record the weights' hashes.
 
@@ -344,6 +349,15 @@ exit, an answer without its completion marker) is retried three times. If it sti
 unknown, never 0, so the products cannot read as secured. Before, a failed `find` read as an empty listing and
 "nothing pending". At teardown, every file of the pod's final listing is checked by sha256 against the dev box's copy;
 a missing or different file is pulled again and checked once more (`final_hash_check`).
+
+**Fixed (third brief, 2026-11-19): files the pod moved after the dev box pulled them.** Once the final listing is
+read, every file this session pulled that the listing no longer holds at its path (the pod moves files only into
+`superseded/`: an isolated part, a generations file composed again) leaves the dev box's active tree too: it goes to
+the path where the pod keeps the same bytes (or, already pulled there, the active duplicate is removed), otherwise
+under `superseded/_withdrawn_on_pod/` (`withdraw_moved`). So it is in neither the dev box's completion check nor a
+resume archive nor the next takeover. The poll's `pending` now counts the listing's files not yet held; it used to
+be the listing's size minus the index's, which a pod-side move drove below 0, so the products could never read as
+secured. Regression: pull, isolate on the pod, then take over.
 
 **Fixed: local retention.** `retain` is COMPLETE only when every arm's initialization and mapping is on the dev box's
 disk as its init record's manifest, re-hashed there, not taken from the fetch's answer. A missing init record, a
