@@ -634,6 +634,14 @@ def test_phase_1_completes_only_with_eight_sets_and_three_inits_and_its_table_re
         SA.phase1_table(out, tmp_path / "t")
     d = CP.ev_dir(out, "depth_only", "H-N")
     _complete_set(d, "H-N", CP.expected_weights("depth_only", out))
+    #: this set's fluid unit was generated in two runs (a takeover): the second submitted only the missing tasks,
+    #: so its task file differs; it is still one protocol, and the mode's four sets share one digest
+    f = d / "generations" / "fluid_reasoning_720__dev_v1.summary.json"
+    summ = json.loads(f.read_text())
+    second = json.loads(json.dumps(summ["runs"][0]))
+    second["attempt"], second["summary"]["identity"]["tasks_sha256"] = "a2", "0" * 64
+    summ["runs"].append(second)
+    f.write_text(json.dumps(summ))
     CP.rescore(d, CP.check(d, "depth_only", "H-N", out, label="depth_only_untrained"))
     assert CP.phase(out)["complete"]
     doc = SA.phase1_table(out, tmp_path / "t")

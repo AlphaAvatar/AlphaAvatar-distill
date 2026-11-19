@@ -232,7 +232,10 @@ def check(d: Path, target: str, mode: str, out: Path, *, label: str | None = Non
             problems["protocol"].append(f"{key}: missing {miss[:4]}")
         if differs:
             problems["protocol"].append(f"{key}: differs {differs[:4]}")
-        digest_body[key] = prot["runs"]
+        #: what the protocol IS, not how many runs produced the unit: a resumed unit's runs are one protocol, and the
+        #: task file a resumed run submits (its missing tasks only) is checked on the sealed summary above
+        digest_body[key] = sorted({json.dumps({k: v for k, v in r.items() if k != "tasks_sha256"}, sort_keys=True,
+                                              default=str) for r in prot["runs"]})
         action = None
         if not u["complete"]:
             action = "recompose"            #: missing, extra or repeated items: the sealed records, then the rest

@@ -310,9 +310,10 @@ records: 32.65 B per generated token at most, archives 8.41× smaller, records a
 
 The evidence bound takes every model at the teacher's capped volume (6.16M tokens) × 1.25. A file `relay.get` is
 fetching sits in the store's own cache and is moved, not copied, so it is never held twice. The launch checks the
-free bytes of the filesystem the session's `--scr` and the local store are on (`the_dev_box_has_room`): 14.72 GiB
-free when this was written, a 2.37 GiB margin. Phase 2 is refused by the same check: one arm's two fp32 finals need
-14.98 GiB, and the six need 44.94 GiB.
+free bytes of the filesystem the session's `--scr` and the local store are on (`the_dev_box_has_room`), at launch:
+the dev box is shared with another project's session, and its free space moved from 14.72 to 19.09 GiB within the
+hour this round ran (a 6.74 GiB margin at the dry run). For phase 2, one arm's two fp32 finals need 14.98 GiB and the
+six 44.94 GiB; after phase 1's inits land, none fits.
 
 **Fixed: streams under `evaluation/live/`.** The runners write their live streams beside the units they serve,
 `<unit>/../../live`, which is `evaluation/live/` in this layout. The poll's listing, `take_over` and the resume archive
@@ -355,32 +356,33 @@ verified products stay recorded, so the next retain fetches only the rest.
 ```text
 launch.py budget --kind sob1_phase1                                      # $0: fundable now?
 launch.py grant --decision '<the maintainer's words>' --granted-by maintainer
-launch.py issue --kind sob1_phase1 --run-id <id> --expected-usd 10.20 --hard-cap-usd 22.55
+launch.py issue --kind sob1_phase1 --run-id <id> --expected-usd 10.21 --hard-cap-usd 22.92
 git commit <the authorization> (the session commit) ; stage the bundle at that commit
 launch.py launch --kind sob1_phase1 --run-id <id> --session-commit <c> --bundle <b> --scr <s> --max-price 1.11 --disk-gb 150
-launch.py retain --kind sob1_phase1 --run-id <id> --from <s>             # the three inits onto the dev box
+launch.py closeout --kind sob1_phase1 --run-id <id> --scr <s>            # + phase 1's completion on the dev box's copy
+launch.py retain --kind sob1_phase1 --run-id <id> --from <s>             # every arm's init and mapping; exit 12 until COMPLETE
+analysis.py phase1-table --evidence <s>/store/out --write <dir>          # the comparison, re-derived at $0
 plan.py --arm <arm> --init-record <its committed init_record.json> --write    # per arm, before phase 2
 ```
 
-**The $0 dry run (2026-11-19, session commit `f56b72c0`; `plans/dry_run_20261119.json`).** Nothing was created.
+**The second $0 dry run (2026-11-19 10:23Z, session commit `8012d22e`; `plans/dry_run_20261119b.json`).** Nothing
+was created.
 
 * The driver's `--check-only` passed: the session derives the journal's four operator config hashes, and both
   selection records reproduce.
-* `budget`: phase 1 fundable; phase 2 refused (no cap proposed).
-* `issue --dry-run`: an artifact outside the run directory. A cap above the kind's, a `sob1_train` artifact, and a
-  real artifact without a grant were each refused.
-* `launch --dry-run`, the runner's gates:
-  * the plan at $1.11/h, $22.5485 all-in, inside $22.55;
-  * the live L40S quote $1.09/h (stock low);
-  * account funds and resources;
-  * study identity, bound files and the project cap.
-* It stopped where a dry-run artifact must stop: the authorization is not in the session commit. This study's other
-  four gates, called directly, passed: the reserve; the relay would accept 11.42 GiB; the bound records; not a
-  training session.
-* **It found one defect**, now fixed: the proposal's first cap ($22.53) left the 5% contingency off setup and
-  transfer, and the runner refused it. The cap is now priced as the runner prices it (test
-  `test_the_hard_cap_is_the_runners_all_in`).
+* `budget`: phase 1 fundable ($22.92 + $1 inside the $30.2442 left; balance $40.24); phase 2 refused (no cap).
+* `issue --dry-run` with $10.21 / $22.92: an artifact outside the run directory. A cap above the kind's, a
+  `sob1_train` artifact and a real artifact without a grant were each refused.
+* `launch --dry-run`: every runner gate passed (the plan at $1.11/h, all-in $22.9165 inside $22.92; the live L40S
+  quote $1.09/h, stock low; account funds and resources; study identity, bound files, the project cap). It stopped
+  where a dry-run artifact must: the authorization is not in the session commit.
+* This study's five gates, called directly, passed: the reserve; the relay would accept 11.42 GiB; the bound records;
+  not a training session; **the dev box holds the bound peak** (19.09 GiB free for 12.35 GiB).
+* The sealed statistics are the session's one relay input, at sha256 `e4145e38…`.
 * Not exercised: staging the bundle and the create. They follow a grant.
+
+The first dry run (`plans/dry_run_20261119.json`, commit `f56b72c0`) found the proposal's first cap $0.02 under the
+runner's all-in; that was fixed then (`test_the_hard_cap_is_the_runners_all_in`).
 
 ## 10. Decisions for the maintainer
 
