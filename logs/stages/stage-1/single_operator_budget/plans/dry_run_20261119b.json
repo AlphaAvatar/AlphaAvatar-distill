@@ -161,5 +161,111 @@
   "_digest": "recomputed after the digest was made independent of how many runs produced a unit (a resumed unit is one protocol; the subset task file a resumed run submits is checked on the sealed summary, not digested)"
  },
  "not_exercised": "staging the bundle and the real create: they follow the maintainer's grant",
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "rerun_on_final_commit": {
+  "utc": "2026-11-19T10:35Z",
+  "session_commit": "06d9fd39891b",
+  "why": "the digest fix (completion.py) landed after the run above on 8012d22e; everything was run again on the commit a launch would use",
+  "driver_check_only": "CONTRACT_OK",
+  "issue_dry_run": "the same artifact terms ($10.21 expected, $22.92 hard cap)",
+  "runner_prechecks": [
+   {
+    "check": "the_study_is_open",
+    "ok": true,
+    "message": "SOB1 is open"
+   },
+   {
+    "check": "the_artifact_is_this_studys_and_unused",
+    "ok": true,
+    "message": "a SOB1 sob1_phase1 artifact, unused"
+   },
+   {
+    "check": "the_gpu_and_price_are_the_grants",
+    "ok": true,
+    "message": "1 x NVIDIA L40S at no more than $1.11/h for the pod, as granted"
+   },
+   {
+    "check": "all_in_within_cap",
+    "ok": true,
+    "message": "all-in $22.9165 over 1216.23 min, inside $22.92"
+   },
+   {
+    "check": "the_study_identity_is_the_authorized_one",
+    "ok": true,
+    "message": "study identity a0b36a705fec is the authorized one"
+   },
+   {
+    "check": "bound_files_are_in_the_session_commit",
+    "ok": true,
+    "message": "every bound file is in the session commit"
+   },
+   {
+    "check": "the_project_cap_holds_now",
+    "ok": true,
+    "message": "$22.92 inside the envelope ($22.92) and the $30.2442 the project cap leaves now"
+   },
+   {
+    "check": "the_authorization_is_in_the_session_commit",
+    "ok": false,
+    "message": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_dryrun3/governance/authorization.json is not in session commit 06d9fd39891b as issued; commit it first"
+   }
+  ],
+  "budget_plan_hard_terminate_usd": 22.4771,
+  "quoted_price_per_hour": 1.09,
+  "stock": null,
+  "stopped_at": "the_authorization_is_in_the_session_commit, by design for a dry-run artifact",
+  "study_prechecks_called_directly": {
+   "the_teardown_reserve_stays": {
+    "ok": true,
+    "message": "$22.92 + the $1.0 teardown reserve fit"
+   },
+   "the_relay_has_room": {
+    "ok": true,
+    "message": "the relay would accept the sob1_phase1 session's bytes: 6 object(s), 11.42 GiB: ACCEPTED (200) 6/6 granted an upload action"
+   },
+   "the_kind_records_are_the_bound_ones": {
+    "ok": true,
+    "message": "the artifact binds this tree's ['design_sha256', 'selection_sha256', 'structures_sha256']"
+   },
+   "the_initialization_is_durable": {
+    "ok": true,
+    "message": "not a training session"
+   },
+   "the_dev_box_has_room": {
+    "ok": true,
+    "message": "the dev box holds the session's bound peak: /home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_phase1_dryrun3: 19.10 GiB free for 12.35 GiB (margin 6.75 GiB)"
+   }
+  },
+  "dev_box_room": {
+   "kind": "sob1_phase1",
+   "arm": null,
+   "scr": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_phase1_dryrun3",
+   "filesystems": [
+    {
+     "free_bytes": 20503789568,
+     "read_at": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_phase1_dryrun3",
+     "bound_bytes": 13260880067,
+     "items": [
+      "evidence",
+      "teardown collector archive + its extracted copy",
+      "resume archive",
+      "residual_width initialization",
+      "residual_width mapping",
+      "ffn_attention initialization",
+      "ffn_attention mapping",
+      "depth_only initialization",
+      "depth_only mapping"
+     ],
+     "fits": true,
+     "margin_gib": 6.75
+    }
+   ],
+   "fits": true,
+   "peak_gib": {
+    "bound": 12.35,
+    "expected": 11.84
+   }
+  },
+  "provider_resource_created": false
+ }
 }

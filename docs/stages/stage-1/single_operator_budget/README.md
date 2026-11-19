@@ -365,8 +365,8 @@ analysis.py phase1-table --evidence <s>/store/out --write <dir>          # the c
 plan.py --arm <arm> --init-record <its committed init_record.json> --write    # per arm, before phase 2
 ```
 
-**The second $0 dry run (2026-11-19 10:23Z, session commit `8012d22e`; `plans/dry_run_20261119b.json`).** Nothing
-was created.
+**The second $0 dry run (2026-11-19 10:23Z on `8012d22e`, run again at 10:35Z on `06d9fd39` after the digest fix,
+with the same result; `plans/dry_run_20261119b.json`).** Nothing was created.
 
 * The driver's `--check-only` passed: the session derives the journal's four operator config hashes, and both
   selection records reproduce.
