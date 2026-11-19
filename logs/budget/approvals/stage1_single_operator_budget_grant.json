@@ -1,0 +1,335 @@
+{
+ "ceiling_usd": 22.92,
+ "decision": "\u6211\u6279\u51c6 SOB1 \u7b2c\u4e00\u9636\u6bb5\uff0c\u7b7e\u53d1\u524d\u5b8c\u6210\u4e24\u9879 $0 \u4fee\u6b63\uff0c\u9488\u5bf9\u6027\u56de\u5f52\u548c\u6700\u7ec8 dry run \u901a\u8fc7\u540e\u76f4\u63a5\u542f\u52a8\u3002\u2026\u2026\u7b2c\u4e00\u9636\u6bb5\u7528\u4e00\u5f20 L40S\uff0c\u9884\u671f $10.21\uff0c\u6240\u6709 attempt \u7d2f\u8ba1\u786c\u4e0a\u9650 $22.92\uff0c\u53e6\u7559 $1.00 \u4e13\u7528\u4e8e\u5173\u95ed\u8d44\u6e90\u3002\u7b7e\u53d1\u548c\u542f\u52a8\u65f6\u590d\u6838\u5b9e\u65f6\u4f59\u989d\u3001\u62a5\u4ef7\u548c\u5b9e\u9645\u843d\u76d8\u7a7a\u95f4\u3002\u53ef\u6062\u590d\u6545\u969c\u5728\u5269\u4f59\u989d\u5ea6\u5185\u81ea\u4e3b\u4fee\u590d\uff0c\u4f18\u5148\u63a5\u7ba1\u5df2\u9a8c\u8bc1\u7684 checkpoint\u3001\u6df1\u5ea6\u641c\u7d22\u8f6e\u6b21\u548c\u9010\u9898\u7ed3\u679c\u3002\u2026\u2026\u672c\u6b21\u6388\u6743\u4ec5\u8986\u76d6 SOB1 \u7b2c\u4e00\u9636\u6bb5\u3002\u7b2c\u4e8c\u9636\u6bb5\u6301\u4e45\u5b58\u50a8\u3001Stage 3 \u6062\u590d\u8bad\u7ec3\u989d\u5ea6\u53ca\u5408\u5165 main \u53e6\u884c\u51b3\u5b9a\u3002\uff08maintainer, 2026-11-19 UTC; reviewed at 654a686f after the two corrections and the final $0 dry run passed\uff09",
+ "design_sha256": "35432bc6b0af88fa41dbb46db7200233297cc8b18d252452a1546ede59ab60de",
+ "expected_total_usd": 10.21,
+ "gpu_count_max": 1,
+ "gpus": {
+  "NVIDIA L40S": 1.11
+ },
+ "granted_by": "maintainer",
+ "hardware": "one NVIDIA L40S per session, secure cloud, at most $1.11/h, 150 GB container disk; the packed search's DEPTH ran on the same card (29.5 GiB reserved); no network volume",
+ "kinds": {
+  "sob1_phase1": {
+   "basis": "phase_1.components (design.json :: cost_model)",
+   "driver_minutes": 1107.6,
+   "expected_usd": 10.21,
+   "per_session_hard_cap_usd": 22.92
+  },
+  "sob1_train": {
+   "expected_usd": null,
+   "per_session_hard_cap_usd": null,
+   "status": "not proposed: phase 2 needs the maintainer's own decision and a cap the project's remainder does not hold (phase_2_draft)"
+  }
+ },
+ "memory_gib": {
+  "depth_only": {
+   "checkpointed_inputs_gib": 1.25,
+   "conservative_peak_allocated_gib": 40.46,
+   "conservative_peak_reserved_gib": 42.14,
+   "expected_peak_allocated_gib": 36.21,
+   "l40s_gib": 44.99,
+   "l40s_margin_conservative_reserved_gib": 2.85,
+   "rest_from_tpi1_gib": 1.96,
+   "rest_scale_conservative": 3.167,
+   "rule": "derived from TPI1's measured peak, not measured at this size; the first optimizer steps of the first unit measure it (the trainer's gpu_mem_gb / gpu_mem_reserved_gb)",
+   "static_gib": 33.01
+  },
+  "ffn_attention": {
+   "checkpointed_inputs_gib": 2.81,
+   "conservative_peak_allocated_gib": 38.46,
+   "conservative_peak_reserved_gib": 40.14,
+   "expected_peak_allocated_gib": 37.97,
+   "l40s_gib": 44.99,
+   "l40s_margin_conservative_reserved_gib": 4.84,
+   "rest_from_tpi1_gib": 1.96,
+   "rest_scale_conservative": 1.25,
+   "rule": "derived from TPI1's measured peak, not measured at this size; the first optimizer steps of the first unit measure it (the trainer's gpu_mem_gb / gpu_mem_reserved_gb)",
+   "static_gib": 33.2
+  },
+  "residual_width": {
+   "checkpointed_inputs_gib": 1.41,
+   "conservative_peak_allocated_gib": 42.9,
+   "conservative_peak_reserved_gib": 44.58,
+   "expected_peak_allocated_gib": 38.65,
+   "l40s_gib": 44.99,
+   "l40s_margin_conservative_reserved_gib": 0.41,
+   "rest_from_tpi1_gib": 1.96,
+   "rest_scale_conservative": 3.167,
+   "rule": "derived from TPI1's measured peak, not measured at this size; the first optimizer steps of the first unit measure it (the trainer's gpu_mem_gb / gpu_mem_reserved_gb)",
+   "static_gib": 35.29
+  }
+ },
+ "min_useful_attempt_usd": 2.2,
+ "money_rules": {
+  "ceiling": "$22.92: phase 1's one session at its hard cap, cumulatively over every attempt",
+  "own_envelope": "the ceiling counts only this study's runs; TPI1, RI-S1, RI-LM1 and Research A are CLOSED and fund nothing here; a provider top-up is not a grant",
+  "project_cap": "the $1,000 project cap is not raised by this proposal",
+  "resume": "a replacement attempt takes over every arm whose init record verified and every sealed sample; its cap is what the ceiling leaves",
+  "teardown_reserve": "$1.00 held outside the ceiling and never issued: each artifact's hard cap plus the reserve must fit what the project cap and the provider balance leave, at issue and at launch (layer_merge_launch.reserve_problems)"
+ },
+ "per_session_hard_cap_usd": 22.92,
+ "phase_1": {
+  "components": {
+   "builds": {
+    "completion_checks_and_comparison_minutes": {
+     "basis": "measured on the dev box: one completion check of a set, its formal report rescored, 1.0 s (non-thinking) to 3.0 s (thinking) on TPI1's A records at 8,192; about 40 checks over the eight sets (start, after generating, after rescoring, the phase check) and the comparison table's rescoring",
+     "bound": 6,
+     "expected": 3
+    },
+    "depth": {
+     "candidate_subsets_new": 270,
+     "candidates_per_new_round": [
+      28,
+      27,
+      26,
+      25,
+      24,
+      23,
+      22,
+      21,
+      20,
+      19,
+      18,
+      17
+     ],
+     "hours_bound": 2.36,
+     "hours_expected": 1.45,
+     "rule": "rounds 9-20 at the journal's 27.2 s per candidate x remaining / 32.5 (expected) or x 1 (bound) plus round 8's re-score, the bound x 1.15"
+    },
+    "hours_bound": 5.26,
+    "hours_expected": 2.31,
+    "other_operators_seconds": 270.0,
+    "per_arm_build_and_state_evaluation_hours": 0.233,
+    "relay_copies_of_the_inits": {
+     "bytes": 12064313856,
+     "hours_bound": 1.646,
+     "hours_expected": 0.032
+    },
+    "residual_width_statistics": {
+     "bytes": 1947442680,
+     "hours_bound": 0.266,
+     "hours_expected": 0.007,
+     "rule": "no teacher statistics pass (the journal's replay was 172 s): TPI1's sealed file is downloaded by setup and loaded here; its time is priced into the driver so the session's hard deadline covers it"
+    }
+   },
+   "pre_recovery_evaluation": {
+    "hours_bound": 9.0,
+    "hours_expected": 3.66,
+    "models": 3
+   },
+   "teacher_at_8192": {
+    "hours_bound": 4.2,
+    "hours_expected": 2.81,
+    "models": 1
+   }
+  },
+  "driver_hours_bound": 18.46,
+  "driver_hours_expected": 8.78,
+  "gpu_hours_expected": 9.2,
+  "hard_cap": {
+   "billable_minutes": 1216.23,
+   "driver_minutes": 1107.6,
+   "usd": 22.92
+  },
+  "hard_cap_plus_reserve_usd": 23.92,
+  "session_kind": "sob1_phase1",
+  "sessions": 1,
+  "teardown_reserve_usd": 1.0,
+  "usd_expected": 10.21
+ },
+ "phase_2_draft": {
+  "one_seed_usd_expected": 58.06,
+  "order": [
+   "residual_width",
+   "depth_only",
+   "ffn_attention"
+  ],
+  "per_arm_session": {
+   "depth_only": {
+    "driver_hours_bound": 50.61,
+    "driver_hours_expected": 31.73,
+    "final_copy_per_seed": {
+     "bytes": 8015407104,
+     "hours_bound": 1.094,
+     "hours_expected": 0.021
+    },
+    "hard_cap": {
+     "billable_minutes": 3241.74,
+     "driver_minutes": 3036.7,
+     "usd": 61.09
+    },
+    "init_fetch": {
+     "bytes": 4007703552,
+     "hours_bound": 0.547,
+     "hours_expected": 0.011
+    },
+    "last_save_point_copy": {
+     "bytes": 20934572032,
+     "hours_bound": 2.856,
+     "hours_expected": 0.055
+    },
+    "post_recovery_evaluation_hours_per_unit": {
+     "bound": 3.0,
+     "expected": 1.22
+    },
+    "training_per_seed": {
+     "hours_bound": 19.51,
+     "hours_expected": 14.62,
+     "seconds_per_step_bound": 7.241,
+     "seconds_per_step_expected": 5.426
+    },
+    "unit_deadline_hours": 19.5,
+    "units": 2,
+    "usd_expected": 35.7
+   },
+   "ffn_attention": {
+    "driver_hours_bound": 50.83,
+    "driver_hours_expected": 32.37,
+    "final_copy_per_seed": {
+     "bytes": 8068265984,
+     "hours_bound": 1.101,
+     "hours_expected": 0.021
+    },
+    "hard_cap": {
+     "billable_minutes": 3255.54,
+     "driver_minutes": 3049.8,
+     "usd": 61.35
+    },
+    "init_fetch": {
+     "bytes": 4034132992,
+     "hours_bound": 0.55,
+     "hours_expected": 0.011
+    },
+    "last_save_point_copy": {
+     "bytes": 21093148672,
+     "hours_bound": 2.878,
+     "hours_expected": 0.055
+    },
+    "post_recovery_evaluation_hours_per_unit": {
+     "bound": 3.0,
+     "expected": 1.22
+    },
+    "training_per_seed": {
+     "hours_bound": 19.6,
+     "hours_expected": 14.94,
+     "seconds_per_step_bound": 7.275,
+     "seconds_per_step_expected": 5.545
+    },
+    "unit_deadline_hours": 19.6,
+    "units": 2,
+    "usd_expected": 36.41
+   },
+   "residual_width": {
+    "driver_hours_bound": 52.59,
+    "driver_hours_expected": 37.93,
+    "final_copy_per_seed": {
+     "bytes": 8044954624,
+     "hours_bound": 1.098,
+     "hours_expected": 0.021
+    },
+    "hard_cap": {
+     "billable_minutes": 3366.17,
+     "driver_minutes": 3155.2,
+     "usd": 63.43
+    },
+    "init_fetch": {
+     "bytes": 4022477312,
+     "hours_bound": 0.549,
+     "hours_expected": 0.011
+    },
+    "last_save_point_copy": {
+     "bytes": 22579039232,
+     "hours_bound": 3.081,
+     "hours_expected": 0.059
+    },
+    "post_recovery_evaluation_hours_per_unit": {
+     "bound": 3.0,
+     "expected": 1.22
+    },
+    "training_per_seed": {
+     "hours_bound": 20.38,
+     "hours_expected": 17.72,
+     "seconds_per_step_bound": 7.564,
+     "seconds_per_step_expected": 6.577
+    },
+    "unit_deadline_hours": 20.4,
+    "units": 2,
+    "usd_expected": 42.59
+   }
+  },
+  "session_kind": "sob1_train",
+  "sessions": 3,
+  "status": "a draft for the maintainer: no cap here is proposed for a grant, and the project cap is not raised",
+  "usd_expected_two_seeds": 114.7,
+  "usd_hard_caps_plus_reserve": 186.87,
+  "usd_hard_caps_two_seeds": 185.87
+ },
+ "position_at_proposal": {
+  "account_pods": 0,
+  "account_volumes": 0,
+  "balance_usd": 40.2437,
+  "committed_usd": 969.7558,
+  "fetched_utc": "2026-11-19T06:43:04+00:00",
+  "project_cap_usd": 1000.0,
+  "project_remaining_usd": 30.2442,
+  "source": "shared.study_engineering.live_position (provider billing, read-only)"
+ },
+ "project_cumulative_cap_usd": 1000.0,
+ "recorded_utc": "2026-11-19",
+ "resource_snapshot_sha256": "5ff869bf4e34196ec036fd1aee5f9a19ccd31107289fe868ce223c2783abaa1d",
+ "schema": "aadistill.stage1.single_operator_budget.proposal/v2",
+ "scope": "phase 1 of SOB1 only (configs/stages/stage-1/single_operator_budget/design.json): one sob1_phase1 session builds the three ~2B initializations from the original teacher with A's operators (depth only resumed from the recorded search's round 9) and evaluates each untrained arm and the teacher on all of eval-set-1 in both modes at 8,192 tokens. No training, no other arm, no network volume. Phase 2 (recovery training and its evaluation) is a separate draft below and proposes no cap",
+ "selection_sha256": "6dfced62437b1967371b4cec03037f321abd8ce560e948a7ab71459a7de8d101",
+ "status": "granted",
+ "storage": {
+  "dev_box_free_after_phase_1_bytes": 2894945792,
+  "dev_box_free_bytes": 14959259648,
+  "dev_box_read_utc": "2026-11-19T06:43Z",
+  "per_arm_bytes": {
+   "depth_only": {
+    "final_fp32": 8015407104,
+    "init_bf16": 4007703552,
+    "rule": "derived: 2P / 4P / 4P + 8T (module docstring)",
+    "save_point": 20934572032
+   },
+   "ffn_attention": {
+    "final_fp32": 8068265984,
+    "init_bf16": 4034132992,
+    "rule": "derived: 2P / 4P / 4P + 8T (module docstring)",
+    "save_point": 21093148672
+   },
+   "residual_width": {
+    "final_fp32": 8044954624,
+    "init_bf16": 4022477312,
+    "rule": "derived: 2P / 4P / 4P + 8T (module docstring)",
+    "save_point": 22579039232
+   }
+  },
+  "phase_1_fits_dev_box": true,
+  "phase_1_fits_relay": true,
+  "phase_1_local_bytes": 12064313856,
+  "phase_1_relay_peak_bytes": 12064313856,
+  "phase_2_dev_box_shortfall_bytes": 45362309632,
+  "phase_2_fits_relay_if_finals_accumulate": false,
+  "phase_2_fits_relay_if_finals_leave": true,
+  "phase_2_local_bytes": 48257255424,
+  "phase_2_relay_peak_bytes_finals_accumulate": 97464240640,
+  "phase_2_relay_peak_bytes_finals_leave_after_evaluation": 57222392320,
+  "relay_headroom_bytes": 64510408785,
+  "rule": "a save point is deleted only after the next one hands off, so a rotation holds two; a final is uploaded while its unit's last save point still exists; the dev box keeps the inits (phase 1) and would keep the finals after their evaluation (phase 2)"
+ },
+ "structures_sha256": "2c7ac8cafea2601a79e3d2dc951e9df9dc9f9d2ed8c5b7a77d8f9f36bb6681c6",
+ "study": "SOB1",
+ "study_cumulative_cap_usd": 23.92,
+ "teardown_reserve_usd": 1.0,
+ "usd_per_hour_all_in": 1.1105,
+ "authorizes": "SOB1's phase only (scope): its session kinds ['sob1_phase1', 'sob1_train'], inside ceiling_usd cumulatively, per_session_hard_cap_usd per session and the project cap; one-use artifacts from `issue`; no other study and no follow-up",
+ "granted_utc": "2026-11-19",
+ "proposal": {
+  "path": "logs/stages/stage-1/single_operator_budget/plans/proposal.json",
+  "sha256": "3563f0ea6b5475125c2771678493e00a0b533136d5e87e0612c2f3a4bd814ea3"
+ },
+ "study_identity_sha256": "b07d2e294732cf2ebc0023830b235fcf1c9683d239923cc3ef928a17758ceeb5",
+ "granted_at_commit": "654a686fb1098180090d2aece20202cb7aa25b73"
+}
