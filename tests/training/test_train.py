@@ -654,3 +654,31 @@ def test_truncation_defaults_off_so_logged_configs_keep_their_path(tmp_path):
     assert tr.truncate_padding is False
     with pytest.raises(ValueError, match="truncate_padding"):
         toy_cfg(tmp_path, batch={"truncate_padding": "yes"})
+
+
+def test_the_memory_probe_logs_every_phase_and_changes_nothing(tmp_path, monkeypatch):
+    """`AADISTILL_MEMORY_PROBE_STEPS` is execution only: the probed run's steps equal an unprobed one's, and on CPU
+    the probe logs its phases (no device figures); an out-of-memory error is logged with the phase it was raised in."""
+    from aadistill.training import train as T
+    cfg = toy_cfg(tmp_path, loss={"ce_weight": 0.5, "kd_weight": 1.0, "kd_scope": "all"})
+    plain = Trainer(cfg, tiny_model(1), toy_blocks(), teacher=tiny_model(2), device="cpu")
+    want = [plain.step_once() for _ in range(3)]
+    monkeypatch.setenv(T.MEMORY_PROBE_ENV, "2")
+    cfg2 = toy_cfg(tmp_path / "b", loss={"ce_weight": 0.5, "kd_weight": 1.0, "kd_scope": "all"})
+    probed = Trainer(cfg2, tiny_model(1), toy_blocks(), teacher=tiny_model(2), device="cpu")
+    got = [probed.step_once() for _ in range(3)]
+    assert [(m["loss"], m["grad_norm"]) for m in got] == [(m["loss"], m["grad_norm"]) for m in want]
+    rows = [json.loads(x) for x in (tmp_path / "b" / "run" / "train_log.jsonl").read_text().splitlines()]
+    probes = [r for r in rows if r["event"] == "memory_probe"]
+    assert [p["step"] for p in probes] == [1, 2]                     #: the first two steps only
+    micro = cfg2["batch"]["blocks_per_step"] // cfg2["batch"]["micro_blocks"]
+    assert [x["after"] for x in probes[0]["phases"]] == ["forward_loss", "backward"] * micro + ["clip", "optimizer_step"]
+
+    def boom(*a, **k):
+        raise torch.cuda.OutOfMemoryError("CUDA out of memory (test)")
+    monkeypatch.setattr(probed.opt, "step", boom)
+    with pytest.raises(torch.cuda.OutOfMemoryError):
+        probed.step_once()
+    rows = [json.loads(x) for x in (tmp_path / "b" / "run" / "train_log.jsonl").read_text().splitlines()]
+    oom = [r for r in rows if r["event"] == "memory_oom"]
+    assert oom and oom[-1]["phase_in_progress"] == "optimizer_step" and oom[-1]["last_completed_phase"] == "clip"

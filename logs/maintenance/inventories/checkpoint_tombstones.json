@@ -46,10 +46,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 147,
-  "active": 145,
-  "active_retired_bytes": 629559173722,
-  "active_retired_human": "586.323 GiB",
+  "tombstones_total": 154,
+  "active": 152,
+  "active_retired_bytes": 643469938634,
+  "active_retired_human": "599.278 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -10587,6 +10587,454 @@
      "oid_left": [],
      "path_in_head": false
     }
+   }
+  },
+  {
+   "canonical_id": "devbox_20261119_ri_s1_D",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D/model.safetensors"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "RI-S1",
+   "seed": null,
+   "scientific_role": "RI-S1's D: the teacher with blocks [2, 3, 8, 20, 26, 28, 30, 32] removed (28 layers, 3,215,021,568 parameters, bf16), untrained; the base of RI-LM1's two deltas",
+   "weights_sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 6430078848,
+   "size_human": "5.99 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D/model.safetensors",
+     "size_bytes": 6430078848,
+     "sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0"
+    }
+   ],
+   "references_at_deletion": [
+    "README.md",
+    "configs/maintenance/architecture/core_boundary_baseline.json",
+    "configs/shared/baselines/initialization_forward_baseline_v1.json",
+    "configs/shared/baselines/initialization_forward_baseline_v2.json",
+    "configs/shared/datasets/assets.json",
+    "configs/shared/infrastructure/artifact_store.json",
+    "configs/shared/infrastructure/pod_image.json",
+    "configs/shared/infrastructure/provider_cli.json",
+    "configs/shared/infrastructure/provider_storage_pricing.json",
+    "configs/shared/pod/micro_preflight/authorization.json",
+    "configs/shared/pod/preflight/harness.json",
+    "configs/shared/pod/preflight/preflight_artifacts_failed.json",
+    "configs/shared/validation/cuda_engineering.json",
+    "configs/shared/validation/cuda_engineering_deployment.json",
+    "configs/stages/stage-0/calibration_volume/audit_inputs.json",
+    "configs/stages/stage-0/calibration_volume/battery_session.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "Terminal: RI-S1 CLOSED 2026-11-14 (logs/budget/approvals/stage1_reasoning_inheritance_grant.json) and RI-LM1 CLOSED 2026-11-15 (stage1_layer_merge_grant.json); every registered unit measured, the evaluations and generations durable (docs/stages/stage-1/reasoning_inheritance/REPORT.md, LAYER_MERGE_REPORT.md, analyses/, the run stores under artifacts/stages/stage-1/reasoning_inheritance/runs/ and the relay evidence archives). Hashes kept: checkpoint_registry.json, storage/local_checkpoints.json, storage/layer_merge_local.json, layer_merge/d_tensor_digests.json. Consumer audit 2026-11-19: readers are only closed studies' drivers, configs and historical tests (reasoning_inheritance/layer_merge*.py, layer_merge/design.json, teacher_parent_initialization/design.json, packed_round_design.json, test_stage3_sr_plan.py); the declared next-round consumer was RI-LM1 (closed) and TPI1 (closed); SOB1, the current round, builds every arm from the teacher and cites RI-S1's D only as a measurement (configs/stages/stage-1/single_operator_budget/design.json :: arms.depth_only.not_this_arm). The maintainer's 2026-11-18 decision made TPI1's A the default baseline and Research A's packed Top-1 a historical reference, so no anchor role remains. Config, MANIFEST and hash files beside the weights are kept. D is also the base of RI-LM1's two deltas, retired with it.",
+   "canonical_surviving_evidence": "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+   "relay_hash_verified": false,
+   "reconstruction_recipe": "keep_blocks(teacher Qwen/Qwen3-4B@1cfa9a72, K = the frozen mapping's kept blocks) by RI-S1's driver groups step; RI-LM1's pod rebuilt D from the teacher and matched every tensor's digest (configs/stages/stage-1/reasoning_inheritance/layer_merge/d_tensor_digests.json), a tensor identity, not a file-hash rebuild",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "about 10 min of one L40S (teacher load + selection + save)",
+   "frozen_results_location": null,
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D",
+    "retention": "control",
+    "never_delete_clause": "the only copy (relay copy retired 2026-11-14); a declared consumer in the next round; every RI-LM1 delta needs it to be a checkpoint",
+    "retention_reason": "outright removal, the control of the next round's adjacent-layer merge variants, and the BASE of their dev-box copies: each RI-LM1 candidate is kept as D plus its span-block delta (logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json)",
+    "maintainer_decision": "maintainer 2026-11-19 (UTC), logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol fixed for its $0 preparation; dev-box checkpoint retirement authorized: 「如果本地磁盘不足，我授权你直接删除本项目中已完成测量、证据已封存、没有现有或已登记后续消费者、且符合 AGENTS.md 退役规则的历史 checkpoint。先核对 registry、实际引用和保留用途，写墓碑后删除权重，保留配置、哈希、日志、生成结果和测量证据。符合条件的可以直接处理，无需逐个问我。」"
+   },
+   "deleted_utc": "2026-11-19T06:19:08+00:00",
+   "tombstone_written_utc": "2026-11-19T06:19:08+00:00",
+   "deletion": {
+    "status": "DELETED"
+   }
+  },
+  {
+   "canonical_id": "devbox_20261119_ri_s1_W",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W/model.safetensors"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "RI-S1",
+   "seed": null,
+   "scientific_role": "RI-S1's W: every non-depth compression of the packed Top-1 at 36 layers (721,897,472 parameters, bf16), untrained",
+   "weights_sha256": "64d367fe0b6613aa57d52cda3e285a5d52122fd0ecee736b0016af92fc59fb29",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1443840376,
+   "size_human": "1.34 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W/model.safetensors",
+     "size_bytes": 1443840376,
+     "sha256": "64d367fe0b6613aa57d52cda3e285a5d52122fd0ecee736b0016af92fc59fb29"
+    }
+   ],
+   "references_at_deletion": [
+    "README.md",
+    "configs/maintenance/architecture/core_boundary_baseline.json",
+    "configs/shared/baselines/initialization_forward_baseline_v1.json",
+    "configs/shared/baselines/initialization_forward_baseline_v2.json",
+    "configs/shared/baselines/selection.json",
+    "configs/shared/infrastructure/artifact_store.json",
+    "configs/shared/infrastructure/provider_cli.json",
+    "configs/shared/validation/cuda_engineering.json",
+    "configs/stages/stage-0/calibration_volume/audit_inputs.json",
+    "configs/stages/stage-0/calibration_volume/mixed_design.json",
+    "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+    "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
+    "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
+    "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
+    "configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json",
+    "configs/stages/stage-1/c2_full_search_perf/c2_full_search_performance.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "Terminal: RI-S1 CLOSED 2026-11-14 (logs/budget/approvals/stage1_reasoning_inheritance_grant.json) and RI-LM1 CLOSED 2026-11-15 (stage1_layer_merge_grant.json); every registered unit measured, the evaluations and generations durable (docs/stages/stage-1/reasoning_inheritance/REPORT.md, LAYER_MERGE_REPORT.md, analyses/, the run stores under artifacts/stages/stage-1/reasoning_inheritance/runs/ and the relay evidence archives). Hashes kept: checkpoint_registry.json, storage/local_checkpoints.json, storage/layer_merge_local.json, layer_merge/d_tensor_digests.json. Consumer audit 2026-11-19: readers are only closed studies' drivers, configs and historical tests (reasoning_inheritance/layer_merge*.py, layer_merge/design.json, teacher_parent_initialization/design.json, packed_round_design.json, test_stage3_sr_plan.py); the declared next-round consumer was RI-LM1 (closed) and TPI1 (closed); SOB1, the current round, builds every arm from the teacher and cites RI-S1's D only as a measurement (configs/stages/stage-1/single_operator_budget/design.json :: arms.depth_only.not_this_arm). The maintainer's 2026-11-18 decision made TPI1's A the default baseline and Research A's packed Top-1 a historical reference, so no anchor role remains. Config, MANIFEST and hash files beside the weights are kept.",
+   "canonical_surviving_evidence": "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+   "relay_hash_verified": false,
+   "reconstruction_recipe": "RI-S1's driver mapping and groups steps from the teacher and the frozen mapping (relay durable/stage1_reasoning_inheritance/.../mapping)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "about 15 min of one L40S",
+   "frozen_results_location": null,
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W",
+    "retention": "control",
+    "never_delete_clause": "the only copy (relay copy retired 2026-11-14); a declared consumer in the next round",
+    "retention_reason": "the full non-depth comparison point of the next round's decomposition",
+    "maintainer_decision": "maintainer 2026-11-19 (UTC), logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol fixed for its $0 preparation; dev-box checkpoint retirement authorized: 「如果本地磁盘不足，我授权你直接删除本项目中已完成测量、证据已封存、没有现有或已登记后续消费者、且符合 AGENTS.md 退役规则的历史 checkpoint。先核对 registry、实际引用和保留用途，写墓碑后删除权重，保留配置、哈希、日志、生成结果和测量证据。符合条件的可以直接处理，无需逐个问我。」"
+   },
+   "deleted_utc": "2026-11-19T06:19:14+00:00",
+   "tombstone_written_utc": "2026-11-19T06:19:14+00:00",
+   "deletion": {
+    "status": "DELETED"
+   }
+  },
+  {
+   "canonical_id": "devbox_20261119_ri_s1_DW",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW/model.safetensors"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "RI-S1",
+   "seed": null,
+   "scientific_role": "RI-S1's DW = the packed full search's Top-1 1f5e4b42 (596,049,920 parameters, bf16, artifact 536742c5), untrained; Research A's B initialization",
+   "weights_sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1192135096,
+   "size_human": "1.11 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-1/reasoning_inheritance/design.json",
+    "docs/stages/stage-1/reasoning_inheritance/LITERATURE.md",
+    "docs/stages/stage-1/reasoning_inheritance/README.md",
+    "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+    "docs/stages/stage-2/teacher_modes/PACKED_ROUND.md",
+    "docs/stages/stage-2/teacher_modes/SIX_CATEGORY.md",
+    "logs/budget/approvals/stage1_reasoning_inheritance_grant.json",
+    "logs/budget/decisions.md",
+    "logs/budget/ledger.md",
+    "logs/maintenance/inventories/architecture_inventory.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/maintenance/storage/storage_measurements.json",
+    "logs/stages/index.json",
+    "logs/stages/stage-1/README.md",
+    "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_attempt4.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "Terminal: RI-S1 CLOSED 2026-11-14 (logs/budget/approvals/stage1_reasoning_inheritance_grant.json) and RI-LM1 CLOSED 2026-11-15 (stage1_layer_merge_grant.json); every registered unit measured, the evaluations and generations durable (docs/stages/stage-1/reasoning_inheritance/REPORT.md, LAYER_MERGE_REPORT.md, analyses/, the run stores under artifacts/stages/stage-1/reasoning_inheritance/runs/ and the relay evidence archives). Hashes kept: checkpoint_registry.json, storage/local_checkpoints.json, storage/layer_merge_local.json, layer_merge/d_tensor_digests.json. Consumer audit 2026-11-19: readers are only closed studies' drivers, configs and historical tests (reasoning_inheritance/layer_merge*.py, layer_merge/design.json, teacher_parent_initialization/design.json, packed_round_design.json, test_stage3_sr_plan.py); the declared next-round consumer was RI-LM1 (closed) and TPI1 (closed); SOB1, the current round, builds every arm from the teacher and cites RI-S1's D only as a measurement (configs/stages/stage-1/single_operator_budget/design.json :: arms.depth_only.not_this_arm). The maintainer's 2026-11-18 decision made TPI1's A the default baseline and Research A's packed Top-1 a historical reference, so no anchor role remains. Config, MANIFEST and hash files beside the weights are kept. DW was the packed search's Top-1, rebuilt by RI-S1 to the journal state's artifact digest; since 2026-11-18 it is a historical reference, not the baseline.",
+   "canonical_surviving_evidence": "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+   "relay_hash_verified": false,
+   "reconstruction_recipe": "RI-S1's driver from the teacher and the frozen mapping; RI-S1 rebuilt it to the journal Top-1 state's artifact digest 536742c5 (REPORT.md section 1, the rebuild table)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "verified",
+   "byte_identical_evidence": "docs/stages/stage-1/reasoning_inheritance/REPORT.md section 1 (the rebuild table: DW equals the journal Top-1 state 1f5e4b42's artifact digest)",
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": true,
+   "expected_reconstruction_cost": "about 15 min of one L40S",
+   "frozen_results_location": null,
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW",
+    "retention": "canonical",
+    "never_delete_clause": "the only copy (relay and volume copies retired 2026-11-14); a declared consumer in the next round",
+    "retention_reason": "the current full initialization baseline; one canonical local copy for both names",
+    "maintainer_decision": "maintainer 2026-11-19 (UTC), logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol fixed for its $0 preparation; dev-box checkpoint retirement authorized: 「如果本地磁盘不足，我授权你直接删除本项目中已完成测量、证据已封存、没有现有或已登记后续消费者、且符合 AGENTS.md 退役规则的历史 checkpoint。先核对 registry、实际引用和保留用途，写墓碑后删除权重，保留配置、哈希、日志、生成结果和测量证据。符合条件的可以直接处理，无需逐个问我。」"
+   },
+   "deleted_utc": "2026-11-19T06:19:19+00:00",
+   "tombstone_written_utc": "2026-11-19T06:19:19+00:00",
+   "deletion": {
+    "status": "DELETED"
+   }
+  },
+  {
+   "canonical_id": "devbox_20261119_rilm1_M-avg_delta",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "RI-LM1",
+   "seed": null,
+   "scientific_role": "RI-LM1's M-avg candidate as its span-block delta on D (66 tensors, 1,211,177,648 bytes)",
+   "weights_sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1211177648,
+   "size_human": "1.13 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+     "size_bytes": 1211177648,
+     "sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+    "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
+    "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "Terminal: RI-LM1 CLOSED 2026-11-15 (logs/budget/approvals/stage1_layer_merge_grant.json: COMPLETE, both merges WORSE than deletion); every registered unit measured, the generations and evaluations durable (LAYER_MERGE_REPORT.md, analyses/layer_merge.json, the run store and the relay evidence archive). Hashes kept: storage/layer_merge_local.json, checkpoint_registry.json. Its base D was retired the same day (tombstone devbox_20261119_ri_s1_D), so the delta is no longer a checkpoint by itself. Consumer audit 2026-11-19: readers are only RI-LM1's own driver, launcher and design (closed study); no registered round consumes it.",
+   "canonical_surviving_evidence": "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+   "relay_hash_verified": false,
+   "reconstruction_recipe": "layer_merge_driver.py build from the teacher and the run's merge statistics (relay durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "about 0.5 h of one L40S",
+   "frozen_results_location": null,
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+    "retention": "canonical",
+    "never_delete_clause": "a candidate of an open study; its relay copy is not its only copy, and neither is this",
+    "retention_reason": "the dev-box copy of a candidate under evaluation (D + delta, verified byte for byte on the pod)",
+    "maintainer_decision": "maintainer 2026-11-19 (UTC), logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol fixed for its $0 preparation; dev-box checkpoint retirement authorized: 「如果本地磁盘不足，我授权你直接删除本项目中已完成测量、证据已封存、没有现有或已登记后续消费者、且符合 AGENTS.md 退役规则的历史 checkpoint。先核对 registry、实际引用和保留用途，写墓碑后删除权重，保留配置、哈希、日志、生成结果和测量证据。符合条件的可以直接处理，无需逐个问我。」"
+   },
+   "deleted_utc": "2026-11-19T06:19:39+00:00",
+   "tombstone_written_utc": "2026-11-19T06:19:39+00:00",
+   "deletion": {
+    "status": "DELETED"
+   }
+  },
+  {
+   "canonical_id": "devbox_20261119_rilm1_M-avg_delta_runstore",
+   "historical_paths": [
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-avg/delta.safetensors"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "RI-LM1",
+   "seed": null,
+   "scientific_role": "the second hard link of RI-LM1's M-avg delta, inside the run's retained store (the same inode as ~/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors)",
+   "weights_sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1211177648,
+   "size_human": "1.13 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-avg/delta.safetensors",
+     "size_bytes": 1211177648,
+     "sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+    "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
+    "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "Terminal: RI-LM1 CLOSED 2026-11-15 (logs/budget/approvals/stage1_layer_merge_grant.json: COMPLETE, both merges WORSE than deletion); every registered unit measured, the generations and evaluations durable (LAYER_MERGE_REPORT.md, analyses/layer_merge.json, the run store and the relay evidence archive). Hashes kept: storage/layer_merge_local.json, checkpoint_registry.json. Its base D was retired the same day (tombstone devbox_20261119_ri_s1_D), so the delta is no longer a checkpoint by itself. Consumer audit 2026-11-19: readers are only RI-LM1's own driver, launcher and design (closed study); no registered round consumes it. The same physical file as tombstone devbox_20261119_rilm1_M-avg_delta; removing this link frees its bytes.",
+   "canonical_surviving_evidence": "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+   "relay_hash_verified": false,
+   "reconstruction_recipe": "as devbox_20261119_rilm1_M-avg_delta",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": null,
+   "frozen_results_location": null,
+   "protection_lifted": {
+    "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-avg/delta.safetensors",
+    "retention": "diagnostic",
+    "never_delete_clause": "unclassified",
+    "retention_reason": "not matched by the classification table — review before any deletion",
+    "maintainer_decision": "maintainer 2026-11-19 (UTC), logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol fixed for its $0 preparation; dev-box checkpoint retirement authorized: 「如果本地磁盘不足，我授权你直接删除本项目中已完成测量、证据已封存、没有现有或已登记后续消费者、且符合 AGENTS.md 退役规则的历史 checkpoint。先核对 registry、实际引用和保留用途，写墓碑后删除权重，保留配置、哈希、日志、生成结果和测量证据。符合条件的可以直接处理，无需逐个问我。」"
+   },
+   "deleted_utc": "2026-11-19T06:19:40+00:00",
+   "tombstone_written_utc": "2026-11-19T06:19:40+00:00",
+   "deletion": {
+    "status": "DELETED"
+   }
+  },
+  {
+   "canonical_id": "devbox_20261119_rilm1_M-act_delta",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "RI-LM1",
+   "seed": null,
+   "scientific_role": "RI-LM1's M-act candidate as its span-block delta on D (66 tensors, 1,211,177,648 bytes)",
+   "weights_sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1211177648,
+   "size_human": "1.13 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+     "size_bytes": 1211177648,
+     "sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+    "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
+    "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "Terminal: RI-LM1 CLOSED 2026-11-15 (logs/budget/approvals/stage1_layer_merge_grant.json: COMPLETE, both merges WORSE than deletion); every registered unit measured, the generations and evaluations durable (LAYER_MERGE_REPORT.md, analyses/layer_merge.json, the run store and the relay evidence archive). Hashes kept: storage/layer_merge_local.json, checkpoint_registry.json. Its base D was retired the same day (tombstone devbox_20261119_ri_s1_D), so the delta is no longer a checkpoint by itself. Consumer audit 2026-11-19: readers are only RI-LM1's own driver, launcher and design (closed study); no registered round consumes it.",
+   "canonical_surviving_evidence": "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+   "relay_hash_verified": false,
+   "reconstruction_recipe": "layer_merge_driver.py build from the teacher and the run's merge statistics (relay durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f)",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": "about 0.5 h of one L40S",
+   "frozen_results_location": null,
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+    "retention": "canonical",
+    "never_delete_clause": "a candidate of an open study; its relay copy is not its only copy, and neither is this",
+    "retention_reason": "the dev-box copy of a candidate under evaluation (D + delta, verified byte for byte on the pod)",
+    "maintainer_decision": "maintainer 2026-11-19 (UTC), logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol fixed for its $0 preparation; dev-box checkpoint retirement authorized: 「如果本地磁盘不足，我授权你直接删除本项目中已完成测量、证据已封存、没有现有或已登记后续消费者、且符合 AGENTS.md 退役规则的历史 checkpoint。先核对 registry、实际引用和保留用途，写墓碑后删除权重，保留配置、哈希、日志、生成结果和测量证据。符合条件的可以直接处理，无需逐个问我。」"
+   },
+   "deleted_utc": "2026-11-19T06:19:45+00:00",
+   "tombstone_written_utc": "2026-11-19T06:19:45+00:00",
+   "deletion": {
+    "status": "DELETED"
+   }
+  },
+  {
+   "canonical_id": "devbox_20261119_rilm1_M-act_delta_runstore",
+   "historical_paths": [
+    "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-act/delta.safetensors"
+   ],
+   "store": "repo_artifacts",
+   "relay_path": null,
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "RI-LM1",
+   "seed": null,
+   "scientific_role": "the second hard link of RI-LM1's M-act delta, inside the run's retained store (the same inode as ~/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors)",
+   "weights_sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1211177648,
+   "size_human": "1.13 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-act/delta.safetensors",
+     "size_bytes": 1211177648,
+     "sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
+    "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
+    "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_tombstones.json",
+    "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/tests/test_layer_merge.py"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "a terminal historical checkpoint whose evidence and hashes are durable and that no consumer or anchor needs (AGENTS.md 2.5)",
+   "reason_physical_weights_deleted": "Terminal: RI-LM1 CLOSED 2026-11-15 (logs/budget/approvals/stage1_layer_merge_grant.json: COMPLETE, both merges WORSE than deletion); every registered unit measured, the generations and evaluations durable (LAYER_MERGE_REPORT.md, analyses/layer_merge.json, the run store and the relay evidence archive). Hashes kept: storage/layer_merge_local.json, checkpoint_registry.json. Its base D was retired the same day (tombstone devbox_20261119_ri_s1_D), so the delta is no longer a checkpoint by itself. Consumer audit 2026-11-19: readers are only RI-LM1's own driver, launcher and design (closed study); no registered round consumes it. The same physical file as tombstone devbox_20261119_rilm1_M-act_delta; removing this link frees its bytes.",
+   "canonical_surviving_evidence": "logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json",
+   "relay_hash_verified": false,
+   "reconstruction_recipe": "as devbox_20261119_rilm1_M-act_delta",
+   "reconstruction_kind": "rebuild",
+   "byte_identical_reconstruction": "not_verified",
+   "byte_identical_evidence": null,
+   "same_hash_copies": [],
+   "deterministic_reconstruction_possible": false,
+   "expected_reconstruction_cost": null,
+   "frozen_results_location": null,
+   "protection_lifted": {
+    "path_local": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-act/delta.safetensors",
+    "retention": "diagnostic",
+    "never_delete_clause": "unclassified",
+    "retention_reason": "not matched by the classification table — review before any deletion",
+    "maintainer_decision": "maintainer 2026-11-19 (UTC), logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol fixed for its $0 preparation; dev-box checkpoint retirement authorized: 「如果本地磁盘不足，我授权你直接删除本项目中已完成测量、证据已封存、没有现有或已登记后续消费者、且符合 AGENTS.md 退役规则的历史 checkpoint。先核对 registry、实际引用和保留用途，写墓碑后删除权重，保留配置、哈希、日志、生成结果和测量证据。符合条件的可以直接处理，无需逐个问我。」"
+   },
+   "deleted_utc": "2026-11-19T06:19:46+00:00",
+   "tombstone_written_utc": "2026-11-19T06:19:46+00:00",
+   "deletion": {
+    "status": "DELETED"
    }
   }
  ],

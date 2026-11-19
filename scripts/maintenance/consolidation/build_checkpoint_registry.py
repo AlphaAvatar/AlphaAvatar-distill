@@ -85,31 +85,31 @@ D_SERIES_CLOSED = (
 #: path suffix -> classification. `disposition` is the proposal a deletion pass
 #: reads; `never_delete` records which clause of the retention rule protects it.
 CLASSIFY: dict[str, dict] = {
-    #: RI-S1's kept checkpoints (DW before D: "groups/D" is a substring of "groups/DW"). The dev box is their only
-    #: store (maintainer 2026-11-14); logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json.
+    #: RI-S1's groups (DW before D: "groups/D" is a substring of "groups/DW"). Their weights were retired 2026-11-19
+    #: (maintainer; tombstones devbox_20261119_ri_s1_{D,W,DW}, logs/maintenance/storage/devbox_cleanup_20261119.json):
+    #: what is left in each directory is its config, MANIFEST and hashes -- evidence, kept.
     "stage1_reasoning_inheritance/913433664fce0fed/groups/DW": dict(
-        experiment="RI-S1", role="DW: the packed full search's Top-1 1f5e4b42 (the same bytes), untrained",
-        retention="canonical", status="active",
-        why="the current full initialization baseline; one canonical local copy for both names",
-        never_delete="the only copy (relay and volume copies retired 2026-11-14); a declared consumer in the next round",
-        reconstruction="driver.py's mapping and groups steps from the teacher and the frozen mapping (kept beside it)",
+        experiment="RI-S1", role="DW (the packed Top-1 1f5e4b42): config and hashes; the weights are retired",
+        retention="evidence", status="retired_weights",
+        why="the identity of a retired checkpoint (RI-S1 closed 2026-11-14; tombstone devbox_20261119_ri_s1_DW)",
+        never_delete="evidence beside retired weights: the config, manifest and hashes stay",
+        reconstruction="driver.py's mapping and groups steps from the teacher and the frozen mapping; RI-S1 rebuilt it "
+                       "to the journal Top-1's artifact digest",
         reconstruction_cost="one L40S, about 30 min", disposition="keep"),
     "stage1_reasoning_inheritance/913433664fce0fed/groups/W": dict(
-        experiment="RI-S1", role="W: all non-depth compression on 36 blocks, untrained",
-        retention="control", status="active",
-        why="the full non-depth comparison point of the next round's decomposition",
-        never_delete="the only copy (relay copy retired 2026-11-14); a declared consumer in the next round",
+        experiment="RI-S1", role="W: config and hashes; the weights are retired",
+        retention="evidence", status="retired_weights",
+        why="the identity of a retired checkpoint (RI-S1 closed 2026-11-14; tombstone devbox_20261119_ri_s1_W)",
+        never_delete="evidence beside retired weights: the config, manifest and hashes stay",
         reconstruction="driver.py's mapping and groups steps from the teacher and the frozen mapping",
         reconstruction_cost="one L40S, about 30 min", disposition="keep"),
     "stage1_reasoning_inheritance/913433664fce0fed/groups/D": dict(
-        experiment="RI-S1", role="D: depth pruning only (blocks 3 11 17 18 25 26 30 32 removed), untrained",
-        retention="control", status="active",
-        why="outright removal, the control of the next round's adjacent-layer merge variants, and the BASE of their "
-            "dev-box copies: each RI-LM1 candidate is kept as D plus its span-block delta "
-            "(logs/stages/stage-1/reasoning_inheritance/storage/layer_merge_local.json)",
-        never_delete="the only copy (relay copy retired 2026-11-14); a declared consumer in the next round; every "
-                     "RI-LM1 delta needs it to be a checkpoint",
-        reconstruction="driver.py's groups step from the teacher and the frozen mapping (its kept blocks K)",
+        experiment="RI-S1", role="D: config and hashes; the weights are retired",
+        retention="evidence", status="retired_weights",
+        why="the identity of a retired checkpoint (RI-S1 and RI-LM1 closed; tombstone devbox_20261119_ri_s1_D)",
+        never_delete="evidence beside retired weights: the config, manifest and hashes stay",
+        reconstruction="driver.py's groups step from the teacher and the frozen mapping (its kept blocks K); RI-LM1's "
+                       "pod matched every tensor's digest (layer_merge/d_tensor_digests.json)",
         reconstruction_cost="one L40S, a few minutes", disposition="keep"),
     #: TPI1's products on the dev box (launch.py retain; logs/stages/stage-1/teacher_parent_initialization/storage/
     #: local_retention.json). The relay copies of the three weight files were retired 2026-11-18 (tombstones
@@ -131,12 +131,13 @@ CLASSIFY: dict[str, dict] = {
         reconstruction="init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for "
                        "bit against the journal)",
         reconstruction_cost="one L40S, about 25 min", disposition="keep"),
-    #: RI-LM1's candidates, each kept as its span-block delta over D (layer_merge_launch.py retain)
+    #: RI-LM1's candidates were kept as span-block deltas over D; both deltas (and their second hard links) were retired
+    #: 2026-11-19 with D (tombstones devbox_20261119_rilm1_*): whatever is left under the prefix is evidence
     "aad-artifacts/stage1_layer_merge/": dict(
-        experiment="RI-LM1", role="a layer-merge candidate's six span blocks; with D's dev-box copy, the candidate",
-        retention="canonical", status="active",
-        why="the dev-box copy of a candidate under evaluation (D + delta, verified byte for byte on the pod)",
-        never_delete="a candidate of an open study; its relay copy is not its only copy, and neither is this",
+        experiment="RI-LM1", role="what remains of a retired layer-merge candidate (its delta retired 2026-11-19)",
+        retention="evidence", status="retired_weights",
+        why="RI-LM1 closed 2026-11-15; its deltas retired with their base D",
+        never_delete="evidence beside retired weights",
         reconstruction="layer_merge_driver.py build from the teacher and the run's statistics",
         reconstruction_cost="one L40S, about 10 min with the statistics kept", disposition="keep"),
     "stages/stage-1/qwen3_0p6b_init_v0/checkpoint": dict(

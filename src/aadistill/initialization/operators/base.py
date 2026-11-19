@@ -207,6 +207,15 @@ class OperatorContext:
     #: also declares it in `config` and `execute` checks the two agree. `None`
     #: is the historical one-item-per-row reading.
     forward_context: Any = None
+    #: AN EARLIER INVOCATION'S COMPLETED WORK, handed back so this one does not
+    #: repeat it. EXECUTION ONLY, like `execution`: never hashed, never part of
+    #: a config or an identity, because a resumed invocation must compute the
+    #: state a whole one would -- the implementation that accepts it re-checks
+    #: what it is given and refuses a record its own scorer does not reproduce.
+    #: Only implementations declaring `accepts_resume_state` take one
+    #: (`depth.causal_kl_greedy_v1`: its committed round records); `execute`
+    #: refuses it everywhere else.
+    resume_state: Any = None
 
     def cached_stats(self, collect):
         """Statistics for this parent under this profile, collected at most once."""
@@ -278,6 +287,10 @@ class OperatorImplementation(ABC):
     #: the same reason as the two flags above -- the reference an invocation
     #: used is bound in its hashed operator config.
     accepts_kl_reference: bool = False
+    #: Whether this implementation can continue from an earlier invocation's
+    #: completed work (`OperatorContext.resume_state`). Not part of
+    #: `signature()`: resuming changes how much is recomputed, never what.
+    accepts_resume_state: bool = False
     deterministic: bool = True
     requires_seed: bool = False
     produces: tuple[str, ...] = ()
@@ -350,6 +363,10 @@ class OperatorImplementation(ABC):
         fields". It runs on every application, including inside the dry run, so
         a contract break cannot survive to a paid pod.
         """
+        if ctx.resume_state is not None and not self.accepts_resume_state:
+            raise ContractViolation(
+                f"{self.impl_id}: handed a resume state, and this "
+                "implementation cannot continue an earlier invocation")
         before = ctx.adapter.spec_of(ctx.model)
         if not before.matches(ctx.parent_spec):
             raise ContractViolation(

@@ -1735,8 +1735,9 @@ STAGE_1 = [
         id="single_operator_budget",
         kind="experiment",
         stage_id="1",
-        status=("PROPOSED at $0 (study SOB1, 2026-11-18; nothing authorized, no run): three ~2.0B structures (N ~ 2) "
-                "from the real implementation, A's method, the registered analysis and a budget draft for review"),
+        status=("PREPARED at $0 (study SOB1; protocol fixed by the maintainer 2026-11-19; nothing authorized, no run): "
+                "three ~2.0B structures (N ~ 2), A's method on the teacher, DEPTH resumed from the recorded search's "
+                "round 9, every evaluation at 8,192 tokens, phase 1 proposed ($22.53 cap), phase 2 a separate draft"),
         title="Single-operator compression at the same parameter budget: depth only vs FFN + attention only vs "
               "residual width only (SOB1)",
         question=("From the same ~4B teacher compressed to about the same real parameter count, how much fluid "
@@ -1752,18 +1753,24 @@ STAGE_1 = [
               "the three structures from transformers' Qwen3 on the meta device: per-module counts, N, legality, "
               "checkpoint sizes, FLOPs and a memory estimate",
               field="schema", equals="aadistill.stage1.single_operator_budget.structures/v1"),
-            E("logs/stages/stage-1/single_operator_budget/plans/proposal.json",
-              "the budget draft per component and phase, and the storage each phase needs",
+            E("configs/stages/stage-1/single_operator_budget/selection.json",
+              "the reused selections and gates: the eight committed DEPTH rounds verbatim with their resume checks, "
+              "the 16 / 8 heads, the FFN and width gates",
               field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/single_operator_budget/plans/proposal.json",
+              "phase 1's proposal (ceiling, per-session hard cap, teardown reserve) and phase 2's draft, with the "
+              "storage each phase needs",
+              field="status", equals="proposed"),
             E("logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json",
-              "the project position, the relay's headroom and the dev box's free space as read on 2026-11-18",
+              "the project position, the relay's headroom and the dev box's free space as read on 2026-11-19",
               field="schema", equals="aadistill.stage1.single_operator_budget.resource_snapshot/v1"),
         ],
         external_material=[
             "docs/stages/stage-1/single_operator_budget/README.md -- the design for review",
             "docs/stages/stage-1/reasoning_inheritance/README.md -- the research index and the baseline decision",
         ],
-        decisions=["logs/budget/decisions.md -- 2026-11-18: A becomes the research's default baseline"],
+        decisions=["logs/budget/decisions.md -- 2026-11-18: A becomes the research's default baseline",
+                   "logs/budget/decisions.md -- 2026-11-19: SOB1's protocol fixed; dev-box checkpoint retirement"],
         canonical_log_destination="logs/stages/stage-1/single_operator_budget",
         classification_reason=(
             "Stage 1 by subject: which structural compression operator to apply at a parameter budget, and the "

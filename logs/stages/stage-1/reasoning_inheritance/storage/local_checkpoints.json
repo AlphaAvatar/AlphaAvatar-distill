@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage1.reasoning_inheritance.local_checkpoints/v1",
  "written_utc": "2026-11-14T10:50:39+00:00",
- "decided_by": "maintainer 2026-11-14: '必要 checkpoint 仅在开发机本地磁盘保留' (logs/budget/decisions.md :: 2026-11-14 (UTC) — All three volumes retired; necessary checkpoints kept on the dev box only)",
+ "decided_by": "maintainer 2026-11-14: '\u5fc5\u8981 checkpoint \u4ec5\u5728\u5f00\u53d1\u673a\u672c\u5730\u78c1\u76d8\u4fdd\u7559' (logs/budget/decisions.md :: 2026-11-14 (UTC) \u2014 All three volumes retired; necessary checkpoints kept on the dev box only)",
  "root": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed",
  "manifest": {
   "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/MANIFEST.json",
@@ -14,7 +14,14 @@
    "sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
    "artifact_digest": "08aa80972097b290a4929b563cdc6d0497a6021fb7f4bde0a39edb2624e53b68",
    "num_parameters": 3215021568,
-   "consumer": "the next round's depth-axis comparison (REPORT.md section 11, recommendation 1): outright removal of the 8 blocks, the control for the merged variants built on its kept blocks K; and the BASE of their dev-box copies (each RI-LM1 candidate is kept as D plus its span-block delta, storage/layer_merge_local.json): deleting D would leave every delta without its checkpoint"
+   "consumer": "the next round's depth-axis comparison (REPORT.md section 11, recommendation 1): outright removal of the 8 blocks, the control for the merged variants built on its kept blocks K; and the BASE of their dev-box copies (each RI-LM1 candidate is kept as D plus its span-block delta, storage/layer_merge_local.json): deleting D would leave every delta without its checkpoint",
+   "retired": {
+    "utc": "2026-11-19T06:25Z",
+    "tombstone": "devbox_20261119_ri_s1_D",
+    "what": "model.safetensors only; the config, MANIFEST and hashes beside it are kept",
+    "decision": "logs/budget/decisions.md :: 2026-11-19 (UTC) \u2014 SOB1 protocol fixed ...; dev-box checkpoint retirement authorized",
+    "record": "logs/maintenance/storage/devbox_cleanup_20261119.json"
+   }
   },
   "W": {
    "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W",
@@ -22,7 +29,14 @@
    "sha256": "64d367fe0b6613aa57d52cda3e285a5d52122fd0ecee736b0016af92fc59fb29",
    "artifact_digest": "78d263b24d46b1028f85e1d378bc41cd83953c43927ab5e16e95d2dd79661514",
    "num_parameters": 721897472,
-   "consumer": "the next round's decomposition of the non-depth damage (recommendation 2): the full non-depth comparison point"
+   "consumer": "the next round's decomposition of the non-depth damage (recommendation 2): the full non-depth comparison point",
+   "retired": {
+    "utc": "2026-11-19T06:25Z",
+    "tombstone": "devbox_20261119_ri_s1_W",
+    "what": "model.safetensors only; the config, MANIFEST and hashes beside it are kept",
+    "decision": "logs/budget/decisions.md :: 2026-11-19 (UTC) \u2014 SOB1 protocol fixed ...; dev-box checkpoint retirement authorized",
+    "record": "logs/maintenance/storage/devbox_cleanup_20261119.json"
+   }
   },
   "DW": {
    "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW",
@@ -35,6 +49,13 @@
     "packed_top1_state": "1f5e4b420125a345f1d190f0b8f87cad",
     "search_run": "a_packed_search_20261105_195011",
     "rule": "the same bytes (b74dede8...); this is the one canonical local copy for both names, no second copy is kept"
+   },
+   "retired": {
+    "utc": "2026-11-19T06:25Z",
+    "tombstone": "devbox_20261119_ri_s1_DW",
+    "what": "model.safetensors only; the config, MANIFEST and hashes beside it are kept",
+    "decision": "logs/budget/decisions.md :: 2026-11-19 (UTC) \u2014 SOB1 protocol fixed ...; dev-box checkpoint retirement authorized",
+    "record": "logs/maintenance/storage/devbox_cleanup_20261119.json"
    }
   }
  },

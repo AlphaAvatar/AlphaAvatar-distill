@@ -654,8 +654,12 @@ def _run_steps(
     root_model: Any = None,
     root_identity: Mapping[str, Any] | None = None,
     root_references: Mapping[str, Any] | None = None,
+    resume_states: Mapping[int, Any] | None = None,
 ) -> list[StepResult]:
     """The step loop, walked by ORIGINAL index.
+
+    ``resume_states``: per step index, an earlier invocation's completed work for that step's operator
+    (`OperatorContext.resume_state`; execution only, never hashed -- an operator that cannot continue refuses it).
 
     Shared by the whole-path and verified-suffix entry points so there is one
     implementation of "apply a step of this spec". `indices` are indices into
@@ -817,6 +821,7 @@ def _run_steps(
             root_reference=root_reference,
             forward_context=spec.forward_context,
             deadline=deadline,
+            resume_state=(resume_states or {}).get(i),
         )
 
         started = time.time()

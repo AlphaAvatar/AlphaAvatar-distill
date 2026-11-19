@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-18 (UTC), TPI1 closed out (A is the default baseline; driver repairs pushed) and SOB1 PROPOSED at $0, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
+**Updated:** 2026-11-19 (UTC), SOB1 PREPARED at $0 (protocol fixed by the maintainer; phase-1 code, plans, budget and a $0 dry run; dev-box checkpoints retired), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,16 +9,25 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PROPOSED AT $0 -- NOTHING AUTHORIZED, NO RUN.**
-- Design `configs/stages/stage-1/single_operator_budget/design.json`; for review
-  `docs/stages/stage-1/single_operator_budget/README.md`. Depth only (16 layers), FFN + attention only (FFN 3840,
-  16 / 8 heads) and residual width only (1280), each about 2.0B parameters (`plans/structures.json`), built with A's
-  method, then A's recovery; evaluated before (40,960) and after (8,192) recovery; three registered pairwise
-  comparisons (Holm, serial gatekeeping).
-- Budget draft `logs/stages/stage-1/single_operator_budget/plans/proposal.json`: phase 1 (the three initializations
-  and their damage) fits what the project cap leaves; phase 2 (recovery, both seeds) does not and needs a cap
-  decision. Storage of the six fp32 finals needs a decision (relay headroom about 60 GiB, dev box 3.7 GB free).
-- Decisions owed by the maintainer: `docs/stages/stage-1/single_operator_budget/README.md` section 9.
+**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PREPARED AT $0 -- NOTHING AUTHORIZED, NO RUN.**
+- Protocol fixed by the maintainer 2026-11-19 (`logs/budget/decisions.md`). Design
+  `configs/stages/stage-1/single_operator_budget/design.json`; for review `docs/stages/stage-1/single_operator_budget/README.md`.
+  Depth only (16 layers), FFN + attention only (FFN 3840, 16 / 8 heads), residual width only (1280), each about 2.0B
+  (`plans/structures.json`), built on the original teacher with A's operators. DEPTH resumes the journal's 36 -> 28
+  search from round 9 (270 new candidate subsets; `selection.json :: depth_only.resume_checks` all true). Research A's
+  recovery recipe unchanged; every model (untrained arms, the teacher, recovered arms) evaluated at 8,192 tokens --
+  no identity-matched teacher record exists, so the teacher is phase 1's. Holm with m = 3; formal only with all three
+  arms x both seeds complete; nothing eliminates an arm.
+- Code: `scripts/stages/stage-1/single_operator_budget/` (phase1_driver, train_driver, plan, launch with `budget`,
+  analysis); core: DEPTH resume (`OperatorContext.resume_state`), the trainer's memory probe
+  (`AADISTILL_MEMORY_PROBE_STEPS`); TPI1's train driver: listing retries, handoff-only retries, byte-sized copy
+  times and a session-deadline reserve. $0 dry run: driver check-only, budget check and a dry-run artifact passed.
+- Budget (`plans/proposal.json`): phase 1 one session, $10.20 expected, $22.53 hard cap + $1.00 reserve (fits the
+  $30.24 left); phase 2 a draft only: both seeds $114.70 expected, caps $185.78 + $1.
+- Dev box: seven historical checkpoints retired 2026-11-19 (RI-S1 D/W/DW, RI-LM1's two deltas; tombstones
+  `devbox_20261119_*`, `logs/maintenance/storage/devbox_cleanup_20261119.json`): 3.23 -> 13.93 GiB free. Phase 1's
+  11.24 GiB fits; phase 2's six finals (44.94 GiB) are 42.25 GiB short.
+- Decisions owed: `docs/stages/stage-1/single_operator_budget/README.md` section 10.
 
 **Baseline (maintainer, 2026-11-18):** TPI1's A (teacher-parent initialization) is the reasoning-inheritance research's
 default baseline; B a historical reference (`docs/stages/stage-1/reasoning_inheritance/README.md`; decisions.md
@@ -39,7 +48,7 @@ default baseline; B a historical reference (`docs/stages/stage-1/reasoning_inher
   `tpi_train_20261117_180111` resumed the verified step_002208 save point and completed both seeds ($19.6325).
 - Closed on the grant's own terminal condition (`logs/budget/approvals/stage1_teacher_parent_init_grant.json ::
   closed`): $23.1321 of $31.50; $8.3679 and the $1.00 reserve lapse. `require_open` refuses TPI1 issue and launch.
-- Storage: A's init, mapping, statistics and both finals on the dev box only for the weights
+- Storage: A's init, mapping, statistics and both finals on the dev box only for the weights (kept 2026-11-19: the baseline's)
   (`~/aad-artifacts/stage1_teacher_parent_init/`, `storage/local_retention.json`); the relay weight copies retired
   2026-11-18 (tombstones `relay_20261118_tpi1_*`); mapping, statistics and the evidence archive also on the relay.
 - After closeout ($0): `restore_final` reads the resumed completion record, save points and finals hand off on

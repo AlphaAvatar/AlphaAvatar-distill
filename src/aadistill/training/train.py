@@ -523,6 +523,31 @@ RESUME_SEMANTICS_ID = ("step counter + RNG state + consumed-block position, "
 #: name everywhere so the manifest cannot record a different default than the
 #: loss applied.
 KD_CHUNK_DEFAULT = 512
+#: EXECUTION-ONLY MEMORY PROBE: the number of optimizer steps, counted from the
+#: start of THIS process (a resumed run probes its first steps again), whose
+#: per-phase GPU memory is logged as ``memory_probe`` events. Never in the
+#: config or its hash: it reads the allocator, it changes no tensor. An
+#: out-of-memory error is logged as ``memory_oom`` with the phase it was raised
+#: in whether or not the probe is on, so a failed first step says whether the
+#: KD computation or the optimizer update exhausted the device.
+MEMORY_PROBE_ENV = "AADISTILL_MEMORY_PROBE_STEPS"
+#: The phases a step runs, in order: each micro-batch's forwards and losses
+#: (student, teacher and the KD/CE reduction), its backward; then the gradient
+#: clip and the optimizer update (AdamW allocates its state at the first one).
+MEMORY_PHASES = ("forward_loss", "backward", "clip", "optimizer_step")
+
+
+def memory_snapshot(device) -> dict:
+    """The allocator's current and peak bytes and the driver's free / total, in GiB (``{}`` off CUDA)."""
+    if not (torch.cuda.is_available() and str(device).startswith("cuda")):
+        return {}
+    gib = 2 ** 30
+    free, total = torch.cuda.mem_get_info(device)
+    return {"allocated_gib": round(torch.cuda.memory_allocated(device) / gib, 3),
+            "peak_allocated_gib": round(torch.cuda.max_memory_allocated(device) / gib, 3),
+            "reserved_gib": round(torch.cuda.memory_reserved(device) / gib, 3),
+            "peak_reserved_gib": round(torch.cuda.max_memory_reserved(device) / gib, 3),
+            "device_free_gib": round(free / gib, 3), "device_total_gib": round(total / gib, 3)}
 
 
 def lr_factor(step: int, total_steps: int, warmup_steps: int, min_lr_frac: float) -> float:
@@ -1139,6 +1164,44 @@ class Trainer:
         for group in self.opt.param_groups:
             group["lr"] = lr
 
+        probe = self._memory_probe_due()
+        phases: list[dict] = []
+
+        def mark(phase: str, micro: int | None = None) -> None:
+            self._memory_phase = (phase, micro)
+            if probe:
+                phases.append({"after": phase, "micro": micro, **memory_snapshot(self.device)})
+
+        try:
+            out = self._step_body(cfg, bps, micro, loss_cfg, ids, mask, content, pos,
+                                  ce_total, kd_total, lr, mark)
+        except torch.cuda.OutOfMemoryError:
+            phase, at = getattr(self, "_memory_phase", (None, None))
+            self.logger.log("memory_oom", step=self.step + 1, phase_in_progress=self._next_phase(phase),
+                            last_completed_phase=phase, micro=at, **memory_snapshot(self.device))
+            raise
+        if probe:
+            self._memory_probes_done += 1
+            self.logger.log("memory_probe", step=self.step, phases=phases)
+        return out
+
+    def _memory_probe_due(self) -> bool:
+        if not hasattr(self, "_memory_probes_done"):
+            import os
+            self._memory_probes_done = 0
+            self._memory_probe_steps = int(os.environ.get(MEMORY_PROBE_ENV, "0") or 0)
+        return self._memory_probes_done < self._memory_probe_steps
+
+    @staticmethod
+    def _next_phase(done: str | None) -> str:
+        """The phase that was running when an error came after ``done`` (micro-batches loop back)."""
+        if done is None:
+            return MEMORY_PHASES[0]
+        return {"forward_loss": "backward", "backward": "forward_loss or clip", "clip": "optimizer_step",
+                "optimizer_step": "after the optimizer step"}[done]
+
+    def _step_body(self, cfg, bps, micro, loss_cfg, ids, mask, content, pos, ce_total, kd_total, lr, mark) -> dict:
+        self._memory_phase = (None, None)
         self.student.train()
         self.opt.zero_grad(set_to_none=True)
         self._step_positions = self._step_nonpad = 0
@@ -1157,8 +1220,10 @@ class Trainer:
                 loss = loss + loss_cfg["ce_weight"] * ce_sum / ce_total
             if kd_total > 0:
                 loss = loss + loss_cfg["kd_weight"] * kd_sum / kd_total
+            mark("forward_loss", i // micro)
             if loss.requires_grad:
                 loss.backward()
+            mark("backward", i // micro)
             ce_acc += float(ce_sum.detach())
             kd_acc += float(kd_sum.detach())
         # The extra stream joins the *same* update. It is deliberately after the
@@ -1172,7 +1237,9 @@ class Trainer:
         grad_norm = torch.nn.utils.clip_grad_norm_(
             self.params, cfg["optim"]["grad_clip"]
         )
+        mark("clip")
         self.opt.step()
+        mark("optimizer_step")
         self.step += 1
         if monitored is not None:
             self.logger.log("param_stats", step=self.step, groups=monitored)

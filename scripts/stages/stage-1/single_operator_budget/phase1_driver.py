@@ -1,0 +1,475 @@
+#!/usr/bin/env python3
+"""On-pod driver of SOB1's phase 1 (one session kind, ``sob1_phase1``): the three ~2B initializations built from the
+original teacher with A's operators, each durable the moment it exists, then every untrained arm and the teacher
+evaluated on all of eval-set-1 in both modes at 8,192 tokens, each finished sample sealed.
+
+    cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=src:scripts:scripts/stages/stage-1:scripts/stages/stage-0/calibration_volume \\
+        /opt/train/bin/python scripts/stages/stage-1/single_operator_budget/phase1_driver.py --run-id <run> \\
+        --out <evidence dir> --work <scratch> --status <file> --device cuda --vllm-python /opt/vllm/bin/python \\
+        [--resume <secured evidence dir or archive>]
+
+    # $0 on the dev box: the design, the reused selections and the session's operator config hashes (nothing loaded)
+    PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python \\
+        scripts/stages/stage-1/single_operator_budget/phase1_driver.py --check-only --out <s>/out --work <s>/w --status <s>/st
+
+Building (`design.json :: phase_1.build_order`; one GPU child process per arm, the teacher loaded in each, every shard
+hashed), always on the unmodified teacher under the packed search's own session (inputs v3; `selection.json`):
+
+* **residual width only** -- the journal's root RESIDUAL_WIDTH(rh) replayed with its statistics retained; its child
+  must equal the state's digest and P at 1,024 over all 37 points must reproduce the recorded diagnostics (TPI1's
+  gates); then P at 1,280 from the same statistics over all 37 points, weights 9 / 1 / 8;
+* **FFN + attention only** -- the FFN operator at 3,072 (must build the journal's FFN state bit for bit) and at 3,840
+  sharing one statistics pass, both under the journal's config hash; the journal's 16 / 8 heads (their child must
+  equal the ATTENTION state's digest);
+* **depth only** -- the DEPTH operator 36 -> 16 under the journal's config hash, resuming its eight committed rounds
+  (`selection.json :: depth_only.rounds`): the operator re-checks them, re-scores round 8's chosen subset exactly and
+  scores rounds 9-20 (270 candidate subsets) against the unbypassed teacher; rounds 1-8 must equal the journal's order.
+
+Each arm: one `FrozenMapping` keyed by root indices, saved and loaded back, materialized onto the teacher (FFN ->
+blocks -> width -> heads), geometry and parameter count against `structures.json`, reloaded with a finite forward,
+state evaluation against the teacher (diagnostic only), then the checkpoint and the mapping to the relay (re-downloaded
+and re-hashed) and the arm's ``<arm>/init_record.json``. A gate that fails stops the session before anything is built
+on it.
+
+Evaluating (`phase_1.evaluation_order`): each untrained arm (its checkpoint on this pod, else fetched from its init
+record's relay copy and re-hashed) and the teacher (the pinned snapshot), through one package rule
+(`common.package`) and the runners with the registered protocol (`common.protocol`, 8,192 tokens) -- TPI1's
+`train_driver.evaluate`. A sample already sealed is never generated again; a mode with a formal report is skipped.
+
+``--resume``: a previous attempt's secured evidence: an arm whose init record's relay copies verified exists and is
+not rebuilt; sealed samples are kept.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+import traceback
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[4]
+for _p in ("src", "scripts", "scripts/stages/stage-1", "scripts/stages/stage-0/calibration_volume"):
+    if str(REPO / _p) not in sys.path:
+        sys.path.insert(0, str(REPO / _p))
+
+from stages.reasoning_inheritance.driver import (  # noqa: E402
+    Status, _identify, _ident_record, _gpu_peak, read_json, sha256_file, utc, write_json)
+from stages.single_operator_budget import common as C  # noqa: E402
+
+SCHEMA = "aadistill.stage1.single_operator_budget.init_record/v1"
+FILES = ("model.safetensors", "config.json")
+TEACHER = "teacher"
+
+
+class DriverError(RuntimeError):
+    pass
+
+
+def selection() -> dict:
+    return read_json(C.SELECTION)
+
+
+def tpi1_selection() -> dict:
+    from stages.teacher_parent_initialization import init_driver as TI
+    return TI.selection()
+
+
+def phase() -> dict:
+    return C.design()["phase_1"]
+
+
+def fixed_spec(s, step: dict, target, device: str, label: str, expected_digest: str | None = None):
+    """One root-level operator step on the teacher as a fixed path, its config hash pinned to the journal's."""
+    from aadistill.initialization.planning.fixed_path import FixedPathSpec, FixedPathStep
+    t = C.design()["teacher"]
+    return FixedPathSpec(
+        path_id=f"stage1.single_operator_budget.{label}", family=s.config.target_spec.family, target_spec=target,
+        steps=(FixedPathStep(impl_id=step["impl_id"], profile_id=step["profile_id"], label=label,
+                             expected_config_hash=step["config_hash"], expected_artifact_digest=expected_digest),),
+        root_repo_id=t["model"], root_revision=t["revision"], device=device,
+        seed=int(selection()["source"]["seed"]), position_policy=s.config.position_policy,
+        distribution_support=s.config.distribution_support, forward_context=s.config.forward_context)
+
+
+def run_step(spec, adapter, teacher, root_sha: str, work: Path, s, cache, resume=None):
+    from aadistill.initialization.planning.fixed_path import _run_steps
+    (res,) = _run_steps(spec, adapter=adapter, model=teacher, indices=[0], parent_spec=adapter.spec_of(teacher),
+                        parent_digest=root_sha, workdir=work, repo_root=str(REPO), stats_cache=cache,
+                        calibration_items=None, on_step=None, deadline=None, execution=s.execution,
+                        resume_states=None if resume is None else {0: resume})
+    return res
+
+
+def gate(rec: dict, name: str, got: str, want: str) -> None:
+    rec["gates"][name] = {"artifact_digest": got, "journal_artifact_digest": want, "equal": got == want}
+    if got != want:
+        raise DriverError(f"{name}: the rebuilt child {got[:12]} is not the journal state's {want[:12]}")
+
+
+# ---- the three builds --------------------------------------------------------------------------------------------------
+
+def select_residual_width(rec, s, adapter, teacher, root_sha, work, device):
+    import torch
+    from aadistill.initialization.planning import frozen_mapping as FM
+    from stages.teacher_parent_initialization import init_driver as TI
+    sel, ts = selection()["residual_width"], tpi1_selection()
+    n_root = selection()["n_root_blocks"]
+    cache = FM.RetainingStatsCache()
+    t0 = time.time()
+    res = run_step(TI.replay_spec(s, ts, device), adapter, teacher, root_sha, work / "width_replay", s, cache)
+    rec["statistics_seconds"] = round(time.time() - t0, 1)
+    gate(rec, "RESIDUAL_WIDTH", res.identity.artifact_digest, sel["gate"]["artifact_digest"])
+    shutil.rmtree(work / "width_replay", ignore_errors=True)
+    if len(cache.retained) != 1:
+        raise DriverError(f"the statistics pass left {len(cache.retained)} states, not one")
+    state = next(iter(cache.retained.values()))
+    diag = sel["gate"]["all_points_diagnostics"]
+    w1024 = FM.width_transform_from_statistics(
+        state, d_child=1024, points=sel["points"], point_weights=diag["point_weights"],
+        final_norm_weight=adapter.final_norm(teacher).weight, post_norm_point=sel["post_norm_point"], device=device)
+    keys = ("energy_captured_frac", "top_eigenvalue", "min_kept_eigenvalue")
+    rec["statistics_reproduction"] = {"recomputed": {k: w1024.diagnostics.get(k) for k in keys},
+                                      "recorded": {k: diag[k] for k in keys},
+                                      "equal": all(w1024.diagnostics.get(k) == diag[k] for k in keys)}
+    if not rec["statistics_reproduction"]["equal"]:
+        raise DriverError(f"the retained statistics do not reproduce the 37-point diagnostics: "
+                          f"{rec['statistics_reproduction']}")
+    del w1024
+    #: evidence beside the gates: the retained statistics against the bytes TPI1 kept (not a gate: the digest gate and
+    #: the diagnostics above already identify the pass)
+    tmp = work / "statistics_check.safetensors"
+    rec["statistics"] = {k: v for k, v in TI.save_statistics(state, tmp).items() if k != "tensors"}
+    rec["statistics"]["equals_tpi1_bytes"] = rec["statistics"]["sha256"] == sel["tpi1_statistics_sha256"]
+    tmp.unlink(missing_ok=True)
+    transform = FM.width_transform_from_statistics(
+        state, d_child=int(sel["hidden_size"]), points=sel["points"], point_weights=sel["point_weights"],
+        final_norm_weight=adapter.final_norm(teacher).weight, post_norm_point=sel["post_norm_point"], device=device)
+    rec["width_transform"] = {"d_child": int(sel["hidden_size"]), "points": sel["points"],
+                              "point_weights": sel["point_weights"], "post_norm_point": sel["post_norm_point"],
+                              "scale": transform.scale, "diagnostics": dict(transform.diagnostics)}
+    del state
+    cache.retained.clear()
+    torch.cuda.empty_cache()
+    return {"kept_blocks": tuple(range(n_root)), "width": transform}, "all"
+
+
+def select_ffn_attention(rec, s, adapter, teacher, root_sha, work, device):
+    import torch
+    from aadistill.initialization.planning import frozen_mapping as FM
+    from aadistill.initialization.statistics.spec import StatsCache
+    sel = selection()["ffn_attention"]
+    n_root = selection()["n_root_blocks"]
+    base = adapter.spec_of(teacher)
+    cache = StatsCache()
+    step = {"impl_id": sel["ffn"]["impl_id"], "profile_id": sel["ffn"]["profile_id"],
+            "config_hash": sel["ffn"]["config_hash"]}
+    t0 = time.time()
+    g = run_step(fixed_spec(s, step, base.replace(intermediate_size=sel["ffn"]["gate"]["intermediate_size"]), device,
+                            "ffn_gate_3072", sel["ffn"]["gate"]["artifact_digest"]),
+                 adapter, teacher, root_sha, work / "ffn_gate", s, cache)
+    gate(rec, "FFN@3072", g.identity.artifact_digest, sel["ffn"]["gate"]["artifact_digest"])
+    shutil.rmtree(work / "ffn_gate", ignore_errors=True)
+    r = run_step(fixed_spec(s, step, base.replace(intermediate_size=sel["ffn"]["intermediate_size"]), device,
+                            "ffn_3840"), adapter, teacher, root_sha, work / "ffn_3840", s, cache)
+    rec["ffn_seconds"] = round(time.time() - t0, 1)
+    shutil.rmtree(work / "ffn_3840", ignore_errors=True)
+    kept, small = r.selection["kept_neurons"], g.selection["kept_neurons"]
+    rec["ffn"] = {"intermediate_size": sel["ffn"]["intermediate_size"], "config_hash": step["config_hash"],
+                  "result_spec_hash": r.result_spec_hash, "child_artifact_digest": r.identity.artifact_digest,
+                  "gate_selection_nested": all(set(a) <= set(b) for a, b in zip(small, kept)),
+                  "trace": {k: v for k, v in r.trace.items() if k not in ("kept_neurons",)}}
+    heads = [sel["attention"]["query_heads"][str(b)] for b in range(n_root)]
+    child = FM.select_query_heads(adapter, teacher, heads, seed=int(selection()["source"]["seed"]))
+    from stages.teacher_parent_initialization.init_driver import _save
+    ident = _save(adapter, child, work / "gates" / "ATTENTION")
+    del child
+    gate(rec, "ATTENTION", ident.artifact_digest, sel["attention"]["artifact_digest"])
+    shutil.rmtree(work / "gates", ignore_errors=True)
+    torch.cuda.empty_cache()
+    return {"kept_blocks": tuple(range(n_root)), "ffn_neurons": {b: tuple(kept[b]) for b in range(n_root)},
+            "query_heads": {b: tuple(heads[b]) for b in range(n_root)}}, "all"
+
+
+def select_depth(rec, s, adapter, teacher, root_sha, work, device):
+    sel = selection()["depth_only"]
+    keep = int(sel["resume"]["target_layers"])
+    base = adapter.spec_of(teacher)
+    t0 = time.time()
+    r = run_step(fixed_spec(s, sel["step"], base.replace(num_hidden_layers=keep), device, "depth_36_to_16"),
+                 adapter, teacher, root_sha, work / "depth", s, None,
+                 resume={"rounds": sel["rounds"], "source": f"journal state {sel['state_id']}"})
+    rec["depth_seconds"] = round(time.time() - t0, 1)
+    order = [int(x) for x in r.trace["removal_order"]]
+    replayed = [int(x["chosen"]) for x in sel["rounds"]]
+    rec["depth"] = {"removal_order": order, "kept_layers": [int(x) for x in r.trace["kept_layers"]],
+                    "first_rounds_are_the_journal": order[:len(replayed)] == replayed,
+                    "local_metrics": r.local_metrics, "result_spec_hash": r.result_spec_hash,
+                    "child_artifact_digest": r.identity.artifact_digest,
+                    "search_rounds": r.selection.get("search_rounds"), "packing": r.trace.get("packing")}
+    if not rec["depth"]["first_rounds_are_the_journal"] or len(order) != selection()["n_root_blocks"] - keep:
+        raise DriverError(f"DEPTH removed {order}; its first rounds must be the journal's {replayed}")
+    shutil.rmtree(work / "depth", ignore_errors=True)
+    return {"kept_blocks": tuple(sorted(rec["depth"]["kept_layers"]))}, "kept"
+
+
+SELECT = {"residual_width": select_residual_width, "ffn_attention": select_ffn_attention, "depth_only": select_depth}
+
+
+def build(arm: str, out: Path, work: Path, device: str, status: Status, run_id: str) -> dict:
+    """One arm (module docstring), in a GPU child process. Writes ``out/<arm>/records/build.json`` as it goes."""
+    import torch
+    from aadistill.initialization.planning import frozen_mapping as FM
+    from aadistill.initialization.specs.arch import get_adapter
+    from stages.teacher_modes import full_search as FS
+    from stages.teacher_parent_initialization import init_driver as TI
+    d = C.design()
+    st = read_json(C.STRUCTURES)["arms"][arm]
+    s = TI.session(work / "session", device)
+    adapter = get_adapter(s.config.target_spec.family)
+    rec: dict = {"started_utc": utc(), "run_id": run_id, "arm": arm, "design_sha256": sha256_file(C.DESIGN),
+                 "selection_sha256": sha256_file(C.SELECTION), "gates": {}}
+    progress = out / arm / "records" / "build.json"
+    t0 = time.time()
+    teacher, rec["root"] = FS.load_root(device)
+    rec["seconds_teacher"] = round(time.time() - t0, 1)
+    if rec["root"]["root_teacher_sha256"] != d["teacher"]["root_teacher_sha256"]:
+        raise DriverError("the loaded teacher is not the design's root")
+    root_sha = rec["root"]["root_teacher_sha256"]
+    aw = work / arm
+    parts, blocks = SELECT[arm](rec, s, adapter, teacher, root_sha, aw, device)
+    write_json(progress, rec)
+    status.mark(f"SELECTED:{arm}")
+    n_root = selection()["n_root_blocks"]
+    mapping = FM.FrozenMapping(
+        root={"model": d["teacher"]["model"], "revision": d["teacher"]["revision"], "root_teacher_sha256": root_sha},
+        n_root_blocks=n_root, kept_blocks=tuple(parts["kept_blocks"]), ffn_neurons=parts.get("ffn_neurons"),
+        query_heads=parts.get("query_heads"), width=parts.get("width"),
+        provenance={"arm": arm, "selection_sha256": rec["selection_sha256"], "design_sha256": rec["design_sha256"],
+                    "rule": d["arms"][arm]["selection"]})
+    bad = FM.problems(mapping, root_spec=adapter.spec_of(teacher))
+    if bad:
+        raise DriverError(f"the mapping is malformed: {bad}")
+    prod = aw / "products"
+    saved = FM.save(mapping, prod / "mapping")
+    mapping = FM.load(prod / "mapping", expected_content_digest=saved["content_digest"])
+    rec["mapping"] = {"content_digest": saved["content_digest"],
+                      "files_sha256": {n: sha256_file(prod / "mapping" / n) for n in (FM.MAPPING_FILE, FM.TENSOR_FILE)}}
+    model, roots = FM.materialize(adapter, teacher, mapping, blocks=blocks, non_depth=True,
+                                  seed=int(selection()["source"]["seed"]))
+    ckpt = prod / "init"
+    ident = TI._save(adapter, model, ckpt)
+    spec = adapter.spec_of(model)
+    geo = {k: (bool(spec[k]) if k == "tie_word_embeddings" else int(spec[k])) for k in st["geometry"]}
+    n_params = int(sum(p.numel() for p in model.parameters()))
+    rec["checkpoint"] = {**_ident_record(ident), "root_blocks": roots, "geometry": geo,
+                         "geometry_matches_structures": geo == st["geometry"], "num_parameters_counted": n_params,
+                         "num_parameters_match_structures": n_params == int(st["num_parameters"])}
+    if arm == "depth_only":
+        rec["checkpoint"]["equals_the_operators_child"] = ident.artifact_digest == rec["depth"]["child_artifact_digest"]
+    if not (rec["checkpoint"]["geometry_matches_structures"] and rec["checkpoint"]["num_parameters_match_structures"]
+            and len(ident.shards) == 1 and rec["checkpoint"].get("equals_the_operators_child", True)):
+        raise DriverError(f"{arm} is {geo}, {n_params} parameters: not structures.json's arm")
+    del model
+    torch.cuda.empty_cache()
+    m = adapter.load(str(ckpt), device=device)
+    m.config.use_cache = False
+    ids = torch.arange(1, 65, device=next(m.parameters()).device).unsqueeze(0)
+    rec["checkpoint"]["reload_forward_finite"] = bool(torch.isfinite(m(input_ids=ids).logits).all().item())
+    if not rec["checkpoint"]["reload_forward_finite"]:
+        raise DriverError(f"the reloaded {arm} gives non-finite logits")
+    write_json(progress, rec)
+    status.mark(f"INIT_BUILT:{arm}")
+    try:                                     #: diagnostic only: a failure is recorded, never a gate
+        t2 = time.time()
+        s.evaluator.prime_reference(teacher)
+        ev = s.evaluator.evaluate(m, ident.artifact_digest)
+        rec["state_evaluation"] = {"measurement_protocol_id": s.evaluator.measurement_protocol_id,
+                                   "suite": s.suite_manifest.get("suite_id"),
+                                   "values": dict(getattr(ev, "values", {}) or {}),
+                                   "seconds": round(time.time() - t2, 1), "role": "diagnostic only"}
+    except Exception as exc:  # noqa: BLE001
+        rec["state_evaluation"] = {"error": f"{type(exc).__name__}: {str(exc)[:1500]}", "role": "diagnostic only"}
+    rec["gpu_peak"] = _gpu_peak(device)
+    rec["finished_utc"] = utc()
+    write_json(progress, rec)
+    return rec
+
+
+def init_record(arm: str, rec: dict, relay: dict) -> dict:
+    """The provenance record a training plan binds (`initialization_provenance.read`: ``root_teacher``,
+    ``commit.selected_rows``) and where every durable byte of the arm is."""
+    ck = rec["checkpoint"]
+    return {"schema": SCHEMA, "status": "COMPLETE", "arm": arm, "run_id": rec["run_id"], "root_teacher": rec["root"],
+            "commit": {"selected_rows": [{"state_id": f"{arm}/{rec['mapping']['content_digest'][:32]}",
+                                          "path": C.design()["arms"][arm]["label"] + ": every selection on the teacher",
+                                          "artifact_digest": ck["artifact_digest"],
+                                          "single_shard_sha256": ck["shards"][0]["sha256"]}]},
+            "checkpoint": ck, "gates": rec["gates"], "mapping": rec["mapping"],
+            **{k: rec[k] for k in ("depth", "ffn", "width_transform", "statistics_reproduction", "statistics")
+               if k in rec},
+            "state_evaluation": rec.get("state_evaluation"), "relay": relay,
+            "design_sha256": rec["design_sha256"], "selection_sha256": rec["selection_sha256"], "finished_utc": utc()}
+
+
+def persist(arm: str, out: Path, work: Path, run_id: str, status: Status) -> dict:
+    """The arm's checkpoint and mapping to the relay (online child processes), then its init record."""
+    from stages.teacher_parent_initialization import relay as R
+    rec = read_json(out / arm / "records" / "build.json")
+    prod = work / arm / "products"
+    digest = rec["mapping"]["content_digest"][:16]
+    groups = {"init": {f"init/{n}": prod / "init" / n for n in FILES if (prod / "init" / n).is_file()},
+              "mapping": {f"mapping/{n}": prod / "mapping" / n for n in rec["mapping"]["files_sha256"]}}
+    relay = {}
+    for name, files in groups.items():
+        nbytes = sum(p.stat().st_size for p in files.values())
+        res = R.run_online("put", {"files": {k: str(v) for k, v in files.items()},
+                                   "prefix": f"{C.relay_root()}/{arm}/init/{digest}",
+                                   "message": f"SOB1 {arm} {run_id}: {name}", "scratch": str(work)},
+                           timeout_s=max(3600.0, nbytes / 2.6e6 * 1.25 + 600))
+        relay[name] = res
+        if not res.get("verified"):
+            write_json(out / arm / "records" / "relay.json", relay)
+            raise DriverError(f"{arm}: the relay copy of {name} did not verify: {str(res)[:600]}")
+        status.mark(f"RELAY_OK:{arm}:{name}")
+    write_json(out / arm / "records" / "relay.json", relay)
+    doc = init_record(arm, rec, relay)
+    write_json(out / arm / "init_record.json", doc)
+    status.mark(f"INIT_RECORD_WRITTEN:{arm}")
+    return doc
+
+
+def durable_init(out: Path, arm: str) -> dict | None:
+    p = out / arm / "init_record.json"
+    if not p.is_file():
+        return None
+    doc = read_json(p)
+    return doc if doc.get("status") == "COMPLETE" and all(v.get("verified") for v in doc["relay"].values()) else None
+
+
+# ---- evaluation -----------------------------------------------------------------------------------------------------
+
+def model_for(target: str, out: Path, work: Path) -> Path:
+    """The weights a target is evaluated from: the teacher's pinned snapshot, or the arm's checkpoint (on this pod,
+    else fetched from its init record's relay copy and re-hashed)."""
+    from shared.pod.teacher_cache import local_snapshot
+    from stages.teacher_parent_initialization import relay as R
+    d = C.design()
+    if target == TEACHER:
+        return Path(local_snapshot(d["teacher"]["model"], d["teacher"]["revision"]))
+    doc = durable_init(out, target)
+    if doc is None:
+        raise DriverError(f"{target} has no durable initialization to evaluate")
+    dest = work / target / "products" / "init"
+    want = doc["checkpoint"]["shards"][0]["sha256"]
+    if (dest / "model.safetensors").is_file() and sha256_file(dest / "model.safetensors") == want:
+        return dest
+    rec = doc["relay"]["init"]
+    flat = {**rec, "files_sha256": {k.removeprefix("init/"): v for k, v in rec["files_sha256"].items()},
+            "prefix": f"{rec['prefix']}/init"}
+    got = R.run_online("get", {"record": flat, "dest": str(dest)}, timeout_s=7200)
+    if not got.get("verified") or sha256_file(dest / "model.safetensors") != want:
+        raise DriverError(f"{target}'s initialization did not restore: {str(got)[:400]}")
+    return dest
+
+
+def evaluate_targets(out: Path, work: Path, vllm_py: str, attempt: str, status: Status, report: dict) -> None:
+    from stages.teacher_parent_initialization import train_driver as TD
+    ev, dirs = C.protocol(), C.mode_dirs()
+    for target in phase()["evaluation_order"]:
+        row = report["evaluations"].setdefault(target, {})
+        for mode, sub in dirs.items():
+            ev_dir = out / "evaluation" / target / sub
+            if (ev_dir / "formal_report.json").is_file():
+                row.setdefault(mode, {"skipped": "a formal report exists (an earlier attempt)"})
+                continue
+            model_dir = model_for(target, out, work)
+            label = TEACHER if target == TEACHER else f"{target}_untrained"
+            status.mark(f"EVAL_START:{target}:{mode}")
+            t0 = time.time()
+            row[mode] = {**TD.evaluate(model_dir, ev_dir, label, mode, vllm_py, attempt, work / "eval", ev, C.package),
+                         "eval_seconds": round(time.time() - t0, 1)}
+            write_json(out / "report.json", report)
+            status.mark(f"EVAL_DONE:{target}:{mode}")
+
+
+# ---- the session ------------------------------------------------------------------------------------------------------
+
+def contract(work: Path, device: str) -> dict:
+    """$0: the session derives the journal's operator config hashes (TPI1's contract), and this round's selection
+    record is what the journal and TPI1's selection give."""
+    from stages.single_operator_budget import selection as SSEL
+    from stages.teacher_parent_initialization import init_driver as TI
+    base = TI.contract(work, device)
+    fresh = SSEL.render(SSEL.extract()) if (REPO / read_json(C.SELECTION)["source"]["journal"]["path"]).is_file() else None
+    return {**base, "sob1_design_sha256": sha256_file(C.DESIGN), "sob1_selection_sha256": sha256_file(C.SELECTION),
+            "sob1_selection_reproduced": None if fresh is None else fresh == C.SELECTION.read_text(),
+            "build_order": phase()["build_order"], "evaluation_order": phase()["evaluation_order"]}
+
+
+def take_over(resume: Path, out: Path) -> dict:
+    """A previous attempt's secured evidence into ``out`` (never a live stream); returns what was taken."""
+    from stages.teacher_parent_initialization import train_driver as TD
+    return TD.take_over(resume, out)
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--run-id", default="check")
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--work", required=True)
+    ap.add_argument("--status", required=True)
+    ap.add_argument("--device", default="cuda")
+    ap.add_argument("--vllm-python", default="/opt/vllm/bin/python")
+    ap.add_argument("--resume", default=None)
+    ap.add_argument("--check-only", action="store_true")
+    ap.add_argument("--phase", choices=("build",), default=None, help=argparse.SUPPRESS)
+    ap.add_argument("--arm", default=None, help=argparse.SUPPRESS)
+    a = ap.parse_args(argv)
+    out, work, status = Path(a.out), Path(a.work), Status(a.status)
+    out.mkdir(parents=True, exist_ok=True)
+    work.mkdir(parents=True, exist_ok=True)
+    if a.phase == "build":                      #: the GPU child, one arm
+        build(a.arm, out, work, a.device, status, a.run_id)
+        return 0
+    report = {"schema": SCHEMA.replace("init_record", "phase1_report"), "run_id": a.run_id, "started_utc": utc(),
+              "inits": {}, "evaluations": {}}
+    ok = True
+    try:
+        if a.resume:
+            report["resumed_from"] = take_over(Path(a.resume), out)
+        report["contract"] = contract(work, "cpu" if a.check_only else a.device)
+        if report["contract"].get("sob1_selection_reproduced") is False:
+            raise DriverError("selection.json is not what the journal and TPI1's selection give")
+        write_json(out / "report.json", report)
+        status.mark("CONTRACT_OK")
+        if a.check_only:
+            return 0
+        env = {**os.environ, "HF_HUB_OFFLINE": "1"}
+        for arm in phase()["build_order"]:
+            if durable_init(out, arm):
+                report["inits"][arm] = {"resumed": "an earlier attempt's init record verified: nothing rebuilt"}
+                continue
+            rc = subprocess.run([sys.executable, str(Path(__file__).resolve()), "--phase", "build", "--arm", arm,
+                                 "--run-id", a.run_id, "--out", str(out), "--work", str(work), "--status",
+                                 str(status.path), "--device", a.device], env=env, cwd=REPO).returncode
+            if rc != 0:
+                raise DriverError(f"{arm}: the build phase exited {rc}; see {arm}/records/build.json")
+            report["inits"][arm] = persist(arm, out, work, a.run_id, status)["commit"]
+            write_json(out / "report.json", report)
+        status.mark("INITS_DURABLE")
+        evaluate_targets(out, work, a.vllm_python, a.run_id, status, report)
+    except BaseException as exc:  # noqa: BLE001
+        ok = False
+        report["error"] = {"error": repr(exc)[:2000], "traceback": traceback.format_exc()[-6000:]}
+    report.update(finished_utc=utc(), terminal="ALL_DONE" if ok else "RUN_FAILED")
+    write_json(out / "report.json", report)
+    status.mark("ALL_DONE" if ok else "RUN_FAILED")
+    return 0 if ok else 3
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

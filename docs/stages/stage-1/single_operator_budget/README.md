@@ -1,16 +1,18 @@
-# Single-operator compression at the same parameter budget (SOB1): design for review
+# Single-operator compression at the same parameter budget (SOB1)
 
-Stage 1 owns this round; its training is `stage3_recovery`. Status: **proposed, $0**. Nothing here is authorized:
-no paid search, recovery training or generation runs until the maintainer has reviewed the design and the budget
-and a grant exists. Recorded 2026-11-18 (UTC) on `research/reasoning-inheritance` (not merged to `main`).
+Stage 1 owns this round; its training is `stage3_recovery`. Status: **prepared at $0, ready for review**. The
+maintainer fixed the protocol on 2026-11-19 (UTC) (`logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol
+fixed ...`). Nothing here is authorized: no paid pod, phase or formal experiment runs until the maintainer grants it.
+Branch `research/reasoning-inheritance`, not merged to `main`.
 
 | file | what it is |
 | --- | --- |
-| [`configs/stages/stage-1/single_operator_budget/design.json`](../../../../configs/stages/stage-1/single_operator_budget/design.json) | the design: arms, operators, calibration, training, evaluation, the registered analysis, the cost model's constants |
-| [`plans/structures.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/structures.json) | the three structures from the real implementation (`structures.py --write / --check`) |
-| [`plans/proposal.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/proposal.json) | the budget draft and storage needs (`proposal.py --write / --check`) |
-| [`plans/resource_snapshot.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json) | the project position, the relay's headroom and the dev box's free space, as read on 2026-11-18 |
-| `scripts/stages/stage-1/single_operator_budget/` | `structures.py`, `proposal.py`, `analysis.py` (the registered decision rule), `tests/` |
+| [`configs/.../single_operator_budget/design.json`](../../../../configs/stages/stage-1/single_operator_budget/design.json) | the design: arms, operators, calibration, training (recipe, order, memory probe, durability), the one evaluation protocol, the registered analysis, the cost model's constants, phases and storage |
+| [`configs/.../single_operator_budget/selection.json`](../../../../configs/stages/stage-1/single_operator_budget/selection.json) | what is reused from the packed search's journal and TPI1, and every gate: the eight committed DEPTH rounds verbatim with their resume checks (`selection.py --write / --check`) |
+| [`plans/structures.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/structures.json) | the three structures from the real implementation (`structures.py`) |
+| [`plans/proposal.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/proposal.json) | phase 1's proposal (ceiling, per-session hard cap, teardown reserve) and phase 2's separate draft (`proposal.py`) |
+| [`plans/resource_snapshot.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json) | the project position, the relay's headroom and the dev box's free space as read on 2026-11-19 |
+| `scripts/stages/stage-1/single_operator_budget/` | `phase1_driver.py` (the three builds and the phase-1 evaluations), `train_driver.py` (TPI1's, with this study's plan), `plan.py` (one arm's training plan), `launch.py` (sessions, budget check, retention), `analysis.py` (the decision rule), `common.py`, `tests/` |
 
 ## 1. Question and hypothesis
 
@@ -18,292 +20,260 @@ From the same ~4B teacher (`Qwen/Qwen3-4B@1cfa9a72`, the hybrid), compressed to 
 how much fluid reasoning does compressing **only depth**, **only the FFN and attention**, or **only the residual
 width** lose? After the same Stage-3 recovery, which of the three keeps more?
 
-* The budget point is N = P_teacher / P_student ≈ 2, the first candidate switching point. P counts every parameter
-  of the real Qwen3 implementation, with the tied embedding counted once. One budget point speaks only for its
-  neighbourhood.
-* "At N ≤ 2, compress depth first" is a **hypothesis to test**, not an assumption.
-* There is published evidence against it. Minitron (Sreenivas et al., arXiv:2408.11796v4, Table 1) pruned
-  Llama 3.1 8B to 4.5B (about 1.8x) and distilled on 94B tokens. The width-pruned model (hidden 3072, MLP 9216, all
-  32 / 8 heads kept) beat the depth-pruned one (16 of 32 layers removed as one contiguous block) on every base
-  benchmark reported, including GSM8K 41.2 vs 16.8. On the instruct models the depth-pruned one won MMLU, GPQA and
-  BFCLv2.
-* That setting differs from this one: another teacher, about 600 times this round's recovery tokens, contiguous
-  depth removal chosen by Winogrande, and benchmark scores rather than fluid reasoning. So it frames the test and
-  predicts nothing here. (Read 2026-11-18 from the arXiv HTML v4.)
-* Past the candidate threshold, later rounds give category A (compress jointly, then recover) and category C
-  (compress and recover in stages) their own same-endpoint controls.
+* N = P_teacher / P_student ≈ 2 is the **first compression point examined**. P counts every parameter of the real
+  Qwen3 implementation, with the tied embedding counted once. One point speaks only for its neighbourhood.
+* "At N ≤ 2, compress depth first" is a hypothesis to test. The priority among the operators is decided only after
+  recovery; nothing in this round ranks them before that.
+* Published evidence against it: Minitron (Sreenivas et al., arXiv:2408.11796v4, Table 1) pruned Llama 3.1 8B to
+  4.5B and distilled on 94B tokens; its width-pruned model beat the depth-pruned one on every base benchmark
+  reported (GSM8K 41.2 vs 16.8). Another teacher, about 600 times this round's recovery tokens and benchmark scores
+  rather than fluid reasoning, so it frames the test and predicts nothing here.
 
 ## 2. The baseline: A's method, not A's weights
 
-The maintainer's decision of 2026-11-18 makes TPI1's A (teacher-parent initialization) the research's default
-baseline; B (Research A's packed Top-1) stays a historical reference
-([TPI1 report](../teacher_parent_initialization/REPORT.md), [research index](../reasoning_inheritance/README.md)).
+TPI1's A (teacher-parent initialization) is the research's default baseline; Research A's packed Top-1 is a
+historical reference (maintainer, 2026-11-18; [research index](../reasoning_inheritance/README.md)).
 
-* **What is reused here** is A's *initialization method*:
-  * every selection is made on the unmodified teacher, with the operator, calibration profile and selection rule A
-    used;
-  * a selection already recorded on the teacher is reused when its target is this round's;
-  * every rebuild must equal its recorded digest.
-* **What is not reused:** A's 596M weights. They are a baseline only on their own structure (N 6.75). They are
-  reported beside the arms as context, never as an arm.
-* **Same lineage:** the teacher, the calibration profiles, the training pack (generated by that teacher), the online
-  KD teacher, the tokenizer, the chat template and the configuration are all one lineage (AGENTS.md P17.1).
+* **Reused:** A's initialization method. Every selection is made on the unmodified teacher with the operator,
+  calibration profile and selection rule A used; a selection already recorded on the teacher is reused when its
+  target is this round's; every rebuild must equal its recorded digest.
+* **Not reused:** A's 596M weights (a baseline only on their own structure). They stand beside the arms as context.
+* **One lineage** (AGENTS.md P17.1): the teacher, the calibration profiles, the training pack (generated by that
+  teacher), the online KD teacher, the tokenizer, the chat template and the configuration.
 
-## 3. The three structures
+## 3. The three structures (fixed)
 
-Counts are `transformers.Qwen3ForCausalLM` instantiated on the meta device from the teacher's pinned `config.json`
-(sha256 `8ba006f7…`). The same method reproduces the teacher's 4,022,468,096 and A's recorded 596,049,920 exactly.
+Counts are `transformers.Qwen3ForCausalLM` on the meta device from the teacher's pinned `config.json`; the same method
+reproduces the teacher's 4,022,468,096 and A's 596,049,920 exactly.
 
-| arm | layers | width | FFN | Q / KV heads | head_dim | parameters | N | vs 2.011B target |
+| arm | layers | width | FFN | Q / KV heads | head_dim | parameters | N | vs 2.011B |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | teacher | 36 | 2560 | 9728 | 32 / 8 | 128 | 4,022,468,096 | 1 | |
-| **depth only** | **16** | 2560 | 9728 | 32 / 8 | 128 | 2,003,851,776 | 2.0074 | −0.37% |
-| **FFN + attention only** | 36 | 2560 | **3840** | **16** / 8 | 128 | 2,017,066,496 | 1.9942 | +0.29% |
-| **residual width only** | 36 | **1280** | 9728 | 32 / 8 | 128 | 2,011,238,656 | 2.0000 | 0.00% |
+| **depth only** | **16** | 2560 | 9728 | 32 / 8 | 128 | 2,003,851,776 | 2.007 | −0.37% |
+| **FFN + attention only** | 36 | 2560 | **3840** | **16** / 8 | 128 | 2,017,066,496 | 1.994 | +0.29% |
+| **residual width only** | 36 | **1280** | 9728 | 32 / 8 | 128 | 2,011,238,656 | 2.000 | 0.00% |
 
-The largest pairwise difference is 13,214,720 parameters (0.66% of the target): FFN + attention minus depth.
+The largest pairwise difference is 13,214,720 parameters (0.66%). The split of the FFN + attention arm, 16 / 8 heads
+with FFN 3,840, is the maintainer's (2026-11-19): attention removes 40% of its parameters and 18.8% of the arm's
+reduction, the FFN 60.5% and 81.2%. Per-module changes: `structures.json :: arms.<arm>.changed_from_teacher`.
 
-**Legal sizes** (each operator's own contract):
+## 4. Building each arm: A's operators on the original teacher
 
-* *Depth.* Layers are integers: 15 layers give 1.903B and 17 give 2.105B, so 16 is the closest.
-* *Attention.* The operator keeps all 8 KV heads, head_dim 128 and the GQA grouping, so query heads can only be 8,
-  16, 24 or 32.
-* *FFN and width.* These two take any size; this round aligns them to multiples of 128.
+One session (`sob1_phase1`, `phase1_driver.py`) builds the arms in the order residual width, FFN + attention, depth
+(the cheap ones are durable before the long search). Each arm runs in its own GPU process on the unmodified teacher,
+under the packed search's own session (inputs v3), every operator config hash pinned to the journal's.
 
-### What each arm changes (parameters, teacher → arm)
-
-* **Depth only:**
-  * every per-layer module is kept whole, in 16 of the 36 blocks;
-  * attention q/o 377,487,360 → 167,772,160 each, k/v 94,371,840 → 41,943,040 each;
-  * FFN gate/up/down 896,532,480 → 398,458,880 each;
-  * the embedding (388,956,160) is unchanged.
-* **FFN + attention only:**
-  * q/o 377,487,360 → 188,743,680 each;
-  * gate/up/down 896,532,480 → 353,894,400 each;
-  * k/v, the norms and the embedding are unchanged.
-  * *How the reduction is split.* Attention removes 10,485,760 parameters per layer (40% of its parameters, 18.8% of
-    the arm's reduction). The FFN removes 45,219,840 per layer (60.5% of its parameters, 81.2% of the reduction).
-* **Residual width only:** every matrix that reads or writes the residual stream is halved with it:
-  * embedding (tied head) 388,956,160 → 194,478,080;
-  * q/o 377,487,360 → 188,743,680 each, k/v 94,371,840 → 47,185,920 each;
-  * gate/up/down 896,532,480 → 448,266,240 each;
-  * block RMSNorms 184,320 → 92,160, final RMSNorm 2,560 → 1,280.
-  * q_norm / k_norm (per head_dim) are unchanged.
-
-### The FFN + attention split (a decision for the maintainer)
-
-| option | Q / KV | FFN | parameters | attention kept | FFN kept |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| **registered draft** | 16 / 8 | 3840 | 2,017,066,496 (+0.29%) | 0.60 | 0.395 |
-| equal-retention alternative | 8 / 8 | 4480 | 2,005,270,016 (−0.30%) | 0.40 | 0.461 |
-| attention-heavy alternative | 24 / 8 | 3200 | 2,028,862,976 (+0.88%) | 0.80 | 0.329 |
-
-Why the draft is 16 / 8:
-
-* It is A's own attention operating point: the 596M target's heads, and the ATTENTION selection already recorded on
-  the teacher (state `87ee6205…`, the one A used). It is reused bit for bit, with no new attention compute.
-* With KV heads preserved, 16 query heads is the middle legal step.
-* Minitron reports (Insight 3) stronger width-pruned accuracy when attention heads are kept and the other dimensions
-  are pruned.
-
-The 8 / 8 option is closer to compressing both modules by the same fraction. Choosing it costs about 85 s of new
-ATTENTION compute and changes nothing else.
-
-## 4. Building each arm (A's operators, on the teacher)
-
-| arm | operator, profile | new or reused | gate before any build |
+| arm | what is reused | what is new | gate before anything is built on it |
 | --- | --- | --- | --- |
-| depth only | `depth.causal_kl_greedy_v1`, `calib.hybrid_d4_base@v2` | **new**: greedy 36 → 16, 20 rounds, 530 candidate subsets, every round scored against the unbypassed teacher | rounds 1-8 must remove `[2, 32, 3, 26, 30, 8, 20, 28]`, the journal's 36 → 28 order (state `fede45db…`) |
-| FFN + attention only | `ffn.activation_importance_v0`, base; `attention.activation_importance_v1`, `calib.hybrid_d4_rh@v2` | FFN **new** at 3,840; ATTENTION **reused** (16 / 8) | the same FFN run's top-3,072 must equal the journal's FFN state on the teacher (`3f743039…`); the attention rebuild must equal `87ee6205…` |
-| residual width only | `width.global_pca_v0`, rh | **new** at 1,280, from the teacher statistics TPI1 collected and verified (relay and dev box, 1.95 GB, 37 points): no new forward pass | the same statistics at 1,024 must rebuild the journal's WIDTH state on the teacher (`02b33196…`) bit for bit |
+| residual width | TPI1's procedure | the journal's root RESIDUAL_WIDTH(rh) replayed with its statistics retained (about 3 min); P at 1,280 over all 37 residual points, weights 9 / 1 / 8 | the replayed child equals state `02b33196…`'s digest; P at 1,024 recomputed from the statistics reproduces the recorded 37-point diagnostics. The statistics' sha256 against TPI1's kept file is recorded as evidence |
+| FFN + attention | the journal's 16 / 8 `kept_heads` on the teacher (A's ATTENTION) | the FFN operator at 3,840, sharing one statistics pass with a run at 3,072 | the 3,072 run builds the journal's FFN state `3f743039…` bit for bit; the head child equals `87ee6205…` |
+| depth | **the journal's 36 → 28 search, rounds 1-8** (state `fede45db…`, 260 candidate subsets) | rounds 9-20: 28 + 27 + … + 17 = **270 candidate subsets**, each against the unbypassed teacher | the operator re-checks the eight rounds, re-scores round 8's chosen subset (must equal 0.5305385485267972 exactly) and continues; rounds 1-8 must stay `[2, 32, 3, 26, 30, 8, 20, 28]` |
 
-The width points follow A's rule with every layer kept: all 37 residual points, weighted 9 (embedding output) /
-1 / 8 (post-final-norm).
+**Why the depth search can resume** (`selection.json :: depth_only.resume_checks`, all true, no field missing):
 
-**Calibration data** is the packed search's own, as in TPI1: a random shuffle, then sequential packing with
-truncation, standard causal attention, 8,192-token sequences (AGENTS.md P19).
+| condition | the journal's step |
+| --- | --- |
+| the reference is the original teacher | `parent_state`, a first-level state of the search root `aea5f999…` |
+| the same teacher | `Qwen/Qwen3-4B@1cfa9a72`, root sha256 `a8b9dec3…` |
+| the same operator and profile | `depth.causal_kl_greedy_v1` (its signature hash unchanged), `calib.hybrid_d4_base@v2` |
+| the same items, scoring positions and packing | config hash `58c86cde…` (TPI1's pin); 558 items; random shuffle, sequential packing with truncation, standard causal attention, 8,192-token sequences (79 packed sequences) |
+| the same execution | micro-batch 1, `original_order_v1`, scored rows, prefix reuse |
+| greedy accumulation and the tie rule | each round removes only the earlier choices, scores every surviving layer, picks the lowest score, ties to the lower index |
+| the removal order | `[2, 32, 3, 26, 30, 8, 20, 28]`, TPI1's committed one |
 
-| profile | used by | before packing | after packing |
-| --- | --- | --- | --- |
-| `calib.hybrid_d4_base@v2` | FFN, DEPTH | 558 examples in 28 cells; 211,203 unique scored positions | 79 packed sequences |
-| `calib.hybrid_d4_rh@v2` | ATTENTION, WIDTH | 388 examples in 28 cells; 213,361 unique scored positions | 58 packed sequences; 236,939 non-padding tokens |
+Every round's full table (each candidate's score) is kept, so the operator can check them. Had a field been missing,
+the record names it and the first round that must be scored again (`minimal_recompute`). The resume is a core
+capability (`OperatorContext.resume_state`, execution only, never hashed: a resumed search computes the state a whole
+one does; `tests/initialization/test_depth_resume.py`).
 
-## 5. Recovery, evaluation and the registered analysis
+Each arm then: one frozen mapping keyed by root indices, saved and loaded back, materialized onto the teacher;
+geometry and parameter count against `structures.json`; a finite forward after reload; state evaluation against the
+teacher (diagnostic only); the checkpoint and mapping to the relay, downloaded again and re-hashed; the arm's
+`init_record.json`.
 
-**The same recovery for every arm.** Each arm trains with A's units, which are themselves A-MIX-6cat-sr's; only the
-initialization and its paths change.
+**Calibration and training are different data sets, each counted before packing.**
 
-* *Data:* one pack, the same proportions and order. Before packing: 45,363 examples, 56,408 turns, 11,862,564
-  unique supervised tokens (thinking 5,935,809 / non-thinking 5,926,755; reasoning 4,945,744, answer 6,916,820, of
-  which tool calling 995,341). After packing: 6,467 packed sequences of 8,192 tokens.
-* *Schedule:* 3 epochs, 9,701 optimizer steps, batch size 2, micro-batch 1.
-* *Objective and optimizer:* CE 0.25 + Top-200 + tail KD 1.0 at the assistant positions, with the teacher in bf16
-  as the online KD teacher; AdamW 5e-5.
-* *Precision and trainable parameters:* fp32 parameters, bf16 autocast, gradient checkpointing; the tied embedding
-  frozen.
-* *Seeds:* 20260726 and 20260801.
-* *Exposure:* supervised-token exposure is counted from each trainer's log, never derived.
-* *What is not matched:* the comparison is parameter-matched. FLOPs and latency are not matched; they are measured
-  and reported separately.
-
-| arm | training FLOPs per token (teacher included), vs A's 596M | expected s / step | expected h / unit (bound) |
-| --- | ---: | ---: | ---: |
-| depth only | 1.59x (1.85x without attention) | 5.43 | 14.6 (19.5) |
-| FFN + attention only | 1.63x (1.86x) | 5.55 | 14.9 (19.6) |
-| residual width only | 1.93x (1.92x) | 6.58 | 17.7 (20.4) |
-
-The seconds are TPI1's measured 3.409 s per step all-in (seed 20260801) times the FLOPs ratio. They are estimates,
-not measurements of these arms.
-
-**GPU memory (L40S, 44.99 GiB as the driver reports it).** The estimate decomposes TPI1's measured peak (17.47 GiB
-allocated, 19.15 reserved) into:
-
-* the fp32 parameters, gradients and AdamW moments;
-* the 7.49 GiB bf16 teacher;
-* the checkpointed block inputs;
-* the rest (logit chunks, the teacher forward, one block's recompute).
-
-| arm | expected peak allocated | conservative peak reserved | L40S margin (conservative) |
-| --- | ---: | ---: | ---: |
-| depth only | 36.2 GiB | 42.1 GiB | 2.9 GiB |
-| FFN + attention only | 38.0 GiB | 40.1 GiB | 4.8 GiB |
-| residual width only | 38.7 GiB | 44.6 GiB | **0.4 GiB** |
-
-Width-only is the tight one: its small embedding leaves 1.82B trainable parameters. So:
-
-* the first optimizer steps of the first unit measure the real peak;
-* if it runs out of memory, the protocol-neutral settings are tried first: a smaller `loss.kd_chunk` (the objective
-  is identical for any chunk) and `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`;
-* only a measured out-of-memory after that justifies an 80 GB GPU, for that operation (the L40S-first rule).
-
-**Evaluation.** Every item of every eval-set-1 unit is generated, in both modes, for every model. eval-set-1 is
-development-exposed.
-
-* **Before recovery** (damage from the initialization alone):
-  * each untrained arm at the architecture's 40,960 tokens, which is RI-S1's protocol;
-  * the teacher's reference at that context is reused from `a_teacher_20261030_012648` under RI-S1's identity rule;
-  * RI-S1's D (3,215,021,568 parameters, N 1.25: 5.6% thinking-mode static fluid untrained, against the teacher's
-    89.6%) is cited as an existing measurement of depth damage, never as this round's depth arm.
-* **After recovery:** each arm and seed at the trained context of 8,192 tokens, TPI1's and B's protocol, so A's 596M
-  records stand beside these.
-* **Teacher at 8,192 (optional):** the teacher once, in both modes, at 8,192 would be the matched reference for
-  damage after recovery. This is a decision for the maintainer (about $2.8 expected).
-
-**Registered analysis** (`design.json :: analysis`, written before any arm exists; `analysis.py` implements the
-decision rule):
-
-* **Primary:** thinking mode, static fluid formal core (570 items in 558 independence groups, TPI1's pins), after
-  the same recovery. There are three pairwise comparisons (depth vs FFN + attention, depth vs width,
-  FFN + attention vs width), each pooled over both seeds and paired item by item.
-* **Test and interval:** per pair, TPI1's group-level sign-flip test (100,000 draws) and its group bootstrap
-  interval.
-* **Multiplicity:** the three thinking-mode pairs form one family, Holm-adjusted at family-wise alpha 0.05.
-  Non-thinking (the key secondary) is a second family, Holm at 0.05, tested only if the first family rejects all
-  three pairs (serial gatekeeping); otherwise it is descriptive.
-* **Verdicts:** `<X>_BETTER` / `<Y>_BETTER` / `NOT_DISTINGUISHED` (not equivalence). An incomplete pair is
-  descriptive. No ranking or pooled score is defined.
-* **Descriptive:**
-  * per seed, and whether the seeds agree in sign;
-  * initialization damage against the teacher;
-  * recovery after vs before (different contexts, said wherever it is shown);
-  * the reasoning axes (items, groups and records apart), the interactive episodes and every supporting unit;
-  * terminations apart from correctness;
-  * A's 596M as context;
-  * diagnostics (step-0 and validation CE / KD, the state-evaluation KL of each initialization) and measured compute.
-
-## 6. Cost (a draft, not approved)
-
-L40S at $1.09/h plus 150 GB of container disk: $1.1105/h all-in. Every figure is an estimate with its basis in
-`design.json :: cost_model`. The bound is what a grant would cap.
-
-| component | GPU hours, expected (bound) | USD, expected (bound) |
-| --- | ---: | ---: |
-| init session: DEPTH 36 → 16 3.4 h (4.6 h), FFN, ATTENTION, WIDTH, builds, relay copies, state evaluation | 4.45 (5.74) | 4.94 (6.37) |
-| pre-recovery evaluation, three arms, 40,960 tokens | 5.4 (10.8) | 6.00 (11.99) |
-| recovery training, 6 units | 94.6 (119.0) | 105.01 (132.13) |
-| post-recovery evaluation, 6 units, 8,192 tokens | 7.3 (18.0) | 8.13 (19.99) |
-| session setup, 6 training sessions | 2.5 | 2.78 |
-| teacher at 8,192 (optional) | 2.5 (3.6) | 2.78 (4.00) |
-
-| option | GPU hours, expected (bound) | USD expected | USD bound + $1 reserve | fits the $30.24 the project cap leaves |
-| --- | ---: | ---: | ---: | --- |
-| **phase 1**: build all three initializations, measure their damage | 9.9 (16.5) | 10.94 | 19.37 | yes |
-| phase 2, both seeds: recovery and post-recovery evaluation | 104.4 (139.5) | 115.92 | 155.90 | no |
-| phase 2, one seed (20260726) | 52.2 (69.7) | 57.96 | 78.45 | no |
-| full study, both seeds | 114.2 (156.0) | 126.86 | 174.27 | no |
-| full study, with the teacher at 8,192 | 116.7 (159.6) | 129.63 | 178.27 | no |
-
-The project position as read on 2026-11-18 19:33Z: cap $1,000, committed $969.7558, **$30.2442 left**; provider
-balance $40.24; no pod, no volume. Phase 2 needs a project-cap decision; this document does not raise the cap or
-assume that it is raised.
-
-## 7. Storage and takeover across attempts
-
-**Space as read on 2026-11-18.**
-
-* *Dev box:* `/` has 3.66 GB free of 211 GB, shared with another project. This project holds about 54 GB of it:
-  the repository about 29 GB, `~/aad-artifacts` 23 GB, scratch 2.3 GB.
-* *Relay:* about 60.1 GiB of private-storage headroom, account-wide. This was bisected with the LFS batch endpoint,
-  which moves no bytes, and 60.76 GiB was refused.
-
-| artifact | bytes per arm (depth / FFN + attention / width) | needed by |
+| set | before packing | after packing (compute records only) |
 | --- | --- | --- |
-| initialization, bf16 | 4.01 / 4.03 / 4.02 GB | the pre-recovery evaluation; each unit's first step |
-| save point (fp32 weights + AdamW moments) | 20.9 / 21.1 / 22.6 GB | a resumed unit only |
-| final weights, fp32 | 8.02 / 8.07 / 8.04 GB | the unit's evaluation; any later round that declares them |
+| calibration `calib.hybrid_d4_base@v2` (FFN, DEPTH) | 558 examples, 28 cells, 211,203 unique scored positions | 79 packed sequences |
+| calibration `calib.hybrid_d4_rh@v2` (ATTENTION, WIDTH) | 388 examples, 28 cells, 213,361 unique scored positions | 58 packed sequences, 236,939 non-padding tokens |
+| training (the A-MIX-6cat-sr pack) | 45,363 examples, 56,408 turns, 11,862,564 unique supervised tokens (thinking 5,935,809, non-thinking 5,926,755; reasoning 4,945,744, answer 6,916,820, tool calling 995,341) | 6,467 packed sequences of 8,192 tokens |
 
-**What fits.**
+## 5. Recovery: Research A's recipe, unchanged
 
-* *Phase 1:* the three initializations, 11.2 GiB on the relay.
-* *Phase 2:*
-  * The relay holds the initializations plus one save-point rotation (two save points; the old one is deleted only
-    after the new one hands off). That is 53.3 GiB at the largest arm, which fits.
-  * The six finals (44.9 GiB) cannot accumulate there during training: 90.8 GiB would be needed.
-  * Nor can they go to the dev box.
-  * So Phase 2 as designed retains its finals only if storage is added; otherwise each final leaves the relay once
-    its unit's evaluation evidence is durable. This is a decision for the maintainer.
+`plan.py --arm <arm>` derives each arm's two units from the A-MIX-6cat-sr plan (sha256 `6632bdbc…`) after phase 1
+commits the arm's init record. Only the unit and arm names, run name, student path, output directory and
+`lineage.initialization` change. Every other field is compared with A-MIX's unit, and with TPI1's A unit of the same
+seed (A's recipe), and must be equal:
 
-**Takeover.** It is TPI1's driver, with this round's repairs:
+* the sealed pack and its data proportions; random order (a per-epoch permutation from the seed); sequential packing
+  with truncation allowed; 8,192 tokens; standard causal attention;
+* batch size 2 as micro-batch 1 × 2 gradient accumulation steps; 3 epochs, 9,701 optimizer steps;
+* the teacher in bf16 as the online KD teacher (one lineage); CE 0.25 + Top-200 + tail KD 1.0 at the assistant
+  positions; AdamW lr 5e-5, weight decay 0.01, betas (0.9, 0.95), 485 warmup steps, cosine to 0.1, clip 1.0;
+* fp32 parameters with bf16 autocast and gradient checkpointing; the tied embedding frozen; save points every 1,104
+  steps; seeds 20260726 then 20260801.
 
-* *Initialization:* built once in the init session, hashed, put on the relay and verified by a fresh download. A
-  later attempt fetches it and re-hashes it; it is never rebuilt.
-* *Training:*
-  * every save point (weights, AdamW state, step, consumed sequences, RNG) hands off before its predecessor is
-    deleted: its record goes beside its files and the replacement's relay listing is confirmed;
-  * a replacement pod restores the latest save point the relay holds, even one whose record the dev box never saw;
-  * finished steps are never retrained.
-* *Final weights:*
-  * the final goes to the relay with the trainer's completion record (under either of the trainer's two names) and
-    hands off before any save point is retired;
-  * a replacement restores it only when that record is this unit's config finished to its last step;
-  * it then runs only the evaluations that have no formal report.
-* *Evaluation:* each finished sample is sealed as it is written, and a later attempt generates only the samples
-  without a sealed record, under the seeds their items derive.
-* *Retiring a temporary copy* requires, first:
-  * the bytes to keep are verified (hash) where they are kept;
-  * the evidence that consumed them is durable;
-  * a tombstone is written (AGENTS.md 2.5).
-* *Reproducibility of the initializations:* they need not be kept after the study. Each is rebuilt from the teacher
-  and its recorded selection, and the rebuild must equal the recorded digest.
+The comparison is parameter-matched; FLOPs and latency are not matched and are reported apart. Supervised-token
+exposure is counted from each trainer's log.
 
-## 8. What remains before a launch
+| arm | training FLOPs per token vs A's 596M | expected s / step | expected h / seed (bound) |
+| --- | ---: | ---: | ---: |
+| residual width only | 1.93x | 6.58 | 17.7 (20.4) |
+| depth only | 1.59x | 5.43 | 14.6 (19.5) |
+| FFN + attention only | 1.63x | 5.55 | 14.9 (19.6) |
 
-* The init driver for the three single-operator builds, and the per-arm training plan. The plan is derived from
-  TPI1's units by the same field-by-field rule. TPI1's driver takes this round's plan, prefix and arm names from
-  configuration instead of its constants.
-* The session kinds, the grant and the launch-bound sweep, once the budget and these decisions exist.
-* Nothing in `src/aadistill` changes: every instance fact (geometries, seeds, prefixes, prices) is in this round's
-  configuration.
+**Order and memory on the L40S.** Phase 2 trains one arm per session on one L40S, the **residual-width arm first**:
+its small embedding leaves 1.82B trainable parameters, so it is the tightest (38.7 GiB expected peak allocated,
+44.6 GiB conservative reserved, of 44.99 GiB).
 
-## 9. Decisions for the maintainer
+* The trainer logs, for each unit's first four optimizer steps, the peak allocated, peak reserved and the device's
+  free memory after each phase: forward with the KD / CE loss, backward, gradient clip, optimizer step (AdamW
+  allocates its state at the first one). An out-of-memory error is logged with the phase it was raised in
+  (`aadistill.training.train.MEMORY_PROBE_ENV`, execution only). The driver keeps them in `units.json :: memory`.
+  If the steps fit, training simply continues.
+* On an out-of-memory error, the phase decides the remedy. In the KD phase: `expandable_segments`, then a smaller
+  `loss.kd_chunk`. In the optimizer step: `expandable_segments`, then AdamW without its multi-tensor temporaries.
+  Each is recorded as a deviation. The sequence length, causal attention and effective batch size are never changed.
+* An 80 GB card is proposed only for an affected arm, after a measured out-of-memory survives those steps.
 
-1. The FFN + attention split: 16 / 8 with FFN 3,840 (draft), 8 / 8 with 4,480, or 24 / 8 with 3,200.
-2. Funding and staging:
-   * Phase 1 alone fits the current $30.24.
-   * Phase 2 needs a project-cap increase: about $116 expected / $156 bound for both seeds, or $58 / $78 for one
-     seed. This document assumes none.
-3. Storage of the six fp32 finals (45 GiB):
-   * add durable storage (private relay plan, or dev-box disk);
-   * or retire each final from the relay after its evaluation evidence is durable (retraining a unit then costs
-     about $16-23).
-4. Whether to measure the teacher at 8,192 tokens as the matched post-recovery reference (about $2.8).
+## 6. Evaluation and the registered analysis
+
+**One protocol for every model** (`design.json :: evaluation.protocol`): eval-set-1, every item of every unit, both
+modes, `nucleus_v1`, action protocol v2, the system message "You are a helpful Assistant.", the degeneration check
+every 256 tokens. Every model generates until EOS or 8,192 tokens minus its rendered prompt. Every model is packaged
+by one rule: the weights linked, plus the teacher's tokenizer files and generation config, hashed against the
+teacher identity. eval-set-1 is development-exposed.
+
+| model | when | records |
+| --- | --- | --- |
+| each untrained arm | phase 1 | new, 8,192 |
+| the teacher | phase 1 | **new, 8,192: no identity-matched record exists** |
+| each arm × seed after recovery | phase 2 | new, 8,192 |
+
+**The teacher reference.** Every generation summary under `logs/` and `artifacts/` naming the hybrid teacher was
+checked on 2026-11-19. Its eval-set-1 records are `a_teacher_20261030_012648`'s, plus RI-S1's copy of them, and they
+are at 40,960 tokens. Its other generations are training-data sessions, not eval-set-1. So the teacher is evaluated at
+8,192 in phase 1. Capped at 8,192, its 40,960 records would decode 5.54M tokens in thinking mode (200 of 1,716
+samples' turns reach the limit) and 0.62M in non-thinking mode. The 40,960 records stay as historical reference and
+are never pooled with these.
+
+**Reported per arm**, both modes, descriptive (`analysis.arm_report`):
+
+* initialization damage: the untrained arm against the teacher, plus its state-evaluation KL / NLL and step-0 CE / KD;
+* recovery: the recovered arm against its own initialization, per seed and pooled;
+* the remaining gap: the recovered arm against the teacher.
+
+**Registered decision** (`analysis.decide`):
+
+* **Primary:** thinking mode, static fluid formal core (570 items, 558 independence groups), after recovery: the
+  three pairwise differences, pooled over both seeds and paired item by item; TPI1's group sign-flip test and group
+  bootstrap interval.
+* **Holm with m = 3 always.** A pair that cannot be tested still counts in m. The earlier code used m = the number of
+  p-values, so two testable pairs at p 0.02 / 0.024 would both have been rejected (0.04 / 0.04); with m = 3 neither
+  is (0.06 / 0.06).
+* **Formal only when the primary units are complete:** all three arms × both registered seeds × every item. With
+  anything missing, every pair of the mode is descriptive (a pair whose two arms are complete keeps its delta and
+  interval, no test).
+* **Non-thinking** (key secondary) is a second Holm family, m = 3, tested only if the first rejects all three pairs.
+* **Nothing eliminates an arm:** no initial KL, CE or generation score stops or drops a unit.
+
+## 7. Cost
+
+L40S at $1.09/h plus 150 GB container disk: $1.1105/h all-in. A session's hard cap is priced at the highest price
+the proposal admits ($1.11/h) over setup, transfer, the driver's bound with 5% contingency, and the closeout, recovery
+and watchdog reserves. Every figure is an estimate; the basis is `design.json :: cost_model`.
+
+**Phase 1 (proposed: one `sob1_phase1` session).**
+
+| component | hours expected (bound) | basis |
+| --- | ---: | --- |
+| builds | 2.30 (4.95) | DEPTH rounds 9-20 1.45 h (2.36 h) at the journal's 27.2 s per candidate; FFN, width replay, attention gate about 7 min; three arms' build and state evaluation 42 min; three inits to the relay 0.03 h (1.65 h at the 2.6 MB/s floor) |
+| untrained arms at 8,192, three | 3.66 (9.0) | RI-S1's untrained D / W / DW capped at 8,192: 3.5-4.5M output tokens each over both modes |
+| teacher at 8,192 | 2.81 (4.2) | 6.16M capped output tokens at its measured 608.8 tokens/s |
+| **session** | **9.19 GPU h, $10.20 expected** | |
+
+* **Hard cap $22.53** (ceiling of the study's proposal: one session; a replacement attempt takes over every arm whose
+  init verified and every sealed sample, within what the ceiling leaves).
+* **Teardown reserve $1.00**, outside the ceiling.
+* **Total $23.53.** The live position on 2026-11-19 06:49Z: $30.2442 left under the $1,000 project cap; balance
+  $40.24; no pod, no volume. `launch.py budget --kind sob1_phase1`: fundable.
+
+**Phase 2 (a draft for the maintainer, proposes no cap; `proposal.json :: phase_2_draft`).** One session per arm,
+both seeds, in the order residual width, depth, FFN + attention.
+
+| session | training h per seed, expected (bound) | driver h, expected (bound) | USD expected | hard cap |
+| --- | ---: | ---: | ---: | ---: |
+| residual width only | 17.7 (20.4) | 37.9 (52.6) | 42.59 | 63.40 |
+| depth only | 14.6 (19.5) | 31.7 (50.6) | 35.70 | 61.06 |
+| FFN + attention only | 14.9 (19.6) | 32.4 (50.8) | 36.41 | 61.32 |
+| **both seeds** | | | **114.70** | **185.78 (+ $1 reserve)** |
+| one seed (20260726) | | | 58.06 | |
+
+The bound includes each unit's post-recovery evaluation (1.22 h, bound 3.0 h). It also includes the floor-rate copies
+of the init, the finals and the last save point. Phase 2 does not fit what the project cap leaves; this document does
+not raise the cap or assume it raised.
+
+## 8. Storage and takeover
+
+**Dev box (2026-11-19).** The maintainer authorized retiring eligible historical checkpoints. The consumer audit
+covered the registry, readers in code and configs, and the declared consumers and retention purposes. Seven
+tombstones were then written and the weights deleted:
+
+* RI-S1's untrained D, W and DW;
+* RI-LM1's two merge deltas (each has two hard links).
+
+Their configs, hashes, logs, generations and measurements are kept
+(`logs/maintenance/storage/devbox_cleanup_20261119.json`). Free space went from 3.23 GiB to **13.93 GiB (10.70 GiB
+freed)**. Kept, with their reasons in that record:
+
+* TPI1's A initialization and finals (the baseline's only copies);
+* the teacher statistics;
+* D1's reference initialization and the 0.6B canonical initialization (registry-protected);
+* other projects' files.
+
+| | bytes | where | fits |
+| --- | ---: | --- | --- |
+| phase 1: three bf16 initializations | 11.24 GiB | relay; dev box `~/aad-artifacts/stage1_single_operator_budget/<arm>/init/<digest>/` | yes (relay 60.08 GiB headroom; dev box 13.93 GiB, 2.69 GiB left after) |
+| phase 2: two save points at once + the inits | 53.29 GiB peak on the relay | relay | yes, if each final leaves the relay after its evaluation |
+| phase 2: six fp32 finals | 44.94 GiB | dev box `<arm>-s<seed>/final/<sha>/` | **no: 42.25 GiB short** after phase 1; 90.77 GiB if they accumulated on the relay |
+
+**Takeover.** TPI1's train driver, with this round's two repairs:
+
+* *An unreadable relay listing* is read up to five times. If it still cannot be read, the evidence's own records are
+  used when there are any; with none, the unit refuses to start. Before, a listing timeout with no local records
+  started the unit from step 0.
+* *Weights verified but their record unpublished:* the next watcher tick, and the final's bounded retries, publish
+  only the record (`hand_off_with_retries`); the weights are never uploaded again. Before, a save point whose handoff
+  failed was never handed off: its predecessor stayed, and a lost pod fell back to it.
+* *Slow transfers:*
+  * every copy's timeout comes from its bytes at the floor rates (uploads 120 MB/s, verifying downloads 2.6 MB/s,
+    × 1.25);
+  * a training session stops early enough to secure one save point and the final before its hard deadline (a 2B save
+    point's floor-rate verify is up to 2.4 h);
+  * an old save point is retired only after the new one hands off;
+  * regressions: `test_takeover.py`.
+* *Evaluation:* each finished sample is sealed as it is written. A later attempt generates only the items, per unit
+  and seed, without a sealed record, each under the seed its item derives.
+
+## 9. Launch path (phase 1)
+
+```text
+launch.py budget --kind sob1_phase1                                      # $0: fundable now?
+launch.py grant --decision '<the maintainer's words>' --granted-by maintainer
+launch.py issue --kind sob1_phase1 --run-id <id> --expected-usd 10.20 --hard-cap-usd 22.53
+git commit <the authorization> (the session commit) ; stage the bundle at that commit
+launch.py launch --kind sob1_phase1 --run-id <id> --session-commit <c> --bundle <b> --scr <s> --max-price 1.11 --disk-gb 150
+launch.py retain --kind sob1_phase1 --run-id <id> --from <s>             # the three inits onto the dev box
+plan.py --arm <arm> --init-record <its committed init_record.json> --write    # per arm, before phase 2
+```
+
+## 10. Decisions for the maintainer
+
+1. Grant phase 1: a $22.53 hard cap for one `sob1_phase1` session (expected $10.20), plus the $1.00 teardown
+   reserve, inside the $30.24 the project cap leaves.
+2. Phase 2's budget: both seeds expected $114.70, hard caps $185.78 + $1 (one seed: $58.06 expected). This needs a
+   project-cap decision; nothing here assumes it.
+3. Phase 2's storage: the six fp32 finals (44.94 GiB) do not fit the dev box (42.25 GiB short after phase 1) or
+   accumulate on the relay. Either add storage, or retire each final from the relay once its evaluation evidence is
+   durable (a unit retrained later then costs about $16-23).

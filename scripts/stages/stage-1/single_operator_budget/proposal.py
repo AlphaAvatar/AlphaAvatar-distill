@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
-"""SOB1's budget draft for the maintainer ($0, CPU): time, GPU hours and dollars per component and per phase, the
-relay and dev-box storage each phase needs against what exists, all from the design's cost model, the structures and
-TPI1's measurements. A draft: it authorizes nothing and no amount in it is approved.
+"""SOB1's budget for the maintainer ($0, CPU): phase 1 as a proposal the issuer can read (its ceiling, per-session
+hard cap and teardown reserve, `shared.study_engineering`'s grant fields), and phase 2 -- recovery training of the
+three arms x two seeds and their evaluation -- as a separate draft that proposes no cap. Nothing here is approved.
 
     PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python \\
         scripts/stages/stage-1/single_operator_budget/proposal.py --write | --check
 
-Inputs: `design.json :: cost_model, arms, training`; `plans/structures.json` (FLOPs ratios, checkpoint bytes, memory);
-`plans/resource_snapshot.json` (the project position, the relay's headroom and the dev box's free space, each read
-once with its time). Every hour figure is an estimate labelled with its basis; ``bound`` is what a grant would cap.
+Inputs: `design.json :: cost_model, arms, training, phase_1`; `plans/structures.json` (FLOPs ratios, checkpoint
+bytes, memory); `plans/resource_snapshot.json` (the project position, the relay's headroom and the dev box's free
+space, each read once with its time; read again at issue and launch). Every hour figure is an estimate labelled with
+its basis; ``bound`` is what a hard cap covers.
+
+A session's hard cap is what `study_engineering`'s session bills at most: setup, transfer, the driver's bound with the
+launch's contingency, the closeout and artifact-recovery reserves and the watchdog's minutes, at the highest price the
+proposal admits plus the container disk (`hard_cap`).
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -28,18 +34,37 @@ from stages.single_operator_budget import structures as ST  # noqa: E402
 PLANS = REPO / "logs/stages/stage-1/single_operator_budget/plans"
 OUT = PLANS / "proposal.json"
 SNAPSHOT = PLANS / "resource_snapshot.json"
-SCHEMA = "aadistill.stage1.single_operator_budget.proposal/v1"
+SCHEMA = "aadistill.stage1.single_operator_budget.proposal/v2"
 GIB = 2 ** 30
+#: the session's fixed reserves as `study_engineering.session_spec` builds them (minutes), and its contingency
+SESSION = {"setup": 25.0, "transfer": 5.0, "closeout": 10.0, "artifact_recovery": 10.0, "watchdog": 1.25,
+           "contingency_fraction": 0.05}
+#: the highest L40S price a session may accept (the proposal's ``gpus``); the accepted price has been $1.09
+MAX_PRICE = 1.11
 
 
 def sha256_file(p: Path) -> str:
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 
-def rate(cm: dict) -> float:
-    """All-in dollars per hour: the GPU and its container disk."""
+def disk_rate(cm: dict) -> float:
     disk = cm["container_disk"]
-    return cm["gpu"]["usd_per_hour"] + disk["gb"] * disk["usd_per_gb_month"] / disk["hours_per_month"]
+    return disk["gb"] * disk["usd_per_gb_month"] / disk["hours_per_month"]
+
+
+def rate(cm: dict) -> float:
+    """All-in dollars per hour at the accepted price: the GPU and its container disk."""
+    return cm["gpu"]["usd_per_hour"] + disk_rate(cm)
+
+
+def hard_cap(driver_minutes: float, cm: dict) -> dict:
+    """The most one session bills (module docstring), ceiled to the cent, and its minutes."""
+    f = 1.0 + SESSION["contingency_fraction"]
+    minutes = (SESSION["setup"] + SESSION["transfer"] + driver_minutes * f + SESSION["closeout"] * f
+               + SESSION["artifact_recovery"] + SESSION["watchdog"])
+    usd = minutes / 60 * (MAX_PRICE + disk_rate(cm))
+    return {"driver_minutes": round(driver_minutes, 1), "billable_minutes": round(minutes, 1),
+            "usd": math.ceil(usd * 100) / 100}
 
 
 def training_hours(arm: dict, steps: int, all_in_seconds: float, factor: float) -> dict:
@@ -50,20 +75,30 @@ def training_hours(arm: dict, steps: int, all_in_seconds: float, factor: float) 
             "hours_expected": round(exp * steps / 3600, 2), "hours_bound": round(bound * steps / 3600, 2)}
 
 
-def depth_hours(cm: dict, n_root: int, n_keep: int) -> dict:
-    """DEPTH 36 -> n_keep on the teacher: the journal's 36 -> 28 rounds as measured, the further rounds at the
-    journal's seconds per candidate scaled by the layers that remain (expected) or unscaled (bound)."""
+def depth_hours(cm: dict, n_root: int, n_keep: int, resumed: int) -> dict:
+    """DEPTH 36 -> n_keep resumed after ``resumed`` rounds: the new rounds at the journal's seconds per candidate
+    scaled by the layers that remain (expected) or unscaled (bound), plus round 8's re-score."""
     ic = cm["init_session"]
-    measured_s, measured_cands, journal_keep = 7073.8, 260, 28
+    measured_s, measured_cands = 7073.8, 260
     per = measured_s / measured_cands
-    avg_measured = sum(range(journal_keep + 1, n_root + 1)) / (n_root - journal_keep)
-    rest = list(range(n_keep + 1, journal_keep + 1))          #: rounds 9..20 score 28, 27, ..., 17 candidates
-    exp = measured_s + sum(c * per * (c / avg_measured) for c in rest)
-    bound = (measured_s + sum(c * per for c in rest)) * ic["bound_factor"]
-    return {"candidate_subsets": sum(range(n_keep + 1, n_root + 1)), "hours_expected": round(exp / 3600, 2),
-            "hours_bound": round(bound / 3600, 2),
-            "rule": "rounds 1-8 at the journal's measured 7,074 s; rounds 9-20 at 27.2 s per candidate x remaining / "
-                    f"{avg_measured} (expected) or x 1 (bound), the bound x {ic['bound_factor']}"}
+    avg = sum(range(n_root - resumed + 1, n_root + 1)) / resumed
+    new = [n_root - r for r in range(resumed, n_root - n_keep)]
+    rescore = per * (n_root - resumed + 1) / avg                       #: one candidate at round 8's depth
+    exp = sum(c * per * (c / avg) for c in new) + rescore
+    bound = (sum(c * per for c in new) + per) * ic["bound_factor"]
+    return {"candidate_subsets_new": sum(new), "candidates_per_new_round": new,
+            "hours_expected": round(exp / 3600, 2), "hours_bound": round(bound / 3600, 2),
+            "rule": f"rounds {resumed + 1}-{n_root - n_keep} at the journal's {per:.1f} s per candidate x remaining / "
+                    f"{avg} (expected) or x 1 (bound) plus round {resumed}'s re-score, the bound x {ic['bound_factor']}"}
+
+
+def transfer_hours(nbytes: float, cm: dict, d: dict) -> dict:
+    """One upload and its verifying download: at TPI1's median rates (expected) and at the floors (bound)."""
+    t = cm["transfer"]
+    exp = nbytes / t["expected_upload_bytes_per_second"] + nbytes / t["expected_download_bytes_per_second"]
+    bound = (nbytes / d["upload_floor_bytes_per_second"] + nbytes / d["download_floor_bytes_per_second"]) \
+        * d["transfer_margin"]
+    return {"bytes": int(nbytes), "hours_expected": round(exp / 3600, 3), "hours_bound": round(bound / 3600, 3)}
 
 
 def build(design: dict | None = None) -> dict:
@@ -71,95 +106,142 @@ def build(design: dict | None = None) -> dict:
     s = json.loads(ST.OUT.read_text())
     if s["design_sha256"] != ST.sha256_file(ST.DESIGN):
         raise SystemExit("structures.json was written under another design; rerun structures.py --write")
+    sel = json.loads((REPO / "configs/stages/stage-1/single_operator_budget/selection.json").read_text())
     snap = json.loads(SNAPSHOT.read_text())
-    cm = d["cost_model"]
+    cm, dur = d["cost_model"], d["training"]["durability"]
+    ic = cm["init_session"]
     usd_h = rate(cm)
     steps = d["training"]["data"]["after_packing"]["optimizer_steps"]
     seeds = d["training"]["seeds"]
     setup_h = cm["session_setup_minutes"] / 60
     all_in = s["tpi1_measured"]["all_in_seconds_per_step"]
     arms = list(s["arms"])
-    train = {a: training_hours(s["arms"][a], steps, all_in, cm["init_session"]["bound_factor"]) for a in arms}
-    dep = depth_hours(cm, s["teacher"]["geometry"]["num_hidden_layers"],
-                      s["arms"]["depth_only"]["geometry"]["num_hidden_layers"])
-    other_ops_h = (185.3 + 85.0 + 172.1) / 3600 + cm["init_session"]["builds_relay_state_evaluation_minutes"] / 60
-    init = {"hours_expected": round(setup_h + dep["hours_expected"] + other_ops_h, 2),
-            "hours_bound": round(setup_h + dep["hours_bound"] + other_ops_h * cm["init_session"]["bound_factor"], 2),
-            "depth": dep, "other_operators_and_builds_hours": round(other_ops_h, 2)}
-    pre = cm["pre_recovery_evaluation"]
-    post = cm["post_recovery_evaluation"]
-    comp = {
-        "init_session": init,
-        "pre_recovery_evaluation": {"models": len(arms), "hours_expected": pre["expected_hours_per_arm"] * len(arms),
-                                    "hours_bound": pre["bound_hours_per_arm"] * len(arms)},
-        "training": {"units": len(arms) * len(seeds), "per_arm_per_seed": train,
-                     "hours_expected": round(len(seeds) * sum(t["hours_expected"] for t in train.values()), 2),
-                     "hours_bound": round(len(seeds) * sum(t["hours_bound"] for t in train.values()), 2)},
-        "post_recovery_evaluation": {"units": len(arms) * len(seeds),
-                                     "hours_expected": round(post["expected_hours_per_unit"] * len(arms) * len(seeds), 2),
-                                     "hours_bound": round(post["bound_hours_per_unit"] * len(arms) * len(seeds), 2)},
-        "training_session_setup": {"sessions": len(arms) * len(seeds),
-                                   "hours_expected": round(setup_h * len(arms) * len(seeds), 2),
-                                   "hours_bound": round(setup_h * len(arms) * len(seeds), 2)},
-        "teacher_at_8192_optional": {"hours_expected": cm["teacher_at_8192"]["expected_hours"],
-                                     "hours_bound": cm["teacher_at_8192"]["bound_hours"]},
-    }
-    for c in comp.values():
-        c["usd_expected"] = round(c["hours_expected"] * usd_h, 2)
-        c["usd_bound"] = round(c["hours_bound"] * usd_h, 2)
-
-    def phase(parts: list[str], seed_share: float = 1.0) -> dict:
-        h_e = sum(comp[p]["hours_expected"] * (seed_share if p in ("training", "post_recovery_evaluation",
-                                                                    "training_session_setup") else 1) for p in parts)
-        h_b = sum(comp[p]["hours_bound"] * (seed_share if p in ("training", "post_recovery_evaluation",
-                                                                 "training_session_setup") else 1) for p in parts)
-        return {"components": parts, "gpu_hours_expected": round(h_e, 1), "gpu_hours_bound": round(h_b, 1),
-                "usd_expected": round(h_e * usd_h, 2), "usd_bound": round(h_b * usd_h, 2),
-                "usd_bound_plus_reserve": round(h_b * usd_h + cm["teardown_reserve_usd"], 2)}
-    p1 = ["init_session", "pre_recovery_evaluation"]
-    p2 = ["training", "post_recovery_evaluation", "training_session_setup"]
-    remaining = snap["project_position"]["project_remaining_usd"]
-    options = {
-        "phase_1_initialization_and_damage": phase(p1),
-        "phase_2_recovery_two_seeds": phase(p2),
-        "phase_2_recovery_one_seed": phase(p2, 0.5),
-        "full_two_seeds": phase(p1 + p2),
-        "full_two_seeds_with_teacher_at_8192": phase(p1 + p2 + ["teacher_at_8192_optional"]),
-    }
-    for o in options.values():
-        o["fits_project_remaining_now"] = o["usd_bound_plus_reserve"] <= remaining
     sizes = {a: s["arms"][a]["checkpoint_bytes"] for a in arms}
-    inits = sum(v["init_bf16"] for v in sizes.values())
+
+    # ---- phase 1: one sob1_phase1 session (three builds, then four models evaluated at 8,192) ----
+    dep = depth_hours(cm, s["teacher"]["geometry"]["num_hidden_layers"],
+                      s["arms"]["depth_only"]["geometry"]["num_hidden_layers"],
+                      sel["depth_only"]["resume"]["rounds_replayed"])
+    other_s = 185.0 + ic["residual_width_replay_seconds"] + 85.0           #: FFN pass, width replay, attention gate
+    per_arm_h = (ic["per_arm_build_state_evaluation_minutes"] + ic["teacher_load_minutes_per_arm"]) / 60
+    inits_bytes = sum(v["init_bf16"] for v in sizes.values())
+    relay_init = transfer_hours(inits_bytes, cm, dur)
+    builds = {"hours_expected": round(dep["hours_expected"] + other_s / 3600 + len(arms) * per_arm_h
+                                      + relay_init["hours_expected"], 2),
+              "hours_bound": round(dep["hours_bound"] + (other_s / 3600 + len(arms) * per_arm_h) * ic["bound_factor"]
+                                   + relay_init["hours_bound"], 2),
+              "depth": dep, "relay_copies_of_the_inits": relay_init,
+              "other_operators_seconds": other_s, "per_arm_build_and_state_evaluation_hours": round(per_arm_h, 3)}
+    pre, teach, post = cm["pre_recovery_evaluation"], cm["teacher_at_8192"], cm["post_recovery_evaluation"]
+    p1 = {"builds": builds,
+          "pre_recovery_evaluation": {"models": len(arms), "hours_expected": round(pre["expected_hours_per_arm"] * len(arms), 2),
+                                      "hours_bound": round(pre["bound_hours_per_arm"] * len(arms), 2)},
+          "teacher_at_8192": {"models": 1, "hours_expected": teach["expected_hours"], "hours_bound": teach["bound_hours"]}}
+    p1_driver_exp = sum(c["hours_expected"] for c in p1.values())
+    p1_driver_bound = sum(c["hours_bound"] for c in p1.values())
+    cap1 = hard_cap(p1_driver_bound * 60, cm)
+    phase_1 = {"session_kind": d["phase_1"]["session_kind"], "sessions": 1, "components": p1,
+               "driver_hours_expected": round(p1_driver_exp, 2), "driver_hours_bound": round(p1_driver_bound, 2),
+               "gpu_hours_expected": round(p1_driver_exp + setup_h, 2),
+               "usd_expected": round((p1_driver_exp + setup_h) * usd_h, 2),
+               "hard_cap": cap1, "teardown_reserve_usd": cm["teardown_reserve_usd"],
+               "hard_cap_plus_reserve_usd": round(cap1["usd"] + cm["teardown_reserve_usd"], 2)}
+
+    # ---- phase 2: one sob1_train session per arm (both seeds), never proposed for a grant here ----
+    train = {a: training_hours(s["arms"][a], steps, all_in, ic["bound_factor"]) for a in arms}
+    per_arm = {}
+    for a in arms:
+        fetch = transfer_hours(sizes[a]["init_bf16"], cm, dur)
+        final = transfer_hours(sizes[a]["final_fp32"], cm, dur)
+        last_sp = transfer_hours(sizes[a]["save_point"], cm, dur)
+        exp = len(seeds) * (train[a]["hours_expected"] + post["expected_hours_per_unit"] + final["hours_expected"]) \
+            + fetch["hours_expected"]
+        bound = len(seeds) * (train[a]["hours_bound"] + post["bound_hours_per_unit"] + final["hours_bound"]) \
+            + fetch["hours_bound"] + last_sp["hours_bound"]
+        cap = hard_cap(bound * 60, cm)
+        per_arm[a] = {"units": len(seeds), "training_per_seed": train[a], "post_recovery_evaluation_hours_per_unit":
+                      {"expected": post["expected_hours_per_unit"], "bound": post["bound_hours_per_unit"]},
+                      "init_fetch": fetch, "final_copy_per_seed": final, "last_save_point_copy": last_sp,
+                      "driver_hours_expected": round(exp, 2), "driver_hours_bound": round(bound, 2),
+                      "usd_expected": round((exp + setup_h) * usd_h, 2), "hard_cap": cap,
+                      "unit_deadline_hours": round(train[a]["hours_bound"] * 1.0, 1)}
+    p2_exp = sum(v["usd_expected"] for v in per_arm.values())
+    p2_cap = sum(v["hard_cap"]["usd"] for v in per_arm.values())
+    phase_2 = {"session_kind": d["phase_2"]["session_kind"], "sessions": len(arms), "order": d["training"]["unit_order"]["arms"],
+               "per_arm_session": per_arm, "usd_expected_two_seeds": round(p2_exp, 2),
+               "usd_hard_caps_two_seeds": round(p2_cap, 2),
+               "usd_hard_caps_plus_reserve": round(p2_cap + cm["teardown_reserve_usd"], 2),
+               "one_seed_usd_expected": round(sum(
+                   (v["driver_hours_expected"] - (v["training_per_seed"]["hours_expected"]
+                                                  + v["post_recovery_evaluation_hours_per_unit"]["expected"]
+                                                  + v["final_copy_per_seed"]["hours_expected"]) + setup_h) * usd_h
+                   for v in per_arm.values()), 2),
+               "status": "a draft for the maintainer: no cap here is proposed for a grant, and the project cap is not raised"}
+
+    # ---- storage ----
+    inits = inits_bytes
     finals = sum(v["final_fp32"] for v in sizes.values()) * len(seeds)
     rotation = 2 * max(v["save_point"] for v in sizes.values())
     head = snap["relay"]["headroom_gib"][0] * GIB
+    free = snap["dev_box"]["free_bytes"]
     storage = {
-        "per_arm_bytes": sizes,
-        "relay_headroom_bytes": int(head),
-        "phase_1_relay_peak_bytes": inits,
-        #: during a rotation two save points; at a unit's end one save point and its final (smaller than two)
+        "per_arm_bytes": sizes, "relay_headroom_bytes": int(head),
+        "phase_1_relay_peak_bytes": inits, "phase_1_fits_relay": inits <= head,
         "phase_2_relay_peak_bytes_finals_leave_after_evaluation": inits + rotation,
-        #: the last unit's rotation beside every earlier unit's final (the smallest final is the last one's, to bound)
+        "phase_2_fits_relay_if_finals_leave": inits + rotation <= head,
         "phase_2_relay_peak_bytes_finals_accumulate": inits + rotation + finals - min(v["final_fp32"] for v in sizes.values()),
-        "six_finals_bytes": finals,
-        "three_inits_bytes": inits,
-        "dev_box_free_bytes": snap["dev_box"]["free_bytes"],
-        "rule": "a save point is deleted only after the next one hands off (TPI1's driver), so a rotation holds two; a "
-                "final is uploaded while its unit's last save point still exists",
-    }
-    storage["phase_1_fits_relay"] = storage["phase_1_relay_peak_bytes"] <= head
-    storage["phase_2_fits_relay_if_finals_leave"] = storage["phase_2_relay_peak_bytes_finals_leave_after_evaluation"] <= head
-    storage["phase_2_fits_relay_if_finals_accumulate"] = storage["phase_2_relay_peak_bytes_finals_accumulate"] <= head
-    storage["finals_fit_dev_box"] = finals <= snap["dev_box"]["free_bytes"]
-    memory = {a: s["arms"][a]["memory"] for a in arms}
+        "phase_2_fits_relay_if_finals_accumulate":
+            inits + rotation + finals - min(v["final_fp32"] for v in sizes.values()) <= head,
+        "dev_box_free_bytes": free, "dev_box_read_utc": snap["dev_box"]["read_utc"],
+        "phase_1_local_bytes": inits, "phase_1_fits_dev_box": inits <= free,
+        "phase_2_local_bytes": finals, "dev_box_free_after_phase_1_bytes": free - inits,
+        "phase_2_dev_box_shortfall_bytes": max(0, finals - (free - inits)),
+        "rule": "a save point is deleted only after the next one hands off, so a rotation holds two; a final is uploaded "
+                "while its unit's last save point still exists; the dev box keeps the inits (phase 1) and would keep "
+                "the finals after their evaluation (phase 2)"}
+    proj = snap["project_position"]
+    reserve = cm["teardown_reserve_usd"]
+    ceiling = cap1["usd"]
     return {
-        "schema": SCHEMA, "status": "proposed: a draft for the maintainer; no amount here is approved, and the project "
-                                    "cap is not raised by it",
+        "schema": SCHEMA, "study": d["study_id"], "status": "proposed", "recorded_utc": d["recorded_utc"][:10],
+        "scope": ("phase 1 of SOB1 only (configs/stages/stage-1/single_operator_budget/design.json): one sob1_phase1 "
+                  "session builds the three ~2B initializations from the original teacher with A's operators (depth "
+                  "only resumed from the recorded search's round 9) and evaluates each untrained arm and the teacher "
+                  "on all of eval-set-1 in both modes at 8,192 tokens. No training, no other arm, no network volume. "
+                  "Phase 2 (recovery training and its evaluation) is a separate draft below and proposes no cap"),
+        "ceiling_usd": ceiling, "teardown_reserve_usd": reserve, "study_cumulative_cap_usd": round(ceiling + reserve, 2),
+        "per_session_hard_cap_usd": cap1["usd"],
+        "min_useful_attempt_usd": hard_cap(60, cm)["usd"],
+        "project_cumulative_cap_usd": proj["project_cap_usd"], "gpus": {cm["gpu"]["type"]: MAX_PRICE}, "gpu_count_max": 1,
+        "expected_total_usd": phase_1["usd_expected"],
+        "kinds": {
+            d["phase_1"]["session_kind"]: {"per_session_hard_cap_usd": cap1["usd"], "expected_usd": phase_1["usd_expected"],
+                                           "driver_minutes": cap1["driver_minutes"],
+                                           "basis": "phase_1.components (design.json :: cost_model)"},
+            d["phase_2"]["session_kind"]: {"per_session_hard_cap_usd": None, "expected_usd": None,
+                                           "status": "not proposed: phase 2 needs the maintainer's own decision and a "
+                                                     "cap the project's remainder does not hold (phase_2_draft)"}},
+        "position_at_proposal": proj, "granted_by": "nobody: a proposal, not a grant",
+        "decision": "PENDING the maintainer's explicit approval",
+        "money_rules": {
+            "own_envelope": "the ceiling counts only this study's runs; TPI1, RI-S1, RI-LM1 and Research A are CLOSED and "
+                            "fund nothing here; a provider top-up is not a grant",
+            "ceiling": f"${ceiling:.2f}: phase 1's one session at its hard cap, cumulatively over every attempt",
+            "teardown_reserve": f"${reserve:.2f} held outside the ceiling and never issued: each artifact's hard cap plus "
+                                "the reserve must fit what the project cap and the provider balance leave, at issue and at "
+                                "launch (layer_merge_launch.reserve_problems)",
+            "resume": "a replacement attempt takes over every arm whose init record verified and every sealed sample; "
+                      "its cap is what the ceiling leaves",
+            "project_cap": "the $1,000 project cap is not raised by this proposal"},
+        "hardware": ("one NVIDIA L40S per session, secure cloud, at most $1.11/h, 150 GB container disk; the packed "
+                     "search's DEPTH ran on the same card (29.5 GiB reserved); no network volume"),
+        "usd_per_hour_all_in": round(usd_h, 4),
         "design_sha256": ST.sha256_file(ST.DESIGN), "structures_sha256": sha256_file(ST.OUT),
+        "selection_sha256": sha256_file(REPO / "configs/stages/stage-1/single_operator_budget/selection.json"),
         "resource_snapshot_sha256": sha256_file(SNAPSHOT),
-        "usd_per_hour_all_in": round(usd_h, 4), "components": comp, "options": options,
-        "project_position": snap["project_position"], "storage": storage, "memory_gib": memory,
-        "authorizes": "nothing",
+        "phase_1": phase_1, "phase_2_draft": phase_2, "storage": storage,
+        "memory_gib": {a: s["arms"][a]["memory"] for a in arms},
+        "authorizes": "nothing: a proposal; the grant is the maintainer's",
     }
 
 

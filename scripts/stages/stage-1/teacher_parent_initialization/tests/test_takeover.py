@@ -188,14 +188,14 @@ def run_attempt(tmp: Path, monkeypatch, u: dict, *, resume: Path | None, out: Pa
     monkeypatch.setattr(TP, "admit", lambda *a, **k: None)
     monkeypatch.setattr(PTP, "attention_problems", lambda cfg, repo: [])
     monkeypatch.setattr(AU, "train_telemetry", lambda d: {"context_strategies": [PTP.CONTEXT_STRATEGY]})
-    monkeypatch.setattr(TD, "fetch_init", lambda unit: {"stub": True})
+    monkeypatch.setattr(TD, "fetch_init", lambda unit, d=None: {"stub": True})
     ran: list[str] = []
 
     def no_training(*a, **k):
         raise AssertionError("a unit whose final weights are durable was trained again")
     monkeypatch.setattr(AU, "train", trainer or no_training)
 
-    def evaluate(model_dir, ev_dir, label, mode, vllm_py, attempt, work):
+    def evaluate(model_dir, ev_dir, label, mode, vllm_py, attempt, work, ev=None, package_fn=None):
         assert (Path(model_dir) / "model.safetensors").is_file()
         ran.append(mode)
         Path(ev_dir).mkdir(parents=True, exist_ok=True)
@@ -324,3 +324,104 @@ def test_a_save_point_that_does_not_hand_off_keeps_its_predecessor(tmp_path, rel
     m.mirror_once()                                                       #: the next one hands off and retires both
     assert {r["tag"] for r in m.records() if r.get("removed")} == {"step_001104", "step_002208"}
     assert not [k for k in relay.files if "/step_001104/" in k or "/step_002208/" in k]
+
+
+# ---- the listing times out; the weights verified but their record did not publish (both reproduced) -------------------
+
+FAST = {**TD.DURABILITY, "listing_attempts": 3, "listing_wait_seconds": 0, "handoff_attempts": 3,
+        "handoff_wait_seconds": 0}
+
+
+def _flaky_listing(relay, fails: int):
+    """The relay listing times out ``fails`` times, then answers (the run_online timeout returns unverified)."""
+    real, n = relay.records, {"left": fails}
+
+    def records(p):
+        if n["left"] > 0:
+            n["left"] -= 1
+            return {"verified": False, "error": "TimeoutExpired: list_repo_tree"}
+        return real(p)
+    relay.records = records
+
+
+def test_a_listing_timeout_is_retried_and_never_sends_a_unit_back_to_step_0(tmp_path, relay, monkeypatch):
+    monkeypatch.setattr(TD, "_sleep", lambda s: None)
+    out_old, ev = tmp_path / "old/train", tmp_path / "ev"
+    save_point(out_old, 2208)
+    rec = relay.put({"files": {k: str(v) for k, v in TD.savepoint_files(out_old / "checkpoints/step_002208").items()},
+                     "prefix": f"{PREFIX}/savepoints/step_002208"})
+    rec.update(tag="step_002208", step=2208)
+    TD.handoff(rec, tmp_path, f"{PREFIX}/savepoints", "t", newest=True, d=FAST)
+    ev.mkdir()                                 #: the lost pod's records never reached the dev box
+    _flaky_listing(relay, 2)                   #: two timeouts, then the listing answers
+    got = TD.restore_savepoint(ev, tmp_path / "pod/train", PREFIX, FAST)
+    assert got["step"] == 2208 and "3 attempt" in got["found"]
+    #: every attempt times out and the evidence holds nothing: refused, not "no save point"
+    _flaky_listing(relay, 99)
+    with pytest.raises(TD.ListingUnreadable, match="refusing to train from step 0"):
+        TD.restore_savepoint(ev, tmp_path / "pod2/train", PREFIX, FAST)
+    #: ... and the same for the final weights
+    with pytest.raises(TD.ListingUnreadable, match="no final.json"):
+        TD.final_record(ev, PREFIX, FAST)
+    #: a listing that WAS read and holds nothing is the only "none": a fresh unit starts at step 0
+    relay.records = FakeRelay.records.__get__(relay)
+    assert TD.restore_savepoint(tmp_path / "ev3", tmp_path / "pod3/train", f"{PREFIX}-other", FAST) is None
+    #: with the listing down for good but a verified record in the evidence, that record is restored
+    (ev / "savepoints.json").write_text(json.dumps([{**rec, "verified": True}]))
+    _flaky_listing(relay, 99)
+    got = TD.restore_savepoint(ev, tmp_path / "pod4/train", PREFIX, FAST)
+    assert got["step"] == 2208 and "unreadable" in got["found"]
+
+
+def test_an_unpublished_record_is_retried_alone_and_the_weights_are_sent_once(tmp_path, relay):
+    out, ev = tmp_path / "pod/train", tmp_path / "ev"
+    ev.mkdir()
+    m = TD.SavepointMirror(UNIT, out, ev, 9701, PREFIX, d=FAST)
+    save_point(out, 1104)
+    assert m.mirror_once()["handoff"]["verified"]
+    save_point(out, 2208)
+    relay.refuse_pointer = True                #: the weights upload and verify; the record's own copy fails
+    rec = m.mirror_once()
+    assert rec["verified"] and not rec["handoff"]["verified"]
+    assert f"{PREFIX}/savepoints/step_001104/model/model.safetensors" in relay.files   #: the predecessor stays
+    weight_puts = lambda: [c for c in relay.calls if c == ("put", f"{PREFIX}/savepoints/step_002208")]
+    sent = len(weight_puts())
+    relay.refuse_pointer = False
+    rec = m.mirror_once()                      #: the next tick: only the record is published, then the old one goes
+    assert rec["handoff"]["verified"] and rec["handoff_tries"] == 2
+    puts = [c for c in relay.calls if c[0] == "put" and c[1] == f"{PREFIX}/savepoints/step_002208"]
+    assert len(puts) == sent + 1               #: one more put: the pointer, never the weights again
+    assert not any(k.startswith(f"{PREFIX}/savepoints/step_001104/") for k in relay.files)
+    assert m.mirror_once() is None             #: handed off: nothing left to do
+    #: the final: verified weights, a record that publishes only on the third try; uploaded once
+    fin = relay.put({"files": {"model.safetensors": str(out / "checkpoints/step_002208/model/model.safetensors")},
+                     "prefix": f"{PREFIX}/final/abc"})
+    n = {"left": 2}
+    real_put = relay.put
+
+    def put(p):
+        if set(p["files"]) == {R.POINTER} and n["left"] > 0:
+            n["left"] -= 1
+            return {"verified": False, "error": "a transport failure"}
+        return real_put(p)
+    relay.put = put
+    h = TD.hand_off_with_retries(fin, tmp_path, f"{PREFIX}/final", "t", newest=False, d=FAST)
+    assert h["verified"] and len(h["attempts"]) == 3
+
+
+def test_the_training_deadline_leaves_room_to_secure_a_2b_save_point():
+    """A 2B unit's save point is about 22.6 GB and its final 8.0 GB (SOB1's structures): at the floor rates the
+    reserve is hours, so a session near its end never starts a trainer it cannot secure."""
+    d = TD.DURABILITY
+    sp, fin = 22.6e9, 8.07e9
+    reserve = TD.transfer_seconds(sp, d) + TD.transfer_seconds(fin, d) + d["closeout_reserve_seconds"]
+    now = 1_800_000_000
+    end = __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime(now + 30 * 3600))
+    got = TD.training_deadline_s(20.0, end, sp, fin, d, now=now)
+    assert got["seconds"] == 20 * 3600                    #: plenty of session: the unit's own bound
+    end = __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime(now + 10 * 3600))
+    got = TD.training_deadline_s(20.0, end, sp, fin, d, now=now)
+    assert got["seconds"] == pytest.approx(10 * 3600 - reserve) and got["reserve_seconds"] == pytest.approx(reserve, abs=0.1)
+    end = __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime(now + 3600))
+    assert TD.training_deadline_s(20.0, end, sp, fin, d, now=now)["seconds"] <= 0
+    assert TD.training_deadline_s(20.0, None, sp, fin, d, now=now)["seconds"] == 20 * 3600

@@ -16904,3 +16904,33 @@ on a paid pod.
   interval still allows A to be about 0.5 pp worse.
 - Revisit when: a round distinguishes A's method from another at the same structure and recipe, or a new structure
   shows the method fails to build.
+
+## 2026-11-19 (UTC) — SOB1 protocol fixed for its $0 preparation; dev-box checkpoint retirement authorized
+
+- Context: the maintainer reviewed `181f2d22` (TPI1 closeout, SOB1 proposed) and accepted TPI1's closeout as
+  COMPLETE / NOT_DISTINGUISHED. The dev box had 3.3 GB free; SOB1's phase 1 needs about 11.24 GiB locally for the
+  three initializations, and phase 2 another 44.94 GiB for six fp32 finals.
+- Decision (maintainer, 2026-11-19, quoted): 「本次授权你完成全部 $0 准备工作，包括清理开发机上符合退役条件的旧
+  checkpoint、补齐执行代码、验证和推送。付费 Pod、正式实验和 main 合并等我审阅后再启动。」 and 「如果本地磁盘不足，
+  我授权你直接删除本项目中已完成测量、证据已封存、没有现有或已登记后续消费者、且符合 AGENTS.md 退役规则的历史
+  checkpoint。先核对 registry、实际引用和保留用途，写墓碑后删除权重，保留配置、哈希、日志、生成结果和测量证据。
+  符合条件的可以直接处理，无需逐个问我。共享磁盘上其他项目的文件不在授权范围内。」
+  - SOB1 is fixed as: Stage 1 study, recovery executed under stage3_recovery; the three ~2B arms (16 layers;
+    FFN 3,840 with 16 / 8 heads; width 1,280), each built directly from TPI1's registered teacher with A's operators
+    and their calibration data. N ≈ 2 is the first compression point examined; the compression priority is decided
+    after recovery.
+  - Every evaluation (untrained arms, recovered arms, the teacher reference) runs at 8,192 tokens with the same items,
+    both modes, decoder and scorer. An identity-matched teacher record is reused; what is missing enters phase 1's
+    budget. The 40,960 results stay as historical reference.
+  - Holm over the three thinking-mode pairs uses m = 3 always; a formal verdict needs all three arms x both seeds.
+    Initial KL, CE and generation scores eliminate nothing.
+  - DEPTH resumes the recorded 36 -> 28 search from round 9 when its reference, calibration, packing, removal order,
+    scoring and tie rule match.
+- Alternatives considered: keeping the pre-recovery evaluation at 40,960 (rejected: it does not match the recovered
+  arms' 8,192); a new 36 -> 16 search from round 1 (rejected: 260 candidate subsets already scored on the same
+  teacher and inputs).
+- Expected upside: initialization damage, recovery and the gap to the teacher are read under one context; the depth
+  search pays for 270 candidates instead of 530.
+- Risks: an 8,192-token context censors long thinking-mode generations of the teacher and the untrained arms
+  (right-censored, reported apart).
+- Revisit when: phase 1's measurements exist, or the maintainer reviews phase 2's budget.

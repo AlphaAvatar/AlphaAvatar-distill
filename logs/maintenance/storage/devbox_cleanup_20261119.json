@@ -1,0 +1,83 @@
+{
+ "schema": "aadistill.devbox_cleanup/v1",
+ "written_utc": "2026-11-19T06:20:07Z",
+ "why": "maintainer 2026-11-19 (UTC): dev-box retirement of eligible historical checkpoints for SOB1 (logs/budget/decisions.md :: 2026-11-19 (UTC) — SOB1 protocol fixed for its $0 preparation; dev-box checkpoint retirement authorized); / had 3.23 GiB free, SOB1 phase 1 needs 11.24 GiB",
+ "free_bytes_before": 3463852032,
+ "free_bytes_after": 14952128512,
+ "freed_bytes": 11488276480,
+ "freed_gib": 10.7,
+ "measured": "df -B1 / immediately before the first and after the last deletion; the disk is shared with another project, so later readings move",
+ "deleted": [
+  {
+   "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D/model.safetensors",
+   "apparent_bytes": 6430078848,
+   "sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
+   "tombstone": "devbox_20261119_ri_s1_D",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "control"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/W/model.safetensors",
+   "apparent_bytes": 1443840376,
+   "sha256": "64d367fe0b6613aa57d52cda3e285a5d52122fd0ecee736b0016af92fc59fb29",
+   "tombstone": "devbox_20261119_ri_s1_W",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "control"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/DW/model.safetensors",
+   "apparent_bytes": 1192135096,
+   "sha256": "b74dede833fba34478a3319fb0b9c98b415e2f5b307983e2441599101cf83b6d",
+   "tombstone": "devbox_20261119_ri_s1_DW",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
+   "apparent_bytes": 1211177648,
+   "sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a",
+   "tombstone": "devbox_20261119_rilm1_M-avg_delta",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-avg/delta.safetensors",
+   "apparent_bytes": 1211177648,
+   "sha256": "db2df6b55a5e97c8903d948a77f88dee9d92f8e289fb76260e685a8389fe5b6a",
+   "tombstone": "devbox_20261119_rilm1_M-avg_delta_runstore",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "diagnostic"
+  },
+  {
+   "path": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
+   "apparent_bytes": 1211177648,
+   "sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e",
+   "tombstone": "devbox_20261119_rilm1_M-act_delta",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "canonical"
+  },
+  {
+   "path": "artifacts/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/scr/store/out/products/M-act/delta.safetensors",
+   "apparent_bytes": 1211177648,
+   "sha256": "41fc2ff2fa87b16e32a9158f99fe546f794a63a13d4e296b6e3b5adcd821d58e",
+   "tombstone": "devbox_20261119_rilm1_M-act_delta_runstore",
+   "criterion": "agents_2_5_standing_retirement",
+   "protection_lifted": "diagnostic"
+  }
+ ],
+ "physical_note": "each RI-LM1 delta had two hard links (one inode); both links were retired, so each delta frees 1.13 GiB once",
+ "kept": {
+  "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/init/01e63327e3d02b2f/init": "TPI1's A initialization, the default baseline's weights at its own structure (maintainer 2026-11-18; the user's 2026-11-19 brief keeps baselines with consumers); its only copy",
+  "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s2026072*/final, -s20260801/final": "TPI1's A finals (2 x 2.22 GiB), the baseline's recovered endpoints; their only copies",
+  "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/statistics/01e63327e3d02b2f": "the teacher's residual statistics: SOB1's residual-width arm builds from them (the relay copy is what the pod reads); not a checkpoint",
+  "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/afd50c9ff0e3d20542bb5473ea745b55": "the selected forward baseline's historical reference initialization (registry: protected, canonical)",
+  "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint": "canonical initialization with a living recovery path (registry: protected)",
+  "artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors": "Stage 0's activation cache: data, not a checkpoint; a living recovery path",
+  "other projects' files (e.g. /var/log/alphaavatar, ~/AlphaAvatar, ~/alphaavatar-*)": "not this project's; outside the authorization"
+ },
+ "sob1_local_landing": {
+  "root": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget",
+  "phase_1": "<arm>/init/<mapping digest[:16]>/ for the three initializations (11.24 GiB), fetched from the relay record the pod verified and re-hashed (launch.py retain)",
+  "phase_2": "<arm>-s<seed>/final/<sha[:16]>/ for six fp32 finals (44.94 GiB): does NOT fit"
+ }
+}

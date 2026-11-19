@@ -318,7 +318,7 @@
   "16": 2003851776,
   "17": 2104782592
  },
- "design_sha256": "f805112d2ad5c43bf3b3e2a6d9550bfb982cc1ad932d27a778597796d1239e12",
+ "design_sha256": "9e23c345eca1dd4bd8c40aeca173ff9e654cbc17f1273193b1e915e7bb9c0319",
  "ffn_attention_alternatives": [
   {
    "attention_params_retained": 0.4,

@@ -54,6 +54,7 @@ from aadistill.initialization.statistics.contribution import (
     forward_kl_mean_batch,
     expected_evaluations,
     greedy_removal,
+    resumed_round_problems,
 )
 from aadistill.initialization.device import model_device
 from aadistill.initialization.specs.arch import (
@@ -111,6 +112,18 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
     #: reducer and the same candidates either way; only the distribution each
     #: candidate is compared with changes.
     accepts_kl_reference = True
+    #: A RESUMED SEARCH (`OperatorContext.resume_state`): ``{"rounds": [...]}``,
+    #: the committed round records of an earlier invocation of the SAME step
+    #: (same parent, profile, items, positions, support, forward context and
+    #: execution) toward a target at least as deep. The records are checked
+    #: against the greedy rule (`resumed_round_problems`), replayed without
+    #: re-scoring, and then the last replayed round's chosen subset is scored
+    #: again and must equal its recorded score exactly (``tolerance``, default
+    #: 0: DEPTH KL scores are bit-identical across sessions at a fixed
+    #: execution) -- the evidence that THIS scorer wrote them. The search then
+    #: continues from the next round against the same intact-parent reference,
+    #: so the result is the state a whole invocation computes.
+    accepts_resume_state = True
     deterministic = True
     requires_seed = False
     produces = ("depth_map", "search_rounds")
@@ -856,15 +869,28 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                   f"{ranked[1]['candidate'] if len(ranked) > 1 else None} "
                   f"margin {margin:.3e}", flush=True)
 
+        resumed = None
+        completed = None
+        if ctx.resume_state is not None:
+            completed, resumed = _resume_rounds(
+                ctx.resume_state, n_layers=ctx.parent_spec[DEPTH_FIELD], n_remove=n_remove,
+                rescore=(lambda before, c: score_round(frozenset(before), [c])[0]) if prefix_reuse
+                else (lambda before, c: score(frozenset(list(before) + [c]))),
+                impl_id=self.impl_id)
         result = greedy_removal(score, ctx.parent_spec[DEPTH_FIELD], n_remove,
+                                completed_rounds=completed,
                                 on_round=on_round, on_candidate=on_candidate,
                                 score_round=score_round if prefix_reuse else None)
         kept = result["kept"]
         child = _build_child_with_layers(ctx, kept)
 
         final_score = result["rounds"][-1]["chosen_score"] if result["rounds"] else 0.0
+        #: The candidate subsets the decision rests on, replayed rounds included,
+        #: so a resumed search reports what a whole one does; what ran HERE is
+        #: in `artifacts.timing` and `artifacts.resume`.
+        evaluations = result["evaluations"] + sum(int(r["n_candidates"]) for r in (completed or ()))
         values = {"op.depth.causal_kl.final": float(final_score),
-                  "op.depth.causal_kl.evaluations": float(result["evaluations"])}
+                  "op.depth.causal_kl.evaluations": float(evaluations)}
         if declared_root and result["rounds"]:
             chosen = reference_candidates[_subset_key(result["removed"])]
             values["op.depth.parent_kl_diagnostic.final"] = float(
@@ -940,9 +966,45 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                        # no other field the operator returns.
                        "timing": {k: (round(v, 4) if isinstance(v, float) else v)
                                   for k, v in timing.items()},
-                       "reference_counters": (reference or sketches).counters()},
+                       "reference_counters": (reference or sketches).counters(),
+                       #: Execution evidence, only when resumed: which rounds
+                       #: were replayed and the re-score that admitted them.
+                       **({} if resumed is None else {"resume": resumed})},
         )
 
+
+
+def _resume_rounds(state, *, n_layers: int, n_remove: int, rescore, impl_id: str):
+    """The round records a resumed invocation replays, checked (module docstring of the class attribute
+    ``accepts_resume_state``); returns ``(rounds, evidence)``. ``rescore(removed_before, chosen)`` scores one subset
+    with this invocation's own scorer."""
+    import math
+    if not isinstance(state, Mapping) or not isinstance(state.get("rounds"), (list, tuple)):
+        raise OperatorError(f"{impl_id}: a resume state is {{'rounds': [...]}}, not {type(state).__name__}")
+    rounds = [dict(r) for r in state["rounds"]]
+    if not rounds:
+        raise OperatorError(f"{impl_id}: a resume state with no rounds resumes nothing")
+    if len(rounds) > n_remove:
+        raise OperatorError(f"{impl_id}: {len(rounds)} resumed rounds for a search of {n_remove}")
+    bad = resumed_round_problems(rounds, n_layers)
+    if bad:
+        raise OperatorError(f"{impl_id}: the resumed rounds are not greedy round records: " + "; ".join(bad))
+    tol = float(state.get("tolerance", 0.0))
+    last = rounds[-1]
+    t0 = time.perf_counter()
+    got = float(rescore(list(last["removed_before"]), int(last["chosen"])))
+    want = float(last["chosen_score"])
+    delta = abs(got - want)
+    evidence = {"rounds_replayed": len(rounds), "removal_order_replayed": [int(r["chosen"]) for r in rounds],
+                "rescored": {"round": len(rounds) - 1, "removed_before": list(last["removed_before"]),
+                             "candidate": int(last["chosen"]), "recorded": want, "rescored": got,
+                             "abs_delta": delta, "tolerance": tol, "seconds": round(time.perf_counter() - t0, 3)},
+                "source": state.get("source")}
+    if not math.isfinite(got) or delta > tol:
+        raise OperatorError(
+            f"{impl_id}: round {len(rounds) - 1}'s chosen subset scores {got!r} here and {want!r} in the resumed "
+            f"record (|delta| {delta:.3e} > {tol}); these records were not written by this scorer")
+    return rounds, evidence
 
 
 def _subset_key(skip) -> str:

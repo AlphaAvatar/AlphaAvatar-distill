@@ -1370,6 +1370,24 @@ bad = {k: v for k, v in kind_conditions(kind).items() if a.stage_conditions.get(
 assert not bad, f'the artifact binds other records than this pod holds: {sorted(bad)}'
 print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "stage1_single_operator" ]; then
+  # The Stage-1 single-operator budget study (SOB1, `stages.single_operator_budget.launch`): its own TYPE, FORMAL,
+  # two session kinds (sob1_phase1, sob1_train), never a dry-run artifact. The study identity (design, selection,
+  # structures), the harness and the kind's bound records (a training session's arm plan and its init record) are
+  # recomputed HERE from the pod's own files.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" PHASE_KIND="${PHASE_KIND:-}" /opt/train/bin/python -c "
+import os
+from shared import study_engineering as SE
+from stages.single_operator_budget.launch import Authorization, kind_conditions
+a = Authorization.load(os.environ['SESSION_AUTH_PATH'])
+kind = (a.stage_conditions or {}).get('kind')
+assert kind in Authorization.STUDY.kinds, f'the artifact names kind {kind!r}, none of the study kinds'
+got = SE.require_on_pod(a, Authorization.STUDY, os.environ['SESSION_PLAN_HASH'], kind=kind)
+bad = {k: v for k, v in kind_conditions(kind, arm=(a.stage_conditions or {}).get('arm') or None).items() if a.stage_conditions.get(k) != v}
+assert not bad, f'the artifact binds other records than this pod holds: {sorted(bad)}'
+print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

@@ -5,7 +5,8 @@
   "path": "/home/ecs-user/aad-artifacts/stage1_reasoning_inheritance/913433664fce0fed/groups/D",
   "weights_sha256": "9de449db82d735824b8a396cbadf229d1f23e8f89221d67df6c6521672e7f5d0",
   "artifact_digest": "08aa80972097b290a4929b563cdc6d0497a6021fb7f4bde0a39edb2624e53b68",
-  "dependency": "every delta below needs this file; it is protected in the checkpoint registry"
+  "dependency": "every delta below needs this file; it is protected in the checkpoint registry",
+  "retired": "2026-11-19 (tombstone devbox_20261119_ri_s1_D): every delta is retired with it"
  },
  "candidates": {
   "M-avg": {
@@ -18,7 +19,16 @@
    "relay": "durable/stage1_reasoning_inheritance/layer_merge/M-avg/d99cfae88c12c2b4/delta.safetensors",
    "producer_run": "ri_merge_20261115_104816",
    "retained_from_run": "ri_merge_20261115_104816",
-   "checked": "delta re-hashed; every span tensor from the delta equals the pod's digest and fits D's shape and dtype; D's local file is D"
+   "checked": "delta re-hashed; every span tensor from the delta equals the pod's digest and fits D's shape and dtype; D's local file is D",
+   "retired": {
+    "utc": "2026-11-19T06:27Z",
+    "tombstones": [
+     "devbox_20261119_rilm1_M-avg_delta",
+     "devbox_20261119_rilm1_M-avg_delta_runstore"
+    ],
+    "why": "RI-LM1 closed; its base D retired the same day; both hard links removed",
+    "record": "logs/maintenance/storage/devbox_cleanup_20261119.json"
+   }
   },
   "M-act": {
    "path": "/home/ecs-user/aad-artifacts/stage1_layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
@@ -30,7 +40,16 @@
    "relay": "durable/stage1_reasoning_inheritance/layer_merge/M-act/c7fd518bffd470bb/delta.safetensors",
    "producer_run": "ri_merge_20261115_104816",
    "retained_from_run": "ri_merge_20261115_104816",
-   "checked": "delta re-hashed; every span tensor from the delta equals the pod's digest and fits D's shape and dtype; D's local file is D"
+   "checked": "delta re-hashed; every span tensor from the delta equals the pod's digest and fits D's shape and dtype; D's local file is D",
+   "retired": {
+    "utc": "2026-11-19T06:27Z",
+    "tombstones": [
+     "devbox_20261119_rilm1_M-act_delta",
+     "devbox_20261119_rilm1_M-act_delta_runstore"
+    ],
+    "why": "RI-LM1 closed; its base D retired the same day; both hard links removed",
+    "record": "logs/maintenance/storage/devbox_cleanup_20261119.json"
+   }
   }
  }
 }

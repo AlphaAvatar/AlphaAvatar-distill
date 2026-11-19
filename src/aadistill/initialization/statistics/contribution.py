@@ -847,6 +847,48 @@ def greedy_removal(
     }
 
 
+def resumed_round_problems(rounds: Iterable[dict], n_layers: int, *, protect: Collection[int] = ()) -> list[str]:
+    """Why ``rounds`` are not the records `greedy_removal` itself would have written; empty when they are.
+
+    A resumed search trusts its recorded choices (`completed_rounds`), so the records are checked first against the
+    rule that produced them: round ``r`` removed exactly the earlier rounds' choices, scored every surviving layer once
+    (in index order), each score finite, and chose the minimum, ties to the lower index. Pure: it reads no model, so it
+    says nothing about WHICH scorer wrote the numbers -- the caller re-scores for that.
+    """
+    bad: list[str] = []
+    protect = {int(i) for i in protect}
+    skipped: list[int] = []
+    for k, rec in enumerate(rounds):
+        where = f"round {k}"
+        try:
+            table = [(int(t["candidate"]), float(t["score"])) for t in rec["table"]]
+            chosen, chosen_score = int(rec["chosen"]), float(rec["chosen_score"])
+            before = [int(x) for x in rec["removed_before"]]
+        except (KeyError, TypeError, ValueError) as exc:
+            bad.append(f"{where}: not a round record ({type(exc).__name__}: {exc})")
+            break
+        if int(rec.get("round", k)) != k:
+            bad.append(f"{where}: numbered {rec.get('round')}")
+        if before != skipped:
+            bad.append(f"{where}: removed_before {before} is not the earlier choices {skipped}")
+        want = [i for i in range(n_layers) if i not in skipped and i not in protect]
+        if [c for c, _ in table] != want:
+            bad.append(f"{where}: its table scores {[c for c, _ in table][:6]}..., not every surviving layer in order")
+        if int(rec.get("n_candidates", len(table))) != len(table):
+            bad.append(f"{where}: n_candidates {rec.get('n_candidates')} for a table of {len(table)}")
+        if not all(math.isfinite(v) for _, v in table):
+            bad.append(f"{where}: a non-finite score")
+        if table:
+            best_c, best_v = min(table, key=lambda t: (t[1], t[0]))
+            if (best_c, best_v) != (chosen, chosen_score):
+                bad.append(f"{where}: chose {chosen} ({chosen_score!r}); the minimum, ties to the lower index, is "
+                           f"{best_c} ({best_v!r})")
+        if chosen in skipped or chosen in protect:
+            bad.append(f"{where}: removes {chosen} again or a protected layer")
+        skipped.append(chosen)
+    return bad
+
+
 def expected_evaluations(n_layers: int, n_remove: int, n_protected: int = 0) -> int:
     """Subset evaluations a full greedy search performs — 260 for 36 -> 28."""
     return sum(n_layers - n_protected - r for r in range(n_remove))

@@ -1,0 +1,1324 @@
+{
+ "authorizes": "nothing",
+ "depth_only": {
+  "resume": {
+   "candidates_per_new_round": [28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17],
+   "first_new_round": 9,
+   "journal_seconds_rounds_1_8": 7073.800259590149,
+   "new_candidate_subsets": 270,
+   "new_rounds": 12,
+   "rescore": {
+    "candidate": 28,
+    "recorded": 0.5305385485267972,
+    "removed_before": [2, 32, 3, 26, 30, 8, 20],
+    "round": 8,
+    "tolerance": 0.0,
+    "why": "the operator scores round 8's chosen subset again and requires the recorded value exactly (DEPTH KL scores are bit-identical across sessions at a fixed execution on the L40S)"
+   },
+   "rounds_replayed": 8,
+   "target_layers": 16
+  },
+  "resume_checks": {
+   "all_ok": true,
+   "checks": {
+    "greedy accumulation, every surviving layer scored, the tie rule": {
+     "ok": true,
+     "problems": [],
+     "rule": "lowest score; ties to the lower index (contribution.greedy_removal)"
+    },
+    "the original teacher is the design's": {
+     "ok": true,
+     "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+     "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192"
+    },
+    "the reference is the original teacher": {
+     "depth": 1,
+     "ok": true,
+     "parent_id": "aea5f9991cf3812b24e16ea994c3ea8f",
+     "reference": "parent_state",
+     "root_state_id": "aea5f9991cf3812b24e16ea994c3ea8f"
+    },
+    "the removal order is TPI1's committed one": {
+     "journal": [2, 32, 3, 26, 30, 8, 20, 28],
+     "ok": true,
+     "tpi1": [2, 32, 3, 26, 30, 8, 20, 28]
+    },
+    "the same calibration items, positions and packing (one operator config)": {
+     "config_hash": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+     "forward_context": {
+      "attention": "causal_continuous_positions_v1",
+      "materialization": "prefix_restart_v1",
+      "packing": "sequential_truncate_v1",
+      "sequence_length": 8192,
+      "shuffle": "sha256_keyed_v1",
+      "shuffle_seed": 20261105,
+      "truncate": true
+     },
+     "ok": true,
+     "packing": {
+      "forwards_per_candidate": 79,
+      "fragments": 78,
+      "kl_row_chunk": 2048,
+      "non_padding_tokens": 644493,
+      "repeated_scored_positions": 20014,
+      "scored_positions": 231217,
+      "segments": 636,
+      "sequences": 79
+     },
+     "scoring_positions": {
+      "n_items": 558,
+      "position_policy": "positions.supervised_target_v1@v1",
+      "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+      "prediction_axis": {
+       "active": 211203,
+       "form": "select",
+       "positions": 568712,
+       "weight_total": 211203.0
+      },
+      "token_axis": {
+       "active": 211203,
+       "form": "select",
+       "positions": 569270,
+       "weight_total": 211203.0
+      }
+     },
+     "tpi1_pinned": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc"
+    },
+    "the same execution (micro-batch, batch packing, scored rows, prefix reuse)": {
+     "calibration_batch_packing": "original_order_v1",
+     "depth_prefix_reuse": true,
+     "micro_batch_size": 1,
+     "ok": true,
+     "prediction_rows": "scored_v1"
+    },
+    "the same operator and calibration profile": {
+     "impl_id": "depth.causal_kl_greedy_v1",
+     "impl_signature_hash": "8106604694621d305dc20324d5ce65d2cefe5491ef2c2ab93a1b5fe8f16b5ca9",
+     "ok": true,
+     "profile_id": "calib.hybrid_d4_base@v2",
+     "signature_now": "8106604694621d305dc20324d5ce65d2cefe5491ef2c2ab93a1b5fe8f16b5ca9"
+    }
+   },
+   "minimal_recompute": null,
+   "missing": []
+  },
+  "rounds": [
+   {
+    "chosen": 2,
+    "chosen_score": 0.047652953542868845,
+    "n_candidates": 36,
+    "removed_before": [],
+    "round": 0,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 9.007875954480154
+     },
+     {
+      "candidate": 1,
+      "score": 0.4368425236508052
+     },
+     {
+      "candidate": 2,
+      "score": 0.047652953542868845
+     },
+     {
+      "candidate": 3,
+      "score": 0.04796145430191927
+     },
+     {
+      "candidate": 4,
+      "score": 0.05864223792930173
+     },
+     {
+      "candidate": 5,
+      "score": 0.0752006642924499
+     },
+     {
+      "candidate": 6,
+      "score": 1.489316359500939
+     },
+     {
+      "candidate": 7,
+      "score": 0.0774808259311886
+     },
+     {
+      "candidate": 8,
+      "score": 0.06640955334921403
+     },
+     {
+      "candidate": 9,
+      "score": 0.08904839714004759
+     },
+     {
+      "candidate": 10,
+      "score": 0.08772088732164793
+     },
+     {
+      "candidate": 11,
+      "score": 0.09435633384974132
+     },
+     {
+      "candidate": 12,
+      "score": 0.14228768977162157
+     },
+     {
+      "candidate": 13,
+      "score": 0.17087472536994835
+     },
+     {
+      "candidate": 14,
+      "score": 0.13226890052838358
+     },
+     {
+      "candidate": 15,
+      "score": 0.14571413910907177
+     },
+     {
+      "candidate": 16,
+      "score": 0.12351509199652785
+     },
+     {
+      "candidate": 17,
+      "score": 0.15362850149624677
+     },
+     {
+      "candidate": 18,
+      "score": 0.1432259115557563
+     },
+     {
+      "candidate": 19,
+      "score": 0.1792058734033354
+     },
+     {
+      "candidate": 20,
+      "score": 0.12982295266697075
+     },
+     {
+      "candidate": 21,
+      "score": 0.1263663824422613
+     },
+     {
+      "candidate": 22,
+      "score": 0.13744554526920355
+     },
+     {
+      "candidate": 23,
+      "score": 0.14704613028183197
+     },
+     {
+      "candidate": 24,
+      "score": 0.13549081339096317
+     },
+     {
+      "candidate": 25,
+      "score": 0.11335086006034097
+     },
+     {
+      "candidate": 26,
+      "score": 0.07275617087264014
+     },
+     {
+      "candidate": 27,
+      "score": 0.07801733958575599
+     },
+     {
+      "candidate": 28,
+      "score": 0.09128665125888022
+     },
+     {
+      "candidate": 29,
+      "score": 0.08351529014868314
+     },
+     {
+      "candidate": 30,
+      "score": 0.09735153097645265
+     },
+     {
+      "candidate": 31,
+      "score": 0.06652121194790739
+     },
+     {
+      "candidate": 32,
+      "score": 0.0689052379068851
+     },
+     {
+      "candidate": 33,
+      "score": 0.10368116802412874
+     },
+     {
+      "candidate": 34,
+      "score": 0.15580224463057815
+     },
+     {
+      "candidate": 35,
+      "score": 0.18218728956253588
+     }
+    ]
+   },
+   {
+    "chosen": 32,
+    "chosen_score": 0.10728181402212526,
+    "n_candidates": 35,
+    "removed_before": [2],
+    "round": 1,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 10.493463428217751
+     },
+     {
+      "candidate": 1,
+      "score": 3.397136996046284
+     },
+     {
+      "candidate": 3,
+      "score": 0.11715835647885846
+     },
+     {
+      "candidate": 4,
+      "score": 0.147746213556035
+     },
+     {
+      "candidate": 5,
+      "score": 0.16005084500715744
+     },
+     {
+      "candidate": 6,
+      "score": 2.0231160943153874
+     },
+     {
+      "candidate": 7,
+      "score": 0.16144413955923415
+     },
+     {
+      "candidate": 8,
+      "score": 0.12636290003712664
+     },
+     {
+      "candidate": 9,
+      "score": 0.1408640836145287
+     },
+     {
+      "candidate": 10,
+      "score": 0.14409986811283776
+     },
+     {
+      "candidate": 11,
+      "score": 0.1422985641520222
+     },
+     {
+      "candidate": 12,
+      "score": 0.20479298596161133
+     },
+     {
+      "candidate": 13,
+      "score": 0.23747891024352433
+     },
+     {
+      "candidate": 14,
+      "score": 0.1828745474434675
+     },
+     {
+      "candidate": 15,
+      "score": 0.1975964103411358
+     },
+     {
+      "candidate": 16,
+      "score": 0.17299548649942306
+     },
+     {
+      "candidate": 17,
+      "score": 0.20416877631857427
+     },
+     {
+      "candidate": 18,
+      "score": 0.1955901062160277
+     },
+     {
+      "candidate": 19,
+      "score": 0.2346641728088414
+     },
+     {
+      "candidate": 20,
+      "score": 0.17264456596905312
+     },
+     {
+      "candidate": 21,
+      "score": 0.17357887471652284
+     },
+     {
+      "candidate": 22,
+      "score": 0.18912834389697483
+     },
+     {
+      "candidate": 23,
+      "score": 0.2035648168189219
+     },
+     {
+      "candidate": 24,
+      "score": 0.17730251162841454
+     },
+     {
+      "candidate": 25,
+      "score": 0.16805249539547712
+     },
+     {
+      "candidate": 26,
+      "score": 0.11600193590598655
+     },
+     {
+      "candidate": 27,
+      "score": 0.11879521297347875
+     },
+     {
+      "candidate": 28,
+      "score": 0.13471798339564162
+     },
+     {
+      "candidate": 29,
+      "score": 0.12492821915483665
+     },
+     {
+      "candidate": 30,
+      "score": 0.14108986441816498
+     },
+     {
+      "candidate": 31,
+      "score": 0.11261579350374099
+     },
+     {
+      "candidate": 32,
+      "score": 0.10728181402212526
+     },
+     {
+      "candidate": 33,
+      "score": 0.13567687061685402
+     },
+     {
+      "candidate": 34,
+      "score": 0.18772034993459236
+     },
+     {
+      "candidate": 35,
+      "score": 0.21275244162282533
+     }
+    ]
+   },
+   {
+    "chosen": 3,
+    "chosen_score": 0.1673895214182558,
+    "n_candidates": 34,
+    "removed_before": [2, 32],
+    "round": 2,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 10.882021775103674
+     },
+     {
+      "candidate": 1,
+      "score": 3.091827182146178
+     },
+     {
+      "candidate": 3,
+      "score": 0.1673895214182558
+     },
+     {
+      "candidate": 4,
+      "score": 0.18952895794841054
+     },
+     {
+      "candidate": 5,
+      "score": 0.2016126737636778
+     },
+     {
+      "candidate": 6,
+      "score": 2.1097775974736437
+     },
+     {
+      "candidate": 7,
+      "score": 0.20534595334507388
+     },
+     {
+      "candidate": 8,
+      "score": 0.17475656491268943
+     },
+     {
+      "candidate": 9,
+      "score": 0.1859242605813746
+     },
+     {
+      "candidate": 10,
+      "score": 0.18784226784881625
+     },
+     {
+      "candidate": 11,
+      "score": 0.18993252017529969
+     },
+     {
+      "candidate": 12,
+      "score": 0.24129769805855297
+     },
+     {
+      "candidate": 13,
+      "score": 0.27041814854952934
+     },
+     {
+      "candidate": 14,
+      "score": 0.21707765307686824
+     },
+     {
+      "candidate": 15,
+      "score": 0.23367576789796402
+     },
+     {
+      "candidate": 16,
+      "score": 0.2083523163103204
+     },
+     {
+      "candidate": 17,
+      "score": 0.23777745964892621
+     },
+     {
+      "candidate": 18,
+      "score": 0.2346251850075755
+     },
+     {
+      "candidate": 19,
+      "score": 0.26434776904546836
+     },
+     {
+      "candidate": 20,
+      "score": 0.21648945512716217
+     },
+     {
+      "candidate": 21,
+      "score": 0.21537230443261973
+     },
+     {
+      "candidate": 22,
+      "score": 0.23819287063240382
+     },
+     {
+      "candidate": 23,
+      "score": 0.24492180798344165
+     },
+     {
+      "candidate": 24,
+      "score": 0.23161577631805058
+     },
+     {
+      "candidate": 25,
+      "score": 0.28247291404896796
+     },
+     {
+      "candidate": 26,
+      "score": 0.16960301031340821
+     },
+     {
+      "candidate": 27,
+      "score": 0.18387346785411546
+     },
+     {
+      "candidate": 28,
+      "score": 0.20386704315636903
+     },
+     {
+      "candidate": 29,
+      "score": 0.1987076232431889
+     },
+     {
+      "candidate": 30,
+      "score": 0.19350630120196363
+     },
+     {
+      "candidate": 31,
+      "score": 0.22410088712136922
+     },
+     {
+      "candidate": 33,
+      "score": 0.35112194853389467
+     },
+     {
+      "candidate": 34,
+      "score": 0.4085978847042397
+     },
+     {
+      "candidate": 35,
+      "score": 0.28608941883606737
+     }
+    ]
+   },
+   {
+    "chosen": 26,
+    "chosen_score": 0.22515398984635177,
+    "n_candidates": 33,
+    "removed_before": [2, 32, 3],
+    "round": 3,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 13.931302421674411
+     },
+     {
+      "candidate": 1,
+      "score": 0.8209944053610961
+     },
+     {
+      "candidate": 4,
+      "score": 0.4834330991101579
+     },
+     {
+      "candidate": 5,
+      "score": 0.40736750470745664
+     },
+     {
+      "candidate": 6,
+      "score": 3.100379656292877
+     },
+     {
+      "candidate": 7,
+      "score": 0.31539220691906694
+     },
+     {
+      "candidate": 8,
+      "score": 0.26092739302381146
+     },
+     {
+      "candidate": 9,
+      "score": 0.27635620955794094
+     },
+     {
+      "candidate": 10,
+      "score": 0.26910135781035394
+     },
+     {
+      "candidate": 11,
+      "score": 0.2791031434730241
+     },
+     {
+      "candidate": 12,
+      "score": 0.33740136424417816
+     },
+     {
+      "candidate": 13,
+      "score": 0.36343648209726576
+     },
+     {
+      "candidate": 14,
+      "score": 0.29125055422911567
+     },
+     {
+      "candidate": 15,
+      "score": 0.29102880891193805
+     },
+     {
+      "candidate": 16,
+      "score": 0.26682492722517925
+     },
+     {
+      "candidate": 17,
+      "score": 0.299238367455679
+     },
+     {
+      "candidate": 18,
+      "score": 0.29164930860091387
+     },
+     {
+      "candidate": 19,
+      "score": 0.32585151372966037
+     },
+     {
+      "candidate": 20,
+      "score": 0.2675271098508425
+     },
+     {
+      "candidate": 21,
+      "score": 0.2717851502335418
+     },
+     {
+      "candidate": 22,
+      "score": 0.2825073459596139
+     },
+     {
+      "candidate": 23,
+      "score": 0.2991989221496848
+     },
+     {
+      "candidate": 24,
+      "score": 0.28687717997715523
+     },
+     {
+      "candidate": 25,
+      "score": 0.35917236963225785
+     },
+     {
+      "candidate": 26,
+      "score": 0.22515398984635177
+     },
+     {
+      "candidate": 27,
+      "score": 0.23696470423116156
+     },
+     {
+      "candidate": 28,
+      "score": 0.25664715983453135
+     },
+     {
+      "candidate": 29,
+      "score": 0.2489365584442929
+     },
+     {
+      "candidate": 30,
+      "score": 0.2458462719043697
+     },
+     {
+      "candidate": 31,
+      "score": 0.2911895106434486
+     },
+     {
+      "candidate": 33,
+      "score": 0.4067635637509448
+     },
+     {
+      "candidate": 34,
+      "score": 0.4523791106882511
+     },
+     {
+      "candidate": 35,
+      "score": 0.32605257211616523
+     }
+    ]
+   },
+   {
+    "chosen": 30,
+    "chosen_score": 0.30531277229973275,
+    "n_candidates": 32,
+    "removed_before": [2, 32, 3, 26],
+    "round": 4,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 13.62265784113499
+     },
+     {
+      "candidate": 1,
+      "score": 0.8142247975335088
+     },
+     {
+      "candidate": 4,
+      "score": 0.5076996246934047
+     },
+     {
+      "candidate": 5,
+      "score": 0.4471682564370316
+     },
+     {
+      "candidate": 6,
+      "score": 3.057160147679057
+     },
+     {
+      "candidate": 7,
+      "score": 0.35974864359408204
+     },
+     {
+      "candidate": 8,
+      "score": 0.31188833134299976
+     },
+     {
+      "candidate": 9,
+      "score": 0.32872298606593514
+     },
+     {
+      "candidate": 10,
+      "score": 0.3144449853928548
+     },
+     {
+      "candidate": 11,
+      "score": 0.32416291677510056
+     },
+     {
+      "candidate": 12,
+      "score": 0.37820401036808204
+     },
+     {
+      "candidate": 13,
+      "score": 0.3982494137077387
+     },
+     {
+      "candidate": 14,
+      "score": 0.3358772744893944
+     },
+     {
+      "candidate": 15,
+      "score": 0.3357766972618793
+     },
+     {
+      "candidate": 16,
+      "score": 0.31496594133024003
+     },
+     {
+      "candidate": 17,
+      "score": 0.35199442322210467
+     },
+     {
+      "candidate": 18,
+      "score": 0.34354217339078624
+     },
+     {
+      "candidate": 19,
+      "score": 0.36658176793434755
+     },
+     {
+      "candidate": 20,
+      "score": 0.31866114345550445
+     },
+     {
+      "candidate": 21,
+      "score": 0.3338016423813232
+     },
+     {
+      "candidate": 22,
+      "score": 0.3368861028126927
+     },
+     {
+      "candidate": 23,
+      "score": 0.3641926816921316
+     },
+     {
+      "candidate": 24,
+      "score": 0.37101656341211753
+     },
+     {
+      "candidate": 25,
+      "score": 0.35603982554517527
+     },
+     {
+      "candidate": 27,
+      "score": 0.30762203819052625
+     },
+     {
+      "candidate": 28,
+      "score": 0.3093833092388805
+     },
+     {
+      "candidate": 29,
+      "score": 0.3210215862011757
+     },
+     {
+      "candidate": 30,
+      "score": 0.30531277229973275
+     },
+     {
+      "candidate": 31,
+      "score": 0.3390404060776978
+     },
+     {
+      "candidate": 33,
+      "score": 0.5358407201725669
+     },
+     {
+      "candidate": 34,
+      "score": 0.5054247339692284
+     },
+     {
+      "candidate": 35,
+      "score": 0.3626078665894438
+     }
+    ]
+   },
+   {
+    "chosen": 8,
+    "chosen_score": 0.37507411490551823,
+    "n_candidates": 31,
+    "removed_before": [2, 32, 3, 26, 30],
+    "round": 5,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 13.74193459796902
+     },
+     {
+      "candidate": 1,
+      "score": 0.7949333789547772
+     },
+     {
+      "candidate": 4,
+      "score": 0.547503918397058
+     },
+     {
+      "candidate": 5,
+      "score": 0.48890831237893895
+     },
+     {
+      "candidate": 6,
+      "score": 2.9149247068903863
+     },
+     {
+      "candidate": 7,
+      "score": 0.41386955790019275
+     },
+     {
+      "candidate": 8,
+      "score": 0.37507411490551823
+     },
+     {
+      "candidate": 9,
+      "score": 0.3844648254507366
+     },
+     {
+      "candidate": 10,
+      "score": 0.376543659657739
+     },
+     {
+      "candidate": 11,
+      "score": 0.3826944543488892
+     },
+     {
+      "candidate": 12,
+      "score": 0.42972728881112865
+     },
+     {
+      "candidate": 13,
+      "score": 0.4465631536039883
+     },
+     {
+      "candidate": 14,
+      "score": 0.39698305945723733
+     },
+     {
+      "candidate": 15,
+      "score": 0.3970249362252275
+     },
+     {
+      "candidate": 16,
+      "score": 0.37658950756679793
+     },
+     {
+      "candidate": 17,
+      "score": 0.4161471703392037
+     },
+     {
+      "candidate": 18,
+      "score": 0.40425656552527406
+     },
+     {
+      "candidate": 19,
+      "score": 0.42845657907370976
+     },
+     {
+      "candidate": 20,
+      "score": 0.3860091445699984
+     },
+     {
+      "candidate": 21,
+      "score": 0.40737609166700006
+     },
+     {
+      "candidate": 22,
+      "score": 0.4109564916120497
+     },
+     {
+      "candidate": 23,
+      "score": 0.4279178388606172
+     },
+     {
+      "candidate": 24,
+      "score": 0.44637350119919866
+     },
+     {
+      "candidate": 25,
+      "score": 0.43421744143705066
+     },
+     {
+      "candidate": 27,
+      "score": 0.38560754526875923
+     },
+     {
+      "candidate": 28,
+      "score": 0.40880912910397627
+     },
+     {
+      "candidate": 29,
+      "score": 0.43310615492044613
+     },
+     {
+      "candidate": 31,
+      "score": 0.4775176753286587
+     },
+     {
+      "candidate": 33,
+      "score": 1.068686349311436
+     },
+     {
+      "candidate": 34,
+      "score": 0.629128936684721
+     },
+     {
+      "candidate": 35,
+      "score": 0.4246605560433931
+     }
+    ]
+   },
+   {
+    "chosen": 20,
+    "chosen_score": 0.45161593590852844,
+    "n_candidates": 30,
+    "removed_before": [2, 32, 3, 26, 30, 8],
+    "round": 6,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 13.674202820943659
+     },
+     {
+      "candidate": 1,
+      "score": 0.989683228829513
+     },
+     {
+      "candidate": 4,
+      "score": 0.7581166977163789
+     },
+     {
+      "candidate": 5,
+      "score": 0.7689207515873319
+     },
+     {
+      "candidate": 6,
+      "score": 2.304652585461837
+     },
+     {
+      "candidate": 7,
+      "score": 0.5648820830027064
+     },
+     {
+      "candidate": 9,
+      "score": 0.4826838596912649
+     },
+     {
+      "candidate": 10,
+      "score": 0.5328057272931674
+     },
+     {
+      "candidate": 11,
+      "score": 0.5117413981377723
+     },
+     {
+      "candidate": 12,
+      "score": 0.5704889946541882
+     },
+     {
+      "candidate": 13,
+      "score": 0.5466224686438704
+     },
+     {
+      "candidate": 14,
+      "score": 0.5088323668937779
+     },
+     {
+      "candidate": 15,
+      "score": 0.4984624884232355
+     },
+     {
+      "candidate": 16,
+      "score": 0.4783946037941288
+     },
+     {
+      "candidate": 17,
+      "score": 0.512246586831265
+     },
+     {
+      "candidate": 18,
+      "score": 0.47890230737851774
+     },
+     {
+      "candidate": 19,
+      "score": 0.5107861613183629
+     },
+     {
+      "candidate": 20,
+      "score": 0.45161593590852844
+     },
+     {
+      "candidate": 21,
+      "score": 0.4816345326259265
+     },
+     {
+      "candidate": 22,
+      "score": 0.46692997687522897
+     },
+     {
+      "candidate": 23,
+      "score": 0.49593914851403875
+     },
+     {
+      "candidate": 24,
+      "score": 0.5258015972536192
+     },
+     {
+      "candidate": 25,
+      "score": 0.49955458502803457
+     },
+     {
+      "candidate": 27,
+      "score": 0.4516830740570487
+     },
+     {
+      "candidate": 28,
+      "score": 0.46526398914622813
+     },
+     {
+      "candidate": 29,
+      "score": 0.4901726838874773
+     },
+     {
+      "candidate": 31,
+      "score": 0.5488844312378698
+     },
+     {
+      "candidate": 33,
+      "score": 1.0989732835187536
+     },
+     {
+      "candidate": 34,
+      "score": 0.6853283814158116
+     },
+     {
+      "candidate": 35,
+      "score": 0.4715005426621809
+     }
+    ]
+   },
+   {
+    "chosen": 28,
+    "chosen_score": 0.5305385485267972,
+    "n_candidates": 29,
+    "removed_before": [2, 32, 3, 26, 30, 8, 20],
+    "round": 7,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 13.289808152949487
+     },
+     {
+      "candidate": 1,
+      "score": 0.9140456084106239
+     },
+     {
+      "candidate": 4,
+      "score": 0.7684218432421825
+     },
+     {
+      "candidate": 5,
+      "score": 0.7695673474872151
+     },
+     {
+      "candidate": 6,
+      "score": 2.6131083055324393
+     },
+     {
+      "candidate": 7,
+      "score": 0.6169696241154765
+     },
+     {
+      "candidate": 9,
+      "score": 0.5411023930711419
+     },
+     {
+      "candidate": 10,
+      "score": 0.577239642066347
+     },
+     {
+      "candidate": 11,
+      "score": 0.5776867992016633
+     },
+     {
+      "candidate": 12,
+      "score": 0.6182148701693106
+     },
+     {
+      "candidate": 13,
+      "score": 0.626838816479025
+     },
+     {
+      "candidate": 14,
+      "score": 0.5803271166172901
+     },
+     {
+      "candidate": 15,
+      "score": 0.5835795542902438
+     },
+     {
+      "candidate": 16,
+      "score": 0.5425032631605253
+     },
+     {
+      "candidate": 17,
+      "score": 0.5705499694995854
+     },
+     {
+      "candidate": 18,
+      "score": 0.5685039313464973
+     },
+     {
+      "candidate": 19,
+      "score": 0.6061615391442867
+     },
+     {
+      "candidate": 21,
+      "score": 0.6054597543231708
+     },
+     {
+      "candidate": 22,
+      "score": 0.6009180537495975
+     },
+     {
+      "candidate": 23,
+      "score": 0.6136473446421703
+     },
+     {
+      "candidate": 24,
+      "score": 0.6372451440069462
+     },
+     {
+      "candidate": 25,
+      "score": 0.5727524639854863
+     },
+     {
+      "candidate": 27,
+      "score": 0.5305461900487285
+     },
+     {
+      "candidate": 28,
+      "score": 0.5305385485267972
+     },
+     {
+      "candidate": 29,
+      "score": 0.5682347727735106
+     },
+     {
+      "candidate": 31,
+      "score": 0.6388850129685306
+     },
+     {
+      "candidate": 33,
+      "score": 1.1706546267321996
+     },
+     {
+      "candidate": 34,
+      "score": 0.7658700804681804
+     },
+     {
+      "candidate": 35,
+      "score": 0.5338032727581862
+     }
+    ]
+   }
+  ],
+  "state_id": "fede45dbe125bec0ec457d5a827d0027",
+  "step": {
+   "config_hash": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+   "impl_id": "depth.causal_kl_greedy_v1",
+   "impl_signature_hash": "8106604694621d305dc20324d5ce65d2cefe5491ef2c2ab93a1b5fe8f16b5ca9",
+   "profile_hash": "d835fad13756d21cf5a2e5cc66c7c9b7badbf251133aa13c53ab033056b2fb45",
+   "profile_id": "calib.hybrid_d4_base@v2",
+   "seed": 20260815
+  }
+ },
+ "ffn_attention": {
+  "attention": {
+   "artifact_digest": "2ccbe236195b98016a8b52c2e8a3d82591baec835cbdeaba37c32e020066bb8d",
+   "num_attention_heads": 16,
+   "query_heads": {
+    "0": [1, 2, 5, 6, 8, 9, 12, 15, 16, 18, 20, 22, 24, 26, 28, 30],
+    "1": [1, 2, 4, 7, 9, 10, 13, 15, 16, 19, 21, 23, 24, 25, 28, 31],
+    "10": [0, 2, 6, 7, 8, 11, 13, 14, 17, 18, 21, 22, 24, 26, 28, 29],
+    "11": [1, 3, 4, 5, 10, 11, 13, 14, 18, 19, 20, 23, 24, 25, 29, 30],
+    "12": [0, 3, 4, 7, 8, 9, 13, 14, 16, 17, 20, 23, 24, 25, 28, 30],
+    "13": [0, 2, 6, 7, 9, 10, 13, 15, 16, 19, 20, 21, 25, 26, 28, 29],
+    "14": [0, 3, 5, 6, 8, 11, 12, 14, 17, 19, 21, 22, 24, 27, 30, 31],
+    "15": [0, 2, 5, 7, 9, 10, 13, 15, 16, 17, 22, 23, 24, 25, 29, 30],
+    "16": [0, 1, 6, 7, 8, 10, 13, 14, 17, 19, 21, 22, 26, 27, 28, 31],
+    "17": [0, 2, 4, 7, 9, 11, 12, 15, 18, 19, 21, 22, 24, 25, 28, 31],
+    "18": [2, 3, 4, 7, 8, 11, 14, 15, 16, 19, 21, 22, 24, 27, 28, 31],
+    "19": [1, 2, 4, 6, 9, 10, 12, 13, 18, 19, 20, 22, 24, 25, 28, 31],
+    "2": [0, 1, 4, 5, 8, 11, 12, 13, 17, 18, 20, 22, 25, 26, 28, 31],
+    "20": [2, 3, 4, 7, 9, 11, 13, 15, 16, 17, 21, 23, 25, 26, 29, 31],
+    "21": [1, 2, 5, 6, 10, 11, 13, 15, 18, 19, 22, 23, 25, 26, 30, 31],
+    "22": [0, 2, 4, 6, 8, 10, 12, 14, 16, 19, 20, 23, 26, 27, 29, 30],
+    "23": [1, 2, 4, 6, 9, 10, 12, 15, 17, 18, 21, 23, 25, 27, 30, 31],
+    "24": [0, 2, 5, 7, 8, 11, 13, 14, 17, 19, 21, 22, 24, 27, 28, 29],
+    "25": [2, 3, 4, 5, 10, 11, 13, 14, 16, 17, 21, 23, 25, 26, 30, 31],
+    "26": [0, 3, 4, 7, 9, 10, 12, 14, 16, 18, 20, 21, 25, 26, 29, 31],
+    "27": [2, 3, 6, 7, 8, 11, 12, 15, 16, 18, 20, 22, 25, 27, 28, 29],
+    "28": [0, 3, 5, 7, 10, 11, 14, 15, 16, 18, 21, 23, 25, 26, 28, 30],
+    "29": [1, 2, 4, 6, 9, 11, 14, 15, 17, 18, 20, 22, 26, 27, 29, 30],
+    "3": [2, 3, 6, 7, 8, 10, 13, 15, 17, 19, 21, 22, 24, 27, 28, 31],
+    "30": [0, 2, 4, 5, 10, 11, 13, 15, 16, 17, 20, 23, 24, 26, 29, 30],
+    "31": [2, 3, 6, 7, 9, 10, 13, 15, 18, 19, 21, 22, 25, 26, 28, 30],
+    "32": [2, 3, 4, 7, 8, 10, 12, 14, 16, 18, 21, 22, 24, 27, 29, 31],
+    "33": [0, 1, 6, 7, 9, 10, 12, 15, 16, 17, 21, 22, 24, 25, 28, 31],
+    "34": [0, 1, 5, 7, 8, 9, 12, 13, 17, 19, 20, 21, 24, 26, 28, 29],
+    "35": [0, 2, 5, 7, 8, 11, 14, 15, 18, 19, 22, 23, 26, 27, 28, 29],
+    "4": [0, 2, 4, 5, 8, 9, 13, 14, 18, 19, 21, 22, 24, 27, 28, 31],
+    "5": [1, 2, 4, 6, 8, 9, 13, 15, 16, 18, 20, 23, 26, 27, 28, 30],
+    "6": [2, 3, 5, 7, 9, 10, 12, 13, 17, 18, 20, 23, 24, 27, 28, 29],
+    "7": [1, 2, 5, 7, 8, 11, 13, 15, 17, 18, 22, 23, 24, 26, 30, 31],
+    "8": [2, 3, 4, 7, 8, 9, 13, 15, 17, 18, 21, 23, 24, 25, 28, 30],
+    "9": [0, 2, 4, 5, 10, 11, 12, 14, 16, 17, 21, 23, 24, 26, 28, 29]
+   },
+   "rule": "reused: the journal's kept_heads on the teacher; their child must equal the state's digest",
+   "state_id": "87ee62059aa27519ff4643dec02300f4"
+  },
+  "ffn": {
+   "config_hash": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+   "gate": {
+    "artifact_digest": "e2c3cabb51322545805418d65a9be203119eb25ee5b12f468a636c99a3c9f31f",
+    "intermediate_size": 3072,
+    "rule": "the same operator run at 3,072 neurons per block, sharing the statistics pass, must build the journal's FFN state on the teacher bit for bit",
+    "state_id": "3f74303972b2a0834f1dc9c024de44e5"
+   },
+   "impl_id": "ffn.activation_importance_v0",
+   "intermediate_size": 3840,
+   "profile_id": "calib.hybrid_d4_base@v2"
+  }
+ },
+ "n_root_blocks": 36,
+ "residual_width": {
+  "gate": {
+   "all_points_diagnostics": {
+    "energy_captured_frac": 0.9246420215957857,
+    "min_kept_eigenvalue": 8.849853922146791e-05,
+    "orthonormality_error": 5.773159728050814e-15,
+    "point_weights": [9.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 8.0],
+    "top_eigenvalue": 0.2669729308976218
+   },
+   "artifact_digest": "998172e203ebd4fe94bdc2855ca072204eba2c953269719948d2feb1f16da1b5",
+   "config_hash": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+   "rule": "TPI1's: the journal's root RESIDUAL_WIDTH(rh) replayed on the teacher with its statistics retained equals the state's digest, and P at 1,024 over all 37 points recomputed from the retained statistics reproduces the recorded diagnostics",
+   "state_id": "02b3319640a0043a77ed5a3ca4e07afc"
+  },
+  "hidden_size": 1280,
+  "point_weights": [9.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 8.0],
+  "points": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+  "post_norm_point": 36,
+  "tpi1_statistics_sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb"
+ },
+ "schema": "aadistill.stage1.single_operator_budget.selection/v1",
+ "source": {
+  "journal": {
+   "path": "artifacts/stages/stage-2/teacher_modes/search_sessions/a_packed_search_20261105_195011/states.jsonl",
+   "sha256": "617d1512959f4966ed4b57a6c5e7137b5b95b1e31b7b26b7266a6cac3da262e8"
+  },
+  "root_state_id": "aea5f9991cf3812b24e16ea994c3ea8f",
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192",
+  "search_run": "a_packed_search_20261105_195011",
+  "seed": 20260815,
+  "tpi1_selection": {
+   "path": "configs/stages/stage-1/teacher_parent_initialization/selection.json",
+   "sha256": "c523a6d1dd18e7cafb52a81060336144c04de2791a1cb2acdf7bc742c52601f8"
+  }
+ }
+}
