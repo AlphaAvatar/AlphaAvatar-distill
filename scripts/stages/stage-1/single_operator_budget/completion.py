@@ -17,22 +17,30 @@ complete only when all of these hold (`check`):
   fields, unit by unit) is recorded: the four models of a mode must share it (`mode_problems`);
 * **formal report** -- ``formal_report.json`` is the scorer's report of exactly these generations (rescored here, $0):
   a ``{}`` or stale report is a missing part, every unit must be measured with nothing missing;
-* **model identity** -- every package an attempt built for this set (``packages.json``, appended before anything is
-  generated) names the expected weights: the arm's committed init record's ``model.safetensors`` sha256, or the
-  teacher identity's three shards.
+* **model identity (provenance)** -- every sealed part (``parts/part_NNNN.<generation>.jsonl``, fluid;
+  ``parts/<unit>/...``, capability) names the generation that sealed it, and that generation's package record
+  (``packages.json``, appended before anything is generated) names the expected weights (the arm's committed init
+  record's ``model.safetensors`` sha256, or the teacher identity's three shards), this target and mode, and the
+  registered protocol (`protocol_sha256`); every record the part holds is a registered item, well formed, under the
+  per-record protocol (seed rule, context, the mode's think state, a teacher EOS id, the system turn). This holds
+  whether or not a generations file exists yet: an attempt stopped with only ``parts/`` is checked the same way. And
+  every record of every generations file is one a proven part holds.
 
-`repair` turns what a check found into the smallest action: a stale report is rescored; a generations file with
-missing, extra or (identically) repeated items gives its valid records to the sealed parts and is superseded, so the
-runners generate only the items no sealed record holds; a unit whose protocol or model cannot be shown is superseded
-whole (records and parts kept under ``superseded/<attempt>/`` as evidence, never pooled) and generated again under the
-same per-item seeds. Two different records sealed for one item are a defect nothing here resolves: refused.
+`repair` turns what a check found into the smallest action, never choosing by outcome: a stale report is rescored;
+every part whose provenance is wrong or unverifiable is isolated (moved under ``superseded/<generation>/`` with its
+reason, never pooled) and the proven ones kept; a generations file with missing, extra or repeated items, or a record
+no proven part holds, is superseded, so the runners compose the unit from the proven parts and generate only the items
+none holds, under the same per-item seeds; a unit whose runner protocol cannot be shown is superseded whole. The same
+item sealed twice in proven parts is a defect nothing here resolves: refused.
 """
 from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[4]
@@ -106,6 +114,18 @@ def expected(mode: str) -> dict:
             "think_state": ev["modes"][mode]["think_state"]}
 
 
+def protocol_sha256(mode: str) -> str:
+    """The registered protocol of ``mode`` as one hash (`expected`): what a generation's package record names, so a
+    part sealed under another protocol is never taken."""
+    return hashlib.sha256(json.dumps(expected(mode), sort_keys=True, default=str).encode()).hexdigest()
+
+
+def teacher_stop_ids() -> list[int]:
+    """The teacher identity's EOS ids: a natural termination of a part's record must end with one of them."""
+    ident = json.loads((REPO / C.design()["teacher"]["identity"]["path"]).read_text())
+    return sorted(int(i) for i in ident["eos_token_ids"])
+
+
 def expected_weights(target: str, out: Path) -> dict[str, str] | None:
     """The weights a set must have been generated from: the arm's committed init record (the copy in this evidence
     directory), or the teacher identity's shards. None when the arm has no COMPLETE init record here."""
@@ -167,6 +187,84 @@ def packages(d: Path) -> list[dict]:
     return json.loads(p.read_text()) if p.is_file() else []
 
 
+#: a sealed part's name (`reasoning_inheritance.driver.PART_NAME`): its number and the generation that sealed it
+PART_NAME = re.compile(r"^part_(\d{4,})(?:\.([A-Za-z0-9_-]+))?\.jsonl$")
+
+
+def _parts(d: Path) -> list[tuple[str, str, Path]]:
+    """(unit, path relative to the set, path) of every sealed part of the registered units."""
+    from stages.teacher_parent_initialization import b_evidence as BE
+    d, out = Path(d), []
+    for key in BE.registered_units():
+        root = d / "parts" if key == BE.FLUID else d / "parts" / key
+        for p in sorted(root.glob("part_*.jsonl")) if root.is_dir() else ():
+            out.append((key, str(p.relative_to(d)), p))
+    return out
+
+
+def part_inventory(d: Path) -> dict[str, str]:
+    """Every sealed part now in the set, by relative path, with its sha256 (a package record keeps it: which parts
+    existed before that generation ran)."""
+    return {rel: sha256_file(p) for _k, rel, p in _parts(d)}
+
+
+def _generation_problem(e: dict | None, gen: str | None, target: str, mode: str, weights, proto: str) -> str | None:
+    if gen is None:
+        return "the part names no generation (sealed before parts carried one)"
+    if e is None:
+        return f"no package record names generation {gen}"
+    if weights is None:
+        return "the weights this target must be evaluated from are unknown (no COMPLETE init record)"
+    if e.get("weights_sha256") != weights:
+        return f"generation {gen} ran other weights {e.get('weights_sha256')}"
+    if e.get("target") != target or e.get("mode") != mode:
+        return f"generation {gen} is {e.get('target')}/{e.get('mode')}'s, not {target}/{mode}'s"
+    if e.get("protocol_sha256") != proto:
+        return f"generation {gen} ran protocol {str(e.get('protocol_sha256'))[:12]}, not the registered one"
+    return None
+
+
+def provenance(d: Path, target: str, mode: str, out: Path) -> dict:
+    """Each sealed part's provenance: the generation it names, that generation's package record (weights, target,
+    mode, protocol), and the part's own records (registered items, well formed, the per-record protocol). Returns
+    ``parts`` (per relative path: unit, generation, sha256, records, ``proven``, ``why``), ``proven_records`` (per
+    unit, by item id) and ``sealed_twice`` (an item two proven parts hold)."""
+    from stages.teacher_parent_initialization import analysis as TA
+    from stages.teacher_parent_initialization import b_evidence as BE
+    d = Path(d)
+    entries = {e.get("generation"): e for e in packages(d) if e.get("generation")}
+    weights, want = expected_weights(target, out), expected(mode)
+    proto, stops, units = protocol_sha256(mode), teacher_stop_ids(), BE.registered_units()
+    parts, proven, twice = {}, {k: {} for k in units}, []
+    for key, rel, p in _parts(d):
+        m = PART_NAME.match(p.name)
+        gen = m.group(2) if m else None
+        rows = _jl(p)
+        why = _generation_problem(entries.get(gen), gen, target, mode, weights, proto)
+        field, ids = units[key]
+        got = [str(r.get(field) if field in r else r.get("id")) for r in rows]
+        if why is None and (not rows or set(got) - set(ids)):
+            why = f"holds {sorted(set(got) - set(ids))[:3] or 'no'} records of registered items"
+        if why is None and _wellformed(key, rows):
+            why = f"{len(_wellformed(key, rows))} records without raw output or termination"
+        if why is None:
+            kind = BE.kind_of(key)
+            with tempfile.TemporaryDirectory() as tmp:
+                shutil.copyfile(p, Path(tmp) / f"{key}.jsonl")
+                item = TA.item_protocol(Path(tmp), None, key, {**want[kind], "stop_ids": stops}, want["think_state"])
+            disagree = {n: v["first"] for n, v in (item.get("checks") or {}).items() if v["disagree"]}
+            if disagree or not item.get("agrees"):
+                why = f"its records are not the registered protocol: {disagree or item.get('unverifiable')}"
+        parts[rel] = {"unit": key, "generation": gen, "sha256": sha256_file(p), "records": len(rows),
+                      "proven": why is None, "why": why}
+        if why is None:
+            for i, r in zip(got, rows):
+                if i in proven[key]:
+                    twice.append(f"{key}/{i}")
+                proven[key][i] = r
+    return {"parts": parts, "proven_records": proven, "sealed_twice": sorted(set(twice))}
+
+
 def check(d: Path, target: str, mode: str, out: Path, *, label: str | None = None) -> dict:
     """The five conditions of the module docstring for the set in ``d``. Returns ``complete``, ``problems`` (by
     condition) and, per unit, what a repair needs. The formal report is rescored here (``rescored``: the report these
@@ -182,6 +280,7 @@ def check(d: Path, target: str, mode: str, out: Path, *, label: str | None = Non
     problems: dict[str, list[str]] = {"coverage": [], "records": [], "protocol": [], "formal_report": [],
                                       "model_identity": []}
     per_unit, digest_body = {}, {}
+    prov = provenance(d, target, mode, out)
     for key, c in comp.items():
         u = {"present": c.get("present", False), "complete": c.get("complete", False)}
         if not u["present"]:
@@ -236,28 +335,32 @@ def check(d: Path, target: str, mode: str, out: Path, *, label: str | None = Non
         #: task file a resumed run submits (its missing tasks only) is checked on the sealed summary above
         digest_body[key] = sorted({json.dumps({k: v for k, v in r.items() if k != "tasks_sha256"}, sort_keys=True,
                                               default=str) for r in prot["runs"]})
+        field, held = units[key][0], prov["proven_records"][key]
+        unproven = sum(1 for r in rows if held.get(str(r.get(field) if field in r else r.get("id"))) != r)
+        if unproven:
+            problems["model_identity"].append(f"{key}: {unproven} of its {len(rows)} records no proven part holds")
         action = None
-        if not u["complete"]:
-            action = "recompose"            #: missing, extra or repeated items: the sealed records, then the rest
+        if not u["complete"] or unproven:
+            action = "recompose"            #: missing, extra, repeated or unproven records: the proven parts, then the rest
         if malformed or miss or differs or disagree or not item.get("agrees"):
             action = "regenerate"           #: records or protocol that cannot be shown: the unit again, same seeds
         per_unit[key] = {**u, "generations_sha256": c.get("generations_sha256"), "records": len(rows),
                          "malformed": len(malformed), "protocol_missing": miss, "protocol_differs": differs,
+                         "records_no_proven_part_holds": unproven,
                          "per_record": {"agrees": item.get("agrees"), "disagree": disagree,
                                         "unverifiable": item.get("unverifiable")},
                          "action": action}
-    # model identity
+    # model identity: every sealed part's generation, weights, mode and protocol (with or without a generations file)
     pk = packages(d)
     weights = expected_weights(target, out)
     if weights is None:
         problems["model_identity"].append(f"{target} has no COMPLETE init record in {out}")
-    elif any(per_unit[k]["present"] for k in per_unit):
-        if not pk:
-            problems["model_identity"].append("no package record: the weights these generations came from are unknown")
-        for e in pk:
-            if e.get("weights_sha256") != weights:
-                problems["model_identity"].append(f"attempt {e.get('attempt')}: package weights "
-                                                  f"{e.get('weights_sha256')} are not {weights}")
+    bad_parts = {rel: v["why"] for rel, v in prov["parts"].items() if not v["proven"]}
+    if bad_parts:
+        problems["model_identity"].append(f"{len(bad_parts)} sealed parts whose provenance is wrong or unverifiable "
+                                          f"({sorted(set(bad_parts.values()))[:3]})")
+    if prov["sealed_twice"]:
+        problems["records"].append(f"items sealed twice in proven parts: {prov['sealed_twice'][:5]}")
     # the formal report: rescored from these generations
     rescored, stored = None, None
     if all(per_unit[k]["present"] for k in per_unit):
@@ -276,10 +379,11 @@ def check(d: Path, target: str, mode: str, out: Path, *, label: str | None = Non
         problems["formal_report"].append("not scorable: units without generations")
     digest = hashlib.sha256(json.dumps(digest_body, sort_keys=True, default=str).encode()).hexdigest()
     complete = not any(problems.values())
-    return {"schema": SCHEMA, "target": target, "mode": mode, "complete": complete,
+    return {"schema": SCHEMA, "target": target, "mode": mode, "out": str(out), "complete": complete,
             "problems": {k: v for k, v in problems.items() if v}, "units": per_unit,
-            "protocol_digest": digest, "packages": [{k: e.get(k) for k in ("attempt", "utc", "weights_sha256")}
-                                                    for e in pk],
+            "protocol_digest": digest, "packages": [{k: e.get(k) for k in ("generation", "attempt", "utc",
+                                                                             "weights_sha256")} for e in pk],
+            "parts": prov["parts"], "sealed_twice": prov["sealed_twice"],
             "expected_weights": weights, "think_state": want["think_state"], "rescored": rescored,
             "stored_report_matches": not problems["formal_report"]}
 
@@ -306,67 +410,53 @@ def _supersede(d: Path, rel: str, attempt: str) -> str | None:
     return rel
 
 
-def _import_into_parts(d: Path, key: str, attempt: str) -> dict:
-    """The generations file's records that no sealed part holds, given to the parts as one more sealed part: a
-    registered item, once (identical repeats are one record), never a second, different record for an item."""
-    from stages.teacher_parent_initialization import b_evidence as BE
-    d = Path(d)
-    field, ids = BE.registered_units()[key]
-    reg = set(ids)
-    fluid = key == BE.FLUID
-    parts = d / "parts" if fluid else d / "parts" / key
-    sealed = {}
-    for p in sorted(parts.glob("part_*.jsonl")) if parts.is_dir() else ():
-        for r in _jl(p):
-            sealed[str(r.get(field) if field in r else r.get("id"))] = r
-    take, conflicts = {}, []
-    for r in _jl(d / "generations" / f"{key}.jsonl"):
-        i = str(r.get(field) if field in r else r.get("id"))
-        if i not in reg:
-            continue
-        for have in (sealed.get(i), take.get(i)):
-            if have is not None and have != r:
-                conflicts.append(i)
-        if i not in sealed:
-            take[i] = r
-    if conflicts:
-        raise CompletionError(f"{d.name}/{key}: two different records are sealed for {sorted(set(conflicts))[:5]}; "
-                              "nothing here chooses between them")
-    if take:
-        parts.mkdir(parents=True, exist_ok=True)
-        n = len(list(parts.glob("part_*.jsonl")))
-        tmp = parts / f".part_{n:04d}.partial"
-        tmp.write_text("".join(json.dumps(take[i], ensure_ascii=False) + "\n" for i in sorted(take)), encoding="utf-8")
-        tmp.replace(parts / f"part_{n:04d}.jsonl")
-    return {"unit": key, "records_given_to_parts": len(take), "attempt": attempt}
+def _proven_generation(e: dict, target: str, mode: str, out: Path) -> bool:
+    return _generation_problem(e, e.get("generation"), target, mode, expected_weights(target, out),
+                               protocol_sha256(mode)) is None
 
 
 def repair(d: Path, st: dict, attempt: str) -> list[dict]:
-    """The smallest actions for what `check` found (module docstring); returns what was done. A stale report needs
-    nothing here (the caller writes the rescored one); a package that names other weights supersedes every unit."""
+    """The smallest actions for what `check` found (module docstring), under ``superseded/<attempt>/``; returns what
+    was done. A stale report needs nothing here (the caller writes the rescored one). Nothing proven is moved and
+    nothing is chosen by its outcome; ``packages.json`` stays whole (it is what the proven parts are read against)."""
+    from stages.reasoning_inheritance.driver import write_json
     from stages.teacher_parent_initialization import b_evidence as BE
     d, done = Path(d), []
-    wrong_model = any("are not" in p or "unknown" in p for p in st["problems"].get("model_identity", []))
+    if st.get("sealed_twice"):
+        raise CompletionError(f"{d.name}: items sealed twice in proven parts {st['sealed_twice'][:5]}; nothing here "
+                              "chooses between them")
+    isolated = {rel: v for rel, v in (st.get("parts") or {}).items() if not v["proven"]}
+    for rel, v in isolated.items():
+        _supersede(d, rel, attempt)
+    if isolated:
+        write_json(d / SUPERSEDED / attempt / "isolated_parts.json", isolated)
+        done.append({"isolated_parts": len(isolated), "kept_parts": len(st["parts"]) - len(isolated),
+                     "why": sorted({v["why"] for v in isolated.values()})})
     for key, u in st["units"].items():
-        action = "regenerate" if (wrong_model and u.get("present")) else u.get("action")
+        action = u.get("action")
         if action == "recompose":
-            done.append(_import_into_parts(d, key, attempt))
             moved = [_supersede(d, f"generations/{key}{s}", attempt) for s in (".jsonl", ".summary.json")]
-            done.append({"unit": key, "superseded": [m for m in moved if m], "why": "recomposed from sealed parts"})
-        elif action == "regenerate":
-            parts = "parts" if key == BE.FLUID else f"parts/{key}"
-            moved = [_supersede(d, f"generations/{key}{s}", attempt) for s in (".jsonl", ".summary.json")]
-            if key == BE.FLUID:
-                moved += [_supersede(d, f"parts/{p.name}", attempt) for p in sorted((d / "parts").glob("part_*.jsonl"))]
-                moved.append(_supersede(d, "fluid_runs.json", attempt))
-            else:
-                moved.append(_supersede(d, parts, attempt))
             done.append({"unit": key, "superseded": [m for m in moved if m],
-                         "why": "its protocol or model cannot be shown: generated again under the same seeds"})
-    if wrong_model or (not st["packages"] and any(u.get("present") for u in st["units"].values())):
-        moved = _supersede(d, PACKAGES, attempt)
-        if moved:
-            done.append({"superseded": [moved], "why": "the package record names other weights"})
+                         "why": "composed again from the proven parts; the items none holds are generated"})
+        elif action == "regenerate":
+            moved = [_supersede(d, f"generations/{key}{s}", attempt) for s in (".jsonl", ".summary.json")]
+            moved += [_supersede(d, rel, attempt) for k, rel, _p in _parts(d) if k == key]
+            done.append({"unit": key, "superseded": [m for m in moved if m],
+                         "why": "its runner protocol or records cannot be shown: generated again under the same seeds"})
+    #: the fluid unit's run history keeps only the runs of proven generations (a run whose parts were isolated must
+    #: not stand in the recomposed unit's summary)
+    runs_p = d / "fluid_runs.json"
+    if runs_p.is_file() and (any(v["unit"] == BE.FLUID for v in isolated.values())
+                             or (st["units"].get(BE.FLUID) or {}).get("action")):
+        entries = {e.get("generation"): e for e in packages(d) if e.get("generation")}
+        runs = json.loads(runs_p.read_text())
+        keep = [r for r in runs if r.get("attempt") in entries
+                and _proven_generation(entries[r["attempt"]], st["target"], st["mode"], st["out"])]
+        if len(keep) != len(runs):
+            _supersede(d, "fluid_runs.json", attempt)
+            if keep:
+                write_json(runs_p, keep)
+            done.append({"unit": BE.FLUID, "fluid_runs_kept": len(keep), "fluid_runs_superseded": len(runs) - len(keep)})
     return done
 
 
@@ -386,15 +476,12 @@ def rescore(d: Path, st: dict) -> None:
 # ---- the phase ----------------------------------------------------------------------------------------------------
 
 def init_problems(out: Path) -> dict[str, str]:
-    """Each arm without a COMPLETE init record whose relay copies all verified, in ``out``."""
+    """Each arm product (``<arm>/init``, ``<arm>/mapping``) whose init record in ``out`` does not show it durable:
+    its manifest the required files, its relay copy verified with exactly them (`common.product_problems`)."""
     bad = {}
     for arm in C.design()["phase_1"]["build_order"]:
         p = Path(out) / arm / "init_record.json"
-        rec = json.loads(p.read_text()) if p.is_file() else None
-        if rec is None:
-            bad[arm] = "no init record"
-        elif rec.get("status") != "COMPLETE" or not all(v.get("verified") for v in (rec.get("relay") or {}).values()):
-            bad[arm] = "init record not COMPLETE or a relay copy unverified"
+        bad.update(C.product_problems(json.loads(p.read_text()) if p.is_file() else None, arm))
     return bad
 
 

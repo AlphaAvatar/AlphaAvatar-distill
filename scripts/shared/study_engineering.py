@@ -419,6 +419,10 @@ class Launch:
     setup_env: dict = field(default_factory=dict)
     teardown_note: str = ("delete the pod, verify from the provider that it is gone, STOP; nothing is kept "
                           "on the provider: the validation's weights are scratch")
+    #: the study's own completion check, run by `closeout` on the dev box once the session's outcome (money, teardown,
+    #: reconciliation) is written -- the formal launch's closeout and a manual one alike: ``(run_id, scr) -> record``
+    #: with a ``status``; the record joins the outcome as ``study_completion``. A failure is recorded, never raised.
+    completion_check: Callable[[str, Path], dict] | None = None
 
     def audit(self) -> str:
         return f"{self.session_kind}_engineering" if self.kind == "engineering_validation" else self.session_kind
@@ -737,6 +741,13 @@ def closeout(study: Study, launch: Launch, run_id: str, scr: Path, *, root: Path
     dest = root / study.run_dir(run_id) / "closeout/outcome.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(out, indent=1, default=str) + "\n")
+    if launch.completion_check is not None:
+        #: after the money and teardown record is on disk, so a failing check can never lose it
+        try:
+            out["study_completion"] = launch.completion_check(run_id, Path(scr))
+        except Exception as exc:  # noqa: BLE001
+            out["study_completion"] = {"status": "INCOMPLETE", "error": f"{type(exc).__name__}: {str(exc)[:1500]}"}
+        dest.write_text(json.dumps(out, indent=1, default=str) + "\n")
     return out
 
 

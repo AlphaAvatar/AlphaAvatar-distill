@@ -16976,3 +16976,52 @@ on a paid pod.
 - Risks: the statistics' download at the 2.6 MB/s floor is 16 min; a unit whose runner summary was lost is generated
   again (its records kept as superseded evidence).
 - Revisit when: the maintainer reviews the corrections and the phase-1 grant.
+
+## 2026-11-20 (UTC) — SOB1: one product manifest per arm, part provenance before a merge, phase 1's completion on both closeout paths
+
+- Context: the maintainer reviewed the corrections (`8012d22e`, `06d9fd39`, `8b85bb62`). Phase 1 keeps its design;
+  its budget is prepared at $10.21 expected, a $22.92 session hard cap and the $1.00 teardown reserve. Three $0 fixes
+  come before the grant; the reused PCA statistics, the journal's DEPTH rounds and TPI1's baseline stay as they are;
+  phase 2's training budget and durable storage are decided separately.
+- Decision (maintainer, 2026-11-20, summarized; the brief is the source):
+  - The build's mapping files follow `frozen_mapping.save`'s returned record: every arm needs `mapping.json`, only
+    an arm that declares a width projection needs the tensor file; build, upload, restore and local `retain` share
+    that list. Regression: three small mappings through the real save, reload, hash manifest and takeover, both arms
+    without a width projection covered.
+  - On a resumed evaluation, the existing parts' weights identity, mode and protocol are checked before completed
+    items are merged, also where an attempt stopped with only `parts/` and no generations file; parts whose provenance
+    is shown are reused, only the wrong or unverifiable ones isolated and regenerated. Regression: an old model left
+    partial answers, the new attempt loads the right model.
+  - The scientific completion is wired into the formal `launch` and the manual `closeout`. An empty relay list or an
+    empty file list does not show weights saved. Phase 1 is registered COMPLETE only after all eight sets are complete
+    and the three initializations and their mappings are verified locally against the manifest; a failed or
+    interrupted session still tears down, reconciles, keeps resumable products and records what is unfinished.
+- Done ($0):
+  - The defect: `build()` hashed `mapping.json` AND `tensors.safetensors` for every arm, so the FFN + attention and
+    depth arms would have raised `FileNotFoundError` right after saving their mappings (the tensor file exists only
+    for a width projection). Now `common.mapping_manifest` derives the list from save's record and the design's
+    declaration (`width_declared`: the arm's build runs RESIDUAL_WIDTH); `common.products` / `product_problems` are
+    the one manifest `persist`, `durable_init`, `model_for`, `completion.init_problems` and `retain` read. The relay's
+    `put` refuses an empty upload; an empty manifest or relay list is never verified.
+  - Part provenance: each generation round is `<attempt>-g<n>`; its package record (weights, target, mode,
+    `protocol_sha256`, the parts already sealed) is written before anything is generated, and the runners' sealer
+    names each part `part_NNNN.<generation>.jsonl` (numbered past the highest, so a gap never overwrites a kept part).
+    `completion.provenance` checks every part (its generation's record, then its own records' per-record protocol, a
+    teacher EOS id ending a natural stop) with or without a generations file; a generations record must be one a
+    proven part holds. `repair` isolates what cannot be shown under `superseded/<generation>/` with its reason, keeps
+    the proven parts and the whole `packages.json`, supersedes a generations file holding an unproven record, and
+    keeps only proven generations' runs in the fluid history. The earlier import of a generations file's records into
+    the parts is removed: a record no proven part holds cannot be shown, so it is regenerated.
+  - `Launch.completion_check` (shared closeout, after the money record is written; a failing check is recorded, never
+    raised) runs `launch.phase1_completion` on every phase-1 closeout: `completion.phase` on the secured copy, then
+    `retain`; `closeout/phase1_completion.json` is COMPLETE only when both hold. SOB1's own closeout wrapper is
+    removed (the manual path is the shared one).
+  - The design's `phase_1.completion` texts (rule, takeover, dev_box) now describe these mechanisms; nothing else in
+    the design changed. `structures.json` and `proposal.json` were regenerated for the new design hash only (every
+    figure unchanged).
+- Alternatives considered: attributing parts by snapshots of the parts present before each generation (rejected: a
+  package record that never reached the dev box would attribute a later generation's parts to an earlier one); keeping
+  the import of a generations file's records into parts (rejected: those records have no provable source).
+- Risks: a unit whose last sample was sealed in the seconds before its runner summary was written has no runner
+  summary and is generated again (the runners process units one at a time, so this window is one unit's last write).
+- Revisit when: the maintainer reviews this round and the phase-1 grant.

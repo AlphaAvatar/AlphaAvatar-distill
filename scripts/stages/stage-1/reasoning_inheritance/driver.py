@@ -39,6 +39,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -515,12 +516,27 @@ def package(model_dir: Path, dest: Path) -> dict:
     return {"model_dir": str(model_dir), "sidecars": side, "teacher_snapshot": str(snap)}
 
 
-class Sealer(threading.Thread):
-    """Seals the complete lines a stream has gained into immutable numbered parts (``parts/part_NNNN.jsonl``)."""
+#: a sealed part's file name: its number, then (since 2026-11-20) the generation that sealed it
+PART_NAME = re.compile(r"^part_(\d{4,})(?:\.([A-Za-z0-9_-]+))?\.jsonl$")
 
-    def __init__(self, stream: Path, parts: Path, every: float = SEAL_EVERY_S):
+
+def next_part_number(parts: Path) -> int:
+    """One past the highest part number in ``parts`` (never the count: a part moved away leaves a gap, and the count
+    would name an existing part again)."""
+    nums = [int(m.group(1)) for p in parts.glob("part_*.jsonl") if (m := PART_NAME.match(p.name))]
+    return max(nums, default=-1) + 1
+
+
+class Sealer(threading.Thread):
+    """Seals the complete lines a stream has gained into immutable numbered parts (``parts/part_NNNN[.<tag>].jsonl``).
+    ``tag``: the generation sealing them (the caller's attempt), so a later attempt can tell which run -- and so which
+    weights, mode and protocol -- produced each part."""
+
+    def __init__(self, stream: Path, parts: Path, every: float = SEAL_EVERY_S, tag: str | None = None):
         super().__init__(daemon=True)
-        self.stream, self.parts, self.every = stream, parts, every
+        if tag is not None and not re.fullmatch(r"[A-Za-z0-9_-]+", tag):
+            raise DriverError(f"a part tag is letters, digits, '_' and '-': {tag!r}")
+        self.stream, self.parts, self.every, self.tag = stream, parts, every, tag
         self.stop = threading.Event()
         self.offset = 0
 
@@ -533,10 +549,10 @@ class Sealer(threading.Thread):
             return 0
         chunk = data[:cut + 1]
         self.parts.mkdir(parents=True, exist_ok=True)
-        n = len(list(self.parts.glob("part_*.jsonl")))
+        n = next_part_number(self.parts)
         tmp = self.parts / f".part_{n:04d}.partial"
         tmp.write_bytes(chunk)
-        os.replace(tmp, self.parts / f"part_{n:04d}.jsonl")
+        os.replace(tmp, self.parts / (f"part_{n:04d}" + (f".{self.tag}" if self.tag else "") + ".jsonl"))
         self.offset += len(chunk)
         return chunk.count(b"\n")
 
@@ -626,7 +642,7 @@ def fluid(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, env: d
         sub = unit_dir.parent.parent / "live" / f"{unit_dir.name}.{attempt}.tasks.jsonl"
         sub.write_text("".join(json.dumps(t, ensure_ascii=False) + "\n" for t in todo))
         tmp_out = unit_dir.parent.parent / "live" / f"{unit_dir.name}.{attempt}.out.jsonl"
-        sealer = Sealer(live, unit_dir / "parts")
+        sealer = Sealer(live, unit_dir / "parts", tag=attempt)
         sealer.start()
         t0 = time.time()
         log = unit_dir / "logs" / f"eval_fluid.{attempt}.log"
@@ -792,7 +808,7 @@ def capability(pkg: Path, unit_dir: Path, label: str, mode: str, vllm_py: str, e
         (staged / f"{k}.jsonl").write_text("".join(l + "\n" for l in keep), encoding="utf-8")
     log = unit_dir / "logs" / f"eval_capability.{attempt}.log"
     log.parent.mkdir(parents=True, exist_ok=True)
-    sealers = {k: Sealer(stream / f"{k}.stream.jsonl", unit_dir / "parts" / k) for k in order}
+    sealers = {k: Sealer(stream / f"{k}.stream.jsonl", unit_dir / "parts" / k, tag=attempt) for k in order}
     for x in sealers.values():
         x.start()
     opts = opts or {}

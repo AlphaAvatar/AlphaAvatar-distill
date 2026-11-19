@@ -101,6 +101,16 @@ geometry and parameter count against `structures.json`; a finite forward after r
 teacher (diagnostic only); the checkpoint and mapping to the relay, downloaded again and re-hashed; the arm's
 `init_record.json`.
 
+**One manifest per arm (fixed 2026-11-20).** The mapping's files come from `frozen_mapping.save`'s own record
+(`common.mapping_manifest`): `mapping.json` always, and `tensors.safetensors` only when the record holds a width
+projection, which must be exactly when the design declares one (the residual-width arm). The checkpoint's are
+`model.safetensors` and `config.json`. Before, the build hashed both mapping files for every arm, so the FFN +
+attention and depth arms (no width projection, no tensor file) would have failed right after saving their mappings.
+The build record's manifest is what the upload sends and verifies (each relay group only when its re-downloaded
+hashes are exactly the manifest), what the takeover and the restore read (`durable_init`, `model_for`) and what local
+retention re-hashes on the dev box (`common.products`, `common.product_problems`). An empty manifest or an empty
+relay list proves nothing, and the relay's `put` refuses an empty upload.
+
 **Calibration and training are different data sets, each counted before packing.**
 
 | set | before packing | after packing (compute records only) |
@@ -181,18 +191,27 @@ teacher, each in both modes. Each is checked against the registered manifest:
 | generation records | each turn carries its raw output and the termination fields the scorers read; record by record, its seed is the seed rule's for its unit, item and turn, prompt plus allowance is 8,192, the rendered prompt has the mode's think state (`self_opening` / `preclosed`), a natural stop ends with the stop id, the fluid system turn is the registered message |
 | protocol summary | every unit's summary and runner summaries; every key field recorded and equal to the registered value (decoding protocol and its seed rule, 8,192 context, system message, chat template and tokenizer, template kwargs, degeneration interval, action protocol, task file). The set's protocol digest is recorded; the four sets of a mode must share it |
 | formal report | rescored from these generations; a `{}` or stale report is a missing part |
-| model identity | every package an attempt built for the set (`packages.json`, written before anything is generated) names the arm's init-record weights or the teacher identity's three shards |
+| model identity (provenance) | every sealed part names the generation that sealed it (`part_NNNN.<generation>.jsonl`); that generation's package record (`packages.json`, written before anything is generated) names the arm's init-record weights or the teacher identity's three shards, this target and mode, and the registered protocol (`protocol_sha256`); the part's own records are registered items under the per-record protocol (a teacher EOS id ends a natural stop). Checked whether or not a generations file exists, so an attempt stopped with only `parts/` is checked the same way. Every generations record must be one a proven part holds |
 
-A set an earlier attempt completed is taken as it is. Otherwise the smallest repair, from the sealed records:
+A set an earlier attempt completed is taken as it is. Otherwise the smallest repair, before anything is merged:
 
 * a `{}` or stale report is rescored, and nothing is generated;
-* a generations file with missing, extra or repeated items gives its valid records to the sealed parts and is
-  superseded, so only the missing items are generated;
-* a unit whose protocol or model cannot be shown is generated again under the same per-item seeds. Its earlier records
-  stay under `superseded/<attempt>/` as evidence and are never pooled.
+* every part whose generation's weights, mode or protocol, or whose own records, cannot be shown is isolated under
+  `superseded/<generation>/` with its reason (`isolated_parts.json`), never pooled; the proven parts are kept and
+  reused;
+* a generations file with missing, extra or repeated items, or a record no proven part holds, is superseded, so the
+  runners compose the unit from the proven parts and generate only the items none holds, under the same per-item
+  seeds;
+* a unit whose runner protocol cannot be shown (no runner summary, or a field that differs) is generated again.
 
-Two different records for one item are refused. Phase 1 ends `ALL_DONE` only when the three inits are durable, the
-eight sets are complete and each mode's sets share one protocol (`completion.phase`). Checked on TPI1's four real A
+The same item sealed twice in proven parts is refused. Each generation round has its own id (`<attempt>-g<n>`), and
+the runners tag every part they seal with it (`reasoning_inheritance.driver.Sealer`, which also numbers a new part
+past the highest, not by count, so a gap left by an isolated part never overwrites a kept one). Phase 1 ends
+`ALL_DONE` only when the three inits are durable, the eight sets are complete and each mode's sets share one protocol
+(`completion.phase`). The counter-example regression: a generation of other weights left partial answers in `parts/`
+with no generations file, an earlier generation of the right weights sealed a few items, one part carries no
+generation; the new attempt isolates the wrong and the untagged parts, reuses the proven ones and generates only the
+rest, through the runners' real merge with a synthetic engine. Checked on TPI1's four real A
 sets at 8,192, coverage, records, protocol and the report all pass, and the two seeds share one protocol digest per
 mode; model identity is missing there because TPI1 did not record the weights' hashes.
 
@@ -324,13 +343,22 @@ exclude a `live/` directory at any depth (`train_driver.is_live`, `FIND`).
 exit, an answer without its completion marker) is retried three times. If it still cannot be read, `pending` is
 unknown, never 0, so the products cannot read as secured. Before, a failed `find` read as an empty listing and
 "nothing pending". At teardown, every file of the pod's final listing is checked by sha256 against the dev box's copy;
-a missing or different file is pulled again and checked once more (`final_hash_check`). `closeout` then re-checks
-phase 1's completion on that copy (`closeout/phase1_completion.json`).
+a missing or different file is pulled again and checked once more (`final_hash_check`).
 
 **Fixed: local retention.** `retain` is COMPLETE only when every arm's initialization and mapping is on the dev box's
-disk with the init record's sha256, re-hashed there, not taken from the fetch's answer. A missing init record, a
-failed fetch, a filesystem without room or different bytes leave it INCOMPLETE, naming what is missing (exit 12). The
-verified products stay recorded, so the next retain fetches only the rest.
+disk as its init record's manifest, re-hashed there, not taken from the fetch's answer. A missing init record, a
+relay list that is empty or not the manifest, a failed fetch, a filesystem without room or different bytes leave it
+INCOMPLETE, naming what is missing (exit 12). The verified products stay recorded, so the next retain fetches only
+the rest.
+
+**Fixed (2026-11-20): phase 1's completion on both closeout paths.** The shared closeout runs a study's own check
+after the outcome's money, teardown and reconciliation record is written (`Launch.completion_check`), so the formal
+`launch`, which closes out after teardown, and a manual `closeout` run the same `phase1_completion`. Before, only the
+manual path re-checked phase 1. Phase 1 is recorded COMPLETE (`closeout/phase1_completion.json`) only when the eight
+sets are complete on the secured copy AND `retain` has every arm's initialization and mapping on the dev box as its
+manifest; otherwise INCOMPLETE, every unfinished item named (`sets`, `inits`, `modes`, `local_retention`). A failed or
+interrupted session is torn down and reconciled as before; its durable products and sealed parts stay for the next
+attempt's takeover.
 
 **Takeover.** TPI1's train driver, with this round's two repairs:
 
@@ -359,7 +387,8 @@ launch.py grant --decision '<the maintainer's words>' --granted-by maintainer
 launch.py issue --kind sob1_phase1 --run-id <id> --expected-usd 10.21 --hard-cap-usd 22.92
 git commit <the authorization> (the session commit) ; stage the bundle at that commit
 launch.py launch --kind sob1_phase1 --run-id <id> --session-commit <c> --bundle <b> --scr <s> --max-price 1.11 --disk-gb 150
-launch.py closeout --kind sob1_phase1 --run-id <id> --scr <s>            # + phase 1's completion on the dev box's copy
+                                                                         # its closeout runs phase1_completion (sets + retain)
+launch.py closeout --kind sob1_phase1 --run-id <id> --scr <s>            # the same closeout by hand, e.g. after a stalled fetch
 launch.py retain --kind sob1_phase1 --run-id <id> --from <s>             # every arm's init and mapping; exit 12 until COMPLETE
 analysis.py phase1-table --evidence <s>/store/out --write <dir>          # the comparison, re-derived at $0
 plan.py --arm <arm> --init-record <its committed init_record.json> --write    # per arm, before phase 2

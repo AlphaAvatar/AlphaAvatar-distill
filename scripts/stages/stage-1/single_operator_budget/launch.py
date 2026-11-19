@@ -30,9 +30,11 @@ hold the session's bound peak (`disk.check_room`).
 
 Finished files leave the pod on every poll (`reasoning_inheritance.launch.secure_incremental`: an unreadable listing is
 retried and leaves "pending" unknown, never 0); at teardown every file of the pod's final listing is checked by sha256
-against the dev box's copy (`final_hash_check`). ``closeout`` then re-checks phase 1's completion on that copy
-(`completion.phase`) and ``retain`` brings EVERY arm's initialization and mapping home, re-hashed on the disk, before
-the local retention is recorded COMPLETE.
+against the dev box's copy (`final_hash_check`). Every closeout of a phase-1 session -- the one the formal ``launch``
+runs after teardown and a manual ``closeout`` -- then runs `phase1_completion` (`Launch.completion_check`): the eight
+sets on that copy (`completion.phase`) and ``retain``, which brings EVERY arm's initialization and mapping home as its
+manifest, re-hashed on the disk. Phase 1 is recorded COMPLETE only when both hold
+(``runs/<run>/closeout/phase1_completion.json``); otherwise INCOMPLETE with what is unfinished.
 """
 from __future__ import annotations
 
@@ -318,7 +320,8 @@ def launch_spec(kind: str, minutes: float = 0.0, resume_from: str | None = None,
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; every finished file is on the "
                        "dev box, every weight on the relay; nothing stays on the provider"))
     return dataclasses.replace(launch, command=functools.partial(command, launch, kind, arm),
-                               on_poll=RIL.secure_incremental(launch), products_secured=RIL.products_secured(launch))
+                               on_poll=RIL.secure_incremental(launch), products_secured=RIL.products_secured(launch),
+                               completion_check=phase1_completion if kind == PHASE1_KIND else None)
 
 
 # ---- the budget check, resume and retention ($0, dev box) ------------------------------------------------------------
@@ -362,12 +365,14 @@ def stage_resume(run_id: str, src_scr: Path) -> str:
 def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, record: Path = REPO / LOCAL_RECORD,
            getter=None, arm: str | None = None) -> dict:
     """Each durable product of a finished session onto the dev box ($0 GPU), from its verified relay record, into the
-    out-of-tree store (`relay.get`; ``getter`` for a test). Phase 1: EVERY arm's initialization and mapping; a
-    training session: both seeds' final weights. Each file is hashed again here, on the disk, against the record the
-    pod verified -- never taken from the fetch's own answer. The record is ``COMPLETE`` only when every product is on
-    the dev box with its sha256; an arm without an init record, a fetch that fails, a filesystem without room or a file
-    whose bytes differ leaves it ``INCOMPLETE``, naming what is missing. Verified products are recorded either way,
-    so a later retain fetches only the rest."""
+    out-of-tree store (`relay.get`; ``getter`` for a test). Phase 1: EVERY arm's initialization and mapping, each
+    exactly its init record's manifest (`common.products`: the checkpoint's two files, ``mapping.json``, and the
+    tensor file only for the declared width projection), refused unless the record shows it durable
+    (`common.product_problems`); a training session: both seeds' final weights. Each file is hashed again here, on
+    the disk, against the manifest -- never taken from the fetch's own answer, and an empty list proves nothing. The
+    record is ``COMPLETE`` only when every product is on the dev box with its sha256; an arm without an init record,
+    a fetch that fails, a filesystem without room or a file whose bytes differ leaves it ``INCOMPLETE``, naming what
+    is missing. Verified products are recorded either way, so a later retain fetches only the rest."""
     import shutil
     from stages.teacher_parent_initialization import relay as R
     getter = getter or R.get
@@ -375,38 +380,35 @@ def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, 
     out = Path(src_scr) / "store" / "out"
     doc = json.loads(record.read_text()) if record.is_file() else {
         "schema": "aadistill.stage1.single_operator_budget.local/v1", "store": str(store), "products": {}}
-    want, missing = {}, {}
+    want, missing = {}, {}                      #: key -> (the relay record, the manifest the disk must hold)
     if kind == PHASE1_KIND:
         for a in C.design()["phase_1"]["build_order"]:
             p = out / a / "init_record.json"
             ir = json.loads(p.read_text()) if p.is_file() else None
-            if ir is None:
-                missing[f"{a}/init"] = missing[f"{a}/mapping"] = "no init record in the secured evidence"
-                continue
-            for name in ("init", "mapping"):
-                rec = (ir.get("relay") or {}).get(name)
-                if ir.get("status") != "COMPLETE" or not (rec or {}).get("verified"):
-                    missing[f"{a}/{name}"] = "the init record is not COMPLETE or its relay copy is unverified"
-                else:
-                    want[f"{a}/{name}"] = rec
+            bad = C.product_problems(ir, a)
+            missing.update(bad)
+            for g, files in (C.products(ir) if ir else {}).items():
+                if f"{a}/{g}" not in bad:
+                    want[f"{a}/{g}"] = (ir["relay"][g], files)
     else:
-        seeds = C.design()["training"]["seeds"]
-        for sd in seeds:
+        for sd in C.design()["training"]["seeds"]:
             name = f"{arm}-s{int(sd)}"
             fin = out / name / "final.json"
             rec = json.loads(fin.read_text()) if fin.is_file() else None
-            if not (rec or {}).get("verified"):
-                missing[f"{name}/final"] = "no verified final record in the secured evidence"
+            if not (rec or {}).get("verified") or not (rec or {}).get("files_sha256"):
+                missing[f"{name}/final"] = "no verified final record with its files in the secured evidence"
             else:
-                want[f"{name}/final"] = rec
-    for key, rec in want.items():
+                want[f"{name}/final"] = (rec, rec["files_sha256"])
+    for key, (rec, files) in want.items():
         dest = store / key / rec["prefix"].rsplit("/", 1)[-1]
-        paths = {k: dest / k for k in rec["files_sha256"]}
-        prev = doc["products"].get(key) or {}
-        if prev.get("verified") and all(p.is_file() and SE.sha256_file(p) == rec["files_sha256"][k]
-                                        for k, p in paths.items()):
-            continue                                          #: on the dev box already, re-hashed: nothing fetched
-        need = sum(int(v) for k, v in (rec.get("bytes") or {}).items() if not paths[k].is_file())
+        paths = {k: dest / k for k in files}
+        if files and all(p.is_file() and SE.sha256_file(p) == files[k] for k, p in paths.items()):
+            prev = doc["products"].get(key) or {}             #: on the dev box already, re-hashed: nothing fetched
+            doc["products"][key] = {**prev, "path": str(dest), "files_sha256": files, "files_on_disk_sha256": files,
+                                    "verified": True, "relay": rec["relay"], "prefix": rec["prefix"],
+                                    "producer_run": prev.get("producer_run", run_id)}
+            continue
+        need = sum(int(v) for k, v in (rec.get("bytes") or {}).items() if k in paths and not paths[k].is_file())
         dest.mkdir(parents=True, exist_ok=True)
         if shutil.disk_usage(dest).free < need:
             missing[key] = f"no room: {need} B to fetch, {shutil.disk_usage(dest).free} B free at {dest}"
@@ -416,13 +418,16 @@ def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, 
         except Exception as exc:  # noqa: BLE001
             got = {"error": f"{type(exc).__name__}: {str(exc)[:300]}"}
         on_disk = {k: (SE.sha256_file(p) if p.is_file() else None) for k, p in paths.items()}
-        ok = on_disk == rec["files_sha256"]
-        doc["products"][key] = {"path": str(dest), "files_sha256": rec["files_sha256"], "files_on_disk_sha256": on_disk,
+        ok = bool(files) and on_disk == files
+        doc["products"][key] = {"path": str(dest), "files_sha256": files, "files_on_disk_sha256": on_disk,
                                 "verified": ok, "relay": rec["relay"], "prefix": rec["prefix"], "producer_run": run_id,
-                                "fetched": got, "checked": "every file re-hashed on the dev box's disk against the "
-                                                           "relay record the pod verified"}
+                                "fetched": got, "checked": "every file of the manifest re-hashed on the dev box's "
+                                                           "disk"}
         if not ok:
-            missing[key] = got.get("error") or "the bytes on the disk are not the record's"
+            missing[key] = got.get("error") or "the bytes on the disk are not the manifest's"
+    for key in missing:                         #: a product no longer shown durable is not verified here either
+        if key in doc["products"] and key not in want:
+            doc["products"][key]["verified"] = False
     doc.update(status="COMPLETE" if not missing else "INCOMPLETE", missing=missing,
                expected_products=sorted(set(want) | set(missing)), last_run=run_id,
                checked_utc=__import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()))
@@ -431,19 +436,52 @@ def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, 
     return doc
 
 
-def closeout(run_id: str, scr: Path, kind: str, arm: str | None = None) -> dict:
-    """The mechanism's closeout, then phase 1's completion checked again on the dev box's copy of the evidence
-    (`completion.phase`: three initializations durable, eight sets complete on their files, one protocol per mode),
-    recorded beside the outcome."""
-    out = SE.closeout(STUDY, launch_spec(kind, arm=arm), run_id, Path(scr))
-    if kind == PHASE1_KIND and (Path(scr) / "store" / "out").is_dir():
-        from stages.single_operator_budget import completion as CP
-        doc = {**CP.phase(Path(scr) / "store" / "out"), "run_id": run_id, "checked_on": "the dev box's secured copy"}
-        dest = REPO / STUDY.run_dir(run_id) / "closeout" / "phase1_completion.json"
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(json.dumps(doc, indent=1) + "\n")
-        out["phase1_completion"] = {k: doc[k] for k in ("complete", "n_complete", "n_sets", "inits", "modes")}
-    return out
+PHASE1_COMPLETION = "closeout/phase1_completion.json"
+
+
+def phase1_completion(run_id: str, scr: Path, *, store: Path | None = None, record: Path = REPO / LOCAL_RECORD,
+                      getter=None, root: Path = REPO) -> dict:
+    """Phase 1's scientific completion, which every closeout of a ``sob1_phase1`` session runs (`Launch.
+    completion_check`: the formal launch's and a manual ``closeout`` alike), after the pod is gone and the account
+    reconciled. COMPLETE only when the eight sets are complete on the dev box's secured copy (`completion.phase`:
+    coverage, records, protocol, the formal report, each part's provenance, one protocol per mode) AND every arm's
+    initialization and mapping is on the dev box's disk as its manifest (`retain`). Otherwise INCOMPLETE, every
+    unfinished item named; what is durable stays recorded for the next attempt's takeover. Writes
+    ``runs/<run_id>/closeout/phase1_completion.json``."""
+    from stages.single_operator_budget import completion as CP
+    out = Path(scr) / "store" / "out"
+    unfinished: dict = {}
+    ph = CP.phase(out) if out.is_dir() else None
+    if ph is None:
+        unfinished["evidence"] = f"no secured evidence at {out}"
+    else:
+        sets = {k: v["problems"] for k, v in ph["sets"].items() if not v["complete"]}
+        if sets:
+            unfinished["sets"] = sets
+        if ph["inits"]["problems"]:
+            unfinished["inits"] = ph["inits"]["problems"]
+        if ph["modes"]:
+            unfinished["modes"] = ph["modes"]
+    ret = retain(PHASE1_KIND, run_id, Path(scr), store=store, record=record, getter=getter)
+    if ret["status"] != "COMPLETE":
+        unfinished["local_retention"] = ret["missing"]
+    doc = {"schema": "aadistill.stage1.single_operator_budget.phase1_completion/v2", "run_id": run_id,
+           "status": "COMPLETE" if not unfinished else "INCOMPLETE",
+           "rule": "the eight sets complete on the secured copy and every arm's initialization and mapping on the dev "
+                   "box's disk as its manifest",
+           "sets": None if ph is None else {"n_complete": ph["n_complete"], "n_sets": ph["n_sets"],
+                                            "per_set": ph["sets"], "modes": ph["modes"]},
+           "inits_durable": None if ph is None else ph["inits"]["durable"],
+           "local_retention": {"status": ret["status"], "missing": ret["missing"], "record": str(record),
+                               "products": {k: {"path": v["path"], "verified": v["verified"]}
+                                            for k, v in ret["products"].items()}},
+           "unfinished": unfinished, "checked_on": "the dev box's secured copy and its local store",
+           "checked_utc": __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime())}
+    dest = Path(root) / STUDY.run_dir(run_id) / PHASE1_COMPLETION
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(doc, indent=1, default=str) + "\n")
+    return {"status": doc["status"], "unfinished": sorted(unfinished), "record": str(dest.relative_to(root))
+            if dest.is_relative_to(root) else str(dest)}
 
 
 def _pop(argv: list[str], flag: str) -> tuple[list[str], str | None]:
@@ -481,13 +519,6 @@ def main(argv=None) -> int:
         print(json.dumps({"status": doc["status"], "missing": doc["missing"],
                           "products": {k: v["path"] for k, v in doc["products"].items()}}, indent=1))
         return 0 if doc["status"] == "COMPLETE" else 12
-    if argv and argv[0] == "closeout":
-        ap = argparse.ArgumentParser(prog="SOB1 closeout")
-        ap.add_argument("--run-id", required=True)
-        ap.add_argument("--scr", required=True)
-        a = ap.parse_args(argv[1:])
-        print(json.dumps(closeout(a.run_id, Path(a.scr), kind, arm), indent=1, default=str))
-        return 0
     if argv and argv[0] in ("issue", "launch"):
         try:
             SE.require_open(STUDY)

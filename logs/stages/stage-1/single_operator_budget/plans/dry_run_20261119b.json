@@ -4,7 +4,7 @@
  "cost_usd": 0.0,
  "provider_resource_created": false,
  "session_commit": "8012d22e8675",
- "rule": "the second /bin/bash dry run, after the maintainer's corrections: everything up to the create, for real, with nothing created",
+ "rule": "the second $0 dry run, after the maintainer's corrections: everything up to the create, for real, with nothing created",
  "driver_check_only": {
   "command": "phase1_driver.py --check-only",
   "terminal": "CONTRACT_OK",
@@ -267,5 +267,6 @@
    }
   },
   "provider_resource_created": false
- }
+ },
+ "_corrected": "2026-11-20: 'rule' read 'the second /bin/bash dry run' -- a $0 expanded by an unquoted shell heredoc when this record was written; restored to $0. Nothing measured changed."
 }

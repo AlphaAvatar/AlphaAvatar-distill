@@ -54,6 +54,10 @@ def put(files: dict[str, Path], prefix: str, *, message: str, relay: str | None 
     re-hash it. Refused (never raised) when the relay's quota does not admit the bytes: ``verified`` is False."""
     from huggingface_hub import HfApi, hf_hub_download
     from aadistill.runtime.hub_capacity import would_accept
+    if not files:
+        #: an empty list re-downloads nothing and so would compare equal: it never shows anything was saved
+        return {"relay": _repo(relay), "prefix": prefix, "files_sha256": {}, "bytes": {}, "verified": False,
+                "refused": "no files to upload: an empty list proves nothing was saved"}
     repo, token = _repo(relay), _token(token_file)
     want = {k: sha256_file(Path(p)) for k, p in files.items()}
     sizes = {k: Path(p).stat().st_size for k, p in files.items()}

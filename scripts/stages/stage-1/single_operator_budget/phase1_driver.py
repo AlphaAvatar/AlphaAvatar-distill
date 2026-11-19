@@ -30,24 +30,26 @@ hashed), always on the unmodified teacher under the packed search's own session 
   Each new round (its choice and every candidate's score) is written to ``depth_only/records/depth_rounds.json`` the
   moment it commits, so an interrupted session resumes from its latest verified round.
 
-Each arm: one `FrozenMapping` keyed by root indices, saved and loaded back, materialized onto the teacher (FFN ->
-blocks -> width -> heads), geometry and parameter count against `structures.json`, reloaded with a finite forward,
-state evaluation against the teacher (diagnostic only), then the checkpoint and the mapping to the relay (re-downloaded
-and re-hashed) and the arm's ``<arm>/init_record.json``. A gate that fails stops the session before anything is built
-on it.
+Each arm: one `FrozenMapping` keyed by root indices, saved and loaded back (`save_mapping`: its files from save's own
+record -- ``mapping.json``, plus the tensor file only for the declared width projection), materialized onto the teacher
+(FFN -> blocks -> width -> heads), geometry and parameter count against `structures.json`, reloaded with a finite
+forward, state evaluation against the teacher (diagnostic only), then exactly the build record's manifest to the relay
+(`persist`; re-downloaded and re-hashed) and the arm's ``<arm>/init_record.json``, COMPLETE only when it shows every
+product durable (`common.product_problems`). A gate that fails stops the session before anything is built on it.
 
 Evaluating (`phase_1.evaluation_order`): eight sets, each untrained arm (its checkpoint on this pod, else fetched from
 its init record's relay copy and re-hashed) and the teacher (the pinned snapshot) in both modes, through one package
 rule (`common.package`, which records the weights' sha256) and the runners with the registered protocol
 (`common.protocol`, 8,192 tokens). A set is complete only on its files (`completion.check`: item coverage, repeats,
-generation records, protocol summary, the formal report, model identity); one an earlier attempt completed is taken
-as it is, otherwise the smallest repair -- a ``{}`` or stale report rescored, missing items generated from the
-sealed records onward, a unit whose protocol or model cannot be shown generated again -- and checked again. Phase 1
+generation records, protocol summary, the formal report, each sealed part's provenance); one an earlier attempt
+completed is taken as it is, otherwise the smallest repair before anything is merged -- a ``{}`` or stale report
+rescored, every part whose generation's weights, mode or protocol cannot be shown isolated and the proven ones reused,
+only the items no proven part holds generated -- and checked again. Phase 1
 ends ALL_DONE only when the three inits are durable, the eight sets are complete and each mode's four sets share one
 protocol (`completion.phase`); then the comparison (`analysis.phase1_table`) is written to ``comparison/``.
 
-``--resume``: a previous attempt's secured evidence: an arm whose init record's relay copies verified exists and is
-not rebuilt; its persisted DEPTH rounds and sealed samples are kept.
+``--resume``: a previous attempt's secured evidence: an arm whose init record shows every product durable is not
+rebuilt; its persisted DEPTH rounds and sealed parts are kept (each part then checked before it is reused).
 """
 from __future__ import annotations
 
@@ -71,7 +73,6 @@ from stages.reasoning_inheritance.driver import (  # noqa: E402
 from stages.single_operator_budget import common as C  # noqa: E402
 
 SCHEMA = "aadistill.stage1.single_operator_budget.init_record/v1"
-FILES = ("model.safetensors", "config.json")
 TEACHER = "teacher"
 
 
@@ -291,6 +292,26 @@ def select_depth(rec, s, adapter, teacher, root_sha, work, device, out: Path | N
 SELECT = {"residual_width": select_residual_width, "ffn_attention": select_ffn_attention, "depth_only": select_depth}
 
 
+def save_mapping(mapping, directory: Path, arm: str):
+    """`frozen_mapping.save`, the mapping loaded back under the content digest save recorded, and its file manifest
+    from save's own record (`common.mapping_manifest`: ``mapping.json``, plus the tensor file only for a declared
+    width projection). Returns (the reloaded mapping, the manifest)."""
+    from aadistill.initialization.planning import frozen_mapping as FM
+    saved = FM.save(mapping, directory)
+    back = FM.load(directory, expected_content_digest=saved["content_digest"])
+    return back, C.mapping_manifest(saved, directory, arm)
+
+
+def checkpoint_files(ident, ckpt: Path) -> dict[str, str]:
+    """The checkpoint's manifest (`common.INIT_FILES`): the single shard's sha256 as identified, the config hashed."""
+    if [s.filename for s in ident.shards] != ["model.safetensors"]:
+        raise DriverError(f"{ckpt} is {[s.filename for s in ident.shards]}, not one model.safetensors")
+    missing = [n for n in C.INIT_FILES if not (ckpt / n).is_file()]
+    if missing:
+        raise DriverError(f"{ckpt} lacks {missing}")
+    return {"model.safetensors": ident.shards[0].sha256, "config.json": sha256_file(ckpt / "config.json")}
+
+
 def build(arm: str, out: Path, work: Path, device: str, status: Status, run_id: str) -> dict:
     """One arm (module docstring), in a GPU child process. Writes ``out/<arm>/records/build.json`` as it goes."""
     import torch
@@ -327,10 +348,7 @@ def build(arm: str, out: Path, work: Path, device: str, status: Status, run_id: 
     if bad:
         raise DriverError(f"the mapping is malformed: {bad}")
     prod = aw / "products"
-    saved = FM.save(mapping, prod / "mapping")
-    mapping = FM.load(prod / "mapping", expected_content_digest=saved["content_digest"])
-    rec["mapping"] = {"content_digest": saved["content_digest"],
-                      "files_sha256": {n: sha256_file(prod / "mapping" / n) for n in (FM.MAPPING_FILE, FM.TENSOR_FILE)}}
+    mapping, rec["mapping"] = save_mapping(mapping, prod / "mapping", arm)
     model, roots = FM.materialize(adapter, teacher, mapping, blocks=blocks, non_depth=True,
                                   seed=int(selection()["source"]["seed"]))
     ckpt = prod / "init"
@@ -346,6 +364,7 @@ def build(arm: str, out: Path, work: Path, device: str, status: Status, run_id: 
     if not (rec["checkpoint"]["geometry_matches_structures"] and rec["checkpoint"]["num_parameters_match_structures"]
             and len(ident.shards) == 1 and rec["checkpoint"].get("equals_the_operators_child", True)):
         raise DriverError(f"{arm} is {geo}, {n_params} parameters: not structures.json's arm")
+    rec["checkpoint"]["files_sha256"] = checkpoint_files(ident, ckpt)
     del model
     torch.cuda.empty_cache()
     m = adapter.load(str(ckpt), device=device)
@@ -388,39 +407,43 @@ def init_record(arm: str, rec: dict, relay: dict) -> dict:
             "design_sha256": rec["design_sha256"], "selection_sha256": rec["selection_sha256"], "finished_utc": utc()}
 
 
-def persist(arm: str, out: Path, work: Path, run_id: str, status: Status) -> dict:
-    """The arm's checkpoint and mapping to the relay (online child processes), then its init record."""
+def persist(arm: str, out: Path, work: Path, run_id: str, status: Status, put=None) -> dict:
+    """The arm's products to the relay (online child processes; ``put`` for a test), exactly the build record's
+    manifest (`common.products`), each group verified only when the relay's re-downloaded hashes are that manifest;
+    then its init record, written COMPLETE only when `common.product_problems` finds nothing."""
     from stages.teacher_parent_initialization import relay as R
+    put = put or (lambda payload, timeout_s: R.run_online("put", payload, timeout_s=timeout_s))
     rec = read_json(out / arm / "records" / "build.json")
     prod = work / arm / "products"
     digest = rec["mapping"]["content_digest"][:16]
-    groups = {"init": {f"init/{n}": prod / "init" / n for n in FILES if (prod / "init" / n).is_file()},
-              "mapping": {f"mapping/{n}": prod / "mapping" / n for n in rec["mapping"]["files_sha256"]}}
     relay = {}
-    for name, files in groups.items():
-        nbytes = sum(p.stat().st_size for p in files.values())
-        res = R.run_online("put", {"files": {k: str(v) for k, v in files.items()},
-                                   "prefix": f"{C.relay_root()}/{arm}/init/{digest}",
-                                   "message": f"SOB1 {arm} {run_id}: {name}", "scratch": str(work)},
-                           timeout_s=max(3600.0, nbytes / 2.6e6 * 1.25 + 600))
+    for name, files in C.products(rec).items():
+        local = {k: prod / k for k in files}
+        nbytes = sum(p.stat().st_size for p in local.values())
+        res = put({"files": {k: str(v) for k, v in local.items()}, "prefix": f"{C.relay_root()}/{arm}/init/{digest}",
+                   "message": f"SOB1 {arm} {run_id}: {name}", "scratch": str(work)},
+                  max(3600.0, nbytes / 2.6e6 * 1.25 + 600))
         relay[name] = res
-        if not res.get("verified"):
+        if not (res.get("verified") is True and res.get("files_sha256") == files and files):
             write_json(out / arm / "records" / "relay.json", relay)
-            raise DriverError(f"{arm}: the relay copy of {name} did not verify: {str(res)[:600]}")
+            raise DriverError(f"{arm}: the relay copy of {name} is not its manifest {sorted(files)} verified: "
+                              f"{str(res)[:600]}")
         status.mark(f"RELAY_OK:{arm}:{name}")
     write_json(out / arm / "records" / "relay.json", relay)
     doc = init_record(arm, rec, relay)
+    bad = C.product_problems(doc, arm)
+    if bad:
+        raise DriverError(f"{arm}: the init record would not show its products durable: {bad}")
     write_json(out / arm / "init_record.json", doc)
     status.mark(f"INIT_RECORD_WRITTEN:{arm}")
     return doc
 
 
 def durable_init(out: Path, arm: str) -> dict | None:
+    """The arm's init record when it shows every product durable (`common.product_problems`), else None."""
     p = out / arm / "init_record.json"
-    if not p.is_file():
-        return None
-    doc = read_json(p)
-    return doc if doc.get("status") == "COMPLETE" and all(v.get("verified") for v in doc["relay"].values()) else None
+    doc = read_json(p) if p.is_file() else None
+    return doc if doc is not None and not C.product_problems(doc, arm) else None
 
 
 # ---- evaluation -----------------------------------------------------------------------------------------------------
@@ -437,24 +460,28 @@ def model_for(target: str, out: Path, work: Path) -> Path:
     if doc is None:
         raise DriverError(f"{target} has no durable initialization to evaluate")
     dest = work / target / "products" / "init"
-    want = doc["checkpoint"]["shards"][0]["sha256"]
-    if (dest / "model.safetensors").is_file() and sha256_file(dest / "model.safetensors") == want:
+    man = {k.removeprefix("init/"): v for k, v in C.products(doc)["init"].items()}
+    here = lambda: all((dest / n).is_file() and sha256_file(dest / n) == h for n, h in man.items())  # noqa: E731
+    if here():
         return dest
     rec = doc["relay"]["init"]
-    flat = {**rec, "files_sha256": {k.removeprefix("init/"): v for k, v in rec["files_sha256"].items()},
-            "prefix": f"{rec['prefix']}/init"}
+    flat = {**rec, "files_sha256": man, "prefix": f"{rec['prefix']}/init"}
     got = R.run_online("get", {"record": flat, "dest": str(dest)}, timeout_s=7200)
-    if not got.get("verified") or sha256_file(dest / "model.safetensors") != want:
-        raise DriverError(f"{target}'s initialization did not restore: {str(got)[:400]}")
+    if not got.get("verified") or not here():
+        raise DriverError(f"{target}'s initialization did not restore as its manifest: {str(got)[:400]}")
     return dest
 
 
 def evaluate_set(target: str, mode: str, out: Path, work: Path, vllm_py: str, attempt: str, status: Status) -> dict:
     """One set (one model x one mode) to completion, on its files (`completion.check`): a set an earlier attempt
-    completed is taken as it is; otherwise the smallest repair (`completion.repair`), the runners over only what no
-    sealed record holds (`reasoning_inheritance.driver.fluid` / `capability` with the registered protocol), the formal
-    report rescored from the generations, and the check again. Two rounds at most; a set still incomplete stops the
-    session with its problems (its sealed records stay for the next attempt)."""
+    completed is taken as it is; otherwise the smallest repair (`completion.repair`: every sealed part whose
+    generation's weights, mode or protocol cannot be shown isolated, a generations file holding a record no proven
+    part holds superseded), the runners over only what no proven part holds (`reasoning_inheritance.driver.fluid` /
+    `capability` with the registered protocol), the formal report rescored from the generations, and the check
+    again. Each generation round has its own id (``<attempt>-g<n>``): its package record (weights, mode, protocol and
+    the parts already sealed) is written before anything is generated, and every part it seals carries that id. Two
+    rounds at most; a set still incomplete stops the session with its problems (its sealed parts stay for the next
+    attempt)."""
     from stages.reasoning_inheritance import driver as RID
     from stages.single_operator_budget import completion as CP
     d = CP.ev_dir(out, target, mode)
@@ -467,16 +494,20 @@ def evaluate_set(target: str, mode: str, out: Path, work: Path, vllm_py: str, at
     env = {**os.environ, "HF_HUB_OFFLINE": "1"}
     ev = C.protocol()
     for rnd in (1, 2):
-        row.setdefault("repairs", []).append(CP.repair(d, st, attempt))
+        gen = f"{attempt}-g{rnd}"
+        row.setdefault("repairs", []).append(CP.repair(d, st, gen))
         if CP.needs_generation(d):
             model_dir = model_for(target, out, work)
             pkg = work / "packages" / f"{label}_{mode}"
-            entry = {"attempt": attempt, "utc": utc(), "target": target, "mode": mode, **C.package(model_dir, pkg)}
+            entry = {"generation": gen, "attempt": attempt, "utc": utc(), "target": target, "mode": mode,
+                     "protocol_sha256": CP.protocol_sha256(mode), "parts_at_start": CP.part_inventory(d),
+                     **C.package(model_dir, pkg)}
             write_json(d / CP.PACKAGES, CP.packages(d) + [entry])   #: before anything is generated
-            status.mark(f"EVAL_GENERATE:{target}:{mode}:{rnd}")
+            status.mark(f"EVAL_GENERATE:{target}:{mode}:{gen}")
             row.setdefault("runs", []).append({
-                "fluid": RID.fluid(pkg, d, label, mode, vllm_py, env, attempt, None, ev),
-                "capability": RID.capability(pkg, d, label, mode, vllm_py, env, attempt, None, ev)})
+                "generation": gen,
+                "fluid": RID.fluid(pkg, d, label, mode, vllm_py, env, gen, None, ev),
+                "capability": RID.capability(pkg, d, label, mode, vllm_py, env, gen, None, ev)})
         st = CP.check(d, target, mode, out, label=label)
         CP.rescore(d, st)                       #: a stale or {} report is replaced by these generations' own
         st = CP.check(d, target, mode, out, label=label)

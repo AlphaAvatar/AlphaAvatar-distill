@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-19 (UTC), SOB1 PREPARED at $0 and corrected (completion on real artifacts, sealed statistics reused, DEPTH persisted per round, dev-box peak, phase-1 comparison; a second $0 dry run), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
+**Updated:** 2026-11-20 (UTC), SOB1 PREPARED at $0 and corrected twice (2026-11-19: completion on real artifacts, sealed statistics reused, DEPTH persisted per round, dev-box peak, phase-1 comparison; 2026-11-20: one product manifest per arm, part provenance checked before a merge, phase 1's completion on both closeout paths; a third $0 dry run), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -10,14 +10,17 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PREPARED AT $0 -- NOTHING AUTHORIZED, NO RUN.**
-- Protocol fixed by the maintainer 2026-11-19 and corrected the same day (`logs/budget/decisions.md`, two entries).
+- Protocol fixed by the maintainer 2026-11-19, corrected that day and on 2026-11-20 (`logs/budget/decisions.md`, three entries).
   Design `configs/stages/stage-1/single_operator_budget/design.json`; for review
   `docs/stages/stage-1/single_operator_budget/README.md`. Depth only (16 layers), FFN + attention only (FFN 3840,
   16 / 8 heads), residual width only (1280), each about 2.0B (`plans/structures.json`), on the original teacher with
   A's operators. The width arm loads TPI1's sealed teacher statistics (`selection.json :: residual_width.statistics`);
   DEPTH resumes the journal's 36 -> 28 search from round 9 (270 new candidate subsets) and persists each round
   (`depth_only/records/depth_rounds.json`). Every model evaluated at 8,192 tokens; a set is complete only on its files
-  (`completion.py`); phase 1 writes the teacher-minus-arm comparison (`analysis.py phase1-table`). Holm with m = 3;
+  (`completion.py`: every sealed part's generation, weights, mode and protocol checked before it is reused); phase 1
+  is COMPLETE only when every closeout (the formal launch's and a manual one) finds the eight sets complete and each
+  arm's initialization and mapping on the dev box as its manifest (`launch.py phase1_completion`); it writes the
+  teacher-minus-arm comparison (`analysis.py phase1-table`). Holm with m = 3;
   formal only with all three arms x both seeds complete; nothing eliminates an arm.
 - Code: `scripts/stages/stage-1/single_operator_budget/` (phase1_driver, completion, analysis, disk, train_driver,
   plan, launch with `budget` / `closeout` / `retain`); core: DEPTH resume with anchors and `OperatorContext.on_progress`,
