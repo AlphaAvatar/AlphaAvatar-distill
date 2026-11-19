@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-19 (UTC), SOB1 phase 1 APPROVED by the maintainer (one L40S, $22.92 cumulative cap + $1.00 reserve) after a third $0 correction (generation ids name target and mode, record labels checked, pod-side moves withdrawn on the dev box); SOB1 PREPARED at $0 and corrected twice that day (first: completion on real artifacts, sealed statistics reused, DEPTH persisted per round, dev-box peak, phase-1 comparison; second: one product manifest per arm, part provenance checked before a merge, phase 1's completion on both closeout paths; a third $0 dry run), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. The human view. Every number here has an owner
+**Updated:** 2026-11-19 (UTC), SOB1 phase 1 APPROVED by the maintainer (one L40S, $22.92 cumulative cap + $1.00 reserve) after a third $0 correction (generation ids name target and mode, record labels checked, pod-side moves withdrawn on the dev box); SOB1 PREPARED at $0 and corrected twice that day (first: completion on real artifacts, sealed statistics reused, DEPTH persisted per round, dev-box peak, phase-1 comparison; second: one product manifest per arm, part provenance checked before a merge, phase 1's completion on both closeout paths; a third $0 dry run), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); SOB1 PHASE 1 RUNNING (one L40S pod, billing; no volume). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PREPARED AT $0 -- NOTHING AUTHORIZED, NO RUN.**
+**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 GRANTED AND RUNNING -- `sob1_phase1_20261119_194259`, pod `heuxh6fau92b4c` (1 x L40S, $1.09/h) created 2026-11-19 19:44Z; launcher in tmux `sob1p1`, log `~/aad-artifacts/stage1_single_operator_budget/sob1_phase1_20261119_194259/launcher.log`; watchdog hard stop 1,215 min ($22.48). Grant `logs/budget/approvals/stage1_single_operator_budget_grant.json`: $22.92 cumulative over every attempt + $1.00 teardown reserve; phase 2, Stage 3 budget and the merge are separate decisions.**
 - Protocol fixed by the maintainer 2026-11-19 and corrected twice the same day (`logs/budget/decisions.md`, three entries).
   Design `configs/stages/stage-1/single_operator_budget/design.json`; for review
   `docs/stages/stage-1/single_operator_budget/README.md`. Depth only (16 layers), FFN + attention only (FFN 3840,
