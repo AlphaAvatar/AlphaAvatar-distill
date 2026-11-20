@@ -593,6 +593,26 @@ launch.py retain --kind sob1_train --arm residual_width --run-id <id> --from <s>
 launch.py study-completion                                               # $0: six finals, twelve sets, the comparison
 ```
 
+**Phase 2's second $0 dry run (2026-11-20 on `c8e28ba1`, clean tree, after the four fixes and the inventory;
+`plans/dry_run_20261120b.json`).** Nothing was created and nothing uploaded.
+* **Passed as measured:**
+  * phase 1 refused as closed (`issue`, `launch`; `budget` $0);
+  * a residual-width artifact launched with `--arm depth_only` refused at $0 by the real launcher ("No provider
+    resource was created"), before the provider or the relay;
+  * the bound records and each init on the relay with its recorded hashes, for all three arms;
+  * the relay room for the remaining rotation on the live relay state (nothing held yet), each ACCEPTED (200):
+    residual width 49.55 GiB, depth 46.46 GiB, FFN + attention 46.80 GiB;
+  * the three plans re-derive; phase 1 still COMPLETE on its secured copy.
+* **Refused as measured, for the owed decisions only:**
+  * `issue`: no phase-2 grant; above an arm's cap; funding (cap $1,000, $25.8113 left, balance $35.81);
+  * the teardown reserve, the same;
+  * **the dev box's room for every arm** (5.34 GiB free for 18.44-18.54 GiB).
+* **Would pass, assumed and not measured:**
+  * with the project cap at $1,161.06 and the $151.06 top-up ($186.8708), every arm's funding and reserve checks are
+    empty;
+  * with the system disk grown by 64 GiB, 69.34 GiB would be free, against an 18.50 GiB first session and 54.84 GiB
+    after three.
+
 **Phase 2's $0 dry run (2026-11-20 on `5e47c52d`, clean tree; `plans/dry_run_20261120.json`).** Nothing was created and
 nothing uploaded.
 * Phase 1: `budget` CLOSED with $0 remaining; `issue --dry-run` and `launch --dry-run` refused at $0 ("the sob1_phase1
