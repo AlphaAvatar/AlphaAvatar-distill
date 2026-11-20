@@ -1,8 +1,8 @@
 {
  "schema": "aadistill.stage1.single_operator_budget.resource_snapshot/v1",
- "rule": "read after this project's dev-box cleanup (the third brief of 2026-11-20); every figure is read again at issue and at launch, and none of them authorizes anything",
+ "rule": "read after the demo service's retirement (the maintainer's decision of 2026-11-20); every figure is read again at issue and at launch, and none of them authorizes anything",
  "project_position": {
-  "fetched_utc": "2026-11-20T15:44:49+00:00",
+  "fetched_utc": "2026-11-20T19:23:40+00:00",
   "source": "shared.study_engineering.live_position (provider billing, read-only)",
   "project_cap_usd": 1000.0,
   "committed_usd": 974.1887,
@@ -12,7 +12,7 @@
   "account_volumes": 0
  },
  "relay": {
-  "probed_utc": "2026-11-20T15:44:48Z",
+  "probed_utc": "2026-11-20T19:23:33Z",
   "repo": "AlphaAvatar/aadistill-artifacts",
   "source": "aadistill.runtime.hub_capacity.would_accept, bisected, objects <= 10 GiB",
   "headroom_gib": [
@@ -25,15 +25,25 @@
   ],
   "calls": 12,
   "refused": "Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
-  "holds": "the three phase-1 initializations and mappings (11.3 GiB) and phase 1's evidence archive (0.03 GiB); nothing of phase 2; unchanged since 09:39Z"
+  "holds": "the three phase-1 initializations and mappings (11.3 GiB) and phase 1's evidence archive (0.03 GiB); nothing of phase 2; unchanged since 09:39Z (read again 19:23Z)"
  },
  "dev_box": {
-  "read_utc": "2026-11-20T15:46Z",
+  "read_utc": "2026-11-20T19:24Z",
   "filesystem": "/",
   "size_bytes": 210978394112,
-  "used_bytes": 184871006208,
-  "free_bytes": 17299968000,
-  "note": "one filesystem (/dev/nvme0n1p3, ext4, the 200 GiB system disk; 8.20 GiB of it reserved for root) holds the repository, the local store and every landing path; it is shared with other projects' files, so the free space moves with them. After this project's cleanup (logs/maintenance/storage/devbox_cleanup_20261120.json: 5.39 -> 16.12 GiB free, 10.73 GiB freed)"
+  "used_bytes": 142693269504,
+  "free_bytes": 59477704704,
+  "note": "one filesystem (/dev/nvme0n1p3, ext4, the 200 GiB system disk; 8.20 GiB of it reserved for root) holds the repository, the local store and every landing path; it is shared with other projects' files, so the free space moves with them. After this project's cleanup (logs/maintenance/storage/devbox_cleanup_20261120.json: 5.39 -> 16.12 GiB free, 10.73 GiB freed); after the demo service's retirement (logs/maintenance/storage/demo_agent_retirement_20261120.json: 16.09 -> 55.39 GiB free, 39.30 GiB freed: 34.04 GiB by its two logs, 5.26 GiB released when its processes exited)"
+ },
+ "before_the_demo_retirement": {
+  "project_position_fetched_utc": "2026-11-20T15:44:49+00:00",
+  "relay_headroom_gib": [
+   50.55,
+   50.59
+  ],
+  "relay_probed_utc": "2026-11-20T15:44:48Z",
+  "dev_box_free_bytes": 17299968000,
+  "dev_box_read_utc": "2026-11-20T15:46Z"
  },
  "before_the_inventory": {
   "project_position_fetched_utc": "2026-11-20T08:30:49+00:00",

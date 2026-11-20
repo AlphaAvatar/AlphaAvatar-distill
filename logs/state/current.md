@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-20 (UTC), SOB1 PHASE 2 READY AT $0 EXCEPT THE DEV BOX'S SPACE (this project's files cleaned, 10.73 GiB freed; the finals placed without a larger disk; two relay interruptions fixed; nothing running, nothing billing: no pod, no volume); the other projects' files (17.82 GiB still short), the project cap ($1,161.06), phase 2's grant and a merge into main are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-20 (UTC), SOB1 PHASE 2 READY AT $0 EXCEPT FUNDING (this project's files cleaned, 10.73 GiB freed; the dev box's demo service retired on the maintainer's decision, 39.30 GiB freed; every launch fits with the swing kept free; two relay interruptions fixed; nothing running, nothing billing: no pod, no volume); the project cap ($1,161.06), the top-up, phase 2's grant and a merge into main are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 COMPLETE AND CLOSED IN CODE; PHASE 2 PREPARED AT $0, BLOCKED ON THE DEV BOX'S SPACE (2026-11-20) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
+**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 COMPLETE AND CLOSED IN CODE; PHASE 2 PREPARED AT $0, BLOCKED ONLY ON FUNDING AND ITS GRANT (2026-11-20) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Phase 1: `sob1_phase1_20261119_194259`, $4.4348 of $22.92, COMPLETE; `kinds.sob1_phase1.closed` refuses issue and launch.
   Untrained arms 0.00% on the static core; pre-recovery KL / top-1: depth 3.47 / 34.08%, width 7.70 / 27.05%, FFN +
   attention 9.35 / 6.37% (`results/pre_recovery_diagnostics.json`); all three go to phase 2.
@@ -25,13 +25,14 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
     $1,161.06.
 - Storage, without a larger disk (the maintainer, 2026-11-20): residual width's and depth's finals on the dev box,
   FFN + attention's on the relay (`design.json :: storage.phase_2_finals.placement`). This project's cleanup took `/`
-  from 5.39 to 16.12 GiB free (`logs/maintenance/storage/devbox_cleanup_20261120.json`). The launches need 18.50 /
-  33.68 / 33.94 GiB (`plans/disk_peak_phase2.json`): **2.38 GiB short for the first arm, 17.82 GiB over the study**.
-  The relay fits on the free plan (50.55 GiB free; the largest need is 49.55 GiB).
-- Position (live 15:44Z): committed $974.1887 of $1,000 ($25.8113 left), balance $35.8108; the maintainer will top up
+  from 5.39 to 16.12 GiB free (`logs/maintenance/storage/devbox_cleanup_20261120.json`); the demo service's
+  retirement (the maintainer's decision) took it to **55.39 GiB** (`logs/maintenance/storage/demo_agent_retirement_20261120.json`).
+  The launches need 18.50 / 33.68 / 33.94 GiB (`plans/disk_peak_phase2.json`): every launch fits, and the study's
+  bound peak plus the swing (44.18 GiB) leaves 11.21 GiB. The relay fits on the free plan (50.55 GiB free at 19:23Z;
+  the largest need is 49.55 GiB). Fourth $0 dry run: `plans/dry_run_20261120d.json`.
+- Position (live 19:23Z): committed $974.1887 of $1,000 ($25.8113 left), balance $35.8108; the maintainer will top up
   $151.06.
-- Decisions owed: the other projects' files (read-only list in the cleanup record), the project cap, phase 2's grant,
-  the hub objects listed in the inventory, a merge into main.
+- Decisions owed: the project cap, phase 2's grant, the hub objects listed in the inventory, a merge into main.
 
 **Baseline (maintainer, 2026-11-18):** TPI1's A (teacher-parent initialization) is the reasoning-inheritance research's
 default baseline; B a historical reference (`docs/stages/stage-1/reasoning_inheritance/README.md`; decisions.md

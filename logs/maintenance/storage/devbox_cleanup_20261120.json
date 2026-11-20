@@ -421,7 +421,8 @@
     "gib": 14.88,
     "last_write_utc": "2026-09-21T13:36:11Z",
     "what": "the service's stderr: a crash loop's repeated tracebacks (ImportError: WorkspacePaths) and uv output, nothing written for two months",
-    "reclaim": "14.88 GiB only by truncation (root: truncate -s 0; the service appends with O_APPEND, no restart) or removal plus a service restart: the running service holds it open (fd 2 of 10 processes), so deleting the path alone frees 0 B"
+    "reclaim": "14.88 GiB only by truncation (root: truncate -s 0; the service appends with O_APPEND, no restart) or removal plus a service restart: the running service holds it open (fd 2 of 10 processes), so deleting the path alone frees 0 B",
+    "resolved": "deleted 2026-11-20T19:20:05Z on the maintainer's decision, after the service was stopped, disabled and its unit removed: logs/maintenance/storage/demo_agent_retirement_20261120.json"
    },
    {
     "path": "/var/log/alphaavatar/demo-agent.log",
@@ -431,7 +432,8 @@
     "gib": 19.16,
     "last_write_utc": "2026-11-19T19:38:33Z",
     "what": "the live service's stdout (JSON log lines), growing",
-    "reclaim": "up to 19.16 GiB by rotation with copytruncate or truncation (root); the owner chooses what history to keep; held open as fd 1"
+    "reclaim": "up to 19.16 GiB by rotation with copytruncate or truncation (root); the owner chooses what history to keep; held open as fd 1",
+    "resolved": "deleted 2026-11-20T19:20:05Z on the maintainer's decision, after the service was stopped, disabled and its unit removed: logs/maintenance/storage/demo_agent_retirement_20261120.json"
    },
    {
     "path": "~/alphaavatar-speaker-eval/sessions/v2/",

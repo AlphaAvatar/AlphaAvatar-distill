@@ -236,7 +236,7 @@
   "account_volumes": 0,
   "balance_usd": 35.8108,
   "committed_usd": 974.1887,
-  "fetched_utc": "2026-11-20T15:44:49+00:00",
+  "fetched_utc": "2026-11-20T19:23:40+00:00",
   "project_cap_usd": 1000.0,
   "project_remaining_usd": 25.8113,
   "source": "shared.study_engineering.live_position (provider billing, read-only)"
@@ -244,14 +244,14 @@
  "project_cap_basis": {
   "committed_usd": 974.1887,
   "current_cap_usd": 1000.0,
-  "fetched_utc": "2026-11-20T15:44:49+00:00",
+  "fetched_utc": "2026-11-20T19:23:40+00:00",
   "plus_ceiling_usd": 185.87,
   "plus_teardown_reserve_usd": 1.0,
   "rule": "committed + ceiling + reserve, rounded up to the cent: the cap at which this phase's whole ceiling and reserve fit what the provider has billed; the maintainer sets it, nothing here raises it"
  },
  "project_cumulative_cap_usd": 1161.06,
  "recorded_utc": "2026-11-20",
- "resource_snapshot_sha256": "6fc6971e2291297a534ef036895c030b46c2c54745488a691adb3cee6f74e4a0",
+ "resource_snapshot_sha256": "526a60fea9df8a813b32e0bddff7fb87c78b2af132c802e764596dbf161228ae",
  "schema": "aadistill.stage1.single_operator_budget.proposal/v2",
  "scope": "phase 2 of SOB1 (configs/stages/stage-1/single_operator_budget/design.json :: phase_2): one sob1_train session per arm, residual width first, each training both seeds (20260726, 20260801) with Research A's recovery recipe from the arm's phase-1 initialization (plans/training_plan_<arm>.json) and evaluating each recovered model on all of eval-set-1 in both modes at 8,192 tokens; the Stage-3 recovery training and the post-recovery evaluation are this one budget. No other arm, seed or kind; no network volume",
  "selection_sha256": "6dfced62437b1967371b4cec03037f321abd8ce560e948a7ab71459a7de8d101",
@@ -259,14 +259,14 @@
  "storage": {
   "dev_box": {
    "filesystem": "/ (one filesystem holds the repository, the local store and every landing path)",
-   "free_gib": 16.11,
+   "free_gib": 55.39,
    "peak_gib": {
     "bound": 39.81,
     "expected": 30.71
    },
    "shortfall_with_swing_gib": {
-    "bound": 28.07,
-    "expected": 18.97
+    "bound": 0.0,
+    "expected": 0.0
    }
   },
   "dev_box_plan": "plans/disk_peak_phase2.json",
@@ -296,7 +296,7 @@
      "rotation_peak_gib": 49.55
     }
    },
-   "probed_utc": "2026-11-20T15:44:48Z",
+   "probed_utc": "2026-11-20T19:23:33Z",
    "rule": "a session's peak is one final and two save points (launch.rotation_peaks); an earlier arm's finals left on the relay count against the account quota"
   }
  },

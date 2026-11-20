@@ -17247,3 +17247,35 @@ on a paid pod.
   free space moves with the other projects.
 - Revisit when: the maintainer decides on the other projects' files (or another source of about 18 GiB), the project
   cap ($1,161.06) and phase 2's grant.
+
+## 2026-11-20 (UTC) — The dev box's demo service retired; SOB1 phase 2's dev box no longer short (maintainer's decision)
+
+- Context: after the third brief the dev box was 17.82 GiB short over SOB1 phase 2 (22.19 GiB keeping the swing free).
+  The maintainer decided: 「我确认，开发机上的 demo-agent 可以退役。请直接停用对应服务并删除日志，不需要保留服务运行。」
+  The scope: 「清理范围限于这个 demo 实例及其日志。」 And: 「开发机维持现有容量。RunPod 充值由我操作，项目总上限、第二阶段
+  grant 和付费启动等我另行确认。」
+- Decision / done (`logs/maintenance/storage/demo_agent_retirement_20261120.json`; $0, no pod, no purchase):
+  - The two logs were held only by the 11 processes of `alphaavatar-demo.service` (nothing outside its cgroup).
+  - The service was stopped (SIGTERM ignored for the 90 s stop timeout, then SIGKILL from systemd) and disabled. Its unit
+    file and its `multi-user.target.wants` link were removed (a copy and its sha256 are kept), and systemd was
+    reloaded. Nothing else (timer, socket, crontab, other unit) referred to the demo.
+  - With no handle left, `/var/log/alphaavatar/demo-agent.err.log` and `demo-agent.log` were deleted. Rechecked: no
+    unit, no process, no log recreated.
+  - `/` went from **16.09 to 55.39 GiB free: 39.30 GiB freed** (same mount, df before and after). 34.04 GiB is the two
+    logs' allocated bytes exactly. 5.26 GiB was released when the demo's processes exited, before any deletion (most
+    likely files it had deleted but still held open).
+  - Nothing else was touched: the AlphaAvatar repository, its `.venv` and `.env.demo`, and the now-empty log directory.
+- The $0 dry run on `c7f8a832` (`plans/dry_run_20261120d.json`):
+  * **every arm's dev-box room passes**. In launch order the needs are 18.50 / 33.68 / 33.94 GiB; with the 4.37 GiB
+    swing kept free the margins are 32.52 / 17.34 / 17.08 GiB. The study's 39.81 GiB bound peak plus the swing,
+    44.18 GiB, leaves 11.21 GiB;
+  * the relay accepted every arm's rotation, and its headroom, bisected again at 19:23Z, is still 50.55 GiB (the width
+    arm's margin is 1.00 GiB);
+  * only `issue` (grant, cap, funding) and the teardown reserve (funding) are refused.
+- Measured: committed $974.1887 of $1,000 ($25.8113 left), balance $35.8108, 0 pods, 0 volumes (19:23Z).
+- Alternatives considered: truncating the logs and keeping the service (the maintainer chose retirement); other
+  projects' files (not needed now).
+- Risks: the relay margin for the width arm is 1.00 GiB on the free plan, and the hub quota is the account's, so
+  another private upload to the same account during that arm's run would reach it. The whole ceiling plus reserve fits
+  the planned balance by $0.0008 and the planned cap by $0.0013.
+- Revisit when: the maintainer decides the project cap ($1,161.06), tops up, and grants phase 2.

@@ -3,8 +3,9 @@
 Stage 1 owns this round; its training is `stage3_recovery`. Status: **phase 1 COMPLETE and closed in code
 (2026-11-20 UTC); phase 2 prepared at $0. The second brief of 2026-11-20 fixed its four takeover and launch defects
 and inventoried the project's storage. The third brief cleaned this project's dev-box files (10.73 GiB freed), set a
-placement for the finals without a larger disk, and fixed the free relay's two interruptions. Waiting for the
-maintainer**: the dev box is still 17.82 GiB short over the study, and the project cap and phase 2's grant are owed
+placement for the finals without a larger disk, and fixed the free relay's two interruptions. On the maintainer's
+decision the dev box's demo service was then retired and its two logs deleted (39.30 GiB freed): every launch now
+fits with the measured swing kept free. Waiting for the maintainer**: the project cap and phase 2's grant are owed
 (section 10). The maintainer fixed the protocol on 2026-11-19 (UTC), corrected the preparation three times the
 same day and granted phase 1 (`logs/budget/decisions.md`, the 2026-11-19 entries). Phase 1 ran once,
 `sob1_phase1_20261119_194259`: one L40S, 239.6 min, $4.4348 all-in of the $22.92 cap, the pod deleted and confirmed
@@ -446,18 +447,30 @@ statistics or a registered control was touched, and there is no resume save poin
 public tool-calling datasets (3.03 GiB, re-downloadable, but an open candidate list), the rebuilt caches, the closed
 runs' remaining evidence. The hub freed nothing more this round: the relay still has **50.55 GiB** free (15:44Z).
 
-*Other projects' files: read only, the maintainer's decision.* Nothing was changed.
+*Other projects' files: read only, the maintainer's decision.* Only the demo service's two logs were changed, on the
+maintainer's decision (the next paragraph).
 
 | path | project | reclaimable | how |
 | --- | --- | ---: | --- |
-| `/var/log/alphaavatar/demo-agent.err.log` | AlphaAvatar's running demo service; no write since 2026-09-21 | 14.88 GiB | root truncation (the service holds it open: deleting the path frees 0 B until a restart) |
-| `/var/log/alphaavatar/demo-agent.log` | the same service's live log | up to 19.16 GiB | rotation or truncation (root) |
+| ~~`/var/log/alphaavatar/demo-agent.err.log`~~ | AlphaAvatar's demo service; no write since 2026-09-21 | ~~14.88 GiB~~ | deleted 2026-11-20 with the service retired |
+| ~~`/var/log/alphaavatar/demo-agent.log`~~ | the same service's log | ~~19.16 GiB~~ | deleted 2026-11-20 with the service retired |
 | `~/alphaavatar-speaker-eval/sessions/v2/` | speaker evaluation; no process, last write 2026-11-13 | 13.24 GiB | if the `.npz` features are no longer needed |
 | `~/alphaavatar-speaker-eval/data*/` archives | the same | up to 4.69 GiB | archives beside extracted copies, once checked |
 | `/tmp/claude-1000/-home-ecs-user-AlphaAvatar/` | AlphaAvatar's Claude sessions | about 0.6 GiB | the finished sessions only; one is still active |
 | `~/.vscode-server/cli/servers/` | the IDE | about 3.8 GiB | the six older server builds |
 | `~/.cache/uv/` | every project's uv environments | at most 2.76 GiB | `uv cache prune` |
 | the root reserve of `/` | the system | about 6.2 GiB | `tune2fs -m 1` (root) |
+
+**The demo service retired (2026-11-20 19:18-19:20Z, the maintainer's decision;
+`logs/maintenance/storage/demo_agent_retirement_20261120.json`).** The two logs were held open only by the 11
+processes of `alphaavatar-demo.service` (fd 1 and fd 2; nothing outside its cgroup). The service was stopped (its main
+process ignored SIGTERM for the 90 s stop timeout and systemd killed it), disabled, its unit file
+`/etc/systemd/system/alphaavatar-demo.service` and its `multi-user.target.wants` link removed (a copy and its sha256 are
+kept), and systemd reloaded; no timer, socket, crontab or other unit referred to it. With no handle left, both logs
+were deleted. `/` went from **16.09 to 55.39 GiB free: 39.30 GiB**, of which 34.04 GiB is the two logs' allocated bytes
+exactly and 5.26 GiB was released when the demo's processes exited, before any deletion (most likely files it had
+deleted but still held open; they cannot be listed after its exit). Rechecked afterwards: no unit, no process, no log
+recreated. Nothing else was touched (the AlphaAvatar repository, its `.venv` and `.env.demo`, the empty log directory).
 
 *The arrangement* (`design.json :: storage.phase_2_finals.placement`). During an arm's run the free relay has room
 for that arm's rotation only (1.00 to 4.09 GiB beside it), so every earlier arm's finals must be on the dev box. The
@@ -468,17 +481,20 @@ sha256:
 * **FFN + attention: on the relay** (`durable/stage1_single_operator_budget/ffn_attention/<unit>/final/<sha16>/`, two
   finals, 15.03 GiB, by LFS sha256). That leaves the relay 35.5 GiB free afterwards.
 
-| launch, in order | the dev box must have free at that launch (`disk.py --total`: the session's bound peak + earlier arms' expected bytes) | free now 16.12 GiB | relay must accept / has |
+| launch, in order | the dev box must have free at that launch (`disk.py --total`: the session's bound peak + earlier arms' expected bytes) | free now 55.39 GiB (after the cleanup: 16.12) | relay must accept / has |
 | --- | ---: | ---: | --- |
-| residual width (first) | 18.50 GiB (two finals land at its closeout) | **2.38 GiB short** | 49.55 / 50.55 GiB |
-| depth only | 33.68 GiB (width's finals stay) | 17.56 GiB short | 46.46 / 50.55 GiB |
-| FFN + attention | 33.94 GiB (its finals stay on the relay) | **17.82 GiB short** | 46.80 / 50.55 GiB |
+| residual width (first) | 18.50 GiB (two finals land at its closeout) | fits, 36.89 GiB margin (was 2.38 short) | 49.55 / 50.55 GiB |
+| depth only | 33.68 GiB (width's finals stay) | fits, 21.71 GiB margin (was 17.56 short) | 46.46 / 50.55 GiB |
+| FFN + attention | 33.94 GiB (its finals stay on the relay) | fits, 21.45 GiB margin (was 17.82 short) | 46.80 / 50.55 GiB |
 
 The big step is the depth arm's closeout, when its two finals land beside the width arm's two: phase 2 then holds
 30.45 GiB expected, 36.64 GiB bound. Its peak over the study, at FFN + attention's closeout, is 30.71 GiB expected and
-39.81 GiB bound (`plans/disk_peak_phase2.json`). **Even the first arm does not fit after the cleanup.** Over the whole study the gap is
-**17.82 GiB**, or **22.19 GiB** keeping the measured 4.37 GiB swing of the other projects free. Placing all six finals
-on the dev box would need 33.94 + 15.03 GiB at the third launch: a gap of 32.8 GiB. No launch threshold was lowered.
+39.81 GiB bound (`plans/disk_peak_phase2.json`). After this project's cleanup alone even the first arm did not fit
+(the gap over the study was 17.82 GiB, 22.19 GiB with the measured 4.37 GiB swing of the other projects kept free).
+**After the demo service's retirement it fits:** 55.39 GiB free against the 39.81 GiB bound peak plus the 4.37 GiB
+swing, 44.18 GiB, leaves **11.21 GiB**; each launch keeps 17.08 GiB or more beyond its need and the swing. Placing all
+six finals on the dev box would raise the bound peak to 54.84 GiB: 0.55 GiB under the free space, 3.82 GiB over it with
+the swing, so the placement is unchanged. No launch threshold was lowered.
 
 *The relay, corrected.* A takeover's need is asked of the relay's live headroom, which already excludes what is held.
 So the margin is never "50.55 minus the need" once something is held. The earlier table's 22.03 and 8.49 GiB margins
@@ -654,6 +670,23 @@ launch.py retain --kind sob1_train --arm residual_width --run-id <id> --from <s>
 launch.py study-completion                                               # $0: six finals, twelve sets, the comparison
 ```
 
+**Phase 2's fourth $0 dry run (2026-11-20 19:22Z on `c7f8a832`, clean tree, after the demo service's retirement;
+`plans/dry_run_20261120d.json`).** Nothing was created, uploaded or removed.
+* **Passed as measured:**
+  * phase 1 refused as closed; the residual-width artifact with `--arm depth_only` refused at $0 by the real launcher;
+  * the bound records and each init on the relay, for all three arms; the relay reclaim found nothing held;
+  * the relay ACCEPTED (200) every arm's remaining rotation: 49.55 / 46.46 / 46.80 GiB. Bisected again at 19:23Z, its
+    headroom is still **50.55-50.59 GiB**: the width arm's margin is 1.00 GiB;
+  * **the dev box's room, for every arm** (55.39 GiB free against 18.50 / 18.44 / 3.51 GiB for each session alone).
+    In launch order each launch needs 18.50 / 33.68 / 33.94 GiB; with the 4.37 GiB swing kept free the margins are
+    32.52 / 17.34 / 17.08 GiB, and the study's bound peak plus the swing (44.18 GiB) leaves 11.21 GiB;
+  * the three plans re-derive; phase 1 still COMPLETE on its secured copy.
+* **Refused as measured:** `issue` (no phase-2 grant; above an arm's cap; funding: cap $1,000, $25.8113 left, balance
+  $35.81) and the teardown reserve. Nothing else.
+* **Would pass, assumed and not measured:** with the project cap at $1,161.06 and the $151.06 top-up ($186.8708), every
+  arm's funding and reserve checks are empty and the whole ceiling plus reserve fits ($186.87 against $186.8708 of
+  balance and $186.8713 under the cap).
+
 **Phase 2's third $0 dry run (2026-11-20 16:11Z on `7b7e8655`, clean tree, after this project's cleanup, the
 placement and the two interruption fixes; `plans/dry_run_20261120c.json`).** Nothing was created, uploaded or
 removed.
@@ -769,17 +802,16 @@ runner's all-in; that was fixed then (`test_the_hard_cap_is_the_runners_all_in`)
 1. ~~Grant phase 1~~: granted 2026-11-19 and COMPLETE 2026-11-20 ($4.4348 of $22.92). Closed in code the same day
    (the grant's `kinds.sob1_phase1.closed`): `issue` and `launch` refuse it and its $18.4852 remainder is void.
 2. Phase 2 (prepared at $0 on 2026-11-20; the maintainer approves the three together):
-   * **the project cap: $1,161.06** (committed $974.1887, read again at 15:44Z, + the $185.87 ceiling + the $1.00 reserve). The
+   * **the project cap: $1,161.06** (committed $974.1887, read again at 19:23Z, + the $185.87 ceiling + the $1.00 reserve). The
      maintainer tops the provider balance up by $151.06 ($35.8108 -> $186.87);
    * **phase 2's grant** from `plans/proposal_phase2.json` (`launch.py grant --kind sob1_train --decision ...`);
    * ~~grow the dev box's disk~~: not approved (2026-11-20, the third brief). The arrangement without it (section 8)
      keeps residual width's and depth's finals on the dev box and FFN + attention's on the relay. After this project's
-     cleanup (16.12 GiB free) the dev box is **2.38 GiB short for the first arm and 17.82 GiB short over the study**
-     (22.19 GiB with the measured 4.37 GiB swing kept free).
-   * **other projects' files** (read only, section 8's table) close it. The smallest set is the stale
-     `/var/log/alphaavatar/demo-agent.err.log` (14.88 GiB, root truncation) plus about 3 GiB more from the same table,
-     or 7.3 GiB more to keep the swing free.
-   * The relay needs no purchase: the largest need is 49.55 GiB against 50.55 GiB free.
+     cleanup (16.12 GiB free) the dev box was 2.38 GiB short for the first arm and 17.82 GiB short over the study.
+   * ~~other projects' files~~: the maintainer retired the demo service and its two logs (2026-11-20, 39.30 GiB
+     freed). 55.39 GiB free now covers the study's 39.81 GiB bound peak and the 4.37 GiB swing with 11.21 GiB to
+     spare; no other project's file is needed.
+   * The relay needs no purchase: the largest need is 49.55 GiB against 50.55 GiB free (bisected again at 19:23Z).
 3. Kept on the hub, for the maintainer: 7.75 GiB of session code bundles, 7.41 GiB of environment wheels, Phase A's
    5.55 GiB of selected leaves, 4.44 GiB of permanent controls, the 1.11 GiB random baseline and the 1.11 GiB
    Stage-0 finalist (section 8; `inventory_20261120.json`).

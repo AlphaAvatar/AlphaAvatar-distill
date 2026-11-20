@@ -1,0 +1,85 @@
+{
+ "schema": "aadistill.maintenance.devbox_service_retirement/v1",
+ "written_utc": "2026-11-20T19:24:14Z",
+ "authorized_by": "the maintainer, 2026-11-20 (UTC): the dev box's demo-agent may be retired; stop and disable its service, remove its local unit and autostart, daemon-reload, delete its two logs; nothing else",
+ "why": "SOB1 phase 2 lacked 17.82 GiB of local free space (22.19 GiB with the measured 4.37 GiB swing) without a larger disk; the demo's two logs were the largest reclaimable files on / (other project, read-only inventory of devbox_cleanup_20261120.json)",
+ "filesystem": "/ (/dev/nvme0n1p3, ext4): the only data filesystem; every free figure below is its df avail",
+ "service": {
+  "unit": "alphaavatar-demo.service (system unit, User=ecs-user, Restart=always)",
+  "unit_file": "/etc/systemd/system/alphaavatar-demo.service",
+  "unit_file_sha256": "f231b9dcd295bd568f3af8c9c9930a72994e6b487d6607b5e9455050bf7d520b",
+  "unit_file_copy": "~/aad-artifacts/maintenance/demo_agent_retirement_20261120/alphaavatar-demo.service.removed",
+  "autostart": "/etc/systemd/system/multi-user.target.wants/alphaavatar-demo.service (symlink to the unit file); no drop-ins, timers, sockets, user units, crontab or rc.local entry referenced the demo",
+  "exec_start_present": false,
+  "exec_start_note": "ExecStart's /home/ecs-user/AlphaAvatar/scripts/start_alphaavatar_demo.sh no longer existed; the process had been running since 2026-08-17T09:45:14Z",
+  "holders_before": "11 processes, all in the unit's cgroup (the alphaavatar main process 1432892, its multiprocessing resource tracker and 9 forkservers), each with fd 1 on demo-agent.log and fd 2 on demo-agent.err.log; no process outside the cgroup held either file"
+ },
+ "steps_utc": [
+  {
+   "at": "2026-11-20T19:18:08Z",
+   "what": "state read: unit active and enabled; df avail",
+   "free_bytes": 17278906368
+  },
+  {
+   "at": "2026-11-20T19:18:15Z",
+   "what": "systemctl stop: SIGTERM; the main process did not exit within the 90 s stop timeout"
+  },
+  {
+   "at": "2026-11-20T19:19:46Z",
+   "what": "systemd sent SIGKILL (result 'timeout'); every process of the cgroup exited; no file handle on /var/log/alphaavatar remained"
+  },
+  {
+   "at": "2026-11-20T19:19:59Z",
+   "what": "systemctl disable (removed the multi-user.target.wants link); rm the unit file; systemctl daemon-reload; reset-failed: LoadState not-found"
+  },
+  {
+   "at": "2026-11-20T19:20:05Z",
+   "what": "df avail before deleting the logs",
+   "free_bytes": 22923694080
+  },
+  {
+   "at": "2026-11-20T19:20:05Z",
+   "what": "rm demo-agent.err.log and demo-agent.log; df avail",
+   "free_bytes": 59478401024
+  }
+ ],
+ "logs_deleted": [
+  {
+   "path": "/var/log/alphaavatar/demo-agent.err.log",
+   "size_bytes": 15980944264,
+   "allocated_bytes": 15980969984,
+   "last_write_utc": "2026-09-21T13:36:11Z",
+   "links": 1
+  },
+  {
+   "path": "/var/log/alphaavatar/demo-agent.log",
+   "size_bytes": 20573707095,
+   "allocated_bytes": 20573736960,
+   "last_write_utc": "2026-11-19T19:38:33Z",
+   "links": 1
+  }
+ ],
+ "freed": {
+  "by_the_log_deletion_bytes": 36554706944,
+  "by_the_log_deletion_gib": 34.04,
+  "equals_the_logs_allocated_bytes": true,
+  "at_the_service_stop_bytes": 5644787712,
+  "at_the_service_stop_gib": 5.26,
+  "at_the_service_stop_note": "released when the demo's processes exited, before any file was deleted; nothing else in the journal for those 2 minutes and the only other active session's scratch grew; most likely files the demo had deleted while still holding them open, which cannot be listed after its exit",
+  "total_bytes": 42199494656,
+  "total_gib": 39.3,
+  "free_before_gib": 16.09,
+  "free_after_gib": 55.39
+ },
+ "verified_after": {
+  "at": "2026-11-20T19:24:14Z",
+  "unit": "LoadState=not-found ActiveState=inactive UnitFileState=",
+  "unit_files_left": "none",
+  "demo_processes": "none",
+  "logs_present": [],
+  "log_directory_entries": [],
+  "free_bytes": 59477766144
+ },
+ "not_touched": "the AlphaAvatar repository, its .venv and .env.demo, the empty /var/log/alphaavatar directory, every other unit and every other project's file",
+ "authorizes": "nothing"
+}

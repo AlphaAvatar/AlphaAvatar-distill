@@ -28,7 +28,7 @@
    },
    "launch_check_bytes": 19863928508,
    "launch_check_gib": 18.5,
-   "launch_shortfall_now_gib": 2.39
+   "launch_shortfall_now_gib": 0.0
   },
   {
    "arm": "depth_only",
@@ -51,7 +51,7 @@
    },
    "launch_check_bytes": 36168873933,
    "launch_check_gib": 33.68,
-   "launch_shortfall_now_gib": 17.57
+   "launch_shortfall_now_gib": 0.0
   },
   {
    "arm": "ffn_attention",
@@ -74,7 +74,7 @@
    },
    "launch_check_bytes": 36443005150,
    "launch_check_gib": 33.94,
-   "launch_shortfall_now_gib": 17.83
+   "launch_shortfall_now_gib": 0.0
   }
  ],
  "phase1_archive_bytes": 29614165,
@@ -86,16 +86,16 @@
   "bound": 39.81,
   "expected": 30.71
  },
- "free_bytes": 17299968000,
- "free_gib": 16.11,
+ "free_bytes": 59477704704,
+ "free_gib": 55.39,
  "shared_filesystem_swing_bytes": 4692251771,
  "shortfall_with_swing_bytes": {
-  "bound": 30142868976,
-  "expected": 20365015043
+  "bound": 0,
+  "expected": 0
  },
  "shortfall_with_swing_gib": {
-  "bound": 28.07,
-  "expected": 18.97
+  "bound": 0.0,
+  "expected": 0.0
  },
  "rule": "the bound peak plus the measured swing of the other project's files, against the free bytes now",
  "inputs": "design.json :: cost_model.dev_box_disk (phase_2), structures.json :: checkpoint_bytes",
