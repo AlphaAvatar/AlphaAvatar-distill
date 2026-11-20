@@ -1,0 +1,316 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.dry_run_phase2/v1",
+ "utc": "2026-11-20T09:06:41Z",
+ "what": "SOB1 phase 2's $0 dry run on the committed tree: budget, issue (dry, over-cap, real), each study gate against live state, the launch spec and pod command, funding now and after the maintainer's cap and top-up; nothing created, nothing uploaded",
+ "commit": "5e47c52da71eb96e6c5c50a2f94eee406fa4d9e8",
+ "dirty_files": 0,
+ "budget_phase1": {
+  "kind": "sob1_phase1",
+  "arm": null,
+  "closed": {
+   "status": "CLOSED",
+   "utc": "2026-11-20T08:42:34Z",
+   "by": "the maintainer's 2026-11-20 brief (\u300c\u8ba9\u7b2c\u4e00\u9636\u6bb5\u5173\u95ed\u5728\u4ee3\u7801\u91cc\u751f\u6548\u2026\u2026\u7b2c\u4e00\u9636\u6bb5\u4f59\u6b3e\u4f5c\u5e9f\u3002\u300d), recorded by the agent",
+   "record": "phase_1_closed (this grant): COMPLETE, $4.4348 of $22.92",
+   "remainder_usd": 0.0,
+   "remainder": "void: the $18.4852 the ceiling left funds nothing, in phase 1 or phase 2",
+   "enforced_by": "shared.study_engineering.require_kind_open: issue, launch (before any artifact or provider read) and the runner's first precheck refuse the kind; closeout, retain and the completion check stay open"
+  },
+  "position": {
+   "fetched_utc": "2026-11-20T09:05:08+00:00",
+   "provider_billed_usd": 974.1887,
+   "committed_usd": 974.1887,
+   "project_cap_usd": 1000.0,
+   "project_remaining_usd": 25.8113,
+   "account_pods": [],
+   "account_volumes": [],
+   "balance_usd": 35.81082753,
+   "spend_per_hour": 0.0,
+   "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+   "unposted_sessions": 0,
+   "campaign_unposted": 0,
+   "campaign_teardown_confirmed_by": {
+    "subrun record": 25,
+    "reconciliation": 30
+   }
+  },
+  "fundable": false,
+  "remaining_usd": 0.0,
+  "problems": [
+   "the sob1_phase1 kind is CLOSED (2026-11-20T08:42:34Z): nothing is issued or launched and its remainder is void"
+  ]
+ },
+ "budget_phase2": {
+  "depth_only": {
+   "kind": "sob1_train",
+   "arm": "depth_only",
+   "source": "logs/stages/stage-1/single_operator_budget/plans/proposal_phase2.json",
+   "status": "proposed",
+   "expected_usd": 35.7,
+   "hard_cap_usd": 61.09,
+   "teardown_reserve_usd": 1.0,
+   "envelope": {
+    "ceiling_usd": 185.87,
+    "spent_usd": 0.0,
+    "remaining_usd": 185.87,
+    "runs": []
+   },
+   "position": {
+    "fetched_utc": "2026-11-20T09:05:10+00:00",
+    "provider_billed_usd": 974.1887,
+    "committed_usd": 974.1887,
+    "project_cap_usd": 1000.0,
+    "project_remaining_usd": 25.8113,
+    "account_pods": [],
+    "account_volumes": [],
+    "balance_usd": 35.81082753,
+    "spend_per_hour": 0.0,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 0,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+     "subrun record": 25,
+     "reconciliation": 30
+    }
+   },
+   "project_cap_usd_this_grant_states": 1161.06,
+   "problems": [
+    "the project cap is $1000.0, the grant was written under $1161.06: a new maintainer decision, not an inference",
+    "$61.09 does not fit the $25.8113 the $1000.0 project cap leaves as the provider bills it now",
+    "the provider account holds $35.81082753, less than the $61.09 hard cap",
+    "$61.09 + the $1.0 reserve exceeds the $25.8113 the project cap leaves",
+    "$61.09 + the $1.0 reserve exceeds the provider balance $35.81082753"
+   ],
+   "fundable": false
+  },
+  "ffn_attention": {
+   "kind": "sob1_train",
+   "arm": "ffn_attention",
+   "source": "logs/stages/stage-1/single_operator_budget/plans/proposal_phase2.json",
+   "status": "proposed",
+   "expected_usd": 36.41,
+   "hard_cap_usd": 61.35,
+   "teardown_reserve_usd": 1.0,
+   "envelope": {
+    "ceiling_usd": 185.87,
+    "spent_usd": 0.0,
+    "remaining_usd": 185.87,
+    "runs": []
+   },
+   "position": {
+    "fetched_utc": "2026-11-20T09:05:13+00:00",
+    "provider_billed_usd": 974.1887,
+    "committed_usd": 974.1887,
+    "project_cap_usd": 1000.0,
+    "project_remaining_usd": 25.8113,
+    "account_pods": [],
+    "account_volumes": [],
+    "balance_usd": 35.81082753,
+    "spend_per_hour": 0.0,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 0,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+     "subrun record": 25,
+     "reconciliation": 30
+    }
+   },
+   "project_cap_usd_this_grant_states": 1161.06,
+   "problems": [
+    "the project cap is $1000.0, the grant was written under $1161.06: a new maintainer decision, not an inference",
+    "$61.35 does not fit the $25.8113 the $1000.0 project cap leaves as the provider bills it now",
+    "the provider account holds $35.81082753, less than the $61.35 hard cap",
+    "$61.35 + the $1.0 reserve exceeds the $25.8113 the project cap leaves",
+    "$61.35 + the $1.0 reserve exceeds the provider balance $35.81082753"
+   ],
+   "fundable": false
+  },
+  "residual_width": {
+   "kind": "sob1_train",
+   "arm": "residual_width",
+   "source": "logs/stages/stage-1/single_operator_budget/plans/proposal_phase2.json",
+   "status": "proposed",
+   "expected_usd": 42.59,
+   "hard_cap_usd": 63.43,
+   "teardown_reserve_usd": 1.0,
+   "envelope": {
+    "ceiling_usd": 185.87,
+    "spent_usd": 0.0,
+    "remaining_usd": 185.87,
+    "runs": []
+   },
+   "position": {
+    "fetched_utc": "2026-11-20T09:05:15+00:00",
+    "provider_billed_usd": 974.1887,
+    "committed_usd": 974.1887,
+    "project_cap_usd": 1000.0,
+    "project_remaining_usd": 25.8113,
+    "account_pods": [],
+    "account_volumes": [],
+    "balance_usd": 35.81082753,
+    "spend_per_hour": 0.0,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 0,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+     "subrun record": 25,
+     "reconciliation": 30
+    }
+   },
+   "project_cap_usd_this_grant_states": 1161.06,
+   "problems": [
+    "the project cap is $1000.0, the grant was written under $1161.06: a new maintainer decision, not an inference",
+    "$63.43 does not fit the $25.8113 the $1000.0 project cap leaves as the provider bills it now",
+    "the provider account holds $35.81082753, less than the $63.43 hard cap",
+    "$63.43 + the $1.0 reserve exceeds the $25.8113 the project cap leaves",
+    "$63.43 + the $1.0 reserve exceeds the provider balance $35.81082753"
+   ],
+   "fundable": false
+  }
+ },
+ "issue_phase1_dry": {
+  "rc": 11,
+  "tail": "REFUSED at $0: SOB1's sob1_phase1 kind is CLOSED (2026-11-20T08:42:34Z, CLOSED); nothing of it is issued or launched, and its remainder funds nothing"
+ },
+ "launch_phase1_dry": {
+  "rc": 11,
+  "tail": "REFUSED at $0: SOB1's sob1_phase1 kind is CLOSED (2026-11-20T08:42:34Z, CLOSED); nothing of it is issued or launched, and its remainder funds nothing"
+ },
+ "issue_phase2_dry": {
+  "rc": 11,
+  "tail": "REFUSED at $0: $63.43 + the $1.0 reserve exceeds the $25.8113 the project cap leaves; $63.43 + the $1.0 reserve exceeds the provider balance $35.81082753"
+ },
+ "issue_phase2_over_cap": {
+  "rc": 11,
+  "tail": "REFUSED at $0: $63.44 exceeds the sob1_train residual_width cap $63.43"
+ },
+ "issue_phase2_real": {
+  "rc": 11,
+  "tail": "REFUSED at $0: no grant at logs/budget/approvals/stage1_single_operator_budget_phase2_grant.json: SOB1 sob1_train is not authorized (a proposal exists)"
+ },
+ "study_gates": {
+  "depth_only": {
+   "the_kind_records_are_the_bound_ones": {
+    "ok": true,
+    "message": "the artifact binds this tree's ['arm', 'design_sha256', 'init_record_sha256', 'plan', 'plan_sha256', 'selection_sha256', 'structures_sha256']"
+   },
+   "the_initialization_is_durable": {
+    "ok": true,
+    "message": "depth_only's initialization is on the relay with its recorded hashes"
+   },
+   "the_relay_has_room": {
+    "ok": true,
+    "message": "the relay would accept the sob1_train session's bytes: 3 object(s), 46.46 GiB: ACCEPTED (200) 3/3 granted an upload action"
+   },
+   "the_dev_box_has_room": {
+    "ok": false,
+    "message": "the dev box cannot hold what this session brings back: /home/ecs-user/aad-artifacts/stage1_single_operator_budget: 6.90 GiB free for 18.11 GiB (margin -11.2 GiB)"
+   },
+   "the_teardown_reserve_stays": {
+    "ok": false,
+    "message": "$61.09 + the $1.0 reserve exceeds the $25.8113 the project cap leaves; $61.09 + the $1.0 reserve exceeds the provider balance $35.81082753"
+   }
+  },
+  "ffn_attention": {
+   "the_kind_records_are_the_bound_ones": {
+    "ok": true,
+    "message": "the artifact binds this tree's ['arm', 'design_sha256', 'init_record_sha256', 'plan', 'plan_sha256', 'selection_sha256', 'structures_sha256']"
+   },
+   "the_initialization_is_durable": {
+    "ok": true,
+    "message": "ffn_attention's initialization is on the relay with its recorded hashes"
+   },
+   "the_relay_has_room": {
+    "ok": true,
+    "message": "the relay would accept the sob1_train session's bytes: 3 object(s), 46.80 GiB: ACCEPTED (200) 3/3 granted an upload action"
+   },
+   "the_dev_box_has_room": {
+    "ok": false,
+    "message": "the dev box cannot hold what this session brings back: /home/ecs-user/aad-artifacts/stage1_single_operator_budget: 6.90 GiB free for 18.21 GiB (margin -11.3 GiB)"
+   },
+   "the_teardown_reserve_stays": {
+    "ok": false,
+    "message": "$61.35 + the $1.0 reserve exceeds the $25.8113 the project cap leaves; $61.35 + the $1.0 reserve exceeds the provider balance $35.81082753"
+   }
+  },
+  "residual_width": {
+   "the_kind_records_are_the_bound_ones": {
+    "ok": true,
+    "message": "the artifact binds this tree's ['arm', 'design_sha256', 'init_record_sha256', 'plan', 'plan_sha256', 'selection_sha256', 'structures_sha256']"
+   },
+   "the_initialization_is_durable": {
+    "ok": true,
+    "message": "residual_width's initialization is on the relay with its recorded hashes"
+   },
+   "the_relay_has_room": {
+    "ok": false,
+    "message": "the relay would accept the sob1_train session's bytes: 3 object(s), 49.55 GiB: REFUSED (403) Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit"
+   },
+   "the_dev_box_has_room": {
+    "ok": false,
+    "message": "the dev box cannot hold what this session brings back: /home/ecs-user/aad-artifacts/stage1_single_operator_budget: 6.90 GiB free for 18.16 GiB (margin -11.26 GiB)"
+   },
+   "the_teardown_reserve_stays": {
+    "ok": false,
+    "message": "$63.43 + the $1.0 reserve exceeds the $25.8113 the project cap leaves; $63.43 + the $1.0 reserve exceeds the provider balance $35.81082753"
+   }
+  }
+ },
+ "launch_spec": {
+  "driver": "scripts/stages/stage-1/single_operator_budget/train_driver.py",
+  "completion_check": "phase2_completion",
+  "completion_arm": "residual_width",
+  "relay_inputs": [
+   [
+    "transfer/stage3_sr/A-MIX-6cat-sr/4c794692a1d6072c/blocks.npz",
+    "4c794692a1d6072ced81c2192aa3493b14dab9a6904132a44645c93107cdbfee"
+   ],
+   [
+    "transfer/stage3_sr/A-MIX-6cat-sr/aaa6fcb0b708f766/ladder.json",
+    "aaa6fcb0b708f7665c4e7b4f9c8fe94666f024425075984ecf90250b735d0519"
+   ],
+   [
+    "transfer/stage3_sr/A-MIX-6cat-sr/63ad3c7fbc8dd2ca/audit.jsonl",
+    "63ad3c7fbc8dd2ca2ee4992565f4f85f79184487dea15c512f41a9d40fb0b598"
+   ]
+  ],
+  "validation_minutes": 3155.2
+ },
+ "pod_command": "mkdir -p /workspace/aad/artifacts/audit/stage1_single_operator/dry_p2 && cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts:/workspace/aad/scripts/stages/stage-1:/workspace/aad/scripts/stages/stage-0/calibration_volume /opt/train/bin/python scripts/stages/stage-1/single_operator_budget/train_driver.py --authorization /workspace/aad/logs/stages/stage-1/single_operator_budget/runs/dry_p2/governance/authorization.json --out /workspace/aad/artifacts/audit/stage1_single_operator/dry_p2 --status /workspace/stage1_single_operator.status --plan logs/stages/stage-1/single_operator_budget/plans/training_plan_residual_width.json --prefix-root durable/stage1_single_operator_budget --unit-deadline-hours 20.4 --vllm-python /opt/vllm/bin/python --attempt dry_p2; grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' /workspace/stage1_single_operator.status || echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> /workspace/stage1_single_operator.status",
+ "funding_now": {
+  "depth_only": [
+   "the project cap is $1000.0, the grant was written under $1161.06: a new maintainer decision, not an inference",
+   "$61.09 does not fit the $25.8113 the $1000.0 project cap leaves as the provider bills it now",
+   "the provider account holds $35.81082753, less than the $61.09 hard cap"
+  ],
+  "ffn_attention": [
+   "the project cap is $1000.0, the grant was written under $1161.06: a new maintainer decision, not an inference",
+   "$61.35 does not fit the $25.8113 the $1000.0 project cap leaves as the provider bills it now",
+   "the provider account holds $35.81082753, less than the $61.35 hard cap"
+  ],
+  "residual_width": [
+   "the project cap is $1000.0, the grant was written under $1161.06: a new maintainer decision, not an inference",
+   "$63.43 does not fit the $25.8113 the $1000.0 project cap leaves as the provider bills it now",
+   "the provider account holds $35.81082753, less than the $63.43 hard cap"
+  ]
+ },
+ "funding_after_cap_and_top_up": {
+  "position_assumed": {
+   "project_cap_usd": 1161.06,
+   "project_remaining_usd": 186.8713,
+   "balance_usd": 186.8708
+  },
+  "per_arm": {
+   "depth_only": [],
+   "ffn_attention": [],
+   "residual_width": []
+  },
+  "whole_ceiling_plus_reserve_fits": true
+ },
+ "plans_check": {
+  "depth_only": true,
+  "ffn_attention": true,
+  "residual_width": true
+ },
+ "phase1_completion_rechecked": true
+}

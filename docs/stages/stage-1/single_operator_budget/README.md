@@ -543,6 +543,31 @@ launch.py retain --kind sob1_train --arm residual_width --run-id <id> --from <s>
 launch.py study-completion                                               # $0: six finals, twelve sets, the comparison
 ```
 
+**Phase 2's $0 dry run (2026-11-20 on `5e47c52d`, clean tree; `plans/dry_run_20261120.json`).** Nothing was created and
+nothing uploaded.
+* Phase 1: `budget` CLOSED with $0 remaining; `issue --dry-run` and `launch --dry-run` refused at $0 ("the sob1_phase1
+  kind is CLOSED").
+* Phase 2's money: `budget` reads `plans/proposal_phase2.json` (per-arm caps $63.43 / $61.09 / $61.35). `issue` was
+  refused at $0 three times:
+  * a real artifact: no phase-2 grant;
+  * $63.44 for the width arm: above its cap;
+  * the dry-run artifact at $63.43: the cap plus the $1.00 reserve exceed the $25.8113 the $1,000 project cap leaves
+    and the $35.81 balance.
+
+  Re-read with the project cap at $1,161.06 and the balance after the $151.06 top-up ($186.8708), every arm's funding
+  and reserve checks are empty, and the whole ceiling plus reserve fits.
+* This study's gates, against live state:
+  * the bound records: pass for all three arms;
+  * each initialization on the relay with its recorded hashes: pass for all three;
+  * relay room: pass for depth (46.46 GiB) and FFN + attention (46.80 GiB); **REFUSED for residual width** (49.55 GiB,
+    403 "Private storage limit reached");
+  * **dev-box room: REFUSED for all three** (6.90 GiB free for about 18.2 GiB);
+  * the teardown reserve: refused until the cap and the top-up.
+* The launch spec: driver `train_driver.py`, closeout check `phase2_completion` (arm bound), the A-MIX pack's three
+  relay inputs by sha256, driver bound 3,155.2 min. The pod command passes the plan, the prefix root, the unit deadline
+  20.4 h and the run id as the attempt.
+* The three plans re-derive. Phase 1's completion re-checked COMPLETE on its secured copy under the generalized code.
+
 **The third $0 dry run (2026-11-19 19:11Z on `8fa9f84c`, after the second correction; first run at 19:10Z on
 `ee2ffc6b` with the same results; `plans/dry_run_20261119c.json`).** Nothing was created.
 
