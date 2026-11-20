@@ -654,6 +654,35 @@ launch.py retain --kind sob1_train --arm residual_width --run-id <id> --from <s>
 launch.py study-completion                                               # $0: six finals, twelve sets, the comparison
 ```
 
+**Phase 2's third $0 dry run (2026-11-20 16:11Z on `7b7e8655`, clean tree, after this project's cleanup, the
+placement and the two interruption fixes; `plans/dry_run_20261120c.json`).** Nothing was created, uploaded or
+removed.
+* **Passed as measured:**
+  * phase 1 refused as closed (`issue`, `launch`; `budget` $0);
+  * a residual-width artifact launched with `--arm depth_only` refused at $0 by the real launcher ("No provider
+    resource was created");
+  * the bound records and each init on the relay with its recorded hashes, for all three arms;
+  * the relay gate's dev-box reclaim ran first and found nothing held, so nothing was removed. The remaining rotation
+    was then asked of the live relay and ACCEPTED (200) for every arm: 49.55 / 46.46 / 46.80 GiB;
+  * FFN + attention's own session (3.51 GiB, its finals stay on the relay) fits the 16.10 GiB free. It launches
+    third, though: after the width and depth finals land, its launch needs 33.94 GiB;
+  * the three plans re-derive; phase 1 still COMPLETE on its secured copy.
+* **Refused as measured:**
+  * `issue`: no phase-2 grant; above an arm's cap; funding (cap $1,000, $25.8113 left, balance $35.81);
+  * the teardown reserve, the same;
+  * **the dev box's room**: residual width needs 18.50 GiB against 16.10 GiB free (2.40 GiB short); depth's own
+    session needs 18.44 GiB.
+* **Would pass, assumed and not measured:**
+  * with the project cap at $1,161.06 and the $151.06 top-up ($186.8708), every arm's funding and reserve checks are
+    empty, and the whole ceiling plus reserve fits;
+  * with other projects' files freed (the maintainer's decision; nothing was changed):
+
+    | freed | free afterwards | every launch fits | the 4.37 GiB swing still kept free |
+    | --- | ---: | --- | --- |
+    | the stale demo error log (14.88 GiB) | 30.98 GiB | no | no |
+    | that log and the six older IDE server builds (about 3.8 GiB) | 34.78 GiB | yes | no |
+    | both demo logs (34.04 GiB) | 50.14 GiB | yes | yes |
+
 **Phase 2's second $0 dry run (2026-11-20 on `c8e28ba1`, clean tree, after the four fixes and the inventory;
 `plans/dry_run_20261120b.json`).** Nothing was created and nothing uploaded.
 * **Passed as measured:**

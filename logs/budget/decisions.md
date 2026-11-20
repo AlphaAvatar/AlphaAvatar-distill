@@ -17235,6 +17235,11 @@ on a paid pod.
     one save point, or seed 1's final held, the width arm's margin is about 1.00 GiB, not 22.03 / 8.49 GiB.
 - Measured: committed $974.1887 of $1,000 ($25.8113 left), balance $35.8108, 0 pods, 0 volumes (15:44Z); relay
   50.55 GiB free (15:44Z); dev box 16.12 GiB free.
+- The $0 dry run on `7b7e8655` (`plans/dry_run_20261120c.json`): every check passes except the owed decisions:
+  * `issue` is refused for the grant, the cap and funding, and the teardown reserve for funding;
+  * the dev box's room: 16.10 GiB free for the first arm's 18.50 GiB.
+
+  The relay's reclaim found nothing held, and the relay accepted every arm's rotation.
 - Alternatives considered: all six finals on the dev box (a 32.8 GiB gap at the third launch); finals left on the relay
   during a later arm's run (no room: 1.00-4.09 GiB beside a rotation); fewer save points held at once (gives up the
   handoff that keeps a resumable save point across a lost pod).
