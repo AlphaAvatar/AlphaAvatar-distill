@@ -17088,3 +17088,59 @@ on a paid pod.
 - Owed to the maintainer (unchanged): phase 2's storage (six fp32 finals, 44.94 GiB; the dev box now has less room
   than before), its budget, the Stage 3 recovery allowance, and the merge into main.
 - Revisit when: the maintainer decides phase 2.
+
+## 2026-11-20 (UTC) — SOB1 phase 2 prepared at $0: takeover and completion fixed, phase 1 closed in code, plans, storage and money in figures
+
+- Context: the maintainer accepted phase 1 as COMPLETE and asked for phase 2's $0 preparation before the project cap
+  and phase 2's grant are approved together (quoted): 「SOB1 第一阶段我接受 `COMPLETE`。……三组全部进入原定的双种子比较。」
+  and 「我会亲自给服务商账户一次性充值 $151.06……现在请先完成下面的 $0 修复和启动准备。……项目上限调整和正式训练 grant
+  等我看过修复结果、实际存储和最新账本后一起批准。」 The four items: fix the training takeover and the scientific
+  completion; make phase 1's closure effective in code; establish where the checkpoints really live; prepare the formal
+  training entry. Plus: report the three arms' existing KL and top-1 agreement as pre-recovery diagnostics.
+- Done ($0):
+  - **Takeover and completion.** Reproduced the defect on `84c48bea`: `a1_units.state` (TPI1's driver, which SOB1's
+    phase 2 ran) returned `done` from report FILES, so a `{}` report in both modes without final weights skipped a
+    unit. SOB1's phase 2 now has its own state machine (`train_driver.py`, TPI1's durability helpers unchanged):
+    * a unit is done only with its seed's final durable and published AND both sets complete against that final's
+      sha256 (`completion.check`, generalized to recovered models);
+    * every set is bound to the arm, seed, mode, protocol and those weights;
+    * a `{}` report is rescored from the sealed generations, other seeds' parts are isolated, only the missing items
+      are generated, and an existing final is restored, never retrained.
+
+    `launch.phase2_completion` runs on the automatic and the manual closeout. `launch.study_completion` checks six
+    finals and twelve sets and recomputes the registered pairs with Holm (m = 3) from the sealed records
+    (`analysis.phase2_readout`).
+  - **Phase 1 closed in code.** `study_engineering` gained kind-scoped grants (PHASES) and a per-kind closure: the
+    study grant's `kinds.sob1_phase1.closed` makes `issue`, `launch` and the runner's first precheck refuse phase 1,
+    while closeout, retain and the completion check stay open. `budget --kind sob1_phase1` now reports CLOSED with
+    remaining $0 (it showed $18.4852 before). Phase 2 has its own proposal and, once granted, its own grant. Its
+    envelope counts only `sob1_train` runs, and the Stage-3 recovery training and its evaluation are one budget.
+  - **Plans.** `plans/training_plan_{residual_width,depth_only,ffn_attention}.json` are derived from phase 1's three
+    committed init records (`plan.py --check`). Outside the declared fields they equal A-MIX's unit and TPI1's A unit
+    of the same seed: the original teacher as the online KD teacher, the same pack and pre-packing counts, random order,
+    sequential packing with truncation, 8,192 tokens, causal attention, micro-batch 1 x 2 accumulation, `stage3_recovery`.
+    The residual-width arm goes first, and its first four formal optimizer steps record the memory.
+  - **Storage, read-only.**
+    * Dev box: `/` has 6.96 GiB free (one ext4 filesystem on the 200 GiB system disk). Phase 2 peaks at 53.83 GiB bound
+      (45.66 GiB expected) after its third session: six finals of 44.94 GiB plus evidence and archives. The shortfall,
+      with the measured 4.37 GiB swing kept free, is 51.25 GiB bound. No further checkpoint meets AGENTS.md 2.5.
+    * Relay: 48.77 GiB free with the three inits on it. The real rotation peak (one final + two save points) is
+      49.55 GiB for the residual-width arm, 0.8 GiB short. The launcher's old 57.04 GiB (two of each) never coexists,
+      and it now asks for the real peak.
+    * Phase 1's raw generations are now one archive with a per-file manifest (29.6 MB, sha256 `1968636e…`), on the dev
+      box and the relay. Its extracted copy re-checks 8 of 8 sets, and its recomputed comparison is byte-identical to
+      the committed one (`storage/phase1_evidence_archive.json`).
+  - **Diagnostics** (`results/pre_recovery_diagnostics.json`, state evaluation suite): teacher KL (equal-domain mean)
+    and top-1 agreement are depth only 3.47 / 34.08%, residual width only 7.70 / 27.05%, FFN + attention only
+    9.35 / 6.37%. Descriptive: all three arms go to the two-seed comparison.
+- Position (live, 2026-11-20 08:30Z): committed $974.1887 of the $1,000 cap, $25.8113 left; provider balance
+  $35.8108; 0 pods, 0 volumes. Phase 2 needs a project cap of $1,161.06 (committed + the $185.87 ceiling + the $1.00
+  reserve, rounded up to the cent; the maintainer's 2026-11-19 estimate was $1,161.07). After the maintainer's $151.06
+  top-up the balance would be $186.87, exactly the ceiling plus the reserve.
+- Decision: none taken here beyond the $0 work. Phase 1's kind is closed and its remainder void, as the brief
+  instructs. Raising the project cap, writing phase 2's grant (`launch.py grant --kind sob1_train`) and the storage
+  are the maintainer's: grow the dev box's system disk by 64 GiB (reference ~$4.90/month), and either upgrade the hub
+  account to PRO ($9/month, 1 TB) or delete the teacher statistics' redundant relay copy and remove each arm's relay
+  finals after local verification.
+- Revisit when: the maintainer approves the cap, the grant and the storage together; then the residual-width session
+  is issued first.

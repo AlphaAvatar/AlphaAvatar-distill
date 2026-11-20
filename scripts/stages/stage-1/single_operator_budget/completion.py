@@ -28,6 +28,13 @@ complete only when all of these hold (`check`):
   whether or not a generations file exists yet: an attempt stopped with only ``parts/`` is checked the same way. And
   every record of every generations file is one a proven part holds.
 
+Phase 2's twelve sets are the same check for each recovered model (one arm x one training seed, ``<arm>_s<seed>``,
+under ``<out>/<arm>-s<seed>/evaluation_<mode>/``): the weights a set must have been generated from are that seed's
+FINAL weights (the unit's verified ``final.json``: the ``model.safetensors`` sha256 the relay copy verified), and its
+package records name the arm, the seed and the unit as well (`binding`). With no verified final, nothing of that seed
+is complete, whatever reports exist. `session` checks one arm's two finals and four sets; `study` all six finals and
+twelve sets, one protocol per mode.
+
 `repair` turns what a check found into the smallest action, never choosing by outcome: a stale report is rescored;
 every part whose provenance is wrong or unverifiable is isolated (moved under ``superseded/<generation>/`` with its
 reason, never pooled) and the proven ones kept; a generations file with missing, extra or repeated items, or a record
@@ -77,7 +84,28 @@ def _jl(p: Path) -> list[dict]:
     return [json.loads(x) for x in Path(p).read_text(encoding="utf-8").split("\n") if x.strip()]
 
 
+def train_target(arm: str, seed: int) -> str:
+    """A recovered model's set target: ``<arm>_s<seed>`` (no ``-``: `generation_id` parses it back)."""
+    return f"{arm}_s{int(seed)}"
+
+
+def parse_train_target(target: str) -> dict | None:
+    """``{"arm", "seed", "unit"}`` of a recovered model's target, or None for an untrained arm or the teacher."""
+    m = re.fullmatch(r"(.+)_s(\d+)", target or "")
+    if not m or m.group(1) not in C.design()["arms"] or int(m.group(2)) not in C.design()["training"]["seeds"]:
+        return None
+    return {"arm": m.group(1), "seed": int(m.group(2)), "unit": unit_name(m.group(1), int(m.group(2)))}
+
+
+def unit_name(arm: str, seed: int) -> str:
+    """The training unit (`plan.unit_name`): its evidence directory and relay prefix."""
+    return f"{arm}-s{int(seed)}"
+
+
 def ev_dir(out: Path, target: str, mode: str) -> Path:
+    t = parse_train_target(target)
+    if t is not None:
+        return Path(out) / t["unit"] / C.mode_dirs()[mode]
     return Path(out) / "evaluation" / target / C.mode_dirs()[mode]
 
 
@@ -85,9 +113,17 @@ def targets() -> list[str]:
     return list(C.design()["phase_1"]["evaluation_order"])
 
 
+def train_targets(arm: str | None = None) -> list[str]:
+    """Phase 2's recovered models (arm order, then seed order), or one arm's two."""
+    tr = C.design()["training"]
+    return [train_target(a, s) for a in tr["unit_order"]["arms"] if arm in (None, a) for s in tr["seeds"]]
+
+
 def label_of(target: str) -> str:
     """The label the runners are given for ``target`` (``--label``) and write into every record they seal."""
-    return TEACHER if target == TEACHER else f"{target}_untrained"
+    if target == TEACHER or parse_train_target(target) is not None:
+        return target
+    return f"{target}_untrained"
 
 
 #: a generation's id: ``<attempt>-<target>-<mode>-g<round>``; the attempt (a run id) and the target hold no ``-``
@@ -153,10 +189,24 @@ def teacher_stop_ids() -> list[int]:
     return sorted(int(i) for i in ident["eos_token_ids"])
 
 
+def final_record(out: Path, unit: str) -> dict | None:
+    """A training unit's verified final-weights record in ``out`` (``<unit>/final.json``), or None."""
+    p = Path(out) / unit / "final.json"
+    rec = json.loads(p.read_text()) if p.is_file() else None
+    if not rec or not rec.get("verified") or not (rec.get("files_sha256") or {}).get("model.safetensors"):
+        return None
+    return rec
+
+
 def expected_weights(target: str, out: Path) -> dict[str, str] | None:
-    """The weights a set must have been generated from: the arm's committed init record (the copy in this evidence
-    directory), or the teacher identity's shards. None when the arm has no COMPLETE init record here."""
+    """The weights a set must have been generated from: a recovered model's verified final record, the arm's
+    committed init record (the copy in this evidence directory), or the teacher identity's shards. None when the
+    target has no verified final / no COMPLETE init record here."""
     d = C.design()
+    t = parse_train_target(target)
+    if t is not None:
+        rec = final_record(out, t["unit"])
+        return None if rec is None else {"model.safetensors": rec["files_sha256"]["model.safetensors"]}
     if target == TEACHER:
         ident = json.loads((REPO / d["teacher"]["identity"]["path"]).read_text())
         return {s["file"]: s["lfs_sha256"] for s in ident["weight_shards"]}
@@ -251,6 +301,10 @@ def _generation_problem(e: dict | None, gen: str | None, target: str, mode: str,
         return f"generation {gen} ran other weights {e.get('weights_sha256')}"
     if e.get("target") != target or e.get("mode") != mode:
         return f"generation {gen} is {e.get('target')}/{e.get('mode')}'s, not {target}/{mode}'s"
+    t = parse_train_target(target)
+    if t is not None and (e.get("arm"), e.get("seed"), e.get("unit")) != (t["arm"], t["seed"], t["unit"]):
+        return (f"generation {gen} names arm {e.get('arm')!r}, seed {e.get('seed')!r}, unit {e.get('unit')!r}, not "
+                f"{t['arm']} / {t['seed']} / {t['unit']}")
     if e.get("protocol_sha256") != proto:
         return f"generation {gen} ran protocol {str(e.get('protocol_sha256'))[:12]}, not the registered one"
     return None
@@ -389,7 +443,9 @@ def check(d: Path, target: str, mode: str, out: Path, *, label: str | None = Non
     pk = packages(d)
     weights = expected_weights(target, out)
     if weights is None:
-        problems["model_identity"].append(f"{target} has no COMPLETE init record in {out}")
+        problems["model_identity"].append(f"{target} has no verified final weights in {out}" if
+                                          parse_train_target(target) else
+                                          f"{target} has no COMPLETE init record in {out}")
     bad_parts = {rel: v["why"] for rel, v in prov["parts"].items() if not v["proven"]}
     if bad_parts:
         problems["model_identity"].append(f"{len(bad_parts)} sealed parts whose provenance is wrong or unverifiable "
@@ -420,7 +476,14 @@ def check(d: Path, target: str, mode: str, out: Path, *, label: str | None = Non
                                                                              "weights_sha256")} for e in pk],
             "parts": prov["parts"], "sealed_twice": prov["sealed_twice"],
             "expected_weights": weights, "think_state": want["think_state"], "rescored": rescored,
-            "stored_report_matches": not problems["formal_report"]}
+            "stored_report_matches": not problems["formal_report"], "binding": binding(target, mode, weights)}
+
+
+def binding(target: str, mode: str, weights: dict | None) -> dict:
+    """What one set is bound to: the target (and, for a recovered model, its arm, training seed and unit), the think
+    mode, the registered protocol and the weights' sha256 every proven part's generation ran."""
+    return {"target": target, **(parse_train_target(target) or {}), "mode": mode,
+            "protocol_sha256": protocol_sha256(mode), "weights_sha256": weights}
 
 
 def brief(st: dict) -> dict:
@@ -508,6 +571,55 @@ def rescore(d: Path, st: dict) -> None:
         write_json(Path(d) / "formal_report.json", st["rescored"])
 
 
+def complete_set(d: Path, target: str, mode: str, out: Path, *, attempt: str, model_fn, work: Path, vllm_py: str,
+                 mark=lambda m: None, entry: dict | None = None, utc=None) -> dict:
+    """One set (one model x one mode) to completion, on its files (`check`): a set an earlier attempt completed is
+    taken as it is (``model_fn`` is never called); otherwise the smallest repair (`repair`), the runners over only
+    what no proven part holds (`reasoning_inheritance.driver.fluid` / `capability` with the registered protocol), the
+    formal report rescored from the generations (a ``{}`` or stale report needs no model), and the check again. Each
+    generation round has its own id (`generation_id`: attempt, target, mode, round); its package record -- the
+    weights, target, mode, protocol, the parts already sealed and ``entry`` (a recovered model's arm, seed and unit) --
+    is written before anything is generated. ``model_fn()`` gives the weights' directory, only when something must be
+    generated. Two rounds at most; a set still incomplete raises with its problems (its sealed parts stay)."""
+    import os
+    import time
+    from stages.reasoning_inheritance import driver as RID
+    from stages.reasoning_inheritance.driver import write_json
+    utc = utc or (lambda: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+    d, label = Path(d), label_of(target)
+    st = check(d, target, mode, out, label=label)
+    row = {"at_start": {"complete": st["complete"], "problems": st["problems"]}, "binding": st["binding"]}
+    if st["complete"]:
+        write(d, st)
+        return {**row, "status": "complete", "generated": False}
+    env = {**os.environ, "HF_HUB_OFFLINE": "1"}
+    ev = C.protocol()
+    for rnd in (1, 2):
+        gen = generation_id(attempt, target, mode, rnd)
+        row.setdefault("repairs", []).append(repair(d, st, gen))
+        if needs_generation(d):
+            model_dir = model_fn()
+            pkg = Path(work) / "packages" / f"{label}_{mode}"
+            rec = {"generation": gen, "attempt": attempt, "utc": utc(), "target": target, "mode": mode,
+                   "protocol_sha256": protocol_sha256(mode), "parts_at_start": part_inventory(d), **(entry or {}),
+                   **C.package(model_dir, pkg)}
+            write_json(d / PACKAGES, packages(d) + [rec])           #: before anything is generated
+            mark(f"EVAL_GENERATE:{target}:{mode}:{gen}")
+            row.setdefault("runs", []).append({
+                "generation": gen,
+                "fluid": RID.fluid(pkg, d, label, mode, vllm_py, env, gen, None, ev),
+                "capability": RID.capability(pkg, d, label, mode, vllm_py, env, gen, None, ev)})
+        st = check(d, target, mode, out, label=label)
+        rescore(d, st)                          #: a stale or {} report is replaced by these generations' own
+        st = check(d, target, mode, out, label=label)
+        if st["complete"]:
+            break
+    write(d, st)
+    if not st["complete"]:
+        raise CompletionError(f"{target}/{mode} is not complete after {rnd} repair rounds: {st['problems']}")
+    return {**row, "status": "complete", "generated": bool(row.get("runs"))}
+
+
 # ---- the phase ----------------------------------------------------------------------------------------------------
 
 def init_problems(out: Path) -> dict[str, str]:
@@ -548,3 +660,83 @@ def phase(out: Path, *, write_records: bool = False) -> dict:
             "sets": {f"{t}/{m}": {"complete": v["complete"], "problems": v["problems"],
                                   "protocol_digest": v["protocol_digest"]} for (t, m), v in sets.items()},
             "modes": modes, "n_sets": len(sets), "n_complete": sum(v["complete"] for v in sets.values())}
+
+
+# ---- phase 2: one arm's session, and the study -------------------------------------------------------------------
+
+def final_problems(out: Path, unit: str) -> list[str]:
+    """Why a training unit's final weights are not shown durable in ``out``: a verified ``final.json`` naming the
+    ``model.safetensors`` sha256 and the trainer's completion record that travelled with it, published (handed off)
+    where a replacement attempt reads it."""
+    p = Path(out) / unit / "final.json"
+    if not p.is_file():
+        return [f"{unit}: no final.json (no final weights secured)"]
+    rec = json.loads(p.read_text())
+    bad = []
+    if not rec.get("verified"):
+        bad.append(f"{unit}: the final weights' relay copy is not verified")
+    files = rec.get("files_sha256") or {}
+    if not files.get("model.safetensors"):
+        bad.append(f"{unit}: the final record names no model.safetensors sha256")
+    if not any(k.startswith("run_completion") for k in files):
+        bad.append(f"{unit}: the trainer's completion record did not travel with the final weights")
+    if not (rec.get("handoff") or {}).get("verified"):
+        bad.append(f"{unit}: the final's record was never published where a replacement attempt reads it")
+    return bad
+
+
+def session(out: Path, arm: str, *, write_records: bool = False) -> dict:
+    """One arm's phase-2 session on the files in ``out`` (the pod's evidence or the dev box's secured copy): both
+    seeds' final weights durable, and the four sets (two seeds x two modes) complete against those finals."""
+    sets, finals = {}, {}
+    for t in train_targets(arm):
+        u = parse_train_target(t)["unit"]
+        finals[u] = {"problems": final_problems(out, u),
+                     "model_safetensors_sha256": ((final_record(out, u) or {}).get("files_sha256") or {}).get(
+                         "model.safetensors")}
+        for m in C.mode_dirs():
+            st = check(ev_dir(out, t, m), t, m, out, label=label_of(t))
+            if write_records and ev_dir(out, t, m).is_dir():
+                write(ev_dir(out, t, m), st)
+            sets[(t, m)] = st
+    modes = mode_problems({k: v for k, v in sets.items() if v["complete"]})
+    complete = (not modes and all(not f["problems"] for f in finals.values())
+                and all(v["complete"] for v in sets.values()))
+    return {"schema": SCHEMA.replace("evaluation_completion", "phase2_session_completion"), "arm": arm,
+            "complete": complete, "finals": finals,
+            "sets": {f"{t}/{m}": {"complete": v["complete"], "problems": v["problems"], "binding": v["binding"],
+                                  "protocol_digest": v["protocol_digest"]} for (t, m), v in sets.items()},
+            "modes": modes, "n_sets": len(sets), "n_complete": sum(v["complete"] for v in sets.values())}
+
+
+def study(outs: dict[str, Path], *, phase1_out: Path | None = None) -> dict:
+    """The study's completion: every arm's session complete in its own evidence directory (``outs[arm]``), so six
+    final weights and twelve sets, and the six recovered models of each mode share one protocol digest. With phase
+    1's evidence, whether its four models of each mode were read under that same digest is reported beside it (the
+    descriptive recovery-vs-untrained reading needs it; the registered decision does not)."""
+    arms = list(C.design()["training"]["unit_order"]["arms"])
+    per = {a: (session(outs[a], a) if a in outs and Path(outs[a]).is_dir() else None) for a in arms}
+    missing = [a for a in arms if per[a] is None]
+    digests: dict[str, dict] = {}
+    for a, s in per.items():
+        for k, v in (s or {}).get("sets", {}).items():
+            t, m = k.rsplit("/", 1)
+            if v["complete"]:
+                digests.setdefault(m, {})[t] = v["protocol_digest"]
+    modes = [f"{m}: the models were read under different protocols {d}" for m, d in sorted(digests.items())
+             if len(set(d.values())) > 1]
+    phase1 = None
+    if phase1_out is not None:                  #: descriptive (recovery vs untrained): reported, never a gate
+        ph1 = phase(phase1_out)
+        phase1 = {"complete": ph1["complete"], "same_protocol_per_mode": {
+            m: sorted({v["protocol_digest"] for k, v in ph1["sets"].items() if k.endswith(f"/{m}") and v["complete"]}
+                      | set(digests.get(m, {}).values())).__len__() == 1 for m in C.mode_dirs()}}
+    n_finals = sum(not f["problems"] for s in per.values() if s for f in s["finals"].values())
+    n_sets = sum(v["complete"] for s in per.values() if s for v in s["sets"].values())
+    want_finals = len(arms) * len(C.design()["training"]["seeds"])
+    want_sets = want_finals * len(C.mode_dirs())
+    complete = not missing and not modes and n_finals == want_finals and n_sets == want_sets
+    return {"schema": SCHEMA.replace("evaluation_completion", "study_completion"), "complete": complete,
+            "finals": {"n_verified": n_finals, "n_expected": want_finals},
+            "sets": {"n_complete": n_sets, "n_expected": want_sets}, "arms_missing": missing, "modes": modes,
+            "per_arm": per, "phase1": phase1}

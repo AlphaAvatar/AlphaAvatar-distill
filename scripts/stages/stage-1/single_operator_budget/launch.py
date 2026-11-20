@@ -9,18 +9,22 @@
     ... launch.py issue --kind sob1_phase1 --run-id <id> --expected-usd <e> --hard-cap-usd <c> --dry-run --out <tmp>
 
 `shared.study_engineering` is the mechanism; this module is the instance (TPI1's launcher, with this study's files).
-The study has its own proposal (``plans/proposal.json``) and, only once the maintainer grants it, its own grant
-(``logs/budget/approvals/stage1_single_operator_budget_grant.json``); its envelope counts only its own runs. Dollar
-amounts live in the proposal / grant, never here.
+Each phase has its own money (`study_engineering`'s PHASES): phase 1 the study grant
+(``logs/budget/approvals/stage1_single_operator_budget_grant.json``, from ``plans/proposal.json``), phase 2 a grant of
+its own (``..._phase2_grant.json``, from ``plans/proposal_phase2.json``, only once the maintainer grants it). Each
+envelope counts only its own kind's runs, so phase 1's remainder funds nothing in phase 2 and phase 2 -- the Stage-3
+recovery training AND its evaluation -- is budgeted once. Dollar amounts live in the proposals / grants, never here.
 
 Two session kinds, one L40S each, on the container disk (no network volume):
 
 * ``sob1_phase1`` -- `phase1_driver.py`: the three initializations (each durable at completion), then each untrained
-  arm and the teacher evaluated at 8,192 tokens in both modes. The proposal funds this kind only.
-* ``sob1_train`` -- `train_driver.py` (TPI1's, with this study's plan, prefix, authorization and package): one arm's
-  two seeds trained and evaluated (``--arm``). Issued only once `plan.py` has derived that arm's plan from a COMMITTED
-  init record whose relay copies verify, and only under a grant whose ``kinds`` names a cap for it: the proposal names
-  none (phase 2 is the maintainer's decision).
+  arm and the teacher evaluated at 8,192 tokens in both modes. **CLOSED** (the study grant's
+  ``kinds.sob1_phase1.closed``, 2026-11-20): `issue` and `launch` refuse it, its remainder is void; `closeout`,
+  `retain` and the completion check stay.
+* ``sob1_train`` -- `train_driver.py` (this study's state machine on TPI1's durability helpers): one arm's two seeds
+  trained and evaluated (``--arm``), each set bound to that seed's final weights. Issued only once `plan.py` has
+  derived that arm's plan from a COMMITTED init record whose relay copies verify, and only under phase 2's grant,
+  inside its per-arm cap (``kinds.sob1_train.per_arm``).
 
 Gates read at $0 before the create, beyond the mechanism's: the authorization is in the session commit; the cap plus
 the teardown reserve fit (`layer_merge_launch.reserve_problems`); the relay would accept the kind's bytes at their true
@@ -34,7 +38,11 @@ against the dev box's copy (`final_hash_check`). Every closeout of a phase-1 ses
 runs after teardown and a manual ``closeout`` -- then runs `phase1_completion` (`Launch.completion_check`): the eight
 sets on that copy (`completion.phase`) and ``retain``, which brings EVERY arm's initialization and mapping home as its
 manifest, re-hashed on the disk. Phase 1 is recorded COMPLETE only when both hold
-(``runs/<run>/closeout/phase1_completion.json``); otherwise INCOMPLETE with what is unfinished.
+(``runs/<run>/closeout/phase1_completion.json``); otherwise INCOMPLETE with what is unfinished. A training session's
+closeouts run `phase2_completion` the same way: the arm's two finals and four sets on the secured copy
+(`completion.session`) and both finals at their declared stores (`retain`), then the study's completion
+(`study_completion`: six finals, twelve sets, the registered comparison recomputed from the sealed records) once every
+arm has a COMPLETE session (``runs/<run>/closeout/phase2_completion.json``, ``results/study_completion.json``).
 """
 from __future__ import annotations
 
@@ -69,10 +77,14 @@ RELAY_TRANSFER = "transfer/stage1_single_operator_budget"
 LOCAL_RECORD = LOGS / "storage/local_retention.json"
 ARMS = ("depth_only", "ffn_attention", "residual_width")
 
+PHASE2_GRANT = Path("logs/budget/approvals/stage1_single_operator_budget_phase2_grant.json")
+PHASE2_PROPOSAL = LOGS / "plans/proposal_phase2.json"
+
 STUDY = SE.Study(
     key="SOB1", plan_id="stage1.single_operator_budget", logs=LOGS,
     grant=Path("logs/budget/approvals/stage1_single_operator_budget_grant.json"),
     proposal=LOGS / "plans/proposal.json",
+    kind_grants=((TRAIN_KIND, PHASE2_GRANT, PHASE2_PROPOSAL),),
     identity_files=(DESIGN, SELECTION, STRUCTURES),
     scripts=(f"{HERE}/__init__.py", f"{HERE}/common.py", f"{HERE}/phase1_driver.py", f"{HERE}/train_driver.py",
              f"{HERE}/plan.py", f"{HERE}/selection.py", f"{HERE}/structures.py", f"{HERE}/launch.py",
@@ -115,6 +127,22 @@ def proposal() -> dict:
     return json.loads((REPO / STUDY.proposal).read_text())
 
 
+def kind_grant(kind: str, *, dry_run: bool = False) -> dict:
+    """The grant that funds ``kind`` (phase 2's own; on a dry run its proposal), refusing a closed kind."""
+    return SE.grant(STUDY, REPO, dry_run=dry_run, kind=kind)
+
+
+def session_terms(kind: str, arm: str | None, g: dict) -> dict:
+    """One session's terms from the grant that funds it: phase 1's kind block, or phase 2's arm block
+    (``kinds.sob1_train.per_arm.<arm>``: expected and hard cap in USD, the driver minutes, the unit deadline)."""
+    k = (g.get("kinds") or {}).get(kind) or {}
+    if kind == TRAIN_KIND:
+        if arm is None:
+            raise SE.AuthorizationError("a training session names its arm (--arm)")
+        return (k.get("per_arm") or {}).get(arm) or {}
+    return k
+
+
 def plan_path(arm: str) -> str:
     if arm not in ARMS:
         raise SE.AuthorizationError(f"--arm {arm!r} is not one of {list(ARMS)}")
@@ -135,13 +163,30 @@ def kind_conditions(kind: str, root: Path = REPO, arm: str | None = None) -> dic
 
 
 def relay_object_sizes(kind: str, arm: str | None = None) -> list[int]:
-    """What the relay receives at most, per kind (bytes), from structures.json: phase 1 the three bf16 inits and
-    their mappings; a training session two save points at once and its two fp32 finals."""
+    """What the relay must accept on top of what it holds, at the session's peak (bytes, from structures.json):
+    phase 1 the three bf16 inits and their mappings. A training session in its real rotation order: a save point is
+    removed only after the next one hands off (two at once), a unit's final is uploaded while its last save point is
+    still there, and the save points go only after the final hands off. Seed 1 peaks at two save points; seed 2 at
+    seed 1's final plus two save points, then at seed 1's final, its last save point and its own final. So the peak
+    is ONE final and TWO save points: ``[save_point, save_point, final]`` (`rotation_peaks` shows each step)."""
     s = json.loads((REPO / STRUCTURES).read_text())["arms"]
     if kind == PHASE1_KIND:
         return [s[a]["checkpoint_bytes"]["init_bf16"] for a in ARMS] + [64 * 2 ** 20] * len(ARMS)
     b = s[arm]["checkpoint_bytes"]
-    return [b["save_point"], b["save_point"], b["final_fp32"], b["final_fp32"]]
+    return [b["save_point"], b["save_point"], b["final_fp32"]]
+
+
+def rotation_peaks(arm: str) -> list[dict]:
+    """What a training session holds on the relay at each step of its rotation (bytes), seed 1 then seed 2."""
+    b = json.loads((REPO / STRUCTURES).read_text())["arms"][arm]["checkpoint_bytes"]
+    sp, fin = b["save_point"], b["final_fp32"]
+    steps = [("seed 1: a save point uploads while the previous one is still listed", 2 * sp),
+             ("seed 1: the final uploads while the last save point is still listed", sp + fin),
+             ("seed 1: save points retired after the final hands off", fin),
+             ("seed 2: a save point uploads while the previous one is listed, beside seed 1's final", fin + 2 * sp),
+             ("seed 2: its final uploads beside its last save point and seed 1's final", 2 * fin + sp),
+             ("seed 2: save points retired", 2 * fin)]
+    return [{"step": w, "bytes": n, "gib": round(n / 2 ** 30, 2)} for w, n in steps]
 
 
 def _kind(ctx) -> str:
@@ -165,8 +210,8 @@ def the_authorization_is_in_the_session_commit(ctx) -> tuple[bool, str]:
 def the_teardown_reserve_stays(ctx) -> tuple[bool, str]:
     from stages.reasoning_inheritance.layer_merge_launch import reserve_problems
     try:
-        g = SE.grant(STUDY, REPO, dry_run=getattr(ctx.args, "dry_run", False))
-        env = SE.envelope(STUDY, g, REPO)
+        g = kind_grant(_kind(ctx), dry_run=getattr(ctx.args, "dry_run", False))
+        env = SE.envelope(STUDY, g, REPO, _kind(ctx))
         pos = ctx.evidence.get("live_position") or SE.live_position(REPO)
     except SE.AuthorizationError as exc:
         return False, str(exc)
@@ -269,7 +314,8 @@ def command(launch, kind: str, arm: str | None, ctx, plan) -> str:
     else:
         auth = f"{SE.POD_REPO}/{STUDY.authorization_path(ctx.args.run_id)}"
         deadline = (ctx.evidence or {}).get("billed_window_deadline_utc")
-        hours = proposal()["phase_2_draft"]["per_arm_session"][arm]["unit_deadline_hours"]
+        hours = session_terms(kind, arm, kind_grant(kind, dry_run=getattr(ctx.args, "dry_run", False)))[
+            "unit_deadline_hours"]
         cmd = (f"{DRIVERS[kind]} --authorization {auth} --out {ev} --status {status} --plan {plan_path(arm)} "
                f"--prefix-root {C.relay_root()} --unit-deadline-hours {hours} "
                + (f"--session-deadline-utc {deadline} " if deadline else "")
@@ -280,10 +326,15 @@ def command(launch, kind: str, arm: str | None, ctx, plan) -> str:
 
 
 def driver_minutes(kind: str, arm: str | None = None) -> float:
-    p = proposal()
+    """The driver's bound for the session: phase 1's proposal; a training session its arm's terms in phase 2's grant
+    (its proposal before a grant exists: a dry run prices the same plan)."""
     if kind == PHASE1_KIND:
-        return float(p["kinds"][kind]["driver_minutes"])
-    return float(p["phase_2_draft"]["per_arm_session"][arm]["hard_cap"]["driver_minutes"])
+        return float(proposal()["kinds"][kind]["driver_minutes"])
+    try:
+        g = kind_grant(kind)
+    except SE.AuthorizationError:
+        g = json.loads((REPO / PHASE2_PROPOSAL).read_text())
+    return float(session_terms(kind, arm, g)["driver_minutes"])
 
 
 def launch_spec(kind: str, minutes: float = 0.0, resume_from: str | None = None, arm: str | None = None) -> SE.Launch:
@@ -321,25 +372,33 @@ def launch_spec(kind: str, minutes: float = 0.0, resume_from: str | None = None,
                        "dev box, every weight on the relay; nothing stays on the provider"))
     return dataclasses.replace(launch, command=functools.partial(command, launch, kind, arm),
                                on_poll=RIL.secure_incremental(launch), products_secured=RIL.products_secured(launch),
-                               completion_check=phase1_completion if kind == PHASE1_KIND else None)
+                               completion_check=(phase1_completion if kind == PHASE1_KIND else
+                                                 functools.partial(phase2_completion, arm=arm)))
 
 
 # ---- the budget check, resume and retention ($0, dev box) ------------------------------------------------------------
 
 def budget(kind: str, arm: str | None = None, *, snapshot: dict | None = None) -> dict:
-    """The kind's cap against what funds it NOW: the proposal's (or grant's) cap, the teardown reserve, the study's
-    envelope, the project cap's remainder and the provider balance, read live (fail closed)."""
+    """The kind's cap against what funds it NOW: the grant's cap for that kind (phase 2's own grant, its proposal
+    before one exists), the teardown reserve, that kind's envelope, the project cap's remainder and the provider
+    balance, read live (fail closed). A closed kind refuses (`SE.require_kind_open`): its remainder is void."""
     from stages.reasoning_inheritance.layer_merge_launch import reserve_problems
-    g = SE.grant(STUDY, REPO, dry_run=True)
-    k = (g.get("kinds") or {}).get(kind) or {}
-    cap = k.get("per_session_hard_cap_usd")
-    env = SE.envelope(STUDY, g, REPO)
     pos = SE.live_position(REPO, snapshot=snapshot)
+    closed = SE.kind_closure(STUDY, kind, REPO)
+    if closed:
+        return {"kind": kind, "arm": arm, "closed": closed, "position": pos, "fundable": False, "remaining_usd": 0.0,
+                "problems": [f"the {kind} kind is CLOSED ({closed.get('utc') if isinstance(closed, dict) else closed}): "
+                             "nothing is issued or launched and its remainder is void"]}
+    g = kind_grant(kind, dry_run=True)
+    k = session_terms(kind, arm, g)
+    cap = k.get("per_session_hard_cap_usd")
+    env = SE.envelope(STUDY, g, REPO, kind)
     out = {"kind": kind, "arm": arm, "source": g["_source"], "status": g.get("status"),
            "expected_usd": k.get("expected_usd"), "hard_cap_usd": cap, "teardown_reserve_usd": g.get("teardown_reserve_usd"),
-           "envelope": env, "position": pos}
+           "envelope": env, "position": pos, "project_cap_usd_this_grant_states": g.get("project_cumulative_cap_usd")}
     if cap is None:
-        out["problems"] = [f"{g['_source']} names no cap for {kind}: {k.get('status') or 'not proposed'}"]
+        out["problems"] = [f"{g['_source']} names no cap for {kind}{f' {arm}' if arm else ''}: "
+                           f"{k.get('status') or 'not proposed'}"]
     else:
         out["problems"] = (SE.funding_problems(float(cap), g, env, pos) + reserve_problems(float(cap), g, env, pos))
     out["fundable"] = not out["problems"]
@@ -362,7 +421,7 @@ def stage_resume(run_id: str, src_scr: Path) -> str:
     return f"{prefix}/{tgz.name}@{res['files_sha256'][tgz.name]}"
 
 
-def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, record: Path = REPO / LOCAL_RECORD,
+def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, record: Path | None = None,
            getter=None, arm: str | None = None) -> dict:
     """Each durable product of a finished session onto the dev box ($0 GPU), from its verified relay record, into the
     out-of-tree store (`relay.get`; ``getter`` for a test). Phase 1: EVERY arm's initialization and mapping, each
@@ -377,6 +436,7 @@ def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, 
     from stages.teacher_parent_initialization import relay as R
     getter = getter or R.get
     store = Path(store or C.local_store())
+    record = Path(record or (REPO / (LOCAL_RECORD if kind == PHASE1_KIND else LOCAL_RECORD_PHASE2)))
     out = Path(src_scr) / "store" / "out"
     doc = json.loads(record.read_text()) if record.is_file() else {
         "schema": "aadistill.stage1.single_operator_budget.local/v1", "store": str(store), "products": {}}
@@ -484,6 +544,118 @@ def phase1_completion(run_id: str, scr: Path, *, store: Path | None = None, reco
             if dest.is_relative_to(root) else str(dest)}
 
 
+PHASE2_COMPLETION = "closeout/phase2_completion.json"
+LOCAL_RECORD_PHASE2 = LOGS / "storage/local_retention_phase2.json"
+STUDY_RESULT = LOGS / "results/study_completion.json"
+PHASE1_RUN_COMPLETION = "closeout/phase1_completion.json"
+
+
+def _utc() -> str:
+    import time
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def phase2_completion(run_id: str, scr: Path, *, arm: str, store: Path | None = None,
+                      record: Path = REPO / LOCAL_RECORD_PHASE2, getter=None, root: Path = REPO) -> dict:
+    """A training session's scientific completion, which every closeout of a ``sob1_train`` session runs (the formal
+    launch's and a manual ``closeout`` alike), after the pod is gone. COMPLETE only when the arm's two finals are
+    durable and its four sets complete against them on the dev box's secured copy (`completion.session`) AND both
+    finals are on the dev box's disk as their records (`retain`). Then, once every arm has a COMPLETE session, the
+    study's completion (`study_completion`). Writes ``runs/<run_id>/closeout/phase2_completion.json``."""
+    from stages.single_operator_budget import completion as CP
+    out = Path(scr) / "store" / "out"
+    unfinished: dict = {}
+    ses = CP.session(out, arm) if out.is_dir() else None
+    if ses is None:
+        unfinished["evidence"] = f"no secured evidence at {out}"
+    else:
+        bad_f = {u: f["problems"] for u, f in ses["finals"].items() if f["problems"]}
+        bad_s = {k: v["problems"] for k, v in ses["sets"].items() if not v["complete"]}
+        if bad_f:
+            unfinished["finals"] = bad_f
+        if bad_s:
+            unfinished["sets"] = bad_s
+        if ses["modes"]:
+            unfinished["modes"] = ses["modes"]
+    ret = retain(TRAIN_KIND, run_id, Path(scr), store=store, record=record, getter=getter, arm=arm)
+    if ret["status"] != "COMPLETE":
+        unfinished["local_retention"] = ret["missing"]
+    doc = {"schema": "aadistill.stage1.single_operator_budget.phase2_completion/v1", "run_id": run_id, "arm": arm,
+           "scr": str(scr), "status": "COMPLETE" if not unfinished else "INCOMPLETE",
+           "rule": "both seeds' final weights durable and published, the four sets (two seeds x two modes) complete on "
+                   "the secured copy against those finals, and both finals on the dev box's disk as their records",
+           "session": ses, "local_retention": {"status": ret["status"], "missing": ret["missing"], "record": str(record)},
+           "unfinished": unfinished, "checked_utc": _utc()}
+    dest = Path(root) / STUDY.run_dir(run_id) / PHASE2_COMPLETION
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(doc, indent=1, default=str) + "\n")
+    res = {"status": doc["status"], "arm": arm, "unfinished": sorted(unfinished),
+           "record": str(dest.relative_to(root)) if dest.is_relative_to(root) else str(dest)}
+    if doc["status"] == "COMPLETE":
+        st = study_completion(root=root)
+        res["study"] = {k: st[k] for k in ("status", "unfinished", "record")}
+    return res
+
+
+def arm_sessions(root: Path = REPO) -> dict[str, dict]:
+    """Each arm's latest COMPLETE training session (its ``phase2_completion.json``), by arm."""
+    best: dict[str, dict] = {}
+    for p in sorted((Path(root) / LOGS / "runs").glob(f"*/{PHASE2_COMPLETION}")):
+        doc = json.loads(p.read_text())
+        if doc.get("status") == "COMPLETE" and (doc["arm"] not in best or doc["checked_utc"] >= best[doc["arm"]]["checked_utc"]):
+            best[doc["arm"]] = doc
+    return best
+
+
+def phase1_evidence(root: Path = REPO) -> Path | None:
+    """Phase 1's secured evidence on the dev box (the COMPLETE phase-1 run's ``<local store>/<run>/store/out``)."""
+    for p in sorted((Path(root) / LOGS / "runs").glob(f"*/{PHASE1_RUN_COMPLETION}"), reverse=True):
+        doc = json.loads(p.read_text())
+        out = C.local_store() / doc["run_id"] / "store" / "out"
+        if doc.get("status") == "COMPLETE" and out.is_dir():
+            return out
+    return None
+
+
+def study_completion(*, root: Path = REPO, sessions: dict | None = None, phase1_out: Path | None = None,
+                     write: bool = True) -> dict:
+    """The study's scientific completion ($0, dev box): every arm's COMPLETE session's secured evidence
+    (`arm_sessions`), so the six final weights and the twelve post-recovery sets checked on their files
+    (`completion.study`), and the registered comparison -- three pairs per mode, Holm with m = 3, the second family
+    only after the first rejects all three -- recomputed from those sealed records (`analysis.phase2_readout`), with
+    each arm's descriptive damage / recovery / gap against phase 1's untrained arm and teacher. Writes
+    ``results/study_completion.json``."""
+    import tempfile
+    from stages.single_operator_budget import analysis as SA
+    from stages.single_operator_budget import completion as CP
+    sessions = arm_sessions(root) if sessions is None else sessions
+    outs = {a: Path(v["scr"]) / "store" / "out" for a, v in sessions.items()}
+    phase1_out = phase1_out if phase1_out is not None else phase1_evidence(root)
+    st = CP.study(outs, phase1_out=phase1_out)
+    unfinished = {}
+    if st["arms_missing"]:
+        unfinished["arms_without_a_complete_session"] = st["arms_missing"]
+    if not st["complete"]:
+        unfinished["study"] = {"finals": st["finals"], "sets": st["sets"], "modes": st["modes"]}
+    readout = None
+    if st["complete"]:
+        with tempfile.TemporaryDirectory() as tmp:
+            readout = SA.phase2_readout(outs, phase1_out, Path(tmp))
+    doc = {"schema": "aadistill.stage1.single_operator_budget.study_completion/v1",
+           "status": "COMPLETE" if st["complete"] else "INCOMPLETE", "unfinished": unfinished,
+           "rule": "three arms x two seeds: six final weights durable and published, twelve sets complete against "
+                   "them, one protocol per mode; the registered comparison recomputed from the sealed records",
+           "sessions": {a: {k: v.get(k) for k in ("run_id", "scr", "checked_utc")} for a, v in sessions.items()},
+           "phase1_evidence": None if phase1_out is None else str(phase1_out),
+           "completion": {k: st[k] for k in ("finals", "sets", "modes", "arms_missing", "phase1")},
+           "readout": readout, "checked_utc": _utc()}
+    dest = Path(root) / STUDY_RESULT
+    if write:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(doc, indent=1, default=str) + "\n")
+    return {**doc, "record": str(dest.relative_to(root)) if dest.is_relative_to(root) else str(dest)}
+
+
 def _pop(argv: list[str], flag: str) -> tuple[list[str], str | None]:
     if flag in argv:
         i = argv.index(flag)
@@ -522,9 +694,21 @@ def main(argv=None) -> int:
     if argv and argv[0] in ("issue", "launch"):
         try:
             SE.require_open(STUDY)
+            SE.require_kind_open(STUDY, kind)
         except SE.AuthorizationError as exc:
             print(f"REFUSED at $0: {exc}")
             return 11
+    if argv and argv[0] == "study-completion":
+        doc = study_completion()
+        print(json.dumps({k: doc[k] for k in ("status", "unfinished", "record")}, indent=1, default=str))
+        return 0 if doc["status"] == "COMPLETE" else 12
+    if argv and argv[0] == "grant" and kind == TRAIN_KIND:
+        ap = argparse.ArgumentParser(prog="SOB1 grant --kind sob1_train")
+        ap.add_argument("--decision", required=True, help="the maintainer's approval, quoted")
+        ap.add_argument("--granted-by", required=True)
+        a = ap.parse_args(argv[1:])
+        print(SE.write_grant(STUDY, decision=a.decision, granted_by=a.granted_by, kind=TRAIN_KIND))
+        return 0
     if argv and argv[0] == "issue":
         from stages.reasoning_inheritance.layer_merge_launch import reserve_problems
         ap = argparse.ArgumentParser(prog="SOB1 issue")
@@ -536,13 +720,13 @@ def main(argv=None) -> int:
         ap.add_argument("--note", default="")
         x = ap.parse_args(argv[1:])
         try:
-            g = SE.grant(STUDY, REPO, dry_run=x.dry_run)
-            cap = ((g.get("kinds") or {}).get(kind) or {}).get("per_session_hard_cap_usd")
+            g = kind_grant(kind, dry_run=x.dry_run)
+            cap = session_terms(kind, arm, g).get("per_session_hard_cap_usd")
             if cap is None:
-                raise SE.AuthorizationError(f"{g['_source']} names no cap for the {kind} kind")
+                raise SE.AuthorizationError(f"{g['_source']} names no cap for the {kind} kind{f' ({arm})' if arm else ''}")
             if x.hard_cap_usd > float(cap) + 1e-9:
-                raise SE.AuthorizationError(f"${x.hard_cap_usd} exceeds the {kind} cap ${cap}")
-            bad = reserve_problems(x.hard_cap_usd, g, SE.envelope(STUDY, g, REPO), SE.live_position(REPO))
+                raise SE.AuthorizationError(f"${x.hard_cap_usd} exceeds the {kind}{f' {arm}' if arm else ''} cap ${cap}")
+            bad = reserve_problems(x.hard_cap_usd, g, SE.envelope(STUDY, g, REPO, kind), SE.live_position(REPO))
             if bad:
                 raise SE.AuthorizationError("; ".join(bad))
             path = SE.issue(STUDY, x.run_id, expected_usd=x.expected_usd, hard_cap_usd=x.hard_cap_usd,

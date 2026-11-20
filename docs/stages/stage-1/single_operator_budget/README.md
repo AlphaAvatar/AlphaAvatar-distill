@@ -1,8 +1,9 @@
 # Single-operator compression at the same parameter budget (SOB1)
 
-Stage 1 owns this round; its training is `stage3_recovery`. Status: **phase 1 COMPLETE (2026-11-20 UTC); phase 2
-not authorized.** The maintainer fixed the protocol on 2026-11-19 (UTC), corrected the preparation three times the same
-day and granted phase 1 (`logs/budget/decisions.md`, the 2026-11-19 entries). Phase 1 ran once,
+Stage 1 owns this round; its training is `stage3_recovery`. Status: **phase 1 COMPLETE and closed in code
+(2026-11-20 UTC); phase 2 prepared at $0 and waiting for the maintainer's grant** (the project cap, phase 2's grant,
+the storage below). The maintainer fixed the protocol on 2026-11-19 (UTC), corrected the preparation three times the
+same day and granted phase 1 (`logs/budget/decisions.md`, the 2026-11-19 entries). Phase 1 ran once,
 `sob1_phase1_20261119_194259`: one L40S, 239.6 min, $4.4348 all-in of the $22.92 cap, the pod deleted and confirmed
 gone; `study_completion.status` COMPLETE (`runs/sob1_phase1_20261119_194259/closeout/phase1_completion.json`), the
 three initializations and mappings re-hashed on the dev box (`storage/local_retention.json`) and kept on the relay
@@ -20,16 +21,45 @@ ranked or eliminated by it). Static fluid formal core, 570 items (558 groups), 9
 Untrained, every arm produces degenerate text (repeated digits, spaces, symbol runs); recovery (phase 2) is what the
 study compares.
 
+**Before recovery: each arm against the teacher on the build session's state evaluation suite** (not eval-set-1;
+`results/pre_recovery_diagnostics.json`, `analysis.py diagnostics`, read from the committed init records). Diagnostic
+only: like the table above, it ranks, keeps and eliminates nothing, and all three arms go to the two-seed comparison.
+
+| arm | teacher KL, equal-domain mean | worst domain | token mean | critical-token KL | top-1 agreement |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| depth only | **3.47** | 3.94 | 3.67 | 10.14 | **34.08%** |
+| residual width only | 7.70 | 11.64 | 8.91 | 30.54 | 27.05% |
+| FFN + attention only | 9.35 | 10.66 | 9.98 | 14.73 | 6.37% |
+
+The depth-only arm is closest to the teacher by KL and by top-1 agreement, and still scores 0/570 on the static core in
+both modes, like the other two.
+
+**Phase 2, prepared at $0 (2026-11-20, the maintainer's brief of that day).** Each arm's two-seed plan is derived from
+its committed init record and checked (`plans/training_plan_<arm>.json`, `plan.py --check`: A-MIX's and TPI1's A unit
+outside the declared fields: the original Qwen3-4B as the online KD teacher, the same pack and proportions counted
+before packing, random order, sequential packing with truncation, 8,192 tokens, causal attention, micro-batch 1 x 2
+gradient accumulation steps, 9,701 steps, `stage3_recovery`). The residual-width arm trains first; its first four
+formal optimizer steps record the memory and continue as training. Phase 2 has its own proposal
+(`plans/proposal_phase2.json`): the Stage-3 recovery training and its evaluation are one budget, $185.87 ceiling
+(per-arm caps $63.43 / $61.09 / $61.35) + $1.00 teardown reserve, needing a project cap of **$1,161.06** at the
+2026-11-20 08:30Z position (committed $974.1887). Phase 1's $18.4852 remainder is void. The dev box and the relay
+cannot hold phase 2's checkpoints yet (section 8, "Phase 2's storage").
+
 | file | what it is |
 | --- | --- |
 | [`configs/.../single_operator_budget/design.json`](../../../../configs/stages/stage-1/single_operator_budget/design.json) | the design: arms, operators, calibration, training (recipe, order, memory probe, durability), the one evaluation protocol, the registered analysis, the cost model's constants, phases and storage |
 | [`configs/.../single_operator_budget/selection.json`](../../../../configs/stages/stage-1/single_operator_budget/selection.json) | what is reused from the packed search's journal and TPI1, and every gate: the eight committed DEPTH rounds verbatim with their resume checks (`selection.py --write / --check`) |
 | [`plans/structures.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/structures.json) | the three structures from the real implementation (`structures.py`) |
-| [`plans/proposal.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/proposal.json) | phase 1's proposal (ceiling, per-session hard cap, teardown reserve) and phase 2's separate draft (`proposal.py`) |
+| [`plans/proposal.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/proposal.json) | phase 1's proposal (ceiling, per-session hard cap, teardown reserve) and phase 2's separate draft; frozen as granted (`proposal.py --check`) |
+| [`plans/proposal_phase2.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/proposal_phase2.json) | phase 2's own proposal: ceiling, per-arm caps, reserve, the project cap it needs, its storage (`proposal.py --phase2`) |
+| [`plans/resource_snapshot_phase2.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/resource_snapshot_phase2.json), [`plans/disk_peak_phase2.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/disk_peak_phase2.json) | the position, relay headroom and dev-box free space read on 2026-11-20; phase 2's dev-box peak at its real landing paths (`disk.py --kind sob1_train --total`) |
+| `plans/training_plan_<arm>.json` | each arm's two units, derived from its committed init record (`plan.py`) |
+| [`results/pre_recovery_diagnostics.json`](../../../../logs/stages/stage-1/single_operator_budget/results/pre_recovery_diagnostics.json) | each untrained arm's state-evaluation KL and top-1 agreement against the teacher |
+| [`storage/phase1_evidence_archive.json`](../../../../logs/stages/stage-1/single_operator_budget/storage/phase1_evidence_archive.json) | phase 1's raw generations and records as one hashed, rescorable archive (dev box and relay) |
 | [`plans/resource_snapshot.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/resource_snapshot.json) | the project position, the relay's headroom and the dev box's free space as read on 2026-11-19 |
 | [`plans/disk_peak.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/disk_peak.json) | where phase 1's bytes land on the dev box and the peak when they coexist (`disk.py`) |
 | [`plans/dry_run_20261119.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119.json), [`plans/dry_run_20261119b.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119b.json), [`plans/dry_run_20261119c.json`](../../../../logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119c.json) | the $0 dry runs of phase 1: everything up to the create, nothing created |
-| `scripts/stages/stage-1/single_operator_budget/` | `phase1_driver.py` (the three builds and the phase-1 evaluations), `completion.py` (an evaluation set is complete only on its files), `train_driver.py` (TPI1's, with this study's plan), `plan.py` (one arm's training plan), `launch.py` (sessions, budget check, closeout, retention), `analysis.py` (the decision rule and phase 1's comparison table), `disk.py` (the dev box's landing paths and peak), `common.py`, `tests/` |
+| `scripts/stages/stage-1/single_operator_budget/` | `phase1_driver.py` (the three builds and the phase-1 evaluations), `completion.py` (an evaluation set is complete only on its files, phase 1's and phase 2's), `train_driver.py` (phase 2's state machine on TPI1's durability helpers), `plan.py` (one arm's training plan), `launch.py` (sessions, budget check, closeout, retention), `analysis.py` (the decision rule and phase 1's comparison table), `disk.py` (the dev box's landing paths and peak), `common.py`, `tests/` |
 
 ## 1. Question and hypothesis
 
@@ -290,8 +320,9 @@ and watchdog reserves. Every figure is an estimate; the basis is `design.json ::
 * One session's ceiling; a replacement attempt takes over every arm whose init verified, every persisted DEPTH round
   and every sealed sample, within what the ceiling leaves.
 
-**Phase 2 (a draft for the maintainer, proposes no cap; `proposal.json :: phase_2_draft`).** One session per arm,
-both seeds, in the order residual width, depth, FFN + attention.
+**Phase 2 (its own proposal since 2026-11-20: `plans/proposal_phase2.json`, from `proposal.json :: phase_2_draft`'s
+sessions unchanged).** One session per arm, both seeds, in the order residual width, depth, FFN + attention; the
+Stage-3 recovery training and the post-recovery evaluation are this one budget.
 
 | session | training h per seed, expected (bound) | driver h, expected (bound) | USD expected | hard cap |
 | --- | ---: | ---: | ---: | ---: |
@@ -302,8 +333,10 @@ both seeds, in the order residual width, depth, FFN + attention.
 | one seed (20260726) | | | 58.06 | |
 
 The bound includes each unit's post-recovery evaluation (1.22 h, bound 3.0 h). It also includes the floor-rate copies
-of the init, the finals and the last save point. Phase 2 does not fit what the project cap leaves; this document does
-not raise the cap or assume it raised.
+of the init, the finals and the last save point. Phase 2's envelope counts only `sob1_train` runs (its own grant):
+phase 1's remainder never funds it. At the 2026-11-20 08:30Z position (committed $974.1887 of the $1,000 cap; balance
+$35.8108) it needs a project cap of **$1,161.06** (committed + $185.87 + $1.00, rounded up to the cent); nothing
+here raises the cap or assumes it raised, and a provider top-up is not a grant.
 
 ## 8. Storage and takeover
 
@@ -350,8 +383,61 @@ The evidence bound takes every model at the teacher's capped volume (6.16M token
 fetching sits in the store's own cache and is moved, not copied, so it is never held twice. The launch checks the
 free bytes of the filesystem the session's `--scr` and the local store are on (`the_dev_box_has_room`), at launch:
 the dev box is shared with another project's session, and its free space moved from 14.72 to 19.09 GiB within the
-hour this round ran (a 6.74 GiB margin at the dry run). For phase 2, one arm's two fp32 finals need 14.98 GiB and the
-six 44.94 GiB; after phase 1's inits land, none fits.
+hour this round ran (a 6.74 GiB margin at the dry run). For phase 2, see the next paragraph.
+
+**Phase 2's storage (read-only, 2026-11-20; `plans/disk_peak_phase2.json`, `plans/resource_snapshot_phase2.json`).**
+Every byte lands on ONE filesystem, `/` (`/dev/nvme0n1p3`, ext4, the instance's 200 GiB system disk, shared with
+other projects): **6.96 GiB free**. Per training session (residual width shown; the other two within 0.05 GiB):
+
+| item | path | bound | expected |
+| --- | --- | ---: | ---: |
+| evidence of the two recovered units (generations, sealed parts, training records) | `<scr>/store/out` | 2.83 GiB | 0.23 GiB |
+| one pull's archive in flight (not at the peak) | `<scr>/store/pull_<n>.tgz` | 0.17 GiB | |
+| teardown collector archive + its extracted copy | `<scr>/store/` | 0.02 GiB | |
+| resume archive (failure path) | `<scr>/resume_<run>.tgz` | 0.34 GiB | 0 |
+| two fp32 finals | `~/aad-artifacts/stage1_single_operator_budget/<arm>-s<seed>/final/<sha16>/` | 14.98 GiB | 14.98 GiB |
+| **session peak (end of retention)** | `/` | **18.16 GiB** | **15.21 GiB** |
+
+The bound takes every turn of both modes at the full 8,192-token context (1.25 x the teacher's turns in phase 1);
+the expectation is TPI1's measured evidence per recovered unit. Each session's finals and evidence stay, so after the
+third session `/` holds **53.83 GiB bound (45.66 GiB expected)**, with phase 1's 0.03 GiB evidence archive: the six
+finals are 44.94 GiB of it. With the measured 4.37 GiB swing of the other project's files kept free, the shortfall is
+**51.25 GiB bound (43.07 GiB expected)**. Even the first session does not fit today (18.16 GiB against 6.96 GiB): the
+launch's `the_dev_box_has_room` refuses it.
+
+No further cleanup frees room: no checkpoint of this project meets AGENTS.md 2.5 beyond the seven retired on
+2026-11-19. Phase 1's completion changed no consumer except the teacher statistics': they are not a checkpoint, and
+the dev box keeps the only local copy of them beside A's baseline. Kept: A's initialization and finals (the baseline's
+only copies), the three phase-1 initializations (phase 2 reads them), D1's reference and the 0.6B canonical
+initialization (registry-protected). Other projects' files (`/var/log/alphaavatar`, 34.0 GiB;
+`~/alphaavatar-speaker-eval`, 33.9 GiB) are outside the authorization. So the dev box needs more disk: **grow the
+system disk by 64 GiB (200 -> 264 GiB)**, which leaves 12.6 GiB beyond the bound and the swing. ECS resizes an ESSD
+online, then `growpart /dev/nvme0n1 3` and `resize2fs /dev/nvme0n1p3`. Reference price: USD 7.65 per 100 GiB-month
+for ESSD PL0 in Alibaba Cloud's ECS documentation (region not stated), about **$4.90/month**. The disk's category and
+the Singapore price are read in the console (the instance metadata does not give them), and they are billed outside
+the RunPod project cap.
+
+**The relay** (the hub account's private storage is account-wide: the free plan's 100 GB) had **48.77-48.81 GiB** free
+at 08:29Z with the three initializations on it (11.3 GiB; the old 60.08 GiB was read before they were uploaded), then
+0.03 GiB less for phase 1's evidence archive. A session's real peak, in rotation order (`launch.rotation_peaks`), is
+one final and two save points. The launcher used to ask for two of each, 57.04 GiB for residual width, which never
+coexist. Now `the_relay_has_room` asks for the real peak:
+
+| arm (order) | rotation peak | against 48.77 GiB |
+| --- | ---: | --- |
+| residual width (first) | 49.55 GiB | **does not fit, short by 0.8 GiB** |
+| depth only | 46.46 GiB | fits by 2.32 GiB, only if no earlier arm's finals are still on the relay |
+| FFN + attention | 46.80 GiB | fits by 1.97 GiB, same |
+
+Two ways to make room, each the maintainer's:
+* (a) upgrade the hub account to PRO, $9/month for 1 TB private. Everything fits, and the six finals stay on the relay
+  as a second copy.
+* (b) stay on the free plan. Delete the teacher statistics' relay copy (1.81 GiB): its one consumer, the phase-1 width
+  build, has finished, and the dev box keeps a copy. Then, before each next session, remove each arm's final copies
+  from the relay once the dev box holds them re-hashed. The dev box would then hold the only copy of each final, as it
+  does for TPI1's A.
+
+Recommended: the 64 GiB disk and (a).
 
 **Fixed: streams under `evaluation/live/`.** The runners write their live streams beside the units they serve,
 `<unit>/../../live`, which is `evaluation/live/` in this layout. The poll's listing, `take_over` and the resume archive
@@ -388,7 +474,25 @@ manifest; otherwise INCOMPLETE, every unfinished item named (`sets`, `inits`, `m
 interrupted session is torn down and reconciled as before; its durable products and sealed parts stay for the next
 attempt's takeover.
 
-**Takeover.** TPI1's train driver, with this round's two repairs:
+**Fixed (2026-11-20): phase 2's takeover and completion.** Reproduced on `84c48bea`: SOB1's phase-2 driver was
+TPI1's, whose state function (`a1_units.state`) called a unit `done` when every evaluation directory held a
+`formal_report.json`. A `{}` report in both modes, with no final weights anywhere, skipped the unit. The phase-2
+driver is now this study's own (`train_driver.py`, TPI1's durability helpers unchanged):
+* a unit is done only when its seed's final weights are durable and published (`completion.final_problems`) AND both
+  sets are complete against that final's `model.safetensors` sha256 (`completion.check`);
+* every set is bound to the arm, the training seed, the mode, the registered protocol and those weights: each sealed
+  part's generation id names the target `<arm>_s<seed>` and mode, and its package record names the arm, seed, unit,
+  protocol and weights;
+* a `{}` or stale report is rescored from the sealed generations, with no model loaded;
+* another seed's parts, or parts under other weights, are isolated, and only the missing items are generated;
+* a final that exists anywhere is restored, never retrained; training happens only when no final exists.
+
+`completion.session` / `study` and `launch.phase2_completion` / `study_completion` put this on both closeout paths
+(section 6). The regressions go through `train_driver.main` with a `{}` report and no final, a `{}` report beside a
+durable final, and another seed's shards, and through a three-arm closeout to the study's completion:
+`tests/test_single_operator_budget.py`.
+
+**Takeover.** TPI1's durability helpers, with this round's two repairs:
 
 * *An unreadable relay listing* is read up to five times. If it still cannot be read, the evidence's own records are
   used when there are any; with none, the unit refuses to start. Before, a listing timeout with no local records
@@ -420,6 +524,23 @@ launch.py closeout --kind sob1_phase1 --run-id <id> --scr <s>            # the s
 launch.py retain --kind sob1_phase1 --run-id <id> --from <s>             # every arm's init and mapping; exit 12 until COMPLETE
 analysis.py phase1-table --evidence <s>/store/out --write <dir>          # the comparison, re-derived at $0
 plan.py --arm <arm> --init-record <its committed init_record.json> --write    # per arm, before phase 2
+```
+
+Phase 1 is closed in code (`kinds.sob1_phase1.closed`): `issue` and `launch` now refuse it, and `closeout`, `retain`
+and `analysis.py` still run.
+
+## 9a. Launch path (phase 2, after the maintainer's grant)
+
+```text
+launch.py budget --kind sob1_train --arm residual_width                  # $0: fundable now? (phase 2's own grant)
+launch.py grant --kind sob1_train --decision '<the maintainer's words>' --granted-by maintainer
+launch.py issue --kind sob1_train --arm residual_width --run-id <id> --expected-usd 42.59 --hard-cap-usd 63.43
+git commit <the authorization> (the session commit) ; stage the bundle at that commit
+launch.py launch --kind sob1_train --arm residual_width --run-id <id> --session-commit <c> --bundle <b> --scr <s> \
+    --max-price 1.11 --disk-gb 150                                       # its closeout runs phase2_completion
+launch.py closeout --kind sob1_train --arm residual_width --run-id <id> --scr <s>   # the same closeout by hand
+launch.py retain --kind sob1_train --arm residual_width --run-id <id> --from <s>    # both finals, re-hashed on the disk
+launch.py study-completion                                               # $0: six finals, twelve sets, the comparison
 ```
 
 **The third $0 dry run (2026-11-19 19:11Z on `8fa9f84c`, after the second correction; first run at 19:10Z on
@@ -460,11 +581,11 @@ runner's all-in; that was fixed then (`test_the_hard_cap_is_the_runners_all_in`)
 
 ## 10. Decisions for the maintainer
 
-1. ~~Grant phase 1~~: granted 2026-11-19 and COMPLETE 2026-11-20 ($4.4348 of $22.92; the remainder is not carried
-   into phase 2: the grant's `phase_1_closed`).
-2. Phase 2 (decided separately): the two seeds and the recipe stay. The storage of the six fp32 finals (44.94 GiB)
-   comes first: the dev box holds none of an arm's two (14.98 GiB against 7.0 GiB free after phase 1 put the three
-   inits there) and the relay cannot
-   accumulate them. Then the budget: both seeds expected $114.70, hard caps $185.87 + $1 (one seed: $58.06 expected),
-   which needs a project-cap decision; nothing here assumes it. Its first session records the L40S memory on the
-   residual-width arm's first four formal optimizer steps (online KD, backward, AdamW update).
+1. ~~Grant phase 1~~: granted 2026-11-19 and COMPLETE 2026-11-20 ($4.4348 of $22.92). Closed in code the same day
+   (the grant's `kinds.sob1_phase1.closed`): `issue` and `launch` refuse it and its $18.4852 remainder is void.
+2. Phase 2 (prepared at $0 on 2026-11-20; the maintainer approves the three together):
+   * **the project cap: $1,161.06** (committed $974.1887 at 08:30Z + the $185.87 ceiling + the $1.00 reserve). The
+     maintainer tops the provider balance up by $151.06 ($35.8108 -> $186.87);
+   * **phase 2's grant** from `plans/proposal_phase2.json` (`launch.py grant --kind sob1_train --decision ...`);
+   * **the storage** (section 8, "Phase 2's storage"): the dev box's disk, and room on the relay for the residual-width
+     arm's rotation.

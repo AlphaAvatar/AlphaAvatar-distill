@@ -408,3 +408,53 @@ def test_a_phase_kind_may_claim_less_and_each_artifact_claims_exactly_its_kinds(
         assert SE.require_on_pod(a, ph, a.plan_hash, str(tmp_path), kind=kind)["kind"] == kind
         with pytest.raises(AuthorizationError, match="claims|not"):
             SE.require_on_pod(a, ph, a.plan_hash, str(tmp_path), kind=other)
+
+
+def test_a_later_phase_has_its_own_grant_and_envelope_and_a_closed_kind_issues_nothing(tmp_path, live):
+    """PHASES: a kind funded by a grant of its own counts only its own runs, so an earlier phase's remainder never
+    funds it (and it never spends the earlier one's); a study grant's ``kinds.<kind>.closed`` closes that one kind
+    for issue and launch while the study and its other kinds stay open."""
+    import dataclasses
+    st = _study(tmp_path)
+    p2g, p2p = Path("logs/budget/approvals/x_phase2_grant.json"), Path("logs/stages/stage-9/x/plans/phase2_proposal.json")
+    ph = dataclasses.replace(st, key="X-P", plan_id="stage9.x.phase", claims=frozenset({"formal", "training"}),
+                             kinds=("one", "two"), kind_grants=(("two", p2g, p2p),),
+                             wire_schema="aadistill.stage9.x.phase_authorization/v1")
+    hw = {"gpus": {"NVIDIA L40S": 1.11}, "gpu_count_max": 1, "gpu": None, "max_price_usd_per_hour": None}
+    _proposal(tmp_path, ph, ceiling_usd=5.0, per_session_hard_cap_usd=5.0, **hw)
+    SE.write_grant(ph, decision="phase one", granted_by="maintainer", root=tmp_path)
+    live["project_remaining_usd"] = 100.0
+    for run, kind, usd in (("a", "one", 1.5), ("b", "two", 2.0)):
+        d = tmp_path / ph.run_dir(run)
+        (d / "governance").mkdir(parents=True)
+        (d / "governance/authorization.json").write_text(json.dumps({"plan_id": ph.plan_id,
+                                                                     "stage_conditions": {"kind": kind}}))
+        (d / "closeout").mkdir()
+        (d / "closeout/outcome.json").write_text(json.dumps({"money": {"all_in_usd": usd}}))
+    g1 = SE.grant(ph, tmp_path, kind="one")
+    assert SE.envelope(ph, g1, tmp_path, "one")["spent_usd"] == 1.5      #: phase two's run is not phase one's
+    with pytest.raises(AuthorizationError, match="no grant at .*x_phase2_grant"):
+        SE.grant(ph, tmp_path, kind="two")                               #: phase one's grant never funds phase two
+    (tmp_path / p2p).parent.mkdir(parents=True, exist_ok=True)
+    (tmp_path / p2p).write_text(json.dumps({"schema": "x", "status": "proposed", "study": ph.key, "granted_by": "nobody",
+                                            "decision": "PENDING", "ceiling_usd": 9.0, "per_session_hard_cap_usd": 9.0,
+                                            "project_cumulative_cap_usd": 740.0, **hw}))
+    g2 = SE.grant(ph, tmp_path, dry_run=True, kind="two")
+    assert g2["_source"] == str(p2p) and SE.envelope(ph, g2, tmp_path, "two") == {
+        "ceiling_usd": 9.0, "spent_usd": 2.0, "remaining_usd": 7.0, "runs": [{"run_id": "b", "usd": 2.0}]}
+    SE.write_grant(ph, decision="phase two", granted_by="maintainer", root=tmp_path, kind="two")
+    assert json.loads((tmp_path / p2g).read_text())["proposal"]["path"] == str(p2p)
+    #: close phase one's kind: it refuses, phase two does not, and the study is not closed
+    doc = json.loads((tmp_path / ph.grant).read_text())
+    doc.setdefault("kinds", {})["one"] = {"closed": {"utc": "2026-11-20T00:00:00Z", "status": "CLOSED"}}
+    (tmp_path / ph.grant).write_text(json.dumps(doc))
+    with pytest.raises(AuthorizationError, match="'s one kind is CLOSED"):
+        SE.issue(ph, "r1", expected_usd=1.0, hard_cap_usd=1.0, root=tmp_path, kind="one")
+    p = SE.issue(ph, "r2", expected_usd=1.0, hard_cap_usd=5.0, root=tmp_path, kind="two")
+    assert json.loads(SE.load_authorization(ph, p).stage_conditions["envelope"])["remaining_usd"] == 7.0
+    SE.require_open(ph, tmp_path)
+    launch = SE.Launch(session_kind="x", authorization=SE.EngineeringAuthorization, teacher_model="m",
+                       teacher_revision="r", driver="scripts/x/driver.py", validation_minutes=10.0, kind="one")
+    is_open = _checks(ph, launch, tmp_path, "the_study_is_open")[0]
+    assert not is_open(SimpleNamespace())[0]
+    assert _checks(ph, dataclasses.replace(launch, kind="two"), tmp_path, "the_study_is_open")[0](SimpleNamespace())[0]

@@ -14,7 +14,16 @@
    "basis": "phase_1.components (design.json :: cost_model)",
    "driver_minutes": 1107.6,
    "expected_usd": 10.21,
-   "per_session_hard_cap_usd": 22.92
+   "per_session_hard_cap_usd": 22.92,
+   "closed": {
+    "status": "CLOSED",
+    "utc": "2026-11-20T08:42:34Z",
+    "by": "the maintainer's 2026-11-20 brief (\u300c\u8ba9\u7b2c\u4e00\u9636\u6bb5\u5173\u95ed\u5728\u4ee3\u7801\u91cc\u751f\u6548\u2026\u2026\u7b2c\u4e00\u9636\u6bb5\u4f59\u6b3e\u4f5c\u5e9f\u3002\u300d), recorded by the agent",
+    "record": "phase_1_closed (this grant): COMPLETE, $4.4348 of $22.92",
+    "remainder_usd": 0.0,
+    "remainder": "void: the $18.4852 the ceiling left funds nothing, in phase 1 or phase 2",
+    "enforced_by": "shared.study_engineering.require_kind_open: issue, launch (before any artifact or provider read) and the runner's first precheck refuse the kind; closeout, retain and the completion check stay open"
+   }
   },
   "sob1_train": {
    "expected_usd": null,

@@ -1,0 +1,67 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.pre_recovery_diagnostics/v1",
+ "source": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence",
+ "suite": "the build session's state evaluation suite (the same scored positions for every arm), not eval-set-1",
+ "measurement_protocol_id": [
+  "b760ab7ec7ab4b557dc4eb971801835d"
+ ],
+ "arms": {
+  "residual_width": {
+   "teacher_kl_equal_domain_mean": 7.702693742882052,
+   "teacher_kl_worst_domain": 11.640369156388923,
+   "teacher_kl_token_mean": 8.914921171757598,
+   "critical_token_kl": 30.53630527570452,
+   "reverse_kl_token_mean": 18.683076554601037,
+   "top1_agreement": 0.2704796875066558,
+   "nll_pooled": 9.056739586981939,
+   "teacher_nll_pooled": 0.20392156168380815,
+   "teacher_kl_by_domain": {
+    "abstract_analogical": 6.645654450488946,
+    "compositional_generalization": 6.828554512938241,
+    "inductive_rule_discovery": 7.636582329479664,
+    "task_contained_deduction": 5.762308265114484,
+    "supporting": 11.640369156388923
+   }
+  },
+  "ffn_attention": {
+   "teacher_kl_equal_domain_mean": 9.353589535777328,
+   "teacher_kl_worst_domain": 10.65759221115359,
+   "teacher_kl_token_mean": 9.97729210614158,
+   "critical_token_kl": 14.732695016816598,
+   "reverse_kl_token_mean": 28.519278834359053,
+   "top1_agreement": 0.06366796304263557,
+   "nll_pooled": 10.138768750597718,
+   "teacher_nll_pooled": 0.20392156168380815,
+   "teacher_kl_by_domain": {
+    "abstract_analogical": 7.3913055674933235,
+    "compositional_generalization": 9.837561317365708,
+    "inductive_rule_discovery": 9.069365488142024,
+    "task_contained_deduction": 9.812123094731989,
+    "supporting": 10.65759221115359
+   }
+  },
+  "depth_only": {
+   "teacher_kl_equal_domain_mean": 3.468487612718699,
+   "teacher_kl_worst_domain": 3.9375806469236596,
+   "teacher_kl_token_mean": 3.6721025629652533,
+   "critical_token_kl": 10.135073501045532,
+   "reverse_kl_token_mean": 19.33125096034889,
+   "top1_agreement": 0.3408247677385552,
+   "nll_pooled": 3.8197766992034548,
+   "teacher_nll_pooled": 0.20392156168380815,
+   "teacher_kl_by_domain": {
+    "abstract_analogical": 2.461998767227654,
+    "compositional_generalization": 3.654613654226382,
+    "inductive_rule_discovery": 3.4191812567511772,
+    "task_contained_deduction": 3.9375806469236596,
+    "supporting": 3.8690637384646216
+   }
+  }
+ },
+ "lowest_teacher_kl_first": [
+  "depth_only",
+  "residual_width",
+  "ffn_attention"
+ ],
+ "role": "diagnostic only, before recovery: ranks, keeps and eliminates nothing (design.json :: analysis)"
+}

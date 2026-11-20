@@ -1,0 +1,42 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.phase1_evidence_archive/v1",
+ "run_id": "sob1_phase1_20261119_194259",
+ "why": "phase 1's raw generations and sealed records (the secured copy, ~300 MB) as one independent archive, hashed and rescorable: the maintainer's 2026-11-20 brief, item 3",
+ "content": "every file of the secured evidence (357 files, 303771858 B): the eight sets' generations, sealed parts, package records, completion records and formal reports, the init and build records, the comparison",
+ "archive": {
+  "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/archives/sob1_phase1_20261119_194259_evidence.tar.gz",
+  "sha256": "1968636e26237f7d96abd181d299de12e754fe83d7733cc6b60a3f438c1a02c2",
+  "bytes": 29614165,
+  "format": "tar (PAX, sorted paths, mtime 0, uid/gid 0, mode 644) gzip -9 mtime 0, under out/"
+ },
+ "manifest": {
+  "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/archives/sob1_phase1_20261119_194259_evidence.manifest.json",
+  "sha256": "1c6d294999fd443845a671ac550b53a276c1f890a15d5890f600b73e2bc70fb5",
+  "per_file_manifest_sha256": "95bb5f4986a67f9052b0db3899d686aae244b2364b26f76b034bb56ad9337316",
+  "files": 357
+ },
+ "copies": {
+  "dev_box": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/archives",
+  "relay": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/phase1_evidence/sob1_phase1_20261119_194259",
+   "files_sha256": {
+    "sob1_phase1_20261119_194259_evidence.tar.gz": "1968636e26237f7d96abd181d299de12e754fe83d7733cc6b60a3f438c1a02c2",
+    "sob1_phase1_20261119_194259_evidence.manifest.json": "1c6d294999fd443845a671ac550b53a276c1f890a15d5890f600b73e2bc70fb5"
+   },
+   "verified": true,
+   "utc": "2026-11-20T08:51:34Z"
+  }
+ },
+ "rescoring_check": {
+  "utc": "2026-11-20T08:50:08Z",
+  "extracted_files_equal_manifest": true,
+  "phase_complete_on_the_extracted_copy": true,
+  "sets_complete": "8 of 8",
+  "every_stored_formal_report_equals_its_rescoring": true,
+  "comparison_table_recomputed_equals_committed": true
+ },
+ "rescore": "extract under a temporary directory, then completion.phase(<dir>/out) and analysis.py phase1-table --evidence <dir>/out",
+ "sensitivity": "raw model outputs include eval-set-1's safety prompts: private relay and dev box only, never git",
+ "authorizes": "nothing"
+}

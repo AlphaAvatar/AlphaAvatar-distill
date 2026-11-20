@@ -411,7 +411,12 @@
    "phase_1": "<arm>/init/<mapping digest[:16]>/ and <arm>/mapping/<digest16>/ (three bf16 initializations 12,064,313,856 B and their mappings), fetched from the relay record the pod verified and re-hashed on the disk (launch.py retain)",
    "phase_2": "<arm>-s<seed>/final/<sha256[:16]>/ (six fp32 finals, 44.94 GiB)"
   },
-  "dev_box_peak": "logs/stages/stage-1/single_operator_budget/plans/disk_peak.json (disk.py): evidence, the pull archive in flight, the teardown collector's archive and its extracted copy, a resume archive, then the retained initializations and mappings; the launch checks the free bytes of the filesystem the session's --scr and the local store are on (the_dev_box_has_room)"
+  "dev_box_peak": "logs/stages/stage-1/single_operator_budget/plans/disk_peak.json (disk.py): evidence, the pull archive in flight, the teardown collector's archive and its extracted copy, a resume archive, then the retained initializations and mappings; the launch checks the free bytes of the filesystem the session's --scr and the local store are on (the_dev_box_has_room)",
+  "phase_2_finals": {
+   "kept": "the dev box (local store, re-hashed on the disk by launch.retain) and the relay copy the pod verified",
+   "dev_box": "plans/disk_peak_phase2.json (disk.py --kind sob1_train): six fp32 finals, each session's evidence and archives, at the real landing paths on the one filesystem /",
+   "relay": "the session's real rotation peak is one final plus two save points (launch.relay_object_sizes, rotation_peaks); the launch asks the relay for exactly that (the_relay_has_room); a prior arm's finals still on the relay count against the account quota"
+  }
  },
  "budget": {
   "proposal": "logs/stages/stage-1/single_operator_budget/plans/proposal.json",
@@ -500,7 +505,22 @@
    "bound_margin": 1.25,
    "_bound": "expected: the teacher's tokens plus the three proxies; bound: every model at max(teacher, proxies) x 1.25",
    "mapping_bytes_per_arm": 22000000,
-   "_mapping_bytes_per_arm": "TPI1's mapping: mapping.json 968,220 B + tensors.safetensors 20,979,888 B, rounded up"
+   "_mapping_bytes_per_arm": "TPI1's mapping: mapping.json 968,220 B + tensors.safetensors 20,979,888 B, rounded up",
+   "phase_2": {
+    "turns_per_mode_bound": {
+     "H-T": 2440,
+     "H-N": 3219
+    },
+    "_turns_per_mode_bound": "the teacher's generated turns per mode at 8,192 tokens in phase 1 (comparison.json :: terminations, whole set: {'H-T': 1952, 'H-N': 2575}) x bound_margin; the most turns any phase-1 model generated",
+    "context_tokens": 8192,
+    "rule": "bound per recovered model: every turn of both modes at the full 8,192-token context x bytes_per_generated_token; expected: TPI1's measured evidence per recovered unit",
+    "expected_bytes_per_recovered_model": 121889613,
+    "_expected_bytes_per_recovered_model": "measured: TPI1's two recovered 596M units at 8,192 tokens, both modes, every evidence file extracted (243,779,226 B) / 2",
+    "training_records_bytes_per_unit_bound": 4000000,
+    "_training_records_bytes_per_unit_bound": "measured: TPI1's train/ evidence per unit (train_log.jsonl 0.57 MB, the stdout tail <= 0.2 MB, config and completion records), rounded up",
+    "shared_filesystem_swing_bytes": 4692251771,
+    "_shared_filesystem_swing_bytes": "measured 2026-11-19: the dev box's free space moved from 14.72 to 19.09 GiB within one hour from another project's files; the margin a storage plan keeps beyond the bound"
+   }
   }
  },
  "decided": {
@@ -561,7 +581,15 @@
  },
  "phase_2": {
   "session_kind": "sob1_train",
-  "driver": "scripts/stages/stage-1/single_operator_budget/train_driver.py (TPI1's train_driver with this study's plan, relay prefix, authorization and package)",
-  "session": "one arm per session, both seeds, in training.unit_order"
+  "driver": "scripts/stages/stage-1/single_operator_budget/train_driver.py (this study's state machine on TPI1's durability helpers: save-point rotation and handoff, final takeover, listing retries)",
+  "session": "one arm per session, both seeds, in training.unit_order (residual width first)",
+  "completion": {
+   "unit": "done only when that seed's final weights are durable and published (final.json verified, the trainer's completion record with them, the handoff verified) AND both sets are complete against those weights (completion.check: coverage, records, protocol, the formal report rescored, every sealed part's generation naming this arm, seed, unit, mode, the registered protocol and the final's model.safetensors sha256); a {} report, another seed's part or a missing final is never done",
+   "takeover": "a final that exists anywhere (the evidence, else the relay listing) is never retrained: restored only when a set must generate; a {} or stale report is rescored from the sealed generations with no model; parts whose provenance is wrong are isolated and only the missing items generated; a unit with no final anywhere resumes from its latest save point (or step 0 only when a READ listing shows none)",
+   "session": "completion.session on the secured copy: both finals and the four sets; every closeout (the launch's and a manual one) runs launch.phase2_completion, which also retains both finals on the dev box re-hashed",
+   "study": "launch.study_completion: every arm's COMPLETE session, so six finals and twelve sets on their files, one protocol per mode, and the registered comparison recomputed from the sealed records (analysis.phase2_readout); results/study_completion.json"
+  },
+  "funding": "its own grant (logs/budget/approvals/stage1_single_operator_budget_phase2_grant.json, from plans/proposal_phase2.json): the Stage-3 recovery training and its evaluation budgeted once, its envelope counting only sob1_train runs; phase 1's remainder is void (the study grant's kinds.sob1_phase1.closed)",
+  "memory": "the first unit is the residual-width arm's seed 20260726; its first four formal optimizer steps record the memory of forward + KD / CE, backward, clip and the AdamW update (training.memory), and continue as training"
  }
 }

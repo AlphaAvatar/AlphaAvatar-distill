@@ -36,6 +36,13 @@ grant document, never here (P3).
   refuse a closed study, whatever its kind and however old its artifact.
   Read-only work (reports, rescoring, archives, identity reviews) reads the
   grant through `grant_record`, which funds nothing and never refuses it.
+* PHASES. A kind may be funded by a grant of its own (``Study.kind_grants``:
+  the kind, its grant, its proposal): `grant(kind=...)` reads that grant (its
+  proposal on a dry run), and its envelope counts only that kind's runs, so a
+  later phase never inherits an earlier phase's remainder and an earlier phase
+  never spends a later one's. The study grant's ``kinds.<kind>.closed`` closes
+  ONE kind (`require_kind_open`): nothing of it is issued or launched, while
+  the study, its other kinds, closeout, retention and reports stay open.
 
 `session_spec` builds the session on the shared runner
 (`aadistill.infrastructure.session_runner`), the same chain H1-PA's sessions
@@ -93,6 +100,15 @@ class Study:
     #: (kind, claims) for a kind that claims other than ``claims``: a formal phase's engineering check
     #: claims engineering_validation only, under the phase's one grant
     kind_claims: tuple[tuple[str, frozenset], ...] = ()
+    #: (kind, grant, proposal) for a kind funded by a grant of its own (module docstring: PHASES)
+    kind_grants: tuple[tuple[str, Path, Path], ...] = ()
+
+    def grant_of(self, kind: str | None = None) -> tuple[Path, Path]:
+        """(grant, proposal) that fund ``kind``: its own when it has one, else the study's."""
+        for k, g, p in self.kind_grants:
+            if k == kind:
+                return Path(g), Path(p)
+        return self.grant, self.proposal
 
     @property
     def formal(self) -> bool:
@@ -235,38 +251,78 @@ def require_open(study: Study, root: Path = REPO_ROOT) -> None:
                                  "launched under it, and a new execution needs a new study and grant")
 
 
-def grant(study: Study, root: Path = REPO_ROOT, *, dry_run: bool = False) -> dict:
+def kind_closure(study: Study, kind: str | None, root: Path = REPO_ROOT) -> dict | str | None:
+    """The closure of ONE kind: the study grant's ``kinds.<kind>.closed`` (or the kind's own grant's ``closed``)."""
+    if not kind:
+        return None
+    for path in dict.fromkeys((study.grant, study.grant_of(kind)[0])):
+        p = Path(root) / path
+        if p.is_file():
+            doc = json.loads(p.read_text())
+            c = ((doc.get("kinds") or {}).get(kind) or {}).get("closed") or (doc.get("closed") if path != study.grant
+                                                                              else None)
+            if c:
+                return c
+    return None
+
+
+def require_kind_open(study: Study, kind: str | None, root: Path = REPO_ROOT) -> None:
+    """Refuse every new execution of a closed KIND (module docstring: PHASES); the study and its other kinds stay
+    open, and closeout, retention and reports never call this."""
+    c = kind_closure(study, kind, root)
+    if c:
+        why = c if isinstance(c, str) else f"{c.get('utc')}, {c.get('status') or c.get('decision')}"
+        raise AuthorizationError(f"{study.key}'s {kind} kind is CLOSED ({why}); nothing of it is issued or launched, "
+                                 "and its remainder funds nothing")
+
+
+def grant(study: Study, root: Path = REPO_ROOT, *, dry_run: bool = False, kind: str | None = None) -> dict:
     """The maintainer's grant, read to FUND a session; for a dry run only, the study's proposal in its place.
-    A closed study refuses (`require_open`)."""
+    ``kind``: the grant that funds that kind (`Study.grant_of`). A closed study or kind refuses (`require_open`,
+    `require_kind_open`)."""
     root = Path(root)
-    p = root / study.grant
+    gpath, ppath = study.grant_of(kind)
+    p = root / gpath
+    require_kind_open(study, kind, root)
     if p.is_file():
         g = json.loads(p.read_text())
         if g.get("status") != "granted":
-            raise AuthorizationError(f"{study.grant} is {g.get('status')!r}, not granted")
+            raise AuthorizationError(f"{gpath} is {g.get('status')!r}, not granted")
         require_open(study, root)
-        g["_source"] = str(study.grant)
-    elif dry_run and (root / study.proposal).is_file():
-        g = json.loads((root / study.proposal).read_text())
+        g["_source"] = str(gpath)
+    elif dry_run and (root / ppath).is_file():
+        require_open(study, root)
+        g = json.loads((root / ppath).read_text())
         if g.get("status") != "proposed":
-            raise AuthorizationError(f"{study.proposal} is {g.get('status')!r}, not a proposal")
-        g["_source"] = str(study.proposal)
+            raise AuthorizationError(f"{ppath} is {g.get('status')!r}, not a proposal")
+        g["_source"] = str(ppath)
     else:
-        raise AuthorizationError(f"no grant at {study.grant}: {study.key} is not authorized "
-                                 f"(a proposal{' exists' if (root / study.proposal).is_file() else ' is missing'})")
+        raise AuthorizationError(f"no grant at {gpath}: {study.key}{f' {kind}' if kind else ''} is not authorized "
+                                 f"(a proposal{' exists' if (root / ppath).is_file() else ' is missing'})")
     missing = [k for k in (PHASE_GRANT_FIELDS if study.formal else GRANT_FIELDS) if g.get(k) in (None, "")]
     if missing or g["study"] != study.key:
         raise AuthorizationError(f"{g['_source']} is not a grant of {study.key} (missing {missing})")
     return g
 
 
-def spent(study: Study, root: Path = REPO_ROOT) -> dict:
-    """Every session of this study: its closeout's all-in cost, or an unknown."""
+def run_kind(auth: dict) -> str | None:
+    return (auth.get("stage_conditions") or {}).get("kind")
+
+
+def spent(study: Study, root: Path = REPO_ROOT, kind: str | None = None) -> dict:
+    """Every session of this study funded by the grant that funds ``kind`` (module docstring: PHASES): a kind with a
+    grant of its own counts its own runs only; the study's grant counts every run of the other kinds. Each run is its
+    closeout's all-in cost, or an unknown."""
     root = Path(root)
+    own = {k for k, _g, _p in study.kind_grants}
     total, runs, unknown = 0.0, [], []
     for d in sorted((root / study.logs / "runs").glob("*")):
         a = d / "governance/authorization.json"
-        if not a.is_file() or json.loads(a.read_text()).get("plan_id") != study.plan_id:
+        doc = json.loads(a.read_text()) if a.is_file() else {}
+        if doc.get("plan_id") != study.plan_id:
+            continue
+        k = run_kind(doc)
+        if (k != kind) if kind in own else (k in own):
             continue
         out, sess = d / "closeout/outcome.json", d / "runtime/session.json"
         doc = json.loads(out.read_text()) if out.is_file() else {}
@@ -283,8 +339,8 @@ def spent(study: Study, root: Path = REPO_ROOT) -> dict:
     return {"sessions_usd": round(total, 4), "runs": runs, "unknown": unknown}
 
 
-def envelope(study: Study, g: dict, root: Path = REPO_ROOT) -> dict:
-    s = spent(study, root)
+def envelope(study: Study, g: dict, root: Path = REPO_ROOT, kind: str | None = None) -> dict:
+    s = spent(study, root, kind)
     if s["unknown"]:
         raise AuthorizationError(f"runs {s['unknown']} created provider resources and record no closeout cost; "
                                  "reconcile them before anything else is funded")
@@ -344,11 +400,11 @@ def issue(study: Study, run_id: str, *, expected_usd: float, hard_cap_usd: float
     kind = kind or study.kinds[0]
     if kind not in study.kinds:
         raise AuthorizationError(f"{kind!r} is not a session kind of {study.key} ({list(study.kinds)})")
-    g = grant(study, root, dry_run=dry_run)
+    g = grant(study, root, dry_run=dry_run, kind=kind)
     ident = identity_hash(study, root)
     if g.get("study_identity_sha256") not in (None, ident):
         raise AuthorizationError(f"the grant names study identity {g['study_identity_sha256'][:12]}, not {ident[:12]}")
-    env = envelope(study, g, root)
+    env = envelope(study, g, root, kind)
     pos = live_position(root, snapshot=snapshot)
     bad = funding_problems(hard_cap_usd, g, env, pos)
     if bad:
@@ -506,9 +562,10 @@ def prechecks(study: Study, launch: Launch, root: Path = REPO_ROOT) -> tuple:
     def the_study_is_open(ctx) -> tuple[bool, str]:
         try:
             require_open(study, root)
+            require_kind_open(study, launch.kind, root)
         except AuthorizationError as exc:
             return False, str(exc)
-        return True, f"{study.key} is open"
+        return True, f"{study.key} and its {launch.kind} kind are open"
 
     def the_artifact_is_this_studys_and_unused(ctx) -> tuple[bool, str]:
         sc = ctx.auth.stage_conditions or {}
@@ -572,8 +629,8 @@ def prechecks(study: Study, launch: Launch, root: Path = REPO_ROOT) -> tuple:
 
     def the_project_cap_holds_now(ctx, snapshot: dict | None = None) -> tuple[bool, str]:
         try:
-            g = grant(study, root, dry_run=getattr(ctx.args, "dry_run", False))
-            env = envelope(study, g, root)
+            g = grant(study, root, dry_run=getattr(ctx.args, "dry_run", False), kind=launch.kind)
+            env = envelope(study, g, root, launch.kind)
             pos = live_position(root, snapshot=snapshot)
         except AuthorizationError as exc:
             return False, str(exc)
@@ -811,8 +868,10 @@ def launch_main(study: Study, launch: Launch, argv=None, *, root: Path = REPO_RO
 
     args = build_parser(description, gpu=gpu).parse_args(argv)
     try:
-        #: before the artifact, the bundle or the provider is read: a closed study launches nothing, a dry run included
+        #: before the artifact, the bundle or the provider is read: a closed study or kind launches nothing, a dry
+        #: run included
         require_open(study, root)
+        require_kind_open(study, launch.kind, root)
     except AuthorizationError as exc:
         print(f"REFUSED at $0: {exc}\nNo provider resource was created.")
         return 11
@@ -863,16 +922,18 @@ def launch_main(study: Study, launch: Launch, argv=None, *, root: Path = REPO_RO
 
 # ---- the grant, written only from the maintainer's decision ---------------------------------------------------
 
-def write_grant(study: Study, *, decision: str, granted_by: str, root: Path = REPO_ROOT) -> Path:
-    """The maintainer's grant from the study's proposal, unchanged but for the decision: run only on the
-    maintainer's explicit approval, which `decision` quotes. Binds the study identity at this commit."""
+def write_grant(study: Study, *, decision: str, granted_by: str, root: Path = REPO_ROOT, kind: str | None = None) -> Path:
+    """The maintainer's grant from the study's proposal (or, with ``kind``, from that kind's own proposal into its own
+    grant), unchanged but for the decision: run only on the maintainer's explicit approval, which `decision` quotes.
+    Binds the study identity at this commit."""
     root = Path(root)
-    prop, dest = root / study.proposal, root / study.grant
+    gpath, ppath = study.grant_of(kind)
+    prop, dest = root / ppath, root / gpath
     if dest.exists():
-        raise AuthorizationError(f"{study.grant} exists; a grant is written once")
+        raise AuthorizationError(f"{gpath} exists; a grant is written once")
     doc = json.loads(prop.read_text())
     if doc.get("status") != "proposed" or doc.get("study") != study.key:
-        raise AuthorizationError(f"{study.proposal} is not {study.key}'s proposal")
+        raise AuthorizationError(f"{ppath} is not {study.key}'s proposal")
     if not decision.strip() or not granted_by.strip():
         raise AuthorizationError("a grant quotes the maintainer's decision and names who granted it")
     app = doc.get("application")
@@ -884,11 +945,12 @@ def write_grant(study: Study, *, decision: str, granted_by: str, root: Path = RE
     doc.update(status="granted", granted_by=granted_by, decision=decision,
                authorizes=(f"{study.key}'s engineering validation only (scope), inside ceiling_usd cumulatively and the "
                            "project cap; one-use artifacts from `issue`; nothing formal" if not study.formal else
-                           f"{study.key}'s phase only (scope): its session kinds {list(study.kinds)}, inside ceiling_usd "
+                           f"{study.key}'s phase only (scope): its session kinds {[kind] if kind else list(study.kinds)}, "
+                           "inside ceiling_usd "
                            "cumulatively, per_session_hard_cap_usd per session and the project cap; one-use artifacts "
                            "from `issue`; no other study and no follow-up"),
                granted_utc=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-               proposal={"path": str(study.proposal), "sha256": sha256_file(prop)},
+               proposal={"path": str(ppath), "sha256": sha256_file(prop)},
                study_identity_sha256=identity_hash(study, root), granted_at_commit=git_head(root))
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(doc, indent=1) + "\n")

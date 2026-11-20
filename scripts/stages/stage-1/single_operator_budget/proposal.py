@@ -1,10 +1,12 @@
-#!/usr/bin/env python3
-"""SOB1's budget for the maintainer ($0, CPU): phase 1 as a proposal the issuer can read (its ceiling, per-session
-hard cap and teardown reserve, `shared.study_engineering`'s grant fields), and phase 2 -- recovery training of the
-three arms x two seeds and their evaluation -- as a separate draft that proposes no cap. Nothing here is approved.
+"""SOB1's budget for the maintainer ($0, CPU). Phase 1 as a proposal the issuer could read (``plans/proposal.json``:
+GRANTED 2026-11-19 and frozen as granted -- the grant binds its sha256 -- then COMPLETE and closed). Phase 2 --
+recovery training of the three arms x two seeds AND their evaluation, budgeted once -- as its own proposal
+(``plans/proposal_phase2.json``, `build_phase2`): its ceiling, per-arm session caps, teardown reserve and the project cap
+the maintainer would have to set for it, from a fresh resource snapshot (``plans/resource_snapshot_phase2.json``).
+Nothing here is approved.
 
     PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python \\
-        scripts/stages/stage-1/single_operator_budget/proposal.py --write | --check
+        scripts/stages/stage-1/single_operator_budget/proposal.py --phase2 --write | --check
 
 Inputs: `design.json :: cost_model, arms, training, phase_1`; `plans/structures.json` (FLOPs ratios, checkpoint
 bytes, memory); `plans/resource_snapshot.json` (the project position, the relay's headroom and the dev box's free
@@ -34,6 +36,9 @@ from stages.single_operator_budget import structures as ST  # noqa: E402
 PLANS = REPO / "logs/stages/stage-1/single_operator_budget/plans"
 OUT = PLANS / "proposal.json"
 SNAPSHOT = PLANS / "resource_snapshot.json"
+OUT2 = PLANS / "proposal_phase2.json"
+SNAPSHOT2 = PLANS / "resource_snapshot_phase2.json"
+DISK2 = PLANS / "disk_peak_phase2.json"
 SCHEMA = "aadistill.stage1.single_operator_budget.proposal/v2"
 GIB = 2 ** 30
 #: the session's fixed reserves as `study_engineering.session_spec` builds them (minutes), and its contingency
@@ -260,23 +265,131 @@ def build(design: dict | None = None) -> dict:
     }
 
 
+def ceil_cents(x: float) -> float:
+    return math.ceil(round(x * 100, 6)) / 100
+
+
+def phase1_frozen() -> bool:
+    """Phase 1's proposal is the one its grant was written from (the grant binds its sha256)."""
+    g1 = json.loads((REPO / "logs/budget/approvals/stage1_single_operator_budget_grant.json").read_text())
+    return sha256_file(OUT) == g1["proposal"]["sha256"]
+
+
+def build_phase2(design: dict | None = None) -> dict:
+    """Phase 2's proposal (module docstring): the sessions and caps of phase 1's draft (one per arm, both seeds, the
+    same cost model), the ceiling their sum, the $1.00 teardown reserve outside it, and the project cap the maintainer
+    would set for it -- what the provider bills now (committed) plus the ceiling and the reserve, rounded up to the
+    cent; with the storage it needs (the relay's rotation peak against its headroom, the dev box's peak against its
+    free bytes)."""
+    d = design or json.loads(ST.DESIGN.read_text())
+    one = build(d)
+    two = one["phase_2_draft"]
+    snap = json.loads(SNAPSHOT2.read_text())
+    disk = json.loads(DISK2.read_text()) if DISK2.is_file() else None
+    cm = d["cost_model"]
+    reserve = cm["teardown_reserve_usd"]
+    per = two["per_arm_session"]
+    ceiling = round(sum(v["hard_cap"]["usd"] for v in per.values()), 2)
+    proj = snap["project_position"]
+    need_cap = ceil_cents(proj["committed_usd"] + ceiling + reserve)
+    s = json.loads(ST.OUT.read_text())
+    sizes = {a: s["arms"][a]["checkpoint_bytes"] for a in per}
+    head = snap["relay"]["headroom_bytes"][0]
+    relay = {}
+    for a in per:
+        peak = 2 * sizes[a]["save_point"] + sizes[a]["final_fp32"]
+        relay[a] = {"rotation_peak_bytes": peak, "rotation_peak_gib": round(peak / GIB, 2),
+                    "fits_headroom_now": peak <= head, "margin_gib": round((head - peak) / GIB, 2)}
+    finals = sum(v["final_fp32"] for v in sizes.values()) * len(d["training"]["seeds"])
+    kinds = {d["phase_2"]["session_kind"]: {
+        "order": two["order"], "basis": "phase_2_draft of plans/proposal.json (design.json :: cost_model), unchanged",
+        "per_arm": {a: {"expected_usd": v["usd_expected"], "per_session_hard_cap_usd": v["hard_cap"]["usd"],
+                        "driver_minutes": v["hard_cap"]["driver_minutes"],
+                        "unit_deadline_hours": v["unit_deadline_hours"]} for a, v in per.items()}}}
+    plans = {}
+    for a in per:
+        f = PLANS / f"training_plan_{a}.json"
+        plans[a] = {"path": str(f.relative_to(REPO)), "sha256": sha256_file(f) if f.is_file() else None}
+    return {
+        "schema": SCHEMA, "study": d["study_id"], "phase": "phase_2", "status": "proposed",
+        "recorded_utc": proj["fetched_utc"][:10],
+        "scope": ("phase 2 of SOB1 (configs/stages/stage-1/single_operator_budget/design.json :: phase_2): one "
+                  "sob1_train session per arm, residual width first, each training both seeds (20260726, 20260801) "
+                  "with Research A's recovery recipe from the arm's phase-1 initialization (plans/training_plan_<arm>.json) "
+                  "and evaluating each recovered model on all of eval-set-1 in both modes at 8,192 tokens; the Stage-3 "
+                  "recovery training and the post-recovery evaluation are this one budget. No other arm, seed or "
+                  "kind; no network volume"),
+        "ceiling_usd": ceiling, "teardown_reserve_usd": reserve, "study_cumulative_cap_usd": round(ceiling + reserve, 2),
+        "per_session_hard_cap_usd": max(v["hard_cap"]["usd"] for v in per.values()),
+        "min_useful_attempt_usd": hard_cap(60, cm)["usd"],
+        "expected_total_usd": round(sum(v["usd_expected"] for v in per.values()), 2),
+        "one_seed_usd_expected": two["one_seed_usd_expected"],
+        "project_cumulative_cap_usd": need_cap,
+        "project_cap_basis": {"committed_usd": proj["committed_usd"], "plus_ceiling_usd": ceiling,
+                              "plus_teardown_reserve_usd": reserve, "fetched_utc": proj["fetched_utc"],
+                              "current_cap_usd": proj["project_cap_usd"],
+                              "rule": "committed + ceiling + reserve, rounded up to the cent: the cap at which this "
+                                      "phase's whole ceiling and reserve fit what the provider has billed; the maintainer "
+                                      "sets it, nothing here raises it"},
+        "gpus": {cm["gpu"]["type"]: MAX_PRICE}, "gpu_count_max": 1, "kinds": kinds,
+        "position_at_proposal": proj, "granted_by": "nobody: a proposal, not a grant",
+        "decision": "PENDING the maintainer's explicit approval (the project cap and this phase's grant)",
+        "money_rules": {
+            "own_envelope": "its own grant; the envelope counts only sob1_train runs (study_engineering PHASES): phase 1's "
+                            "$18.4852 remainder is void and funds nothing here",
+            "once": "the Stage-3 recovery training and its evaluation are both inside this ceiling: there is no separate "
+                    "Stage-3 allowance",
+            "ceiling": f"${ceiling:.2f}: the three per-arm session caps, cumulatively over every attempt",
+            "per_arm": "each session's hard cap is its arm's (kinds.sob1_train.per_arm); a replacement attempt's cap is "
+                       "what the ceiling leaves",
+            "teardown_reserve": f"${reserve:.2f} held outside the ceiling and never issued",
+            "balance": "the provider balance must cover each session's hard cap plus the reserve at issue and at launch; "
+                       "a top-up is not a grant"},
+        "hardware": ("one NVIDIA L40S per session, secure cloud, at most $1.11/h, 150 GB container disk, no network volume; "
+                     "an 80 GB card only for an arm whose measured out-of-memory survives the recipe-preserving steps "
+                     "(design.json :: training.memory), as a new proposal"),
+        "usd_per_hour_all_in": one["usd_per_hour_all_in"],
+        "design_sha256": ST.sha256_file(ST.DESIGN), "structures_sha256": sha256_file(ST.OUT),
+        "selection_sha256": one["selection_sha256"], "resource_snapshot_sha256": sha256_file(SNAPSHOT2),
+        "plans": plans, "phase_2": two,
+        "storage": {"relay": {"headroom_bytes": snap["relay"]["headroom_bytes"], "probed_utc": snap["relay"]["probed_utc"],
+                              "per_arm": relay, "finals_total_bytes": finals,
+                              "rule": "a session's peak is one final and two save points (launch.rotation_peaks); an "
+                                      "earlier arm's finals left on the relay count against the account quota"},
+                    "dev_box": None if disk is None else {k: disk[k] for k in (
+                        "peak_gib", "free_gib", "shortfall_with_swing_gib", "filesystem")},
+                    "dev_box_plan": "plans/disk_peak_phase2.json"},
+        "memory_gib": one["memory_gib"],
+        "authorizes": "nothing: a proposal; the grant is the maintainer's",
+    }
+
+
 def render(doc: dict) -> str:
     return json.dumps(doc, indent=1, sort_keys=True) + "\n"
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--phase2", action="store_true", help="phase 2's proposal (phase 1's is frozen as granted)")
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--write", action="store_true")
     g.add_argument("--check", action="store_true")
     a = ap.parse_args(argv)
-    text = render(build())
+    if not a.phase2:
+        if a.write:
+            print("phase 1 is granted and closed: its proposal is not rewritten")
+            return 1
+        same = phase1_frozen()
+        print("proposal.json is the proposal phase 1 was granted on (frozen)" if same else
+              "proposal.json is NOT the proposal phase 1 was granted on")
+        return 0 if same else 1
+    text = render(build_phase2())
     if a.write:
-        OUT.write_text(text)
-        print(f"wrote {OUT.relative_to(REPO)}")
+        OUT2.write_text(text)
+        print(f"wrote {OUT2.relative_to(REPO)}")
         return 0
-    same = OUT.is_file() and OUT.read_text() == text
-    print("proposal.json reproduces" if same else "proposal.json does NOT reproduce")
+    same = OUT2.is_file() and OUT2.read_text() == text
+    print("proposal_phase2.json reproduces" if same else "proposal_phase2.json does NOT reproduce")
     return 0 if same else 1
 
 

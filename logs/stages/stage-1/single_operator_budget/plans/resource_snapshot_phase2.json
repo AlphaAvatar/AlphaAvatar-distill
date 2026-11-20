@@ -1,0 +1,38 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.resource_snapshot/v1",
+ "rule": "read while preparing phase 2's proposal (2026-11-20); every figure is read again at issue and at launch, and none of them authorizes anything",
+ "project_position": {
+  "fetched_utc": "2026-11-20T08:30:49+00:00",
+  "source": "shared.study_engineering.live_position (provider billing, read-only)",
+  "project_cap_usd": 1000.0,
+  "committed_usd": 974.1887,
+  "project_remaining_usd": 25.8113,
+  "balance_usd": 35.8108,
+  "account_pods": 0,
+  "account_volumes": 0
+ },
+ "relay": {
+  "probed_utc": "2026-11-20T08:29:37Z",
+  "repo": "AlphaAvatar/aadistill-artifacts",
+  "source": "aadistill.runtime.hub_capacity.would_accept, bisected, objects <= 10 GiB",
+  "headroom_gib": [
+   48.77,
+   48.81
+  ],
+  "headroom_bytes": [
+   52371128320,
+   52407828480
+  ],
+  "calls": 12,
+  "refused": "Private storage limit reached for user AlphaAvatar, please upgrade your plan to increase your private storage limit",
+  "holds": "the three phase-1 initializations and mappings (11.3 GiB) among the account's objects; the limit is account-wide (the free plan's 100 GB private storage)"
+ },
+ "dev_box": {
+  "read_utc": "2026-11-20T08:42Z",
+  "filesystem": "/",
+  "size_bytes": 210978394112,
+  "used_bytes": 194701365248,
+  "free_bytes": 7469608960,
+  "note": "one filesystem (/dev/nvme0n1p3, ext4, the 200 GiB system disk) holds the repository, the local store and every landing path; it is shared with other projects' files, so the free space moves with them"
+ }
+}

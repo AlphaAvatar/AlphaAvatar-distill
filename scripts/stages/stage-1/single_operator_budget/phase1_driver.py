@@ -473,51 +473,16 @@ def model_for(target: str, out: Path, work: Path) -> Path:
 
 
 def evaluate_set(target: str, mode: str, out: Path, work: Path, vllm_py: str, attempt: str, status: Status) -> dict:
-    """One set (one model x one mode) to completion, on its files (`completion.check`): a set an earlier attempt
-    completed is taken as it is; otherwise the smallest repair (`completion.repair`: every sealed part whose
-    generation's weights, mode or protocol cannot be shown isolated, a generations file holding a record no proven
-    part holds superseded), the runners over only what no proven part holds (`reasoning_inheritance.driver.fluid` /
-    `capability` with the registered protocol), the formal report rescored from the generations, and the check
-    again. Each generation round has its own id (`completion.generation_id`: attempt, target, mode, round): its package
-    record (weights, mode, protocol and the parts already sealed) is written before anything is generated, every part
-    it seals carries that id and every record the runners' label (`completion.label_of`). Two
-    rounds at most; a set still incomplete stops the session with its problems (its sealed parts stay for the next
-    attempt)."""
-    from stages.reasoning_inheritance import driver as RID
+    """One set (one model x one mode) to completion, on its files: `completion.complete_set` (a set an earlier attempt
+    completed is taken as it is; otherwise the smallest repair, the runners over only what no proven part holds, the
+    formal report rescored, and the check again; two rounds at most), with the weights from `model_for`."""
     from stages.single_operator_budget import completion as CP
-    d = CP.ev_dir(out, target, mode)
-    label = CP.label_of(target)
-    st = CP.check(d, target, mode, out, label=label)
-    row = {"at_start": {"complete": st["complete"], "problems": st["problems"]}}
-    if st["complete"]:
-        CP.write(d, st)
-        return {**row, "status": "complete", "generated": False}
-    env = {**os.environ, "HF_HUB_OFFLINE": "1"}
-    ev = C.protocol()
-    for rnd in (1, 2):
-        gen = CP.generation_id(attempt, target, mode, rnd)
-        row.setdefault("repairs", []).append(CP.repair(d, st, gen))
-        if CP.needs_generation(d):
-            model_dir = model_for(target, out, work)
-            pkg = work / "packages" / f"{label}_{mode}"
-            entry = {"generation": gen, "attempt": attempt, "utc": utc(), "target": target, "mode": mode,
-                     "protocol_sha256": CP.protocol_sha256(mode), "parts_at_start": CP.part_inventory(d),
-                     **C.package(model_dir, pkg)}
-            write_json(d / CP.PACKAGES, CP.packages(d) + [entry])   #: before anything is generated
-            status.mark(f"EVAL_GENERATE:{target}:{mode}:{gen}")
-            row.setdefault("runs", []).append({
-                "generation": gen,
-                "fluid": RID.fluid(pkg, d, label, mode, vllm_py, env, gen, None, ev),
-                "capability": RID.capability(pkg, d, label, mode, vllm_py, env, gen, None, ev)})
-        st = CP.check(d, target, mode, out, label=label)
-        CP.rescore(d, st)                       #: a stale or {} report is replaced by these generations' own
-        st = CP.check(d, target, mode, out, label=label)
-        if st["complete"]:
-            break
-    CP.write(d, st)
-    if not st["complete"]:
-        raise DriverError(f"{target}/{mode} is not complete after {rnd} repair rounds: {st['problems']}")
-    return {**row, "status": "complete", "generated": bool(row.get("runs"))}
+    try:
+        return CP.complete_set(CP.ev_dir(out, target, mode), target, mode, out, attempt=attempt,
+                               model_fn=lambda: model_for(target, out, work), work=work, vllm_py=vllm_py,
+                               mark=status.mark, utc=utc)
+    except CP.CompletionError as exc:
+        raise DriverError(str(exc)) from exc
 
 
 def evaluate_targets(out: Path, work: Path, vllm_py: str, attempt: str, status: Status, report: dict) -> None:

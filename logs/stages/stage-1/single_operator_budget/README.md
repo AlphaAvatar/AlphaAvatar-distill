@@ -5,6 +5,7 @@ Everything this experiment produced, in one place.
 | area | what it holds |
 | --- | --- |
 | [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
+| [`results/`](results/) | aggregate results across runs |
 | [`storage/`](storage/) | material |
 | [`runs/`](runs/) | one directory per execution attempt |
 

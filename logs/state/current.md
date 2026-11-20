@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-20 (UTC), SOB1 PHASE 1 COMPLETE (`sob1_phase1_20261119_194259`, one L40S, $4.4348 of the $22.92 cap; pod deleted, confirmed gone; nothing running, nothing billing: no pod, no volume); phase 2, the Stage 3 allowance and a merge into main are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-20 (UTC), SOB1 PHASE 2 PREPARED AT $0 (phase 1 COMPLETE and closed in code; nothing running, nothing billing: no pod, no volume); the project cap ($1,161.06 needed), phase 2's grant, the storage and a merge into main are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,42 +9,27 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 COMPLETE (2026-11-20) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. Phase 2 is not authorized.**
-- Run `sob1_phase1_20261119_194259` (pod `heuxh6fau92b4c`, 1 x L40S $1.09/h): 2026-11-19 19:44Z to 23:44Z, 239.6 min,
-  $4.4348 all-in, one attempt, ALL_DONE; the provider confirms the pod gone (`runs/.../closeout/outcome.json`).
-  `study_completion.status` COMPLETE (`runs/.../closeout/phase1_completion.json`): 8 of 8 sets complete, the three
-  inits and mappings re-hashed on the dev box (`storage/local_retention.json`). Grant: `phase_1_closed` ($18.4852
-  and the reserve not carried into phase 2).
-- Result (descriptive, `runs/.../evidence/comparison/comparison.md`): static fluid core, 570 items. Thinking: teacher
-  85.79%, each untrained arm 0.00% (85.79 pp [82.87, 88.58]); non-thinking: teacher 70.53%, each arm 0.00% (70.53 pp
-  [66.73, 74.30]). Degeneration stops on the core, thinking / non-thinking: width 570 / 570, FFN + attention 570 / 568,
-  depth 551 / 549. The arms' raw outputs are degenerate text.
-- Storage: the three inits + mappings (11.3 GiB) on the relay (phase 2's training plans read them there) and on the
-  dev box `~/aad-artifacts/stage1_single_operator_budget/` (7.0 GiB free after); raw generations (~200 MB) in the
-  run's secured copy there, outside git.
-- Protocol fixed by the maintainer 2026-11-19 and corrected twice the same day (`logs/budget/decisions.md`, three entries).
-  Design `configs/stages/stage-1/single_operator_budget/design.json`; for review
-  `docs/stages/stage-1/single_operator_budget/README.md`. Depth only (16 layers), FFN + attention only (FFN 3840,
-  16 / 8 heads), residual width only (1280), each about 2.0B (`plans/structures.json`), on the original teacher with
-  A's operators. The width arm loads TPI1's sealed teacher statistics (`selection.json :: residual_width.statistics`);
-  DEPTH resumes the journal's 36 -> 28 search from round 9 (270 new candidate subsets) and persists each round
-  (`depth_only/records/depth_rounds.json`). Every model evaluated at 8,192 tokens; a set is complete only on its files
-  (`completion.py`: every sealed part's generation, weights, mode and protocol checked before it is reused); phase 1
-  is COMPLETE only when every closeout (the formal launch's and a manual one) finds the eight sets complete and each
-  arm's initialization and mapping on the dev box as its manifest (`launch.py phase1_completion`); it writes the
-  teacher-minus-arm comparison (`analysis.py phase1-table`). Holm with m = 3;
-  formal only with all three arms x both seeds complete; nothing eliminates an arm.
-- Code: `scripts/stages/stage-1/single_operator_budget/` (phase1_driver, completion, analysis, disk, train_driver,
-  plan, launch with `budget` / `closeout` / `retain`); core: DEPTH resume with anchors and `OperatorContext.on_progress`,
-  the trainer's memory probe; shared poll: an unreadable listing is retried and never read as empty, the final listing
-  is hash-checked, `live/` excluded at any depth. Dry runs: `plans/dry_run_20261119.json`, `plans/dry_run_20261119b.json`,
-  `plans/dry_run_20261119c.json` (the third, on `8fa9f84c`).
-- Budget (`plans/proposal.json`): phase 1 one session, $10.21 expected, $22.92 hard cap + $1.00 reserve (fits the
-  $30.24 left); phase 2 a draft only: both seeds $114.70 expected, caps $185.87 + $1.
-- Dev box: `plans/disk_peak.json`: phase 1's bound peak 12.35 GiB at the real landing paths (evidence, archives,
-  three inits and mappings); no further checkpoint was eligible for retirement. Phase 2's finals do not fit
-  (one arm's two need 14.98 GiB).
-- Decisions owed: `docs/stages/stage-1/single_operator_budget/README.md` section 10.
+**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 COMPLETE AND CLOSED IN CODE; PHASE 2 PREPARED AT $0, WAITING FOR THE MAINTAINER (2026-11-20) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
+- Phase 1, `sob1_phase1_20261119_194259`: $4.4348 of the $22.92 ceiling, one attempt, pod gone; `study_completion`
+  COMPLETE (`runs/.../closeout/phase1_completion.json`). The study grant's `kinds.sob1_phase1.closed` makes `issue`
+  and `launch` refuse phase 1; its $18.4852 remainder is void. Result (descriptive): static fluid core, every
+  untrained arm 0.00% against the teacher's 85.79% (thinking) / 70.53% (non-thinking). Pre-recovery diagnostics,
+  state evaluation suite (`results/pre_recovery_diagnostics.json`): depth only is closest to the teacher (KL 3.47,
+  top-1 34.08%), then residual width (7.70, 27.05%), then FFN + attention (9.35, 6.37%); all three go to phase 2.
+- Phase 2, prepared at $0 (docs README section 10; decisions.md 2026-11-20 "SOB1 phase 2 prepared"):
+  * its own state machine (`train_driver.py`): done only with the seed's final durable and both sets complete
+    against its sha256; regressions through the real entry point;
+  * `phase2_completion` on both closeout paths, `study-completion` (six finals, twelve sets, Holm m = 3 recomputed);
+  * three plans derived from the committed init records (`plans/training_plan_<arm>.json`), residual width first;
+  * its own proposal (`plans/proposal_phase2.json`): $185.87 ceiling + $1.00 reserve, project cap needed $1,161.06.
+- Position (live 2026-11-20 08:30Z): committed $974.1887 of the $1,000 cap ($25.8113 left), balance $35.8108; the
+  maintainer will top up $151.06.
+- Storage (`plans/disk_peak_phase2.json`, README section 8): the dev box's `/` has 6.96 GiB free against phase 2's 53.83
+  GiB bound peak, so the system disk would grow by 64 GiB. The relay has 48.77 GiB against the residual-width
+  rotation's 49.55 GiB: upgrade the hub account to PRO, or delete the redundant copies (the maintainer's).
+- Phase 1's raw generations: one archive, sha256 `1968636e…`, on the dev box and the relay, rescorable
+  (`storage/phase1_evidence_archive.json`).
+- Decisions owed: the project cap, phase 2's grant, the storage, a merge into main (README section 10).
 
 **Baseline (maintainer, 2026-11-18):** TPI1's A (teacher-parent initialization) is the reasoning-inheritance research's
 default baseline; B a historical reference (`docs/stages/stage-1/reasoning_inheritance/README.md`; decisions.md

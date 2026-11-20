@@ -1,0 +1,91 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.disk_peak_phase2/v1",
+ "order": [
+  "residual_width",
+  "depth_only",
+  "ffn_attention"
+ ],
+ "filesystem": "/ (one filesystem holds the repository, the local store and every landing path)",
+ "sessions": [
+  {
+   "arm": "residual_width",
+   "session_peak_bytes": {
+    "bound": 19503023410,
+    "expected": 16335053637
+   },
+   "kept_before_bytes": {
+    "bound": 29614165,
+    "expected": 29614165
+   },
+   "peak_with_earlier_sessions_bytes": {
+    "bound": 19532637575,
+    "expected": 16364667802
+   },
+   "peak_with_earlier_sessions_gib": {
+    "bound": 18.19,
+    "expected": 15.24
+   }
+  },
+  {
+   "arm": "depth_only",
+   "session_peak_bytes": {
+    "bound": 19443928370,
+    "expected": 16275958597
+   },
+   "kept_before_bytes": {
+    "bound": 19171732477,
+    "expected": 16364667802
+   },
+   "peak_with_earlier_sessions_bytes": {
+    "bound": 38615660847,
+    "expected": 32640626399
+   },
+   "peak_with_earlier_sessions_gib": {
+    "bound": 35.96,
+    "expected": 30.4
+   }
+  },
+  {
+   "arm": "ffn_attention",
+   "session_peak_bytes": {
+    "bound": 19549646130,
+    "expected": 16381676357
+   },
+   "kept_before_bytes": {
+    "bound": 38254755749,
+    "expected": 32640626399
+   },
+   "peak_with_earlier_sessions_bytes": {
+    "bound": 57804401879,
+    "expected": 49022302756
+   },
+   "peak_with_earlier_sessions_gib": {
+    "bound": 53.83,
+    "expected": 45.66
+   }
+  }
+ ],
+ "phase1_archive_bytes": 29614165,
+ "peak_bytes": {
+  "bound": 57804401879,
+  "expected": 49022302756
+ },
+ "peak_gib": {
+  "bound": 53.83,
+  "expected": 45.66
+ },
+ "free_bytes": 7469608960,
+ "free_gib": 6.96,
+ "shared_filesystem_swing_bytes": 4692251771,
+ "shortfall_with_swing_bytes": {
+  "bound": 55027044690,
+  "expected": 46244945567
+ },
+ "shortfall_with_swing_gib": {
+  "bound": 51.25,
+  "expected": 43.07
+ },
+ "rule": "the bound peak plus the measured swing of the other project's files, against the free bytes now",
+ "inputs": "design.json :: cost_model.dev_box_disk (phase_2), structures.json :: checkpoint_bytes",
+ "authorizes": "nothing"
+}

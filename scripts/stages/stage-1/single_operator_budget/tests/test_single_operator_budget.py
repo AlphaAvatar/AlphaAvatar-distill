@@ -27,10 +27,13 @@ def _teacher_or_skip() -> dict:
         pytest.skip(str(exc))
 
 
-def test_the_committed_structures_and_proposal_reproduce():
+def test_the_committed_structures_and_proposals_reproduce():
+    """structures.json is the derivation; phase 1's proposal is frozen as granted (its grant binds its sha256);
+    phase 2's proposal is the derivation from its own resource snapshot and disk plan."""
     _teacher_or_skip()
     assert ST.render(ST.build()) == ST.OUT.read_text()
-    assert PR.render(PR.build()) == PR.OUT.read_text()
+    assert PR.phase1_frozen()
+    assert PR.render(PR.build_phase2()) == PR.OUT2.read_text()
 
 
 def test_the_counts_are_the_implementations_with_the_tied_embedding_once():
@@ -275,7 +278,11 @@ def test_the_launcher_binds_the_kinds_records_and_funds_phase_2_with_nothing():
     assert p["kinds"][L.TRAIN_KIND]["per_session_hard_cap_usd"] is None
     sizes = L.relay_object_sizes(L.PHASE1_KIND)
     assert sum(sizes[:3]) == p["storage"]["phase_1_relay_peak_bytes"]
-    assert L.relay_object_sizes(L.TRAIN_KIND, "residual_width")[0] == p["storage"]["per_arm_bytes"]["residual_width"]["save_point"]
+    #: a training session asks the relay for its real rotation peak: one final and two save points
+    for a in DESIGN["arms"]:
+        b = p["storage"]["per_arm_bytes"][a]
+        assert sorted(L.relay_object_sizes(L.TRAIN_KIND, a)) == sorted([b["save_point"], b["save_point"], b["final_fp32"]])
+        assert sum(L.relay_object_sizes(L.TRAIN_KIND, a)) == max(r["bytes"] for r in L.rotation_peaks(a))
     assert L.Authorization.STUDY.key == "SOB1" and L.package.__name__ == "package"
     #: setup's branch for this study's session kind loads exactly its type
     setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
@@ -1108,7 +1115,7 @@ def test_every_closeout_records_phase_1_complete_only_on_the_eight_sets_and_the_
         getter=_relay_getter(relay, fetched, fail=lambda rec: stall["on"] and "/depth_only/" in rec["prefix"])))
     launch = L.launch_spec(L.PHASE1_KIND, 60.0)
     assert launch.completion_check is L.phase1_completion
-    assert L.launch_spec(L.TRAIN_KIND, 60.0, arm="depth_only").completion_check is None
+    assert L.launch_spec(L.TRAIN_KIND, 60.0, arm="depth_only").completion_check.keywords["arm"] == "depth_only"
     close = lambda: L.SE.closeout(L.STUDY, launch, "r1", scr, root=tmp_path, reconcile=lambda: {"ok": True})  # noqa: E731
     res = close()
     rec = json.loads((tmp_path / L.STUDY.run_dir("r1") / L.PHASE1_COMPLETION).read_text())
@@ -1124,3 +1131,396 @@ def test_every_closeout_records_phase_1_complete_only_on_the_eight_sets_and_the_
     (CP.ev_dir(out, "teacher", "H-N") / "formal_report.json").write_text("{}\n")
     rec = close()["study_completion"]
     assert rec["status"] == "INCOMPLETE" and rec["unfinished"] == ["sets"]
+
+
+# ---- phase 2 (maintainer 2026-11-20): takeover, completion and the study, through the real entry points --------------
+
+ARM = "residual_width"
+
+
+def _sha(b: bytes) -> str:
+    import hashlib
+    return hashlib.sha256(b).hexdigest()
+
+
+def _mode_engine(asked: dict):
+    """`_engine` for either mode: the runners' own ``--chat-template-kwargs`` say which protocol to answer under."""
+    engines = {m: _engine(_proto(m), asked.setdefault(m, {})) for m in ("H-T", "H-N")}
+
+    def engine(cmd, log, env, time_box_s, poll=None):
+        kw = json.loads(cmd[cmd.index("--chat-template-kwargs") + 1])
+        return engines["H-T" if kw.get("enable_thinking") else "H-N"](cmd, log, env, time_box_s, poll)
+    return engine
+
+
+def _final_bytes(seed: int) -> dict[str, bytes]:
+    from stages.teacher_modes import a1_units as AU
+    return {n: f"{ARM} seed {seed} final {n}".encode() for n in AU.FINAL_FILES}
+
+
+def _trainer(trained: list):
+    """A trainer that finishes the config it is given: the final weights and the completion record of its steps."""
+    from aadistill.infrastructure.manifest import sha256_json
+
+    def train(cfg_path, *, resume, deadline_s, log):
+        cfg = json.loads(Path(cfg_path).read_text())
+        out_dir, steps = Path(cfg["out_dir"]), int(cfg["schedule"]["total_steps"])
+        m = out_dir / "checkpoints" / f"step_{steps:06d}" / "model"
+        m.mkdir(parents=True, exist_ok=True)
+        for n, b in _final_bytes(cfg["seed"]).items():
+            (m / n).write_bytes(b)
+        (out_dir / "run_completion.json").write_text(json.dumps({
+            "config_sha256": sha256_json(cfg), "final_step": steps, "planned_total_steps": steps,
+            "completed_all_steps": True}))
+        trained.append(cfg["seed"])
+        return 0
+    return train
+
+
+def _phase2_plan(tmp: Path) -> dict:
+    from stages.single_operator_budget import launch as L
+    plan = json.loads((REPO / L.plan_path(ARM)).read_text())
+    for u in plan["units"]:
+        u["config"]["out_dir"] = str(tmp / "pod" / u["unit"] / "train")
+        u["config"]["student_path"] = str(tmp / "pod" / "init")
+    (tmp / "plan.json").write_text(json.dumps(plan))
+    return plan
+
+
+def _run_phase2(tmp: Path, monkeypatch, *, out: Path, resume: Path | None = None) -> dict:
+    """One `train_driver.main` attempt: everything but the state machine, the completion checks, the runners' merge
+    and the relay's contract stood in for (the trainer, the engine, the package, the pod's environment)."""
+    from shared import study_engineering as SE
+    import shared.pod.teacher_cache as TC
+    from stages.reasoning_inheritance import driver as RID
+    from stages.single_operator_budget import common as C
+    from stages.single_operator_budget import launch as L
+    from stages.single_operator_budget import train_driver as SD
+    from stages.teacher_modes import a1_units as AU
+    from stages.teacher_modes import packed_training_plan as PTP
+    from stages.teacher_modes import training_plan as TP
+    from stages.teacher_parent_initialization import train_driver as TD
+    trained, asked, fetched = [], {}, []
+    monkeypatch.setattr(L.Authorization, "load", classmethod(lambda cls, p: object()))
+    monkeypatch.setattr(SE, "require_on_pod", lambda *a, **k: {"authorization_id": "test"})
+    monkeypatch.setattr(SE, "identity_hash", lambda *a, **k: "h")
+    monkeypatch.setattr(TC, "local_snapshot", lambda *a, **k: str(tmp))
+    monkeypatch.setattr(TP, "stage_tokenizers", lambda snap: {})
+    monkeypatch.setattr(TP, "admit", lambda *a, **k: None)
+    monkeypatch.setattr(PTP, "attention_problems", lambda cfg, repo: [])
+    monkeypatch.setattr(AU, "train_telemetry", lambda d: {"context_strategies": [PTP.CONTEXT_STRATEGY]})
+    monkeypatch.setattr(TD, "fetch_init", lambda u, d=None: fetched.append(u["unit"]) or {"stub": True})
+    monkeypatch.setattr(TD, "_sleep", lambda s: None)
+    monkeypatch.setattr(AU, "train", _trainer(trained))
+    monkeypatch.setattr(RID, "_run_bounded", _mode_engine(asked))
+    monkeypatch.setattr(C, "package", lambda model_dir, dest: {
+        "weights_sha256": {"model.safetensors": _sha((Path(model_dir) / "model.safetensors").read_bytes())},
+        "linked": ["model.safetensors"]})
+    argv = ["--authorization", "a.json", "--out", str(out), "--status", str(tmp / "status.log"), "--plan",
+            str(tmp / "plan.json"), "--unit-deadline-hours", "1", "--attempt", "sob1_train_test2"]
+    rc = SD.main(argv + (["--resume", str(resume)] if resume else []))
+    return {"rc": rc, "units": json.loads((out / "units.json").read_text()), "trained": trained, "asked": asked,
+            "fetched": fetched}
+
+
+def _sealed_final(out: Path, relay, seed: int, tmp: Path) -> dict:
+    """A seed's final made durable as the driver does it: on the (fake) relay, handed off, recorded in the evidence."""
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_parent_initialization import train_driver as TD
+    unit = CP.unit_name(ARM, seed)
+    src = out.parent / "lost_pod" / unit
+    src.mkdir(parents=True, exist_ok=True)
+    files = {}
+    for n, b in _final_bytes(seed).items():
+        (src / n).write_bytes(b)
+        files[n] = str(src / n)
+    plan = json.loads((tmp / "plan.json").read_text())         #: the plan this test's driver reads (`_phase2_plan`)
+    cfg = next(u for u in plan["units"] if u["seed"] == seed)["config"]
+    from aadistill.infrastructure.manifest import sha256_json
+    (src / "run_completion.json").write_text(json.dumps({"config_sha256": sha256_json(cfg),
+                                                         "final_step": cfg["schedule"]["total_steps"],
+                                                         "planned_total_steps": cfg["schedule"]["total_steps"],
+                                                         "completed_all_steps": True}))
+    files["run_completion.json"] = str(src / "run_completion.json")
+    prefix = f"durable/stage1_single_operator_budget/{ARM}/{unit}"
+    rec = relay.put({"files": files, "prefix": f"{prefix}/final/{_sha(_final_bytes(seed)['model.safetensors'])[:16]}"})
+    rec["handoff"] = TD.handoff(rec, src, f"{prefix}/final", "test", newest=False)
+    (out / unit / "train").mkdir(parents=True, exist_ok=True)
+    (out / unit / "final.json").write_text(json.dumps(rec))
+    (out / unit / "train" / "run_completion.json").write_text((src / "run_completion.json").read_text())
+    return rec
+
+
+def _trained_set(out: Path, seed: int, mode: str, *, attempt: str = "sob1_train_test1", of_seed: int | None = None):
+    """A complete sealed set of ``seed``'s target, generated from ``of_seed``'s final weights (default: its own)."""
+    from stages.single_operator_budget import completion as CP
+    t = CP.train_target(ARM, seed)
+    src_t = CP.train_target(ARM, of_seed or seed)
+    d = CP.ev_dir(out, t, mode)
+    _complete_set(d, mode, None, attempt=attempt, target=src_t)
+    gen = CP.generation_id(attempt, src_t, mode, 1)
+    w = {"model.safetensors": _sha(_final_bytes(of_seed or seed)["model.safetensors"])}
+    pt = CP.parse_train_target(src_t)
+    (d / CP.PACKAGES).write_text(json.dumps([{**_entry(gen, src_t, mode, w), "arm": pt["arm"], "seed": pt["seed"],
+                                              "unit": pt["unit"]}]))
+    return d
+
+
+def test_empty_reports_without_final_weights_are_never_done_and_the_unit_is_trained(tmp_path, monkeypatch):
+    """The 84c48bea reproduction: a previous attempt left a ``{}`` formal_report.json in both modes of both seeds and
+    no final weights anywhere. TPI1's state function called that unit ``done``; this driver trains each seed, makes
+    its final durable and generates every set from it, each part's package naming the arm, seed, unit and weights."""
+    _eval_set_or_skip()
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_modes import a1_units as AU
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    from stages.teacher_parent_initialization import relay as R
+    relay = FakeRelay()
+    monkeypatch.setattr(R, "run_online", relay)
+    _phase2_plan(tmp_path)
+    prev = tmp_path / "devbox/store/out"
+    dirs = []
+    for s in DESIGN["training"]["seeds"]:
+        for m in DESIGN["evaluation"]["protocol"]["modes"]:
+            d = CP.ev_dir(prev, CP.train_target(ARM, s), m)
+            d.mkdir(parents=True)
+            (d / "formal_report.json").write_text("{}\n")
+            dirs.append(d)
+    #: the defect: the old state function read the report files alone
+    assert AU.state(tmp_path / "pod/none", dirs) == "done"
+    assert CP.session(prev, ARM)["complete"] is False
+    got = _run_phase2(tmp_path, monkeypatch, out=tmp_path / "attempt2/out", resume=prev)
+    assert got["rc"] == 0 and got["units"]["terminal"] == "ALL_DONE", got["units"].get("error")
+    assert got["trained"] == DESIGN["training"]["seeds"]
+    assert all(got["units"]["units"][CP.unit_name(ARM, s)]["state_at_start"] == "train" for s in DESIGN["training"]["seeds"])
+    out = tmp_path / "attempt2/out"
+    ses = CP.session(out, ARM)
+    assert ses["complete"] and ses["n_complete"] == 4
+    for k, v in ses["sets"].items():
+        t = k.rsplit("/", 1)[0]
+        seed = CP.parse_train_target(t)["seed"]
+        assert v["binding"]["weights_sha256"] == {"model.safetensors": _sha(_final_bytes(seed)["model.safetensors"])}
+        assert (v["binding"]["arm"], v["binding"]["seed"]) == (ARM, seed)
+    assert [c for c in relay.calls if c[0] == "put" and "/final/" in c[1] and not c[1].endswith("final")]
+
+
+def test_an_empty_report_beside_a_durable_final_is_rescored_without_training_or_loading_a_model(tmp_path, monkeypatch):
+    """Both seeds' finals durable, every set's generations sealed from them, the formal reports ``{}``: the driver
+    rescores the reports from the sealed generations; nothing is trained, restored or generated."""
+    _eval_set_or_skip()
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    from stages.teacher_parent_initialization import relay as R
+    relay = FakeRelay()
+    monkeypatch.setattr(R, "run_online", relay)
+    _phase2_plan(tmp_path)
+    prev = tmp_path / "devbox/store/out"
+    for s in DESIGN["training"]["seeds"]:
+        _sealed_final(prev, relay, s, tmp_path)
+        for m in DESIGN["evaluation"]["protocol"]["modes"]:
+            (_trained_set(prev, s, m) / "formal_report.json").write_text("{}\n")
+    before = CP.session(prev, ARM)
+    assert not before["complete"] and all(v["problems"] == {"formal_report": ["empty ({})"]}
+                                          for v in before["sets"].values())
+    relay.calls.clear()
+    got = _run_phase2(tmp_path, monkeypatch, out=tmp_path / "attempt2/out", resume=prev)
+    assert got["rc"] == 0 and got["units"]["terminal"] == "ALL_DONE", got["units"].get("error")
+    assert got["trained"] == [] and got["fetched"] == [] and not any(got["asked"].values())
+    assert not [c for c in relay.calls if c[0] in ("get", "put") and "/final/" in str(c[1])]
+    assert CP.session(tmp_path / "attempt2/out", ARM)["complete"]
+    for s in DESIGN["training"]["seeds"]:
+        row = got["units"]["units"][CP.unit_name(ARM, s)]
+        assert row["state_at_start"] == "final_durable" and "restored_final" not in row
+        assert all(e["generated"] is False for e in row["evaluations"].values())
+
+
+def test_another_seeds_parts_are_isolated_and_only_the_missing_items_come_from_this_seeds_restored_final(
+        tmp_path, monkeypatch):
+    """Seed 20260726's thinking set holds parts sealed by seed 20260801's generation (its target, package and
+    weights) and a few of its own; its final is durable on the relay only. The other seed's parts are isolated, the
+    final is restored (never retrained), and only the items no proven part of THIS seed holds are generated."""
+    _eval_set_or_skip()
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_parent_initialization import b_evidence as BE
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    from stages.teacher_parent_initialization import relay as R
+    relay = FakeRelay()
+    monkeypatch.setattr(R, "run_online", relay)
+    _phase2_plan(tmp_path)
+    s1, s2 = DESIGN["training"]["seeds"]
+    prev = tmp_path / "devbox/store/out"
+    for s in (s1, s2):
+        _sealed_final(prev, relay, s, tmp_path)
+    for s, m in ((s1, "H-N"), (s2, "H-T"), (s2, "H-N")):
+        _trained_set(prev, s, m)
+        CP.rescore(CP.ev_dir(prev, CP.train_target(ARM, s), m),
+                   CP.check(CP.ev_dir(prev, CP.train_target(ARM, s), m), CP.train_target(ARM, s), m, prev))
+    #: the wrong seed's shards filed in seed 1's thinking set, plus three of seed 1's own
+    d = _trained_set(prev, s1, "H-T", of_seed=s2)
+    t1, pr, units = CP.train_target(ARM, s1), _proto("H-T"), BE.registered_units()
+    own = CP.generation_id("sob1_train_test0", t1, "H-T", 1)
+    keep = units[BE.FLUID][1][:3]
+    _part(d, BE.FLUID, own, [_row(BE.FLUID, i, pr, label=t1) for i in keep], n=1)
+    pk = json.loads((d / CP.PACKAGES).read_text())
+    pk.append({**_entry(own, t1, "H-T", {"model.safetensors": _sha(_final_bytes(s1)["model.safetensors"])}),
+               "arm": ARM, "seed": s1, "unit": CP.unit_name(ARM, s1)})
+    (d / CP.PACKAGES).write_text(json.dumps(pk))
+    st = CP.check(d, t1, "H-T", prev, label=t1)
+    wrong = [v for v in st["parts"].values() if not v["proven"]]
+    assert not st["complete"] and len(wrong) == len(units) and all(f"{CP.train_target(ARM, s2)}/H-T's" in v["why"]
+                                                                   for v in wrong)
+    got = _run_phase2(tmp_path, monkeypatch, out=tmp_path / "attempt2/out", resume=prev)
+    assert got["rc"] == 0 and got["units"]["terminal"] == "ALL_DONE", got["units"].get("error")
+    assert got["trained"] == []
+    row = got["units"]["units"][CP.unit_name(ARM, s1)]
+    assert row["restored_final"]["model_safetensors_sha256"] == _sha(_final_bytes(s1)["model.safetensors"])
+    assert got["asked"]["H-T"][BE.FLUID] == [i for i in units[BE.FLUID][1] if i not in keep]
+    assert all(len(got["asked"]["H-T"][k]) == len(units[k][1]) for k in units if k != BE.FLUID)
+    assert "H-N" not in got["asked"] or not got["asked"]["H-N"]     #: the complete sets were taken as they were
+    out = tmp_path / "attempt2/out"
+    d2 = CP.ev_dir(out, t1, "H-T")
+    fin = CP.check(d2, t1, "H-T", out, label=t1)
+    assert fin["complete"] and {v["generation"] for v in fin["parts"].values()} == {
+        own, CP.generation_id("sob1_train_test2", t1, "H-T", 1)}
+    iso = json.loads((d2 / CP.SUPERSEDED / CP.generation_id("sob1_train_test2", t1, "H-T", 1)
+                      / "isolated_parts.json").read_text())
+    assert len(iso) == len(units) and CP.session(out, ARM)["complete"]
+
+
+def _arm_session_evidence(out: Path, arm: str) -> dict[str, dict]:
+    """One arm's secured copy as a finished session leaves it: both finals durable and published, four sets
+    complete against them, reports rescored. Returns each final's file bodies by unit."""
+    from stages.single_operator_budget import completion as CP
+    bodies = {}
+    for s in DESIGN["training"]["seeds"]:
+        unit, t = CP.unit_name(arm, s), CP.train_target(arm, s)
+        b = {n: f"{arm} {s} {n}".encode() for n in ("model.safetensors", "config.json", "run_completion.json")}
+        bodies[unit] = b
+        (out / unit).mkdir(parents=True, exist_ok=True)
+        (out / unit / "final.json").write_text(json.dumps({
+            "relay": "fake", "prefix": f"durable/stage1_single_operator_budget/{arm}/{unit}/final/x", "verified": True,
+            "files_sha256": {n: _sha(v) for n, v in b.items()}, "bytes": {n: len(v) for n, v in b.items()},
+            "handoff": {"verified": True}}))
+        w = {"model.safetensors": _sha(b["model.safetensors"])}
+        for m in DESIGN["evaluation"]["protocol"]["modes"]:
+            d = CP.ev_dir(out, t, m)
+            _complete_set(d, m, None, target=t, attempt="r1")
+            gen = CP.generation_id("r1", t, m, 1)
+            (d / CP.PACKAGES).write_text(json.dumps([{**_entry(gen, t, m, w), "arm": arm, "seed": s, "unit": unit}]))
+            CP.rescore(d, CP.check(d, t, m, out))
+    return bodies
+
+
+def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_with_six_finals_and_twelve_sets(
+        tmp_path, monkeypatch):
+    """Each sob1_train closeout (the launch's and a manual one: `Launch.completion_check`) records its arm COMPLETE only
+    with both finals durable, four sets complete against them and both finals re-hashed on the dev box; the study is
+    COMPLETE only when all three arms are, and its registered comparison is recomputed from the sealed records."""
+    _eval_set_or_skip()
+    import functools
+    from stages.single_operator_budget import completion as CP
+    from stages.single_operator_budget import launch as L
+    bodies = {}
+    for a in DESIGN["training"]["unit_order"]["arms"]:
+        bodies.update(_arm_session_evidence(tmp_path / f"scr_{a}" / "store" / "out", a))
+
+    def getter(rec, dest):
+        unit = rec["prefix"].split("/")[3]
+        for n in rec["files_sha256"]:
+            (Path(dest) / n).write_bytes(bodies[unit][n])
+        return {"verified": True}
+    monkeypatch.setattr(L, "phase2_completion", functools.partial(
+        L.phase2_completion, store=tmp_path / "store", record=tmp_path / "local2.json", getter=getter, root=tmp_path))
+    first = DESIGN["training"]["unit_order"]["arms"][0]
+    launch = L.launch_spec(L.TRAIN_KIND, 60.0, arm=first)
+    assert launch.completion_check.keywords["arm"] == first
+    #: one arm's {} report: that arm is INCOMPLETE on the formal closeout, and its money record stands
+    scr = tmp_path / f"scr_{first}"
+    d = CP.ev_dir(scr / "store/out", CP.train_target(first, 20260726), "H-T")
+    good = (d / "formal_report.json").read_text()
+    (d / "formal_report.json").write_text("{}\n")
+    res = L.SE.closeout(L.STUDY, launch, "t1", scr, root=tmp_path, reconcile=lambda: {"ok": True})
+    assert res["study_completion"]["status"] == "INCOMPLETE" and res["study_completion"]["unfinished"] == ["sets"]
+    assert json.loads((tmp_path / L.STUDY.run_dir("t1") / "closeout/outcome.json").read_text())["money"]["all_in_usd"] == 0.0
+    (d / "formal_report.json").write_text(good)
+    res = L.SE.closeout(L.STUDY, launch, "t1", scr, root=tmp_path, reconcile=lambda: {"ok": True})
+    assert res["study_completion"]["status"] == "COMPLETE"
+    assert res["study_completion"]["study"]["status"] == "INCOMPLETE"        #: two arms have no session yet
+    for i, a in enumerate(DESIGN["training"]["unit_order"]["arms"][1:], start=2):
+        out = L.phase2_completion(f"t{i}", tmp_path / f"scr_{a}", arm=a)
+        assert out["status"] == "COMPLETE"
+    assert out["study"]["status"] == "COMPLETE"
+    doc = json.loads((tmp_path / L.STUDY_RESULT).read_text())
+    assert doc["completion"]["finals"] == {"n_verified": 6, "n_expected": 6}
+    assert doc["completion"]["sets"] == {"n_complete": 12, "n_expected": 12}
+    dec = doc["readout"]["decision"]
+    assert dec["_rule"]["m"] == 3 and dec["_rule"]["seeds"] == DESIGN["training"]["seeds"]
+    pairs = [k for k in dec["H-T"] if not k.startswith("_")]
+    assert len(pairs) == 3 and all(dec["H-T"][k]["status"] == "formal" and dec["H-T"][k]["holm_m"] == 3 for k in pairs)
+    assert all(dec["H-T"][k]["verdict"] == "NOT_DISTINGUISHED" for k in pairs)   #: identical records: no difference
+    assert all(v["status"] == "descriptive_only" for k, v in dec["H-N"].items() if not k.startswith("_"))
+    #: recomputed from the same sealed records, the readout is the same
+    again = L.study_completion(root=tmp_path, write=False)
+    assert again["readout"]["decision"] == doc["readout"]["decision"]
+    #: the six finals are on the dev box as their records
+    rec = json.loads((tmp_path / "local2.json").read_text())
+    assert sum(v["verified"] for k, v in rec["products"].items() if k.endswith("/final")) == 6   #: every arm kept
+    assert len(list((tmp_path / "store").glob("*-s*/final/*/model.safetensors"))) == 6
+
+
+def test_phase_1_is_closed_in_code_and_phase_2_is_funded_once_by_its_own_grant(tmp_path, monkeypatch, capsys):
+    """Item 2 of the maintainer's 2026-11-20 brief: issue and launch refuse a new phase-1 session (the remainder is
+    void) while closeout, retain and the completion check stay; phase 2 -- the Stage-3 recovery training and its
+    evaluation -- has its own proposal / grant, per-arm caps, and an envelope that counts only sob1_train runs."""
+    import math
+    from stages.single_operator_budget import launch as L
+    pos = {"fetched_utc": "t", "provider_billed_usd": 974.1887, "committed_usd": 974.1887, "project_cap_usd": 1000.0,
+           "project_remaining_usd": 25.8113, "account_pods": [], "account_volumes": [], "balance_usd": 35.8108}
+    monkeypatch.setattr(L.SE, "live_position", lambda root=None, snapshot=None: dict(pos))
+    b = L.budget(L.PHASE1_KIND)
+    assert not b["fundable"] and b["remaining_usd"] == 0.0 and "CLOSED" in b["problems"][0]
+    assert L.main(["issue", "--kind", L.PHASE1_KIND, "--run-id", "x", "--expected-usd", "1", "--hard-cap-usd", "1",
+                   "--dry-run", "--out", str(tmp_path / "a.json")]) == 11
+    assert L.main(["launch", "--kind", L.PHASE1_KIND, "--run-id", "x", "--scr", str(tmp_path), "--max-price", "1.1",
+                   "--dry-run", "--authorization", str(tmp_path / "a.json")]) == 11
+    assert capsys.readouterr().out.count("sob1_phase1 kind is CLOSED") == 2 and not (tmp_path / "a.json").exists()
+    by = {c.__name__: c for c in L.SE.prechecks(L.STUDY, L.launch_spec(L.PHASE1_KIND, 60.0), L.REPO)}
+    assert not by["the_study_is_open"](None)[0]
+    L.SE.require_open(L.STUDY)                       #: the study is not closed: phase 2 can still be granted under it
+    L.SE.require_kind_open(L.STUDY, L.TRAIN_KIND)
+    #: phase 2's money: its own proposal until a grant exists, its own envelope (no phase-1 run in it)
+    g = L.kind_grant(L.TRAIN_KIND, dry_run=True)
+    assert g["_source"] == str(L.PHASE2_PROPOSAL) and g["status"] == "proposed"
+    env = L.SE.envelope(L.STUDY, g, L.REPO, L.TRAIN_KIND)
+    assert env["spent_usd"] == 0.0 and env["runs"] == [] and env["remaining_usd"] == g["ceiling_usd"]
+    caps = {a: v["per_session_hard_cap_usd"] for a, v in g["kinds"][L.TRAIN_KIND]["per_arm"].items()}
+    assert g["ceiling_usd"] == round(sum(caps.values()), 2) and g["teardown_reserve_usd"] == 1.0
+    assert g["per_session_hard_cap_usd"] == max(caps.values()) and g["kinds"][L.TRAIN_KIND]["order"][0] == "residual_width"
+    basis = g["project_cap_basis"]
+    assert g["project_cumulative_cap_usd"] == math.ceil(round((basis["committed_usd"] + g["ceiling_usd"] + 1.0) * 100, 6)) / 100
+    assert "no separate Stage-3 allowance" in g["money_rules"]["once"]
+    b2 = L.budget(L.TRAIN_KIND, "residual_width")
+    assert b2["hard_cap_usd"] == caps["residual_width"] and not b2["fundable"]
+    assert any("project cap" in x for x in b2["problems"])     #: the cap a new maintainer decision sets, never inferred
+    with pytest.raises(L.SE.AuthorizationError, match="no grant at .*phase2_grant"):
+        L.kind_grant(L.TRAIN_KIND)                          #: a real issue reads only a grant
+    #: each committed plan is the derivation the proposal binds
+    for a, v in g["plans"].items():
+        assert v["sha256"] == L.SE.sha256_file(REPO / v["path"])
+
+
+def test_phase_2_disk_plan_counts_finals_evidence_and_archives_on_the_one_filesystem():
+    from stages.single_operator_budget import disk as DK
+    st = json.loads(ST.OUT.read_text())["arms"]
+    pl = DK.plan("sob1_train", ARM, "/s")
+    names = " | ".join(i["item"] for i in pl["items"])
+    for w in ("evidence", "pull archive", "teardown collector", "resume archive", "s20260726 final", "s20260801 final"):
+        assert w in names
+    assert pl["peak_phase"] == "retain"
+    finals = sum(st[a]["checkpoint_bytes"]["final_fp32"] for a in st) * len(DESIGN["training"]["seeds"])
+    doc = json.loads(DK.OUT_PHASE2.read_text())
+    again = DK.phase2_total(free_bytes=doc["free_bytes"], archive_bytes=doc["phase1_archive_bytes"])
+    assert DK.render(again) == DK.OUT_PHASE2.read_text()
+    assert doc["peak_bytes"]["expected"] >= finals and doc["sessions"][-1]["arm"] == DESIGN["training"]["unit_order"]["arms"][-1]
+    assert doc["shortfall_with_swing_bytes"]["bound"] == max(0, doc["peak_bytes"]["bound"]
+                                                            + doc["shared_filesystem_swing_bytes"] - doc["free_bytes"])

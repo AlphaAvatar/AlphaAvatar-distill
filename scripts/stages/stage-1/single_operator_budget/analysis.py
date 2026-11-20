@@ -276,6 +276,98 @@ def phase1_table(out, tmp) -> dict:
     return doc
 
 
+# ---- phase 2: the registered comparison, recomputed from the sealed post-recovery records -----------------------------
+
+READOUT_SCHEMA = "aadistill.stage1.single_operator_budget.phase2_readout/v1"
+
+
+def phase2_readout(outs: dict, phase1_out, tmp) -> dict:
+    """The study's registered analysis from the twelve sealed post-recovery sets (``outs[arm]``: that arm's secured
+    evidence, complete on its files -- `completion.study`): per mode and seed, each recovered model's per-item
+    correctness on the static fluid formal core (the registered scorer, rescored here), then `decide` -- the three
+    pairs pooled over both seeds, Holm with m = 3, the non-thinking family only after the thinking one rejects all
+    three -- with each pair's per-seed deltas and whether the seeds agree in sign, and each arm's descriptive damage,
+    recovery and remaining gap against phase 1's untrained arm and teacher (``phase1_out``; ``not_available`` without
+    it). Terminations are counted apart, per set."""
+    from stages.single_operator_budget import common as C
+    from stages.single_operator_budget import completion as CP
+    tmp = Path(tmp)
+    d = C.design()
+    primary = TA.registered_items(d)
+    groups = TA.independence_groups(primary, d)
+    seeds = [int(x) for x in d["training"]["seeds"]]
+    pairs = [tuple(x) for x in d["analysis"]["comparisons"]]
+    arms = sorted({a for pr in pairs for a in pr})
+    y, digests, terms = {}, {}, {}
+    for a in arms:
+        for mode in C.mode_dirs():
+            for sd in seeds:
+                t = CP.train_target(a, sd)
+                gd = CP.ev_dir(outs[a], t, mode) / "generations"
+                r = _set_reading(gd, CP.label_of(t), tmp / f"{t}_{mode}")
+                if sorted(r["static"]) != sorted(primary):
+                    raise ValueError(f"{t}/{mode}: the static core is not the registered {len(primary)} items")
+                y.setdefault(a, {}).setdefault(mode, {})[sd] = r["static"]
+                digests[f"{t}/{mode}"] = r["digest"]
+                terms[f"{t}/{mode}"] = terminations(gd, primary)
+    decision = decide(y, pairs, groups, seeds)
+    per_seed = {}
+    for mode in C.mode_dirs():
+        for x, z in pairs:
+            key = f"{x} - {z}"
+            rows = {str(sd): _paired({sd: y[x][mode][sd]}, {sd: y[z][mode][sd]}, groups, [sd]) for sd in seeds}
+            signs = {(r["delta"] > 0) - (r["delta"] < 0) for r in rows.values()}
+            per_seed.setdefault(mode, {})[key] = {"per_seed": rows, "seeds_agree_in_sign": len(signs) == 1}
+    pre = {}
+    if phase1_out is not None:
+        for mode in C.mode_dirs():
+            for t in [CP.TEACHER, *arms]:
+                pre.setdefault(mode, {})[t] = _set_reading(CP.ev_dir(phase1_out, t, mode) / "generations",
+                                                           CP.label_of(t), tmp / f"pre_{t}_{mode}")["static"]
+    reports = {mode: {a: arm_report((pre.get(mode) or {}).get(a), y[a][mode], (pre.get(mode) or {}).get(CP.TEACHER),
+                                    groups, seeds) for a in arms} for mode in C.mode_dirs()}
+    acc = {mode: {a: {str(sd): _pp(sum(y[a][mode][sd].values()) / len(primary)) for sd in seeds} for a in arms}
+           for mode in C.mode_dirs()}
+    return {"schema": READOUT_SCHEMA, "role": "the registered decision (design.json :: analysis), recomputed from the "
+                                             "sealed records; descriptive parts are labelled as such",
+            "context_tokens": d["evaluation"]["protocol"]["context"]["tokens"], "n_items": len(primary),
+            "n_groups": len(groups), "seeds": seeds, "decision": decision, "per_seed_deltas": per_seed,
+            "accuracy_pct": acc, "per_arm_descriptive": reports, "terminations": terms, "scored_digests": digests,
+            "phase1_evidence": None if phase1_out is None else str(phase1_out)}
+
+
+DIAG_SCHEMA = "aadistill.stage1.single_operator_budget.pre_recovery_diagnostics/v1"
+
+
+def pre_recovery_diagnostics(evidence) -> dict:
+    """Each untrained arm's state evaluation against the teacher, read from its init record (the build session's
+    ``state_evaluation`` on the state evaluation suite -- not eval-set-1): equal-domain mean, worst-domain and
+    token-mean teacher KL, the critical-token KL, the reverse KL, the pooled NLL beside the teacher's, and top-1
+    agreement (the share of scored positions whose argmax is the teacher's). Diagnostic only: it ranks, keeps and
+    eliminates nothing, and none of it is a fluid-reasoning result."""
+    import json
+    from stages.single_operator_budget import common as C
+    keys = {"teacher_kl_equal_domain_mean": "state.teacher_kl.equal_domain_mean",
+            "teacher_kl_worst_domain": "state.teacher_kl.worst_domain",
+            "teacher_kl_token_mean": "state.teacher_kl.token_mean", "critical_token_kl": "state.critical_token_kl",
+            "reverse_kl_token_mean": "state.reverse_kl.token_mean", "top1_agreement": "state.top1_agreement",
+            "nll_pooled": "state.nll.pooled_all_domains", "teacher_nll_pooled": "state.nll.teacher_reference_pooled"}
+    rows, protocol = {}, set()
+    for a in C.design()["phase_1"]["build_order"]:
+        se = json.loads((Path(evidence) / a / "init_record.json").read_text())["state_evaluation"]
+        v = se["values"]
+        protocol.add(se.get("measurement_protocol_id"))
+        rows[a] = {k: v.get(src) for k, src in keys.items()}
+        rows[a]["teacher_kl_by_domain"] = {k.removeprefix("state.teacher_kl."): x for k, x in v.items()
+                                           if k.startswith("state.teacher_kl.") and k.rsplit(".", 1)[-1]
+                                           not in ("equal_domain_mean", "worst_domain", "token_mean")}
+    return {"schema": DIAG_SCHEMA, "source": str(evidence),
+            "suite": "the build session's state evaluation suite (the same scored positions for every arm), not "
+                     "eval-set-1", "measurement_protocol_id": sorted(protocol, key=str), "arms": rows,
+            "lowest_teacher_kl_first": sorted(rows, key=lambda a: rows[a]["teacher_kl_equal_domain_mean"]),
+            "role": "diagnostic only, before recovery: ranks, keeps and eliminates nothing (design.json :: analysis)"}
+
+
 ARM_WORDS = {"residual_width": "仅残差宽度 (width 1280)", "ffn_attention": "仅 FFN + 注意力 (FFN 3840, 16Q/8KV)",
              "depth_only": "仅深度 (16 layers)"}
 MODE_WORDS = {"H-T": "思考模式", "H-N": "非思考模式"}
@@ -326,10 +418,17 @@ def main(argv=None) -> int:
     import json
     import tempfile
     ap = argparse.ArgumentParser(description="SOB1 analysis: phase 1's comparison table from sealed records")
-    ap.add_argument("command", choices=("phase1-table",))
+    ap.add_argument("command", choices=("phase1-table", "diagnostics"))
     ap.add_argument("--evidence", required=True, help="an evidence directory (the pod's out or <scr>/store/out)")
     ap.add_argument("--write", default=None, help="a directory for comparison.json and comparison.md")
     a = ap.parse_args(argv)
+    if a.command == "diagnostics":
+        doc = pre_recovery_diagnostics(Path(a.evidence))
+        if a.write:
+            Path(a.write).mkdir(parents=True, exist_ok=True)
+            (Path(a.write) / "pre_recovery_diagnostics.json").write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps(doc, indent=1))
+        return 0
     with tempfile.TemporaryDirectory() as tmp:
         doc = phase1_table(Path(a.evidence), Path(tmp))
     md = render_table(doc)
