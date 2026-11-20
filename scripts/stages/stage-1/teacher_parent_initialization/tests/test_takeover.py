@@ -356,13 +356,17 @@ def test_a_listing_timeout_is_retried_and_never_sends_a_unit_back_to_step_0(tmp_
     _flaky_listing(relay, 2)                   #: two timeouts, then the listing answers
     got = TD.restore_savepoint(ev, tmp_path / "pod/train", PREFIX, FAST)
     assert got["step"] == 2208 and "3 attempt" in got["found"]
+    #: the save point found only in the listing now enters the evidence, so the rotation retires it later
+    assert [r["tag"] for r in json.loads((ev / "savepoints.json").read_text())] == ["step_002208"]
     #: every attempt times out and the evidence holds nothing: refused, not "no save point"
+    empty = tmp_path / "ev_empty"
+    empty.mkdir()
     _flaky_listing(relay, 99)
     with pytest.raises(TD.ListingUnreadable, match="refusing to train from step 0"):
-        TD.restore_savepoint(ev, tmp_path / "pod2/train", PREFIX, FAST)
+        TD.restore_savepoint(empty, tmp_path / "pod2/train", PREFIX, FAST)
     #: ... and the same for the final weights
     with pytest.raises(TD.ListingUnreadable, match="no final.json"):
-        TD.final_record(ev, PREFIX, FAST)
+        TD.final_record(empty, PREFIX, FAST)
     #: a listing that WAS read and holds nothing is the only "none": a fresh unit starts at step 0
     relay.records = FakeRelay.records.__get__(relay)
     assert TD.restore_savepoint(tmp_path / "ev3", tmp_path / "pod3/train", f"{PREFIX}-other", FAST) is None

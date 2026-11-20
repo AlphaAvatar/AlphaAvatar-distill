@@ -10,7 +10,7 @@
   "path": "logs/stages/stage-1/teacher_parent_initialization/plans/training_plan.json",
   "sha256": "c8b8c3e793fcab7dd7ba7a5b430448eb7055e5101b8293ef1f269192a3d3b75e"
  },
- "design_sha256": "6ab0c25aa58c134ea322c0b318a0b65da799777a98039c3e2528853cacb4f3bf",
+ "design_sha256": "6ceca717a2fa9418f15b7b83932db5fa7f710bb43b87e68ac079bea5658aaaaf",
  "init_record": {
   "path": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/ffn_attention/init_record.json",
   "sha256": "10a0596a4cd0c5dbfcef092b4d25a434bd55bb895fded4913154166dbd92ae3b",

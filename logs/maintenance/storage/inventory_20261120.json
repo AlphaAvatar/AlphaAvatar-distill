@@ -1,0 +1,398 @@
+{
+ "schema": "aadistill.maintenance.storage_inventory/v1",
+ "recorded_utc": "2026-11-20",
+ "scope": "every checkpoint of this project (AlphaAvatar-distill) on the dev box and on the hub, from the files and the LFS objects themselves: the repository's artifacts/, .scratch/, ~/aad-artifacts, ~/aad-scratch, this project's hub cache and session scratch; the hub account's private repos AlphaAvatar/aadistill-artifacts and AlphaAvatar/aadistill-transport. Other projects' data and logs are out of scope (and untouched)",
+ "method": {
+  "local": "every file >= 16 MiB, de-duplicated by inode (hard links counted once); weights by suffix; cross-checked with checkpoint_registry.json, local_retention records and the tombstones",
+  "hub": "every LFS object (list_lfs_files) against the tree (list_repo_tree): in-tree, history-only (orphan) and shared oids; weights through audit_relay_weights.py with reviewed dispositions (relay_weight_dispositions_20261120.json)"
+ },
+ "local": {
+  "weights_ge_100MiB": [
+   {
+    "artifact": "SOB1 residual-width initialization + mapping",
+    "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/",
+    "size_gib": 4.042,
+    "disposition": "keep",
+    "why": "SOB1 phase 2 trains from it (plans/training_plan_residual_width.json); the relay copy is what the pod fetches",
+    "consumer_or_evidence": "storage/local_retention.json",
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "SOB1 FFN + attention initialization + mapping",
+    "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/",
+    "size_gib": 3.758,
+    "disposition": "keep",
+    "why": "SOB1 phase 2 (plans/training_plan_ffn_attention.json)",
+    "consumer_or_evidence": "storage/local_retention.json",
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "SOB1 depth-only initialization + mapping",
+    "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only/",
+    "size_gib": 3.733,
+    "disposition": "keep",
+    "why": "SOB1 phase 2 (plans/training_plan_depth_only.json)",
+    "consumer_or_evidence": "storage/local_retention.json",
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "TPI1 A finals (2 seeds, fp32)",
+    "path": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/A_teacher_parent-s*/final/",
+    "size_gib": 4.441,
+    "disposition": "keep",
+    "why": "the A baseline's measured endpoints, only copies (registry: canonical, protected)",
+    "consumer_or_evidence": "registry 1a02ba42 / 19396052",
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "TPI1 A initialization",
+    "path": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/init/01e63327e3d02b2f/",
+    "size_gib": 1.11,
+    "disposition": "keep",
+    "why": "the A baseline's initialization, only copy (registry: reproducibility_required)",
+    "consumer_or_evidence": "registry",
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "TPI1 teacher residual statistics",
+    "path": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/statistics/01e63327e3d02b2f/",
+    "size_gib": 1.814,
+    "disposition": "keep",
+    "why": "A's width input; now the only copy (its relay copy retired 2026-11-20); re-hashed e4145e38... at the retirement",
+    "consumer_or_evidence": "tombstone relay_20261120_tpi1_teacher_residual_statistics",
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "Stage-0 activation cache",
+    "path": "artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+    "size_gib": 1.814,
+    "disposition": "keep",
+    "why": "data, not a checkpoint; the 0.6B canonical init's pinned input (registry: reproducibility_required)",
+    "consumer_or_evidence": "registry",
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "0.6B canonical initialization",
+    "path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+    "size_gib": 1.11,
+    "disposition": "keep",
+    "why": "registry: canonical, protected; launchers declare its relay copy",
+    "consumer_or_evidence": "registry",
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "D1 reference initialization",
+    "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/afd50c9ff0e3d20542bb5473ea745b55",
+    "size_gib": 1.11,
+    "disposition": "keep",
+    "why": "the selected forward baseline's historical reference (registry: canonical, protected)",
+    "consumer_or_evidence": "registry",
+    "freed_bytes": 0
+   }
+  ],
+  "duplicates_checked": [
+   {
+    "what": "relay download cache blob f7f5035e... (stage-3 corpus_v2 candidates.jsonl)",
+    "path": "~/.cache/huggingface/hub/models--AlphaAvatar--aadistill-artifacts/blobs/f7f5035e...",
+    "size_gib": 0.797,
+    "finding": "a hard link of artifacts/stages/stage-3/corpus_v2/candidates.jsonl (one inode): removing either path frees 0 B; data, not a checkpoint"
+   },
+   {
+    "what": ".scratch/research_a <-> ~/aad-artifacts/research_a/scratch_evidence_20261110",
+    "size_gib": null,
+    "finding": "hard links (one inode each): Research A's evidence kept twice by path, once on disk; removing a path frees 0 B"
+   },
+   {
+    "what": "the session scratch of this project's earlier Claude sessions (/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/*)",
+    "size_gib": 1.51,
+    "finding": "dry runs, code bundles, synthetic test sets, a Python env: no checkpoint and no copy of one"
+   }
+  ],
+  "retired": [],
+  "freed_bytes": 0,
+  "finding": "no local checkpoint meets AGENTS.md 2.5 or has an unprotected redundant copy: every weight is a baseline, this round's initializations, registry-protected or data"
+ },
+ "hub": {
+  "account_private_repos": [
+   "AlphaAvatar/aadistill-artifacts",
+   "AlphaAvatar/aadistill-transport"
+  ],
+  "relay_lfs_objects": 647,
+  "relay_lfs_gib": 38.828,
+  "relay_orphan_objects": 1,
+  "relay_orphan_gib": 0.004,
+  "relay_shared_oids": 17,
+  "transport_lfs_gib": 5.551,
+  "weights": [
+   {
+    "artifact": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 0.02,
+    "disposition": "keep",
+    "why": "RI-S1's frozen structural mapping (registry: protected, unclassified never-delete); 0.02 GiB",
+    "launchers": [],
+    "registry": [
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic",
+     "diagnostic"
+    ],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 0.002,
+    "disposition": "keep",
+    "why": "RI-LM1's merge statistics (registry: protected, unclassified); 0.002 GiB",
+    "launchers": [],
+    "registry": [
+     "diagnostic",
+     "diagnostic"
+    ],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/init/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 3.732,
+    "disposition": "keep",
+    "why": "SOB1 phase 2 reads it: plans/training_plan_depth_only.json (the pod fetches its init from this relay copy)",
+    "launchers": [],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 3.757,
+    "disposition": "keep",
+    "why": "SOB1 phase 2 reads it: plans/training_plan_ffn_attention.json",
+    "launchers": [],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 3.746,
+    "disposition": "keep",
+    "why": "SOB1 phase 2 reads it: plans/training_plan_residual_width.json",
+    "launchers": [],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/tensors.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 0.024,
+    "disposition": "keep",
+    "why": "SOB1's width projection, beside the init the plan derives from",
+    "launchers": [],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/mapping/tensors.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 0.02,
+    "disposition": "keep",
+    "why": "A baseline's mapping (registry: reproducibility_required, protected)",
+    "launchers": [],
+    "registry": [
+     "reproducibility_required"
+    ],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 1.814,
+    "disposition": "retire",
+    "why": "a REDUNDANT REMOTE COPY (maintainer 2026-11-20: retire it as a redundant copy once the dev box's same-hash copy reads, phase 1's archive is complete and no registered plan reads the remote object). Its one consumer of the remote object was SOB1 phase 1's residual-width build, COMPLETE and closed in code; phase 2's launch stages only the A-MIX pack; TPI1 is CLOSED. The dev box keeps the protected local copy (A baseline's input)",
+    "launchers": [],
+    "registry": [
+     "reproducibility_required"
+    ],
+    "freed_bytes": 1947442680
+   },
+   {
+    "artifact": "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 2.22,
+    "disposition": "keep",
+    "why": "a permanent control declared by autoinit_continuation_launch and configs/stages/stage-0/calibration_volume/battery_session.json; its only copy; consumer status is the maintainer's decision",
+    "launchers": [
+     "autoinit_continuation_launch"
+    ],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 2.22,
+    "disposition": "keep",
+    "why": "as sa: a permanent control, its only copy",
+    "launchers": [
+     "autoinit_continuation_launch"
+    ],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 1.11,
+    "disposition": "keep",
+    "why": "declared by igv_launch (study independent-gated-E, PROPOSED: a declared consumer); its only copy",
+    "launchers": [
+     "igv_launch"
+    ],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 1.11,
+    "disposition": "keep",
+    "why": "the canonical 0.6B initialization (registry: canonical, protected; launchers declare this relay path)",
+    "launchers": [
+     "autoinit_preflight_launch",
+     "autoinit_phase_a_launch",
+     "autoinit_continuation_launch",
+     "autoinit_device_canary_launch",
+     "autoinit_measurement_launch",
+     "autoinit_recovery_continuation_launch"
+    ],
+    "registry": [
+     "canonical"
+    ],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "stage1/qwen3_0p6b_init_v0/random_baseline/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-artifacts",
+    "size_gib": 1.11,
+    "disposition": "keep",
+    "why": "the 0.6B family's random-initialization control: no registry row, no launcher, its only copy; whether it is a retained control is the maintainer's decision (listed, not retired)",
+    "launchers": [],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "phase_a_attempt12/selected_leaves/281a02c3ac18419b70e896296dac0d03/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-transport",
+    "size_gib": 1.11,
+    "disposition": "keep (maintainer decision owed)",
+    "why": "Phase A attempt 12's selected leaf: the only copy (no dev-box copy); archival_retirement_20260930.json records it protected because autoinit_recovery_continuation_launch declares this path",
+    "launchers": [
+     "autoinit_recovery_continuation_launch"
+    ],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "phase_a_attempt12/selected_leaves/4e429f7ed722b180dd662c779895693f/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-transport",
+    "size_gib": 1.11,
+    "disposition": "keep (maintainer decision owed)",
+    "why": "Phase A attempt 12's selected leaf: the only copy (no dev-box copy); archival_retirement_20260930.json records it protected because autoinit_recovery_continuation_launch declares this path",
+    "launchers": [
+     "autoinit_recovery_continuation_launch"
+    ],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "phase_a_attempt12/selected_leaves/158b96cf651fd8ba8f8ceaefefde2067/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-transport",
+    "size_gib": 1.11,
+    "disposition": "keep (maintainer decision owed)",
+    "why": "Phase A attempt 12's selected leaf: the only copy (no dev-box copy); archival_retirement_20260930.json records it protected because autoinit_recovery_continuation_launch declares this path",
+    "launchers": [
+     "autoinit_recovery_continuation_launch"
+    ],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "phase_a_attempt12/selected_leaves/85bde4ded2c31953f802e39cf2252c87/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-transport",
+    "size_gib": 1.11,
+    "disposition": "keep (maintainer decision owed)",
+    "why": "Phase A attempt 12's selected leaf: the only copy (no dev-box copy); archival_retirement_20260930.json records it protected because autoinit_recovery_continuation_launch declares this path",
+    "launchers": [
+     "autoinit_recovery_continuation_launch"
+    ],
+    "registry": [],
+    "freed_bytes": 0
+   },
+   {
+    "artifact": "phase_a_attempt12/selected_leaves/cca699c93f34dad7e94a5d13a25b2bc2/model.safetensors",
+    "repo": "AlphaAvatar/aadistill-transport",
+    "size_gib": 1.11,
+    "disposition": "keep (maintainer decision owed)",
+    "why": "Phase A attempt 12's selected leaf: the only copy (no dev-box copy); archival_retirement_20260930.json records it protected because autoinit_recovery_continuation_launch declares this path",
+    "launchers": [
+     "autoinit_recovery_continuation_launch"
+    ],
+    "registry": [],
+    "freed_bytes": 0
+   }
+  ],
+  "non_checkpoint_large": [
+   {
+    "what": "transfer/*.bundle: 396 session code bundles",
+    "size_gib": 7.75,
+    "disposition": "keep (maintainer decision owed)",
+    "why": "not checkpoints: git bundles each pod session staged; every commit stays reachable in git, so they are reproducible, but no standing rule covers retiring them"
+   },
+   {
+    "what": "transfer/wheelhouse_cu128_cp312 (torch 2.11 cu128 env)",
+    "size_gib": 3.82,
+    "disposition": "keep (maintainer decision owed)",
+    "why": "environment wheels pod setup can stage; not checkpoints"
+   },
+   {
+    "what": "transfer/wheelhouse_vllm_cp312 (vLLM 0.27.1, torch 2.13)",
+    "size_gib": 3.595,
+    "disposition": "keep (maintainer decision owed)",
+    "why": "environment wheels; not checkpoints"
+   }
+  ],
+  "retired": [
+   {
+    "artifact": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+    "size_bytes": 1947442680,
+    "tombstone": "relay_20261120_tpi1_teacher_residual_statistics",
+    "criterion": "byte_identical_duplicate (maintainer 2026-11-20)",
+    "kept_copy": "~/aad-artifacts/stage1_teacher_parent_init/init/statistics/01e63327e3d02b2f/ (re-hashed e4145e38...)",
+    "verified": "path gone from the tree, its LFS object gone (list_lfs_files)"
+   }
+  ],
+  "freed_bytes_measured": 1943472701,
+  "headroom_gib_before": [
+   48.77,
+   48.81
+  ],
+  "headroom_gib_after": [
+   50.55,
+   50.59
+  ],
+  "note": "48.77 GiB was read before phase 1's 0.03 GiB evidence archive went up; the retirement freed 1.81 GiB (50.55 - 48.74)"
+ },
+ "authorizes": "nothing"
+}

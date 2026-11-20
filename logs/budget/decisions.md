@@ -17144,3 +17144,49 @@ on a paid pod.
   finals after local verification.
 - Revisit when: the maintainer approves the cap, the grant and the storage together; then the residual-width session
   is issued first.
+
+## 2026-11-20 (UTC) — SOB1 phase 2 fixes, storage inventory (maintainer's second brief of the day)
+
+- Decision (maintainer, quoted): 「继续在 `research/reasoning-inheritance` 分支工作，以 `99121ef1` 为本轮审查基准。……本轮先完成
+  **$0 修复、存储清理和启动验证**。正式训练 grant、付费扩盘和 HF 订阅由我另行批准，请等最终复核后再创建 Pod。」 Four fixes
+  (the authorized arm against the plan actually run; final weights traceable to their seed; the relay preflight by what a
+  resume really adds; a failed removal never read as retired), a project-wide checkpoint inventory on the dev box and the
+  hub, and: 「单独复核 HF 上 1.81 GiB 的教师统计量：确认开发机同哈希副本可读、第一阶段归档完整、第二阶段和其他已登记计划均不依赖该远端对象后，
+  可按冗余副本退役。」 and 「优先采用免费 relay 轮转：每组两个种子的最终权重都已在开发机逐文件核验、该组评测证据已持久化后，再退役远端冗余副本。」
+- Done ($0, plus one authorized hub deletion):
+  - **The four fixes**, each with a counter-example through the real entry point (SOB1 tests):
+    1. the launcher refuses, at $0 and before the bundle, the provider or the relay, an artifact whose arm, plan or
+       init record is not what `--arm` runs, and the runner's gate and the pod's driver check the same: a
+       residual-width artifact with the depth plan is refused all three ways;
+    2. a takeover checks the final's arm, seed, relay path and the completion record archived with it (its sha256
+       against the evidence's `train/` copy, its config hash, all its steps): swapped `final.json` files are refused,
+       never adopted or retrained;
+    3. the relay preflight asks for what the remaining rotation adds from the valid objects the relay holds:
+       first run 49.55 GiB, one 21.03 GiB save point held 28.52 GiB, seed 1's final durable 42.06 GiB;
+    4. a removal counts only when `verified_absent`; a failed one stays pending and is retried before the next large
+       upload and at a takeover. `relay.remove` now keeps LFS objects that kept paths share, and save points seen only
+       in the relay listing are now tracked.
+  - **The free relay rotation** (the maintainer's preference): after an arm's session is COMPLETE, its evidence
+    archive goes to the relay, and each final's relay copy is tombstoned and removed once the dev box's copy
+    re-hashes.
+  - **Inventory** (`logs/maintenance/storage/inventory_20261120.json`), from the files and LFS objects of both private
+    repos and every local root, de-duplicated by inode:
+    * dev box: no checkpoint eligible, 0 B freed. All ten weights are kept: the baseline, SOB1's inits, the
+      registry-protected ones and data. The duplicates found are hard links, so removing one frees 0 B;
+    * hub: the teacher statistics' redundant relay copy retired, after its dev-box copy re-hashed and every code reader
+      was classified (`relay_weight_dispositions_20261120.json`; tombstone
+      `relay_20261120_tpi1_teacher_residual_statistics`). Headroom went from 48.74 GiB to 50.55 GiB.
+  - **Kept and listed for the maintainer:** 7.75 GiB of session bundles, 7.41 GiB of wheelhouses, Phase A's 5.55 GiB
+    of leaves, 4.44 GiB of permanent controls, the 1.11 GiB random baseline and the 1.11 GiB Stage-0 finalist. The
+    registry was regenerated: SOB1's inits are now protected, and the statistics row no longer names a relay copy.
+- Measured after the cleanup:
+  - dev box `/` 5.34 GiB free (other projects moved it from 6.96 GiB);
+  - relay 50.55 GiB free;
+  - committed $974.1887 of the $1,000 cap ($25.8113 left), balance $35.8108, 0 pods, 0 volumes (09:50Z).
+- Capacity:
+  - dev box: each session's bound peak is 18.50 GiB, and three sessions peak at 54.84 GiB bound (45.74 GiB
+    expected). The shortfall, with the 4.37 GiB swing, is 53.87 GiB bound, so the system disk needs +64 GiB
+    (reference ~$4.90/month);
+  - relay: on the free plan with the rotation the width arm's first run fits by 1.00 GiB and the later arms by
+    4.09 / 3.75 GiB, so HF PRO is not needed.
+- Revisit when: the maintainer approves the project cap ($1,161.06), phase 2's grant and the disk.

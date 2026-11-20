@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-11-19T10:13:07+00:00",
+  "created_utc": "2026-11-20T09:52:51+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -1401,16 +1401,16 @@
     }
   },
   "local": {
-    "n_units": 79,
-    "n_weight_files": 60,
-    "total_bytes": 14493831869,
-    "total_human": "13.498 GiB",
+    "n_units": 83,
+    "n_weight_files": 64,
+    "total_bytes": 26584486971,
+    "total_human": "24.759 GiB",
     "artifacts_tree_bytes": 21938835401,
-    "external_store_tree_bytes": 19005541374,
+    "external_store_tree_bytes": 31489329313,
     "by_store": {
       "external_store": {
-        "units": 37,
-        "bytes": 10780685833
+        "units": 41,
+        "bytes": 22871340935
       },
       "repo_artifacts": {
         "units": 42,
@@ -1418,12 +1418,12 @@
       }
     },
     "proposed_disposition": {
-      "keep": 18,
+      "keep": 22,
       "retire": 2,
       "review": 59
     },
     "proposed_disposition_bytes": {
-      "keep": 12656662414,
+      "keep": 24747317516,
       "retire": 67747076,
       "review": 1769422379
     }
@@ -1431,13 +1431,17 @@
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-11-19T10:11:47+00:00",
-    "n_files": 1688,
-    "total_bytes": 30365826360,
+    "queried_utc": "2026-11-20T09:50:35+00:00",
+    "n_files": 1700,
+    "total_bytes": 40596580072,
     "by_prefix": {
       "transfer": {
-        "files": 713,
-        "bytes": 17383044030
+        "files": 714,
+        "bytes": 17439672290
+      },
+      "durable": {
+        "files": 43,
+        "bytes": 12543186956
       },
       "permanent_controls": {
         "files": 18,
@@ -1446,10 +1450,6 @@
       "stage1": {
         "files": 26,
         "bytes": 2453541326
-      },
-      "durable": {
-        "files": 32,
-        "bytes": 2369061578
       },
       "stage0_calvol": {
         "files": 27,
@@ -1533,7 +1533,7 @@
       },
       ".gitattributes": {
         "files": 1,
-        "bytes": 60543
+        "bytes": 60617
       },
       "c1_preserved_probes": {
         "files": 18,
@@ -1548,7 +1548,7 @@
     "files": [
       {
         "path": ".gitattributes",
-        "size_bytes": 60543,
+        "size_bytes": 60617,
         "sha256": null
       },
       {
@@ -1782,6 +1782,66 @@
         "sha256": "22c2cd71b77fda0a1888e867646b56643ecb53575f32f06f0ff5db663e44f983"
       },
       {
+        "path": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/init/config.json",
+        "size_bytes": 1154,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/init/model.safetensors",
+        "size_bytes": 4007724000,
+        "sha256": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222"
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/mapping/mapping.json",
+        "size_bytes": 2051,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/config.json",
+        "size_bytes": 1594,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/model.safetensors",
+        "size_bytes": 4034178856,
+        "sha256": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14"
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/mapping/mapping.json",
+        "size_bytes": 1214806,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/phase1_evidence/sob1_phase1_20261119_194259/sob1_phase1_20261119_194259_evidence.manifest.json",
+        "size_bytes": 78585,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/phase1_evidence/sob1_phase1_20261119_194259/sob1_phase1_20261119_194259_evidence.tar.gz",
+        "size_bytes": 29614165,
+        "sha256": "1968636e26237f7d96abd181d299de12e754fe83d7733cc6b60a3f438c1a02c2"
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/config.json",
+        "size_bytes": 1594,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors",
+        "size_bytes": 4022523088,
+        "sha256": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/mapping.json",
+        "size_bytes": 3349,
+        "sha256": null
+      },
+      {
+        "path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/tensors.safetensors",
+        "size_bytes": 26224816,
+        "sha256": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37"
+      },
+      {
         "path": "durable/stage1_teacher_parent_init/A_teacher_parent/A_teacher_parent-s20260726/final/1a02ba42945d8a82/config.json",
         "size_bytes": 1417,
         "sha256": null
@@ -1815,11 +1875,6 @@
         "path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/mapping/tensors.safetensors",
         "size_bytes": 20979888,
         "sha256": "aae2e9b853a541d458667434b763b058a33029624526d4e531eb19d48f38f286"
-      },
-      {
-        "path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
-        "size_bytes": 1947442680,
-        "sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb"
       },
       {
         "path": "durable/stage1_teacher_parent_init/evidence/tpi_train_20261117_180111/units_evidence.tgz",
@@ -6850,6 +6905,11 @@
         "path": "transfer/aad_autoinit_b09bb98e.bundle",
         "size_bytes": 19491260,
         "sha256": "e9ec9c97b5ebc283442455d4e0fe6f3f7b8ae2f08a6ae03c654508ce00c912dd"
+      },
+      {
+        "path": "transfer/aad_autoinit_b0bc53cb.bundle",
+        "size_bytes": 56628260,
+        "sha256": "cd72f5822b83024295ca9f7c4e70ecd1c1bd9ec73cc9208866ef01207f3e8448"
       },
       {
         "path": "transfer/aad_autoinit_b0e2bbef.bundle",
@@ -17594,6 +17654,159 @@
   ],
   "checkpoints": [
     {
+      "canonical_name": "init",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/model.safetensors"
+      ],
+      "experiment": "SOB1",
+      "role": "a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "phase 2 trains each arm from its initialization (plans/training_plan_<arm>.json); a final is a measured endpoint of the study",
+      "architecture": {
+        "num_hidden_layers": 36,
+        "hidden_size": 2560,
+        "intermediate_size": 3840,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 4034180450,
+      "size_human": "3.757 GiB",
+      "weights_sha256": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14",
+      "config_sha256": "80e72c4b2b5f27edaddaa933cb50f57be664c252e94793c6c399a42e529941a1",
+      "referenced_by": [
+        "README.md",
+        "configs/index.json",
+        "configs/shared/baselines/initialization_forward_baseline_v1.json",
+        "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/selection.json",
+        "configs/shared/pod/device_canary_artifacts.json",
+        "configs/shared/pod/micro_preflight/authorization.json",
+        "configs/shared/pod/preflight/harness.json",
+        "configs/shared/pod/preflight/preflight_artifacts.json",
+        "configs/shared/pod/preflight/preflight_artifacts_failed.json",
+        "configs/shared/validation/cuda_engineering.json",
+        "configs/shared/validation/cuda_engineering_deployment.json"
+      ],
+      "relay_path": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/model.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": true,
+      "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
+      "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
+      "never_delete_clause": "SOB1 is open: its phase 2 consumes the initializations, and its finals are the study's endpoints",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "init",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors"
+      ],
+      "experiment": "SOB1",
+      "role": "a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "phase 2 trains each arm from its initialization (plans/training_plan_<arm>.json); a final is a measured endpoint of the study",
+      "architecture": {
+        "num_hidden_layers": 36,
+        "hidden_size": 1280,
+        "intermediate_size": 9728,
+        "num_attention_heads": 32,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 4022524682,
+      "size_human": "3.746 GiB",
+      "weights_sha256": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
+      "config_sha256": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8",
+      "referenced_by": [
+        "README.md",
+        "configs/index.json",
+        "configs/shared/baselines/initialization_forward_baseline_v1.json",
+        "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/selection.json",
+        "configs/shared/pod/device_canary_artifacts.json",
+        "configs/shared/pod/micro_preflight/authorization.json",
+        "configs/shared/pod/preflight/harness.json",
+        "configs/shared/pod/preflight/preflight_artifacts.json",
+        "configs/shared/pod/preflight/preflight_artifacts_failed.json",
+        "configs/shared/validation/cuda_engineering.json",
+        "configs/shared/validation/cuda_engineering_deployment.json"
+      ],
+      "relay_path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": true,
+      "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
+      "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
+      "never_delete_clause": "SOB1 is open: its phase 2 consumes the initializations, and its finals are the study's endpoints",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "init",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/init",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/init/model.safetensors"
+      ],
+      "experiment": "SOB1",
+      "role": "a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "phase 2 trains each arm from its initialization (plans/training_plan_<arm>.json); a final is a measured endpoint of the study",
+      "architecture": {
+        "num_hidden_layers": 16,
+        "hidden_size": 2560,
+        "intermediate_size": 9728,
+        "num_attention_heads": 32,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 4007725154,
+      "size_human": "3.732 GiB",
+      "weights_sha256": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+      "config_sha256": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019",
+      "referenced_by": [
+        "README.md",
+        "configs/index.json",
+        "configs/shared/baselines/initialization_forward_baseline_v1.json",
+        "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/selection.json",
+        "configs/shared/pod/device_canary_artifacts.json",
+        "configs/shared/pod/micro_preflight/authorization.json",
+        "configs/shared/pod/preflight/harness.json",
+        "configs/shared/pod/preflight/preflight_artifacts.json",
+        "configs/shared/pod/preflight/preflight_artifacts_failed.json",
+        "configs/shared/validation/cuda_engineering.json",
+        "configs/shared/validation/cuda_engineering_deployment.json"
+      ],
+      "relay_path": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/init/model.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": true,
+      "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
+      "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
+      "never_delete_clause": "SOB1 is open: its phase 2 consumes the initializations, and its finals are the study's endpoints",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
       "canonical_name": "1a02ba42945d8a82",
       "kind": "checkpoint",
       "store": "external_store",
@@ -17720,7 +17933,7 @@
       ],
       "relay_path": null,
       "relay_verified": false,
-      "relay_same_size_unverified": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+      "relay_same_size_unverified": null,
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
       "reconstructable": true,
@@ -17742,32 +17955,35 @@
       "role": "A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's residual statistics",
       "retention": "reproducibility_required",
       "status": "active",
-      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from, and SOB1 phase 1's residual-width build reads them again (configs/stages/stage-1/single_operator_budget/selection.json :: residual_width.statistics: the relay copy, sha256 e4145e38...) in place of a second teacher statistics pass",
+      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from (SOB1 phase 1's residual-width build read their relay copy, sha256 e4145e38...; that phase is COMPLETE and closed)",
       "architecture": {},
       "size_bytes": 1947442680,
       "size_human": "1.814 GiB",
       "weights_sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
         "configs/stages/stage-1/single_operator_budget/selection.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/single_operator_budget/phase1_driver.py",
-        "scripts/stages/stage-1/single_operator_budget/selection.py",
-        "scripts/stages/stage-1/teacher_parent_initialization/init_driver.py"
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
+        "logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119b.json",
+        "logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119c.json",
+        "logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119d.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json"
       ],
-      "relay_path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
-      "relay_verified": true,
+      "relay_path": null,
+      "relay_verified": false,
       "relay_same_size_unverified": null,
       "relay_mirror_verification": null,
-      "canonical_location": "relay + local",
+      "canonical_location": "local only (no second copy)",
       "reconstructable": true,
       "reconstruction_recipe": "init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for bit against the journal)",
       "reconstruction_cost": "one L40S, about 25 min",
-      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay, and the statistics' relay copy is a declared input of SOB1 phase 1 (keep it there)",
+      "never_delete_clause": "the init's and the statistics' only copies (the init's relay copy retired 2026-11-18; the statistics' relay copy retired 2026-11-20 as a redundant copy by the maintainer's decision, tombstone relay_20261120_tpi1_teacher_residual_statistics); the mapping is also on the relay",
       "protected": true,
       "disposition": "keep"
     },
@@ -17901,7 +18117,7 @@
       "role": "A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's residual statistics",
       "retention": "reproducibility_required",
       "status": "active",
-      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from, and SOB1 phase 1's residual-width build reads them again (configs/stages/stage-1/single_operator_budget/selection.json :: residual_width.statistics: the relay copy, sha256 e4145e38...) in place of a second teacher statistics pass",
+      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from (SOB1 phase 1's residual-width build read their relay copy, sha256 e4145e38...; that phase is COMPLETE and closed)",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -17936,7 +18152,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for bit against the journal)",
       "reconstruction_cost": "one L40S, about 25 min",
-      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay, and the statistics' relay copy is a declared input of SOB1 phase 1 (keep it there)",
+      "never_delete_clause": "the init's and the statistics' only copies (the init's relay copy retired 2026-11-18; the statistics' relay copy retired 2026-11-20 as a redundant copy by the maintainer's decision, tombstone relay_20261120_tpi1_teacher_residual_statistics); the mapping is also on the relay",
       "protected": true,
       "disposition": "keep"
     },
@@ -18272,6 +18488,50 @@
       "disposition": "review"
     },
     {
+      "canonical_name": "tensors.safetensors",
+      "kind": "tensor_file",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/mapping/c853640b1ce2392c/mapping/tensors.safetensors",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/mapping/c853640b1ce2392c/mapping/tensors.safetensors"
+      ],
+      "experiment": "SOB1",
+      "role": "a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "phase 2 trains each arm from its initialization (plans/training_plan_<arm>.json); a final is a measured endpoint of the study",
+      "architecture": {},
+      "size_bytes": 26224816,
+      "size_human": "0.024 GiB",
+      "weights_sha256": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37",
+      "config_sha256": null,
+      "referenced_by": [
+        "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
+        "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
+      ],
+      "relay_path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/tensors.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": true,
+      "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
+      "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
+      "never_delete_clause": "SOB1 is open: its phase 2 consumes the initializations, and its finals are the study's endpoints",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
       "canonical_name": "p2_ceheavy",
       "kind": "artifact_tree",
       "store": "external_store",
@@ -18375,17 +18635,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18419,17 +18679,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18463,17 +18723,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18507,17 +18767,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18551,17 +18811,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18595,17 +18855,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18639,17 +18899,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18683,17 +18943,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18727,17 +18987,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18771,17 +19031,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18815,17 +19075,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18859,17 +19119,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18903,17 +19163,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18947,17 +19207,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -18991,17 +19251,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -19027,7 +19287,7 @@
       "role": "A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's residual statistics",
       "retention": "reproducibility_required",
       "status": "active",
-      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from, and SOB1 phase 1's residual-width build reads them again (configs/stages/stage-1/single_operator_budget/selection.json :: residual_width.statistics: the relay copy, sha256 e4145e38...) in place of a second teacher statistics pass",
+      "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from (SOB1 phase 1's residual-width build read their relay copy, sha256 e4145e38...; that phase is COMPLETE and closed)",
       "architecture": {},
       "size_bytes": 20979888,
       "size_human": "0.020 GiB",
@@ -19035,17 +19295,17 @@
       "config_sha256": null,
       "referenced_by": [
         "configs/stages/stage-1/single_operator_budget/design.json",
+        "docs/stages/stage-1/single_operator_budget/README.md",
+        "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
         "logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
-        "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json",
-        "logs/stages/stage-1/teacher_parent_initialization/storage/local_retention.json",
-        "scripts/stages/stage-1/reasoning_inheritance/README.md",
-        "scripts/stages/stage-1/reasoning_inheritance/driver.py",
-        "src/aadistill/initialization/planning/frozen_mapping.py"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json"
       ],
       "relay_path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -19055,7 +19315,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for bit against the journal)",
       "reconstruction_cost": "one L40S, about 25 min",
-      "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay, and the statistics' relay copy is a declared input of SOB1 phase 1 (keep it there)",
+      "never_delete_clause": "the init's and the statistics' only copies (the init's relay copy retired 2026-11-18; the statistics' relay copy retired 2026-11-20 as a redundant copy by the maintainer's decision, tombstone relay_20261120_tpi1_teacher_residual_statistics); the mapping is also on the relay",
       "protected": true,
       "disposition": "keep"
     },
@@ -20544,7 +20804,9 @@
         "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
         "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
         "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
-        "logs/maintenance/inventories/checkpoint_registry.json"
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors",
       "relay_verified": true,
@@ -20580,7 +20842,9 @@
         "configs/stages/stage-1/reasoning_inheritance/layer_merge/design.json",
         "docs/stages/stage-1/reasoning_inheritance/LAYER_MERGE_REPORT.md",
         "docs/stages/stage-1/reasoning_inheritance/REPORT.md",
-        "logs/maintenance/inventories/checkpoint_registry.json"
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
+        "logs/maintenance/inventories/relay_weight_dispositions_20261120.json"
       ],
       "relay_path": "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors",
       "relay_verified": true,
@@ -20743,12 +21007,12 @@
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
         "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "logs/maintenance/storage/storage_closeout_20260831.json",
         "logs/stages/stage-1/phase_c1/runs/attempt10/governance/readiness.json",
-        "logs/stages/stage-1/phase_c1/runs/attempt11/governance/readiness.json",
-        "logs/stages/stage-1/phase_c1/runs/attempt12/governance/readiness.json"
+        "logs/stages/stage-1/phase_c1/runs/attempt11/governance/readiness.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -20785,12 +21049,12 @@
         "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/storage/devbox_cleanup_20261119.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_103303/governance/authorization.json",
         "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_103303/runtime/session.json",
-        "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/governance/authorization.json",
-        "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/runtime/session.json"
+        "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816/governance/authorization.json"
       ],
       "relay_path": null,
       "relay_verified": false,

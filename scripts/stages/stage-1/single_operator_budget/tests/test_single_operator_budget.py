@@ -1187,7 +1187,22 @@ def _phase2_plan(tmp: Path) -> dict:
     return plan
 
 
-def _run_phase2(tmp: Path, monkeypatch, *, out: Path, resume: Path | None = None) -> dict:
+def _auth_for(plan_file: Path, arm: str = ARM):
+    """An artifact as `issue` writes it for ``arm`` (its kind, arm, plan and init record sha256), with the plan file
+    the driver will load standing in for the committed one."""
+    from types import SimpleNamespace
+    from stages.single_operator_budget import launch as L
+    sc = {**L.kind_conditions(L.TRAIN_KIND, arm=arm), "kind": L.TRAIN_KIND}
+    if arm == ARM:
+        sc["plan_sha256"] = L.SE.sha256_file(plan_file)
+    return SimpleNamespace(stage_conditions=sc)
+
+
+def _plan_of(tmp: Path) -> dict:
+    return json.loads((tmp / "plan.json").read_text())
+
+
+def _run_phase2(tmp: Path, monkeypatch, *, out: Path, resume: Path | None = None, auth=None, plan_file=None) -> dict:
     """One `train_driver.main` attempt: everything but the state machine, the completion checks, the runners' merge
     and the relay's contract stood in for (the trainer, the engine, the package, the pod's environment)."""
     from shared import study_engineering as SE
@@ -1201,7 +1216,8 @@ def _run_phase2(tmp: Path, monkeypatch, *, out: Path, resume: Path | None = None
     from stages.teacher_modes import training_plan as TP
     from stages.teacher_parent_initialization import train_driver as TD
     trained, asked, fetched = [], {}, []
-    monkeypatch.setattr(L.Authorization, "load", classmethod(lambda cls, p: object()))
+    auth = auth or _auth_for(tmp / "plan.json")
+    monkeypatch.setattr(L.Authorization, "load", classmethod(lambda cls, p: auth))
     monkeypatch.setattr(SE, "require_on_pod", lambda *a, **k: {"authorization_id": "test"})
     monkeypatch.setattr(SE, "identity_hash", lambda *a, **k: "h")
     monkeypatch.setattr(TC, "local_snapshot", lambda *a, **k: str(tmp))
@@ -1217,7 +1233,7 @@ def _run_phase2(tmp: Path, monkeypatch, *, out: Path, resume: Path | None = None
         "weights_sha256": {"model.safetensors": _sha((Path(model_dir) / "model.safetensors").read_bytes())},
         "linked": ["model.safetensors"]})
     argv = ["--authorization", "a.json", "--out", str(out), "--status", str(tmp / "status.log"), "--plan",
-            str(tmp / "plan.json"), "--unit-deadline-hours", "1", "--attempt", "sob1_train_test2"]
+            str(plan_file or (tmp / "plan.json")), "--unit-deadline-hours", "1", "--attempt", "sob1_train_test2"]
     rc = SD.main(argv + (["--resume", str(resume)] if resume else []))
     return {"rc": rc, "units": json.loads((out / "units.json").read_text()), "trained": trained, "asked": asked,
             "fetched": fetched}
@@ -1288,13 +1304,13 @@ def test_empty_reports_without_final_weights_are_never_done_and_the_unit_is_trai
             dirs.append(d)
     #: the defect: the old state function read the report files alone
     assert AU.state(tmp_path / "pod/none", dirs) == "done"
-    assert CP.session(prev, ARM)["complete"] is False
+    assert CP.session(prev, ARM, plan=_plan_of(tmp_path))["complete"] is False
     got = _run_phase2(tmp_path, monkeypatch, out=tmp_path / "attempt2/out", resume=prev)
     assert got["rc"] == 0 and got["units"]["terminal"] == "ALL_DONE", got["units"].get("error")
     assert got["trained"] == DESIGN["training"]["seeds"]
     assert all(got["units"]["units"][CP.unit_name(ARM, s)]["state_at_start"] == "train" for s in DESIGN["training"]["seeds"])
     out = tmp_path / "attempt2/out"
-    ses = CP.session(out, ARM)
+    ses = CP.session(out, ARM, plan=_plan_of(tmp_path))
     assert ses["complete"] and ses["n_complete"] == 4
     for k, v in ses["sets"].items():
         t = k.rsplit("/", 1)[0]
@@ -1319,7 +1335,7 @@ def test_an_empty_report_beside_a_durable_final_is_rescored_without_training_or_
         _sealed_final(prev, relay, s, tmp_path)
         for m in DESIGN["evaluation"]["protocol"]["modes"]:
             (_trained_set(prev, s, m) / "formal_report.json").write_text("{}\n")
-    before = CP.session(prev, ARM)
+    before = CP.session(prev, ARM, plan=_plan_of(tmp_path))
     assert not before["complete"] and all(v["problems"] == {"formal_report": ["empty ({})"]}
                                           for v in before["sets"].values())
     relay.calls.clear()
@@ -1327,7 +1343,7 @@ def test_an_empty_report_beside_a_durable_final_is_rescored_without_training_or_
     assert got["rc"] == 0 and got["units"]["terminal"] == "ALL_DONE", got["units"].get("error")
     assert got["trained"] == [] and got["fetched"] == [] and not any(got["asked"].values())
     assert not [c for c in relay.calls if c[0] in ("get", "put") and "/final/" in str(c[1])]
-    assert CP.session(tmp_path / "attempt2/out", ARM)["complete"]
+    assert CP.session(tmp_path / "attempt2/out", ARM, plan=_plan_of(tmp_path))["complete"]
     for s in DESIGN["training"]["seeds"]:
         row = got["units"]["units"][CP.unit_name(ARM, s)]
         assert row["state_at_start"] == "final_durable" and "restored_final" not in row
@@ -1384,21 +1400,33 @@ def test_another_seeds_parts_are_isolated_and_only_the_missing_items_come_from_t
         own, CP.generation_id("sob1_train_test2", t1, "H-T", 1)}
     iso = json.loads((d2 / CP.SUPERSEDED / CP.generation_id("sob1_train_test2", t1, "H-T", 1)
                       / "isolated_parts.json").read_text())
-    assert len(iso) == len(units) and CP.session(out, ARM)["complete"]
+    assert len(iso) == len(units) and CP.session(out, ARM, plan=_plan_of(tmp_path))["complete"]
 
 
-def _arm_session_evidence(out: Path, arm: str) -> dict[str, dict]:
-    """One arm's secured copy as a finished session leaves it: both finals durable and published, four sets
-    complete against them, reports rescored. Returns each final's file bodies by unit."""
+def _arm_session_evidence(out: Path, arm: str, relay=None) -> dict[str, dict]:
+    """One arm's secured copy as a finished session leaves it: both finals durable and published (on ``relay`` when
+    given), each with the completion record of the committed plan's unit beside it, four sets complete against them,
+    reports rescored. Returns each final's file bodies by unit."""
+    from aadistill.infrastructure.manifest import sha256_json
     from stages.single_operator_budget import completion as CP
+    plan, units = CP.plan_units(arm)
     bodies = {}
     for s in DESIGN["training"]["seeds"]:
         unit, t = CP.unit_name(arm, s), CP.train_target(arm, s)
-        b = {n: f"{arm} {s} {n}".encode() for n in ("model.safetensors", "config.json", "run_completion.json")}
+        cfg = units[unit]["config"]
+        steps = cfg["schedule"]["total_steps"]
+        b = {"model.safetensors": f"{arm} {s} weights".encode(), "config.json": f"{arm} {s} config".encode(),
+             "run_completion.json": json.dumps({"config_sha256": sha256_json(cfg), "final_step": steps,
+                                                "planned_total_steps": steps, "completed_all_steps": True}).encode()}
         bodies[unit] = b
-        (out / unit).mkdir(parents=True, exist_ok=True)
+        prefix = f"{plan['relay_prefix_root']}/{arm}/{unit}/final/{_sha(b['model.safetensors'])[:16]}"
+        (out / unit / "train").mkdir(parents=True, exist_ok=True)
+        (out / unit / "train" / "run_completion.json").write_bytes(b["run_completion.json"])
+        if relay is not None:
+            for n, v in b.items():
+                relay.files[f"{prefix}/{n}"] = v
         (out / unit / "final.json").write_text(json.dumps({
-            "relay": "fake", "prefix": f"durable/stage1_single_operator_budget/{arm}/{unit}/final/x", "verified": True,
+            "relay": "fake", "prefix": prefix, "verified": True,
             "files_sha256": {n: _sha(v) for n, v in b.items()}, "bytes": {n: len(v) for n, v in b.items()},
             "handoff": {"verified": True}}))
         w = {"model.safetensors": _sha(b["model.safetensors"])}
@@ -1420,9 +1448,15 @@ def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_wit
     import functools
     from stages.single_operator_budget import completion as CP
     from stages.single_operator_budget import launch as L
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    relay = FakeRelay()
+    monkeypatch.setattr(R, "run_online", relay)
+    tomb = tmp_path / "tombstones.json"
+    tomb.write_text((REPO / "logs/maintenance/inventories/checkpoint_tombstones.json").read_text())
     bodies = {}
     for a in DESIGN["training"]["unit_order"]["arms"]:
-        bodies.update(_arm_session_evidence(tmp_path / f"scr_{a}" / "store" / "out", a))
+        bodies.update(_arm_session_evidence(tmp_path / f"scr_{a}" / "store" / "out", a, relay))
 
     def getter(rec, dest):
         unit = rec["prefix"].split("/")[3]
@@ -1430,7 +1464,8 @@ def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_wit
             (Path(dest) / n).write_bytes(bodies[unit][n])
         return {"verified": True}
     monkeypatch.setattr(L, "phase2_completion", functools.partial(
-        L.phase2_completion, store=tmp_path / "store", record=tmp_path / "local2.json", getter=getter, root=tmp_path))
+        L.phase2_completion, store=tmp_path / "store", record=tmp_path / "local2.json", getter=getter, root=tmp_path,
+        tombstones=tomb))
     first = DESIGN["training"]["unit_order"]["arms"][0]
     launch = L.launch_spec(L.TRAIN_KIND, 60.0, arm=first)
     assert launch.completion_check.keywords["arm"] == first
@@ -1450,6 +1485,7 @@ def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_wit
         out = L.phase2_completion(f"t{i}", tmp_path / f"scr_{a}", arm=a)
         assert out["status"] == "COMPLETE"
     assert out["study"]["status"] == "COMPLETE"
+    assert str((out.get("relay_rotation") or {}).get("status")).startswith("ROTATED"), out.get("relay_rotation")
     doc = json.loads((tmp_path / L.STUDY_RESULT).read_text())
     assert doc["completion"]["finals"] == {"n_verified": 6, "n_expected": 6}
     assert doc["completion"]["sets"] == {"n_complete": 12, "n_expected": 12}
@@ -1466,6 +1502,15 @@ def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_wit
     rec = json.loads((tmp_path / "local2.json").read_text())
     assert sum(v["verified"] for k, v in rec["products"].items() if k.endswith("/final")) == 6   #: every arm kept
     assert len(list((tmp_path / "store").glob("*-s*/final/*/model.safetensors"))) == 6
+    #: the free relay's rotation: each COMPLETE arm's evidence archive is on the relay, then its finals' relay copies
+    #: are tombstoned and removed (confirmed absent); the dev box's six copies stay
+    rot = json.loads((tmp_path / L.ROTATION_RECORD).read_text())
+    assert set(rot["arms"]) == set(DESIGN["training"]["unit_order"]["arms"])
+    assert all(v["status"].startswith("ROTATED") and v["evidence"]["verified"] for v in rot["arms"].values())
+    assert not any("/final/" in k for k in relay.files)
+    assert sum(k.endswith("_evidence.tar.gz") for k in relay.files) == 3
+    ts = [t for t in json.loads(tomb.read_text())["tombstones"] if t.get("experiment") == "SOB1"]
+    assert len(ts) == 6 and all(t["deletion"]["status"] == "DELETED" and t["tombstone_written_utc"] for t in ts)
 
 
 def test_phase_1_is_closed_in_code_and_phase_2_is_funded_once_by_its_own_grant(tmp_path, monkeypatch, capsys):
@@ -1524,3 +1569,174 @@ def test_phase_2_disk_plan_counts_finals_evidence_and_archives_on_the_one_filesy
     assert doc["peak_bytes"]["expected"] >= finals and doc["sessions"][-1]["arm"] == DESIGN["training"]["unit_order"]["arms"][-1]
     assert doc["shortfall_with_swing_bytes"]["bound"] == max(0, doc["peak_bytes"]["bound"]
                                                             + doc["shared_filesystem_swing_bytes"] - doc["free_bytes"])
+
+
+# ---- the maintainer's four counter-examples (2026-11-20, second brief), through the real entry points ----------------
+
+def test_a_residual_width_artifact_with_the_depth_plan_is_refused_before_any_cost(tmp_path, monkeypatch, capsys):
+    """Counter-example 1: an artifact issued for the residual-width arm, launched with ``--arm depth_only``. The real
+    launcher refuses at $0 before the bundle, the provider or the relay is read; the runner's gate refuses the same;
+    and the pod's driver, handed the depth plan, refuses before fetching or training anything."""
+    from stages.single_operator_budget import launch as L
+    from stages.single_operator_budget import train_driver as SD
+    sc = {**L.kind_conditions(L.TRAIN_KIND, arm="residual_width"), "kind": L.TRAIN_KIND}
+    art = tmp_path / "width_artifact.json"
+    art.write_text(json.dumps({"stage_conditions": sc}))
+    touched = []
+    monkeypatch.setattr(L.SE, "launch_main", lambda *a, **k: touched.append("launch_main") or 0)
+    monkeypatch.setattr(L.SE, "live_position", lambda *a, **k: touched.append("provider") or {})
+    rc = L.main(["launch", "--kind", L.TRAIN_KIND, "--arm", "depth_only", "--run-id", "dry_mismatch", "--scr",
+                 str(tmp_path / "scr"), "--max-price", "1.11", "--dry-run", "--authorization", str(art)])
+    out = capsys.readouterr().out
+    assert rc == 11 and touched == [] and "does not fund the plan this launch would run" in out
+    assert "No provider resource was created" in out and "arm: the artifact binds 'residual_width'" in out
+    #: the runner's own gate, for the launch built from --arm depth_only
+    gate = next(c for c in L.launch_spec(L.TRAIN_KIND, 60.0, arm="depth_only").extra_prechecks
+                if c.__name__ == "the_launch_runs_the_authorized_arm_and_plan")
+    from types import SimpleNamespace
+    ok, msg = gate(SimpleNamespace(auth=SimpleNamespace(stage_conditions=sc)))
+    assert not ok and "plan_sha256" in msg
+    assert gate(SimpleNamespace(auth=SimpleNamespace(stage_conditions={
+        **L.kind_conditions(L.TRAIN_KIND, arm="depth_only"), "kind": L.TRAIN_KIND})))[0]
+    #: the pod: the width artifact with the depth plan stops the driver before anything is fetched or trained
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    from stages.teacher_parent_initialization import relay as R
+    relay = FakeRelay()
+    monkeypatch.setattr(R, "run_online", relay)
+    _phase2_plan(tmp_path)
+    got = _run_phase2(tmp_path, monkeypatch, out=tmp_path / "pod/out", auth=SimpleNamespace(stage_conditions=sc),
+                      plan_file=REPO / L.plan_path("depth_only"))
+    assert got["rc"] == 3 and "does not fund the plan this driver loaded" in got["units"]["error"]["error"]
+    assert got["trained"] == [] and got["fetched"] == [] and relay.calls == []
+
+
+def test_two_seeds_finals_swapped_are_refused_and_never_adopted(tmp_path, monkeypatch):
+    """Counter-example 2: both seeds' finals durable, then their ``final.json`` swapped between the two unit
+    directories while each directory keeps its OWN legitimate training completion record. The relay path, the archived
+    completion record (by sha256) and its config all disagree: the driver refuses the unit, trains nothing, evaluates
+    nothing; the dev box's session check reports both."""
+    _eval_set_or_skip()
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    from stages.teacher_parent_initialization import relay as R
+    relay = FakeRelay()
+    monkeypatch.setattr(R, "run_online", relay)
+    _phase2_plan(tmp_path)
+    s1, s2 = DESIGN["training"]["seeds"]
+    prev = tmp_path / "devbox/store/out"
+    for s in (s1, s2):
+        _sealed_final(prev, relay, s, tmp_path)
+    u1, u2 = CP.unit_name(ARM, s1), CP.unit_name(ARM, s2)
+    assert not CP.final_identity_problems(prev, u1, plan=_plan_of(tmp_path))       #: legit: taken over
+    f1, f2 = (prev / u1 / "final.json").read_text(), (prev / u2 / "final.json").read_text()
+    (prev / u1 / "final.json").write_text(f2)
+    (prev / u2 / "final.json").write_text(f1)
+    bad = CP.final_identity_problems(prev, u1, plan=_plan_of(tmp_path))
+    assert any("relay path" in b for b in bad) and any("not the record archived with the final" in b for b in bad)
+    ses = CP.session(prev, ARM, plan=_plan_of(tmp_path))
+    assert all(ses["finals"][u]["problems"] for u in (u1, u2))
+    got = _run_phase2(tmp_path, monkeypatch, out=tmp_path / "attempt2/out", resume=prev)
+    assert got["rc"] == 3 and "the final found is not this unit" in got["units"]["error"]["error"]
+    assert got["trained"] == [] and not any(got["asked"].values())
+
+
+def test_the_relay_preflight_asks_only_what_the_remaining_rotation_adds(tmp_path, monkeypatch):
+    """Counter-example 3: the width arm's first run needs one final and two save points (49.55 GiB); with seed 1's one
+    valid 21.03 GiB save point on the relay the remaining rotation needs 28.52 GiB (that save point is released by
+    seed 1's end); with seed 1's final already durable, 42.06 GiB. The listing's objects are reusable only when present,
+    verified and their LFS sha256 is the record's. The latest resumable save point is never removed before a later one
+    is uploaded."""
+    from types import SimpleNamespace
+    from stages.single_operator_budget import launch as L
+    G = 2 ** 30
+    plan = json.loads((REPO / L.plan_path(ARM)).read_text())
+    sizes = json.loads((REPO / L.STRUCTURES).read_text())["arms"][ARM]["checkpoint_bytes"]
+    u1, u2 = plan["unit_order"]
+    need = lambda st: L.rotation_need(plan, st, sizes)["peak_bytes"] / G  # noqa: E731
+    assert round(need({}), 2) == 49.55 == round((2 * sizes["save_point"] + sizes["final_fp32"]) / G, 2)
+    assert round(need({u1: {"save_points": [2208]}}), 2) == 28.52
+    assert round(need({u1: {"final": True}}), 2) == 42.06
+    assert need({u1: {"final": True}, u2: {"final": True}}) == 0
+    trace = L.rotation_need(plan, {u1: {"save_points": [2208]}}, sizes)["trace"]
+    first_up = next(i for i, t in enumerate(trace) if "uploaded" in t["step"])
+    assert all("removed" not in t["step"] for t in trace[:first_up])        #: the resumable one stays until then
+    #: the state the gate reads: a valid save point counts; one whose LFS object is not the record's does not
+    prefix = f"{plan['relay_prefix_root']}/{ARM}/{u1}/savepoints/step_002208"
+    rec = {"prefix": prefix, "verified": True, "step": 2208,
+           "files_sha256": {"model/model.safetensors": "a" * 64, "trainer_state.pt": "b" * 64}}
+    lists = {f"{plan['relay_prefix_root']}/{ARM}/{u1}/savepoints": {"records": [{"present": True, "record": rec}]}}
+    lfs = {f"{prefix}/model/model.safetensors": "a" * 64, f"{prefix}/trainer_state.pt": "b" * 64}
+    st = L.relay_state(ARM, list_records=lambda p: lists.get(p, {"records": []}), lfs_sha=lambda ps: lfs)
+    assert st[u1]["save_points"] == [2208] and not st[u1]["final"]
+    bad = L.relay_state(ARM, list_records=lambda p: lists.get(p, {"records": []}),
+                        lfs_sha=lambda ps: {**lfs, f"{prefix}/trainer_state.pt": "c" * 64})
+    assert bad[u1]["save_points"] == [] and "LFS sha256 differs" in bad[u1]["not_reusable"][0]["why"]
+    #: the launch's gate asks the relay for exactly the remaining need
+    asked = []
+    import aadistill.runtime.hub_capacity as HC
+    monkeypatch.setattr(L, "relay_state", lambda arm: st)
+    monkeypatch.setattr(HC, "would_accept", lambda repo, sizes_, tok: asked.append(sum(sizes_)) or SimpleNamespace(
+        accepted=True, __str__=lambda self: "ACCEPTED"))
+    tok = Path("~/.cache/huggingface/token").expanduser()
+    if not tok.is_file():
+        pytest.skip("no hub token file to read (the gate reads it before asking)")
+    ctx = SimpleNamespace(auth=SimpleNamespace(stage_conditions={"kind": L.TRAIN_KIND, "arm": ARM}), evidence={})
+    ok, msg = L.the_relay_has_room(ctx)
+    assert ok and round(asked[0] / G, 2) == 28.52 and ctx.evidence["relay_need"]["peak_gib"] == 28.52
+
+
+def test_a_failed_removal_stays_pending_and_the_next_takeover_retires_it(tmp_path, monkeypatch):
+    """Counter-example 4: the rotation's first removal of the previous save point fails (``{"verified": false}``); the
+    record stays PENDING (still on the relay, never read as retired). The pod is lost; the next attempt retries it
+    before anything is uploaded (it succeeds), resumes from the latest save point -- kept until the final hands off --
+    and finishes. Old records (``verified_absent: true``) still read as retired."""
+    _eval_set_or_skip()
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization import train_driver as TD
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay, save_point
+    relay = FakeRelay()
+    fails = {"n": 1}
+    real_remove = relay.remove
+
+    def flaky_remove(p):
+        if fails["n"] > 0:
+            fails["n"] -= 1
+            return {"verified": False, "error": "ReadTimeout: the hub did not answer"}
+        return real_remove(p)
+    relay.remove = flaky_remove
+    monkeypatch.setattr(R, "run_online", relay)
+    monkeypatch.setattr(TD, "_sleep", lambda s: None)
+    plan = _phase2_plan(tmp_path)
+    s1 = DESIGN["training"]["seeds"][0]
+    u = next(x for x in plan["units"] if x["seed"] == s1)
+    name, cfg = u["unit"], u["config"]
+    prefix = f"{plan['relay_prefix_root']}/{ARM}/{name}"
+    lost = tmp_path / "lost_pod"
+    ev = tmp_path / "devbox/store/out" / name
+    m = TD.SavepointMirror(name, lost, ev, cfg["schedule"]["total_steps"], prefix)
+    save_point(lost, 1104)
+    m.mirror_once()
+    save_point(lost, 2208)
+    m.mirror_once()
+    recs = json.loads((ev / "savepoints.json").read_text())
+    first = next(r for r in recs if r["step"] == 1104)
+    assert "removed" in first and not TD.retired(first) and first["removed"]["verified"] is False
+    assert any(k.startswith(f"{prefix}/savepoints/step_001104/") for k in relay.files)   #: still there, still counted
+    assert TD.retired({"removed": {"verified": True, "verified_absent": True}})           #: an old record's shape
+    calls_before = len(relay.calls)
+    got = _run_phase2(tmp_path, monkeypatch, out=tmp_path / "attempt2/out", resume=tmp_path / "devbox/store/out")
+    assert got["rc"] == 0 and got["units"]["terminal"] == "ALL_DONE", got["units"].get("error")
+    row = got["units"]["units"][name]
+    assert row["pending_removals_at_takeover"]["freed"] == ["step_001104"]
+    assert row["restored_savepoint"]["tag"] == "step_002208"
+    after = json.loads((tmp_path / "attempt2/out" / name / "savepoints.json").read_text())
+    s1104 = next(r for r in after if r["step"] == 1104)
+    assert TD.retired(s1104) and [a["verified_absent"] for a in s1104["remove_attempts"]] == [None, True]
+    assert all(TD.retired(r) for r in after)          #: 2208 retired too, but only once the final handed off
+    later = relay.calls[calls_before:]
+    rm2208 = next(i for i, c in enumerate(later) if c[0] == "remove" and "step_002208" in str(c[1]))
+    final_put = next(i for i, c in enumerate(later) if c[0] == "put" and "/final/" in str(c[1]))
+    assert final_put < rm2208
+    assert not any("/savepoints/" in k for k in relay.files)
+    assert CP.session(tmp_path / "attempt2/out", ARM, plan=_plan_of(tmp_path))["complete"]

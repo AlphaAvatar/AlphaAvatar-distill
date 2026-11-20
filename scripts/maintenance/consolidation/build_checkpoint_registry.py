@@ -125,15 +125,26 @@ CLASSIFY: dict[str, dict] = {
         experiment="TPI1", role="A_teacher_parent's initialization (bf16), its frozen mapping and the teacher's "
                                 "residual statistics",
         retention="reproducibility_required", status="active",
-        why="the input of both TPI1 training seeds; the statistics are what the width PCA was built from, and SOB1 "
-            "phase 1's residual-width build reads them again (configs/stages/stage-1/single_operator_budget/"
-            "selection.json :: residual_width.statistics: the relay copy, sha256 e4145e38...) in place of a second "
-            "teacher statistics pass",
-        never_delete="the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on "
-                     "the relay, and the statistics' relay copy is a declared input of SOB1 phase 1 (keep it there)",
+        why="the input of both TPI1 training seeds; the statistics are what the width PCA was built from (SOB1 "
+            "phase 1's residual-width build read their relay copy, sha256 e4145e38...; that phase is COMPLETE and "
+            "closed)",
+        never_delete="the init's and the statistics' only copies (the init's relay copy retired 2026-11-18; the "
+                     "statistics' relay copy retired 2026-11-20 as a redundant copy by the maintainer's decision, "
+                     "tombstone relay_20261120_tpi1_teacher_residual_statistics); the mapping is also on the relay",
         reconstruction="init_driver.py from the teacher, selection.json and the replayed statistics (gated bit for "
                        "bit against the journal)",
         reconstruction_cost="one L40S, about 25 min", disposition="keep"),
+    #: SOB1's three phase-1 initializations and mappings, retained from the relay (launch.py retain; logs/stages/stage-1/
+    #: single_operator_budget/storage/local_retention.json); phase 2's plans read their relay copies, and the dev box
+    #: holds the durable local ones. Phase 2's finals land under the same root (<arm>-s<seed>/final/).
+    "aad-artifacts/stage1_single_operator_budget/": dict(
+        experiment="SOB1", role="a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
+        retention="reproducibility_required", status="active",
+        why="phase 2 trains each arm from its initialization (plans/training_plan_<arm>.json); a final is a measured "
+            "endpoint of the study",
+        never_delete="SOB1 is open: its phase 2 consumes the initializations, and its finals are the study's endpoints",
+        reconstruction="phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
+        reconstruction_cost="one L40S, 0.2-1.5 h per arm", disposition="keep"),
     #: RI-LM1's candidates were kept as span-block deltas over D; both deltas (and their second hard links) were retired
     #: 2026-11-19 with D (tombstones devbox_20261119_rilm1_*): whatever is left under the prefix is evidence
     "aad-artifacts/stage1_layer_merge/": dict(

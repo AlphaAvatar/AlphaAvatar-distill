@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-20 (UTC), SOB1 PHASE 2 PREPARED AT $0 (phase 1 COMPLETE and closed in code; nothing running, nothing billing: no pod, no volume); the project cap ($1,161.06 needed), phase 2's grant, the storage and a merge into main are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-20 (UTC), SOB1 PHASE 2 READY AT $0 (four defects fixed, the project's storage inventoried; nothing running, nothing billing: no pod, no volume); the project cap ($1,161.06), phase 2's grant, the dev box's +64 GiB and a merge into main are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,27 +9,25 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 COMPLETE AND CLOSED IN CODE; PHASE 2 PREPARED AT $0, WAITING FOR THE MAINTAINER (2026-11-20) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
-- Phase 1, `sob1_phase1_20261119_194259`: $4.4348 of the $22.92 ceiling, one attempt, pod gone; `study_completion`
-  COMPLETE (`runs/.../closeout/phase1_completion.json`). The study grant's `kinds.sob1_phase1.closed` makes `issue`
-  and `launch` refuse phase 1; its $18.4852 remainder is void. Result (descriptive): static fluid core, every
-  untrained arm 0.00% against the teacher's 85.79% (thinking) / 70.53% (non-thinking). Pre-recovery diagnostics,
-  state evaluation suite (`results/pre_recovery_diagnostics.json`): depth only is closest to the teacher (KL 3.47,
-  top-1 34.08%), then residual width (7.70, 27.05%), then FFN + attention (9.35, 6.37%); all three go to phase 2.
-- Phase 2, prepared at $0 (docs README section 10; decisions.md 2026-11-20 "SOB1 phase 2 prepared"):
-  * its own state machine (`train_driver.py`): done only with the seed's final durable and both sets complete
-    against its sha256; regressions through the real entry point;
-  * `phase2_completion` on both closeout paths, `study-completion` (six finals, twelve sets, Holm m = 3 recomputed);
-  * three plans derived from the committed init records (`plans/training_plan_<arm>.json`), residual width first;
-  * its own proposal (`plans/proposal_phase2.json`): $185.87 ceiling + $1.00 reserve, project cap needed $1,161.06.
-- Position (live 2026-11-20 08:30Z): committed $974.1887 of the $1,000 cap ($25.8113 left), balance $35.8108; the
-  maintainer will top up $151.06.
-- Storage (`plans/disk_peak_phase2.json`, README section 8): the dev box's `/` has 6.96 GiB free against phase 2's 53.83
-  GiB bound peak, so the system disk would grow by 64 GiB. The relay has 48.77 GiB against the residual-width
-  rotation's 49.55 GiB: upgrade the hub account to PRO, or delete the redundant copies (the maintainer's).
-- Phase 1's raw generations: one archive, sha256 `1968636e…`, on the dev box and the relay, rescorable
-  (`storage/phase1_evidence_archive.json`).
-- Decisions owed: the project cap, phase 2's grant, the storage, a merge into main (README section 10).
+**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 COMPLETE AND CLOSED IN CODE; PHASE 2 PREPARED AT $0 AND ITS FOUR DEFECTS FIXED (2026-11-20) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
+- Phase 1: `sob1_phase1_20261119_194259`, $4.4348 of $22.92, COMPLETE; `kinds.sob1_phase1.closed` refuses issue and launch.
+  Untrained arms 0.00% on the static core; pre-recovery KL / top-1: depth 3.47 / 34.08%, width 7.70 / 27.05%, FFN +
+  attention 9.35 / 6.37% (`results/pre_recovery_diagnostics.json`); all three go to phase 2.
+- Phase 2 (docs README sections 8 and 10; decisions.md 2026-11-20, three entries):
+  * SOB1's own driver: done only with the seed's final durable, published and traceable to the seed (arm, relay path,
+    archived completion record), and both sets complete against it;
+  * the launcher, the runner and the pod refuse an artifact of another arm's plan;
+  * the relay preflight asks for what the remaining rotation adds; a failed removal stays pending, retried;
+  * the free relay rotation retires each arm's relay finals after the dev box re-hashes them;
+  * plans `plans/training_plan_<arm>.json`, residual width first; its own proposal: $185.87 + $1.00, project cap
+    $1,161.06.
+- Storage (inventory `logs/maintenance/storage/inventory_20261120.json`): the dev box retires nothing (0 B); the hub
+  retired the teacher statistics' redundant relay copy (1.81 GiB; relay 48.74 -> 50.55 GiB free). The dev box `/` has
+  5.34 GiB free against a 54.84 GiB bound peak, so the disk needs +64 GiB. The relay fits on the free plan (the width
+  arm's first run 49.55 GiB).
+- Position (live 09:50Z): committed $974.1887 of $1,000 ($25.8113 left), balance $35.8108; the maintainer will top up
+  $151.06.
+- Decisions owed: the project cap, phase 2's grant, the disk, the hub objects listed in the inventory, a merge into main.
 
 **Baseline (maintainer, 2026-11-18):** TPI1's A (teacher-parent initialization) is the reasoning-inheritance research's
 default baseline; B a historical reference (`docs/stages/stage-1/reasoning_inheritance/README.md`; decisions.md

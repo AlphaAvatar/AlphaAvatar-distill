@@ -131,12 +131,19 @@ def remove(record: dict, *, message: str, token_file: Path | None = None) -> dic
         api.create_commit(repo, operations=[CommitOperationDelete(path_in_repo=p) for p in there],
                           commit_message=message, repo_type="model")
     oids = set(record["files_sha256"].values())
-    objs = [o for o in api.list_lfs_files(repo) if o.file_oid in oids]
+    #: one LFS object serves every path with its sha256: an object a path that STAYS still references is not
+    #: permanently deleted (that would empty the kept path); it frees nothing and is reported as shared
+    kept = {getattr(getattr(i, "lfs", None), "sha256", None)
+            for i in api.list_repo_tree(repo, recursive=True, repo_type="model") if hasattr(i, "size")}
+    shared = sorted(oids & kept)
+    objs = [o for o in api.list_lfs_files(repo) if o.file_oid in oids - kept]
     if objs:
         api.permanently_delete_lfs_files(repo, objs, rewrite_history=True)
-    left = [o.file_oid for o in api.list_lfs_files(repo) if o.file_oid in oids]
-    return {"removed_paths": there, "lfs_objects_deleted": len(objs), "lfs_left": left,
-            "verified_absent": not left, "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    left = [o.file_oid for o in api.list_lfs_files(repo) if o.file_oid in oids - kept]
+    still = [i.path for i in api.get_paths_info(repo, paths, repo_type="model")]
+    return {"removed_paths": there, "lfs_objects_deleted": len(objs), "lfs_left": left, "shared_oids_kept": shared,
+            "freed_bytes": sum(int(o.size) for o in objs if o.file_oid not in left), "paths_left": still,
+            "verified_absent": not left and not still, "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 
 
 #: a durable record's own copy beside its files (``<record prefix>/record.json``): how a later attempt finds a save

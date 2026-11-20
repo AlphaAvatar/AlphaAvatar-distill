@@ -1,8 +1,9 @@
 # Single-operator compression at the same parameter budget (SOB1)
 
 Stage 1 owns this round; its training is `stage3_recovery`. Status: **phase 1 COMPLETE and closed in code
-(2026-11-20 UTC); phase 2 prepared at $0 and waiting for the maintainer's grant** (the project cap, phase 2's grant,
-the storage below). The maintainer fixed the protocol on 2026-11-19 (UTC), corrected the preparation three times the
+(2026-11-20 UTC); phase 2 prepared at $0, its four takeover and launch defects fixed and the project's storage
+inventoried (the second brief of 2026-11-20); waiting for the maintainer's grant** (the project cap, phase 2's
+grant, the dev box's disk; section 10). The maintainer fixed the protocol on 2026-11-19 (UTC), corrected the preparation three times the
 same day and granted phase 1 (`logs/budget/decisions.md`, the 2026-11-19 entries). Phase 1 ran once,
 `sob1_phase1_20261119_194259`: one L40S, 239.6 min, $4.4348 all-in of the $22.92 cap, the pod deleted and confirmed
 gone; `study_completion.status` COMPLETE (`runs/sob1_phase1_20261119_194259/closeout/phase1_completion.json`), the
@@ -42,8 +43,9 @@ gradient accumulation steps, 9,701 steps, `stage3_recovery`). The residual-width
 formal optimizer steps record the memory and continue as training. Phase 2 has its own proposal
 (`plans/proposal_phase2.json`): the Stage-3 recovery training and its evaluation are one budget, $185.87 ceiling
 (per-arm caps $63.43 / $61.09 / $61.35) + $1.00 teardown reserve, needing a project cap of **$1,161.06** at the
-2026-11-20 08:30Z position (committed $974.1887). Phase 1's $18.4852 remainder is void. The dev box and the relay
-cannot hold phase 2's checkpoints yet (section 8, "Phase 2's storage").
+2026-11-20 position (committed $974.1887, read again at 09:50Z). Phase 1's $18.4852 remainder is void. After
+the project-wide inventory the relay fits phase 2 on the free plan with the rotation, but the dev box does not hold
+its finals yet (section 8, "Phase 2's storage").
 
 | file | what it is |
 | --- | --- |
@@ -385,59 +387,80 @@ free bytes of the filesystem the session's `--scr` and the local store are on (`
 the dev box is shared with another project's session, and its free space moved from 14.72 to 19.09 GiB within the
 hour this round ran (a 6.74 GiB margin at the dry run). For phase 2, see the next paragraph.
 
-**Phase 2's storage (read-only, 2026-11-20; `plans/disk_peak_phase2.json`, `plans/resource_snapshot_phase2.json`).**
-Every byte lands on ONE filesystem, `/` (`/dev/nvme0n1p3`, ext4, the instance's 200 GiB system disk, shared with
-other projects): **6.96 GiB free**. Per training session (residual width shown; the other two within 0.05 GiB):
+**Phase 2's storage, after the project-wide inventory (2026-11-20, the second brief; `logs/maintenance/storage/
+inventory_20261120.json`, `plans/disk_peak_phase2.json`, `plans/resource_snapshot_phase2.json`).**
 
-| item | path | bound | expected |
+*The inventory* started from the files and the LFS objects themselves. On the dev box it covered every file of
+16 MiB or more under the project's roots, de-duplicated by inode; on the hub, every LFS object of the account's two
+private repos against their trees. Both were cross-checked with the registry (regenerated: SOB1's inits are now
+protected rows), the tombstones, the retention records and every launcher.
+* **Dev box: nothing retired, 0 B freed.** Its ten weight files of 100 MiB or more (22.4 GiB) are all kept:
+  * SOB1's three inits: phase 2 trains from them;
+  * A's initialization and both finals, and the teacher statistics: the baseline;
+  * the Stage-0 activation cache: data;
+  * the 0.6B canonical and D1 reference initializations: registry-protected.
+
+  The duplicates found are hard links: the hub cache blob of `candidates.jsonl`, and Research A's scratch evidence.
+  Removing either path frees 0 B. The two rows the registry proposes for retirement were refused by
+  `retire_eligible_checkpoints.py` (their weights are already gone, and code still names them).
+* **Hub: the teacher statistics' redundant relay copy retired, 1.81 GiB freed** (tombstone
+  `relay_20261120_tpi1_teacher_residual_statistics`). The dev box's copy re-hashed `e4145e38…`; phase 1's archive is
+  complete; no registered plan reads the remote object. Every one of its 13 code readers is classified in
+  `relay_weight_dispositions_20261120.json`: they belong to TPI1 (closed) or to SOB1 phase 1 (closed). The path and
+  its LFS object were confirmed gone. The relay had 48.74 GiB free before and **50.55 GiB** after (09:39Z).
+* **Kept on the hub, the maintainer's decision owed** (each is the only copy, protected, declared by a launcher, or
+  not a checkpoint):
+
+  | object | size | why it stays |
+  | --- | ---: | --- |
+  | `transfer/*.bundle` (396 session code bundles) | 7.75 GiB | reproducible from git; no rule covers retiring them |
+  | the two environment wheelhouses | 7.41 GiB | not checkpoints |
+  | Phase A attempt 12's five selected leaves (`aadistill-transport`) | 5.55 GiB | only copies; `autoinit_recovery_continuation_launch` declares the path |
+  | two permanent controls | 4.44 GiB | only copies; a launcher and a battery config declare them |
+  | the 0.6B family's random baseline | 1.11 GiB | only copy; no registry row, no launcher |
+  | a Stage-0 finalist | 1.11 GiB | declared by the proposed `independent-gated-E` study |
+
+*The dev box*, one filesystem `/`, **5.34 GiB free** at 09:50Z. It was 6.96 GiB at 08:43Z; other projects' files
+moved it, and this project's roots are unchanged.
+
+| item, per training session (residual width) | path | bound | expected |
 | --- | --- | ---: | ---: |
-| evidence of the two recovered units (generations, sealed parts, training records) | `<scr>/store/out` | 2.83 GiB | 0.23 GiB |
+| evidence of the two recovered units | `<scr>/store/out` | 2.83 GiB | 0.23 GiB |
 | one pull's archive in flight (not at the peak) | `<scr>/store/pull_<n>.tgz` | 0.17 GiB | |
 | teardown collector archive + its extracted copy | `<scr>/store/` | 0.02 GiB | |
 | resume archive (failure path) | `<scr>/resume_<run>.tgz` | 0.34 GiB | 0 |
+| evidence archive for the relay rotation | `<scr>/archive/` | 0.34 GiB | 0.03 GiB |
 | two fp32 finals | `~/aad-artifacts/stage1_single_operator_budget/<arm>-s<seed>/final/<sha16>/` | 14.98 GiB | 14.98 GiB |
-| **session peak (end of retention)** | `/` | **18.16 GiB** | **15.21 GiB** |
+| **session peak** | `/` | **18.50 GiB** | **15.24 GiB** |
 
-The bound takes every turn of both modes at the full 8,192-token context (1.25 x the teacher's turns in phase 1);
-the expectation is TPI1's measured evidence per recovered unit. Each session's finals and evidence stay, so after the
-third session `/` holds **53.83 GiB bound (45.66 GiB expected)**, with phase 1's 0.03 GiB evidence archive: the six
-finals are 44.94 GiB of it. With the measured 4.37 GiB swing of the other project's files kept free, the shortfall is
-**51.25 GiB bound (43.07 GiB expected)**. Even the first session does not fit today (18.16 GiB against 6.96 GiB): the
-launch's `the_dev_box_has_room` refuses it.
+Every session's finals and evidence stay, so after the third session `/` holds **54.84 GiB bound (45.74 GiB
+expected)**, of which the six finals are 44.94 GiB. With the measured 4.37 GiB swing of the other projects kept free,
+**the shortfall is 53.87 GiB bound (44.76 GiB expected)**. The first session alone does not fit (18.50 GiB against
+5.34 GiB). **Growing the system disk by 64 GiB** (200 -> 264 GiB) leaves 10.1 GiB beyond the bound and the swing.
+ECS resizes an ESSD online, then `growpart /dev/nvme0n1 3` and `resize2fs /dev/nvme0n1p3`. The reference price is
+USD 7.65 per 100 GiB-month (ESSD PL0, Alibaba Cloud's ECS documentation), about **$4.90/month**; the disk's category
+and the Singapore price are confirmed in the console. It is billed outside the RunPod project cap.
 
-No further cleanup frees room: no checkpoint of this project meets AGENTS.md 2.5 beyond the seven retired on
-2026-11-19. Phase 1's completion changed no consumer except the teacher statistics': they are not a checkpoint, and
-the dev box keeps the only local copy of them beside A's baseline. Kept: A's initialization and finals (the baseline's
-only copies), the three phase-1 initializations (phase 2 reads them), D1's reference and the 0.6B canonical
-initialization (registry-protected). Other projects' files (`/var/log/alphaavatar`, 34.0 GiB;
-`~/alphaavatar-speaker-eval`, 33.9 GiB) are outside the authorization. So the dev box needs more disk: **grow the
-system disk by 64 GiB (200 -> 264 GiB)**, which leaves 12.6 GiB beyond the bound and the swing. ECS resizes an ESSD
-online, then `growpart /dev/nvme0n1 3` and `resize2fs /dev/nvme0n1p3`. Reference price: USD 7.65 per 100 GiB-month
-for ESSD PL0 in Alibaba Cloud's ECS documentation (region not stated), about **$4.90/month**. The disk's category and
-the Singapore price are read in the console (the instance metadata does not give them), and they are billed outside
-the RunPod project cap.
+*The relay, on the free plan, with the rotation the maintainer prefers.*
+* **The rotation.** Once an arm's session is COMPLETE (both finals and four sets on their files, both finals re-hashed
+  on the dev box), its secured evidence goes to the relay as one verified archive. Then each final's relay copy is
+  tombstoned, removed and confirmed absent (`launch.rotate_relay`, `storage/relay_rotation_phase2.json`; the policy
+  is `design.json :: storage.phase_2_finals.relay_rotation`). A final that does not re-hash on the dev box keeps its
+  relay copy.
+* **The preflight.** A session asks the relay for what its REMAINING rotation adds (`launch.rotation_need` over
+  `launch.relay_state`). Only valid objects count: present, verified, and with the record's LFS sha256. A held save
+  point is credited only once a later one has been uploaded, and the latest resumable save point is never removed
+  before then.
 
-**The relay** (the hub account's private storage is account-wide: the free plan's 100 GB) had **48.77-48.81 GiB** free
-at 08:29Z with the three initializations on it (11.3 GiB; the old 60.08 GiB was read before they were uploaded), then
-0.03 GiB less for phase 1's evidence archive. A session's real peak, in rotation order (`launch.rotation_peaks`), is
-one final and two save points. The launcher used to ask for two of each, 57.04 GiB for residual width, which never
-coexist. Now `the_relay_has_room` asks for the real peak:
-
-| arm (order) | rotation peak | against 48.77 GiB |
+| the residual-width arm (first) | the relay must still accept | against 50.55 GiB free |
 | --- | ---: | --- |
-| residual width (first) | 49.55 GiB | **does not fit, short by 0.8 GiB** |
-| depth only | 46.46 GiB | fits by 2.32 GiB, only if no earlier arm's finals are still on the relay |
-| FFN + attention | 46.80 GiB | fits by 1.97 GiB, same |
+| first run | 49.55 GiB (two save points + one final) | **fits, 1.00 GiB margin** |
+| takeover: seed 1 holds one valid 21.03 GiB save point | 28.52 GiB | fits |
+| takeover: seed 1's final durable | 42.06 GiB (seed 2's two save points) | fits |
+| depth only / FFN + attention, after the previous arm's rotation | 46.46 / 46.80 GiB | fits, 4.09 / 3.75 GiB margin |
 
-Two ways to make room, each the maintainer's:
-* (a) upgrade the hub account to PRO, $9/month for 1 TB private. Everything fits, and the six finals stay on the relay
-  as a second copy.
-* (b) stay on the free plan. Delete the teacher statistics' relay copy (1.81 GiB): its one consumer, the phase-1 width
-  build, has finished, and the dev box keeps a copy. Then, before each next session, remove each arm's final copies
-  from the relay once the dev box holds them re-hashed. The dev box would then hold the only copy of each final, as it
-  does for TPI1's A.
-
-Recommended: the 64 GiB disk and (a).
+**HF PRO is not needed** under this rotation. No peak exceeds the free plan's 100 GB: the largest is the width arm's
+first run, 49.55 GiB against 50.55 GiB.
 
 **Fixed: streams under `evaluation/live/`.** The runners write their live streams beside the units they serve,
 `<unit>/../../live`, which is `evaluation/live/` in this layout. The poll's listing, `take_over` and the resume archive
@@ -491,6 +514,33 @@ driver is now this study's own (`train_driver.py`, TPI1's durability helpers unc
 (section 6). The regressions go through `train_driver.main` with a `{}` report and no final, a `{}` report beside a
 durable final, and another seed's shards, and through a three-arm closeout to the study's completion:
 `tests/test_single_operator_budget.py`.
+
+**Fixed (2026-11-20, the second brief): four takeover and launch defects**, each with a counter-example through the
+real entry point (`tests/test_single_operator_budget.py`):
+1. *The authorized arm against the plan actually run.* The launcher's gates compared the artifact with records of its
+   own arm, while the pod command ran the `--arm` plan. Now:
+   * `launch.py launch` refuses at $0, before the bundle, the provider or the relay is read, when the artifact's arm,
+     plan, plan sha256 or init record sha256 is not what `--arm` would run (`arm_binding_problems`);
+   * the runner's gate `the_launch_runs_the_authorized_arm_and_plan` does the same;
+   * the pod's driver checks the plan it loaded against the artifact before fetching anything.
+
+   Counter-example: a residual-width artifact launched with the depth plan is refused all three ways.
+2. *A final traceable to its seed.* A takeover checks the final found (`completion.final_identity_problems`): the arm,
+   the seed's relay path `<root>/<arm>/<unit>/final/<sha16>`, and the training completion record archived with the
+   weights. That record must match the evidence's `train/` copy by sha256, carry this unit's config hash, and record
+   all 9,701 steps. A final that does not check out stops the unit: it is never adopted and never retrained.
+   Counter-example: the two seeds' `final.json` swapped, each directory keeping its own legitimate record, is refused.
+   Legitimate finals are still taken over; `{}` reports are only rescored; missing items are only filled in.
+3. *The relay preflight by what a resume adds* (`rotation_need` / `relay_state`, the table above): 49.55 / 28.52 /
+   42.06 GiB for a first run, one valid 21.03 GiB save point held, and seed 1's final durable.
+4. *A failed removal never read as retired.* `relay.remove` answers `{"verified": false}` on a timeout, and the
+   rotation took any non-empty `removed` as done. Now a record is retired only when `verified_absent` is true; old
+   records keep that meaning. A failed removal stays PENDING (still counted) and is retried before the next large
+   upload, before a final's upload, and at a takeover, only for a save point a later published one supersedes.
+   `relay.remove` also keeps an LFS object that a path which stays still references, and reports what it freed. A
+   save point found only in the relay listing now enters `savepoints.json`, so it is retired, not leaked.
+   Counter-example: the first removal fails, the pod is lost, the next attempt retires it before uploading anything,
+   and the latest save point is removed only after the final hands off.
 
 **Takeover.** TPI1's durability helpers, with this round's two repairs:
 
@@ -612,5 +662,11 @@ runner's all-in; that was fixed then (`test_the_hard_cap_is_the_runners_all_in`)
    * **the project cap: $1,161.06** (committed $974.1887 at 08:30Z + the $185.87 ceiling + the $1.00 reserve). The
      maintainer tops the provider balance up by $151.06 ($35.8108 -> $186.87);
    * **phase 2's grant** from `plans/proposal_phase2.json` (`launch.py grant --kind sob1_train --decision ...`);
-   * **the storage** (section 8, "Phase 2's storage"): the dev box's disk, and room on the relay for the residual-width
-     arm's rotation.
+   * **the dev box's disk** (section 8): grow the system disk by 64 GiB (shortfall 53.87 GiB bound, 44.76 GiB expected;
+     about $4.90/month at the reference price). Phase 2 cannot start without it: even the first session needs
+     18.50 GiB against 5.34 GiB free.
+   * The relay needs no purchase. The free plan fits with the rotation: the largest need is 49.55 GiB against
+     50.55 GiB free.
+3. Kept on the hub, for the maintainer: 7.75 GiB of session code bundles, 7.41 GiB of environment wheels, Phase A's
+   5.55 GiB of selected leaves, 4.44 GiB of permanent controls, the 1.11 GiB random baseline and the 1.11 GiB
+   Stage-0 finalist (section 8; `inventory_20261120.json`).

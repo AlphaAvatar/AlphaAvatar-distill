@@ -176,6 +176,87 @@ def relay_object_sizes(kind: str, arm: str | None = None) -> list[int]:
     return [b["save_point"], b["save_point"], b["final_fp32"]]
 
 
+def rotation_need(plan: dict, state: dict, sizes: dict) -> dict:
+    """What the relay must still accept, as the remaining rotation of the arm's units would run from ``state`` (what
+    the relay already holds, `relay_state`), in the driver's order: each later save point is uploaded while every
+    earlier one is still there, then they are removed (a held superseded one is credited only then); the final is uploaded while the last save point is there, then the save
+    points go. A unit whose final is held uploads nothing. Bytes already held are in the quota already: the need is
+    the peak of (bytes uploaded - bytes removed) over the sequence. The latest resumable save point is never removed
+    before a later one is uploaded."""
+    sp, fin = int(sizes["save_point"]), int(sizes["final_fp32"])
+    net, peak, trace = 0, 0, []
+
+    def step(what: str, delta: int):
+        nonlocal net, peak
+        net += delta
+        peak = max(peak, net)
+        trace.append({"step": what, "net_bytes": net})
+    for name in plan["unit_order"]:
+        u = next(x for x in plan["units"] if x["unit"] == name)
+        st = state.get(name) or {}
+        held = sorted(st.get("save_points") or [])         #: steps of the valid save points the relay holds
+        if st.get("final"):
+            for k in held:
+                step(f"{name}: save point {k} retired (the final is held)", -sp)
+            continue
+        latest = held[-1] if held else 0
+        every, total = int(u["config"]["checkpoint"]["save_every"]), int(u["config"]["schedule"]["total_steps"])
+        #: every held save point stays until the next upload hands off (the mirror then removes all older ones): the
+        #: superseded ones are credited only then, never before -- the need is never under-asked
+        current = list(held)
+        for k in range(every, total, every):
+            if k <= latest:
+                continue
+            step(f"{name}: save point {k} uploaded", sp)
+            for _ in current:
+                step(f"{name}: save point before {k} removed", -sp)
+            current = [k]
+        step(f"{name}: final uploaded", fin)
+        for _ in current:
+            step(f"{name}: save points retired after the final", -sp)
+    return {"peak_bytes": peak, "peak_gib": round(peak / 2 ** 30, 2), "end_bytes": net, "trace": trace,
+            "rule": "the peak of bytes uploaded minus bytes removed over the remaining rotation (rotation_need)"}
+
+
+def relay_state(arm: str, *, list_records=None, lfs_sha=None) -> dict:
+    """What the relay holds for the arm's units NOW ($0, read-only): each unit's save points and final whose record is
+    verified, whose files are all listed, and whose LFS objects carry the record's sha256 (a size or hash that differs
+    is not reusable and is reported, never counted)."""
+    from stages.teacher_parent_initialization import train_driver as TD
+    plan = json.loads((REPO / plan_path(arm)).read_text())
+    list_records = list_records or (lambda prefix: TD.list_records(prefix, TD.durability(plan)))
+    lfs_sha = lfs_sha or _lfs_sha
+    out = {}
+    for name in plan["unit_order"]:
+        up = f"{plan['relay_prefix_root']}/{arm}/{name}"
+        row = {"save_points": [], "final": False, "not_reusable": []}
+        for kind in ("savepoints", "final"):
+            for x in list_records(f"{up}/{kind}").get("records", []):
+                rec = x["record"]
+                big = {f"{rec['prefix']}/{k}": v for k, v in (rec.get("files_sha256") or {}).items()
+                       if k.endswith((".safetensors", ".pt"))}
+                ok = bool(x.get("present") and rec.get("verified") and big)
+                got = lfs_sha(list(big)) if ok else {}
+                bad = [q for q, v in big.items() if got.get(q) != v]
+                if not ok or bad:
+                    row["not_reusable"].append({"prefix": rec.get("prefix"), "why": "not present or not verified"
+                                                if not ok else f"LFS sha256 differs at {bad}"})
+                elif kind == "final":
+                    row["final"] = True
+                else:
+                    row["save_points"].append(int(rec["step"]))
+        out[name] = row
+    return out
+
+
+def _lfs_sha(paths: list[str]) -> dict[str, str]:
+    from huggingface_hub import HfApi
+    from shared.deployment import MAIN_RELAY
+    tok = Path(os.path.expanduser("~/.cache/huggingface/token")).read_text().strip()
+    info = HfApi(token=tok).get_paths_info(MAIN_RELAY, paths, repo_type="model")
+    return {i.path: getattr(getattr(i, "lfs", None), "sha256", None) for i in info}
+
+
 def rotation_peaks(arm: str) -> list[dict]:
     """What a training session holds on the relay at each step of its rotation (bytes), seed 1 then seed 2."""
     b = json.loads((REPO / STRUCTURES).read_text())["arms"][arm]["checkpoint_bytes"]
@@ -220,15 +301,71 @@ def the_teardown_reserve_stays(ctx) -> tuple[bool, str]:
             if not bad else "; ".join(bad))
 
 
+def chunks(n: int, most: int = 10 * 2 ** 30) -> list[int]:
+    """``n`` bytes as objects of at most ``most`` (the hub refuses one object of 50 GB or more by its own limit)."""
+    k = max(1, -(-int(n) // most))
+    return [int(n) // k] * (k - 1) + [int(n) - (int(n) // k) * (k - 1)]
+
+
 def the_relay_has_room(ctx) -> tuple[bool, str]:
+    """Phase 1: its three inits. A training session: what the REMAINING rotation will still add (`rotation_need`) from
+    what the relay holds now (`relay_state`): a first run asks for two save points and a final; a takeover only for
+    what is left, crediting the valid objects already there."""
     from aadistill.runtime.hub_capacity import would_accept
     from shared.deployment import MAIN_RELAY
     tok = Path(os.path.expanduser("~/.cache/huggingface/token"))
     if not tok.is_file():
         return False, "no hub token on the dev box to ask the relay"
-    v = would_accept(MAIN_RELAY, relay_object_sizes(_kind(ctx), _arm(ctx)), tok.read_text().strip())
+    if _kind(ctx) != TRAIN_KIND:
+        v = would_accept(MAIN_RELAY, relay_object_sizes(_kind(ctx), _arm(ctx)), tok.read_text().strip())
+        ctx.evidence["relay_room"] = str(v)
+        return v.accepted, f"the relay would accept the {_kind(ctx)} session's bytes: {v}"
+    arm = _arm(ctx)
+    plan = json.loads((REPO / plan_path(arm)).read_text())
+    sizes = json.loads((REPO / STRUCTURES).read_text())["arms"][arm]["checkpoint_bytes"]
+    state = relay_state(arm)
+    need = rotation_need(plan, state, sizes)
+    ctx.evidence["relay_state"], ctx.evidence["relay_need"] = state, {k: v for k, v in need.items() if k != "trace"}
+    if need["peak_bytes"] <= 0:
+        return True, f"the remaining rotation adds nothing beyond what the relay holds ({state})"
+    v = would_accept(MAIN_RELAY, chunks(need["peak_bytes"]), tok.read_text().strip())
     ctx.evidence["relay_room"] = str(v)
-    return v.accepted, f"the relay would accept the {_kind(ctx)} session's bytes: {v}"
+    return v.accepted, (f"the remaining rotation needs {need['peak_gib']} GiB more at its peak (held now: "
+                        f"{ {k: (r['save_points'], r['final']) for k, r in state.items()} }): {v}")
+
+
+def arm_binding_problems(sc: dict, arm: str | None, root: Path = REPO) -> list[str]:
+    """A training artifact funds ONE arm's plan: what this launch would run (``--arm``: its plan path, the plan's and
+    its init record's sha256, on this tree) must be what the artifact binds. Empty when they agree."""
+    if (sc or {}).get("kind") != TRAIN_KIND:
+        return []
+    if arm is None:
+        return ["the launch names no --arm"]
+    try:
+        want = kind_conditions(TRAIN_KIND, root, arm)
+    except (OSError, KeyError, ValueError, SE.AuthorizationError) as exc:
+        return [f"{arm}'s plan is not on this tree: {exc}"]
+    return [f"{k}: the artifact binds {sc.get(k)!r}, this launch's --arm {arm} runs {want[k]!r}"
+            for k in ("arm", "plan", "plan_sha256", "init_record_sha256") if sc.get(k) != want[k]]
+
+
+def launch_arm_gate(arm: str | None):
+    """The runner's gate for the launch's own arm (bound when the launch is built from ``--arm``)."""
+    def the_launch_runs_the_authorized_arm_and_plan(ctx) -> tuple[bool, str]:
+        bad = arm_binding_problems(getattr(ctx.auth, "stage_conditions", None) or {}, arm)
+        return (not bad, f"the artifact funds the plan this launch runs ({arm})" if not bad else "; ".join(bad))
+    return the_launch_runs_the_authorized_arm_and_plan
+
+
+def artifact_conditions(argv: list[str]) -> dict | None:
+    """The stage conditions of the artifact a ``launch`` command line would read: ``--authorization`` (a dry run),
+    else the run's own one-use artifact; None when there is none to read (the launcher refuses that itself)."""
+    def val(flag):
+        return argv[argv.index(flag) + 1] if flag in argv and argv.index(flag) + 1 < len(argv) else None
+    path = val("--authorization") or (str(REPO / STUDY.authorization_path(val("--run-id"))) if val("--run-id") else None)
+    if not path or not Path(path).is_file():
+        return None
+    return json.loads(Path(path).read_text()).get("stage_conditions") or {}
 
 
 def the_kind_records_are_the_bound_ones(ctx) -> tuple[bool, str]:
@@ -365,7 +502,8 @@ def launch_spec(kind: str, minutes: float = 0.0, resume_from: str | None = None,
         teacher_revision=d["teacher"]["revision"], kind=kind, local_assets=assets, disk_gb=150,
         relay_inputs=relay, driver=DRIVERS[kind],
         extra_prechecks=(the_authorization_is_in_the_session_commit, the_teardown_reserve_stays, the_relay_has_room,
-                         the_kind_records_are_the_bound_ones, the_initialization_is_durable, the_dev_box_has_room),
+                         the_kind_records_are_the_bound_ones, the_initialization_is_durable, the_dev_box_has_room,
+                         *((launch_arm_gate(arm),) if kind == TRAIN_KIND else ())),
         validation_minutes=float(minutes or driver_minutes(kind, arm)), setup_minutes=25.0, contingency_fraction=0.05,
         description=desc, artifact_spec="configs/stages/stage-1/single_operator_budget/artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; every finished file is on the "
@@ -556,7 +694,8 @@ def _utc() -> str:
 
 
 def phase2_completion(run_id: str, scr: Path, *, arm: str, store: Path | None = None,
-                      record: Path = REPO / LOCAL_RECORD_PHASE2, getter=None, root: Path = REPO) -> dict:
+                      record: Path = REPO / LOCAL_RECORD_PHASE2, getter=None, root: Path = REPO,
+                      tombstones: Path | None = None) -> dict:
     """A training session's scientific completion, which every closeout of a ``sob1_train`` session runs (the formal
     launch's and a manual ``closeout`` alike), after the pod is gone. COMPLETE only when the arm's two finals are
     durable and its four sets complete against them on the dev box's secured copy (`completion.session`) AND both
@@ -591,10 +730,142 @@ def phase2_completion(run_id: str, scr: Path, *, arm: str, store: Path | None = 
     dest.write_text(json.dumps(doc, indent=1, default=str) + "\n")
     res = {"status": doc["status"], "arm": arm, "unfinished": sorted(unfinished),
            "record": str(dest.relative_to(root)) if dest.is_relative_to(root) else str(dest)}
+    if doc["status"] == "COMPLETE" and C.design()["storage"]["phase_2_finals"].get("relay_rotation") == "retire":
+        try:                                #: after the record, so a failing rotation can never lose it
+            res["relay_rotation"] = rotate_relay(arm, run_id, Path(scr), json.loads(Path(record).read_text()), root=root,
+                                                 tombstones=tombstones)
+        except Exception as exc:  # noqa: BLE001
+            res["relay_rotation"] = {"status": "FAILED", "error": f"{type(exc).__name__}: {str(exc)[:800]}"}
     if doc["status"] == "COMPLETE":
         st = study_completion(root=root)
         res["study"] = {k: st[k] for k in ("status", "unfinished", "record")}
     return res
+
+
+TOMBSTONES = Path("logs/maintenance/inventories/checkpoint_tombstones.json")
+ROTATION_RECORD = LOGS / "storage/relay_rotation_phase2.json"
+ROTATION_DECISION = ("maintainer 2026-11-20 (logs/budget/decisions.md, 'SOB1 phase 2 fixes, storage inventory'): "
+                     "「优先采用免费 relay 轮转：每组两个种子的最终权重都已在开发机逐文件核验、该组评测证据已持久化后，"
+                     "再退役远端冗余副本。」")
+
+
+def evidence_archive(src: Path, dest: Path) -> dict:
+    """``src`` (a session's secured evidence) as ONE deterministic archive under ``out/`` (sorted paths, mtime 0,
+    uid / gid 0, mode 644, gzip mtime 0) with its per-file sha256 manifest beside it."""
+    import gzip
+    import io
+    import tarfile
+    files = sorted(q for q in Path(src).rglob("*") if q.is_file())
+    man = {str(q.relative_to(src)): {"sha256": SE.sha256_file(q), "bytes": q.stat().st_size} for q in files}
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w", format=tarfile.PAX_FORMAT) as t:
+        for q in files:
+            ti = tarfile.TarInfo(f"out/{q.relative_to(src)}")
+            ti.size, ti.mtime, ti.mode, ti.uid, ti.gid, ti.uname, ti.gname = q.stat().st_size, 0, 0o644, 0, 0, "", ""
+            with open(q, "rb") as f:
+                t.addfile(ti, f)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with open(dest, "wb") as f, gzip.GzipFile(filename="", mode="wb", fileobj=f, mtime=0, compresslevel=9) as g:
+        g.write(buf.getvalue())
+    mpath = dest.with_name(dest.name.replace(".tar.gz", ".manifest.json"))
+    mpath.write_text(json.dumps(man, indent=1, sort_keys=True) + "\n")
+    return {"archive": str(dest), "sha256": SE.sha256_file(dest), "bytes": dest.stat().st_size, "files": len(man),
+            "manifest": str(mpath), "manifest_sha256": SE.sha256_file(mpath)}
+
+
+def write_tombstone(entry: dict, path: Path) -> None:
+    """Append ``entry`` to the project's tombstones BEFORE the bytes go (retire_artifact.py's schema and totals)."""
+    doc = json.loads(path.read_text())
+    if any(t["canonical_id"] == entry["canonical_id"] for t in doc["tombstones"]):
+        raise SE.AuthorizationError(f"a tombstone for {entry['canonical_id']} already exists")
+    doc["fields"] = sorted(set(doc["fields"]) | set(entry))
+    doc["tombstones"].append(entry)
+    if "totals" in doc:
+        t = doc["totals"]
+        t.update(tombstones_total=t["tombstones_total"] + 1, active=t["active"] + 1,
+                 active_retired_bytes=t["active_retired_bytes"] + int(entry["size_bytes"]))
+        t["active_retired_human"] = f"{t['active_retired_bytes'] / 2**30:.3f} GiB"
+    path.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
+
+
+def rotate_relay(arm: str, run_id: str, scr: Path, local: dict, *, root: Path = REPO,
+                 tombstones: Path | None = None) -> dict:
+    """The free relay's rotation after an arm's session is COMPLETE (`design.json :: storage.phase_2_finals`): (1) the
+    session's secured evidence as one archive on the relay, uploaded, downloaded again and re-hashed; then (2) for each
+    final whose dev-box copy re-hashes file by file to its record NOW, a tombstone first, then the relay copy removed
+    (`relay.remove`, permanent, the pointer with it) and confirmed absent. A final that fails any of these keeps its
+    relay copy. Writes ``storage/relay_rotation_phase2.json``."""
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization import train_driver as TD
+    tombstones = Path(tombstones or (root / TOMBSTONES))
+    out = Path(scr) / "store" / "out"
+    rec_path = Path(root) / ROTATION_RECORD
+    doc = json.loads(rec_path.read_text()) if rec_path.is_file() else {
+        "schema": "aadistill.stage1.single_operator_budget.relay_rotation/v1", "decision": ROTATION_DECISION, "arms": {}}
+    row = doc["arms"].setdefault(arm, {"run_id": run_id, "finals": {}})
+    arch = Path(scr) / "archive" / f"{run_id}_evidence.tar.gz"     #: beside the secured copy, on the same disk
+    if not (row.get("evidence") or {}).get("verified"):
+        a = evidence_archive(out, arch)
+        put = R.run_online("put", {"files": {Path(a["archive"]).name: a["archive"], Path(a["manifest"]).name: a["manifest"]},
+                                   "prefix": f"{C.relay_root()}/phase2_evidence/{run_id}", "scratch": str(arch.parent),
+                                   "message": f"SOB1 phase 2: {run_id}'s secured evidence, one archive"}, timeout_s=7200)
+        row["evidence"] = {**a, "relay": {k: put.get(k) for k in ("relay", "prefix", "files_sha256", "error")},
+                           "verified": bool(put.get("verified"))}
+    if not row["evidence"]["verified"]:
+        row["status"] = "EVIDENCE_NOT_DURABLE: no relay copy is retired"
+    else:
+        for t in CP.train_targets(arm):
+            unit = CP.parse_train_target(t)["unit"]
+            fin = json.loads((out / unit / "final.json").read_text())
+            if (row["finals"].get(unit) or {}).get("verified_absent"):
+                continue
+            prod = (local.get("products") or {}).get(f"{unit}/final") or {}
+            files = {k: v for k, v in fin["files_sha256"].items() if k != R.POINTER}
+            here = {k: (SE.sha256_file(Path(prod["path"]) / k) if prod.get("path") and (Path(prod["path"]) / k).is_file()
+                        else None) for k in files}
+            if here != files:
+                row["finals"][unit] = {"kept": "the dev box's copy does not re-hash to the record", "on_disk": here}
+                continue
+            size = sum(int(v) for v in (fin.get("bytes") or {}).values())
+            tid = f"relay_{run_id}_{unit}_final"
+            write_tombstone({
+                "canonical_id": tid, "historical_paths": [f"{fin['prefix']}/{k}" for k in sorted(files)],
+                "store": "relay", "relay_path": fin["prefix"], "retention_tier": "REDUNDANT_REMOTE_COPY",
+                "experiment": "SOB1", "seed": CP.parse_train_target(t)["seed"],
+                "scientific_role": f"{unit}'s final weights (fp32): the relay COPY; the dev box keeps the copy",
+                "weights_sha256": files.get("model.safetensors"), "config_sha256": None, "architecture": None,
+                "size_bytes": size, "size_human": f"{size / 2**30:.3f} GiB", "n_files": len(files),
+                "members": [{"path": f"{fin['prefix']}/{k}", "sha256": v} for k, v in sorted(files.items())],
+                "deletion_criterion": "byte_identical_duplicate",
+                "deletion_criterion_meaning": "byte-identical to a copy that survives",
+                "same_hash_copies": [{"location": prod["path"], "kind": "local",
+                                      "verified": "every file re-hashed to the record just before the removal"}],
+                "canonical_surviving_evidence": prod["path"], "frozen_results_location": str(rec_path.relative_to(root))
+                if rec_path.is_relative_to(root) else str(rec_path),
+                "reason_physical_weights_deleted": (f"the free relay's rotation: {arm}'s session {run_id} is COMPLETE "
+                                                    "(both finals and four sets on their files), its evidence archive "
+                                                    "is on the relay, and this final re-hashes on the dev box"),
+                "maintainer_decision": ROTATION_DECISION,
+                "tombstone_written_utc": _utc(), "deleted_utc": None}, tombstones)
+            got = R.run_online("remove", {"record": TD.with_pointer(fin), "message": f"{unit}: final weights, a "
+                                          f"redundant copy (tombstone {tid})"}, timeout_s=3600)
+            row["finals"][unit] = {"tombstone": tid, "local": prod["path"], "verified_absent": bool(got.get("verified_absent")),
+                                   "freed_bytes": got.get("freed_bytes"), "error": got.get("error"), "utc": _utc()}
+            t_doc = json.loads(tombstones.read_text())
+            e = next(x for x in t_doc["tombstones"] if x["canonical_id"] == tid)
+            e.update(deleted_utc=_utc() if got.get("verified_absent") else None,
+                     deletion={"status": "DELETED" if got.get("verified_absent") else "PENDING",
+                               "relay_remove": {k: got.get(k) for k in ("removed_paths", "lfs_left", "paths_left",
+                                                                         "shared_oids_kept", "freed_bytes", "error")}})
+            tombstones.write_text(json.dumps(t_doc, indent=1, ensure_ascii=False) + "\n")
+        units = [CP.parse_train_target(t)["unit"] for t in CP.train_targets(arm)]
+        row["status"] = ("ROTATED: both relay copies retired" if all((row["finals"].get(u) or {}).get("verified_absent")
+                                                                     for u in units) else "PARTIAL: see finals")
+    row["checked_utc"] = _utc()
+    rec_path.parent.mkdir(parents=True, exist_ok=True)
+    rec_path.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
+    return {k: row.get(k) for k in ("status", "finals")}
 
 
 def arm_sessions(root: Path = REPO) -> dict[str, dict]:
@@ -697,6 +968,13 @@ def main(argv=None) -> int:
             SE.require_kind_open(STUDY, kind)
         except SE.AuthorizationError as exc:
             print(f"REFUSED at $0: {exc}")
+            return 11
+    if argv and argv[0] == "launch" and kind == TRAIN_KIND:
+        sc = artifact_conditions(argv)              #: before the bundle, the provider or the relay is read
+        bad = arm_binding_problems(sc, arm) if sc is not None else []
+        if bad:
+            print(f"REFUSED at $0: the artifact does not fund the plan this launch would run: {bad}\n"
+                  "No provider resource was created.")
             return 11
     if argv and argv[0] == "study-completion":
         doc = study_completion()

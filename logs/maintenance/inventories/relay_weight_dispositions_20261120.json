@@ -1,0 +1,76 @@
+{
+ "schema": "aadistill.relay_weight_dispositions/v1",
+ "recorded_utc": "2026-11-20",
+ "rule": "AGENTS.md 2.5 and the maintainer's 2026-11-20 brief: retire only a terminal, consumer-free checkpoint or a redundant copy whose kept copy is re-hashed; keep anything protected, declared by a launcher of an open or proposed study, or of unclear consumer, and list it",
+ "maintainer_scope": "「单独复核 HF 上 1.81 GiB 的教师统计量：确认开发机同哈希副本可读、第一阶段归档完整、第二阶段和其他已登记计划均不依赖该远端对象后，可按冗余副本退役。」",
+ "objects": {
+  "durable/stage1_reasoning_inheritance/913433664fce0fed/mapping/tensors.safetensors": {
+   "disposition": "keep",
+   "reason": "RI-S1's frozen structural mapping (registry: protected, unclassified never-delete); 0.02 GiB"
+  },
+  "durable/stage1_reasoning_inheritance/layer_merge/statistics/6a6a5676cd3ad50f/merge_statistics.safetensors": {
+   "disposition": "keep",
+   "reason": "RI-LM1's merge statistics (registry: protected, unclassified); 0.002 GiB"
+  },
+  "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/init/model.safetensors": {
+   "disposition": "keep",
+   "reason": "SOB1 phase 2 reads it: plans/training_plan_depth_only.json (the pod fetches its init from this relay copy)"
+  },
+  "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/model.safetensors": {
+   "disposition": "keep",
+   "reason": "SOB1 phase 2 reads it: plans/training_plan_ffn_attention.json"
+  },
+  "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors": {
+   "disposition": "keep",
+   "reason": "SOB1 phase 2 reads it: plans/training_plan_residual_width.json"
+  },
+  "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/tensors.safetensors": {
+   "disposition": "keep",
+   "reason": "SOB1's width projection, beside the init the plan derives from"
+  },
+  "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/mapping/tensors.safetensors": {
+   "disposition": "keep",
+   "reason": "A baseline's mapping (registry: reproducibility_required, protected)"
+  },
+  "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors": {
+   "disposition": "retire",
+   "reason": "a REDUNDANT REMOTE COPY (maintainer 2026-11-20: retire it as a redundant copy once the dev box's same-hash copy reads, phase 1's archive is complete and no registered plan reads the remote object). Its one consumer of the remote object was SOB1 phase 1's residual-width build, COMPLETE and closed in code; phase 2's launch stages only the A-MIX pack; TPI1 is CLOSED. The dev box keeps the protected local copy (A baseline's input)",
+   "readers": {
+    "configs/stages/stage-1/single_operator_budget/design.json": "SOB1's design names A_teacher_parent as the baseline; phase 1's statistics input is closed in code (kinds.sob1_phase1.closed); phase 2 stages only the A-MIX pack",
+    "configs/stages/stage-1/single_operator_budget/selection.json": "SOB1 phase 1's recorded input (the residual-width build, COMPLETE 2026-11-20 and closed in code): a record of what phase 1 read, not a planned read",
+    "configs/stages/stage-1/teacher_parent_initialization/README.md": "TPI1 (CLOSED 2026-11-18: require_open refuses every issue and launch); names A's identity, never fetches this relay object for a planned run",
+    "configs/stages/stage-1/teacher_parent_initialization/design.json": "TPI1 (CLOSED 2026-11-18: require_open refuses every issue and launch); names A's identity, never fetches this relay object for a planned run",
+    "scripts/maintenance/consolidation/stage_attribution.py": "log navigation: names the experiment directory, reads no weights",
+    "scripts/stages/stage-1/teacher_parent_initialization/README.md": "TPI1 (CLOSED 2026-11-18: require_open refuses every issue and launch); names A's identity, never fetches this relay object for a planned run",
+    "scripts/stages/stage-1/teacher_parent_initialization/analysis.py": "TPI1 (CLOSED 2026-11-18: require_open refuses every issue and launch); names A's identity, never fetches this relay object for a planned run",
+    "scripts/stages/stage-1/teacher_parent_initialization/init_driver.py": "TPI1 (CLOSED 2026-11-18: require_open refuses every issue and launch); names A's identity, never fetches this relay object for a planned run",
+    "scripts/stages/stage-1/teacher_parent_initialization/launch.py": "TPI1 (CLOSED 2026-11-18: require_open refuses every issue and launch); names A's identity, never fetches this relay object for a planned run",
+    "scripts/stages/stage-1/teacher_parent_initialization/plan.py": "TPI1 (CLOSED 2026-11-18: require_open refuses every issue and launch); names A's identity, never fetches this relay object for a planned run",
+    "scripts/stages/stage-1/teacher_parent_initialization/relay.py": "the relay mechanism (its root prefix constant): reads no object by itself",
+    "scripts/stages/stage-1/teacher_parent_initialization/selection.py": "TPI1 (CLOSED 2026-11-18: require_open refuses every issue and launch); names A's identity, never fetches this relay object for a planned run",
+    "scripts/stages/stage-1/teacher_parent_initialization/train_driver.py": "TPI1's / SOB1 phase 2's durability helpers: name A's unit prefix for TPI1's units, never this statistics object"
+   },
+   "registry_protection": "the registry row protects the LOCAL copy (A baseline's input, kept) and kept the relay copy only as SOB1 phase 1's declared input ('keep it there'); that phase is COMPLETE and closed in code, and the maintainer's 2026-11-20 decision retires this relay copy as redundant: retire_artifact.py --maintainer-decision lifts the protection for the relay object only"
+  },
+  "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors": {
+   "disposition": "keep",
+   "reason": "a permanent control declared by autoinit_continuation_launch and configs/stages/stage-0/calibration_volume/battery_session.json; its only copy; consumer status is the maintainer's decision"
+  },
+  "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors": {
+   "disposition": "keep",
+   "reason": "as sa: a permanent control, its only copy"
+  },
+  "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors": {
+   "disposition": "keep",
+   "reason": "declared by igv_launch (study independent-gated-E, PROPOSED: a declared consumer); its only copy"
+  },
+  "stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors": {
+   "disposition": "keep",
+   "reason": "the canonical 0.6B initialization (registry: canonical, protected; launchers declare this relay path)"
+  },
+  "stage1/qwen3_0p6b_init_v0/random_baseline/model.safetensors": {
+   "disposition": "keep",
+   "reason": "the 0.6B family's random-initialization control: no registry row, no launcher, its only copy; whether it is a retained control is the maintainer's decision (listed, not retired)"
+  }
+ }
+}

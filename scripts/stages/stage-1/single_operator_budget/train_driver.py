@@ -71,6 +71,16 @@ def modes_of(u: dict) -> list[str]:
     return got
 
 
+def authorized_plan_problems(sc: dict, plan: dict, plan_path: Path, kind: str) -> list[str]:
+    """The artifact funds ONE arm's plan: its kind, arm, plan sha256 and init record sha256 must be the plan this driver
+    loaded (`launch.kind_conditions` wrote them at issue). Checked before anything is fetched or trained."""
+    from stages.teacher_parent_initialization import relay as R
+    got = {"kind": kind, "arm": plan.get("arm"), "plan_sha256": R.sha256_file(plan_path),
+           "init_record_sha256": R.sha256_file(REPO / plan["init_record"]["path"])}
+    return [f"{k}: the authorization binds {sc.get(k)!r}, the driver loaded {v!r}" for k, v in got.items()
+            if sc.get(k) != v]
+
+
 def final_here(out_dir: Path, cfg: dict, steps: int) -> Path | None:
     """The final weights on this pod: the trainer's completion record of this config's steps and the model file."""
     from stages.teacher_modes import a1_units as AU
@@ -161,6 +171,7 @@ def secure_final(name: str, model_dir: Path, out_dir: Path, cfg: dict, ev_unit: 
         raise DriverError(f"{name}: a verified final {prev['files_sha256']['model.safetensors'][:12]} exists and this "
                           f"pod holds other final weights {sha[:12]}; a unit never holds two finals")
     if not prev.get("verified"):
+        row["removals_before_final"] = TD.retry_pending_removals(ev_unit, name)     #: room first, then the upload
         files = {n: str(model_dir / n) for n in AU.FINAL_FILES if (model_dir / n).is_file()}
         files[done.name] = str(done)        #: the training's completion travels with its weights
         nbytes = sum(Path(f).stat().st_size for f in files.values())
@@ -189,8 +200,27 @@ def publish(name: str, rec: dict, scratch: Path, ev_unit: Path, unit_prefix: str
     row["final_relay"] = {k: rec.get(k) for k in ("relay", "prefix", "verified")}
 
 
+def final_identity(name: str, out: Path, ev_unit: Path, plan: dict, row: dict) -> None:
+    """Step 1's check: the final found is THIS unit's (`completion.final_identity_problems`: arm, seed, relay path,
+    the completion record archived with it). A record the evidence lacks is fetched from the final's own relay copy
+    and re-hashed first; any remaining problem stops the unit -- a final of another seed is never adopted, and never
+    silently replaced by a retrain."""
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_parent_initialization import relay as R
+    rec = read_json(ev_unit / "final.json")
+    bad = CP.final_identity_problems(out, name, plan=plan)
+    names = [k for k in rec.get("files_sha256", {}) if k.startswith("run_completion")]
+    if bad and len(names) == 1 and not (ev_unit / "train" / names[0]).is_file():
+        got = R.run_online("get", {"record": rec, "dest": str(ev_unit / "train"), "only": names}, timeout_s=600)
+        row["completion_record_fetched"] = {k: got.get(k) for k in ("verified", "from", "error")}
+        bad = CP.final_identity_problems(out, name, plan=plan)
+    row["final_identity"] = {"problems": bad, "checked_utc": utc()}
+    if bad:
+        raise DriverError(f"{name}: the final found is not this unit's: {bad}")
+
+
 def run_unit(u: dict, *, out: Path, record: dict, dur: dict, prefix_root: str, snap: Path, a, attempt: str,
-             mark, save) -> None:
+             mark, save, plan: dict | None = None) -> None:
     from stages.single_operator_budget import completion as CP
     name, cfg, arm, seed = u["unit"], u["config"], u["arm"], int(u["seed"])
     if CP.unit_name(arm, seed) != name:
@@ -202,12 +232,17 @@ def run_unit(u: dict, *, out: Path, record: dict, dur: dict, prefix_root: str, s
     ev_unit.mkdir(parents=True, exist_ok=True)
     steps = int(cfg["schedule"]["total_steps"])
     unit_prefix = f"{prefix_root}/{arm}/{name}"
-    # 1. the final weights, wherever they were made durable
+    #: a removal that failed in an earlier attempt is retried first (only of a superseded save point: the latest
+    #: resumable checkpoint stays until a later one is published)
+    row["pending_removals_at_takeover"] = TD.retry_pending_removals(ev_unit, name)
+    # 1. the final weights, wherever they were made durable -- and only if they are THIS unit's
     hit = TD.final_record(ev_unit, unit_prefix, dur)
     if hit is not None and hit[1] != "evidence":
         rec = {**hit[0], "handoff": {"verified": True, "why": None, "utc": utc(),
                                      "found": f"listed under {unit_prefix}/final"}}
         write_json(ev_unit / "final.json", rec)
+    if hit is not None:
+        final_identity(name, out, ev_unit, plan, row)
     # 2. done only on the files, against this seed's final
     sets = {m: CP.check(CP.ev_dir(out, target, m), target, m, out, label=CP.label_of(target)) for m in modes}
     row["at_start"] = {"final": None if hit is None else hit[1], "final_problems": CP.final_problems(out, name),
@@ -312,6 +347,10 @@ def main(argv=None) -> int:
             record["resumed_from"] = TD.take_over(Path(a.resume), out)
         plan_path = Path(a.plan) if Path(a.plan).is_absolute() else REPO / a.plan
         plan = read_json(plan_path)
+        bad = authorized_plan_problems(getattr(auth, "stage_conditions", None) or {}, plan, plan_path, L.TRAIN_KIND)
+        record["authorized_plan"] = {"problems": bad, "plan": str(plan_path), "arm": plan.get("arm")}
+        if bad:
+            raise DriverError(f"the authorization does not fund the plan this driver loaded: {bad}")
         dur = TD.durability(plan)
         prefix_root = a.prefix_root or plan["relay_prefix_root"]
         record.update(plan=str(plan_path), plan_sha256=R.sha256_file(plan_path), arm=plan["arm"],
@@ -332,8 +371,8 @@ def main(argv=None) -> int:
         mark("CONTRACT_OK")
         for u in us:
             run_unit(u, out=out, record=record, dur=dur, prefix_root=prefix_root, snap=snap, a=a, attempt=attempt,
-                     mark=mark, save=save)
-        record["completion"] = CP.session(out, plan["arm"], write_records=True)
+                     mark=mark, save=save, plan=plan)
+        record["completion"] = CP.session(out, plan["arm"], write_records=True, plan=plan)
         save()
         if not a.units and not record["completion"]["complete"]:
             raise DriverError(f"{plan['arm']}'s session is not complete on its files: "

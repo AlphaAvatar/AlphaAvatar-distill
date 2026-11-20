@@ -664,10 +664,60 @@ def phase(out: Path, *, write_records: bool = False) -> dict:
 
 # ---- phase 2: one arm's session, and the study -------------------------------------------------------------------
 
-def final_problems(out: Path, unit: str) -> list[str]:
+def plan_units(arm: str, plan: dict | None = None) -> tuple[dict, dict[str, dict]]:
+    """The arm's training plan (the committed one unless given) and its units by name."""
+    if plan is None:
+        plan = json.loads((C.LOGS / "plans" / f"training_plan_{arm}.json").read_text())
+    return plan, {u["unit"]: u for u in plan["units"]}
+
+
+def final_identity_problems(out: Path, unit: str, *, plan: dict, archived_record: Path | None = None) -> list[str]:
+    """Whether the final in ``<out>/<unit>/final.json`` is THIS unit's: its arm and seed, its relay path
+    (``<relay prefix root>/<arm>/<unit>/final/<its model sha256[:16]>``), and the training completion record archived
+    with the weights. That record must be the evidence's ``<unit>/train/<its name>`` (or ``archived_record``) by
+    sha256, written for this unit's config (`a1_units.completion`'s hash) and finished to its planned steps. A final
+    another seed wrote, a moved record or a record of another config is refused, whatever the directory beside it
+    holds."""
+    from aadistill.infrastructure.manifest import sha256_json
+    p = Path(out) / unit / "final.json"
+    rec = json.loads(p.read_text()) if p.is_file() else None
+    _, units = plan_units(plan["arm"], plan)
+    u = units.get(unit)
+    if rec is None or u is None:
+        return [f"{unit}: {'no final.json' if rec is None else 'not a unit of the plan'}"]
+    files = rec.get("files_sha256") or {}
+    sha = files.get("model.safetensors") or ""
+    want = f"{plan['relay_prefix_root']}/{u['arm']}/{unit}/final/{sha[:16]}"
+    bad = []
+    if (u["arm"], u["unit"]) != (plan["arm"], unit) or unit != unit_name(u["arm"], u["seed"]):
+        bad.append(f"{unit}: the plan's unit is {u['arm']} / seed {u['seed']}")
+    if rec.get("prefix") != want:
+        bad.append(f"{unit}: the final's relay path is {rec.get('prefix')!r}, this unit's would be {want!r}")
+    names = sorted(k for k in files if k.startswith("run_completion"))
+    if len(names) != 1:
+        return bad + [f"{unit}: the final carries {len(names)} training completion records, not one"]
+    name = names[0]
+    local = Path(archived_record) if archived_record else Path(out) / unit / "train" / name
+    if not local.is_file():
+        return bad + [f"{unit}: the completion record archived with the final ({name}) is not in the evidence"]
+    if sha256_file(local) != files[name]:
+        return bad + [f"{unit}: train/{name} is not the record archived with the final ({sha256_file(local)[:12]} != "
+                      f"{files[name][:12]})"]
+    c = json.loads(local.read_text())
+    steps = int(u["config"]["schedule"]["total_steps"])
+    if c.get("config_sha256") != sha256_json(u["config"]):
+        bad.append(f"{unit}: the archived completion record was written for config {str(c.get('config_sha256'))[:12]}, "
+                   f"not this unit's {sha256_json(u['config'])[:12]}")
+    if (c.get("final_step"), c.get("planned_total_steps"), c.get("completed_all_steps")) != (steps, steps, True):
+        bad.append(f"{unit}: the archived completion record stops at {c.get('final_step')} of "
+                   f"{c.get('planned_total_steps')} ({c.get('completed_all_steps')}), not {steps} of {steps}")
+    return bad
+
+
+def final_problems(out: Path, unit: str, *, plan: dict | None = None) -> list[str]:
     """Why a training unit's final weights are not shown durable in ``out``: a verified ``final.json`` naming the
     ``model.safetensors`` sha256 and the trainer's completion record that travelled with it, published (handed off)
-    where a replacement attempt reads it."""
+    where a replacement attempt reads it, and THIS unit's (`final_identity_problems` against the plan)."""
     p = Path(out) / unit / "final.json"
     if not p.is_file():
         return [f"{unit}: no final.json (no final weights secured)"]
@@ -682,16 +732,19 @@ def final_problems(out: Path, unit: str) -> list[str]:
         bad.append(f"{unit}: the trainer's completion record did not travel with the final weights")
     if not (rec.get("handoff") or {}).get("verified"):
         bad.append(f"{unit}: the final's record was never published where a replacement attempt reads it")
+    arm = parse_train_target(unit.replace("-s", "_s"))
+    if arm is not None:
+        bad += final_identity_problems(out, unit, plan=plan_units(arm["arm"], plan)[0])
     return bad
 
 
-def session(out: Path, arm: str, *, write_records: bool = False) -> dict:
+def session(out: Path, arm: str, *, write_records: bool = False, plan: dict | None = None) -> dict:
     """One arm's phase-2 session on the files in ``out`` (the pod's evidence or the dev box's secured copy): both
     seeds' final weights durable, and the four sets (two seeds x two modes) complete against those finals."""
     sets, finals = {}, {}
     for t in train_targets(arm):
         u = parse_train_target(t)["unit"]
-        finals[u] = {"problems": final_problems(out, u),
+        finals[u] = {"problems": final_problems(out, u, plan=plan),
                      "model_safetensors_sha256": ((final_record(out, u) or {}).get("files_sha256") or {}).get(
                          "model.safetensors")}
         for m in C.mode_dirs():
@@ -709,13 +762,14 @@ def session(out: Path, arm: str, *, write_records: bool = False) -> dict:
             "modes": modes, "n_sets": len(sets), "n_complete": sum(v["complete"] for v in sets.values())}
 
 
-def study(outs: dict[str, Path], *, phase1_out: Path | None = None) -> dict:
+def study(outs: dict[str, Path], *, phase1_out: Path | None = None, plans: dict | None = None) -> dict:
     """The study's completion: every arm's session complete in its own evidence directory (``outs[arm]``), so six
     final weights and twelve sets, and the six recovered models of each mode share one protocol digest. With phase
     1's evidence, whether its four models of each mode were read under that same digest is reported beside it (the
     descriptive recovery-vs-untrained reading needs it; the registered decision does not)."""
     arms = list(C.design()["training"]["unit_order"]["arms"])
-    per = {a: (session(outs[a], a) if a in outs and Path(outs[a]).is_dir() else None) for a in arms}
+    per = {a: (session(outs[a], a, plan=(plans or {}).get(a)) if a in outs and Path(outs[a]).is_dir() else None)
+           for a in arms}
     missing = [a for a in arms if per[a] is None]
     digests: dict[str, dict] = {}
     for a, s in per.items():

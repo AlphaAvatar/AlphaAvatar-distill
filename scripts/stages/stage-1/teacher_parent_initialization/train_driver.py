@@ -198,6 +198,48 @@ def hand_off_with_retries(rec: dict, scratch: Path, listing: str, message: str, 
     return {**h, "attempts": tries}
 
 
+def retired(rec: dict) -> bool:
+    """A record is retired only when the relay CONFIRMED its objects absent (`relay.remove`'s ``verified_absent``).
+    A removal that failed or timed out (``{"verified": False, ...}``) leaves the record PENDING: still on the relay,
+    still counted, retried before the next large upload. Records written before this rule carry the same field."""
+    return (rec.get("removed") or {}).get("verified_absent") is True
+
+
+def remove_now(rec: dict, message: str) -> bool:
+    """One removal attempt of ``rec`` (`relay.remove`, permanent): its answer is kept as ``removed`` and appended to
+    ``remove_attempts``; True only when the relay confirms the objects absent."""
+    from stages.teacher_parent_initialization import relay as R
+    got = R.run_online("remove", {"record": with_pointer(rec), "message": message})
+    rec.setdefault("remove_attempts", []).append({k: got.get(k) for k in ("verified_absent", "error", "utc")})
+    rec["removed"] = got
+    return retired(rec)
+
+
+def superseded(rec: dict, recs: list[dict], *, final_handed_off: bool = False) -> bool:
+    """Whether ``rec`` may be removed: a LATER save point of the unit has handed off, or the unit's final has. The
+    latest resumable checkpoint is never superseded by anything that is not itself published."""
+    return final_handed_off or any(o is not rec and int(o.get("step", -1)) > int(rec.get("step", -1))
+                                   and o.get("verified") and (o.get("handoff") or {}).get("verified") for o in recs)
+
+
+def retry_pending_removals(ev_unit: Path, name: str, *, final_handed_off: bool = False) -> dict:
+    """Every PENDING removal of the unit (verified, not confirmed absent, superseded): tried again, before the next
+    large upload and at a takeover. Returns what was freed (only confirmed removals count) and what is still pending."""
+    p = Path(ev_unit) / "savepoints.json"
+    recs = read_json(p) if p.is_file() else []
+    freed, pending = [], []
+    for r in recs:
+        if not r.get("verified") or retired(r) or "removed" not in r:
+            continue                         #: never attempted: the rotation removes it when its time comes
+        if not superseded(r, recs, final_handed_off=final_handed_off):
+            continue
+        ok = remove_now(r, f"{name}: {r['tag']} superseded (retry of a pending removal)")
+        write_json(p, recs)
+        (freed if ok else pending).append(r["tag"])
+    return {"freed": freed, "freed_bytes": sum(sum((r.get("bytes") or {}).values()) for r in recs if r["tag"] in freed),
+            "pending": pending, "utc": utc()}
+
+
 def with_pointer(rec: dict) -> dict:
     """The record whose removal also deletes its pointer (a record written before pointers existed has none)."""
     from stages.teacher_parent_initialization import relay as R
@@ -233,6 +275,8 @@ class SavepointMirror(threading.Thread):
         if rec is not None and (rec.get("handoff") or {}).get("verified"):
             return None
         if rec is None:
+            retry_pending_removals(self.ev_unit, self.unit)     #: a failed removal frees its bytes before the upload
+            recs = self.records()
             ckpt = self.out_dir / "checkpoints" / tag
             files = savepoint_files(ckpt)
             nbytes = sum(f.stat().st_size for f in files.values())
@@ -255,10 +299,9 @@ class SavepointMirror(threading.Thread):
         if not rec["handoff"]["verified"]:
             return rec                          #: the previous save point stays until one hands off
         for old in recs:
-            if old is not rec and old["step"] < rec["step"] and old.get("verified") and not old.get("removed"):
-                old["removed"] = R.run_online("remove", {"record": with_pointer(old), "message": f"{self.unit}: "
-                                                         f"{old['tag']} superseded by {tag}"})
-                write_json(self.path, recs)
+            if old is not rec and old["step"] < rec["step"] and old.get("verified") and not retired(old):
+                remove_now(old, f"{self.unit}: {old['tag']} superseded by {tag}")
+                write_json(self.path, recs)     #: a failure stays PENDING (`retired`): retried before the next upload
         return rec
 
     def copy_small(self) -> None:
@@ -302,7 +345,8 @@ def restore_savepoint(ev_unit: Path, out_dir: Path, prefix: str | None = None, d
     from stages.teacher_parent_initialization import relay as R
     d = d or DURABILITY
     p = ev_unit / "savepoints.json"
-    local = [r for r in (read_json(p) if p.is_file() else []) if r.get("verified") and not r.get("removed")]
+    held = read_json(p) if p.is_file() else []
+    local = [r for r in held if r.get("verified") and not retired(r)]
     found = "evidence"
     cands = {r["tag"]: r for r in local}
     if prefix:
@@ -321,6 +365,13 @@ def restore_savepoint(ev_unit: Path, out_dir: Path, prefix: str | None = None, d
     if not cands:
         return None
     rec = max(cands.values(), key=lambda r: r["step"])
+    #: every listed save point the evidence did not hold (a pod lost before the dev box pulled its record) enters
+    #: savepoints.json, so the rotation retires the superseded ones and keeps counting what the relay holds
+    known = {r["tag"] for r in held}
+    extra = [{**c, "found": "relay listing"} for t, c in sorted(cands.items()) if t not in known]
+    if extra:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        write_json(p, held + extra)
     ckpt = out_dir / "checkpoints" / rec["tag"]
     nbytes = sum((rec.get("bytes") or {}).values())
     got = R.run_online("get", {"record": rec, "dest": str(ckpt)},
@@ -472,10 +523,9 @@ def retire_save_points(ev_unit: Path, name: str) -> None:
     sp_path = ev_unit / "savepoints.json"
     recs = read_json(sp_path) if sp_path.is_file() else []
     for sp in recs:
-        if sp.get("verified") and not sp.get("removed"):
-            sp["removed"] = R.run_online("remove", {"record": with_pointer(sp), "message": f"{name}: "
-                                                    f"{sp['tag']} superseded by the verified final weights"})
-            write_json(sp_path, recs)
+        if sp.get("verified") and not retired(sp):
+            remove_now(sp, f"{name}: {sp['tag']} superseded by the verified final weights")
+            write_json(sp_path, recs)       #: a failure stays PENDING: `retry_pending_removals` tries it again
 
 
 # ---- evaluation ---------------------------------------------------------------------------------------------------------

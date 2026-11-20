@@ -2,7 +2,7 @@
  "authorizes": "nothing: a proposal; the grant is the maintainer's",
  "ceiling_usd": 185.87,
  "decision": "PENDING the maintainer's explicit approval (the project cap and this phase's grant)",
- "design_sha256": "6ab0c25aa58c134ea322c0b318a0b65da799777a98039c3e2528853cacb4f3bf",
+ "design_sha256": "6ceca717a2fa9418f15b7b83932db5fa7f710bb43b87e68ac079bea5658aaaaf",
  "expected_total_usd": 114.7,
  "gpu_count_max": 1,
  "gpus": {
@@ -220,15 +220,15 @@
  "plans": {
   "depth_only": {
    "path": "logs/stages/stage-1/single_operator_budget/plans/training_plan_depth_only.json",
-   "sha256": "3c97c79be733b4c7165934d6867957f3878e190df3885e4e094aa5ffdf142d0c"
+   "sha256": "bc9f44c7dec05438978a12923c3ac5e0234e54b4a913c55f3a4e5fc707830c50"
   },
   "ffn_attention": {
    "path": "logs/stages/stage-1/single_operator_budget/plans/training_plan_ffn_attention.json",
-   "sha256": "e1c6f94740ff0dd4ccaacf25e71d74e468e3afa24b7ad5b2fa1784442670129c"
+   "sha256": "ab532de908bca77f8d9b779eac61b49d7cc66a986f88de5f8519bd7aa573987f"
   },
   "residual_width": {
    "path": "logs/stages/stage-1/single_operator_budget/plans/training_plan_residual_width.json",
-   "sha256": "be948fd6ec4c9755da7e516aa3d6ff7ed09d46a083c979806048521a543f72a1"
+   "sha256": "120c051088f49f545c69a27ce8a728469b957ad0e52479745e21d8bc78907544"
   }
  },
  "position_at_proposal": {
@@ -236,7 +236,7 @@
   "account_volumes": 0,
   "balance_usd": 35.8108,
   "committed_usd": 974.1887,
-  "fetched_utc": "2026-11-20T08:30:49+00:00",
+  "fetched_utc": "2026-11-20T09:50:43+00:00",
   "project_cap_usd": 1000.0,
   "project_remaining_usd": 25.8113,
   "source": "shared.study_engineering.live_position (provider billing, read-only)"
@@ -244,14 +244,14 @@
  "project_cap_basis": {
   "committed_usd": 974.1887,
   "current_cap_usd": 1000.0,
-  "fetched_utc": "2026-11-20T08:30:49+00:00",
+  "fetched_utc": "2026-11-20T09:50:43+00:00",
   "plus_ceiling_usd": 185.87,
   "plus_teardown_reserve_usd": 1.0,
   "rule": "committed + ceiling + reserve, rounded up to the cent: the cap at which this phase's whole ceiling and reserve fit what the provider has billed; the maintainer sets it, nothing here raises it"
  },
  "project_cumulative_cap_usd": 1161.06,
  "recorded_utc": "2026-11-20",
- "resource_snapshot_sha256": "47453163afa98670da9a9505d6d5c7a739e040c344927dc2ae555a6bb021aebe",
+ "resource_snapshot_sha256": "06ed6cb6f8f3fa95ca8c2fa3ecd08e94ce94a0a1c943a6d84a3ae45235117fc1",
  "schema": "aadistill.stage1.single_operator_budget.proposal/v2",
  "scope": "phase 2 of SOB1 (configs/stages/stage-1/single_operator_budget/design.json :: phase_2): one sob1_train session per arm, residual width first, each training both seeds (20260726, 20260801) with Research A's recovery recipe from the arm's phase-1 initialization (plans/training_plan_<arm>.json) and evaluating each recovered model on all of eval-set-1 in both modes at 8,192 tokens; the Stage-3 recovery training and the post-recovery evaluation are this one budget. No other arm, seed or kind; no network volume",
  "selection_sha256": "6dfced62437b1967371b4cec03037f321abd8ce560e948a7ab71459a7de8d101",
@@ -259,48 +259,48 @@
  "storage": {
   "dev_box": {
    "filesystem": "/ (one filesystem holds the repository, the local store and every landing path)",
-   "free_gib": 6.96,
+   "free_gib": 5.34,
    "peak_gib": {
-    "bound": 53.83,
-    "expected": 45.66
+    "bound": 54.84,
+    "expected": 45.74
    },
    "shortfall_with_swing_gib": {
-    "bound": 51.25,
-    "expected": 43.07
+    "bound": 53.87,
+    "expected": 44.76
    }
   },
   "dev_box_plan": "plans/disk_peak_phase2.json",
   "relay": {
    "finals_total_bytes": 48257255424,
    "headroom_bytes": [
-    52371128320,
-    52407828480
+    54279536640,
+    54316236800
    ],
    "per_arm": {
     "depth_only": {
      "fits_headroom_now": true,
-     "margin_gib": 2.32,
+     "margin_gib": 4.09,
      "rotation_peak_bytes": 49884551168,
      "rotation_peak_gib": 46.46
     },
     "ffn_attention": {
      "fits_headroom_now": true,
-     "margin_gib": 1.97,
+     "margin_gib": 3.75,
      "rotation_peak_bytes": 50254563328,
      "rotation_peak_gib": 46.8
     },
     "residual_width": {
-     "fits_headroom_now": false,
-     "margin_gib": -0.77,
+     "fits_headroom_now": true,
+     "margin_gib": 1.0,
      "rotation_peak_bytes": 53203033088,
      "rotation_peak_gib": 49.55
     }
    },
-   "probed_utc": "2026-11-20T08:29:37Z",
+   "probed_utc": "2026-11-20T09:39:35Z",
    "rule": "a session's peak is one final and two save points (launch.rotation_peaks); an earlier arm's finals left on the relay count against the account quota"
   }
  },
- "structures_sha256": "6da97f84fb175ff7340ebb54e95b6e9ca72958bfd3ada439283f66381e5316e8",
+ "structures_sha256": "3d36b21f2273b8e82a430f4c88382879e22f06f2d1f4618aaddf0ddc1fc66f54",
  "study": "SOB1",
  "study_cumulative_cap_usd": 186.87,
  "teardown_reserve_usd": 1.0,

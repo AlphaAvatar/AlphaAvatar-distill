@@ -46,10 +46,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 154,
-  "active": 152,
-  "active_retired_bytes": 643469938634,
-  "active_retired_human": "599.278 GiB",
+  "tombstones_total": 155,
+  "active": 153,
+  "active_retired_bytes": 645417381314,
+  "active_retired_human": "601.092 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -11035,6 +11035,90 @@
    "tombstone_written_utc": "2026-11-19T06:19:46+00:00",
    "deletion": {
     "status": "DELETED"
+   }
+  },
+  {
+   "canonical_id": "relay_20261120_tpi1_teacher_residual_statistics",
+   "historical_paths": [
+    "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+   "retention_tier": "TIER_4_DISPOSABLE",
+   "experiment": "TPI1",
+   "seed": null,
+   "scientific_role": "the teacher's residual statistics: A baseline's width input and SOB1 phase 1's residual-width input; this is the relay COPY",
+   "weights_sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 1947442680,
+   "size_human": "1.81 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+     "size_bytes": 1947442680,
+     "sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stages/stage-1/single_operator_budget/design.json",
+    "configs/stages/stage-1/single_operator_budget/selection.json",
+    "docs/stages/stage-1/single_operator_budget/README.md",
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/relay_weight_audit_20261120.json",
+    "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
+    "logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119b.json",
+    "logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119c.json",
+    "logs/stages/stage-1/single_operator_budget/plans/dry_run_20261119d.json",
+    "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+    "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
+    "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/runtime/session.json",
+    "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/build.json",
+    "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+    "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/relay.json"
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "reason_physical_weights_deleted": "A redundant remote copy. Its one planned reader, SOB1 phase 1's residual-width build, is COMPLETE (2026-11-20) and closed in code (kinds.sob1_phase1.closed); phase 2 stages only the A-MIX pack; TPI1 is CLOSED. Phase 1's evidence archive is complete and verified (storage/phase1_evidence_archive.json). The dev box keeps the protected same-hash copy, re-hashed here. Consumer audit: logs/maintenance/inventories/relay_weight_audit_20261120.json (every reader classified; refused only by the registry row, which this decision lifts for the relay object).",
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/statistics/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+   "relay_hash_verified": true,
+   "reconstruction_recipe": "upload the dev box's same-hash copy again (stages.teacher_parent_initialization.relay.put)",
+   "reconstruction_kind": "copy",
+   "byte_identical_reconstruction": "verified",
+   "byte_identical_evidence": "the same-hash copy /home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/statistics/01e63327e3d02b2f/teacher_residual_statistics.safetensors, re-hashed by verify_copies at deletion",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/statistics/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+     "kind": "local",
+     "verified": "every member's size and sha256 match",
+     "members": 1
+    }
+   ],
+   "deterministic_reconstruction_possible": true,
+   "expected_reconstruction_cost": "$0 (a 1.81 GiB upload from the dev box)",
+   "frozen_results_location": "logs/stages/stage-1/single_operator_budget/storage/phase1_evidence_archive.json",
+   "protection_lifted": {
+    "path_local": "/home/ecs-user/aad-artifacts/stage1_teacher_parent_init/init/statistics/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+    "retention": "reproducibility_required",
+    "never_delete_clause": "the init's only copy (relay copy retired 2026-11-18); the mapping and statistics are also on the relay, and the statistics' relay copy is a declared input of SOB1 phase 1 (keep it there)",
+    "retention_reason": "the input of both TPI1 training seeds; the statistics are what the width PCA was built from, and SOB1 phase 1's residual-width build reads them again (configs/stages/stage-1/single_operator_budget/selection.json :: residual_width.statistics: the relay copy, sha256 e4145e38...) in place of a second teacher statistics pass",
+    "maintainer_decision": "maintainer 2026-11-20 (logs/budget/decisions.md, 2026-11-20 'SOB1 phase 2 fixes, storage inventory'): 「单独复核 HF 上 1.81 GiB 的教师统计量：确认开发机同哈希副本可读、第一阶段归档完整、第二阶段和其他已登记计划均不依赖该远端对象后，可按冗余副本退役。」"
+   },
+   "deleted_utc": "2026-11-20T09:38:43+00:00",
+   "tombstone_written_utc": "2026-11-20T09:38:26+00:00",
+   "deletion": {
+    "status": "DELETED",
+    "relay_commit": "03f8c4b13783b2633860689039452218d39f6058",
+    "method": "CommitOperationDelete of the path, then permanently_delete_lfs_files(rewrite_history=True) on the one LFS object with this oid",
+    "lfs_bytes_before": 41690785123,
+    "lfs_bytes_after": 39743342443,
+    "freed_bytes": 1947442680,
+    "verified": {
+     "oid_left": [],
+     "path_in_head": false
+    }
    }
   }
  ],

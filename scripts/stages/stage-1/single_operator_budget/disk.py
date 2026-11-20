@@ -147,6 +147,9 @@ def plan(kind: str = "sob1_phase1", arm: str | None = None, scr: str | None = No
             2 * n * ev["per_model_expected"] * m["records_share"], "the runner's local hash verification")
         add("resume archive", f"{scr}/resume_<run>.tgz", "only when a session must be resumed",
             n * ev["per_model_bound"] / m["archive_ratio"], 0, "stage-resume's upload", phases=("retain",))
+        add("evidence archive (the free relay's rotation)", f"{scr}/archive/<run>_evidence.tar.gz", "closeout, kept",
+            n * ev["per_model_bound"] / m["archive_ratio"], n * ev["per_model_expected"] / m["archive_ratio"],
+            "its relay copy, before any final's relay copy is retired", phases=("retain",))
         for s in d["training"]["seeds"]:
             add(f"{arm}-s{s} final weights (fp32)", f"{store}/{arm}-s{s}/final/<sha16>/", "retain, after closeout",
                 st[arm]["checkpoint_bytes"]["final_fp32"], consumer="the durable local copy", phases=("retain",))

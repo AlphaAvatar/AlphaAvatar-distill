@@ -10,80 +10,80 @@
   {
    "arm": "residual_width",
    "session_peak_bytes": {
-    "bound": 19503023410,
-    "expected": 16335053637
+    "bound": 19863928508,
+    "expected": 16364040465
    },
    "kept_before_bytes": {
     "bound": 29614165,
     "expected": 29614165
    },
    "peak_with_earlier_sessions_bytes": {
-    "bound": 19532637575,
-    "expected": 16364667802
+    "bound": 19893542673,
+    "expected": 16393654630
    },
    "peak_with_earlier_sessions_gib": {
-    "bound": 18.19,
-    "expected": 15.24
+    "bound": 18.53,
+    "expected": 15.27
    }
   },
   {
    "arm": "depth_only",
    "session_peak_bytes": {
-    "bound": 19443928370,
-    "expected": 16275958597
+    "bound": 19804833468,
+    "expected": 16304945425
    },
    "kept_before_bytes": {
-    "bound": 19171732477,
-    "expected": 16364667802
+    "bound": 19532637575,
+    "expected": 16393654630
    },
    "peak_with_earlier_sessions_bytes": {
-    "bound": 38615660847,
-    "expected": 32640626399
+    "bound": 39337471043,
+    "expected": 32698600055
    },
    "peak_with_earlier_sessions_gib": {
-    "bound": 35.96,
-    "expected": 30.4
+    "bound": 36.64,
+    "expected": 30.45
    }
   },
   {
    "arm": "ffn_attention",
    "session_peak_bytes": {
-    "bound": 19549646130,
-    "expected": 16381676357
+    "bound": 19910551228,
+    "expected": 16410663185
    },
    "kept_before_bytes": {
-    "bound": 38254755749,
-    "expected": 32640626399
+    "bound": 38976565945,
+    "expected": 32698600055
    },
    "peak_with_earlier_sessions_bytes": {
-    "bound": 57804401879,
-    "expected": 49022302756
+    "bound": 58887117173,
+    "expected": 49109263240
    },
    "peak_with_earlier_sessions_gib": {
-    "bound": 53.83,
-    "expected": 45.66
+    "bound": 54.84,
+    "expected": 45.74
    }
   }
  ],
  "phase1_archive_bytes": 29614165,
  "peak_bytes": {
-  "bound": 57804401879,
-  "expected": 49022302756
+  "bound": 58887117173,
+  "expected": 49109263240
  },
  "peak_gib": {
-  "bound": 53.83,
-  "expected": 45.66
+  "bound": 54.84,
+  "expected": 45.74
  },
- "free_bytes": 7469608960,
- "free_gib": 6.96,
+ "free_bytes": 5737869312,
+ "free_gib": 5.34,
  "shared_filesystem_swing_bytes": 4692251771,
  "shortfall_with_swing_bytes": {
-  "bound": 55027044690,
-  "expected": 46244945567
+  "bound": 57841499632,
+  "expected": 48063645699
  },
  "shortfall_with_swing_gib": {
-  "bound": 51.25,
-  "expected": 43.07
+  "bound": 53.87,
+  "expected": 44.76
  },
  "rule": "the bound peak plus the measured swing of the other project's files, against the free bytes now",
  "inputs": "design.json :: cost_model.dev_box_disk (phase_2), structures.json :: checkpoint_bytes",
