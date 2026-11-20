@@ -44,6 +44,13 @@ def local_store() -> Path:
     return Path(os.path.expanduser(storage()["local_store"]))
 
 
+def final_placement(arm: str) -> str:
+    """Where an arm's two fp32 finals are kept once its session is COMPLETE (`design.json ::
+    storage.phase_2_finals.placement`): ``dev_box`` (retained on the local store, then the relay copy rotated off) or
+    ``relay`` (the relay copy the pod verified stays, checked by LFS sha256; nothing lands on the dev box)."""
+    return storage()["phase_2_finals"]["placement"][arm]
+
+
 def protocol() -> dict:
     """The registered evaluation protocol (`design.json :: evaluation.protocol`), one for the untrained arms, the
     teacher and the recovered arms, in the runners' shape."""

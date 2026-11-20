@@ -120,12 +120,13 @@ def get(record: dict, dest: Path, *, only: tuple[str, ...] | None = None, token_
 
 
 def remove(record: dict, *, message: str, token_file: Path | None = None) -> dict:
-    """Delete a superseded record's paths and permanently delete their LFS objects (only permanent deletion frees the
-    quota), then read the listing back. Used for a unit's PREVIOUS save point after the next one verified."""
+    """Delete a superseded record's paths -- its own pointer (`POINTER`) with them, whether or not the record names it --
+    and permanently delete their LFS objects (only permanent deletion frees the quota), then read the listing back.
+    Used for a unit's PREVIOUS save point after the next one verified, and for a final's redundant relay copy."""
     from huggingface_hub import CommitOperationDelete, HfApi
     repo, base, token = record["relay"], record["prefix"], _token(token_file)
     api = HfApi(token=token)
-    paths = [f"{base}/{k}" for k in sorted(record["files_sha256"])]
+    paths = [f"{base}/{k}" for k in sorted(set(record["files_sha256"]) | {POINTER})]
     there = [i.path for i in api.get_paths_info(repo, paths, repo_type="model")]
     if there:
         api.create_commit(repo, operations=[CommitOperationDelete(path_in_repo=p) for p in there],

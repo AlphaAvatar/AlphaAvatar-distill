@@ -179,10 +179,12 @@ def relay_object_sizes(kind: str, arm: str | None = None) -> list[int]:
 def rotation_need(plan: dict, state: dict, sizes: dict) -> dict:
     """What the relay must still accept, as the remaining rotation of the arm's units would run from ``state`` (what
     the relay already holds, `relay_state`), in the driver's order: each later save point is uploaded while every
-    earlier one is still there, then they are removed (a held superseded one is credited only then); the final is uploaded while the last save point is there, then the save
-    points go. A unit whose final is held uploads nothing. Bytes already held are in the quota already: the need is
-    the peak of (bytes uploaded - bytes removed) over the sequence. The latest resumable save point is never removed
-    before a later one is uploaded."""
+    earlier one is still there, then they are removed (a held superseded one is credited only then); the final is
+    uploaded while the last save point is there, then the save points go. A unit whose final is held uploads nothing,
+    and a save point still held beside it is credited nothing: it is removed before the launch (`reclaim_superseded`)
+    or it stays in the quota. Bytes already held are in the quota already: the need is the peak of (bytes uploaded -
+    bytes removed) over the sequence, against the relay's LIVE headroom (which already excludes them). The latest
+    resumable save point is never removed before a later one is uploaded."""
     sp, fin = int(sizes["save_point"]), int(sizes["final_fp32"])
     net, peak, trace = 0, 0, []
 
@@ -196,9 +198,7 @@ def rotation_need(plan: dict, state: dict, sizes: dict) -> dict:
         st = state.get(name) or {}
         held = sorted(st.get("save_points") or [])         #: steps of the valid save points the relay holds
         if st.get("final"):
-            for k in held:
-                step(f"{name}: save point {k} retired (the final is held)", -sp)
-            continue
+            continue                    #: uploads nothing; a save point still held is never credited before it goes
         latest = held[-1] if held else 0
         every, total = int(u["config"]["checkpoint"]["save_every"]), int(u["config"]["schedule"]["total_steps"])
         #: every held save point stays until the next upload hands off (the mirror then removes all older ones): the
@@ -257,6 +257,108 @@ def _lfs_sha(paths: list[str]) -> dict[str, str]:
     return {i.path: getattr(getattr(i, "lfs", None), "sha256", None) for i in info}
 
 
+RECLAIM_RECORD = LOGS / "storage/relay_reclaim_phase2.json"
+
+
+def _listed_problem(x: dict, *, up: str, kind: str, every: int, total: int, lfs_sha) -> str | None:
+    """Why a listed record is not a valid object of this unit (None when it is): present with every file its pointer
+    names, verified, at this unit's path (a save point: a planned step under ``<up>/savepoints/<tag>``), and each weight
+    object's LFS sha256 the record's."""
+    rec = x["record"]
+    big = {f"{rec.get('prefix')}/{k}": v for k, v in (rec.get("files_sha256") or {}).items()
+           if k.endswith((".safetensors", ".pt"))}
+    if not (x.get("present") and rec.get("verified") and big):
+        return "not present with every file, or not verified"
+    if kind == "savepoints":
+        step = int(rec.get("step", -1))
+        if (rec.get("tag") != f"step_{step:06d}" or rec.get("prefix") != f"{up}/savepoints/{rec.get('tag')}"
+                or not 0 < step < total or step % every):
+            return f"not one of this unit's planned save points ({rec.get('prefix')}, step {step})"
+    elif not str(rec.get("prefix", "")).startswith(f"{up}/final/"):
+        return f"not under this unit's final path ({rec.get('prefix')})"
+    got = lfs_sha(list(big))
+    bad = [q for q, v in big.items() if got.get(q) != v]
+    return f"LFS sha256 differs at {bad}" if bad else None
+
+
+def reclaim_superseded(arm: str, *, list_records=None, lfs_sha=None, root: Path = REPO, write: bool = True) -> dict:
+    """Before a training launch, on the dev box ($0): a save point the rotation should already have removed -- the
+    driver removes it right after a later one hands off, and a failed removal leaves it PENDING on the relay -- is
+    removed here, so the room check reads the relay as the takeover will find it and the pod-side retry is never the
+    only way out. Each unit's save points are read from the relay listing (`_listed_problem`); the one a takeover
+    restores (`train_driver.restore_savepoint`: the latest listed and present) is checked first: valid, with the same
+    resume identity (``resume_identity.json``'s sha256: the same data and initialization) as each one it supersedes.
+    Only then is each older valid save point removed (`relay.remove`, permanent, its pointer with it) and confirmed
+    absent. Every save point of a unit whose final is listed, valid and this unit's (`completion.final_identity_problems`
+    on its archived completion record) is superseded the same way. The latest valid save point of a unit without such a
+    final always stays; an invalid listed object is left for diagnosis and never counted. A removal that does not
+    confirm stays held and counted. Writes ``storage/relay_reclaim_phase2.json``."""
+    import tempfile
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization import train_driver as TD
+    plan = json.loads((REPO / plan_path(arm)).read_text())
+    list_records = list_records or (lambda prefix: TD.list_records(prefix, TD.durability(plan)))
+    lfs_sha = lfs_sha or _lfs_sha
+    units = {u["unit"]: u for u in plan["units"]}
+    rows = {}
+    for name in plan["unit_order"]:
+        cfg = units[name]["config"]
+        every, total = int(cfg["checkpoint"]["save_every"]), int(cfg["schedule"]["total_steps"])
+        up = f"{plan['relay_prefix_root']}/{arm}/{name}"
+        chk = functools.partial(_listed_problem, up=up, every=every, total=total, lfs_sha=lfs_sha)
+        row = {"kept": None, "removed": [], "not_removed": [], "invalid": []}
+        sps = []
+        for x in list_records(f"{up}/savepoints").get("records", []):
+            why = chk(x, kind="savepoints")
+            (row["invalid"].append({"prefix": x["record"].get("prefix"), "why": why}) if why else sps.append(x["record"]))
+        fins = [x["record"] for x in list_records(f"{up}/final").get("records", []) if not chk(x, kind="final")]
+        final_ok = None
+        if len(fins) == 1 and sps:
+            rec = fins[0]
+            names = [k for k in rec.get("files_sha256", {}) if k.startswith("run_completion")]
+            with tempfile.TemporaryDirectory() as tmp:
+                (Path(tmp) / name).mkdir()
+                (Path(tmp) / name / "final.json").write_text(json.dumps(rec))
+                got = (R.run_online("get", {"record": rec, "dest": f"{tmp}/archived", "only": names}, timeout_s=600)
+                       if len(names) == 1 else {"verified": False, "error": f"{len(names)} completion records"})
+                bad = (CP.final_identity_problems(Path(tmp), name, plan=plan, archived_record=Path(tmp) / "archived" /
+                                                  names[0]) if got.get("verified") else [str(got.get("error"))[:300]])
+            final_ok = not bad
+            row["final"] = {"prefix": rec.get("prefix"), "identity_problems": bad}
+        if final_ok:
+            keep, older = None, sorted(sps, key=lambda r: int(r["step"]))
+            row["kept"] = {"final": fins[0]["prefix"]}
+        elif sps:
+            keep = max(sps, key=lambda r: int(r["step"]))
+            older = sorted((r for r in sps if int(r["step"]) < int(keep["step"])), key=lambda r: int(r["step"]))
+            row["kept"] = {"tag": keep["tag"], "step": int(keep["step"]), "prefix": keep["prefix"],
+                           "why": "the latest valid save point: the one a takeover restores"}
+        else:
+            older = []
+        for o in older:
+            ident = (o.get("files_sha256") or {}).get("resume_identity.json")
+            if keep is not None and (ident is None or ident != (keep.get("files_sha256") or {}).get("resume_identity.json")):
+                row["not_removed"].append({"tag": o["tag"], "why": "its resume identity is not the kept save point's"})
+                continue
+            got = R.run_online("remove", {"record": o, "message": f"{name}: {o['tag']} superseded by "
+                                                     f"{keep['tag'] if keep else 'the final'} (dev-box reclaim)"},
+                               timeout_s=3600)
+            (row["removed"] if got.get("verified_absent") else row["not_removed"]).append(
+                {"tag": o["tag"], "step": int(o["step"]), "verified_absent": bool(got.get("verified_absent")),
+                 "freed_bytes": got.get("freed_bytes"), "error": got.get("error"), "utc": _utc()})
+        rows[name] = row
+    doc = {"schema": "aadistill.stage1.single_operator_budget.relay_reclaim/v1", "arm": arm, "units": rows,
+           "checked_utc": _utc()}
+    if write and any(r["removed"] or r["not_removed"] for r in rows.values()):
+        p = Path(root) / RECLAIM_RECORD
+        hist = json.loads(p.read_text()) if p.is_file() else {"schema": doc["schema"], "reclaims": []}
+        hist["reclaims"].append(doc)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(hist, indent=1, default=str) + "\n")
+    return doc
+
+
 def rotation_peaks(arm: str) -> list[dict]:
     """What a training session holds on the relay at each step of its rotation (bytes), seed 1 then seed 2."""
     b = json.loads((REPO / STRUCTURES).read_text())["arms"][arm]["checkpoint_bytes"]
@@ -308,9 +410,11 @@ def chunks(n: int, most: int = 10 * 2 ** 30) -> list[int]:
 
 
 def the_relay_has_room(ctx) -> tuple[bool, str]:
-    """Phase 1: its three inits. A training session: what the REMAINING rotation will still add (`rotation_need`) from
-    what the relay holds now (`relay_state`): a first run asks for two save points and a final; a takeover only for
-    what is left, crediting the valid objects already there."""
+    """Phase 1: its three inits. A training session: first the superseded save points a lost pod left are removed
+    (`reclaim_superseded`, real and dry runs alike: it completes the rotation's own step, never touches the latest
+    valid save point, and creates nothing); then what the REMAINING rotation will still add (`rotation_need`) from
+    what the relay holds now (`relay_state`), asked of the relay's live headroom: a first run asks for two save points
+    and a final; a takeover only for what is left, crediting the valid objects already there."""
     from aadistill.runtime.hub_capacity import would_accept
     from shared.deployment import MAIN_RELAY
     tok = Path(os.path.expanduser("~/.cache/huggingface/token"))
@@ -323,6 +427,9 @@ def the_relay_has_room(ctx) -> tuple[bool, str]:
     arm = _arm(ctx)
     plan = json.loads((REPO / plan_path(arm)).read_text())
     sizes = json.loads((REPO / STRUCTURES).read_text())["arms"][arm]["checkpoint_bytes"]
+    #: what the rotation should already have removed goes first (a pending removal the lost pod left), so the
+    #: remaining need is read from the relay a takeover will find, against its live headroom
+    ctx.evidence["relay_reclaim"] = reclaim_superseded(arm)
     state = relay_state(arm)
     need = rotation_need(plan, state, sizes)
     ctx.evidence["relay_state"], ctx.evidence["relay_need"] = state, {k: v for k, v in need.items() if k != "trace"}
@@ -560,7 +667,7 @@ def stage_resume(run_id: str, src_scr: Path) -> str:
 
 
 def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, record: Path | None = None,
-           getter=None, arm: str | None = None) -> dict:
+           getter=None, arm: str | None = None, lfs_sha=None) -> dict:
     """Each durable product of a finished session onto the dev box ($0 GPU), from its verified relay record, into the
     out-of-tree store (`relay.get`; ``getter`` for a test). Phase 1: EVERY arm's initialization and mapping, each
     exactly its init record's manifest (`common.products`: the checkpoint's two files, ``mapping.json``, and the
@@ -569,7 +676,9 @@ def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, 
     the disk, against the manifest -- never taken from the fetch's own answer, and an empty list proves nothing. The
     record is ``COMPLETE`` only when every product is on the dev box with its sha256; an arm without an init record,
     a fetch that fails, a filesystem without room or a file whose bytes differ leaves it ``INCOMPLETE``, naming what
-    is missing. Verified products are recorded either way, so a later retain fetches only the rest."""
+    is missing. Verified products are recorded either way, so a later retain fetches only the rest. An arm whose finals
+    are placed on the relay (`common.final_placement`) lands nothing: each final is checked where it stays -- every
+    file of its record listed at its relay prefix and each weight object's LFS sha256 the record's (``lfs_sha``)."""
     import shutil
     from stages.teacher_parent_initialization import relay as R
     getter = getter or R.get
@@ -597,7 +706,18 @@ def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, 
                 missing[f"{name}/final"] = "no verified final record with its files in the secured evidence"
             else:
                 want[f"{name}/final"] = (rec, rec["files_sha256"])
-    for key, (rec, files) in want.items():
+    on_relay = kind == TRAIN_KIND and C.final_placement(arm) == "relay"
+    for key, (rec, files) in (want.items() if on_relay else ()):
+        paths = {f"{rec['prefix']}/{k}": v for k, v in files.items()}
+        got = (lfs_sha or _lfs_sha)(list(paths))
+        bad = sorted(q for q, v in paths.items() if q not in got or (q.endswith((".safetensors", ".pt")) and got[q] != v))
+        doc["products"][key] = {"kept_on": "relay", "relay": rec["relay"], "prefix": rec["prefix"],
+                                "files_sha256": files, "relay_lfs_sha256": got, "verified": not bad,
+                                "producer_run": run_id, "checked": "every file listed at its relay prefix and each "
+                                "weight object's LFS sha256 the record's (placement: relay)"}
+        if bad:
+            missing[key] = f"not on the relay as recorded: {bad}"
+    for key, (rec, files) in (() if on_relay else want.items()):
         dest = store / key / rec["prefix"].rsplit("/", 1)[-1]
         paths = {k: dest / k for k in files}
         if files and all(p.is_file() and SE.sha256_file(p) == files[k] for k, p in paths.items()):
@@ -695,12 +815,13 @@ def _utc() -> str:
 
 def phase2_completion(run_id: str, scr: Path, *, arm: str, store: Path | None = None,
                       record: Path = REPO / LOCAL_RECORD_PHASE2, getter=None, root: Path = REPO,
-                      tombstones: Path | None = None) -> dict:
+                      tombstones: Path | None = None, lfs_sha=None) -> dict:
     """A training session's scientific completion, which every closeout of a ``sob1_train`` session runs (the formal
     launch's and a manual ``closeout`` alike), after the pod is gone. COMPLETE only when the arm's two finals are
     durable and its four sets complete against them on the dev box's secured copy (`completion.session`) AND both
-    finals are on the dev box's disk as their records (`retain`). Then, once every arm has a COMPLETE session, the
-    study's completion (`study_completion`). Writes ``runs/<run_id>/closeout/phase2_completion.json``."""
+    finals are at their placement as their records (`retain`: on the dev box's disk, re-hashed; or, for an arm placed
+    on the relay, there by LFS sha256). Then the relay's rotation (`rotate_relay`) and, once every arm has a COMPLETE
+    session, the study's completion (`study_completion`). Writes ``runs/<run_id>/closeout/phase2_completion.json``."""
     from stages.single_operator_budget import completion as CP
     out = Path(scr) / "store" / "out"
     unfinished: dict = {}
@@ -716,13 +837,14 @@ def phase2_completion(run_id: str, scr: Path, *, arm: str, store: Path | None = 
             unfinished["sets"] = bad_s
         if ses["modes"]:
             unfinished["modes"] = ses["modes"]
-    ret = retain(TRAIN_KIND, run_id, Path(scr), store=store, record=record, getter=getter, arm=arm)
+    ret = retain(TRAIN_KIND, run_id, Path(scr), store=store, record=record, getter=getter, arm=arm, lfs_sha=lfs_sha)
     if ret["status"] != "COMPLETE":
         unfinished["local_retention"] = ret["missing"]
     doc = {"schema": "aadistill.stage1.single_operator_budget.phase2_completion/v1", "run_id": run_id, "arm": arm,
            "scr": str(scr), "status": "COMPLETE" if not unfinished else "INCOMPLETE",
            "rule": "both seeds' final weights durable and published, the four sets (two seeds x two modes) complete on "
-                   "the secured copy against those finals, and both finals on the dev box's disk as their records",
+                   "the secured copy against those finals, and both finals at their placement as their records (the "
+                   "dev box's disk, re-hashed; or the relay, by LFS sha256)", "final_placement": C.final_placement(arm),
            "session": ses, "local_retention": {"status": ret["status"], "missing": ret["missing"], "record": str(record)},
            "unfinished": unfinished, "checked_utc": _utc()}
     dest = Path(root) / STUDY.run_dir(run_id) / PHASE2_COMPLETION
@@ -794,7 +916,11 @@ def rotate_relay(arm: str, run_id: str, scr: Path, local: dict, *, root: Path = 
     session's secured evidence as one archive on the relay, uploaded, downloaded again and re-hashed; then (2) for each
     final whose dev-box copy re-hashes file by file to its record NOW, a tombstone first, then the relay copy removed
     (`relay.remove`, permanent, the pointer with it) and confirmed absent. A final that fails any of these keeps its
-    relay copy. Writes ``storage/relay_rotation_phase2.json``."""
+    relay copy. Re-running it continues an interrupted rotation: a PENDING tombstone of the same id, relay path,
+    weights sha256 and members (written, then a removal that failed, or one that took effect but was never recorded) is
+    taken up again -- the local copy re-hashed, the removal retried (an absent copy confirms absent), the tombstone and
+    this record completed -- never written twice; a tombstone of that id for other bytes stops that final. Writes
+    ``storage/relay_rotation_phase2.json``."""
     from stages.single_operator_budget import completion as CP
     from stages.teacher_parent_initialization import relay as R
     from stages.teacher_parent_initialization import train_driver as TD
@@ -814,6 +940,9 @@ def rotate_relay(arm: str, run_id: str, scr: Path, local: dict, *, root: Path = 
                            "verified": bool(put.get("verified"))}
     if not row["evidence"]["verified"]:
         row["status"] = "EVIDENCE_NOT_DURABLE: no relay copy is retired"
+    elif C.final_placement(arm) == "relay":
+        row["status"] = ("KEPT_ON_RELAY: this arm's finals are placed on the relay (design.json :: "
+                         "storage.phase_2_finals.placement); its evidence archive is there too; nothing is retired")
     else:
         for t in CP.train_targets(arm):
             unit = CP.parse_train_target(t)["unit"]
@@ -829,7 +958,7 @@ def rotate_relay(arm: str, run_id: str, scr: Path, local: dict, *, root: Path = 
                 continue
             size = sum(int(v) for v in (fin.get("bytes") or {}).values())
             tid = f"relay_{run_id}_{unit}_final"
-            write_tombstone({
+            entry = {
                 "canonical_id": tid, "historical_paths": [f"{fin['prefix']}/{k}" for k in sorted(files)],
                 "store": "relay", "relay_path": fin["prefix"], "retention_tier": "REDUNDANT_REMOTE_COPY",
                 "experiment": "SOB1", "seed": CP.parse_train_target(t)["seed"],
@@ -847,15 +976,34 @@ def rotate_relay(arm: str, run_id: str, scr: Path, local: dict, *, root: Path = 
                                                     "(both finals and four sets on their files), its evidence archive "
                                                     "is on the relay, and this final re-hashes on the dev box"),
                 "maintainer_decision": ROTATION_DECISION,
-                "tombstone_written_utc": _utc(), "deleted_utc": None}, tombstones)
+                "tombstone_written_utc": _utc(), "deleted_utc": None}
+            prior = next((x for x in json.loads(tombstones.read_text())["tombstones"] if x["canonical_id"] == tid), None)
+            if prior is not None and any(prior.get(k) != entry[k] for k in ("relay_path", "weights_sha256", "members")):
+                row["finals"][unit] = {"kept": f"tombstone {tid} exists for other bytes; nothing is removed",
+                                       "tombstone_relay_path": prior.get("relay_path")}
+                continue
+            if prior is None:               #: first: the tombstone, before any byte goes
+                write_tombstone(entry, tombstones)
+            #: a pending one (written, then a failed or unrecorded removal) is continued under the same id: the local
+            #: copy was re-hashed above; the removal is idempotent (an absent copy confirms absent and frees nothing)
+            try:                            #: whether the relay still holds every file (for the record only)
+                there = _lfs_sha([f"{fin['prefix']}/{k}" for k in files])
+                was = len(there) == len(files)
+            except Exception:  # noqa: BLE001
+                was = None
             got = R.run_online("remove", {"record": TD.with_pointer(fin), "message": f"{unit}: final weights, a "
                                           f"redundant copy (tombstone {tid})"}, timeout_s=3600)
-            row["finals"][unit] = {"tombstone": tid, "local": prod["path"], "verified_absent": bool(got.get("verified_absent")),
-                                   "freed_bytes": got.get("freed_bytes"), "error": got.get("error"), "utc": _utc()}
+            ok = bool(got.get("verified_absent"))
+            row["finals"][unit] = {"tombstone": tid, "local": prod["path"], "verified_absent": ok,
+                                   "freed_bytes": got.get("freed_bytes"), "error": got.get("error"), "utc": _utc(),
+                                   "relay_copy_present_before": was,
+                                   "continued_pending_tombstone": prior is not None}
             t_doc = json.loads(tombstones.read_text())
             e = next(x for x in t_doc["tombstones"] if x["canonical_id"] == tid)
-            e.update(deleted_utc=_utc() if got.get("verified_absent") else None,
-                     deletion={"status": "DELETED" if got.get("verified_absent") else "PENDING",
+            att = [*((e.get("deletion") or {}).get("attempts") or []),
+                   {"utc": _utc(), "verified_absent": ok, "relay_copy_present_before": was, "error": got.get("error")}]
+            e.update(deleted_utc=(e.get("deleted_utc") or _utc()) if ok else None,
+                     deletion={"status": "DELETED" if ok else "PENDING", "attempts": att,
                                "relay_remove": {k: got.get(k) for k in ("removed_paths", "lfs_left", "paths_left",
                                                                          "shared_oids_kept", "freed_bytes", "error")}})
             tombstones.write_text(json.dumps(t_doc, indent=1, ensure_ascii=False) + "\n")

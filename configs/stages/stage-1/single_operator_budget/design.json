@@ -409,12 +409,18 @@
   "local_store": "~/aad-artifacts/stage1_single_operator_budget",
   "local_landing": {
    "phase_1": "<arm>/init/<mapping digest[:16]>/ and <arm>/mapping/<digest16>/ (three bf16 initializations 12,064,313,856 B and their mappings), fetched from the relay record the pod verified and re-hashed on the disk (launch.py retain)",
-   "phase_2": "<arm>-s<seed>/final/<sha256[:16]>/ (six fp32 finals, 44.94 GiB)"
+   "phase_2": "<arm>-s<seed>/final/<sha256[:16]>/ for the arms placed on the dev box (storage.phase_2_finals.placement: residual width and depth only, four fp32 finals, 29.91 GiB); FFN + attention's two stay at their relay prefix"
   },
   "dev_box_peak": "logs/stages/stage-1/single_operator_budget/plans/disk_peak.json (disk.py): evidence, the pull archive in flight, the teardown collector's archive and its extracted copy, a resume archive, then the retained initializations and mappings; the launch checks the free bytes of the filesystem the session's --scr and the local store are on (the_dev_box_has_room)",
   "phase_2_finals": {
-   "kept": "the dev box (local store, every file re-hashed by launch.retain); the relay copy the pod verified until the arm's session is COMPLETE",
-   "dev_box": "plans/disk_peak_phase2.json (disk.py --kind sob1_train): six fp32 finals, each session's evidence and archives, at the real landing paths on the one filesystem /",
+   "kept": "per arm (placement): the dev box (local store, every file re-hashed by launch.retain, then the relay copy rotated off) or the relay (the copy the pod verified, its LFS sha256 checked by launch.retain; no local copy)",
+   "placement": {
+    "residual_width": "dev_box",
+    "depth_only": "dev_box",
+    "ffn_attention": "relay"
+   },
+   "_placement": "the arrangement without a larger disk (maintainer 2026-11-20: the dev box stays at 200 GiB, the hub on its free plan): during an arm's run the relay's free plan has room for that arm's rotation only (1.00 to 4.09 GiB beside it), so every EARLIER arm's finals must be on the dev box; the LAST arm's finals need no room for a later rotation and stay on the relay (15.03 GiB of its free space afterwards). Each of the six is retrievable by its sha256: four on the local store, two at their relay prefix",
+   "dev_box": "plans/disk_peak_phase2.json (disk.py --kind sob1_train): the dev-box-placed finals (placement), each session's evidence and archives, at the real landing paths on the one filesystem /",
    "relay": "a session asks the relay for what its REMAINING rotation adds (launch.rotation_need from launch.relay_state: a first run one final and two save points; a takeover credits the valid objects already there)",
    "relay_rotation": "retire",
    "_relay_rotation": "the free relay's rotation (maintainer 2026-11-20): once an arm's session is COMPLETE -- both finals and four sets on their files, both finals re-hashed on the dev box -- its secured evidence goes to the relay as one archive, then each final's relay copy is tombstoned and removed, confirmed absent (launch.rotate_relay), so the next arm's rotation fits the free plan's 100 GB"

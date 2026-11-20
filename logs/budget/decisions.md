@@ -17190,3 +17190,55 @@ on a paid pod.
   - relay: on the free plan with the rotation the width arm's first run fits by 1.00 GiB and the later arms by
     4.09 / 3.75 GiB, so HF PRO is not needed.
 - Revisit when: the maintainer approves the project cap ($1,161.06), phase 2's grant and the disk.
+
+## 2026-11-20 (UTC) — SOB1 phase 2: this project's dev-box cleanup, the finals without a larger disk, two relay interruptions fixed (maintainer's third brief)
+
+- Context: the maintainer will top up $151.06 and decided: 「开发机维持现有 200 GiB，不批准扩盘；HF 使用免费档。」 The $0 work
+  asked for: 「从整个开发机文件系统的实际占用开始，优先清理本项目无用的代码副本、资源和 checkpoint。」 For the shared partition:
+  「整个共享分区可以只读盘点。……其他项目的文件不要直接删除。」 And: 「给出一套不扩盘、能保住六份最终权重的存储安排」, plus fixes
+  for the free relay rotation's two interruption cases. 「本轮不创建 Pod，不购买存储，也不合入 `main`。」
+- Decision / done ($0; no pod, no storage purchased, no hub deletion this round):
+  - **This project's cleanup** (`logs/maintenance/storage/devbox_cleanup_20261120.json`): `/` went from 5.39 to
+    **16.12 GiB free, 10.73 GiB freed** (measured; hard links count once):
+    * the 19 earlier Claude sessions' scratch (0.31 GiB), after archiving the 47 files without a copy elsewhere;
+    * this session's dry-run outputs (0.69 GiB);
+    * closed experiments' extracted copies (4.54 GiB), removed only file by file where the archive beside them holds the
+      same path and sha256 (restore command left beside each);
+    * byte-identical duplicates in archival zones made hard links of one copy (388 groups, 779 paths, about 5.5 GiB).
+
+    No weight, baseline, initialization, mapping, teacher statistics or registered control was touched.
+  - **Other projects' files: inventoried read only** (same record), none changed. The decision list for the maintainer:
+    * the stale demo-service error log (14.88 GiB, no write since 2026-09-21; root truncation, since the running
+      service holds it open);
+    * the live demo log (up to 19.16 GiB);
+    * speaker-eval session features (13.24 GiB) and its dataset archives (up to 4.69 GiB);
+    * old IDE server builds (about 3.8 GiB);
+    * the shared uv cache (at most 2.76 GiB);
+    * the root reserve (about 6.2 GiB).
+  - **The arrangement** (`design.json :: storage.phase_2_finals.placement`):
+    * residual width's and depth's finals on the dev box (29.91 GiB), each re-hashed, with their relay copies rotated
+      off;
+    * FFN + attention's two finals on the relay (15.03 GiB), checked by LFS sha256 (`launch.retain`), with no local
+      copy. Only the last arm needs no relay room for a later rotation.
+
+    Each launch's need is `disk.py --total`: 18.50 / 33.68 / 33.94 GiB against 16.12 GiB free. The gap is **2.38 GiB for
+    the first arm, 17.82 GiB over the study** (22.19 GiB keeping the 4.37 GiB swing free). No threshold was lowered.
+  - **Two interruptions fixed**, each with an offline counter-example:
+    1. Two save points left on the relay by a failed removal (8.50 GiB of headroom, 21.03 GiB asked). The launch's
+       relay gate now reclaims first on the dev box (`launch.reclaim_superseded`): it checks the save point a takeover
+       restores, removes the older valid ones of the same resume identity (confirmed absent), and then asks the live
+       headroom (28.52 of 29.52 GiB).
+    2. A final's retirement interrupted after its tombstone (removal failed, or removed with the answer lost). The next
+       closeout continues the same tombstone: local re-hash, idempotent removal, records completed. It never writes a
+       second tombstone, and stops on a tombstone of that id for other bytes.
+  - **Report corrected:** a takeover's margin is against the live headroom, which already excludes what is held. With
+    one save point, or seed 1's final held, the width arm's margin is about 1.00 GiB, not 22.03 / 8.49 GiB.
+- Measured: committed $974.1887 of $1,000 ($25.8113 left), balance $35.8108, 0 pods, 0 volumes (15:44Z); relay
+  50.55 GiB free (15:44Z); dev box 16.12 GiB free.
+- Alternatives considered: all six finals on the dev box (a 32.8 GiB gap at the third launch); finals left on the relay
+  during a later arm's run (no room: 1.00-4.09 GiB beside a rotation); fewer save points held at once (gives up the
+  handoff that keeps a resumable save point across a lost pod).
+- Risks: FFN + attention's finals have one copy (on the hub), like the dev box's four; the dev box is shared, and its
+  free space moves with the other projects.
+- Revisit when: the maintainer decides on the other projects' files (or another source of about 18 GiB), the project
+  cap ($1,161.06) and phase 2's grant.

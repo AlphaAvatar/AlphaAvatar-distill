@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "SOB1 phase 2 ready at $0 2026-11-20 (its README section 10): the maintainer approves the project cap ($1,161.06), phase 2's grant and the dev box's +64 GiB; the relay fits on the free plan",
+ "next": "SOB1 phase 2 ready at $0 except the dev box (its README section 10): 17.82 GiB short over the study after this project's cleanup; the maintainer decides other projects' files, the cap ($1,161.06), the grant",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",

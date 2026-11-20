@@ -1463,6 +1463,7 @@ def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_wit
         for n in rec["files_sha256"]:
             (Path(dest) / n).write_bytes(bodies[unit][n])
         return {"verified": True}
+    monkeypatch.setattr(L, "_lfs_sha", lambda paths: {q: _sha(relay.files[q]) for q in paths if q in relay.files})
     monkeypatch.setattr(L, "phase2_completion", functools.partial(
         L.phase2_completion, store=tmp_path / "store", record=tmp_path / "local2.json", getter=getter, root=tmp_path,
         tombstones=tomb))
@@ -1485,7 +1486,7 @@ def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_wit
         out = L.phase2_completion(f"t{i}", tmp_path / f"scr_{a}", arm=a)
         assert out["status"] == "COMPLETE"
     assert out["study"]["status"] == "COMPLETE"
-    assert str((out.get("relay_rotation") or {}).get("status")).startswith("ROTATED"), out.get("relay_rotation")
+    assert str((out.get("relay_rotation") or {}).get("status")).startswith("KEPT_ON_RELAY"), out.get("relay_rotation")
     doc = json.loads((tmp_path / L.STUDY_RESULT).read_text())
     assert doc["completion"]["finals"] == {"n_verified": 6, "n_expected": 6}
     assert doc["completion"]["sets"] == {"n_complete": 12, "n_expected": 12}
@@ -1498,19 +1499,28 @@ def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_wit
     #: recomputed from the same sealed records, the readout is the same
     again = L.study_completion(root=tmp_path, write=False)
     assert again["readout"]["decision"] == doc["readout"]["decision"]
-    #: the six finals are on the dev box as their records
+    #: the six finals at their placement as their records: the dev-box arms' four on the disk, re-hashed; the
+    #: relay-placed arm's two where they stay, by LFS sha256 (`design.json :: storage.phase_2_finals.placement`)
+    placed = DESIGN["storage"]["phase_2_finals"]["placement"]
     rec = json.loads((tmp_path / "local2.json").read_text())
-    assert sum(v["verified"] for k, v in rec["products"].items() if k.endswith("/final")) == 6   #: every arm kept
-    assert len(list((tmp_path / "store").glob("*-s*/final/*/model.safetensors"))) == 6
-    #: the free relay's rotation: each COMPLETE arm's evidence archive is on the relay, then its finals' relay copies
-    #: are tombstoned and removed (confirmed absent); the dev box's six copies stay
+    fin = {k: v for k, v in rec["products"].items() if k.endswith("/final")}
+    assert len(fin) == 6 and all(v["verified"] for v in fin.values())
+    assert sorted(k.rsplit("-s", 1)[0] for k, v in fin.items() if v.get("kept_on") == "relay") == [
+        a for a in sorted(placed) for _ in (0, 1) if placed[a] == "relay"]
+    assert len(list((tmp_path / "store").glob("*-s*/final/*/model.safetensors"))) == 2 * sum(
+        v == "dev_box" for v in placed.values())
+    #: the free relay's rotation: each COMPLETE arm's evidence archive is on the relay; a dev-box arm's finals' relay
+    #: copies are then tombstoned and removed (confirmed absent); the relay-placed arm's stay
     rot = json.loads((tmp_path / L.ROTATION_RECORD).read_text())
     assert set(rot["arms"]) == set(DESIGN["training"]["unit_order"]["arms"])
-    assert all(v["status"].startswith("ROTATED") and v["evidence"]["verified"] for v in rot["arms"].values())
-    assert not any("/final/" in k for k in relay.files)
+    assert all(v["evidence"]["verified"] and v["status"].startswith("ROTATED" if placed[a] == "dev_box" else
+                                                                     "KEPT_ON_RELAY") for a, v in rot["arms"].items())
+    left = {k.split("/")[2] for k in relay.files if "/final/" in k}
+    assert left == {a for a, v in placed.items() if v == "relay"}
     assert sum(k.endswith("_evidence.tar.gz") for k in relay.files) == 3
     ts = [t for t in json.loads(tomb.read_text())["tombstones"] if t.get("experiment") == "SOB1"]
-    assert len(ts) == 6 and all(t["deletion"]["status"] == "DELETED" and t["tombstone_written_utc"] for t in ts)
+    assert len(ts) == 2 * sum(v == "dev_box" for v in placed.values())
+    assert all(t["deletion"]["status"] == "DELETED" and t["tombstone_written_utc"] for t in ts)
 
 
 def test_phase_1_is_closed_in_code_and_phase_2_is_funded_once_by_its_own_grant(tmp_path, monkeypatch, capsys):
@@ -1562,11 +1572,22 @@ def test_phase_2_disk_plan_counts_finals_evidence_and_archives_on_the_one_filesy
     for w in ("evidence", "pull archive", "teardown collector", "resume archive", "s20260726 final", "s20260801 final"):
         assert w in names
     assert pl["peak_phase"] == "retain"
-    finals = sum(st[a]["checkpoint_bytes"]["final_fp32"] for a in st) * len(DESIGN["training"]["seeds"])
+    placed = DESIGN["storage"]["phase_2_finals"]["placement"]
+    finals = sum(st[a]["checkpoint_bytes"]["final_fp32"] for a in st if placed[a] == "dev_box") * len(
+        DESIGN["training"]["seeds"])
+    for a in (a for a, v in placed.items() if v == "relay"):      #: an arm whose finals stay on the relay lands none
+        assert not any("final" in i["item"] for i in DK.plan("sob1_train", a, "/s")["items"])
     doc = json.loads(DK.OUT_PHASE2.read_text())
     again = DK.phase2_total(free_bytes=doc["free_bytes"], archive_bytes=doc["phase1_archive_bytes"])
     assert DK.render(again) == DK.OUT_PHASE2.read_text()
     assert doc["peak_bytes"]["expected"] >= finals and doc["sessions"][-1]["arm"] == DESIGN["training"]["unit_order"]["arms"][-1]
+    #: each launch's own check asks its bound peak on top of the earlier arms' expected bytes (the archive is on disk)
+    kept = 0
+    for x in doc["sessions"]:
+        assert x["launch_check_bytes"] == kept + x["session_peak_bytes"]["bound"]
+        kept = x["kept_before_bytes"]["expected"] - doc["phase1_archive_bytes"] + sum(
+            i["bytes_expected"] for i in DK.plan("sob1_train", x["arm"], "/s")["items"]
+            if "kept" in i["when"] or i["when"].startswith("retain"))
     assert doc["shortfall_with_swing_bytes"]["bound"] == max(0, doc["peak_bytes"]["bound"]
                                                             + doc["shared_filesystem_swing_bytes"] - doc["free_bytes"])
 
@@ -1740,3 +1761,201 @@ def test_a_failed_removal_stays_pending_and_the_next_takeover_retires_it(tmp_pat
     assert final_put < rm2208
     assert not any("/savepoints/" in k for k in relay.files)
     assert CP.session(tmp_path / "attempt2/out", ARM, plan=_plan_of(tmp_path))["complete"]
+
+
+# ---- the free relay's two interruptions (maintainer 2026-11-20, third brief) ------------------------------------------
+
+def _savepoint_with_identity(out_dir: Path, step: int, identity: str = "data d / initialization i") -> None:
+    from stages.teacher_parent_initialization.tests.test_takeover import save_point
+    save_point(out_dir, step)
+    (out_dir / "checkpoints" / f"step_{step:06d}" / "resume_identity.json").write_text(json.dumps({"id": identity}))
+
+
+def test_two_save_points_left_on_the_relay_are_reclaimed_on_the_dev_box_before_the_room_is_asked(tmp_path, monkeypatch):
+    """Interruption 1: step_002208 handed off, step_001104's removal failed and the pod was lost, so both 21.03 GiB save
+    points sit on the free relay (live headroom 50.55 - 2 x 21.03 = 8.49 GiB at the snapshot). Without a dev-box reclaim
+    the remaining rotation asks 21.03 GiB and the launch is refused before any pod could retry the removal. The launch's
+    relay gate first checks step_002208 -- listed with every file (the one a takeover restores), its LFS sha256 the
+    record's, a planned step, the resume identity of the one it supersedes -- then removes step_001104 (confirmed absent,
+    its pointer with it) and asks the live headroom: 28.52 GiB of 29.52, about 1.00 GiB to spare. The latest save point
+    stays; an older one of another resume identity, or beside a later one whose bytes differ, is never removed."""
+    from types import SimpleNamespace
+    import aadistill.runtime.hub_capacity as HC
+    from stages.single_operator_budget import launch as L
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization import train_driver as TD
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    if not Path("~/.cache/huggingface/token").expanduser().is_file():
+        pytest.skip("no hub token file to read (the gate reads it before asking)")
+    G = 2 ** 30
+    plan = json.loads((REPO / L.plan_path(ARM)).read_text())
+    sizes = json.loads((REPO / L.STRUCTURES).read_text())["arms"][ARM]["checkpoint_bytes"]
+    head = json.loads((REPO / L.LOGS / "plans/resource_snapshot_phase2.json").read_text())["relay"]["headroom_bytes"][0]
+    u1 = plan["unit_order"][0]
+    cfg = next(x for x in plan["units"] if x["unit"] == u1)["config"]
+    prefix = f"{plan['relay_prefix_root']}/{ARM}/{u1}"
+    relay = FakeRelay()
+    fails = {"n": 1}
+    real_remove = relay.remove
+
+    def flaky_remove(p):
+        if fails["n"] > 0:
+            fails["n"] -= 1
+            return {"verified": False, "error": "ReadTimeout: the hub did not answer"}
+        return real_remove(p)
+    relay.remove = flaky_remove
+    monkeypatch.setattr(R, "run_online", relay)
+    monkeypatch.setattr(TD, "_sleep", lambda s: None)
+    monkeypatch.setattr(L, "_lfs_sha", lambda paths: {q: _sha(relay.files[q]) for q in paths if q in relay.files})
+    monkeypatch.setattr(L, "RECLAIM_RECORD", tmp_path / "relay_reclaim_phase2.json")
+    lost = tmp_path / "lost_pod"
+    m = TD.SavepointMirror(u1, lost, tmp_path / "ev" / u1, cfg["schedule"]["total_steps"], prefix)
+    for k in (1104, 2208):
+        _savepoint_with_identity(lost, k)
+        m.mirror_once()
+    tags = lambda: sorted({q.split("/savepoints/")[1].split("/")[0] for q in relay.files if "/savepoints/" in q})  # noqa: E731
+    assert tags() == ["step_001104", "step_002208"]                      #: the failed removal left both
+
+    def held() -> int:
+        return len(tags()) * sizes["save_point"] + sum(q.endswith("/model.safetensors") and "/final/" in q
+                                                       for q in relay.files) * sizes["final_fp32"]
+    asked = []
+    monkeypatch.setattr(HC, "would_accept", lambda repo, sz, tok: asked.append((sum(sz), head - held())) or
+                        SimpleNamespace(accepted=sum(sz) <= head - held()))
+    ctx = lambda: SimpleNamespace(auth=SimpleNamespace(stage_conditions={"kind": L.TRAIN_KIND, "arm": ARM}),  # noqa: E731
+                                  evidence={})
+    #: without the reclaim (as before this fix): 21.03 GiB asked of 8.49, refused before any pod exists
+    real_reclaim = L.reclaim_superseded
+    monkeypatch.setattr(L, "reclaim_superseded", lambda arm: {"units": {}})
+    ok, _ = L.the_relay_has_room(ctx())
+    assert not ok and round(asked[-1][0] / G, 2) == 21.03 and asked[-1][1] == head - 2 * sizes["save_point"]
+    assert abs(asked[-1][1] / G - 8.49) < 0.01                          #: 8.495 GiB
+    monkeypatch.setattr(L, "reclaim_superseded", real_reclaim)
+    c = ctx()
+    ok, msg = L.the_relay_has_room(c)
+    assert ok, msg
+    rc = c.evidence["relay_reclaim"]["units"][u1]
+    assert rc["kept"]["tag"] == "step_002208" and [r["tag"] for r in rc["removed"]] == ["step_001104"]
+    assert rc["removed"][0]["verified_absent"] and tags() == ["step_002208"]
+    assert not any("step_001104" in q for q in relay.files)              #: its pointer went with it
+    need, free = asked[-1]
+    assert round(need / G, 2) == 28.52 and free == head - sizes["save_point"] and abs((free - need) / G - 1.00) < 0.01
+    assert c.evidence["relay_state"][u1]["save_points"] == [2208]
+    assert json.loads((tmp_path / "relay_reclaim_phase2.json").read_text())["reclaims"][-1]["units"][u1]["removed"]
+    #: a takeover restores exactly the kept one
+    assert TD.restore_savepoint(tmp_path / "ev2", tmp_path / "pod2", prefix)["tag"] == "step_002208"
+    #: never removed: an older one of another resume identity; one beside a later save point whose bytes differ
+    for k, ident in ((3312, "another data or initialization"), (4416, "data d / initialization i")):
+        _savepoint_with_identity(lost, k, ident)
+        relay.remove = lambda p: {"verified": False, "error": "the mirror is stopped here"}
+        m.mirror_once()
+    relay.remove = real_remove
+    got = L.reclaim_superseded(ARM, write=False)["units"][u1]
+    assert got["kept"]["tag"] == "step_004416" and {r["tag"] for r in got["removed"]} == {"step_002208"}
+    assert [r["tag"] for r in got["not_removed"]] == ["step_003312"] and "resume identity" in got["not_removed"][0]["why"]
+    relay.files[f"{prefix}/savepoints/step_004416/trainer_state.pt"] = b"not the record's bytes"
+    got = L.reclaim_superseded(ARM, write=False)["units"][u1]
+    assert got["kept"]["tag"] == "step_003312" and not got["removed"]   #: the only valid one left, kept
+    assert "LFS sha256 differs" in got["invalid"][0]["why"]
+    assert tags() == ["step_003312", "step_004416"]
+    #: beside the unit's own final (listed, valid, its archived completion record this unit's config at its planned
+    #: steps), every valid save point is superseded; the invalid one stays for diagnosis; the final uploads nothing more
+    from aadistill.infrastructure.manifest import sha256_json
+    steps = cfg["schedule"]["total_steps"]
+    fb = {"model.safetensors": b"final weights", "config.json": b"{}", "run_completion.json": json.dumps({
+        "config_sha256": sha256_json(cfg), "final_step": steps, "planned_total_steps": steps,
+        "completed_all_steps": True}).encode()}
+    src = tmp_path / "final_src"
+    src.mkdir()
+    for n, b in fb.items():
+        (src / n).write_bytes(b)
+    frec = relay.put({"files": {n: str(src / n) for n in fb}, "prefix": f"{prefix}/final/{_sha(fb['model.safetensors'])[:16]}"})
+    assert TD.handoff(frec, src, f"{prefix}/final", "test", newest=False)["verified"]
+    got = L.reclaim_superseded(ARM, write=False)["units"][u1]
+    assert got["final"]["identity_problems"] == [] and [r["tag"] for r in got["removed"]] == ["step_003312"]
+    assert tags() == ["step_004416"]
+    st = L.relay_state(ARM)
+    assert st[u1]["final"] and L.rotation_need(plan, st, sizes)["peak_bytes"] == 2 * sizes["save_point"]
+
+
+@pytest.mark.parametrize("interrupt", ["the removal failed after the tombstone",
+                                       "the removal took effect but its answer was lost"])
+def test_an_interrupted_final_retirement_is_continued_by_the_next_closeout(tmp_path, monkeypatch, interrupt):
+    """Interruption 2: `rotate_relay` writes a final's tombstone, then the removal fails (``{"verified": false}``) -- or
+    removes the copy but its answer never reaches the records. The next closeout continues THAT tombstone (same id,
+    relay path, weights sha256 and members; never "already exists", never a second one): the dev box's copy is
+    re-hashed file by file first (a copy that does not re-hash keeps the relay copy), the removal is retried (an absent
+    copy confirms absent), and the tombstone and the rotation record are completed. The arm's evidence archive is on the
+    relay before any final's relay copy goes."""
+    _eval_set_or_skip()
+    from stages.single_operator_budget import launch as L
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    assert DESIGN["storage"]["phase_2_finals"]["placement"][ARM] == "dev_box"
+    relay = FakeRelay()
+    monkeypatch.setattr(R, "run_online", relay)
+    monkeypatch.setattr(L, "_lfs_sha", lambda paths: {q: _sha(relay.files[q]) for q in paths if q in relay.files})
+    tomb = tmp_path / "tombstones.json"
+    tomb.write_text((REPO / "logs/maintenance/inventories/checkpoint_tombstones.json").read_text())
+    n0 = len(json.loads(tomb.read_text())["tombstones"])
+    scr = tmp_path / "scr"
+    bodies = _arm_session_evidence(scr / "store" / "out", ARM, relay)
+
+    def getter(rec, dest):                      #: only what the relay holds
+        for n in rec["files_sha256"]:
+            (Path(dest) / n).write_bytes(relay.files[f"{rec['prefix']}/{n}"])
+        return {"verified": True}
+    real_remove, seen = relay.remove, []
+
+    def interrupted(p):
+        seen.append(p["record"]["prefix"])
+        if len(seen) > 1:
+            return real_remove(p)
+        if interrupt.startswith("the removal failed"):
+            return {"verified": False, "verified_absent": False, "error": "ReadTimeout: the hub did not answer"}
+        real_remove(p)
+        raise RuntimeError("the dev box lost the removal's answer")
+    relay.remove = interrupted
+    close = lambda: L.phase2_completion("t1", scr, arm=ARM, store=tmp_path / "store", record=tmp_path / "local.json",  # noqa: E731
+                                        getter=getter, root=tmp_path, tombstones=tomb)
+    first = close()
+    assert first["status"] == "COMPLETE"
+    rot = first["relay_rotation"]
+    assert rot["status"] == "FAILED" if interrupt.endswith("lost") else rot["status"].startswith("PARTIAL")
+    tid = next(t["canonical_id"] for t in json.loads(tomb.read_text())["tombstones"][n0:])
+    u1 = tid.removeprefix("relay_t1_").removesuffix("_final")
+    on_relay = lambda u: any(f"/{u}/final/" in q for q in relay.files)  # noqa: E731
+    assert on_relay(u1) == interrupt.startswith("the removal failed")
+    t = next(x for x in json.loads(tomb.read_text())["tombstones"] if x["canonical_id"] == tid)
+    assert t["deleted_utc"] is None and (t.get("deletion") or {}).get("status", "PENDING") == "PENDING"
+    assert any(q.endswith("_evidence.tar.gz") for q in relay.files)    #: the evidence went first
+    #: the rotation, with the dev box's copy altered: nothing more is removed and no tombstone is added
+    local = json.loads((tmp_path / "local.json").read_text())
+    victim = Path(local["products"][f"{u1}/final"]["path"]) / "config.json"
+    good = victim.read_bytes()
+    victim.write_bytes(b"altered")
+    again = L.rotate_relay(ARM, "t1", scr, local, root=tmp_path, tombstones=tomb)
+    assert "does not re-hash" in again["finals"][u1]["kept"] and on_relay(u1) == interrupt.startswith("the removal failed")
+    assert [x["canonical_id"] for x in json.loads(tomb.read_text())["tombstones"]].count(tid) == 1
+    victim.write_bytes(good)
+    #: and with the copy intact: the same tombstone is continued and completed
+    done = close()["relay_rotation"]
+    assert done["status"].startswith("ROTATED"), done
+    row = done["finals"][u1]
+    assert row["continued_pending_tombstone"] and row["verified_absent"] and not on_relay(u1)
+    assert row["relay_copy_present_before"] is interrupt.startswith("the removal failed")
+    ts = json.loads(tomb.read_text())["tombstones"]
+    mine = [x for x in ts[n0:] if x["canonical_id"] == tid]
+    assert len(mine) == 1 and mine[0]["deletion"]["status"] == "DELETED" and mine[0]["deleted_utc"]
+    assert len(ts) == n0 + 2 and all(x["deletion"]["status"] == "DELETED" for x in ts[n0:])
+    rec = json.loads((tmp_path / L.ROTATION_RECORD).read_text())["arms"][ARM]
+    assert rec["status"].startswith("ROTATED") and all(v["verified_absent"] for v in rec["finals"].values())
+    #: a tombstone of that id for other bytes stops that final
+    doc = json.loads(tomb.read_text())
+    next(x for x in doc["tombstones"] if x["canonical_id"] == tid)["weights_sha256"] = "f" * 64
+    tomb.write_text(json.dumps(doc))
+    rec_path = tmp_path / L.ROTATION_RECORD
+    r = json.loads(rec_path.read_text())
+    r["arms"][ARM]["finals"].pop(u1)
+    rec_path.write_text(json.dumps(r))
+    assert "other bytes" in close()["relay_rotation"]["finals"][u1]["kept"]

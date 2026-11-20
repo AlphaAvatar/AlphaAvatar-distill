@@ -1,9 +1,11 @@
 # Single-operator compression at the same parameter budget (SOB1)
 
 Stage 1 owns this round; its training is `stage3_recovery`. Status: **phase 1 COMPLETE and closed in code
-(2026-11-20 UTC); phase 2 prepared at $0, its four takeover and launch defects fixed and the project's storage
-inventoried (the second brief of 2026-11-20); waiting for the maintainer's grant** (the project cap, phase 2's
-grant, the dev box's disk; section 10). The maintainer fixed the protocol on 2026-11-19 (UTC), corrected the preparation three times the
+(2026-11-20 UTC); phase 2 prepared at $0. The second brief of 2026-11-20 fixed its four takeover and launch defects
+and inventoried the project's storage. The third brief cleaned this project's dev-box files (10.73 GiB freed), set a
+placement for the finals without a larger disk, and fixed the free relay's two interruptions. Waiting for the
+maintainer**: the dev box is still 17.82 GiB short over the study, and the project cap and phase 2's grant are owed
+(section 10). The maintainer fixed the protocol on 2026-11-19 (UTC), corrected the preparation three times the
 same day and granted phase 1 (`logs/budget/decisions.md`, the 2026-11-19 entries). Phase 1 ran once,
 `sob1_phase1_20261119_194259`: one L40S, 239.6 min, $4.4348 all-in of the $22.92 cap, the pod deleted and confirmed
 gone; `study_completion.status` COMPLETE (`runs/sob1_phase1_20261119_194259/closeout/phase1_completion.json`), the
@@ -43,9 +45,9 @@ gradient accumulation steps, 9,701 steps, `stage3_recovery`). The residual-width
 formal optimizer steps record the memory and continue as training. Phase 2 has its own proposal
 (`plans/proposal_phase2.json`): the Stage-3 recovery training and its evaluation are one budget, $185.87 ceiling
 (per-arm caps $63.43 / $61.09 / $61.35) + $1.00 teardown reserve, needing a project cap of **$1,161.06** at the
-2026-11-20 position (committed $974.1887, read again at 09:50Z). Phase 1's $18.4852 remainder is void. After
-the project-wide inventory the relay fits phase 2 on the free plan with the rotation, but the dev box does not hold
-its finals yet (section 8, "Phase 2's storage").
+2026-11-20 position (committed $974.1887, read again at 15:44Z). Phase 1's $18.4852 remainder is void. The relay
+fits phase 2 on the free plan with the rotation, and FFN + attention's finals stay there. After this project's
+cleanup the dev box has 16.12 GiB free, which is not enough for even the first arm's 18.50 GiB (section 8).
 
 | file | what it is |
 | --- | --- |
@@ -420,47 +422,78 @@ protected rows), the tombstones, the retention records and every launcher.
   | the 0.6B family's random baseline | 1.11 GiB | only copy; no registry row, no launcher |
   | a Stage-0 finalist | 1.11 GiB | declared by the proposed `independent-gated-E` study |
 
-*The dev box*, one filesystem `/`, **5.34 GiB free** at 09:50Z. It was 6.96 GiB at 08:43Z; other projects' files
-moved it, and this project's roots are unchanged.
+**This project's dev-box cleanup and the arrangement without a larger disk (2026-11-20, the third brief;
+`logs/maintenance/storage/devbox_cleanup_20261120.json`).** The maintainer keeps the dev box at 200 GiB and the hub on
+its free plan.
 
-| item, per training session (residual width) | path | bound | expected |
-| --- | --- | ---: | ---: |
-| evidence of the two recovered units | `<scr>/store/out` | 2.83 GiB | 0.23 GiB |
-| one pull's archive in flight (not at the peak) | `<scr>/store/pull_<n>.tgz` | 0.17 GiB | |
-| teardown collector archive + its extracted copy | `<scr>/store/` | 0.02 GiB | |
-| resume archive (failure path) | `<scr>/resume_<run>.tgz` | 0.34 GiB | 0 |
-| evidence archive for the relay rotation | `<scr>/archive/` | 0.34 GiB | 0.03 GiB |
-| two fp32 finals | `~/aad-artifacts/stage1_single_operator_budget/<arm>-s<seed>/final/<sha16>/` | 14.98 GiB | 14.98 GiB |
-| **session peak** | `/` | **18.50 GiB** | **15.24 GiB** |
+*The whole partition first.* `/` (`/dev/nvme0n1p3`) is the only data filesystem on the machine: there is no other
+persistent mount (`/boot/efi` is the 200 MB EFI partition), and 8.20 GiB of `/` is reserved for root. One `du` pass
+over `/`, files counted once by inode, found this project holding about 52 GiB and other projects more than 80 GiB.
 
-Every session's finals and evidence stay, so after the third session `/` holds **54.84 GiB bound (45.74 GiB
-expected)**, of which the six finals are 44.94 GiB. With the measured 4.37 GiB swing of the other projects kept free,
-**the shortfall is 53.87 GiB bound (44.76 GiB expected)**. The first session alone does not fit (18.50 GiB against
-5.34 GiB). **Growing the system disk by 64 GiB** (200 -> 264 GiB) leaves 10.1 GiB beyond the bound and the swing.
-ECS resizes an ESSD online, then `growpart /dev/nvme0n1 3` and `resize2fs /dev/nvme0n1p3`. The reference price is
-USD 7.65 per 100 GiB-month (ESSD PL0, Alibaba Cloud's ECS documentation), about **$4.90/month**; the disk's category
-and the Singapore price are confirmed in the console. It is billed outside the RunPod project cap.
+*This project's cleanup: 5.39 -> 16.12 GiB free, **10.73 GiB freed**, measured on `/` before and after.* Hard links
+count once.
 
-*The relay, on the free plan, with the rotation the maintainer prefers.*
-* **The rotation.** Once an arm's session is COMPLETE (both finals and four sets on their files, both finals re-hashed
-  on the dev box), its secured evidence goes to the relay as one verified archive. Then each final's relay copy is
-  tombstoned, removed and confirmed absent (`launch.rotate_relay`, `storage/relay_rotation_phase2.json`; the policy
-  is `design.json :: storage.phase_2_finals.relay_rotation`). A final that does not re-hash on the dev box keeps its
-  relay copy.
-* **The preflight.** A session asks the relay for what its REMAINING rotation adds (`launch.rotation_need` over
-  `launch.relay_state`). Only valid objects count: present, verified, and with the record's LFS sha256. A held save
-  point is credited only once a later one has been uploaded, and the latest resumable save point is never removed
-  before then.
-
-| the residual-width arm (first) | the relay must still accept | against 50.55 GiB free |
+| what | freed | rule |
 | --- | ---: | --- |
-| first run | 49.55 GiB (two save points + one final) | **fits, 1.00 GiB margin** |
-| takeover: seed 1 holds one valid 21.03 GiB save point | 28.52 GiB | fits |
-| takeover: seed 1's final durable | 42.06 GiB (seed 2's two save points) | fits |
-| depth only / FFN + attention, after the previous arm's rotation | 46.46 / 46.80 GiB | fits, 4.09 / 3.75 GiB margin |
+| the 19 earlier Claude sessions' scratch | 0.31 GiB | 47 files (0.5 MB) without a copy elsewhere are kept as one read-back archive under `~/aad-artifacts/maintenance/` |
+| this session's own dry-run bundles and outputs | 0.69 GiB | nothing cites them |
+| closed experiments' extracted copies with their archive beside them (Research A's tool sessions, Stage 3's two runs, D1-D3, A3, C1, C2, Phase A) | 4.54 GiB | a file goes only when the archive holds the same path with the same sha256; a `RESTORE_FROM_ARCHIVE.txt` gives the command |
+| byte-identical duplicates in archival zones made hard links of one copy (388 groups, 779 paths) | about 5.5 GiB | every path stays readable; the git-tracked files, `data/` and this session are excluded |
 
-**HF PRO is not needed** under this rotation. No peak exceeds the free plan's 100 GB: the largest is the width arm's
-first run, 49.55 GiB against 50.55 GiB.
+The 1.51 GiB of "old Claude scratch" in the 2026-11-20 inventory included the current session's own scratch; the
+earlier sessions held 0.31 GiB by now. Nothing that is a weight, the A baseline, SOB1's inits and mappings, the teacher
+statistics or a registered control was touched, and there is no resume save point on the dev box. Not cleaned: the
+public tool-calling datasets (3.03 GiB, re-downloadable, but an open candidate list), the rebuilt caches, the closed
+runs' remaining evidence. The hub freed nothing more this round: the relay still has **50.55 GiB** free (15:44Z).
+
+*Other projects' files: read only, the maintainer's decision.* Nothing was changed.
+
+| path | project | reclaimable | how |
+| --- | --- | ---: | --- |
+| `/var/log/alphaavatar/demo-agent.err.log` | AlphaAvatar's running demo service; no write since 2026-09-21 | 14.88 GiB | root truncation (the service holds it open: deleting the path frees 0 B until a restart) |
+| `/var/log/alphaavatar/demo-agent.log` | the same service's live log | up to 19.16 GiB | rotation or truncation (root) |
+| `~/alphaavatar-speaker-eval/sessions/v2/` | speaker evaluation; no process, last write 2026-11-13 | 13.24 GiB | if the `.npz` features are no longer needed |
+| `~/alphaavatar-speaker-eval/data*/` archives | the same | up to 4.69 GiB | archives beside extracted copies, once checked |
+| `/tmp/claude-1000/-home-ecs-user-AlphaAvatar/` | AlphaAvatar's Claude sessions | about 0.6 GiB | the finished sessions only; one is still active |
+| `~/.vscode-server/cli/servers/` | the IDE | about 3.8 GiB | the six older server builds |
+| `~/.cache/uv/` | every project's uv environments | at most 2.76 GiB | `uv cache prune` |
+| the root reserve of `/` | the system | about 6.2 GiB | `tune2fs -m 1` (root) |
+
+*The arrangement* (`design.json :: storage.phase_2_finals.placement`). During an arm's run the free relay has room
+for that arm's rotation only (1.00 to 4.09 GiB beside it), so every earlier arm's finals must be on the dev box. The
+last arm's finals need no room for a later rotation, so they stay on the relay. Each of the six is retrievable by its
+sha256:
+* **residual width and depth: on the dev box** (`~/aad-artifacts/stage1_single_operator_budget/<arm>-s<seed>/final/
+  <sha16>/`, four fp32 finals, 29.91 GiB). Each is re-hashed there, then its relay copy is tombstoned and removed.
+* **FFN + attention: on the relay** (`durable/stage1_single_operator_budget/ffn_attention/<unit>/final/<sha16>/`, two
+  finals, 15.03 GiB, by LFS sha256). That leaves the relay 35.5 GiB free afterwards.
+
+| launch, in order | the dev box must have free at that launch (`disk.py --total`: the session's bound peak + earlier arms' expected bytes) | free now 16.12 GiB | relay must accept / has |
+| --- | ---: | ---: | --- |
+| residual width (first) | 18.50 GiB (two finals land at its closeout) | **2.38 GiB short** | 49.55 / 50.55 GiB |
+| depth only | 33.68 GiB (width's finals stay) | 17.56 GiB short | 46.46 / 50.55 GiB |
+| FFN + attention | 33.94 GiB (its finals stay on the relay) | **17.82 GiB short** | 46.80 / 50.55 GiB |
+
+The big step is the depth arm's closeout, when its two finals land beside the width arm's two: phase 2 then holds
+30.45 GiB expected, 36.64 GiB bound. Its peak over the study, at FFN + attention's closeout, is 30.71 GiB expected and
+39.81 GiB bound (`plans/disk_peak_phase2.json`). **Even the first arm does not fit after the cleanup.** Over the whole study the gap is
+**17.82 GiB**, or **22.19 GiB** keeping the measured 4.37 GiB swing of the other projects free. Placing all six finals
+on the dev box would need 33.94 + 15.03 GiB at the third launch: a gap of 32.8 GiB. No launch threshold was lowered.
+
+*The relay, corrected.* A takeover's need is asked of the relay's live headroom, which already excludes what is held.
+So the margin is never "50.55 minus the need" once something is held. The earlier table's 22.03 and 8.49 GiB margins
+were wrong: with one save point, or with seed 1's final held, the width arm's true margin is **about 1.00 GiB**, as on
+a first run.
+
+| the residual-width arm | held on the relay | its live headroom | the remaining rotation needs | margin |
+| --- | --- | ---: | ---: | ---: |
+| first run | nothing | 50.55 GiB | 49.55 GiB | 1.00 GiB |
+| takeover | seed 1's one valid save point (21.03 GiB) | 29.52 GiB | 28.52 GiB | 1.00 GiB |
+| takeover | seed 1's final (7.49 GiB) | 43.06 GiB | 42.06 GiB | 1.00 GiB |
+| takeover, two save points left by a failed removal | 2 x 21.03 GiB | 8.50 GiB before the dev box's reclaim, 29.52 after | 28.52 GiB | 1.00 GiB |
+| depth only / FFN + attention, after the previous arm's rotation | nothing | 50.55 GiB | 46.46 / 46.80 GiB | 4.09 / 3.75 GiB |
+
+**HF PRO is not needed.** No peak exceeds the free plan: the largest is the width arm's, 49.55 GiB against 50.55 GiB.
 
 **Fixed: streams under `evaluation/live/`.** The runners write their live streams beside the units they serve,
 `<unit>/../../live`, which is `evaluation/live/` in this layout. The poll's listing, `take_over` and the resume archive
@@ -542,6 +575,34 @@ real entry point (`tests/test_single_operator_budget.py`):
    Counter-example: the first removal fails, the pod is lost, the next attempt retires it before uploading anything,
    and the latest save point is removed only after the final hands off.
 
+**Fixed (2026-11-20, the third brief): the free relay's two interruptions**, each with an offline counter-example
+(`tests/test_single_operator_budget.py`):
+1. *Two save points left on the relay.* `step_002208` handed off, but `step_001104`'s removal failed and the pod was
+   lost. The relay then held both (8.50 GiB of live headroom left), the preflight asked 21.03 GiB, and the launch was
+   refused before any pod could retry the removal. Now the launch's relay gate first runs `launch.reclaim_superseded`
+   on the dev box (a real or a dry run alike; it creates nothing):
+   * the save point a takeover restores is checked: the latest listed and present, with every file, its LFS sha256 the
+     record's, a planned step, and the same `resume_identity.json` sha256 as each one it supersedes;
+   * each older valid save point is then removed (`relay.remove`, permanent, its pointer with it) and confirmed absent
+     (`storage/relay_reclaim_phase2.json`);
+   * the need is asked of the live headroom: 28.52 of 29.52 GiB.
+
+   The latest valid save point always stays. An older one of another resume identity, or one beside a later save point
+   whose bytes differ, is never removed. Beside the unit's own final, every save point is superseded, but only once
+   the final's archived completion record proves it is the unit's (`completion.final_identity_problems`).
+   `rotation_need` no longer credits a save point held beside a final before it is gone. `relay.remove` now always
+   deletes the record's pointer.
+2. *A final's retirement interrupted.* `rotate_relay` writes the tombstone, then removes the relay copy. When the
+   removal failed, or took effect without its answer being recorded, the next closeout stopped on "a tombstone already
+   exists". Now a pending tombstone with the same id, relay path, weights sha256 and members is continued:
+   * the dev box's copy is re-hashed file by file first; a copy that does not re-hash keeps the relay copy;
+   * the removal is retried (an absent copy confirms absent);
+   * the tombstone and `relay_rotation_phase2.json` are completed, with whether the copy was still there.
+
+   A tombstone of that id for other bytes stops that final. The arm's evidence archive is on the relay before any
+   final's copy goes. The counter-examples cover both cases: the tombstone is written and the removal fails; the copy
+   is removed and the answer is lost.
+
 **Takeover.** TPI1's durability helpers, with this round's two repairs:
 
 * *An unreadable relay listing* is read up to five times. If it still cannot be read, the evidence's own records are
@@ -589,7 +650,7 @@ git commit <the authorization> (the session commit) ; stage the bundle at that c
 launch.py launch --kind sob1_train --arm residual_width --run-id <id> --session-commit <c> --bundle <b> --scr <s> \
     --max-price 1.11 --disk-gb 150                                       # its closeout runs phase2_completion
 launch.py closeout --kind sob1_train --arm residual_width --run-id <id> --scr <s>   # the same closeout by hand
-launch.py retain --kind sob1_train --arm residual_width --run-id <id> --from <s>    # both finals, re-hashed on the disk
+launch.py retain --kind sob1_train --arm residual_width --run-id <id> --from <s>    # both finals at their placement
 launch.py study-completion                                               # $0: six finals, twelve sets, the comparison
 ```
 
@@ -679,14 +740,17 @@ runner's all-in; that was fixed then (`test_the_hard_cap_is_the_runners_all_in`)
 1. ~~Grant phase 1~~: granted 2026-11-19 and COMPLETE 2026-11-20 ($4.4348 of $22.92). Closed in code the same day
    (the grant's `kinds.sob1_phase1.closed`): `issue` and `launch` refuse it and its $18.4852 remainder is void.
 2. Phase 2 (prepared at $0 on 2026-11-20; the maintainer approves the three together):
-   * **the project cap: $1,161.06** (committed $974.1887 at 08:30Z + the $185.87 ceiling + the $1.00 reserve). The
+   * **the project cap: $1,161.06** (committed $974.1887, read again at 15:44Z, + the $185.87 ceiling + the $1.00 reserve). The
      maintainer tops the provider balance up by $151.06 ($35.8108 -> $186.87);
    * **phase 2's grant** from `plans/proposal_phase2.json` (`launch.py grant --kind sob1_train --decision ...`);
-   * **the dev box's disk** (section 8): grow the system disk by 64 GiB (shortfall 53.87 GiB bound, 44.76 GiB expected;
-     about $4.90/month at the reference price). Phase 2 cannot start without it: even the first session needs
-     18.50 GiB against 5.34 GiB free.
-   * The relay needs no purchase. The free plan fits with the rotation: the largest need is 49.55 GiB against
-     50.55 GiB free.
+   * ~~grow the dev box's disk~~: not approved (2026-11-20, the third brief). The arrangement without it (section 8)
+     keeps residual width's and depth's finals on the dev box and FFN + attention's on the relay. After this project's
+     cleanup (16.12 GiB free) the dev box is **2.38 GiB short for the first arm and 17.82 GiB short over the study**
+     (22.19 GiB with the measured 4.37 GiB swing kept free).
+   * **other projects' files** (read only, section 8's table) close it. The smallest set is the stale
+     `/var/log/alphaavatar/demo-agent.err.log` (14.88 GiB, root truncation) plus about 3 GiB more from the same table,
+     or 7.3 GiB more to keep the swing free.
+   * The relay needs no purchase: the largest need is 49.55 GiB against 50.55 GiB free.
 3. Kept on the hub, for the maintainer: 7.75 GiB of session code bundles, 7.41 GiB of environment wheels, Phase A's
    5.55 GiB of selected leaves, 4.44 GiB of permanent controls, the 1.11 GiB random baseline and the 1.11 GiB
    Stage-0 finalist (section 8; `inventory_20261120.json`).

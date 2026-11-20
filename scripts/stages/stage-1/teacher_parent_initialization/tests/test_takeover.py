@@ -74,7 +74,7 @@ class FakeRelay:
         return {"verified": True, "from": f"fake:{rec['prefix']}"}
 
     def remove(self, p):
-        for k in p["record"]["files_sha256"]:
+        for k in {*p["record"]["files_sha256"], R.POINTER}:       #: the real remove takes the record's pointer too
             self.files.pop(f"{p['record']['prefix']}/{k}", None)
         return {"verified": True, "verified_absent": True}
 

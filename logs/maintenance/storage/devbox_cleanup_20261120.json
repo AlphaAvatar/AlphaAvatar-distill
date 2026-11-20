@@ -1,0 +1,493 @@
+{
+ "schema": "aadistill.devbox_cleanup/v2",
+ "written_utc": "2026-11-20T15:28:09Z",
+ "why": "the maintainer's third brief of 2026-11-20: 「从整个开发机文件系统的实际占用开始，优先清理本项目无用的代码副本、资源和 checkpoint。……对本项目拥有、已确认无人使用、没有未提交工作、没有后续消费者的临时文件和可替代副本，可以直接清理。……清理前后用同一挂载点的实际可用字节对账；硬链接只按真正释放的空间计算。」",
+ "filesystem": "/ (/dev/nvme0n1p3, ext4, 196.49 GiB; 8.20 GiB of it reserved for root; the only data filesystem: no other persistent mount exists, /boot/efi is the 200 MB EFI partition)",
+ "free_bytes_before": 5788545024,
+ "free_bytes_after": 17309716480,
+ "freed_bytes_measured": 11521171456,
+ "freed_gib_measured": 10.73,
+ "measured": "shutil.disk_usage('/').free, read at 2026-11-20T15:27:28Z and 2026-11-20T15:28:09Z; the other projects' writes in between are inside it",
+ "actions": {
+  "scratch": {
+   "what": "this project's 19 earlier Claude session scratch directories (/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/<session>, not the current one)",
+   "bytes_on_disk": 329584640,
+   "rule": "every other file has a byte-identical copy elsewhere in this project's roots (sha256), or is a Python environment (rgenv / rcenv / mdenv / pqenv), rebuilt from its lock when wanted",
+   "kept_unique_files": 47,
+   "kept_unique_bytes": 521927,
+   "kept_in": "~/aad-artifacts/maintenance/claude_scratch_20261120/claude_scratch_unique_files.tar.gz",
+   "kept_sha256": "248d0eab6ac8d0d4fe57f6a336ba607cd4d834db19621e54643c82a2c0c88e69",
+   "kept_manifest": "~/aad-artifacts/maintenance/claude_scratch_20261120/manifest.json",
+   "kept_what": "A-MIX's watchdog log (cited by its session.json), launcher logs and a few small scripts and logs; the archive was read back member by member before anything was removed",
+   "the_1_51_gib": "the 1.51 GiB of the 2026-11-20 inventory included the current session's own scratch; the earlier sessions held 0.31 GiB by now"
+  },
+  "session": {
+   "what": "this session's own code bundles and dry-run outputs from the two earlier rounds (bundle*, table_dry, pkgcheck, a vLLM source checkout, a temp dir); no committed record cites this session's scratch",
+   "paths": [
+    "bundle",
+    "bundle1",
+    "bundle2",
+    "bundle3",
+    "bundle4",
+    "bundle5",
+    "bundle6",
+    "table_dry",
+    "pkgcheck",
+    "vllm_src",
+    "tmp6r_smzc7"
+   ],
+   "bytes_on_disk": 744980480
+  },
+  "extracted": {
+   "rule": "a file goes only when the archive beside it holds the same relative path with the same sha256; every other file stays; a RESTORE_FROM_ARCHIVE.txt beside each says how",
+   "bytes_on_disk": 4870561792,
+   "readers": "tool_session_summary.py (Research A, closed) reads the tool sessions' unpacked/; mixed_training_plan.py (A-MIX's planning, done) reads a_train_sr_c1's extracted/<unit>/train/; both are historical and run again after the restore command",
+   "rows": [
+    {
+     "experiment": "Research A",
+     "status": "closed NO_GO 2026-11-11",
+     "archive": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/tool_generation_hybrid.tgz",
+     "archive_sha256": "33e992a9490f367cc138559ddea8241776edb050cafaec8823e3c793bb2fdc6d",
+     "extracted": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked",
+     "archive_prefix_components_stripped": 0,
+     "files": 479,
+     "restorable_files": 479,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 2334265344,
+     "restore": "tar -xzf artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/tool_generation_hybrid.tgz -C artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_074146/unpacked",
+     "archive_sha256_recorded_in": [
+      "logs/stages/stage-2/teacher_modes/runs/a_tool_generation_20261105_074146/closeout/teardown.json"
+     ]
+    },
+    {
+     "experiment": "Research A",
+     "status": "closed NO_GO 2026-11-11",
+     "archive": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261104_195411/tool_generation_thinking_2507.tgz",
+     "archive_sha256": "7cdb61f34cedb7d873a5e3cc873666478238a15d62f451a479798bc7c347cc0c",
+     "extracted": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261104_195411/unpacked",
+     "archive_prefix_components_stripped": 0,
+     "files": 82,
+     "restorable_files": 82,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 197877760,
+     "restore": "tar -xzf artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261104_195411/tool_generation_thinking_2507.tgz -C artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261104_195411/unpacked",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "Research A",
+     "status": "closed NO_GO 2026-11-11",
+     "archive": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_105512/tool_generation_hybrid.tgz",
+     "archive_sha256": "154b4abe16c42b78d00aea4cd58301b9c0a1c4577763db718cf699123b1780d5",
+     "extracted": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_105512/unpacked",
+     "archive_prefix_components_stripped": 0,
+     "files": 58,
+     "restorable_files": 58,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 202104832,
+     "restore": "tar -xzf artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_105512/tool_generation_hybrid.tgz -C artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_20261105_105512/unpacked",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "Research A",
+     "status": "closed NO_GO 2026-11-11",
+     "archive": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/tool_generation_hybrid.tgz",
+     "archive_sha256": "2e269bedb685b3afbde5b95f731c64922a73b5dc89d63f22aa4673cdd60d185e",
+     "extracted": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/unpacked",
+     "archive_prefix_components_stripped": 0,
+     "files": 100,
+     "restorable_files": 100,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 153591808,
+     "restore": "tar -xzf artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/tool_generation_hybrid.tgz -C artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_20261105_153741/unpacked",
+     "archive_sha256_recorded_in": [
+      "logs/maintenance/inventories/checkpoint_registry.json",
+      "logs/stages/stage-2/teacher_modes/storage/schema_restored_session_archives.json"
+     ]
+    },
+    {
+     "experiment": "Research A",
+     "status": "closed NO_GO 2026-11-11",
+     "archive": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261105_064829/tool_generation_thinking_2507.tgz",
+     "archive_sha256": "757ff83d245740eb78548ebea1d963848a63f1b0ebcf9943a55f167fa64fa035",
+     "extracted": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261105_064829/unpacked",
+     "archive_prefix_components_stripped": 0,
+     "files": 26,
+     "restorable_files": 26,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 40038400,
+     "restore": "tar -xzf artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261105_064829/tool_generation_thinking_2507.tgz -C artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_t2507_20261105_064829/unpacked",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "Research A",
+     "status": "closed NO_GO 2026-11-11",
+     "archive": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_t2507_20261105_164515/tool_generation_thinking_2507.tgz",
+     "archive_sha256": "a5584e18c4bf4a0b982bf81d0cfed9a077618dcd31886f3604aa592208b632a3",
+     "extracted": "artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_t2507_20261105_164515/unpacked",
+     "archive_prefix_components_stripped": 0,
+     "files": 24,
+     "restorable_files": 24,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 26398720,
+     "restore": "tar -xzf artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_t2507_20261105_164515/tool_generation_thinking_2507.tgz -C artifacts/stages/stage-2/teacher_modes/tool_generation_sessions/a_tool_generation_sr_t2507_20261105_164515/unpacked",
+     "archive_sha256_recorded_in": [
+      "logs/maintenance/inventories/checkpoint_registry.json",
+      "logs/stages/stage-2/teacher_modes/storage/schema_restored_session_archives.json"
+     ]
+    },
+    {
+     "experiment": "Stage 3 A-MIX",
+     "status": "COMPLETE 2026-11-10",
+     "archive": "~/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz",
+     "archive_sha256": "fadea6263ed99ed9bbdfbc4646b195bde62bb48fcc17b03804eb55a1e7ed1417",
+     "extracted": "~/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 830,
+     "restorable_files": 826,
+     "kept_count": 4,
+     "restorable_bytes_on_disk": 830861312,
+     "restore": "tar -xzf ~/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/stage3_units_evidence.tgz -C ~/aad-artifacts/stage3_sr/a_train_sr_mix_20261109_193709/extracted",
+     "archive_sha256_recorded_in": [
+      "configs/stages/stage-1/teacher_parent_initialization/design.json",
+      "logs/maintenance/inventories/checkpoint_registry.json",
+      "logs/stages/stage-1/teacher_parent_initialization/audit/b_evidence.json"
+     ]
+    },
+    {
+     "experiment": "Stage 3",
+     "status": "COMPLETE 2026-11-08",
+     "archive": "~/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/stage3_units_evidence.tgz",
+     "archive_sha256": "c0901fbb629d6e7f55d52c5fc905a49292b4b11dfef2a05c32703e1129217ec8",
+     "extracted": "~/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 510,
+     "restorable_files": 502,
+     "kept_count": 8,
+     "restorable_bytes_on_disk": 541491200,
+     "restore": "tar -xzf ~/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/stage3_units_evidence.tgz -C ~/aad-artifacts/stage3_sr/a_train_sr_c1_20261108_104542/extracted",
+     "archive_sha256_recorded_in": [
+      "logs/maintenance/inventories/checkpoint_registry.json",
+      "logs/stages/stage-2/teacher_modes/runs/a_train_sr_c1_20261108_104542/evidence/evidence_archive.json"
+     ]
+    },
+    {
+     "experiment": "D2",
+     "status": "D-series closed",
+     "archive": "~/aad-artifacts/phase_d2/d2_search_20261015_051722/store/d2_search_artifacts.tar.gz",
+     "archive_sha256": "d8d957006d95a972ef99c971ddbdea026fb36b00ae2ce32ccb5adc2e9ed030b9",
+     "extracted": "~/aad-artifacts/phase_d2/d2_search_20261015_051722/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 5,
+     "restorable_files": 5,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 117907456,
+     "restore": "tar -xzf ~/aad-artifacts/phase_d2/d2_search_20261015_051722/store/d2_search_artifacts.tar.gz -C ~/aad-artifacts/phase_d2/d2_search_20261015_051722/store/extracted",
+     "archive_sha256_recorded_in": [
+      "logs/maintenance/inventories/checkpoint_registry.json",
+      "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json",
+      "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json"
+     ]
+    },
+    {
+     "experiment": "D2",
+     "status": "D-series closed",
+     "archive": "~/aad-artifacts/phase_d2/d2_screening_20261015_203346/store/d2_screening_artifacts.tar.gz",
+     "archive_sha256": "f297577621d0e40f1e81b3d79e29798f016369a0c612926ff5e914019a569835",
+     "extracted": "~/aad-artifacts/phase_d2/d2_screening_20261015_203346/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 252,
+     "restorable_files": 252,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 83275776,
+     "restore": "tar -xzf ~/aad-artifacts/phase_d2/d2_screening_20261015_203346/store/d2_screening_artifacts.tar.gz -C ~/aad-artifacts/phase_d2/d2_screening_20261015_203346/store/extracted",
+     "archive_sha256_recorded_in": [
+      "logs/maintenance/inventories/checkpoint_registry.json",
+      "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/archive_relay_copy.json"
+     ]
+    },
+    {
+     "experiment": "D1",
+     "status": "D-series closed",
+     "archive": "~/aad-artifacts/phase_d1/d1_search_20261006_210210/store/d1_search_artifacts.tar.gz",
+     "archive_sha256": "3a23219108feee2c5cfbc88f5eb2393a495bc22dd9f5e4e691f298e49121bc4b",
+     "extracted": "~/aad-artifacts/phase_d1/d1_search_20261006_210210/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 5,
+     "restorable_files": 5,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 67854336,
+     "restore": "tar -xzf ~/aad-artifacts/phase_d1/d1_search_20261006_210210/store/d1_search_artifacts.tar.gz -C ~/aad-artifacts/phase_d1/d1_search_20261006_210210/store/extracted",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "A3",
+     "status": "closed",
+     "archive": "~/aad-artifacts/phase_a3/_sessions/a3_attempt38/store/a3_artifacts.tar.gz",
+     "archive_sha256": "7e5b4ce1ead4e1e0a0a4883dbf60b006afb214b621c3d8dad5add25b0664a18c",
+     "extracted": "~/aad-artifacts/phase_a3/_sessions/a3_attempt38/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 81,
+     "restorable_files": 81,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 47484928,
+     "restore": "tar -xzf ~/aad-artifacts/phase_a3/_sessions/a3_attempt38/store/a3_artifacts.tar.gz -C ~/aad-artifacts/phase_a3/_sessions/a3_attempt38/store/extracted",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "D3",
+     "status": "D-series closed",
+     "archive": "~/aad-artifacts/phase_d3/d3_probes_20261017_110022/store/d3_probes_artifacts.tar.gz",
+     "archive_sha256": "c58b2d704439fe231404dd7e9bae8dbf86aabed5435ed3335370bb7702720898",
+     "extracted": "~/aad-artifacts/phase_d3/d3_probes_20261017_110022/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 97,
+     "restorable_files": 97,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 34754560,
+     "restore": "tar -xzf ~/aad-artifacts/phase_d3/d3_probes_20261017_110022/store/d3_probes_artifacts.tar.gz -C ~/aad-artifacts/phase_d3/d3_probes_20261017_110022/store/extracted",
+     "archive_sha256_recorded_in": [
+      "logs/maintenance/inventories/checkpoint_registry.json",
+      "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/closeout/outcome.json",
+      "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/archive_relay_copy.json"
+     ]
+    },
+    {
+     "experiment": "D2",
+     "status": "D-series closed",
+     "archive": "~/aad-artifacts/phase_d2/d2_confirmation_20261016_105802/store/d2_confirmation_artifacts.tar.gz",
+     "archive_sha256": "7e7a82e567369ab7b06b7472a35260957cf116369d854f91d9c81289c367122b",
+     "extracted": "~/aad-artifacts/phase_d2/d2_confirmation_20261016_105802/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 97,
+     "restorable_files": 97,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 32256000,
+     "restore": "tar -xzf ~/aad-artifacts/phase_d2/d2_confirmation_20261016_105802/store/d2_confirmation_artifacts.tar.gz -C ~/aad-artifacts/phase_d2/d2_confirmation_20261016_105802/store/extracted",
+     "archive_sha256_recorded_in": [
+      "logs/maintenance/inventories/checkpoint_registry.json",
+      "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/archive_relay_copy.json"
+     ]
+    },
+    {
+     "experiment": "C2",
+     "status": "closed",
+     "archive": "~/aad-scratch/c2_attempt4/store/c2_search1_artifacts.tar.gz",
+     "archive_sha256": "b79d565184fcee70789e9f18844236abbaf7b97ae7188d3201923b12e56e5be5",
+     "extracted": "~/aad-scratch/c2_attempt4/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 7,
+     "restorable_files": 7,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 29298688,
+     "restore": "tar -xzf ~/aad-scratch/c2_attempt4/store/c2_search1_artifacts.tar.gz -C ~/aad-scratch/c2_attempt4/store/extracted",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "Phase A",
+     "status": "closed",
+     "archive": "~/aad-scratch/phase_a12_20260821/store/phase_a_artifacts.tar.gz",
+     "archive_sha256": "36fa7cee515aa78ab2ec2b3e266b6a424092bd53402ea157e1b3ba2388db7e8a",
+     "extracted": "~/aad-scratch/phase_a12_20260821/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 14,
+     "restorable_files": 14,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 26599424,
+     "restore": "tar -xzf ~/aad-scratch/phase_a12_20260821/store/phase_a_artifacts.tar.gz -C ~/aad-scratch/phase_a12_20260821/store/extracted",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "Phase A",
+     "status": "closed",
+     "archive": "~/aad-scratch/phase_a11_20260820/store/phase_a_artifacts.tar.gz",
+     "archive_sha256": "4d6c79b0f8d881759051f428646bcb8f835c2c0bcfeb63b65cba6ee7544c40e5",
+     "extracted": "~/aad-scratch/phase_a11_20260820/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 13,
+     "restorable_files": 13,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 26570752,
+     "restore": "tar -xzf ~/aad-scratch/phase_a11_20260820/store/phase_a_artifacts.tar.gz -C ~/aad-scratch/phase_a11_20260820/store/extracted",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "C1",
+     "status": "closed",
+     "archive": "~/aad-scratch/c1_attempt18/store/c1_artifacts.tar.gz",
+     "archive_sha256": "72b0b6e48525dfbad396addfd0b8ca80a4fae87e06304b9c9881bc5fc111d9cf",
+     "extracted": "~/aad-scratch/c1_attempt18/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 164,
+     "restorable_files": 164,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 27197440,
+     "restore": "tar -xzf ~/aad-scratch/c1_attempt18/store/c1_artifacts.tar.gz -C ~/aad-scratch/c1_attempt18/store/extracted",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "D1",
+     "status": "D-series closed",
+     "archive": "~/aad-scratch/sessions/d1_behavioural_20261012_064341/store/d1_behavioural_artifacts.tar.gz",
+     "archive_sha256": "75f50b4685dd1d9693a6ffca6de3bf5e70c4d9964424739fbd0e6793d9d76bc4",
+     "extracted": "~/aad-scratch/sessions/d1_behavioural_20261012_064341/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 116,
+     "restorable_files": 116,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 25366528,
+     "restore": "tar -xzf ~/aad-scratch/sessions/d1_behavioural_20261012_064341/store/d1_behavioural_artifacts.tar.gz -C ~/aad-scratch/sessions/d1_behavioural_20261012_064341/store/extracted",
+     "archive_sha256_recorded_in": []
+    },
+    {
+     "experiment": "D1",
+     "status": "D-series closed",
+     "archive": "~/aad-artifacts/phase_d1/d1_behavioural_20261012_064341/store/d1_behavioural_artifacts.tar.gz",
+     "archive_sha256": "75f50b4685dd1d9693a6ffca6de3bf5e70c4d9964424739fbd0e6793d9d76bc4",
+     "extracted": "~/aad-artifacts/phase_d1/d1_behavioural_20261012_064341/store/extracted",
+     "archive_prefix_components_stripped": 0,
+     "files": 116,
+     "restorable_files": 116,
+     "kept_count": 0,
+     "restorable_bytes_on_disk": 25366528,
+     "restore": "tar -xzf ~/aad-artifacts/phase_d1/d1_behavioural_20261012_064341/store/d1_behavioural_artifacts.tar.gz -C ~/aad-artifacts/phase_d1/d1_behavioural_20261012_064341/store/extracted",
+     "archive_sha256_recorded_in": []
+    }
+   ]
+  },
+  "dedup": {
+   "what": "byte-identical files (sha256) with distinct inodes, in archival zones only, made hard links of one copy (os.link to a temporary name, then os.replace): every path stays readable with the same bytes; modes are left alone",
+   "zones": [
+    "artifacts/",
+    ".scratch/",
+    "~/aad-artifacts/",
+    "~/aad-scratch/",
+    "~/.cache/huggingface/"
+   ],
+   "excluded": "git-tracked files, the repository's data/, this session's scratch, and anything outside the zones",
+   "groups": 388,
+   "paths_linked": 779,
+   "bytes_saved_apparent": 5952848819,
+   "by_zone_bytes": {
+    "~/aad-artifacts/": 3126764950,
+    "artifacts/": 2013998733,
+    "~/aad-scratch/": 763459985,
+    "~/.cache/huggingface/": 48625151,
+    ".scratch/": 607822723
+   },
+   "caution": "a writer that rewrites one of these paths IN PLACE (open 'w' without unlinking) changes every path of its inode; these are closed experiments' archived files, which nothing rewrites; os.replace / git checkout break the link instead",
+   "full_manifest": "~/aad-artifacts/maintenance/devbox_cleanup_20261120_full.json",
+   "full_manifest_sha256": "4d7d797c389507db2e8cb33eec9e7f37094942fcb93e8f2115d8e2621de0c2b4"
+  }
+ },
+ "not_cleaned": [
+  {
+   "path": "artifacts/stages/stage-2/teacher_modes/tool_sources/",
+   "gib": 3.03,
+   "what": "public tool-calling datasets at pinned revisions (Nemotron Pivot 1.63 GiB, ToolACE, xLAM, ...)",
+   "why": "re-downloadable, but the Stage-2 tool-calling sources are an open candidate list (none approved): a later consumer is possible; the maintainer's decision"
+  },
+  {
+   "path": "the repository's __pycache__ / .pytest_cache",
+   "gib": 0.19,
+   "why": "rebuilt on the next import or test run: not a durable saving"
+  },
+  {
+   "path": "~/aad-scratch (0.99 GiB left)",
+   "why": "what is left after the de-duplication is the closed runs' own evidence (scr stores without another copy)"
+  },
+  {
+   "path": "every weight file of 100 MiB or more (22.4 GiB)",
+   "why": "unchanged from logs/maintenance/storage/inventory_20261120.json: A's baseline, SOB1's three initializations and mappings, the teacher statistics (the only copy), registry-protected controls; no valid resume save point exists on the dev box"
+  }
+ ],
+ "hub": {
+  "freed_bytes": 0,
+  "relay_headroom_gib": [
+   50.55,
+   50.59
+  ],
+  "probed_utc": "2026-11-20T15:44:48Z",
+  "why": "nothing on the hub met the standing rule beyond what the 2026-11-20 inventory retired (the teacher statistics' redundant copy, 1.81 GiB); the kept-for-the-maintainer list there stands. Freeing hub bytes does not reduce the dev box's gap"
+ },
+ "authorizes": "nothing",
+ "other_projects_read_only": {
+  "rule": "read only (sizes from one du pass over / at 2026-11-20T15:10Z, files counted once by inode; last writes from mtimes; processes from /proc). Nothing here was changed; each row is the maintainer's decision",
+  "rows": [
+   {
+    "path": "/var/log/alphaavatar/demo-agent.err.log",
+    "project": "AlphaAvatar (alphaavatar-demo.service, running since 2026-08-17)",
+    "owner": "root (the directory is ecs-user's)",
+    "bytes": 15980944264,
+    "gib": 14.88,
+    "last_write_utc": "2026-09-21T13:36:11Z",
+    "what": "the service's stderr: a crash loop's repeated tracebacks (ImportError: WorkspacePaths) and uv output, nothing written for two months",
+    "reclaim": "14.88 GiB only by truncation (root: truncate -s 0; the service appends with O_APPEND, no restart) or removal plus a service restart: the running service holds it open (fd 2 of 10 processes), so deleting the path alone frees 0 B"
+   },
+   {
+    "path": "/var/log/alphaavatar/demo-agent.log",
+    "project": "AlphaAvatar (the same service)",
+    "owner": "root",
+    "bytes": 20573707095,
+    "gib": 19.16,
+    "last_write_utc": "2026-11-19T19:38:33Z",
+    "what": "the live service's stdout (JSON log lines), growing",
+    "reclaim": "up to 19.16 GiB by rotation with copytruncate or truncation (root); the owner chooses what history to keep; held open as fd 1"
+   },
+   {
+    "path": "~/alphaavatar-speaker-eval/sessions/v2/",
+    "project": "AlphaAvatar speaker evaluation (no process; last write 2026-11-13T19:20Z)",
+    "owner": "ecs-user",
+    "gib": 13.24,
+    "what": "4,000-odd .npz session feature files",
+    "reclaim": "13.24 GiB if they are derived and no longer needed"
+   },
+   {
+    "path": "~/alphaavatar-speaker-eval/data*/ archives",
+    "project": "the same",
+    "owner": "ecs-user",
+    "gib": 4.69,
+    "what": "dataset archives beside extracted copies: data/librispeech 2 x .tar.gz (0.64 GiB, extracted beside them), data/aishell1 41 archives (1.41), data3/aishell1 60 archives (2.05), DEMAND zips (0.57); LibriSpeech is held in data/, data2/ and data3/",
+    "reclaim": "up to 4.69 GiB after the owner checks the extracted copies are complete"
+   },
+   {
+    "path": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar/",
+    "project": "AlphaAvatar's Claude sessions",
+    "owner": "ecs-user",
+    "gib": 6.05,
+    "what": "session 9c20a255 (5.44 GiB, still being written today) and older sessions (about 0.6 GiB)",
+    "reclaim": "about 0.6 GiB from the finished sessions; the active one is not to be touched"
+   },
+   {
+    "path": "~/.vscode-server/cli/servers/",
+    "project": "the IDE (VS Code server)",
+    "owner": "ecs-user",
+    "gib": 4.48,
+    "what": "seven server builds of about 0.64 GiB; the newest (2026-11-18) is in use",
+    "reclaim": "about 3.8 GiB from the six older builds"
+   },
+   {
+    "path": "~/.cache/uv/",
+    "project": "shared: every uv environment of every project",
+    "owner": "ecs-user",
+    "gib": 11.57,
+    "what": "8.72 GiB of it is hard-linked into installed environments (removing those frees 0 B)",
+    "reclaim": "at most 2.76 GiB (`uv cache prune`)"
+   },
+   {
+    "path": "~/.local/share/pnpm/store, ~/.npm/_cacache",
+    "project": "other projects' Node caches",
+    "owner": "ecs-user",
+    "gib": 7.48,
+    "reclaim": "not measured per link; the owners' decision"
+   },
+   {
+    "path": "the filesystem's root reserve",
+    "project": "the system",
+    "owner": "root",
+    "gib": 8.2,
+    "what": "ext4 reserved blocks (5%), usable by root only",
+    "reclaim": "about 6.2 GiB by tune2fs -m 1 (root); it is the margin that keeps root services writing when the disk fills"
+   }
+  ]
+ }
+}

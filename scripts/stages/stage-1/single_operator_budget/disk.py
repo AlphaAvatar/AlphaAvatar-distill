@@ -15,8 +15,9 @@ A training session (phase 2, `design.json :: cost_model.dev_box_disk.phase_2`) b
 paths: the evidence of its two units (generations, sealed parts and training records; bound: every turn of both modes
 at the full 8,192-token context; expected: TPI1's measured evidence per recovered unit), one pull's archive in flight,
 the teardown collector's archive and its extracted copy, a resume archive on the failure path, then both seeds' fp32
-finals retained from the relay (``<local store>/<arm>-s<seed>/final/<sha16>/``). `phase2_total` adds the three
-sessions on the one filesystem: every arm's finals and evidence stay, so the last session's peak holds all six finals
+finals retained from the relay (``<local store>/<arm>-s<seed>/final/<sha16>/``) for an arm whose finals are placed on
+the dev box (`common.final_placement`; an arm placed on the relay lands none). `phase2_total` adds the three sessions
+on the one filesystem: every arm's kept evidence and dev-box finals stay, so the last session's peak holds them all
 (``--kind sob1_train --total``; ``plans/disk_peak_phase2.json``), beside phase 1's independent generations archive.
 
 `check_room` is the launch's precheck: the free bytes of the filesystem each landing path is on, against the bound
@@ -69,8 +70,10 @@ def phase2_evidence_bytes() -> dict:
 
 def phase2_total(scr_root: str | None = None, *, free_bytes: int | None = None, archive_bytes: int = 0) -> dict:
     """The three training sessions on the one filesystem, in their order: each session's peak beside every earlier
-    session's kept evidence and finals; the last one holds all six finals. ``free_bytes``: the filesystem's free bytes
-    now (read when not given); ``archive_bytes``: phase 1's independent generations archive, kept beside them."""
+    session's kept evidence and dev-box finals (`common.final_placement`). ``launch_check`` is what each launch's own
+    check (`check_room`: the session's BOUND peak) will ask for on top of the earlier sessions' EXPECTED kept bytes --
+    the free space each arm needs now, before the study starts, for its launch to pass. ``free_bytes``: the
+    filesystem's free bytes now (read when not given); ``archive_bytes``: phase 1's independent generations archive."""
     d = C.design()
     order = d["training"]["unit_order"]["arms"]
     swing = d["cost_model"]["dev_box_disk"]["phase_2"]["shared_filesystem_swing_bytes"]
@@ -79,9 +82,11 @@ def phase2_total(scr_root: str | None = None, *, free_bytes: int | None = None, 
     for a in order:
         pl = plan("sob1_train", a, f"{scr_root or SCR_PLACEHOLDER}/<{a} run>")
         peak = {k: kept[k] + pl["peak_bytes"][k] for k in kept}
-        sessions.append({"arm": a, "session_peak_bytes": pl["peak_bytes"], "kept_before_bytes": dict(kept),
-                         "peak_with_earlier_sessions_bytes": peak,
-                         "peak_with_earlier_sessions_gib": {k: round(v / GIB, 2) for k, v in peak.items()}})
+        check = kept["expected"] - archive_bytes + pl["peak_bytes"]["bound"]    #: the archive is on the disk already
+        sessions.append({"arm": a, "final_placement": C.final_placement(a), "session_peak_bytes": pl["peak_bytes"],
+                         "kept_before_bytes": dict(kept), "peak_with_earlier_sessions_bytes": peak,
+                         "peak_with_earlier_sessions_gib": {k: round(v / GIB, 2) for k, v in peak.items()},
+                         "launch_check_bytes": check, "launch_check_gib": round(check / GIB, 2)})
         for k in kept:                          #: what stays: the evidence, the collector archives and the finals
             kept[k] += sum(i[f"bytes_{k}"] for i in pl["items"]
                            if "kept" in i["when"] or i["when"].startswith("retain"))
@@ -89,6 +94,8 @@ def phase2_total(scr_root: str | None = None, *, free_bytes: int | None = None, 
     free = shutil.disk_usage(Path(os.path.expanduser(str(C.local_store()))).resolve().anchor).free \
         if free_bytes is None else int(free_bytes)
     need = {k: max(0, peak[k] + swing - free) for k in peak}
+    for s_ in sessions:
+        s_["launch_shortfall_now_gib"] = round(max(0, s_["launch_check_bytes"] - free) / GIB, 2)
     return {"schema": "aadistill.stage1.single_operator_budget.disk_peak_phase2/v1", "order": order,
             "filesystem": "/ (one filesystem holds the repository, the local store and every landing path)",
             "sessions": sessions, "phase1_archive_bytes": archive_bytes, "peak_bytes": peak,
@@ -150,7 +157,7 @@ def plan(kind: str = "sob1_phase1", arm: str | None = None, scr: str | None = No
         add("evidence archive (the free relay's rotation)", f"{scr}/archive/<run>_evidence.tar.gz", "closeout, kept",
             n * ev["per_model_bound"] / m["archive_ratio"], n * ev["per_model_expected"] / m["archive_ratio"],
             "its relay copy, before any final's relay copy is retired", phases=("retain",))
-        for s in d["training"]["seeds"]:
+        for s in d["training"]["seeds"] if C.final_placement(arm) == "dev_box" else ():   #: else kept on the relay
             add(f"{arm}-s{s} final weights (fp32)", f"{store}/{arm}-s{s}/final/<sha16>/", "retain, after closeout",
                 st[arm]["checkpoint_bytes"]["final_fp32"], consumer="the durable local copy", phases=("retain",))
     by_phase = {ph: {k: sum(i[f"bytes_{k}"] for i in items if ph in i["present_during"]) for k in ("bound", "expected")}
