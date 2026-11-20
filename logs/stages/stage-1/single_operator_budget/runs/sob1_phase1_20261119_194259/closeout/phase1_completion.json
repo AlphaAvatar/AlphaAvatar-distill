@@ -1,0 +1,88 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.phase1_completion/v2",
+ "run_id": "sob1_phase1_20261119_194259",
+ "status": "COMPLETE",
+ "rule": "the eight sets complete on the secured copy and every arm's initialization and mapping on the dev box's disk as its manifest",
+ "sets": {
+  "n_complete": 8,
+  "n_sets": 8,
+  "per_set": {
+   "residual_width/H-T": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "residual_width/H-N": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   },
+   "ffn_attention/H-T": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "ffn_attention/H-N": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   },
+   "depth_only/H-T": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "depth_only/H-N": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   },
+   "teacher/H-T": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "teacher/H-N": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   }
+  },
+  "modes": []
+ },
+ "inits_durable": true,
+ "local_retention": {
+  "status": "COMPLETE",
+  "missing": {},
+  "record": "/home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/single_operator_budget/storage/local_retention.json",
+  "products": {
+   "residual_width/init": {
+    "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+    "verified": true
+   },
+   "residual_width/mapping": {
+    "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/mapping/c853640b1ce2392c",
+    "verified": true
+   },
+   "ffn_attention/init": {
+    "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+    "verified": true
+   },
+   "ffn_attention/mapping": {
+    "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/mapping/4429c94994a5bd1f",
+    "verified": true
+   },
+   "depth_only/init": {
+    "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6",
+    "verified": true
+   },
+   "depth_only/mapping": {
+    "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only/mapping/36888440ef83bfd6",
+    "verified": true
+   }
+  }
+ },
+ "unfinished": {},
+ "checked_on": "the dev box's secured copy and its local store",
+ "checked_utc": "2026-11-20T00:00:09Z"
+}

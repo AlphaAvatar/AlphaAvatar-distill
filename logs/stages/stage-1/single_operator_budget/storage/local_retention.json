@@ -1,0 +1,156 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.local/v1",
+ "store": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget",
+ "products": {
+  "residual_width/init": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+   "files_sha256": {
+    "init/model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
+    "init/config.json": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8"
+   },
+   "files_on_disk_sha256": {
+    "init/model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
+    "init/config.json": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+   "producer_run": "sob1_phase1_20261119_194259",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+    "files": {
+     "init/config.json": "downloaded",
+     "init/model.safetensors": "downloaded"
+    },
+    "utc": "2026-11-19T23:49:45Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
+  },
+  "residual_width/mapping": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/mapping/c853640b1ce2392c",
+   "files_sha256": {
+    "mapping/mapping.json": "8e15cc4865e3906e92f4e72f7ba35ec584894f998fa62a59fa0b9bdeb1e97046",
+    "mapping/tensors.safetensors": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37"
+   },
+   "files_on_disk_sha256": {
+    "mapping/mapping.json": "8e15cc4865e3906e92f4e72f7ba35ec584894f998fa62a59fa0b9bdeb1e97046",
+    "mapping/tensors.safetensors": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+   "producer_run": "sob1_phase1_20261119_194259",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+    "files": {
+     "mapping/mapping.json": "downloaded",
+     "mapping/tensors.safetensors": "downloaded"
+    },
+    "utc": "2026-11-19T23:49:53Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
+  },
+  "ffn_attention/init": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+   "files_sha256": {
+    "init/model.safetensors": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14",
+    "init/config.json": "80e72c4b2b5f27edaddaa933cb50f57be664c252e94793c6c399a42e529941a1"
+   },
+   "files_on_disk_sha256": {
+    "init/model.safetensors": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14",
+    "init/config.json": "80e72c4b2b5f27edaddaa933cb50f57be664c252e94793c6c399a42e529941a1"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+   "producer_run": "sob1_phase1_20261119_194259",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+    "files": {
+     "init/config.json": "downloaded",
+     "init/model.safetensors": "downloaded"
+    },
+    "utc": "2026-11-19T23:54:50Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
+  },
+  "ffn_attention/mapping": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/mapping/4429c94994a5bd1f",
+   "files_sha256": {
+    "mapping/mapping.json": "5703693da29d43a2e35182cc2b6287d18c09e241d02e5e0ba2739be4a579e4bb"
+   },
+   "files_on_disk_sha256": {
+    "mapping/mapping.json": "5703693da29d43a2e35182cc2b6287d18c09e241d02e5e0ba2739be4a579e4bb"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+   "producer_run": "sob1_phase1_20261119_194259",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+    "files": {
+     "mapping/mapping.json": "downloaded"
+    },
+    "utc": "2026-11-19T23:54:53Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
+  },
+  "depth_only/init": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6",
+   "files_sha256": {
+    "init/model.safetensors": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+    "init/config.json": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019"
+   },
+   "files_on_disk_sha256": {
+    "init/model.safetensors": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+    "init/config.json": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6",
+   "producer_run": "sob1_phase1_20261119_194259",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6",
+    "files": {
+     "init/config.json": "downloaded",
+     "init/model.safetensors": "downloaded"
+    },
+    "utc": "2026-11-20T00:00:05Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
+  },
+  "depth_only/mapping": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only/mapping/36888440ef83bfd6",
+   "files_sha256": {
+    "mapping/mapping.json": "4ba52c6edd3b7e51d40a7cb734916d4c40ceb752667918a3055049b91c32c734"
+   },
+   "files_on_disk_sha256": {
+    "mapping/mapping.json": "4ba52c6edd3b7e51d40a7cb734916d4c40ceb752667918a3055049b91c32c734"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6",
+   "producer_run": "sob1_phase1_20261119_194259",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6",
+    "files": {
+     "mapping/mapping.json": "downloaded"
+    },
+    "utc": "2026-11-20T00:00:09Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
+  }
+ },
+ "status": "COMPLETE",
+ "missing": {},
+ "expected_products": [
+  "depth_only/init",
+  "depth_only/mapping",
+  "ffn_attention/init",
+  "ffn_attention/mapping",
+  "residual_width/init",
+  "residual_width/mapping"
+ ],
+ "last_run": "sob1_phase1_20261119_194259",
+ "checked_utc": "2026-11-20T00:00:09Z"
+}

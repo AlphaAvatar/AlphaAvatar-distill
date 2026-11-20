@@ -1,0 +1,704 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.phase1_report/v1",
+ "run_id": "sob1_phase1_20261119_194259",
+ "started_utc": "2026-11-19T19:51:52Z",
+ "inits": {
+  "residual_width": {
+   "selected_rows": [
+    {
+     "state_id": "residual_width/c853640b1ce2392c8bac0c7c89e0c16d",
+     "path": "residual width only: every selection on the teacher",
+     "artifact_digest": "39873ef1e9122464389897f16609aae6c2305741ba69fd001baa8f928a7a8ac3",
+     "single_shard_sha256": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+    }
+   ]
+  },
+  "ffn_attention": {
+   "selected_rows": [
+    {
+     "state_id": "ffn_attention/4429c94994a5bd1f4c48178256d9c34f",
+     "path": "FFN + attention only: every selection on the teacher",
+     "artifact_digest": "bbfed559365f62c6f4018976a9238e77018e41032524b9c544a2f68ae050f200",
+     "single_shard_sha256": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14"
+    }
+   ]
+  },
+  "depth_only": {
+   "selected_rows": [
+    {
+     "state_id": "depth_only/36888440ef83bfd69a32db1808e7930e",
+     "path": "depth only: every selection on the teacher",
+     "artifact_digest": "2c738b963335dcb286b9eabec35901f089b383c6077d0979b4e6d4308bed73c6",
+     "single_shard_sha256": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222"
+    }
+   ]
+  }
+ },
+ "evaluations": {
+  "residual_width": {
+   "H-T": {
+    "at_start": {
+     "complete": false,
+     "problems": {
+      "coverage": [
+       "fluid_reasoning_720__dev_v1: no generations",
+       "stage3_capability_846__math_verified: no generations",
+       "stage3_capability_846__gsm8k: no generations",
+       "stage3_capability_846__multihop: no generations",
+       "stage3_capability_846__rag: no generations",
+       "stage3_capability_846__answerability_paired: no generations",
+       "stage3_capability_846__safety_paired: no generations",
+       "stage3_capability_846__knowledge: no generations",
+       "stage3_capability_846__eval_behavior_v0: no generations",
+       "stage3_legacy_150__items: no generations"
+      ],
+      "formal_report": [
+       "not scorable: units without generations"
+      ]
+     }
+    },
+    "repairs": [
+     []
+    ],
+    "runs": [
+     {
+      "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+      "fluid": {
+       "status": "complete",
+       "runs": 1
+      },
+      "capability": {
+       "withheld": [],
+       "units": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "missing_at_start": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "sealed_samples_taken": {},
+       "status": "complete",
+       "seconds": 210.1,
+       "attempt": "sob1_phase1_20261119_194259-residual_width-H-T-g1"
+      }
+     }
+    ],
+    "status": "complete",
+    "generated": true,
+    "eval_seconds": 427.6
+   },
+   "H-N": {
+    "at_start": {
+     "complete": false,
+     "problems": {
+      "coverage": [
+       "fluid_reasoning_720__dev_v1: no generations",
+       "stage3_capability_846__math_verified: no generations",
+       "stage3_capability_846__gsm8k: no generations",
+       "stage3_capability_846__multihop: no generations",
+       "stage3_capability_846__rag: no generations",
+       "stage3_capability_846__answerability_paired: no generations",
+       "stage3_capability_846__safety_paired: no generations",
+       "stage3_capability_846__knowledge: no generations",
+       "stage3_capability_846__eval_behavior_v0: no generations",
+       "stage3_legacy_150__items: no generations"
+      ],
+      "formal_report": [
+       "not scorable: units without generations"
+      ]
+     }
+    },
+    "repairs": [
+     []
+    ],
+    "runs": [
+     {
+      "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+      "fluid": {
+       "status": "complete",
+       "runs": 1
+      },
+      "capability": {
+       "withheld": [],
+       "units": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "missing_at_start": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "sealed_samples_taken": {},
+       "status": "complete",
+       "seconds": 210.1,
+       "attempt": "sob1_phase1_20261119_194259-residual_width-H-N-g1"
+      }
+     }
+    ],
+    "status": "complete",
+    "generated": true,
+    "eval_seconds": 367.4
+   }
+  },
+  "ffn_attention": {
+   "H-T": {
+    "at_start": {
+     "complete": false,
+     "problems": {
+      "coverage": [
+       "fluid_reasoning_720__dev_v1: no generations",
+       "stage3_capability_846__math_verified: no generations",
+       "stage3_capability_846__gsm8k: no generations",
+       "stage3_capability_846__multihop: no generations",
+       "stage3_capability_846__rag: no generations",
+       "stage3_capability_846__answerability_paired: no generations",
+       "stage3_capability_846__safety_paired: no generations",
+       "stage3_capability_846__knowledge: no generations",
+       "stage3_capability_846__eval_behavior_v0: no generations",
+       "stage3_legacy_150__items: no generations"
+      ],
+      "formal_report": [
+       "not scorable: units without generations"
+      ]
+     }
+    },
+    "repairs": [
+     []
+    ],
+    "runs": [
+     {
+      "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+      "fluid": {
+       "status": "complete",
+       "runs": 1
+      },
+      "capability": {
+       "withheld": [],
+       "units": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "missing_at_start": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "sealed_samples_taken": {},
+       "status": "complete",
+       "seconds": 390.2,
+       "attempt": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1"
+      }
+     }
+    ],
+    "status": "complete",
+    "generated": true,
+    "eval_seconds": 578.4
+   },
+   "H-N": {
+    "at_start": {
+     "complete": false,
+     "problems": {
+      "coverage": [
+       "fluid_reasoning_720__dev_v1: no generations",
+       "stage3_capability_846__math_verified: no generations",
+       "stage3_capability_846__gsm8k: no generations",
+       "stage3_capability_846__multihop: no generations",
+       "stage3_capability_846__rag: no generations",
+       "stage3_capability_846__answerability_paired: no generations",
+       "stage3_capability_846__safety_paired: no generations",
+       "stage3_capability_846__knowledge: no generations",
+       "stage3_capability_846__eval_behavior_v0: no generations",
+       "stage3_legacy_150__items: no generations"
+      ],
+      "formal_report": [
+       "not scorable: units without generations"
+      ]
+     }
+    },
+    "repairs": [
+     []
+    ],
+    "runs": [
+     {
+      "generation": "sob1_phase1_20261119_194259-ffn_attention-H-N-g1",
+      "fluid": {
+       "status": "complete",
+       "runs": 1
+      },
+      "capability": {
+       "withheld": [],
+       "units": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "missing_at_start": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "sealed_samples_taken": {},
+       "status": "complete",
+       "seconds": 330.1,
+       "attempt": "sob1_phase1_20261119_194259-ffn_attention-H-N-g1"
+      }
+     }
+    ],
+    "status": "complete",
+    "generated": true,
+    "eval_seconds": 494.3
+   }
+  },
+  "depth_only": {
+   "H-T": {
+    "at_start": {
+     "complete": false,
+     "problems": {
+      "coverage": [
+       "fluid_reasoning_720__dev_v1: no generations",
+       "stage3_capability_846__math_verified: no generations",
+       "stage3_capability_846__gsm8k: no generations",
+       "stage3_capability_846__multihop: no generations",
+       "stage3_capability_846__rag: no generations",
+       "stage3_capability_846__answerability_paired: no generations",
+       "stage3_capability_846__safety_paired: no generations",
+       "stage3_capability_846__knowledge: no generations",
+       "stage3_capability_846__eval_behavior_v0: no generations",
+       "stage3_legacy_150__items: no generations"
+      ],
+      "formal_report": [
+       "not scorable: units without generations"
+      ]
+     }
+    },
+    "repairs": [
+     []
+    ],
+    "runs": [
+     {
+      "generation": "sob1_phase1_20261119_194259-depth_only-H-T-g1",
+      "fluid": {
+       "status": "complete",
+       "runs": 1
+      },
+      "capability": {
+       "withheld": [],
+       "units": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "missing_at_start": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "sealed_samples_taken": {},
+       "status": "complete",
+       "seconds": 180.1,
+       "attempt": "sob1_phase1_20261119_194259-depth_only-H-T-g1"
+      }
+     }
+    ],
+    "status": "complete",
+    "generated": true,
+    "eval_seconds": 308.1
+   },
+   "H-N": {
+    "at_start": {
+     "complete": false,
+     "problems": {
+      "coverage": [
+       "fluid_reasoning_720__dev_v1: no generations",
+       "stage3_capability_846__math_verified: no generations",
+       "stage3_capability_846__gsm8k: no generations",
+       "stage3_capability_846__multihop: no generations",
+       "stage3_capability_846__rag: no generations",
+       "stage3_capability_846__answerability_paired: no generations",
+       "stage3_capability_846__safety_paired: no generations",
+       "stage3_capability_846__knowledge: no generations",
+       "stage3_capability_846__eval_behavior_v0: no generations",
+       "stage3_legacy_150__items: no generations"
+      ],
+      "formal_report": [
+       "not scorable: units without generations"
+      ]
+     }
+    },
+    "repairs": [
+     []
+    ],
+    "runs": [
+     {
+      "generation": "sob1_phase1_20261119_194259-depth_only-H-N-g1",
+      "fluid": {
+       "status": "complete",
+       "runs": 1
+      },
+      "capability": {
+       "withheld": [],
+       "units": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "missing_at_start": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "sealed_samples_taken": {},
+       "status": "complete",
+       "seconds": 150.1,
+       "attempt": "sob1_phase1_20261119_194259-depth_only-H-N-g1"
+      }
+     }
+    ],
+    "status": "complete",
+    "generated": true,
+    "eval_seconds": 301.6
+   }
+  },
+  "teacher": {
+   "H-T": {
+    "at_start": {
+     "complete": false,
+     "problems": {
+      "coverage": [
+       "fluid_reasoning_720__dev_v1: no generations",
+       "stage3_capability_846__math_verified: no generations",
+       "stage3_capability_846__gsm8k: no generations",
+       "stage3_capability_846__multihop: no generations",
+       "stage3_capability_846__rag: no generations",
+       "stage3_capability_846__answerability_paired: no generations",
+       "stage3_capability_846__safety_paired: no generations",
+       "stage3_capability_846__knowledge: no generations",
+       "stage3_capability_846__eval_behavior_v0: no generations",
+       "stage3_legacy_150__items: no generations"
+      ],
+      "formal_report": [
+       "not scorable: units without generations"
+      ]
+     }
+    },
+    "repairs": [
+     []
+    ],
+    "runs": [
+     {
+      "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+      "fluid": {
+       "status": "complete",
+       "runs": 1
+      },
+      "capability": {
+       "withheld": [],
+       "units": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "missing_at_start": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "sealed_samples_taken": {},
+       "status": "complete",
+       "seconds": 1020.2,
+       "attempt": "sob1_phase1_20261119_194259-teacher-H-T-g1"
+      }
+     }
+    ],
+    "status": "complete",
+    "generated": true,
+    "eval_seconds": 3943.3
+   },
+   "H-N": {
+    "at_start": {
+     "complete": false,
+     "problems": {
+      "coverage": [
+       "fluid_reasoning_720__dev_v1: no generations",
+       "stage3_capability_846__math_verified: no generations",
+       "stage3_capability_846__gsm8k: no generations",
+       "stage3_capability_846__multihop: no generations",
+       "stage3_capability_846__rag: no generations",
+       "stage3_capability_846__answerability_paired: no generations",
+       "stage3_capability_846__safety_paired: no generations",
+       "stage3_capability_846__knowledge: no generations",
+       "stage3_capability_846__eval_behavior_v0: no generations",
+       "stage3_legacy_150__items: no generations"
+      ],
+      "formal_report": [
+       "not scorable: units without generations"
+      ]
+     }
+    },
+    "repairs": [
+     []
+    ],
+    "runs": [
+     {
+      "generation": "sob1_phase1_20261119_194259-teacher-H-N-g1",
+      "fluid": {
+       "status": "complete",
+       "runs": 1
+      },
+      "capability": {
+       "withheld": [],
+       "units": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "missing_at_start": [
+        "stage3_capability_846__answerability_paired",
+        "stage3_capability_846__eval_behavior_v0",
+        "stage3_capability_846__gsm8k",
+        "stage3_capability_846__knowledge",
+        "stage3_capability_846__math_verified",
+        "stage3_capability_846__multihop",
+        "stage3_capability_846__rag",
+        "stage3_capability_846__safety_paired",
+        "stage3_legacy_150__items"
+       ],
+       "sealed_samples_taken": {},
+       "status": "complete",
+       "seconds": 180.1,
+       "attempt": "sob1_phase1_20261119_194259-teacher-H-N-g1"
+      }
+     }
+    ],
+    "status": "complete",
+    "generated": true,
+    "eval_seconds": 427.9
+   }
+  }
+ },
+ "contract": {
+  "design_sha256": "423eb41222af704d647becb0aba6146a5d5109ea3df8c122c69bc044fd9c51dd",
+  "selection_sha256": "c523a6d1dd18e7cafb52a81060336144c04de2791a1cb2acdf7bc742c52601f8",
+  "selection_reproduced_from_journal": null,
+  "session": {
+   "config_hash": "457d5adbe0696631a168c038afd14122d49d6c0fd1ca363115a27b99d026fea5",
+   "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+   "forward_context": {
+    "packing": "sequential_truncate_v1",
+    "truncate": true,
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261105
+   },
+   "profiles": {
+    "calib.hybrid_d4_base@v2": "d835fad13756d21cf5a2e5cc66c7c9b7badbf251133aa13c53ab033056b2fb45",
+    "calib.hybrid_d4_rh@v2": "6a20196d550d0f1c7570faf5b84366fb0e5e1404fa6b82cc40c24129b1efa590"
+   }
+  },
+  "config_hashes": [
+   {
+    "step": "FFN",
+    "impl_id": "ffn.activation_importance_v0",
+    "profile_id": "calib.hybrid_d4_base@v2",
+    "derived": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "journal": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "matches": true
+   },
+   {
+    "step": "DEPTH",
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "profile_id": "calib.hybrid_d4_base@v2",
+    "derived": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "journal": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "matches": true
+   },
+   {
+    "step": "ATTENTION",
+    "impl_id": "attention.activation_importance_v1",
+    "profile_id": "calib.hybrid_d4_rh@v2",
+    "derived": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "journal": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "matches": true
+   },
+   {
+    "step": "RESIDUAL_WIDTH",
+    "impl_id": "width.global_pca_v0",
+    "profile_id": "calib.hybrid_d4_rh@v2",
+    "derived": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "journal": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "matches": true
+   }
+  ],
+  "sob1_design_sha256": "35432bc6b0af88fa41dbb46db7200233297cc8b18d252452a1546ede59ab60de",
+  "sob1_selection_sha256": "6dfced62437b1967371b4cec03037f321abd8ce560e948a7ab71459a7de8d101",
+  "sob1_selection_reproduced": null,
+  "build_order": [
+   "residual_width",
+   "ffn_attention",
+   "depth_only"
+  ],
+  "evaluation_order": [
+   "residual_width",
+   "ffn_attention",
+   "depth_only",
+   "teacher"
+  ]
+ },
+ "completion": {
+  "schema": "aadistill.stage1.single_operator_budget.phase1_completion/v1",
+  "complete": true,
+  "inits": {
+   "problems": {},
+   "durable": true
+  },
+  "sets": {
+   "residual_width/H-T": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "residual_width/H-N": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   },
+   "ffn_attention/H-T": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "ffn_attention/H-N": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   },
+   "depth_only/H-T": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "depth_only/H-N": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   },
+   "teacher/H-T": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "teacher/H-N": {
+    "complete": true,
+    "problems": {},
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   }
+  },
+  "modes": [],
+  "n_sets": 8,
+  "n_complete": 8
+ },
+ "comparison": {
+  "json": "comparison/comparison.json",
+  "markdown": "comparison/comparison.md"
+ },
+ "finished_utc": "2026-11-19T23:41:29Z",
+ "terminal": "ALL_DONE"
+}

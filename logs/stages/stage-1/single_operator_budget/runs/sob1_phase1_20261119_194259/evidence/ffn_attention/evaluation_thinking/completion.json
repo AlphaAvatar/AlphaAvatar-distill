@@ -1,0 +1,301 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.evaluation_completion/v1",
+ "target": "ffn_attention",
+ "mode": "H-T",
+ "out": "/workspace/aad/artifacts/audit/stage1_single_operator/sob1_phase1_20261119_194259",
+ "complete": true,
+ "problems": {},
+ "units": {
+  "fluid_reasoning_720__dev_v1": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "1d7a097d7f82e73ac884cc3f42988c8dc660fc783c2bae0824883dea0f80b967",
+   "records": 720,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__math_verified": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "bb853aab76acc6e8fed4975611cfc23efdc5d7d550a1a7ef03d4145fff146e20",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__gsm8k": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "c94d71eabc40af26ea31795f377e26bbc9af53ecb7e333f243c79861fe2f3e87",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__multihop": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "774bd13e211d026f6d7819fb85721cc54257f94c7a1445ec4091dbc5dc273bec",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__rag": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "a6b7eed81f8bc115d67c1cad15e7e1fe7fcc59fa4c97f5926e9499ae5809430f",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__answerability_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "e0760d4b29556160b61045326db05de2cc7b43ce9f2beac03c175097511ce1fd",
+   "records": 120,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__safety_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "30e72d526d5943d4001ddc5acbe9b2c03bbaf9b4fba464d1aab3c9a06043c776",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__knowledge": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "f9431d37b9c0b6e66a68ca4f7a491bf977568ffb97985bd1190d088298864827",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__eval_behavior_v0": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "fe75954537ae71020750f56b214cda8b9f70f3ff6757e27d2e90d78c7ae338d5",
+   "records": 76,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_legacy_150__items": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "4e9f9a16c6aaa80e6011da721afb5e00703435fe53b2abbda528108d8cd9eadb",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  }
+ },
+ "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2",
+ "packages": [
+  {
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "attempt": "sob1_phase1_20261119_194259",
+   "utc": "2026-11-19T21:58:44Z",
+   "weights_sha256": {
+    "model.safetensors": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14"
+   }
+  }
+ ],
+ "parts": {
+  "parts/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "9f5493d391dd207fcb6e2032782ae925d71286f7bddec34eea1a33929825fab2",
+   "records": 487,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0001.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "8b062ce038278f13c3b7019a55b99954482d89906ada759a413b93cbe720b89a",
+   "records": 233,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "f3ff29f2ce2a965180a108e8bd60bab0ab317dae1ab83672c3d1314e2a6dc3b7",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "2606e1973631bfdfdb7b5e74ed48f9908e8e75a3fc26c75ddd22019c8860a9f1",
+   "records": 98,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0001.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "06f2f9ac2ea90d68894834dc30b56cac0a8011af7ec7443b4c330c5499535e9c",
+   "records": 2,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "ed88b2ab11ee3f664bf775f7956edace49128ebf54dbdcd325d3f77eebcd8a58",
+   "records": 99,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0001.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "67056b7b7971a819c031f76ff324e6ec8881fb76581df6538d8b12b523b144a0",
+   "records": 1,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__rag/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__rag",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "6eca2dad72fa74620292fde91ad818dee23e9c4f37f5702169ce9e32cb58e573",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__answerability_paired/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__answerability_paired",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "364b2f5cfd04d3d72eee1847d546f5cb9244a4c568453718482f9b44c5051c6d",
+   "records": 120,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "dd7b70af470862219db4acb4806a56f12355e96cd758fff7f376afe8ab3101b5",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "11df89e51ab574864d31f8ff98a5a38a23ac4da1b9f2ecb8b66f484e6aa387f9",
+   "records": 150,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "9f754ea3f6a64a864b09dc3af9794fb9fd5dfa572bfc305c50389cddaf5181f6",
+   "records": 76,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0000.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "241faa0ce443dcf3cf860f84c3a69bad72bca084495898098406e3dad0e709e5",
+   "records": 149,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0001.sob1_phase1_20261119_194259-ffn_attention-H-T-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_phase1_20261119_194259-ffn_attention-H-T-g1",
+   "sha256": "882475fedde621f4d48fc77016236e2e84ad699e8eda9233917ab6985421346b",
+   "records": 1,
+   "proven": true,
+   "why": null
+  }
+ },
+ "sealed_twice": [],
+ "expected_weights": {
+  "model.safetensors": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14"
+ },
+ "think_state": "self_opening",
+ "stored_report_matches": true
+}

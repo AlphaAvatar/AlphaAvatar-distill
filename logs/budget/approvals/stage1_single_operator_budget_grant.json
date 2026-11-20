@@ -331,5 +331,27 @@
   "sha256": "3563f0ea6b5475125c2771678493e00a0b533136d5e87e0612c2f3a4bd814ea3"
  },
  "study_identity_sha256": "b07d2e294732cf2ebc0023830b235fcf1c9683d239923cc3ef928a17758ceeb5",
- "granted_at_commit": "654a686fb1098180090d2aece20202cb7aa25b73"
+ "granted_at_commit": "654a686fb1098180090d2aece20202cb7aa25b73",
+ "phase_1_closed": {
+  "status": "COMPLETE",
+  "terminal_state": "COMPLETE: the three ~2.0B initializations built and relay-durable, the teacher and each untrained arm evaluated on all of eval-set-1 in both modes at 8,192 tokens (8 of 8 sets complete on their files); study_completion COMPLETE on the formal closeout (closeout/phase1_completion.json) with every arm's initialization and mapping re-hashed on the dev box (storage/local_retention.json)",
+  "utc": "2026-11-20T00:06:11Z",
+  "by": "the agent, on the maintainer's phase-1 grant",
+  "source": "sob1_phase1_20261119_194259 (ALL_DONE; 357 files secured, each sha256 equal to the pod's final listing; pod deleted, provider confirms gone)",
+  "spent_usd": 4.4348,
+  "by_run_usd": {
+   "sob1_phase1_20261119_194259": 4.4348
+  },
+  "_spent": "study_engineering.spent at closure: every session's closeout all-in, 1 run, none unknown",
+  "ceiling_usd": 22.92,
+  "unspent_usd": 18.4852,
+  "teardown_reserve_usd": 1.0,
+  "remainder": "phase 1 is complete and valid, so no further sob1_phase1 session is run under this grant (AGENTS.md P12.1: a complete valid measurement is not rerun); the unspent $18.4852 and the $1.00 reserve are not carried into phase 2, whose storage and budget are the maintainer's separate decision",
+  "provider_reconciliation": "balance $40.2437 before the create (2026-11-19), $35.8108 at 2026-11-20T00:06Z after teardown (-$4.4329) against $4.4348 booked all-in; 0 pods, 0 volumes",
+  "enforced_by": "nothing in code: a record of the terminal state. sob1_train stays refused by its null cap (kinds.sob1_train); the study is not closed (phase 2 is pending the maintainer)",
+  "historical": "every field above is unchanged (grant_before_closure)",
+  "grant_before_closure": {
+   "sha256": "105530173000b48ea18eb042dd970062af2e9a72fbfae16cb76e03e7339fe300"
+  }
+ }
 }

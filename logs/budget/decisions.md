@@ -17055,3 +17055,36 @@ on a paid pod.
   stop, context-limit hit) for the 570-item core and the whole set. The design's `phase_1.completion` texts follow;
   `structures.json` and `proposal.json` regenerated for the hash only.
 - Revisit when: phase 1 closes.
+
+## 2026-11-20 (UTC) — SOB1 phase 1 COMPLETE: three ~2.0B initializations durable, the teacher and each untrained arm evaluated
+
+- Context: `sob1_phase1_20261119_194259` (pod `heuxh6fau92b4c`, one L40S at $1.09/h) ran 2026-11-19 19:44Z to 23:44Z:
+  239.6 min, $4.4348 all-in (GPU $4.3528, container disk $0.0820), one attempt, ALL_DONE; the pod deleted and the
+  provider confirms it gone; 0 pods, 0 volumes after. Balance $40.2437 before the create, $35.8108 after (-$4.4329).
+  - Builds: residual width only (1280, TPI1's sealed statistics, the 1,024-dim diagnostics reproduced exactly), FFN +
+    attention only (FFN 3840, 16 / 8 heads; the FFN and ATTENTION artifacts equal to the journal's), depth only (DEPTH
+    resumed the journal at round 9, kept 16 layers, causal KL 3.545). Each was uploaded to the relay, downloaded again
+    and verified by sha256 when it finished (`INITS_DURABLE` at 21:45Z).
+  - Evaluations: the teacher and each untrained arm on all of eval-set-1 in both modes at 8,192 tokens, 8 of 8 sets
+    complete on their files (`completion.json`, `stored_report_matches`).
+  - Closeout (the formal launch's): `study_completion.status` COMPLETE (`closeout/phase1_completion.json`); the three
+    inits and mappings fetched to `~/aad-artifacts/stage1_single_operator_budget/` and re-hashed against their
+    manifests (`storage/local_retention.json`; the width arm's mapping holds `tensors.safetensors`, the other two
+    `mapping.json` only). Re-hashed once more by hand at 00:05Z: all ten files equal.
+- Result (`runs/sob1_phase1_20261119_194259/evidence/comparison/`, descriptive; re-derived on the dev box, byte-identical
+  to the pod's): static fluid formal core, 570 items (558 groups). Thinking mode: teacher 85.79%, each arm 0.00%,
+  teacher minus arm 85.79 pp [82.87, 88.58]. Non-thinking: teacher 70.53%, each arm 0.00%, 70.53 pp [66.73, 74.30].
+  Degeneration stops on the core, thinking / non-thinking: width 570 / 570, FFN + attention 570 / 568, depth 551 / 549
+  (teacher 6 / 4; teacher context-limit hits 54 / 0). The untrained arms' outputs are degenerate text (repeated digits,
+  spaces, symbol runs): the 0% is the models', read in their raw generations, not the harness's.
+- Decision: phase 1 reached its terminal state COMPLETE. The grant records it (`phase_1_closed`): $4.4348 of the
+  $22.92 ceiling; no further `sob1_phase1` session (a complete valid measurement is not rerun); the unspent $18.4852
+  and the $1.00 reserve are not carried into phase 2. The study is not closed: phase 2 stays the maintainer's.
+- Storage: the three inits and mappings (11.3 GiB) are on the relay and on the dev box (7.0 GiB free after). The relay
+  copies are kept: `plan.py` derives an arm's training plan only from relay copies that verify, so phase 2 is their
+  declared consumer. Raw generations (~200 MB) stay outside git in the run's secured copy; the run directory holds
+  the records (`evidence/`: init records, build/relay/DEPTH records, per-set completion, formal reports, packages,
+  the comparison).
+- Owed to the maintainer (unchanged): phase 2's storage (six fp32 finals, 44.94 GiB; the dev box now has less room
+  than before), its budget, the Stage 3 recovery allowance, and the merge into main.
+- Revisit when: the maintainer decides phase 2.

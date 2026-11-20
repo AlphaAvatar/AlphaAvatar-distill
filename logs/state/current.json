@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 1000.0,
-  "cumulative_spend_usd": 917.8833,
+  "cumulative_spend_usd": 922.3181,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 82.1167,
+  "remaining_usd": 77.6819,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "SOB1 PREPARED at $0, corrected twice 2026-11-19 (docs/stages/stage-1/single_operator_budget/README.md): phase 1 GRANTED 2026-11-19 and running ($22.92 cumulative + $1 reserve); then phase 2's storage and budget (section 10), separate decisions. A merge into main is the maintainer's.",
+ "next": "SOB1 phase 1 COMPLETE 2026-11-20 (docs/stages/stage-1/single_operator_budget/README.md), $4.4348 of $22.92. Owed to the maintainer: phase 2's storage and budget (section 10), the Stage 3 allowance, a merge into main.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -200,7 +200,7 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 0,
-  "run": "SOB1 sob1_phase1_20261119_194259: pod heuxh6fau92b4c (L40S $1.09/h) created 2026-11-19T19:44Z, launcher tmux sob1p1",
+  "run": "none; SOB1 sob1_phase1_20261119_194259 COMPLETE 2026-11-19T23:44Z ($4.4348, pod gone)",
   "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",
@@ -227,7 +227,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts",
    "git": "/home/ecs-user/AlphaAvatar-distill"
   },
-  "kept_checkpoints": "RI-S1 D, W, DW (= packed Top-1), mapping: dev box only (logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json)"
+  "kept_checkpoints": "RI-S1 D, W, DW (= packed Top-1), mapping: dev box only (logs/stages/stage-1/reasoning_inheritance/storage/local_checkpoints.json); SOB1's three inits: relay + dev box (its storage/local_retention.json)"
  },
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "test_suites": {

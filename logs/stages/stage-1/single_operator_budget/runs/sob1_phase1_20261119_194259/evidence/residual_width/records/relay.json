@@ -1,0 +1,54 @@
+{
+ "init": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+  "files_sha256": {
+   "init/model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
+   "init/config.json": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8"
+  },
+  "bytes": {
+   "init/model.safetensors": 4022523088,
+   "init/config.json": 1594
+  },
+  "quota": "2 object(s), 3.75 GiB: ACCEPTED (200) 2/2 granted an upload action",
+  "uploaded": [
+   "init/config.json",
+   "init/model.safetensors"
+  ],
+  "upload_seconds": 29.2,
+  "downloaded_sha256": {
+   "init/config.json": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8",
+   "init/model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+  },
+  "verified": true,
+  "verify_seconds": 27.4,
+  "utc": "2026-11-19T19:57:36Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+ },
+ "mapping": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+  "files_sha256": {
+   "mapping/mapping.json": "8e15cc4865e3906e92f4e72f7ba35ec584894f998fa62a59fa0b9bdeb1e97046",
+   "mapping/tensors.safetensors": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37"
+  },
+  "bytes": {
+   "mapping/mapping.json": 3349,
+   "mapping/tensors.safetensors": 26224816
+  },
+  "quota": "2 object(s), 0.02 GiB: ACCEPTED (200) 2/2 granted an upload action",
+  "uploaded": [
+   "mapping/mapping.json",
+   "mapping/tensors.safetensors"
+  ],
+  "upload_seconds": 6.1,
+  "downloaded_sha256": {
+   "mapping/mapping.json": "8e15cc4865e3906e92f4e72f7ba35ec584894f998fa62a59fa0b9bdeb1e97046",
+   "mapping/tensors.safetensors": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37"
+  },
+  "verified": true,
+  "verify_seconds": 2.3,
+  "utc": "2026-11-19T19:57:46Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+ }
+}

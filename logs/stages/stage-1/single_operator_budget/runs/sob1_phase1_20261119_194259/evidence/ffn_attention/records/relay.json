@@ -1,0 +1,50 @@
+{
+ "init": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+  "files_sha256": {
+   "init/model.safetensors": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14",
+   "init/config.json": "80e72c4b2b5f27edaddaa933cb50f57be664c252e94793c6c399a42e529941a1"
+  },
+  "bytes": {
+   "init/model.safetensors": 4034178856,
+   "init/config.json": 1594
+  },
+  "quota": "2 object(s), 3.76 GiB: ACCEPTED (200) 2/2 granted an upload action",
+  "uploaded": [
+   "init/config.json",
+   "init/model.safetensors"
+  ],
+  "upload_seconds": 25.2,
+  "downloaded_sha256": {
+   "init/config.json": "80e72c4b2b5f27edaddaa933cb50f57be664c252e94793c6c399a42e529941a1",
+   "init/model.safetensors": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14"
+  },
+  "verified": true,
+  "verify_seconds": 28.8,
+  "utc": "2026-11-19T20:07:17Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+ },
+ "mapping": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+  "files_sha256": {
+   "mapping/mapping.json": "5703693da29d43a2e35182cc2b6287d18c09e241d02e5e0ba2739be4a579e4bb"
+  },
+  "bytes": {
+   "mapping/mapping.json": 1214806
+  },
+  "quota": "1 object(s), 0.00 GiB: ACCEPTED (200) 1/1 granted an upload action",
+  "uploaded": [
+   "mapping/mapping.json"
+  ],
+  "upload_seconds": 1.2,
+  "downloaded_sha256": {
+   "mapping/mapping.json": "5703693da29d43a2e35182cc2b6287d18c09e241d02e5e0ba2739be4a579e4bb"
+  },
+  "verified": true,
+  "verify_seconds": 0.5,
+  "utc": "2026-11-19T20:07:19Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+ }
+}

@@ -1,0 +1,277 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.evaluation_completion/v1",
+ "target": "residual_width",
+ "mode": "H-N",
+ "out": "/workspace/aad/artifacts/audit/stage1_single_operator/sob1_phase1_20261119_194259",
+ "complete": true,
+ "problems": {},
+ "units": {
+  "fluid_reasoning_720__dev_v1": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "49962f676d70e646f8d672061363ae47cadefdd8bf6b9ef6def730e3bf22ac64",
+   "records": 720,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__math_verified": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "9c597f60d775c61f64b4a9479aafe287f647588ac69cb822b71d5378054313ad",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__gsm8k": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "9e2a215324e95bf8616b7fffc863564fa847bf5db624c31fa84ae4767fa4366c",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__multihop": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "8c8c1530a539221cc1621842a69de77391dc3cc102081f6a0f3081e042fb8764",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__rag": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "1deb398eae505734d1ff49b4ff0568440a43947ac075dbfb1362be5620d2f114",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__answerability_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "a07474a60c36b618a403cf5c4da4efce40c486becd71700803b549ed2b0d0abe",
+   "records": 120,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__safety_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "73de7585b5b35ee8d700bc1ebf2913b21be15bb83cbe7cf7a7801084ef4a3b43",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__knowledge": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "b259fd12a8c44568d8abe52a152fd5ef9352ee809a0e2be25622dff2b5997852",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__eval_behavior_v0": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "97e89dd96890cf0ad2ce05e4427a76e2110f3ebbc47a21e235333142a4a1aa28",
+   "records": 76,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_legacy_150__items": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "3a3636afc2218de8152ceed04532fc0642018c8aba662f435da75a7bf93ff4e2",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  }
+ },
+ "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f",
+ "packages": [
+  {
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "attempt": "sob1_phase1_20261119_194259",
+   "utc": "2026-11-19T21:52:37Z",
+   "weights_sha256": {
+    "model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+   }
+  }
+ ],
+ "parts": {
+  "parts/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "ae8c1a6318f30b869e39e2f3a1169f987f38c3fd7411dfab56ce29e61e993db7",
+   "records": 512,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0001.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "c12034d4344c342bf62e7c6acee0658469390b91f906c8e06c1a40015e2e37bb",
+   "records": 208,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "4a71ea403d339b658a2c6f9dde522c50852692a4cc6e1744a5e9a85759dc8acf",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "86c3cc5b83bdbcd92a36dd7dab2d91ef4c0c454f8d5074489ab8d05834645c04",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "ec7aa6e02ab7c2f430b03eff04c2383fcdd0065109d3e603f530b5f14889cbdd",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__rag/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__rag",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "fc25e4176825d5edec190ba385c2aa1443abebfed0594c70111cdfe23e0d1684",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__answerability_paired/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__answerability_paired",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "2171d8f714efb78b73c194ed0d1221bb0e5b54c8b02403f69695b6218fd53e32",
+   "records": 120,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "322d4365b0b4f554bbf261ed68173056d016e8222258bfaf4dd72dd174e66873",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "25d77e8ad0ec02a5243f12e307625a146362b1157eede67124bbf442360278ba",
+   "records": 150,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "0d30aa2f4fc1521db75f0061f12d792c039b1a274c1152790b2776fc00fc44db",
+   "records": 76,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0000.sob1_phase1_20261119_194259-residual_width-H-N-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-N-g1",
+   "sha256": "3a3636afc2218de8152ceed04532fc0642018c8aba662f435da75a7bf93ff4e2",
+   "records": 150,
+   "proven": true,
+   "why": null
+  }
+ },
+ "sealed_twice": [],
+ "expected_weights": {
+  "model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+ },
+ "think_state": "preclosed",
+ "stored_report_matches": true
+}

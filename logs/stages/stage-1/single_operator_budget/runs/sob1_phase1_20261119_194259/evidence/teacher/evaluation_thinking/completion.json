@@ -1,0 +1,521 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.evaluation_completion/v1",
+ "target": "teacher",
+ "mode": "H-T",
+ "out": "/workspace/aad/artifacts/audit/stage1_single_operator/sob1_phase1_20261119_194259",
+ "complete": true,
+ "problems": {},
+ "units": {
+  "fluid_reasoning_720__dev_v1": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "ab81369fe033da7ae0000387f2413f3f7683cbd8cf9b390b801e7f0573e1d68a",
+   "records": 720,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__math_verified": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "5475cfa692316e7f4a197d33951544b0b538dc1a5f4648bd9046e0db7dd857b4",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__gsm8k": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "1c3354ef9bf4784fb50b837ee032fde3c26ec7baeb1deaa4b42710b321095012",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__multihop": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "93236c66c350a8aa6e7569158aba6275c3ff9116b3cc4f0cc844b4b476a9eb42",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__rag": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "41fedba7e594b588984db5b14d5d5d99db640700a68ef470ef762df7f61583c2",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__answerability_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "3e06c49926c127cfa2f1181e195eeacaed2ee961a8c827290629f79c74009d1b",
+   "records": 120,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__safety_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "be9c48b4c89d4f2d4f37c1c3993c51a57f7ed1fe48af4859da2cad33c8a9244b",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__knowledge": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "26bfb815b8e8e53cc94afe4c6839f6bb4b1705ba5f7d5a36778cde729a5f7195",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__eval_behavior_v0": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "151958288a80d8fc1e13e17fe17382bbf6eea915f1dc32ea9673f464695646b8",
+   "records": 76,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_legacy_150__items": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "00ec3241600ea6c1cad3ca606ed3b27dfb1133c2fefa552cd9500ee09350b424",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  }
+ },
+ "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2",
+ "packages": [
+  {
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "attempt": "sob1_phase1_20261119_194259",
+   "utc": "2026-11-19T22:26:45Z",
+   "weights_sha256": {
+    "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
+    "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
+    "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
+   }
+  }
+ ],
+ "parts": {
+  "parts/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "eeb083feafa896e4558e6ddb05b5d031e908e83317d1ce21587a88b0be0e2f17",
+   "records": 48,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0001.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "be9729ac241693c2e17a0801c24425c1baa20c948cc894762dae3690952a8f58",
+   "records": 104,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0002.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "8774fdef1d1baa2534e81b419b4554b0a801c4f9172579397c0c576c364fbf75",
+   "records": 37,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0003.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "16869817453be7e5e55bbaffd058c01471d70aa7e4a62de976ae5a1de458b4bb",
+   "records": 19,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0004.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "56816bf91816dcea50051595fbdb52255747e5e8ca62e1b666b761c4f62e000e",
+   "records": 61,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0005.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "72fd68fbc3f62aa66829ccb73b41e7a6d267551121cbff239739d11bb01203be",
+   "records": 111,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0006.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "188760783352a3d30d8349bbb3fd7f6fd6a08dd084c04f24ffbe554e17d12f73",
+   "records": 94,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0007.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "baf16f95d9b32880c2a7e314b6d62cb7ba67186e6de865852c8b46705d558206",
+   "records": 44,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0008.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "60e166f89cc6be8bcefa5c1945ace8385b46a63af59a433318b3a5a33144e419",
+   "records": 18,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0009.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "de811887cd4beb129ee9d9c4d17f460390e9358f9a700d9dfa590dce9b89092a",
+   "records": 3,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0010.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "2429b1c7599791493d0c836d20acd8efd943411387c768858db560f74882a35a",
+   "records": 34,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0011.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "a5af1dfb4ddaf384c69712dbaaa29da356c39eb2b0a560da6b8498192eb49486",
+   "records": 7,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0012.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "c50ae2cae016584054138e381b0763bc26515d1503e69e1d549384cc520d4502",
+   "records": 10,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0013.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "d91a5af2f39d8b226b018fc347766edac8b93e2063a989e47f9727e18c01794b",
+   "records": 12,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0014.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "885be80caef65338f6705c85698878c5c85580546ca85f7ae62c74413dcabca9",
+   "records": 28,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0015.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "31092e4aab5a725d64a9fde3720ae1846a27508282ff00e2c11bdde40590b077",
+   "records": 5,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0016.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "707f4cab6a8e1f784b24463786c13846d0bb47f160377baf8581cd7d213e6b80",
+   "records": 8,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0017.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "1c1bf454fc3e99e784d2516c19b69c63e56b75320959cb3cffd2ef365b4e770d",
+   "records": 19,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0018.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "2e8a79ddea75c301a71de3fee491e5f6862f2ced22792e9c9a14dd5a4484c76d",
+   "records": 20,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0019.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "abce541b143e987aba035cd18b3cfb2d7db618efaf416dfbf71fcc8e1d0757df",
+   "records": 9,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0020.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "f036d257f14d3861b38c7458e2198aeb5fef9a9e64548fbab6b6bb3be823fc53",
+   "records": 11,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0021.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "c28a2c524ddae70cdafd1086dfe0259c4dde9477d12a227364d209da62a65e1a",
+   "records": 3,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0022.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "2539db841993e9d0cc2cf766e7155ded96614a6708e31efdcdec195305d78e7e",
+   "records": 11,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0023.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "22f88e8688f910c129adfdd90f23f9f035aba7fa5380bf456403d3c4795c461a",
+   "records": 1,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0024.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "bde5bef6d7013269db16ae2be71f8872d8109c799dce2ac59dcc003ba8797c1b",
+   "records": 3,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "6068e20df594b5c3c66ec8225800eabeb92f1e74a7089cb6d27831c9a52c8c80",
+   "records": 35,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0001.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "7aeb3f4162f7ee3853ad4a910f39a12dd68aeb1a4a8c549d5d3c3a29e4da4895",
+   "records": 41,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0002.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "740ce7c02f611181e3de818fda3c481da7a285c1c3aecac61eedcb39825e08fa",
+   "records": 24,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "95d88d3a2b404492cd21e0b39f8984763a152020a3ca696152f36abc2357f020",
+   "records": 85,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0001.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "da2c6a5859277da6bf978aa597c57525a82ff4a8ff9675405e667d18589ba0c3",
+   "records": 15,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "13e5b1394479bf604490f2e4fbabae95dd7185fa513b2870ea38d6ec0e111d53",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__rag/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__rag",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "1a6c8ef5820fb500aa4046a2af2c4cf76a62601285f42d7809356612158bae72",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__answerability_paired/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__answerability_paired",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "586626ed3b6f333db5e76acf82d18475e48bbed2fa5334386c7f4cadee8df1a9",
+   "records": 120,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "ea9dd8988f06b69001a368523b16acd055d052666019f2a284756d53783a256d",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "d191111d8d017e03668f5892beb2ee04db1f3c4ecc12084bc8484e03260e4303",
+   "records": 127,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0001.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "62fc256245dc6c72bf6d2f690a4a122a99f3514bdd145d8ecc20d953f25eaf88",
+   "records": 23,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "bd12d1369e22769a4902ffda6336496b9d1851b7e4b1d56b5f8cb611072427d0",
+   "records": 72,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0001.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "1999fc4ffdba255221c43a55923d45078e3744d7016c8eca35f6e78159241b5a",
+   "records": 4,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0000.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "a345985cde6248110c8c799e3714fca29181087385d99d1b73bdef08e35df680",
+   "records": 13,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0001.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "7c43b7b4c2cf1e6ede2ae04ad46359f4f11c5641e0a4cc95194f18320f41cadf",
+   "records": 132,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0002.sob1_phase1_20261119_194259-teacher-H-T-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_phase1_20261119_194259-teacher-H-T-g1",
+   "sha256": "468d869cb993a0b2fa93ba32f0edeb4276c6367e12bc81fe7a07e8c150dea0c3",
+   "records": 5,
+   "proven": true,
+   "why": null
+  }
+ },
+ "sealed_twice": [],
+ "expected_weights": {
+  "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
+  "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
+  "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
+ },
+ "think_state": "self_opening",
+ "stored_report_matches": true
+}

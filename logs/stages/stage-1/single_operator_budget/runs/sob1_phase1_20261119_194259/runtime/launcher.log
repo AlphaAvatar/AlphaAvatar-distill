@@ -1,0 +1,158 @@
+launcher start 2026-11-19T19:44:33Z pid 2262739
+bundle OK: transfer/aad_autoinit_b0bc53cb.bundle on the relay
+[19:44:34] budget: expected 1138 min $21.05 · soft $22.29 · hard $22.48 (authorized $22.92)
+[19:44:34] NVIDIA L40S $1.09/h, stock None
+[19:44:34] account funds OK: the provider account holds $40.2437 against the $22.4771 this session must be able to fund
+[19:44:35] account resources OK: the provider account holds only the 0 resource(s) the records account for
+[19:44:35] SOB1 is open
+[19:44:35] a SOB1 sob1_phase1 artifact, unused
+[19:44:35] 1 x NVIDIA L40S at no more than $1.11/h for the pod, as granted
+[19:44:35] all-in $22.9165 over 1216.23 min, inside $22.92
+[19:44:35] study identity b07d2e294732 is the authorized one
+[19:44:35] every bound file is in the session commit
+[19:44:38] $22.92 inside the envelope ($22.92) and the $30.2442 the project cap leaves now
+[19:44:38] the authorization is in session commit b0bc53cb98ee
+[19:44:38] $22.92 + the $1.0 teardown reserve fit
+[19:44:40] the relay would accept the sob1_phase1 session's bytes: 6 object(s), 11.42 GiB: ACCEPTED (200) 6/6 granted an upload action
+[19:44:40] the artifact binds this tree's ['design_sha256', 'selection_sha256', 'structures_sha256']
+[19:44:40] not a training session
+[19:44:40] the dev box holds the session's bound peak: /home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_phase1_20261119_194259: 18.70 GiB free for 12.35 GiB (margin 6.35 GiB)
+[19:44:41] precheck OK: 1 relay inputs (1 from AlphaAvatar/aadistill-artifacts), 3 local assets
+[19:44:44] watchdog detached — hard 1215 min = $22.48
+[19:44:44] created heuxh6fau92b4c at $1.09/h in an unread datacenter
+[19:45:40]   starting (60s) — $0.02
+[19:46:45]   starting (120s) — $0.04
+[19:47:28] TCP 22 at 202.181.159.212:12400 after 2.8 min
+[19:47:31] draw 1: ssh reachable — $0.05
+[19:48:35] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.112.07
+[19:48:35] draw 1: running setup
+[19:51:50] draw 1: setup complete — $0.13
+[19:51:55] driver detached, pid 2358, confirmed by descriptor_probe — $0.13
+[19:53:05]   2026-11-19T19:52:37Z MARKER:INIT_BUILT:residual_width — $0.15
+[19:53:18] secured 2 file(s) (2 held)
+[19:57:22] secured 1 file(s) (2 held)
+[19:58:35]   2026-11-19T19:57:46Z MARKER:INIT_RECORD_WRITTEN:residual_width — $0.25
+[19:58:48] secured 3 file(s) (4 held)
+[20:02:39]   2026-11-19T20:02:03Z MARKER:SELECTED:ffn_attention — $0.33
+[20:02:52] secured 1 file(s) (5 held)
+[20:04:05]   2026-11-19T20:02:46Z MARKER:INIT_BUILT:ffn_attention — $0.35
+[20:04:18] secured 1 file(s) (5 held)
+[20:07:03] secured 1 file(s) (5 held)
+[20:08:17]   2026-11-19T20:07:19Z MARKER:INIT_RECORD_WRITTEN:ffn_attention — $0.43
+[20:08:30] secured 3 file(s) (7 held)
+[20:20:25] secured 1 file(s) (8 held)
+[20:31:01] secured 1 file(s) (8 held)
+[20:41:37] secured 1 file(s) (8 held)
+[20:49:36] secured 1 file(s) (8 held)
+[20:58:53] secured 1 file(s) (8 held)
+[21:05:34] secured 1 file(s) (8 held)
+[21:13:32] secured 1 file(s) (8 held)
+[21:20:13] secured 1 file(s) (8 held)
+[21:25:35] secured 1 file(s) (8 held)
+[21:32:18] secured 1 file(s) (8 held)
+[21:36:22] secured 1 file(s) (8 held)
+[21:41:31]   2026-11-19T21:41:13Z MARKER:SELECTED:depth_only — $2.12
+[21:41:44] secured 2 file(s) (9 held)
+[21:42:57]   2026-11-19T21:41:34Z MARKER:INIT_BUILT:depth_only — $2.15
+[21:45:36]   2026-11-19T21:45:32Z MARKER:EVAL_GENERATE:residual_width:H-T:sob1_phase1_20261119_194259-residual_width-H-T-g1 — $2.20
+[21:45:50] secured 6 file(s) (13 held)
+[21:47:16] secured 1 file(s) (13 held)
+[21:48:43] secured 1 file(s) (13 held)
+[21:50:10] secured 7 file(s) (19 held)
+[21:51:37] secured 16 file(s) (34 held)
+[21:52:50]   2026-11-19T21:52:39Z MARKER:EVAL_GENERATE:residual_width:H-N:sob1_phase1_20261119_194259-residual_width-H-N-g1 — $2.33
+[21:53:04] secured 19 file(s) (51 held)
+[21:54:30] secured 1 file(s) (51 held)
+[21:55:58] secured 8 file(s) (58 held)
+[21:57:24] secured 16 file(s) (73 held)
+[21:58:51] secured 17 file(s) (88 held)
+[22:00:04]   2026-11-19T21:58:46Z MARKER:EVAL_GENERATE:ffn_attention:H-T:sob1_phase1_20261119_194259-ffn_attention-H-T-g1 — $2.46
+[22:00:17] secured 2 file(s) (90 held)
+[22:01:44] secured 2 file(s) (91 held)
+[22:03:12] secured 6 file(s) (97 held)
+[22:04:39] secured 12 file(s) (108 held)
+[22:06:06] secured 7 file(s) (114 held)
+[22:07:33] secured 7 file(s) (120 held)
+[22:08:46]   2026-11-19T22:08:25Z MARKER:EVAL_GENERATE:ffn_attention:H-N:sob1_phase1_20261119_194259-ffn_attention-H-N-g1 — $2.62
+[22:09:00] secured 14 file(s) (132 held)
+[22:10:28] secured 1 file(s) (132 held)
+[22:11:56] secured 8 file(s) (139 held)
+[22:13:23] secured 10 file(s) (148 held)
+[22:14:50] secured 5 file(s) (152 held)
+[22:16:18] secured 10 file(s) (161 held)
+[22:17:31]   2026-11-19T22:16:39Z MARKER:EVAL_GENERATE:depth_only:H-T:sob1_phase1_20261119_194259-depth_only-H-T-g1 — $2.78
+[22:17:45] secured 11 file(s) (171 held)
+[22:19:13] secured 7 file(s) (177 held)
+[22:20:42] secured 11 file(s) (187 held)
+[22:21:55]   2026-11-19T22:21:47Z MARKER:EVAL_GENERATE:depth_only:H-N:sob1_phase1_20261119_194259-depth_only-H-N-g1 — $2.86
+[22:22:10] secured 25 file(s) (210 held)
+[22:23:36] secured 1 file(s) (210 held)
+[22:25:04] secured 12 file(s) (222 held)
+[22:26:32] secured 23 file(s) (244 held)
+[22:27:45]   2026-11-19T22:26:49Z MARKER:EVAL_GENERATE:teacher:H-T:sob1_phase1_20261119_194259-teacher-H-T-g1 — $2.96
+[22:27:59] secured 5 file(s) (248 held)
+[22:29:27] secured 2 file(s) (249 held)
+[22:30:54] secured 1 file(s) (249 held)
+[22:32:22] secured 2 file(s) (250 held)
+[22:33:49] secured 2 file(s) (251 held)
+[22:35:18] secured 2 file(s) (252 held)
+[22:36:44] secured 1 file(s) (252 held)
+[22:38:12] secured 2 file(s) (253 held)
+[22:39:39] secured 2 file(s) (254 held)
+[22:41:06] secured 2 file(s) (255 held)
+[22:42:33] secured 1 file(s) (255 held)
+[22:44:00] secured 2 file(s) (256 held)
+[22:45:29] secured 2 file(s) (257 held)
+[22:46:57] secured 1 file(s) (257 held)
+[22:48:25] secured 2 file(s) (258 held)
+[22:49:52] secured 2 file(s) (259 held)
+[22:51:20] secured 2 file(s) (260 held)
+[22:52:47] secured 1 file(s) (260 held)
+[22:54:14] secured 2 file(s) (261 held)
+[22:55:41] secured 2 file(s) (262 held)
+[22:57:08] secured 2 file(s) (263 held)
+[22:58:36] secured 1 file(s) (263 held)
+[23:00:03] secured 2 file(s) (264 held)
+[23:01:30] secured 2 file(s) (265 held)
+[23:02:57] secured 1 file(s) (265 held)
+[23:04:24] secured 2 file(s) (266 held)
+[23:05:52] secured 2 file(s) (267 held)
+[23:07:20] secured 2 file(s) (268 held)
+[23:08:47] secured 1 file(s) (268 held)
+[23:10:14] secured 2 file(s) (269 held)
+[23:11:41] secured 2 file(s) (270 held)
+[23:13:09] secured 2 file(s) (271 held)
+[23:14:37] secured 1 file(s) (271 held)
+[23:16:07] secured 8 file(s) (278 held)
+[23:17:34] secured 5 file(s) (282 held)
+[23:19:01] secured 3 file(s) (284 held)
+[23:20:28] secured 2 file(s) (286 held)
+[23:21:56] secured 5 file(s) (290 held)
+[23:23:23] secured 3 file(s) (292 held)
+[23:24:50] secured 2 file(s) (294 held)
+[23:26:17] secured 1 file(s) (295 held)
+[23:27:45] secured 4 file(s) (298 held)
+[23:29:13] secured 5 file(s) (302 held)
+[23:30:40] secured 7 file(s) (308 held)
+[23:32:08] secured 1 file(s) (309 held)
+[23:33:21]   2026-11-19T23:32:32Z MARKER:EVAL_GENERATE:teacher:H-N:sob1_phase1_20261119_194259-teacher-H-N-g1 — $4.15
+[23:33:35] secured 10 file(s) (317 held)
+[23:35:03] secured 2 file(s) (318 held)
+[23:36:31] secured 1 file(s) (318 held)
+[23:37:59] secured 12 file(s) (330 held)
+[23:39:26] secured 14 file(s) (343 held)
+[23:40:39]   2026-11-19T23:40:03Z MARKER:PHASE1_COMPLETE — $4.29
+[23:40:54] secured 14 file(s) (355 held)
+[23:42:07]   2026-11-19T23:41:29Z MARKER:ALL_DONE — $4.31
+[23:42:07] polling ended: ALL_DONE — $4.31
+[23:43:39]   manifest rc=0
+124 file(s) across 4 class(es) -> /workspace/manifest.json
+  final_required: 124 · mutable_snapshot: 0 · final_streams_quiescent: True
+[23:44:04] secured 3 file(s) (357 held)
+[23:44:07] teardown gate: allowed=True failed=None
+[23:44:07] deleting pod (gate passed)
+[23:44:18] pod deleted — 239.6 min, $4.35; provider confirms gone: True
+
+stage1_single_operator-sob1_phase1 COMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/runtime/session.json. 
+{"all_in_usd": 4.4348, "gpu_usd": 4.3528, "disk_usd": 0.082, "elapsed_minutes": 239.6, "price_per_hour": 1.09, "authorized_usd": 22.92, "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"}
+launcher exit rc=0 2026-11-20T00:00:09Z

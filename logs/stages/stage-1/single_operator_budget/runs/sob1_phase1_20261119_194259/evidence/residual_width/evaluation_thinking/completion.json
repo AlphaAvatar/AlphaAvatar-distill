@@ -1,0 +1,269 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.evaluation_completion/v1",
+ "target": "residual_width",
+ "mode": "H-T",
+ "out": "/workspace/aad/artifacts/audit/stage1_single_operator/sob1_phase1_20261119_194259",
+ "complete": true,
+ "problems": {},
+ "units": {
+  "fluid_reasoning_720__dev_v1": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "7c2a45c8697f0e3c0a492fb99ba2fe343f7fe2c435e9763ca35f5e96db3f8004",
+   "records": 720,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__math_verified": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "8e32e3417a00541d78f1f9f351112655077ee3655290aaed81e2a58723054252",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__gsm8k": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "3c4ac98ae986b8999a01d599c974dac8f4b9ffae3036fa3caf4e79d12d02e9de",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__multihop": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "b382e956f3977cce1bb5dbee365a221b4dd1a8f8448e2e1d9d05b04460aad995",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__rag": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "6fc89a61b78828bac44b03e8b06b958e405afef76ad1a758e3473424a92d8511",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__answerability_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "0a233494371131695b2e464495e7f7fa199bc10e288f496c458eb04b12d16fd2",
+   "records": 120,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__safety_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "21accfbd81800e25ebfa746620583f48fc404a91ba469bb2d459d49ba2d8fc6d",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__knowledge": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "805c1bd0dc00d39916cc383d8157a6f1ba16007d2711a7ef8e70192610ee2fcc",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__eval_behavior_v0": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "f20c34084d4961293ca792f87fce1308c3dbe84aefab6fde5f12886d0a279d2f",
+   "records": 76,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_legacy_150__items": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "73f918a09a94f3c8afca404b0751e0eab8882e0630fe0ce0b700977ae5e520bb",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  }
+ },
+ "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2",
+ "packages": [
+  {
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "attempt": "sob1_phase1_20261119_194259",
+   "utc": "2026-11-19T21:45:29Z",
+   "weights_sha256": {
+    "model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+   }
+  }
+ ],
+ "parts": {
+  "parts/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "7c2a45c8697f0e3c0a492fb99ba2fe343f7fe2c435e9763ca35f5e96db3f8004",
+   "records": 720,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "b4162aaf4e3a822fb30a26d9403dd50ba27e6d326fb769050936aaf11444e9e3",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "1066d8544c607035f18a62fa2fe0e3929bcd37cb4536c3f12ac10f43f68a2e5d",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "2138fda962ddf30419a39eddfe085ea0aee44732b3d53afe75d4a90a427c9502",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__rag/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__rag",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "198fa6e35d5c21549c0b93c4d048161bba9579130ebca39aadd5f0829963c81e",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__answerability_paired/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__answerability_paired",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "adfc47752985b84c816f2a285a3a8c499dd586480a58aa99306e33c02f2039d9",
+   "records": 120,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "5bfd42e4fc6220e318d22dfbf851a3b40ff3ef57ab4a7fa571d036dccfb54f6b",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "0c30e1410d36b6f6c0a9b7d9bc4c5a2dfaf1f5261dba0b68190da0d3e9344984",
+   "records": 150,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "cf6a0054781dfffd98189438cb44f9f282348d138a61bd5fa16cbfc17790332a",
+   "records": 76,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0000.sob1_phase1_20261119_194259-residual_width-H-T-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_phase1_20261119_194259-residual_width-H-T-g1",
+   "sha256": "73f918a09a94f3c8afca404b0751e0eab8882e0630fe0ce0b700977ae5e520bb",
+   "records": 150,
+   "proven": true,
+   "why": null
+  }
+ },
+ "sealed_twice": [],
+ "expected_weights": {
+  "model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+ },
+ "think_state": "self_opening",
+ "stored_report_matches": true
+}

@@ -1,10 +1,24 @@
 # Single-operator compression at the same parameter budget (SOB1)
 
-Stage 1 owns this round; its training is `stage3_recovery`. Status: **prepared at $0, ready for review**. The
-maintainer fixed the protocol on 2026-11-19 (UTC) and corrected the preparation the same day (`logs/budget/decisions.md
-:: 2026-11-19 (UTC) — SOB1 protocol fixed ...` and `... SOB1 completion on real artifacts ...`). Nothing here is
-authorized: no paid pod, phase or formal experiment runs until the maintainer grants it. Branch
-`research/reasoning-inheritance`, not merged to `main`.
+Stage 1 owns this round; its training is `stage3_recovery`. Status: **phase 1 COMPLETE (2026-11-20 UTC); phase 2
+not authorized.** The maintainer fixed the protocol on 2026-11-19 (UTC), corrected the preparation three times the same
+day and granted phase 1 (`logs/budget/decisions.md`, the 2026-11-19 entries). Phase 1 ran once,
+`sob1_phase1_20261119_194259`: one L40S, 239.6 min, $4.4348 all-in of the $22.92 cap, the pod deleted and confirmed
+gone; `study_completion.status` COMPLETE (`runs/sob1_phase1_20261119_194259/closeout/phase1_completion.json`), the
+three initializations and mappings re-hashed on the dev box (`storage/local_retention.json`) and kept on the relay
+for phase 2 (`decisions.md :: 2026-11-20 (UTC) — SOB1 phase 1 COMPLETE`). Branch `research/reasoning-inheritance`,
+not merged to `main`.
+
+**Phase 1's comparison** (`runs/sob1_phase1_20261119_194259/evidence/comparison/comparison.md`, descriptive: no arm is
+ranked or eliminated by it). Static fluid formal core, 570 items (558 groups), 95% group-bootstrap intervals:
+
+| mode | teacher | each untrained arm | teacher − arm, pp | degeneration stops on the core: width / FFN + attention / depth (teacher) |
+| --- | ---: | ---: | --- | --- |
+| thinking | 85.79% | 0.00% | 85.79 [82.87, 88.58] | 570 / 570 / 551 (6) |
+| non-thinking | 70.53% | 0.00% | 70.53 [66.73, 74.30] | 570 / 568 / 549 (4) |
+
+Untrained, every arm produces degenerate text (repeated digits, spaces, symbol runs); recovery (phase 2) is what the
+study compares.
 
 | file | what it is |
 | --- | --- |
@@ -446,11 +460,11 @@ runner's all-in; that was fixed then (`test_the_hard_cap_is_the_runners_all_in`)
 
 ## 10. Decisions for the maintainer
 
-1. Grant phase 1: a $22.92 hard cap for one `sob1_phase1` session (expected $10.21), plus the $1.00 teardown
-   reserve ($23.92), inside the $30.24 the project cap leaves. The cap rose from $22.55 by the sealed statistics'
-   floor-rate download and the completion checks.
+1. ~~Grant phase 1~~: granted 2026-11-19 and COMPLETE 2026-11-20 ($4.4348 of $22.92; the remainder is not carried
+   into phase 2: the grant's `phase_1_closed`).
 2. Phase 2 (decided separately): the two seeds and the recipe stay. The storage of the six fp32 finals (44.94 GiB)
-   comes first: the dev box holds none of an arm's two (14.98 GiB against about 14.7 GiB free) and the relay cannot
+   comes first: the dev box holds none of an arm's two (14.98 GiB against 7.0 GiB free after phase 1 put the three
+   inits there) and the relay cannot
    accumulate them. Then the budget: both seeds expected $114.70, hard caps $185.87 + $1 (one seed: $58.06 expected),
    which needs a project-cap decision; nothing here assumes it. Its first session records the L40S memory on the
    residual-width arm's first four formal optimizer steps (online KD, backward, AdamW update).

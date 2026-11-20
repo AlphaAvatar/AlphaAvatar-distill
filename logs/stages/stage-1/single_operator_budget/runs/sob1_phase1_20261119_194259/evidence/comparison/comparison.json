@@ -1,0 +1,1757 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.phase1_comparison/v1",
+ "role": "descriptive only: the teacher minus each untrained arm, item by item, under one protocol; no arm is ranked, eliminated or kept by it -- all three go to recovery and are compared after it",
+ "context_tokens": 8192,
+ "eval_set": "eval-set-1",
+ "modes": {
+  "H-T": {
+   "dir": "evaluation_thinking",
+   "terminations": {
+    "teacher": {
+     "primary_static_fluid_core": {
+      "turns": 570,
+      "natural_termination": 510,
+      "degeneration_stop": 6,
+      "context_limit_hit": 54,
+      "other_stop": 0
+     },
+     "whole_set": {
+      "turns": 1952,
+      "natural_termination": 1803,
+      "degeneration_stop": 15,
+      "context_limit_hit": 134,
+      "other_stop": 0
+     }
+    },
+    "residual_width": {
+     "primary_static_fluid_core": {
+      "turns": 570,
+      "natural_termination": 0,
+      "degeneration_stop": 570,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     },
+     "whole_set": {
+      "turns": 1716,
+      "natural_termination": 0,
+      "degeneration_stop": 1716,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     }
+    },
+    "ffn_attention": {
+     "primary_static_fluid_core": {
+      "turns": 570,
+      "natural_termination": 0,
+      "degeneration_stop": 570,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     },
+     "whole_set": {
+      "turns": 1716,
+      "natural_termination": 9,
+      "degeneration_stop": 1707,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     }
+    },
+    "depth_only": {
+     "primary_static_fluid_core": {
+      "turns": 570,
+      "natural_termination": 19,
+      "degeneration_stop": 551,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     },
+     "whole_set": {
+      "turns": 1719,
+      "natural_termination": 54,
+      "degeneration_stop": 1665,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     }
+    }
+   },
+   "teacher_headlines": {
+    "fluid_reasoning_720/dev_v1": {
+     "status": "measured",
+     "n": 714,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.7353,
+     "natural_termination_rate": null,
+     "degeneration_rate": null
+    },
+    "stage3_capability_846/math_verified": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.76,
+     "natural_termination_rate": 0.84,
+     "degeneration_rate": 0.02
+    },
+    "stage3_capability_846/gsm8k": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.89,
+     "natural_termination_rate": 0.99,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/multihop": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.8,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/rag": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.7,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/answerability_paired": {
+     "status": "measured",
+     "n": 120,
+     "in_formal_core": true,
+     "headline": "pair_correct",
+     "value": 0.5333,
+     "natural_termination_rate": 0.9917,
+     "degeneration_rate": 0.0083
+    },
+    "stage3_capability_846/safety_paired": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "pair_correct",
+     "value": 0.42,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/knowledge": {
+     "status": "measured",
+     "n": 150,
+     "in_formal_core": false,
+     "headline": "correct",
+     "value": 0.5533,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/eval_behavior_v0": {
+     "status": "measured",
+     "n": 65,
+     "in_formal_core": true,
+     "headline": null,
+     "value": null,
+     "natural_termination_rate": null,
+     "degeneration_rate": null
+    },
+    "stage3_legacy_150/items": {
+     "status": "measured",
+     "n": 150,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.9467,
+     "natural_termination_rate": null,
+     "degeneration_rate": null
+    }
+   },
+   "arm_headlines": {
+    "residual_width": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    },
+    "ffn_attention": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.03,
+      "degeneration_rate": 0.97
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.0067,
+      "degeneration_rate": 0.9933
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    },
+    "depth_only": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.05,
+      "degeneration_rate": 0.95
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.03,
+      "degeneration_rate": 0.97
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.03,
+      "degeneration_rate": 0.97
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.01,
+      "degeneration_rate": 0.99
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.0667,
+      "degeneration_rate": 0.9333
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.02,
+      "degeneration_rate": 0.98
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.02,
+      "degeneration_rate": 0.98
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    }
+   },
+   "arms": {
+    "residual_width": {
+     "primary_static_fluid_core": {
+      "n_items": 570,
+      "n_groups": 558,
+      "teacher_accuracy_pct": 85.79,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 85.79,
+      "ci95_pp": [
+       82.87,
+       88.58
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "interactive_episodes": {
+      "n_items": 144,
+      "n_groups": 144,
+      "teacher_accuracy_pct": 25.0,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 25.0,
+      "ci95_pp": [
+       18.06,
+       32.64
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "supporting_units": {
+      "stage3_capability_846__answerability_paired": {
+       "n_items": 120,
+       "n_groups": 120,
+       "teacher_accuracy_pct": 73.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 73.33,
+       "ci95_pp": [
+        65.0,
+        80.83
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_capability_846__gsm8k": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 89.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 89.0,
+       "ci95_pp": [
+        83.0,
+        95.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__knowledge": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 55.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 55.33,
+       "ci95_pp": [
+        47.33,
+        63.33
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__math_verified": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 76.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 76.0,
+       "ci95_pp": [
+        67.0,
+        84.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__multihop": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 80.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 80.0,
+       "ci95_pp": [
+        72.0,
+        87.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__rag": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 70.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 70.0,
+       "ci95_pp": [
+        61.0,
+        79.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__safety_paired": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 71.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 71.0,
+       "ci95_pp": [
+        62.0,
+        80.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_legacy_150__items": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 94.67,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 94.67,
+       "ci95_pp": [
+        90.67,
+        98.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      }
+     }
+    },
+    "ffn_attention": {
+     "primary_static_fluid_core": {
+      "n_items": 570,
+      "n_groups": 558,
+      "teacher_accuracy_pct": 85.79,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 85.79,
+      "ci95_pp": [
+       82.87,
+       88.58
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "interactive_episodes": {
+      "n_items": 144,
+      "n_groups": 144,
+      "teacher_accuracy_pct": 25.0,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 25.0,
+      "ci95_pp": [
+       18.06,
+       32.64
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "supporting_units": {
+      "stage3_capability_846__answerability_paired": {
+       "n_items": 120,
+       "n_groups": 120,
+       "teacher_accuracy_pct": 73.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 73.33,
+       "ci95_pp": [
+        65.0,
+        80.83
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_capability_846__gsm8k": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 89.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 89.0,
+       "ci95_pp": [
+        83.0,
+        95.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__knowledge": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 55.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 55.33,
+       "ci95_pp": [
+        47.33,
+        63.33
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__math_verified": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 76.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 76.0,
+       "ci95_pp": [
+        67.0,
+        84.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__multihop": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 80.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 80.0,
+       "ci95_pp": [
+        72.0,
+        87.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__rag": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 70.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 70.0,
+       "ci95_pp": [
+        61.0,
+        79.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__safety_paired": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 71.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 71.0,
+       "ci95_pp": [
+        62.0,
+        80.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_legacy_150__items": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 94.67,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 94.67,
+       "ci95_pp": [
+        90.67,
+        98.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      }
+     }
+    },
+    "depth_only": {
+     "primary_static_fluid_core": {
+      "n_items": 570,
+      "n_groups": 558,
+      "teacher_accuracy_pct": 85.79,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 85.79,
+      "ci95_pp": [
+       82.87,
+       88.58
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "interactive_episodes": {
+      "n_items": 144,
+      "n_groups": 144,
+      "teacher_accuracy_pct": 25.0,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 25.0,
+      "ci95_pp": [
+       18.06,
+       32.64
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "supporting_units": {
+      "stage3_capability_846__answerability_paired": {
+       "n_items": 120,
+       "n_groups": 120,
+       "teacher_accuracy_pct": 73.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 73.33,
+       "ci95_pp": [
+        65.0,
+        80.83
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_capability_846__gsm8k": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 89.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 89.0,
+       "ci95_pp": [
+        83.0,
+        95.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__knowledge": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 55.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 55.33,
+       "ci95_pp": [
+        47.33,
+        63.33
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__math_verified": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 76.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 76.0,
+       "ci95_pp": [
+        67.0,
+        84.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__multihop": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 80.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 80.0,
+       "ci95_pp": [
+        72.0,
+        87.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__rag": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 70.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 70.0,
+       "ci95_pp": [
+        61.0,
+        79.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__safety_paired": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 71.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 71.0,
+       "ci95_pp": [
+        62.0,
+        80.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_legacy_150__items": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 94.67,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 94.67,
+       "ci95_pp": [
+        90.67,
+        98.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      }
+     }
+    }
+   },
+   "scored_digests": {
+    "teacher": "b0c2372a638d07ac7dc9f82aa06ec132a002f9b4e63d59fe95cc9f37f85f5a96",
+    "residual_width": "81dddbd0a0f8c3b2f669f4eb9e5c78c93c5a4f7ba62c07770b0ee16a273c8a29",
+    "ffn_attention": "c970889c10b87afc9ca57a735d6e9380b609fde4d49f077261ef393d333e2b28",
+    "depth_only": "baa7e158791f91c777a87e870b4bde598a5342f5151ffac94a30035e99c19054"
+   }
+  },
+  "H-N": {
+   "dir": "evaluation_non_thinking",
+   "terminations": {
+    "teacher": {
+     "primary_static_fluid_core": {
+      "turns": 570,
+      "natural_termination": 566,
+      "degeneration_stop": 4,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     },
+     "whole_set": {
+      "turns": 2575,
+      "natural_termination": 2554,
+      "degeneration_stop": 21,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     }
+    },
+    "residual_width": {
+     "primary_static_fluid_core": {
+      "turns": 570,
+      "natural_termination": 0,
+      "degeneration_stop": 570,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     },
+     "whole_set": {
+      "turns": 1716,
+      "natural_termination": 0,
+      "degeneration_stop": 1716,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     }
+    },
+    "ffn_attention": {
+     "primary_static_fluid_core": {
+      "turns": 570,
+      "natural_termination": 2,
+      "degeneration_stop": 568,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     },
+     "whole_set": {
+      "turns": 1716,
+      "natural_termination": 7,
+      "degeneration_stop": 1709,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     }
+    },
+    "depth_only": {
+     "primary_static_fluid_core": {
+      "turns": 570,
+      "natural_termination": 21,
+      "degeneration_stop": 549,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     },
+     "whole_set": {
+      "turns": 1719,
+      "natural_termination": 56,
+      "degeneration_stop": 1663,
+      "context_limit_hit": 0,
+      "other_stop": 0
+     }
+    }
+   },
+   "teacher_headlines": {
+    "fluid_reasoning_720/dev_v1": {
+     "status": "measured",
+     "n": 714,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.6218,
+     "natural_termination_rate": null,
+     "degeneration_rate": null
+    },
+    "stage3_capability_846/math_verified": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.77,
+     "natural_termination_rate": 0.99,
+     "degeneration_rate": 0.01
+    },
+    "stage3_capability_846/gsm8k": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.4,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/multihop": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.75,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/rag": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.81,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/answerability_paired": {
+     "status": "measured",
+     "n": 120,
+     "in_formal_core": true,
+     "headline": "pair_correct",
+     "value": 0.55,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/safety_paired": {
+     "status": "measured",
+     "n": 100,
+     "in_formal_core": true,
+     "headline": "pair_correct",
+     "value": 0.62,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/knowledge": {
+     "status": "measured",
+     "n": 150,
+     "in_formal_core": false,
+     "headline": "correct",
+     "value": 0.5333,
+     "natural_termination_rate": 1,
+     "degeneration_rate": 0
+    },
+    "stage3_capability_846/eval_behavior_v0": {
+     "status": "measured",
+     "n": 65,
+     "in_formal_core": true,
+     "headline": null,
+     "value": null,
+     "natural_termination_rate": null,
+     "degeneration_rate": null
+    },
+    "stage3_legacy_150/items": {
+     "status": "measured",
+     "n": 150,
+     "in_formal_core": true,
+     "headline": "correct",
+     "value": 0.7333,
+     "natural_termination_rate": null,
+     "degeneration_rate": null
+    }
+   },
+   "arm_headlines": {
+    "residual_width": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    },
+    "ffn_attention": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.01,
+      "degeneration_rate": 0.99
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.03,
+      "degeneration_rate": 0.97
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.01,
+      "degeneration_rate": 0.99
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0067,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    },
+    "depth_only": {
+     "fluid_reasoning_720/dev_v1": {
+      "status": "measured",
+      "n": 714,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_capability_846/math_verified": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.08,
+      "degeneration_rate": 0.92
+     },
+     "stage3_capability_846/gsm8k": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.02,
+      "degeneration_rate": 0.98
+     },
+     "stage3_capability_846/multihop": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.03,
+      "degeneration_rate": 0.97
+     },
+     "stage3_capability_846/rag": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.05,
+      "degeneration_rate": 0.95
+     },
+     "stage3_capability_846/answerability_paired": {
+      "status": "measured",
+      "n": 120,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0.0167,
+      "degeneration_rate": 0.9833
+     },
+     "stage3_capability_846/safety_paired": {
+      "status": "measured",
+      "n": 100,
+      "in_formal_core": true,
+      "headline": "pair_correct",
+      "value": 0,
+      "natural_termination_rate": 0,
+      "degeneration_rate": 1
+     },
+     "stage3_capability_846/knowledge": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": false,
+      "headline": "correct",
+      "value": 0,
+      "natural_termination_rate": 0.02,
+      "degeneration_rate": 0.98
+     },
+     "stage3_capability_846/eval_behavior_v0": {
+      "status": "measured",
+      "n": 65,
+      "in_formal_core": true,
+      "headline": null,
+      "value": null,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     },
+     "stage3_legacy_150/items": {
+      "status": "measured",
+      "n": 150,
+      "in_formal_core": true,
+      "headline": "correct",
+      "value": 0.0133,
+      "natural_termination_rate": null,
+      "degeneration_rate": null
+     }
+    }
+   },
+   "arms": {
+    "residual_width": {
+     "primary_static_fluid_core": {
+      "n_items": 570,
+      "n_groups": 558,
+      "teacher_accuracy_pct": 70.53,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 70.53,
+      "ci95_pp": [
+       66.73,
+       74.3
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "interactive_episodes": {
+      "n_items": 144,
+      "n_groups": 144,
+      "teacher_accuracy_pct": 29.17,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 29.17,
+      "ci95_pp": [
+       21.53,
+       36.81
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "supporting_units": {
+      "stage3_capability_846__answerability_paired": {
+       "n_items": 120,
+       "n_groups": 120,
+       "teacher_accuracy_pct": 75.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 75.0,
+       "ci95_pp": [
+        66.67,
+        82.5
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_capability_846__gsm8k": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 40.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 40.0,
+       "ci95_pp": [
+        31.0,
+        50.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__knowledge": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 53.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 53.33,
+       "ci95_pp": [
+        45.33,
+        61.33
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__math_verified": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 77.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 77.0,
+       "ci95_pp": [
+        68.0,
+        85.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__multihop": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 75.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 75.0,
+       "ci95_pp": [
+        66.0,
+        83.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__rag": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 81.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 81.0,
+       "ci95_pp": [
+        73.0,
+        88.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__safety_paired": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 81.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 81.0,
+       "ci95_pp": [
+        73.0,
+        88.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_legacy_150__items": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 73.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 73.33,
+       "ci95_pp": [
+        66.0,
+        80.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      }
+     }
+    },
+    "ffn_attention": {
+     "primary_static_fluid_core": {
+      "n_items": 570,
+      "n_groups": 558,
+      "teacher_accuracy_pct": 70.53,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 70.53,
+      "ci95_pp": [
+       66.73,
+       74.3
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "interactive_episodes": {
+      "n_items": 144,
+      "n_groups": 144,
+      "teacher_accuracy_pct": 29.17,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 29.17,
+      "ci95_pp": [
+       21.53,
+       36.81
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "supporting_units": {
+      "stage3_capability_846__answerability_paired": {
+       "n_items": 120,
+       "n_groups": 120,
+       "teacher_accuracy_pct": 75.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 75.0,
+       "ci95_pp": [
+        66.67,
+        82.5
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_capability_846__gsm8k": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 40.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 40.0,
+       "ci95_pp": [
+        31.0,
+        50.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__knowledge": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 53.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 53.33,
+       "ci95_pp": [
+        45.33,
+        61.33
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__math_verified": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 77.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 77.0,
+       "ci95_pp": [
+        68.0,
+        85.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__multihop": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 75.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 75.0,
+       "ci95_pp": [
+        66.0,
+        83.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__rag": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 81.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 81.0,
+       "ci95_pp": [
+        73.0,
+        88.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__safety_paired": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 81.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 81.0,
+       "ci95_pp": [
+        73.0,
+        88.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_legacy_150__items": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 73.33,
+       "arm_accuracy_pct": 0.67,
+       "teacher_minus_arm_pp": 72.67,
+       "ci95_pp": [
+        65.33,
+        79.33
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      }
+     }
+    },
+    "depth_only": {
+     "primary_static_fluid_core": {
+      "n_items": 570,
+      "n_groups": 558,
+      "teacher_accuracy_pct": 70.53,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 70.53,
+      "ci95_pp": [
+       66.73,
+       74.3
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "interactive_episodes": {
+      "n_items": 144,
+      "n_groups": 144,
+      "teacher_accuracy_pct": 29.17,
+      "arm_accuracy_pct": 0.0,
+      "teacher_minus_arm_pp": 29.17,
+      "ci95_pp": [
+       21.53,
+       36.81
+      ],
+      "interval": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "supporting_units": {
+      "stage3_capability_846__answerability_paired": {
+       "n_items": 120,
+       "n_groups": 120,
+       "teacher_accuracy_pct": 75.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 75.0,
+       "ci95_pp": [
+        66.67,
+        82.5
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_capability_846__gsm8k": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 40.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 40.0,
+       "ci95_pp": [
+        31.0,
+        50.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__knowledge": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 53.33,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 53.33,
+       "ci95_pp": [
+        45.33,
+        61.33
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__math_verified": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 77.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 77.0,
+       "ci95_pp": [
+        68.0,
+        85.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__multihop": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 75.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 75.0,
+       "ci95_pp": [
+        66.0,
+        83.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__rag": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 81.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 81.0,
+       "ci95_pp": [
+        73.0,
+        88.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      },
+      "stage3_capability_846__safety_paired": {
+       "n_items": 100,
+       "n_groups": 100,
+       "teacher_accuracy_pct": 81.0,
+       "arm_accuracy_pct": 0.0,
+       "teacher_minus_arm_pp": 81.0,
+       "ci95_pp": [
+        73.0,
+        88.0
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "pair_correct",
+       "reading": "per-item correctness; the unit's registered headline is pair_correct (in the headlines beside this table), not this"
+      },
+      "stage3_legacy_150__items": {
+       "n_items": 150,
+       "n_groups": 150,
+       "teacher_accuracy_pct": 73.33,
+       "arm_accuracy_pct": 1.33,
+       "teacher_minus_arm_pp": 72.0,
+       "ci95_pp": [
+        64.67,
+        79.33
+       ],
+       "interval": "effect interval, unadjusted for multiplicity; not the decision",
+       "registered_headline": "correct",
+       "reading": "per-item correctness, the unit's registered headline"
+      }
+     }
+    }
+   },
+   "scored_digests": {
+    "teacher": "bf0a70da99e75c4edab650ebaca092cb2cac9adcf73da56cf9e7ab90e6da21d2",
+    "residual_width": "bce0000dc54b9241924e742c6517c815f3430a280ee1a9098dd22ed4c7acbc1e",
+    "ffn_attention": "13d62ae3c6d450dc27afa15be533b939bd3e186cb1d7560c217c263de91611a9",
+    "depth_only": "e2830c2b87bc457521e4267c27d30557f247417cbedfbdab5d8beb5308c77055"
+   }
+  }
+ },
+ "completion": {
+  "complete": true,
+  "n_complete": 8,
+  "n_sets": 8
+ },
+ "sets": {
+  "residual_width/H-T": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2",
+  "residual_width/H-N": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f",
+  "ffn_attention/H-T": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2",
+  "ffn_attention/H-N": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f",
+  "depth_only/H-T": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2",
+  "depth_only/H-N": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f",
+  "teacher/H-T": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2",
+  "teacher/H-N": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+ }
+}

@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-19 (UTC), SOB1 phase 1 APPROVED by the maintainer (one L40S, $22.92 cumulative cap + $1.00 reserve) after a third $0 correction (generation ids name target and mode, record labels checked, pod-side moves withdrawn on the dev box); SOB1 PREPARED at $0 and corrected twice that day (first: completion on real artifacts, sealed statistics reused, DEPTH persisted per round, dev-box peak, phase-1 comparison; second: one product manifest per arm, part provenance checked before a merge, phase 1's completion on both closeout paths; a third $0 dry run), on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged); SOB1 PHASE 1 RUNNING (one L40S pod, billing; no volume). The human view. Every number here has an owner
+**Updated:** 2026-11-20 (UTC), SOB1 PHASE 1 COMPLETE (`sob1_phase1_20261119_194259`, one L40S, $4.4348 of the $22.92 cap; pod deleted, confirmed gone; nothing running, nothing billing: no pod, no volume); phase 2, the Stage 3 allowance and a merge into main are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,19 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 GRANTED AND RUNNING -- `sob1_phase1_20261119_194259`, pod `heuxh6fau92b4c` (1 x L40S, $1.09/h) created 2026-11-19 19:44Z; launcher in tmux `sob1p1`, log `~/aad-artifacts/stage1_single_operator_budget/sob1_phase1_20261119_194259/launcher.log`; watchdog hard stop 1,215 min ($22.48). Grant `logs/budget/approvals/stage1_single_operator_budget_grant.json`: $22.92 cumulative over every attempt + $1.00 teardown reserve; phase 2, Stage 3 budget and the merge are separate decisions.**
+**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 COMPLETE (2026-11-20) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME. Phase 2 is not authorized.**
+- Run `sob1_phase1_20261119_194259` (pod `heuxh6fau92b4c`, 1 x L40S $1.09/h): 2026-11-19 19:44Z to 23:44Z, 239.6 min,
+  $4.4348 all-in, one attempt, ALL_DONE; the provider confirms the pod gone (`runs/.../closeout/outcome.json`).
+  `study_completion.status` COMPLETE (`runs/.../closeout/phase1_completion.json`): 8 of 8 sets complete, the three
+  inits and mappings re-hashed on the dev box (`storage/local_retention.json`). Grant: `phase_1_closed` ($18.4852
+  and the reserve not carried into phase 2).
+- Result (descriptive, `runs/.../evidence/comparison/comparison.md`): static fluid core, 570 items. Thinking: teacher
+  85.79%, each untrained arm 0.00% (85.79 pp [82.87, 88.58]); non-thinking: teacher 70.53%, each arm 0.00% (70.53 pp
+  [66.73, 74.30]). Degeneration stops on the core, thinking / non-thinking: width 570 / 570, FFN + attention 570 / 568,
+  depth 551 / 549. The arms' raw outputs are degenerate text.
+- Storage: the three inits + mappings (11.3 GiB) on the relay (phase 2's training plans read them there) and on the
+  dev box `~/aad-artifacts/stage1_single_operator_budget/` (7.0 GiB free after); raw generations (~200 MB) in the
+  run's secured copy there, outside git.
 - Protocol fixed by the maintainer 2026-11-19 and corrected twice the same day (`logs/budget/decisions.md`, three entries).
   Design `configs/stages/stage-1/single_operator_budget/design.json`; for review
   `docs/stages/stage-1/single_operator_budget/README.md`. Depth only (16 layers), FFN + attention only (FFN 3840,
@@ -4746,7 +4758,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$917.8833` spent of `$1000.0000`, leaving `$82.1167` |
+| project cap | `$922.3181` spent of `$1000.0000`, leaving `$77.6819` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

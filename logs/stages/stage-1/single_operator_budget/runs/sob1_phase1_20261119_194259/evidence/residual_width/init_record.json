@@ -1,0 +1,422 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.init_record/v1",
+ "status": "COMPLETE",
+ "arm": "residual_width",
+ "run_id": "sob1_phase1_20261119_194259",
+ "root_teacher": {
+  "verified": [
+   "model-00001-of-00003.safetensors",
+   "model-00002-of-00003.safetensors",
+   "model-00003-of-00003.safetensors"
+  ],
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192"
+ },
+ "commit": {
+  "selected_rows": [
+   {
+    "state_id": "residual_width/c853640b1ce2392c8bac0c7c89e0c16d",
+    "path": "residual width only: every selection on the teacher",
+    "artifact_digest": "39873ef1e9122464389897f16609aae6c2305741ba69fd001baa8f928a7a8ac3",
+    "single_shard_sha256": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+   }
+  ]
+ },
+ "checkpoint": {
+  "artifact_digest": "39873ef1e9122464389897f16609aae6c2305741ba69fd001baa8f928a7a8ac3",
+  "config_sha256": "8b055e972165efaa2dfc6354763e461ce251ed033a480e596edce4767216bb9b",
+  "shards": [
+   {
+    "filename": "model.safetensors",
+    "sha256": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
+    "size_bytes": 4022523088
+   }
+  ],
+  "num_parameters": 2011238656,
+  "arch_signature": "4e3963c7a077549036be9b4f4610b7ff89c896d0729b8d512937623cbc19b250",
+  "root_blocks": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35
+  ],
+  "geometry": {
+   "head_dim": 128,
+   "hidden_size": 1280,
+   "intermediate_size": 9728,
+   "num_attention_heads": 32,
+   "num_hidden_layers": 36,
+   "num_key_value_heads": 8,
+   "tie_word_embeddings": true,
+   "vocab_size": 151936
+  },
+  "geometry_matches_structures": true,
+  "num_parameters_counted": 2011238656,
+  "num_parameters_match_structures": true,
+  "files_sha256": {
+   "model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
+   "config.json": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8"
+  },
+  "reload_forward_finite": true
+ },
+ "gates": {
+  "STATISTICS_DIAGNOSTICS_1024": {
+   "recomputed": {
+    "energy_captured_frac": 0.9246420215957857,
+    "top_eigenvalue": 0.2669729308976218,
+    "min_kept_eigenvalue": 8.849853922146791e-05
+   },
+   "recorded": {
+    "energy_captured_frac": 0.9246420215957857,
+    "top_eigenvalue": 0.2669729308976218,
+    "min_kept_eigenvalue": 8.849853922146791e-05
+   },
+   "equal": true
+  }
+ },
+ "mapping": {
+  "content_digest": "c853640b1ce2392c8bac0c7c89e0c16d46c3cb57fee1d6755fe248305aac21fa",
+  "width_projection": true,
+  "files": [
+   "mapping.json",
+   "tensors.safetensors"
+  ],
+  "files_sha256": {
+   "mapping.json": "8e15cc4865e3906e92f4e72f7ba35ec584894f998fa62a59fa0b9bdeb1e97046",
+   "tensors.safetensors": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37"
+  }
+ },
+ "width_transform": {
+  "d_child": 1280,
+  "points": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36
+  ],
+  "point_weights": [
+   9.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   8.0
+  ],
+  "post_norm_point": 36,
+  "scale": 1.4142135623730951,
+  "diagnostics": {
+   "energy_captured_frac": 0.944517816014738,
+   "top_eigenvalue": 0.2669729308976218,
+   "min_kept_eigenvalue": 6.84204215147548e-05,
+   "orthonormality_error": 4.170275236248244e-15,
+   "point_weights": [
+    9.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    8.0
+   ],
+   "points": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36
+   ]
+  }
+ },
+ "statistics_reproduction": {
+  "recomputed": {
+   "energy_captured_frac": 0.9246420215957857,
+   "top_eigenvalue": 0.2669729308976218,
+   "min_kept_eigenvalue": 8.849853922146791e-05
+  },
+  "recorded": {
+   "energy_captured_frac": 0.9246420215957857,
+   "top_eigenvalue": 0.2669729308976218,
+   "min_kept_eigenvalue": 8.849853922146791e-05
+  },
+  "equal": true
+ },
+ "statistics": {
+  "source": "loaded: TPI1's sealed teacher statistics (no teacher forward here)",
+  "relay": {
+   "path": "durable/stage1_teacher_parent_init/A_teacher_parent/init/01e63327e3d02b2f/teacher_residual_statistics.safetensors",
+   "repo": "AlphaAvatar/aadistill-artifacts"
+  },
+  "tpi1_init_record": {
+   "path": "logs/stages/stage-1/teacher_parent_initialization/runs/tpi_init_20261117_142049/evidence/init_record.json",
+   "run_id": "tpi_init_20261117_142049",
+   "sha256": "5a8c7dd39239c364f6a461afca999c7329001f6231849a4dfc7bb8c99c29183f"
+  },
+  "sha256": "e4145e38450de26e3c5ae203434fce3d754dd4182f2b10d63e3420dbdee113eb",
+  "sha256_equal": true,
+  "layout_equal": true,
+  "residual_count": 236939,
+  "positions_equal": true,
+  "points": 37,
+  "load_seconds": 1.1
+ },
+ "state_evaluation": {
+  "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+  "suite": "state_eval_hybrid",
+  "values": {
+   "state.teacher_kl.equal_domain_mean": 7.702693742882052,
+   "state.teacher_kl.worst_domain": 11.640369156388923,
+   "state.teacher_kl.token_mean": 8.914921171757598,
+   "state.reverse_kl.token_mean": 18.683076554601037,
+   "state.nll.pooled_all_domains": 9.056739586981939,
+   "state.nll.teacher_reference_pooled": 0.20392156168380815,
+   "state.nll_delta_vs_teacher_pooled": 8.85281802529813,
+   "state.top1_agreement": 0.2704796875066558,
+   "state.teacher_kl.abstract_analogical": 6.645654450488946,
+   "state.teacher_kl.compositional_generalization": 6.828554512938241,
+   "state.teacher_kl.inductive_rule_discovery": 7.636582329479664,
+   "state.teacher_kl.task_contained_deduction": 5.762308265114484,
+   "state.teacher_kl.supporting": 11.640369156388923,
+   "state.nll.abstract_analogical": 6.749247891793649,
+   "state.nll.compositional_generalization": 6.971328839115954,
+   "state.nll.inductive_rule_discovery": 7.786988643146262,
+   "state.nll.task_contained_deduction": 5.896684044943563,
+   "state.nll.supporting": 11.76933886425669,
+   "state.critical_token_kl.assistant": 8.914921171757598,
+   "state.critical_token_kl.eos": 27.472043156449303,
+   "state.critical_token_kl.final_answer": 8.777145596855565,
+   "state.critical_token_kl.reasoning": 8.917190656835672,
+   "state.critical_token_kl.think_close": 35.104653638951916,
+   "state.critical_token_kl.tool_call_close": 46.71663708496094,
+   "state.critical_token_kl.tool_call_open": 35.7125463180542,
+   "state.critical_token_kl.group.H-N": 29.575866548610396,
+   "state.critical_token_kl.group.H-N.final_answer": 8.630762471560617,
+   "state.critical_token_kl.group.H-N.eos": 26.557843900110726,
+   "state.critical_token_kl.group.H-N.tool_call_open": 36.353501158700865,
+   "state.critical_token_kl.group.H-N.tool_call_close": 46.76135866406938,
+   "state.critical_token_kl.group.H-T": 31.496744002798646,
+   "state.critical_token_kl.group.H-T.think_close": 35.104653638951916,
+   "state.critical_token_kl.group.H-T.final_answer": 9.258108102268572,
+   "state.critical_token_kl.group.H-T.eos": 31.59331238462079,
+   "state.critical_token_kl.group.H-T.tool_call_open": 34.8698093979447,
+   "state.critical_token_kl.group.H-T.tool_call_close": 46.657836490207245,
+   "state.critical_token_kl": 30.53630527570452
+  },
+  "seconds": 238.2,
+  "role": "diagnostic only"
+ },
+ "relay": {
+  "init": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+   "files_sha256": {
+    "init/model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
+    "init/config.json": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8"
+   },
+   "bytes": {
+    "init/model.safetensors": 4022523088,
+    "init/config.json": 1594
+   },
+   "quota": "2 object(s), 3.75 GiB: ACCEPTED (200) 2/2 granted an upload action",
+   "uploaded": [
+    "init/config.json",
+    "init/model.safetensors"
+   ],
+   "upload_seconds": 29.2,
+   "downloaded_sha256": {
+    "init/config.json": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8",
+    "init/model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+   },
+   "verified": true,
+   "verify_seconds": 27.4,
+   "utc": "2026-11-19T19:57:36Z",
+   "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+  },
+  "mapping": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+   "files_sha256": {
+    "mapping/mapping.json": "8e15cc4865e3906e92f4e72f7ba35ec584894f998fa62a59fa0b9bdeb1e97046",
+    "mapping/tensors.safetensors": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37"
+   },
+   "bytes": {
+    "mapping/mapping.json": 3349,
+    "mapping/tensors.safetensors": 26224816
+   },
+   "quota": "2 object(s), 0.02 GiB: ACCEPTED (200) 2/2 granted an upload action",
+   "uploaded": [
+    "mapping/mapping.json",
+    "mapping/tensors.safetensors"
+   ],
+   "upload_seconds": 6.1,
+   "downloaded_sha256": {
+    "mapping/mapping.json": "8e15cc4865e3906e92f4e72f7ba35ec584894f998fa62a59fa0b9bdeb1e97046",
+    "mapping/tensors.safetensors": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37"
+   },
+   "verified": true,
+   "verify_seconds": 2.3,
+   "utc": "2026-11-19T19:57:46Z",
+   "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+  }
+ },
+ "design_sha256": "35432bc6b0af88fa41dbb46db7200233297cc8b18d252452a1546ede59ab60de",
+ "selection_sha256": "6dfced62437b1967371b4cec03037f321abd8ce560e948a7ab71459a7de8d101",
+ "finished_utc": "2026-11-19T19:57:46Z"
+}

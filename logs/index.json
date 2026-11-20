@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 201,
+  "runs_unrecorded": 202,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -873,6 +873,11 @@
     "recorded": 8,
     "unrecorded": 0,
     "total": 8
+   },
+   "single_operator_budget": {
+    "recorded": 0,
+    "unrecorded": 1,
+    "total": 1
    },
    "teacher_modes": {
     "recorded": 0,
@@ -3956,6 +3961,14 @@
    "root": "logs/stages/stage-1/reasoning_inheritance/runs/ri_merge_20261115_104816",
    "n_files": 3,
    "digest": "b90a4932ea4a4cf05a1672c09925302ed30010d2d9eac906ed516ec470c27ada",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "single_operator_budget",
+   "run_id": "sob1_phase1_20261119_194259",
+   "root": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259",
+   "n_files": 60,
+   "digest": "2345bcc0578e1f1f358da16c5a3e4a0e46c015ddb7911c4afdf686047f9bda00",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {
