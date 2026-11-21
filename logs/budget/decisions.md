@@ -17279,3 +17279,26 @@ on a paid pod.
   another private upload to the same account during that arm's run would reach it. The whole ceiling plus reserve fits
   the planned balance by $0.0008 and the planned cap by $0.0013.
 - Revisit when: the maintainer decides the project cap ($1,161.06), tops up, and grants phase 2.
+
+## 2026-11-21 (UTC) — SOB1 phase 2 GRANTED; the project cap raised to $1,161.06 (maintainer's decision)
+
+- Context: phase 2 was prepared at $0 (`plans/proposal_phase2.json`, fourth dry run `plans/dry_run_20261120d.json`).
+  The maintainer decided: 「RunPod 已充值 $151.06。我批准将项目累计支出上限调整为 **$1,161.06**，批准按
+  `proposal_phase2.json` 签发 **SOB1 第二阶段 grant**，并授权在 `research/reasoning-inheritance` 分支正式启动。」 And:
+  「检查通过后直接启动，三个组无需逐组再向我确认。」 Budget: expected $114.70, $185.87 cumulative over every attempt, $1.00
+  for teardown; one L40S; residual width ($63.43), then depth ($61.09), then FFN + attention ($61.35).
+- Decision: `logs/budget/approvals/stage1_single_operator_budget_phase2_grant.json`, written by `launch.py grant --kind
+  sob1_train` from the proposal unchanged but for the decision. It states the project cap $1,161.06, which
+  `derive_budget.latest_project_cap` now reads (committed $974.1887 + the $185.87 ceiling + the $1.00 reserve, rounded
+  up).
+- Measured before the grant (2026-11-21 07:40-07:42Z): committed $974.1887 (unchanged since 2026-11-20); **balance
+  $235.8108**, i.e. $200.00 above the $35.8108 before the top-up rather than the $151.06 stated. The extra balance is
+  not budget: every limit is the cap and the grant's ceiling, and the balance only has to cover each session's hard cap
+  plus the reserve. 0 pods, 0 volumes. Dev box: 55.22 GiB free on `/`. Relay: 50.55-50.59 GiB headroom (bisected,
+  12 calls), so the width arm's 49.55 GiB rotation keeps a 1.00 GiB margin before the 54 MiB session bundle.
+- Alternatives considered: none open; the storage arrangement (four finals on the dev box, two on the free relay) and
+  the dev box's capacity were decided on 2026-11-20.
+- Risks: the width arm's relay margin (about 0.95 GiB after its bundle) on an account-wide quota; the memory of the
+  width arm is derived (conservative peak reserved 44.58 GiB of 44.99), measured on its first four optimizer steps.
+- Revisit when: an arm cannot run on the L40S after the recipe-preserving memory steps (a new proposal), a ceiling or
+  cap is reached, or the study completes.
