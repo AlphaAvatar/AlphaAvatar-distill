@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-20 (UTC), SOB1 PHASE 2 READY AT $0 EXCEPT FUNDING (this project's files cleaned, 10.73 GiB freed; the dev box's demo service retired on the maintainer's decision, 39.30 GiB freed; every launch fits with the swing kept free; two relay interruptions fixed; nothing running, nothing billing: no pod, no volume); the project cap ($1,161.06), the top-up, phase 2's grant and a merge into main are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-21 (UTC), SOB1 PHASE 2 RUNNING (the maintainer granted it on 2026-11-21: project cap $1,161.06, $185.87 cumulative, $1.00 teardown reserve); arm 1 of 3, residual width only, `sob1_train_residual_width_20261121_074426` on one L40S (pod `ombh51bu2anrmn`, $1.09/h, created 07:47:12Z; launcher in tmux `sob1rw`); a merge into main is the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,30 +9,23 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 1 COMPLETE AND CLOSED IN CODE; PHASE 2 PREPARED AT $0, BLOCKED ONLY ON FUNDING AND ITS GRANT (2026-11-20) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
-- Phase 1: `sob1_phase1_20261119_194259`, $4.4348 of $22.92, COMPLETE; `kinds.sob1_phase1.closed` refuses issue and launch.
-  Untrained arms 0.00% on the static core; pre-recovery KL / top-1: depth 3.47 / 34.08%, width 7.70 / 27.05%, FFN +
-  attention 9.35 / 6.37% (`results/pre_recovery_diagnostics.json`); all three go to phase 2.
-- Phase 2 (docs README sections 8 and 10; decisions.md 2026-11-20, four entries):
-  * SOB1's own driver: done only with the seed's final durable, published and traceable to the seed (arm, relay path,
-    archived completion record), and both sets complete against it;
-  * the launcher, the runner and the pod refuse an artifact of another arm's plan;
-  * the relay preflight asks the live headroom for what the remaining rotation adds; superseded save points a lost pod
-    left are reclaimed on the dev box first (`launch.reclaim_superseded`); a failed removal stays pending, retried;
-  * the free relay rotation retires a dev-box arm's relay finals after the dev box re-hashes them; an interrupted
-    retirement continues its own tombstone;
-  * plans `plans/training_plan_<arm>.json`, residual width first; its own proposal: $185.87 + $1.00, project cap
-    $1,161.06.
-- Storage, without a larger disk (the maintainer, 2026-11-20): residual width's and depth's finals on the dev box,
-  FFN + attention's on the relay (`design.json :: storage.phase_2_finals.placement`). This project's cleanup took `/`
-  from 5.39 to 16.12 GiB free (`logs/maintenance/storage/devbox_cleanup_20261120.json`); the demo service's
-  retirement (the maintainer's decision) took it to **55.39 GiB** (`logs/maintenance/storage/demo_agent_retirement_20261120.json`).
-  The launches need 18.50 / 33.68 / 33.94 GiB (`plans/disk_peak_phase2.json`): every launch fits, and the study's
-  bound peak plus the swing (44.18 GiB) leaves 11.21 GiB. The relay fits on the free plan (50.55 GiB free at 19:23Z;
-  the largest need is 49.55 GiB). Fourth $0 dry run: `plans/dry_run_20261120d.json`.
-- Position (live 19:23Z): committed $974.1887 of $1,000 ($25.8113 left), balance $35.8108; the maintainer will top up
-  $151.06.
-- Decisions owed: the project cap, phase 2's grant, the hub objects listed in the inventory, a merge into main.
+**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 2 RUNNING (granted 2026-11-21) -- ONE POD BILLING.**
+- The grant: `logs/budget/approvals/stage1_single_operator_budget_phase2_grant.json` (decisions.md 2026-11-21); the
+  project cap $1,161.06; $185.87 cumulative over every attempt of the three sessions, $1.00 teardown reserve; one
+  L40S at most $1.11/h; residual width ($63.43), then depth ($61.09), then FFN + attention ($61.35).
+- Read before the grant (07:40-07:44Z): committed $974.1887; balance $235.8108 ($200.00 more than before the top-up,
+  not the $151.06 stated; it is not budget); 0 pods, 0 volumes; dev box 55.22 GiB free; relay 50.55-50.59 GiB.
+- Arm 1, residual width only: `sob1_train_residual_width_20261121_074426`, session commit `d72a9b46`, bundle
+  `transfer/aad_autoinit_d72a9b46.bundle`; pod `ombh51bu2anrmn` at $1.09/h (07:47:12Z), watchdog hard 3,365 min =
+  $62.25; launcher `~/aad-artifacts/stage1_single_operator_budget/<run>/launch.sh` in tmux `sob1rw`, its stdout
+  beside it. Every gate passed: the relay accepted the 49.55 GiB rotation, the dev box had 59.20 GiB for 18.50 GiB.
+- Measured on the L40S (seed 20260726, its first four optimizer steps, kept in training): peak allocated 42.37 GiB,
+  peak reserved 43.40 GiB of the 44.39 GiB the device reports (at least 0.48 GiB free); about 6.3-6.7 s per step
+  (expected 6.58, bound 7.56); step-0 validation CE 9.78. No out-of-memory, nothing changed.
+- Then: closeout and `retain` (both finals to the dev box, re-hashed, then their relay copies retired), depth, FFN +
+  attention (its finals stay on the relay), `study-completion` and the registered analysis (README sections 6, 9a).
+- Phase 1: `sob1_phase1_20261119_194259`, $4.4348, COMPLETE and closed in code. Storage arrangement and the demo
+  service's retirement: decisions.md 2026-11-20.
 
 **Baseline (maintainer, 2026-11-18):** TPI1's A (teacher-parent initialization) is the reasoning-inheritance research's
 default baseline; B a historical reference (`docs/stages/stage-1/reasoning_inheritance/README.md`; decisions.md

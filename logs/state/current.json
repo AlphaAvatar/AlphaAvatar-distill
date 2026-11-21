@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "SOB1 phase 2 ready at $0 except funding (its README section 10): the dev box fits after the demo service's retirement (55.39 GiB free); the maintainer decides the cap ($1,161.06), the top-up, the grant",
+ "next": "SOB1 phase 2 running (granted 2026-11-21, cap $1,161.06): residual width, then depth, then FFN + attention; then study-completion and the registered analysis",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -197,10 +197,10 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": false,
-  "pods": 0,
+  "paid_compute": true,
+  "pods": 1,
   "network_volumes": 0,
-  "run": "none; SOB1 phase 1 COMPLETE 2026-11-19 ($4.4348), closed in code; phase 2 prepared at $0, not granted",
+  "run": "SOB1 phase 2 arm 1 (residual width only): sob1_train_residual_width_20261121_074426, pod ombh51bu2anrmn, L40S $1.09/h, from 2026-11-21T07:47:12Z",
   "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",
