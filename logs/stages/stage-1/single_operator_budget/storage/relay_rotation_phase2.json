@@ -1,0 +1,51 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.relay_rotation/v1",
+ "decision": "maintainer 2026-11-20 (logs/budget/decisions.md, 'SOB1 phase 2 fixes, storage inventory'): 「优先采用免费 relay 轮转：每组两个种子的最终权重都已在开发机逐文件核验、该组评测证据已持久化后，再退役远端冗余副本。」",
+ "arms": {
+  "residual_width": {
+   "run_id": "sob1_train_residual_width_20261121_074426",
+   "finals": {
+    "residual_width-s20260726": {
+     "tombstone": "relay_sob1_train_residual_width_20261121_074426_residual_width-s20260726_final",
+     "local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width-s20260726/final/00b430fdcef27257",
+     "verified_absent": true,
+     "freed_bytes": 8045000112,
+     "error": null,
+     "utc": "2026-11-22T22:35:51Z",
+     "relay_copy_present_before": true,
+     "continued_pending_tombstone": false
+    },
+    "residual_width-s20260801": {
+     "tombstone": "relay_sob1_train_residual_width_20261121_074426_residual_width-s20260801_final",
+     "local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width-s20260801/final/b701868f05c6d6e4",
+     "verified_absent": true,
+     "freed_bytes": 8045000112,
+     "error": null,
+     "utc": "2026-11-22T22:36:14Z",
+     "relay_copy_present_before": true,
+     "continued_pending_tombstone": false
+    }
+   },
+   "evidence": {
+    "archive": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_residual_width_20261121_074426/archive/sob1_train_residual_width_20261121_074426_evidence.tar.gz",
+    "sha256": "e145e45014084ab077fe320a6189fdbbf30e4b04fb3f55600496373706ae3ed7",
+    "bytes": 40824708,
+    "files": 236,
+    "manifest": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_residual_width_20261121_074426/archive/sob1_train_residual_width_20261121_074426_evidence.manifest.json",
+    "manifest_sha256": "aab2a8138e9b40b810bd0c9913c404230de67016cd9407e61c6ea64d3e3cdb13",
+    "relay": {
+     "relay": "AlphaAvatar/aadistill-artifacts",
+     "prefix": "durable/stage1_single_operator_budget/phase2_evidence/sob1_train_residual_width_20261121_074426",
+     "files_sha256": {
+      "sob1_train_residual_width_20261121_074426_evidence.tar.gz": "e145e45014084ab077fe320a6189fdbbf30e4b04fb3f55600496373706ae3ed7",
+      "sob1_train_residual_width_20261121_074426_evidence.manifest.json": "aab2a8138e9b40b810bd0c9913c404230de67016cd9407e61c6ea64d3e3cdb13"
+     },
+     "error": null
+    },
+    "verified": true
+   },
+   "status": "ROTATED: both relay copies retired",
+   "checked_utc": "2026-11-22T22:36:14Z"
+  }
+ }
+}

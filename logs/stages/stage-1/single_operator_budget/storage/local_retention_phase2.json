@@ -1,0 +1,74 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.local/v1",
+ "store": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget",
+ "products": {
+  "residual_width-s20260726/final": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width-s20260726/final/00b430fdcef27257",
+   "files_sha256": {
+    "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263",
+    "config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "14fcff5c3b0ac245817310c43e0d508d310693a92555eef557a80d17b2197f4c"
+   },
+   "files_on_disk_sha256": {
+    "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263",
+    "config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "14fcff5c3b0ac245817310c43e0d508d310693a92555eef557a80d17b2197f4c"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260726/final/00b430fdcef27257",
+   "producer_run": "sob1_train_residual_width_20261121_074426",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/residual_width/residual_width-s20260726/final/00b430fdcef27257",
+    "files": {
+     "config.json": "downloaded",
+     "generation_config.json": "downloaded",
+     "model.safetensors": "downloaded",
+     "run_completion.json": "downloaded"
+    },
+    "utc": "2026-11-22T22:23:23Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
+  },
+  "residual_width-s20260801/final": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width-s20260801/final/b701868f05c6d6e4",
+   "files_sha256": {
+    "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0",
+    "config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "6ac9f3716104fa7d5a04a1a6b0ee00e52efbeeb21afef79054c8fd1de09dcf1b"
+   },
+   "files_on_disk_sha256": {
+    "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0",
+    "config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "6ac9f3716104fa7d5a04a1a6b0ee00e52efbeeb21afef79054c8fd1de09dcf1b"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/final/b701868f05c6d6e4",
+   "producer_run": "sob1_train_residual_width_20261121_074426",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/final/b701868f05c6d6e4",
+    "files": {
+     "config.json": "downloaded",
+     "generation_config.json": "downloaded",
+     "model.safetensors": "downloaded",
+     "run_completion.json": "downloaded"
+    },
+    "utc": "2026-11-22T22:33:53Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
+  }
+ },
+ "status": "COMPLETE",
+ "missing": {},
+ "expected_products": [
+  "residual_width-s20260726/final",
+  "residual_width-s20260801/final"
+ ],
+ "last_run": "sob1_train_residual_width_20261121_074426",
+ "checked_utc": "2026-11-22T22:33:59Z"
+}

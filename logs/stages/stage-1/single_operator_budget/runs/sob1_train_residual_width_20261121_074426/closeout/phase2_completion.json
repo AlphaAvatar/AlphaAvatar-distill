@@ -1,0 +1,100 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.phase2_completion/v1",
+ "run_id": "sob1_train_residual_width_20261121_074426",
+ "arm": "residual_width",
+ "scr": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_residual_width_20261121_074426",
+ "status": "COMPLETE",
+ "rule": "both seeds' final weights durable and published, the four sets (two seeds x two modes) complete on the secured copy against those finals, and both finals at their placement as their records (the dev box's disk, re-hashed; or the relay, by LFS sha256)",
+ "final_placement": "dev_box",
+ "session": {
+  "schema": "aadistill.stage1.single_operator_budget.phase2_session_completion/v1",
+  "arm": "residual_width",
+  "complete": true,
+  "finals": {
+   "residual_width-s20260726": {
+    "problems": [],
+    "model_safetensors_sha256": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+   },
+   "residual_width-s20260801": {
+    "problems": [],
+    "model_safetensors_sha256": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+   }
+  },
+  "sets": {
+   "residual_width_s20260726/H-T": {
+    "complete": true,
+    "problems": {},
+    "binding": {
+     "target": "residual_width_s20260726",
+     "arm": "residual_width",
+     "seed": 20260726,
+     "unit": "residual_width-s20260726",
+     "mode": "H-T",
+     "protocol_sha256": "2db89a2590b7f27434613656b0a39c1f3563098afbd9ac97454adbefab1744b0",
+     "weights_sha256": {
+      "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+     }
+    },
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "residual_width_s20260726/H-N": {
+    "complete": true,
+    "problems": {},
+    "binding": {
+     "target": "residual_width_s20260726",
+     "arm": "residual_width",
+     "seed": 20260726,
+     "unit": "residual_width-s20260726",
+     "mode": "H-N",
+     "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+     "weights_sha256": {
+      "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+     }
+    },
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   },
+   "residual_width_s20260801/H-T": {
+    "complete": true,
+    "problems": {},
+    "binding": {
+     "target": "residual_width_s20260801",
+     "arm": "residual_width",
+     "seed": 20260801,
+     "unit": "residual_width-s20260801",
+     "mode": "H-T",
+     "protocol_sha256": "2db89a2590b7f27434613656b0a39c1f3563098afbd9ac97454adbefab1744b0",
+     "weights_sha256": {
+      "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+     }
+    },
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "residual_width_s20260801/H-N": {
+    "complete": true,
+    "problems": {},
+    "binding": {
+     "target": "residual_width_s20260801",
+     "arm": "residual_width",
+     "seed": 20260801,
+     "unit": "residual_width-s20260801",
+     "mode": "H-N",
+     "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+     "weights_sha256": {
+      "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+     }
+    },
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   }
+  },
+  "modes": [],
+  "n_sets": 4,
+  "n_complete": 4
+ },
+ "local_retention": {
+  "status": "COMPLETE",
+  "missing": {},
+  "record": "/home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/single_operator_budget/storage/local_retention_phase2.json"
+ },
+ "unfinished": {},
+ "checked_utc": "2026-11-22T22:33:59Z"
+}
