@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-21 (UTC), SOB1 PHASE 2 RUNNING (the maintainer granted it on 2026-11-21: project cap $1,161.06, $185.87 cumulative, $1.00 teardown reserve); arm 1 of 3, residual width only, `sob1_train_residual_width_20261121_074426` on one L40S (pod `ombh51bu2anrmn`, $1.09/h, created 07:47:12Z; launcher in tmux `sob1rw`); a merge into main is the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-22 (UTC), SOB1 PHASE 2 RUNNING (the maintainer granted it on 2026-11-21: project cap $1,161.06, $185.87 cumulative, $1.00 teardown reserve); arm 1 of 3 (residual width only) COMPLETE ($42.6771, pod gone); arm 2 of 3, depth only, `sob1_train_depth_only_20261122_223829` on one L40S (pod `6qvdu7iw1kbl14`, $1.09/h, created 22:39:54Z; launcher in tmux `sob1do`); a merge into main is the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -15,15 +15,21 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   L40S at most $1.11/h; residual width ($63.43), then depth ($61.09), then FFN + attention ($61.35).
 - Read before the grant (07:40-07:44Z): committed $974.1887; balance $235.8108 ($200.00 more than before the top-up,
   not the $151.06 stated; it is not budget); 0 pods, 0 volumes; dev box 55.22 GiB free; relay 50.55-50.59 GiB.
-- Arm 1, residual width only: `sob1_train_residual_width_20261121_074426`, session commit `d72a9b46`, bundle
-  `transfer/aad_autoinit_d72a9b46.bundle`; pod `ombh51bu2anrmn` at $1.09/h (07:47:12Z), watchdog hard 3,365 min =
-  $62.25; launcher `~/aad-artifacts/stage1_single_operator_budget/<run>/launch.sh` in tmux `sob1rw`, its stdout
-  beside it. Every gate passed: the relay accepted the 49.55 GiB rotation, the dev box had 59.20 GiB for 18.50 GiB.
-- Measured on the L40S (seed 20260726, its first four optimizer steps, kept in training): peak allocated 42.37 GiB,
-  peak reserved 43.40 GiB of the 44.39 GiB the device reports (at least 0.48 GiB free); about 6.3-6.7 s per step
-  (expected 6.58, bound 7.56); step-0 validation CE 9.78. No out-of-memory, nothing changed.
-- Then: closeout and `retain` (both finals to the dev box, re-hashed, then their relay copies retired), depth, FFN +
-  attention (its finals stay on the relay), `study-completion` and the registered analysis (README sections 6, 9a).
+- Arm 1, residual width only: `sob1_train_residual_width_20261121_074426` (session commit `d72a9b46`) COMPLETE
+  2026-11-22: 2,305.8 min on one L40S, $42.6771 all-in (GPU $41.8879 + disk $0.7891; expected $42.59, cap $63.43); pod
+  gone, provider-confirmed. Measured over its first four optimizer steps (kept in training): peak allocated 42.37 GiB,
+  reserved 43.40 GiB of 44.39 (seed 20260801: reserved 43.70); no out-of-memory, nothing changed. Finals on the dev box,
+  re-hashed (`closeout/phase2_completion.json`): s20260726 `00b430fd...2263`, s20260801 `b701868f...cccc0`
+  (8,045,000,112 B each); four sets complete against them; evidence archive verified on the relay and both relay
+  copies retired with tombstones (`storage/relay_rotation_phase2.json`).
+- Arm 2, depth only: `sob1_train_depth_only_20261122_223829`, session commit `1b368f1e`, bundle
+  `transfer/aad_autoinit_1b368f1e.bundle`; pod `6qvdu7iw1kbl14` (US-TX-4) at $1.09/h from 22:39:54Z, watchdog hard
+  3,241 min = $59.95; planned all-in bound $61.0825 inside $61.09; tmux `sob1do`. Read before the issue (22:37Z):
+  committed $1,016.212, balance $193.1258, 0 pods, 0 volumes; envelope $143.1929 of $185.87 left; dev box 41.35 GiB
+  free for 18.44 GiB; the relay accepted the 46.46 GiB rotation. Measured over its first four optimizer steps: peak
+  allocated 39.39 GiB, reserved 40.90 GiB (at least 2.97 GiB free); about 4.7 s per step; step-0 validation CE 3.69.
+- Then: arm 2's closeout and `retain` as arm 1's, FFN + attention (its finals stay on the relay),
+  `study-completion` and the registered analysis (README sections 6, 9a).
 - Phase 1: `sob1_phase1_20261119_194259`, $4.4348, COMPLETE and closed in code. Storage arrangement and the demo
   service's retirement: decisions.md 2026-11-20.
 

@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "SOB1 phase 2 running (granted 2026-11-21, cap $1,161.06): residual width, then depth, then FFN + attention; then study-completion and the registered analysis",
+ "next": "SOB1 phase 2 running (granted 2026-11-21, cap $1,161.06): residual width COMPLETE, depth running, then FFN + attention; then study-completion and the registered analysis",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -153,7 +153,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
@@ -200,7 +200,7 @@
   "paid_compute": true,
   "pods": 1,
   "network_volumes": 0,
-  "run": "SOB1 phase 2 arm 1 (residual width only): sob1_train_residual_width_20261121_074426, pod ombh51bu2anrmn, L40S $1.09/h, from 2026-11-21T07:47:12Z",
+  "run": "SOB1 phase 2 arm 2 (depth only): sob1_train_depth_only_20261122_223829, pod 6qvdu7iw1kbl14, L40S $1.09/h, from 2026-11-22T22:39:54Z; arm 1 (residual width) COMPLETE $42.6771",
   "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",
