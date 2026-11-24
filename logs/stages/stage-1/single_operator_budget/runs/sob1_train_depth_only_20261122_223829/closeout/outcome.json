@@ -1,0 +1,93 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.authorization_outcome/v1",
+ "run_id": "sob1_train_depth_only_20261122_223829",
+ "study": "SOB1",
+ "recorded_utc": "2026-11-24T03:08:09+00:00",
+ "status": "COMPLETE",
+ "validation_passed": null,
+ "validation": "not applicable: this kind defines no verdict (Launch.verdict is None); completion is status, from the secured products or the verified evidence",
+ "products_secured": {
+  "ok": true,
+  "why": "every finished file is on the dev box (201 files, each sha256 equal to the pod's final listing)"
+ },
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "provider_resource_created": true,
+ "evidence": null,
+ "verdict_rederived": null,
+ "money": {
+  "all_in_usd": 31.6179,
+  "gpu_usd": 31.0332,
+  "disk_usd": 0.5846,
+  "elapsed_minutes": 1708.25,
+  "price_per_hour": 1.09,
+  "authorized_usd": 61.09,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [],
+  "error": null,
+  "accounted": [],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 0 resource(s) the records account for"
+ },
+ "kind": "sob1_train",
+ "scientific_use": true,
+ "authorizes": "nothing",
+ "study_completion": {
+  "status": "COMPLETE",
+  "arm": "depth_only",
+  "unfinished": [],
+  "record": "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/closeout/phase2_completion.json",
+  "relay_rotation": {
+   "status": "ROTATED: both relay copies retired",
+   "finals": {
+    "depth_only-s20260726": {
+     "tombstone": "relay_sob1_train_depth_only_20261122_223829_depth_only-s20260726_final",
+     "local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260726/final/5635c33e6b414bd0",
+     "verified_absent": true,
+     "freed_bytes": 8015427400,
+     "error": null,
+     "utc": "2026-11-24T03:30:08Z",
+     "relay_copy_present_before": true,
+     "continued_pending_tombstone": false
+    },
+    "depth_only-s20260801": {
+     "tombstone": "relay_sob1_train_depth_only_20261122_223829_depth_only-s20260801_final",
+     "local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260801/final/e4159f1fc5b1f884",
+     "verified_absent": true,
+     "freed_bytes": 8015427400,
+     "error": null,
+     "utc": "2026-11-24T03:30:32Z",
+     "relay_copy_present_before": true,
+     "continued_pending_tombstone": false
+    }
+   }
+  },
+  "study": {
+   "status": "INCOMPLETE",
+   "unfinished": {
+    "arms_without_a_complete_session": [
+     "ffn_attention"
+    ],
+    "study": {
+     "finals": {
+      "n_verified": 4,
+      "n_expected": 6
+     },
+     "sets": {
+      "n_complete": 8,
+      "n_expected": 12
+     },
+     "modes": []
+    }
+   },
+   "record": "logs/stages/stage-1/single_operator_budget/results/study_completion.json"
+  }
+ }
+}

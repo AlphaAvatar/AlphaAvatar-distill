@@ -3,16 +3,15 @@
  "status": "INCOMPLETE",
  "unfinished": {
   "arms_without_a_complete_session": [
-   "depth_only",
    "ffn_attention"
   ],
   "study": {
    "finals": {
-    "n_verified": 2,
+    "n_verified": 4,
     "n_expected": 6
    },
    "sets": {
-    "n_complete": 4,
+    "n_complete": 8,
     "n_expected": 12
    },
    "modes": []
@@ -20,6 +19,11 @@
  },
  "rule": "three arms x two seeds: six final weights durable and published, twelve sets complete against them, one protocol per mode; the registered comparison recomputed from the sealed records",
  "sessions": {
+  "depth_only": {
+   "run_id": "sob1_train_depth_only_20261122_223829",
+   "scr": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_depth_only_20261122_223829",
+   "checked_utc": "2026-11-24T03:27:56Z"
+  },
   "residual_width": {
    "run_id": "sob1_train_residual_width_20261121_074426",
    "scr": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_residual_width_20261121_074426",
@@ -29,16 +33,15 @@
  "phase1_evidence": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_phase1_20261119_194259/store/out",
  "completion": {
   "finals": {
-   "n_verified": 2,
+   "n_verified": 4,
    "n_expected": 6
   },
   "sets": {
-   "n_complete": 4,
+   "n_complete": 8,
    "n_expected": 12
   },
   "modes": [],
   "arms_missing": [
-   "depth_only",
    "ffn_attention"
   ],
   "phase1": {
@@ -50,5 +53,5 @@
   }
  },
  "readout": null,
- "checked_utc": "2026-11-22T22:36:53Z"
+ "checked_utc": "2026-11-24T03:31:22Z"
 }

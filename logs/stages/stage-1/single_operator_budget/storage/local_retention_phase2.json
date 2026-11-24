@@ -61,14 +61,74 @@
     "utc": "2026-11-22T22:33:53Z"
    },
    "checked": "every file of the manifest re-hashed on the dev box's disk"
+  },
+  "depth_only-s20260726/final": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260726/final/5635c33e6b414bd0",
+   "files_sha256": {
+    "model.safetensors": "5635c33e6b414bd0bd361c450f132c41050e69c68cd948a734c2bfd27a86f80b",
+    "config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "f3aa47ba52d6432ad4ef9b79b97359b35d53f6b965cbdc47f11c463e8204e7f9"
+   },
+   "files_on_disk_sha256": {
+    "model.safetensors": "5635c33e6b414bd0bd361c450f132c41050e69c68cd948a734c2bfd27a86f80b",
+    "config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "f3aa47ba52d6432ad4ef9b79b97359b35d53f6b965cbdc47f11c463e8204e7f9"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0",
+   "producer_run": "sob1_train_depth_only_20261122_223829",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0",
+    "files": {
+     "config.json": "downloaded",
+     "generation_config.json": "downloaded",
+     "model.safetensors": "downloaded",
+     "run_completion.json": "downloaded"
+    },
+    "utc": "2026-11-24T03:17:59Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
+  },
+  "depth_only-s20260801/final": {
+   "path": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260801/final/e4159f1fc5b1f884",
+   "files_sha256": {
+    "model.safetensors": "e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98",
+    "config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "9a8c2ee7f053b092f18dd26624cb5b079ca3d3cb03bd028fbc958a516f49e05b"
+   },
+   "files_on_disk_sha256": {
+    "model.safetensors": "e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98",
+    "config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "9a8c2ee7f053b092f18dd26624cb5b079ca3d3cb03bd028fbc958a516f49e05b"
+   },
+   "verified": true,
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884",
+   "producer_run": "sob1_train_depth_only_20261122_223829",
+   "fetched": {
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884",
+    "files": {
+     "config.json": "downloaded",
+     "generation_config.json": "downloaded",
+     "model.safetensors": "downloaded",
+     "run_completion.json": "downloaded"
+    },
+    "utc": "2026-11-24T03:27:50Z"
+   },
+   "checked": "every file of the manifest re-hashed on the dev box's disk"
   }
  },
  "status": "COMPLETE",
  "missing": {},
  "expected_products": [
-  "residual_width-s20260726/final",
-  "residual_width-s20260801/final"
+  "depth_only-s20260726/final",
+  "depth_only-s20260801/final"
  ],
- "last_run": "sob1_train_residual_width_20261121_074426",
- "checked_utc": "2026-11-22T22:33:59Z"
+ "last_run": "sob1_train_depth_only_20261122_223829",
+ "checked_utc": "2026-11-24T03:27:56Z"
 }

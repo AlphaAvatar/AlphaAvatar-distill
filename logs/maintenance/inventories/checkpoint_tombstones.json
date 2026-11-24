@@ -46,10 +46,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 157,
-  "active": 155,
-  "active_retired_bytes": 661507391398,
-  "active_retired_human": "616.077 GiB",
+  "tombstones_total": 159,
+  "active": 157,
+  "active_retired_bytes": 677538255170,
+  "active_retired_human": "631.007 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -11275,6 +11275,164 @@
      "paths_left": [],
      "shared_oids_kept": [],
      "freed_bytes": 8045000112,
+     "error": null
+    }
+   }
+  },
+  {
+   "canonical_id": "relay_sob1_train_depth_only_20261122_223829_depth_only-s20260726_final",
+   "historical_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/run_completion.json"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0",
+   "retention_tier": "REDUNDANT_REMOTE_COPY",
+   "experiment": "SOB1",
+   "seed": 20260726,
+   "scientific_role": "depth_only-s20260726's final weights (fp32): the relay COPY; the dev box keeps the copy",
+   "weights_sha256": "5635c33e6b414bd0bd361c450f132c41050e69c68cd948a734c2bfd27a86f80b",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 8015431885,
+   "size_human": "7.465 GiB",
+   "n_files": 4,
+   "members": [
+    {
+     "path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/config.json",
+     "sha256": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/generation_config.json",
+     "sha256": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/model.safetensors",
+     "sha256": "5635c33e6b414bd0bd361c450f132c41050e69c68cd948a734c2bfd27a86f80b"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/run_completion.json",
+     "sha256": "f3aa47ba52d6432ad4ef9b79b97359b35d53f6b965cbdc47f11c463e8204e7f9"
+    }
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260726/final/5635c33e6b414bd0",
+     "kind": "local",
+     "verified": "every file re-hashed to the record just before the removal"
+    }
+   ],
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260726/final/5635c33e6b414bd0",
+   "frozen_results_location": "logs/stages/stage-1/single_operator_budget/storage/relay_rotation_phase2.json",
+   "reason_physical_weights_deleted": "the free relay's rotation: depth_only's session sob1_train_depth_only_20261122_223829 is COMPLETE (both finals and four sets on their files), its evidence archive is on the relay, and this final re-hashes on the dev box",
+   "maintainer_decision": "maintainer 2026-11-20 (logs/budget/decisions.md, 'SOB1 phase 2 fixes, storage inventory'): 「优先采用免费 relay 轮转：每组两个种子的最终权重都已在开发机逐文件核验、该组评测证据已持久化后，再退役远端冗余副本。」",
+   "tombstone_written_utc": "2026-11-24T03:29:50Z",
+   "deleted_utc": "2026-11-24T03:30:08Z",
+   "deletion": {
+    "status": "DELETED",
+    "attempts": [
+     {
+      "utc": "2026-11-24T03:30:08Z",
+      "verified_absent": true,
+      "relay_copy_present_before": true,
+      "error": null
+     }
+    ],
+    "relay_remove": {
+     "removed_paths": [
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/config.json",
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/generation_config.json",
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/model.safetensors",
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/record.json",
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/final/5635c33e6b414bd0/run_completion.json"
+     ],
+     "lfs_left": [],
+     "paths_left": [],
+     "shared_oids_kept": [],
+     "freed_bytes": 8015427400,
+     "error": null
+    }
+   }
+  },
+  {
+   "canonical_id": "relay_sob1_train_depth_only_20261122_223829_depth_only-s20260801_final",
+   "historical_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/run_completion.json"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884",
+   "retention_tier": "REDUNDANT_REMOTE_COPY",
+   "experiment": "SOB1",
+   "seed": 20260801,
+   "scientific_role": "depth_only-s20260801's final weights (fp32): the relay COPY; the dev box keeps the copy",
+   "weights_sha256": "e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98",
+   "config_sha256": null,
+   "architecture": null,
+   "size_bytes": 8015431887,
+   "size_human": "7.465 GiB",
+   "n_files": 4,
+   "members": [
+    {
+     "path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/config.json",
+     "sha256": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/generation_config.json",
+     "sha256": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/model.safetensors",
+     "sha256": "e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/run_completion.json",
+     "sha256": "9a8c2ee7f053b092f18dd26624cb5b079ca3d3cb03bd028fbc958a516f49e05b"
+    }
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260801/final/e4159f1fc5b1f884",
+     "kind": "local",
+     "verified": "every file re-hashed to the record just before the removal"
+    }
+   ],
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260801/final/e4159f1fc5b1f884",
+   "frozen_results_location": "logs/stages/stage-1/single_operator_budget/storage/relay_rotation_phase2.json",
+   "reason_physical_weights_deleted": "the free relay's rotation: depth_only's session sob1_train_depth_only_20261122_223829 is COMPLETE (both finals and four sets on their files), its evidence archive is on the relay, and this final re-hashes on the dev box",
+   "maintainer_decision": "maintainer 2026-11-20 (logs/budget/decisions.md, 'SOB1 phase 2 fixes, storage inventory'): 「优先采用免费 relay 轮转：每组两个种子的最终权重都已在开发机逐文件核验、该组评测证据已持久化后，再退役远端冗余副本。」",
+   "tombstone_written_utc": "2026-11-24T03:30:14Z",
+   "deleted_utc": "2026-11-24T03:30:32Z",
+   "deletion": {
+    "status": "DELETED",
+    "attempts": [
+     {
+      "utc": "2026-11-24T03:30:32Z",
+      "verified_absent": true,
+      "relay_copy_present_before": true,
+      "error": null
+     }
+    ],
+    "relay_remove": {
+     "removed_paths": [
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/config.json",
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/generation_config.json",
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/model.safetensors",
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/record.json",
+      "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884/run_completion.json"
+     ],
+     "lfs_left": [],
+     "paths_left": [],
+     "shared_oids_kept": [],
+     "freed_bytes": 8015427400,
      "error": null
     }
    }

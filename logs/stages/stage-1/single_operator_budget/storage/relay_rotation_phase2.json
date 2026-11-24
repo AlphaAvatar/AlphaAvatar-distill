@@ -46,6 +46,51 @@
    },
    "status": "ROTATED: both relay copies retired",
    "checked_utc": "2026-11-22T22:36:14Z"
+  },
+  "depth_only": {
+   "run_id": "sob1_train_depth_only_20261122_223829",
+   "finals": {
+    "depth_only-s20260726": {
+     "tombstone": "relay_sob1_train_depth_only_20261122_223829_depth_only-s20260726_final",
+     "local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260726/final/5635c33e6b414bd0",
+     "verified_absent": true,
+     "freed_bytes": 8015427400,
+     "error": null,
+     "utc": "2026-11-24T03:30:08Z",
+     "relay_copy_present_before": true,
+     "continued_pending_tombstone": false
+    },
+    "depth_only-s20260801": {
+     "tombstone": "relay_sob1_train_depth_only_20261122_223829_depth_only-s20260801_final",
+     "local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/depth_only-s20260801/final/e4159f1fc5b1f884",
+     "verified_absent": true,
+     "freed_bytes": 8015427400,
+     "error": null,
+     "utc": "2026-11-24T03:30:32Z",
+     "relay_copy_present_before": true,
+     "continued_pending_tombstone": false
+    }
+   },
+   "evidence": {
+    "archive": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_depth_only_20261122_223829/archive/sob1_train_depth_only_20261122_223829_evidence.tar.gz",
+    "sha256": "9c863f894bb4a17d37c2dba9ef3d442772cb73b19cef2a5a420f5d790f2eb509",
+    "bytes": 38491146,
+    "files": 201,
+    "manifest": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_depth_only_20261122_223829/archive/sob1_train_depth_only_20261122_223829_evidence.manifest.json",
+    "manifest_sha256": "1c9fc9dee242ef97b67a1a5e7bc0ff93dee16a85c4c7d1a0af33f563dd30c3db",
+    "relay": {
+     "relay": "AlphaAvatar/aadistill-artifacts",
+     "prefix": "durable/stage1_single_operator_budget/phase2_evidence/sob1_train_depth_only_20261122_223829",
+     "files_sha256": {
+      "sob1_train_depth_only_20261122_223829_evidence.tar.gz": "9c863f894bb4a17d37c2dba9ef3d442772cb73b19cef2a5a420f5d790f2eb509",
+      "sob1_train_depth_only_20261122_223829_evidence.manifest.json": "1c9fc9dee242ef97b67a1a5e7bc0ff93dee16a85c4c7d1a0af33f563dd30c3db"
+     },
+     "error": null
+    },
+    "verified": true
+   },
+   "status": "ROTATED: both relay copies retired",
+   "checked_utc": "2026-11-24T03:30:32Z"
   }
  }
 }
