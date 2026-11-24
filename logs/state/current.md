@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-22 (UTC), SOB1 PHASE 2 RUNNING (the maintainer granted it on 2026-11-21: project cap $1,161.06, $185.87 cumulative, $1.00 teardown reserve); arm 1 of 3 (residual width only) COMPLETE ($42.6771, pod gone); arm 2 of 3, depth only, `sob1_train_depth_only_20261122_223829` on one L40S (pod `6qvdu7iw1kbl14`, $1.09/h, created 22:39:54Z; launcher in tmux `sob1do`); a merge into main is the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-24 (UTC), SOB1 PHASE 2 RUNNING (the maintainer granted it on 2026-11-21: project cap $1,161.06, $185.87 cumulative, $1.00 teardown reserve); arm 1 of 3 (residual width only) COMPLETE ($42.6771, pod gone); arm 2 of 3 (depth only) COMPLETE ($31.6179, pod gone); arm 3 of 3, FFN + attention only, `sob1_train_ffn_attention_20261124_033254` on one L40S (pod `t58wmac140suz7`, $1.09/h, created 03:44:59Z; launcher in tmux `sob1fa`); a merge into main is the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -22,14 +22,21 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   re-hashed (`closeout/phase2_completion.json`): s20260726 `00b430fd...2263`, s20260801 `b701868f...cccc0`
   (8,045,000,112 B each); four sets complete against them; evidence archive verified on the relay and both relay
   copies retired with tombstones (`storage/relay_rotation_phase2.json`).
-- Arm 2, depth only: `sob1_train_depth_only_20261122_223829`, session commit `1b368f1e`, bundle
-  `transfer/aad_autoinit_1b368f1e.bundle`; pod `6qvdu7iw1kbl14` (US-TX-4) at $1.09/h from 22:39:54Z, watchdog hard
-  3,241 min = $59.95; planned all-in bound $61.0825 inside $61.09; tmux `sob1do`. Read before the issue (22:37Z):
-  committed $1,016.212, balance $193.1258, 0 pods, 0 volumes; envelope $143.1929 of $185.87 left; dev box 41.35 GiB
-  free for 18.44 GiB; the relay accepted the 46.46 GiB rotation. Measured over its first four optimizer steps: peak
-  allocated 39.39 GiB, reserved 40.90 GiB (at least 2.97 GiB free); about 4.7 s per step; step-0 validation CE 3.69.
-- Then: arm 2's closeout and `retain` as arm 1's, FFN + attention (its finals stay on the relay),
-  `study-completion` and the registered analysis (README sections 6, 9a).
+- Arm 2, depth only: `sob1_train_depth_only_20261122_223829` (session commit `1b368f1e`) COMPLETE 2026-11-24:
+  1,708.3 min on one L40S (pod `6qvdu7iw1kbl14`, US-TX-4), $31.6179 all-in (GPU $31.0332 + disk $0.5846; expected
+  $35.70, cap $61.09); pod gone, provider-confirmed, 0 pods, 0 volumes. Measured over its first four optimizer steps
+  (kept in training): peak allocated 39.39 GiB, reserved 40.90 GiB (at least 2.97 GiB free); no out-of-memory,
+  nothing changed. Finals on the dev box, re-hashed: s20260726 `5635c33e...7a86f80b`, s20260801 `e4159f1f...2b4e341f98`
+  (8,015,427,400 B each); four sets complete against them; evidence archive verified on the relay and both relay copies
+  retired with tombstones. Closeout commit `cd412183`.
+- Arm 3, FFN + attention only: `sob1_train_ffn_attention_20261124_033254`, session commit `614e7e60`, bundle
+  `transfer/aad_autoinit_614e7e60.bundle`; pod `t58wmac140suz7` (US-TX-4) at $1.09/h from 03:44:59Z (two capacity
+  refusals first), watchdog hard 3,254 min = $60.20; planned all-in bound $61.3417 inside $61.35; tmux `sob1fa`. Read
+  before the issue (03:32Z): committed $1,047.8319, balance $161.5021, 0 pods, 0 volumes; envelope $111.575 of $185.87
+  left; dev box 14.48 GiB free for a 3.51 GiB bound; the relay accepted the 46.80 GiB rotation. Measured over its first
+  four optimizer steps: peak allocated 40.49 GiB, reserved 42.89 GiB (at least 0.99 GiB free); about 5.3 s per step;
+  step-0 validation CE 9.66. Its finals stay on the relay (KEPT_ON_RELAY), paths and SHA-256 recorded at closeout.
+- Then: arm 3's closeout, `study-completion` and the registered analysis (README sections 6, 9a), the final report.
 - Phase 1: `sob1_phase1_20261119_194259`, $4.4348, COMPLETE and closed in code. Storage arrangement and the demo
   service's retirement: decisions.md 2026-11-20.
 

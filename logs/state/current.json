@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "SOB1 phase 2 running (granted 2026-11-21, cap $1,161.06): residual width COMPLETE, depth running, then FFN + attention; then study-completion and the registered analysis",
+ "next": "SOB1 phase 2 running (granted 2026-11-21, cap $1,161.06): residual width and depth COMPLETE, FFN + attention running; then study-completion, the registered analysis and the final report",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -200,7 +200,7 @@
   "paid_compute": true,
   "pods": 1,
   "network_volumes": 0,
-  "run": "SOB1 phase 2 arm 2 (depth only): sob1_train_depth_only_20261122_223829, pod 6qvdu7iw1kbl14, L40S $1.09/h, from 2026-11-22T22:39:54Z; arm 1 (residual width) COMPLETE $42.6771",
+  "run": "SOB1 phase 2 arm 3 (FFN + attention): sob1_train_ffn_attention_20261124_033254, pod t58wmac140suz7, L40S $1.09/h, from 2026-11-24T03:44:59Z; arms 1-2 COMPLETE $42.6771 + $31.6179",
   "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",
