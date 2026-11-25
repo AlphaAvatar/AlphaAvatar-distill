@@ -82,6 +82,27 @@ def test_the_registry_covers_the_out_of_tree_store():
         "nothing in it")
 
 
+def test_a_generic_unit_name_is_not_matched_as_a_reference():
+    """`referenced_by` matched a unit's bare name, so each of SOB1's three phase-1 initializations (a directory named
+    `init`) was listed as referenced by README.md and the shared baselines. A reference is now matched by the path or
+    by the nearest name that identifies the unit (a content id or a run stamp)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "build_checkpoint_registry_refs", REPO / "scripts/maintenance/consolidation/build_checkpoint_registry.py")
+    B = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(B)
+    rel = "/x/aad-artifacts/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init"
+    assert B.identifying_name(rel, "init") == "4429c94994a5bd1f"
+    assert B.identifying_name("/x/final/00b430fdcef27257", "00b430fdcef27257") == "00b430fdcef27257"
+    assert B.identifying_name("/x/a_search_20261101_153803/store/search_a1/top1", "top1") == "a_search_20261101_153803"
+    assert B.identifying_name("/x/plain/init", "init") is None
+    corpus = {"README.md": "every init is a checkpoint", "plan.json": "init 4429c94994a5bd1f/init"}
+    assert B.referenced_by(corpus, rel, "init") == ["plan.json"]
+    for e in load(REGISTRY)["checkpoints"]:
+        if e.get("experiment") == "SOB1" and e["canonical_name"] == "init":
+            assert "README.md" not in e["referenced_by"], e["path_local"]
+
+
 # --- the log inventory -----------------------------------------------------
 
 def test_every_duplicate_names_a_survivor_that_exists():

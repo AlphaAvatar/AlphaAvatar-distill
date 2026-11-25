@@ -14,6 +14,14 @@ eval-set-1's static fluid formal core: 570 items in 558 groups, both seeds poole
 
 The teacher scores 85.79% / 70.53%, and every untrained arm 0%.
 
+**Scope.** The result holds for this point only:
+* about 2.0B parameters, with the registered initialization method and the one recovery recipe;
+* measured on eval-set-1, which is development-exposed.
+
+The intervals (group bootstrap) and the test (group sign-flip) work over items and groups with each arm's two trained checkpoints fixed, so they do not
+measure training randomness. The two seeds agree in sign on every pair, which supports the direction, but two seeds
+are limited evidence about training randomness (REPORT.md section 5).
+
 **Phase-2 execution.** Three sessions ran once each, in order, on one L40S at $1.09/h:
 * residual width `sob1_train_residual_width_20261121_074426`, $42.6771;
 * depth `sob1_train_depth_only_20261122_223829`, $31.6179;
@@ -21,6 +29,9 @@ The teacher scores 85.79% / 70.53%, and every untrained arm 0%.
 
 Together that is $112.0621 of the $185.87 ceiling. No session hit an out-of-memory error, and every pod was deleted
 and confirmed gone. The `sob1_train` kind is closed in its grant (`kinds.sob1_train.closed`); the remainder lapses.
+
+The provider's billing for the three pods settled at $112.0825 (2026-11-25 18:46Z), equal to the balance drop and
++$0.0204 against the records. $74.7887 remains under the $1,161.06 project cap (REPORT.md section 7).
 
 **Where the finals are.** Residual width's and depth's four finals are on the dev box; FFN + attention's two are on
 the relay (REPORT.md section 8).
@@ -819,10 +830,13 @@ runner's all-in; that was fixed then (`test_the_hard_cap_is_the_runners_all_in`)
 
 ## 10. Decisions for the maintainer
 
-**Open, 2026-11-25:**
-* the review of [`REPORT.md`](REPORT.md) and whether to integrate the branch into `main` (squash, P12.2);
-* the three phase-1 initializations (dev box and relay) are kept. AGENTS.md 2.5 would retire them once no later
-  round declares a use for them.
+**Open, 2026-11-26:**
+* the review of [`REPORT.md`](REPORT.md) and when to integrate the branch into `main` (squash, P12.2), after the
+  $0 closeout round of 2026-11-26;
+* the next round of the reasoning-inheritance research: its compression threshold and its path, to be discussed
+  after that review;
+* the six finals stay at their approved placement. The three phase-1 initializations (dev box and relay) are kept
+  until the next round's plan is fixed; their retirement is then decided by its explicit consumers (AGENTS.md 2.5).
 
 **Closed:**
 

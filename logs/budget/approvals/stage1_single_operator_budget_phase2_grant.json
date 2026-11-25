@@ -339,6 +339,23 @@
   "teardown_reserve_usd": 1.0,
   "remainder": "phase 2 is complete and valid, so no further sob1_train session is run under this grant (AGENTS.md P12.1: a complete valid measurement is not rerun); the unspent $73.8079 and the $1.00 reserve are not carried into any later round",
   "provider_reconciliation": "balance $235.8108 at 2026-11-21T07:40Z before phase 2, $123.7283 at 2026-11-25T13:54Z after teardown (-$112.0825) against $112.0621 booked all-in (+$0.0204); 0 pods, 0 volumes",
+  "provider_settlement": {
+   "status": "SETTLED",
+   "snapshot": "logs/budget/provider/runpod_billing_v2_2026-11-25T1846Z.json",
+   "fetched_utc": "2026-11-25T18:46:02Z",
+   "billed_by_pod_usd": {
+    "sob1_train_residual_width_20261121_074426 (ombh51bu2anrmn)": 42.685,
+    "sob1_train_depth_only_20261122_223829 (6qvdu7iw1kbl14)": 31.6237,
+    "sob1_train_ffn_attention_20261124_033254 (t58wmac140suz7)": 37.7738
+   },
+   "billed_total_usd": 112.0825,
+   "billed_minus_booked_usd": 0.0204,
+   "balance_drop_usd": 112.0825,
+   "balance_after_usd": 123.7283,
+   "_basis": "billed: /v2/billing/pods daily buckets, every bucket of the three pods; the FFN + attention pod's 2026-11-25 bucket was still posting at 14:03Z ($36.9745 for the pod then) and is now $15.3337. Booked: each session's closeout all-in (spent_usd, unchanged). The billed total equals the balance drop to the cent. Billed minus booked is +$0.0079, +$0.0058 and +$0.0067 per pod (each under 0.03%); its cause is not attributed further.",
+   "account": "0 pods, 0 volumes, $0.00/h",
+   "utc": "2026-11-25T18:50:00Z"
+  },
   "historical": "every field above is unchanged (grant_before_closure)",
   "grant_before_closure": {
    "sha256": "73f53e12a066ef2581a79e9defc33381dfd8133d148a695848d06f88f8180045"

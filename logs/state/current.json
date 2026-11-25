@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "SOB1 COMPLETE 2026-11-25 ($112.0621 of $185.87; sob1_train closed): the maintainer reviews docs/stages/stage-1/single_operator_budget/REPORT.md and decides the merge",
+ "next": "SOB1 COMPLETE 2026-11-25 ($112.0621 of $185.87, provider-settled $112.0825; sob1_train closed); $0 closeout round done 2026-11-26: the maintainer reviews docs/stages/stage-1/single_operator_budget/REPORT.md, then decides the merge and the next round",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",

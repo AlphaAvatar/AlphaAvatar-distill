@@ -3,7 +3,9 @@
 Stage 1 owns this round; the training execution stage is `stage3_recovery`. The design and how it was run are in
 [`README.md`](README.md); the evidence is in
 [`logs/stages/stage-1/single_operator_budget/`](../../../../logs/stages/stage-1/single_operator_budget/).
-Recorded 2026-11-25 (UTC). Terminal state: **COMPLETE**: six training units (three arms x two seeds), six final
+Recorded 2026-11-25 (UTC); revised 2026-11-26 (UTC) at $0: section 5's reading of the intervals and seeds and its
+scope, section 7's settled provider billing, section 8's retention check. No verdict, rule or raw result changed.
+Terminal state: **COMPLETE**: six training units (three arms x two seeds), six final
 weights and twelve post-recovery sets (thinking and non-thinking) verified; the registered comparison is formal in
 both modes (`results/study_completion.json`, `analysis.phase2_readout`). Branch `research/reasoning-inheritance`; not
 merged into `main` (the maintainer decides after reviewing this report).
@@ -42,9 +44,12 @@ distinguished.
     were at least as extreme.
 * The interval is the group bootstrap (10,000 resamples, seed 20261120). It is unadjusted for multiplicity and is
   shown beside the test, not as the decision.
+* The test and the interval both work over items and groups with each arm's two trained checkpoints fixed. They do
+  not measure training randomness (section 5).
 
 **Seeds and multiplicity**
-* Both seeds agree in sign for every pair in both modes (section 4).
+* Both seeds agree in sign for every pair in both modes (section 4). Two seeds are limited evidence about training
+  randomness (section 5).
 * The FFN + attention − residual width thinking-mode difference is the smallest effect that the test rejects:
   * per seed it is +4.21 pp [+0.53, +8.07] and +2.11 pp [−1.58, +5.89];
   * it passes Holm at its last step, where the threshold is α = 0.05, not α / 3.
@@ -52,7 +57,8 @@ distinguished.
 **Exposure.** eval-set-1 is development-exposed, so nothing here is a never-seen blind result.
 
 **The registered hypothesis.** "At N ≤ 2, compress depth first" (README section 1) is not supported at this point:
-* under this recipe, compressing only depth keeps the least static fluid accuracy in both modes;
+* at about 2.0B parameters, with the registered initialization and this recovery recipe, on the development-exposed
+  eval-set-1, compressing only depth keeps the least static fluid accuracy in both modes;
 * the published contrast (Minitron, width beat depth) had another teacher, about 600x the recovery tokens and
   benchmark scores. It predicted nothing here; this round's direction agrees with it.
 
@@ -245,7 +251,16 @@ pooled with the fluid core.
 
 ## 5. What the results say, and what they do not
 
-* **They say:** at about 2.0B parameters from this 4B teacher and under this 9,701-step recovery:
+**Scope.** Every statement in this section is about this round's point and nothing wider:
+* about 2.0B parameters (N ≈ 2) from this 4B teacher;
+* each arm initialized by the registered method (A's operators, calibration profiles and selection rules on the
+  unmodified teacher, section 2);
+* one recovery recipe (A-MIX-6cat-sr, 9,701 optimizer steps per seed);
+* eval-set-1, which is development-exposed.
+
+The preregistered rule, the formal verdicts of section 1 and the raw results stand as recorded.
+
+* **They say:** within that scope:
   * compressing only depth (36 → 16 layers) keeps significantly less static fluid accuracy than compressing only the
     FFN and attention or only the residual width, in both modes, by 12–16 pp;
   * in thinking mode the FFN + attention arm is also above the residual-width arm, by +3.16 pp [+0.35, +6.03]
@@ -254,17 +269,32 @@ pooled with the fluid core.
 * **They do not say:**
   * that FFN + attention and residual width differ in non-thinking mode, or are equivalent there (NOT_DISTINGUISHED
     is not equivalence);
-  * that the ordering holds at another compression ratio, another recipe, a longer recovery or a blind set;
+  * that the ordering holds at another compression ratio, another initialization, another recipe, a longer recovery
+    or a blind set;
+  * how stable the ranking is across training runs beyond these two seeds;
   * which part of the FFN + attention arm (the FFN's 60.5% or the attention's 40% parameter cut) carries its result;
   * anything about latency: the arms were not FLOPs- or latency-matched.
 
   Absolute accuracy is low for every arm (17–33% against the teacher's 71–86%).
-* **For a later round (a planning note, not a claim):**
+* **What the intervals and the test measure.**
+  * The group bootstrap resamples eval-set-1's independence groups, and the group sign-flip test flips the signs of
+    their paired differences, while each arm's two trained checkpoints stay fixed. They measure the uncertainty from which items and groups the set holds, given
+    the checkpoints these two training seeds produced. They do not measure how much a result moves from one training
+    run to the next.
+  * The two kinds of evidence answer different questions:
+    * more independent items that were not used in development would test whether the ordering generalizes to
+      other items;
+    * more training seeds would estimate training randomness and how stable the ranking is across runs.
+  * Both seeds agree in sign on every pair in both modes. That supports the direction. Two seeds are still limited
+    evidence about training randomness. For the smallest effect, the thinking-mode FFN + attention − residual width
+    difference, the two seeds give:
+    * +4.21 pp [+0.53, +8.07] for seed 20260726;
+    * +2.11 pp [−1.58, +5.89] for seed 20260801.
+* **Observed in this round (descriptive, not a selection rule):**
   * Initial teacher-forced proximity (step-0 CE, state KL, top-1 agreement) favoured the depth-only arm and did not
-    predict its recovered accuracy. An initialization ranking that eliminates arms before recovery would have kept the
-    wrong one here.
-  * The width-vs-FFN + attention thinking-mode difference has an interval half-width of about 2.8 pp. Resolving
-    effects of that size needs more independent items, not more seeds.
+    predict its recovered accuracy: ranking the arms by it before recovery would have kept the arm that ended last.
+  * How a later round chooses its compression threshold and its path is left to that round's design discussion with
+    the maintainer; this report recommends neither.
 
 ## 6. Execution
 
@@ -322,18 +352,32 @@ elapsed minutes, from the run's `closeout/outcome.json`.
 **Reconciliation with the provider** (read-only; REST v2 and the account):
 * **Balance:** $235.8108 before phase 2 (2026-11-21 07:40Z) and $123.7283 after it (2026-11-25 13:54Z), a drop of
   $112.0825. The records book $112.0621, a difference of +$0.0204 (0.02%).
-* **Billed per pod** (`/v2/billing/pods`, fetched 2026-11-25 14:03Z):
+* **Billed per pod** (`/v2/billing/pods`, daily buckets). Fetched first at 2026-11-25 14:03Z, while the last pod's
+  2026-11-25 bucket was still posting, and again at 18:46Z, when it had posted (SETTLED):
 
-  | arm | billed | difference from the record |
-  | --- | ---: | ---: |
-  | residual width | $42.6850 | +$0.0079 |
-  | depth | $31.6237 | +$0.0058 |
-  | FFN + attention | $36.9745 | −$0.7926: the 11-25 bucket was still posting, 18 min after the delete |
+  | arm | billed at 14:03Z | billed at 18:46Z | settled − record |
+  | --- | ---: | ---: | ---: |
+  | residual width | $42.6850 | $42.6850 | +$0.0079 |
+  | depth | $31.6237 | $31.6237 | +$0.0058 |
+  | FFN + attention | $36.9745 (−$0.7926: still posting, 18 min after the delete) | $37.7738 | +$0.0067 |
+  | **phase 2** | $111.2832 | **$112.0825** | **+$0.0204** |
 
-  The snapshot committed with this report is `logs/budget/provider/runpod_billing_v2_2026-11-25T1403Z.json`.
-* **Project position** (`shared.project_position` on the full-history snapshot): $1,085.38 committed at 13:54Z with
-  the last bucket partial, against $1,086.2508 by the records ($974.1887 before phase 2 + $112.0621). About $74.8
-  remains under the $1,161.06 cap.
+  * The settled billed total equals the balance drop, $112.0825, to the cent.
+  * The +$0.0204 against the closeouts' all-in is under 0.03% per pod; its cause is not attributed further.
+  * Nothing remains to post: the account has billed $0.00/h since the last delete, and the balance read $123.7283
+    at 13:54Z and again at 18:46Z.
+  * Snapshots: `logs/budget/provider/runpod_billing_v2_2026-11-25T1403Z.json` (posting) and
+    `runpod_billing_v2_2026-11-25T1846Z.json` (settled). The grant's `phase_2_closed.provider_settlement` records the
+    settled figures; its `provider_reconciliation` keeps the 13:54Z reading.
+* **Project position** (`shared.project_position` on the full-history snapshot):
+  * at 13:54Z, with the last bucket partial: $1,085.38 committed;
+  * settled (18:46Z snapshot): **$1,086.2713** committed by the provider, against $1,086.2508 by the records
+    ($974.1887 before phase 2 + $112.0621);
+  * **$74.7887** remains under the $1,161.06 cap;
+  * account balance $123.7283; 0 pods, 0 volumes.
+
+  The phase-2 grant is closed: its unused $73.8079 and the $1.00 reserve are void. The $74.7887 is headroom under
+  the project cap, not an authorization; a later round needs its own approval.
 
 ## 8. Checkpoints and storage
 
@@ -367,8 +411,30 @@ deterministic archive. Each is on the dev box (`<scr>/archive/`) and on the rela
 **Evidence in git.** Each run's lightweight evidence is committed under `runs/<run>/evidence/`: train logs and
 configs, `final.json`, `savepoints.json`, formal reports, completion and package records.
 
-**The three phase-1 initializations** (dev box and relay) are kept. A rerun or a follow-up recovery would read them.
-Their retirement under AGENTS.md 2.5 waits for the maintainer's review of this report.
+**The three phase-1 initializations** (dev box and relay) are kept until the next round's plan is fixed (maintainer,
+2026-11-26). No run consumes them now, since phase 2 is complete and its kind closed. Their retirement under AGENTS.md
+2.5 is then decided by that plan's explicit consumers. The six finals stay at the placement above.
+
+| initialization | sha256 of `init/model.safetensors` | bytes | kept |
+| --- | --- | ---: | --- |
+| residual width | `599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada` | 4,022,523,088 | dev box and relay `durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/` (with its mapping, `aeaaca73…`) |
+| FFN + attention | `1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14` | 4,034,178,856 | dev box and relay `durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/` |
+| depth | `76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222` | 4,007,724,000 | dev box and relay `durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/` |
+
+**Retention check, 2026-11-26 (UTC), read-only.**
+* Dev box: the four finals, the three initializations and the residual-width mapping were re-hashed. Every sha256 and
+  size equals the registry (`logs/maintenance/inventories/checkpoint_registry.json`) and the retention records
+  (`storage/local_retention.json`, `storage/local_retention_phase2.json`).
+* Relay, listed with LFS metadata:
+  * present, each LFS sha256 equal to its record: the two FFN + attention finals, the three initializations and the
+    mapping, and the four sessions' evidence archives;
+  * absent: no residual-width or depth final (their tombstones) and no save point.
+* Dependencies. The registry's `referenced_by` used to match a unit's bare name, so each `init` directory was listed
+  as referenced by README.md and the shared baselines. It now matches the nearest identifying name, the content id
+  (`build_checkpoint_registry.py :: identifying_name`). No config or script outside SOB1 names the initializations or
+  the finals. SOB1's own driver and launcher read them through `design.json :: relay_prefix_root`, and both of its
+  kinds are closed, so `require_kind_open` refuses any further session. Their remaining consumers are this study's
+  records.
 
 ## 9. Reproducing
 

@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-25 (UTC), SOB1 COMPLETE: phase 2's three arms (residual width, depth, FFN + attention) trained, evaluated and closed out ($112.0621 of $185.87), the registered decision formal, the `sob1_train` kind closed in its grant; nothing running, nothing billing (0 pods, 0 volumes); the report `docs/stages/stage-1/single_operator_budget/REPORT.md` awaits the maintainer's review; a merge into main is the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-26 (UTC), SOB1 COMPLETE and its $0 closeout round done: phase 2's three arms (residual width, depth, FFN + attention) trained, evaluated and closed out ($112.0621 of $185.87; provider billing settled at $112.0825), the registered decision formal, the `sob1_train` kind closed in its grant; nothing running, nothing billing (0 pods, 0 volumes); the report `docs/stages/stage-1/single_operator_budget/REPORT.md` awaits the maintainer's review; a merge into main and the next round are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -18,7 +18,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   - non-thinking: FFN + attention 29.82% and residual width 31.75% NOT_DISTINGUISHED (−1.93 pp, p 0.160), both above
     depth 17.54% (p < 0.0001).
   - Teacher 85.79% / 70.53%; untrained arms 0%. "Compress depth first at N ≤ 2" is not supported here.
-  - eval-set-1 is development-exposed.
+  - eval-set-1 is development-exposed. Scope: ~2.0B, the registered initialization, one recovery recipe. The
+    intervals and the test work over items with each arm's two checkpoints fixed, so they do not measure training randomness; two
+    seeds agreeing in sign is limited evidence about it (REPORT.md section 5).
 - Runs, one L40S at $1.09/h, each once, ALL_DONE, pod gone and provider-confirmed, no out-of-memory, recipe
   unchanged:
   - `sob1_train_residual_width_20261121_074426` $42.6771, peak reserved 43.40 / 43.70 GiB;
@@ -27,7 +29,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 - Money: total $112.0621 (expected $114.70; ceiling $185.87).
   - The kind is closed (`kinds.sob1_train.closed`, `phase_2_closed` in the phase-2 grant); the $73.8079 remainder
     and the $1.00 reserve lapse.
-  - Provider balance $235.8108 → $123.7283 (−$112.0825).
+  - Provider balance $235.8108 → $123.7283 (−$112.0825). Billing settled 2026-11-25 18:46Z: $112.0825 for the three
+    pods (+$0.0204 against the records; grant `phase_2_closed.provider_settlement`). Project: $1,086.2713 committed,
+    $74.7887 under the $1,161.06 cap.
 - Finals:
   - residual width `00b430fd…` / `b701868f…` and depth `5635c33e…` / `e4159f1f…` on the dev box
     (`~/aad-artifacts/stage1_single_operator_budget/<arm>-s<seed>/final/`), their relay copies retired
@@ -36,8 +40,13 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
     (`durable/stage1_single_operator_budget/ffn_attention/<arm>-s<seed>/final/`).
 
   Paths and sha256: REPORT.md section 8, `storage/local_retention_phase2.json`.
-- Owed to the maintainer: the review of the report and the merge decision. The three phase-1 initializations are kept
-  until then (their AGENTS.md 2.5 retirement waits for that review).
+- Owed to the maintainer: the review of the report, when to merge, and the next round's path. The six finals stay at
+  their approved placement; the three phase-1 initializations are kept until the next round's plan is fixed, then
+  decided by its explicit consumers (AGENTS.md 2.5). Re-hashed and relay-listed 2026-11-26: registry, records and
+  storage agree.
+- Architecture check (`tests/architecture/test_cuda_surface_preserved.py`): the five core files SOB1 changed
+  (DEPTH resume and progress, the trainer's memory probe and OOM phase record) are declared as round `181f2d22`;
+  the OOM phase record's extra-stream case was corrected.
 - Phase 1: `sob1_phase1_20261119_194259`, $4.4348, COMPLETE and closed in code.
 
 **Baseline (maintainer, 2026-11-18):** TPI1's A (teacher-parent initialization) is the reasoning-inheritance research's

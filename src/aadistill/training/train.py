@@ -532,9 +532,12 @@ KD_CHUNK_DEFAULT = 512
 #: KD computation or the optimizer update exhausted the device.
 MEMORY_PROBE_ENV = "AADISTILL_MEMORY_PROBE_STEPS"
 #: The phases a step runs, in order: each micro-batch's forwards and losses
-#: (student, teacher and the KD/CE reduction), its backward; then the gradient
-#: clip and the optimizer update (AdamW allocates its state at the first one).
-MEMORY_PHASES = ("forward_loss", "backward", "clip", "optimizer_step")
+#: (student, teacher and the KD/CE reduction), its backward; then, only on a
+#: step the extra stream joins, that stream's forwards and backwards
+#: (`extra_stream`); then the gradient clip (with the parameter monitor before
+#: it, when due) and the optimizer update (AdamW allocates its state at the
+#: first one).
+MEMORY_PHASES = ("forward_loss", "backward", "extra_stream", "clip", "optimizer_step")
 
 
 def memory_snapshot(device) -> dict:
@@ -1172,12 +1175,15 @@ class Trainer:
             if probe:
                 phases.append({"after": phase, "micro": micro, **memory_snapshot(self.device)})
 
+        step_no = self.step + 1
+        extra = self.extra_active(self.step)
         try:
             out = self._step_body(cfg, bps, micro, loss_cfg, ids, mask, content, pos,
                                   ce_total, kd_total, lr, mark)
         except torch.cuda.OutOfMemoryError:
             phase, at = getattr(self, "_memory_phase", (None, None))
-            self.logger.log("memory_oom", step=self.step + 1, phase_in_progress=self._next_phase(phase),
+            running = self._next_phase(phase, at, n_micro=len(range(0, bps, micro)), extra=extra)
+            self.logger.log("memory_oom", step=step_no, phase_in_progress=running,
                             last_completed_phase=phase, micro=at, **memory_snapshot(self.device))
             raise
         if probe:
@@ -1193,11 +1199,17 @@ class Trainer:
         return self._memory_probes_done < self._memory_probe_steps
 
     @staticmethod
-    def _next_phase(done: str | None) -> str:
-        """The phase that was running when an error came after ``done`` (micro-batches loop back)."""
+    def _next_phase(done: str | None, micro: int | None, *, n_micro: int, extra: bool) -> str:
+        """The phase that was running when an error came after ``done`` in micro-batch ``micro`` of ``n_micro``:
+        a backward is followed by the next micro-batch's forward, after the last one by the extra stream on a step it
+        joins, else by the clip."""
         if done is None:
             return MEMORY_PHASES[0]
-        return {"forward_loss": "backward", "backward": "forward_loss or clip", "clip": "optimizer_step",
+        if done == "backward":
+            if micro is not None and micro + 1 < n_micro:
+                return "forward_loss"
+            return "extra_stream" if extra else "clip"
+        return {"forward_loss": "backward", "extra_stream": "clip", "clip": "optimizer_step",
                 "optimizer_step": "after the optimizer step"}[done]
 
     def _step_body(self, cfg, bps, micro, loss_cfg, ids, mask, content, pos, ce_total, kd_total, lr, mark) -> dict:
@@ -1231,8 +1243,10 @@ class Trainer:
         # selection, its normalizers and its position against the LR schedule
         # are all already fixed by this point and cannot be functions of whether
         # this branch runs.
-        extra_metrics = (self._extra_pass() if self.extra_active(self.step)
-                         else {})
+        extra_on = self.extra_active(self.step)
+        extra_metrics = self._extra_pass() if extra_on else {}
+        if extra_on:
+            mark("extra_stream")
         monitored = self._param_stats() if self._monitor_due(self.step + 1) else None
         grad_norm = torch.nn.utils.clip_grad_norm_(
             self.params, cfg["optim"]["grad_clip"]

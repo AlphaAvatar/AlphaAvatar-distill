@@ -53,6 +53,7 @@ import argparse
 import collections
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -140,12 +141,14 @@ CLASSIFY: dict[str, dict] = {
     "aad-artifacts/stage1_single_operator_budget/": dict(
         experiment="SOB1", role="a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
         retention="reproducibility_required", status="active",
-        why="the initializations are the inputs of phase 2's six recovery runs (plans/training_plan_<arm>.json); a "
-            "final is a measured endpoint of the completed study (results/study_completion.json, 2026-11-25 COMPLETE)",
+        why="the initializations were the inputs of phase 2's six recovery runs (plans/training_plan_<arm>.json; "
+            "phase 2 COMPLETE, its kind closed, so no run consumes them now); a final is a measured endpoint of the "
+            "completed study (results/study_completion.json, 2026-11-25 COMPLETE)",
         never_delete="the four finals here are their only copies (relay copies retired, tombstones "
-                     "relay_sob1_train_*) and the endpoints the report measured; the initializations are what a rerun "
-                     "or a follow-up recovery would read: any retirement waits for the maintainer's review of the "
-                     "phase-2 report",
+                     "relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; "
+                     "the three initializations (here and on the relay) are kept until the next round's plan is "
+                     "fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit "
+                     "consumers (AGENTS.md 2.5)",
         reconstruction="phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
         reconstruction_cost="one L40S, 0.2-1.5 h per arm", disposition="keep"),
     #: RI-LM1's candidates were kept as span-block deltas over D; both deltas (and their second hard links) were retired
@@ -1007,8 +1010,26 @@ def load_corpus() -> dict[str, str]:
     return corpus
 
 
+#: A name that identifies one unit in a record: a content id (12+ hex characters, as every final, init and mapping
+#: directory carries) or a run stamp (an 8-digit date, as `<arm>-s20260726` or `a_search_20261101_153803`).
+_IDENTIFYING = re.compile(r"[0-9a-f]{12,}|[0-9]{8}")
+
+
+def identifying_name(rel: str, name: str) -> str | None:
+    """The most specific name a record would cite this unit by: its own name if it identifies it, else its nearest
+    ancestor directory that does, else None (then only its path is matched).
+
+    A generic name ("init", "top1", "store", "tensors.safetensors") is in hundreds of unrelated files, and matching it
+    listed README.md and the shared baselines as referencing each of SOB1's three initializations."""
+    for part in (name, *reversed(Path(rel).parts[:-1])):
+        if _IDENTIFYING.search(part):
+            return part
+    return None
+
+
 def referenced_by(corpus: dict[str, str], rel: str, name: str) -> list[str]:
-    hits = [k for k, text in corpus.items() if rel in text or name in text]
+    token = identifying_name(rel, name)
+    hits = [k for k, text in corpus.items() if rel in text or (token is not None and token in text)]
     return sorted(set(hits))[:12]
 
 

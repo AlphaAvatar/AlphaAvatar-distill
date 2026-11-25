@@ -2663,6 +2663,62 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "(tests/initialization/test_layer_merge.py). No existing module, operator or CUDA-surface file changes. "
             "NO CUDA SURFACE CHANGE.",
      }),
+    ("181f2d2232da2164f5d555089a259a031b735fe2",
+     "SOB1: a DEPTH search continues from committed rounds and reports each one; the trainer's memory probe and "
+     "OOM phase record (declared 2026-11-26; implemented in f56b72c0 and 8012d22e, 2026-11-19)",
+     {
+        "src/aadistill/initialization/operators/base.py":
+            "`OperatorContext.resume_state` and `.on_progress`, EXECUTION ONLY (never hashed, in no config or "
+            "identity), and the class flags `accepts_resume_state` / `reports_progress` (outside `signature()`); "
+            "`execute` refuses either for an implementation that does not declare it (f56b72c0, 8012d22e; "
+            "tests/initialization/test_depth_resume.py, the two refusal tests). Every existing call passes neither "
+            "and runs as before. NO CUDA SURFACE.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "`_run_steps(resume_states=, progress_observers=)`: per original step index, the two execution-only "
+            "values handed to that step's `OperatorContext`; absent, every call is unchanged (f56b72c0, 8012d22e). "
+            "Already listed in HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION: 7027a8f4's evidence is not claimed "
+            "for it. It ran on CUDA in SOB1 phase 1 (`sob1_phase1_20261119_194259`, one L40S, executable "
+            "`b0bc53cb`, whose bytes of this file equal this tree's).",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "Declares `accepts_resume_state` and `reports_progress` (f56b72c0, 8012d22e). `resume_state` "
+            "`{'rounds': [...], 'anchors', 'tolerance', 'source'}`: the records are checked against the greedy rule "
+            "(`resumed_round_problems`) and replayed without re-scoring; the last replayed round's chosen subset, "
+            "and each anchor's, is scored again with THIS invocation's scorer (prefix reuse or not) and must equal "
+            "its recorded score within `tolerance` (default 0), else the operator raises; the search continues from "
+            "the next round against the same intact-parent reference. `on_progress` receives each new round record "
+            "as it commits. `op.depth.causal_kl.evaluations` counts replayed rounds' candidates too, so a resumed "
+            "search reports what a whole one does; what ran is in `artifacts.timing` and `artifacts.resume`. "
+            "Without either value the scoring, the table, the tie-break and the result are unchanged. CUDA: "
+            "executed in SOB1 phase 1 on one L40S at `b0bc53cb` (same bytes as this tree). It replayed the packed "
+            "search journal's eight 36 -> 28 rounds, re-scored round 8's chosen subset at tolerance 0 and searched "
+            "rounds 9-20 (`evidence/depth_only/records/build.json`: `depth_resume` journal_rounds 8, anchors [7]; "
+            "`first_rounds_are_the_journal` true; removal order begins 2, 32, 3, 26, 30, 8, 20, 28). CPU: "
+            "tests/initialization/test_depth_resume.py (8 tests, with and without prefix reuse: a resumed search "
+            "equals the whole search; an interrupted search resumes from its observed rounds).",
+        "src/aadistill/initialization/statistics/contribution.py":
+            "NEW pure function `resumed_round_problems(rounds, n_layers, protect=)` (f56b72c0): why round records "
+            "are not what `greedy_removal` would have written (numbering, removed_before, every surviving layer "
+            "scored once in index order, finite scores, the minimum chosen with ties to the lower index). It reads "
+            "no model. `greedy_removal` and every other function are unchanged. NO CHANGE TO THE CUDA "
+            "COMPUTATION on this file; covered by tests/initialization/test_depth_resume.py.",
+        "src/aadistill/training/train.py":
+            "EXECUTION-ONLY memory probe (f56b72c0): the first `AADISTILL_MEMORY_PROBE_STEPS` (`MEMORY_PROBE_ENV`) steps (counted from this "
+            "process's start; never in the config or its hash) log `memory_probe` with the allocator's current and "
+            "peak bytes and the device's free / total after each phase (`memory_snapshot`); an out-of-memory error "
+            "is logged as `memory_oom` with the last completed phase and the one in progress, probe on or off; "
+            "`step_once` became a wrapper around `_step_body`, whose tensor operations are unchanged "
+            "(tests/training/test_train.py::test_the_memory_probe_logs_every_phase_and_changes_nothing: a probed "
+            "run's losses and gradient norms equal an unprobed one's). Ran on CUDA in all six SOB1 phase-2 units "
+            "(one L40S, probe on for each unit's first four steps, which are training steps; executables "
+            "`d72a9b46`, `1b368f1e`, `614e7e60`, whose bytes of this file are f56b72c0's). Corrected in this round: "
+            "the OOM record named the phase after the last micro-batch's backward as 'forward_loss or clip', which "
+            "is wrong on a step the extra stream joins, whose forwards and backwards run there. That phase is now "
+            "marked `extra_stream`, and the phase in progress is derived from the micro-batch index, so it is "
+            "`forward_loss`, `extra_stream` or `clip`; the step number is taken before the step "
+            "(tests/training/test_dual_stream.py::test_an_oom_in_the_extra_stream_is_logged_as_the_extra_stream, "
+            "which fails on the earlier code). SOB1 has no extra stream, so this changes nothing its six units "
+            "logged. NOT ON THE CALIBRATION CUDA SURFACE.",
+     }),
 )
 
 

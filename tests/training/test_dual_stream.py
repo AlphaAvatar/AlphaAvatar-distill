@@ -347,3 +347,37 @@ def test_an_extra_stream_without_a_teacher_is_refused(tmp_path):
     with pytest.raises(ValueError, match="KD-only and needs a teacher"):
         Trainer(cfg, tiny_model(0), (ids, mask), device="cpu",
                 out_dir=tmp_path / "run", extra_stream_blocks=(e_ids, e_content))
+
+
+# --------------------------------------------------------------------------
+# the memory probe names the extra stream's phase
+# --------------------------------------------------------------------------
+
+def test_an_oom_in_the_extra_stream_is_logged_as_the_extra_stream(tmp_path, monkeypatch):
+    """The extra stream's forwards and backwards run between the last micro-batch's backward and the clip. An
+    out-of-memory error there is logged as `extra_stream`, not as the next forward or the clip; the probe records the
+    phase on a step the stream joins; and without the stream the last backward is followed by the clip."""
+    from aadistill.training import train as T
+    monkeypatch.setenv(T.MEMORY_PROBE_ENV, "1")
+    trainer, cfg = make(tmp_path, with_extra=True)
+    trainer.step_once()
+    log = tmp_path / "with" / "train_log.jsonl"
+    rows = [json.loads(x) for x in log.read_text().splitlines()]
+    n_micro = cfg["batch"]["blocks_per_step"] // cfg["batch"]["micro_blocks"]
+    probe = [r for r in rows if r["event"] == "memory_probe"]
+    assert [x["after"] for x in probe[0]["phases"]] == (
+        ["forward_loss", "backward"] * n_micro + ["extra_stream", "clip", "optimizer_step"])
+
+    def boom(*a, **k):
+        raise torch.cuda.OutOfMemoryError("CUDA out of memory (test)")
+    monkeypatch.setattr(trainer, "_extra_micro_kd", boom)
+    with pytest.raises(torch.cuda.OutOfMemoryError):
+        trainer.step_once()
+    oom = [json.loads(x) for x in log.read_text().splitlines() if '"memory_oom"' in x]
+    assert oom[-1]["step"] == 2
+    assert oom[-1]["last_completed_phase"] == "backward" and oom[-1]["micro"] == n_micro - 1
+    assert oom[-1]["phase_in_progress"] == "extra_stream"
+
+    assert T.Trainer._next_phase("backward", n_micro - 1, n_micro=n_micro, extra=False) == "clip"
+    assert T.Trainer._next_phase("backward", 0, n_micro=2, extra=True) == "forward_loss"
+    assert T.Trainer._next_phase("extra_stream", None, n_micro=2, extra=True) == "clip"

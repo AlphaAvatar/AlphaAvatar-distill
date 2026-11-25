@@ -17352,3 +17352,55 @@ on a paid pod.
   copies of four finals.
 - Revisit when: the maintainer reviews the report (a merge into `main` is the maintainer's), or a later round consumes
   these finals or initializations.
+
+## 2026-11-26 (UTC) — SOB1 $0 closeout round: what the intervals measure, the core changes declared, billing settled
+
+- Context: the maintainer asked for a $0 repair and closeout of SOB1 on `research/reasoning-inheritance` before the
+  next round and the merge are discussed. No paid resource was created and no scientific record was re-run. The
+  preregistered rule, the formal verdicts and the raw results are unchanged.
+- Decision:
+  - **Reading of the result** (REPORT.md sections 1 and 5; README).
+    - The group bootstrap resamples eval-set-1's independence groups, and the group sign-flip test flips the signs
+      of their paired differences, with each arm's two trained checkpoints fixed. They measure the uncertainty from the items and groups given these two seeds'
+      checkpoints, not training randomness.
+    - More independent, undeveloped items would test generalization to other items; more training seeds would
+      estimate training randomness and how stable the ranking is. The report had said the smallest effect needs "more
+      independent items, not more seeds"; that sentence is replaced.
+    - The two seeds agree in sign on every pair, which supports the direction but is limited evidence about training
+      randomness.
+    - Every conclusion is scoped to about 2.0B parameters, the registered initialization method, the one recovery
+      recipe and the development-exposed eval-set-1. The next round's compression threshold and path are left to
+      its design discussion.
+  - **Core changes declared** (`tests/architecture/test_cuda_surface_preserved.py`, round `181f2d22`). Five core files
+    changed after RI-LM1 without a declaration, so the check failed 16 times. The files are `operators/base.py`,
+    `planning/fixed_path.py`, `operators/depth/causal_kl_greedy.py`, `statistics/contribution.py` and
+    `training/train.py`:
+    - the DEPTH search continuing from committed rounds;
+    - per-round progress handed to the caller;
+    - the greedy-record check;
+    - the trainer's execution-only memory probe and OOM phase record.
+
+    Each declaration names its implementing commits (`f56b72c0`, `8012d22e`), its tests and where it ran on CUDA.
+    The DEPTH resume ran in SOB1 phase 1 at `b0bc53cb`; the memory probe ran in the six phase-2 units at `d72a9b46`,
+    `1b368f1e` and `614e7e60`, whose bytes of these files equal the tree's. The historical 7027a8f4 binding is
+    untouched.
+  - **One implementation defect fixed:** the OOM record called the phase after the last micro-batch's backward
+    "forward_loss or clip", which is wrong on a step the extra stream joins. That phase is now `extra_stream`, and
+    the phase in progress is derived from the micro-batch index (regression in `tests/training/test_dual_stream.py`).
+    SOB1 has no extra stream, so nothing it logged changes.
+  - **Billing settled** (`logs/budget/provider/runpod_billing_v2_2026-11-25T1846Z.json`; the grant's
+    `phase_2_closed.provider_settlement`):
+    - per pod: $42.6850, $31.6237 and $37.7738 (the last pod's 2026-11-25 bucket had been posting at 14:03Z);
+    - total $112.0825, equal to the balance drop, +$0.0204 against the booked $112.0621;
+    - project: $1,086.2713 committed, $74.7887 under the $1,161.06 cap; balance $123.7283; 0 pods, 0 volumes;
+    - the phase-2 grant's unused authorization stays void.
+  - **Retention.** The six finals stay at their approved placement. The three phase-1 initializations are kept
+    until the next round's plan is fixed, then decided by its explicit consumers. A read-only re-hash and relay
+    listing found the registry, the retention records and the storage in agreement. The registry's `referenced_by`
+    now matches a unit's identifying name rather than a generic one, so the three `init` directories no longer list
+    README.md as a reference.
+- Alternatives considered: rewriting the 2026-11-25 entry. Not done: that entry is not wrong, and this one records
+  the clarification.
+- Risks: unchanged from 2026-11-25 (a development-exposed set, two seeds, the smallest effect at Holm's last step, the
+  only copies of four finals on the dev box).
+- Revisit when: the maintainer has reviewed this closeout and decides the merge and the next round.
