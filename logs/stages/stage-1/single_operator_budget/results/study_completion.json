@@ -1,28 +1,18 @@
 {
  "schema": "aadistill.stage1.single_operator_budget.study_completion/v1",
- "status": "INCOMPLETE",
- "unfinished": {
-  "arms_without_a_complete_session": [
-   "ffn_attention"
-  ],
-  "study": {
-   "finals": {
-    "n_verified": 4,
-    "n_expected": 6
-   },
-   "sets": {
-    "n_complete": 8,
-    "n_expected": 12
-   },
-   "modes": []
-  }
- },
+ "status": "COMPLETE",
+ "unfinished": {},
  "rule": "three arms x two seeds: six final weights durable and published, twelve sets complete against them, one protocol per mode; the registered comparison recomputed from the sealed records",
  "sessions": {
   "depth_only": {
    "run_id": "sob1_train_depth_only_20261122_223829",
    "scr": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_depth_only_20261122_223829",
    "checked_utc": "2026-11-24T03:27:56Z"
+  },
+  "ffn_attention": {
+   "run_id": "sob1_train_ffn_attention_20261124_033254",
+   "scr": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_ffn_attention_20261124_033254",
+   "checked_utc": "2026-11-25T13:45:40Z"
   },
   "residual_width": {
    "run_id": "sob1_train_residual_width_20261121_074426",
@@ -33,17 +23,15 @@
  "phase1_evidence": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_phase1_20261119_194259/store/out",
  "completion": {
   "finals": {
-   "n_verified": 4,
+   "n_verified": 6,
    "n_expected": 6
   },
   "sets": {
-   "n_complete": 8,
+   "n_complete": 12,
    "n_expected": 12
   },
   "modes": [],
-  "arms_missing": [
-   "ffn_attention"
-  ],
+  "arms_missing": [],
   "phase1": {
    "complete": true,
    "same_protocol_per_mode": {
@@ -52,6 +40,1386 @@
    }
   }
  },
- "readout": null,
- "checked_utc": "2026-11-24T03:31:22Z"
+ "readout": {
+  "schema": "aadistill.stage1.single_operator_budget.phase2_readout/v1",
+  "role": "the registered decision (design.json :: analysis), recomputed from the sealed records; descriptive parts are labelled as such",
+  "context_tokens": 8192,
+  "n_items": 570,
+  "n_groups": 558,
+  "seeds": [
+   20260726,
+   20260801
+  ],
+  "decision": {
+   "_rule": {
+    "alpha": 0.05,
+    "family_1": "H-T",
+    "family_2": "H-N",
+    "m": 3,
+    "multiplicity": "Holm within each mode over the registered pairs (m fixed); the second family only if the first rejects all",
+    "formal_requires": "every registered arm x every registered seed covers every item",
+    "seeds": [
+     20260726,
+     20260801
+    ],
+    "arms": [
+     "depth_only",
+     "ffn_attention",
+     "residual_width"
+    ],
+    "registered_items": 570,
+    "groups": 558
+   },
+   "H-T": {
+    "_completeness": {
+     "complete": true,
+     "missing": {}
+    },
+    "depth_only - ffn_attention": {
+     "status": "formal",
+     "n_items": 570,
+     "n_seeds": 2,
+     "n_paired_records": 1140,
+     "n_groups": 558,
+     "delta": -0.15964912280701754,
+     "accuracy": {
+      "depth_only": 0.1675438596491228,
+      "ffn_attention": 0.32719298245614037
+     },
+     "effect_interval": {
+      "estimate": -0.15964912280701754,
+      "ci95_percentile": [
+       -0.19005328596802842,
+       -0.13001658243124303
+      ],
+      "draws": 10000,
+      "seed": 20261120,
+      "groups": 558,
+      "label": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "test": {
+      "statistic_abs_sum": 182,
+      "draws": 100000,
+      "seed": 20261119,
+      "exceed_or_equal": 0,
+      "p_two_sided": 9.99990000099999e-06,
+      "nonzero_groups": 193
+     },
+     "p_two_sided": 9.99990000099999e-06,
+     "p_holm": 2.999970000299997e-05,
+     "holm_m": 3,
+     "rejected": true,
+     "verdict": "ffn_attention_BETTER"
+    },
+    "depth_only - residual_width": {
+     "status": "formal",
+     "n_items": 570,
+     "n_seeds": 2,
+     "n_paired_records": 1140,
+     "n_groups": 558,
+     "delta": -0.1280701754385965,
+     "accuracy": {
+      "depth_only": 0.1675438596491228,
+      "residual_width": 0.2956140350877193
+     },
+     "effect_interval": {
+      "estimate": -0.1280701754385965,
+      "ci95_percentile": [
+       -0.15684617867944406,
+       -0.09930900326767887
+      ],
+      "draws": 10000,
+      "seed": 20261120,
+      "groups": 558,
+      "label": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "test": {
+      "statistic_abs_sum": 146,
+      "draws": 100000,
+      "seed": 20261119,
+      "exceed_or_equal": 0,
+      "p_two_sided": 9.99990000099999e-06,
+      "nonzero_groups": 177
+     },
+     "p_two_sided": 9.99990000099999e-06,
+     "p_holm": 2.999970000299997e-05,
+     "holm_m": 3,
+     "rejected": true,
+     "verdict": "residual_width_BETTER"
+    },
+    "ffn_attention - residual_width": {
+     "status": "formal",
+     "n_items": 570,
+     "n_seeds": 2,
+     "n_paired_records": 1140,
+     "n_groups": 558,
+     "delta": 0.031578947368421054,
+     "accuracy": {
+      "ffn_attention": 0.32719298245614037,
+      "residual_width": 0.2956140350877193
+     },
+     "effect_interval": {
+      "estimate": 0.031578947368421054,
+      "ci95_percentile": [
+       0.0034965034965034965,
+       0.06031658727595669
+      ],
+      "draws": 10000,
+      "seed": 20261120,
+      "groups": 558,
+      "label": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "test": {
+      "statistic_abs_sum": 36,
+      "draws": 100000,
+      "seed": 20261119,
+      "exceed_or_equal": 3128,
+      "p_two_sided": 0.03128968710312897,
+      "nonzero_groups": 178
+     },
+     "p_two_sided": 0.03128968710312897,
+     "p_holm": 0.03128968710312897,
+     "holm_m": 3,
+     "rejected": true,
+     "verdict": "ffn_attention_BETTER"
+    }
+   },
+   "H-N": {
+    "_completeness": {
+     "complete": true,
+     "missing": {}
+    },
+    "depth_only - ffn_attention": {
+     "status": "formal",
+     "n_items": 570,
+     "n_seeds": 2,
+     "n_paired_records": 1140,
+     "n_groups": 558,
+     "delta": -0.12280701754385964,
+     "accuracy": {
+      "depth_only": 0.17543859649122806,
+      "ffn_attention": 0.2982456140350877
+     },
+     "effect_interval": {
+      "estimate": -0.12280701754385964,
+      "ci95_percentile": [
+       -0.1524822695035461,
+       -0.0941385435168739
+      ],
+      "draws": 10000,
+      "seed": 20261120,
+      "groups": 558,
+      "label": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "test": {
+      "statistic_abs_sum": 140,
+      "draws": 100000,
+      "seed": 20261119,
+      "exceed_or_equal": 0,
+      "p_two_sided": 9.99990000099999e-06,
+      "nonzero_groups": 180
+     },
+     "p_two_sided": 9.99990000099999e-06,
+     "p_holm": 2.999970000299997e-05,
+     "holm_m": 3,
+     "rejected": true,
+     "verdict": "ffn_attention_BETTER"
+    },
+    "depth_only - residual_width": {
+     "status": "formal",
+     "n_items": 570,
+     "n_seeds": 2,
+     "n_paired_records": 1140,
+     "n_groups": 558,
+     "delta": -0.14210526315789473,
+     "accuracy": {
+      "depth_only": 0.17543859649122806,
+      "residual_width": 0.3175438596491228
+     },
+     "effect_interval": {
+      "estimate": -0.14210526315789473,
+      "ci95_percentile": [
+       -0.1713538723319692,
+       -0.11395759717314488
+      ],
+      "draws": 10000,
+      "seed": 20261120,
+      "groups": 558,
+      "label": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "test": {
+      "statistic_abs_sum": 162,
+      "draws": 100000,
+      "seed": 20261119,
+      "exceed_or_equal": 0,
+      "p_two_sided": 9.99990000099999e-06,
+      "nonzero_groups": 204
+     },
+     "p_two_sided": 9.99990000099999e-06,
+     "p_holm": 2.999970000299997e-05,
+     "holm_m": 3,
+     "rejected": true,
+     "verdict": "residual_width_BETTER"
+    },
+    "ffn_attention - residual_width": {
+     "status": "formal",
+     "n_items": 570,
+     "n_seeds": 2,
+     "n_paired_records": 1140,
+     "n_groups": 558,
+     "delta": -0.01929824561403509,
+     "accuracy": {
+      "ffn_attention": 0.2982456140350877,
+      "residual_width": 0.3175438596491228
+     },
+     "effect_interval": {
+      "estimate": -0.01929824561403509,
+      "ci95_percentile": [
+       -0.04442655957444171,
+       0.0053573824431382535
+      ],
+      "draws": 10000,
+      "seed": 20261120,
+      "groups": 558,
+      "label": "effect interval, unadjusted for multiplicity; not the decision"
+     },
+     "test": {
+      "statistic_abs_sum": 22,
+      "draws": 100000,
+      "seed": 20261119,
+      "exceed_or_equal": 15976,
+      "p_two_sided": 0.15976840231597683,
+      "nonzero_groups": 170
+     },
+     "p_two_sided": 0.15976840231597683,
+     "p_holm": 0.15976840231597683,
+     "holm_m": 3,
+     "rejected": false,
+     "verdict": "NOT_DISTINGUISHED"
+    }
+   }
+  },
+  "per_seed_deltas": {
+   "H-T": {
+    "depth_only - ffn_attention": {
+     "per_seed": {
+      "20260726": {
+       "delta": -0.1824561403508772,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.16140350877192983,
+        0.34385964912280703
+       ],
+       "effect_interval": {
+        "estimate": -0.1824561403508772,
+        "ci95_percentile": [
+         -0.22142857142857142,
+         -0.14385964912280702
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "20260801": {
+       "delta": -0.1368421052631579,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.1736842105263158,
+        0.3105263157894737
+       ],
+       "effect_interval": {
+        "estimate": -0.1368421052631579,
+        "ci95_percentile": [
+         -0.17482517482517482,
+         -0.1
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      }
+     },
+     "seeds_agree_in_sign": true
+    },
+    "depth_only - residual_width": {
+     "per_seed": {
+      "20260726": {
+       "delta": -0.14035087719298245,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.16140350877192983,
+        0.3017543859649123
+       ],
+       "effect_interval": {
+        "estimate": -0.14035087719298245,
+        "ci95_percentile": [
+         -0.1786339754816112,
+         -0.10247349823321555
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "20260801": {
+       "delta": -0.11578947368421053,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.1736842105263158,
+        0.2894736842105263
+       ],
+       "effect_interval": {
+        "estimate": -0.11578947368421053,
+        "ci95_percentile": [
+         -0.15156794425087108,
+         -0.0800711743772242
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      }
+     },
+     "seeds_agree_in_sign": true
+    },
+    "ffn_attention - residual_width": {
+     "per_seed": {
+      "20260726": {
+       "delta": 0.042105263157894736,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.34385964912280703,
+        0.3017543859649123
+       ],
+       "effect_interval": {
+        "estimate": 0.042105263157894736,
+        "ci95_percentile": [
+         0.005262927458751959,
+         0.08070175438596491
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "20260801": {
+       "delta": 0.021052631578947368,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.3105263157894737,
+        0.2894736842105263
+       ],
+       "effect_interval": {
+        "estimate": 0.021052631578947368,
+        "ci95_percentile": [
+         -0.015817919379192556,
+         0.058933618012422286
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      }
+     },
+     "seeds_agree_in_sign": true
+    }
+   },
+   "H-N": {
+    "depth_only - ffn_attention": {
+     "per_seed": {
+      "20260726": {
+       "delta": -0.1280701754385965,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.17543859649122806,
+        0.30350877192982456
+       ],
+       "effect_interval": {
+        "estimate": -0.1280701754385965,
+        "ci95_percentile": [
+         -0.16549295774647887,
+         -0.09121818773718848
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "20260801": {
+       "delta": -0.11754385964912281,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.17543859649122806,
+        0.2929824561403509
+       ],
+       "effect_interval": {
+        "estimate": -0.11754385964912281,
+        "ci95_percentile": [
+         -0.15411558669001751,
+         -0.08041958041958042
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      }
+     },
+     "seeds_agree_in_sign": true
+    },
+    "depth_only - residual_width": {
+     "per_seed": {
+      "20260726": {
+       "delta": -0.14210526315789473,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.17543859649122806,
+        0.3175438596491228
+       ],
+       "effect_interval": {
+        "estimate": -0.14210526315789473,
+        "ci95_percentile": [
+         -0.1804153361919533,
+         -0.10442477876106195
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "20260801": {
+       "delta": -0.14210526315789473,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.17543859649122806,
+        0.3175438596491228
+       ],
+       "effect_interval": {
+        "estimate": -0.14210526315789473,
+        "ci95_percentile": [
+         -0.1795774647887324,
+         -0.10434782608695652
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      }
+     },
+     "seeds_agree_in_sign": true
+    },
+    "ffn_attention - residual_width": {
+     "per_seed": {
+      "20260726": {
+       "delta": -0.014035087719298246,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.30350877192982456,
+        0.3175438596491228
+       ],
+       "effect_interval": {
+        "estimate": -0.014035087719298246,
+        "ci95_percentile": [
+         -0.052449848750199014,
+         0.022968197879858657
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "20260801": {
+       "delta": -0.02456140350877193,
+       "n_paired_records": 570,
+       "accuracy": [
+        0.2929824561403509,
+        0.3175438596491228
+       ],
+       "effect_interval": {
+        "estimate": -0.02456140350877193,
+        "ci95_percentile": [
+         -0.0625,
+         0.013722716368116087
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      }
+     },
+     "seeds_agree_in_sign": true
+    }
+   }
+  },
+  "accuracy_pct": {
+   "H-T": {
+    "depth_only": {
+     "20260726": 16.14,
+     "20260801": 17.37
+    },
+    "ffn_attention": {
+     "20260726": 34.39,
+     "20260801": 31.05
+    },
+    "residual_width": {
+     "20260726": 30.18,
+     "20260801": 28.95
+    }
+   },
+   "H-N": {
+    "depth_only": {
+     "20260726": 17.54,
+     "20260801": 17.54
+    },
+    "ffn_attention": {
+     "20260726": 30.35,
+     "20260801": 29.3
+    },
+    "residual_width": {
+     "20260726": 31.75,
+     "20260801": 31.75
+    }
+   }
+  },
+  "per_arm_descriptive": {
+   "H-T": {
+    "depth_only": {
+     "role": "descriptive only: initial KL, CE and generation scores eliminate nothing",
+     "initialization_damage": {
+      "delta": -0.8578947368421053,
+      "n_paired_records": 570,
+      "accuracy": [
+       0.0,
+       0.8578947368421053
+      ],
+      "effect_interval": {
+       "estimate": -0.8578947368421053,
+       "ci95_percentile": [
+        -0.8857644991212654,
+        -0.8286713286713286
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     },
+     "recovery": {
+      "pooled": {
+       "delta": 0.1675438596491228,
+       "n_paired_records": 1140,
+       "accuracy": [
+        0.1675438596491228,
+        0.0
+       ],
+       "effect_interval": {
+        "estimate": 0.1675438596491228,
+        "ci95_percentile": [
+         0.1402108134920635,
+         0.19636911688152614
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "per_seed": {
+       "20260726": {
+        "delta": 0.16140350877192983,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.16140350877192983,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.16140350877192983,
+         "ci95_percentile": [
+          0.13134494044292083,
+          0.1929203539823009
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       },
+       "20260801": {
+        "delta": 0.1736842105263158,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.1736842105263158,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.1736842105263158,
+         "ci95_percentile": [
+          0.14210526315789473,
+          0.2074468085106383
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       }
+      }
+     },
+     "remaining_gap": {
+      "delta": -0.6903508771929825,
+      "n_paired_records": 1140,
+      "accuracy": [
+       0.1675438596491228,
+       0.8578947368421053
+      ],
+      "effect_interval": {
+       "estimate": -0.6903508771929825,
+       "ci95_percentile": [
+        -0.7274305555555556,
+        -0.6521367141162515
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     }
+    },
+    "ffn_attention": {
+     "role": "descriptive only: initial KL, CE and generation scores eliminate nothing",
+     "initialization_damage": {
+      "delta": -0.8578947368421053,
+      "n_paired_records": 570,
+      "accuracy": [
+       0.0,
+       0.8578947368421053
+      ],
+      "effect_interval": {
+       "estimate": -0.8578947368421053,
+       "ci95_percentile": [
+        -0.8857644991212654,
+        -0.8286713286713286
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     },
+     "recovery": {
+      "pooled": {
+       "delta": 0.32719298245614037,
+       "n_paired_records": 1140,
+       "accuracy": [
+        0.32719298245614037,
+        0.0
+       ],
+       "effect_interval": {
+        "estimate": 0.32719298245614037,
+        "ci95_percentile": [
+         0.29307282415630553,
+         0.3618881118881119
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "per_seed": {
+       "20260726": {
+        "delta": 0.34385964912280703,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.34385964912280703,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.34385964912280703,
+         "ci95_percentile": [
+          0.3045774647887324,
+          0.38353765323992994
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       },
+       "20260801": {
+        "delta": 0.3105263157894737,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.3105263157894737,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.3105263157894737,
+         "ci95_percentile": [
+          0.2722383694036525,
+          0.3495673456977805
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       }
+      }
+     },
+     "remaining_gap": {
+      "delta": -0.5307017543859649,
+      "n_paired_records": 1140,
+      "accuracy": [
+       0.32719298245614037,
+       0.8578947368421053
+      ],
+      "effect_interval": {
+       "estimate": -0.5307017543859649,
+       "ci95_percentile": [
+        -0.5702850493154625,
+        -0.49040139616055844
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     }
+    },
+    "residual_width": {
+     "role": "descriptive only: initial KL, CE and generation scores eliminate nothing",
+     "initialization_damage": {
+      "delta": -0.8578947368421053,
+      "n_paired_records": 570,
+      "accuracy": [
+       0.0,
+       0.8578947368421053
+      ],
+      "effect_interval": {
+       "estimate": -0.8578947368421053,
+       "ci95_percentile": [
+        -0.8857644991212654,
+        -0.8286713286713286
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     },
+     "recovery": {
+      "pooled": {
+       "delta": 0.2956140350877193,
+       "n_paired_records": 1140,
+       "accuracy": [
+        0.2956140350877193,
+        0.0
+       ],
+       "effect_interval": {
+        "estimate": 0.2956140350877193,
+        "ci95_percentile": [
+         0.261101243339254,
+         0.3307017543859649
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "per_seed": {
+       "20260726": {
+        "delta": 0.3017543859649123,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.3017543859649123,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.3017543859649123,
+         "ci95_percentile": [
+          0.26325088339222613,
+          0.3410714285714286
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       },
+       "20260801": {
+        "delta": 0.2894736842105263,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.2894736842105263,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.2894736842105263,
+         "ci95_percentile": [
+          0.2508896797153025,
+          0.32749638448348456
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       }
+      }
+     },
+     "remaining_gap": {
+      "delta": -0.5622807017543859,
+      "n_paired_records": 1140,
+      "accuracy": [
+       0.2956140350877193,
+       0.8578947368421053
+      ],
+      "effect_interval": {
+       "estimate": -0.5622807017543859,
+       "ci95_percentile": [
+        -0.6024310876386457,
+        -0.5219674020287979
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     }
+    }
+   },
+   "H-N": {
+    "depth_only": {
+     "role": "descriptive only: initial KL, CE and generation scores eliminate nothing",
+     "initialization_damage": {
+      "delta": -0.7052631578947368,
+      "n_paired_records": 570,
+      "accuracy": [
+       0.0,
+       0.7052631578947368
+      ],
+      "effect_interval": {
+       "estimate": -0.7052631578947368,
+       "ci95_percentile": [
+        -0.743006993006993,
+        -0.6672535211267606
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     },
+     "recovery": {
+      "pooled": {
+       "delta": 0.17543859649122806,
+       "n_paired_records": 1140,
+       "accuracy": [
+        0.17543859649122806,
+        0.0
+       ],
+       "effect_interval": {
+        "estimate": 0.17543859649122806,
+        "ci95_percentile": [
+         0.14798598949211908,
+         0.20418940343632475
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "per_seed": {
+       "20260726": {
+        "delta": 0.17543859649122806,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.17543859649122806,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.17543859649122806,
+         "ci95_percentile": [
+          0.14410646892276188,
+          0.20774647887323944
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       },
+       "20260801": {
+        "delta": 0.17543859649122806,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.17543859649122806,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.17543859649122806,
+         "ci95_percentile": [
+          0.1445993031358885,
+          0.2073170731707317
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       }
+      }
+     },
+     "remaining_gap": {
+      "delta": -0.5298245614035088,
+      "n_paired_records": 1140,
+      "accuracy": [
+       0.17543859649122806,
+       0.7052631578947368
+      ],
+      "effect_interval": {
+       "estimate": -0.5298245614035088,
+       "ci95_percentile": [
+        -0.5720486111111112,
+        -0.4875222816399287
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     }
+    },
+    "ffn_attention": {
+     "role": "descriptive only: initial KL, CE and generation scores eliminate nothing",
+     "initialization_damage": {
+      "delta": -0.7052631578947368,
+      "n_paired_records": 570,
+      "accuracy": [
+       0.0,
+       0.7052631578947368
+      ],
+      "effect_interval": {
+       "estimate": -0.7052631578947368,
+       "ci95_percentile": [
+        -0.743006993006993,
+        -0.6672535211267606
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     },
+     "recovery": {
+      "pooled": {
+       "delta": 0.2982456140350877,
+       "n_paired_records": 1140,
+       "accuracy": [
+        0.2982456140350877,
+        0.0
+       ],
+       "effect_interval": {
+        "estimate": 0.2982456140350877,
+        "ci95_percentile": [
+         0.26532399299474607,
+         0.33126110124333924
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "per_seed": {
+       "20260726": {
+        "delta": 0.30350877192982456,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.30350877192982456,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.30350877192982456,
+         "ci95_percentile": [
+          0.26631393298059963,
+          0.3409893992932862
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       },
+       "20260801": {
+        "delta": 0.2929824561403509,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.2929824561403509,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.2929824561403509,
+         "ci95_percentile": [
+          0.2561392811296534,
+          0.33049116879456936
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       }
+      }
+     },
+     "remaining_gap": {
+      "delta": -0.4070175438596491,
+      "n_paired_records": 1140,
+      "accuracy": [
+       0.2982456140350877,
+       0.7052631578947368
+      ],
+      "effect_interval": {
+       "estimate": -0.4070175438596491,
+       "ci95_percentile": [
+        -0.447972660082712,
+        -0.36597938144329895
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     }
+    },
+    "residual_width": {
+     "role": "descriptive only: initial KL, CE and generation scores eliminate nothing",
+     "initialization_damage": {
+      "delta": -0.7052631578947368,
+      "n_paired_records": 570,
+      "accuracy": [
+       0.0,
+       0.7052631578947368
+      ],
+      "effect_interval": {
+       "estimate": -0.7052631578947368,
+       "ci95_percentile": [
+        -0.743006993006993,
+        -0.6672535211267606
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     },
+     "recovery": {
+      "pooled": {
+       "delta": 0.3175438596491228,
+       "n_paired_records": 1140,
+       "accuracy": [
+        0.3175438596491228,
+        0.0
+       ],
+       "effect_interval": {
+        "estimate": 0.3175438596491228,
+        "ci95_percentile": [
+         0.284452296819788,
+         0.3509700176366843
+        ],
+        "draws": 10000,
+        "seed": 20261120,
+        "groups": 558,
+        "label": "effect interval, unadjusted for multiplicity; not the decision"
+       }
+      },
+      "per_seed": {
+       "20260726": {
+        "delta": 0.3175438596491228,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.3175438596491228,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.3175438596491228,
+         "ci95_percentile": [
+          0.27816901408450706,
+          0.35852614993030724
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       },
+       "20260801": {
+        "delta": 0.3175438596491228,
+        "n_paired_records": 570,
+        "accuracy": [
+         0.3175438596491228,
+         0.0
+        ],
+        "effect_interval": {
+         "estimate": 0.3175438596491228,
+         "ci95_percentile": [
+          0.2786596119929453,
+          0.35575221238938054
+         ],
+         "draws": 10000,
+         "seed": 20261120,
+         "groups": 558,
+         "label": "effect interval, unadjusted for multiplicity; not the decision"
+        }
+       }
+      }
+     },
+     "remaining_gap": {
+      "delta": -0.387719298245614,
+      "n_paired_records": 1140,
+      "accuracy": [
+       0.3175438596491228,
+       0.7052631578947368
+      ],
+      "effect_interval": {
+       "estimate": -0.387719298245614,
+       "ci95_percentile": [
+        -0.42894748527624565,
+        -0.3462214411247803
+       ],
+       "draws": 10000,
+       "seed": 20261120,
+       "groups": 558,
+       "label": "effect interval, unadjusted for multiplicity; not the decision"
+      }
+     }
+    }
+   }
+  },
+  "terminations": {
+   "depth_only_s20260726/H-T": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 433,
+     "degeneration_stop": 106,
+     "context_limit_hit": 31,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 1870,
+     "natural_termination": 1438,
+     "degeneration_stop": 361,
+     "context_limit_hit": 71,
+     "other_stop": 0
+    }
+   },
+   "depth_only_s20260801/H-T": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 404,
+     "degeneration_stop": 118,
+     "context_limit_hit": 48,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 1917,
+     "natural_termination": 1447,
+     "degeneration_stop": 375,
+     "context_limit_hit": 95,
+     "other_stop": 0
+    }
+   },
+   "depth_only_s20260726/H-N": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 529,
+     "degeneration_stop": 41,
+     "context_limit_hit": 0,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 2472,
+     "natural_termination": 2362,
+     "degeneration_stop": 109,
+     "context_limit_hit": 1,
+     "other_stop": 0
+    }
+   },
+   "depth_only_s20260801/H-N": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 508,
+     "degeneration_stop": 62,
+     "context_limit_hit": 0,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 2368,
+     "natural_termination": 2232,
+     "degeneration_stop": 135,
+     "context_limit_hit": 1,
+     "other_stop": 0
+    }
+   },
+   "ffn_attention_s20260726/H-T": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 414,
+     "degeneration_stop": 88,
+     "context_limit_hit": 68,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 1943,
+     "natural_termination": 1479,
+     "degeneration_stop": 327,
+     "context_limit_hit": 137,
+     "other_stop": 0
+    }
+   },
+   "ffn_attention_s20260801/H-T": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 410,
+     "degeneration_stop": 78,
+     "context_limit_hit": 82,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 1941,
+     "natural_termination": 1490,
+     "degeneration_stop": 300,
+     "context_limit_hit": 151,
+     "other_stop": 0
+    }
+   },
+   "ffn_attention_s20260726/H-N": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 515,
+     "degeneration_stop": 55,
+     "context_limit_hit": 0,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 2423,
+     "natural_termination": 2299,
+     "degeneration_stop": 124,
+     "context_limit_hit": 0,
+     "other_stop": 0
+    }
+   },
+   "ffn_attention_s20260801/H-N": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 525,
+     "degeneration_stop": 45,
+     "context_limit_hit": 0,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 2414,
+     "natural_termination": 2305,
+     "degeneration_stop": 108,
+     "context_limit_hit": 1,
+     "other_stop": 0
+    }
+   },
+   "residual_width_s20260726/H-T": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 377,
+     "degeneration_stop": 112,
+     "context_limit_hit": 81,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 1871,
+     "natural_termination": 1325,
+     "degeneration_stop": 402,
+     "context_limit_hit": 144,
+     "other_stop": 0
+    }
+   },
+   "residual_width_s20260801/H-T": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 381,
+     "degeneration_stop": 85,
+     "context_limit_hit": 104,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 1945,
+     "natural_termination": 1452,
+     "degeneration_stop": 328,
+     "context_limit_hit": 165,
+     "other_stop": 0
+    }
+   },
+   "residual_width_s20260726/H-N": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 530,
+     "degeneration_stop": 40,
+     "context_limit_hit": 0,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 2430,
+     "natural_termination": 2316,
+     "degeneration_stop": 112,
+     "context_limit_hit": 2,
+     "other_stop": 0
+    }
+   },
+   "residual_width_s20260801/H-N": {
+    "primary_static_fluid_core": {
+     "turns": 570,
+     "natural_termination": 531,
+     "degeneration_stop": 39,
+     "context_limit_hit": 0,
+     "other_stop": 0
+    },
+    "whole_set": {
+     "turns": 2385,
+     "natural_termination": 2267,
+     "degeneration_stop": 114,
+     "context_limit_hit": 4,
+     "other_stop": 0
+    }
+   }
+  },
+  "scored_digests": {
+   "depth_only_s20260726/H-T": "88ca2e212b52e9d4174e43a283bbb27bf9c5124524890b26a366f1e8028fb220",
+   "depth_only_s20260801/H-T": "cd14b96e4d19680dd8639889f5bc58c8cb7307d27c53dab9ef2f30c47415ff7b",
+   "depth_only_s20260726/H-N": "871676e464122948684084baaf051729925f61f49539ab56fa7b91ea68fac17e",
+   "depth_only_s20260801/H-N": "f2487e3d41c31c3c52460d87afa9d81a06a2d1484bdaa73ef7b29b1060d939d7",
+   "ffn_attention_s20260726/H-T": "f7210e0c1a2354233e7975f349d476b0520a445e4d5c3b826acc6838565b3bb1",
+   "ffn_attention_s20260801/H-T": "fb6c90fa072994efd70e0e988b8495f7adfe40b2a3afdac9b79522b54bd112e2",
+   "ffn_attention_s20260726/H-N": "a5f33fe187ba4a4a59eeb24956707ef7b20660d51710d6c5f5793905cb87f11f",
+   "ffn_attention_s20260801/H-N": "e5db71fcbe2c3351b45effbecdc76f2abd0f2e548844cd4feee8a47fbd556265",
+   "residual_width_s20260726/H-T": "848aa9175d0716e1c21dbebe814c44d2b3c25f2754846abffd48f8cae52d2c34",
+   "residual_width_s20260801/H-T": "4753f4f21e3baddb4486692e51d2fe7ce6d77298431d03713e31bb69d90e5db2",
+   "residual_width_s20260726/H-N": "7dd56eaf1602e62f603ed06cf65b0e8c8347b344e7eb589a0a26268295d8b0dc",
+   "residual_width_s20260801/H-N": "42871dfff7a4ceef2a664c0badbf0cb3e8bc33203c69334adcabc09ba64ccf6c"
+  },
+  "phase1_evidence": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_phase1_20261119_194259/store/out"
+ },
+ "checked_utc": "2026-11-25T13:49:51Z"
 }

@@ -91,6 +91,30 @@
    },
    "status": "ROTATED: both relay copies retired",
    "checked_utc": "2026-11-24T03:30:32Z"
+  },
+  "ffn_attention": {
+   "run_id": "sob1_train_ffn_attention_20261124_033254",
+   "finals": {},
+   "evidence": {
+    "archive": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_ffn_attention_20261124_033254/archive/sob1_train_ffn_attention_20261124_033254_evidence.tar.gz",
+    "sha256": "b2dea49fdf5152cd84e811d75918c70791ad6eef693bea7ef38a9e2fd7c20efc",
+    "bytes": 42332116,
+    "files": 238,
+    "manifest": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_ffn_attention_20261124_033254/archive/sob1_train_ffn_attention_20261124_033254_evidence.manifest.json",
+    "manifest_sha256": "3048c43853b1cf982aeea96c049c304ae45417f28f8f1ad7d4d5a26188a3af68",
+    "relay": {
+     "relay": "AlphaAvatar/aadistill-artifacts",
+     "prefix": "durable/stage1_single_operator_budget/phase2_evidence/sob1_train_ffn_attention_20261124_033254",
+     "files_sha256": {
+      "sob1_train_ffn_attention_20261124_033254_evidence.tar.gz": "b2dea49fdf5152cd84e811d75918c70791ad6eef693bea7ef38a9e2fd7c20efc",
+      "sob1_train_ffn_attention_20261124_033254_evidence.manifest.json": "3048c43853b1cf982aeea96c049c304ae45417f28f8f1ad7d4d5a26188a3af68"
+     },
+     "error": null
+    },
+    "verified": true
+   },
+   "status": "KEPT_ON_RELAY: this arm's finals are placed on the relay (design.json :: storage.phase_2_finals.placement); its evidence archive is there too; nothing is retired",
+   "checked_utc": "2026-11-25T13:47:06Z"
   }
  }
 }

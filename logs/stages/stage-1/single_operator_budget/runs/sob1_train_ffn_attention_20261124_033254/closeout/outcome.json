@@ -1,0 +1,57 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.authorization_outcome/v1",
+ "run_id": "sob1_train_ffn_attention_20261124_033254",
+ "study": "SOB1",
+ "recorded_utc": "2026-11-25T13:45:27+00:00",
+ "status": "COMPLETE",
+ "validation_passed": null,
+ "validation": "not applicable: this kind defines no verdict (Launch.verdict is None); completion is status, from the secured products or the verified evidence",
+ "products_secured": {
+  "ok": true,
+  "why": "every finished file is on the dev box (238 files, each sha256 equal to the pod's final listing)"
+ },
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "provider_resource_created": true,
+ "evidence": null,
+ "verdict_rederived": null,
+ "money": {
+  "all_in_usd": 37.7671,
+  "gpu_usd": 37.0687,
+  "disk_usd": 0.6983,
+  "elapsed_minutes": 2040.48,
+  "price_per_hour": 1.09,
+  "authorized_usd": 61.35,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [],
+  "error": null,
+  "accounted": [],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 0 resource(s) the records account for"
+ },
+ "kind": "sob1_train",
+ "scientific_use": true,
+ "authorizes": "nothing",
+ "study_completion": {
+  "status": "COMPLETE",
+  "arm": "ffn_attention",
+  "unfinished": [],
+  "record": "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/closeout/phase2_completion.json",
+  "relay_rotation": {
+   "status": "KEPT_ON_RELAY: this arm's finals are placed on the relay (design.json :: storage.phase_2_finals.placement); its evidence archive is there too; nothing is retired",
+   "finals": {}
+  },
+  "study": {
+   "status": "COMPLETE",
+   "unfinished": {},
+   "record": "logs/stages/stage-1/single_operator_budget/results/study_completion.json"
+  }
+ }
+}

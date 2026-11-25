@@ -121,14 +121,54 @@
     "utc": "2026-11-24T03:27:50Z"
    },
    "checked": "every file of the manifest re-hashed on the dev box's disk"
+  },
+  "ffn_attention-s20260726/final": {
+   "kept_on": "relay",
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495",
+   "files_sha256": {
+    "model.safetensors": "589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b",
+    "config.json": "072f1d3392c8a9b707995a3eaf8683ae56ca10dc86fc4adb37c192eb967d2ddf",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "b96ecb5b55cda4366f7e732c3a63a91761ca7f1ba36d874f520808aa223ec329"
+   },
+   "relay_lfs_sha256": {
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/model.safetensors": "589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b",
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/config.json": null,
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/generation_config.json": null,
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/run_completion.json": null
+   },
+   "verified": true,
+   "producer_run": "sob1_train_ffn_attention_20261124_033254",
+   "checked": "every file listed at its relay prefix and each weight object's LFS sha256 the record's (placement: relay)"
+  },
+  "ffn_attention-s20260801/final": {
+   "kept_on": "relay",
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e",
+   "files_sha256": {
+    "model.safetensors": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e",
+    "config.json": "072f1d3392c8a9b707995a3eaf8683ae56ca10dc86fc4adb37c192eb967d2ddf",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion.json": "53c4fe602d2c96b2fe7c7503156b66be12b83a9c748c89746214eac5ffcfc001"
+   },
+   "relay_lfs_sha256": {
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/model.safetensors": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e",
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/config.json": null,
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/generation_config.json": null,
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/run_completion.json": null
+   },
+   "verified": true,
+   "producer_run": "sob1_train_ffn_attention_20261124_033254",
+   "checked": "every file listed at its relay prefix and each weight object's LFS sha256 the record's (placement: relay)"
   }
  },
  "status": "COMPLETE",
  "missing": {},
  "expected_products": [
-  "depth_only-s20260726/final",
-  "depth_only-s20260801/final"
+  "ffn_attention-s20260726/final",
+  "ffn_attention-s20260801/final"
  ],
- "last_run": "sob1_train_depth_only_20261122_223829",
- "checked_utc": "2026-11-24T03:27:56Z"
+ "last_run": "sob1_train_ffn_attention_20261124_033254",
+ "checked_utc": "2026-11-25T13:45:40Z"
 }
