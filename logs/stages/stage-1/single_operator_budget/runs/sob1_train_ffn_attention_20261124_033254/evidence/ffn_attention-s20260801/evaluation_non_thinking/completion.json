@@ -1,0 +1,296 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.evaluation_completion/v1",
+ "target": "ffn_attention_s20260801",
+ "mode": "H-N",
+ "out": "/workspace/aad/artifacts/audit/stage1_single_operator/sob1_train_ffn_attention_20261124_033254",
+ "complete": true,
+ "problems": {},
+ "units": {
+  "fluid_reasoning_720__dev_v1": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "d80cc998dd5ab447eedb95e0c3505d221b20db81774831e9f8010c7f51b42681",
+   "records": 720,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__math_verified": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "91b986ee263dfcbc0f0ea2d502f4d5c90caba03901d3c86c9f13ff811bae4ce8",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__gsm8k": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "b05bdcc2f6a12abb8c1667bb717ae033a1e7ca2c11b3618a3f8d8e2dd7117b30",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__multihop": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "9084fc46bfac0b1e6bd7f01f9999d011fcfbc48cb6ef9e4e1f22122ae63982ee",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__rag": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "242883f1d8289f4a3d59d429d03afb1672f02719867747cc8f7f072df938f538",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__answerability_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "6e75b918d7fa945489c5256d7c4c9b32582ad411fc690a52108e6bcc10c2ca94",
+   "records": 120,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__safety_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "5257afd3d55393dae89f15273e75b3580816bd8efd9beb597d4a3124f035e6e9",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__knowledge": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "e149ff8919cde93b6c211d28476e3645b9d0e2128abb22029ade6b11397dc3e1",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__eval_behavior_v0": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "85fa281650c859644e734121e03b747fe8eb8533b054e809052e3405b6203d8b",
+   "records": 76,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_legacy_150__items": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "c79bde2f1cd2583a0dc407ca7e04be1e1be9d4655c47cb548f4897501011763e",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  }
+ },
+ "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f",
+ "packages": [
+  {
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "attempt": "sob1_train_ffn_attention_20261124_033254",
+   "utc": "2026-11-25T13:34:26Z",
+   "weights_sha256": {
+    "model.safetensors": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e"
+   }
+  }
+ ],
+ "parts": {
+  "parts/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "d19fe36757c9d323c93bdb96196eb8398f1d20ce0404be9ba99eb3f873d2306c",
+   "records": 326,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "89b03ddac7193ca29e1ea038a9d167132615d3edad5238553202dea4ef7fdc94",
+   "records": 382,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0002.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "e866cd5dc7a24c037652c944d919e9d0ac002d5ab3afbaf26e5bdeeb800a80cd",
+   "records": 12,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "a5919e421132e0fdc3e051cf146e22d1fdf8b7baea1e59db83dde185b550c2fe",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "6e8c87b6f738e8e69866ac6cda0f3369a1880aaee3f778f8d0f5b753d7d20821",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "b7b9b90f5aa7961dba6352e7cea555fa6305224b24749896c0e19beaa5807e21",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__rag/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__rag",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "cdb37a80c79b786191382a8d2a3e22ecafef44a61602b56d6f57b3ff39c5896f",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__answerability_paired/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__answerability_paired",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "eed35bd4b95b3a470f3cbae7b718ccd5a94d7675df1606eb929d6cabd5447517",
+   "records": 120,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "3853d1627bfba62a9db12400cb95774c991720df70783249b23bd2a71458349a",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "b4416ec55bba72e2f7e81961fd305d191a7dad326d05c4836fa53ecc0eefa341",
+   "records": 150,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "ada86beb5d88fa7eddf6fdc011698d27518f270a65f0a72a84c4c582bd1c0336",
+   "records": 76,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-N-g1",
+   "sha256": "a5871d9e2942d34c942901d08e27761c528b735d5feafe4507f84916afe41c1b",
+   "records": 150,
+   "proven": true,
+   "why": null
+  }
+ },
+ "sealed_twice": [],
+ "expected_weights": {
+  "model.safetensors": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e"
+ },
+ "think_state": "preclosed",
+ "stored_report_matches": true,
+ "binding": {
+  "target": "ffn_attention_s20260801",
+  "arm": "ffn_attention",
+  "seed": 20260801,
+  "unit": "ffn_attention-s20260801",
+  "mode": "H-N",
+  "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+  "weights_sha256": {
+   "model.safetensors": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e"
+  }
+ }
+}

@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-24 (UTC), SOB1 PHASE 2 RUNNING (the maintainer granted it on 2026-11-21: project cap $1,161.06, $185.87 cumulative, $1.00 teardown reserve); arm 1 of 3 (residual width only) COMPLETE ($42.6771, pod gone); arm 2 of 3 (depth only) COMPLETE ($31.6179, pod gone); arm 3 of 3, FFN + attention only, `sob1_train_ffn_attention_20261124_033254` on one L40S (pod `t58wmac140suz7`, $1.09/h, created 03:44:59Z; launcher in tmux `sob1fa`); a merge into main is the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-25 (UTC), SOB1 COMPLETE: phase 2's three arms (residual width, depth, FFN + attention) trained, evaluated and closed out ($112.0621 of $185.87), the registered decision formal, the `sob1_train` kind closed in its grant; nothing running, nothing billing (0 pods, 0 volumes); the report `docs/stages/stage-1/single_operator_budget/REPORT.md` awaits the maintainer's review; a merge into main is the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,36 +9,36 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): PHASE 2 RUNNING (granted 2026-11-21) -- ONE POD BILLING.**
-- The grant: `logs/budget/approvals/stage1_single_operator_budget_phase2_grant.json` (decisions.md 2026-11-21); the
-  project cap $1,161.06; $185.87 cumulative over every attempt of the three sessions, $1.00 teardown reserve; one
-  L40S at most $1.11/h; residual width ($63.43), then depth ($61.09), then FFN + attention ($61.35).
-- Read before the grant (07:40-07:44Z): committed $974.1887; balance $235.8108 ($200.00 more than before the top-up,
-  not the $151.06 stated; it is not budget); 0 pods, 0 volumes; dev box 55.22 GiB free; relay 50.55-50.59 GiB.
-- Arm 1, residual width only: `sob1_train_residual_width_20261121_074426` (session commit `d72a9b46`) COMPLETE
-  2026-11-22: 2,305.8 min on one L40S, $42.6771 all-in (GPU $41.8879 + disk $0.7891; expected $42.59, cap $63.43); pod
-  gone, provider-confirmed. Measured over its first four optimizer steps (kept in training): peak allocated 42.37 GiB,
-  reserved 43.40 GiB of 44.39 (seed 20260801: reserved 43.70); no out-of-memory, nothing changed. Finals on the dev box,
-  re-hashed (`closeout/phase2_completion.json`): s20260726 `00b430fd...2263`, s20260801 `b701868f...cccc0`
-  (8,045,000,112 B each); four sets complete against them; evidence archive verified on the relay and both relay
-  copies retired with tombstones (`storage/relay_rotation_phase2.json`).
-- Arm 2, depth only: `sob1_train_depth_only_20261122_223829` (session commit `1b368f1e`) COMPLETE 2026-11-24:
-  1,708.3 min on one L40S (pod `6qvdu7iw1kbl14`, US-TX-4), $31.6179 all-in (GPU $31.0332 + disk $0.5846; expected
-  $35.70, cap $61.09); pod gone, provider-confirmed, 0 pods, 0 volumes. Measured over its first four optimizer steps
-  (kept in training): peak allocated 39.39 GiB, reserved 40.90 GiB (at least 2.97 GiB free); no out-of-memory,
-  nothing changed. Finals on the dev box, re-hashed: s20260726 `5635c33e...7a86f80b`, s20260801 `e4159f1f...2b4e341f98`
-  (8,015,427,400 B each); four sets complete against them; evidence archive verified on the relay and both relay copies
-  retired with tombstones. Closeout commit `cd412183`.
-- Arm 3, FFN + attention only: `sob1_train_ffn_attention_20261124_033254`, session commit `614e7e60`, bundle
-  `transfer/aad_autoinit_614e7e60.bundle`; pod `t58wmac140suz7` (US-TX-4) at $1.09/h from 03:44:59Z (two capacity
-  refusals first), watchdog hard 3,254 min = $60.20; planned all-in bound $61.3417 inside $61.35; tmux `sob1fa`. Read
-  before the issue (03:32Z): committed $1,047.8319, balance $161.5021, 0 pods, 0 volumes; envelope $111.575 of $185.87
-  left; dev box 14.48 GiB free for a 3.51 GiB bound; the relay accepted the 46.80 GiB rotation. Measured over its first
-  four optimizer steps: peak allocated 40.49 GiB, reserved 42.89 GiB (at least 0.99 GiB free); about 5.3 s per step;
-  step-0 validation CE 9.66. Its finals stay on the relay (KEPT_ON_RELAY), paths and SHA-256 recorded at closeout.
-- Then: arm 3's closeout, `study-completion` and the registered analysis (README sections 6, 9a), the final report.
-- Phase 1: `sob1_phase1_20261119_194259`, $4.4348, COMPLETE and closed in code. Storage arrangement and the demo
-  service's retirement: decisions.md 2026-11-20.
+**SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): COMPLETE (2026-11-25) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
+- Report `docs/stages/stage-1/single_operator_budget/REPORT.md`; decision `logs/stages/stage-1/single_operator_budget/
+  results/study_completion.json` (COMPLETE: 6/6 finals, 12/12 sets, one protocol per mode); decisions.md 2026-11-25.
+- Result, static fluid formal core (570 items, 558 groups, both seeds pooled, Holm m = 3 per mode):
+  - thinking (primary): FFN + attention 32.72% > residual width 29.56% (+3.16 pp [+0.35, +6.03], p 0.031) > depth
+    16.75% (each pair rejected);
+  - non-thinking: FFN + attention 29.82% and residual width 31.75% NOT_DISTINGUISHED (−1.93 pp, p 0.160), both above
+    depth 17.54% (p < 0.0001).
+  - Teacher 85.79% / 70.53%; untrained arms 0%. "Compress depth first at N ≤ 2" is not supported here.
+  - eval-set-1 is development-exposed.
+- Runs, one L40S at $1.09/h, each once, ALL_DONE, pod gone and provider-confirmed, no out-of-memory, recipe
+  unchanged:
+  - `sob1_train_residual_width_20261121_074426` $42.6771, peak reserved 43.40 / 43.70 GiB;
+  - `sob1_train_depth_only_20261122_223829` $31.6179, 40.90 / 40.98 GiB;
+  - `sob1_train_ffn_attention_20261124_033254` $37.7671, 42.89 / 42.51 GiB (of 44.39).
+- Money: total $112.0621 (expected $114.70; ceiling $185.87).
+  - The kind is closed (`kinds.sob1_train.closed`, `phase_2_closed` in the phase-2 grant); the $73.8079 remainder
+    and the $1.00 reserve lapse.
+  - Provider balance $235.8108 → $123.7283 (−$112.0825).
+- Finals:
+  - residual width `00b430fd…` / `b701868f…` and depth `5635c33e…` / `e4159f1f…` on the dev box
+    (`~/aad-artifacts/stage1_single_operator_budget/<arm>-s<seed>/final/`), their relay copies retired
+    (tombstones `relay_sob1_train_*`);
+  - FFN + attention `589acf28…` / `64292e50…` on the relay
+    (`durable/stage1_single_operator_budget/ffn_attention/<arm>-s<seed>/final/`).
+
+  Paths and sha256: REPORT.md section 8, `storage/local_retention_phase2.json`.
+- Owed to the maintainer: the review of the report and the merge decision. The three phase-1 initializations are kept
+  until then (their AGENTS.md 2.5 retirement waits for that review).
+- Phase 1: `sob1_phase1_20261119_194259`, $4.4348, COMPLETE and closed in code.
 
 **Baseline (maintainer, 2026-11-18):** TPI1's A (teacher-parent initialization) is the reasoning-inheritance research's
 default baseline; B a historical reference (`docs/stages/stage-1/reasoning_inheritance/README.md`; decisions.md
@@ -4752,7 +4752,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$922.3181` spent of `$1000.0000`, leaving `$77.6819` |
+| project cap | `$1034.3802` spent of `$1161.0600`, leaving `$126.6798` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

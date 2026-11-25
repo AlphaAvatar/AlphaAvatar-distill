@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 202,
+  "runs_unrecorded": 205,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -876,8 +876,8 @@
    },
    "single_operator_budget": {
     "recorded": 0,
-    "unrecorded": 1,
-    "total": 1
+    "unrecorded": 4,
+    "total": 4
    },
    "teacher_modes": {
     "recorded": 0,
@@ -3969,6 +3969,30 @@
    "root": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259",
    "n_files": 60,
    "digest": "2345bcc0578e1f1f358da16c5a3e4a0e46c015ddb7911c4afdf686047f9bda00",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "single_operator_budget",
+   "run_id": "sob1_train_depth_only_20261122_223829",
+   "root": "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829",
+   "n_files": 36,
+   "digest": "38d0918f79db91f66aab9a448e8a187a441e981efc83e5d81074232a65a0948a",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "single_operator_budget",
+   "run_id": "sob1_train_ffn_attention_20261124_033254",
+   "root": "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254",
+   "n_files": 36,
+   "digest": "272e05e1a52ce486ec8ee4a4864e311ab993d1b37245cbcd4bc0ac00c0782fef",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "single_operator_budget",
+   "run_id": "sob1_train_residual_width_20261121_074426",
+   "root": "logs/stages/stage-1/single_operator_budget/runs/sob1_train_residual_width_20261121_074426",
+   "n_files": 36,
+   "digest": "0aa1aa381b929901c5fad15a0986dd07d946b2a13492e3b1154a56e801ceaa63",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {

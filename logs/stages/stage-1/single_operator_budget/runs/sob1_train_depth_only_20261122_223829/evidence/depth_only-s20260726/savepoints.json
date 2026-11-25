@@ -1,0 +1,674 @@
+[
+ {
+  "tag": "step_001104",
+  "step": 1104,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_001104",
+  "files_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "3acd286ef5e3d75bfe60a15c9a50beabb7ce4ab13a50017dd0c0e534ceffd3b9",
+   "trainer_state.pt": "c0d38a62f975d0a9df6e36e8dc44e5c4268cdd1cb4bed5efbba099257f3bc0e0",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b"
+  },
+  "bytes": {
+   "model/config.json": 1153,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8015427400,
+   "trainer_state.pt": 12919335335,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 19.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 114.2,
+  "downloaded_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "3acd286ef5e3d75bfe60a15c9a50beabb7ce4ab13a50017dd0c0e534ceffd3b9",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b",
+   "trainer_state.pt": "c0d38a62f975d0a9df6e36e8dc44e5c4268cdd1cb4bed5efbba099257f3bc0e0"
+  },
+  "verified": true,
+  "verify_seconds": 38.8,
+  "utc": "2026-11-23T00:21:19Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_001104",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_001104",
+    "files_sha256": {
+     "record.json": "e5b333896321e891f351d0e8009a0240318f54b962b87803af94cf4d23e6e163"
+    },
+    "verified": true,
+    "utc": "2026-11-23T00:21:20Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints",
+   "listed_present": 1,
+   "verified": true,
+   "utc": "2026-11-23T00:21:21Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-23T01:54:31Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_001104/model/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_001104/model/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_001104/model/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_001104/record.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_001104/resume_identity.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_001104/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 20934762735,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-23T01:54:31Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_002208",
+  "step": 2208,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_002208",
+  "files_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "8a0ea86bd9e18f77d5bdb379ed6219fdde3ee04d3c767dc38e5c4211c669d61a",
+   "trainer_state.pt": "e0e9167ee62b8fc488d775fe89fa8b157c5fb4bc54013f0f449dba8e2650a98f",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b"
+  },
+  "bytes": {
+   "model/config.json": 1153,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8015427400,
+   "trainer_state.pt": 12919335335,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 19.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 116.5,
+  "downloaded_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "8a0ea86bd9e18f77d5bdb379ed6219fdde3ee04d3c767dc38e5c4211c669d61a",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b",
+   "trainer_state.pt": "e0e9167ee62b8fc488d775fe89fa8b157c5fb4bc54013f0f449dba8e2650a98f"
+  },
+  "verified": true,
+  "verify_seconds": 37.6,
+  "utc": "2026-11-23T01:54:13Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_002208",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_002208",
+    "files_sha256": {
+     "record.json": "56f1e25950223176a81222a09e18dc8ee4e25b7f814fb908d18afa36aaf03060"
+    },
+    "verified": true,
+    "utc": "2026-11-23T01:54:15Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-23T01:54:16Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-23T03:25:41Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_002208/model/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_002208/model/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_002208/model/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_002208/record.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_002208/resume_identity.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_002208/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 20934762735,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-23T03:25:41Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_003312",
+  "step": 3312,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_003312",
+  "files_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "363f796ee6a5bb47d5b5e9535fbe4f92f8dd34a9b347ee4e819e4705c89849a0",
+   "trainer_state.pt": "feb3bf6cd9f0701501a83ffd7ec2d8de252b7e9b6672e24ccfef3f76602f40b5",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b"
+  },
+  "bytes": {
+   "model/config.json": 1153,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8015427400,
+   "trainer_state.pt": 12919335335,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 19.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 114.4,
+  "downloaded_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "363f796ee6a5bb47d5b5e9535fbe4f92f8dd34a9b347ee4e819e4705c89849a0",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b",
+   "trainer_state.pt": "feb3bf6cd9f0701501a83ffd7ec2d8de252b7e9b6672e24ccfef3f76602f40b5"
+  },
+  "verified": true,
+  "verify_seconds": 38.5,
+  "utc": "2026-11-23T03:25:23Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_003312",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_003312",
+    "files_sha256": {
+     "record.json": "b041cec0115a380ce12d5e8d586d381c44f86763957ed5623714e056a886fdca"
+    },
+    "verified": true,
+    "utc": "2026-11-23T03:25:24Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-23T03:25:25Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-23T04:56:48Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_003312/model/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_003312/model/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_003312/model/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_003312/record.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_003312/resume_identity.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_003312/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 20934762735,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-23T04:56:48Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_004416",
+  "step": 4416,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_004416",
+  "files_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "545e05db4bfb12942e17890e32f8f20d24b8f540b6eb25f51007ac5d48a003be",
+   "trainer_state.pt": "408953fd263269199d48e8bc65ce3e5addba841bef0ea29ea7a63288703a86e1",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b"
+  },
+  "bytes": {
+   "model/config.json": 1153,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8015427400,
+   "trainer_state.pt": 12919335335,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 19.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 113.2,
+  "downloaded_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "545e05db4bfb12942e17890e32f8f20d24b8f540b6eb25f51007ac5d48a003be",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b",
+   "trainer_state.pt": "408953fd263269199d48e8bc65ce3e5addba841bef0ea29ea7a63288703a86e1"
+  },
+  "verified": true,
+  "verify_seconds": 37.0,
+  "utc": "2026-11-23T04:56:30Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_004416",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_004416",
+    "files_sha256": {
+     "record.json": "9c4d1da604f841931a260df1f54d50cd348f30832321922dd71bddfbce73e6ca"
+    },
+    "verified": true,
+    "utc": "2026-11-23T04:56:31Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-23T04:56:32Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-23T06:27:58Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_004416/model/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_004416/model/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_004416/model/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_004416/record.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_004416/resume_identity.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_004416/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 20934762735,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-23T06:27:58Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_005520",
+  "step": 5520,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_005520",
+  "files_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "ac60a8aa38fcc8f9da9b7467275990c42af16d4441af24fa43a0548d10aa5dcb",
+   "trainer_state.pt": "759b3cbea53c5a9c86b28cbf7a1cfd1741373ad0ffed8f9718e4bf8150e8a880",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b"
+  },
+  "bytes": {
+   "model/config.json": 1153,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8015427400,
+   "trainer_state.pt": 12919335335,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 19.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 115.8,
+  "downloaded_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "ac60a8aa38fcc8f9da9b7467275990c42af16d4441af24fa43a0548d10aa5dcb",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b",
+   "trainer_state.pt": "759b3cbea53c5a9c86b28cbf7a1cfd1741373ad0ffed8f9718e4bf8150e8a880"
+  },
+  "verified": true,
+  "verify_seconds": 37.4,
+  "utc": "2026-11-23T06:27:40Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_005520",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_005520",
+    "files_sha256": {
+     "record.json": "24bd9e3f5bd30b084114fe0a59175e32ea00685039361e5411895615865f1548"
+    },
+    "verified": true,
+    "utc": "2026-11-23T06:27:41Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-23T06:27:42Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-23T07:59:07Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_005520/model/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_005520/model/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_005520/model/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_005520/record.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_005520/resume_identity.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_005520/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 20934762735,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-23T07:59:07Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_006624",
+  "step": 6624,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_006624",
+  "files_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "edea60e47b25021019bdea363cf8610932d2a04b1b31aceaf920de46a15273fe",
+   "trainer_state.pt": "03954cefb1af20de0430574f77ff0f282390f47810dc447e5624fccf11b120e3",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b"
+  },
+  "bytes": {
+   "model/config.json": 1153,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8015427400,
+   "trainer_state.pt": 12919335335,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 19.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 115.4,
+  "downloaded_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "edea60e47b25021019bdea363cf8610932d2a04b1b31aceaf920de46a15273fe",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b",
+   "trainer_state.pt": "03954cefb1af20de0430574f77ff0f282390f47810dc447e5624fccf11b120e3"
+  },
+  "verified": true,
+  "verify_seconds": 37.1,
+  "utc": "2026-11-23T07:58:49Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_006624",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_006624",
+    "files_sha256": {
+     "record.json": "73ca7928ea2a42496e8be1246a1c78e46ad1aae6a61cf2839d1bc917bf2a4da8"
+    },
+    "verified": true,
+    "utc": "2026-11-23T07:58:51Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-23T07:58:52Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-23T09:30:26Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_006624/model/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_006624/model/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_006624/model/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_006624/record.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_006624/resume_identity.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_006624/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 20934762735,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-23T09:30:26Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_007728",
+  "step": 7728,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_007728",
+  "files_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "c64f15ba4efacc61c115053cc01c93523abd031a77f1d293c2601623ba94b843",
+   "trainer_state.pt": "6afcb9fc2721b84e7aa63a2e3be65002b96111052dcadb0f854e5d20db221254",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b"
+  },
+  "bytes": {
+   "model/config.json": 1153,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8015427400,
+   "trainer_state.pt": 12919335335,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 19.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 116.0,
+  "downloaded_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "c64f15ba4efacc61c115053cc01c93523abd031a77f1d293c2601623ba94b843",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b",
+   "trainer_state.pt": "6afcb9fc2721b84e7aa63a2e3be65002b96111052dcadb0f854e5d20db221254"
+  },
+  "verified": true,
+  "verify_seconds": 45.8,
+  "utc": "2026-11-23T09:30:07Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_007728",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_007728",
+    "files_sha256": {
+     "record.json": "683eba3961ff90cfda0ee398441f54169a3bee262dba66b5eb6c738eee30c5d1"
+    },
+    "verified": true,
+    "utc": "2026-11-23T09:30:09Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-23T09:30:10Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-23T11:01:38Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_007728/model/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_007728/model/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_007728/model/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_007728/record.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_007728/resume_identity.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_007728/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 20934762735,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-23T11:01:38Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_008832",
+  "step": 8832,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_008832",
+  "files_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "e138101fba42de7e3767abc371a72e1134e72b439a759380ef656cabc117f3de",
+   "trainer_state.pt": "6913b9c6b3778f257dff67e81624cf66843ed9b9d89093f38972361258bd3091",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b"
+  },
+  "bytes": {
+   "model/config.json": 1153,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8015427400,
+   "trainer_state.pt": 12919335335,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 19.50 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 117.4,
+  "downloaded_sha256": {
+   "model/config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "e138101fba42de7e3767abc371a72e1134e72b439a759380ef656cabc117f3de",
+   "resume_identity.json": "129f232ed163af4e6bc25bb2f8480ee7cff22f3fdd788e1fd61af4adc9e1d58b",
+   "trainer_state.pt": "6913b9c6b3778f257dff67e81624cf66843ed9b9d89093f38972361258bd3091"
+  },
+  "verified": true,
+  "verify_seconds": 37.8,
+  "utc": "2026-11-23T11:01:20Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_008832",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_008832",
+    "files_sha256": {
+     "record.json": "197be84e386d081783ef5ef76d9ce0ac268e7f31d634108aa71372cf2c25a294"
+    },
+    "verified": true,
+    "utc": "2026-11-23T11:01:21Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-23T11:01:22Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-23T12:13:13Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_008832/model/config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_008832/model/generation_config.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_008832/model/model.safetensors",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_008832/record.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_008832/resume_identity.json",
+    "durable/stage1_single_operator_budget/depth_only/depth_only-s20260726/savepoints/step_008832/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 20934762735,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-23T12:13:13Z",
+   "verified": true
+  }
+ }
+]

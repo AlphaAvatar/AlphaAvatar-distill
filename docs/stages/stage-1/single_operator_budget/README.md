@@ -1,18 +1,38 @@
 # Single-operator compression at the same parameter budget (SOB1)
 
-Stage 1 owns this round; its training is `stage3_recovery`. Status: **phase 1 COMPLETE and closed in code
-(2026-11-20 UTC); phase 2 prepared at $0. The second brief of 2026-11-20 fixed its four takeover and launch defects
-and inventoried the project's storage. The third brief cleaned this project's dev-box files (10.73 GiB freed), set a
-placement for the finals without a larger disk, and fixed the free relay's two interruptions. On the maintainer's
-decision the dev box's demo service was then retired and its two logs deleted (39.30 GiB freed): every launch now
-fits with the measured swing kept free. Waiting for the maintainer**: the project cap and phase 2's grant are owed
-(section 10). The maintainer fixed the protocol on 2026-11-19 (UTC), corrected the preparation three times the
-same day and granted phase 1 (`logs/budget/decisions.md`, the 2026-11-19 entries). Phase 1 ran once,
-`sob1_phase1_20261119_194259`: one L40S, 239.6 min, $4.4348 all-in of the $22.92 cap, the pod deleted and confirmed
-gone; `study_completion.status` COMPLETE (`runs/sob1_phase1_20261119_194259/closeout/phase1_completion.json`), the
-three initializations and mappings re-hashed on the dev box (`storage/local_retention.json`) and kept on the relay
-for phase 2 (`decisions.md :: 2026-11-20 (UTC) — SOB1 phase 1 COMPLETE`). Branch `research/reasoning-inheritance`,
-not merged to `main`.
+Stage 1 owns this round; its training is `stage3_recovery`. Status: **COMPLETE (2026-11-25 UTC): phase 1 and phase 2
+both complete and closed in code. The report is [`REPORT.md`](REPORT.md)**; not merged into `main` (the maintainer
+decides after reviewing it).
+
+**Phase 2's result** (`results/study_completion.json`, the registered decision, formal in both modes). The scope is
+eval-set-1's static fluid formal core: 570 items in 558 groups, both seeds pooled, Holm with m = 3 per mode.
+
+| mode | FFN + attention | residual width | depth | FFN + attention − width | FFN + attention − depth | width − depth |
+| --- | ---: | ---: | ---: | --- | --- | --- |
+| thinking (primary) | 32.72% | 29.56% | 16.75% | +3.16 pp [+0.35, +6.03], p 0.031: higher | +15.96 pp, p < 0.0001: higher | +12.81 pp, p < 0.0001: higher |
+| non-thinking (second family) | 29.82% | 31.75% | 17.54% | −1.93 pp [−4.44, +0.54], p 0.160: NOT_DISTINGUISHED | +12.28 pp, p < 0.0001: higher | +14.21 pp, p < 0.0001: higher |
+
+The teacher scores 85.79% / 70.53%, and every untrained arm 0%.
+
+**Phase-2 execution.** Three sessions ran once each, in order, on one L40S at $1.09/h:
+* residual width `sob1_train_residual_width_20261121_074426`, $42.6771;
+* depth `sob1_train_depth_only_20261122_223829`, $31.6179;
+* FFN + attention `sob1_train_ffn_attention_20261124_033254`, $37.7671.
+
+Together that is $112.0621 of the $185.87 ceiling. No session hit an out-of-memory error, and every pod was deleted
+and confirmed gone. The `sob1_train` kind is closed in its grant (`kinds.sob1_train.closed`); the remainder lapses.
+
+**Where the finals are.** Residual width's and depth's four finals are on the dev box; FFN + attention's two are on
+the relay (REPORT.md section 8).
+
+**Phase 1 (history).** Phase 1 was granted on 2026-11-19 and ran once, `sob1_phase1_20261119_194259`: one L40S,
+239.6 min, $4.4348 all-in of the $22.92 cap, the pod deleted and confirmed gone.
+* `study_completion.status` COMPLETE (`runs/sob1_phase1_20261119_194259/closeout/phase1_completion.json`).
+* The three initializations and mappings were re-hashed on the dev box (`storage/local_retention.json`) and kept on
+  the relay for phase 2 (`decisions.md :: 2026-11-20 (UTC) — SOB1 phase 1 COMPLETE`).
+* Phase 2 was prepared at $0 over three briefs on 2026-11-20 and granted on 2026-11-21
+  (`decisions.md :: 2026-11-21 (UTC) — SOB1 phase 2 GRANTED`). The sections below describe that preparation as it
+  was.
 
 **Phase 1's comparison** (`runs/sob1_phase1_20261119_194259/evidence/comparison/comparison.md`, descriptive: no arm is
 ranked or eliminated by it). Static fluid formal core, 570 items (558 groups), 95% group-bootstrap intervals:
@@ -798,6 +818,13 @@ The first dry run (`plans/dry_run_20261119.json`, commit `f56b72c0`) found the p
 runner's all-in; that was fixed then (`test_the_hard_cap_is_the_runners_all_in`).
 
 ## 10. Decisions for the maintainer
+
+**Open, 2026-11-25:**
+* the review of [`REPORT.md`](REPORT.md) and whether to integrate the branch into `main` (squash, P12.2);
+* the three phase-1 initializations (dev box and relay) are kept. AGENTS.md 2.5 would retire them once no later
+  round declares a use for them.
+
+**Closed:**
 
 1. ~~Grant phase 1~~: granted 2026-11-19 and COMPLETE 2026-11-20 ($4.4348 of $22.92). Closed in code the same day
    (the grant's `kinds.sob1_phase1.closed`): `issue` and `launch` refuse it and its $18.4852 remainder is void.

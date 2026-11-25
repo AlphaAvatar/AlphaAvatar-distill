@@ -135,14 +135,17 @@ CLASSIFY: dict[str, dict] = {
                        "bit against the journal)",
         reconstruction_cost="one L40S, about 25 min", disposition="keep"),
     #: SOB1's three phase-1 initializations and mappings, retained from the relay (launch.py retain; logs/stages/stage-1/
-    #: single_operator_budget/storage/local_retention.json); phase 2's plans read their relay copies, and the dev box
-    #: holds the durable local ones. Phase 2's finals land under the same root (<arm>-s<seed>/final/).
+    #: single_operator_budget/storage/local_retention.json), and phase 2's residual-width and depth finals
+    #: (<arm>-s<seed>/final/; storage/local_retention_phase2.json). FFN + attention's finals are on the relay only.
     "aad-artifacts/stage1_single_operator_budget/": dict(
         experiment="SOB1", role="a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
         retention="reproducibility_required", status="active",
-        why="phase 2 trains each arm from its initialization (plans/training_plan_<arm>.json); a final is a measured "
-            "endpoint of the study",
-        never_delete="SOB1 is open: its phase 2 consumes the initializations, and its finals are the study's endpoints",
+        why="the initializations are the inputs of phase 2's six recovery runs (plans/training_plan_<arm>.json); a "
+            "final is a measured endpoint of the completed study (results/study_completion.json, 2026-11-25 COMPLETE)",
+        never_delete="the four finals here are their only copies (relay copies retired, tombstones "
+                     "relay_sob1_train_*) and the endpoints the report measured; the initializations are what a rerun "
+                     "or a follow-up recovery would read: any retirement waits for the maintainer's review of the "
+                     "phase-2 report",
         reconstruction="phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
         reconstruction_cost="one L40S, 0.2-1.5 h per arm", disposition="keep"),
     #: RI-LM1's candidates were kept as span-block deltas over D; both deltas (and their second hard links) were retired

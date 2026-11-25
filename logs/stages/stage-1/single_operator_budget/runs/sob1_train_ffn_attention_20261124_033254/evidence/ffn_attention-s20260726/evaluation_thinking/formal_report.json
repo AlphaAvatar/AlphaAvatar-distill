@@ -1,0 +1,1252 @@
+{
+ "schema": "aadistill.eval_set_report/v2",
+ "label": "ffn_attention_s20260726",
+ "eval_set_id": "eval-set-1",
+ "eval_set_identity": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+ "eval_set_status": "frozen",
+ "created_utc": "2026-11-24T20:24:13+00:00",
+ "formal_core": {
+  "rule": "formal measurement generates EVERY item of every unit; the formal numbers are computed on the core: fluid_reasoning_720 validity_v1 (714 items), every capability unit except knowledge (TriviaQA, supplementary), eval_behavior_v0 without the xLAM prompts (and without the four Stage-2 train overlaps in held-out correctness), and stage3_legacy_150 only as in-sample regression. A non-core unit or row is reported beside, never inside, a formal number.",
+  "scoring": "each component's scorer.formal_protocol (v2)"
+ },
+ "units": {
+  "fluid_reasoning_720/dev_v1": {
+   "status": "measured",
+   "in_formal_core": true,
+   "protocol": "v2",
+   "n": 714,
+   "missing": 0,
+   "headline": "correct",
+   "n_items": 714,
+   "correct": 204,
+   "rate": 0.2857,
+   "n_independent": 702,
+   "rate_independent": 0.2835,
+   "excluded_from_formal": {
+    "validity: ambiguous_rule": 2,
+    "validity: answer_leak": 1,
+    "validity: unanswerable": 1,
+    "validity: underdetermined": 1,
+    "validity: wrong_gold": 1
+   },
+   "all_registered_items": {
+    "headline": "correct",
+    "n_items": 720,
+    "correct": 205,
+    "rate": 0.2847,
+    "n_independent": 708,
+    "rate_independent": 0.2825
+   }
+  },
+  "stage3_capability_846/math_verified": {
+   "status": "measured",
+   "in_formal_core": true,
+   "protocol": "v2",
+   "n": 100,
+   "missing": 0,
+   "headline": "correct",
+   "headline_value": 0.03,
+   "n_items": 100,
+   "metrics": {
+    "n": 100,
+    "correct": 0.03,
+    "answer_matches_ignoring_protocol": 0.03,
+    "protocol_valid_rate": 0.48,
+    "natural_termination_rate": 0.48,
+    "degeneration_rate": 0.27,
+    "reasons": {
+     "protocol:not_terminated": 52,
+     "answer_mismatch": 45,
+     "ok": 3
+    },
+    "verification_paths": {
+     "no_boxed": 52,
+     "numeric": 29,
+     "normalized_string": 12,
+     "rational": 4,
+     "symbolic": 3
+    }
+   }
+  },
+  "stage3_capability_846/gsm8k": {
+   "status": "measured",
+   "in_formal_core": true,
+   "protocol": "v2",
+   "n": 100,
+   "missing": 0,
+   "headline": "correct",
+   "headline_value": 0.34,
+   "n_items": 100,
+   "metrics": {
+    "n": 100,
+    "correct": 0.34,
+    "answer_matches_ignoring_protocol": 0.34,
+    "protocol_valid_rate": 0.93,
+    "natural_termination_rate": 0.93,
+    "degeneration_rate": 0.07,
+    "reasons": {
+     "answer_mismatch": 59,
+     "ok": 34,
+     "protocol:not_terminated": 7
+    }
+   }
+  },
+  "stage3_capability_846/multihop": {
+   "status": "measured",
+   "in_formal_core": true,
+   "protocol": "v2",
+   "n": 100,
+   "missing": 0,
+   "headline": "correct",
+   "headline_value": 0.64,
+   "n_items": 100,
+   "metrics": {
+    "n": 100,
+    "correct": 0.64,
+    "answer_matches_ignoring_protocol": 0.64,
+    "protocol_valid_rate": 0.93,
+    "natural_termination_rate": 0.93,
+    "degeneration_rate": 0.07,
+    "reasons": {
+     "ok": 64,
+     "answer_mismatch": 29,
+     "protocol:not_terminated": 7
+    },
+    "evidence_recall": 0.655,
+    "answer_f1": 0.1113
+   }
+  },
+  "stage3_capability_846/rag": {
+   "status": "measured",
+   "in_formal_core": true,
+   "protocol": "v2",
+   "n": 100,
+   "missing": 0,
+   "headline": "correct",
+   "headline_value": 0.62,
+   "n_items": 100,
+   "metrics": {
+    "n": 100,
+    "correct": 0.62,
+    "answer_matches_ignoring_protocol": 0.71,
+    "protocol_valid_rate": 0.95,
+    "natural_termination_rate": 0.95,
+    "degeneration_rate": 0.05,
+    "reasons": {
+     "ok": 62,
+     "echoed": 18,
+     "answer_mismatch": 15,
+     "protocol:not_terminated": 5
+    },
+    "evidence_attributed_rate": 0.7,
+    "unsupported_claim_rate": 0.0764,
+    "echo_rate": 0.19,
+    "answer_f1": 0.2531
+   }
+  },
+  "stage3_capability_846/answerability_paired": {
+   "status": "measured",
+   "in_formal_core": true,
+   "protocol": "v2",
+   "n": 120,
+   "missing": 0,
+   "headline": "pair_correct",
+   "headline_value": 0.1,
+   "n_items": 120,
+   "metrics": {
+    "n": 120,
+    "correct": 0.4583,
+    "answer_matches_ignoring_protocol": 0.4583,
+    "protocol_valid_rate": 0.95,
+    "natural_termination_rate": 0.95,
+    "degeneration_rate": 0.05,
+    "reasons": {
+     "ok": 55,
+     "answered_unanswerable": 46,
+     "answer_mismatch": 13,
+     "protocol:not_terminated": 6
+    },
+    "pairs": 60,
+    "pair_correct": 0.1,
+    "answerable_correct": 0.7833,
+    "negative_half_correct": 0.1333,
+    "refusal_rate_on_answerable": 0,
+    "incomplete_pairs": 0
+   }
+  },
+  "stage3_capability_846/safety_paired": {
+   "status": "measured",
+   "in_formal_core": true,
+   "protocol": "v2",
+   "n": 100,
+   "missing": 0,
+   "headline": "pair_correct",
+   "headline_value": 0,
+   "n_items": 100,
+   "metrics": {
+    "n": 100,
+    "correct": 0.34,
+    "answer_matches_ignoring_protocol": 0.34,
+    "protocol_valid_rate": 0.61,
+    "natural_termination_rate": 0.62,
+    "degeneration_rate": 0.38,
+    "reasons": {
+     "protocol:not_terminated": 38,
+     "ok": 34,
+     "complied_with_unsafe": 27,
+     "protocol:think_delimiters_invalid": 1
+    },
+    "pairs": 50,
+    "pair_correct": 0,
+    "benign_correct": 0.68,
+    "negative_half_correct": 0,
+    "refusal_rate_on_benign": 0,
+    "incomplete_pairs": 0
+   }
+  },
+  "stage3_capability_846/knowledge": {
+   "status": "measured",
+   "in_formal_core": false,
+   "protocol": "v2",
+   "n": 150,
+   "missing": 0,
+   "headline": "correct",
+   "headline_value": 0.0267,
+   "n_items": 150,
+   "metrics": {
+    "n": 150,
+    "correct": 0.0267,
+    "answer_matches_ignoring_protocol": 0.0267,
+    "protocol_valid_rate": 0.66,
+    "natural_termination_rate": 0.66,
+    "degeneration_rate": 0.34,
+    "reasons": {
+     "answer_mismatch": 95,
+     "protocol:not_terminated": 51,
+     "ok": 4
+    }
+   }
+  },
+  "stage3_capability_846/eval_behavior_v0": {
+   "status": "measured",
+   "in_formal_core": true,
+   "protocol": "v2",
+   "n": 65,
+   "missing": 0,
+   "headline": null,
+   "n_items": 65,
+   "metrics": {
+    "overall": {
+     "n": 65,
+     "terminated": 0.7385,
+     "truncated_at_cap": 0.2615,
+     "think_closed": 0.7538,
+     "think_immediate": 0.0,
+     "no_stray_markers": 0.7692,
+     "format_ok": 0.7385,
+     "empty_answer": 0.2462,
+     "answer_is_echo": 0.1692,
+     "echo_4gram": 0.2125,
+     "rep_3gram": 0.0205,
+     "answer_words": 35.8769
+    },
+    "by_group": {
+     "code_math": {
+      "n": 10,
+      "terminated": 0.6,
+      "truncated_at_cap": 0.4,
+      "think_closed": 0.6,
+      "think_immediate": 0.0,
+      "no_stray_markers": 0.6,
+      "format_ok": 0.6,
+      "empty_answer": 0.4,
+      "echo_4gram": 0.0317,
+      "rep_3gram": 0.0518,
+      "answer_words": 66.6,
+      "answer_is_echo": 0.0,
+      "answer_em": 0.2857,
+      "answer_em_credited": 0.2857
+     },
+     "instruction": {
+      "n": 12,
+      "terminated": 0.3333,
+      "truncated_at_cap": 0.6667,
+      "think_closed": 0.4167,
+      "think_immediate": 0.0,
+      "no_stray_markers": 0.4167,
+      "format_ok": 0.3333,
+      "empty_answer": 0.5833,
+      "echo_4gram": 0.0754,
+      "rep_3gram": 0.0372,
+      "answer_words": 51.1667,
+      "answer_is_echo": 0.0833
+     },
+     "multihop_qa": {
+      "n": 4,
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "think_immediate": 0.0,
+      "no_stray_markers": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "echo_4gram": 0.3668,
+      "rep_3gram": 0.0254,
+      "answer_words": 25.5,
+      "answer_is_echo": 0.5,
+      "evidence_hit": 0.75,
+      "evidence_hit_credited": 0.5
+     },
+     "rag_evidence": {
+      "n": 12,
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "think_immediate": 0.0,
+      "no_stray_markers": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "echo_4gram": 0.364,
+      "rep_3gram": 0.0125,
+      "answer_words": 23.75,
+      "answer_is_echo": 0.1667,
+      "evidence_hit": 0.9167,
+      "evidence_hit_credited": 0.75
+     },
+     "refusal_uncertainty": {
+      "n": 12,
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "think_immediate": 0.0,
+      "no_stray_markers": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "echo_4gram": 0.4387,
+      "rep_3gram": 0.004,
+      "answer_words": 21.0833,
+      "answer_is_echo": 0.4167,
+      "refusal": 0.0833,
+      "refusal_credited": 0.0833
+     },
+     "short_realtime": {
+      "n": 10,
+      "terminated": 0.5,
+      "truncated_at_cap": 0.5,
+      "think_closed": 0.5,
+      "think_immediate": 0.0,
+      "no_stray_markers": 0.6,
+      "format_ok": 0.5,
+      "empty_answer": 0.5,
+      "echo_4gram": 0.1119,
+      "rep_3gram": 0.007,
+      "answer_words": 34.0,
+      "answer_is_echo": 0.1
+     },
+     "tool_calling": {
+      "n": 5,
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "think_immediate": 0.0,
+      "no_stray_markers": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "echo_4gram": 0.075,
+      "rep_3gram": 0.0,
+      "answer_words": 14.4,
+      "answer_is_echo": 0.0,
+      "tool_call_emitted": 1.0,
+      "tool_call_parsed": 1.0,
+      "tool_name_valid": 1.0,
+      "tool_args_schema_ok": 1.0,
+      "tool_call_exact_match": 1.0
+     }
+    },
+    "stray_marker_counts": {
+     "<think>": 15
+    }
+   },
+   "excluded_from_formal": {
+    "outside held-out correctness (training overlap)": 4,
+    "outside the formal core": 7
+   },
+   "all_registered_items": {
+    "headline": null,
+    "n_items": 76,
+    "metrics": {
+     "overall": {
+      "n": 76,
+      "terminated": 0.7632,
+      "truncated_at_cap": 0.2368,
+      "think_closed": 0.7632,
+      "think_immediate": 0.0,
+      "no_stray_markers": 0.7895,
+      "format_ok": 0.75,
+      "empty_answer": 0.2237,
+      "answer_is_echo": 0.1447,
+      "echo_4gram": 0.1872,
+      "rep_3gram": 0.0239,
+      "answer_words": 36.8289
+     },
+     "by_group": {
+      "code_math": {
+       "n": 12,
+       "terminated": 0.5833,
+       "truncated_at_cap": 0.4167,
+       "think_closed": 0.5833,
+       "think_immediate": 0.0,
+       "no_stray_markers": 0.5833,
+       "format_ok": 0.5833,
+       "empty_answer": 0.4167,
+       "echo_4gram": 0.033,
+       "rep_3gram": 0.0526,
+       "answer_words": 65.25,
+       "answer_is_echo": 0.0,
+       "answer_em": 0.2857,
+       "answer_em_credited": 0.2857
+      },
+      "instruction": {
+       "n": 12,
+       "terminated": 0.3333,
+       "truncated_at_cap": 0.6667,
+       "think_closed": 0.4167,
+       "think_immediate": 0.0,
+       "no_stray_markers": 0.4167,
+       "format_ok": 0.3333,
+       "empty_answer": 0.5833,
+       "echo_4gram": 0.0754,
+       "rep_3gram": 0.0372,
+       "answer_words": 51.1667,
+       "answer_is_echo": 0.0833
+      },
+      "multihop_qa": {
+       "n": 4,
+       "terminated": 1.0,
+       "truncated_at_cap": 0.0,
+       "think_closed": 1.0,
+       "think_immediate": 0.0,
+       "no_stray_markers": 1.0,
+       "format_ok": 1.0,
+       "empty_answer": 0.0,
+       "echo_4gram": 0.3668,
+       "rep_3gram": 0.0254,
+       "answer_words": 25.5,
+       "answer_is_echo": 0.5,
+       "evidence_hit": 0.75,
+       "evidence_hit_credited": 0.5
+      },
+      "rag_evidence": {
+       "n": 12,
+       "terminated": 1.0,
+       "truncated_at_cap": 0.0,
+       "think_closed": 1.0,
+       "think_immediate": 0.0,
+       "no_stray_markers": 1.0,
+       "format_ok": 1.0,
+       "empty_answer": 0.0,
+       "echo_4gram": 0.364,
+       "rep_3gram": 0.0125,
+       "answer_words": 23.75,
+       "answer_is_echo": 0.1667,
+       "evidence_hit": 0.9167,
+       "evidence_hit_credited": 0.75
+      },
+      "refusal_uncertainty": {
+       "n": 12,
+       "terminated": 1.0,
+       "truncated_at_cap": 0.0,
+       "think_closed": 1.0,
+       "think_immediate": 0.0,
+       "no_stray_markers": 1.0,
+       "format_ok": 1.0,
+       "empty_answer": 0.0,
+       "echo_4gram": 0.4387,
+       "rep_3gram": 0.004,
+       "answer_words": 21.0833,
+       "answer_is_echo": 0.4167,
+       "refusal": 0.0833,
+       "refusal_credited": 0.0833
+      },
+      "short_realtime": {
+       "n": 12,
+       "terminated": 0.5833,
+       "truncated_at_cap": 0.4167,
+       "think_closed": 0.5,
+       "think_immediate": 0.0,
+       "no_stray_markers": 0.6667,
+       "format_ok": 0.5,
+       "empty_answer": 0.4167,
+       "echo_4gram": 0.121,
+       "rep_3gram": 0.0106,
+       "answer_words": 44.75,
+       "answer_is_echo": 0.0833
+      },
+      "tool_calling": {
+       "n": 12,
+       "terminated": 1.0,
+       "truncated_at_cap": 0.0,
+       "think_closed": 1.0,
+       "think_immediate": 0.0,
+       "no_stray_markers": 1.0,
+       "format_ok": 1.0,
+       "empty_answer": 0.0,
+       "echo_4gram": 0.0312,
+       "rep_3gram": 0.0259,
+       "answer_words": 18.75,
+       "answer_is_echo": 0.0,
+       "tool_call_emitted": 1.0,
+       "tool_call_parsed": 1.0,
+       "tool_name_valid": 1.0,
+       "tool_args_schema_ok": 1.0,
+       "tool_call_exact_match": 0.8333
+      }
+     },
+     "stray_marker_counts": {
+      "<think>": 16
+     }
+    }
+   }
+  },
+  "stage3_legacy_150/items": {
+   "status": "measured",
+   "in_formal_core": true,
+   "protocol": "v2",
+   "n": 150,
+   "missing": 0,
+   "headline": "correct",
+   "n_items": 150,
+   "correct": 96,
+   "rate": 0.64,
+   "n_independent": 150,
+   "rate_independent": 0.64
+  }
+ },
+ "capabilities": {
+  "fluid.abstract_analogical": {
+   "status": "measured",
+   "units": {
+    "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 95,
+     "correct": 7,
+     "rate": 0.0737
+    }
+   }
+  },
+  "fluid.compositional_generalization": {
+   "status": "measured",
+   "units": {
+    "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 144,
+     "correct": 73,
+     "rate": 0.5069
+    }
+   }
+  },
+  "fluid.inductive_rule_discovery": {
+   "status": "measured",
+   "units": {
+    "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 142,
+     "correct": 38,
+     "rate": 0.2676
+    }
+   }
+  },
+  "fluid.interactive_adaptation": {
+   "status": "measured",
+   "units": {
+    "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 144,
+     "correct": 8,
+     "rate": 0.0556
+    }
+   }
+  },
+  "fluid.task_contained_deduction": {
+   "status": "measured",
+   "units": {
+    "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 189,
+     "correct": 78,
+     "rate": 0.4127
+    }
+   }
+  },
+  "supporting.closed_book_knowledge": {
+   "status": "measured",
+   "units": {
+    "stage3_capability_846/knowledge": {
+     "status": "measured",
+     "in_formal_core": false,
+     "protocol": "v2",
+     "n": 150,
+     "missing": 0,
+     "headline": "correct",
+     "headline_value": 0.0267,
+     "n_items": 150,
+     "metrics": {
+      "n": 150,
+      "correct": 0.0267,
+      "answer_matches_ignoring_protocol": 0.0267,
+      "protocol_valid_rate": 0.66,
+      "natural_termination_rate": 0.66,
+      "degeneration_rate": 0.34,
+      "reasons": {
+       "answer_mismatch": 95,
+       "protocol:not_terminated": 51,
+       "ok": 4
+      }
+     }
+    }
+   }
+  },
+  "supporting.math_mixed": {
+   "status": "measured",
+   "units": {
+    "stage3_capability_846/math_verified": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 100,
+     "missing": 0,
+     "headline": "correct",
+     "headline_value": 0.03,
+     "n_items": 100,
+     "metrics": {
+      "n": 100,
+      "correct": 0.03,
+      "answer_matches_ignoring_protocol": 0.03,
+      "protocol_valid_rate": 0.48,
+      "natural_termination_rate": 0.48,
+      "degeneration_rate": 0.27,
+      "reasons": {
+       "protocol:not_terminated": 52,
+       "answer_mismatch": 45,
+       "ok": 3
+      },
+      "verification_paths": {
+       "no_boxed": 52,
+       "numeric": 29,
+       "normalized_string": 12,
+       "rational": 4,
+       "symbolic": 3
+      }
+     }
+    },
+    "stage3_capability_846/gsm8k": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 100,
+     "missing": 0,
+     "headline": "correct",
+     "headline_value": 0.34,
+     "n_items": 100,
+     "metrics": {
+      "n": 100,
+      "correct": 0.34,
+      "answer_matches_ignoring_protocol": 0.34,
+      "protocol_valid_rate": 0.93,
+      "natural_termination_rate": 0.93,
+      "degeneration_rate": 0.07,
+      "reasons": {
+       "answer_mismatch": 59,
+       "ok": 34,
+       "protocol:not_terminated": 7
+      }
+     }
+    }
+   }
+  },
+  "grounded.multihop_evidence_reasoning": {
+   "status": "measured",
+   "units": {
+    "stage3_capability_846/multihop": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 100,
+     "missing": 0,
+     "headline": "correct",
+     "headline_value": 0.64,
+     "n_items": 100,
+     "metrics": {
+      "n": 100,
+      "correct": 0.64,
+      "answer_matches_ignoring_protocol": 0.64,
+      "protocol_valid_rate": 0.93,
+      "natural_termination_rate": 0.93,
+      "degeneration_rate": 0.07,
+      "reasons": {
+       "ok": 64,
+       "answer_mismatch": 29,
+       "protocol:not_terminated": 7
+      },
+      "evidence_recall": 0.655,
+      "answer_f1": 0.1113
+     }
+    }
+   }
+  },
+  "grounded.rag_reading": {
+   "status": "measured",
+   "units": {
+    "stage3_capability_846/rag": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 100,
+     "missing": 0,
+     "headline": "correct",
+     "headline_value": 0.62,
+     "n_items": 100,
+     "metrics": {
+      "n": 100,
+      "correct": 0.62,
+      "answer_matches_ignoring_protocol": 0.71,
+      "protocol_valid_rate": 0.95,
+      "natural_termination_rate": 0.95,
+      "degeneration_rate": 0.05,
+      "reasons": {
+       "ok": 62,
+       "echoed": 18,
+       "answer_mismatch": 15,
+       "protocol:not_terminated": 5
+      },
+      "evidence_attributed_rate": 0.7,
+      "unsupported_claim_rate": 0.0764,
+      "echo_rate": 0.19,
+      "answer_f1": 0.2531
+     }
+    }
+   }
+  },
+  "uncertainty.evidence_conditioned_abstention": {
+   "status": "measured",
+   "units": {
+    "stage3_capability_846/answerability_paired": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 120,
+     "missing": 0,
+     "headline": "pair_correct",
+     "headline_value": 0.1,
+     "n_items": 120,
+     "metrics": {
+      "n": 120,
+      "correct": 0.4583,
+      "answer_matches_ignoring_protocol": 0.4583,
+      "protocol_valid_rate": 0.95,
+      "natural_termination_rate": 0.95,
+      "degeneration_rate": 0.05,
+      "reasons": {
+       "ok": 55,
+       "answered_unanswerable": 46,
+       "answer_mismatch": 13,
+       "protocol:not_terminated": 6
+      },
+      "pairs": 60,
+      "pair_correct": 0.1,
+      "answerable_correct": 0.7833,
+      "negative_half_correct": 0.1333,
+      "refusal_rate_on_answerable": 0,
+      "incomplete_pairs": 0
+     }
+    }
+   }
+  },
+  "safety.refusal": {
+   "status": "measured",
+   "units": {
+    "stage3_capability_846/safety_paired": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 100,
+     "missing": 0,
+     "headline": "pair_correct",
+     "headline_value": 0,
+     "n_items": 100,
+     "metrics": {
+      "n": 100,
+      "correct": 0.34,
+      "answer_matches_ignoring_protocol": 0.34,
+      "protocol_valid_rate": 0.61,
+      "natural_termination_rate": 0.62,
+      "degeneration_rate": 0.38,
+      "reasons": {
+       "protocol:not_terminated": 38,
+       "ok": 34,
+       "complied_with_unsafe": 27,
+       "protocol:think_delimiters_invalid": 1
+      },
+      "pairs": 50,
+      "pair_correct": 0,
+      "benign_correct": 0.68,
+      "negative_half_correct": 0,
+      "refusal_rate_on_benign": 0,
+      "incomplete_pairs": 0
+     }
+    }
+   }
+  },
+  "tool_use.function_calling": {
+   "status": "measured",
+   "units": {
+    "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 5,
+     "metrics": {
+      "overall": {
+       "n": 5,
+       "terminated": 1.0,
+       "truncated_at_cap": 0.0,
+       "think_closed": 1.0,
+       "think_immediate": 0.0,
+       "no_stray_markers": 1.0,
+       "format_ok": 1.0,
+       "empty_answer": 0.0,
+       "answer_is_echo": 0.0,
+       "echo_4gram": 0.075,
+       "rep_3gram": 0.0,
+       "answer_words": 14.4
+      },
+      "by_group": {
+       "tool_calling": {
+        "n": 5,
+        "terminated": 1.0,
+        "truncated_at_cap": 0.0,
+        "think_closed": 1.0,
+        "think_immediate": 0.0,
+        "no_stray_markers": 1.0,
+        "format_ok": 1.0,
+        "empty_answer": 0.0,
+        "echo_4gram": 0.075,
+        "rep_3gram": 0.0,
+        "answer_words": 14.4,
+        "answer_is_echo": 0.0,
+        "tool_call_emitted": 1.0,
+        "tool_call_parsed": 1.0,
+        "tool_name_valid": 1.0,
+        "tool_args_schema_ok": 1.0,
+        "tool_call_exact_match": 1.0
+       }
+      },
+      "stray_marker_counts": {}
+     }
+    }
+   }
+  },
+  "interaction.instruction_and_realtime": {
+   "status": "measured",
+   "units": {
+    "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 12,
+     "metrics": {
+      "overall": {
+       "n": 12,
+       "terminated": 0.3333,
+       "truncated_at_cap": 0.6667,
+       "think_closed": 0.4167,
+       "think_immediate": 0.0,
+       "no_stray_markers": 0.4167,
+       "format_ok": 0.3333,
+       "empty_answer": 0.5833,
+       "answer_is_echo": 0.0833,
+       "echo_4gram": 0.0754,
+       "rep_3gram": 0.0372,
+       "answer_words": 51.1667
+      },
+      "by_group": {
+       "instruction": {
+        "n": 12,
+        "terminated": 0.3333,
+        "truncated_at_cap": 0.6667,
+        "think_closed": 0.4167,
+        "think_immediate": 0.0,
+        "no_stray_markers": 0.4167,
+        "format_ok": 0.3333,
+        "empty_answer": 0.5833,
+        "echo_4gram": 0.0754,
+        "rep_3gram": 0.0372,
+        "answer_words": 51.1667,
+        "answer_is_echo": 0.0833
+       }
+      },
+      "stray_marker_counts": {
+       "<think>": 7
+      }
+     }
+    },
+    "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 10,
+     "metrics": {
+      "overall": {
+       "n": 10,
+       "terminated": 0.5,
+       "truncated_at_cap": 0.5,
+       "think_closed": 0.5,
+       "think_immediate": 0.0,
+       "no_stray_markers": 0.6,
+       "format_ok": 0.5,
+       "empty_answer": 0.5,
+       "answer_is_echo": 0.1,
+       "echo_4gram": 0.1119,
+       "rep_3gram": 0.007,
+       "answer_words": 34.0
+      },
+      "by_group": {
+       "short_realtime": {
+        "n": 10,
+        "terminated": 0.5,
+        "truncated_at_cap": 0.5,
+        "think_closed": 0.5,
+        "think_immediate": 0.0,
+        "no_stray_markers": 0.6,
+        "format_ok": 0.5,
+        "empty_answer": 0.5,
+        "echo_4gram": 0.1119,
+        "rep_3gram": 0.007,
+        "answer_words": 34.0,
+        "answer_is_echo": 0.1
+       }
+      },
+      "stray_marker_counts": {
+       "<think>": 4
+      }
+     }
+    }
+   }
+  },
+  "rollout.protocol_integrity": {
+   "status": "measured",
+   "units": {
+    "stage3_capability_846/eval_behavior_v0": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 65,
+     "missing": 0,
+     "headline": null,
+     "n_items": 65,
+     "metrics": {
+      "overall": {
+       "n": 65,
+       "terminated": 0.7385,
+       "truncated_at_cap": 0.2615,
+       "think_closed": 0.7538,
+       "think_immediate": 0.0,
+       "no_stray_markers": 0.7692,
+       "format_ok": 0.7385,
+       "empty_answer": 0.2462,
+       "answer_is_echo": 0.1692,
+       "echo_4gram": 0.2125,
+       "rep_3gram": 0.0205,
+       "answer_words": 35.8769
+      },
+      "by_group": {
+       "code_math": {
+        "n": 10,
+        "terminated": 0.6,
+        "truncated_at_cap": 0.4,
+        "think_closed": 0.6,
+        "think_immediate": 0.0,
+        "no_stray_markers": 0.6,
+        "format_ok": 0.6,
+        "empty_answer": 0.4,
+        "echo_4gram": 0.0317,
+        "rep_3gram": 0.0518,
+        "answer_words": 66.6,
+        "answer_is_echo": 0.0,
+        "answer_em": 0.2857,
+        "answer_em_credited": 0.2857
+       },
+       "instruction": {
+        "n": 12,
+        "terminated": 0.3333,
+        "truncated_at_cap": 0.6667,
+        "think_closed": 0.4167,
+        "think_immediate": 0.0,
+        "no_stray_markers": 0.4167,
+        "format_ok": 0.3333,
+        "empty_answer": 0.5833,
+        "echo_4gram": 0.0754,
+        "rep_3gram": 0.0372,
+        "answer_words": 51.1667,
+        "answer_is_echo": 0.0833
+       },
+       "multihop_qa": {
+        "n": 4,
+        "terminated": 1.0,
+        "truncated_at_cap": 0.0,
+        "think_closed": 1.0,
+        "think_immediate": 0.0,
+        "no_stray_markers": 1.0,
+        "format_ok": 1.0,
+        "empty_answer": 0.0,
+        "echo_4gram": 0.3668,
+        "rep_3gram": 0.0254,
+        "answer_words": 25.5,
+        "answer_is_echo": 0.5,
+        "evidence_hit": 0.75,
+        "evidence_hit_credited": 0.5
+       },
+       "rag_evidence": {
+        "n": 12,
+        "terminated": 1.0,
+        "truncated_at_cap": 0.0,
+        "think_closed": 1.0,
+        "think_immediate": 0.0,
+        "no_stray_markers": 1.0,
+        "format_ok": 1.0,
+        "empty_answer": 0.0,
+        "echo_4gram": 0.364,
+        "rep_3gram": 0.0125,
+        "answer_words": 23.75,
+        "answer_is_echo": 0.1667,
+        "evidence_hit": 0.9167,
+        "evidence_hit_credited": 0.75
+       },
+       "refusal_uncertainty": {
+        "n": 12,
+        "terminated": 1.0,
+        "truncated_at_cap": 0.0,
+        "think_closed": 1.0,
+        "think_immediate": 0.0,
+        "no_stray_markers": 1.0,
+        "format_ok": 1.0,
+        "empty_answer": 0.0,
+        "echo_4gram": 0.4387,
+        "rep_3gram": 0.004,
+        "answer_words": 21.0833,
+        "answer_is_echo": 0.4167,
+        "refusal": 0.0833,
+        "refusal_credited": 0.0833
+       },
+       "short_realtime": {
+        "n": 10,
+        "terminated": 0.5,
+        "truncated_at_cap": 0.5,
+        "think_closed": 0.5,
+        "think_immediate": 0.0,
+        "no_stray_markers": 0.6,
+        "format_ok": 0.5,
+        "empty_answer": 0.5,
+        "echo_4gram": 0.1119,
+        "rep_3gram": 0.007,
+        "answer_words": 34.0,
+        "answer_is_echo": 0.1
+       },
+       "tool_calling": {
+        "n": 5,
+        "terminated": 1.0,
+        "truncated_at_cap": 0.0,
+        "think_closed": 1.0,
+        "think_immediate": 0.0,
+        "no_stray_markers": 1.0,
+        "format_ok": 1.0,
+        "empty_answer": 0.0,
+        "echo_4gram": 0.075,
+        "rep_3gram": 0.0,
+        "answer_words": 14.4,
+        "answer_is_echo": 0.0,
+        "tool_call_emitted": 1.0,
+        "tool_call_parsed": 1.0,
+        "tool_name_valid": 1.0,
+        "tool_args_schema_ok": 1.0,
+        "tool_call_exact_match": 1.0
+       }
+      },
+      "stray_marker_counts": {
+       "<think>": 15
+      }
+     },
+     "excluded_from_formal": {
+      "outside held-out correctness (training overlap)": 4,
+      "outside the formal core": 7
+     },
+     "all_registered_items": {
+      "headline": null,
+      "n_items": 76,
+      "metrics": {
+       "overall": {
+        "n": 76,
+        "terminated": 0.7632,
+        "truncated_at_cap": 0.2368,
+        "think_closed": 0.7632,
+        "think_immediate": 0.0,
+        "no_stray_markers": 0.7895,
+        "format_ok": 0.75,
+        "empty_answer": 0.2237,
+        "answer_is_echo": 0.1447,
+        "echo_4gram": 0.1872,
+        "rep_3gram": 0.0239,
+        "answer_words": 36.8289
+       },
+       "by_group": {
+        "code_math": {
+         "n": 12,
+         "terminated": 0.5833,
+         "truncated_at_cap": 0.4167,
+         "think_closed": 0.5833,
+         "think_immediate": 0.0,
+         "no_stray_markers": 0.5833,
+         "format_ok": 0.5833,
+         "empty_answer": 0.4167,
+         "echo_4gram": 0.033,
+         "rep_3gram": 0.0526,
+         "answer_words": 65.25,
+         "answer_is_echo": 0.0,
+         "answer_em": 0.2857,
+         "answer_em_credited": 0.2857
+        },
+        "instruction": {
+         "n": 12,
+         "terminated": 0.3333,
+         "truncated_at_cap": 0.6667,
+         "think_closed": 0.4167,
+         "think_immediate": 0.0,
+         "no_stray_markers": 0.4167,
+         "format_ok": 0.3333,
+         "empty_answer": 0.5833,
+         "echo_4gram": 0.0754,
+         "rep_3gram": 0.0372,
+         "answer_words": 51.1667,
+         "answer_is_echo": 0.0833
+        },
+        "multihop_qa": {
+         "n": 4,
+         "terminated": 1.0,
+         "truncated_at_cap": 0.0,
+         "think_closed": 1.0,
+         "think_immediate": 0.0,
+         "no_stray_markers": 1.0,
+         "format_ok": 1.0,
+         "empty_answer": 0.0,
+         "echo_4gram": 0.3668,
+         "rep_3gram": 0.0254,
+         "answer_words": 25.5,
+         "answer_is_echo": 0.5,
+         "evidence_hit": 0.75,
+         "evidence_hit_credited": 0.5
+        },
+        "rag_evidence": {
+         "n": 12,
+         "terminated": 1.0,
+         "truncated_at_cap": 0.0,
+         "think_closed": 1.0,
+         "think_immediate": 0.0,
+         "no_stray_markers": 1.0,
+         "format_ok": 1.0,
+         "empty_answer": 0.0,
+         "echo_4gram": 0.364,
+         "rep_3gram": 0.0125,
+         "answer_words": 23.75,
+         "answer_is_echo": 0.1667,
+         "evidence_hit": 0.9167,
+         "evidence_hit_credited": 0.75
+        },
+        "refusal_uncertainty": {
+         "n": 12,
+         "terminated": 1.0,
+         "truncated_at_cap": 0.0,
+         "think_closed": 1.0,
+         "think_immediate": 0.0,
+         "no_stray_markers": 1.0,
+         "format_ok": 1.0,
+         "empty_answer": 0.0,
+         "echo_4gram": 0.4387,
+         "rep_3gram": 0.004,
+         "answer_words": 21.0833,
+         "answer_is_echo": 0.4167,
+         "refusal": 0.0833,
+         "refusal_credited": 0.0833
+        },
+        "short_realtime": {
+         "n": 12,
+         "terminated": 0.5833,
+         "truncated_at_cap": 0.4167,
+         "think_closed": 0.5,
+         "think_immediate": 0.0,
+         "no_stray_markers": 0.6667,
+         "format_ok": 0.5,
+         "empty_answer": 0.4167,
+         "echo_4gram": 0.121,
+         "rep_3gram": 0.0106,
+         "answer_words": 44.75,
+         "answer_is_echo": 0.0833
+        },
+        "tool_calling": {
+         "n": 12,
+         "terminated": 1.0,
+         "truncated_at_cap": 0.0,
+         "think_closed": 1.0,
+         "think_immediate": 0.0,
+         "no_stray_markers": 1.0,
+         "format_ok": 1.0,
+         "empty_answer": 0.0,
+         "echo_4gram": 0.0312,
+         "rep_3gram": 0.0259,
+         "answer_words": 18.75,
+         "answer_is_echo": 0.0,
+         "tool_call_emitted": 1.0,
+         "tool_call_parsed": 1.0,
+         "tool_name_valid": 1.0,
+         "tool_args_schema_ok": 1.0,
+         "tool_call_exact_match": 0.8333
+        }
+       },
+       "stray_marker_counts": {
+        "<think>": 16
+       }
+      }
+     }
+    }
+   }
+  },
+  "in_sample.recall_regression": {
+   "status": "measured",
+   "units": {
+    "stage3_legacy_150/items": {
+     "status": "measured",
+     "in_formal_core": true,
+     "protocol": "v2",
+     "n": 150,
+     "missing": 0,
+     "headline": "correct",
+     "n_items": 150,
+     "correct": 96,
+     "rate": 0.64,
+     "n_independent": 150,
+     "rate_independent": 0.64
+    }
+   }
+  }
+ },
+ "pooled": "none by contract: units and capabilities are reported separately"
+}

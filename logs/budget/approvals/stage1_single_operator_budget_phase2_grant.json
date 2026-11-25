@@ -36,6 +36,15 @@
      "per_session_hard_cap_usd": 63.43,
      "unit_deadline_hours": 20.4
     }
+   },
+   "closed": {
+    "status": "CLOSED",
+    "utc": "2026-11-25T14:20:00Z",
+    "by": "the agent, on the grant's own terminal condition (the maintainer's 2026-11-21 decision: \u300c\u8bf7\u6301\u7eed\u6267\u884c\u5230\u516d\u4e2a\u8bad\u7ec3\u5355\u5143\u3001\u516d\u4efd\u6700\u7ec8\u6743\u91cd\u548c\u5341\u4e8c\u5957\u601d\u8003\uff0f\u975e\u601d\u8003\u8bc4\u6d4b\u5168\u90e8\u6838\u9a8c\u5b8c\u6210\uff0c\u6216\u8fbe\u5230\u5df2\u767b\u8bb0\u7684\u9884\u7b97\u7ec8\u6b62\u6761\u4ef6\u3002\u300d)",
+    "record": "phase_2_closed (this grant): COMPLETE, $112.0621 of $185.87",
+    "remainder_usd": 0.0,
+    "remainder": "void: the $73.8079 the ceiling left and the $1.00 reserve fund nothing",
+    "enforced_by": "shared.study_engineering.require_kind_open: issue, launch (before any artifact or provider read) and the runner's first precheck refuse the kind; closeout, retain, study-completion and reports stay open"
    }
   }
  },
@@ -311,5 +320,28 @@
   "sha256": "2eff952d56bd5071b314e4f6ec5c67c2f7d90362faff122cb8387ea768bd66a7"
  },
  "study_identity_sha256": "a42ccf221a51efb0bde906a7a885ac1fa63bc2fcdfb560963cf0d9bbf9f5d45e",
- "granted_at_commit": "6f3e6e7bf3a789dae11c58510f382f24fda38896"
+ "granted_at_commit": "6f3e6e7bf3a789dae11c58510f382f24fda38896",
+ "phase_2_closed": {
+  "status": "COMPLETE",
+  "terminal_state": "COMPLETE: six training units (three arms x two seeds, 9,701 of 9,701 steps each), six final weights durable at their placement (residual width and depth on the dev box, re-hashed; FFN + attention on the relay, by LFS sha256), twelve post-recovery sets complete on their files; results/study_completion.json COMPLETE with the registered decision formal in both modes",
+  "utc": "2026-11-25T14:20:00Z",
+  "by": "the agent, on the maintainer's phase-2 grant",
+  "source": "sob1_train_residual_width_20261121_074426, sob1_train_depth_only_20261122_223829, sob1_train_ffn_attention_20261124_033254 (each ALL_DONE; pod deleted, provider confirms gone)",
+  "spent_usd": 112.0621,
+  "by_run_usd": {
+   "sob1_train_residual_width_20261121_074426": 42.6771,
+   "sob1_train_depth_only_20261122_223829": 31.6179,
+   "sob1_train_ffn_attention_20261124_033254": 37.7671
+  },
+  "_spent": "study_engineering.spent(kind='sob1_train') at closure: every session's closeout all-in, 3 runs, none unknown",
+  "ceiling_usd": 185.87,
+  "unspent_usd": 73.8079,
+  "teardown_reserve_usd": 1.0,
+  "remainder": "phase 2 is complete and valid, so no further sob1_train session is run under this grant (AGENTS.md P12.1: a complete valid measurement is not rerun); the unspent $73.8079 and the $1.00 reserve are not carried into any later round",
+  "provider_reconciliation": "balance $235.8108 at 2026-11-21T07:40Z before phase 2, $123.7283 at 2026-11-25T13:54Z after teardown (-$112.0825) against $112.0621 booked all-in (+$0.0204); 0 pods, 0 volumes",
+  "historical": "every field above is unchanged (grant_before_closure)",
+  "grant_before_closure": {
+   "sha256": "73f53e12a066ef2581a79e9defc33381dfd8133d148a695848d06f88f8180045"
+  }
+ }
 }

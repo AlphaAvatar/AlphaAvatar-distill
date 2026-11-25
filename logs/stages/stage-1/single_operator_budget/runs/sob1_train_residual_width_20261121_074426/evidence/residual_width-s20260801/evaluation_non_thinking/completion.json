@@ -1,0 +1,296 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.evaluation_completion/v1",
+ "target": "residual_width_s20260801",
+ "mode": "H-N",
+ "out": "/workspace/aad/artifacts/audit/stage1_single_operator/sob1_train_residual_width_20261121_074426",
+ "complete": true,
+ "problems": {},
+ "units": {
+  "fluid_reasoning_720__dev_v1": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "27e0644436bd8ebe0db5f3a4f2c04c98f91e1a49a7c47ed583b739c275f04d82",
+   "records": 720,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__math_verified": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "768dd23b8388d2a0549acd7451688f6f0de59a157fa2fbe3f21e86f7200fe99d",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__gsm8k": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "bc61bd88a7d8a56dd6bcccbae653241c04a1d0f67471bceeb9a17400a5c19438",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__multihop": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "3d379f2dc54587dca9c0e6deb5575cedc1e3f0a4d866f863381ed52dd17a9e28",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__rag": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "9854d294b71c0f0ffccbc4c262eeae2a0c4b945aaa726e4d5ba795f03ccbe4cc",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__answerability_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "4dfb56679d5dce1a98830b33f811f246a7f41306d209e22eb1362768b468c6c5",
+   "records": 120,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__safety_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "947687f126f9e42485b5009b3f83f1ac1b402cf9b2dd33b7a71808917c82a483",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__knowledge": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "dba0691f5e1cc9ff998d4ad170316324ccfd6a39c5069789c5952ba053abd455",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__eval_behavior_v0": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "2bb6442f261942bb65cb5841d81907d5fb74e36afad228185e7f0e59843a1e78",
+   "records": 76,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_legacy_150__items": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "32d7b579501383dac7e46c765b2ab5bd61ba7c305488d38663b8743dc2318938",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  }
+ },
+ "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f",
+ "packages": [
+  {
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "attempt": "sob1_train_residual_width_20261121_074426",
+   "utc": "2026-11-22T22:00:47Z",
+   "weights_sha256": {
+    "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+   }
+  }
+ ],
+ "parts": {
+  "parts/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "c40157723016f7acd35545319dd9138a7f95e956cb954343b44a6d5eabd1ae7e",
+   "records": 422,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0001.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "117d2aea0931d00dfeaa626383d99e0cab5fbc7951738edb439bb6e278fa7f81",
+   "records": 284,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0002.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "a5059dc4b85b556cc207b499db1fbbcc360a728c0df8a51f36466bb1dcd82507",
+   "records": 14,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "e56d87a15cea81a2189ce14acbd8d495cc7b8ecc355ee95aab6de10b093202fc",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "f28ed5be5f8e4ed7f5b9d7bb3b33b6639151f6781407a1ff1bf4d487011aca5a",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "67f95a9247c5cdc9e26bd41dbd38abf346d91c1d26048d12206c9e28f9084612",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__rag/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__rag",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "f8fcfec089f912ca7eba1d27790a7b91ec0099b38f54bdb968d5d7fa95c67a4a",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__answerability_paired/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__answerability_paired",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "611bc060d35c0fd6fbc7d82feea90439d94a126de829039ee07434f2ced152d1",
+   "records": 120,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "59173f9d836fbb110f2b92317f11cf1b9401560353264db96d7c3e5bb486cc6a",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "c5e03edc3263c437b8e9b477b1c15005c0970cac2ce1fe6aa7aecea58f818a00",
+   "records": 150,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "84f9a59d57a346f3305bf81c2af934ab4d502e607b6f58efcca62881d3393fb3",
+   "records": 76,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+   "sha256": "6c5a666ed88f21bd687bc9d697c1d755b397833a9e5b4679121619fc9e2e0ae2",
+   "records": 150,
+   "proven": true,
+   "why": null
+  }
+ },
+ "sealed_twice": [],
+ "expected_weights": {
+  "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+ },
+ "think_state": "preclosed",
+ "stored_report_matches": true,
+ "binding": {
+  "target": "residual_width_s20260801",
+  "arm": "residual_width",
+  "seed": 20260801,
+  "unit": "residual_width-s20260801",
+  "mode": "H-N",
+  "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+  "weights_sha256": {
+   "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+  }
+ }
+}

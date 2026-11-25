@@ -1,0 +1,544 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.evaluation_completion/v1",
+ "target": "ffn_attention_s20260801",
+ "mode": "H-T",
+ "out": "/workspace/aad/artifacts/audit/stage1_single_operator/sob1_train_ffn_attention_20261124_033254",
+ "complete": true,
+ "problems": {},
+ "units": {
+  "fluid_reasoning_720__dev_v1": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "2a5219b7227bd1e5454c85889241f35c32736e80571c3a48ec7ea985d3b8c774",
+   "records": 720,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__math_verified": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "d65798824bdf23f5182d3d268efd9d08c326ccfe3be27bf8d13bc81e13c685e5",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__gsm8k": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "6e57aa2a7a67bcc759c8013b057cebce2cd8247579ac4c44be92a9832cee48d0",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__multihop": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "d7fe0fe8ae43594eb49f19db9b1d99911862b89c6db2ae839e178c252b38de37",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__rag": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "2e59613cd4b5ef5dea3358c592bcbd43e61f18c494318f9907c428a7b0b30de7",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__answerability_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "09a332ede60f071fb43ab63e8f39a98cce1b1296c3920c7027f14ccd033d9014",
+   "records": 120,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__safety_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "df1bf4df0f714057acfde8f99fa4d3e119d913af382e64beafb85088128a3b84",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__knowledge": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "300024d98018c24233a43e84254cc118c014b5505c2b8692d43d44fb39461dc1",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__eval_behavior_v0": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "1528f0a22bd2450cc859fa7a8fa6a816540c3ee50675b60b604f0a12f0b5b8a8",
+   "records": 76,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_legacy_150__items": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "32a37c2161a7b04c54d7ee9bb31843c54a313c7ad2a8b12ba477ae0759323c31",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  }
+ },
+ "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2",
+ "packages": [
+  {
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "attempt": "sob1_train_ffn_attention_20261124_033254",
+   "utc": "2026-11-25T12:25:24Z",
+   "weights_sha256": {
+    "model.safetensors": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e"
+   }
+  }
+ ],
+ "parts": {
+  "parts/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "10361dbdef43eb43152dc7914e8fd81bfe2e06154d98fdeed3f843f479fd093e",
+   "records": 6,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "2a5e5531f6c048b0bdec05e1652243c9e726f0dfd631aa25812964db8722125e",
+   "records": 67,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0002.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "91b1fdfe3335d99b90aec3730c439c9ab409bf99041d2613a7707202adea6b93",
+   "records": 26,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0003.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "601abfbcc8f2b82fad893844db60adbd810f873078541944ff93e633f8af4e07",
+   "records": 24,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0004.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "e6cf5426477497f9d02c3c746825e6e02a5fe4623ebc4335b2574a937f9dc4e1",
+   "records": 55,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0005.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "08e2d0a5f32abd7a35e75f29adf2e18fccb979af53fdb085974ca2a94aac8a50",
+   "records": 38,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0006.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "87dce3890166faffb97f2cee101a224bc9df945c6b91a078532fd130cf5f84d0",
+   "records": 75,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0007.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "fb175d8f6b7151f9f72dce11fe85246ea04c8fcde3fb02d09f8562cc7c796a83",
+   "records": 68,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0008.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "121b6ecf97d8df51f8b19f3c818395d3e09415f37efdc85ed798d40c40df3956",
+   "records": 35,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0009.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "aec4cd72d2a97b645fc20c7d753f84063961a06328b6c3371f0a6c968e1a9e50",
+   "records": 23,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0010.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "be5c7f252bdadd62aa8a761e82cca83f1b2d58d482ad36e9129ced969dd91e6f",
+   "records": 30,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0011.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "4a467d432643e95fd8ca4a07d21e7c1ccd2e61c67ff464cfaefaa83cce156af4",
+   "records": 38,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0012.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "ef6ed3a52d8d15642067642978c72825f4c84dcb053ac0763a1ad25e903e0b0f",
+   "records": 20,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0013.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "816829371395c7399f4cf59bd8d013a4b7e18e1427e0b8735e1fa7b752a8dc14",
+   "records": 23,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0014.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "5ced29a26ea088c834ec52def9ba5e2a8814e859ce33cf40df5aceb36dade4e1",
+   "records": 25,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0015.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "b7690536628c684b3272285d3bfbdf6182ab94e15a6c7c795b4bb636c51a6600",
+   "records": 13,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0016.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "1fd82611711d6faa0b99285c65a54328b04df635ac11eb9644327fac2e1fb3f7",
+   "records": 16,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0017.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "a50df6e7beb54b8a88517d94a60f3e525c8ef0e962640e796e697635619a9e7d",
+   "records": 12,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0018.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "8fcd7b199fb60c0692b15c5c6e401f61051e03891e2bb5b0a5a13d48fb679337",
+   "records": 20,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0019.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "19f5df9b635e68cd207913a6b82928737f74d0fb89a5a5a3f953843bc88530fc",
+   "records": 12,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0020.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "d49d92f3efadd33ccd6900db8ba79e2976bb1fbc80b36507300be65c349ec855",
+   "records": 15,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0021.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "c3d3d3e97215cb58e442095c75730e5e792cf06ef7c7c8136ca319b1038726af",
+   "records": 23,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0022.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "45cb238681eb7700d1362c5d39bc136b722ae0bea43e9771e26be5bd5e3b6b2e",
+   "records": 38,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0023.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "c812125a48b32d177cf35b7e81d4e09780082e8acfc5c9ca2b88268865b0fcb6",
+   "records": 17,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0024.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "0ebc9aa520344d85a4a6517f2818ac8ca229b4026740718ba42067007fa34647",
+   "records": 1,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "98d6ea326773efa22816b9b6183adddddc2c6e91cb94f822abd56f5f88dabf08",
+   "records": 16,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "3f82d9d504bb88f9473f2242f51490470ef7f453661f6a739b8edfaaa8d61a8f",
+   "records": 25,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0002.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "70e1adb74d5c4d993d8c59f85f00a38fdf0c84a2b2c18ac4cd2ee2ec37471090",
+   "records": 24,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0003.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "8bf12ef1330ba051bd57050698109c85a1cdc4eecdaaa1964375d4164b025b56",
+   "records": 35,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "d02f141b3c8fabb561de80873a730639ed4589114877a341c3779e2664a15a16",
+   "records": 89,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "62a23887078c9842ddc7ee5c47d5635ba50caa9feb5651f8b5f7916aae069c72",
+   "records": 11,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "359bebc8b59d9bf2ca4d4bfa04e643d1e974eab1c6181461045f3b8317574bb3",
+   "records": 58,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "d5822f8585f2d888ac96f95684b94c475f4a5835ff462d917d82cd0e0ca06348",
+   "records": 42,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__rag/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__rag",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "16f2ea3b20bcc2e5296f96dd4b7d39870845297260abcc3d6e2c51cd6992f808",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__answerability_paired/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__answerability_paired",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "793e7aaf32b3121fa17bb10df35e50f337b96ea73468b6823d15d93129d858db",
+   "records": 120,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "c6d330af9be4c368c33800670d7be81ada650f121eea62a35ca8a99ed201a36b",
+   "records": 96,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "412c8b726990c90debeaac3d612d2c3a5b6a55f73ba04a60aa600aaa504b40fc",
+   "records": 4,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "2f1cda16f2ef38ffabbbc2756eb063caf3bc9750e3c400600630dcb98ae6f4b3",
+   "records": 124,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "6556f1c036e8241b69432d28eb07ec1f6f04e78b78363ba328eded2c92b3d320",
+   "records": 26,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "bda451fd9952a653679795c994a9f5238ce4b2302dfaac6103c592e8d1810b98",
+   "records": 71,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "a2d01f980a5c2137e7b280b5f8ce353cfe0672191bc87e53e9f8a06bad617917",
+   "records": 5,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "f95bef9e9326eed18d53c27d0fedd8420d32fb89d933a47b8876f22ca143dd6e",
+   "records": 134,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260801-H-T-g1",
+   "sha256": "f9b1771245145b7c29f9959cfb4e8b7dc9cf9da22686cfb2969833cbf7baceed",
+   "records": 16,
+   "proven": true,
+   "why": null
+  }
+ },
+ "sealed_twice": [],
+ "expected_weights": {
+  "model.safetensors": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e"
+ },
+ "think_state": "self_opening",
+ "stored_report_matches": true,
+ "binding": {
+  "target": "ffn_attention_s20260801",
+  "arm": "ffn_attention",
+  "seed": 20260801,
+  "unit": "ffn_attention-s20260801",
+  "mode": "H-T",
+  "protocol_sha256": "2db89a2590b7f27434613656b0a39c1f3563098afbd9ac97454adbefab1744b0",
+  "weights_sha256": {
+   "model.safetensors": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e"
+  }
+ }
+}

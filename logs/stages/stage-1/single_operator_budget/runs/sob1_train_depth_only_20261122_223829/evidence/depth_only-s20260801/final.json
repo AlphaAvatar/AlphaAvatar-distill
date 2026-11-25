@@ -1,0 +1,58 @@
+{
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884",
+ "files_sha256": {
+  "model.safetensors": "e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98",
+  "config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+  "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+  "run_completion.json": "9a8c2ee7f053b092f18dd26624cb5b079ca3d3cb03bd028fbc958a516f49e05b"
+ },
+ "bytes": {
+  "model.safetensors": 8015427400,
+  "config.json": 1153,
+  "generation_config.json": 143,
+  "run_completion.json": 3191
+ },
+ "quota": "4 object(s), 7.46 GiB: ACCEPTED (200) 4/4 granted an upload action",
+ "uploaded": [
+  "config.json",
+  "generation_config.json",
+  "model.safetensors",
+  "run_completion.json"
+ ],
+ "upload_seconds": 47.3,
+ "downloaded_sha256": {
+  "config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+  "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+  "model.safetensors": "e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98",
+  "run_completion.json": "9a8c2ee7f053b092f18dd26624cb5b079ca3d3cb03bd028fbc958a516f49e05b"
+ },
+ "verified": true,
+ "verify_seconds": 16.8,
+ "utc": "2026-11-24T02:22:30Z",
+ "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+ "handoff": {
+  "pointer": {
+   "prefix": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final/e4159f1fc5b1f884",
+   "files_sha256": {
+    "record.json": "2f485d78c73205df95837004043e2034be38910c74504cc92f485692cad659a7"
+   },
+   "verified": true,
+   "utc": "2026-11-24T02:22:31Z",
+   "error": null,
+   "refused": null
+  },
+  "listing": "durable/stage1_single_operator_budget/depth_only/depth_only-s20260801/final",
+  "listed_present": 1,
+  "verified": true,
+  "utc": "2026-11-24T02:22:32Z",
+  "why": null,
+  "attempts": [
+   {
+    "verified": true,
+    "why": null,
+    "utc": "2026-11-24T02:22:32Z"
+   }
+  ]
+ }
+}

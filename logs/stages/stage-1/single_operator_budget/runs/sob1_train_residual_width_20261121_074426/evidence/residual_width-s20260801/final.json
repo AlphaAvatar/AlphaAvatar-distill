@@ -1,0 +1,58 @@
+{
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/final/b701868f05c6d6e4",
+ "files_sha256": {
+  "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0",
+  "config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+  "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+  "run_completion.json": "6ac9f3716104fa7d5a04a1a6b0ee00e52efbeeb21afef79054c8fd1de09dcf1b"
+ },
+ "bytes": {
+  "model.safetensors": 8045000112,
+  "config.json": 1593,
+  "generation_config.json": 143,
+  "run_completion.json": 3194
+ },
+ "quota": "4 object(s), 7.49 GiB: ACCEPTED (200) 4/4 granted an upload action",
+ "uploaded": [
+  "config.json",
+  "generation_config.json",
+  "model.safetensors",
+  "run_completion.json"
+ ],
+ "upload_seconds": 49.3,
+ "downloaded_sha256": {
+  "config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+  "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+  "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0",
+  "run_completion.json": "6ac9f3716104fa7d5a04a1a6b0ee00e52efbeeb21afef79054c8fd1de09dcf1b"
+ },
+ "verified": true,
+ "verify_seconds": 24.8,
+ "utc": "2026-11-22T20:48:05Z",
+ "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+ "handoff": {
+  "pointer": {
+   "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/final/b701868f05c6d6e4",
+   "files_sha256": {
+    "record.json": "e271415169dc3b49fe3ed4632e7747468a4f64dca5edd4e5c075a3118699d0e8"
+   },
+   "verified": true,
+   "utc": "2026-11-22T20:48:06Z",
+   "error": null,
+   "refused": null
+  },
+  "listing": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/final",
+  "listed_present": 1,
+  "verified": true,
+  "utc": "2026-11-22T20:48:07Z",
+  "why": null,
+  "attempts": [
+   {
+    "verified": true,
+    "why": null,
+    "utc": "2026-11-22T20:48:07Z"
+   }
+  ]
+ }
+}

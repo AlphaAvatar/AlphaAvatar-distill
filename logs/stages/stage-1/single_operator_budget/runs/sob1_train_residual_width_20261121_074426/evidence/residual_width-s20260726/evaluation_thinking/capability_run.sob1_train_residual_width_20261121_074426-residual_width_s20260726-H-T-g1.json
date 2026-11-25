@@ -1,0 +1,29 @@
+{
+ "withheld": [],
+ "units": [
+  "stage3_capability_846__answerability_paired",
+  "stage3_capability_846__eval_behavior_v0",
+  "stage3_capability_846__gsm8k",
+  "stage3_capability_846__knowledge",
+  "stage3_capability_846__math_verified",
+  "stage3_capability_846__multihop",
+  "stage3_capability_846__rag",
+  "stage3_capability_846__safety_paired",
+  "stage3_legacy_150__items"
+ ],
+ "missing_at_start": [
+  "stage3_capability_846__answerability_paired",
+  "stage3_capability_846__eval_behavior_v0",
+  "stage3_capability_846__gsm8k",
+  "stage3_capability_846__knowledge",
+  "stage3_capability_846__math_verified",
+  "stage3_capability_846__multihop",
+  "stage3_capability_846__rag",
+  "stage3_capability_846__safety_paired",
+  "stage3_legacy_150__items"
+ ],
+ "sealed_samples_taken": {},
+ "status": "complete",
+ "seconds": 1140.3,
+ "attempt": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-T-g1"
+}

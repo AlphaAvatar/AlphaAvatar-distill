@@ -1454,6 +1454,8 @@ def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_wit
     monkeypatch.setattr(R, "run_online", relay)
     tomb = tmp_path / "tombstones.json"
     tomb.write_text((REPO / "logs/maintenance/inventories/checkpoint_tombstones.json").read_text())
+    #: the repository's own SOB1 tombstones (the real phase-2 rotation) are already in the copy; count only new ones
+    before = {t["canonical_id"] for t in json.loads(tomb.read_text())["tombstones"] if t.get("experiment") == "SOB1"}
     bodies = {}
     for a in DESIGN["training"]["unit_order"]["arms"]:
         bodies.update(_arm_session_evidence(tmp_path / f"scr_{a}" / "store" / "out", a, relay))
@@ -1518,7 +1520,8 @@ def test_every_training_closeout_checks_its_arm_and_the_study_completes_only_wit
     left = {k.split("/")[2] for k in relay.files if "/final/" in k}
     assert left == {a for a, v in placed.items() if v == "relay"}
     assert sum(k.endswith("_evidence.tar.gz") for k in relay.files) == 3
-    ts = [t for t in json.loads(tomb.read_text())["tombstones"] if t.get("experiment") == "SOB1"]
+    ts = [t for t in json.loads(tomb.read_text())["tombstones"] if t.get("experiment") == "SOB1"
+          and t["canonical_id"] not in before]
     assert len(ts) == 2 * sum(v == "dev_box" for v in placed.values())
     assert all(t["deletion"]["status"] == "DELETED" and t["tombstone_written_utc"] for t in ts)
 
@@ -1541,13 +1544,19 @@ def test_phase_1_is_closed_in_code_and_phase_2_is_funded_once_by_its_own_grant(t
     assert capsys.readouterr().out.count("sob1_phase1 kind is CLOSED") == 2 and not (tmp_path / "a.json").exists()
     by = {c.__name__: c for c in L.SE.prechecks(L.STUDY, L.launch_spec(L.PHASE1_KIND, 60.0), L.REPO)}
     assert not by["the_study_is_open"](None)[0]
-    L.SE.require_open(L.STUDY)                       #: the study is not closed: phase 2 can still be granted under it
-    L.SE.require_kind_open(L.STUDY, L.TRAIN_KIND)
-    #: phase 2's money: its own proposal until a grant exists, its own envelope (no phase-1 run in it)
-    g = L.kind_grant(L.TRAIN_KIND, dry_run=True)
-    assert g["_source"] == str(L.PHASE2_PROPOSAL) and g["status"] == "proposed"
-    env = L.SE.envelope(L.STUDY, g, L.REPO, L.TRAIN_KIND)
-    assert env["spent_usd"] == 0.0 and env["runs"] == [] and env["remaining_usd"] == g["ceiling_usd"]
+    L.SE.require_open(L.STUDY)                       #: the study grant itself carries no closure
+    #: phase 2 was granted on 2026-11-21 and ran to its terminal condition; its kind is closed in its own grant
+    #: (2026-11-25), so nothing of it is issued or launched again and its remainder is void
+    with pytest.raises(L.SE.AuthorizationError, match="sob1_train kind is CLOSED"):
+        L.SE.require_kind_open(L.STUDY, L.TRAIN_KIND)
+    grant = json.loads((REPO / L.PHASE2_GRANT).read_text())
+    spent = L.SE.spent(L.STUDY, kind=L.TRAIN_KIND)
+    assert grant["status"] == "granted" and grant["kinds"][L.TRAIN_KIND]["closed"]["remainder_usd"] == 0.0
+    assert grant["phase_2_closed"]["spent_usd"] == spent["sessions_usd"] and not spent["unknown"]
+    assert {r["run_id"] for r in spent["runs"]} == set(grant["phase_2_closed"]["by_run_usd"])   #: no phase-1 run in it
+    #: phase 2's money as proposed and granted unchanged but for the decision
+    g = json.loads((REPO / L.PHASE2_PROPOSAL).read_text())
+    assert g["status"] == "proposed" and grant["ceiling_usd"] == g["ceiling_usd"]
     caps = {a: v["per_session_hard_cap_usd"] for a, v in g["kinds"][L.TRAIN_KIND]["per_arm"].items()}
     assert g["ceiling_usd"] == round(sum(caps.values()), 2) and g["teardown_reserve_usd"] == 1.0
     assert g["per_session_hard_cap_usd"] == max(caps.values()) and g["kinds"][L.TRAIN_KIND]["order"][0] == "residual_width"
@@ -1555,10 +1564,9 @@ def test_phase_1_is_closed_in_code_and_phase_2_is_funded_once_by_its_own_grant(t
     assert g["project_cumulative_cap_usd"] == math.ceil(round((basis["committed_usd"] + g["ceiling_usd"] + 1.0) * 100, 6)) / 100
     assert "no separate Stage-3 allowance" in g["money_rules"]["once"]
     b2 = L.budget(L.TRAIN_KIND, "residual_width")
-    assert b2["hard_cap_usd"] == caps["residual_width"] and not b2["fundable"]
-    assert any("project cap" in x for x in b2["problems"])     #: the cap a new maintainer decision sets, never inferred
-    with pytest.raises(L.SE.AuthorizationError, match="no grant at .*phase2_grant"):
-        L.kind_grant(L.TRAIN_KIND)                          #: a real issue reads only a grant
+    assert not b2["fundable"] and any("CLOSED" in x for x in b2["problems"])
+    with pytest.raises(L.SE.AuthorizationError, match="sob1_train kind is CLOSED"):
+        L.kind_grant(L.TRAIN_KIND)                          #: a real issue reads only an open grant
     #: each committed plan is the derivation the proposal binds
     for a, v in g["plans"].items():
         assert v["sha256"] == L.SE.sha256_file(REPO / v["path"])
@@ -1606,8 +1614,13 @@ def test_a_residual_width_artifact_with_the_depth_plan_is_refused_before_any_cos
     touched = []
     monkeypatch.setattr(L.SE, "launch_main", lambda *a, **k: touched.append("launch_main") or 0)
     monkeypatch.setattr(L.SE, "live_position", lambda *a, **k: touched.append("provider") or {})
-    rc = L.main(["launch", "--kind", L.TRAIN_KIND, "--arm", "depth_only", "--run-id", "dry_mismatch", "--scr",
-                 str(tmp_path / "scr"), "--max-price", "1.11", "--dry-run", "--authorization", str(art)])
+    argv = ["launch", "--kind", L.TRAIN_KIND, "--arm", "depth_only", "--run-id", "dry_mismatch", "--scr",
+            str(tmp_path / "scr"), "--max-price", "1.11", "--dry-run", "--authorization", str(art)]
+    #: since 2026-11-25 the sob1_train kind is closed, and that refusal comes first; the arm binding behind it is
+    #: exercised with the closure lifted for this call only
+    assert L.main(argv) == 11 and "sob1_train kind is CLOSED" in capsys.readouterr().out and touched == []
+    monkeypatch.setattr(L.SE, "require_kind_open", lambda *a, **k: None)
+    rc = L.main(argv)
     out = capsys.readouterr().out
     assert rc == 11 and touched == [] and "does not fund the plan this launch would run" in out
     assert "No provider resource was created" in out and "arm: the artifact binds 'residual_width'" in out

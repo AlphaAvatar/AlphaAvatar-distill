@@ -1,0 +1,304 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.evaluation_completion/v1",
+ "target": "ffn_attention_s20260726",
+ "mode": "H-N",
+ "out": "/workspace/aad/artifacts/audit/stage1_single_operator/sob1_train_ffn_attention_20261124_033254",
+ "complete": true,
+ "problems": {},
+ "units": {
+  "fluid_reasoning_720__dev_v1": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "81fd95d8302ec3479fcb4303c861cb676dbdf30bff51287e654951606893cc7f",
+   "records": 720,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__math_verified": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "b2366224f6649485b694b14408e2ffbd1d89de799638496e5979d01eedc48c48",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__gsm8k": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "da71090ab1cdd69e7c1409d8873c134a2b6a309e0f5759958d1566ceb6cad2d9",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__multihop": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "b0e4b07d8a989f8ddcaa45a41685ff360e3d509f97a8627ffbffab2a0f963e16",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__rag": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "35bcbcc34febd98b5cf25c97362e61c6b6127e4b8efefdac560589f575fba2bf",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__answerability_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "65cc7a473fac9658251521991de2352c4d7f712221ed28ba4147df8648fd6997",
+   "records": 120,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__safety_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "8a50cd0e967edca005601121949b3c0fa6ff5fcbc657ad2542f6e35e75bd7d52",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__knowledge": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "5c1645f45fbfd7298332e7c92b3abb9e09da1e5b5509b50845f9c80beb7d514b",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__eval_behavior_v0": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "97e72c66ccd3c0a3bdb5a870271d4b0dfe0e5be3f90989914c61e6c9e7fc5116",
+   "records": 76,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_legacy_150__items": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "28f85d52036c4e60d116a4a267cc27b402189d1949c186f15af57802fce86826",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  }
+ },
+ "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f",
+ "packages": [
+  {
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "attempt": "sob1_train_ffn_attention_20261124_033254",
+   "utc": "2026-11-24T20:24:27Z",
+   "weights_sha256": {
+    "model.safetensors": "589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b"
+   }
+  }
+ ],
+ "parts": {
+  "parts/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "e2b216dd5796db146ca8f9addcdfe2242eedd8832ff26171eea186b8b2da63a5",
+   "records": 362,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "aa8fd75c6158482b6ef0273033ac180f1cdbdd86ce22e9722bc91ef3c7d083f0",
+   "records": 351,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0002.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "ef37a5c631de6b5e204eaec2cfee3a6750536fc7408b543e53d75b9cda95a083",
+   "records": 7,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "fa570575aa2e305d4350104678317c2ed89df8dc96a23f12c86fa66e0b123544",
+   "records": 94,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0001.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "cf5a719169c994d7f75bedb8796bf83602f2c16cc9850d948d1e87fc4912acec",
+   "records": 6,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "f8d0b752ef943b09190e9de156c5fbe0ef39aa735946d877cb38c418766f47a9",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "14a9ad36bd29c877f5d2b486d561b72b8629f6d8e5c6f43584bf4d7534484495",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__rag/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__rag",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "cf9a9efe85869571f83a267be79240150a3479ece7ac99c7b7e3c4e6c45c4d5a",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__answerability_paired/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__answerability_paired",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "4f0da866fcec32356bd3e82c65abf2b342cfb64fc5a4a7964023bd0c197526a7",
+   "records": 120,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "d4dfe91a6d14d6431d6b3d2aaf9a538c6d837c369dfb88fa931bb13aeba5b46f",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "417aa659165fbd8fedf0864693d46efd3fd2dd150c7a56aac56a09ace484beae",
+   "records": 150,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "f56cc947d992cc9f6aa3caae6d6b825fcba5261ebc1eb0bf54e1d63b44f37aee",
+   "records": 76,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0000.sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_train_ffn_attention_20261124_033254-ffn_attention_s20260726-H-N-g1",
+   "sha256": "36c8d36ead22c8357f5078170c90cc592774add6252c1048b43de396a466297d",
+   "records": 150,
+   "proven": true,
+   "why": null
+  }
+ },
+ "sealed_twice": [],
+ "expected_weights": {
+  "model.safetensors": "589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b"
+ },
+ "think_state": "preclosed",
+ "stored_report_matches": true,
+ "binding": {
+  "target": "ffn_attention_s20260726",
+  "arm": "ffn_attention",
+  "seed": 20260726,
+  "unit": "ffn_attention-s20260726",
+  "mode": "H-N",
+  "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+  "weights_sha256": {
+   "model.safetensors": "589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b"
+  }
+ }
+}

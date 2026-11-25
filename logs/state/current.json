@@ -31,8 +31,8 @@
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
-  "authorized_cap_usd": 1000.0,
-  "cumulative_spend_usd": 922.3181,
+  "authorized_cap_usd": 1161.06,
+  "cumulative_spend_usd": 1034.3802,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 77.6819,
+  "remaining_usd": 126.6798,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "SOB1 phase 2 running (granted 2026-11-21, cap $1,161.06): residual width and depth COMPLETE, FFN + attention running; then study-completion, the registered analysis and the final report",
+ "next": "SOB1 COMPLETE 2026-11-25 ($112.0621 of $185.87; sob1_train closed): the maintainer reviews docs/stages/stage-1/single_operator_budget/REPORT.md and decides the merge",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -197,10 +197,10 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": true,
-  "pods": 1,
+  "paid_compute": false,
+  "pods": 0,
   "network_volumes": 0,
-  "run": "SOB1 phase 2 arm 3 (FFN + attention): sob1_train_ffn_attention_20261124_033254, pod t58wmac140suz7, L40S $1.09/h, from 2026-11-24T03:44:59Z; arms 1-2 COMPLETE $42.6771 + $31.6179",
+  "run": null,
   "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",

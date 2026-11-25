@@ -1,0 +1,304 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.evaluation_completion/v1",
+ "target": "residual_width_s20260726",
+ "mode": "H-N",
+ "out": "/workspace/aad/artifacts/audit/stage1_single_operator/sob1_train_residual_width_20261121_074426",
+ "complete": true,
+ "problems": {},
+ "units": {
+  "fluid_reasoning_720__dev_v1": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "7d71b914a3f2aa39fa6f56b013fd72837be597ab4f7a867ee25c33f444e113eb",
+   "records": 720,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__math_verified": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "3fa03d5cbe5094732a13a37ff4c4bc4e6c4fcd67db1ec91568729b3a93bfd23c",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__gsm8k": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "4d0543abc24c7a8ab28f6dc3345cba962e874d0c88bd2d97d8da80a1ae138a4d",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__multihop": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "6358196136db872c768aacab8b709b3b9cf2f4fb83b3b4dc608cb8397d0f7372",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__rag": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "c8792858cc7f06b3613d750f3fec230c5255c5309dffa8fd12c74be7c639465e",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__answerability_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "bbd284a07b24610651420f37db2f246d5d01104cedba97e11e04be6fa2d4cc01",
+   "records": 120,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__safety_paired": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "df00b00e2eb587ef2d766da4ae8ff6a28c0bd4d02c5c342d74d0ec1a43015d6c",
+   "records": 100,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__knowledge": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "5ebfaf6fbada92736eeac3eca449741b465a2cc8078c31405c65cf6d1dc4c3fb",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_capability_846__eval_behavior_v0": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "a5bc505bf0ed7b33cfef16aa947e692ca9895707bb7c608c6dfeb6b5b93ced99",
+   "records": 76,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  },
+  "stage3_legacy_150__items": {
+   "present": true,
+   "complete": true,
+   "generations_sha256": "9321587783e451538126fe97019519506a546ef17797a49115bca01805ba370e",
+   "records": 150,
+   "malformed": 0,
+   "protocol_missing": [],
+   "protocol_differs": [],
+   "records_no_proven_part_holds": 0,
+   "per_record": {
+    "agrees": true,
+    "disagree": {},
+    "unverifiable": []
+   },
+   "action": null
+  }
+ },
+ "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f",
+ "packages": [
+  {
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "attempt": "sob1_train_residual_width_20261121_074426",
+   "utc": "2026-11-22T02:51:26Z",
+   "weights_sha256": {
+    "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+   }
+  }
+ ],
+ "parts": {
+  "parts/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "3c0272d0400d32a946402414958baf782696a9d1711d2ee46d1ad49592a05838",
+   "records": 449,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0001.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "c5fe9c1f7461e784f281039a5a281140b82437d6aa0c7ccd7407318390346ae0",
+   "records": 266,
+   "proven": true,
+   "why": null
+  },
+  "parts/part_0002.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "fluid_reasoning_720__dev_v1",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "46577c4675a1538911d92b5c08e617ea38cfeed1bb32982b355c44cf08d40f91",
+   "records": 5,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "56db9a41768045aaf7183282d98d5c2ba870f15a3d3af16a9b2a5ec3281f6327",
+   "records": 98,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__math_verified/part_0001.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__math_verified",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "2a4eb3b96dcf85e3eb704ad79776d208253c717f8ba83b4bc15fdd620e812935",
+   "records": 2,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__gsm8k/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__gsm8k",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "9aabba7faccc01fa298b15c9c6173395129621a70ea03f9a031c10211138bc9a",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__multihop/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__multihop",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "a1ba468efc43a31c196679397276b3e5534722b5db8d7a50fb5088a91252a148",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__rag/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__rag",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "9e859281660b97d5cfc2eb865876efea1be173ac64b605a8a4a3aa942a372587",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__answerability_paired/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__answerability_paired",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "0c96ddc44e742883f999e324bbe3dabddb243f7854a5d390d65ab92906344dd6",
+   "records": 120,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__safety_paired/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__safety_paired",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "1b0eac3b3d9e4b2eb3ea3a7134ff281dd0a9cb91e40a8ecd48f8240dae8cb7ad",
+   "records": 100,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__knowledge/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__knowledge",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "b52c198dc02a9cdfe6e44687a932cfc10cd9dd4b634536af44b93ec25264e42b",
+   "records": 150,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_capability_846__eval_behavior_v0/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_capability_846__eval_behavior_v0",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "92359e1bc7833173d6cd3e5387333a0fbf09d08db26cb642ad31741370c12f4d",
+   "records": 76,
+   "proven": true,
+   "why": null
+  },
+  "parts/stage3_legacy_150__items/part_0000.sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1.jsonl": {
+   "unit": "stage3_legacy_150__items",
+   "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+   "sha256": "48b9eba2e2927d7a176c214c6dd3746c1b3f5c4d3629abaf06688ac37235f69c",
+   "records": 150,
+   "proven": true,
+   "why": null
+  }
+ },
+ "sealed_twice": [],
+ "expected_weights": {
+  "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+ },
+ "think_state": "preclosed",
+ "stored_report_matches": true,
+ "binding": {
+  "target": "residual_width_s20260726",
+  "arm": "residual_width",
+  "seed": 20260726,
+  "unit": "residual_width-s20260726",
+  "mode": "H-N",
+  "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+  "weights_sha256": {
+   "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+  }
+ }
+}

@@ -17302,3 +17302,53 @@ on a paid pod.
   width arm is derived (conservative peak reserved 44.58 GiB of 44.99), measured on its first four optimizer steps.
 - Revisit when: an arm cannot run on the L40S after the recipe-preserving memory steps (a new proposal), a ceiling or
   cap is reached, or the study completes.
+
+## 2026-11-25 (UTC) — SOB1 phase 2 COMPLETE and its kind closed: depth-only compression keeps the least fluid accuracy
+
+- Context: the three phase-2 sessions ran once each, in order, on one L40S at $1.09/h, under the 2026-11-21 grant:
+  - residual width `sob1_train_residual_width_20261121_074426`: 2,305.8 min, $42.6771;
+  - depth `sob1_train_depth_only_20261122_223829`: 1,708.3 min, $31.6179;
+  - FFN + attention `sob1_train_ffn_attention_20261124_033254`: 2,040.5 min, $37.7671.
+
+  For every session:
+  - ALL_DONE, the pod deleted, the provider confirms it gone.
+  - Both seeds trained 9,701 of 9,701 steps, with no out-of-memory error and no recipe or memory change.
+  - Peak reserved on the first four optimizer steps: 43.40 / 43.70 (width), 40.90 / 40.98 (depth) and 42.89 / 42.51
+    GiB (FFN + attention), against the 44.39 GiB the device reports.
+  - All four sets per arm were evaluated on all of eval-set-1.
+- Result (`results/study_completion.json`, COMPLETE, the registered decision formal in both modes; report
+  `docs/stages/stage-1/single_operator_budget/REPORT.md`). Static fluid formal core, 570 items, 558 groups, both seeds
+  pooled, Holm m = 3 per mode:
+  - Thinking mode (primary) rejects all three pairs:
+    - FFN + attention 32.72% − residual width 29.56%: +3.16 pp [+0.35, +6.03], p 0.031;
+    - FFN + attention − depth 16.75%: +15.96 pp [+13.00, +19.01], p < 0.0001;
+    - residual width − depth: +12.81 pp [+9.93, +15.68], p < 0.0001.
+  - Non-thinking mode (second family, opened because the first rejected all three):
+    - FFN + attention 29.82% − residual width 31.75%: −1.93 pp [−4.44, +0.54], p 0.160, NOT_DISTINGUISHED;
+    - FFN + attention − depth 17.54%: +12.28 pp [+9.41, +15.25], p < 0.0001;
+    - residual width − depth: +14.21 pp [+11.40, +17.14], p < 0.0001.
+  - Both seeds agree in sign everywhere.
+  - "At N ≤ 2, compress depth first" is not supported at this point under this recipe.
+- Decision: the phase reached its terminal condition (the maintainer's 「……全部核验完成」).
+  - The grant's `kinds.sob1_train.closed` is written by the agent on that condition, so `require_kind_open` refuses any
+    further `sob1_train` session; `phase_2_closed` records the terminal state.
+  - Money: $112.0621 of the $185.87 ceiling (expected $114.70). The unspent $73.8079 and the $1.00 reserve lapse.
+    The project cap ($1,161.06) is unchanged.
+  - Provider: balance $235.8108 → $123.7283 (−$112.0825, +$0.0204 against the records). Billed per pod: width
+    $42.6850 (+$0.0079) and depth $31.6237 (+$0.0058); the FFN + attention pod's last day was still posting at
+    14:03Z ($36.9745; `logs/budget/provider/runpod_billing_v2_2026-11-25T1403Z.json`). 0 pods, 0 volumes.
+- Storage:
+  - Residual width's and depth's four finals are on the dev box, verified file by file. Their relay copies were
+    retired behind tombstones `relay_sob1_train_*` (the 2026-11-20 rotation decision).
+  - FFN + attention's two finals stay on the relay by design (`589acf28…`, `64292e50…`; LFS sha256 checked).
+  - Every session's evidence archive is on the dev box and the relay. All 48 save points were removed after their
+    hand-off.
+  - The three phase-1 initializations are kept until the maintainer reviews the report.
+  - During arm 3, another project's Claude job filled `~/.claude/jobs/206b5fe3/tmp` (13 GB). On the maintainer's
+    permission (「可以清理 ~/.claude/jobs/」) only that tmp was deleted, after checking that the job was idle there.
+- Alternatives considered: none open; the protocol, the order and the placement were fixed before the grant.
+- Risks: eval-set-1 is development-exposed. The width-vs-FFN + attention thinking-mode difference passes only at
+  Holm's last step, and one point (N ≈ 2, one recipe) speaks only for its neighbourhood. The dev box holds the only
+  copies of four finals.
+- Revisit when: the maintainer reviews the report (a merge into `main` is the maintainer's), or a later round consumes
+  these finals or initializations.

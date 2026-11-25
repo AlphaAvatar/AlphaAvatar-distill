@@ -1,0 +1,674 @@
+[
+ {
+  "tag": "step_001104",
+  "step": 1104,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_001104",
+  "files_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "807688618ca803cc9a2b81644a8e0065dd70c827b74aaa07e26b860988483f60",
+   "trainer_state.pt": "b1898f77de1cbb1b8494f47f07994dabf80ae4416f79737e99e6a44f36898b98",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0"
+  },
+  "bytes": {
+   "model/config.json": 1593,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8045000112,
+   "trainer_state.pt": 14534459132,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 21.03 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 127.5,
+  "downloaded_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "807688618ca803cc9a2b81644a8e0065dd70c827b74aaa07e26b860988483f60",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0",
+   "trainer_state.pt": "b1898f77de1cbb1b8494f47f07994dabf80ae4416f79737e99e6a44f36898b98"
+  },
+  "verified": true,
+  "verify_seconds": 56.0,
+  "utc": "2026-11-22T05:05:28Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_001104",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_001104",
+    "files_sha256": {
+     "record.json": "0cf7441ba8363d1c99510de8b2bf1bf23339223cfaae2af0199288ff4b9e4458"
+    },
+    "verified": true,
+    "utc": "2026-11-22T05:05:29Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints",
+   "listed_present": 1,
+   "verified": true,
+   "utc": "2026-11-22T05:05:30Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-22T07:07:14Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_001104/model/config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_001104/model/generation_config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_001104/model/model.safetensors",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_001104/record.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_001104/resume_identity.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_001104/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 22579459244,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-22T07:07:14Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_002208",
+  "step": 2208,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_002208",
+  "files_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "e9d304c3363b119ae632720d91a75596be1639c90085e9657da9c0c7f0c536df",
+   "trainer_state.pt": "f2b1769a684a3293dfe84ea82aae3e7bbd27750a75c6339ad7106cc7d435bba9",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0"
+  },
+  "bytes": {
+   "model/config.json": 1593,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8045000112,
+   "trainer_state.pt": 14534459132,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 21.03 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 127.4,
+  "downloaded_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "e9d304c3363b119ae632720d91a75596be1639c90085e9657da9c0c7f0c536df",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0",
+   "trainer_state.pt": "f2b1769a684a3293dfe84ea82aae3e7bbd27750a75c6339ad7106cc7d435bba9"
+  },
+  "verified": true,
+  "verify_seconds": 62.8,
+  "utc": "2026-11-22T07:06:55Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_002208",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_002208",
+    "files_sha256": {
+     "record.json": "e62da07f72221fa33b98f7560ea22f5d4d203d32d5e35fe9f7206f4caefc34b0"
+    },
+    "verified": true,
+    "utc": "2026-11-22T07:06:56Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-22T07:06:58Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-22T09:08:08Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_002208/model/config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_002208/model/generation_config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_002208/model/model.safetensors",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_002208/record.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_002208/resume_identity.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_002208/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 22579459244,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-22T09:08:08Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_003312",
+  "step": 3312,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_003312",
+  "files_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "a4cecabc8e03db96fd7120cd1fdfcc6a7f3456526bac758219833ca99894d52d",
+   "trainer_state.pt": "159d9d94934e70b09429f22bce61fee9740a7d8167332e328d70bd72e9b52bd1",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0"
+  },
+  "bytes": {
+   "model/config.json": 1593,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8045000112,
+   "trainer_state.pt": 14534459132,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 21.03 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 128.0,
+  "downloaded_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "a4cecabc8e03db96fd7120cd1fdfcc6a7f3456526bac758219833ca99894d52d",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0",
+   "trainer_state.pt": "159d9d94934e70b09429f22bce61fee9740a7d8167332e328d70bd72e9b52bd1"
+  },
+  "verified": true,
+  "verify_seconds": 72.1,
+  "utc": "2026-11-22T09:07:49Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_003312",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_003312",
+    "files_sha256": {
+     "record.json": "4a2e74e6001bac8d41321aa67e08f3d298ac8b25d717beb815afff02f78e2aba"
+    },
+    "verified": true,
+    "utc": "2026-11-22T09:07:50Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-22T09:07:52Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-22T11:08:57Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_003312/model/config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_003312/model/generation_config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_003312/model/model.safetensors",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_003312/record.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_003312/resume_identity.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_003312/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 22579459244,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-22T11:08:57Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_004416",
+  "step": 4416,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_004416",
+  "files_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "dd3a29a2b51de9c5ae49cf3ede63ad61f3f539b9a2da8ea2a1f33f00eeed480f",
+   "trainer_state.pt": "8c52ad4d158919f2afc6e7ad8fba77b83c56284d3d88fe574e82620acadda85f",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0"
+  },
+  "bytes": {
+   "model/config.json": 1593,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8045000112,
+   "trainer_state.pt": 14534459132,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 21.03 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 128.0,
+  "downloaded_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "dd3a29a2b51de9c5ae49cf3ede63ad61f3f539b9a2da8ea2a1f33f00eeed480f",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0",
+   "trainer_state.pt": "8c52ad4d158919f2afc6e7ad8fba77b83c56284d3d88fe574e82620acadda85f"
+  },
+  "verified": true,
+  "verify_seconds": 66.8,
+  "utc": "2026-11-22T11:08:37Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_004416",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_004416",
+    "files_sha256": {
+     "record.json": "c436ebebe6d811ff166e3aaec0fc477ea82ad0d0e220ade92eaf50a76fd7c8b2"
+    },
+    "verified": true,
+    "utc": "2026-11-22T11:08:39Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-22T11:08:40Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-22T13:10:33Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_004416/model/config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_004416/model/generation_config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_004416/model/model.safetensors",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_004416/record.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_004416/resume_identity.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_004416/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 22579459244,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-22T13:10:33Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_005520",
+  "step": 5520,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_005520",
+  "files_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "7fe4eaeae88431d063af6767c0fa25f59a043ddadfdfb89678046ad12078130e",
+   "trainer_state.pt": "5e959c6418e093c63edb82e874851fa4a6b04075dc78c78e375dff177171d8f2",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0"
+  },
+  "bytes": {
+   "model/config.json": 1593,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8045000112,
+   "trainer_state.pt": 14534459132,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 21.03 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 128.5,
+  "downloaded_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "7fe4eaeae88431d063af6767c0fa25f59a043ddadfdfb89678046ad12078130e",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0",
+   "trainer_state.pt": "5e959c6418e093c63edb82e874851fa4a6b04075dc78c78e375dff177171d8f2"
+  },
+  "verified": true,
+  "verify_seconds": 54.7,
+  "utc": "2026-11-22T13:10:14Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_005520",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_005520",
+    "files_sha256": {
+     "record.json": "04e0d08d2c0a855900b0057c13b44b45272f735c2c3d897152332e44050ff4d8"
+    },
+    "verified": true,
+    "utc": "2026-11-22T13:10:16Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-22T13:10:17Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-22T15:11:20Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_005520/model/config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_005520/model/generation_config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_005520/model/model.safetensors",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_005520/record.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_005520/resume_identity.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_005520/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 22579459244,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-22T15:11:20Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_006624",
+  "step": 6624,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_006624",
+  "files_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "e3b3dec6ca15630e48793be87c101982093ae8d27673ab20e92b31fb8cbb2405",
+   "trainer_state.pt": "175d060b6a2bbfb41c1b52bdac92cac435aa6b3ce5f4414205ac8ff136b9a1ca",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0"
+  },
+  "bytes": {
+   "model/config.json": 1593,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8045000112,
+   "trainer_state.pt": 14534459132,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 21.03 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 131.9,
+  "downloaded_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "e3b3dec6ca15630e48793be87c101982093ae8d27673ab20e92b31fb8cbb2405",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0",
+   "trainer_state.pt": "175d060b6a2bbfb41c1b52bdac92cac435aa6b3ce5f4414205ac8ff136b9a1ca"
+  },
+  "verified": true,
+  "verify_seconds": 60.5,
+  "utc": "2026-11-22T15:11:00Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_006624",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_006624",
+    "files_sha256": {
+     "record.json": "fd0da6571e1969f68c66b6b4ab593d08676118dac6fa38607b7afc3ca3f0ddd2"
+    },
+    "verified": true,
+    "utc": "2026-11-22T15:11:02Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-22T15:11:03Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-22T17:12:58Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_006624/model/config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_006624/model/generation_config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_006624/model/model.safetensors",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_006624/record.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_006624/resume_identity.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_006624/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 22579459244,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-22T17:12:58Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_007728",
+  "step": 7728,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_007728",
+  "files_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "e328926c5e2ee77af243613c0ab518af7a7b00800f45e0b659f4a618f18a3003",
+   "trainer_state.pt": "8e70b8be9c0ab4009af2eeb7933899ed3f9ac0ec2d5b9298d60c1384e0012066",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0"
+  },
+  "bytes": {
+   "model/config.json": 1593,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8045000112,
+   "trainer_state.pt": 14534459132,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 21.03 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 130.6,
+  "downloaded_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "e328926c5e2ee77af243613c0ab518af7a7b00800f45e0b659f4a618f18a3003",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0",
+   "trainer_state.pt": "8e70b8be9c0ab4009af2eeb7933899ed3f9ac0ec2d5b9298d60c1384e0012066"
+  },
+  "verified": true,
+  "verify_seconds": 53.4,
+  "utc": "2026-11-22T17:12:39Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_007728",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_007728",
+    "files_sha256": {
+     "record.json": "b0434401bdeffaa94b5698ec3798bd53b13c5af83b10a48957addb35c9836891"
+    },
+    "verified": true,
+    "utc": "2026-11-22T17:12:40Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-22T17:12:42Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-22T19:13:38Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_007728/model/config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_007728/model/generation_config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_007728/model/model.safetensors",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_007728/record.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_007728/resume_identity.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_007728/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 22579459244,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-22T19:13:38Z",
+   "verified": true
+  }
+ },
+ {
+  "tag": "step_008832",
+  "step": 8832,
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_008832",
+  "files_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "df020e76fa8accc7d1727cbc7be14bd259c31dc65fc00ff6f3488ebecc8278fd",
+   "trainer_state.pt": "dacd6171c6dfd68c0b08fa26270716b19fb8f405c0f661ca8389c0de6e7c3139",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0"
+  },
+  "bytes": {
+   "model/config.json": 1593,
+   "model/generation_config.json": 143,
+   "model/model.safetensors": 8045000112,
+   "trainer_state.pt": 14534459132,
+   "resume_identity.json": 544
+  },
+  "quota": "5 object(s), 21.03 GiB: ACCEPTED (200) 5/5 granted an upload action",
+  "uploaded": [
+   "model/config.json",
+   "model/generation_config.json",
+   "model/model.safetensors",
+   "resume_identity.json",
+   "trainer_state.pt"
+  ],
+  "upload_seconds": 127.8,
+  "downloaded_sha256": {
+   "model/config.json": "415b6599ade88e56dd86d2d7dd92513cb3a11edfcf8a1d0c768f0629cb3a355d",
+   "model/generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+   "model/model.safetensors": "df020e76fa8accc7d1727cbc7be14bd259c31dc65fc00ff6f3488ebecc8278fd",
+   "resume_identity.json": "ee3930a53ba1432cb5e628542cee06fa90ce8a7287b9e8ca3701effc7f0eb3e0",
+   "trainer_state.pt": "dacd6171c6dfd68c0b08fa26270716b19fb8f405c0f661ca8389c0de6e7c3139"
+  },
+  "verified": true,
+  "verify_seconds": 57.6,
+  "utc": "2026-11-22T19:13:19Z",
+  "rule": "uploaded, downloaded again into a fresh cache and re-hashed",
+  "latest_txt": "step_008832",
+  "handoff_tries": 1,
+  "handoff": {
+   "pointer": {
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_008832",
+    "files_sha256": {
+     "record.json": "1a46b2e4538f3219802a407aaaa555abb549c47947b67c68eb6daaf6d3f3b84e"
+    },
+    "verified": true,
+    "utc": "2026-11-22T19:13:21Z",
+    "error": null,
+    "refused": null
+   },
+   "listing": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints",
+   "listed_present": 2,
+   "verified": true,
+   "utc": "2026-11-22T19:13:22Z",
+   "why": null
+  },
+  "remove_attempts": [
+   {
+    "verified_absent": true,
+    "error": null,
+    "utc": "2026-11-22T20:48:23Z"
+   }
+  ],
+  "removed": {
+   "removed_paths": [
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_008832/model/config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_008832/model/generation_config.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_008832/model/model.safetensors",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_008832/record.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_008832/resume_identity.json",
+    "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/savepoints/step_008832/trainer_state.pt"
+   ],
+   "lfs_objects_deleted": 2,
+   "lfs_left": [],
+   "shared_oids_kept": [],
+   "freed_bytes": 22579459244,
+   "paths_left": [],
+   "verified_absent": true,
+   "utc": "2026-11-22T20:48:23Z",
+   "verified": true
+  }
+ }
+]

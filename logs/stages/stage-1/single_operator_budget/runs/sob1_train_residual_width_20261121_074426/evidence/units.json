@@ -1,0 +1,1226 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.train_units/v1",
+ "started_utc": "2026-11-21T07:52:56Z",
+ "attempt": "sob1_train_residual_width_20261121_074426",
+ "units": {
+  "residual_width-s20260726": {
+   "pending_removals_at_takeover": {
+    "freed": [],
+    "freed_bytes": 0,
+    "pending": [],
+    "utc": "2026-11-21T07:52:56Z"
+   },
+   "at_start": {
+    "final": null,
+    "final_problems": [
+     "residual_width-s20260726: no final.json (no final weights secured)"
+    ],
+    "sets": {
+     "H-T": {
+      "complete": false,
+      "problems": {
+       "coverage": [
+        "fluid_reasoning_720__dev_v1: no generations",
+        "stage3_capability_846__math_verified: no generations",
+        "stage3_capability_846__gsm8k: no generations",
+        "stage3_capability_846__multihop: no generations",
+        "stage3_capability_846__rag: no generations",
+        "stage3_capability_846__answerability_paired: no generations",
+        "stage3_capability_846__safety_paired: no generations",
+        "stage3_capability_846__knowledge: no generations",
+        "stage3_capability_846__eval_behavior_v0: no generations",
+        "stage3_legacy_150__items: no generations"
+       ],
+       "formal_report": [
+        "not scorable: units without generations"
+       ],
+       "model_identity": [
+        "residual_width_s20260726 has no verified final weights in /workspace/aad/artifacts/audit/stage1_single_operator/sob1_train_residual_width_20261121_074426"
+       ]
+      }
+     },
+     "H-N": {
+      "complete": false,
+      "problems": {
+       "coverage": [
+        "fluid_reasoning_720__dev_v1: no generations",
+        "stage3_capability_846__math_verified: no generations",
+        "stage3_capability_846__gsm8k: no generations",
+        "stage3_capability_846__multihop: no generations",
+        "stage3_capability_846__rag: no generations",
+        "stage3_capability_846__answerability_paired: no generations",
+        "stage3_capability_846__safety_paired: no generations",
+        "stage3_capability_846__knowledge: no generations",
+        "stage3_capability_846__eval_behavior_v0: no generations",
+        "stage3_legacy_150__items: no generations"
+       ],
+       "formal_report": [
+        "not scorable: units without generations"
+       ],
+       "model_identity": [
+        "residual_width_s20260726 has no verified final weights in /workspace/aad/artifacts/audit/stage1_single_operator/sob1_train_residual_width_20261121_074426"
+       ]
+      }
+     }
+    }
+   },
+   "state_at_start": "train",
+   "init": {
+    "path": "/workspace/single_operator/init/residual_width",
+    "from": "AlphaAvatar/aadistill-artifacts:durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init",
+    "utc": "2026-11-21T07:54:10Z"
+   },
+   "admitted_utc": "2026-11-21T07:54:17Z",
+   "training_deadline": {
+    "seconds": 73440.0,
+    "session_deadline_utc": "2026-11-23T15:52:08Z",
+    "reserve_seconds": 16842.1,
+    "session_left_after_reserve_s": 184628.2,
+    "rule": "min(the unit's deadline, the session's hard deadline - now - the floor-rate copy of one save point and the final - the closeout reserve)"
+   },
+   "train_rc": 0,
+   "train_seconds": 63996.5,
+   "telemetry": {
+    "logged_steps": 970,
+    "median_seconds_per_step": 6.45,
+    "p95_seconds_per_step": 6.87,
+    "kd_positions_per_step_median": 3532.5,
+    "peak_gpu_mem_gb": 42.37,
+    "peak_gpu_mem_reserved_gb": 43.4,
+    "save_points": [
+     1104,
+     2208,
+     3312,
+     4416,
+     5520,
+     6624,
+     7728,
+     8832,
+     9701
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "memory": {
+    "probes": [
+     {
+      "step": 1,
+      "peak_allocated_gib": 42.367,
+      "peak_reserved_gib": 42.742,
+      "min_device_free_gib": 1.136,
+      "device_total_gib": 44.394,
+      "phases": [
+       {
+        "after": "forward_loss",
+        "micro": 0,
+        "allocated_gib": 16.598,
+        "peak_allocated_gib": 20.867,
+        "reserved_gib": 21.395,
+        "peak_reserved_gib": 21.395,
+        "device_free_gib": 22.493,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 0,
+        "allocated_gib": 21.959,
+        "peak_allocated_gib": 23.397,
+        "reserved_gib": 24.264,
+        "peak_reserved_gib": 24.264,
+        "device_free_gib": 19.615,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "forward_loss",
+        "micro": 1,
+        "allocated_gib": 23.4,
+        "peak_allocated_gib": 27.752,
+        "reserved_gib": 28.764,
+        "peak_reserved_gib": 28.764,
+        "device_free_gib": 15.115,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 1,
+        "allocated_gib": 21.959,
+        "peak_allocated_gib": 27.752,
+        "reserved_gib": 29.637,
+        "peak_reserved_gib": 29.637,
+        "device_free_gib": 14.242,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "clip",
+        "micro": null,
+        "allocated_gib": 21.959,
+        "peak_allocated_gib": 27.752,
+        "reserved_gib": 29.637,
+        "peak_reserved_gib": 29.637,
+        "device_free_gib": 14.242,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "optimizer_step",
+        "micro": null,
+        "allocated_gib": 35.546,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 42.742,
+        "peak_reserved_gib": 42.742,
+        "device_free_gib": 1.136,
+        "device_total_gib": 44.394
+       }
+      ]
+     },
+     {
+      "step": 2,
+      "peak_allocated_gib": 42.367,
+      "peak_reserved_gib": 43.396,
+      "min_device_free_gib": 0.482,
+      "device_total_gib": 44.394,
+      "phases": [
+       {
+        "after": "forward_loss",
+        "micro": 0,
+        "allocated_gib": 30.194,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.105,
+        "peak_reserved_gib": 43.105,
+        "device_free_gib": 0.773,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 0,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.396,
+        "peak_reserved_gib": 43.396,
+        "device_free_gib": 0.482,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "forward_loss",
+        "micro": 1,
+        "allocated_gib": 37.018,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.396,
+        "peak_reserved_gib": 43.396,
+        "device_free_gib": 0.482,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 1,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.396,
+        "peak_reserved_gib": 43.396,
+        "device_free_gib": 0.482,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "clip",
+        "micro": null,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.396,
+        "peak_reserved_gib": 43.396,
+        "device_free_gib": 0.482,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "optimizer_step",
+        "micro": null,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.396,
+        "peak_reserved_gib": 43.396,
+        "device_free_gib": 0.482,
+        "device_total_gib": 44.394
+       }
+      ]
+     },
+     {
+      "step": 3,
+      "peak_allocated_gib": 42.367,
+      "peak_reserved_gib": 43.398,
+      "min_device_free_gib": 0.48,
+      "device_total_gib": 44.394,
+      "phases": [
+       {
+        "after": "forward_loss",
+        "micro": 0,
+        "allocated_gib": 30.192,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.396,
+        "peak_reserved_gib": 43.396,
+        "device_free_gib": 0.482,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 0,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.396,
+        "peak_reserved_gib": 43.396,
+        "device_free_gib": 0.482,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "forward_loss",
+        "micro": 1,
+        "allocated_gib": 37.001,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.396,
+        "peak_reserved_gib": 43.396,
+        "device_free_gib": 0.482,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 1,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.398,
+        "peak_reserved_gib": 43.398,
+        "device_free_gib": 0.48,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "clip",
+        "micro": null,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.398,
+        "peak_reserved_gib": 43.398,
+        "device_free_gib": 0.48,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "optimizer_step",
+        "micro": null,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.398,
+        "peak_reserved_gib": 43.398,
+        "device_free_gib": 0.48,
+        "device_total_gib": 44.394
+       }
+      ]
+     },
+     {
+      "step": 4,
+      "peak_allocated_gib": 42.367,
+      "peak_reserved_gib": 43.398,
+      "min_device_free_gib": 0.48,
+      "device_total_gib": 44.394,
+      "phases": [
+       {
+        "after": "forward_loss",
+        "micro": 0,
+        "allocated_gib": 30.195,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.398,
+        "peak_reserved_gib": 43.398,
+        "device_free_gib": 0.48,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 0,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.398,
+        "peak_reserved_gib": 43.398,
+        "device_free_gib": 0.48,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "forward_loss",
+        "micro": 1,
+        "allocated_gib": 37.01,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.398,
+        "peak_reserved_gib": 43.398,
+        "device_free_gib": 0.48,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 1,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.398,
+        "peak_reserved_gib": 43.398,
+        "device_free_gib": 0.48,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "clip",
+        "micro": null,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.398,
+        "peak_reserved_gib": 43.398,
+        "device_free_gib": 0.48,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "optimizer_step",
+        "micro": null,
+        "allocated_gib": 35.583,
+        "peak_allocated_gib": 42.367,
+        "reserved_gib": 43.398,
+        "peak_reserved_gib": 43.398,
+        "device_free_gib": 0.48,
+        "device_total_gib": 44.394
+       }
+      ]
+     }
+    ],
+    "oom": [],
+    "oom_phase": null
+   },
+   "completion_record": "run_completion.json",
+   "final_model_safetensors_sha256": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263",
+   "removals_before_final": {
+    "freed": [],
+    "freed_bytes": 0,
+    "pending": [],
+    "utc": "2026-11-22T01:40:58Z"
+   },
+   "final_relay": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260726/final/00b430fdcef27257",
+    "verified": true
+   },
+   "evaluations": {
+    "H-T": {
+     "at_start": {
+      "complete": false,
+      "problems": {
+       "coverage": [
+        "fluid_reasoning_720__dev_v1: no generations",
+        "stage3_capability_846__math_verified: no generations",
+        "stage3_capability_846__gsm8k: no generations",
+        "stage3_capability_846__multihop: no generations",
+        "stage3_capability_846__rag: no generations",
+        "stage3_capability_846__answerability_paired: no generations",
+        "stage3_capability_846__safety_paired: no generations",
+        "stage3_capability_846__knowledge: no generations",
+        "stage3_capability_846__eval_behavior_v0: no generations",
+        "stage3_legacy_150__items: no generations"
+       ],
+       "formal_report": [
+        "not scorable: units without generations"
+       ]
+      }
+     },
+     "binding": {
+      "target": "residual_width_s20260726",
+      "arm": "residual_width",
+      "seed": 20260726,
+      "unit": "residual_width-s20260726",
+      "mode": "H-T",
+      "protocol_sha256": "2db89a2590b7f27434613656b0a39c1f3563098afbd9ac97454adbefab1744b0",
+      "weights_sha256": {
+       "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+      }
+     },
+     "repairs": [
+      []
+     ],
+     "runs": [
+      {
+       "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-T-g1",
+       "fluid": {
+        "status": "complete",
+        "runs": 1
+       },
+       "capability": {
+        "withheld": [],
+        "units": [
+         "stage3_capability_846__answerability_paired",
+         "stage3_capability_846__eval_behavior_v0",
+         "stage3_capability_846__gsm8k",
+         "stage3_capability_846__knowledge",
+         "stage3_capability_846__math_verified",
+         "stage3_capability_846__multihop",
+         "stage3_capability_846__rag",
+         "stage3_capability_846__safety_paired",
+         "stage3_legacy_150__items"
+        ],
+        "missing_at_start": [
+         "stage3_capability_846__answerability_paired",
+         "stage3_capability_846__eval_behavior_v0",
+         "stage3_capability_846__gsm8k",
+         "stage3_capability_846__knowledge",
+         "stage3_capability_846__math_verified",
+         "stage3_capability_846__multihop",
+         "stage3_capability_846__rag",
+         "stage3_capability_846__safety_paired",
+         "stage3_legacy_150__items"
+        ],
+        "sealed_samples_taken": {},
+        "status": "complete",
+        "seconds": 1140.3,
+        "attempt": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-T-g1"
+       }
+      }
+     ],
+     "status": "complete",
+     "generated": true,
+     "eval_seconds": 4128.0
+    },
+    "H-N": {
+     "at_start": {
+      "complete": false,
+      "problems": {
+       "coverage": [
+        "fluid_reasoning_720__dev_v1: no generations",
+        "stage3_capability_846__math_verified: no generations",
+        "stage3_capability_846__gsm8k: no generations",
+        "stage3_capability_846__multihop: no generations",
+        "stage3_capability_846__rag: no generations",
+        "stage3_capability_846__answerability_paired: no generations",
+        "stage3_capability_846__safety_paired: no generations",
+        "stage3_capability_846__knowledge: no generations",
+        "stage3_capability_846__eval_behavior_v0: no generations",
+        "stage3_legacy_150__items: no generations"
+       ],
+       "formal_report": [
+        "not scorable: units without generations"
+       ]
+      }
+     },
+     "binding": {
+      "target": "residual_width_s20260726",
+      "arm": "residual_width",
+      "seed": 20260726,
+      "unit": "residual_width-s20260726",
+      "mode": "H-N",
+      "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+      "weights_sha256": {
+       "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+      }
+     },
+     "repairs": [
+      []
+     ],
+     "runs": [
+      {
+       "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1",
+       "fluid": {
+        "status": "complete",
+        "runs": 1
+       },
+       "capability": {
+        "withheld": [],
+        "units": [
+         "stage3_capability_846__answerability_paired",
+         "stage3_capability_846__eval_behavior_v0",
+         "stage3_capability_846__gsm8k",
+         "stage3_capability_846__knowledge",
+         "stage3_capability_846__math_verified",
+         "stage3_capability_846__multihop",
+         "stage3_capability_846__rag",
+         "stage3_capability_846__safety_paired",
+         "stage3_legacy_150__items"
+        ],
+        "missing_at_start": [
+         "stage3_capability_846__answerability_paired",
+         "stage3_capability_846__eval_behavior_v0",
+         "stage3_capability_846__gsm8k",
+         "stage3_capability_846__knowledge",
+         "stage3_capability_846__math_verified",
+         "stage3_capability_846__multihop",
+         "stage3_capability_846__rag",
+         "stage3_capability_846__safety_paired",
+         "stage3_legacy_150__items"
+        ],
+        "sealed_samples_taken": {},
+        "status": "complete",
+        "seconds": 210.1,
+        "attempt": "sob1_train_residual_width_20261121_074426-residual_width_s20260726-H-N-g1"
+       }
+      }
+     ],
+     "status": "complete",
+     "generated": true,
+     "eval_seconds": 522.7
+    }
+   }
+  },
+  "residual_width-s20260801": {
+   "pending_removals_at_takeover": {
+    "freed": [],
+    "freed_bytes": 0,
+    "pending": [],
+    "utc": "2026-11-22T03:00:04Z"
+   },
+   "at_start": {
+    "final": null,
+    "final_problems": [
+     "residual_width-s20260801: no final.json (no final weights secured)"
+    ],
+    "sets": {
+     "H-T": {
+      "complete": false,
+      "problems": {
+       "coverage": [
+        "fluid_reasoning_720__dev_v1: no generations",
+        "stage3_capability_846__math_verified: no generations",
+        "stage3_capability_846__gsm8k: no generations",
+        "stage3_capability_846__multihop: no generations",
+        "stage3_capability_846__rag: no generations",
+        "stage3_capability_846__answerability_paired: no generations",
+        "stage3_capability_846__safety_paired: no generations",
+        "stage3_capability_846__knowledge: no generations",
+        "stage3_capability_846__eval_behavior_v0: no generations",
+        "stage3_legacy_150__items: no generations"
+       ],
+       "formal_report": [
+        "not scorable: units without generations"
+       ],
+       "model_identity": [
+        "residual_width_s20260801 has no verified final weights in /workspace/aad/artifacts/audit/stage1_single_operator/sob1_train_residual_width_20261121_074426"
+       ]
+      }
+     },
+     "H-N": {
+      "complete": false,
+      "problems": {
+       "coverage": [
+        "fluid_reasoning_720__dev_v1: no generations",
+        "stage3_capability_846__math_verified: no generations",
+        "stage3_capability_846__gsm8k: no generations",
+        "stage3_capability_846__multihop: no generations",
+        "stage3_capability_846__rag: no generations",
+        "stage3_capability_846__answerability_paired: no generations",
+        "stage3_capability_846__safety_paired: no generations",
+        "stage3_capability_846__knowledge: no generations",
+        "stage3_capability_846__eval_behavior_v0: no generations",
+        "stage3_legacy_150__items: no generations"
+       ],
+       "formal_report": [
+        "not scorable: units without generations"
+       ],
+       "model_identity": [
+        "residual_width_s20260801 has no verified final weights in /workspace/aad/artifacts/audit/stage1_single_operator/sob1_train_residual_width_20261121_074426"
+       ]
+      }
+     }
+    }
+   },
+   "state_at_start": "train",
+   "admitted_utc": "2026-11-22T03:00:10Z",
+   "training_deadline": {
+    "seconds": 73440.0,
+    "session_deadline_utc": "2026-11-23T15:52:08Z",
+    "reserve_seconds": 16842.1,
+    "session_left_after_reserve_s": 115875.3,
+    "rule": "min(the unit's deadline, the session's hard deadline - now - the floor-rate copy of one save point and the final - the closeout reserve)"
+   },
+   "train_rc": 0,
+   "train_seconds": 63990.6,
+   "telemetry": {
+    "logged_steps": 970,
+    "median_seconds_per_step": 6.45,
+    "p95_seconds_per_step": 6.87,
+    "kd_positions_per_step_median": 3585.5,
+    "peak_gpu_mem_gb": 42.36,
+    "peak_gpu_mem_reserved_gb": 43.7,
+    "save_points": [
+     1104,
+     2208,
+     3312,
+     4416,
+     5520,
+     6624,
+     7728,
+     8832,
+     9701
+    ],
+    "resumed_at": [],
+    "context_strategies": [
+     "cross_context"
+    ]
+   },
+   "memory": {
+    "probes": [
+     {
+      "step": 1,
+      "peak_allocated_gib": 42.365,
+      "peak_reserved_gib": 42.756,
+      "min_device_free_gib": 1.122,
+      "device_total_gib": 44.394,
+      "phases": [
+       {
+        "after": "forward_loss",
+        "micro": 0,
+        "allocated_gib": 16.594,
+        "peak_allocated_gib": 20.47,
+        "reserved_gib": 21.252,
+        "peak_reserved_gib": 21.252,
+        "device_free_gib": 22.636,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 0,
+        "allocated_gib": 21.958,
+        "peak_allocated_gib": 23.397,
+        "reserved_gib": 23.961,
+        "peak_reserved_gib": 23.961,
+        "device_free_gib": 19.917,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "forward_loss",
+        "micro": 1,
+        "allocated_gib": 23.378,
+        "peak_allocated_gib": 27.734,
+        "reserved_gib": 28.631,
+        "peak_reserved_gib": 28.631,
+        "device_free_gib": 15.247,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 1,
+        "allocated_gib": 21.957,
+        "peak_allocated_gib": 27.734,
+        "reserved_gib": 29.67,
+        "peak_reserved_gib": 29.67,
+        "device_free_gib": 14.208,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "clip",
+        "micro": null,
+        "allocated_gib": 21.957,
+        "peak_allocated_gib": 27.734,
+        "reserved_gib": 29.67,
+        "peak_reserved_gib": 29.67,
+        "device_free_gib": 14.208,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "optimizer_step",
+        "micro": null,
+        "allocated_gib": 35.544,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 42.756,
+        "peak_reserved_gib": 42.756,
+        "device_free_gib": 1.122,
+        "device_total_gib": 44.394
+       }
+      ]
+     },
+     {
+      "step": 2,
+      "peak_allocated_gib": 42.365,
+      "peak_reserved_gib": 43.703,
+      "min_device_free_gib": 0.175,
+      "device_total_gib": 44.394,
+      "phases": [
+       {
+        "after": "forward_loss",
+        "micro": 0,
+        "allocated_gib": 30.21,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.119,
+        "peak_reserved_gib": 43.119,
+        "device_free_gib": 0.759,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 0,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.701,
+        "peak_reserved_gib": 43.701,
+        "device_free_gib": 0.177,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "forward_loss",
+        "micro": 1,
+        "allocated_gib": 36.999,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.701,
+        "peak_reserved_gib": 43.701,
+        "device_free_gib": 0.177,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 1,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "clip",
+        "micro": null,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "optimizer_step",
+        "micro": null,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       }
+      ]
+     },
+     {
+      "step": 3,
+      "peak_allocated_gib": 42.365,
+      "peak_reserved_gib": 43.703,
+      "min_device_free_gib": 0.175,
+      "device_total_gib": 44.394,
+      "phases": [
+       {
+        "after": "forward_loss",
+        "micro": 0,
+        "allocated_gib": 30.199,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 0,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "forward_loss",
+        "micro": 1,
+        "allocated_gib": 37.017,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 1,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "clip",
+        "micro": null,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "optimizer_step",
+        "micro": null,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       }
+      ]
+     },
+     {
+      "step": 4,
+      "peak_allocated_gib": 42.365,
+      "peak_reserved_gib": 43.703,
+      "min_device_free_gib": 0.175,
+      "device_total_gib": 44.394,
+      "phases": [
+       {
+        "after": "forward_loss",
+        "micro": 0,
+        "allocated_gib": 30.216,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 0,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "forward_loss",
+        "micro": 1,
+        "allocated_gib": 37.003,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "backward",
+        "micro": 1,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "clip",
+        "micro": null,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       },
+       {
+        "after": "optimizer_step",
+        "micro": null,
+        "allocated_gib": 35.581,
+        "peak_allocated_gib": 42.365,
+        "reserved_gib": 43.703,
+        "peak_reserved_gib": 43.703,
+        "device_free_gib": 0.175,
+        "device_total_gib": 44.394
+       }
+      ]
+     }
+    ],
+    "oom": [],
+    "oom_phase": null
+   },
+   "completion_record": "run_completion.json",
+   "final_model_safetensors_sha256": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0",
+   "removals_before_final": {
+    "freed": [],
+    "freed_bytes": 0,
+    "pending": [],
+    "utc": "2026-11-22T20:46:45Z"
+   },
+   "final_relay": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage1_single_operator_budget/residual_width/residual_width-s20260801/final/b701868f05c6d6e4",
+    "verified": true
+   },
+   "evaluations": {
+    "H-T": {
+     "at_start": {
+      "complete": false,
+      "problems": {
+       "coverage": [
+        "fluid_reasoning_720__dev_v1: no generations",
+        "stage3_capability_846__math_verified: no generations",
+        "stage3_capability_846__gsm8k: no generations",
+        "stage3_capability_846__multihop: no generations",
+        "stage3_capability_846__rag: no generations",
+        "stage3_capability_846__answerability_paired: no generations",
+        "stage3_capability_846__safety_paired: no generations",
+        "stage3_capability_846__knowledge: no generations",
+        "stage3_capability_846__eval_behavior_v0: no generations",
+        "stage3_legacy_150__items: no generations"
+       ],
+       "formal_report": [
+        "not scorable: units without generations"
+       ]
+      }
+     },
+     "binding": {
+      "target": "residual_width_s20260801",
+      "arm": "residual_width",
+      "seed": 20260801,
+      "unit": "residual_width-s20260801",
+      "mode": "H-T",
+      "protocol_sha256": "2db89a2590b7f27434613656b0a39c1f3563098afbd9ac97454adbefab1744b0",
+      "weights_sha256": {
+       "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+      }
+     },
+     "repairs": [
+      []
+     ],
+     "runs": [
+      {
+       "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-T-g1",
+       "fluid": {
+        "status": "complete",
+        "runs": 1
+       },
+       "capability": {
+        "withheld": [],
+        "units": [
+         "stage3_capability_846__answerability_paired",
+         "stage3_capability_846__eval_behavior_v0",
+         "stage3_capability_846__gsm8k",
+         "stage3_capability_846__knowledge",
+         "stage3_capability_846__math_verified",
+         "stage3_capability_846__multihop",
+         "stage3_capability_846__rag",
+         "stage3_capability_846__safety_paired",
+         "stage3_legacy_150__items"
+        ],
+        "missing_at_start": [
+         "stage3_capability_846__answerability_paired",
+         "stage3_capability_846__eval_behavior_v0",
+         "stage3_capability_846__gsm8k",
+         "stage3_capability_846__knowledge",
+         "stage3_capability_846__math_verified",
+         "stage3_capability_846__multihop",
+         "stage3_capability_846__rag",
+         "stage3_capability_846__safety_paired",
+         "stage3_legacy_150__items"
+        ],
+        "sealed_samples_taken": {},
+        "status": "complete",
+        "seconds": 1170.3,
+        "attempt": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-T-g1"
+       }
+      }
+     ],
+     "status": "complete",
+     "generated": true,
+     "eval_seconds": 4338.7
+    },
+    "H-N": {
+     "at_start": {
+      "complete": false,
+      "problems": {
+       "coverage": [
+        "fluid_reasoning_720__dev_v1: no generations",
+        "stage3_capability_846__math_verified: no generations",
+        "stage3_capability_846__gsm8k: no generations",
+        "stage3_capability_846__multihop: no generations",
+        "stage3_capability_846__rag: no generations",
+        "stage3_capability_846__answerability_paired: no generations",
+        "stage3_capability_846__safety_paired: no generations",
+        "stage3_capability_846__knowledge: no generations",
+        "stage3_capability_846__eval_behavior_v0: no generations",
+        "stage3_legacy_150__items: no generations"
+       ],
+       "formal_report": [
+        "not scorable: units without generations"
+       ]
+      }
+     },
+     "binding": {
+      "target": "residual_width_s20260801",
+      "arm": "residual_width",
+      "seed": 20260801,
+      "unit": "residual_width-s20260801",
+      "mode": "H-N",
+      "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+      "weights_sha256": {
+       "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+      }
+     },
+     "repairs": [
+      []
+     ],
+     "runs": [
+      {
+       "generation": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1",
+       "fluid": {
+        "status": "complete",
+        "runs": 1
+       },
+       "capability": {
+        "withheld": [],
+        "units": [
+         "stage3_capability_846__answerability_paired",
+         "stage3_capability_846__eval_behavior_v0",
+         "stage3_capability_846__gsm8k",
+         "stage3_capability_846__knowledge",
+         "stage3_capability_846__math_verified",
+         "stage3_capability_846__multihop",
+         "stage3_capability_846__rag",
+         "stage3_capability_846__safety_paired",
+         "stage3_legacy_150__items"
+        ],
+        "missing_at_start": [
+         "stage3_capability_846__answerability_paired",
+         "stage3_capability_846__eval_behavior_v0",
+         "stage3_capability_846__gsm8k",
+         "stage3_capability_846__knowledge",
+         "stage3_capability_846__math_verified",
+         "stage3_capability_846__multihop",
+         "stage3_capability_846__rag",
+         "stage3_capability_846__safety_paired",
+         "stage3_legacy_150__items"
+        ],
+        "sealed_samples_taken": {},
+        "status": "complete",
+        "seconds": 180.1,
+        "attempt": "sob1_train_residual_width_20261121_074426-residual_width_s20260801-H-N-g1"
+       }
+      }
+     ],
+     "status": "complete",
+     "generated": true,
+     "eval_seconds": 522.6
+    }
+   }
+  }
+ },
+ "authorization": "stage1.single_operator_budget.sob1_train_residual_width_20261121_074426",
+ "authorized_plan": {
+  "problems": [],
+  "plan": "/workspace/aad/logs/stages/stage-1/single_operator_budget/plans/training_plan_residual_width.json",
+  "arm": "residual_width"
+ },
+ "plan": "/workspace/aad/logs/stages/stage-1/single_operator_budget/plans/training_plan_residual_width.json",
+ "plan_sha256": "75d13966a1901a1f44cdade7b6837df31b58ca3b9fcd63f03214e159e476e220",
+ "arm": "residual_width",
+ "prefix_root": "durable/stage1_single_operator_budget",
+ "durability": {
+  "listing_attempts": 5,
+  "listing_wait_seconds": 60,
+  "listing_timeout_seconds": 600,
+  "handoff_attempts": 4,
+  "handoff_wait_seconds": 120,
+  "upload_floor_bytes_per_second": 120000000.0,
+  "download_floor_bytes_per_second": 2600000.0,
+  "transfer_margin": 1.25,
+  "closeout_reserve_seconds": 1800,
+  "memory_probe_steps": 4,
+  "basis": "TPI1's 20 save points and finals: uploads 121-161 MB/s; verifying downloads 128-386 MB/s, with an episode of 2.6-4.6 MB/s on the private-repo download path (2026-11-17/18). A 2B save point is 20.9-22.6 GB, so a floor-rate verify takes up to 2.4 h: copies get their time from their bytes, and a session stops training early enough to secure its last save point and the final before its hard deadline",
+  "rules": [
+   "an unreadable relay listing is retried and never read as empty: a unit goes back to step 0 only when a listing that WAS read holds no save point (train_driver.restore_savepoint)",
+   "weights uploaded and verified are never sent again: only their record's publication (the handoff) is retried (SavepointMirror.mirror_once, hand_off_with_retries)",
+   "a save point is retired only after the next one hands off; save points only after the final hands off"
+  ]
+ },
+ "tokenizer": {
+  "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+  "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+  "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+  "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+ },
+ "completion": {
+  "schema": "aadistill.stage1.single_operator_budget.phase2_session_completion/v1",
+  "arm": "residual_width",
+  "complete": true,
+  "finals": {
+   "residual_width-s20260726": {
+    "problems": [],
+    "model_safetensors_sha256": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+   },
+   "residual_width-s20260801": {
+    "problems": [],
+    "model_safetensors_sha256": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+   }
+  },
+  "sets": {
+   "residual_width_s20260726/H-T": {
+    "complete": true,
+    "problems": {},
+    "binding": {
+     "target": "residual_width_s20260726",
+     "arm": "residual_width",
+     "seed": 20260726,
+     "unit": "residual_width-s20260726",
+     "mode": "H-T",
+     "protocol_sha256": "2db89a2590b7f27434613656b0a39c1f3563098afbd9ac97454adbefab1744b0",
+     "weights_sha256": {
+      "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+     }
+    },
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "residual_width_s20260726/H-N": {
+    "complete": true,
+    "problems": {},
+    "binding": {
+     "target": "residual_width_s20260726",
+     "arm": "residual_width",
+     "seed": 20260726,
+     "unit": "residual_width-s20260726",
+     "mode": "H-N",
+     "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+     "weights_sha256": {
+      "model.safetensors": "00b430fdcef27257e8b4b08f8c98794eb5f8dd8c60e51de1b84df12ba4e82263"
+     }
+    },
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   },
+   "residual_width_s20260801/H-T": {
+    "complete": true,
+    "problems": {},
+    "binding": {
+     "target": "residual_width_s20260801",
+     "arm": "residual_width",
+     "seed": 20260801,
+     "unit": "residual_width-s20260801",
+     "mode": "H-T",
+     "protocol_sha256": "2db89a2590b7f27434613656b0a39c1f3563098afbd9ac97454adbefab1744b0",
+     "weights_sha256": {
+      "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+     }
+    },
+    "protocol_digest": "030ba2acc585c3a02e09c843e148a13dce09452f47160edc8e921d0344721fa2"
+   },
+   "residual_width_s20260801/H-N": {
+    "complete": true,
+    "problems": {},
+    "binding": {
+     "target": "residual_width_s20260801",
+     "arm": "residual_width",
+     "seed": 20260801,
+     "unit": "residual_width-s20260801",
+     "mode": "H-N",
+     "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+     "weights_sha256": {
+      "model.safetensors": "b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0"
+     }
+    },
+    "protocol_digest": "fa18466858f0d0d5301dfa4b0316df1c51e0d637671d5219e9ce3282193c261f"
+   }
+  },
+  "modes": [],
+  "n_sets": 4,
+  "n_complete": 4
+ },
+ "finished_utc": "2026-11-22T22:09:36Z",
+ "terminal": "ALL_DONE"
+}
