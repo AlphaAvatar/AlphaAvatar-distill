@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 37,
-  "single_stage": 37,
+  "experiment_total": 39,
+  "single_stage": 39,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -33,7 +33,8 @@
   "stage-0",
   "stage-1",
   "stage-2",
-  "stage-3"
+  "stage-3",
+  "stage-6"
  ],
  "stages": [
   {
@@ -150,10 +151,10 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 4,
-    "experiments": 19,
-    "experiments_with_logs": 19,
+    "experiments": 20,
+    "experiments_with_logs": 20,
     "runs": 249,
-    "canonical_configs": 22,
+    "canonical_configs": 23,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -161,6 +162,7 @@
     "configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json",
     "configs/stages/stage-1/c2_full_search_perf/c2_full_search_performance.json",
     "configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json",
+    "configs/stages/stage-1/depth_merge/design.json",
     "configs/stages/stage-1/phase_c1/authorization.json",
     "configs/stages/stage-1/phase_c2_baseline_completion/baseline_completion_authorization.json",
     "configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json",
@@ -362,6 +364,46 @@
    "canonical_data_manifests": [
     "data/stages/stage-3/stage3_pilot/manifest.json"
    ]
+  },
+  {
+   "stage_id": "6",
+   "purpose": "Study recurrent forward execution: a block whose parameters are shared and executed repeatedly, one iteration after another, and the training such a student needs (AGENTS.md 4.8, maintainer decision 2026-11-13). Whether repetition recovers depth -- and with it reasoning -- a compressed student lost, at the parameter count the budget allows, and at what compute and latency cost.",
+   "inputs": [
+    "a training-pre initialization of a depth-compressed student and the teacher lineage it came from",
+    "a recovery data set and recipe each Stage-6 design registers for itself (nothing inherited by default)"
+   ],
+   "data": [],
+   "execution": [
+    "the shared blocks, how often each runs, the initialization, the data and packing, the objective and the compute accounting are recorded as the design's identity before its first run",
+    "parameter-matched, FLOPs-matched and latency-matched comparisons are different comparisons, reported apart"
+   ],
+   "outputs": [
+    "recovered recurrent students' weights on the relay, their sealed eval-set-1 sets on the dev box"
+   ],
+   "configs": [
+    {
+     "path": "configs/stages/stage-6/depth_recurrence/design.json",
+     "says": "DMR1's variants 2 and 3: the 36-logical-layer schedule over SOB1's 16 kept blocks, the initialization selection, the hidden-state term, the round's registered analysis",
+     "field": "stage",
+     "equals": 6
+    }
+   ],
+   "code": [],
+   "status": "Prepared at $0 (DMR1, 2026-11-26): no Stage-6 run exists; nothing is authorized.",
+   "groups": [],
+   "activity": {
+    "pipeline_activity": 0,
+    "experiments": 1,
+    "experiments_with_logs": 1,
+    "runs": 0,
+    "canonical_configs": 1,
+    "canonical_data_manifests": 0,
+    "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
+   },
+   "canonical_configs": [
+    "configs/stages/stage-6/depth_recurrence/design.json"
+   ],
+   "canonical_data_manifests": []
   }
  ],
  "experiments": [
@@ -1730,6 +1772,50 @@
    "live_state": null
   },
   {
+   "experiment_id": "depth_merge",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "PREPARED at $0 (DMR1 variant 1, READY_FOR_REVIEW 2026-11-26; nothing granted, issued or run): the alpha (importance-normalized) merge of each kept block's span at SOB1's 16-of-36 depth selection, then SOB1's depth recovery recipe; its two sessions proposed",
+   "title": "Depth recovery, variant 1: importance-merged initialization at SOB1's depth-only structure (DMR1-M)",
+   "question": "At SOB1's depth-only structure, does writing each kept block from its whole span by the alpha merge, instead of keeping it as it is, leave more static fluid reasoning after the same Stage-3 recovery?",
+   "canonical_path": "logs/stages/stage-1/depth_merge",
+   "canonical_config": "configs/stages/stage-1/depth_merge/design.json",
+   "evidence": [
+    {
+     "path": "configs/stages/stage-1/depth_merge/design.json",
+     "says": "the base (SOB1's depth init and control), the spans, the alpha merge, the statistics, the reuse, the recovery recipe and the storage",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-1/depth_merge/plans/proposal_dmr1_merge_build.json",
+     "says": "the build session's proposal",
+     "field": "status",
+     "equals": "proposed"
+    },
+    {
+     "path": "logs/stages/stage-1/depth_merge/plans/proposal_dmr1_merge_train.json",
+     "says": "the training session's proposal",
+     "field": "status",
+     "equals": "proposed"
+    }
+   ],
+   "external_material": [
+    "docs/stages/stage-1/depth_merge/README.md -- variant 1's design",
+    "docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md -- the round's review report"
+   ],
+   "decisions": [
+    "the maintainer's brief of 2026-11-26 (DMR1: three variants; variant 1 first, after review)"
+   ],
+   "classification_reason": "Stage 1 by subject: how the initialization of a depth-compressed student is written (AGENTS.md 4.3); the Stage-3 recovery (execution stage stage3_recovery) and eval-set-1 are its fixed instruments.",
+   "canonical_scripts": "scripts/stages/stage-1/depth_merge",
+   "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/depth_merge",
+   "canonical_data": null,
+   "canonical_docs": "docs/stages/stage-1/depth_merge",
+   "live_state": null
+  },
+  {
    "experiment_id": "stage2_offline_mixture",
    "stage_id": "2",
    "classification": "pipeline-activity",
@@ -2865,6 +2951,44 @@
    "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a717.5"
+  },
+  {
+   "experiment_id": "depth_recurrence",
+   "stage_id": "6",
+   "classification": "experiment",
+   "status": "PREPARED at $0 (DMR1 variants 2 and 3, READY_FOR_REVIEW 2026-11-26; no paid run authorized): SOB1's 16 kept blocks executed on the 36-logical-layer schedule from the selected training-pre initialization, with and without a per-iteration hidden-state term; estimated, not proposed",
+   "title": "Depth recovery, variants 2 and 3: recurrent execution of the kept blocks, and per-iteration hidden-state distillation (DMR1-R, DMR1-RH)",
+   "question": "Does executing each kept block once per teacher layer of its span leave more static fluid reasoning after the same recovery than executing it once, from the same initialization; and does a per-iteration hidden-state loss change what survives?",
+   "canonical_path": "logs/stages/stage-6/depth_recurrence",
+   "canonical_config": "configs/stages/stage-6/depth_recurrence/design.json",
+   "evidence": [
+    {
+     "path": "configs/stages/stage-6/depth_recurrence/design.json",
+     "says": "the schedule, the initialization selection and its two legal paths, the hidden-state term, the round's registered analysis and the compute accounting",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-6/depth_recurrence/plans/estimates.json",
+     "says": "variants 2 and 3's time, money and memory on the real execution graph, not proposed",
+     "field": "status",
+     "equals": "estimate, NOT proposed this round"
+    }
+   ],
+   "external_material": [
+    "docs/stages/stage-6/depth_recurrence/README.md -- variants 2 and 3's design",
+    "docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md -- the round's review report"
+   ],
+   "decisions": [
+    "the maintainer's brief of 2026-11-26 (DMR1: variants 2 and 3 prepared, not authorized)"
+   ],
+   "classification_reason": "Stage 6 by subject: shared-parameter repeated execution and the training it needs (AGENTS.md 4.8, maintainer 2026-11-13); its recovery data and recipe are registered explicitly as the design's.",
+   "canonical_scripts": "scripts/stages/stage-6/depth_recurrence",
+   "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-6/depth_recurrence",
+   "canonical_data": null,
+   "canonical_docs": "docs/stages/stage-6/depth_recurrence",
+   "live_state": null
   },
   {
    "experiment_id": "device_canary",

@@ -43,11 +43,12 @@ something is "an experiment thing" or "a run thing" before you can find it.
 | stage | what it is | its own work | experiments | runs |
 | --- | --- | --- | --- | --- |
 | [`stage-0/`](stages/stage-0/) | Initialization warm-up data collection | 1 pipeline activity · 3 configs · 1 data manifest | 1, all with logs | 43 |
-| [`stage-1/`](stages/stage-1/) | Projection and structural initialization | 4 pipeline activities · 22 configs · 1 data manifest | 19, all with logs | 249 |
+| [`stage-1/`](stages/stage-1/) | Projection and structural initialization | 4 pipeline activities · 23 configs · 1 data manifest | 20, all with logs | 249 |
 | [`stage-2/`](stages/stage-2/) | Offline warm-up data collection | 1 pipeline activity · 3 configs · 3 data manifests | 2, all with logs | 51 |
 | [`stage-3/`](stages/stage-3/) | Student recovery | 3 pipeline activities · 13 configs · 1 data manifest | 15, of which 5 produced no logs of their own | 0 |
+| [`stage-6/`](stages/stage-6/) | Recurrent depth | 1 config | 1, all with logs | 0 |
 
-**37 experiments — 37 in one stage, 0 genuinely cross-stage, 0 unresolved.** 2 stage-neutral infrastructure entries are counted separately, in [`shared/`](shared/).
+**39 experiments — 39 in one stage, 0 genuinely cross-stage, 0 unresolved.** 2 stage-neutral infrastructure entries are counted separately, in [`shared/`](shared/).
 
 Generated from [`stages/index.json`](stages/index.json), which carries the
 evidence for every row.

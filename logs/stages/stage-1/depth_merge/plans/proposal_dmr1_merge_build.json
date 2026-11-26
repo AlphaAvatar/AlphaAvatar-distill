@@ -1,0 +1,73 @@
+{
+ "schema": "aadistill.dmr1.proposal/v1",
+ "study": "DMR1-M",
+ "status": "proposed",
+ "kind": "dmr1_merge_build",
+ "recorded_utc": "2026-11-26",
+ "design_sha256": "2b701bee2a0e9b2ba2e355ade42df25dc409cca7ce2d21e94074846826a6da09",
+ "scope": "DMR1 variant 1, session kind dmr1_merge_build only",
+ "ceiling_usd": 5.43,
+ "per_session_hard_cap_usd": 5.43,
+ "teardown_reserve_usd": 1.0,
+ "kinds": {
+  "dmr1_merge_build": {
+   "driver_minutes": 223.7,
+   "expected_usd": 2.5,
+   "per_session_hard_cap_usd": 5.43
+  }
+ },
+ "gpus": {
+  "NVIDIA L40S": 1.11
+ },
+ "gpu_count_max": 1,
+ "hardware": "one NVIDIA L40S, secure cloud, at most $1.11/h, 150 GB container disk, no network volume",
+ "usd_per_hour_all_in": 1.1105,
+ "project_cumulative_cap_usd": 1161.06,
+ "position_at_proposal": {
+  "read_utc": "2026-11-26T11:48:05Z",
+  "committed_usd": 1086.2713,
+  "project_cap_usd": 1161.06,
+  "project_remaining_usd": 74.7887,
+  "balance_usd": 123.7283,
+  "pods": 0,
+  "volumes": 0,
+  "spend_per_hour": 0.0,
+  "relay_headroom_gib": [
+   35.24,
+   35.28
+  ],
+  "dev_box_free_gib": 23
+ },
+ "terms": {
+  "minutes_expected": {
+   "session_and_contract": 3,
+   "teacher_load_and_base_check": 3,
+   "statistics_pass": 4.0,
+   "assignments_20_x_178s": 59.3,
+   "merge_9_spans_cpu_float64": 8,
+   "equivalence_checks": 1,
+   "save_reload": 2,
+   "state_evaluation": 10,
+   "diagnostics": 3,
+   "relay_init_and_statistics_expected": 2
+  },
+  "driver_minutes_expected": 95.3,
+  "driver_minutes": 223.7,
+  "expected_usd": 2.5,
+  "hard_cap": {
+   "driver_minutes": 223.7,
+   "billable_minutes": 288.08,
+   "usd": 5.43
+  },
+  "per_session_hard_cap_usd": 5.43,
+  "basis": "RI-LM1's measured statistics pass (117 s for 14 blocks) and assignments (1,420 s for 8 on the pod's CPU), scaled to 29 blocks and 20 pairs; the bound doubles every compute step and takes the init's verify download at the 2.6 MB/s floor x 1.25"
+ },
+ "money_rules": {
+  "own_envelope": "its own grant; the envelope counts only this kind's runs; SOB1's closed grants' remainders are void and fund nothing here",
+  "balance": "the provider balance must cover the hard cap plus the reserve at issue and at launch; a top-up is not a grant",
+  "teardown_reserve": "$1.00 held outside the ceiling, never issued"
+ },
+ "authorizes": "nothing: a proposal; the grant is the maintainer's",
+ "decision": "PENDING",
+ "granted_by": "nobody"
+}

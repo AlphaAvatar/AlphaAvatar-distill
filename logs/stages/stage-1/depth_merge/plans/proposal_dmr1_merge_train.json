@@ -1,0 +1,106 @@
+{
+ "schema": "aadistill.dmr1.proposal/v1",
+ "study": "DMR1-M",
+ "status": "proposed",
+ "kind": "dmr1_merge_train",
+ "recorded_utc": "2026-11-26",
+ "design_sha256": "2b701bee2a0e9b2ba2e355ade42df25dc409cca7ce2d21e94074846826a6da09",
+ "scope": "DMR1 variant 1, session kind dmr1_merge_train only",
+ "ceiling_usd": 64.46,
+ "per_session_hard_cap_usd": 64.46,
+ "teardown_reserve_usd": 1.0,
+ "kinds": {
+  "dmr1_merge_train": {
+   "per_arm": {
+    "depth_merge": {
+     "driver_minutes": 3207.3,
+     "expected_usd": 32.68,
+     "per_session_hard_cap_usd": 64.46,
+     "unit_deadline_hours": 19.5
+    }
+   }
+  }
+ },
+ "gpus": {
+  "NVIDIA L40S": 1.11
+ },
+ "gpu_count_max": 1,
+ "hardware": "one NVIDIA L40S, secure cloud, at most $1.11/h, 150 GB container disk, no network volume",
+ "usd_per_hour_all_in": 1.1105,
+ "project_cumulative_cap_usd": 1161.06,
+ "position_at_proposal": {
+  "read_utc": "2026-11-26T11:48:05Z",
+  "committed_usd": 1086.2713,
+  "project_cap_usd": 1161.06,
+  "project_remaining_usd": 74.7887,
+  "balance_usd": 123.7283,
+  "pods": 0,
+  "volumes": 0,
+  "spend_per_hour": 0.0,
+  "relay_headroom_gib": [
+   35.24,
+   35.28
+  ],
+  "dev_box_free_gib": 23
+ },
+ "terms": {
+  "units": 2,
+  "training_per_seed": {
+   "seconds_per_step_expected": 4.83,
+   "seconds_per_step_bound": 7.241,
+   "hours_expected": 13.02,
+   "hours_bound": 19.51
+  },
+  "post_recovery_evaluation_hours_per_unit": {
+   "expected": 1.22,
+   "bound": 3.0
+  },
+  "copies": {
+   "init_fetch": {
+    "bytes": 4007703552,
+    "hours_bound": 0.535,
+    "hours_expected": 0.009
+   },
+   "final_copy_per_seed": {
+    "bytes": 8015407104,
+    "hours_bound": 1.094,
+    "hours_expected": 0.037
+   },
+   "last_save_point_copy": {
+    "bytes": 20934572032,
+    "hours_bound": 2.856,
+    "hours_expected": 0.097
+   }
+  },
+  "driver_hours_expected": 28.76,
+  "driver_hours_bound": 53.46,
+  "driver_minutes": 3207.3,
+  "unit_deadline_hours": 19.5,
+  "expected_usd": 32.68,
+  "hard_cap": {
+   "driver_minutes": 3207.3,
+   "billable_minutes": 3420.92,
+   "usd": 64.46
+  },
+  "per_session_hard_cap_usd": 64.46,
+  "sob1_depth_proposal_terms": {
+   "driver_minutes": 3036.7,
+   "expected_usd": 35.7,
+   "per_session_hard_cap_usd": 61.09,
+   "unit_deadline_hours": 19.5
+  },
+  "measured_sob1_depth_session": {
+   "minutes": 1708.3,
+   "usd": 31.6179
+  }
+ },
+ "money_rules": {
+  "own_envelope": "its own grant; the envelope counts only this kind's runs; SOB1's closed grants' remainders are void and fund nothing here",
+  "balance": "the provider balance must cover the hard cap plus the reserve at issue and at launch; a top-up is not a grant",
+  "teardown_reserve": "$1.00 held outside the ceiling, never issued"
+ },
+ "authorizes": "nothing: a proposal; the grant is the maintainer's",
+ "decision": "PENDING",
+ "granted_by": "nobody",
+ "variant_1_total_with_reserves_usd": 71.89
+}

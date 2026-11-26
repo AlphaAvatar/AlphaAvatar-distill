@@ -2719,6 +2719,47 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "which fails on the earlier code). SOB1 has no extra stream, so this changes nothing its six units "
             "logged. NOT ON THE CALIBRATION CUDA SURFACE.",
      }),
+    ("4a76fde2d91bb6fba955e491111ca3e42cb3445d",
+     "DMR1 (prepared at $0, 2026-11-26): the recurrent-depth family (HF and vLLM) and the trainer's per-logical-layer "
+     "hidden-state term",
+     {
+        "src/aadistill/initialization/adapters/recurrent_depth.py":
+            "NEW MODULE: `RecurrentDepthConfig` (num_hidden_layers = LOGICAL layers, `layer_to_block`, "
+            "`num_parameter_blocks`), `RecurrentDepthModel` / `RecurrentDepthForCausalLM` (B Qwen3 decoder blocks "
+            "executed on the schedule; each logical layer gets its own cache entry through `LogicalLayerCache`, the "
+            "shared modules' layer_idx is never mutated; `hidden_supervision` receives each logical layer's output "
+            "from the model's own loop, outside the checkpointed calls), `schedule_from_spans`, "
+            "`recurrent_config_from`. CPU: tests/models/test_recurrent_depth.py (12: bit-exact against the unrolled "
+            "tied-weight Qwen3, summed shared gradients, cached = uncached generation, per-logical-layer caches, "
+            "checkpointing on / off, save / load, conversion and the identity schedule). NOT MEASURED ON CUDA.",
+        "src/aadistill/initialization/adapters/recurrent_depth_vllm.py":
+            "NEW MODULE: the recurrent-depth model for vLLM 0.27.1 as an out-of-tree model (the plugin's second entry "
+            "point): B blocks hold the weights, one `Attention` per LOGICAL layer (prefix `<model>.attn_layers.<p>`) "
+            "holds the KV cache, HF names through `projected_residual_vllm.vllm_parameter_name`, pipeline "
+            "parallelism refused. CPU: only its pure functions (the weight-name mapping, the one-integer attention "
+            "prefixes). NOT MEASURED: vLLM is not installed on the dev box and no GPU has run it (DMR1 REVIEW "
+            "section 8 lists the validation it owes).",
+        "src/aadistill/training/hidden_state.py":
+            "NEW MODULE: per-(student layer, teacher layer) relative squared error at the KD rows, its own autograd "
+            "function (no gathered copy of the student rows), the teacher's layer outputs by forward hooks (each layer "
+            "once), `HiddenSupervision` (each logical layer handed over once). CPU: tests/training/test_hidden_state.py "
+            "(10). NOT MEASURED ON CUDA.",
+        "src/aadistill/training/train.py":
+            "`loss.hidden_state` (optional): validated (needs `kd_support`); `Trainer` checks the student's decoder "
+            "supports hidden supervision and the pairs' layers exist; `_row_micro_losses` captures the teacher's "
+            "layer outputs at the KD rows in the same no-grad forward its sketch comes from and passes "
+            "`hidden_supervision` to the student's decoder; `_step_body` adds weight x sum / (pairs x the step's KD "
+            "rows) to the step's loss and logs `hidden`, `hidden_weight`, `hidden_by_layer`; `_eval_blocks` logs "
+            "`val_hidden` per layer; `execution_record` records `hidden_state_objective`. WITHOUT the key every "
+            "tensor operation is the one before (the student's autocast block is split in two around a Python "
+            "assignment, which computes nothing): tests/training/test_hidden_state.py::test_the_hidden_term_moves_the_"
+            "gradients_and_its_absence_is_the_unchanged_path. NOT ON THE CALIBRATION CUDA SURFACE; the hidden path "
+            "is NOT MEASURED ON CUDA.",
+        "src/aadistill/initialization/adapters/families.py":
+            "`CUSTOM_MODEL_FAMILIES` gains `aad_recurrent_depth`, so the Auto loaders (the trainer's student and "
+            "resume, evaluation readers) resolve the recurrent family once a caller registers the families. No "
+            "existing family changes.",
+     }),
 )
 
 

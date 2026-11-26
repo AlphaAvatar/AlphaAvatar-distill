@@ -218,12 +218,13 @@ def rotation_need(plan: dict, state: dict, sizes: dict) -> dict:
             "rule": "the peak of bytes uploaded minus bytes removed over the remaining rotation (rotation_need)"}
 
 
-def relay_state(arm: str, *, list_records=None, lfs_sha=None) -> dict:
+def relay_state(arm: str, *, list_records=None, lfs_sha=None, plan: dict | None = None) -> dict:
     """What the relay holds for the arm's units NOW ($0, read-only): each unit's save points and final whose record is
     verified, whose files are all listed, and whose LFS objects carry the record's sha256 (a size or hash that differs
-    is not reusable and is reported, never counted)."""
+    is not reusable and is reported, never counted). ``plan``: the arm's training plan (the committed SOB1 one unless
+    given: a study binding this chain passes its own)."""
     from stages.teacher_parent_initialization import train_driver as TD
-    plan = json.loads((REPO / plan_path(arm)).read_text())
+    plan = plan if plan is not None else json.loads((REPO / plan_path(arm)).read_text())
     list_records = list_records or (lambda prefix: TD.list_records(prefix, TD.durability(plan)))
     lfs_sha = lfs_sha or _lfs_sha
     out = {}
@@ -281,7 +282,8 @@ def _listed_problem(x: dict, *, up: str, kind: str, every: int, total: int, lfs_
     return f"LFS sha256 differs at {bad}" if bad else None
 
 
-def reclaim_superseded(arm: str, *, list_records=None, lfs_sha=None, root: Path = REPO, write: bool = True) -> dict:
+def reclaim_superseded(arm: str, *, list_records=None, lfs_sha=None, root: Path = REPO, write: bool = True,
+                       plan: dict | None = None, record: Path | None = None) -> dict:
     """Before a training launch, on the dev box ($0): a save point the rotation should already have removed -- the
     driver removes it right after a later one hands off, and a failed removal leaves it PENDING on the relay -- is
     removed here, so the room check reads the relay as the takeover will find it and the pod-side retry is never the
@@ -297,7 +299,7 @@ def reclaim_superseded(arm: str, *, list_records=None, lfs_sha=None, root: Path 
     from stages.single_operator_budget import completion as CP
     from stages.teacher_parent_initialization import relay as R
     from stages.teacher_parent_initialization import train_driver as TD
-    plan = json.loads((REPO / plan_path(arm)).read_text())
+    plan = plan if plan is not None else json.loads((REPO / plan_path(arm)).read_text())
     list_records = list_records or (lambda prefix: TD.list_records(prefix, TD.durability(plan)))
     lfs_sha = lfs_sha or _lfs_sha
     units = {u["unit"]: u for u in plan["units"]}
@@ -351,7 +353,7 @@ def reclaim_superseded(arm: str, *, list_records=None, lfs_sha=None, root: Path 
     doc = {"schema": "aadistill.stage1.single_operator_budget.relay_reclaim/v1", "arm": arm, "units": rows,
            "checked_utc": _utc()}
     if write and any(r["removed"] or r["not_removed"] for r in rows.values()):
-        p = Path(root) / RECLAIM_RECORD
+        p = Path(record) if record is not None else Path(root) / RECLAIM_RECORD
         hist = json.loads(p.read_text()) if p.is_file() else {"schema": doc["schema"], "reclaims": []}
         hist["reclaims"].append(doc)
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -706,7 +708,8 @@ def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, 
                 missing[f"{name}/final"] = "no verified final record with its files in the secured evidence"
             else:
                 want[f"{name}/final"] = (rec, rec["files_sha256"])
-    on_relay = kind == TRAIN_KIND and C.final_placement(arm) == "relay"
+    #: any training kind (SOB1's, or another study's binding this chain): its finals at the design's placement
+    on_relay = kind != PHASE1_KIND and C.final_placement(arm) == "relay"
     for key, (rec, files) in (want.items() if on_relay else ()):
         paths = {f"{rec['prefix']}/{k}": v for k, v in files.items()}
         got = (lfs_sha or _lfs_sha)(list(paths))

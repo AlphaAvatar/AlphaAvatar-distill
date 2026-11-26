@@ -53,6 +53,7 @@ import torch.nn.functional as F
 from ..data.dataset import best_fit_blocks, encode_sample, load_split, pack_blocks
 from ..data.token_documents import CONTEXT_STRATEGIES
 from ..infrastructure.manifest import sha256_json
+from . import hidden_state as HS
 from . import topk_kd
 from .lora import (
     LoRAConfig,
@@ -149,6 +150,16 @@ def validate_train_config(cfg: dict) -> None:
             raise ValueError("loss.kd_support is not implemented for the extra stream")
         if cfg.get("lora") is not None:
             raise ValueError("loss.kd_support is not implemented together with lora")
+    # Optional. `loss.hidden_state`: per-layer hidden-state distillation (`hidden_state`): {weight, pairs
+    # [[student_layer, teacher_layer], ...], rows "kd", error}. It runs only on the head-row path (`kd_support`),
+    # at the KD rows, against the online teacher. Absent: the trainer's objective and its code path are unchanged.
+    if "hidden_state" in loss:
+        try:
+            HS.validate_config(loss["hidden_state"])
+        except HS.HiddenStateError as exc:
+            raise ValueError(str(exc)) from exc
+        if "kd_support" not in loss:
+            raise ValueError("loss.hidden_state runs on the head-row path: it needs loss.kd_support")
     optim = need(cfg, "optim", dict)
     for key in ("lr", "weight_decay", "eps", "grad_clip"):
         need(optim, key, (int, float), "optim.")
@@ -804,6 +815,23 @@ class Trainer:
         if self.kd_support is not None:
             self.student_head = topk_kd.output_head(self.student)
             self.teacher_head = topk_kd.output_head(self.teacher)
+        # Hidden-state distillation (`loss.hidden_state`): the student's decoder must hand its logical-layer outputs
+        # over from its own loop (`supports_hidden_supervision`), and every pair must name layers both models have.
+        self.hidden_cfg = loss_cfg.get("hidden_state")
+        self.hidden_pairs = HS.pairs_of(self.hidden_cfg) if self.hidden_cfg else []
+        self._micro_hidden = None
+        if self.hidden_cfg:
+            if self.teacher is None:
+                raise ValueError("loss.hidden_state needs the online teacher")
+            if not getattr(self.student.get_decoder(), "supports_hidden_supervision", False):
+                raise ValueError(f"{type(self.student).__name__}'s decoder does not hand over its logical-layer "
+                                 "outputs (supports_hidden_supervision); loss.hidden_state cannot be computed")
+            n_s = int(self.student.config.num_hidden_layers)
+            n_t = len(self.teacher.get_decoder().layers)
+            bad = [p for p in self.hidden_pairs if not (p[0] < n_s and p[1] < n_t)]
+            if bad:
+                raise ValueError(f"loss.hidden_state pairs {bad} name layers outside the student's {n_s} logical "
+                                 f"layers or the teacher's {n_t}")
         # Per-step sums of the head-row KD diagnostics (see _row_micro_losses).
         self._step_kd_diag = {"rows": 0, "teacher_tail_mass": 0.0, "target_in_support": 0}
 
@@ -996,21 +1024,35 @@ class Trainer:
         kd_pos = prediction_mask(mask, loss_cfg["kd_scope"], content,
                                  input_ids=ids, think_ids=self.think_ids).bool()
         rows = ce_pos | kd_pos
+        self._micro_hidden = None
         if not bool(rows.any()):
             zero = torch.zeros((), device=ids.device)
             return zero, 0, zero, 0
         targets = ids[:, 1:][rows]
         chunk = loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT)
         temperature = float(loss_cfg["kd_temperature"])
+        supervision, student_kw = None, {}
         with torch.no_grad(), self._autocast():
-            t_hidden = topk_kd.head_rows(self.teacher, ids, rows, **fwd)
+            if self.hidden_cfg:
+                #: the teacher's layer outputs at the KD rows, taken in the same forward its head rows come from
+                h_rows = HS.flat_rows(kd_pos)
+                with HS.capture_layer_outputs(self.teacher, HS.teacher_layers(self.hidden_pairs), h_rows) as got:
+                    t_hidden = topk_kd.head_rows(self.teacher, ids, rows, **fwd)
+                supervision = HS.HiddenSupervision(h_rows, {s: got[t] for s, t in self.hidden_pairs})
+                student_kw = {"hidden_supervision": supervision}
+            else:
+                t_hidden = topk_kd.head_rows(self.teacher, ids, rows, **fwd)
             sketch = topk_kd.teacher_sketch(self.teacher_head, t_hidden,
                                             top_k=int(self.kd_support.top_k),
                                             temperature=temperature, chunk=chunk)
         del t_hidden
         kd_rows = kd_pos[rows]
         with self._autocast():
-            s_hidden = topk_kd.head_rows(self.student, ids, rows, **fwd)
+            s_hidden = topk_kd.head_rows(self.student, ids, rows, **fwd, **student_kw)
+        if supervision is not None:
+            supervision.finish()
+            self._micro_hidden = supervision
+        with self._autocast():
             ce_sum, kd_sum = topk_kd.topk_tail_losses(
                 self.student_head, s_hidden, sketch, targets, ce_pos[rows], kd_rows,
                 temperature=temperature, chunk=chunk)
@@ -1219,6 +1261,9 @@ class Trainer:
         self._step_positions = self._step_nonpad = 0
         self._step_kd_diag = {"rows": 0, "teacher_tail_mass": 0.0, "target_in_support": 0}
         ce_acc = kd_acc = 0.0
+        #: the hidden-state term's step normalizer: every (pair, KD row) of the step, known before any forward
+        hidden_total = len(self.hidden_pairs) * kd_total if self.hidden_cfg else 0
+        hidden_acc, hidden_by_layer = 0.0, {}
         for i in range(0, bps, micro):
             mids = ids[i : i + micro].to(self.device)
             mmask = mask[i : i + micro].to(self.device)
@@ -1232,12 +1277,20 @@ class Trainer:
                 loss = loss + loss_cfg["ce_weight"] * ce_sum / ce_total
             if kd_total > 0:
                 loss = loss + loss_cfg["kd_weight"] * kd_sum / kd_total
+            sup = self._micro_hidden if self.hidden_cfg else None
+            if sup is not None and hidden_total > 0 and sup.loss_sum is not None:
+                loss = loss + float(self.hidden_cfg["weight"]) * sup.loss_sum / hidden_total
             mark("forward_loss", i // micro)
             if loss.requires_grad:
                 loss.backward()
             mark("backward", i // micro)
             ce_acc += float(ce_sum.detach())
             kd_acc += float(kd_sum.detach())
+            if sup is not None and sup.loss_sum is not None:
+                hidden_acc += float(sup.loss_sum.detach())
+                for k, v in sup.by_layer.items():
+                    hidden_by_layer[k] = hidden_by_layer.get(k, 0.0) + float(v)
+            self._micro_hidden = None
         # The extra stream joins the *same* update. It is deliberately after the
         # rollout microbatches and before the clip: the rollout stream's block
         # selection, its normalizers and its position against the LR schedule
@@ -1260,14 +1313,22 @@ class Trainer:
 
         ce_mean = ce_acc / ce_total if ce_total else None
         kd_mean = kd_acc / kd_total if kd_total else None
+        hidden_mean = hidden_acc / hidden_total if hidden_total else None
         total = sum(
             w * m
             for w, m in (
                 (loss_cfg["ce_weight"], ce_mean),
                 (loss_cfg["kd_weight"], kd_mean),
+                ((self.hidden_cfg or {}).get("weight", 0.0), hidden_mean),
             )
             if m is not None
         )
+        if self.hidden_cfg:
+            #: the hidden-state term beside CE and KD (`loss` includes it with its weight); per student layer its
+            #: mean relative squared error over the step's KD rows
+            extra_metrics["hidden"] = round(hidden_mean, 6) if hidden_mean is not None else None
+            extra_metrics["hidden_weight"] = float(self.hidden_cfg["weight"])
+            extra_metrics["hidden_by_layer"] = HS.summarize_by_layer(hidden_by_layer, kd_total)
         # The reported `loss` is the rollout objective, unchanged in definition
         # from every single-stream run, so the curve stays comparable across
         # experiments. The extra term is reported beside it, never folded in.
@@ -1320,6 +1381,7 @@ class Trainer:
         self.student.eval()
         ce_s = kd_s = 0.0
         ce_n = kd_n = 0
+        h_s, h_n, h_layers = 0.0, 0, {}
         for i in range(0, n, micro):
             ids = val_ids[i : i + micro].to(self.device)
             mask = val_mask[i : i + micro].to(self.device)
@@ -1333,6 +1395,13 @@ class Trainer:
             ce_n += cn
             kd_s += float(kd_sum)
             kd_n += kn
+            sup = self._micro_hidden if self.hidden_cfg else None
+            if sup is not None and sup.loss_sum is not None:
+                h_s += float(sup.loss_sum)
+                h_n += sup.count
+                for k, v in sup.by_layer.items():
+                    h_layers[k] = h_layers.get(k, 0.0) + float(v)
+            self._micro_hidden = None
         if was_training:
             self.student.train()
         out = {"val_blocks": n}
@@ -1341,6 +1410,9 @@ class Trainer:
             out["val_ppl"] = round(math.exp(min(ce_s / ce_n, 30.0)), 4)
         if kd_n:
             out["val_kd"] = round(kd_s / kd_n, 6)
+        if self.hidden_cfg and h_n:
+            out["val_hidden"] = round(h_s / h_n, 6)
+            out["val_hidden_by_layer"] = HS.summarize_by_layer(h_layers, h_n // len(self.hidden_pairs))
         return out
 
     def evaluate(self, max_blocks: int | None = None) -> dict:
@@ -1416,6 +1488,7 @@ class Trainer:
             **({"kd_objective": topk_kd.objective_identity(
                     self.kd_support, loss_cfg["kd_scope"], loss_cfg["kd_temperature"])}
                if self.kd_support is not None else {}),
+            **({"hidden_state_objective": HS.objective_identity(self.hidden_cfg)} if self.hidden_cfg else {}),
             **({"resume_identity": self.resume_identity} if self.resume_identity else {}),
             **({"target_policy": self.target_policy} if self.target_policy else {}),
             # batch semantics as executed

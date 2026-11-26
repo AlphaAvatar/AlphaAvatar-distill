@@ -1388,6 +1388,42 @@ bad = {k: v for k, v in kind_conditions(kind, arm=(a.stage_conditions or {}).get
 assert not bad, f'the artifact binds other records than this pod holds: {sorted(bad)}'
 print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "dmr1_depth_merge" ]; then
+  # DMR1 variant 1 (study DMR1-M, `stages.depth_merge.launch`): two session kinds (dmr1_merge_build,
+  # dmr1_merge_train). FORMAL, never a dry-run artifact. The study identity (its designs and
+  # pinned configs), the harness and the kind's bound records (a training arm's plan and its init record) are
+  # recomputed HERE from the pod's own files.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" PHASE_KIND="${PHASE_KIND:-}" /opt/train/bin/python -c "
+import os
+from shared import study_engineering as SE
+from stages.depth_merge.launch import Authorization, kind_conditions
+a = Authorization.load(os.environ['SESSION_AUTH_PATH'])
+kind = (a.stage_conditions or {}).get('kind')
+assert kind in Authorization.STUDY.kinds, f'the artifact names kind {kind!r}, none of the study kinds'
+got = SE.require_on_pod(a, Authorization.STUDY, os.environ['SESSION_PLAN_HASH'], kind=kind)
+bad = {k: v for k, v in kind_conditions(kind, arm=(a.stage_conditions or {}).get('arm') or None).items() if a.stage_conditions.get(k) != v}
+assert not bad, f'the artifact binds other records than this pod holds: {sorted(bad)}'
+print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "dmr1_depth_recurrence" ]; then
+  # DMR1 variants 2 and 3 (study DMR1-R, `stages.depth_recurrence.launch`): two training kinds
+  # (dmr1_loop_train, dmr1_loop_hidden_train). FORMAL, never a dry-run artifact. The study identity (its designs and
+  # pinned configs), the harness and the kind's bound records (a training arm's plan and its init record) are
+  # recomputed HERE from the pod's own files.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" PHASE_KIND="${PHASE_KIND:-}" /opt/train/bin/python -c "
+import os
+from shared import study_engineering as SE
+from stages.depth_recurrence.launch import Authorization, kind_conditions
+a = Authorization.load(os.environ['SESSION_AUTH_PATH'])
+kind = (a.stage_conditions or {}).get('kind')
+assert kind in Authorization.STUDY.kinds, f'the artifact names kind {kind!r}, none of the study kinds'
+got = SE.require_on_pod(a, Authorization.STUDY, os.environ['SESSION_PLAN_HASH'], kind=kind)
+bad = {k: v for k, v in kind_conditions(kind, arm=(a.stage_conditions or {}).get('arm') or None).items() if a.stage_conditions.get(k) != v}
+assert not bad, f'the artifact binds other records than this pod holds: {sorted(bad)}'
+print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

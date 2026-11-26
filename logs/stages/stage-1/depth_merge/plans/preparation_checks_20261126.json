@@ -1,0 +1,314 @@
+{
+ "schema": "aadistill.dmr1.preparation_checks/v1",
+ "recorded_utc": "2026-11-26",
+ "provider_resource_created": false,
+ "grant_written": false,
+ "artifact_issued": false,
+ "tree": {
+  "branch": "research/reasoning-inheritance",
+  "base_commit": "4a76fde2d91bb6fba955e491111ca3e42cb3445d",
+  "note": "run on the working tree before this round's commit"
+ },
+ "build_contract": {
+  "command": "build_driver.py --check-only (dev box, CPU)",
+  "marker": "CONTRACT_OK",
+  "spans": [
+   [
+    1,
+    2,
+    3
+   ],
+   [
+    7,
+    8,
+    9
+   ],
+   [
+    10,
+    11
+   ],
+   [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   [
+    19,
+    20,
+    21
+   ],
+   [
+    24,
+    25,
+    26,
+    27,
+    28
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    31,
+    32,
+    33
+   ],
+   [
+    34,
+    35
+   ]
+  ],
+  "pairs": [
+   [
+    1,
+    2
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    7,
+    8
+   ],
+   [
+    7,
+    9
+   ],
+   [
+    10,
+    11
+   ],
+   [
+    12,
+    13
+   ],
+   [
+    12,
+    14
+   ],
+   [
+    12,
+    15
+   ],
+   [
+    12,
+    16
+   ],
+   [
+    12,
+    17
+   ],
+   [
+    19,
+    20
+   ],
+   [
+    19,
+    21
+   ],
+   [
+    24,
+    25
+   ],
+   [
+    24,
+    26
+   ],
+   [
+    24,
+    27
+   ],
+   [
+    24,
+    28
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    31,
+    32
+   ],
+   [
+    31,
+    33
+   ],
+   [
+    34,
+    35
+   ]
+  ],
+  "operator_config_hashes": [
+   {
+    "step": "FFN",
+    "impl_id": "ffn.activation_importance_v0",
+    "profile_id": "calib.hybrid_d4_base@v2",
+    "derived": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "journal": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "matches": true
+   },
+   {
+    "step": "DEPTH",
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "profile_id": "calib.hybrid_d4_base@v2",
+    "derived": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "journal": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+    "matches": true
+   },
+   {
+    "step": "ATTENTION",
+    "impl_id": "attention.activation_importance_v1",
+    "profile_id": "calib.hybrid_d4_rh@v2",
+    "derived": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "journal": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "matches": true
+   },
+   {
+    "step": "RESIDUAL_WIDTH",
+    "impl_id": "width.global_pca_v0",
+    "profile_id": "calib.hybrid_d4_rh@v2",
+    "derived": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "journal": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+    "matches": true
+   }
+  ],
+  "selection_reproduced_from_journal": true,
+  "session": {
+   "config_hash": "80f93491a2d1bf7cfa47c023afa3651181aaf3a280b6a1f7f81217dfe6469a8b",
+   "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+   "forward_context": {
+    "packing": "sequential_truncate_v1",
+    "truncate": true,
+    "materialization": "prefix_restart_v1",
+    "shuffle": "sha256_keyed_v1",
+    "attention": "causal_continuous_positions_v1",
+    "sequence_length": 8192,
+    "shuffle_seed": 20261105
+   },
+   "profiles": {
+    "calib.hybrid_d4_base@v2": "d835fad13756d21cf5a2e5cc66c7c9b7badbf251133aa13c53ab033056b2fb45",
+    "calib.hybrid_d4_rh@v2": "6a20196d550d0f1c7570faf5b84366fb0e5e1404fa6b82cc40c24129b1efa590"
+   }
+  },
+  "method_identity": {
+   "statistics": {
+    "objects": {
+     "aadistill.initialization.planning.layer_merge.PearsonMoments": "e61093ca09759f2567917e6a4092d9912ff28f82461ecdf315b2dcb30c3e3909",
+     "aadistill.initialization.planning.layer_merge.GramMoments": "4293b0e6929cf4eeb12a41c540c58c79eceb79fac45462321afdb96b9b1b5cf0",
+     "aadistill.initialization.planning.layer_merge.group_sum": "decfb318841880d5710dd76d2dbdd8bfd6064d3b34648a0296a6ef424546b0cf",
+     "aadistill.initialization.planning.layer_merge.linear_assignment": "fdb77d766d3576ae2a8ba10f2e813199b7b7c06a1bdd0aad4b147cc057d47729",
+     "stages.reasoning_inheritance.layer_merge.calibration": "b20dc7724b8379b18193c5d2903294384b668127bf2181117d2be41518ed8ad2",
+     "stages.reasoning_inheritance.layer_merge.valid_rows": "9a806f3972a89ab8a0b9acda65f2c3e1025372411807bc522a39042740eeaeba",
+     "stages.reasoning_inheritance.layer_merge.forward": "02a406a8d45683e3c7a7601f7d66bb24db266ac392f4bc9285095abc04e28c8e",
+     "stages.reasoning_inheritance.layer_merge.head_writes": "80187b8154f7ec7c93dc5c3dc9ec7584e4cacb6986a9287c8e9eb49c611e23c7",
+     "stages.reasoning_inheritance.layer_merge.collect_statistics": "f250ac2bc5b6aff30ffa6552687e6f71518b5a94ec5451245bb8ee66b61061a9",
+     "stages.reasoning_inheritance.layer_merge.alignments": "b69adc41d17c97b420329f14ad7f269aff17c52cea719cd754da5994bc0e4301",
+     "stages.reasoning_inheritance.layer_merge.statistics_tensors": "2fd0709429c7aa3cc16daec5e67e42e064f4de2a6e29a0794d998d280493bee9",
+     "stages.depth_merge.merge.calibration": "a25cc91f7292eb3f4bdc852533fb02381de2124cdbc5d0eda8e56d30afee8bc3",
+     "stages.depth_merge.merge.pair_alignments": "e505de580cb4bc42f4b8ec283c5eb38594302ad7493eb303dd2cd009c01ca11e",
+     "stages.depth_merge.merge.correlation_sha256": "6130a8ed243eccddefff0b9a7163ed56fdd856eed20aaf96dc14ca8918a74bde"
+    },
+    "sha256": "728766ed5a1d01f28faa167d6e0eca2c1358a014dc0f1b6b26dcf59d5614d0e8",
+    "rule": "sha256 of ast.dump (no positions, docstrings dropped) of each object's source"
+   },
+   "candidate": {
+    "objects": {
+     "aadistill.initialization.planning.layer_merge.block_tensors": "f6c8a4eb13a171c5a89c13ba7f2088441cfe5330fa31b324a3de419acd04a0d4",
+     "aadistill.initialization.planning.layer_merge._params": "2df8bde2b13bbb68769495918e8f4ad437acf0ba0c0ca9593da201c873b3cbbb",
+     "aadistill.initialization.planning.layer_merge.fold_norm_gains": "69b7d80563e065a2c03637243327940c9d6b61997cefe7c362b83098755866b1",
+     "aadistill.initialization.planning.layer_merge.permute_block": "45b4eaabc77be9232a0ec52ad1a05471fcd1e7abfdc442d08289b93f5c8feb07",
+     "aadistill.initialization.planning.layer_merge.query_head_order": "43402eac736c11d47183b2a2befeacb2de5bf72c6d50d99942f0ae8dd2b767e3",
+     "aadistill.initialization.planning.layer_merge.head_rows": "1051eff3e7174f785d3f5d43350acf58ed8292b1ce939aa67f64ca93f9ca2f7e",
+     "aadistill.initialization.planning.layer_merge.convex_weights": "9fddddd8cab5159cc821822c3d0bd54bcca9a439d1146507680cc7c7613eef03",
+     "aadistill.initialization.planning.layer_merge.MergeWeights": "c9062e168de550095393f14a3d2415b55f71658c704898bffec31573d018ffd4",
+     "aadistill.initialization.planning.layer_merge.merge_blocks": "9ce340ebc21670efa6a65de7225124943810a0e3b9b51de174eeb4c85c461368",
+     "aadistill.initialization.planning.layer_merge.write_block": "0c90cb9b4b540704c38837bbfb6f80d2ad513ec32102981c87bf30ad9cf22514",
+     "stages.reasoning_inheritance.layer_merge.merged_tensors": "3d0a627243809589a04b08b6883c349a9008d53e8921fad92cc892a5b0f4887a",
+     "stages.reasoning_inheritance.layer_merge.build_candidate": "d34778ab582d807a6bb91ada6a1fa47872a8ecbd557bb61bf73c37633c236986"
+    },
+    "sha256": "944fa3afff70719ae4a518a02beb0a3ea86967b70f4d9c7b8feb6d5f546a1aa8",
+    "rule": "sha256 of ast.dump (no positions, docstrings dropped) of each object's source"
+   }
+  }
+ },
+ "statistics_counts": {
+  "examples": 558,
+  "packed_sequences": 79,
+  "statistics_positions": 231242,
+  "expected": {
+   "examples": 558,
+   "packed_sequences": 79,
+   "statistics_positions": 231242,
+   "source": "RI-LM1's statistics pass measured 79 packed sequences and 231,242 statistics positions on this profile under the same session (both RI-S1's and TPI1's sessions are packed_full_search.build_session(which='v3'): one session); the build stops on any other count"
+  },
+  "seconds": 2.1
+ },
+ "statistics_counts_rule": "M.calibration on a meta-device teacher (no forward): the build's gate counts, read at $0",
+ "budget": {
+  "dmr1_merge_build": {
+   "source": "logs/stages/stage-1/depth_merge/plans/proposal_dmr1_merge_build.json",
+   "status": "proposed",
+   "expected_usd": 2.5,
+   "hard_cap_usd": 5.43,
+   "teardown_reserve_usd": 1.0,
+   "fundable": true,
+   "problems": [],
+   "envelope": {
+    "ceiling_usd": 5.43,
+    "spent_usd": 0.0,
+    "remaining_usd": 5.43,
+    "runs": []
+   }
+  },
+  "dmr1_merge_train": {
+   "source": "logs/stages/stage-1/depth_merge/plans/proposal_dmr1_merge_train.json",
+   "status": "proposed",
+   "expected_usd": 32.68,
+   "hard_cap_usd": 64.46,
+   "teardown_reserve_usd": 1.0,
+   "fundable": true,
+   "problems": [],
+   "envelope": {
+    "ceiling_usd": 64.46,
+    "spent_usd": 0.0,
+    "remaining_usd": 64.46,
+    "runs": []
+   }
+  }
+ },
+ "position": {
+  "fetched_utc": "2026-11-26T12:06:37+00:00",
+  "provider_billed_usd": 1086.2713,
+  "committed_usd": 1086.2713,
+  "project_cap_usd": 1161.06,
+  "project_remaining_usd": 74.7887,
+  "account_pods": [],
+  "account_volumes": [],
+  "balance_usd": 123.7282750308,
+  "spend_per_hour": 0.0,
+  "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+  "unposted_sessions": 0,
+  "campaign_unposted": 0,
+  "campaign_teardown_confirmed_by": {
+   "subrun record": 25,
+   "reconciliation": 30
+  }
+ },
+ "relay_headroom_gib": [
+  35.24,
+  35.28
+ ],
+ "relay_headroom_read_utc": "2026-11-26T11:32Z",
+ "relay_rotation_need_gib": 46.46,
+ "relay_shortfall_gib": 11.22,
+ "dev_box_free_gib": 20,
+ "not_run": {
+  "issue": "no grant exists; issuing is outside this round's authorization",
+  "launch --dry-run": "needs an issued artifact"
+ }
+}

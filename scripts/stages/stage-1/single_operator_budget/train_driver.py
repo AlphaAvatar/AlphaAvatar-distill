@@ -92,8 +92,10 @@ def final_here(out_dir: Path, cfg: dict, steps: int) -> Path | None:
 
 
 def train_unit(u: dict, row: dict, ev_unit: Path, out_dir: Path, unit_prefix: str, dur: dict, a, snap: Path,
-               mark, save) -> Path:
-    """Step 3 of the module docstring; returns the final model directory."""
+               mark, save, stage_init=None) -> Path:
+    """Step 3 of the module docstring; returns the final model directory. ``stage_init(u, dur)`` places the unit's
+    initialization at its student path when it is not there (`teacher_parent_initialization.train_driver.fetch_init`
+    by default; another study binding this chain passes its own, e.g. one that also writes an execution config)."""
     from stages.teacher_modes import a1_units as AU
     from stages.teacher_modes import packed_training_plan as PTP
     from stages.teacher_modes import training_plan as TP
@@ -105,7 +107,7 @@ def train_unit(u: dict, row: dict, ev_unit: Path, out_dir: Path, unit_prefix: st
             row["restored_savepoint"] = got
     resume = (out_dir / "checkpoints" / "latest.txt").is_file()
     if not Path(cfg["student_path"], "model.safetensors").is_file():
-        row["init"] = TD.fetch_init(u, dur)
+        row["init"] = (stage_init or TD.fetch_init)(u, dur)
     bad = PTP.attention_problems(cfg, REPO)
     if bad:
         raise DriverError(f"{name}: the attention is not the declared one: {bad}")
@@ -220,7 +222,7 @@ def final_identity(name: str, out: Path, ev_unit: Path, plan: dict, row: dict) -
 
 
 def run_unit(u: dict, *, out: Path, record: dict, dur: dict, prefix_root: str, snap: Path, a, attempt: str,
-             mark, save, plan: dict | None = None) -> None:
+             mark, save, plan: dict | None = None, stage_init=None) -> None:
     from stages.single_operator_budget import completion as CP
     name, cfg, arm, seed = u["unit"], u["config"], u["arm"], int(u["seed"])
     if CP.unit_name(arm, seed) != name:
@@ -245,7 +247,8 @@ def run_unit(u: dict, *, out: Path, record: dict, dur: dict, prefix_root: str, s
         final_identity(name, out, ev_unit, plan, row)
     # 2. done only on the files, against this seed's final
     sets = {m: CP.check(CP.ev_dir(out, target, m), target, m, out, label=CP.label_of(target)) for m in modes}
-    row["at_start"] = {"final": None if hit is None else hit[1], "final_problems": CP.final_problems(out, name),
+    row["at_start"] = {"final": None if hit is None else hit[1], "final_problems": CP.final_problems(out, name,
+                                                                                                    plan=plan),
                        "sets": {m: {"complete": v["complete"], "problems": v["problems"]} for m, v in sets.items()}}
     save()
     if not row["at_start"]["final_problems"] and all(v["complete"] for v in sets.values()):
@@ -261,7 +264,7 @@ def run_unit(u: dict, *, out: Path, record: dict, dur: dict, prefix_root: str, s
         row["state_at_start"] = "final_on_pod" if model is not None else "train"
         save()
         if model is None:
-            model = train_unit(u, row, ev_unit, out_dir, unit_prefix, dur, a, snap, mark, save)
+            model = train_unit(u, row, ev_unit, out_dir, unit_prefix, dur, a, snap, mark, save, stage_init)
         secure_final(name, model, out_dir, cfg, ev_unit, unit_prefix, dur, row)
     else:
         row["state_at_start"] = "final_durable"

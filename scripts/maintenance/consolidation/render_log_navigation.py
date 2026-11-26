@@ -230,6 +230,10 @@ STAGE_PURPOSE = {
     "3": ("Student recovery",
           "recover the initialized student offline, before on-policy training "
           "(AGENTS.md 4.5)."),
+    "6": ("Recurrent depth",
+          "study shared-parameter repeated execution -- a block executed again "
+          "and again on its own output -- and the training it needs (AGENTS.md "
+          "4.8, maintainer 2026-11-13)."),
 }
 
 #: Rows that are experiments; everything else is stage work of another kind.

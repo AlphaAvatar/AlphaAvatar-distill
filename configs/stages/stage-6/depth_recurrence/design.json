@@ -1,0 +1,758 @@
+{
+ "schema": "aadistill.stage6.depth_recurrence.design/v1",
+ "study_id": "DMR1-R",
+ "round": {
+  "id": "DMR1",
+  "title": "depth recovery at SOB1's depth-only structure: importance merging, recurrent execution and per-iteration hidden-state distillation",
+  "variants": {
+   "DMR1-M": "variant 1, this design (Stage 1 initialization, Stage 3 recovery)",
+   "DMR1-R": "variant 2 (Stage 6): configs/stages/stage-6/depth_recurrence/design.json",
+   "DMR1-RH": "variant 3 (Stage 6): configs/stages/stage-6/depth_recurrence/design.json"
+  },
+  "index": "docs/stages/stage-1/reasoning_inheritance/README.md (the research index)",
+  "review": "docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md"
+ },
+ "experiment": "depth_recurrence",
+ "stage": 6,
+ "training_execution_stage": "stage6_recurrent_depth",
+ "recorded_utc": "2026-11-26",
+ "status": "PREPARED at $0, READY_FOR_REVIEW: nothing granted, issued or run; no paid run of variant 2 or 3 is authorized this round",
+ "branch": "research/reasoning-inheritance",
+ "question": {
+  "DMR1-R": "Executing each of SOB1's 16 kept blocks once per teacher layer of its span (36 logical layers, shared parameters, each iteration reading the previous one's output), from the same training-pre initialization as its single-execution control, does more static fluid reasoning survive the same Stage-3 recovery?",
+  "DMR1-RH": "With variant 2's initialization, sharing, schedule, data and optimizer steps, does adding a per-iteration hidden-state loss against the teacher's layer outputs change what survives?"
+ },
+ "stage_6_identity": {
+  "rule": "AGENTS.md 4.8: a Stage-6 design decides and records, before its first run, what is shared and how often it runs, its initialization, its data and packing, its objective and lineage, and how compute is counted",
+  "shared_blocks": "every one of the 16 kept blocks; block j is executed once per root block of its span S_j (|S_j| times), consecutively",
+  "iterations": "fixed per block, from the real mapping (not chosen per input): the schedule below",
+  "initialization": "the training-pre initialization the selection rule picks (initialization_selection): the kept-block weights (SOB1's depth init) or the alpha-merged weights (variant 1's init)",
+  "data_and_packing": "SOB1's depth recovery data and recipe, registered as this stage's: the A-MIX-6cat-sr pack, random order, sequential packing with truncation, 8,192 tokens, standard causal attention, continuous position ids (P19's Stage-3 rule, adopted explicitly, not inherited by default)",
+  "objective": {
+   "DMR1-R": "SOB1's: CE 0.25 + Top-200 + tail KD 1.0 against the original teacher online",
+   "DMR1-RH": "the same plus lambda_hidden x L_hidden (hidden_state)"
+  },
+  "lineage": "one teacher lineage (P17.1): the original hybrid Qwen3-4B; the teacher's layer outputs are the hidden-state targets",
+  "compute": "recurrent iterations multiply FLOPs per token without adding parameters: parameter-matched (16 blocks = SOB1's depth arm), not FLOPs- or latency-matched; compute, time and memory are reported apart (compute_accounting)"
+ },
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192",
+  "identity": {
+   "path": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+   "sha256": "624027db1f8608f9637a72ef77e82e30c2a8b1b4c1ebd513422f89bbdeba7b7f"
+  },
+  "lineage": "the hybrid Qwen3-4B, NOT Qwen3-4B-Thinking-2507 (AGENTS.md P17.1): selection, calibration, statistics, training data, the online KD teacher, tokenizer, chat template and configuration all derive from this one checkpoint",
+  "config_sha256": "8ba006f74fecfaaeb392872a60f4a480e7ec9860153d2e1b769ec81f9a147f8a",
+  "num_parameters": 4022468096
+ },
+ "base": {
+  "depth_merge_design": {
+   "path": "configs/stages/stage-1/depth_merge/design.json",
+   "sha256": "6f675db2b96b1f1f248fdc04c1ba3687db2ccbab2220f9a8bc77cc798e08e443"
+  },
+  "mapping": {
+   "content_digest": "36888440ef83bfd69a32db1808e7930e3edfbd8a59f79a74eaf6431c9273bb7b",
+   "kept_blocks": [
+    0,
+    1,
+    4,
+    5,
+    6,
+    7,
+    10,
+    12,
+    18,
+    19,
+    22,
+    23,
+    24,
+    29,
+    31,
+    34
+   ],
+   "removal_order": [
+    2,
+    32,
+    3,
+    26,
+    30,
+    8,
+    20,
+    28,
+    27,
+    9,
+    16,
+    35,
+    15,
+    21,
+    14,
+    25,
+    11,
+    17,
+    33,
+    13
+   ],
+   "n_root_blocks": 36,
+   "rule": "the depth selection is SOB1's, unchanged: no depth search is run again"
+  },
+  "kept_init": {
+   "path": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/depth_only/init_record.json",
+   "sha256": "413686f23fa23f25b0c5bb6534ff9dbd3029fc5c40493a84296d987cd73b02de",
+   "artifact_digest": "2c738b963335dcb286b9eabec35901f089b383c6077d0979b4e6d4308bed73c6",
+   "model_safetensors_sha256": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+   "config_json_sha256": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019",
+   "relay": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6",
+    "files_sha256": {
+     "init/model.safetensors": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+     "init/config.json": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019"
+    },
+    "bytes": {
+     "init/model.safetensors": 4007724000,
+     "init/config.json": 1154
+    }
+   }
+  },
+  "kept_control": {
+   "arm": "depth_only (SOB1)",
+   "sessions": {
+    "run_id": "sob1_train_depth_only_20261122_223829",
+    "completion": {
+     "path": "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/closeout/phase2_completion.json",
+     "sha256": "1faf0b0ec3389d900dc746190902ddc9fddf3e040251383750ff1c09ffef7f8a"
+    },
+    "secured_evidence": "~/aad-artifacts/stage1_single_operator_budget/sob1_train_depth_only_20261122_223829/store/out (the dev box; the relay's phase2_evidence archive holds the same bytes)",
+    "finals_sha256": {
+     "depth_only-s20260726": "5635c33e6b414bd0bd361c450f132c41050e69c68cd948a734c2bfd27a86f80b",
+     "depth_only-s20260801": "e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98"
+    }
+   }
+  },
+  "merged_init": "logs/stages/stage-1/depth_merge/runs/<the COMPLETE build run>/evidence/depth_merge/init_record.json (not built yet)",
+  "merged_control": {
+   "arm": "depth_merge (variant 1)",
+   "sessions": "its COMPLETE training session (not run yet)"
+  }
+ },
+ "schedule": {
+  "rule": "recurrent_depth.schedule_from_spans(layer_merge.spans_from_kept_blocks(36, kept_blocks)): logical layer p runs block layer_to_block[p] and stands where root block root_layer_of_layer[p] stood; block j runs |S_j| times in a row",
+  "spans": [
+   [
+    0
+   ],
+   [
+    1,
+    2,
+    3
+   ],
+   [
+    4
+   ],
+   [
+    5
+   ],
+   [
+    6
+   ],
+   [
+    7,
+    8,
+    9
+   ],
+   [
+    10,
+    11
+   ],
+   [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   [
+    18
+   ],
+   [
+    19,
+    20,
+    21
+   ],
+   [
+    22
+   ],
+   [
+    23
+   ],
+   [
+    24,
+    25,
+    26,
+    27,
+    28
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    31,
+    32,
+    33
+   ],
+   [
+    34,
+    35
+   ]
+  ],
+  "layer_to_block": [
+   0,
+   1,
+   1,
+   1,
+   2,
+   3,
+   4,
+   5,
+   5,
+   5,
+   6,
+   6,
+   7,
+   7,
+   7,
+   7,
+   7,
+   7,
+   8,
+   9,
+   9,
+   9,
+   10,
+   11,
+   12,
+   12,
+   12,
+   12,
+   12,
+   13,
+   13,
+   14,
+   14,
+   14,
+   15,
+   15
+  ],
+  "root_layer_of_layer": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35
+  ],
+  "n_parameter_blocks": 16,
+  "n_logical_layers": 36,
+  "executions_per_block": [
+   1,
+   3,
+   1,
+   1,
+   1,
+   3,
+   2,
+   6,
+   1,
+   3,
+   1,
+   1,
+   5,
+   2,
+   3,
+   2
+  ],
+  "what_an_iteration_is": "a whole decoder block -- input RMSNorm, attention with q/k norm and RoPE, residual add, post-attention RMSNorm, gated FFN, residual add -- with the block's shared parameters; each iteration's input is the previous iteration's output; the same token keeps its position id at every iteration; each logical layer has its own KV-cache entry",
+  "gradients": "through every iteration: the 16 blocks are registered once with the optimizer and each parameter's gradient is the sum over its calls",
+  "config": "configs/stages/stage-6/depth_recurrence/recurrent_config.json: the base's config.json (both paths share it: SOB1's depth init and variant 1's build both save it) with num_hidden_layers 36, layer_to_block, num_parameter_blocks 16, model_type aad_recurrent_depth (recurrent_depth.recurrent_config_from); the weight file is the base's, byte for byte",
+  "identity": "a recurrent initialization's identity is its weights AND this config (the schedule): the same weights on another schedule are another model; its init record binds both (schedule.py init-record)"
+ },
+ "initialization_selection": {
+  "role": "an ENGINEERING choice of variant 2's (and so variant 3's) training-pre initialization; not a statistical claim about variant 1, whose formal verdict is comparison 1's",
+  "input": "comparison 1 (depth_merge - depth_only) on its COMPLETE records: thinking mode, static fluid formal core, both seeds",
+  "rule": "MERGED iff comparison 1's primary units are complete in thinking mode AND its pooled delta > 0 AND each seed's delta > 0; otherwise KEPT",
+  "ties_and_unclear": "a pooled delta of 0, or seeds that disagree in sign, select KEPT: the simpler initialization (no merge step), whose single-execution control (SOB1's depth arm) is already measured",
+  "incomplete": "comparison 1 not complete (a set or a final missing): no selection is written; the binding refuses and the maintainer decides",
+  "independent_of_the_test": "the p-value plays no part: a non-significant positive difference in both seeds still selects MERGED, a significant one alone does not decide it",
+  "legal_paths": {
+   "KEPT": {
+    "base_init": "SOB1's depth init (base.kept_init)",
+    "control": "SOB1's depth_only arm"
+   },
+   "MERGED": {
+    "base_init": "variant 1's init (its COMPLETE build record)",
+    "control": "variant 1's depth_merge arm"
+   }
+  },
+  "binding": "schedule.py select --write: logs/stages/stage-6/depth_recurrence/plans/init_selection.json from comparison 1's analysis record; schedule.py init-record --write: the recurrent init record over the selected base; plan.py derives variant 2's and 3's units only from a COMPLETE selection and its init record, and refuses any base but the two legal ones"
+ },
+ "hidden_state": {
+  "applies_to": "DMR1-RH only; DMR1-R has no hidden-state term and runs the trainer's unchanged path",
+  "loss": "L = 0.25 L_CE + 1.0 L_KD + lambda_hidden L_hidden",
+  "pairs": "every logical layer p with the teacher layer root_layer_of_layer[p] (here p itself): 36 pairs, [[p, p] for p in 0..35]",
+  "what_is_compared": "the student's residual stream after logical layer p (the raw output of the whole block call) against the teacher's after its layer p (the raw output of its decoder block); both before any final norm. The last logical layer's raw output is compared with the teacher layer 35's raw output; the final RMSNorm's output is not a hidden-state target and reaches the loss only through the head (CE / KD)",
+  "every_iteration": "every iteration of a looped block is supervised, the first included: block j's first call against teacher layer j, its k-th against teacher layer j + k - 1",
+  "single_execution_blocks": "INCLUDED (blocks 0, 4, 5, 6, 18, 22, 23): a block run once is the one-iteration case of the same rule, and the first iteration of every looped block is supervised the same way; excluding them would treat structurally identical calls differently. The alternative (supervise only iterations 2..|S_j|) is not registered",
+  "rows": "the KD rows: the assistant prediction positions (kd_scope 'assistant'), row t being the position whose state predicts token t + 1 -- the same rows, with no further offset, whose final states reach the head for KD. Prompt and padding positions carry no hidden-state term",
+  "error": "relative_squared_error_v1: per (pair, row) ||s - h||^2 / ||h||^2, the squared error of the whole 2,560-dimensional state divided by the teacher target's own energy at that row (dimensionless; the hidden width cancels; NOT bounded above: a student state larger than the teacher's gives values above 1)",
+  "normalization": "the step's sum over pairs and rows divided by (36 pairs x the step's KD rows), the same row count that normalizes KD: a mean over layers, iterations and rows. The per-row denominator keeps a few very-high-norm positions (the residual stream's massive activations) and the deeper layers' larger norms from dominating",
+  "lambda_hidden": 1.0,
+  "lambda_rationale": "1.0, not tuned (no search, no eval-set-1 reading). The term is dimensionless, but the per-row relative error is not bounded above (a student state larger than the teacher's gives values above 1). Measured at $0 on the KEPT recurrent init (logs/stages/stage-6/depth_recurrence/plans/step0_diagnostic_20261126.json: 2 validation sequences, 2,048 tokens, CPU): L_hidden 14.56 against KD 12.30 at step 0, so at 1.0 the hidden term starts at about KD's size (1.2x), concentrated in logical layers 14-28 (block 7's six iterations and after), and the gradient clip at 1.0 bounds the update. SOB1's depth KD fell from 3.54 to 0.41 over recovery; whether the hidden term falls with it is what the run's per-layer log shows. A smaller weight (e.g. 0.25, KD-led from the start) is the alternative a reviewer may prefer; it is not registered",
+  "teacher_side": "the teacher runs the same packed ids without position ids (cross_context) under no_grad; its layer outputs are taken at the KD rows by forward hooks in the same forward its KD sketch comes from, each layer required to run once; they are targets only, never the student's inputs",
+  "student_side": "the student's states are handed over by its own logical-layer loop (RecurrentDepthModel.forward(hidden_supervision=...)), outside the checkpointed block calls, so a recomputation never registers a loss twice; no detach between iterations",
+  "memory": "the teacher targets at the KD rows in bf16: 36 x rows x 2,560 x 2 B (about 0.33 GB at the median 1,790 rows of one 8,192-token sequence, 1.5 GB at a full sequence); the error function keeps a reference to the student state the next checkpoint holds anyway, never a gathered copy",
+  "config": {
+   "weight": 1.0,
+   "pairs": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     4,
+     4
+    ],
+    [
+     5,
+     5
+    ],
+    [
+     6,
+     6
+    ],
+    [
+     7,
+     7
+    ],
+    [
+     8,
+     8
+    ],
+    [
+     9,
+     9
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     11,
+     11
+    ],
+    [
+     12,
+     12
+    ],
+    [
+     13,
+     13
+    ],
+    [
+     14,
+     14
+    ],
+    [
+     15,
+     15
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     17,
+     17
+    ],
+    [
+     18,
+     18
+    ],
+    [
+     19,
+     19
+    ],
+    [
+     20,
+     20
+    ],
+    [
+     21,
+     21
+    ],
+    [
+     22,
+     22
+    ],
+    [
+     23,
+     23
+    ],
+    [
+     24,
+     24
+    ],
+    [
+     25,
+     25
+    ],
+    [
+     26,
+     26
+    ],
+    [
+     27,
+     27
+    ],
+    [
+     28,
+     28
+    ],
+    [
+     29,
+     29
+    ],
+    [
+     30,
+     30
+    ],
+    [
+     31,
+     31
+    ],
+    [
+     32,
+     32
+    ],
+    [
+     33,
+     33
+    ],
+    [
+     34,
+     34
+    ],
+    [
+     35,
+     35
+    ]
+   ],
+   "rows": "kd",
+   "error": "relative_squared_error_v1"
+  }
+ },
+ "arms": {
+  "depth_loop": {
+   "label": "recurrent depth, 16 blocks x 36 logical layers",
+   "variant": "DMR1-R",
+   "geometry": {
+    "num_hidden_layers": 36,
+    "num_parameter_blocks": 16
+   },
+   "hidden_state": null
+  },
+  "depth_loop_hidden": {
+   "label": "recurrent depth with per-iteration hidden-state distillation",
+   "variant": "DMR1-RH",
+   "geometry": {
+    "num_hidden_layers": 36,
+    "num_parameter_blocks": 16
+   },
+   "hidden_state": "hidden_state.config"
+  }
+ },
+ "lineage": {
+  "rule": "one teacher lineage (AGENTS.md P17.1): the original hybrid Qwen3-4B for calibration, statistics, initialization, the online KD teacher, the tokenizer, chat template and configuration; the training pack is that teacher's"
+ },
+ "training": {
+  "derived_from": {
+   "path": "logs/stages/stage-1/single_operator_budget/plans/training_plan_depth_only.json",
+   "sha256": "4eeab53fee1d8c0ca22d7cf15ff79416eef57af52cc37b659d25818f257aa359",
+   "rule": "each unit is SOB1's depth unit of the same seed with only changed_fields replaced (depth_merge/plan.py compares every other field): SOB1's depth recovery recipe, unchanged"
+  },
+  "changed_fields": [
+   "unit",
+   "arm",
+   "config.stage",
+   "config.run_name",
+   "config.student_path",
+   "config.out_dir",
+   "config.lineage.initialization",
+   "config.loss.hidden_state"
+  ],
+  "changed_fields_rule": "config.loss.hidden_state only for depth_loop_hidden; config.stage is stage6_recurrent_depth (the execution stage) with SOB1's recovery data and recipe registered for it",
+  "recipe": "every other field of SOB1's depth unit, compared field by field (`plan.py`): stage stage3_recovery; seeds 20260726 and 20260801 in that order; 9,701 optimizer steps, 3 epochs of 6,467 packed sequences of 8,192 tokens; batch size 2, micro-batch size 1, 2 gradient accumulation steps; fp32 parameters with bf16 autocast and gradient checkpointing; the teacher in bf16 as the online KD teacher; CE 0.25 + KD 1.0, temperature 1.0, assistant scope, Top-200 + tail; AdamW lr 5e-5, weight decay 0.01, betas (0.9, 0.95), eps 1e-8, clip 1.0; 485 warmup steps, cosine to 0.1; the same trainable patterns (embedding / tied head frozen); cross_context packing (sequential, truncation allowed, standard causal attention); the same pack, tokenizer and save points (every 1,104 steps, keep 1)",
+  "data": {
+   "before_packing": {
+    "examples": 45363,
+    "turns": 56408,
+    "unique_supervised_tokens": 11862564,
+    "reasoning_tokens": 4945744,
+    "answer_tokens": 6916820,
+    "tool_calling_tokens": 995341,
+    "thinking_unique_supervised_tokens": 5935809,
+    "non_thinking_unique_supervised_tokens": 5926755
+   },
+   "after_packing": {
+    "packed_sequences": 6467,
+    "sequence_length": 8192,
+    "epochs": 3,
+    "optimizer_steps": 9701,
+    "kd_positions_per_step_median_measured": [
+     3541.5,
+     3585.5
+    ],
+    "note": "supervised-token exposure is counted from the trainer's log (sum of kd_positions), never derived"
+   },
+   "source": "logs/stages/stage-2/teacher_modes/plans/mixed_training_plan.json :: units[*].data"
+  },
+  "seeds": [
+   20260726,
+   20260801
+  ],
+  "same_data_and_steps": "the same pack, proportions, order (the trainer's per-epoch permutation from the seed), 9,701 optimizer steps and pre-packing token budget as the single-execution control: recurrence deepens the computation per token, it adds no training token; the loop arms are NOT shortened to match FLOPs",
+  "independent_runs": "variant 3 trains from the same training-pre initialization as variant 2, independently: never from variant 2's trained weights",
+  "unit_order": {
+   "arms": [
+    "depth_loop",
+    "depth_loop_hidden"
+   ],
+   "seeds": [
+    20260726,
+    20260801
+   ]
+  },
+  "plans": "logs/stages/stage-6/depth_recurrence/plans/training_plan_<arm>.json (stages.depth_merge.plan, only after the selection is bound)",
+  "durability": {
+   "listing_attempts": 5,
+   "listing_wait_seconds": 60,
+   "listing_timeout_seconds": 600,
+   "handoff_attempts": 4,
+   "handoff_wait_seconds": 120,
+   "upload_floor_bytes_per_second": 120000000.0,
+   "download_floor_bytes_per_second": 2600000.0,
+   "transfer_margin": 1.25,
+   "closeout_reserve_seconds": 1800,
+   "memory_probe_steps": 4,
+   "basis": "TPI1's 20 save points and finals: uploads 121-161 MB/s; verifying downloads 128-386 MB/s, with an episode of 2.6-4.6 MB/s on the private-repo download path (2026-11-17/18). A 2B save point is 20.9-22.6 GB, so a floor-rate verify takes up to 2.4 h: copies get their time from their bytes, and a session stops training early enough to secure its last save point and the final before its hard deadline",
+   "rules": [
+    "an unreadable relay listing is retried and never read as empty: a unit goes back to step 0 only when a listing that WAS read holds no save point (train_driver.restore_savepoint)",
+    "weights uploaded and verified are never sent again: only their record's publication (the handoff) is retried (SavepointMirror.mirror_once, hand_off_with_retries)",
+    "a save point is retired only after the next one hands off; save points only after the final hands off"
+   ]
+  },
+  "memory": {
+   "card": "one NVIDIA L40S",
+   "estimate": "logs/stages/stage-6/depth_recurrence/plans/estimates.json (not measured: the first four optimizer steps of the first unit measure it)",
+   "first_steps": "every unit's trainer logs, for its first `durability.memory_probe_steps` optimizer steps, the peak allocated, peak reserved and the device's free memory after each phase (forward + KD/CE loss, backward, gradient clip, optimizer step: AdamW allocates its state at the first one), and an out-of-memory error with the phase it was raised in (aadistill.training.train.MEMORY_PROBE_ENV; execution only, never in the config hash); the driver keeps them in units.json :: memory",
+   "on_oom": [
+    "locate the phase (units.json :: memory.oom_phase)",
+    "in the forward / KD phase: PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True, then a smaller loss.kd_chunk (512 -> 256; the same reduction in smaller row chunks), recorded as a deviation",
+    "in the optimizer step: PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True, then AdamW without the multi-tensor (foreach) temporaries, recorded as a deviation",
+    "never: a shorter sequence, another attention, another effective batch size",
+    "an 80 GB card only for the affected arm, after these fail on a measured OOM, as a proposal to the maintainer (AGENTS.md P8.2)"
+   ]
+  }
+ },
+ "evaluation": {
+  "set": "eval-set-1 (development-exposed: no result here is a never-seen blind one)",
+  "every_item": "every item of every unit, in both modes, for every model evaluated",
+  "protocol": {
+   "eval_set": "eval-set-1",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "decoding": {
+    "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+    "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+   },
+   "context": {
+    "tokens": 8192,
+    "rule": "every model here -- each untrained arm, the teacher, each recovered arm -- generates until EOS or 8,192 tokens minus its rendered prompt, passed explicitly to both runners (--trained-context 8192): the recovered students' trained context, and the same value for the other two so the three are read under one context (maintainer 2026-11-19)"
+   },
+   "action_protocol": "v2",
+   "system_message": "You are a helpful Assistant.",
+   "degeneration_check_every": 256,
+   "modes": {
+    "H-T": {
+     "template_kwargs": {
+      "enable_thinking": true
+     },
+     "dir": "evaluation_thinking",
+     "role": "primary",
+     "think_state": "self_opening"
+    },
+    "H-N": {
+     "template_kwargs": {
+      "enable_thinking": false
+     },
+     "dir": "evaluation_non_thinking",
+     "role": "key secondary",
+     "think_state": "preclosed"
+    }
+   },
+   "package": {
+    "rule": "teacher_sidecars_v1",
+    "sidecars": [
+     "tokenizer.json",
+     "tokenizer_config.json",
+     "vocab.json",
+     "merges.txt",
+     "generation_config.json"
+    ],
+    "what": "the model's weights and config linked, the teacher's tokenizer files and generation config copied and hashed against teacher_identity.json -- one rule for every model evaluated (common.package), as RI-S1 packaged its groups"
+   },
+   "resume": "each finished sample is streamed and sealed (reasoning_inheritance.driver.fluid / capability with this protocol passed in): a later attempt generates only the samples without a sealed record, each under the seed its item derives; nothing is generated twice and nothing is chosen by outcome",
+   "think_state_rule": "the think state every rendered prompt of the mode carries, as the A-MIX plan's evaluations declare it (training_plan.json :: evaluations[].think_state): thinking self_opening, non-thinking preclosed; checked record by record (completion.py)"
+  },
+  "models": {
+   "post_recovery": "each loop arm x seed after recovery",
+   "controls": "the selected path's single-execution arm (its sealed sets reused) and, for comparison 3, depth_loop"
+  },
+  "untrained": "not evaluated on eval-set-1: SOB1 found every untrained arm at 0/570 in both modes; the build's state evaluation is the diagnostic",
+  "engine": "vLLM 0.27.1 with the recurrent-depth out-of-tree model (aadistill.initialization.adapters.recurrent_depth_vllm, loaded through scripts/shared/rollout/vllm_plugin on the runners' PYTHONPATH): the same 36-layer schedule as training, one KV cache per logical layer. NOT MEASURED ON A GPU: its agreement with the HF reference is the engine validation's question (REVIEW section 8)"
+ },
+ "analysis": {
+  "registered_before": "any variant's initialization, training or evaluation exists (2026-11-26)",
+  "primary_items": {
+   "n": 570,
+   "sha256": "40293ab158372c1eca07c308ed791e8f3f83f99e749fdfc3d603286d5cdbb051",
+   "rule": "fluid_reasoning_720/dev_v1 minus the set's formal-core exclusions (eval_set_scoring.unit_masks) minus the interactive episodes; sha256 over the sorted task ids each followed by a newline"
+  },
+  "units_of_independence": {
+   "file": "fluid_reasoning_720/independence_v1.json",
+   "sha256": "4e5a06d48624c14a1eb20aaa5267198b2dfd801d268b7cf13a3f67b8ef17a1c5",
+   "groups": 558,
+   "rule": "an item and its other-seed copy are never two independent observations: a group holds its items under both seeds"
+  },
+  "comparisons": {
+   "C1": {
+    "pair": [
+     "depth_merge",
+     "depth_only"
+    ],
+    "question": "alpha-merged initialization vs direct deletion, same structure, same recovery",
+    "controls": "SOB1's depth_only sets (reused)"
+   },
+   "C2": {
+    "pair": [
+     "depth_loop",
+     "<the selected path's single-execution arm>"
+    ],
+    "question": "recurrent execution vs single execution from the same initialization",
+    "controls": "KEPT: depth_only (SOB1); MERGED: depth_merge (variant 1)"
+   },
+   "C3": {
+    "pair": [
+     "depth_loop_hidden",
+     "depth_loop"
+    ],
+    "question": "adding the per-iteration hidden-state loss to the same recurrent run",
+    "controls": "depth_loop"
+   }
+  },
+  "primary": "per comparison: thinking mode (H-T), static fluid formal core (570 items, 558 independence groups), after recovery, pooled over the two training seeds; each record paired with the other arm's record of the SAME training seed and item (the seeds fix the data order in both arms)",
+  "key_secondary": "per comparison: non-thinking mode (H-N), the same statistic",
+  "statistic": "per comparison (A, B): delta = (1 / (2 x 570)) sum_seeds sum_items (y_X - y_Y); per group g, d_g sums both seeds' differences of the group's items, n_g = 2 |g|",
+  "test": "TPI1's two-sided group-level paired sign-flip test, B = 100,000, numpy default_rng(20261119)",
+  "effect_interval": "per pair, the percentile 95% group-bootstrap interval of sum d / sum n, 10,000 resamples, default_rng(20261120); reported beside the test, not the decision",
+  "family": "each comparison is its own family, at family-wise alpha 0.05: the thinking-mode test at 0.05; the non-thinking test at 0.05 only if the thinking test rejects (fixed sequence), otherwise non-thinking is descriptive. Each comparison asks about a different intervention, against its own control, decided when its own records are complete; no claim is made that pools or chains them, and none is a gate for another",
+  "across_comparisons": "no adjustment for the per-comparison verdicts (three distinct questions, not one family of exchangeable contrasts -- unlike SOB1's three pairwise arm comparisons, m = 3 is not copied). Reported beside them, once all three exist, as a sensitivity line only: Holm over the three thinking-mode p-values (m = 3)",
+  "verdicts": "A_BETTER / B_BETTER at p <= 0.05 in the comparison's family, otherwise NOT_DISTINGUISHED (not equivalence)",
+  "completeness": "a comparison is formal in a mode only when both arms' records of BOTH registered seeds cover all 570 items in that mode; otherwise its deltas and intervals are descriptive and no test is run, never partially pooled",
+  "seeds_and_items": "the test and the interval resample items and groups with each arm's two trained checkpoints fixed: they measure item sampling, not training randomness. Per-seed deltas with intervals and whether the seeds agree in sign are reported beside each comparison; two seeds are limited evidence about training randomness, and 1,140 records are 570 items, not 1,140 independent ones",
+  "secondary_descriptive": [
+   "per reasoning axis (deduction, induction, composition, the abstract / analogical sub-category)",
+   "interactive episodes (formal core)",
+   "every supporting unit's registered headline",
+   "terminations apart from correctness: natural, degeneration stop, context-limit hit (right-censored length), usable rollout, mean generated tokens",
+   "validation CE / KD curves; for depth_loop_hidden the hidden-state error per logical layer (diagnostics, never a reasoning result and never a reason to drop a run)",
+   "compute: training FLOPs per token, seconds per step, peak memory, evaluation time and decode throughput (compute_accounting)"
+  ],
+  "exposure": "eval-set-1 is development-exposed: nothing here is a never-seen blind result",
+  "nothing_eliminates": "no initial KL, CE, hidden error or generation score stops or drops a unit",
+  "target": "the research target is inferring rules and abstractions from the information a task supplies and generalizing them (AGENTS.md P10.2); a lower diagnostic loss is never reported as a reasoning gain"
+ },
+ "compute_accounting": {
+  "parameters": "16 blocks: 2,003,851,776 parameters, the depth arm's",
+  "logical_layers": {
+   "single_execution": 16,
+   "recurrent": 36
+  },
+  "training_forward_equivalents_per_token": "teacher 36 layer forwards + student 4 per logical layer under gradient checkpointing (forward, recomputation, backward 2x): single 36 + 64 = 100, recurrent 36 + 144 = 180 (1.8x)",
+  "inference": "decode work and KV cache per token scale with the logical layers: 36 / 16 = 2.25x the depth arm's (the teacher's 36 layers' KV size, 147,456 B per token in bf16)",
+  "reported": "measured seconds per step, peak allocated / reserved memory of the first four steps, evaluation minutes and generated tokens, beside the comparison; the comparison is not FLOPs- or latency-matched"
+ },
+ "storage": {
+  "relay_prefix_root": "durable/stage6_depth_recurrence",
+  "pod_root": "/workspace/depth_recurrence",
+  "local_store": "~/aad-artifacts/stage6_depth_recurrence",
+  "phase_2_finals": {
+   "placement": {
+    "depth_loop": "relay",
+    "depth_loop_hidden": "relay"
+   }
+  },
+  "sizes": "the depth arm's: init 4,007,724,000 B (bf16, the base's file), save point 20,934,572,032 B, final 8,015,407,104 B (fp32) -- 16 blocks whatever the schedule",
+  "shortfall": "each training session's rotation peaks at 46.46 GiB on the relay, which read 35.24 GiB free (2026-11-26): the same 11.2 GiB as variant 1's, plus each finished variant's finals (14.93 GiB) wherever they are placed (REVIEW section 9)"
+ },
+ "authorizes": "nothing",
+ "step0_diagnostic": {
+  "path": "logs/stages/stage-6/depth_recurrence/plans/step0_diagnostic_20261126.json",
+  "role": "a $0 diagnostic; it changes nothing registered"
+ }
+}

@@ -1,2 +1,3 @@
 [vllm.general_plugins]
 aadistill_projected_residual = aadistill.initialization.adapters.projected_residual_vllm:register
+aadistill_recurrent_depth = aadistill.initialization.adapters.recurrent_depth_vllm:register

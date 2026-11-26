@@ -20,6 +20,33 @@ class SOB1Error(RuntimeError):
     pass
 
 
+#: SOB1's own files, the default every SOB1 command reads
+SOB1_FILES = {"DESIGN": DESIGN, "SELECTION": SELECTION, "STRUCTURES": STRUCTURES, "LOGS": LOGS}
+
+
+def bind(*, design: Path, logs: Path, structures: Path | None = None, selection: Path | None = None) -> dict:
+    """Point this module -- and so SOB1's phase-2 chain (`completion`, `train_driver.run_unit`), which reads the
+    design, the plans and the protocol only through it -- at ANOTHER study's files with SOB1's design schema
+    (``arms``, ``training.seeds`` / ``unit_order``, ``evaluation.protocol``, ``teacher``, ``storage``).
+
+    Called once, at the entry of a program of that study (its pod driver, its launcher, its completion check), never
+    by an import; SOB1's own commands never call it. Returns the files bound before, so a test can restore them.
+    The chain's rules -- what a complete set is, what makes a final this unit's, the takeover -- are not changed by
+    binding; only which design, plans and evidence they read."""
+    global DESIGN, SELECTION, STRUCTURES, LOGS
+    before = {"DESIGN": DESIGN, "SELECTION": SELECTION, "STRUCTURES": STRUCTURES, "LOGS": LOGS}
+    DESIGN, LOGS = Path(design), Path(logs)
+    STRUCTURES = Path(structures) if structures is not None else Path(logs) / "plans/structures.json"
+    SELECTION = Path(selection) if selection is not None else SOB1_FILES["SELECTION"]
+    return before
+
+
+def restore(files: dict) -> None:
+    """Undo `bind` (tests)."""
+    global DESIGN, SELECTION, STRUCTURES, LOGS
+    DESIGN, SELECTION, STRUCTURES, LOGS = (files[k] for k in ("DESIGN", "SELECTION", "STRUCTURES", "LOGS"))
+
+
 def read_json(p: Path):
     return json.loads(Path(p).read_text())
 

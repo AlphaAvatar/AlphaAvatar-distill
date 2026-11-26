@@ -13,6 +13,7 @@ import importlib
 #: ``model_type`` -> the module whose ``register_auto_classes`` resolves it
 CUSTOM_MODEL_FAMILIES = {
     "aad_projected_residual": "aadistill.initialization.adapters.projected_residual",
+    "aad_recurrent_depth": "aadistill.initialization.adapters.recurrent_depth",
 }
 
 __all__ = ["CUSTOM_MODEL_FAMILIES", "register_custom_model_families"]

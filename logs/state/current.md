@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-26 (UTC), SOB1 COMPLETE and its $0 closeout round done: phase 2's three arms (residual width, depth, FFN + attention) trained, evaluated and closed out ($112.0621 of $185.87; provider billing settled at $112.0825), the registered decision formal, the `sob1_train` kind closed in its grant; nothing running, nothing billing (0 pods, 0 volumes); the report `docs/stages/stage-1/single_operator_budget/REPORT.md` awaits the maintainer's review; a merge into main and the next round are the maintainer's, on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-26 (UTC), DMR1 prepared at $0 and READY_FOR_REVIEW (designs, the three variants' code and tests, the review report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md`); SOB1 COMPLETE and closed out before it. Nothing running, nothing billing (0 pods, 0 volumes); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,27 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**DMR1 (DEPTH RECOVERY AT SOB1'S DEPTH-ONLY STRUCTURE): PREPARED AT $0, READY_FOR_REVIEW (2026-11-26) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
+- Report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md` (for the maintainer's review); designs
+  `configs/stages/stage-1/depth_merge/design.json` (variant 1, Stage 1 + stage3_recovery) and
+  `configs/stages/stage-6/depth_recurrence/design.json` (variants 2 and 3, Stage 6, and the round's registered analysis).
+- Variants: (1) `depth_merge`, the alpha merge of each kept block's span (RI-LM1's M-act at this structure); (2)
+  `depth_loop`, SOB1's 16 kept blocks on a 36-logical-layer schedule from the selected training-pre init; (3)
+  `depth_loop_hidden`, (2) plus a per-iteration hidden-state term (lambda 1.0, proposed). Every arm trains with SOB1's
+  depth recipe; SOB1's depth arm and its sealed sets are the control.
+- Core added (declared round `4a76fde2`, NOT MEASURED ON CUDA): the recurrent-depth family
+  (`initialization/adapters/recurrent_depth.py`, `recurrent_depth_vllm.py`) and `training/hidden_state.py` with
+  `loss.hidden_state` in the trainer.
+- $0 checks (`logs/stages/stage-1/depth_merge/plans/preparation_checks_20261126.json`): the build contract, the
+  statistics counts (558 / 79 / 231,242), the budget read fundable; step-0 diagnostic on real weights
+  (`logs/stages/stage-6/depth_recurrence/plans/step0_diagnostic_20261126.json`): the untrained recurrent init starts at
+  CE 12.46 vs the single-execution base's 3.46.
+- Money: balance $123.7283; $1,086.2713 committed, $74.7887 under the $1,161.06 cap; variant 1 proposed at $5.43 +
+  $64.46 caps + $2 reserves = $71.89 (not granted). Variants 2 and 3 estimated only.
+- Blocker for any training session: the relay's live headroom 35.24 GiB vs the 46.46 GiB rotation peak (11.2 GiB
+  short): a maintainer decision (REVIEW section 9).
+- Owed to the maintainer: the review; variant 1's grants and the relay room. Branch not merged.
 
 **SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): COMPLETE (2026-11-25) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Report `docs/stages/stage-1/single_operator_budget/REPORT.md`; decision `logs/stages/stage-1/single_operator_budget/

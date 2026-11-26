@@ -1,0 +1,65 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "dmr1_depth_merge",
+ "note": "One spec for success and failure; every entry may match nothing (P8.2.1: preserved when they exist, never demanded). Finished files leave the pod on every poll (reasoning_inheritance.launch.secure_incremental); every weight -- the initialization and its statistics, each save point and each final model -- goes to the relay from the pod when it completes (relay.put). This archive is the teardown's last copy of the evidence directory's records and logs.",
+ "patterns_are_relative_to": "the collector's --root, <checkout>/artifacts",
+ "entries": [
+  {
+   "artifact_class": "driver_report",
+   "pattern": "audit/dmr1_depth_merge/*/report.json",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "init_record",
+   "pattern": "audit/dmr1_depth_merge/*/init_record.json",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "driver_records",
+   "pattern": "audit/dmr1_depth_merge/*/records/*.json",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "unit_records",
+   "pattern": "audit/dmr1_depth_merge/*/*/*.json",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "train_logs",
+   "pattern": "audit/dmr1_depth_merge/*/*/train/*",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "driver_logs",
+   "pattern": "audit/dmr1_depth_merge/*/*/*/logs/*.log",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "evaluation_records",
+   "pattern": "audit/dmr1_depth_merge/*/evaluation/*/*/*.json",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "arm_records",
+   "pattern": "audit/dmr1_depth_merge/*/*/records/*.json",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  }
+ ],
+ "authorizes": "nothing"
+}
