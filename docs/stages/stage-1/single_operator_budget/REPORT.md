@@ -387,8 +387,8 @@ elapsed minutes, from the run's `closeout/outcome.json`.
 | residual width, 20260801 | `b701868f05c6d6e4d7ed8b2b193551060c5f0d8c7cadb3bb30f97561740cccc0` | 8,045,000,112 | dev box `~/aad-artifacts/stage1_single_operator_budget/residual_width-s20260801/final/b701868f05c6d6e4/` |
 | depth, 20260726 | `5635c33e6b414bd0bd361c450f132c41050e69c68cd948a734c2bfd27a86f80b` | 8,015,427,400 | dev box `~/aad-artifacts/stage1_single_operator_budget/depth_only-s20260726/final/5635c33e6b414bd0/` |
 | depth, 20260801 | `e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98` | 8,015,427,400 | dev box `~/aad-artifacts/stage1_single_operator_budget/depth_only-s20260801/final/e4159f1fc5b1f884/` |
-| FFN + attention, 20260726 | `589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b` | 8,068,311,496 | relay `AlphaAvatar/aadistill-artifacts`, `durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/` |
-| FFN + attention, 20260801 | `64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e` | 8,068,311,496 | relay, `durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/` |
+| FFN + attention, 20260726 | `589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b` | 8,068,311,496 | dev box since 2026-11-26 `~/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260726/final/589acf286481f495/` (was the relay's `durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/`) |
+| FFN + attention, 20260801 | `64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e` | 8,068,311,496 | dev box since 2026-11-26 `~/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260801/final/64292e508e2d6d2e/` (was the relay's `.../ffn_attention-s20260801/final/64292e508e2d6d2e/`) |
 
 **Dev-box finals** (residual width and depth): each was verified file by file on the dev box (`launch.py retain`;
 `storage/local_retention_phase2.json`). After their arm's evaluation evidence was archived, their relay copies were
@@ -397,6 +397,10 @@ retired under the maintainer's 2026-11-20 rotation decision. The tombstones are 
 
 **Relay finals** (FFN + attention): kept on the relay by design (`design.json :: storage.phase_2_finals.placement`).
 Each object was listed and its LFS sha256 checked against the record (`storage/local_retention_phase2.json`).
+**Moved 2026-11-26** (the maintainer's storage option a, for DMR1 variant 1's relay room): both were fetched to the dev
+box, re-hashed file by file and read back. After they were registered, their relay copies were retired behind the
+tombstones `relay_sob1_train_ffn_attention_20261124_033254_*_final` (`relocate_relay_finals.py`; decision log
+2026-11-26). The weights, their hashes and every measurement are unchanged.
 
 **Evidence archives.** Each session's evidence (generations, sealed parts, training records; no weights) is one
 deterministic archive. Each is on the dev box (`<scr>/archive/`) and on the relay

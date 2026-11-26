@@ -2810,6 +2810,36 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "next micro-batch's forward or at the optimizer step. No arithmetic changes; without "
             "`loss.hidden_state` the step is the one before.",
      }),
+    ("d92f48f85efa1ff1709cd4be9e6c551e68d4b29c",
+     "DMR1 third repair round (2026-11-26, $0): a declared operator config refused before compute; forward "
+     "baseline records may declare per-operator configs",
+     {
+        "src/aadistill/initialization/operators/base.py":
+            "NEW ATTRIBUTE `OperatorImplementation.required_config` (the operator-config keys an implementation "
+            "cannot run without; empty by default) and NEW FUNCTION `missing_config(impl, declared)`. Not part of "
+            "`signature()`, so no frozen signature hash moves. tests/initialization/"
+            "test_required_operator_config.py.",
+        "src/aadistill/initialization/operators/width/residual/global_pca.py":
+            "`required_config = {stream_weighting}`; the declaration is read and validated (`stream_weighting(...)`) "
+            "BEFORE the statistics pass instead of after it. Same points, weights and projection for the same "
+            "declaration; signature hash unchanged.",
+        "src/aadistill/initialization/operators/composite/stage1_sandwich.py":
+            "`required_config = {stream_weighting}`; the declaration is validated against the parent's depth before "
+            "the statistics pass. Arithmetic unchanged.",
+        "src/aadistill/initialization/planning/search.py":
+            "`_assert_target_reachable` (run once, when the root is known, before any forward) also refuses an "
+            "allowed implementation that can act on the target and whose `required_config` the search does not "
+            "declare in `operator_configs`. A search that declares it is unchanged.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "NEW FUNCTION `require_declared_configs(spec, indices)`, called by `materialize_fixed_path` and "
+            "`materialize_fixed_path_suffix` before the root is loaded, for the steps that will run. A spec is still "
+            "CONSTRUCTED without the declaration (deriving a historical step's config hash needs no execution).",
+        "src/aadistill/initialization/baseline.py":
+            "NEW FIELD `ForwardBaseline.operator_configs` from an optional `method.operator_configs` (impl_id -> "
+            "config; only the record's own operators; no executor-owned or KL key), in `as_record` only when "
+            "present. Records without it (v1, v2) parse and identify exactly as before. tests/initialization/"
+            "test_forward_baseline.py.",
+     }),
 )
 
 

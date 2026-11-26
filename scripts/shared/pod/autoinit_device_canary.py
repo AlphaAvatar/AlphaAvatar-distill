@@ -51,6 +51,12 @@ from aadistill.initialization.operators.register import register_builtin_operato
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from shared.calibration import DOMAIN_BALANCED_V1  # noqa: E402
+from shared import stream_weighting as SW  # noqa: E402
+
+#: The configs the operators that need one are given (`OperatorImplementation.required_config`): the registered
+#: stream-weighting recipe, by name. A device check needs a valid declaration, not a scientific choice; the core has
+#: no default, so the canary declares one like any run.
+DECLARED = SW.operator_configs(SW.HISTORICAL)
 from aadistill.initialization.device import model_device, stats_bytes  # noqa: E402
 from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
 from aadistill.initialization.operators.base import (  # noqa: E402
@@ -164,7 +170,7 @@ def main() -> int:
         run_id="autoinit.device_canary", target_spec=target,
         schedule=SCHEDULE_V1, seed=20260817, workdir=workdir,
         profiles=(DOMAIN_BALANCED_V1,), policy=PARETO_V1, suite=suite,
-        device=args.device,
+        device=args.device, operator_configs=DECLARED,
         notes={"purpose": "device canary; NOT an experiment",
                "scientific_use": "false"})
     engine = BeamSearch(
@@ -184,7 +190,7 @@ def main() -> int:
             # the thing under test.
             cache = StatsCache(stats_spec=config.stats_spec, max_entries=1)
             ctx = OperatorContext(
-                adapter=adapter, model=parent, parent_spec=parent_spec,
+                adapter=adapter, model=parent, parent_spec=parent_spec, config=DECLARED.get(impl_id, {}),
                 target_spec=target, profile=DOMAIN_BALANCED_V1,
                 calibration_items=items, seed=config.seed,
                 device=str(model_device(parent)), workdir=workdir,

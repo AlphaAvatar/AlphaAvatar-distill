@@ -136,16 +136,18 @@ CLASSIFY: dict[str, dict] = {
                        "bit against the journal)",
         reconstruction_cost="one L40S, about 25 min", disposition="keep"),
     #: SOB1's three phase-1 initializations and mappings, retained from the relay (launch.py retain; logs/stages/stage-1/
-    #: single_operator_budget/storage/local_retention.json), and phase 2's residual-width and depth finals
-    #: (<arm>-s<seed>/final/; storage/local_retention_phase2.json). FFN + attention's finals are on the relay only.
+    #: single_operator_budget/storage/local_retention.json), and phase 2's six finals (<arm>-s<seed>/final/;
+    #: storage/local_retention_phase2.json): FFN + attention's two moved here from the relay on 2026-11-26 (maintainer
+    #: 2026-11-27, storage option a; relocate_relay_finals.py), their relay copies retired as redundant.
     "aad-artifacts/stage1_single_operator_budget/": dict(
         experiment="SOB1", role="a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
         retention="reproducibility_required", status="active",
         why="the initializations were the inputs of phase 2's six recovery runs (plans/training_plan_<arm>.json; "
             "phase 2 COMPLETE, its kind closed, so no run consumes them now); a final is a measured endpoint of the "
             "completed study (results/study_completion.json, 2026-11-25 COMPLETE)",
-        never_delete="the four finals here are their only copies (relay copies retired, tombstones "
-                     "relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; "
+        never_delete="the six finals here are their only copies (relay copies retired, tombstones "
+                     "relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage "
+                     "option a) and the endpoints the report measured, kept at their approved placement; "
                      "the three initializations (here and on the relay) are kept until the next round's plan is "
                      "fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit "
                      "consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth "

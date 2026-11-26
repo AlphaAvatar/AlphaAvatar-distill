@@ -28,6 +28,7 @@ from typing import Any
 
 import torch
 
+from aadistill.initialization.transforms.project import stream_weighting as resolve_stream_weighting
 from aadistill.initialization.transforms.sandwich import init_student
 from aadistill.initialization.specs.arch import (
     ArchitectureAdapter,
@@ -84,6 +85,8 @@ class CompositeStage1SandwichV0(OperatorImplementation):
     preserves = frozenset({"num_key_value_heads", "head_dim", "vocab_size",
                            "tie_word_embeddings"})
     calibration = CalibrationNeed.ACTIVATION_STATS
+    #: its stream weighting is the run's declaration (`apply`), never a core default
+    required_config = frozenset({"stream_weighting"})
     objective = "captured energy fraction (projection diagnostic)"
     deterministic = True
     requires_seed = True
@@ -130,6 +133,8 @@ class CompositeStage1SandwichV0(OperatorImplementation):
         if weighting is None:
             raise OperatorError(f"{self.impl_id}: the run declares no stream_weighting (the points the projection "
                                 "reads and their weights); the core has none of its own")
+        #: validated now, against the parent's depth, before the statistics pass
+        resolve_stream_weighting(weighting, ctx.parent_spec["num_hidden_layers"])
 
         # Host cache -> device working copy (autoinit.device). `init_student`
         # does all of its math against the PARENT's weights and writes into the

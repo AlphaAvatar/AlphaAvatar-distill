@@ -3,10 +3,10 @@
  "_contract": "WHICH baseline record is in force, per role, bound by the record's sha256: editing a record without re-selecting it fails at resolution. Resolved by aadistill.initialization.baseline.resolve_selection; record paths are relative to this file. AUTHORIZES NOTHING. `superseded` lists, per role, the records a role used to select, each still sha256-bound, for replays of the experiments that ran them (aadistill.initialization.baseline.resolve_superseded).",
  "selections": {
   "initialization": {
-   "record": "initialization_forward_baseline_v2.json",
-   "sha256": "737aabdec7d6d409f93bf3b0814a0273e4158e558c5a95e5019e7193986386a3",
-   "selected_utc": "2026-11-03",
-   "decision_record": "logs/budget/decisions.md 2026-11-03"
+   "record": "initialization_forward_baseline_v3.json",
+   "sha256": "e1c0c599c3fa690a5ce05ca074c6c1e7fa11b45a02a0abb82e8d5c4474fb684d",
+   "selected_utc": "2026-11-26",
+   "decision_record": "logs/budget/decisions.md 2026-11-26"
   }
  },
  "authorizes": "nothing",
@@ -19,6 +19,14 @@
     "decision_record": "logs/budget/decisions.md 2026-10-17",
     "superseded_utc": "2026-11-03",
     "superseded_by": "initialization_forward_baseline_v2.json"
+   },
+   {
+    "record": "initialization_forward_baseline_v2.json",
+    "sha256": "737aabdec7d6d409f93bf3b0814a0273e4158e558c5a95e5019e7193986386a3",
+    "selected_utc": "2026-11-03",
+    "decision_record": "logs/budget/decisions.md 2026-11-03",
+    "superseded_utc": "2026-11-26",
+    "superseded_by": "initialization_forward_baseline_v3.json"
    }
   ]
  }

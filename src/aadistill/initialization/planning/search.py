@@ -764,6 +764,23 @@ class BeamSearch:
             raise SearchError(
                 f"target differs from the teacher in {orphan}, and no registered "
                 "implementation modifies those fields; the target is unreachable")
+        #: An implementation that could act on this target and needs a declared
+        #: config (`OperatorImplementation.required_config`, e.g. a projection's
+        #: stream weighting) that the search does not declare would otherwise be
+        #: refused only when the beam first expands its kind -- after the root's
+        #: and every earlier level's forwards.
+        from aadistill.initialization.operators.base import missing_config
+        undeclared = {}
+        for impl_id in self._allowed_impl_ids():
+            impl = get_implementation(impl_id)
+            if impl.modifies & differing:
+                miss = missing_config(impl, (self.config.operator_configs or {}).get(impl_id))
+                if miss:
+                    undeclared[impl_id] = miss
+        if undeclared:
+            raise SearchError(
+                f"allowed implementations that can act on this target need a declared config the search does not "
+                f"give them: {undeclared}; declare it in SearchConfig.operator_configs (the core has no default)")
 
     def _allowed_impl_ids(self) -> list[str]:
         from aadistill.initialization.operators.base import registered_implementations

@@ -14,7 +14,8 @@ Gates read at $0 before the create, beyond the mechanism's:
 * a training session: its plan is the derivation (`depth_merge.plan`) and its initialization is on the relay with the
   recorded hashes; the relay accepts what the REMAINING rotation adds (`reclaim_superseded`, then `rotation_need`
   from `relay_state`, against the live headroom);
-* a build session: the relay accepts its products (the bf16 init and the statistics);
+* a build session: the relay accepts what the chain still adds -- its products, less those a takeover holds there
+  under this identity, and the training session after them (`build_need`);
 * the dev box's filesystem under ``--scr`` holds the session's evidence bound.
 
 Every closeout (the formal launch's after teardown and a manual ``closeout``) runs the variant's completion: a build
@@ -231,7 +232,7 @@ def gates(v: Variant, arm: str | None) -> tuple:
         return initialization_on_relay(v.arm_of(_kind(ctx), _arm(ctx)))
 
     def the_relay_has_room(ctx) -> tuple[bool, str]:
-        return relay_room(v, _kind(ctx), _arm(ctx), ctx.evidence)
+        return relay_room(v, _kind(ctx), _arm(ctx), ctx.evidence, resume_from=getattr(ctx.args, "resume_from", None))
 
     def the_dev_box_has_room(ctx) -> tuple[bool, str]:
         import shutil
@@ -292,11 +293,61 @@ def checkpoint_bytes(root: Path = REPO) -> dict:
     return s["arms"][DC.SOB1_DEPTH]["checkpoint_bytes"]
 
 
-def relay_room(v: Variant, kind: str, arm: str | None, evidence: dict) -> tuple[bool, str]:
-    """A build session: its products and the training session after them (`storage.sequence`). A training session:
-    first the superseded save points a lost pod left are
-    removed (SOB1's `reclaim_superseded`, dev-box side), then what the REMAINING rotation adds (`rotation_need` from
-    `relay_state`), asked of the relay's live headroom."""
+def resume_records(spec: str | None) -> tuple[dict, dict]:
+    """The build record and relay record a build attempt resumes from: ``--resume-from``'s archive on the relay,
+    fetched and re-hashed, read as the pod's `take_over` will copy them; ``({}, {})`` for a first run."""
+    if not spec:
+        return {}, {}
+    import tarfile
+    import tempfile
+    from huggingface_hub import hf_hub_download
+    from shared.deployment import MAIN_RELAY
+    from stages.depth_merge import build_driver as BD
+    path, _, sha = spec.partition("@")
+    tok = Path(os.path.expanduser("~/.cache/huggingface/token")).read_text().strip()
+    with tempfile.TemporaryDirectory() as tmp:
+        f = Path(hf_hub_download(MAIN_RELAY, path, repo_type="model", token=tok, cache_dir=tmp))
+        if SE.sha256_file(f) != sha:
+            raise SE.AuthorizationError(f"the resume archive {path} is not {sha[:12]}")
+        got = []
+        with tarfile.open(f) as t:
+            names = set(t.getnames())
+            for name in (f"{BD.ARM}/records/build.json", f"{BD.ARM}/records/relay.json"):
+                got.append(json.loads(t.extractfile(name).read()) if name in names else {})
+    return got[0], got[1]
+
+
+def relay_present(token: str):
+    """``present(record)`` for `build_driver.held`: every file the record names at its prefix on the relay, each LFS
+    object's sha256 the record's."""
+    from huggingface_hub import HfApi
+    from shared.deployment import MAIN_RELAY
+    api = HfApi(token=token)
+
+    def present(r: dict) -> bool:
+        want = {f"{r['prefix']}/{k}": x for k, x in (r.get("files_sha256") or {}).items()}
+        info = {i.path: i for i in api.get_paths_info(r.get("relay") or MAIN_RELAY, list(want), repo_type="model")}
+        return bool(want) and all(q in info and (getattr(info[q], "lfs", None) is None or info[q].lfs.sha256 == x)
+                                  for q, x in want.items())
+    return present
+
+
+def build_need(ident: dict, rec: dict, prev: dict, present) -> dict:
+    """What a build session asks of the relay's live headroom: the whole chain (`storage.sequence`) less what the
+    attempt takes over there (`build_driver.held` on the records it resumes from: its products under this identity,
+    their files present), counted as the chain counts them (`storage.remaining`). A first run holds nothing and asks
+    for the whole chain; the live headroom already excludes what is held, so nothing is subtracted twice."""
+    from stages.depth_merge import build_driver as BD
+    from stages.depth_merge import storage as STO
+    return STO.remaining(BD.held(ident, rec, prev, present))
+
+
+def relay_room(v: Variant, kind: str, arm: str | None, evidence: dict, *,
+               resume_from: str | None = None) -> tuple[bool, str]:
+    """A build session: what the chain still adds -- its products (less those a takeover holds on the relay) and the
+    training session after them (`build_need`). A training session: first the superseded save points a lost pod left
+    are removed (SOB1's `reclaim_superseded`, dev-box side), then what the REMAINING rotation adds (`rotation_need`
+    from `relay_state`), asked of the relay's live headroom."""
     from aadistill.runtime.hub_capacity import would_accept
     from shared.deployment import MAIN_RELAY
     from stages.single_operator_budget import launch as SL
@@ -307,14 +358,21 @@ def relay_room(v: Variant, kind: str, arm: str | None, evidence: dict) -> tuple[
     if kind == v.build_kind:
         #: the WHOLE chain, not the build's products alone: an init built for a training session the relay cannot
         #: hold would wait on storage after its money was spent (storage.py; design storage.chain_rule)
-        from stages.depth_merge import storage as STO
-        seq = STO.sequence()["relay"]
-        evidence["relay_need"] = {k: seq[k] for k in ("peak_gib", "peak_at", "margin_bytes", "need_gib")}
-        res = would_accept(MAIN_RELAY, SL.chunks(seq["need_bytes"]), tok.read_text().strip())
+        import tempfile
+        from stages.depth_merge import build_driver as BD
+        try:
+            rec, prev = resume_records(resume_from)
+            with tempfile.TemporaryDirectory() as tmp:
+                ident = BD.current_identity(Path(tmp))
+            need = build_need(ident, rec, prev, relay_present(tok.read_text().strip()))
+        except Exception as exc:  # noqa: BLE001
+            return False, f"what the relay already holds of this build is unknown: {type(exc).__name__}: {exc}"
+        evidence["relay_need"] = need
+        res = would_accept(MAIN_RELAY, SL.chunks(need["need_bytes"]), tok.read_text().strip())
         evidence["relay_room"] = str(res)
-        return res.accepted, (f"the relay would accept the build's products AND the training session after them "
-                              f"({seq['peak_gib']} GiB at its peak, {seq['peak_at']}, plus the margin: "
-                              f"{seq['need_gib']} GiB): {res}")
+        return res.accepted, (f"the relay would accept what the chain still adds ({need['need_gib']} GiB: its peak "
+                              f"{need['remaining_peak_gib']} GiB at {need['peak_at']} with the margin; held on the "
+                              f"relay: {need['held'] or 'nothing'}): {res}")
     arm = v.arm_of(kind, arm)
     before = DC.bind_for(arm)
     try:

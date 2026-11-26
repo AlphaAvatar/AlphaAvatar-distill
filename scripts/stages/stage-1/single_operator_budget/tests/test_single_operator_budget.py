@@ -1972,3 +1972,39 @@ def test_an_interrupted_final_retirement_is_continued_by_the_next_closeout(tmp_p
     r["arms"][ARM]["finals"].pop(u1)
     rec_path.write_text(json.dumps(r))
     assert "other bytes" in close()["relay_rotation"]["finals"][u1]["kept"]
+
+
+def test_a_final_relocated_to_the_dev_box_is_checked_there_and_never_looked_for_on_the_relay(tmp_path):
+    """The maintainer's 2026-11-27 storage option a moved the relay-placed arm's finals to the dev box
+    (`relocate_relay_finals.py`); the design keeps its historical placement. A later `retain` of that arm reads the
+    retention record's relocation: every file re-hashed on the disk, the relay never asked; a copy that no longer
+    re-hashes is missing."""
+    import hashlib
+    from stages.single_operator_budget import launch as L
+    arm = next(a for a, v in DESIGN["storage"]["phase_2_finals"]["placement"].items() if v == "relay")
+    scr, store, record = tmp_path / "scr", tmp_path / "store", tmp_path / "local2.json"
+    products = {}
+    for sd in DESIGN["training"]["seeds"]:
+        unit = f"{arm}-s{int(sd)}"
+        files = {"model.safetensors": f"w{sd}".encode(), "config.json": b"{}"}
+        man = {k: hashlib.sha256(v).hexdigest() for k, v in files.items()}
+        prefix = f"durable/x/{arm}/{unit}/final/{man['model.safetensors'][:16]}"
+        (scr / "store/out" / unit).mkdir(parents=True)
+        (scr / "store/out" / unit / "final.json").write_text(json.dumps(
+            {"relay": "r", "prefix": prefix, "files_sha256": man, "verified": True}))
+        dest = store / f"{unit}/final" / prefix.rsplit("/", 1)[-1]
+        dest.mkdir(parents=True)
+        for k, v in files.items():
+            (dest / k).write_bytes(v)
+        products[f"{unit}/final"] = {"kept_on": "dev_box", "path": str(dest), "files_sha256": man, "verified": True,
+                                     "relay": "r", "prefix": prefix, "relocated": {"decision": "test"}}
+    record.write_text(json.dumps({"schema": "s", "store": str(store), "products": products}))
+
+    def relay_asked(_paths):
+        raise AssertionError("a relocated final was looked for on the relay")
+    doc = L.retain(L.TRAIN_KIND, "r1", scr, store=store, record=record, arm=arm, lfs_sha=relay_asked)
+    assert doc["status"] == "COMPLETE" and all(v["verified"] for v in doc["products"].values())
+    first = next(iter(products.values()))
+    (Path(first["path"]) / "model.safetensors").write_bytes(b"other bytes")
+    doc = L.retain(L.TRAIN_KIND, "r1", scr, store=store, record=record, arm=arm, lfs_sha=relay_asked)
+    assert doc["status"] == "INCOMPLETE" and "does not re-hash" in next(iter(doc["missing"].values()))

@@ -296,3 +296,36 @@ class TestTheLiveRegistryIsChecked:
         b = self._baseline(tmp_path, doc)
         with pytest.raises(BaselineError, match="does not accept"):
             b.require_registered_operators(_registry())
+
+
+class TestARecordDeclaresConfigsForItsOwnOperators:
+    """`method.operator_configs`: what the method declares per implementation (a projection's stream weighting),
+    handed to the search that runs it. Absent, nothing is declared and the record's identity is as before."""
+
+    def test_absent_declares_nothing_and_adds_nothing_to_the_record(self, tmp_path):
+        _, sel = _write(tmp_path, record())
+        b = resolve_selection(sel, "init")
+        assert dict(b.operator_configs) == {} and "operator_configs" not in b.as_record()
+
+    def test_a_declaration_for_a_named_implementation_is_carried(self, tmp_path):
+        doc = copy.deepcopy(record())
+        cfg = {"stream_weighting": {"endpoint_weights": {"first": 2.0, "interior": 1.0, "last": 3.0},
+                                    "source": "a test recipe"}}
+        doc["method"]["operator_configs"] = {"kind_b.toy_v1": cfg}
+        _, sel = _write(tmp_path, doc)
+        b = resolve_selection(sel, "init")
+        assert dict(b.operator_configs) == {"kind_b.toy_v1": cfg}
+        assert b.as_record()["operator_configs"] == {"kind_b.toy_v1": cfg}
+
+    @pytest.mark.parametrize("decl,match", [
+        ({"kind_z.toy_v1": {"x": 1}}, "names no operator"),
+        ({"kind_b.toy_v1": {}}, "non-empty mapping"),
+        ({"kind_b.toy_v1": {"n_calibration_items": 3}}, "executor derives"),
+        ({"kind_a.toy_v1": {"kl_reference": "root_state"}}, "executor derives or kl_reference declares"),
+        ({}, "maps implementation ids")])
+    def test_a_declaration_the_record_cannot_own_is_refused(self, tmp_path, decl, match):
+        doc = copy.deepcopy(record())
+        doc["method"]["operator_configs"] = decl
+        _, sel = _write(tmp_path, doc)
+        with pytest.raises(BaselineError, match=match):
+            resolve_selection(sel, "init")

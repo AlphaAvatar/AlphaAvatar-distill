@@ -17,11 +17,11 @@ blocks, merged spans, pairs), the calibration (profile and its data hash, the st
 policy, the packed forward context, the session's config hash and measurement protocol, the execution's packing and
 micro-batch) and the code (`merge.method_identity`: ast digests, so a docstring or comment changes nothing). The
 statistics' identity is the sha256 of the first four and the statistics code; the checkpoint's adds the base, the
-method, its seed and the candidate code. A product made under another identity is never adopted.
+method, its seed and the candidate code. Each product carries its OWN identity (`stamp`), written when the product is
+made or verified for reuse -- never before, and never copied onto a product made under another one.
 
 **Products, in order**, each recorded in ``out/depth_merge/records/build.json`` the moment it exists and copied to
-the relay at once (uploaded, downloaded again, re-hashed; then its own record put beside it, `relay.POINTER`, so a
-later attempt finds it even when the pod was lost before the dev box pulled ``records/relay.json``):
+the relay at once:
 
 1. **the contract** -- the packed search's session derives the journal's operator config hashes; the design's pinned
    records hash to their sha256 (`contract`);
@@ -37,25 +37,39 @@ later attempt finds it even when the pod was lost before the dev box pulled ``re
 5. **diagnostics** (recorded, never a gate) -- the state evaluation and each merged span's residual update against
    the teacher span's, for the base's kept block and the merged one (each candidate block on the teacher's device,
    `span_candidates`);
-6. ``depth_merge/init_record.json``, COMPLETE only when both relay groups verified, under this identity.
+6. ``depth_merge/init_record.json``, COMPLETE only when both relay groups are verified AND handed off, under this
+   identity.
+
+**A relay group's two states** (`secure`, recorded in ``records/relay.json`` at each): the files uploaded, downloaded
+again and re-hashed (``verified``) -- recorded at once; then the handoff (``handoff.verified``): the group's record put
+beside its files (`relay.POINTER`) and the relay listing read back naming it with its files present. The record carries
+the product's identity and description (`product_view`), so a later attempt finds and restores it even when the pod
+was lost before the dev box pulled ``build.json`` or ``relay.json`` (`recover`). A handoff that does not verify leaves
+the files where they are: only the handoff is retried (later in the attempt, and by the next attempt), the files are
+never sent again, nothing is recomputed, and no init record is written until it is done.
 
 **Takeover** (`run`; ``--resume`` copies a previous attempt's secured evidence into ``out`` first). A product is
-taken over when its record is under this identity and its bytes are where the record says -- locally with their
-sha256, or on the relay (relay.json's verified record, or the relay's own listing). Only what is missing is made:
+taken over when ITS identity is this attempt's and its bytes are where its record says -- locally with their sha256,
+or on the relay (relay.json's verified record, or the relay's own listing). Only what is missing is made:
 
 * the init record durable under this identity -> nothing runs;
-* weights durable, diagnostics recorded -> only the init record is written (no teacher, no GPU);
+* weights durable, diagnostics recorded -> only the pending handoffs and the init record (no teacher, no GPU);
 * weights durable, diagnostics missing -> the weights are restored from their verified relay copy (re-hashed) for
   the diagnostics; nothing is rebuilt;
-* statistics durable, weights missing -> the weights are built from the statistics file (no statistics forward);
+* statistics durable, weights missing or made under another checkpoint identity (the base, the method, its seed or
+  the candidate code changed) -> the weights are built from the statistics file (fetched from the relay only then; no
+  statistics forward); the old weights' records are set aside with their own identity (``superseded``), never
+  relabelled;
 * statistics missing -> the statistics forward runs; each persisted pair is reused only under the same inputs.
 
-A build record under another identity is moved aside (``build.superseded_<utc>.json``), kept as evidence, never
-reused.
+A build record whose statistics were made under another identity is moved aside (``build.superseded_<utc>.json``),
+kept as evidence, never reused. `held` is the same lookup without side effects, for the launch gate's room arithmetic
+(`session.relay_room`: a takeover asks the relay only for what the chain still adds).
 """
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -79,10 +93,13 @@ GROUPS = ("statistics", "init")
 #: what a product's identity is made of (`identity`): the statistics', then the checkpoint's on top
 STATISTICS_PARTS = ("teacher", "mapping", "calibration", "statistics_code")
 CHECKPOINT_PARTS = ("base", "merge")
-#: what a weights rebuild or a new statistics pass makes stale in the build record
+#: what a weights rebuild or a new statistics pass makes stale in the build record (and ``checks.equivalence``)
 DOWNSTREAM_OF = {"statistics": ("checkpoint", "candidate", "state_evaluation", "diagnostics", "gpu_peak",
                                 "finished_utc"),
-                 "checkpoint": ("state_evaluation", "diagnostics", "gpu_peak", "finished_utc")}
+                 "checkpoint": ("checkpoint", "candidate", "state_evaluation", "diagnostics", "gpu_peak",
+                                "finished_utc")}
+#: a relay group's product, by the identity it carries
+WHAT = {"statistics": "statistics", "init": "checkpoint"}
 
 
 class DriverError(RuntimeError):
@@ -156,15 +173,27 @@ def identity(c: dict, d: dict | None = None) -> dict:
                     "checkpoint = the statistics' identity, the base, the merge (method, seed, candidate code)"}
 
 
+def _parts_of(what: str) -> tuple[str, ...]:
+    return STATISTICS_PARTS + (CHECKPOINT_PARTS if what == "checkpoint" else ())
+
+
+def stamp(ident: dict, what: str) -> dict:
+    """The identity a product (``statistics`` / ``checkpoint``) is recorded under, once it is made or verified for
+    reuse: its digest and the parts it is a function of."""
+    return {"sha256": ident[what], "parts": {k: ident["parts"][k] for k in _parts_of(what)}}
+
+
 def identity_problems(recorded: dict | None, ident: dict, what: str) -> list[str]:
-    """Why a product recorded under ``recorded`` is not this attempt's ``what`` (``statistics`` / ``checkpoint``),
-    naming the parts that differ."""
-    if not recorded or what not in recorded:
+    """Why a product recorded under ``recorded`` (its `stamp`, or a whole `identity`) is not this attempt's ``what``
+    (``statistics`` / ``checkpoint``), naming the parts that differ."""
+    rec = recorded or {}
+    sha = rec.get("sha256", rec.get(what))
+    if not sha:
         return [f"{what}: no identity recorded"]
-    if recorded[what] == ident[what]:
+    if sha == ident[what]:
         return []
-    have = recorded.get("parts") or {}
-    differ = [k for k in ident["parts"] if have.get(k) != ident["parts"][k]]
+    have = rec.get("parts") or {}
+    differ = [k for k in _parts_of(what) if have.get(k) != ident["parts"][k]]
     return [f"{what}: made under another identity ({', '.join(differ) or 'the digest only'})"]
 
 
@@ -233,8 +262,10 @@ def persisted_pairs(out: Path) -> dict:
 
 # ---- the products ------------------------------------------------------------------------------------------------
 
-def statistics_step(g: Gpu, rec: dict, out: Path, status: Status, run_id: str) -> None:
-    """Step 3 of the module docstring: the statistics forward, the alignments, the statistics file."""
+def statistics_step(g: Gpu, rec: dict, out: Path, status: Status, run_id: str) -> dict:
+    """Step 3 of the module docstring: the statistics forward, the alignments, the statistics file. Returns the
+    statistics' record; `run` stamps it with its identity and records it (a pass interrupted before then is not a
+    product: ``saved_utc`` is what makes one)."""
     import torch
     from safetensors.torch import save_file
     LMX = M.lmx()
@@ -270,12 +301,12 @@ def statistics_step(g: Gpu, rec: dict, out: Path, status: Status, run_id: str) -
                      pairs={f"{a}->{b}": x["summary"] for (a, b), x in al.items()},
                      permutation_sha256={k: hashlib.sha256(v.numpy().tobytes()).hexdigest()
                                          for k, v in stats.items() if "perm" in k})
-    write_json(records(out) / "build.json", rec)
-    status.mark("STATISTICS_SAVED")
+    return stats_rec
 
 
 def weights_step(g: Gpu, rec: dict, out: Path, work: Path, status: Status):
-    """Step 4: the checks and the candidate from the saved statistics file; returns the reloaded model."""
+    """Step 4: the checks and the candidate from the saved statistics file; returns the reloaded model and the
+    checkpoint's record, which `run` stamps with its identity and records."""
     import torch
     from safetensors.torch import load_file
     from stages.teacher_parent_initialization import init_driver as TI
@@ -314,10 +345,7 @@ def weights_step(g: Gpu, rec: dict, out: Path, work: Path, status: Status):
     ck["reload_forward_finite"] = bool(torch.isfinite(m(input_ids=ids).logits).all().item())
     if not ck["reload_forward_finite"]:
         raise DriverError("the reloaded candidate gives non-finite logits")
-    rec["checkpoint"] = ck
-    write_json(records(out) / "build.json", rec)
-    status.mark("INIT_BUILT")
-    return m
+    return m, ck
 
 
 def diagnostics_step(g: Gpu, rec: dict, out: Path, work: Path, m=None) -> None:
@@ -413,53 +441,134 @@ def _bytes_ok(files: dict[str, str], local: dict[str, Path]) -> bool:
     return all(local[k].is_file() and sha256_file(local[k]) == s for k, s in files.items())
 
 
-def relay_copy(name: str, rec: dict, prev: dict) -> dict | None:
-    """The group's verified relay copy of exactly the build record's files: relay.json's record (this or an earlier
-    attempt's), else a record the relay's own listing names with its files present; None when there is none."""
-    files = group_files(name, rec)
-    r = prev.get(name) or {}
-    if r.get("verified") is True and r.get("files_sha256") == files:
-        return r
+def product_view(name: str, rec: dict) -> dict:
+    """What a group's relay record carries of the build record (it is also the record put beside the files): the
+    product's own record with its identity, so an attempt whose build record never came back restores it (`recover`)."""
+    if name == "statistics":
+        return {"statistics": rec["statistics"]}
+    return {"checkpoint": rec["checkpoint"], "candidate": rec.get("candidate"),
+            "equivalence": (rec.get("checks") or {}).get("equivalence")}
+
+
+def handed_off(r: dict | None) -> bool:
+    """The group's record is beside its files on the relay and the listing names it with its files present."""
+    return ((r or {}).get("handoff") or {}).get("verified") is True
+
+
+def _listed(name: str) -> list[dict]:
+    """The relay's records under the group's root that have their files present, as a takeover adopts them: found by
+    the listing, which is the handoff's own check."""
+    out = []
     for x in _listing(group_root(name)).get("records", []):
-        rr = x.get("record") or {}
-        if x.get("present") and rr.get("verified") is True and rr.get("files_sha256") == files:
-            return {**rr, "found_by": f"the relay listing under {group_root(name)}"}
+        if x.get("present"):
+            out.append({**(x.get("record") or {}), "found_by": f"the relay listing under {group_root(name)}",
+                        "handoff": {"verified": True, "by": "the relay listing names it with its files present",
+                                    "utc": utc()}})
+    return out
+
+
+def _is(r: dict, files: dict, want: str) -> bool:
+    return r.get("verified") is True and r.get("files_sha256") == files and r.get("identity_sha256") == want
+
+
+def relay_copy(name: str, rec: dict, prev: dict, ident: dict) -> dict | None:
+    """The group's verified relay copy of exactly the build record's files, recorded under this attempt's identity of
+    the product: relay.json's record (this or an earlier attempt's, handed off or not), else a record the relay's
+    own listing names; None when there is none."""
+    files, want = group_files(name, rec), ident[WHAT[name]]
+    r = prev.get(name) or {}
+    if _is(r, files, want):
+        return r
+    return next((x for x in _listed(name) if _is(x, files, want)), None)
+
+
+def recover(name: str, rec: dict, prev: dict, ident: dict) -> dict | None:
+    """A product the build record does not name but the relay holds under this identity -- relay.json's record, or a
+    record the relay's listing names (the pod lost before the dev box pulled its latest ``build.json``) -- restored
+    into ``rec`` from the description its record carries (`product_view`), once that description is under this
+    identity and names exactly the record's files (the weights: made from the build record's statistics). Returns
+    the relay record (also put in ``prev``), or None."""
+    want, what = ident[WHAT[name]], WHAT[name]
+    cands = ([prev[name]] if (prev.get(name) or {}).get("verified") is True else []) + _listed(name)
+    for r in cands:
+        view = r.get("product") or {}
+        if r.get("verified") is not True or r.get("identity_sha256") != want or what not in view:
+            continue
+        trial = copy.deepcopy(rec)
+        trial[what] = copy.deepcopy(view[what])
+        if name == "init":
+            if view[what].get("statistics_sha256") != (rec.get("statistics") or {}).get("tensors_sha256"):
+                continue
+            trial["candidate"] = view.get("candidate")
+            trial.setdefault("checks", {})["equivalence"] = view.get("equivalence")
+        if identity_problems(trial[what].get("identity"), ident, what):
+            continue
+        try:
+            files = group_files(name, trial)
+        except (KeyError, TypeError, AttributeError):
+            continue
+        if files != r.get("files_sha256"):
+            continue
+        rec.clear()
+        rec.update(trial)
+        prev[name] = r
+        return r
     return None
 
 
-def secure(name: str, rec: dict, out: Path, work: Path, run_id: str, status: Status, prev: dict) -> dict:
-    """The group durable: an existing verified copy is taken (never sent again); otherwise the local files, which
-    must be the record's, are put, verified, and their record put beside them (`relay.POINTER`)."""
+def secure(name: str, rec: dict, out: Path, work: Path, run_id: str, status: Status, prev: dict,
+           ident: dict) -> dict:
+    """The group durable (the module docstring's two states): an existing verified copy under this identity is taken
+    (never sent again); otherwise the local files, which must be the record's, are put and verified, and that record
+    is written to relay.json AT ONCE; then, unless it is already, the group is handed off. A handoff that does not
+    verify is recorded and left pending (`run` retries it before the init record; the next attempt takes the verified
+    copy over and retries only the handoff)."""
     files, local = group_files(name, rec), local_files(name, out, work)
+    relay_p = records(out) / "relay.json"
     here = _bytes_ok(files, local)
     try:
-        have = relay_copy(name, rec, prev)
+        have = relay_copy(name, rec, prev, ident)
     except DriverError:
         if not here:
             raise
         have = None                          #: the files are here: `relay.put` sends only what the relay lacks
-    if have is not None:
+    if have is None:
+        if not here:
+            raise DriverError(f"{name}: no verified relay copy, and the local files are not the record's")
+        nbytes = sum(p.stat().st_size for p in local.values())
+        res = _put({"files": {k: str(v) for k, v in local.items()}, "prefix": group_prefix(name, rec),
+                    "message": f"DMR1-M {run_id}: {name}", "scratch": str(work)},
+                   max(3600.0, nbytes / 2.6e6 * 1.25 + 600))
+        if not (res.get("verified") is True and res.get("files_sha256") == files):
+            prev[name] = res
+            write_json(relay_p, prev)
+            raise DriverError(f"the relay copy of {name} is not its manifest verified: {str(res)[:600]}")
+        have = {**res, "group": name, "identity_sha256": ident[WHAT[name]], "run_id": run_id,
+                "product": product_view(name, rec), "handoff": {"verified": False, "why": "not attempted yet"}}
         prev[name] = have
-        write_json(records(out) / "relay.json", prev)
+        write_json(relay_p, prev)            #: the verified bytes recorded before anything else can fail
+        status.mark(f"RELAY_VERIFIED:{name}")
+    else:
+        prev[name] = have
+        write_json(relay_p, prev)
         status.mark(f"RELAY_TAKEN_OVER:{name}")
-        return have
-    if not here:
-        raise DriverError(f"{name}: no verified relay copy, and the local files are not the record's")
-    nbytes = sum(p.stat().st_size for p in local.values())
-    res = _put({"files": {k: str(v) for k, v in local.items()}, "prefix": group_prefix(name, rec),
-                "message": f"DMR1-M {run_id}: {name}", "scratch": str(work)},
-               max(3600.0, nbytes / 2.6e6 * 1.25 + 600))
-    if not (res.get("verified") is True and res.get("files_sha256") == files):
-        prev[name] = res
-        write_json(records(out) / "relay.json", prev)
-        raise DriverError(f"the relay copy of {name} is not its manifest verified: {str(res)[:600]}")
-    res = {**res, "group": name, "identity_sha256": rec["identity"]["checkpoint" if name == "init" else "statistics"],
-           "run_id": run_id}
-    res["handoff"] = _handoff(res, work, group_root(name), f"DMR1-M {run_id}: {name}")
-    prev[name] = res
-    write_json(records(out) / "relay.json", prev)
-    status.mark(f"RELAY_OK:{name}")
-    return res
+    if not handed_off(have):
+        hand_off(name, have, work, run_id, prev, relay_p)
+    status.mark(f"RELAY_OK:{name}" if handed_off(have) else f"RELAY_HANDOFF_PENDING:{name}")
+    return have
+
+
+def hand_off(name: str, have: dict, work: Path, run_id: str, prev: dict, relay_p: Path) -> bool:
+    """One handoff of the group's verified record (`train_driver.hand_off_with_retries`: only its pointer is
+    written and the listing read; the files are never sent again), its answer kept in relay.json; True when it
+    verified."""
+    tries = (have.get("handoff") or {}).get("attempts_by_run") or []
+    h = _handoff(have, work, group_root(name), f"DMR1-M {run_id}: {name}")
+    have["handoff"] = {**h, "attempts_by_run": [*tries, {"run_id": run_id, "verified": h.get("verified") is True,
+                                                         "why": h.get("why"), "utc": utc()}]}
+    prev[name] = have
+    write_json(relay_p, prev)
+    return handed_off(have)
 
 
 def restore(name: str, rec: dict, relay_rec: dict, out: Path, work: Path) -> None:
@@ -479,30 +588,42 @@ def restore(name: str, rec: dict, relay_rec: dict, out: Path, work: Path) -> Non
 
 # ---- the build as a sequence of products, each taken over or made -----------------------------------------------
 
+def _checkpoint_problems(rec: dict, ident: dict) -> list[str]:
+    """Why the build record's weights are not this attempt's (empty when they are)."""
+    ck = rec.get("checkpoint") or {}
+    why = identity_problems(ck.get("identity"), ident, "checkpoint")
+    if not why and ck.get("statistics_sha256") != (rec.get("statistics") or {}).get("tensors_sha256"):
+        why = ["checkpoint: made from other statistics than the build record's"]
+    if not why and ck.get("reload_forward_finite") is not True:
+        why = ["checkpoint: its reload was never checked finite"]
+    return why
+
+
 def run(out: Path, work: Path, device: str, status: Status, run_id: str, ident: dict) -> dict:
     """The module docstring's takeover rule. Returns ``{"init_record", "actions"}``."""
     doc = durable_init(out, ident)
     if doc is not None:
         status.mark("INIT_TAKEN_OVER")
         return {"init_record": doc, "actions": ["init record: taken over (durable under this identity)"]}
-    rec_p = records(out) / "build.json"
+    rec_p, relay_p = records(out) / "build.json", records(out) / "relay.json"
     rec = read_json(rec_p) if rec_p.is_file() else {}
+    prev = read_json(relay_p) if relay_p.is_file() else {}
     actions: list[str] = []
-    why = identity_problems(rec.get("identity"), ident, "statistics") if rec else []
+    if rec.get("statistics") and not rec["statistics"].get("saved_utc"):
+        rec.pop("statistics")                #: an interrupted pass: not a product
+    why = identity_problems(rec["statistics"].get("identity"), ident, "statistics") if rec.get("statistics") else []
     if why:
         aside = rec_p.with_name(f"build.superseded_{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.json")
         os.replace(rec_p, aside)
         actions.append(f"build record set aside ({'; '.join(why)}): {aside.name}")
         rec = {}
     if not rec:
-        rec = {"started_utc": utc(), "run_id": run_id, "arm": ARM, "method": M.METHOD,
-               "method_identity": M.method_identity(), "checks": {}}
-    rec["identity"] = ident
-    rec.setdefault("attempts", []).append({"run_id": run_id, "utc": utc(), "actions": actions})
+        rec = {"started_utc": utc(), "run_id": run_id, "arm": ARM, "method": M.METHOD, "checks": {}}
+    rec["method_identity"] = M.method_identity()
+    rec.setdefault("attempts", []).append({"run_id": run_id, "utc": utc(), "actions": actions,
+                                           "identity": {k: ident[k] for k in ("statistics", "checkpoint")}})
     records(out).mkdir(parents=True, exist_ok=True)
     write_json(rec_p, rec)
-    relay_p = records(out) / "relay.json"
-    prev = read_json(relay_p) if relay_p.is_file() else {}
     g: Gpu | None = None
 
     def gpu() -> Gpu:
@@ -516,56 +637,99 @@ def run(out: Path, work: Path, device: str, status: Status, run_id: str, ident: 
     def stale(what: str) -> None:
         for k in DOWNSTREAM_OF[what]:
             rec.pop(k, None)
+        rec.setdefault("checks", {}).pop("equivalence", None)
 
     # the statistics
-    have_stats = bool((rec.get("statistics") or {}).get("saved_utc"))
-    if have_stats and not _bytes_ok(group_files("statistics", rec), local_files("statistics", out, work)):
-        copy = relay_copy("statistics", rec, prev)
-        if copy is None:
+    have_stats = bool(rec.get("statistics"))
+    if not have_stats and recover("statistics", rec, prev, ident) is not None:
+        have_stats = True
+        actions.append("statistics: not in the build record; restored from the record beside their verified relay "
+                       "copy (this identity)")
+    s_local = have_stats and _bytes_ok(group_files("statistics", rec), local_files("statistics", out, work))
+    s_copy = None
+    if have_stats and not s_local:
+        s_copy = relay_copy("statistics", rec, prev, ident)
+        if s_copy is None:
             have_stats = False
             actions.append("statistics: recorded but no copy is left anywhere: recomputed")
         else:
-            restore("statistics", rec, copy, out, work)
-            actions.append("statistics: restored from the relay (re-hashed)")
+            actions.append("statistics: taken over (their verified relay copy; fetched only for a weights build)")
     elif have_stats:
         actions.append("statistics: taken over (the secured file, sha256 the record's)")
     if not have_stats:
         stale("statistics")
-        statistics_step(gpu(), rec, out, status, run_id)
+        made = statistics_step(gpu(), rec, out, status, run_id)
+        rec["statistics"] = {**made, "identity": stamp(ident, "statistics")}
+        write_json(rec_p, rec)
+        status.mark("STATISTICS_SAVED")
+        s_local = True
         actions.append("statistics: computed")
-    secure("statistics", rec, out, work, run_id, status, prev)
+    write_json(rec_p, rec)
+    secure("statistics", rec, out, work, run_id, status, prev, ident)
 
     # the weights
     m = None
-    ck = rec.get("checkpoint") or {}
-    have_w = bool(ck.get("reload_forward_finite") is True
-                  and ck.get("statistics_sha256") == rec["statistics"]["tensors_sha256"]
-                  and not identity_problems(rec.get("identity"), ident, "checkpoint"))
+    if rec.get("checkpoint"):
+        why = _checkpoint_problems(rec, ident)
+        if why:
+            old = {k: rec[k] for k in DOWNSTREAM_OF["checkpoint"] if k in rec}
+            old["equivalence"] = (rec.get("checks") or {}).get("equivalence")
+            old_relay = prev.pop("init", None)
+            rec.setdefault("superseded", []).append({"product": "checkpoint", "why": why, "utc": utc(),
+                                                     "record": old, "relay": old_relay})
+            if old_relay is not None:
+                prev.setdefault("superseded", []).append(old_relay)
+                write_json(relay_p, prev)
+            stale("checkpoint")
+            write_json(rec_p, rec)
+            actions.append(f"weights: set aside ({'; '.join(why)}), kept as evidence under their own identity")
+    have_w = bool(rec.get("checkpoint"))
+    if not have_w and recover("init", rec, prev, ident) is not None:
+        have_w = True
+        actions.append("weights: not in the build record; restored from the record beside their verified relay copy "
+                       "(this identity)")
     w_local = have_w and _bytes_ok(group_files("init", rec), local_files("init", out, work))
-    if have_w and not w_local and relay_copy("init", rec, prev) is None:
+    if have_w and not w_local and relay_copy("init", rec, prev, ident) is None:
         have_w = False
         actions.append("weights: recorded but no copy is left anywhere: rebuilt from the statistics file")
     if not have_w:
         stale("checkpoint")
-        m = weights_step(gpu(), rec, out, work, status)
+        if not s_local:
+            restore("statistics", rec, s_copy or relay_copy("statistics", rec, prev, ident), out, work)
+            actions.append("statistics: fetched from their verified relay copy (re-hashed) for the weights build")
+        m, made = weights_step(gpu(), rec, out, work, status)
+        rec["checkpoint"] = {**made, "identity": stamp(ident, "checkpoint")}
+        write_json(rec_p, rec)
+        status.mark("INIT_BUILT")
         w_local = True
         actions.append("weights: built from the statistics file")
     else:
         actions.append("weights: taken over (" + ("the pod's files" if w_local else "the verified relay copy") + ")")
-    secure("init", rec, out, work, run_id, status, prev)
+    secure("init", rec, out, work, run_id, status, prev, ident)
 
     # the diagnostics
     if not rec.get("finished_utc"):
         if not w_local:
-            restore("init", rec, relay_copy("init", rec, prev), out, work)
+            restore("init", rec, relay_copy("init", rec, prev, ident), out, work)
             actions.append("weights: restored from the verified relay copy for the diagnostics")
         diagnostics_step(gpu(), rec, out, work, m)
         actions.append("diagnostics: computed")
     else:
         actions.append("diagnostics: taken over")
+
+    # the handoffs still pending, then the init record
+    for name in GROUPS:
+        if not handed_off(prev[name]):
+            ok = hand_off(name, prev[name], work, run_id, prev, relay_p)
+            actions.append(f"{name}: handoff " + ("completed" if ok else "still pending"))
     rec["attempts"][-1]["actions"] = actions
     write_json(rec_p, rec)
-    doc = init_record(rec, {name: prev[name] for name in GROUPS})
+    pending = [name for name in GROUPS if not handed_off(prev[name])]
+    if pending:
+        status.mark("RELAY_HANDOFF_PENDING")
+        raise DriverError(f"the relay copies of {pending} are verified but not handed off (their records beside them, "
+                          "the listing naming them): kept as they are; the next attempt retries only the handoff")
+    doc = init_record(rec, {name: prev[name] for name in GROUPS}, ident)
     bad = product_problems(doc, ident)
     if bad:
         raise DriverError(f"the init record would not show its products durable: {bad}")
@@ -574,36 +738,70 @@ def run(out: Path, work: Path, device: str, status: Status, run_id: str, ident: 
     return {"init_record": doc, "actions": actions}
 
 
-def init_record(rec: dict, relay: dict) -> dict:
+def held(ident: dict, rec: dict | None = None, prev: dict | None = None, present=None) -> dict[str, dict]:
+    """What a build attempt starting from ``rec`` and ``prev`` (a previous attempt's ``build.json`` and
+    ``relay.json`` as its ``--resume`` carries them; both empty for a first run) takes over from the relay instead of
+    putting it again, by group: `run`'s own lookups (a product of this identity in the build record: `relay_copy`;
+    else one the relay records under this identity: `recover`), each counted only while ``present(record)`` (the
+    caller's read of the relay's paths) finds its files there. No side effect; the weights are never held without
+    the statistics (`run` rebuilds weights whose statistics are made again). Raises `DriverError` when the relay
+    listing is unreadable: what it holds is then unknown, never empty."""
+    rec, prev = copy.deepcopy(rec or {}), copy.deepcopy(prev or {})
+    present = present or (lambda r: True)
+    out: dict[str, dict] = {}
+    st = rec.get("statistics") or {}
+    if st and not st.get("saved_utc"):
+        rec.pop("statistics")
+    elif st and identity_problems(st.get("identity"), ident, "statistics"):
+        rec = {}
+    r = relay_copy("statistics", rec, prev, ident) if rec.get("statistics") else recover("statistics", rec, prev, ident)
+    if r is None or not present(r):
+        return out
+    out["statistics"] = r
+    if rec.get("checkpoint") and _checkpoint_problems(rec, ident):
+        rec.pop("checkpoint")
+        prev.pop("init", None)
+    r = relay_copy("init", rec, prev, ident) if rec.get("checkpoint") else recover("init", rec, prev, ident)
+    if r is not None and present(r):
+        out["init"] = r
+    return out
+
+
+def init_record(rec: dict, relay: dict, ident: dict) -> dict:
     """The provenance record a training plan binds (`initialization_provenance.read`: ``root_teacher``,
-    ``commit.selected_rows``), under which identity it was made and where every durable byte is."""
+    ``commit.selected_rows``), under which identity it was made (``ident``: written only once every product carries
+    it, `product_problems`) and where every durable byte is."""
     ck = rec["checkpoint"]
     return {"schema": SCHEMA, "status": "COMPLETE", "arm": ARM, "run_id": rec["run_id"], "root_teacher": rec["root"],
             "commit": {"selected_rows": [{"state_id": f"{ARM}/{ck['artifact_digest'][:32]}",
                                           "path": "SOB1's depth selection, alpha-merged (M-act) at its spans",
                                           "artifact_digest": ck["artifact_digest"],
                                           "single_shard_sha256": ck["shards"][0]["sha256"]}]},
-            "identity": rec["identity"], "checkpoint": ck, "base": DC.design()["baseline"]["init_record"],
+            "identity": ident, "checkpoint": ck, "base": DC.design()["baseline"]["init_record"],
             "method": rec["method"], "method_identity": rec["method_identity"], "statistics": rec["statistics"],
             "checks": rec["checks"], "candidate": rec["candidate"], "state_evaluation": rec.get("state_evaluation"),
             "diagnostics": rec.get("diagnostics"), "relay": relay, "attempts": rec.get("attempts", []),
-            "finished_utc": utc()}
+            "superseded": rec.get("superseded", []), "finished_utc": utc()}
 
 
 def product_problems(doc: dict | None, ident: dict | None = None) -> list[str]:
     """Why ``doc`` is not a durable init record of THIS build (empty when it is): COMPLETE for this arm, each relay
-    group verified with exactly the record's files, the weights the checkpoint's shard, made from the recorded
-    statistics, the equivalence checks within the design's tolerance and, given ``ident`` (`identity` of this
-    contract), made under it."""
+    group verified with exactly the record's files AND handed off, the weights the checkpoint's shard, made from the
+    recorded statistics, the equivalence checks within the design's tolerance and, given ``ident`` (`identity` of
+    this contract), each product, its relay record and the record itself under it."""
     if doc is None:
         return ["no init record"]
     if doc.get("status") != "COMPLETE" or doc.get("arm") != ARM:
         return [f"the init record is {doc.get('status')!r} for {doc.get('arm')!r}"]
     bad = []
+    relay = doc.get("relay") or {}
     for g, files in products(doc).items():
-        r = (doc.get("relay") or {}).get(g) or {}
+        r = relay.get(g) or {}
         if not files or r.get("verified") is not True or r.get("files_sha256") != files:
             bad.append(f"{g}: the relay copy is not exactly {sorted(files)} verified")
+        elif not handed_off(r):
+            bad.append(f"{g}: the relay copy is verified but not handed off (its record beside it, the listing "
+                       "naming it)")
     ck = doc["checkpoint"]
     if ck["files_sha256"].get("model.safetensors") != ck["shards"][0]["sha256"]:
         bad.append("the manifest's weights are not the checkpoint's shard")
@@ -614,8 +812,14 @@ def product_problems(doc: dict | None, ident: dict | None = None) -> list[str]:
     if not (eq.get("passed") is True and float(eq.get("worst", float("inf"))) <= tol):
         bad.append(f"the equivalence checks are not passed within the design's tolerance {tol}")
     if ident is not None:
-        bad += identity_problems(doc.get("identity"), ident, "statistics")
-        bad += identity_problems(doc.get("identity"), ident, "checkpoint")
+        bad += identity_problems((doc.get("statistics") or {}).get("identity"), ident, "statistics")
+        bad += identity_problems(ck.get("identity"), ident, "checkpoint")
+        whole = doc.get("identity") or {}
+        if (whole.get("statistics"), whole.get("checkpoint")) != (ident["statistics"], ident["checkpoint"]):
+            bad.append("the init record is not written under this identity")
+        for g in GROUPS:
+            if (relay.get(g) or {}).get("identity_sha256") != ident[WHAT[g]]:
+                bad.append(f"{g}: its relay copy is recorded under another identity")
     elif not doc.get("identity"):
         bad.append("the init record carries no identity")
     return bad

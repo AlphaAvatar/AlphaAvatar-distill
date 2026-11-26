@@ -711,6 +711,16 @@ def retain(kind: str, run_id: str, src_scr: Path, *, store: Path | None = None, 
     #: any training kind (SOB1's, or another study's binding this chain): its finals at the design's placement
     on_relay = kind != PHASE1_KIND and C.final_placement(arm) == "relay"
     for key, (rec, files) in (want.items() if on_relay else ()):
+        ent = doc["products"].get(key) or {}
+        if ent.get("relocated") and ent.get("kept_on") == "dev_box":
+            #: moved to the dev box after the design placed it on the relay (its retention record names the decision,
+            #: `relocate_relay_finals.py`): checked where it is now, every file re-hashed on the disk
+            here = {k: (SE.sha256_file(Path(ent["path"]) / k) if (Path(ent["path"]) / k).is_file() else None)
+                    for k in files}
+            ent.update(files_on_disk_sha256=here, verified=here == files)
+            if here != files:
+                missing[key] = "relocated to the dev box, and the local copy does not re-hash to the manifest"
+            continue
         paths = {f"{rec['prefix']}/{k}": v for k, v in files.items()}
         got = (lfs_sha or _lfs_sha)(list(paths))
         bad = sorted(q for q, v in paths.items() if q not in got or (q.endswith((".safetensors", ".pt")) and got[q] != v))
@@ -943,9 +953,12 @@ def rotate_relay(arm: str, run_id: str, scr: Path, local: dict, *, root: Path = 
                            "verified": bool(put.get("verified"))}
     if not row["evidence"]["verified"]:
         row["status"] = "EVIDENCE_NOT_DURABLE: no relay copy is retired"
-    elif C.final_placement(arm) == "relay":
+    elif C.final_placement(arm) == "relay" and not (row.get("finals") and all(
+            f.get("verified_absent") for f in row["finals"].values())):
         row["status"] = ("KEPT_ON_RELAY: this arm's finals are placed on the relay (design.json :: "
                          "storage.phase_2_finals.placement); its evidence archive is there too; nothing is retired")
+    elif C.final_placement(arm) == "relay":
+        pass                                #: relocated to the dev box since, its relay copies retired: as recorded
     else:
         for t in CP.train_targets(arm):
             unit = CP.parse_train_target(t)["unit"]

@@ -582,6 +582,23 @@ def step_operator_config(step: FixedPathStep, n_items: int) -> dict[str, Any]:
     return {"n_calibration_items": n_items, **declared}
 
 
+def require_declared_configs(spec: FixedPathSpec, indices: Sequence[int]) -> None:
+    """Every step that will run declares the config its implementation cannot run without
+    (`OperatorImplementation.required_config`), checked before the root is loaded. A spec is still CONSTRUCTED
+    without it -- deriving a historical step's config hash needs no execution -- but it is never executed without
+    it."""
+    from aadistill.initialization.operators.base import missing_config
+    bad = {}
+    for i in indices:
+        step = spec.steps[i]
+        miss = missing_config(get_implementation(step.impl_id), step.config)
+        if miss:
+            bad[f"step {i} ({step.impl_id})"] = miss
+    if bad:
+        raise FixedPathError(f"{spec.path_id}: steps that would run need a declared config their step does not give "
+                             f"them: {bad} (the core has no default)")
+
+
 def materialize_fixed_path(
     spec: FixedPathSpec,
     *,
@@ -622,6 +639,7 @@ def materialize_fixed_path(
     measured in hours (`depth.causal_kl_greedy_v1` checks it per candidate) had
     nothing to consult here.
     """
+    require_declared_configs(spec, range(len(spec.steps)))
     model = root_loader()
     # Before the first operator, and from the tensors rather than the
     # declaration. `root_loader` is the caller's, so this is the only step whose
@@ -1124,6 +1142,7 @@ def materialize_fixed_path_suffix(
     the record, so that a reader can check the premise without rerunning it.
     """
     premise = verify_suffix_premise(spec, verified)
+    require_declared_configs(spec, range(verified.start_index, len(spec.steps)))
 
     model = root_loader()
     placement = verify_root_placement(model, spec.device)

@@ -17404,3 +17404,45 @@ on a paid pod.
 - Risks: unchanged from 2026-11-25 (a development-exposed set, two seeds, the smallest effect at Holm's last step, the
   only copies of four finals on the dev box).
 - Revisit when: the maintainer has reviewed this closeout and decides the merge and the next round.
+
+## 2026-11-26 (UTC) — Forward baseline v3: the width stream weighting declared; SOB1's FFN + attention finals moved to the dev box (maintainer's third DMR1 brief)
+
+- Context: the maintainer's review of `d92f48f8` (brief dated 2026-11-27) found that the core no longer holds the
+  residual-width projection's 9 / 1 / 8 stream weighting, but the default entry for new work did not pass one: the
+  selected forward baseline (v2) declared none, `shared.forward_baseline.session_terms` carried none, the packed
+  search's `SearchConfig` received none, and `width.global_pca_v0.apply` refused only after its statistics pass. It
+  also authorized storage option a for DMR1 variant 1's chain, which was 8.28 GiB short on the relay.
+- Decision:
+  - **Forward baseline v3** (`configs/shared/baselines/initialization_forward_baseline_v3.json`, selected; v2
+    superseded and still sha256-bound for replays):
+    - v2's method unchanged (operators, signatures, positions, support, KL references, search, ranking, forward
+      context, execution), plus `method.operator_configs`: `width.global_pca_v0` gets the historical recipe
+      `endpoints_9_1_8_v0`, its source inline — the same values the core used to hold;
+    - the declaration enters the width operator's hashed config, so v3 width invocations have new config hashes;
+      the version changes with them (the brief: 「新配置身份需要版本变化时，建立新的版本化绑定；使用既有配方数值，不借此改变初始化方法」).
+  - **Who reads which version:**
+    - new searches built from `session_terms` pass its `operator_configs` as `SearchConfig.operator_configs`;
+    - the packed full search pins v2, because its journal and every session built on it are v2's (TPI1, SOB1,
+      DMR1's statistics session). Their identities and derived config hashes are unchanged;
+    - a v2 replay still derives its recorded width hash, but cannot apply width; no closed v2 search is re-run.
+  - **Refusal before compute:** an implementation's `required_config` (width and the composite: `stream_weighting`)
+    is refused when undeclared:
+    - by a search, when its root is known and before the first forward;
+    - by a fixed path, before its root is loaded;
+    - by the operator, before its statistics pass (a malformed declaration too).
+  - **Storage option a, executed:** SOB1 `ffn_attention`'s two fp32 finals (seeds 20260726 and 20260801) were
+    fetched to `~/aad-artifacts/stage1_single_operator_budget/`. Each file was re-hashed on the disk and read back,
+    and the retention record updated. Each relay copy was then tombstoned and removed, and confirmed absent
+    (`scripts/maintenance/consolidation/relocate_relay_finals.py`). SOB1's design keeps its historical placement;
+    its readers honour the recorded relocation.
+- Alternatives considered:
+  - keeping v2 selected and passing the recipe from each caller: rejected, because the default entry is the record,
+    and a term every new search needs belongs to the method;
+  - letting the packed search float to v3: rejected, because that would change the identity of a completed search
+    and of the sessions built on it;
+  - buying storage (option b): not chosen by the maintainer.
+- Risks:
+  - the 9 / 1 / 8 weighting was measured once, for the 0.6B geometry (2026-07-14), and not re-validated for the
+    hybrid teacher;
+  - the dev box now holds the only copies of all six SOB1 finals, on a disk shared with another project.
+- Revisit when: a new initialization search is designed (it reads v3), or the dev box's disk changes.

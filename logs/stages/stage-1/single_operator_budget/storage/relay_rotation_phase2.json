@@ -94,7 +94,32 @@
   },
   "ffn_attention": {
    "run_id": "sob1_train_ffn_attention_20261124_033254",
-   "finals": {},
+   "finals": {
+    "ffn_attention-s20260726": {
+     "tombstone": "relay_sob1_train_ffn_attention_20261124_033254_ffn_attention-s20260726_final",
+     "local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260726/final/589acf286481f495",
+     "verified_absent": true,
+     "freed_bytes": 8068311496,
+     "error": null,
+     "utc": "2026-11-26T18:17:42Z",
+     "relay_copy_present_before": true,
+     "relay_paths_present_after": 0,
+     "continued_pending_tombstone": false,
+     "decision": "maintainer brief 2026-11-27 (DMR1 repair round 3), item 5: 「本轮明确授权采用存储方案 a：将 SOB1 FFN + Attention 的两份最终权重迁移到开发机，逐文件核验并完成登记后，退役 relay 上对应的冗余副本。」"
+    },
+    "ffn_attention-s20260801": {
+     "tombstone": "relay_sob1_train_ffn_attention_20261124_033254_ffn_attention-s20260801_final",
+     "local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260801/final/64292e508e2d6d2e",
+     "verified_absent": true,
+     "freed_bytes": 8068311496,
+     "error": null,
+     "utc": "2026-11-26T18:18:21Z",
+     "relay_copy_present_before": true,
+     "relay_paths_present_after": 0,
+     "continued_pending_tombstone": false,
+     "decision": "maintainer brief 2026-11-27 (DMR1 repair round 3), item 5: 「本轮明确授权采用存储方案 a：将 SOB1 FFN + Attention 的两份最终权重迁移到开发机，逐文件核验并完成登记后，退役 relay 上对应的冗余副本。」"
+    }
+   },
    "evidence": {
     "archive": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_ffn_attention_20261124_033254/archive/sob1_train_ffn_attention_20261124_033254_evidence.tar.gz",
     "sha256": "b2dea49fdf5152cd84e811d75918c70791ad6eef693bea7ef38a9e2fd7c20efc",
@@ -113,8 +138,8 @@
     },
     "verified": true
    },
-   "status": "KEPT_ON_RELAY: this arm's finals are placed on the relay (design.json :: storage.phase_2_finals.placement); its evidence archive is there too; nothing is retired",
-   "checked_utc": "2026-11-25T13:47:06Z"
+   "status": "ROTATED: both relay copies retired after the finals moved to the dev box (maintainer 2026-11-27, storage option a)",
+   "checked_utc": "2026-11-26T18:18:21Z"
   }
  }
 }

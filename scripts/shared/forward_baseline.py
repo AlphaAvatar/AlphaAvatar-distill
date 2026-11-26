@@ -13,7 +13,10 @@ different places, and both keep working:
 * "what does NEW work run by default?" -- this module, resolved from
   `configs/shared/baselines/selection.json` (maintainer decision 2026-10-17:
   D1's method with `prediction_rows=scored_v1`; 2026-11-03: version 2, the
-  same method read in a packed causal forward context);
+  same method read in a packed causal forward context; 2026-11-26: version 3,
+  version 2 with the residual-width stream weighting the core no longer holds
+  declared in the record -- `session_terms()["operator_configs"]`, which every
+  search built from these terms passes as `SearchConfig.operator_configs`);
 * "what did a PAST experiment run?" -- `historical(version)`, the superseded
   record that experiment resolved, still sha256-bound. A replay pins its
   version; it never floats with the selection;
@@ -56,6 +59,13 @@ def historical(version: int, repo_root: str | Path = REPO_ROOT):
     return resolve_superseded(Path(repo_root) / SELECTION, ROLE, int(version))
 
 
+def version(n: int, repo_root: str | Path = REPO_ROOT):
+    """The record of version ``n``: the selected one when it is that version, else the superseded one. For a search
+    whose journal is pinned to a version (it never floats with the selection)."""
+    b = selected(repo_root)
+    return b if b.version == int(n) else historical(n, repo_root)
+
+
 def forward_context(baseline=None, *, sequence_length: int, shuffle_seed: int):
     """The baseline's forward context with an experiment's own instance values,
     or ``None`` for a record that reads one item per row."""
@@ -95,6 +105,11 @@ def session_terms(baseline=None) -> dict[str, Any]:
     registered protocol searches over, the state-evaluation suite, the seed and
     the run's identities -- and, under a forward-context policy, the sequence
     length and shuffle seed (`forward_context`).
+
+    ``operator_configs`` is what the method declares per implementation (None
+    when it declares nothing, as versions 1 and 2): a search passes it as
+    `SearchConfig.operator_configs`, and that is how a declared term (the width
+    projection's stream weighting) reaches its operator.
     """
     b = baseline or selected()
     return {
@@ -109,6 +124,8 @@ def session_terms(baseline=None) -> dict[str, Any]:
         "allowed_impls": tuple(sorted(b.implementation_ids().values())),
         "operator_kl_reference": {k: b.kl_reference_config(k)
                                   for k in b.operators},
+        "operator_configs": ({k: dict(v) for k, v in b.operator_configs.items()}
+                             or None),
         "baseline": b.as_record(),
     }
 

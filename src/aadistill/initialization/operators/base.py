@@ -266,6 +266,11 @@ class OperatorOutcome:
 # --- the implementation contract -------------------------------------------
 
 
+def missing_config(impl: "OperatorImplementation", declared: Mapping[str, Any] | None) -> list[str]:
+    """The keys of `impl.required_config` that `declared` (a run's operator config) does not supply."""
+    return sorted(k for k in getattr(impl, "required_config", frozenset()) if (declared or {}).get(k) is None)
+
+
 class OperatorImplementation(ABC):
     """One versioned algorithm for one operator kind."""
 
@@ -304,6 +309,12 @@ class OperatorImplementation(ABC):
     #: `OperatorContext.on_progress`. Not part of `signature()`: observing
     #: changes nothing that is computed.
     reports_progress: bool = False
+    #: The operator-config keys this implementation cannot run without: its run's declaration, never a core default
+    #: (a projection's stream weighting). Checked before anything expensive -- a search refuses an undeclared one for
+    #: an implementation that could act on its target before the first forward, a fixed path before it loads its
+    #: root -- and by the implementation itself before it collects statistics. Not part of `signature()`, for the
+    #: same reason as the flags above: what a run declared is bound in its hashed operator config.
+    required_config: frozenset[str] = frozenset()
     deterministic: bool = True
     requires_seed: bool = False
     produces: tuple[str, ...] = ()

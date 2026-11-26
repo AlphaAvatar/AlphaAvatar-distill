@@ -71,6 +71,8 @@ class WidthGlobalPCAV0(OperatorImplementation):
                            "num_attention_heads", "num_key_value_heads", "head_dim",
                            "vocab_size", "tie_word_embeddings"})
     calibration = CalibrationNeed.ACTIVATION_STATS
+    #: its stream weighting is the run's declaration (`apply`), never a core default
+    required_config = frozenset({"stream_weighting"})
     objective = "captured energy fraction of the residual second moment"
     #: Under an objective that declares `weights_activation_statistics`, the
     #: residual second moments are root-confidence weighted
@@ -107,6 +109,16 @@ class WidthGlobalPCAV0(OperatorImplementation):
         # derived from it and then multiplied against parent weights, so the
         # working copy is moved to the parent's ACTUAL device here — explicitly,
         # once, and freed when this call returns.
+        # The points and weights are the run's declaration (a fixed path's step
+        # config or the search's `operator_configs`), never a core default --
+        # checked and validated HERE, before the statistics pass it would
+        # otherwise follow.
+        weighting = (ctx.config or {}).get("stream_weighting")
+        if weighting is None:
+            raise OperatorError(f"{self.impl_id}: the run declares no stream_weighting (the points the projection "
+                                "reads and their weights); the core has none of its own")
+        points, weights = stream_weighting(weighting, n_layers)
+
         compute = model_device(parent)
         batch_size = ctx.execution.micro_batch_size
         packing = ctx.execution.calibration_batch_packing
@@ -120,13 +132,6 @@ class WidthGlobalPCAV0(OperatorImplementation):
             compute, batch_size=batch_size, packing=packing,
             active=active, forward_context=ctx.forward_context)), compute)
 
-        # The points and weights are the run's declaration (a fixed path's step
-        # config or the search's `operator_configs`), never a core default.
-        weighting = (ctx.config or {}).get("stream_weighting")
-        if weighting is None:
-            raise OperatorError(f"{self.impl_id}: the run declares no stream_weighting (the points the projection "
-                                "reads and their weights); the core has none of its own")
-        points, weights = stream_weighting(weighting, n_layers)
         proj, proj_diag = stream_projection(state, d_c, points, weights)
         proj_diag["point_weights"] = weights
         scale = (d_p / d_c) ** 0.5

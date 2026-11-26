@@ -1,4 +1,5 @@
-"""The forward baseline: version 1 is the method D1 ran; version 2, selected, is that method packed.
+"""The forward baseline: version 1 is the method D1 ran; version 2 is that method packed; version 3, selected, is
+version 2 with the residual-width stream weighting declared in the record.
 
 Maintainer decision 2026-10-17 adopted D1's initialization methodology with
 `prediction_rows=scored_v1` (version 1). These tests hold that record to the
@@ -10,8 +11,15 @@ hold the one distinction the decision insists on: q2 was produced under
 Maintainer decision 2026-11-03 selected version 2: the same method read in the
 packed causal forward context. Version 1 is superseded and still resolves
 through `historical(1)`, which is what the D1-method checks below read;
-`TestVersion2IsTheSameMethodPacked` holds the selected record to version 1's
-method and to the packing rules the core implements.
+`TestVersion2IsTheSameMethodPacked` holds version 2 to version 1's method and to
+the packing rules the core implements.
+
+Maintainer brief 2026-11-27 (item 4): the core no longer holds the width
+projection's stream weighting, so version 3 -- selected -- declares it (the same
+9 / 1 / 8 values), and every search built from `session_terms` passes it to the
+operator. `TestVersion3DeclaresTheWeightingAndNothingElseMoves` holds that; the
+packed search pins version 2 (its journal's), so its sessions keep their
+identities.
 """
 from __future__ import annotations
 
@@ -33,6 +41,16 @@ def baseline():
     from shared.forward_baseline import historical, register_operators
 
     b = historical(1, REPO)
+    register_operators(b)
+    return b
+
+
+@pytest.fixture(scope="module")
+def v2_baseline():
+    """Version 2, the packed method (superseded 2026-11-26, still resolvable; the packed search pins it)."""
+    from shared.forward_baseline import historical, register_operators
+
+    b = historical(2, REPO)
     register_operators(b)
     return b
 
@@ -167,7 +185,7 @@ class TestQ2IsTheHistoricalReferenceAndNotTheForwardArtifact:
 
         row = reg["scientific_artifacts"]["d1_finalist_q2"]
         assert row["retention"] == "canonical"
-        #: the registry derives from the SELECTED baseline (v2 since 2026-11-03), which names the same q2 artifact as
+        #: the registry derives from the SELECTED baseline (v3 since 2026-11-26), which names the same q2 artifact as
         #: this historical v1
         current = selected(REPO)
         assert row["forward_baseline"]["baseline"] == current.qualified_id
@@ -217,8 +235,8 @@ class TestProvenanceIsCheckable:
 
 
 class TestVersion2IsTheSameMethodPacked:
-    def test_the_method_is_version_1s(self, baseline, selected_baseline):
-        v1, v2 = baseline, selected_baseline
+    def test_the_method_is_version_1s(self, baseline, v2_baseline):
+        v1, v2 = baseline, v2_baseline
         assert v2.qualified_id.endswith("@v2") and v1.qualified_id.endswith("@v1")
         assert v2.operators == v1.operators
         assert v2.position_policy.policy_hash == v1.position_policy.policy_hash
@@ -228,8 +246,10 @@ class TestVersion2IsTheSameMethodPacked:
         assert v2.operator_kl_references == v1.operator_kl_references
         assert v2.state_evaluation_reference == v1.state_evaluation_reference
 
-    def test_it_declares_the_packed_context_the_core_implements(self, selected_baseline):
+    def test_it_declares_the_packed_context_the_core_implements(self, v2_baseline, selected_baseline):
         from aadistill.initialization.baseline import FORWARD_CONTEXT_RULES
+
+        assert dict(v2_baseline.forward_context_policy) == dict(FORWARD_CONTEXT_RULES)
 
         assert dict(selected_baseline.forward_context_policy) == dict(FORWARD_CONTEXT_RULES)
         assert selected_baseline.execution.micro_batch_size == 1
@@ -245,12 +265,54 @@ class TestVersion2IsTheSameMethodPacked:
         assert baseline.execution_fingerprint.startswith("e627f461")
         assert selected_baseline.execution_fingerprint != baseline.execution_fingerprint
 
-    def test_the_selection_binds_both_records(self):
+    def test_the_selection_binds_every_record(self):
         sel = json.loads((REPO / "configs/shared/baselines/selection.json").read_text())
         cur = sel["selections"]["initialization"]
-        (old,) = sel["superseded"]["initialization"]
-        for entry in (cur, old):
+        v1, v2 = sel["superseded"]["initialization"]
+        for entry in (cur, v1, v2):
             got = hashlib.sha256((REPO / "configs/shared/baselines" / entry["record"]).read_bytes()).hexdigest()
             assert got == entry["sha256"], entry["record"]
-        assert old["record"] == "initialization_forward_baseline_v1.json"
-        assert old["superseded_by"] == cur["record"]
+        assert v1["record"] == "initialization_forward_baseline_v1.json"
+        assert v1["superseded_by"] == v2["record"] == "initialization_forward_baseline_v2.json"
+        assert v2["superseded_by"] == cur["record"] == "initialization_forward_baseline_v3.json"
+
+
+class TestVersion3DeclaresTheWeightingAndNothingElseMoves:
+    def test_the_method_is_version_2s_with_the_width_weighting_declared(self, v2_baseline, selected_baseline):
+        from shared import stream_weighting as SW
+        v2, v3 = v2_baseline, selected_baseline
+        assert v3.qualified_id.endswith("@v3")
+        for k in ("operators", "operator_kl_references", "state_evaluation_reference", "distribution_support",
+                  "execution", "numerics", "forward_context_policy"):
+            assert getattr(v3, k) == getattr(v2, k), k
+        assert v3.position_policy.policy_hash == v2.position_policy.policy_hash
+        assert v3.schedule.schedule_hash == v2.schedule.schedule_hash
+        assert v3.ranking_policy.policy_hash == v2.ranking_policy.policy_hash
+        assert v3.execution_fingerprint == v2.execution_fingerprint
+        assert dict(v2.operator_configs) == {}
+        assert dict(v3.operator_configs) == {"width.global_pca_v0": {"stream_weighting": SW.recipe(SW.HISTORICAL)}}
+        assert v3.as_record()["operator_configs"] == dict(v3.operator_configs)
+        assert "operator_configs" not in v2.as_record()
+
+    def test_session_terms_hand_the_declaration_to_the_search(self, v2_baseline, selected_baseline):
+        from shared.forward_baseline import session_terms
+        assert session_terms(v2_baseline)["operator_configs"] is None
+        terms = session_terms(selected_baseline)
+        assert terms["operator_configs"] == {k: dict(v) for k, v in selected_baseline.operator_configs.items()}
+        assert set(terms["operator_configs"]) <= set(terms["allowed_impls"])
+
+    def test_the_packed_search_pins_v2_and_carries_whatever_its_version_declares(self, tmp_path):
+        """The packed search's session (TPI1's, SOB1's and DMR1's statistics session) stays v2's: its search config
+        declares nothing and its config hash is the v2 session's. Built at version 3, the same builder hands v3's
+        declaration to the search config -- the hashed config the width operator is applied with."""
+        from stages.teacher_modes import packed_full_search as PFS
+        s2 = PFS.build_session(workdir=tmp_path / "v2", device="cpu", repo_root=REPO)
+        assert PFS.BASELINE_VERSION == 2 and s2.config.operator_configs is None
+        assert "operator_configs" not in s2.config.as_dict()
+        s3 = PFS.build_session(workdir=tmp_path / "v3", device="cpu", repo_root=REPO, baseline_version=3)
+        decl = s3.config.operator_configs["width.global_pca_v0"]
+        assert decl["stream_weighting"]["endpoint_weights"] == {"first": 9.0, "interior": 1.0, "last": 8.0}
+        assert s3.config.config_hash != s2.config.config_hash
+        #: what `BeamSearch._expand_one` merges into the width operator's hashed config (`hashed_operator_config`'s
+        #: ``declared``; the core suite holds that merge)
+        assert s3.config.as_dict()["operator_configs"]["width.global_pca_v0"] == decl

@@ -153,7 +153,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
@@ -242,7 +242,7 @@
  },
  "forward_baseline": {
   "_derived_by": "render_log_navigation.py, via shared.forward_baseline",
-  "baseline": "stage1_init.d1_target_aware.scored_v1@v2",
+  "baseline": "stage1_init.d1_target_aware.scored_v1@v3",
   "owner": "configs/shared/baselines/selection.json",
   "execution": "micro_batch_size=1, original_order_v1, prediction_rows=scored_v1",
   "historical_reference": "d1_q2 afd50c9f/3a4b4ede under prediction_rows=all_v1",

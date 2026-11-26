@@ -184,6 +184,10 @@ class ForwardBaseline:
     record: Mapping[str, Any]
     #: The record's forward-context RULES, or `None` (one item per row).
     forward_context_policy: Mapping[str, Any] | None = None
+    #: impl_id -> the config the method declares for it (`method.operator_configs`), merged into that operator's
+    #: hashed config by the search that runs it (`SearchConfig.operator_configs`). Empty when the record declares
+    #: none, which keeps every earlier record's identity as it was.
+    operator_configs: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
 
     @property
     def qualified_id(self) -> str:
@@ -291,6 +295,8 @@ class ForwardBaseline:
             "distribution_support": self.distribution_support.as_dict(),
             **({} if self.forward_context_policy is None else
                {"forward_context_policy": dict(self.forward_context_policy)}),
+            **({"operator_configs": {k: dict(v) for k, v in sorted(self.operator_configs.items())}}
+               if self.operator_configs else {}),
         }
 
 
@@ -421,6 +427,8 @@ def parse_baseline(doc: Mapping[str, Any], *, record_sha256: str) -> ForwardBase
                 f"{execution.calibration_batch_packing!r}")
         context_policy = rules
 
+    op_configs = _operator_configs(method.get("operator_configs"), operators, where)
+
     references = tuple(_artifact(a, numerics, f"{where} reference artifact")
                        for a in doc.get("reference_artifacts") or ())
     forward = tuple(_artifact(a, numerics, f"{where} forward materialization")
@@ -439,7 +447,33 @@ def parse_baseline(doc: Mapping[str, Any], *, record_sha256: str) -> ForwardBase
         operators=operators, operator_kl_references=local,
         state_evaluation_reference=state_ref, reference_artifacts=references,
         forward_materializations=forward, record=doc,
-        forward_context_policy=context_policy)
+        forward_context_policy=context_policy, operator_configs=op_configs)
+
+
+def _operator_configs(raw: Any, operators: Mapping[str, Mapping[str, str]],
+                      where: str) -> dict[str, dict[str, Any]]:
+    """`method.operator_configs`: impl_id -> the config the method declares for one of ITS operators (absent: none).
+    An executor-owned key or a KL reference (declared in ``kl_reference``) is refused, as `hashed_operator_config`
+    refuses them; what a key means is the implementation's, which validates it before it computes."""
+    if raw is None:
+        return {}
+    from aadistill.initialization.planning.operator_config import EXECUTOR_DERIVED_CONFIG_KEYS
+    from aadistill.initialization.scoring.kl_reference import KL_REFERENCE_KEY
+    if not isinstance(raw, Mapping) or not raw:
+        raise BaselineError(f"{where}: operator_configs, when present, maps implementation ids to their configs")
+    named = {str(v["impl_id"]) for v in operators.values()}
+    out: dict[str, dict[str, Any]] = {}
+    for impl_id, cfg in raw.items():
+        if impl_id not in named:
+            raise BaselineError(f"{where} declares a config for {impl_id!r}, which it names no operator for")
+        if not isinstance(cfg, Mapping) or not cfg:
+            raise BaselineError(f"{where}: the config declared for {impl_id} is not a non-empty mapping")
+        bad = sorted((EXECUTOR_DERIVED_CONFIG_KEYS | {KL_REFERENCE_KEY}) & set(cfg))
+        if bad:
+            raise BaselineError(f"{where}: the config declared for {impl_id} names {bad}, which the executor "
+                                "derives or kl_reference declares")
+        out[str(impl_id)] = json.loads(json.dumps(cfg))
+    return out
 
 
 def load_baseline(path: str | Path, *,

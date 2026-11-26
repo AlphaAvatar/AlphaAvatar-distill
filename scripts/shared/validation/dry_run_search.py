@@ -57,6 +57,7 @@ from aadistill.initialization.planning.recovery import (
     probe_configs,
 )
 from shared.recipes import E1_KD_HEAVY_0860K
+from shared import stream_weighting as SW  # noqa: E402
 from shared.recovery_policy import plan_policy  # noqa: E402
 from aadistill.initialization.planning.search import (  # noqa: E402
     BeamSearch,
@@ -165,6 +166,9 @@ def main() -> None:
         run_id="autoinit_dryrun", target_spec=target_spec,
         schedule=schedule, seed=args.seed, workdir=out / "search",
         profiles=make_profiles(args.profiles), policy=PARETO_V1, suite=suite,
+        #: every registered operator is allowed here, so the two that read a stream weighting get the registered
+        #: recipe by name (the core has none of its own)
+        operator_configs=SW.operator_configs(SW.HISTORICAL),
         notes={"purpose": "zero-cost end-to-end validation of the mandatory cycle"})
 
     search = BeamSearch(

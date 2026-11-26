@@ -749,7 +749,7 @@
    }
   },
   "sizes": "the depth arm's: init 4,007,724,000 B (bf16, the base's file), save point 20,934,572,032 B, final 8,015,407,104 B (fp32) -- 16 blocks whatever the schedule",
-  "shortfall": "each training session's rotation peaks at 46.46 GiB on the relay, which read 35.24 GiB free (2026-11-26): the same 11.2 GiB as variant 1's, plus each finished variant's finals (14.93 GiB) wherever they are placed (REVIEW section 9)"
+  "shortfall": "each training session's rotation peaks at 46.46 GiB on the relay (+1 GiB margin). Live 2026-11-26 18:19Z: the relay accepts 58.13 GiB, after SOB1's FFN + attention finals moved to the dev box; variant 1's chain, if it runs first, leaves its init, two finals and archives there (18.97 GiB), so about 39.2 GiB would remain and variants 2 / 3 need their own room decision (REVIEW section 0.6)"
  },
  "authorizes": "nothing",
  "step0_diagnostic": {

@@ -4,7 +4,7 @@
  "status": "proposed",
  "kind": "dmr1_merge_train",
  "recorded_utc": "2026-11-26",
- "design_sha256": "5aa719fa41c87568cc5c345b24cb3dbf424217a582628091cd23198d87150ba4",
+ "design_sha256": "e9ec8fc6118f1cfcbfa533357b81012d302c9d6c1d2d9a5edf763c402acd36cd",
  "scope": "DMR1 variant 1, session kind dmr1_merge_train only",
  "ceiling_usd": 64.46,
  "per_session_hard_cap_usd": 64.46,

@@ -174,7 +174,8 @@ def build_session(*, workdir: Path, device: str = "cuda", suite_dir: Path = SUIT
         workdir=Path(workdir), profiles=profiles(), policy=terms["ranking_policy"], suite=suite,
         position_policy=terms["position_policy"], distribution_support=terms["distribution_support"],
         measurement_protocol_id=evaluator.measurement_protocol_id, allowed_impls=terms["allowed_impls"],
-        max_depth=None, impl_profiles=None, prune_weights=False, device=device)
+        max_depth=None, impl_profiles=None, operator_configs=terms["operator_configs"], prune_weights=False,
+        device=device)
     return Session(evaluator=evaluator, config=config,
                    execution=dataclasses.replace(execution, depth_prefix_reuse=True),
                    numerics=terms["numerics"], suite_manifest=manifest, baseline=terms["baseline"])

@@ -392,7 +392,7 @@ def freeze_record(suite_dir: Path = SUITE_V2, types_path: Path = TYPES_V2) -> di
     from stages.teacher_modes import packed_full_search as PFS
     ident = json.loads(TEACHER.read_text())
     suite, items, man = HSE.load(suite_dir, ident, types_path, critical_groups=CRITICAL_GROUPS_V2)
-    b = FB.selected(REPO)
+    b = PFS.baseline(REPO)                   #: the packed search's own version, never the floating selection
     terms = FB.session_terms(b)
     fc = PFS.forward_context(b)
     ev = StateEvaluator(suite, items, device="cpu", vocab_size=int(ident["architecture"]["vocab_size"]),

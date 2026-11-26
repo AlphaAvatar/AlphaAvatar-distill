@@ -58,7 +58,14 @@
  },
  "reading": [
   "executing the kept blocks on the schedule without training starts far from the teacher: CE 12.46 against the single-execution base's 3.46 on the same rows, above the uniform distribution's ln(151,936) = 11.93",
-  "the per-row relative error is 0 at logical layers 0-1 (the teacher's own blocks on the teacher's input), below 0.5 up to layer 8, and explodes inside block 7's six iterations (logical 12-17: 1.10 -> 83.2, the student state about 9x the teacher's norm) before decaying through the later blocks",
+  "the per-row relative error is 0 at logical layers 0-1 (the teacher's own blocks on the teacher's input), below 0.5 up to layer 8, and explodes inside block 7's six iterations (logical 12-17: 1.10 -> 83.2) before decaying through the later blocks",
   "the per-row relative error is NOT bounded above: at lambda_hidden 1.0 the hidden term (14.56) is about 1.2x KD (12.30) at step 0 on these rows, its mass in logical layers 14-28"
+ ],
+ "corrections": [
+  {
+   "utc": "2026-11-26",
+   "by": "the maintainer's review of d92f48f8 (brief 2026-11-27, item 6)",
+   "what": "removed 'the student state about 9x the teacher's norm' from the reading: a relative squared error of 83.2 does not by itself give the ratio of the two states' norms. Prose only; every measured value is as it was"
+  }
  ]
 }

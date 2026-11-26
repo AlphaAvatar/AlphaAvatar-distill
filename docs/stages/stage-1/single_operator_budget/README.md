@@ -511,6 +511,12 @@ sha256:
   <sha16>/`, four fp32 finals, 29.91 GiB). Each is re-hashed there, then its relay copy is tombstoned and removed.
 * **FFN + attention: on the relay** (`durable/stage1_single_operator_budget/ffn_attention/<unit>/final/<sha16>/`, two
   finals, 15.03 GiB, by LFS sha256). That leaves the relay 35.5 GiB free afterwards.
+* **Since 2026-11-26 all six are on the dev box.** The maintainer chose storage option a for DMR1 variant 1's chain
+  (decision log 2026-11-26): FFN + attention's two finals were fetched into the same layout, every file re-hashed and
+  read back, and registered. Their relay copies were then retired, tombstones
+  `relay_sob1_train_ffn_attention_20261124_033254_*_final` (`scripts/maintenance/consolidation/relocate_relay_finals.py`;
+  `storage/local_retention_phase2.json :: relocated`). The design keeps its historical placement; `launch.retain`
+  reads the relocation.
 
 | launch, in order | the dev box must have free at that launch (`disk.py --total`: the session's bound peak + earlier arms' expected bytes) | free now 55.39 GiB (after the cleanup: 16.12) | relay must accept / has |
 | --- | ---: | ---: | --- |

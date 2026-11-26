@@ -10,8 +10,10 @@ session runs SOB1's depth rotation from an empty state (`single_operator_budget.
 point uploaded while the previous one is still there, the final uploaded while the last save point is there, then
 the save points go; seed 1's final stays while seed 2 rotates); each session's closeout archive. The dev box's side
 is each session's evidence bound (`session.evidence_bound_gib`). `need_bytes` -- the chain's peak plus the design's
-margin -- is what the build session's launch gate asks the relay for (`session.relay_room`), so the init is never
-built for a training session that would not fit.
+margin -- is what a first build session's launch gate asks the relay for (`session.relay_room`), so the init is never
+built for a training session that would not fit. A build TAKEOVER asks for what the chain still adds (`remaining`:
+the chain less each product the attempt holds on the relay under this identity, at the chain's own count), against a
+live headroom that already excludes those products -- the same margin, never the whole chain twice.
 """
 from __future__ import annotations
 
@@ -31,6 +33,7 @@ from stages.depth_merge import common as DC  # noqa: E402
 
 GIB = 2 ** 30
 RECORD = DC.LOGS / "plans/storage_plan.json"
+GROUPS_HELD = ("statistics", "init")
 
 
 def sizes(root: Path = REPO) -> dict:
@@ -101,24 +104,77 @@ def live(repo: str | None = None) -> dict:
                     "the sum of list_lfs_files (the billing basis)"}
 
 
-def plan(live_state: dict, root: Path = REPO) -> dict:
+def counted(groups, root: Path = REPO) -> dict[str, int]:
+    """How the chain counts each build product it starts with (the init at its bf16 size, the statistics at their
+    bound): what a takeover that holds the group on the relay no longer adds."""
+    count = {"init": int(sizes(root)["init_bf16"]), "statistics": int(DC.design()["storage"]["statistics_bytes_bound"])}
+    return {g: count[g] for g in groups}
+
+
+def remaining(held: dict, root: Path = REPO) -> dict:
+    """What the chain still adds when a build takeover holds ``held`` (group -> its relay record, `build_driver.held`):
+    every step of the chain includes the build's products, so each held group's count comes off every step -- the
+    peak with them -- and the margin stays. The live headroom it is asked of already excludes the held bytes."""
+    seq = sequence(root)["relay"]
+    credit = counted(held, root)
+    peak = seq["peak_bytes"] - sum(credit.values())
+    return {"held": sorted(held), "credit_bytes": credit,
+            "held_actual_bytes": {g: int(sum((r.get("bytes") or {}).values())) for g, r in held.items()},
+            "remaining_peak_bytes": peak, "remaining_peak_gib": round(peak / GIB, 2), "peak_at": seq["peak_at"],
+            "margin_bytes": seq["margin_bytes"], "need_bytes": peak + seq["margin_bytes"],
+            "need_gib": round((peak + seq["margin_bytes"]) / GIB, 2), "first_run_need_bytes": seq["need_bytes"]}
+
+
+def dev_box_live() -> dict:
+    """The dev box's filesystem under the sessions' store (one filesystem holds the store, every --scr and the
+    retained weights): its live free bytes, and what is left after the largest session evidence bound."""
+    import shutil
+    from stages.depth_merge import session as S
+    store = DC.local_store(next(iter(DC.ARMS)))
+    probe = next((q for q in (store, *store.parents) if q.exists()), Path("/"))
+    free = shutil.disk_usage(probe).free
+    peak = max(S.evidence_bound_gib(k, S_variant()) for k in S_variant().kinds) * GIB
+    return {"path": str(probe), "free_bytes": free, "free_gib": round(free / GIB, 2),
+            "peak_evidence_gib": round(peak / GIB, 2), "margin_after_peak_gib": round((free - peak) / GIB, 2),
+            "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "note": "the filesystem is shared with another project; its use moves without this project"}
+
+
+def plan(live_state: dict, root: Path = REPO, dev_box: dict | None = None) -> dict:
     seq = sequence(root)
     short = seq["relay"]["need_bytes"] - int(live_state["headroom_bytes"])
-    return {"schema": "aadistill.dmr1.storage_plan/v1", "variant": "DMR1-M", "live": live_state, **seq,
+    takeover = {}
+    for label, groups in (("statistics_on_the_relay", ("statistics",)), ("both_products_on_the_relay", GROUPS_HELD)):
+        r = remaining({g: {} for g in groups}, root)
+        #: the headroom such a takeover finds: what it has now, less the held products' count (they went in since)
+        found = int(live_state["headroom_bytes"]) - sum(r["credit_bytes"].values())
+        takeover[label] = {"need_bytes": r["need_bytes"], "need_gib": r["need_gib"], "credit_bytes": r["credit_bytes"],
+                           "headroom_then_gib": round(found / GIB, 2),
+                           "shortfall_gib": round(max(r["need_bytes"] - found, 0) / GIB, 2)}
+    return {"schema": "aadistill.dmr1.storage_plan/v1", "variant": "DMR1-M", "live": live_state,
+            "dev_box_live": dev_box, **seq,
             "relay_shortfall_bytes": max(short, 0), "relay_shortfall_gib": round(max(short, 0) / GIB, 2),
-            "fits": short <= 0}
+            "fits": short <= 0, "relay_margin_after_first_run_need_gib": round(-short / GIB, 2),
+            "takeover": takeover,
+            "takeover_rule": "a build takeover asks only for what the chain still adds (session.build_need: the "
+                             "chain less each product it holds on the relay under this identity, its files present, "
+                             "at the chain's own count); its headroom is then the live headroom less those products, "
+                             "so the margin is the same as the first run's"}
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--write", action="store_true")
     a = ap.parse_args(argv)
-    doc = plan(live())
+    doc = plan(live(), dev_box=dev_box_live())
     if a.write:
         RECORD.parent.mkdir(parents=True, exist_ok=True)
         RECORD.write_text(json.dumps(doc, indent=1) + "\n")
-    print(json.dumps({k: doc[k] for k in ("fits", "relay_shortfall_gib")} | {"peak": doc["relay"]["peak_gib"],
-                      "need": doc["relay"]["need_gib"], "headroom": doc["live"]["headroom_gib"]}))
+    print(json.dumps({k: doc[k] for k in ("fits", "relay_shortfall_gib", "relay_margin_after_first_run_need_gib")}
+                     | {"peak": doc["relay"]["peak_gib"], "need": doc["relay"]["need_gib"],
+                        "headroom": doc["live"]["headroom_gib"],
+                        "takeover": {k: (v["need_gib"], v["headroom_then_gib"]) for k, v in doc["takeover"].items()},
+                        "dev_box": {k: doc["dev_box_live"][k] for k in ("free_gib", "margin_after_peak_gib")}}))
     return 0
 
 

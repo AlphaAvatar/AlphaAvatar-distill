@@ -9,7 +9,8 @@
     PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.teacher_modes.packed_full_search --check-only \\
         --durable-root <scratch> --status <scratch>/status --deadline-minutes 1 [--inputs v1_dry_run]
 
-The method is the forward baseline's version 2 (`shared.forward_baseline.selected()`), read and never retyped: D1's
+The method is the forward baseline's version 2 (`baseline()`: pinned, never floating with the selection -- its journal and
+every session built on it, TPI1's, SOB1's and DMR1's statistics session, are v2's), read and never retyped: D1's
 four operators, beam.delayed_prune@v1 (width 6, warmup 1), Pareto v2, supervised_target_v1 positions, Top-200 + tail,
 scored_v1 rows, DEPTH against the intact parent, state evaluation against the root -- now read in the packed causal
 forward context (random shuffle -> sequential packing -> truncation -> standard causal attention). What this
@@ -26,6 +27,11 @@ experiment supplies (`packed_round_design.json`):
 
 ``--inputs v1_dry_run`` builds the same session over v1's profiles and suite: a structural check, never a search input.
 A formal search reads only the design's ``formal_inputs``.
+
+The search's operator configs are the baseline's (`session_terms`'s ``operator_configs`` -> ``SearchConfig``): version 2
+declares none, so its sessions keep their identities and a width or composite expansion is refused before the first
+forward (the core has no stream weighting); a session built at ``baseline_version=3`` carries v3's declaration to the
+operator.
 
 The first state evaluation is the device admission, as in v2 (`full_search.FirstEvaluationCheck`): both modes'
 critical groups present and the frozen epsilon rule measured on the device. A deadline stops the search with its
@@ -63,8 +69,17 @@ RELAY_PREFIX = "durable/packed_full_search"
 POD_TOKEN = Path("/workspace/hf/token")
 
 
+#: the forward baseline version this search's journal was made under (packed_round_design.json :: method)
+BASELINE_VERSION = 2
+
+
 class PackedSearchError(RuntimeError):
     pass
+
+
+def baseline(repo_root: Path = REPO, version: int = BASELINE_VERSION):
+    from shared import forward_baseline as FB
+    return FB.version(version, repo_root)
 
 
 def design() -> dict:
@@ -94,7 +109,8 @@ def forward_context(baseline, d: dict | None = None):
     return ctx
 
 
-def build_session(*, workdir: Path, device: str = "cuda", which: str | None = None, repo_root: Path = REPO):
+def build_session(*, workdir: Path, device: str = "cuda", which: str | None = None, repo_root: Path = REPO,
+                  baseline_version: int = BASELINE_VERSION):
     from aadistill.initialization.planning.metrics import StateEvaluator
     from aadistill.initialization.planning.search import SearchConfig
     from aadistill.initialization.specs.metrics import ReferenceStrategy
@@ -108,7 +124,7 @@ def build_session(*, workdir: Path, device: str = "cuda", which: str | None = No
     if src.get("status") != "READY":
         raise PackedSearchError(f"input set {which!r} is {src.get('status')!r}: {src.get('why', '')}")
     ident = json.loads(FS.TEACHER.read_text())
-    baseline = FB.selected(repo_root)
+    baseline = FB.version(baseline_version, repo_root)
     D1S._register_frozen_operators()
     FB.register_operators(baseline)
     terms = FB.session_terms(baseline)
@@ -131,7 +147,7 @@ def build_session(*, workdir: Path, device: str = "cuda", which: str | None = No
         policy=terms["ranking_policy"], suite=suite, position_policy=terms["position_policy"],
         distribution_support=terms["distribution_support"], measurement_protocol_id=evaluator.measurement_protocol_id,
         forward_context=fc, allowed_impls=terms["allowed_impls"], max_depth=None, impl_profiles=None,
-        prune_weights=False, device=device)
+        operator_configs=terms["operator_configs"], prune_weights=False, device=device)
     return FS.Session(evaluator=evaluator, config=config,
                       execution=dataclasses.replace(execution, depth_prefix_reuse=True),
                       numerics=terms["numerics"], suite_manifest=manifest, baseline=terms["baseline"])

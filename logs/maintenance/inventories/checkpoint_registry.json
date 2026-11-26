@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-11-25T18:57:02+00:00",
+  "created_utc": "2026-11-26T18:24:41+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -109,12 +109,12 @@
         "phase_d1 screening and confirmation: COMPLETE (D-series closed 2026-10-17)"
       ],
       "open_consumers": [
-        "forward baseline stage1_init.d1_target_aware.scored_v1@v2: its historical reference initialization"
+        "forward baseline stage1_init.d1_target_aware.scored_v1@v3: its historical reference initialization"
       ],
       "forward_baseline": {
-        "baseline": "stage1_init.d1_target_aware.scored_v1@v2",
+        "baseline": "stage1_init.d1_target_aware.scored_v1@v3",
         "selection": "configs/shared/baselines/selection.json",
-        "record_sha256": "737aabdec7d6d409f93bf3b0814a0273e4158e558c5a95e5019e7193986386a3",
+        "record_sha256": "e1c0c599c3fa690a5ce05ca074c6c1e7fa11b45a02a0abb82e8d5c4474fb684d",
         "materialized_under": {
           "micro_batch_size": 3,
           "calibration_batch_packing": "length_sorted_v1",
@@ -1401,16 +1401,16 @@
     }
   },
   "local": {
-    "n_units": 87,
-    "n_weight_files": 68,
-    "total_bytes": 58562358042,
-    "total_human": "54.540 GiB",
-    "artifacts_tree_bytes": 18986686885,
-    "external_store_tree_bytes": 62889079374,
+    "n_units": 89,
+    "n_weight_files": 70,
+    "total_bytes": 74698990893,
+    "total_human": "69.569 GiB",
+    "artifacts_tree_bytes": 18986686584,
+    "external_store_tree_bytes": 79025712225,
     "by_store": {
       "external_store": {
-        "units": 45,
-        "bytes": 54849212006
+        "units": 47,
+        "bytes": 70985844857
       },
       "repo_artifacts": {
         "units": 42,
@@ -1418,12 +1418,12 @@
       }
     },
     "proposed_disposition": {
-      "keep": 26,
+      "keep": 28,
       "retire": 2,
       "review": 59
     },
     "proposed_disposition_bytes": {
-      "keep": 56725188587,
+      "keep": 72861821438,
       "retire": 67747076,
       "review": 1769422379
     }
@@ -1431,17 +1431,17 @@
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-11-25T18:53:06+00:00",
-    "n_files": 1719,
-    "total_bytes": 57025725516,
+    "queried_utc": "2026-11-26T18:19:17+00:00",
+    "n_files": 1330,
+    "total_bytes": 32470812147,
     "by_prefix": {
       "durable": {
-        "files": 59,
-        "bytes": 28801623213
+        "files": 49,
+        "bytes": 12664988262
       },
       "transfer": {
-        "files": 717,
-        "bytes": 17610381255
+        "files": 338,
+        "bytes": 9192102837
       },
       "permanent_controls": {
         "files": 18,
@@ -1794,56 +1794,6 @@
       {
         "path": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/mapping/mapping.json",
         "size_bytes": 2051,
-        "sha256": null
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/config.json",
-        "size_bytes": 1593,
-        "sha256": null
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/generation_config.json",
-        "size_bytes": 143,
-        "sha256": null
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/model.safetensors",
-        "size_bytes": 8068311496,
-        "sha256": "589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b"
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/record.json",
-        "size_bytes": 1049,
-        "sha256": null
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/run_completion.json",
-        "size_bytes": 3194,
-        "sha256": null
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/config.json",
-        "size_bytes": 1593,
-        "sha256": null
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/generation_config.json",
-        "size_bytes": 143,
-        "sha256": null
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/model.safetensors",
-        "size_bytes": 8068311496,
-        "sha256": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e"
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/record.json",
-        "size_bytes": 1051,
-        "sha256": null
-      },
-      {
-        "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/run_completion.json",
-        "size_bytes": 3193,
         "sha256": null
       },
       {
@@ -5857,769 +5807,9 @@
         "sha256": null
       },
       {
-        "path": "transfer/aad_autoinit_000d8ebc.bundle",
-        "size_bytes": 12485286,
-        "sha256": "43fe4d1ff0926014d7c8ac5140281bfffd9dc8077d72e6e83f56ee49ba875581"
-      },
-      {
-        "path": "transfer/aad_autoinit_001f069f.bundle",
-        "size_bytes": 3888570,
-        "sha256": "25d2ad0567496ae2fe49ec18ca53a0cbeb3667b46b36d767e802d6af8ddbc322"
-      },
-      {
-        "path": "transfer/aad_autoinit_0033cb10.bundle",
-        "size_bytes": 18194225,
-        "sha256": "092a6cf916d53ee8765e915bf6701dd66e06af64734189d8a03ba7fc191232b2"
-      },
-      {
-        "path": "transfer/aad_autoinit_008a0bbb.bundle",
-        "size_bytes": 55214023,
-        "sha256": "c96896b95a79c33e49b8a98d0a5bd650203912c08c8b9baafd6414f80fb1d12e"
-      },
-      {
-        "path": "transfer/aad_autoinit_0231bd2e.bundle",
-        "size_bytes": 18305662,
-        "sha256": "9699c39c7ffb7d60d1e497b48a851370816d210360d98a7a8934b28cc60d4f2d"
-      },
-      {
-        "path": "transfer/aad_autoinit_0270782f.bundle",
-        "size_bytes": 13053293,
-        "sha256": "16bf79291db66540c341c4ccfcad3a5221d31c6d27078dda29c7c6c4422ab4e9"
-      },
-      {
-        "path": "transfer/aad_autoinit_0286080c.bundle",
-        "size_bytes": 18668504,
-        "sha256": "1ddeac89ecacc16a3bc0178bb93cf21379b2a48c7d385d256af9ec7249d3904a"
-      },
-      {
-        "path": "transfer/aad_autoinit_03254ae3.bundle",
-        "size_bytes": 57694085,
-        "sha256": "0573588a410c7cf754016191538fe5f6556c7f12bf4bfe763fe48d357916991f"
-      },
-      {
-        "path": "transfer/aad_autoinit_041b4587.bundle",
-        "size_bytes": 17899327,
-        "sha256": "d687911fa67f3d8929d2e377103d0739586b343f9514201028fe9e9a67d758ab"
-      },
-      {
-        "path": "transfer/aad_autoinit_04e24183.bundle",
-        "size_bytes": 9468826,
-        "sha256": "a367a9bc4630741887deb685015a1baab2172f68b5cbf3ff657fb870eccf89c6"
-      },
-      {
-        "path": "transfer/aad_autoinit_05157d29.bundle",
-        "size_bytes": 4065416,
-        "sha256": "778eb05568c67d51e0a9029bc03f2319013795135453730e56c6458ba88cbe9c"
-      },
-      {
-        "path": "transfer/aad_autoinit_053d5f6a.bundle",
-        "size_bytes": 34662338,
-        "sha256": "b996d28badd477e4c7776ec2136d1ada65f50c9ad496565665d27037f177dd00"
-      },
-      {
-        "path": "transfer/aad_autoinit_055627a1.bundle",
-        "size_bytes": 22911099,
-        "sha256": "f9d0a99162e4ccc0653f8c4bf70436e049b3ab62d5964fab1568885a3c6f9406"
-      },
-      {
-        "path": "transfer/aad_autoinit_05b97567.bundle",
-        "size_bytes": 51977017,
-        "sha256": "bdfe5d4f612b47d0c92d4cf5f71df69250aaaee963fbeb97eb34da2c3053e8c8"
-      },
-      {
-        "path": "transfer/aad_autoinit_082ddc7e.bundle",
-        "size_bytes": 23337940,
-        "sha256": "f9a9e69bc1a763347ac519f9973f692e588628ce33aa0cce1601059de422bb5f"
-      },
-      {
-        "path": "transfer/aad_autoinit_08670e5e.bundle",
-        "size_bytes": 6047776,
-        "sha256": "6e2ac713eebf33d5712d4cc347a8326d088071419252d22f9aa2854ddddf012e"
-      },
-      {
-        "path": "transfer/aad_autoinit_098b3289.bundle",
-        "size_bytes": 34644149,
-        "sha256": "79e3f9301edaad00b93239b08bf97920d49176396a495222e158e345b1afcd4e"
-      },
-      {
-        "path": "transfer/aad_autoinit_0a698242.bundle",
-        "size_bytes": 30166280,
-        "sha256": "2f8247b9378689eb19f9be70b3c59072855dea38a994a9a8d3e48a35baa04583"
-      },
-      {
-        "path": "transfer/aad_autoinit_0ab1e84f.bundle",
-        "size_bytes": 15230736,
-        "sha256": "18a5b8aa7d338c9233a5e66e4e49860fa5b13a7b5aa4890ed80394db5f2dc82a"
-      },
-      {
-        "path": "transfer/aad_autoinit_0bf4c419.bundle",
-        "size_bytes": 3710226,
-        "sha256": "486e4bd9d2518f7d624332d64421edb1186485fa3a1c122eaafb8fd36e8f8704"
-      },
-      {
-        "path": "transfer/aad_autoinit_0c7cb42a.bundle",
-        "size_bytes": 5467247,
-        "sha256": "b52d271679bebd8f304c3160f7c9c4c0ab913c1014bde3aa9ecc9b8134124e79"
-      },
-      {
-        "path": "transfer/aad_autoinit_0d5b6026.bundle",
-        "size_bytes": 7833487,
-        "sha256": "4a8b5deeec4dad081459366645dcc5cbae3a58e9391fd50feaadc64982777891"
-      },
-      {
-        "path": "transfer/aad_autoinit_0d6976a9.bundle",
-        "size_bytes": 18527145,
-        "sha256": "07bd129532124cdccf3153b3347f2a80c8227f48983dfcebd3149e6fedae0d6f"
-      },
-      {
-        "path": "transfer/aad_autoinit_0f6f68a0.bundle",
-        "size_bytes": 17755594,
-        "sha256": "10fa7e4d2288136f11105b0f478065075a0c16a3d6afa961b14452b3e006416f"
-      },
-      {
-        "path": "transfer/aad_autoinit_0facf513.bundle",
-        "size_bytes": 38461491,
-        "sha256": "e3c63a4e87f699c0fe2115c9ced9808892deebf6c2a159cff3e2e31b21d3b560"
-      },
-      {
-        "path": "transfer/aad_autoinit_1013f46f.bundle",
-        "size_bytes": 15359694,
-        "sha256": "c81e1fdb014619b20b54c818b2771370cd21005ccde60d17b5e7e2494899ab6b"
-      },
-      {
-        "path": "transfer/aad_autoinit_11471236.bundle",
-        "size_bytes": 55401805,
-        "sha256": "0dedc4f1b108af40708f06f7ad5e1e650555cb062d66ac7ffb74e9db28ba84e9"
-      },
-      {
-        "path": "transfer/aad_autoinit_12989d68.bundle",
-        "size_bytes": 23012853,
-        "sha256": "56372de7cd574755925fe4f5904957ac575aa465cccc54f4d728f28433d329c1"
-      },
-      {
-        "path": "transfer/aad_autoinit_1301a297.bundle",
-        "size_bytes": 28965623,
-        "sha256": "283ba882925d0b7e8ad0797da0bdb39ce621610ad2c83f71c7a9992a03783b70"
-      },
-      {
-        "path": "transfer/aad_autoinit_13c3a69b.bundle",
-        "size_bytes": 3958210,
-        "sha256": "fb1ee41158897944b18e80feeef323c65bd2eb65fd506219dd79db23652ff3b4"
-      },
-      {
-        "path": "transfer/aad_autoinit_13d68a40.bundle",
-        "size_bytes": 6487102,
-        "sha256": "d8df31f52d5ebd8feb8fe80a9463d503ee68748251cc997528c9563fef80922f"
-      },
-      {
-        "path": "transfer/aad_autoinit_149432a9.bundle",
-        "size_bytes": 34832940,
-        "sha256": "f78d8e223f9fbf7e3b3d8876ec5aa501c0c576c75cdc9f1bbbfbf4a43e41fc6b"
-      },
-      {
-        "path": "transfer/aad_autoinit_15e3ccf0.bundle",
-        "size_bytes": 18457667,
-        "sha256": "b316d46dcec051cde293463b2f3d202dd376add2e0d5f8c55d1d289ab94f61d1"
-      },
-      {
-        "path": "transfer/aad_autoinit_15e93042.bundle",
-        "size_bytes": 14127051,
-        "sha256": "b3635cc84d024fc50b6421cd80cf7b03eb464180b59df2b20f8b312738729850"
-      },
-      {
-        "path": "transfer/aad_autoinit_1682081a.bundle",
-        "size_bytes": 12434888,
-        "sha256": "57b5bd4a541a6c74ee07742988d65a1466e22adcdb28454b500c9fc7da032691"
-      },
-      {
-        "path": "transfer/aad_autoinit_1725ee48.bundle",
-        "size_bytes": 54424728,
-        "sha256": "7cfcc8e23ffdf191ec6e8765dd1b4036e1753ce9c0bc83d3ee9aab13536eecf5"
-      },
-      {
-        "path": "transfer/aad_autoinit_1742b0c1.bundle",
-        "size_bytes": 22847657,
-        "sha256": "466ed08b9389d334dd983d631ee714ef10063e7045b25fbb817010a8ed901fd3"
-      },
-      {
-        "path": "transfer/aad_autoinit_1a26a4d8.bundle",
-        "size_bytes": 18570903,
-        "sha256": "ae9229398bea29f5d759530b792aae6cb3dc4c63259050ce42757d4be94c1a6c"
-      },
-      {
-        "path": "transfer/aad_autoinit_1a8c3d40.bundle",
-        "size_bytes": 28798561,
-        "sha256": "25b40ddb25bfe06a42b57edefcf8b637aed3285dbe44fed3bad3c669baa1c958"
-      },
-      {
-        "path": "transfer/aad_autoinit_1aa0e4f8.bundle",
-        "size_bytes": 13038419,
-        "sha256": "4e3b418e3a2857b918bbefa0551485a99f52b372fd4ab3340a1a6bfd0e70f7f5"
-      },
-      {
-        "path": "transfer/aad_autoinit_1b368f1e.bundle",
-        "size_bytes": 56906394,
-        "sha256": "8ea68f953384e3301cd820a9f3188938aec07c2a11d74db37a74c58fd8a1f8b3"
-      },
-      {
-        "path": "transfer/aad_autoinit_1c02b493.bundle",
-        "size_bytes": 18616413,
-        "sha256": "92ec7de4a4f976a15150e72890d7a4365288ed1dfcb54223021067a0bcc52c86"
-      },
-      {
-        "path": "transfer/aad_autoinit_1d6af533.bundle",
-        "size_bytes": 23052870,
-        "sha256": "e9ae762a2d41d320f6afc37792fe3a7f117c570c73dbde3215d4f1578b661d29"
-      },
-      {
-        "path": "transfer/aad_autoinit_1dd2f886.bundle",
-        "size_bytes": 17920125,
-        "sha256": "0e562e1a9f031b8d705d798320a5efae0260a5260cf76d3af372da52a897ee9f"
-      },
-      {
-        "path": "transfer/aad_autoinit_1df402be.bundle",
-        "size_bytes": 14088630,
-        "sha256": "56ab6e8b9db7b5c8cf05879fe7ecf640d6f8fd9aa0ca4e9e25e42254bd2dad1c"
-      },
-      {
-        "path": "transfer/aad_autoinit_1e7f347b.bundle",
-        "size_bytes": 3895366,
-        "sha256": "4bd3426487d25cb165c379803976132082cce932bdb143eeef439e8f1e7f55db"
-      },
-      {
-        "path": "transfer/aad_autoinit_1e9eba37.bundle",
-        "size_bytes": 22833783,
-        "sha256": "4653939455bccf7c130a7197e3ead022e27210c2d76bd9e848a1480d61b4a6b0"
-      },
-      {
-        "path": "transfer/aad_autoinit_20cb45f5.bundle",
-        "size_bytes": 17896726,
-        "sha256": "ef27bcde73bea7a701336a1efd0ab44ada25d13a4e2f82c8ce65deab16bfb75c"
-      },
-      {
-        "path": "transfer/aad_autoinit_218c51c7.bundle",
-        "size_bytes": 6431555,
-        "sha256": "ba8d2eb6d7c1a0c1e891dc4bc013863ffc084f9b59e6fd4d7728132dadf5116a"
-      },
-      {
-        "path": "transfer/aad_autoinit_2421f630.bundle",
-        "size_bytes": 13788879,
-        "sha256": "3cbfe5ea6476f9879ab5f78e7b03c2ecba3ffff4cb16c1f5362114bf94daf534"
-      },
-      {
-        "path": "transfer/aad_autoinit_242d2475.bundle",
-        "size_bytes": 55490530,
-        "sha256": "db0c99660172c845ea0930cee3071134db5c173f15e6b01bf8fa7e83e15660bd"
-      },
-      {
-        "path": "transfer/aad_autoinit_2547b42f.bundle",
-        "size_bytes": 18683222,
-        "sha256": "4deb7b32069c72246beeb9d7b7754cf7602d07038ab8b82e2f0c05241e8fd972"
-      },
-      {
-        "path": "transfer/aad_autoinit_255e7c08.bundle",
-        "size_bytes": 55418481,
-        "sha256": "2ef10acf4f9bb332808b709a421e09518e0262f3070f52344793c886130450d1"
-      },
-      {
-        "path": "transfer/aad_autoinit_26fd4cc9.bundle",
-        "size_bytes": 7449366,
-        "sha256": "473396ae3f6846f7302ced4dbab3c06b3e783c303f08b4e1fa0b493ac8b1aa01"
-      },
-      {
-        "path": "transfer/aad_autoinit_2711d0c7.bundle",
-        "size_bytes": 18577046,
-        "sha256": "daab244cb694b1c8d0a396500c19ad70fca533a07ae31f79c67b17746f5dfc79"
-      },
-      {
-        "path": "transfer/aad_autoinit_275f16e5.bundle",
-        "size_bytes": 22921416,
-        "sha256": "d38a8e953238e026d7df4765ebbaa4a7febb8b829eb39df27ab9dd99714c5894"
-      },
-      {
-        "path": "transfer/aad_autoinit_27747849.bundle",
-        "size_bytes": 13197728,
-        "sha256": "f07ba0718f5178425e8b4f78ad40f29328bf0abd460cdd5018ecd57d08895191"
-      },
-      {
-        "path": "transfer/aad_autoinit_27a366e8.bundle",
-        "size_bytes": 6647097,
-        "sha256": "e7b2a4237c15d596ba4fded4daa5de1fb3865be42de0ee72ce64ca9fe804c92b"
-      },
-      {
-        "path": "transfer/aad_autoinit_289c213c.bundle",
-        "size_bytes": 4443770,
-        "sha256": "1f1d16238a53addf4df5bd98398927d0604485745677fc6d7b9149fe891eb434"
-      },
-      {
-        "path": "transfer/aad_autoinit_293f5ed6.bundle",
-        "size_bytes": 17919514,
-        "sha256": "fb2d61b8b23e69d863d644ea31c1d4f612fc5d3f0b987e7f9dafcaf910689b81"
-      },
-      {
-        "path": "transfer/aad_autoinit_29d8c531.bundle",
-        "size_bytes": 14813512,
-        "sha256": "d63421a646914e224804d0402c6455ce9795b991a758ee3527fe5e26590a6342"
-      },
-      {
-        "path": "transfer/aad_autoinit_2b2c2cc4.bundle",
-        "size_bytes": 18598214,
-        "sha256": "3cb8fb2eb16b898a0106280a97236da9480d269aa1444af50ec516a6f7daa4a0"
-      },
-      {
-        "path": "transfer/aad_autoinit_2d8a9ac5.bundle",
-        "size_bytes": 30341494,
-        "sha256": "2eca4d565fb5e57c182a9da1e11d26eaf7087b6ae29db4fdd8cb0e8ea8d0afa5"
-      },
-      {
-        "path": "transfer/aad_autoinit_2e08a86a.bundle",
-        "size_bytes": 14115994,
-        "sha256": "c2c3102665af3d829683c35fed0057e93b30e80bb774064c9da9d8a59c0ee7a2"
-      },
-      {
-        "path": "transfer/aad_autoinit_2e477bfb.bundle",
-        "size_bytes": 13723619,
-        "sha256": "87b391b843cbc6da2f9cb1b25b1ca49d658eb4c2d894893a5cff2fbcbcd8e95c"
-      },
-      {
-        "path": "transfer/aad_autoinit_2eaee049.bundle",
-        "size_bytes": 22902327,
-        "sha256": "595cba1c62a99bc7f12d96d2ff68b602c35f98d2ac289b4052e7fb08ecec2653"
-      },
-      {
-        "path": "transfer/aad_autoinit_2f032662.bundle",
-        "size_bytes": 47290378,
-        "sha256": "0891868576e2abc4642de321ecee008458031a9220e75e572454d497c10999e6"
-      },
-      {
-        "path": "transfer/aad_autoinit_2f2c98cf.bundle",
-        "size_bytes": 19479924,
-        "sha256": "9983836c6724c8bc15a97758c4079d9cbca9c0ec26927c44faeab5b449e34835"
-      },
-      {
-        "path": "transfer/aad_autoinit_2f41017e.bundle",
-        "size_bytes": 18274315,
-        "sha256": "208bf66ebe4324a6d4d05b670cfc145c12cc022086b74e9c9ec5d4eac6d1292f"
-      },
-      {
-        "path": "transfer/aad_autoinit_2fe300a8.bundle",
-        "size_bytes": 51986283,
-        "sha256": "7ebd05e9fbb79af2db90d12a79e7d864a04cdf48aca3ab27dfd93de3bda06ffd"
-      },
-      {
-        "path": "transfer/aad_autoinit_2ff6f818.bundle",
-        "size_bytes": 46779685,
-        "sha256": "dec34703d572c7819deb064236d0b1d94fc9bf07a42209527ae02e3d85d53f05"
-      },
-      {
-        "path": "transfer/aad_autoinit_3023bccf.bundle",
-        "size_bytes": 38443828,
-        "sha256": "9abf61acd34cf8eabb577fcedb71e9abbbd371f437e3f05e41d906a821e910f4"
-      },
-      {
-        "path": "transfer/aad_autoinit_30f5fa79.bundle",
-        "size_bytes": 18340737,
-        "sha256": "e07ab6e1cdfe181862a999928690d3eaca6a0693c45e836acdbc26f49c1df862"
-      },
-      {
-        "path": "transfer/aad_autoinit_31f7643c.bundle",
-        "size_bytes": 38801029,
-        "sha256": "19ceea380ef1f7754ebef3b7d59bc5c1f777b24358cf847a8dc8882452fcf6ae"
-      },
-      {
-        "path": "transfer/aad_autoinit_323aa4ae.bundle",
-        "size_bytes": 18604185,
-        "sha256": "79d810da9dab4fc3fdd2fb0933456de8e40094798c0cdf1b16e59915ed531b84"
-      },
-      {
-        "path": "transfer/aad_autoinit_3272bbd4.bundle",
-        "size_bytes": 22886744,
-        "sha256": "a20b354204b04b0bf376cfd9924a397c5311dcee366fb86ed1539af404845619"
-      },
-      {
-        "path": "transfer/aad_autoinit_32f51ce4.bundle",
-        "size_bytes": 4555180,
-        "sha256": "41e52dcaa87cb194e8be20c9b6d6b3861a0b1ccf5e707f2672b5386bc213048c"
-      },
-      {
-        "path": "transfer/aad_autoinit_33596bae.bundle",
-        "size_bytes": 33246121,
-        "sha256": "d0b5fb5ec7e73ac7cc0c4040fa305ced06e0d58b9ce5b1a89bd61fbfb2dfc74f"
-      },
-      {
-        "path": "transfer/aad_autoinit_33bd1708.bundle",
-        "size_bytes": 19414589,
-        "sha256": "a420f5ce817ccefe3c1a7118145f5d4b6dc1928e14f9aabb2639e8601c4ec046"
-      },
-      {
-        "path": "transfer/aad_autoinit_34c5302e.bundle",
-        "size_bytes": 34920615,
-        "sha256": "a82477e578a014f168c25ed79ba3c26691b7d205073017cb2bbc56cd9750227e"
-      },
-      {
-        "path": "transfer/aad_autoinit_366d7587.bundle",
-        "size_bytes": 14450687,
-        "sha256": "94c6b9173989e133c225738f67c8ada37409f413bbf656d71de7816e0dc69477"
-      },
-      {
-        "path": "transfer/aad_autoinit_39639d4b.bundle",
-        "size_bytes": 18616959,
-        "sha256": "ace5181075e3bbdf9a185d5101fb84b62903b3daf1f39bd411476d239c17fdc2"
-      },
-      {
-        "path": "transfer/aad_autoinit_39e5bdf9.bundle",
-        "size_bytes": 32414223,
-        "sha256": "46f3f67a546b1338c3986fc66e592210174e4cbca8a765de5769b37bd6c9aaf3"
-      },
-      {
-        "path": "transfer/aad_autoinit_3a0a3321.bundle",
-        "size_bytes": 12753272,
-        "sha256": "200bdf7f29c3eb045ba2e6ed973f9f7127546469ca0c2bb9e15faaee91ab2f66"
-      },
-      {
-        "path": "transfer/aad_autoinit_3a29e976.bundle",
-        "size_bytes": 18709378,
-        "sha256": "f266e11657051336dc7b5ec1fe074dc669994cd99f061527e42638afc31f675f"
-      },
-      {
-        "path": "transfer/aad_autoinit_3a8710de.bundle",
-        "size_bytes": 12540691,
-        "sha256": "d39fab3a4563854b26b9744147b63c059dea2e4bfffc57f7e114de5e93da6cb8"
-      },
-      {
-        "path": "transfer/aad_autoinit_3c799ef5.bundle",
-        "size_bytes": 13725815,
-        "sha256": "59a2dbe2e26525cbccdf9630017e601f50f89f8dbea359adba2088a6c633211b"
-      },
-      {
-        "path": "transfer/aad_autoinit_3e3f2295.bundle",
-        "size_bytes": 5744531,
-        "sha256": "96c77475e85f61cf7fbd72b23fea91904caaad6d3f80717283b63c1334e31830"
-      },
-      {
-        "path": "transfer/aad_autoinit_3f553c33.bundle",
-        "size_bytes": 7864114,
-        "sha256": "f31736b3bd14b6b42a293cbbb170ea4167549b7c89afeb34b16b705b985f1235"
-      },
-      {
-        "path": "transfer/aad_autoinit_3f88f690.bundle",
-        "size_bytes": 37651574,
-        "sha256": "fbc18fd63d6e4c02f53c7a223710819107220715532468cd9ff879192de9a389"
-      },
-      {
-        "path": "transfer/aad_autoinit_40c3d53a.bundle",
-        "size_bytes": 3997902,
-        "sha256": "a18f22a5220591e0867ed363c8f48d400d729c47c1a43fc36e45c212bfc3a5b4"
-      },
-      {
-        "path": "transfer/aad_autoinit_40f5e0de.bundle",
-        "size_bytes": 22872126,
-        "sha256": "670b575772d8229a045ad78ee5b717ffac8ba90e164929da24dedc866e3d0bf0"
-      },
-      {
-        "path": "transfer/aad_autoinit_41409938.bundle",
-        "size_bytes": 34764931,
-        "sha256": "66a50eefe93983ee3f55fc4d1ca80310800442abf876e2eef049c3935ef61d44"
-      },
-      {
-        "path": "transfer/aad_autoinit_4197e782.bundle",
-        "size_bytes": 55458489,
-        "sha256": "835e2e6fdafea813ede25f1ee498655574c07fd038a14cd63a606c95bbc3363f"
-      },
-      {
-        "path": "transfer/aad_autoinit_44ea4f72.bundle",
-        "size_bytes": 14248942,
-        "sha256": "324e95b8b53ed840842f5033d9b27278fb717357e121fffdcf195a7bb74ec203"
-      },
-      {
-        "path": "transfer/aad_autoinit_45566d94.bundle",
-        "size_bytes": 18467948,
-        "sha256": "972a1bede86411537f9d82714dc83e37b0bae78ad443a532801b7a0fd06a78ae"
-      },
-      {
-        "path": "transfer/aad_autoinit_4563d106.bundle",
-        "size_bytes": 4917159,
-        "sha256": "509b29abb227e15ac3d86af75b08c4cd2f4e9add37d7d2530b97d2facadaa19b"
-      },
-      {
-        "path": "transfer/aad_autoinit_46bc5f35.bundle",
-        "size_bytes": 23080849,
-        "sha256": "5a6e20bd2a0ca0cea412c4b87125afcba23715ca62b6a1741acfb8b98e1fae1e"
-      },
-      {
-        "path": "transfer/aad_autoinit_47fbfe8c.bundle",
-        "size_bytes": 7780618,
-        "sha256": "b5e781dba27cd567b38b3b2595cf90a9d8d9cfef72c4590cca9c00ca7a48d88a"
-      },
-      {
-        "path": "transfer/aad_autoinit_48cc1269.bundle",
-        "size_bytes": 38188045,
-        "sha256": "2823dc9ea2091b6ea1ff57a2f36e83cb473058fa2466f075636f13d16e280373"
-      },
-      {
-        "path": "transfer/aad_autoinit_4a25699a.bundle",
-        "size_bytes": 6437940,
-        "sha256": "d8b8d95781ffeee30a6c2d3d45cfa3668dda034144bb1c74f4d6f5b90ce0ecf6"
-      },
-      {
-        "path": "transfer/aad_autoinit_4b31c8f4.bundle",
-        "size_bytes": 34395865,
-        "sha256": "4b139ea34d18e75bf29575660deca53b098963a27cbb559ad91139163e1a69dd"
-      },
-      {
-        "path": "transfer/aad_autoinit_4b80dcbc.bundle",
-        "size_bytes": 34818229,
-        "sha256": "ef12f3459bfc379af3ccb45c932066c4d455fba156f5017a0a8654980bfc1fb4"
-      },
-      {
-        "path": "transfer/aad_autoinit_4bc7b0d5.bundle",
-        "size_bytes": 18285464,
-        "sha256": "7f6c0c40869f7c46b42b47ec2bed15ea2fd11e7ba561151dad5b433ccf00ef7e"
-      },
-      {
-        "path": "transfer/aad_autoinit_4d7f7598.bundle",
-        "size_bytes": 19523656,
-        "sha256": "2af0b26644e11fcb6e9524b440da07ca304ac5d936c80ef5b2db9435fe7844d6"
-      },
-      {
-        "path": "transfer/aad_autoinit_50ac7773.bundle",
-        "size_bytes": 19479167,
-        "sha256": "2b337bf44fab9afa5ebc2de658fd77e509404a4bce959b439ddeb1f3de865527"
-      },
-      {
         "path": "transfer/aad_autoinit_51762aff.bundle",
         "size_bytes": 25586178,
         "sha256": "f145e6f0e81e0c9e5066275a301c06663fdf8c96baddf20c37fe86fa7d1578bb"
-      },
-      {
-        "path": "transfer/aad_autoinit_51d3dbb7.bundle",
-        "size_bytes": 22851093,
-        "sha256": "3190d86966dd7741ab210b2711d2f1de2b13bdc0ebfcae51cf622623257e55bd"
-      },
-      {
-        "path": "transfer/aad_autoinit_52039cea.bundle",
-        "size_bytes": 23045810,
-        "sha256": "cc0d62c44b44d765228fd0887b60a51896aa16c9e729d7a33acd20c41dd0f5df"
-      },
-      {
-        "path": "transfer/aad_autoinit_52d6b68d.bundle",
-        "size_bytes": 9418617,
-        "sha256": "1ca99db0ba579c0112ab300334767311e5d81639b4152a98d9c0b6df1508df53"
-      },
-      {
-        "path": "transfer/aad_autoinit_53bc27d0.bundle",
-        "size_bytes": 9543307,
-        "sha256": "9573d4fc285e9bb920cc280a817bcc25a127295f42e339bc1d9bca45ecc2cc97"
-      },
-      {
-        "path": "transfer/aad_autoinit_5598fb56.bundle",
-        "size_bytes": 23130090,
-        "sha256": "f24c8cf1c16c073c59349c6ac67eb7d03eb4857d6d106632bae04d58e89f9e95"
-      },
-      {
-        "path": "transfer/aad_autoinit_56c0a362.bundle",
-        "size_bytes": 32741350,
-        "sha256": "8c3249d618656d0b08a6d75150809e079c2242206705ef45ee85e3a8e2122555"
-      },
-      {
-        "path": "transfer/aad_autoinit_56fed7a8.bundle",
-        "size_bytes": 14144737,
-        "sha256": "5e24dccd42bd683751702a7487ccb23d5a22e1b349a2f5ae20f8bd7e3a54d02e"
-      },
-      {
-        "path": "transfer/aad_autoinit_571e4a72.bundle",
-        "size_bytes": 52095980,
-        "sha256": "550f6399d60e9de025fd99e5e9cc6c707de37ea6f9b5930d6c5ffb326d9133a4"
-      },
-      {
-        "path": "transfer/aad_autoinit_588dd1fc.bundle",
-        "size_bytes": 22903522,
-        "sha256": "6424f7127ca9e6929954add0313e6c780967c4f6c390719b141a362a34dc1c98"
-      },
-      {
-        "path": "transfer/aad_autoinit_5947afbb.bundle",
-        "size_bytes": 38297218,
-        "sha256": "bef112da6faf5a6858b0dedda3a3b5418d3ec345a2f610f80af68369299f9c99"
-      },
-      {
-        "path": "transfer/aad_autoinit_5b0396c7.bundle",
-        "size_bytes": 12705285,
-        "sha256": "7ba0cfee94db3ba4439745dc834bdf9e5ef7bd38bb04175b2d286c9644e19636"
-      },
-      {
-        "path": "transfer/aad_autoinit_5b9d138b.bundle",
-        "size_bytes": 32730848,
-        "sha256": "306f1ed1c31b33f99eaf7d13633ffdb4daa90a66a11859161645447b9c0f9a4a"
-      },
-      {
-        "path": "transfer/aad_autoinit_5ea67b16.bundle",
-        "size_bytes": 18369176,
-        "sha256": "f4ad51d770b3b460c849e37a0d7df1ea9b893194ec6a1889b7dea06c545f52f6"
-      },
-      {
-        "path": "transfer/aad_autoinit_5ead21fe.bundle",
-        "size_bytes": 17929359,
-        "sha256": "af8b67f87eba7fc7e30aa8c9a636b6e810111ad7aa2a29f4a4713a3defe90460"
-      },
-      {
-        "path": "transfer/aad_autoinit_5ebbe890.bundle",
-        "size_bytes": 55336434,
-        "sha256": "7567956469d4a2e676be80f670afca58b0b2ddf55448eb11974912d6f63cd3b2"
-      },
-      {
-        "path": "transfer/aad_autoinit_614e7e60.bundle",
-        "size_bytes": 56928996,
-        "sha256": "b269411a1d8e68859f3a3c11f62ec22a5974b11620a68d00148535ea1ab7df9c"
-      },
-      {
-        "path": "transfer/aad_autoinit_623275da.bundle",
-        "size_bytes": 18394206,
-        "sha256": "1514e8e56b0b8f986909055f912db95e4795b5930f006c49453fc9fc16d2cd8b"
-      },
-      {
-        "path": "transfer/aad_autoinit_63625e15.bundle",
-        "size_bytes": 5893872,
-        "sha256": "0e4e989bc11f5153464b61ae397e20cee99ee0165b5c983cb01ba01f0788146d"
-      },
-      {
-        "path": "transfer/aad_autoinit_637335ab.bundle",
-        "size_bytes": 7587230,
-        "sha256": "e4bc32c95d3dbd7b77fbfe0915cd9830df853719186130d81c2ff16655b97f8b"
-      },
-      {
-        "path": "transfer/aad_autoinit_6375ce73.bundle",
-        "size_bytes": 18367476,
-        "sha256": "2fc8d569c719447cce604afbdb226615481c3d3c61f32b13090ce069736ce099"
-      },
-      {
-        "path": "transfer/aad_autoinit_6396c819.bundle",
-        "size_bytes": 17768032,
-        "sha256": "df4b5893d3cb7dae4eb28d56255790d624496d365909be67229dec667b866324"
-      },
-      {
-        "path": "transfer/aad_autoinit_64907751.bundle",
-        "size_bytes": 22992814,
-        "sha256": "5c01e1de12d3c6c733b9f894e7ba6ee4c8ffba934955c1f2b19474c1cc0b4753"
-      },
-      {
-        "path": "transfer/aad_autoinit_64e45780.bundle",
-        "size_bytes": 17950052,
-        "sha256": "017d0cad12543779b3a6e5eafcf47a1e68d155a43b59cc2abe2ae428ea50d75d"
-      },
-      {
-        "path": "transfer/aad_autoinit_679a7f7f.bundle",
-        "size_bytes": 18258629,
-        "sha256": "d4e39ab126809001c0993b1438c29fa238d1d9166db807ecd0fd9db7febba941"
-      },
-      {
-        "path": "transfer/aad_autoinit_67d376c3.bundle",
-        "size_bytes": 52159459,
-        "sha256": "74f74099abfa751220a7190d1c12dd18d22f52a78e14217ba4c9ed17222764d1"
-      },
-      {
-        "path": "transfer/aad_autoinit_6805cd5f.bundle",
-        "size_bytes": 13746930,
-        "sha256": "1ca7d948506aa9c8a42a0be89650709f3b76a54b14f67a58b2ac91c20285e57b"
-      },
-      {
-        "path": "transfer/aad_autoinit_68cb1d5a.bundle",
-        "size_bytes": 18481717,
-        "sha256": "6a4f389728ab0c6c44dfa2565be01c0c0d7791d744607fc37feebdff7a8ae4da"
-      },
-      {
-        "path": "transfer/aad_autoinit_69938926.bundle",
-        "size_bytes": 56843717,
-        "sha256": "f9149a70cd646137e3c584702a310a1aab1709f000290297dd8f142ff98faad4"
-      },
-      {
-        "path": "transfer/aad_autoinit_6ab82ecc.bundle",
-        "size_bytes": 22976797,
-        "sha256": "79981683b542c32f1eb6d6418deafc95ea8e8c3cbad752cb6bc15f9ac4b1c916"
-      },
-      {
-        "path": "transfer/aad_autoinit_6ba7cce9.bundle",
-        "size_bytes": 3908135,
-        "sha256": "b407dd844c8c9d09e6dcec69d4bb6e9d272c9e90011436f7cbfb7a2426e69a91"
-      },
-      {
-        "path": "transfer/aad_autoinit_6bd7bd74.bundle",
-        "size_bytes": 3893440,
-        "sha256": "2d05579ab27d45734b2c584f4cd72291b8b6610fbda4ce6925779c83075fe285"
-      },
-      {
-        "path": "transfer/aad_autoinit_6c9ea758.bundle",
-        "size_bytes": 25538842,
-        "sha256": "9a82a133a8726adb46534ab573c0d76e1b15146cba47e1d4906bb7bf54403dde"
-      },
-      {
-        "path": "transfer/aad_autoinit_6fc5dcfb.bundle",
-        "size_bytes": 22871464,
-        "sha256": "fab0afbea68f68958bb6cdee6a53cb5dac120caa4b84ae4dad5ec9ac26114825"
-      },
-      {
-        "path": "transfer/aad_autoinit_709b29c7.bundle",
-        "size_bytes": 30274733,
-        "sha256": "13568fe9f16400a0f6cf9983de8ffa6602e00b4e0c5d080775f1301f9b090de9"
-      },
-      {
-        "path": "transfer/aad_autoinit_71916201.bundle",
-        "size_bytes": 33118833,
-        "sha256": "7c68380358ceaac9d75fa999b7b570c51b3bcd5583dc0078faa3482627af9632"
-      },
-      {
-        "path": "transfer/aad_autoinit_72512395.bundle",
-        "size_bytes": 37554040,
-        "sha256": "4bffab1477656c09c301551ac4f3f12bd911bede3a118a2b066e10cd59294a9a"
-      },
-      {
-        "path": "transfer/aad_autoinit_7289f0e1.bundle",
-        "size_bytes": 22842306,
-        "sha256": "e48c8411d712bc6e574bf79507de8e8b4c56cc73a277f3a6e879cc1aa03481aa"
-      },
-      {
-        "path": "transfer/aad_autoinit_7357e04a.bundle",
-        "size_bytes": 55218492,
-        "sha256": "631823b3dae351dfcd3d22c85ef037d301e002f8579f7a47641b85f85c324108"
-      },
-      {
-        "path": "transfer/aad_autoinit_73c09c42.bundle",
-        "size_bytes": 18443620,
-        "sha256": "9d3adbe6cc91d208333db51d8549b91345fad568f7e61674f982257087e7a973"
-      },
-      {
-        "path": "transfer/aad_autoinit_7424ceb9.bundle",
-        "size_bytes": 23334413,
-        "sha256": "754ae124ae8e4ce42dc2e00505d367daeb687de89b5c2d8ec084113a8113b1fd"
-      },
-      {
-        "path": "transfer/aad_autoinit_7448caab.bundle",
-        "size_bytes": 22859176,
-        "sha256": "69e6c029d229ef61ea3c8b1931e57e4ac4c090a9da0a64e2e7ad7b63aaa52593"
-      },
-      {
-        "path": "transfer/aad_autoinit_74cfe3e3.bundle",
-        "size_bytes": 12731568,
-        "sha256": "ac7634cd85e5b03f41452b91bf355bd999b2a36f175e10db66d66728c27a7b71"
-      },
-      {
-        "path": "transfer/aad_autoinit_74dbf942.bundle",
-        "size_bytes": 32732098,
-        "sha256": "3ecbd0e484629c621da1b7185b432a16f33141a3d6557164c7c382486423f0ea"
-      },
-      {
-        "path": "transfer/aad_autoinit_762ae5fa.bundle",
-        "size_bytes": 4362006,
-        "sha256": "3c8a7653bba0609480ee92b01b0d56d63295bbabc206ae6a8c75e9c46d1bda1c"
-      },
-      {
-        "path": "transfer/aad_autoinit_765521d5.bundle",
-        "size_bytes": 23326815,
-        "sha256": "f7b153bd56cc1acffbfdceacc9644a15f3c0735bf0a00bfb30a7c97bf7332389"
-      },
-      {
-        "path": "transfer/aad_autoinit_766acb69.bundle",
-        "size_bytes": 54434716,
-        "sha256": "e46f5849288ffd24c42b84cebd90551d13074e45ad3011adb47945813e7ade90"
       },
       {
         "path": "transfer/aad_autoinit_778e2bcb.bundle",
@@ -6627,1144 +5817,9 @@
         "sha256": "18323415345788904b9a84a84cc29ea6a780a08823ada8b2934f940398111ae3"
       },
       {
-        "path": "transfer/aad_autoinit_77aedc90.bundle",
-        "size_bytes": 29052777,
-        "sha256": "c44ff349c3739aace95b2dc06e1d08ba4ac062b63666d8b3cf2cb549fb7b671a"
-      },
-      {
-        "path": "transfer/aad_autoinit_79c18adb.bundle",
-        "size_bytes": 7669955,
-        "sha256": "2d1865ae797336b11a3addb4441352cd56af92e753fd2113ab76d919589d73b3"
-      },
-      {
-        "path": "transfer/aad_autoinit_7c568df9.bundle",
-        "size_bytes": 34882961,
-        "sha256": "f814fca5f1b01e27dfce9c20cb3407ebca6a2c801f8e2d339d76e5197789c6ab"
-      },
-      {
-        "path": "transfer/aad_autoinit_7c780b56.bundle",
-        "size_bytes": 19485472,
-        "sha256": "911c1c96b092cae43fd1043c1fa90204f1fa53fdc3cb7d3978c9b00d7c8eb4f3"
-      },
-      {
-        "path": "transfer/aad_autoinit_7d2bd15c.bundle",
-        "size_bytes": 3738445,
-        "sha256": "cb3204275989fbf9c6d916ec38ac03ea2f3c953be039c0b57603edc8e8510c93"
-      },
-      {
-        "path": "transfer/aad_autoinit_7efa59c5.bundle",
-        "size_bytes": 28786448,
-        "sha256": "bb1932de473533c565da884da1bfc3e185183443cb2dc4bef6caf9577b96e839"
-      },
-      {
-        "path": "transfer/aad_autoinit_81513ff9.bundle",
-        "size_bytes": 22916230,
-        "sha256": "d682ef4d77fe2b4fd9c9e36ddb65b267bc64e9deaabfcb12b9433c26c7702199"
-      },
-      {
-        "path": "transfer/aad_autoinit_8183a23e.bundle",
-        "size_bytes": 4950102,
-        "sha256": "7d42d783500f7fd3962e3dbdb2c297cc98e1a70e1aa6308073b8ae72fbd57aad"
-      },
-      {
-        "path": "transfer/aad_autoinit_8256414e.bundle",
-        "size_bytes": 15147824,
-        "sha256": "38215c0a2c001d3cdc94ecb87b0bcc6bc5c1d23dbda5de8bddb37873a035b458"
-      },
-      {
-        "path": "transfer/aad_autoinit_8360ce08.bundle",
-        "size_bytes": 19513184,
-        "sha256": "4cb1e791415388059aa944955dca9d8cc9cbf24f09c4acfaa1c94b15227eb494"
-      },
-      {
-        "path": "transfer/aad_autoinit_8362963a.bundle",
-        "size_bytes": 7240562,
-        "sha256": "ec7fdd37e952de924374354bfb42807f1f7e28e87f4a64454df835c1f8f72c99"
-      },
-      {
-        "path": "transfer/aad_autoinit_83981084.bundle",
-        "size_bytes": 7051090,
-        "sha256": "a6bd6b5ff3852e3cfe357613c7d5eccfd7a91955812318bd428ce551dc5db545"
-      },
-      {
-        "path": "transfer/aad_autoinit_84fbcdd1.bundle",
-        "size_bytes": 39270816,
-        "sha256": "8e2a682da462bfcfc8cb8fcdf76da4f5fdb91a9dc0518c0e753c9a60c8d16cc7"
-      },
-      {
-        "path": "transfer/aad_autoinit_8518458c.bundle",
-        "size_bytes": 18568714,
-        "sha256": "4fa11ecd431db09e2d128d05986aa5a1eb1213c392a6f5fff5744be86e16c73f"
-      },
-      {
-        "path": "transfer/aad_autoinit_8565b1fa.bundle",
-        "size_bytes": 46704852,
-        "sha256": "adf3660773fe3db1ddffe7adac538b57d992b00667df7fb630c398205849ee03"
-      },
-      {
-        "path": "transfer/aad_autoinit_856fa3f3.bundle",
-        "size_bytes": 19495182,
-        "sha256": "cd0d45c568dc08ec95bd358ea9fb6acaf94437b3553c4e8de4527f06cbb9b884"
-      },
-      {
-        "path": "transfer/aad_autoinit_85810598.bundle",
-        "size_bytes": 18447007,
-        "sha256": "8bcb67e0e22da5228e2a71556ecf01604f83916472b11a681039c09349653219"
-      },
-      {
-        "path": "transfer/aad_autoinit_88349d70.bundle",
-        "size_bytes": 5131329,
-        "sha256": "ca879159ce149bb21bd1f18050c1be92c3397eef85d4e24f4ecc1bd25c89830c"
-      },
-      {
-        "path": "transfer/aad_autoinit_8a25d399.bundle",
-        "size_bytes": 52146548,
-        "sha256": "32e677d8c5d6e58d4a02b66f649191abd10c8d871ef514af3bcfc7dce1d33fea"
-      },
-      {
-        "path": "transfer/aad_autoinit_8a7012ae.bundle",
-        "size_bytes": 38079960,
-        "sha256": "14f36a2f5a8ef718224727b42a33cdf80c36f63ce70f3cc5085e0055724dd6e2"
-      },
-      {
-        "path": "transfer/aad_autoinit_8b4ee3fd.bundle",
-        "size_bytes": 34716087,
-        "sha256": "9ec9e009c64e242a8c40b87ef5806f32ce042c2f1de7b1539ef9a10267c423c6"
-      },
-      {
-        "path": "transfer/aad_autoinit_8c075d61.bundle",
-        "size_bytes": 22838938,
-        "sha256": "f7084f0a664fddaac94f7aba6d64f384ffb86edaed4604a0b034f0233b5f7fc1"
-      },
-      {
-        "path": "transfer/aad_autoinit_8c7c42e1.bundle",
-        "size_bytes": 5683712,
-        "sha256": "34fc7689e3b058d3e15ed17007ed543888cf52cbaf74edcaedc990d35807fc07"
-      },
-      {
-        "path": "transfer/aad_autoinit_8d0c9d12.bundle",
-        "size_bytes": 18323779,
-        "sha256": "c73577da1663dbbd7720fa9fb9115d1a32d6a66e6c649124b51c23ca554820f2"
-      },
-      {
-        "path": "transfer/aad_autoinit_8d527c8a.bundle",
-        "size_bytes": 22919764,
-        "sha256": "6fa25b8afd05b16e5f713a91764b8af4d9a226fd9cf70c892196902b0a630abb"
-      },
-      {
-        "path": "transfer/aad_autoinit_8d544115.bundle",
-        "size_bytes": 14197468,
-        "sha256": "85d806793e07543fb648154815310bca121f7dff58d33df1c0d8bde45ce5ae63"
-      },
-      {
-        "path": "transfer/aad_autoinit_8d6ba98e.bundle",
-        "size_bytes": 6773263,
-        "sha256": "eac0061d9358fdf5e747c5ed666f28bb527d0bd51c603495031e6eec6ae39248"
-      },
-      {
-        "path": "transfer/aad_autoinit_8dc58b3a.bundle",
-        "size_bytes": 52167250,
-        "sha256": "7fd32a218b4d27c1a56689360a5851936f772890d4448b870157291fa0e4ffdd"
-      },
-      {
-        "path": "transfer/aad_autoinit_8dccb959.bundle",
-        "size_bytes": 19442778,
-        "sha256": "888c9384537fccc8d4281fa0923cde54f8ff52c25920eedc17b232dea90d6e72"
-      },
-      {
-        "path": "transfer/aad_autoinit_8df1bad2.bundle",
-        "size_bytes": 7035095,
-        "sha256": "e4c61d7345e46f427facec1773cdcdca4a97113614fce0021af8d593aef1b0fb"
-      },
-      {
-        "path": "transfer/aad_autoinit_8df69c63.bundle",
-        "size_bytes": 34383346,
-        "sha256": "18f315570f680a626f57f62b6bcb559c21380dcdc9b57e55390e7d348d580f81"
-      },
-      {
-        "path": "transfer/aad_autoinit_8e716005.bundle",
-        "size_bytes": 55232476,
-        "sha256": "b4f08536eb762b2af20c84e8f19c1de7df120685d8303662bd394c9ddafd8ca9"
-      },
-      {
-        "path": "transfer/aad_autoinit_8e8f1441.bundle",
-        "size_bytes": 38313981,
-        "sha256": "112e207fe8c030d1cd7cbd41f3c809f94a1aeb915c3d23d9e8dbb2fc4d561779"
-      },
-      {
-        "path": "transfer/aad_autoinit_8f74bc94.bundle",
-        "size_bytes": 55301637,
-        "sha256": "4db252f70a07f7e33edbe03f5c45a8b5ddc00cb671e2a56a4cec49bb8b9f0967"
-      },
-      {
-        "path": "transfer/aad_autoinit_917b57fd.bundle",
-        "size_bytes": 18429719,
-        "sha256": "fa591eba2b396f61162399a06e1f395261d77d61544071017343cc95462e19c9"
-      },
-      {
-        "path": "transfer/aad_autoinit_919b8272.bundle",
-        "size_bytes": 19609314,
-        "sha256": "416923fdc7d7a5183d1568dad120a03c717b4f8a737fc6d00398d320476b580b"
-      },
-      {
-        "path": "transfer/aad_autoinit_922d126a.bundle",
-        "size_bytes": 18246263,
-        "sha256": "5611bd2f29f9b6ec463d1a60f08ba58833745248f124625184968a546aa280d3"
-      },
-      {
-        "path": "transfer/aad_autoinit_923d4c33.bundle",
-        "size_bytes": 22903046,
-        "sha256": "3601d748f06bf9fbf6b9d8b29f0c488b5020c3d86e80eb2ae51f780c57a2e19b"
-      },
-      {
-        "path": "transfer/aad_autoinit_925eebc0.bundle",
-        "size_bytes": 4375726,
-        "sha256": "a7616ac79333414bf6823711f00f73293dea1c9024d63237a9813c285bde89fe"
-      },
-      {
-        "path": "transfer/aad_autoinit_93589a00.bundle",
-        "size_bytes": 56945539,
-        "sha256": "4636b005d976b86994c0d536578660d866e8c9848a3ec092cb79266eda9fefda"
-      },
-      {
-        "path": "transfer/aad_autoinit_94cdcd26.bundle",
-        "size_bytes": 3953622,
-        "sha256": "c308943689d1244265195919f04522257b9840d5cee81f7ee23cf9d7d083a4ea"
-      },
-      {
-        "path": "transfer/aad_autoinit_96611c89.bundle",
-        "size_bytes": 12966063,
-        "sha256": "98ec9ff05e31d51b291761756cbcca38a162ffbe1a40ec4154a3f5f7fdd2193d"
-      },
-      {
-        "path": "transfer/aad_autoinit_96889a6e.bundle",
-        "size_bytes": 38330551,
-        "sha256": "e661179b659125f0e4725db05955dc5a31e9137be65081eb4c3533547418fa82"
-      },
-      {
-        "path": "transfer/aad_autoinit_98bc7bb7.bundle",
-        "size_bytes": 5057602,
-        "sha256": "8ea8174248f3cd1c95540a8760a068f790c04d2eb2f9ce1c79f13ce4acae76df"
-      },
-      {
-        "path": "transfer/aad_autoinit_99a4e464.bundle",
-        "size_bytes": 18357931,
-        "sha256": "8443d60ac7d4670d84553887338f50b9797ef5be7b5356d8d9b3ec58d461c0d4"
-      },
-      {
-        "path": "transfer/aad_autoinit_9a9569f7.bundle",
-        "size_bytes": 34635307,
-        "sha256": "f052e48684030bdf8b192b5cd75b8cc4a709b379d653b7842a70d0caa4102ed1"
-      },
-      {
-        "path": "transfer/aad_autoinit_9d2098f7.bundle",
-        "size_bytes": 18282691,
-        "sha256": "31963c9e051e80b08f4797b22403ceb8c29b5c4537c86b1a2b7cd8bd925042bf"
-      },
-      {
-        "path": "transfer/aad_autoinit_9d49805c.bundle",
-        "size_bytes": 14436923,
-        "sha256": "bac51b2da36a2f411825b424b0bc59c86c2ee52699f638f355ca27922654d194"
-      },
-      {
-        "path": "transfer/aad_autoinit_9dd6bc01.bundle",
-        "size_bytes": 28983456,
-        "sha256": "b39794bbcd800844d3758e7ec5454d61533bf3d7e35f095680aff7189309bace"
-      },
-      {
-        "path": "transfer/aad_autoinit_9f3ff7f5.bundle",
-        "size_bytes": 4906535,
-        "sha256": "c8d2478d8d911230eac5997703fd462f7c4ee606784c2d16309fde2104d484db"
-      },
-      {
-        "path": "transfer/aad_autoinit_9f63a266.bundle",
-        "size_bytes": 34409655,
-        "sha256": "dc9c930675ab7614f91063620c9a6746afd091f495ae7193ed3d58bd642287af"
-      },
-      {
-        "path": "transfer/aad_autoinit_9ffa9f49.bundle",
-        "size_bytes": 5107838,
-        "sha256": "400e974085f786a7f6d1aefbacd558c899c9d0533156f4cc3c44b18cf3edbb6e"
-      },
-      {
-        "path": "transfer/aad_autoinit_a070b86a.bundle",
-        "size_bytes": 22831355,
-        "sha256": "6eae55cf0bdf44dc9ac5cc4fdd099d2916dca1d862797ac6ba640acb68299067"
-      },
-      {
-        "path": "transfer/aad_autoinit_a0cc3c5f.bundle",
-        "size_bytes": 39160913,
-        "sha256": "8a0006a57c052d7a9671b443a7e12eda4131659dfcffb98d58b8f857a15a4251"
-      },
-      {
-        "path": "transfer/aad_autoinit_a227fe8f.bundle",
-        "size_bytes": 30087194,
-        "sha256": "41cb67ca74fd34a4929d10403df92ad6b4896d0f507b22e3fc2042249b858093"
-      },
-      {
-        "path": "transfer/aad_autoinit_a2baff8f.bundle",
-        "size_bytes": 57528030,
-        "sha256": "d034ecd1d6e107e366dc18a0168353854ca83affef883cd28053e0d9037d89ea"
-      },
-      {
-        "path": "transfer/aad_autoinit_a350a6a7.bundle",
-        "size_bytes": 4324750,
-        "sha256": "430233935ee3c099ef8e7a33617fd7f9096a4305b1abbbd26fd9a7bdf205e216"
-      },
-      {
-        "path": "transfer/aad_autoinit_a35167da.bundle",
-        "size_bytes": 33248581,
-        "sha256": "13b13e8bc5e9aea989787a9d9ba404fcb2253e6ddc9e4b8cbf3112d0571c74f7"
-      },
-      {
-        "path": "transfer/aad_autoinit_a4eb636a.bundle",
-        "size_bytes": 30073933,
-        "sha256": "7a5b41ff1e0ce15f3cfd9235af7d3d209da5c984ebf224e35edd8c15cc8a3262"
-      },
-      {
-        "path": "transfer/aad_autoinit_a5459101.bundle",
-        "size_bytes": 3875382,
-        "sha256": "f3e8ae01ce027763bba65408183520e35e96646e149d24cb120f80b0a0cf340f"
-      },
-      {
-        "path": "transfer/aad_autoinit_a65ba90b.bundle",
-        "size_bytes": 18331319,
-        "sha256": "1bb50a0eee2b979514d5045eb7188d2cb8e12196f19e8ee9fe02e0df8eeb45d5"
-      },
-      {
-        "path": "transfer/aad_autoinit_a8ac576a.bundle",
-        "size_bytes": 12574741,
-        "sha256": "bdd20b9c473146bd25c31ee181d73c2b46a5e0091413734ba906d776a83bcfc2"
-      },
-      {
-        "path": "transfer/aad_autoinit_a90f4512.bundle",
-        "size_bytes": 18498256,
-        "sha256": "a5aa8f76aca1a7c1f644be10400710bda463c869a5106e09dea5ef61d328ca03"
-      },
-      {
-        "path": "transfer/aad_autoinit_a9937e15.bundle",
-        "size_bytes": 55270711,
-        "sha256": "f96be641f712a5b6bd24d82b75859499501da89419a6af4684e6e68fb7cb6b5a"
-      },
-      {
-        "path": "transfer/aad_autoinit_a9f868e6.bundle",
-        "size_bytes": 4321186,
-        "sha256": "357d667444d833b2da599d9e4aa9ee67be79b37dda9930e4664525991d75bd66"
-      },
-      {
-        "path": "transfer/aad_autoinit_aa9359f0.bundle",
-        "size_bytes": 56692028,
-        "sha256": "a5eaffb6a9d31db858d1cb4545927f7da0c2753f612a338c10e6791408576e30"
-      },
-      {
-        "path": "transfer/aad_autoinit_aacda75b.bundle",
-        "size_bytes": 57388040,
-        "sha256": "34e98da403345dc49b6feac1bb4ecf0f482dbf7c919836700b5300c5ede74b15"
-      },
-      {
-        "path": "transfer/aad_autoinit_ab09c706.bundle",
-        "size_bytes": 3744955,
-        "sha256": "aae671c1b4ec9599feee3c2c2c4bb12980c84ae7812490cab46d0baf3e31b648"
-      },
-      {
-        "path": "transfer/aad_autoinit_ac3c895f.bundle",
-        "size_bytes": 5243242,
-        "sha256": "66ad8d1df656b94e26bc4dd22b391ce60a21fc19eeaeb0c11ed8b43aaa7791c7"
-      },
-      {
-        "path": "transfer/aad_autoinit_ad73e05a.bundle",
-        "size_bytes": 5892198,
-        "sha256": "d2ea1df7a6a5076bf302f8d76db023d51aec15abf6f658f523a3ecf568bb260a"
-      },
-      {
-        "path": "transfer/aad_autoinit_ae497d9f.bundle",
-        "size_bytes": 22813696,
-        "sha256": "4030026421e3e0c174291adf66000d38b42a932994c08716824bc6669995c542"
-      },
-      {
-        "path": "transfer/aad_autoinit_af7b9f58.bundle",
-        "size_bytes": 18454905,
-        "sha256": "1e83cba127de2826e29117c650120d5479e5462741e654905931e3177635776d"
-      },
-      {
-        "path": "transfer/aad_autoinit_b094fd28.bundle",
-        "size_bytes": 38601557,
-        "sha256": "b8a102b28bd86ef585dfeb013fa77f3fe591bfbaa5d87630fc25777ef7573a3f"
-      },
-      {
-        "path": "transfer/aad_autoinit_b09bb98e.bundle",
-        "size_bytes": 19491260,
-        "sha256": "e9ec9c97b5ebc283442455d4e0fe6f3f7b8ae2f08a6ae03c654508ce00c912dd"
-      },
-      {
-        "path": "transfer/aad_autoinit_b0bc53cb.bundle",
-        "size_bytes": 56628260,
-        "sha256": "cd72f5822b83024295ca9f7c4e70ecd1c1bd9ec73cc9208866ef01207f3e8448"
-      },
-      {
-        "path": "transfer/aad_autoinit_b0e2bbef.bundle",
-        "size_bytes": 38479401,
-        "sha256": "303097f2a736915ad87c444f17f7612671123f6d8e417681e6b14f4c86d0bbcb"
-      },
-      {
-        "path": "transfer/aad_autoinit_b189fade.bundle",
-        "size_bytes": 7099490,
-        "sha256": "ff00482c76e635b84974e7473db5b852c4fbfa310606cf9f3263a1c3a2248431"
-      },
-      {
-        "path": "transfer/aad_autoinit_b1f3a020.bundle",
-        "size_bytes": 33303310,
-        "sha256": "27e7bb5dfda16de9c8870a4e691f18a2598eea5cfaeaa884ab4abea0721bd611"
-      },
-      {
-        "path": "transfer/aad_autoinit_b20a0d36.bundle",
-        "size_bytes": 12628287,
-        "sha256": "1eeb0a5105ebd12d12aeef6482b60a7bca8de2ce4ed4d2f5c59a0695db9b30dc"
-      },
-      {
-        "path": "transfer/aad_autoinit_b222f427.bundle",
-        "size_bytes": 55872862,
-        "sha256": "ac846f232c32fe2c71af9e2eceb3d99f8096a9610d0516406c745142413a280d"
-      },
-      {
-        "path": "transfer/aad_autoinit_b2a25a14.bundle",
-        "size_bytes": 18376745,
-        "sha256": "66eb069669f66837a5dffe7ac0429d03efbc6fe9df547f5e6275003a907934f1"
-      },
-      {
-        "path": "transfer/aad_autoinit_b354d386.bundle",
-        "size_bytes": 25479433,
-        "sha256": "f983ef436da9af61e7637dfda400f3aa430c4d8d5d6d75dcba12d89f9e8ab510"
-      },
-      {
-        "path": "transfer/aad_autoinit_b3659623.bundle",
-        "size_bytes": 34832490,
-        "sha256": "66643ce24e82d08aca99223e33e566a2c3d30e1d70b9a64f35a580879b6432b3"
-      },
-      {
-        "path": "transfer/aad_autoinit_b4d48ea9.bundle",
-        "size_bytes": 55894952,
-        "sha256": "ff77d44395f6306f12aec1ce78e94ef51aacfa410b8501980aa38e5e8d3fdb75"
-      },
-      {
-        "path": "transfer/aad_autoinit_b5f8f5aa.bundle",
-        "size_bytes": 56321012,
-        "sha256": "004100ef5eb1ac97c8d3c60a638659b64bb184a52ce06e02121a8aec7d2d7fc8"
-      },
-      {
-        "path": "transfer/aad_autoinit_b6aa0f64.bundle",
-        "size_bytes": 37970414,
-        "sha256": "52dda325a86dec2813bd75c58521e4923ba9ae5ec9cb4f05aec842dcc173b83f"
-      },
-      {
-        "path": "transfer/aad_autoinit_b7ebcbc4.bundle",
-        "size_bytes": 34711556,
-        "sha256": "ced5d97c097df4370a944d9e535a19c73cb2b3179534e87375c7d648fd2f085e"
-      },
-      {
-        "path": "transfer/aad_autoinit_b8d3af1e.bundle",
-        "size_bytes": 55354893,
-        "sha256": "16c32c592d8ad655b419242cb26d9e425c60c9f4707a49c6e72061330720c375"
-      },
-      {
-        "path": "transfer/aad_autoinit_b8d406e0.bundle",
-        "size_bytes": 18337988,
-        "sha256": "86a39750e8b51797f7eff8523d562d61ee58e5455d389450f2383b7967a19620"
-      },
-      {
-        "path": "transfer/aad_autoinit_baa86b90.bundle",
-        "size_bytes": 23016474,
-        "sha256": "ab79ccd98a68adcdd966375fe11127cada73f22f84f9b2dba383bef6d5581ba3"
-      },
-      {
-        "path": "transfer/aad_autoinit_bb890694.bundle",
-        "size_bytes": 34888244,
-        "sha256": "2243d81e138d452a0c68a1ac8d1856022774dbf38dc3bd26c2f6554ae649735d"
-      },
-      {
-        "path": "transfer/aad_autoinit_bc34e783.bundle",
-        "size_bytes": 28936536,
-        "sha256": "dcc74bd9e0080e28b2e701c1c2bf8fd361bfe7415f98b8b6849dda2c6b13975b"
-      },
-      {
-        "path": "transfer/aad_autoinit_bcea3d0c.bundle",
-        "size_bytes": 34523758,
-        "sha256": "4e8a87b3c68aba184c53323f5d258fea531da636748269bbb4f981ff437400c4"
-      },
-      {
-        "path": "transfer/aad_autoinit_bd957881.bundle",
-        "size_bytes": 46673859,
-        "sha256": "001b90c19d1c41896d73ea9780f002a0d193756c618ec309ca56ee46d3f68b6a"
-      },
-      {
-        "path": "transfer/aad_autoinit_bdeb2ff8.bundle",
-        "size_bytes": 18353377,
-        "sha256": "1cff59df29379b2b387cb837d88feafdf6bf59e646e7693d8171deb935f074d9"
-      },
-      {
-        "path": "transfer/aad_autoinit_be84c6f9.bundle",
-        "size_bytes": 4539722,
-        "sha256": "020d45722978d11863ed324876414d2906488ef6f71d66be00aef44d41dc12a9"
-      },
-      {
-        "path": "transfer/aad_autoinit_bfd772b3.bundle",
-        "size_bytes": 18670052,
-        "sha256": "f5c6de7bc223e17cde3064682a53cfe71fa98274b0bd9253bd65ed9f7534f328"
-      },
-      {
-        "path": "transfer/aad_autoinit_c020727d.bundle",
-        "size_bytes": 22986828,
-        "sha256": "482d6052242fc556eea757d65ed489f91ffe47021b6a21c1f82122cb58828067"
-      },
-      {
-        "path": "transfer/aad_autoinit_c023ba38.bundle",
-        "size_bytes": 18507756,
-        "sha256": "a560c4794c931b2ce505e7502f094b909e077979475ffdfaa7f8993deee005fd"
-      },
-      {
-        "path": "transfer/aad_autoinit_c10ad811.bundle",
-        "size_bytes": 33276335,
-        "sha256": "1e379ddea1e2db52866b77c845fb6030007981bb2cf550a89488575f624e6e30"
-      },
-      {
-        "path": "transfer/aad_autoinit_c1bc1740.bundle",
-        "size_bytes": 52122724,
-        "sha256": "fa8f27d9f4006d7a86695904e48502bf655bffc565cd994050dae8ca9099e1da"
-      },
-      {
-        "path": "transfer/aad_autoinit_c1f27191.bundle",
-        "size_bytes": 34797005,
-        "sha256": "a40f38e915dbc4f7d49f8e346c0785242e0bc51242466601b5239c0008d3d4ae"
-      },
-      {
-        "path": "transfer/aad_autoinit_c29bae2c.bundle",
-        "size_bytes": 56877123,
-        "sha256": "0700f2ef790b1e510a31b6125ae690693fc1e1958a7ce1eb61208fa7e8091b96"
-      },
-      {
-        "path": "transfer/aad_autoinit_c338a76b.bundle",
-        "size_bytes": 8030873,
-        "sha256": "5c1384bb41c3395def207b4bf51d2e94085993e6e915c3de72c7642ca5a006a1"
-      },
-      {
-        "path": "transfer/aad_autoinit_c33b3bd9.bundle",
-        "size_bytes": 22818156,
-        "sha256": "c80fd62d97e0e8761f0c4557d2f0f4d3817b0e2412d0b59a09fe19914d1262e6"
-      },
-      {
-        "path": "transfer/aad_autoinit_c44dc242.bundle",
-        "size_bytes": 33127600,
-        "sha256": "5380c10a31d0fc32a4bd8aeb471056e111ec031711288d24c68512022e7b330d"
-      },
-      {
-        "path": "transfer/aad_autoinit_c4a84baa.bundle",
-        "size_bytes": 18413061,
-        "sha256": "9c3f855d8f5dcc2299fcc34f96729c0f528f7ce2dd9005987a4670eeda42ead7"
-      },
-      {
-        "path": "transfer/aad_autoinit_c611812c.bundle",
-        "size_bytes": 4373965,
-        "sha256": "fa69ce977edd4eb9efffff9a9690e11df9ad2ad4bfda9128ac4d4712a6739e73"
-      },
-      {
-        "path": "transfer/aad_autoinit_c697bece.bundle",
-        "size_bytes": 34771189,
-        "sha256": "9430122eff430fd1740ca8cef1258a6976cfc7e104f60c1ca9c5d2878d80f6ac"
-      },
-      {
-        "path": "transfer/aad_autoinit_c7bc42f6.bundle",
-        "size_bytes": 18602824,
-        "sha256": "76dd223712dc498ff2336009e938de691ad55396b295c4e1e702e04a6853412a"
-      },
-      {
-        "path": "transfer/aad_autoinit_c96d9d16.bundle",
-        "size_bytes": 19566982,
-        "sha256": "b9ad56eeaaefe3b250812db159267164a8f48aab3d51808c07ae71025189df64"
-      },
-      {
-        "path": "transfer/aad_autoinit_ca519e67.bundle",
-        "size_bytes": 7426279,
-        "sha256": "c5a62d9c85af757a7da42161a28dc403270584eb6153880314320b5a43c8e55a"
-      },
-      {
-        "path": "transfer/aad_autoinit_ca97e4e6.bundle",
-        "size_bytes": 28801283,
-        "sha256": "fd4d17d84c642544ca1193224e8eeb6b1e2a0aa4180e861d09b8ff1318670f71"
-      },
-      {
-        "path": "transfer/aad_autoinit_cb656a9a.bundle",
-        "size_bytes": 22948516,
-        "sha256": "b9d01d4a811103b5be7a4bc5db893a4cfa4e0e5ea5dd7a52f5fbd2b1c6e399b3"
-      },
-      {
-        "path": "transfer/aad_autoinit_cc4248bd.bundle",
-        "size_bytes": 55902581,
-        "sha256": "6fe52ba0e58781b08151f734b42de0211a2d66f659b80cd9c9ad92006c99e37d"
-      },
-      {
-        "path": "transfer/aad_autoinit_cc5f7aea.bundle",
-        "size_bytes": 19567749,
-        "sha256": "fda46d2f293489a3762ebf2dfd7bbecdcddcf05345af3dcf876ef886bb2b4f39"
-      },
-      {
-        "path": "transfer/aad_autoinit_ce5ebe14.bundle",
-        "size_bytes": 32399375,
-        "sha256": "6d67ce7965146bbbfeaee6af60de669205c7caad29f967c2013e75d7ca3cd867"
-      },
-      {
-        "path": "transfer/aad_autoinit_cf041844.bundle",
-        "size_bytes": 18486128,
-        "sha256": "7bf1a60c433d15799b9b05ecd5e5e6e209783cada4417f4f51011940f3962b64"
-      },
-      {
-        "path": "transfer/aad_autoinit_d217977d.bundle",
-        "size_bytes": 3893442,
-        "sha256": "ace19d0b89185d310bce6251d4ed997c79face1eaed3e8ef8354e3e5392d3d19"
-      },
-      {
-        "path": "transfer/aad_autoinit_d39f025c.bundle",
-        "size_bytes": 22919692,
-        "sha256": "1a5a56d36c9fe8550cc3781e3322a4c9245da10290f33d3cce3fbfbd610a6fc1"
-      },
-      {
-        "path": "transfer/aad_autoinit_d5c75485.bundle",
-        "size_bytes": 22917519,
-        "sha256": "93ee37aa5f5dacbeee5edbe56aa5f2facff3ce0eff19e76813fb40a120ea838b"
-      },
-      {
-        "path": "transfer/aad_autoinit_d64490ee.bundle",
-        "size_bytes": 31959035,
-        "sha256": "b9437033274f22a74443de5fb2449630ee3ccf1bebb325db9a94bd33b7cb2dbe"
-      },
-      {
-        "path": "transfer/aad_autoinit_d64ac6ba.bundle",
-        "size_bytes": 4161938,
-        "sha256": "6e9bcad31d6ec017a4689e68349e2d7e12c1e38b65c391418b0c7bd52738d14f"
-      },
-      {
-        "path": "transfer/aad_autoinit_d71b80ca.bundle",
-        "size_bytes": 18677818,
-        "sha256": "c5ddd0faad29ddb38755c005c59a48c14d00828eee5b0cae431d1c6d8b156848"
-      },
-      {
-        "path": "transfer/aad_autoinit_d72a9b46.bundle",
-        "size_bytes": 56873575,
-        "sha256": "5c7a310b0cb3422f450680368300ad0ddb061b8e1f8ba832455702a6bf6e9a6b"
-      },
-      {
-        "path": "transfer/aad_autoinit_d83bb178.bundle",
-        "size_bytes": 38371306,
-        "sha256": "350355499926d5555f40836d79937da0f02f9b1ba65ad40ae2571975afdad977"
-      },
-      {
-        "path": "transfer/aad_autoinit_d85f24b3.bundle",
-        "size_bytes": 34830285,
-        "sha256": "2bcbf19029bca784f4dd021e50c670d131f3c4f77d88effd418055b930db5f86"
-      },
-      {
-        "path": "transfer/aad_autoinit_d8b9b883.bundle",
-        "size_bytes": 30122032,
-        "sha256": "379b770f51a2c82881c530eb96890ed89fb79ce34c42594a0bfc0b33ef90dcdc"
-      },
-      {
-        "path": "transfer/aad_autoinit_d8e90df8.bundle",
-        "size_bytes": 23301524,
-        "sha256": "29e452469ffd65899485d7d20dda4d15994ed40f8ffa02ae6f5e0931118ad6cd"
-      },
-      {
-        "path": "transfer/aad_autoinit_d8f095c5.bundle",
-        "size_bytes": 38649421,
-        "sha256": "cbc80c60172487f65fb890e0dbb51dca721d8954ac98f02a636840e8ea7312eb"
-      },
-      {
-        "path": "transfer/aad_autoinit_d91bef1c.bundle",
-        "size_bytes": 30395158,
-        "sha256": "20e56e5639d35629278d6bcc3bb6909a579d3cb365f1fa42fb514e68fe43f767"
-      },
-      {
-        "path": "transfer/aad_autoinit_d94216b8.bundle",
-        "size_bytes": 18267099,
-        "sha256": "0fa60526e1d9e5ad6b1f367edd2edb912d8d89a0381e2b46a442726f35cb927c"
-      },
-      {
-        "path": "transfer/aad_autoinit_d968b201.bundle",
-        "size_bytes": 6121983,
-        "sha256": "c0d63dc6d1d9179af58f5bd9d1b1a09c400a0c74a275e3e4fcd64d81596d64b0"
-      },
-      {
-        "path": "transfer/aad_autoinit_d9e620f2.bundle",
-        "size_bytes": 18339869,
-        "sha256": "d07ab6b59d3f9e7f800a48e2c08000a71df71f8fddc7c955a7a9b16107b24595"
-      },
-      {
-        "path": "transfer/aad_autoinit_da594726.bundle",
-        "size_bytes": 55588535,
-        "sha256": "594efe4f0d0518d23036ce71e8f38dd0f905b8f524309495f341f47d5823cd48"
-      },
-      {
-        "path": "transfer/aad_autoinit_db480621.bundle",
-        "size_bytes": 38320295,
-        "sha256": "87563486418e1406da4e85f53579eca9d203177b39686992f757cbb90f30df7a"
-      },
-      {
-        "path": "transfer/aad_autoinit_db8bf1f7.bundle",
-        "size_bytes": 4020654,
-        "sha256": "f69d4120031000007713c35a23e7e81c1af2cd6c9689cc54c04048b78c9b03de"
-      },
-      {
-        "path": "transfer/aad_autoinit_dc8fff3a.bundle",
-        "size_bytes": 22820267,
-        "sha256": "9a3566f0ae3fc57d843b150ee9ba30843d508f6dda1d497147896edd97f0fb4d"
-      },
-      {
-        "path": "transfer/aad_autoinit_dcb9164d.bundle",
-        "size_bytes": 33261645,
-        "sha256": "cb33d9df2f607543845061b82bb8b25df7271f02e140c9b5244a3522d8d92c2f"
-      },
-      {
-        "path": "transfer/aad_autoinit_deac14cb.bundle",
-        "size_bytes": 34541976,
-        "sha256": "f827cad15b061e2bed8cb987bc3c28d6bcc76df7db403a5295a0aefb7eeb3c08"
-      },
-      {
-        "path": "transfer/aad_autoinit_ded8b7a8.bundle",
-        "size_bytes": 39216802,
-        "sha256": "f2d9d9189156aadc10eeaf9ccfa4b2556d68191689abff2dd82e596fe603c935"
-      },
-      {
-        "path": "transfer/aad_autoinit_deeb17c9.bundle",
-        "size_bytes": 34598827,
-        "sha256": "64ee32d687ceed15da26385376ef16de02d3e95487e0628c55723e836a621a5f"
-      },
-      {
-        "path": "transfer/aad_autoinit_df66254f.bundle",
-        "size_bytes": 15506554,
-        "sha256": "e2322f9c491ac242a65aefd0ee8efa189d063a4e9190f7f0e026799fdddd8969"
-      },
-      {
-        "path": "transfer/aad_autoinit_dff810e8.bundle",
-        "size_bytes": 25514949,
-        "sha256": "f5eae8d9dcf3664c7f6fb8be7eb8ab035e03b48c1798b72779b505a93d588a5b"
-      },
-      {
-        "path": "transfer/aad_autoinit_e0b5b30c.bundle",
-        "size_bytes": 12870524,
-        "sha256": "6352697d366ba7a6242f282b5aaaad66ac17be37c1a8497e43cb9f921cfa1266"
-      },
-      {
-        "path": "transfer/aad_autoinit_e2091225.bundle",
-        "size_bytes": 3705074,
-        "sha256": "fe0dfabf0886dbb1b4968ac4deedf695df3b25280287c30ee6f4c74227c28d00"
-      },
-      {
-        "path": "transfer/aad_autoinit_e2e06663.bundle",
-        "size_bytes": 15184792,
-        "sha256": "ce7664dcebb93ab2c8f861922aee2996ca276101af623d6f667748876741479f"
-      },
-      {
-        "path": "transfer/aad_autoinit_e2eec882.bundle",
-        "size_bytes": 22915371,
-        "sha256": "ca90eb60f3ee4dad89bf89ef5a203fa581e35a545f4ed4c52071da3fb0cca0bc"
-      },
-      {
-        "path": "transfer/aad_autoinit_e3ce7b73.bundle",
-        "size_bytes": 32526872,
-        "sha256": "6bfbc192759cb85eba3aca041c48b71c21d7bcb5ed824074da1117e80d815679"
-      },
-      {
-        "path": "transfer/aad_autoinit_e477fb02.bundle",
-        "size_bytes": 18310213,
-        "sha256": "e47abb1713fd58c3db72df575208147e2cda0960c02c13dcbdd6ff4d8a3d7631"
-      },
-      {
-        "path": "transfer/aad_autoinit_e6dea2a4.bundle",
-        "size_bytes": 22983641,
-        "sha256": "3fbbfcef528d2b30aca69274863415af5919795cc9da808353e1649548b49fe8"
-      },
-      {
-        "path": "transfer/aad_autoinit_e714c116.bundle",
-        "size_bytes": 56823896,
-        "sha256": "227631822d06808bcb5248594ace7df286f5a5f28a6314db057930229e1f202e"
-      },
-      {
-        "path": "transfer/aad_autoinit_e7d0daf1.bundle",
-        "size_bytes": 22873795,
-        "sha256": "78035259b9272dc9bf13b59b8af7b412757aeb92a3eaf0f85b1fe1daa118e6a6"
-      },
-      {
-        "path": "transfer/aad_autoinit_e8dc921d.bundle",
-        "size_bytes": 55999506,
-        "sha256": "d9eb4453f71ffa66e24db0d4da0c4c5b7828c99d647080b5f91991b862c055f5"
-      },
-      {
-        "path": "transfer/aad_autoinit_ea754349.bundle",
-        "size_bytes": 14114166,
-        "sha256": "4b309c660274adb5c3600f2df8ada60ee1d8445c6dcbf801a23ad4bc696259b2"
-      },
-      {
-        "path": "transfer/aad_autoinit_eb6d5d25.bundle",
-        "size_bytes": 22968957,
-        "sha256": "cbfb4c9ccc2a728d0551ecb09bde45f429426c1e8f20654dc90a523c80717c83"
-      },
-      {
-        "path": "transfer/aad_autoinit_ee9832d8.bundle",
-        "size_bytes": 30203530,
-        "sha256": "5a7b4eb19d75522e3efdb438f1c317def24a97c9aaf8b86128e089eb46af1407"
-      },
-      {
-        "path": "transfer/aad_autoinit_eec1bb2a.bundle",
-        "size_bytes": 9425438,
-        "sha256": "91d5e6b03d552656b7d9ee1c8b6712282ceb54b45a55a2c9b1989de5abd09b53"
-      },
-      {
-        "path": "transfer/aad_autoinit_ef1aac41.bundle",
-        "size_bytes": 28944252,
-        "sha256": "2b7d34c288236283d3930e8c0774fa29e039b07a72b676240c10b76ef70019a2"
-      },
-      {
-        "path": "transfer/aad_autoinit_ef4353c9.bundle",
-        "size_bytes": 5925614,
-        "sha256": "d6ad96961908acf832d4ae56ca97b87c6b23b9da4e6d8d5633d85e551e8d5f5d"
-      },
-      {
-        "path": "transfer/aad_autoinit_f0bcdcb3.bundle",
-        "size_bytes": 50343504,
-        "sha256": "96c83aad25cff5b03d45470f131207ef2e12998c6064f592b5183dca00bc30c6"
-      },
-      {
-        "path": "transfer/aad_autoinit_f27ee093.bundle",
-        "size_bytes": 38488948,
-        "sha256": "8517fa1913327e593140caa8dad4ccc58adabb4fe6de5ce7164cbf907fd50eb7"
-      },
-      {
-        "path": "transfer/aad_autoinit_f3597146.bundle",
-        "size_bytes": 18572061,
-        "sha256": "c9942c609c6a7b0d3c662a1a0d3a44ffcc8ab610571f246406c3653e88282a42"
-      },
-      {
-        "path": "transfer/aad_autoinit_f37578a7.bundle",
-        "size_bytes": 46799022,
-        "sha256": "b07a070dbd9e0a30d140cf14e65ecb504167fb8f9e751160e4f4b70aa30954be"
-      },
-      {
-        "path": "transfer/aad_autoinit_f3a783a8.bundle",
-        "size_bytes": 19508682,
-        "sha256": "ff255210efde2e3433d8c2fbbeff679e9dbce817a374ba5d6e2d85c0eec00cf7"
-      },
-      {
-        "path": "transfer/aad_autoinit_f418b56c.bundle",
-        "size_bytes": 14238133,
-        "sha256": "eb2af19a952d776036a39308b1d60f12a9a14e0a046c74b5b1d93ecf55ac54d7"
-      },
-      {
-        "path": "transfer/aad_autoinit_f4afe5c5.bundle",
-        "size_bytes": 18703070,
-        "sha256": "2029a5838442f4f8388649062785e28bdc2bb31ce2c9956bde6c5f40cde43e6e"
-      },
-      {
-        "path": "transfer/aad_autoinit_f54254a2.bundle",
-        "size_bytes": 7406322,
-        "sha256": "cd6696b0be00af3fc17131c4fb2bd560d984b388568a86d9e55e3819457bbba1"
-      },
-      {
-        "path": "transfer/aad_autoinit_f5e25228.bundle",
-        "size_bytes": 48334817,
-        "sha256": "03d03c20a1be77a5dc559a30ef87bc15e0ec9563a3bf703cf1fab1013d9d13f4"
-      },
-      {
-        "path": "transfer/aad_autoinit_f7e6a755.bundle",
-        "size_bytes": 38056593,
-        "sha256": "f7ce89c87fe061f6f40b362e066533c8915fbe3f22dbd01a3d504d146cba0cdc"
-      },
-      {
-        "path": "transfer/aad_autoinit_f8884680.bundle",
-        "size_bytes": 52053370,
-        "sha256": "4137d1f76aafa0380b15869b94ee08c6180789bcda79c4aab7a757654dd84daf"
-      },
-      {
-        "path": "transfer/aad_autoinit_f93d83a7.bundle",
-        "size_bytes": 47043762,
-        "sha256": "6eed0ef652967340705f4b54ad83178db095630b5eb9336b227126e65bb53947"
-      },
-      {
-        "path": "transfer/aad_autoinit_f95f3a6e.bundle",
-        "size_bytes": 18303637,
-        "sha256": "b91c34dfc212c31eea0a917246ff02a789ae25462cdad6ae16e3eec4698eda81"
-      },
-      {
-        "path": "transfer/aad_autoinit_f9759dc6.bundle",
-        "size_bytes": 55579473,
-        "sha256": "5a26a2cc3e68042b76b2a4e2f91c2aac5822577e1ef87a6c17501828112b2c02"
-      },
-      {
-        "path": "transfer/aad_autoinit_fa73aa8d.bundle",
-        "size_bytes": 22811904,
-        "sha256": "c19b9004c3a54af7596c4c878f2ddfeb4b60b9c3a44634da4ced568ebbbc6626"
-      },
-      {
-        "path": "transfer/aad_autoinit_fbae4636.bundle",
-        "size_bytes": 56609017,
-        "sha256": "eca7a882b6356800684e9f35fc02eb1d8c37122139fb013d6330b852c3c92a66"
-      },
-      {
-        "path": "transfer/aad_autoinit_fcdacb02.bundle",
-        "size_bytes": 7160007,
-        "sha256": "19744a9749d7f009a3af8b84ba66f590be8b3dbf2fd8b9e6aac30442be13a469"
-      },
-      {
-        "path": "transfer/aad_autoinit_fcf119fe.bundle",
-        "size_bytes": 4485351,
-        "sha256": "cb2240cca59a7c2111a097b182dab6d150aee751cacbc9990c569ea57440d24e"
-      },
-      {
-        "path": "transfer/aad_autoinit_fd2fb13d.bundle",
-        "size_bytes": 28795686,
-        "sha256": "105f683c486d27fab27bc3dd5de342cc97fe807ded720b6ca972a99b903f4437"
-      },
-      {
-        "path": "transfer/aad_autoinit_fd33992d.bundle",
-        "size_bytes": 18398922,
-        "sha256": "8bfba7b909223d803775b11fbf1f7599ca5b421c5b286af3b7f608215bdc56e7"
-      },
-      {
-        "path": "transfer/aad_autoinit_fe455abb.bundle",
-        "size_bytes": 3950025,
-        "sha256": "98a7bf1868c417d8822f9fffc7f68bca14be235100de3d990cbbe7f5144e1431"
-      },
-      {
-        "path": "transfer/aad_autoinit_fef6bb64.bundle",
-        "size_bytes": 30250020,
-        "sha256": "06b4229ca7a92b0aab9766b8f08a46c09514af43e128f59a2ef65556f9ff05db"
-      },
-      {
-        "path": "transfer/aad_d0_07a5533.bundle",
-        "size_bytes": 1803885,
-        "sha256": "d664e71ede9f22632d116119ff89f838d4d359c9d05aef3131348598a87a1707"
-      },
-      {
-        "path": "transfer/aad_e2diag_f480350.bundle",
-        "size_bytes": 1717270,
-        "sha256": "f160bb64c3fb89a605b1beb6b3f73768b71df6446b73375db55ccfa553800d0b"
-      },
-      {
-        "path": "transfer/aad_e3_81d668a9.bundle",
-        "size_bytes": 1937335,
-        "sha256": "9b64e84ef8d1dd6b98a2132fbbd9c900a8df8dfb4e82accd477f193eab5ec186"
-      },
-      {
-        "path": "transfer/aad_e4_1dafec29.bundle",
-        "size_bytes": 1990291,
-        "sha256": "9fff016fd97d27ba7f1af6279177ed249ba7b02611677a88ad0689a8fde0cee2"
-      },
-      {
-        "path": "transfer/aad_e4_b57b6c0d.bundle",
-        "size_bytes": 1998074,
-        "sha256": "a9c8a6b7939ce2fa76950d2061bc6c077f9d923ff3da0dc72658ff1fca787a29"
-      },
-      {
-        "path": "transfer/aad_e5_91cd1cdc.bundle",
-        "size_bytes": 2121954,
-        "sha256": "9335e9e9e0376340f7dc709a38f7833ed39d5950df851dc271b0640d3d682b73"
-      },
-      {
-        "path": "transfer/aad_e5b_40f81222.bundle",
-        "size_bytes": 2151199,
-        "sha256": "11342cb9cf42b9a7db4a45d941bec8a7d89b987f2eebd5984b66331a83561c61"
-      },
-      {
-        "path": "transfer/aad_e5c_917fc344.bundle",
-        "size_bytes": 2154330,
-        "sha256": "7e45bac45bc99c626b34491ff1593c77e29195843dcdf542fa2724f0b1940e6c"
-      },
-      {
-        "path": "transfer/aad_e5d_a4935c45.bundle",
-        "size_bytes": 2169014,
-        "sha256": "1434f7146afeed90a199330e4640b2d2ffe8892b8a182a97b074a804b00990a3"
-      },
-      {
-        "path": "transfer/aad_e5e_83ac95d1.bundle",
-        "size_bytes": 2186315,
-        "sha256": "6cabfa14f85c206d10e89e0ebb90e4844198ebc553cba3a686a6195fd20fc6c2"
-      },
-      {
-        "path": "transfer/aad_e5e_f6abb508.bundle",
-        "size_bytes": 2184179,
-        "sha256": "12c769350797c3f1dec9d098519c5234d7695cf7ae79bd8d8ee9e30468053898"
-      },
-      {
-        "path": "transfer/aad_e5f_c94a96ae.bundle",
-        "size_bytes": 2187212,
-        "sha256": "0c028e2633d602f7d43bc62d97e414d77fc835e03cc95434c0c64c3d96b27d67"
-      },
-      {
-        "path": "transfer/aad_e5g_6f0485d9.bundle",
-        "size_bytes": 2198026,
-        "sha256": "07e1b04895c7d774fd1adeade0f8b200d1ec83af3fa3509e11ce2a9526667a97"
-      },
-      {
-        "path": "transfer/aad_e5g_d1e523be.bundle",
-        "size_bytes": 2204427,
-        "sha256": "289a299d17abe11f68561141c366a9e128f4883e6a34d23974ecfd30302c0c15"
-      },
-      {
-        "path": "transfer/aad_e5h_7ed009e7.bundle",
-        "size_bytes": 2253574,
-        "sha256": "852783330bcc8c0dfda17eb301613a8e816edec4ec8ea8f4604f7a2d0e59f3d3"
-      },
-      {
-        "path": "transfer/aad_e5i_8c852235.bundle",
-        "size_bytes": 2248885,
-        "sha256": "51b81fd93b608936ba16ed40f58e460c18a5265c8dba37f01b3be2a7e60ba24d"
-      },
-      {
-        "path": "transfer/aad_e5p_356da634.bundle",
-        "size_bytes": 2083322,
-        "sha256": "c4845dbd94164b331c3b91aced001e33eea999232e4f3eaa2cad44b100f51e4b"
-      },
-      {
-        "path": "transfer/aad_e5p_6671a7be.bundle",
-        "size_bytes": 2079572,
-        "sha256": "6a7f39915a7b11ba38b9823d75643e1e3d613dfe1dfd19eade4003971f555a25"
-      },
-      {
-        "path": "transfer/aad_e5p_ba53095b.bundle",
-        "size_bytes": 2074064,
-        "sha256": "b74ce565f0dfb873b6202b9bdb62e32ef12d597dd5061b1bd3361b66848d5e5a"
-      },
-      {
-        "path": "transfer/aad_e6_0eaa633f.bundle",
-        "size_bytes": 2299056,
-        "sha256": "429b7d56051339c826d48e98024b3560c0f8ac614eab0b25d7b24174341504f1"
-      },
-      {
-        "path": "transfer/aad_e6_ad250cd1.bundle",
-        "size_bytes": 2320890,
-        "sha256": "aa3739f7b4b8a7d5ac438eedca9cf1f6c689540d9c37b5c9adce5aee9daa67d5"
-      },
-      {
-        "path": "transfer/aad_e6_ca7df630.bundle",
-        "size_bytes": 2317080,
-        "sha256": "05aae60705ae3ac9a02fe29ed650c8fa226758bf760ffce3c411a72bbe4a69f6"
-      },
-      {
-        "path": "transfer/aad_e6_ea890af7.bundle",
-        "size_bytes": 2236973,
-        "sha256": "652ee09eb290aa154b6c3d14cb8a6e90bdcf9ae439189489083eab939c028665"
-      },
-      {
-        "path": "transfer/aad_e6b_2c646322.bundle",
-        "size_bytes": 2397731,
-        "sha256": "f4f695620d5b5c555a46f3419b6753ec33263d41a8164587d2980590646d6c91"
-      },
-      {
-        "path": "transfer/aad_e6b_6375e299.bundle",
-        "size_bytes": 2413789,
-        "sha256": "35c1641f3fe85b4d82491f9d2c1732331bf42bfae5ff2b5f3af66987e8af8084"
-      },
-      {
-        "path": "transfer/aad_e7_97cd963d.bundle",
-        "size_bytes": 2679543,
-        "sha256": "d3c0c3cdde3e407523519fa772ab6d310670688113d962a4afd14bea0e7a75c7"
-      },
-      {
-        "path": "transfer/aad_e8a_2c223ac3.bundle",
-        "size_bytes": 2908859,
-        "sha256": "24ca02db9b1e3bb5adb922c042898923c5a0af27e4bdd3608eff3662f3ff4bce"
-      },
-      {
-        "path": "transfer/aad_e8a_4d293440.bundle",
-        "size_bytes": 2887060,
-        "sha256": "cf768412be9328b3796889a7f78260aa82bea421117956464aa62ddc5d360cf4"
-      },
-      {
         "path": "transfer/aad_e8a_75a30746.bundle",
         "size_bytes": 2890756,
         "sha256": "cb3868119f6372d0ea78d3c7a9f7fbe107758e5ff51f704533c2f6ebaeec1a1a"
-      },
-      {
-        "path": "transfer/aad_e8a_90647597.bundle",
-        "size_bytes": 2892288,
-        "sha256": "caf1229e076f2930744bb4c34e8c21b382b874c1805cc0c99937114caaf99f31"
-      },
-      {
-        "path": "transfer/aad_e8a_927cb7b8.bundle",
-        "size_bytes": 2880603,
-        "sha256": "fb624f02cf70688e8fec3838ed6f1a4a8834a1d98dd196e8899bbe666f62ea45"
-      },
-      {
-        "path": "transfer/aad_e8a_f8dac2e7.bundle",
-        "size_bytes": 2907205,
-        "sha256": "7448b7e8cd36585627db92ae1615debe6ba8b9780b0e69118b38df6b079c383d"
-      },
-      {
-        "path": "transfer/aad_e8b_6539d6b8.bundle",
-        "size_bytes": 2937815,
-        "sha256": "2f77d730291c7744fb1fb9e63e9c3b4c9005c6fffcc8e2f8147399e7ed605581"
-      },
-      {
-        "path": "transfer/aad_e8b_6b9d4416.bundle",
-        "size_bytes": 3137026,
-        "sha256": "3ca8d659998045a0648999a76ac019c685c30c61864ae73c64549d8a026633c0"
-      },
-      {
-        "path": "transfer/aad_e8b_ae6dda30.bundle",
-        "size_bytes": 3010610,
-        "sha256": "bfd275476d44c9e2a3b16e33227789b602a0a47357bd9ab70b193d798b5e32ba"
-      },
-      {
-        "path": "transfer/aad_e8b_c9517bea.bundle",
-        "size_bytes": 3082392,
-        "sha256": "2d766a3346db6f3ce62e175599c0b7c3beade6edd4279ac85288703a1bf2364d"
-      },
-      {
-        "path": "transfer/aad_e8b_ccba0fbf.bundle",
-        "size_bytes": 3074809,
-        "sha256": "35579cb8d0982d35e159f3a99bb6fcb492d7042decc6be54663e5a2203262f07"
-      },
-      {
-        "path": "transfer/aad_e8b_d3bc2b63.bundle",
-        "size_bytes": 3007022,
-        "sha256": "41af2245911261115fa95bd6ca8eb6f3847068c0071fbd34ea08ab09035e9847"
-      },
-      {
-        "path": "transfer/aad_e8b_d77ba7ca.bundle",
-        "size_bytes": 2915451,
-        "sha256": "06263adcd3b6ec9d61c0802a55cfb3b6eee710be7b0cbb8df09e2831102a9009"
-      },
-      {
-        "path": "transfer/aad_e8b_df954db1.bundle",
-        "size_bytes": 2960773,
-        "sha256": "bc2242f0698b0f4508afa137e3363ca10209565c8b41d0378e423f29285eba7e"
-      },
-      {
-        "path": "transfer/aad_e8b_ee20fa91.bundle",
-        "size_bytes": 3072468,
-        "sha256": "e6ff6006232529e113bb23b506fcd796cc11209883033544fd5521dddb229006"
-      },
-      {
-        "path": "transfer/aad_e8b_f55ae68b.bundle",
-        "size_bytes": 3090858,
-        "sha256": "830cd98603849120087de75fcbd5ea25c6bbfb3b1ae0dd0c060c558b7e6ba4a5"
-      },
-      {
-        "path": "transfer/aad_p0asst_5f0e6f4.bundle",
-        "size_bytes": 1773169,
-        "sha256": "3b24da336bf09509687e096eeb0bbf1716dea8a6f2af6e57b09d975974904358"
-      },
-      {
-        "path": "transfer/aad_p0asst_ba07846.bundle",
-        "size_bytes": 1829880,
-        "sha256": "6e33fdb49810648cf238b78f9d84556d77ba59ce2fb5a475c10b633925712982"
-      },
-      {
-        "path": "transfer/aad_p0asst_ecdd277.bundle",
-        "size_bytes": 1824611,
-        "sha256": "d72b1ab77d33a2af321078998a62823bc9ebe2261b0056fb63eeb9c9d30abfce"
-      },
-      {
-        "path": "transfer/aad_p2_fde7209.bundle",
-        "size_bytes": 1813319,
-        "sha256": "778db5b257fadff71f8eae83953f4d2ec27f1b62c0806aef10fad6f0d674c0e2"
       },
       {
         "path": "transfer/e5_quota_probe.txt",
@@ -14439,6 +12494,108 @@
   ],
   "checkpoints": [
     {
+      "canonical_name": "589acf286481f495",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260726/final/589acf286481f495",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260726/final/589acf286481f495/model.safetensors"
+      ],
+      "experiment": "SOB1",
+      "role": "a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "the initializations were the inputs of phase 2's six recovery runs (plans/training_plan_<arm>.json; phase 2 COMPLETE, its kind closed, so no run consumes them now); a final is a measured endpoint of the completed study (results/study_completion.json, 2026-11-25 COMPLETE)",
+      "architecture": {
+        "num_hidden_layers": 36,
+        "hidden_size": 2560,
+        "intermediate_size": 3840,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 8068316426,
+      "size_human": "7.514 GiB",
+      "weights_sha256": "589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b",
+      "config_sha256": "072f1d3392c8a9b707995a3eaf8683ae56ca10dc86fc4adb37c192eb967d2ddf",
+      "referenced_by": [
+        "docs/stages/stage-1/single_operator_budget/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/closeout/phase2_completion.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260726/evaluation_non_thinking/completion.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260726/evaluation_non_thinking/packages.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260726/evaluation_thinking/completion.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260726/evaluation_thinking/packages.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260726/final.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/report.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/units.json",
+        "logs/stages/stage-1/single_operator_budget/storage/local_retention_phase2.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
+      "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "64292e508e2d6d2e",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260801/final/64292e508e2d6d2e",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260801/final/64292e508e2d6d2e/model.safetensors"
+      ],
+      "experiment": "SOB1",
+      "role": "a ~2B single-operator initialization (bf16) or its mapping, or a phase-2 final",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "the initializations were the inputs of phase 2's six recovery runs (plans/training_plan_<arm>.json; phase 2 COMPLETE, its kind closed, so no run consumes them now); a final is a measured endpoint of the completed study (results/study_completion.json, 2026-11-25 COMPLETE)",
+      "architecture": {
+        "num_hidden_layers": 36,
+        "hidden_size": 2560,
+        "intermediate_size": 3840,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 8068316425,
+      "size_human": "7.514 GiB",
+      "weights_sha256": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e",
+      "config_sha256": "072f1d3392c8a9b707995a3eaf8683ae56ca10dc86fc4adb37c192eb967d2ddf",
+      "referenced_by": [
+        "docs/stages/stage-1/single_operator_budget/REPORT.md",
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/closeout/phase2_completion.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260801/evaluation_non_thinking/completion.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260801/evaluation_non_thinking/packages.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260801/evaluation_thinking/completion.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260801/evaluation_thinking/packages.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/ffn_attention-s20260801/final.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/report.json",
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/units.json",
+        "logs/stages/stage-1/single_operator_budget/storage/local_retention_phase2.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
+      "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
       "canonical_name": "00b430fdcef27257",
       "kind": "checkpoint",
       "store": "external_store",
@@ -14485,7 +12642,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
       "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
-      "never_delete_clause": "the four finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5)",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
       "protected": true,
       "disposition": "keep"
     },
@@ -14536,7 +12693,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
       "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
-      "never_delete_clause": "the four finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5)",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
       "protected": true,
       "disposition": "keep"
     },
@@ -14566,6 +12723,8 @@
       "weights_sha256": "e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98",
       "config_sha256": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
       "referenced_by": [
+        "configs/stages/stage-1/depth_merge/design.json",
+        "configs/stages/stage-6/depth_recurrence/design.json",
         "docs/stages/stage-1/single_operator_budget/REPORT.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -14575,9 +12734,7 @@
         "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260801/evaluation_non_thinking/packages.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260801/evaluation_thinking/completion.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260801/evaluation_thinking/packages.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260801/final.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/report.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/units.json"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260801/final.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -14587,7 +12744,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
       "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
-      "never_delete_clause": "the four finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5)",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
       "protected": true,
       "disposition": "keep"
     },
@@ -14617,6 +12774,8 @@
       "weights_sha256": "5635c33e6b414bd0bd361c450f132c41050e69c68cd948a734c2bfd27a86f80b",
       "config_sha256": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
       "referenced_by": [
+        "configs/stages/stage-1/depth_merge/design.json",
+        "configs/stages/stage-6/depth_recurrence/design.json",
         "docs/stages/stage-1/single_operator_budget/REPORT.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -14626,9 +12785,7 @@
         "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260726/evaluation_non_thinking/packages.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260726/evaluation_thinking/completion.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260726/evaluation_thinking/packages.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260726/final.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/report.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/units.json"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/depth_only-s20260726/final.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -14638,7 +12795,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
       "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
-      "never_delete_clause": "the four finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5)",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
       "protected": true,
       "disposition": "keep"
     },
@@ -14668,6 +12825,7 @@
       "weights_sha256": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14",
       "config_sha256": "80e72c4b2b5f27edaddaa933cb50f57be664c252e94793c6c399a42e529941a1",
       "referenced_by": [
+        "docs/stages/stage-1/single_operator_budget/REPORT.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
@@ -14678,8 +12836,7 @@
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/ffn_attention/records/build.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/ffn_attention/records/relay.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/report.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/report.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/units.json"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_ffn_attention_20261124_033254/evidence/report.json"
       ],
       "relay_path": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/model.safetensors",
       "relay_verified": true,
@@ -14689,7 +12846,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
       "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
-      "never_delete_clause": "the four finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5)",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
       "protected": true,
       "disposition": "keep"
     },
@@ -14719,6 +12876,7 @@
       "weights_sha256": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
       "config_sha256": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8",
       "referenced_by": [
+        "docs/stages/stage-1/single_operator_budget/REPORT.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
@@ -14729,8 +12887,7 @@
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_residual_width_20261121_074426/evidence/report.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_residual_width_20261121_074426/evidence/units.json"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_residual_width_20261121_074426/evidence/report.json"
       ],
       "relay_path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors",
       "relay_verified": true,
@@ -14740,7 +12897,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
       "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
-      "never_delete_clause": "the four finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5)",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
       "protected": true,
       "disposition": "keep"
     },
@@ -14770,6 +12927,9 @@
       "weights_sha256": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
       "config_sha256": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019",
       "referenced_by": [
+        "configs/stages/stage-1/depth_merge/design.json",
+        "configs/stages/stage-6/depth_recurrence/design.json",
+        "docs/stages/stage-1/single_operator_budget/REPORT.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
@@ -14778,10 +12938,7 @@
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/closeout/phase1_completion.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/depth_only/init_record.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/depth_only/records/build.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/depth_only/records/relay.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/report.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/report.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/evidence/units.json"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/depth_only/records/relay.json"
       ],
       "relay_path": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/init/model.safetensors",
       "relay_verified": true,
@@ -14791,7 +12948,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
       "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
-      "never_delete_clause": "the four finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5)",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
       "protected": true,
       "disposition": "keep"
     },
@@ -15051,6 +13208,7 @@
       "referenced_by": [
         "configs/shared/baselines/initialization_forward_baseline_v1.json",
         "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/initialization_forward_baseline_v3.json",
         "docs/shared/STAGE0_HANDOFF.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/storage/devbox_cleanup_20261119.json",
@@ -15059,8 +13217,7 @@
         "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
         "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
         "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json"
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -15193,6 +13350,7 @@
       "referenced_by": [
         "configs/shared/baselines/initialization_forward_baseline_v1.json",
         "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/initialization_forward_baseline_v3.json",
         "logs/index.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -15201,8 +13359,7 @@
         "logs/stages/stage-1/families/d_series/closeout/programme_closeout.json",
         "logs/stages/stage-1/families/d_series/plans/d_series_shared_eval_v1.json",
         "logs/stages/stage-1/phase_d1/README.md",
-        "logs/stages/stage-1/phase_d1/current.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/closeout/outcome.json"
+        "logs/stages/stage-1/phase_d1/current.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -15235,6 +13392,7 @@
       "referenced_by": [
         "configs/shared/baselines/initialization_forward_baseline_v1.json",
         "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/initialization_forward_baseline_v3.json",
         "logs/index.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -15243,8 +13401,7 @@
         "logs/maintenance/storage/devbox_cleanup_20261120.json",
         "logs/stages/stage-1/families/d_series/closeout/programme_closeout.json",
         "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json",
-        "logs/stages/stage-1/phase_d1/README.md",
-        "logs/stages/stage-1/phase_d1/current.json"
+        "logs/stages/stage-1/phase_d1/README.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -15388,6 +13545,7 @@
       "referenced_by": [
         "configs/shared/baselines/initialization_forward_baseline_v1.json",
         "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/initialization_forward_baseline_v3.json",
         "logs/budget/decisions.md",
         "logs/index.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
@@ -15396,8 +13554,7 @@
         "logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
         "logs/stages/stage-1/families/d_series/analyses/d1_shared_evidence_audit.json",
         "logs/stages/stage-1/families/d_series/closeout/programme_closeout.json",
-        "logs/stages/stage-1/families/d_series/plans/d_series_shared_eval_v1.json",
-        "logs/stages/stage-1/phase_d1/README.md"
+        "logs/stages/stage-1/families/d_series/plans/d_series_shared_eval_v1.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -15430,6 +13587,7 @@
       "weights_sha256": "aeaaca73bb7322457085b1a250277226b0afb0627d53784851dea7bad8165a37",
       "config_sha256": null,
       "referenced_by": [
+        "docs/stages/stage-1/single_operator_budget/REPORT.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/relay_weight_audit_20261120.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261120.json",
@@ -15440,8 +13598,7 @@
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/build.json",
         "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/records/relay.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_residual_width_20261121_074426/evidence/report.json",
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_residual_width_20261121_074426/evidence/units.json"
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_train_residual_width_20261121_074426/evidence/report.json"
       ],
       "relay_path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/tensors.safetensors",
       "relay_verified": true,
@@ -15451,7 +13608,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",
       "reconstruction_cost": "one L40S, 0.2-1.5 h per arm",
-      "never_delete_clause": "the four finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5)",
+      "never_delete_clause": "the six finals here are their only copies (relay copies retired, tombstones relay_sob1_train_*; FFN + attention's two moved from the relay 2026-11-26, maintainer storage option a) and the endpoints the report measured, kept at their approved placement; the three initializations (here and on the relay) are kept until the next round's plan is fixed (maintainer, 2026-11-26), and their retirement is then decided by that plan's explicit consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison 2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
       "protected": true,
       "disposition": "keep"
     },
@@ -15474,6 +13631,7 @@
       "referenced_by": [
         "configs/shared/baselines/initialization_forward_baseline_v1.json",
         "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/initialization_forward_baseline_v3.json",
         "configs/stages/stage-0/calibration_volume/pilot_search_session.json",
         "logs/budget/decisions.md",
         "logs/index.json",
@@ -15482,8 +13640,7 @@
         "logs/maintenance/inventories/log_inventory.json",
         "logs/maintenance/storage/devbox_cleanup_20261120.json",
         "logs/stages/index.json",
-        "logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
-        "logs/stages/stage-1/README.md"
+        "logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -18040,6 +16197,7 @@
       "referenced_by": [
         "configs/shared/baselines/initialization_forward_baseline_v1.json",
         "configs/shared/baselines/initialization_forward_baseline_v2.json",
+        "configs/shared/baselines/initialization_forward_baseline_v3.json",
         "logs/budget/approvals/autoinit_d3_probes_grant.json",
         "logs/budget/decisions.md",
         "logs/index.json",
@@ -18048,8 +16206,7 @@
         "logs/maintenance/inventories/log_inventory.json",
         "logs/maintenance/inventories/relay_weight_audit_20261114.json",
         "logs/maintenance/inventories/relay_weight_dispositions_20261114.json",
-        "logs/stages/index.json",
-        "logs/stages/stage-1/README.md"
+        "logs/stages/index.json"
       ],
       "relay_path": null,
       "relay_verified": false,

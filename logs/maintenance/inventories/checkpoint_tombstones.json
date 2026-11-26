@@ -46,10 +46,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 159,
-  "active": 157,
-  "active_retired_bytes": 677538255170,
-  "active_retired_human": "631.007 GiB",
+  "tombstones_total": 161,
+  "active": 159,
+  "active_retired_bytes": 693674888021,
+  "active_retired_human": "646.035 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -11433,6 +11433,164 @@
      "paths_left": [],
      "shared_oids_kept": [],
      "freed_bytes": 8015427400,
+     "error": null
+    }
+   }
+  },
+  {
+   "canonical_id": "relay_sob1_train_ffn_attention_20261124_033254_ffn_attention-s20260726_final",
+   "historical_paths": [
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/config.json",
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/generation_config.json",
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/model.safetensors",
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/run_completion.json"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495",
+   "retention_tier": "REDUNDANT_REMOTE_COPY",
+   "experiment": "SOB1",
+   "seed": 20260726,
+   "scientific_role": "ffn_attention-s20260726's final weights (fp32): the relay COPY; the dev box keeps the copy",
+   "weights_sha256": "589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b",
+   "config_sha256": "072f1d3392c8a9b707995a3eaf8683ae56ca10dc86fc4adb37c192eb967d2ddf",
+   "architecture": null,
+   "size_bytes": 8068316426,
+   "size_human": "7.514 GiB",
+   "n_files": 4,
+   "members": [
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/config.json",
+     "sha256": "072f1d3392c8a9b707995a3eaf8683ae56ca10dc86fc4adb37c192eb967d2ddf"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/generation_config.json",
+     "sha256": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/model.safetensors",
+     "sha256": "589acf286481f495a587ac76ad8956af66a623d3134e029fb55bed12a8c8c16b"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/run_completion.json",
+     "sha256": "b96ecb5b55cda4366f7e732c3a63a91761ca7f1ba36d874f520808aa223ec329"
+    }
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260726/final/589acf286481f495",
+     "kind": "local",
+     "verified": "every file re-hashed to the record just before the removal"
+    }
+   ],
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260726/final/589acf286481f495",
+   "frozen_results_location": "logs/stages/stage-1/single_operator_budget/results/study_completion.json",
+   "reason_physical_weights_deleted": "relocation to the dev box (storage option a): the final is kept on the dev box, verified file by file and registered; the relay copy is redundant and its room is DMR1 variant 1's chain",
+   "maintainer_decision": "maintainer brief 2026-11-27 (DMR1 repair round 3), item 5: 「本轮明确授权采用存储方案 a：将 SOB1 FFN + Attention 的两份最终权重迁移到开发机，逐文件核验并完成登记后，退役 relay 上对应的冗余副本。」",
+   "tombstone_written_utc": "2026-11-26T18:17:24Z",
+   "deleted_utc": "2026-11-26T18:17:42Z",
+   "deletion": {
+    "status": "DELETED",
+    "attempts": [
+     {
+      "utc": "2026-11-26T18:17:42Z",
+      "verified_absent": true,
+      "relay_paths_present_after": 0,
+      "error": null
+     }
+    ],
+    "relay_remove": {
+     "removed_paths": [
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/config.json",
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/generation_config.json",
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/model.safetensors",
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/record.json",
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260726/final/589acf286481f495/run_completion.json"
+     ],
+     "lfs_left": [],
+     "paths_left": [],
+     "shared_oids_kept": [],
+     "freed_bytes": 8068311496,
+     "error": null
+    }
+   }
+  },
+  {
+   "canonical_id": "relay_sob1_train_ffn_attention_20261124_033254_ffn_attention-s20260801_final",
+   "historical_paths": [
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/config.json",
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/generation_config.json",
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/model.safetensors",
+    "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/run_completion.json"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e",
+   "retention_tier": "REDUNDANT_REMOTE_COPY",
+   "experiment": "SOB1",
+   "seed": 20260801,
+   "scientific_role": "ffn_attention-s20260801's final weights (fp32): the relay COPY; the dev box keeps the copy",
+   "weights_sha256": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e",
+   "config_sha256": "072f1d3392c8a9b707995a3eaf8683ae56ca10dc86fc4adb37c192eb967d2ddf",
+   "architecture": null,
+   "size_bytes": 8068316425,
+   "size_human": "7.514 GiB",
+   "n_files": 4,
+   "members": [
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/config.json",
+     "sha256": "072f1d3392c8a9b707995a3eaf8683ae56ca10dc86fc4adb37c192eb967d2ddf"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/generation_config.json",
+     "sha256": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/model.safetensors",
+     "sha256": "64292e508e2d6d2e67b503a5267b088ae13be45aad1bb3fadbe15c8dcd14530e"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/run_completion.json",
+     "sha256": "53c4fe602d2c96b2fe7c7503156b66be12b83a9c748c89746214eac5ffcfc001"
+    }
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260801/final/64292e508e2d6d2e",
+     "kind": "local",
+     "verified": "every file re-hashed to the record just before the removal"
+    }
+   ],
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention-s20260801/final/64292e508e2d6d2e",
+   "frozen_results_location": "logs/stages/stage-1/single_operator_budget/results/study_completion.json",
+   "reason_physical_weights_deleted": "relocation to the dev box (storage option a): the final is kept on the dev box, verified file by file and registered; the relay copy is redundant and its room is DMR1 variant 1's chain",
+   "maintainer_decision": "maintainer brief 2026-11-27 (DMR1 repair round 3), item 5: 「本轮明确授权采用存储方案 a：将 SOB1 FFN + Attention 的两份最终权重迁移到开发机，逐文件核验并完成登记后，退役 relay 上对应的冗余副本。」",
+   "tombstone_written_utc": "2026-11-26T18:18:04Z",
+   "deleted_utc": "2026-11-26T18:18:21Z",
+   "deletion": {
+    "status": "DELETED",
+    "attempts": [
+     {
+      "utc": "2026-11-26T18:18:21Z",
+      "verified_absent": true,
+      "relay_paths_present_after": 0,
+      "error": null
+     }
+    ],
+    "relay_remove": {
+     "removed_paths": [
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/config.json",
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/generation_config.json",
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/model.safetensors",
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/record.json",
+      "durable/stage1_single_operator_budget/ffn_attention/ffn_attention-s20260801/final/64292e508e2d6d2e/run_completion.json"
+     ],
+     "lfs_left": [],
+     "paths_left": [],
+     "shared_oids_kept": [],
+     "freed_bytes": 8068311496,
      "error": null
     }
    }

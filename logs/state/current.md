@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-26 (UTC), DMR1 repair round done at $0 and READY_FOR_REVIEW again (variant 1's build takeover and identity binding, the alignment cache's inputs, the span diagnostic's devices, the selection's source, the hidden targets' lifetime, the two core hardcodes, the storage chain; the review report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md` section 0); SOB1 COMPLETE and closed out before it. Nothing running, nothing billing (0 pods, 0 volumes); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-26 (UTC), DMR1's third repair round done at $0 and READY_FOR_REVIEW again (variant 1's per-product identity, handoff and sync-window takeover, the takeover's room; forward baseline v3 declares the width stream weighting; SOB1's FFN + attention finals moved to the dev box under the maintainer's storage option a; the review report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md` section 0). Nothing running, nothing billing (0 pods, 0 volumes); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -10,25 +10,34 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **DMR1 (DEPTH RECOVERY AT SOB1'S DEPTH-ONLY STRUCTURE): PREPARED AND REPAIRED AT $0, READY_FOR_REVIEW (2026-11-26) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
-- Report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md` (section 0: this round's repairs, the principle
-  audit, the conditions per variant, storage, money); designs `configs/stages/stage-1/depth_merge/design.json` (variant
-  1, Stage 1 + stage3_recovery) and `configs/stages/stage-6/depth_recurrence/design.json` (variants 2 and 3, Stage 6,
-  and the round's registered analysis).
+- Report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md`: section 0 is the third round (the fixes, the moved
+  finals, storage, the search configuration, what is not GPU-validated, conditions, money); 0A is the second round
+  (with the principle audit). Designs `configs/stages/stage-1/depth_merge/design.json` (variant 1, Stage 1 +
+  stage3_recovery) and `configs/stages/stage-6/depth_recurrence/design.json` (variants 2 and 3, Stage 6, and the
+  round's registered analysis).
 - Variants: (1) `depth_merge`, the alpha merge of each kept block's span (RI-LM1's M-act at this structure); (2)
   `depth_loop`, SOB1's 16 kept blocks on a 36-logical-layer schedule from the selected training-pre init; (3)
   `depth_loop_hidden`, (2) plus a per-iteration hidden-state term (lambda 1.0, a proposal). Every arm trains with SOB1's
   depth recipe; SOB1's depth arm and its sealed sets are the control.
-- Core: the recurrent-depth family and `training/hidden_state.py` (round `4a76fde2`, NOT MEASURED ON CUDA); this round
-  (round `49ce2014`): the PCA stream weighting and the cost model's hardware became caller inputs
-  (`configs/shared/initialization/stream_weighting.json`, `configs/shared/infrastructure/hardware_profiles.json`), the
-  hidden targets no longer outlive their micro-batch.
-- Storage (`logs/stages/stage-1/depth_merge/plans/storage_plan.json`): variant 1's whole chain peaks at 50.38 GiB on the
-  relay (+1 GiB margin) against 43.09 GiB of live headroom, after this round retired 379 unconsumed, rebuildable session
-  code bundles (7.84 GiB; `logs/maintenance/inventories/relay_bundle_tombstones_20261126.json`): **8.28 GiB short, a
-  maintainer decision** (REVIEW 0.4; the build's launch gate refuses until then).
+- Core: the recurrent-depth family and `training/hidden_state.py` (round `4a76fde2`, NOT MEASURED ON CUDA).
+  - Round `49ce2014`: the PCA stream weighting and the cost model's hardware became caller inputs
+    (`configs/shared/initialization/stream_weighting.json`, `configs/shared/infrastructure/hardware_profiles.json`);
+    the hidden targets no longer outlive their micro-batch.
+  - The third round (after `d92f48f8`): `OperatorImplementation.required_config`, refused before compute (search,
+    fixed path, the operators); `ForwardBaseline.operator_configs`.
+- **Forward baseline v3 selected** (`configs/shared/baselines/initialization_forward_baseline_v3.json`): v2's method with
+  the width stream weighting declared (the historical 9 / 1 / 8, `endpoints_9_1_8_v0`). New searches pass it through
+  `session_terms()["operator_configs"]`. The packed search and its sessions (TPI1, SOB1, DMR1's statistics session) pin
+  v2, so their identities are unchanged. v1 / v2 are superseded and still loadable.
+- Storage (`logs/stages/stage-1/depth_merge/plans/storage_plan.json`, live 2026-11-26 18:19Z):
+  - SOB1's two FFN + attention finals moved to the dev box: re-hashed, read back, registered, and their relay copies
+    retired behind tombstones (maintainer's storage option a; `relocate_relay_finals.py`);
+  - the relay accepts **58.13 GiB** against variant 1's first-run need of 51.38, so **6.75 GiB spare**; a takeover asks
+    only for what the chain still adds;
+  - the dev box has 7.00 GiB free (shared; at most 1.5 GiB of one session's evidence).
 - Money: balance $123.73; $1,086.27 committed, $74.79 under the $1,161.06 cap; variant 1 proposed at $5.43 + $64.46 caps
   + $2 reserves = $71.89 (not granted). Variants 2 and 3 estimated only.
-- Owed to the maintainer: the review; the relay-room decision; variant 1's grants. Branch not merged.
+- Owed to the maintainer: the review and variant 1's two grants (the relay room fits). Branch not merged.
 
 **SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): COMPLETE (2026-11-25) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Report `docs/stages/stage-1/single_operator_budget/REPORT.md`; decision `logs/stages/stage-1/single_operator_budget/
@@ -57,8 +66,8 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   - residual width `00b430fd…` / `b701868f…` and depth `5635c33e…` / `e4159f1f…` on the dev box
     (`~/aad-artifacts/stage1_single_operator_budget/<arm>-s<seed>/final/`), their relay copies retired
     (tombstones `relay_sob1_train_*`);
-  - FFN + attention `589acf28…` / `64292e50…` on the relay
-    (`durable/stage1_single_operator_budget/ffn_attention/<arm>-s<seed>/final/`).
+  - FFN + attention `589acf28…` / `64292e50…` on the dev box since 2026-11-26 (moved from the relay, maintainer storage
+    option a; relay copies retired, tombstones `relay_sob1_train_ffn_attention_*`).
 
   Paths and sha256: REPORT.md section 8, `storage/local_retention_phase2.json`.
 - Owed to the maintainer: the review of the report, when to merge, and the next round's path. The six finals stay at
@@ -295,9 +304,10 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
   with truncation (the maintainer's `packing_conversation`) and standard causal attention; Stage-5 rollouts keep
   their real context and are never packed. Core: `aadistill.data.sequence_packing`; Stage 1's `ForwardContext`;
   Stage 3's `pack_sequential`.
-- **Forward baseline version 2 selected** (`configs/shared/baselines/initialization_forward_baseline_v2.json`): D1's
+- **Forward baseline version 2 selected then** (`configs/shared/baselines/initialization_forward_baseline_v2.json`): D1's
   method in the packed context, fingerprint `1dcaad69…`. Version 1 superseded, still loadable; Research A v2 and
-  Stage-0 drivers pin it, and the v2 search's identities reproduce exactly.
+  Stage-0 drivers pin it, and the v2 search's identities reproduce exactly. (Superseded 2026-11-26 by v3, which declares
+  the width stream weighting; the packed search pins v2.)
 - **Measured at $0** (`audit/packing_audit.json`): Stage-1 sets re-score 10–13% of scored positions in fragments; A1's
   documents add 18.7% repeated supervised tokens (1,288 sequences vs 1,102), A2's 4.3%; on this data
   `truncate=False` gives the same sequences.
