@@ -17,6 +17,7 @@ and this repository has shipped exactly that kind of test before.
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -105,7 +106,7 @@ def context(model, items, batch_size, target_spec=None):
         adapter=QWEN3_ADAPTER, model=model, parent_spec=parent,
         target_spec=target_spec if target_spec is not None else parent,
         profile=NO_CALIBRATION, calibration_items=items, seed=0, device="cpu",
-        config={"n_calibration_items": len(items)}, execution=execution)
+        config=declared({"n_calibration_items": len(items)}), execution=execution)
 
 
 # --- 1. the batcher ---------------------------------------------------------

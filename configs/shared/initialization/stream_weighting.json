@@ -1,0 +1,13 @@
+{
+ "schema": "aadistill.initialization.stream_weighting/v1",
+ "_contract": "The residual stream points a global activation-PCA width projection reads, and their weights, as RECIPE data. The core (aadistill.initialization.transforms.project.stream_weighting) validates a declaration and computes with it; it holds no weighting of its own. A recipe, a search (SearchConfig.operator_configs) or a fixed-path step names one of these records explicitly; nothing falls back to one.",
+ "recipes": {
+  "endpoints_9_1_8_v0": {
+   "endpoint_weights": {"first": 9.0, "interior": 1.0, "last": 8.0},
+   "points": "every pre-norm residual state 0..L-1 and the post-final-norm point L (L = the parent's depth)",
+   "source": "Stage-1 v0 width-only ablation, 2026-07-14 (Qwen3-4B-Thinking -> 0.6B geometry, width 2560 -> 1024): holdout top-1 0.036 with the unweighted projection, 0.082 end-weighted; the end points are the two the tied embedding and head read and the worst-captured (0.74 / 0.75 vs >= 0.94 mid-stream). git show 633dc6b4c:logs/experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md (the log was consolidated away in 1fbcb992; the commit keeps it)",
+   "used_by": "every historical record whose projection diagnostics carry point_weights [9, 1, ..., 1, 8]: the Stage-1 v0 init (scripts/shared/training/init_stage1.py), composite.stage1_sandwich_v0 and width.global_pca_v0 in every search before 2026-11-26 (their recorded config hashes predate this declaration and stay as recorded)",
+   "status": "historical recipe; not re-validated for the hybrid teacher or any other geometry"
+  }
+ }
+}

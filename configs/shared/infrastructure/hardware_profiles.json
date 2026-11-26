@@ -1,0 +1,24 @@
+{
+ "schema": "aadistill.infrastructure.hardware_profiles/v1",
+ "_contract": "Hardware profiles a cost estimate may be priced with, as DATA with their sources: name, the hourly price the profile was priced at, the effective bf16 throughput, VRAM, whether the throughput was measured, and the per-token upper bound of an activation-statistics pass on that setup. aadistill.runtime.cost holds the type (HardwareProfile) and the formulas, never an instance: a caller (scripts/shared/hardware_profiles.py) builds the profile it prices with from here, or from its own measurement. The prices are the ones each historical plan was priced at, NOT live provider quotes; a new plan reads the live rate and its own grant. A profile measured for one teacher, device or statistics implementation is not a measurement of another.",
+ "profiles": {
+  "L40S_MEASURED": {
+   "name": "L40S", "price_per_hour_usd": 0.99, "effective_tflops": 88.83, "vram_gb": 48.0, "measured": true,
+   "source": "E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at 4.02B full width. aadistill.runtime.cost's own accounting puts that workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the 362 TFLOPS bf16 dense peak. The price is the one the E8a-era plans used.",
+   "stats_seconds_per_token_upper": {"numerator_seconds": 4972.0, "denominator_tokens": 949859,
+                                     "source": "Stage 0 regeneration on the CPU-only dev box (4.02B forward + float64 X^T X accumulation, 949,859 tokens in 4,972 s): the upper bound every pre-2026-11-26 plan used for a GPU statistics pass, because the float64 accumulation stays on the host"}
+  },
+  "A100_80GB_ESTIMATED": {
+   "name": "A100-SXM-80GB", "price_per_hour_usd": 1.59, "effective_tflops": 76.56, "vram_gb": 80.0, "measured": false,
+   "source": "ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio 312/362. MFU is assumed to transfer across architectures; it has not been measured on this workload.",
+   "stats_seconds_per_token_upper": {"numerator_seconds": 4972.0, "denominator_tokens": 949859,
+                                     "source": "the same dev-box CPU rate as L40S_MEASURED (the host-side accumulation)"}
+  },
+  "DEVBOX_CPU_MEASURED": {
+   "name": "dev-box CPU (16 vCPU)", "price_per_hour_usd": 0.0, "effective_tflops": 1.59, "vram_gb": 0.0, "measured": true,
+   "source": "Stage 0 regeneration: 949,859 tokens of 4.02B forward + float64 X^T X accumulation in 4,972 s",
+   "stats_seconds_per_token_upper": {"numerator_seconds": 4972.0, "denominator_tokens": 949859,
+                                     "source": "Stage 0 regeneration on this dev box"}
+  }
+ }
+}

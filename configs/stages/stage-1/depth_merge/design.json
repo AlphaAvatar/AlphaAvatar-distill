@@ -434,7 +434,12 @@
    "_placement": "the two fp32 finals stay at their relay prefix (the dev box has 23 GiB free and is shared): their next consumer is variant 2 if the selection rule chooses this initialization's path -- variant 2 trains from the TRAINING-PRE initialization, never from these finals, so the finals are the control's weights only"
   },
   "relay_rotation": "keep (the finals are not rotated off; a later round's room is planned against the live headroom)",
-  "shortfall_2026_11_26": "the relay's live headroom read 35.24-35.28 GiB (2026-11-26 11:32Z, read-only bisection); one training session's rotation peaks at two save points and a final, 2 x 20,934,572,032 + 8,015,407,104 B = 46.46 GiB. The training session is 11.2 GiB short (12.2 GiB with the 1 GiB margin): its launch gate refuses until the maintainer frees room (REVIEW section 9)"
+  "relay_margin_gib": 1.0,
+  "statistics_bytes_bound": 67108864,
+  "closeout_archive_bytes_bound": 134217728,
+  "_bounds": "statistics: 29 blocks x 9,728 float64 E|a| + head energies + 20 pairs' int64 permutations (~4 MB), bounded at 64 MiB; closeout archive: SOB1's phase-2 evidence archives held 0.113 GiB for three sessions (about 0.04 GiB each), bounded at 128 MiB",
+  "chain_rule": "the build session's launch gate asks the relay for the WHOLE chain (storage.py: the build's products, its closeout archive, the training session's rotation peak and the margin), not the build's products alone",
+  "storage_plan": "logs/stages/stage-1/depth_merge/plans/storage_plan.json (storage.py --write: live headroom, sequence, shortfall)"
  },
  "cost_model": {
   "basis": "SOB1's measured depth session (sob1_train_depth_only_20261122_223829: 1,708.3 min, $31.6179; 4.83 s / step; evaluation 34.5-35.5 / 6.9-7.2 min per seed and mode) for training; RI-LM1's measured statistics (117 s for 14 blocks) and assignment (178 s each) for the build",

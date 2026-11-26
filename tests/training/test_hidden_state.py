@@ -7,11 +7,15 @@
   gradient reaches every block; the teacher gets none;
 * gradient checkpointing on or off gives the same hidden loss and gradients;
 * without ``loss.hidden_state`` nothing of this runs (the CE / KD and the gradients are those of the unchanged path);
-* configs that cannot be computed are refused at construction.
+* configs that cannot be computed are refused at construction;
+* a micro-batch's teacher targets do not outlive its backward (training) or its loss (validation): none is alive when
+  the next micro-batch's forward starts or when the optimizer steps.
 """
 from __future__ import annotations
 
+import gc
 import sys
+import weakref
 from pathlib import Path
 
 import pytest
@@ -179,3 +183,62 @@ def test_configs_that_cannot_be_computed_are_refused(tmp_path):
     with pytest.raises(ValueError, match="outside"):
         Trainer(cfg(tmp_path, hidden=hidden_cfg(pairs=[[0, 9]])), student(), toy_blocks(), teacher=teacher(),
                 device="cpu")
+
+
+# ---- the targets' lifetime ------------------------------------------------------------------------------------------
+
+def _watch_targets(monkeypatch):
+    """Every HiddenSupervision the trainer builds, its teacher targets watched by weak reference, by micro-batch."""
+    made: list[list[weakref.ref]] = []
+
+    class Watched(HS.HiddenSupervision):
+        def __init__(self, rows, targets):
+            super().__init__(rows, targets)
+            made.append([weakref.ref(t) for t in targets.values()])
+    monkeypatch.setattr(HS, "HiddenSupervision", Watched)
+    return made
+
+
+def _alive(refs) -> int:
+    gc.collect()
+    return sum(r() is not None for r in refs)
+
+
+def test_a_micro_batchs_targets_are_gone_before_the_next_forward_and_the_optimizer_step(tmp_path, monkeypatch):
+    made = _watch_targets(monkeypatch)
+    tr = Trainer(cfg(tmp_path, hidden=hidden_cfg(1.0)), student(), toy_blocks(), teacher=teacher(), device="cpu")
+    assert tr.cfg["batch"]["blocks_per_step"] // tr.cfg["batch"]["micro_blocks"] >= 2
+    seen = []
+    real = tr._micro_losses
+
+    def micro(*a, **k):
+        seen.append(sum(_alive(m) for m in made))       #: every earlier micro-batch's targets, at this forward
+        return real(*a, **k)
+    monkeypatch.setattr(tr, "_micro_losses", micro)
+    real_step = tr.opt.step
+
+    def step(*a, **k):
+        seen.append(("opt", sum(_alive(m) for m in made)))
+        return real_step(*a, **k)
+    monkeypatch.setattr(tr.opt, "step", step)
+    out = tr.step_once()
+    assert out["hidden"] > 0 and len(made) >= 2
+    assert seen[0] == 0 and all(x == 0 for x in seen[1:-1]), seen
+    assert seen[-1] == ("opt", 0), seen
+
+
+def test_validation_releases_each_micro_batchs_targets_before_the_next(tmp_path, monkeypatch):
+    made = _watch_targets(monkeypatch)
+    blocks = toy_blocks()
+    tr = Trainer(cfg(tmp_path, hidden=hidden_cfg(1.0)), student(), blocks, val_blocks=blocks, teacher=teacher(),
+                 device="cpu")
+    seen = []
+    real = tr._micro_losses
+
+    def micro(*a, **k):
+        seen.append(sum(_alive(m) for m in made))
+        return real(*a, **k)
+    monkeypatch.setattr(tr, "_micro_losses", micro)
+    ev = tr.evaluate(3)
+    assert ev["val_hidden"] > 0 and len(made) == 3
+    assert seen == [0, 0, 0] and sum(_alive(m) for m in made) == 0

@@ -19,6 +19,7 @@ the driver.
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import json
 import shutil
@@ -132,7 +133,7 @@ def run_chain(policy, execution, *, items, teacher):
     decisions: list[dict] = []
     for impl_id in CHAIN:
         impl = get_implementation(impl_id)
-        config = {"n_calibration_items": len(items), **policy_config(policy)}
+        config = declared({"n_calibration_items": len(items), **policy_config(policy)})
         ctx = OperatorContext(
             adapter=adapter, model=model, parent_spec=spec, target_spec=target,
             profile=profile, calibration_items=items, seed=7, device="cpu",
@@ -435,7 +436,7 @@ def _search(workdir, *, policy, execution, teacher, calib, suite, suite_items):
         reference_strategy=ReferenceStrategy.CACHE_IN_MEMORY,
         vocab_size=TEACHER_GEOMETRY["vocab_size"], position_policy=policy)
     evaluator.prime_reference(teacher)
-    config = SearchConfig(
+    config = SearchConfig(operator_configs=WEIGHTED_OPERATOR_CONFIGS,
         run_id="regression", target_spec=ArchSpec.of("qwen3", TARGET_GEOMETRY),
         schedule=SCHEDULE_V1, seed=7, workdir=workdir,
         profiles=(make_profile("balanced"),), policy=PARETO_V1, suite=suite,
@@ -663,7 +664,7 @@ class TestTheMeasurementProtocolBinder:
     def _build(self, tmp, teacher, calib, suite, items, *, evaluator,
                declared, run_id="binder"):
         adapter = adapter_for_config(teacher.config)
-        config = SearchConfig(
+        config = SearchConfig(operator_configs=WEIGHTED_OPERATOR_CONFIGS,
             run_id=run_id, target_spec=ArchSpec.of("qwen3", TARGET_GEOMETRY),
             schedule=SCHEDULE_V1, seed=7, workdir=tmp,
             profiles=(make_profile("balanced"),), policy=PARETO_V1, suite=suite,
@@ -790,7 +791,7 @@ class TestOnePolicyForTheOperatorsAndTheBeam:
                 vocab_size=TEACHER_GEOMETRY["vocab_size"],
                 position_policy=ALL_POSITIONS_V1)
             evaluator.prime_reference(teacher)
-            config = SearchConfig(
+            config = SearchConfig(operator_configs=WEIGHTED_OPERATOR_CONFIGS,
                 run_id="mismatch",
                 target_spec=ArchSpec.of("qwen3", TARGET_GEOMETRY),
                 schedule=SCHEDULE_V1, seed=7, workdir=tmp,

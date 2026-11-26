@@ -32,7 +32,6 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from stages.phase_b import price_phase_b as pb  # noqa: E402
 from aadistill.runtime.cost import (  # noqa: E402
-    L40S_MEASURED,
     REFERENCE_MODES,
     conservative_hard_seconds,
     enumerate_paths,
@@ -42,6 +41,7 @@ from aadistill.runtime.cost import (  # noqa: E402
     price_search,
     profile_multiplicity,
 )
+from shared.hardware_profiles import L40S_MEASURED  # noqa: E402
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 
 # --- what attempt 3 actually did --------------------------------------------

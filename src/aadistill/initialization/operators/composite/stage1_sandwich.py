@@ -123,6 +123,13 @@ class CompositeStage1SandwichV0(OperatorImplementation):
         parent = ctx.model
         cfg = dict(ctx.config or {})
         kept_layers = cfg.get("kept_layers")
+        #: The stream points and weights of the projection: the run's declaration
+        #: (a fixed path's step config or the search's `operator_configs`), in the
+        #: hashed config, never a core default.
+        weighting = cfg.get("stream_weighting")
+        if weighting is None:
+            raise OperatorError(f"{self.impl_id}: the run declares no stream_weighting (the points the projection "
+                                "reads and their weights); the core has none of its own")
 
         # Host cache -> device working copy (autoinit.device). `init_student`
         # does all of its math against the PARENT's weights and writes into the
@@ -156,13 +163,13 @@ class CompositeStage1SandwichV0(OperatorImplementation):
         dtype = model_dtype(adapter, parent)
         student_config = adapter.build_config(parent.config, ctx.target_spec)
         child = adapter.build_model(student_config, dtype, ctx.seed)
-        diag = init_student(parent, child, state, kept_layers=kept_layers)
+        diag = init_student(parent, child, state, kept_layers=kept_layers, stream_weighting=weighting)
 
         if cfg.get("verify_full_assignment"):
             # Any parameter init_student failed to write would still hold its
             # random draw, so a second build under a different seed would differ.
             other = adapter.build_model(student_config, dtype, ctx.seed + 1)
-            init_student(parent, other, state, kept_layers=kept_layers)
+            init_student(parent, other, state, kept_layers=kept_layers, stream_weighting=weighting)
             for (name, a), (_, b) in zip(child.named_parameters(),
                                          other.named_parameters()):
                 if not torch.equal(a, b):

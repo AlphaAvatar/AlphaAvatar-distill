@@ -314,6 +314,10 @@ def run_phase_a_search(*, workdir: Path, state_eval: Path, top_n: int,
         allowed_impls=tuple(allowed_impls) if allowed_impls else None,
         impl_profiles=({k: tuple(v) for k, v in impl_profiles.items()}
                        if impl_profiles else None),
+        #: the PCA stream weighting every Phase A / B search ran under, named explicitly: the core holds none
+        #: (configs/shared/initialization/stream_weighting.json; declared, it enters the width / composite configs)
+        operator_configs=__import__("shared.stream_weighting", fromlist=["operator_configs"]).operator_configs(
+            "endpoints_9_1_8_v0"),
         notes={"purpose": purpose,
                # The closed-form leaf count describes the UNRESTRICTED space and
                # is wrong the moment a caller restricts one. Say so rather than

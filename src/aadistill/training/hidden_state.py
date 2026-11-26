@@ -134,11 +134,17 @@ class HiddenSupervision:
 
     ``rows``: flat row indices; ``targets``: student layer -> ``[N, H]`` teacher states at those rows (no graph).
     After the forward, ``loss_sum`` is the summed relative squared error over every pair and row (a graph-carrying
-    float32 scalar), ``count`` the number of (pair, row) terms, ``by_layer`` each layer's detached sum."""
+    float32 scalar), ``count`` the number of (pair, row) terms, ``by_layer`` each layer's detached sum.
+
+    **Lifetime.** `finish` drops this object's own references to the targets, their inverse energies and the rows:
+    from then on the only holder of what the backward needs is the autograd graph of ``loss_sum`` (each term's
+    saved tensors), which the backward frees. A caller that keeps this object after its micro-batch's backward
+    (to read ``loss_sum`` or ``by_layer``) therefore keeps two scalars, never a micro-batch's teacher states."""
 
     def __init__(self, rows: torch.Tensor, targets: Mapping[int, torch.Tensor]):
         self.rows = rows
         self.targets = dict(targets)
+        self._count = int(rows.shape[0]) * len(self.targets)
         self.inv_energy = {}
         for p, t in self.targets.items():
             if t.shape[0] != rows.shape[0]:
@@ -153,9 +159,11 @@ class HiddenSupervision:
 
     @property
     def count(self) -> int:
-        return int(self.rows.shape[0]) * len(self.targets)
+        return self._count
 
     def add(self, layer: int, hidden: torch.Tensor) -> None:
+        if self.targets is None:
+            raise HiddenStateError("a state handed over after finish()")
         if layer in self.by_layer:
             raise HiddenStateError(f"logical layer {layer} handed over twice in one forward")
         s = relative_squared_error_sum(hidden, self.rows, self.targets[layer], self.inv_energy[layer])
@@ -164,10 +172,14 @@ class HiddenSupervision:
         self.seen.append(layer)
 
     def finish(self) -> None:
-        """Every target layer must have been handed over exactly once."""
+        """Every target layer must have been handed over exactly once; then this object's references to the targets
+        are dropped (class docstring: the graph keeps what the backward needs, and nothing else does)."""
+        if self.targets is None:
+            raise HiddenStateError("finish() called twice")
         missing = sorted(set(self.targets) - set(self.by_layer))
         if missing:
             raise HiddenStateError(f"the student's forward handed over no state for layers {missing}")
+        self.targets, self.inv_energy, self.rows = None, None, None
 
 
 @contextlib.contextmanager

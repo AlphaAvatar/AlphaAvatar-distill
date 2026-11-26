@@ -19,6 +19,7 @@ Two separate claims:
   non-increasing in the round index.
 """
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -107,7 +108,7 @@ class TestNoRegisteredOperatorIncreasesAStructuralField:
         ctx = OperatorContext(
             adapter=adapter, model=model, parent_spec=parent, target_spec=target,
             profile=None, calibration_items=_items(), seed=0, device="cpu",
-            workdir=tmp_path, config={"n_calibration_items": 4},
+            workdir=tmp_path, config=declared({"n_calibration_items": 4}),
             execution=ExecutionConfig())
         outcome = impl.apply(ctx)
         child = adapter.spec_of(outcome.model)

@@ -1,14 +1,148 @@
 # DMR1: depth recovery at SOB1's depth-only structure -- review report (READY_FOR_REVIEW)
 
-**Terminal state of this round: READY_FOR_REVIEW** (2026-11-26 UTC). The designs, the code of all three variants,
-the $0 verification and this report are committed and pushed on `research/reasoning-inheritance` (not merged into
-`main`). **This is not a scientific COMPLETE:** no initialization was built, nothing trained or generated, no pod or
-volume created, no grant written, no artifact issued. Variant 1 starts only after this review and the maintainer's
-explicit authorization; variants 2 and 3 have no paid authorization this round.
+**Terminal state of this round: READY_FOR_REVIEW** (2026-11-26 UTC, after the repair round of the maintainer's second
+brief). The designs, the code of all three variants, this round's repairs, the principle audit, the $0 verification and
+this report are committed and pushed on `research/reasoning-inheritance` (not merged into `main`). **This is not a
+scientific COMPLETE:** no initialization was built, nothing trained or generated, no pod or volume created, no grant
+written, no artifact issued. Variant 1 starts only after this review, the maintainer's explicit authorization and the
+relay-room decision of section 0.4; variants 2 and 3 have no paid authorization.
 
-Contents: 1 scope and entry points · 2 baseline, teacher, mapping, schedule · 3 variant 1 · 4 variant 2's initialization
-and binding · 5 variant 3's hidden-state term · 6 comparisons and statistics · 7 the recurrent mechanism · 8 tests,
-fixes, what is not measured · 9 time, memory, storage, money · 10 $0 state and authorization boundaries.
+Contents: **0 this round's repairs, principle audit, conditions per variant, storage, money, state** · 1 scope and entry
+points · 2 baseline, teacher, mapping, schedule · 3 variant 1 · 4 variant 2's initialization and binding · 5 variant
+3's hidden-state term · 6 comparisons and statistics · 7 the recurrent mechanism · 8 tests, fixes, what is not measured
+· 9 time, memory, storage, money · 10 $0 state and authorization boundaries.
+
+## 0. Repair round (2026-11-26, second brief)
+
+The first round's preparation was reviewed and this round repairs what the review found, audits the repository
+against the project's principles and settles variant 1's storage arrangement. Still $0: no grant, no build, no
+training, no generation, no paid resource. Section 0 is the round's report; sections 1-10 are the design, updated
+where this round changed them.
+
+### 0.1 What was fixed, where, and the evidence
+
+| # | problem | fix (code) | evidence |
+| --- | --- | --- | --- |
+| 1 | **V1 build takeover.** Weights uploaded and verified, init record not yet written, pod lost: the next attempt found no `work/products` and called `build()` again | `build_driver.run`: the build is a sequence of products (statistics, weights, diagnostics, init record), each recorded in `build.json` and copied to the relay **the moment it exists** (statistics right after they are saved, weights right after the reload check, then diagnostics), each relay group's record put beside its files (`relay.POINTER`) so a later attempt finds it even when relay.json was lost with the pod. A takeover makes only what is missing: init record durable → nothing runs; weights durable → only the record (no teacher, no GPU); diagnostics missing → the weights restored from the verified relay copy (`relay.get`, re-hashed) for them; statistics surviving → weights rebuilt from the statistics file (no statistics forward); persisted pairs reused under the same inputs | `depth_merge/tests :: test_weights_uploaded_and_verified_but_no_init_record_is_taken_over_without_building` (the real interruption through the real entry `build_driver.main --resume`: the teacher, the statistics step, the weights step and the diagnostics are all replaced by a failure, and none is called; the weights are never sent again; a second takeover only adopts the record); `test_a_verified_copy_the_dev_box_never_pulled_is_found_by_the_relay_listing`; `test_missing_diagnostics_restore_the_weights_from_their_verified_copy_and_rebuild_nothing`; `test_a_fresh_build_puts_each_group_once_and_a_refused_copy_writes_no_record` |
+| 2 | **Takeover not bound to the experiment.** `product_problems` / `durable_init` checked a record's internal consistency only | `build_driver.identity`: the statistics' identity = teacher (root id, weights sha256, config), mapping (kept blocks, spans, pairs), calibration (profile hashes, positions operator and policy hash, packed forward context, session config hash, measurement protocol, execution packing and micro-batch, the journal's operator config hashes) and the statistics code (ast digests); the checkpoint's adds the base (init record, weights, config, per-tensor digests) and the merge (method, seed, candidate code). Never the design file's bytes, so a changed description recomputes nothing. `product_problems(doc, ident)` names the part that differs; a build record under another identity is set aside (`build.superseded_<utc>.json`), never reused. The dev-box closeout (`session.completion`) and the training plan's derivation (`plan.init_problems`) check under THIS tree's identity (`current_identity`, $0, ~3 s on the CPU) | `test_products_made_under_another_identity_are_set_aside_and_never_adopted` (another calibration profile: the record is set aside, the teacher is opened to rebuild, `product_problems` names `calibration`); the closeout reads INCOMPLETE under another identity (in the fresh-build test) |
+| 3 | **Alignment cache keyed on the FFN correlation alone**, which also decided the KV-group and query-head permutations | `merge.pair_inputs`: a pair is reused only when ALL its inputs are this pass's -- the FFN Pearson correlation, the attention matching's inputs (the pair's head-write Gram: cross products and both sides' energies; both blocks' own head Grams, which give the group energies), the head geometry and the alignment code's ast digest; the reuse report names what differed | `test_an_unchanged_ffn_correlation_does_not_carry_a_stale_attention_matching` (the counter-example: the absorbed block's heads in reverse order, its FFN moments untouched -- the FFN hash still matches, the KV / head permutations change, the pair is recomputed and equals a fresh computation; the other pairs are reused); `test_alignments_are_reused_only_under_the_same_inputs` |
+| 4 | **Span diagnostic devices.** The base's kept blocks stayed on the host while the diagnostic's inputs came from the GPU teacher | `build_driver.span_candidates`: only the 9 kept blocks the diagnostic compares are moved to the teacher's device (about 1.6 GB; the rest of the base stays on the host), dropped with the base after the diagnostic; a failure is recorded as before, never a gate | `test_the_span_diagnostic_moves_only_the_kept_blocks_to_the_teachers_device` (to `meta`: the 9 move, every other block and the embedding stay). The real GPU path runs in the formal build session itself; no separate run |
+| 5 | **V2 / V3 selection source.** `decide` accepted a truthy `complete`, an empty or foreign per-seed dict, non-finite deltas; C2 read the CURRENT selection file | `schedule.comparison_1_problems` + `decide`: REFUSED unless the record is comparison 1's (schema, id, pair, `analysis.protocol_identity`: set manifest, decoding, action protocol, modes, the 570 items' sha256, the 558 groups' file, the two registered seeds; both sessions complete), `complete is True`, a finite pooled delta and one finite delta per registered seed (no bool). `schedule.selection_problems`: a selection stands only while the comparison-1 file it names re-hashes and re-derives the same choice and deltas; `select --write` never rewrites a selection. Comparison records now carry `protocol`. `analysis.bound_init`: C2's control and C3's pair come from the init record each trained unit's committed plan bound (plan → recurrent init record → selection), C3 refusing two different inits | `depth_recurrence/tests :: test_an_invalid_or_incomplete_comparison_1_selects_nothing` (13 cases: `complete="yes"`, `{}`, a foreign seed, a missing seed, NaN, inf, a bool delta, another pair, another id, another protocol, other seeds, 569 items, an incomplete session); `test_the_selection_stands_only_while_it_rederives_from_the_comparison_1_record_it_read`; `test_c2_and_c3_read_the_initialization_the_trained_units_bound_not_a_later_selection` |
+| 6 | **Hidden-state targets outlived their micro-batch.** After `self._micro_hidden = None` the local `sup` still held the previous micro-batch's teacher targets through the next forward, and the last one through the optimizer step | `HiddenSupervision.finish` drops the object's own references to the targets, inverse energies and rows (the autograd graph keeps what the backward needs and frees it in the backward); `_step_body` and `_eval_blocks` drop `sup` (and the step's loss tensors) at the end of each micro-batch | `tests/training/test_hidden_state.py :: test_a_micro_batchs_targets_are_gone_before_the_next_forward_and_the_optimizer_step`, `test_validation_releases_each_micro_batchs_targets_before_the_next` (weak references to every target, checked at every micro-batch's forward and at the optimizer step; **both fail on the previous code**, checked by stashing the fix). Only a run with `loss.hidden_state` (variant 3) builds a supervision: SOB1 and variant 1 were never affected |
+| 7 | **Wording that overstated** the hidden loss and the statistics | stage-6 `design.json :: hidden_state.error` (a per-position RELATIVE squared error, not MSE), `hidden_state.lambda_rationale` (1.0 a proposal; 0.25 not a validated "KD-dominant" setting; a similar scalar size is not a similar gradient share; the global clip neither guarantees KD dominates nor bounds AdamW's per-coordinate update), `step0_diagnostic.scope` (evidence about this initialization, not about recovery), `analysis.family` (each comparison's own 0.05; no round-wide rate), `analysis.selection_conditioning` (C2 measured at the init C1 chose on the same items); the stage-6 README sections 3-4; sections 5-6 below; every comparison record carries `error_rate_scope`, and C2's `selection_conditioning` | no rerun of any diagnostic (the brief) |
+| 8 | **Core hardcode: the PCA end-point weights 9 / 1 / 8** (one 2026-07-14 Qwen3-4B ablation) inside `init_student` and `width.global_pca_v0` | `transforms.project.stream_weighting` validates a CALLER's declaration (explicit points and weights, or first / interior / last over every point; finite, > 0; a source) and the core computes with it; `init_student(stream_weighting=)` is required (no default); `composite.stage1_sandwich_v0` (both `init_student` calls, the `verify_full_assignment` one included) and `width.global_pca_v0` read the run's declared `stream_weighting` from their hashed config and refuse without it; `SearchConfig.operator_configs` carries a run's per-operator declarations (omitted when unset, so every committed search keeps its hash). The historical recipe is data, `configs/shared/initialization/stream_weighting.json :: endpoints_9_1_8_v0`, with its source (`git show 633dc6b4c:logs/experiments/stage1/2026-07-14_stage1_qwen3_0p6b_init_v0.md`); `scripts/shared/stream_weighting.py` reads it, and `init_stage1.py` names it explicitly for the configs written before the key existed | `tests/initialization/test_stage1.py :: test_the_projection_weighting_is_the_callers_declaration_never_a_core_default` (no default; four malformed declarations refused; the historical recipe gives the recorded weights); the e8 frozen-record suite (the composite equals `init_student` bit for bit under the declared recipe); every core test that runs either operator now declares it; Phase A's search runner (`phase_a_search.run_phase_a_search`, the historical AutoInit search) names the historical recipe explicitly and its suite's searches pass. **Identity**: a run that declares the weighting hashes it into the operator config, so it gets new state ids (registered as any declared config); an undeclared historical replay still derives the config hash its record carries (DMR1's contract does), but applying width or the composite now needs the declaration -- the historical tree applies it as it was. No recorded result or hash was edited |
+| 9 | **Core hardcode: hardware instances in `runtime/cost.py`** (L40S / A100 / dev-box profiles, prices, throughputs, `CPU_STATS_SECONDS_PER_TOKEN = 4972 / 949,859`) | moved to `configs/shared/infrastructure/hardware_profiles.json` with their sources (historical values unchanged), built by `scripts/shared/hardware_profiles.py` (the historical planners import the same names from there); `HardwareProfile.stats_seconds_per_token_upper` / `stats_rate_source`: a statistics pass is priced only with the rate its own profile declares (`CostModelError` otherwise), never with one measured for another teacher, device or implementation. The core keeps the type and the formulas | `tests/runtime/test_forward_pass_pricing.py :: test_a_profile_without_a_statistics_rate_refuses_to_price_a_statistics_pass`, `test_the_core_cost_model_holds_no_hardware_instance`; the historical planners' suites reproduce their prices (`scripts/shared/tests/test_cost_and_recovery.py`, `phase_b/tests/test_cost_model_replay.py`, `phase_c3/tests/test_pilot_pricing.py`) |
+| 10 | **V1's storage proved only for the build** (the report also omitted the new init's 3.73 GiB) | `depth_merge/storage.py`: the relay's net change over the whole chain in the drivers' order (build products, build closeout archive, the training rotation from an empty state, closeout archive) against the live headroom; `session.relay_room` for the build kind asks the relay for the WHOLE chain plus a 1 GiB margin, so no init is built for a training session that would not fit; `logs/stages/stage-1/depth_merge/plans/storage_plan.json` | `storage.py --write` against the live relay (0.4) |
+| 11 | **Code bundles kept for no consumer** | `scripts/maintenance/consolidation/retire_relay_bundles.py`: a session bundle is retired only when its commit is exactly one commit on a pushed ref (rebuildable), no pod exists, and it is not under a protected prefix; tombstone first, exact-object permanent deletion, listing read back | 379 bundles retired, 8,418,278,418 B (7.84 GiB) freed, 0 left (`logs/maintenance/inventories/relay_bundle_tombstones_20261126.json`, written before the deletion); 20 bundles (0.07 GiB) whose commit is not on a pushed ref are KEPT; the headroom read back 43.09 GiB (it was 35.27) |
+| 12 | README / AGENTS | README's goal now says the other capabilities are still measured separately and names the two environments (data generation and training); its student sizes include the ~2.0B rounds. AGENTS P8.3: the full-suite counts are upper bounds, never a quota | -- |
+
+### 0.2 Principle audit
+
+Checked = run (a test or a live read), static (read in the code or records), or not implemented.
+
+| principle | where it lives | check | result, gap or fix |
+| --- | --- | --- | --- |
+| 1 GPU validation where CPU cannot answer | P8.2 / P8.3; this report 0.3 | static | no CPU stand-in was built for a CUDA question this round. V1's real GPU paths (statistics, 20 assignments, the span diagnostic on the device, the reload) run in the formal build session itself. V2 / V3's engine and memory validation (~1 h, ~$1.2, cap $2.5: the recurrent model in vLLM 0.27.1 vs the HF reference, prefill / decode, the per-logical-layer KV cache, the first training steps' memory with and without the hidden term, the two terms' gradient norms at step 0) is a condition of V2 / V3 only, unauthorized |
+| 2, 4 scalability; no instance hardcode in the core | `src/aadistill`; adapters; `configs/` | run + static | the two confirmed hardcodes fixed (0.1 #8, #9). A grep of `src/aadistill` for teacher names, dimensions, seeds, experiment paths, device names and provider ids finds only docstrings / comments, the RunPod provider adapter (an infrastructure adapter, like a model-family adapter) and `cpu_test_env.host_local_store`'s default store name (`aad-artifacts`, a local-store name; noted, not changed). Stage 0-6, other families, geometries and compression ratios enter through configs and adapters (the recurrent family is an adapter; schedule, pairs and weights are config). **Gap left open, deliberately:** the other application search builders (`packed_full_search`, `full_search`, the D1 / D2 sessions, the calibration-volume session, `dry_run_search`, the device canary) and the forward baseline v2 record declare no stream weighting; their searches still derive the hashes their records carry, but one that APPLIES width or the composite now stops loudly until it declares one. The next forward run declares it in its own protocol (or a baseline v3); editing the registered v2 record or the closed builders here would move recorded identities for no consumer |
+| 3 logs by stage / experiment / run | `logs/stages/stage-1/depth_merge/`, `logs/stages/stage-6/depth_recurrence/`, generated READMEs and `logs/stages/index.json` | run | regenerated after this round's new records (the storage plan, the bundle tombstones); the historical layout is untouched |
+| 5 test economy | P8.3 | static | mid-round checks only for specific questions (the lifetime regression against the old code; the counter-example; the operators' callers). One convergence validation and one full core suite after the implementation (0.6). The P8.3 bound is now stated as an upper bound, not a duty |
+| 6, 9 autonomous completion | P8.2.1, P12.1 | run | every repair above was made and verified in this round; the one thing outside the authority is the relay room (0.4), listed as a decision with its objects and sizes |
+| 7 historical weight retirement | AGENTS 2.5; `retire_eligible_checkpoints.py` | run | the standing-rule dry run finds **0** eligible rows (two refused: their bytes are already gone, or code still names them). Every remaining relay checkpoint is protected by an explicit maintainer clause (SOB1's finals at their approved placement; SOB1's three inits "kept until the next round's plan is fixed"; the permanent controls; the canonical 0.6B init) or is DMR1's own base. The 379 session code bundles (7.84 GiB) had no consumer and were retired (0.1 #11) |
+| 8 review priorities | P8.3 | static | this report leads with validity (the selection's source, the conditioning of C2, the identity binding, the lifetime bug), then reuse and identity, then storage and money |
+| 10, 11 keep new products; reuse across attempts | P8.2.1, P8.4 | run | the build persists each product at once and takes over by identity (0.1 #1-#3); training reuses SOB1's chain (finals restored, never retrained; sealed generation parts reused; save points resume optimizer, schedule, RNG and data position: the end-to-end driver tests of the first round) |
+| 12 capability target | P10.2, P10.3; `data/eval-set/` | static | fluid reasoning is the primary target; the primary comparison reads eval-set-1's static fluid formal core; every other unit is reported on its own. eval-set-1 is development-exposed (its own manifest); `stage3_legacy_150` is in-sample training prompts and is never reported as generalization; nothing here is a never-seen result |
+| 13 terminology | AGENTS 2.10 | static | packed sequence, sequence length, batch size (2 sequences per optimizer step), micro-batch size (1), gradient accumulation (2 steps), epoch; a **logical layer** is one execution of a Transformer block at one teacher-layer position (defined once, stage-6 README section 2); a **recurrent iteration** is one more call of the same block; a Transformer block keeps its meaning |
+| 14 one teacher lineage | P17.1; `design.json :: teacher, lineage`; the plans' `lineage` | static | hybrid `Qwen/Qwen3-4B@1cfa9a72` for calibration, statistics, initialization, SOB1's training targets, the online KD teacher, tokenizer, chat template and config; the build checks the loaded teacher's sha256; a save point is restored only under the same trainer config sha256 (which binds teacher and data) |
+| 15 packing and token counts | P19; the designs' `statistics`, `training.data` | static | V1's statistics forward: the packed search's context (seeded sha256 shuffle, sequential packing, truncation, continuous positions, causal, 8,192). Training: SOB1's pack (the same rule; 6,467 packed sequences x 8,192). Volumes counted before packing (558 calibration examples; 45,363 training examples, 56,408 turns, 11.86 M unique supervised tokens); 79 packed sequences / 231,242 positions and the per-step KD rows are packing and exposure measures only. V2 / V3 (Stage 6) register Stage 3's packing as their own identity. **Stage 5: no run exists -- not executed, not validated** |
+| environments | `requirements-cu128.txt` → `/opt/train` (relay wheelhouse `wheelhouse_cu128_cp312`), `requirements-vllm.txt` → `/opt/vllm` (`wheelhouse_vllm_cp312`); `autoinit_preflight_setup.sh` | static | data generation and evaluation generation run in the vLLM environment, training in the training environment (`train_driver --vllm-python /opt/vllm/bin/python` hands evaluation to the other one); the online KD teacher's forward is part of the training computation, in the trainer's process. Both wheelhouses are the pods' environment and are kept |
+| "never seen" | `data/eval-set/eval-set-1/manifest.json`; `shared.eval_sets` | static | unseen ITEMS: training, calibration and search data are checked disjoint from held-out units (`require_disjoint`, `held_out_paths`); unseen RULE FAMILIES: fluid_reasoning_720's generator families are evaluation-split and calibration builds are checked disjoint by family, content and prompt; unseen INTERACTIVE ENVIRONMENTS: the `interactive_adaptation` episodes (formal core; descriptive here); DEVELOPMENT EXPOSURE: eval-set-1's items and per-item results were read during development, so a claim of untouched-test generalization needs eval-set-2 (not built; out of scope) |
+
+### 0.3 Which conditions belong to which variant
+
+**Variant 1 (before its build session is launched):** this review; the maintainer's grant for each of its two kinds;
+**the relay room for the whole chain** (0.4) -- the build's launch gate refuses until it exists. No separate GPU
+validation: the build session's own run is the GPU check of its paths. **Not** conditions of variant 1: the vLLM
+recurrent engine, the hidden-loss memory, the lambda question, anything of comparison 1's outcome.
+
+**Variants 2 and 3:** comparison 1 complete and valid (the selection refuses otherwise); the selection written once and
+its recurrent init record committed; the GPU engine validation above; a project-cap decision (their caps exceed what
+the cap leaves after variant 1); a proposal and a grant per kind; their own relay room (their rotation is the same
+46.46 GiB peak; after variant 1 its init, two finals and archives hold 18.97 GiB more); R1 / R2 answered (section 5).
+
+### 0.4 Storage, on the real objects and in the real order
+
+Live (read-only, 2026-11-26 15:15Z): the relay holds **44.47 GiB** (the sum of its LFS objects, the billing basis) and
+accepts **43.09 GiB** more (LFS batch-endpoint bisection, nothing stored). The sizes are SOB1's measured depth arm's:
+init 4,007,703,552 B (bf16), save point 20,934,572,032 B (fp32 weights + AdamW + state), final 8,015,407,104 B (fp32);
+statistics bounded at 64 MiB (about 4 MB), each closeout archive at 128 MiB (SOB1's were about 40 MB).
+`logs/stages/stage-1/depth_merge/plans/storage_plan.json` holds every step.
+
+| step (drivers' order; the previous save point is removed only after the next one verified and handed off) | relay, net vs now | dev box |
+| --- | ---: | ---: |
+| build session: the init and the statistics put (each verified, its pointer beside it) | +3.79 GiB | evidence ≤ 0.5 GiB |
+| build closeout: its evidence archive; the init stays at its relay prefix | +3.92 | |
+| training, seed 20260726: each save point uploaded while the previous one is still there (2 at once) | **+42.91** | evidence ≤ 1.5 GiB (one session at a time) |
+| seed 20260726's final uploaded, then its last save point removed | +30.88 → +11.38 | |
+| training, seed 20260801: seed 1's final held while two save points rotate | **+50.38 (the peak)** | |
+| seed 20260801's final, then its last save point removed | +38.35 → +18.85 | |
+| training closeout: its archive; both finals and the init stay on the relay (`storage.phase_2_finals.placement`) | +18.97 | |
+
+**Need: 50.38 + 1.00 margin = 51.38 GiB against 43.09: short by 8.28 GiB.** The build session's launch gate asks for
+exactly this (0.1 #10), so it refuses now; the training session's gate asks for its remaining rotation. The dev box
+(23 GiB free, shared with another project) is never the constraint for variant 1 itself: at most one session's
+evidence (≤ 1.5 GiB) at a time; the finals stay on the relay.
+
+**What this round could free, and did:** the standing-rule dry run finds no eligible checkpoint; the 379 session code
+bundles (7.84 GiB) had no consumer and are rebuildable from pushed commits -- retired. **What it could not**, because a
+maintainer clause or a consumer holds each one:
+
+| object | size | held by |
+| --- | ---: | --- |
+| SOB1 `ffn_attention` finals, seeds 20260726 / 20260801 (relay only) | 2 x 7.51 GiB | "the endpoints the report measured, kept at their approved placement" (SOB1; placement = relay) |
+| SOB1 `residual_width` and `ffn_attention` inits (relay copies; dev-box copies verified) | 3.75 + 3.76 GiB | "kept (here and on the relay) until the next round's plan is fixed, then decided by its consumers" (maintainer, 2026-11-26) |
+| SOB1 `depth_only` init | 3.73 GiB | DMR1's own base (variant 2's KEPT path fetches it) |
+| permanent controls (2), canonical 0.6B init and its random baseline | 4.44 + 2.22 GiB | protected prefixes |
+| stage-0 calibration-volume finalist | 1.11 GiB | named by Stage-2 configs |
+| the two wheelhouses | 7.42 GiB | the pods' training and vLLM environments (every session's setup) |
+
+**The decision the maintainer owes before variant 1 launches** (any one that makes 8.28 GiB):
+
+1. *(recommended)* move SOB1's two `ffn_attention` finals to the dev box -- downloaded, re-hashed, recorded as the width
+   and depth finals were, then their relay objects permanently deleted with tombstones (a change of their approved
+   placement): relay +15.03 GiB, **6.75 GiB to spare** at variant 1's peak; the dev box drops to about 8 GiB free
+   (≥ 6.4 GiB during a variant-1 session);
+2. buy at least 9 GiB of private storage;
+3. *(not enough alone)* once DMR1's plan is approved and so "fixed", retire the relay copies of SOB1's width and
+   `ffn_attention` inits (their dev-box copies stay): +7.50 GiB leaves 0.22 GiB of the 1 GiB margin -- too thin by
+   itself; with option 2 or 1 it is ample.
+
+Retiring the `ffn_attention` finals outright (their only copy; a $38 retraining to recover) is possible but not
+recommended. After variant 1 the relay holds 18.97 GiB more (its init and two finals), so variants 2 / 3 need their own
+room decision later (their rotation peaks at the same 46.46 GiB); that is theirs, not variant 1's.
+
+### 0.5 Budget and authorization (live, read-only, 2026-11-26 15:07Z)
+
+* Account balance **$123.73**; 0 pods, 0 volumes, $0.00/h. Project cap $1,161.06, committed $1,086.27
+  (provider-settled), **$74.79** left under it. SOB1's closed grants' remainders are void and fund nothing.
+* **Variant 1's proposals, unchanged in amount** (regenerated only because the design file changed): build $2.50
+  expected / **$5.43** cap; training $32.68 expected / **$64.46** cap; $1.00 teardown reserve each: **$71.89**, inside
+  the $74.79 and the balance. Both kinds read fundable (`launch.py budget`); both still refuse to launch on the relay
+  room. Nothing is granted or issued.
+* Variants 2 and 3: estimates only (~$59 / $62 expected, caps $110.43 / $114.60), not proposed; no paid authorization.
+  The proposed engine validation (~$1.2, cap $2.5) is not authorized.
+* The balance, the remaining project cap and an experiment's authorization are three different things: the first two
+  are room, only a grant authorizes.
+
+### 0.6 Commit, push, resources
+
+* This round's work is the commit that carries this report on `research/reasoning-inheritance` (`git log -1 --
+  docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md`), pushed to `origin`; the first round's was `49ce2014`.
+  Not merged into `main`.
+* Running resources: **none** -- 0 pods, 0 volumes, $0.00/h (live read 2026-11-26 15:07Z); no session, grant or issued
+  artifact exists for any DMR1 kind; every background watcher of this round is closed.
+* Generated files: the new records are small JSON in the tree (`storage_plan.json`, the bundle tombstones, the two
+  recipe / profile configs); no weight, cache or archive was added to git; the dev box's scratch holds only the
+  rendered report page.
 
 ## 1. Scope, files and real entry points
 
@@ -186,14 +320,22 @@ exactly.
   recovered from 9.78 to 0.50, so a high start is not by itself fatal, but this is a materially worse starting point
   than variant 2's control, and the comparison measures it together with recurrence. The registered design is
   unchanged; this is flagged for the review (question R1 below).
-* **lambda_hidden = 1.0** (proposed, not tuned): at step 0 the hidden term is about KD's size (14.56 against 12.30,
-  1.2x), its mass in logical layers 14-28; the gradient clip at 1.0 bounds each update; KD fell from 3.54 to 0.41 over
-  SOB1's depth recovery, and the per-layer log shows whether the hidden term falls with it. The alternative a reviewer
-  may prefer is a KD-led weight such as 0.25; it is not registered.
+* **lambda_hidden = 1.0 is a proposal**, not tuned and not validated; 0.25 is an equally unvalidated alternative, not a
+  "KD-dominant" setting. What step 0 measured is only the scalar size: the hidden term 14.56 against KD 12.30, its mass
+  in logical layers 14-28. That does not make their gradient contributions similar (not measured: the hidden term
+  reaches every block through every logical layer's output, KD only through the head); the global gradient-norm clip at
+  1.0 rescales the summed gradient as a whole, so it neither guarantees that KD dominates nor changes the two terms'
+  shares; and it bounds the gradient's norm, not the parameter update -- AdamW normalizes each coordinate by its running
+  second moment, so the update size follows the learning rate and those moments. KD fell from 3.54 to 0.41 over SOB1's
+  depth recovery; the per-layer log shows whether the hidden term falls with it. No lambda search is part of this round;
+  the two terms' gradient norms at step 0 are a cheap addition to variants 2 / 3's GPU validation.
+* **The scope of the step-0 result**: two validation sequences show that THIS initialization starts degenerate on the
+  36-layer schedule. It is not evidence that recovery fails, and it is no reason to change the number of iterations, add
+  a residual scale or change the initialization rule; the registered design runs as registered.
 
 **Questions for the review.** R1: should variant 2's registered initialization stay the plain schedule of the
-selected weights (the brief's definition), given its step-0 distance? R2: lambda_hidden 1.0 or a KD-led 0.25? R3: the
-relay room (section 9).
+selected weights (the brief's definition), given its step-0 distance? R2: lambda_hidden 1.0 or 0.25 (neither
+validated)? R3: the relay-room decision (section 0.4).
 
 **Implementation** (`aadistill.training.hidden_state`, `train.py`): the teacher's layer outputs at the KD rows are
 taken by forward hooks in the same no-grad forward the KD sketch comes from (each hooked layer must run once); the
@@ -227,6 +369,13 @@ unchanged one (tested). Logged per step: `hidden`, `hidden_weight`, `hidden_by_l
   (`analysis.py sensitivity`).
 * **Completeness**: formal in a mode only when both arms × both seeds cover all 570 items AND both sessions are
   complete on their files (`completion.session`); otherwise deltas and intervals only, never partially pooled.
+* **The error rate's scope**: each comparison's 0.05 is its own family's; no error rate is controlled or claimed over
+  the round's three comparisons together (every record says so, `error_rate_scope`).
+* **C2 is conditional on the selection**: both of its arms start from the initialization C1 chose on the SAME
+  development-exposed items C2 is scored on, and the MERGED path's control is the arm that looked better on them. C2
+  estimates the recurrence's effect at the selected initialization, not at one chosen independently of this set (the
+  record carries `selection_conditioning`); C2 and C3 read the initialization their trained units bound
+  (`analysis.bound_init`), never a later selection file.
 * **Seeds vs items**: the test and the interval resample items and groups with each arm's two checkpoints fixed --
   item sampling, not training randomness. Per-seed deltas with intervals and sign agreement are reported beside; two
   seeds are limited evidence about training randomness; 1,140 records are 570 items, not 1,140 independent ones.
@@ -260,8 +409,34 @@ unchanged one (tested). Logged per step: `hidden`, `hidden_weight`, `hidden_by_l
 
 ## 8. Verification, repairs, and what is not measured
 
-**Evidence, by kind** (one convergence validation after the implementation, then one full core suite; the two small
-early checks were API questions about transformers 5.13's Qwen3 internals):
+**This round's evidence** (the repair round; one convergence validation after the repairs, then one full core suite;
+mid-round checks only for specific questions -- the lifetime regressions run against the previous code, the
+alignment counter-example, which callers the operators' declaration reaches):
+
+```text
+development checks (specific questions)  : the two lifetime regressions FAIL on the previous code (the fix stashed)
+                                           and pass with it; the alignment counter-example; tests/initialization run
+                                           to find every caller the operators' declaration had to reach
+convergence, experiment suites            : depth_merge 17, depth_recurrence (27 + the 13 refusal cases), SOB1, RI,
+  (incl. the historical planners' pricing   continuation_b, phase_b cost replay, shared cost and recovery, e8 frozen
+   suites this round's imports touched)     records, phase_c3 pricing: 298 passed / 1 failed / 42 skipped, 6.7 min;
+                                           the failure is PRE-EXISTING (continuation_b's frozen set names
+                                           scripts/experiments/__init__.py, absent at HEAD too)
+Phase A (historical; its search runner     : 156 passed / 8 failed, 15.2 min; the 8 are test_phase_a_attempt12_import,
+  now declares the historical recipe)       PRE-EXISTING (its checkpoint was retired 2026-11-14)
+Phase B / A3 frozen-digest suites          : 40 passed / 91 skipped
+full core suite (pytest, testpaths=tests)  : 4,181 passed / 12 failed / 50 skipped, 14.3 min; the 12 were
+                                           tests/validation/test_cuda_suffix_case.py (the shared CUDA engineering
+                                           check applies width without a declaration): its case config now names the
+                                           recipe; tests/validation rerun 83 passed / 0 failed, and the minimal
+                                           neighbourhood (test_calibration_item_preparation 29, depth_merge 17) passed
+GPU validation                             : none (no GPU; nothing paid)
+historical suites not run                  : the other closed experiments' (D1, D2, C2, C3, calibration volume,
+                                           teacher_modes); their search builders declare no weighting (0.2, 2/4)
+```
+
+**The first round's evidence** (kept for the record; one convergence validation after the implementation, then one
+full core suite; the two small early checks were API questions about transformers 5.13's Qwen3 internals):
 
 ```text
 convergence, core (tests/docs, tests/architecture, tests/models, tests/training,
@@ -297,7 +472,7 @@ historical suites                                           : SOB1's and RI's ra
 | the comparison's family rule | `test_each_comparison_is_its_own_fixed_sequence_family_and_formal_only_when_complete` |
 | core declared, nothing else moved | `tests/architecture/test_cuda_surface_preserved.py` (81) |
 
-**Fixed during the round**:
+**Fixed during the first round** (this round's repairs: section 0.1):
 
 1. the hidden error was accumulated in float32 even for a float64 state (a 4e-8 relative difference in the float64
    test): it now accumulates in float64 for float64 states (training is fp32 student / bf16 targets, unchanged);
@@ -360,23 +535,15 @@ size per token (36 layers, 147,456 B in bf16), 2.25x the depth arm's. Not measur
 | save point (fp32 + AdamW + state) | 20.93 GB | relay, rotated: at most two at once |
 | final (fp32) | 8.02 GB per seed | relay (`design.json :: storage.phase_2_finals.placement`) |
 | evidence | ~0.35 GB per training session | dev box (`<scr>/store/out`) and the relay archive |
-| a training session's relay peak | **46.46 GiB** (two save points + one final) | -- |
+| a training session's relay peak | **46.46 GiB** (two save points + one final); variant 1's chain adds its init and archives: **50.38 GiB** (0.4) | -- |
 
-**The relay is short.** Its live headroom read **35.24-35.28 GiB** (2026-11-26 11:32Z, read-only bisection). Every
-training session (each of the three variants) needs 46.46 GiB at its peak: **11.2 GiB short (12.2 with the 1 GiB
-margin)**, and each finished variant's two finals then hold 14.93 GiB more. The build session needs 3.8 GiB and fits.
-The dev box has 18-23 GiB free (shared with another project; a 4.4 GiB swing was measured). With no disk growth and no
-storage purchase (the brief), the training session's launch gate refuses until the maintainer frees room. Options, the
-maintainer's to choose:
+**The relay.** Superseded by section 0.4, which counts the new init (3.73 GiB) the first version of this section left
+out, follows the drivers' real order, and asks the relay for the whole chain: 50.38 GiB at variant 1's peak (+1 GiB
+margin) against 43.09 GiB of live headroom after this round retired the unconsumed code bundles -- **8.28 GiB short, a
+maintainer decision** (0.4 lists the objects and the options). The one-save-point rotation the first version offered
+as an option is withdrawn: it would delete the only valid save point before the next one is uploaded.
 
-1. retire the 7.75 GiB of session code bundles on the relay (reproducible from git) plus about 4.5 GiB more (e.g. the
-   1.11 GiB random baseline, and a further decision) -- each a maintainer decision (SOB1 README section 8);
-2. move SOB1's two FFN + attention finals (15.03 GiB) from the relay to the dev box -- leaves the dev box ~5-8 GiB free,
-   too thin beside the 4.4 GiB swing;
-3. approve a one-save-point rotation (remove the previous save point before the next upload): peak 28.95 GB, fits,
-   but a failure in that window falls back to the previous final or step 0 -- a change of the durability rule.
-
-**Money** (live 2026-11-26 11:48Z, read-only):
+**Money** (live 2026-11-26 15:07Z, read-only; unchanged since 11:48Z):
 
 * account balance **$123.7283**; 0 pods, 0 volumes, $0.00/h;
 * project cap $1,161.06, committed $1,086.2713 (provider-settled), **$74.7887** left under it;
@@ -394,12 +561,18 @@ bf16-vs-fp32 difference); run the hidden-state trainer's first four steps on 8,1
 
 ## 10. $0 state and authorization boundaries
 
-* Nothing billed this round: no pod, no volume, no grant, no artifact, no upload, no relay deletion. Read-only
-  queries: the provider position, the relay's headroom, the vLLM 0.27.1 wheel (for its source) and the public teacher
-  weights (for the step-0 diagnostic; deleted afterwards).
-* Retention: SOB1's depth init and its two finals are registered as DMR1's declared consumers
-  (`build_checkpoint_registry.py`); the three SOB1 initializations stay; nothing retired.
-* Owed to the maintainer: this review; variant 1's two grants and its relay room (section 9); for variants 2 and 3, a
-  project-cap decision, their proposals and grants after the selection, the engine validation.
-* After review and the maintainer's authorization, variant 1 starts with `launch.py grant --kind dmr1_merge_build
-  ...` (its design document, section 5).
+* Nothing billed in either round: no pod, no volume, no grant, no artifact, no build, no training, no generation.
+  Read-only queries: the provider position, the relay's headroom and inventory, the vLLM 0.27.1 wheel (its source) and
+  the public teacher weights (the step-0 diagnostic; deleted afterwards).
+* **One relay deletion, this round, under the brief's rule for code packages**: 379 session code bundles (7.84 GiB),
+  each rebuildable from a commit on a pushed ref, none read by anything (0 pods); tombstone
+  `logs/maintenance/inventories/relay_bundle_tombstones_20261126.json` written before the deletion; 20 bundles whose
+  commit is not on a pushed ref kept. No checkpoint, log or evidence was touched: the standing-rule dry run found none
+  eligible.
+* Retention: SOB1's depth init and its two finals are DMR1's declared consumers (`build_checkpoint_registry.py`); the
+  three SOB1 initializations and every SOB1 final stay where their maintainer clauses keep them.
+* Owed to the maintainer: this review; **the relay-room decision (0.4)**; variant 1's two grants. For variants 2 and 3: a
+  project-cap decision, their proposals and grants after the selection, the GPU engine validation, their own relay room.
+* After the review, the room decision and the maintainer's authorization, variant 1 starts with `launch.py grant
+  --kind dmr1_merge_build ...` (its design document, section 5); the build's launch gate re-reads the relay for the
+  whole chain before anything is created.

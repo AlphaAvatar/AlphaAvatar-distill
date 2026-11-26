@@ -80,13 +80,17 @@ def source_plan(root: Path = REPO) -> dict:
 
 def init_problems(arm: str, rec: dict, rec_path: str, root: Path = REPO) -> list[str]:
     """Why ``rec`` is not a legal training-pre initialization of ``arm`` (empty when it is)."""
-    d = DC.design_of(arm)
     if rec.get("status") != "COMPLETE":
         return [f"{rec_path} is {rec.get('status')!r}, not COMPLETE"]
     if not DC.is_recurrent(arm):
+        import tempfile
+        from stages.depth_merge import build_driver as BD
         bad = [] if rec.get("arm") == arm else [f"{rec_path} is {rec.get('arm')!r}'s init record, not {arm}'s"]
         if not all((v or {}).get("verified") for v in (rec.get("relay") or {}).values()) or not rec.get("relay"):
             bad.append(f"{rec_path}: the initialization's relay copies are not all verified")
+        with tempfile.TemporaryDirectory() as tmp:          #: made under this tree's identity of the build ($0)
+            bad += [f"{rec_path}: {b}" for b in BD.product_problems(rec, BD.current_identity(Path(tmp)))
+                    if b not in bad]
         return bad
     from stages.depth_recurrence import schedule as SCH
     return SCH.init_record_problems(rec, arm=arm, root=root)

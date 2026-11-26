@@ -115,6 +115,8 @@
    "ffn.activation_importance_v0",
    "width.global_pca_v0"
   ],
+  "stream_weighting": "endpoints_9_1_8_v0",
+  "_stream_weighting": "the PCA stream weighting width.global_pca_v0 is applied with (configs/shared/initialization/stream_weighting.json): the core holds none, so the case names the historical recipe it always ran under",
   "incumbent_impl_id": "attention.weight_proxy_v0",
   "_incumbent_reads_no_calibration": "exactly as C1's incumbent arm does, so its step carries the null profile",
   "incumbent_profile_id": "calib.none@v1",

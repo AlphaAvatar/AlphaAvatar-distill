@@ -19,6 +19,7 @@ forwards must be on the same device as the model.
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -73,7 +74,7 @@ def run_with_split_cache(impl_id, teacher, teacher_spec, target_spec, items,
     ctx = OperatorContext(
         adapter=ADAPTER, model=teacher, parent_spec=teacher_spec,
         target_spec=target_spec, profile=profile, calibration_items=items,
-        seed=1234, device=str(model_device(teacher)),
+        seed=1234, device=str(model_device(teacher)), config=declared(),
         stats_cache=SplitCache(), stats_cache_key="split")
     return impl.execute(ctx)
 

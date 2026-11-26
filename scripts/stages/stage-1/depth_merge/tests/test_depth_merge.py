@@ -5,8 +5,11 @@
 * the alpha merge on the toy teacher with a 4-block span: each merged slot is sum_i alpha_i A_i(theta_i) with alpha the
   importance normalized over the span, recomputed here from the definitions; an all-zero slot is uniform; single
   spans and every other tensor are the base's;
-* the alignments are durable pair by pair and reused only under the same correlation;
-* the build's products are durable only when the relay verifies them, and are never sent twice;
+* the alignments are durable pair by pair and reused only under the same inputs (the FFN correlation AND the
+  attention Grams): an unchanged correlation with changed head statistics is recomputed;
+* the build's products are durable only when the relay verifies them, are never sent twice, and are bound to
+  their scientific identity; a takeover makes only what is missing (the real interruption: weights verified, no
+  init record, pod lost -> nothing is built); the span diagnostic moves only the kept blocks to the device;
 * the plan is SOB1's depth unit outside the declared fields;
 * the registered comparison's family rule (thinking at 0.05, non-thinking only after it rejects; formal only when
   complete) and its per-seed reading;
@@ -147,7 +150,7 @@ def test_an_all_zero_slot_takes_uniform_weights_and_is_counted(teacher):
     assert how["uniform_fallback_slots"]["ffn"] >= 1
 
 
-def test_alignments_are_reused_only_under_the_same_correlation(teacher):
+def test_alignments_are_reused_only_under_the_same_inputs(teacher):
     LMX = M.lmx()
     adapter, spans, _b, _d = _toy(teacher)
     n_q, n_kv, _ = adapter.head_groups(adapter.spec_of(teacher))
@@ -156,12 +159,39 @@ def test_alignments_are_reused_only_under_the_same_correlation(teacher):
     al1, _ = M.pair_alignments(st, n_q, n_kv, on_pair=lambda tag, x: written.__setitem__(tag, x))
     again = {}
     al2, rep = M.pair_alignments(st, n_q, n_kv, persisted=written, on_pair=lambda t, x: again.__setitem__(t, x))
-    assert set(rep.values()) == {"reused (same correlation)"} and not again
+    assert set(rep.values()) == {"reused (same inputs)"} and not again
     for k in al1:
         assert torch.equal(al1[k]["ffn_perm"], al2[k]["ffn_perm"])
-    stale = {k: {**v, "correlation_sha256": "0" * 64} for k, v in written.items()}
+    stale = {k: {**v, "inputs": {**v["inputs"], "code_sha256": "0" * 64}} for k, v in written.items()}
     _al3, rep3 = M.pair_alignments(st, n_q, n_kv, persisted=stale, on_pair=lambda t, x: again.__setitem__(t, x))
-    assert set(rep3.values()) == {"recomputed (another correlation)"} and sorted(again) == sorted(written)
+    assert set(rep3.values()) == {"recomputed (code_sha256 differ)"} and sorted(again) == sorted(written)
+
+
+def test_an_unchanged_ffn_correlation_does_not_carry_a_stale_attention_matching(teacher):
+    """The counter-example: the absorbed block's head statistics change (its heads in reverse order), its FFN Pearson
+    moments do not. The persisted pair's FFN correlation hash still matches; its attention matching must not be reused."""
+    LMX = M.lmx()
+    adapter, spans, _b, _d = _toy(teacher)
+    n_q, n_kv, _ = adapter.head_groups(adapter.spec_of(teacher))
+    st = LMX.collect_statistics(adapter, teacher, spans, _batches(), None, chunk=16)
+    written = {}
+    M.pair_alignments(st, n_q, n_kv, on_pair=lambda tag, x: written.__setitem__(tag, x))
+    key = (1, 2)
+    st2 = copy.deepcopy(st)
+    rev = torch.arange(n_q - 1, -1, -1)
+    hm = st2.heads[key]
+    hm.cross, hm.energy_b = hm.cross[:, rev], hm.energy_b[rev]
+    st2.self_heads[2].cross = st2.self_heads[2].cross[rev][:, rev]
+    assert torch.equal(st2.pearson[key].correlation(), st.pearson[key].correlation())
+    fresh = LMX.alignments(st2, n_q, n_kv)[key]
+    old = written["1->2"]
+    assert (fresh["kv_perm"].tolist(), fresh["q_perm_within"].tolist()) != (old["kv_perm"], old["q_perm_within"])
+    got, rep = M.pair_alignments(st2, n_q, n_kv, persisted=written)
+    assert rep["1->2"] == "recomputed (attention_sha256 differ)"
+    assert rep["1->3"] == rep["1->4"] == "reused (same inputs)"
+    assert torch.equal(got[key]["kv_perm"], fresh["kv_perm"]) and torch.equal(got[key]["q_perm_within"],
+                                                                             fresh["q_perm_within"])
+    assert torch.equal(got[key]["ffn_perm"], fresh["ffn_perm"])
 
 
 def test_the_base_check_refuses_a_rebuilt_base_that_is_not_the_bases(teacher):
@@ -174,56 +204,229 @@ def test_the_base_check_refuses_a_rebuilt_base_that_is_not_the_bases(teacher):
         BD.check_base(adapter, teacher, TOY_SEL, bad)
 
 
-# ---- the build's durability ---------------------------------------------------------------------------------------
+# ---- the build's durability and takeover -----------------------------------------------------------------------
 
-def _build_record(out: Path, work: Path) -> dict:
+@pytest.fixture(scope="module")
+def contract(tmp_path_factory):
+    """The real $0 contract of this tree (the packed search's session on the CPU, about 3 s)."""
     from stages.depth_merge import build_driver as BD
-    (work / "products/init").mkdir(parents=True)
-    (work / "products/init/model.safetensors").write_bytes(b"weights")
-    (work / "products/init/config.json").write_text("{}")
-    rec_dir = BD.records(out)
+    return BD.contract(tmp_path_factory.mktemp("contract"), "cpu")
+
+
+def _secured(ev: Path, ident: dict, *, finished: bool = True, relay: dict | None = None) -> dict:
+    """A previous attempt's secured evidence (what `take_over` copies into ``out``): its build record under ``ident``
+    with statistics, checkpoint and (``finished``) diagnostics, the statistics file, and ``relay`` as relay.json."""
+    from stages.depth_merge import build_driver as BD
+    rec_dir = BD.records(ev)
     rec_dir.mkdir(parents=True)
     (rec_dir / f"{M.STATS}.safetensors").write_bytes(b"stats")
-    rec = {"run_id": "r", "root": {"root_teacher_id": "t", "root_teacher_sha256": "s"}, "method": M.METHOD,
-           "method_identity": {}, "statistics": {"tensors_sha256": sha(rec_dir / f"{M.STATS}.safetensors")},
-           "checks": {}, "candidate": {}, "design_sha256": "d",
-           "checkpoint": {"artifact_digest": "a" * 64, "shards": [{"filename": "model.safetensors",
-                                                                     "sha256": sha(work / "products/init/model.safetensors"),
-                                                                     "size_bytes": 7}],
-                          "files_sha256": {"model.safetensors": sha(work / "products/init/model.safetensors"),
-                                           "config.json": sha(work / "products/init/config.json")}}}
+    w = hashlib.sha256(b"weights").hexdigest()
+    rec = {"run_id": "r1", "arm": BD.ARM, "identity": ident, "method": M.METHOD, "method_identity": {},
+           "root": {"root_teacher_id": "t", "root_teacher_sha256": "s"},
+           "statistics": {"tensors_sha256": sha(rec_dir / f"{M.STATS}.safetensors"), "saved_utc": "u"},
+           "checks": {"equivalence": {"passed": True, "worst": 1e-6}}, "candidate": {},
+           "checkpoint": {"artifact_digest": "a" * 64, "reload_forward_finite": True,
+                          "statistics_sha256": sha(rec_dir / f"{M.STATS}.safetensors"),
+                          "shards": [{"filename": "model.safetensors", "sha256": w, "size_bytes": 7}],
+                          "files_sha256": {"model.safetensors": w, "config.json": hashlib.sha256(b"{}").hexdigest()}},
+           "attempts": [{"run_id": "r1"}]}
+    if finished:
+        rec.update(diagnostics={"spans": {}}, state_evaluation={"values": {}}, finished_utc="u")
     (rec_dir / "build.json").write_text(json.dumps(rec))
+    if relay is not None:
+        (rec_dir / "relay.json").write_text(json.dumps(relay))
     return rec
 
 
-def test_the_init_record_is_complete_only_when_every_relay_copy_verifies_and_nothing_is_sent_twice(tmp_path):
+def _verified(name: str, rec: dict) -> dict:
+    from stages.depth_merge import build_driver as BD
+    return {"relay": "r", "prefix": BD.group_prefix(name, rec), "files_sha256": BD.group_files(name, rec),
+            "bytes": {k: 7 for k in BD.group_files(name, rec)}, "verified": True}
+
+
+class Relay:
+    """The relay as the driver sees it (`_put`, `_get`, `_listing`, `_handoff`), every call recorded."""
+
+    def __init__(self, listed=()):
+        self.calls, self.listed = [], list(listed)
+
+    def put(self, payload, timeout_s):
+        self.calls.append(("put", payload["prefix"].split("/")[-2]))
+        return {"relay": "r", "prefix": payload["prefix"], "verified": True,
+                "files_sha256": {k: sha(v) for k, v in payload["files"].items()}}
+
+    def get(self, record, dest, timeout_s):
+        self.calls.append(("get", record["prefix"].split("/")[-2]))
+        for k in record["files_sha256"]:
+            t = Path(dest) / k
+            t.parent.mkdir(parents=True, exist_ok=True)
+            t.write_bytes(b"weights" if k.endswith("model.safetensors") else b"{}")
+        return {"verified": True}
+
+    def listing(self, prefix):
+        self.calls.append(("list", prefix.split("/")[-1]))
+        return {"records": [{"present": True, "record": r} for r in self.listed if r["prefix"].startswith(prefix)]}
+
+    def install(self, monkeypatch, BD):
+        monkeypatch.setattr(BD, "_put", self.put)
+        monkeypatch.setattr(BD, "_get", self.get)
+        monkeypatch.setattr(BD, "_listing", self.listing)
+        monkeypatch.setattr(BD, "_handoff", lambda rec, scratch, listing, message: {"verified": True})
+
+
+def _no_gpu(*_a, **_k):
+    raise AssertionError("a takeover of durable products opened the teacher")
+
+
+def _main(BD, tmp_path, contract, monkeypatch, resume: Path) -> tuple[int, dict, Path]:
+    monkeypatch.setattr(BD, "contract", lambda work, device: contract)
+    out = tmp_path / "out2"
+    rc = BD.main(["--run-id", "r2", "--out", str(out), "--work", str(tmp_path / "work2"), "--status",
+                  str(tmp_path / "st2"), "--device", "cpu", "--resume", str(resume)])
+    return rc, json.loads((out / "report.json").read_text()), out
+
+
+def test_weights_uploaded_and_verified_but_no_init_record_is_taken_over_without_building(tmp_path, contract,
+                                                                                       monkeypatch):
+    """The real interruption: the weights' relay copy verified (relay.json secured), the statistics' upload not yet,
+    the init record never written, the pod lost with its files. The entry point writes the init record from the
+    secured evidence: no teacher, no statistics forward, no weights build, the weights never sent again."""
+    from stages.depth_merge import build_driver as BD
+    ident = BD.identity(contract)
+    ev = tmp_path / "secured"
+    rec = _secured(ev, ident)
+    (BD.records(ev) / "relay.json").write_text(json.dumps({"init": _verified("init", rec)}))
+    relay = Relay()
+    relay.install(monkeypatch, BD)
+    monkeypatch.setattr(BD, "open_gpu", _no_gpu)
+    for step in ("statistics_step", "weights_step", "diagnostics_step"):
+        monkeypatch.setattr(BD, step, _no_gpu)
+    rc, rep, out = _main(BD, tmp_path, contract, monkeypatch, ev)
+    assert rc == 0, rep.get("error")
+    assert [c for c in relay.calls if c[0] in ("put", "get")] == [("put", "statistics")]
+    doc = BD.durable_init(out, ident)
+    assert doc is not None and doc["relay"]["init"]["files_sha256"] == BD.group_files("init", rec)
+    assert "weights: taken over (the verified relay copy)" in rep["actions"]
+    assert "diagnostics: taken over" in rep["actions"]
+    rc2, rep2, _ = _main(BD, tmp_path, contract, monkeypatch, ev)          #: once more: the record itself
+    assert rc2 == 0 and rep2["actions"] == ["init record: taken over (durable under this identity)"]
+
+
+def test_a_verified_copy_the_dev_box_never_pulled_is_found_by_the_relay_listing(tmp_path, contract, monkeypatch):
+    from stages.depth_merge import build_driver as BD
+    ident = BD.identity(contract)
+    ev = tmp_path / "secured"
+    rec = _secured(ev, ident)                                        #: no relay.json: lost with the pod
+    relay = Relay(listed=[_verified("init", rec), _verified("statistics", rec)])
+    relay.install(monkeypatch, BD)
+    monkeypatch.setattr(BD, "open_gpu", _no_gpu)
+    rc, rep, out = _main(BD, tmp_path, contract, monkeypatch, ev)
+    assert rc == 0, rep.get("error")
+    assert not [c for c in relay.calls if c[0] in ("put", "get")]
+    assert BD.durable_init(out, ident)["relay"]["statistics"]["found_by"].startswith("the relay listing")
+
+
+def test_missing_diagnostics_restore_the_weights_from_their_verified_copy_and_rebuild_nothing(tmp_path, contract,
+                                                                                           monkeypatch):
+    from stages.depth_merge import build_driver as BD
+    ident = BD.identity(contract)
+    ev = tmp_path / "secured"
+    rec = _secured(ev, ident, finished=False)
+    (BD.records(ev) / "relay.json").write_text(json.dumps({"init": _verified("init", rec),
+                                                           "statistics": _verified("statistics", rec)}))
+    relay = Relay()
+    relay.install(monkeypatch, BD)
+    ran = []
+    monkeypatch.setattr(BD, "open_gpu", lambda work, device, r: SimpleNamespace(kind="gpu"))
+    for step in ("statistics_step", "weights_step"):
+        monkeypatch.setattr(BD, step, _no_gpu)
+
+    def diag(g, r, out, work, m=None):
+        ran.append((m, sha(work / "products/init/model.safetensors")))
+        r.update(diagnostics={"spans": {}}, finished_utc="now")
+    monkeypatch.setattr(BD, "diagnostics_step", diag)
+    rc, rep, out = _main(BD, tmp_path, contract, monkeypatch, ev)
+    assert rc == 0, rep.get("error")
+    assert [c for c in relay.calls if c[0] in ("put", "get")] == [("get", "init")]
+    assert ran == [(None, rec["checkpoint"]["files_sha256"]["model.safetensors"])]
+    assert BD.durable_init(out, ident)
+
+
+def test_products_made_under_another_identity_are_set_aside_and_never_adopted(tmp_path, contract, monkeypatch):
+    from stages.depth_merge import build_driver as BD
+    ident = BD.identity(contract)
+    other = copy.deepcopy(ident)
+    other["parts"]["calibration"]["profiles"] = {"calib.other@v1": "0" * 64}
+    other["statistics"] = other["checkpoint"] = "f" * 64
+    ev = tmp_path / "secured"
+    rec = _secured(ev, other)
+    (BD.records(ev) / "relay.json").write_text(json.dumps({"init": _verified("init", rec),
+                                                           "statistics": _verified("statistics", rec)}))
+    Relay().install(monkeypatch, BD)
+
+    class Opened(Exception):
+        pass
+
+    def opened(*_a, **_k):
+        raise Opened("the teacher is opened: the statistics are made again")
+    monkeypatch.setattr(BD, "open_gpu", opened)
+    rc, rep, out = _main(BD, tmp_path, contract, monkeypatch, ev)
+    assert rc == 3 and "Opened" in rep["error"]["error"]
+    assert list(BD.records(out).glob("build.superseded_*.json"))
+    doc = BD.init_record(rec, {"init": _verified("init", rec), "statistics": _verified("statistics", rec)})
+    assert BD.product_problems(doc, other) == []
+    bad = BD.product_problems(doc, ident)
+    assert any("calibration" in b for b in bad), bad
+    assert BD.durable_init(out, ident) is None
+
+
+def test_a_fresh_build_puts_each_group_once_and_a_refused_copy_writes_no_record(tmp_path, contract, monkeypatch):
     from stages.depth_merge import build_driver as BD
     from stages.reasoning_inheritance.driver import Status
+    ident = BD.identity(contract)
     out, work = tmp_path / "out", tmp_path / "work"
-    _build_record(out, work)
-    sent = []
-
-    def put(payload, timeout_s, ok=True):
-        sent.append(payload["prefix"])
-        files = {k: sha(v) for k, v in payload["files"].items()}
-        return {"relay": "r", "prefix": payload["prefix"], "files_sha256": files if ok else {}, "verified": ok}
+    _secured(out, ident)                                  #: this attempt's own records, its files on the pod
+    (work / "products/init").mkdir(parents=True)
+    (work / "products/init/model.safetensors").write_bytes(b"weights")
+    (work / "products/init/config.json").write_bytes(b"{}")
+    relay = Relay()
+    relay.install(monkeypatch, BD)
+    monkeypatch.setattr(BD, "open_gpu", _no_gpu)
+    monkeypatch.setattr(BD, "_put", lambda p, t: {"verified": False, "refused": "quota"})
     with pytest.raises(BD.DriverError):
-        BD.persist(out, work, "r", Status(tmp_path / "st"), put=lambda p, t: put(p, t, ok=False))
-    assert BD.durable_init(out) is None and not (out / BD.ARM / "init_record.json").exists()
-    sent.clear()
-    doc = BD.persist(out, work, "r", Status(tmp_path / "st"), put=put)
-    assert doc["status"] == "COMPLETE" and BD.product_problems(doc) == [] and BD.durable_init(out)
-    assert [s.split("/")[-2] for s in sent] == ["init", "statistics"]
-    sent.clear()
-    BD.persist(out, work, "r", Status(tmp_path / "st"), put=put)            #: a takeover: verified copies stay
-    assert sent == []
+        BD.run(out, work, "cpu", Status(tmp_path / "st"), "r1", ident)
+    assert BD.durable_init(out, ident) is None and not (out / BD.ARM / "init_record.json").exists()
+    monkeypatch.setattr(BD, "_put", relay.put)
+    BD.run(out, work, "cpu", Status(tmp_path / "st"), "r1", ident)
+    assert [c for c in relay.calls if c[0] == "put"] == [("put", "statistics"), ("put", "init")]
+    assert BD.durable_init(out, ident)
+    (out / BD.ARM / "init_record.json").unlink()                          #: a takeover: verified copies stay
+    relay.calls.clear()
+    BD.run(out, work, "cpu", Status(tmp_path / "st"), "r1", ident)
+    assert not [c for c in relay.calls if c[0] == "put"]
     from stages.depth_merge import launch as L
     from stages.depth_merge import session as S
     scr = tmp_path / "scr"
     (scr / "store").mkdir(parents=True)
     (scr / "store/out").symlink_to(out)
+    monkeypatch.setattr(BD, "current_identity", lambda work: ident)
     res = S.completion(L.VARIANT, L.BUILD_KIND, None, "r1", scr, root=tmp_path)
     assert res["status"] == "COMPLETE"
+    monkeypatch.setattr(BD, "current_identity", lambda work: {**ident, "checkpoint": "0" * 64})
+    assert S.completion(L.VARIANT, L.BUILD_KIND, None, "r1", scr, root=tmp_path)["status"] == "INCOMPLETE"
+
+
+def test_the_span_diagnostic_moves_only_the_kept_blocks_to_the_teachers_device(teacher):
+    from stages.depth_merge import build_driver as BD
+    adapter, spans, base, _digests = _toy(teacher)
+    merged = copy.deepcopy(base)
+    cands = BD.span_candidates(adapter, base, merged, TOY_SEL, spans, "meta")
+    assert set(cands) == {"kept", "merged"} and set(cands["kept"]) == {1}
+    assert all(p.device.type == "meta" for p in cands["kept"][1].parameters())
+    blocks = adapter.blocks(base)
+    assert all(p.device.type == "cpu" for i in (0, 2) for p in blocks[i].parameters())
+    assert all(p.device.type == "cpu" for p in adapter.embedding(base).parameters())
+    assert cands["merged"][1] is adapter.blocks(merged)[1]
 
 
 # ---- the comparison's rule ----------------------------------------------------------------------------------------
@@ -269,22 +472,30 @@ def test_the_comparison_registry_names_the_three_direct_questions():
 # ---- the plan -----------------------------------------------------------------------------------------------------
 
 def merge_init_record(root: Path) -> Path:
-    """A COMPLETE variant-1 init record as the build writes it, at a committed-like path under ``root``."""
+    """A COMPLETE variant-1 init record as the build writes it (`build_driver.init_record`, under this tree's identity
+    of the build's products), at a committed-like path under ``root``."""
+    import tempfile
+    from stages.depth_merge import build_driver as BD
     base = json.loads((REPO / DC.design()["baseline"]["init_record"]["path"]).read_text())
-    w = "b" * 64
-    doc = {"schema": "aadistill.stage1.depth_merge.init_record/v1", "status": "COMPLETE", "arm": "depth_merge",
-           "root_teacher": base["root_teacher"],
-           "commit": {"selected_rows": [{"state_id": "depth_merge/x", "artifact_digest": "c" * 64,
-                                         "single_shard_sha256": w}]},
-           "checkpoint": {"artifact_digest": "c" * 64, "shards": [{"filename": "model.safetensors", "sha256": w,
-                                                                     "size_bytes": 4007724000}],
-                          "files_sha256": {"model.safetensors": w,
-                                           "config.json": DC.design()["baseline"]["init_record"]["config_json_sha256"]},
-                          "num_parameters_counted": 2003851776, "num_parameters": 2003851776},
-           "relay": {"init": {"relay": "AlphaAvatar/aadistill-artifacts", "prefix": "durable/stage1_depth_merge/depth_merge/init/cccc",
-                              "files_sha256": {"init/model.safetensors": w, "init/config.json": DC.design()["baseline"]["init_record"]["config_json_sha256"]},
-                              "bytes": {"init/model.safetensors": 4007724000, "init/config.json": 1154}, "verified": True},
-                     "statistics": {"verified": True}}}
+    with tempfile.TemporaryDirectory() as tmp:
+        ident = BD.current_identity(Path(tmp))
+    w, stats = "b" * 64, "d" * 64
+    cfg = DC.design()["baseline"]["init_record"]["config_json_sha256"]
+    rec = {"run_id": "dmr1_merge_build_x", "root": base["root_teacher"], "identity": ident, "method": M.METHOD,
+           "method_identity": {}, "statistics": {"tensors_sha256": stats, "saved_utc": "u"},
+           "checks": {"equivalence": {"passed": True, "worst": 1e-6}}, "candidate": {},
+           "checkpoint": {"artifact_digest": "c" * 64, "statistics_sha256": stats, "reload_forward_finite": True,
+                          "shards": [{"filename": "model.safetensors", "sha256": w, "size_bytes": 4007724000}],
+                          "files_sha256": {"model.safetensors": w, "config.json": cfg},
+                          "num_parameters_counted": 2003851776, "num_parameters": 2003851776}}
+    relay = {"init": {"relay": "AlphaAvatar/aadistill-artifacts", "prefix": "durable/stage1_depth_merge/depth_merge/init/cccc",
+                      "files_sha256": {"init/model.safetensors": w, "init/config.json": cfg},
+                      "bytes": {"init/model.safetensors": 4007724000, "init/config.json": 1154}, "verified": True},
+             "statistics": {"relay": "AlphaAvatar/aadistill-artifacts",
+                            "prefix": "durable/stage1_depth_merge/depth_merge/statistics/dddd",
+                            "files_sha256": {f"statistics/{M.STATS}.safetensors": stats}, "verified": True}}
+    doc = BD.init_record(rec, relay)
+    assert BD.product_problems(doc, ident) == []
     p = root / "logs/stages/stage-1/depth_merge/runs/dmr1_merge_build_x/evidence/depth_merge/init_record.json"
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(doc, indent=1))

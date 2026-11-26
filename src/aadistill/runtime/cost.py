@@ -5,22 +5,22 @@ survivor count — an arithmetic one rather than a guess. Everything is derived
 from an ``ArchSpec`` through the adapter, so the same model prices a 4B -> 596M
 pilot and a 30B -> 4.xB study with no edit.
 
-Anchors, and how good each one is:
+**Hardware is an input.** Every price, throughput and statistics rate is a
+`HardwareProfile` the caller builds -- from a measurement of its own or from
+the application's record of historical profiles
+(``configs/shared/infrastructure/hardware_profiles.json`` through
+``scripts/shared/hardware_profiles.py``), each with its source. This module
+holds the type and the formulas, no instance: a new teacher, device or
+statistics implementation is priced with its own profile, never silently with
+one measured for another.
 
-* **88.83 effective TFLOP/s on an L40S**, *measured*. E8a's depth search ran 260
-  subset evaluations over a 67-item / 59,763-position mixture in 1,300 s at full
-  4B width. The FLOP accounting below, applied to that exact workload, gives
-  1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% MFU. That is a real end-to-end
-  number including the Python loop, not a spec sheet.
-* **Other accelerators are scaled by peak bf16 and marked ESTIMATED.** Scaling
-  MFU across architectures is an assumption; it is labelled as one.
-* **Activation-statistics collection is a range, not a point.** The one
-  measurement available is 4,972 s for 949,859 tokens (5.24 ms/token) on this
-  CPU-only dev box, which includes the model forward. On a GPU the forward
-  collapses but the float64 ``X^T X`` accumulation stays on the CPU, and the
-  split has never been measured. So the model reports a lower bound (GPU forward
-  only) and an upper bound (the full CPU rate) and says so. Measuring the split
-  is a cheap pre-pilot task and is listed as one.
+* ``effective_tflops`` prices FLOPs: forward compute, measured or marked
+  estimated by the profile.
+* ``stats_seconds_per_token_upper`` bounds an activation-statistics pass from
+  above (the forward plus the float64 ``X^T X`` accumulation, which stays on the
+  host in the current implementation); the GPU-forward-only time is the lower
+  bound. A profile that declares no upper bound cannot price a statistics pass:
+  `operator_cost` and `price_search` refuse rather than report zero.
 
 Nothing here is allowed to quietly shrink a plan to fit a budget. ``price_search``
 reports what the search costs; comparing that against an authorization is the
@@ -40,14 +40,28 @@ from aadistill.initialization.operators.base import OperatorImplementation
 BYTES_PER_PARAM_BF16 = 2
 
 
+class CostModelError(ValueError):
+    pass
+
+
 @dataclass(frozen=True)
 class HardwareProfile:
+    """One priced hardware setup, supplied by the caller with its source (module docstring)."""
     name: str
     price_per_hour_usd: float
     effective_tflops: float
     vram_gb: float
     measured: bool
     source: str
+    #: seconds per calibration token of a statistics pass, upper bound; ``None``: not declared
+    stats_seconds_per_token_upper: float | None = None
+    stats_rate_source: str | None = None
+
+    def stats_upper_seconds(self, tokens: float) -> float:
+        if self.stats_seconds_per_token_upper is None:
+            raise CostModelError(f"hardware profile {self.name!r} declares no statistics rate "
+                                 "(stats_seconds_per_token_upper): a statistics pass cannot be priced with it")
+        return float(tokens) * float(self.stats_seconds_per_token_upper)
 
     def seconds_for(self, flops: float) -> float:
         return flops / (self.effective_tflops * 1e12)
@@ -58,38 +72,10 @@ class HardwareProfile:
     def as_dict(self) -> dict[str, Any]:
         return {"name": self.name, "price_per_hour_usd": self.price_per_hour_usd,
                 "effective_tflops": self.effective_tflops, "vram_gb": self.vram_gb,
-                "measured": self.measured, "source": self.source}
-
-
-L40S_MEASURED = HardwareProfile(
-    name="L40S", price_per_hour_usd=0.99, effective_tflops=88.83, vram_gb=48.0,
-    measured=True,
-    source=("E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in "
-            "1,300 s at 4.02B full width. This module's own accounting puts that "
-            "workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the "
-            "362 TFLOPS bf16 dense peak. Asserted round-trip by the cost "
-            "model's own anchor tests."),
-)
-
-A100_80GB_ESTIMATED = HardwareProfile(
-    name="A100-SXM-80GB", price_per_hour_usd=1.59, effective_tflops=76.56, vram_gb=80.0,
-    measured=False,
-    source=("ESTIMATED: the L40S's measured 88.83 scaled by the bf16 dense peak ratio "
-            "312/362. MFU is assumed to transfer across architectures; it has not "
-            "been measured on this workload."),
-)
-
-DEVBOX_CPU_MEASURED = HardwareProfile(
-    name="dev-box CPU (16 vCPU)", price_per_hour_usd=0.0, effective_tflops=1.59,
-    vram_gb=0.0, measured=True,
-    source=("Stage 0 regeneration: 949,859 tokens of 4.02B forward + float64 X^T X "
-            "accumulation in 4,972 s"),
-)
-
-#: End-to-end statistics-collection rate on the CPU-only dev box, model forward
-#: included. Upper bound for a GPU run, because the float64 accumulation does not
-#: move to the accelerator in the current implementation.
-CPU_STATS_SECONDS_PER_TOKEN = 4972.0 / 949_859.0
+                "measured": self.measured, "source": self.source,
+                **({} if self.stats_seconds_per_token_upper is None else
+                   {"stats_seconds_per_token_upper": self.stats_seconds_per_token_upper,
+                    "stats_rate_source": self.stats_rate_source})}
 
 
 # --- FLOP accounting --------------------------------------------------------
@@ -430,7 +416,7 @@ def materialization_overhead_seconds(child_bytes: float) -> float:
     """save -> hash/identify -> canonical reload -> validate, for one child.
 
     **None of this is FLOPs, and the hardware anchor does not cover it.**
-    `L40S_MEASURED.effective_tflops` was measured from 260 subset evaluations —
+    A profile's `effective_tflops` (the L40S one was measured from 260 subset evaluations) —
     pure forward compute — so using it to price checkpoint I/O, hashing, Python
     bookkeeping and a round-trip validation would be reading a number off an
     instrument that was never pointed at them.
@@ -601,11 +587,10 @@ def operator_cost(impl: OperatorImplementation, parent_spec: ArchSpec,
             stats_flops = plan.stats_passes * per_pass
             if include_stats:
                 stats_low = hardware.seconds_for(stats_flops)
-                stats_high = (plan.stats_passes * calibration_tokens
-                              * CPU_STATS_SECONDS_PER_TOKEN)
+                stats_high = hardware.stats_upper_seconds(plan.stats_passes * calibration_tokens)
                 notes = (f"{notes}; statistics pass priced as a range: "
-                         "GPU-forward-only lower bound vs the measured CPU "
-                         "end-to-end rate")
+                         "GPU-forward-only lower bound vs the profile's declared "
+                         "end-to-end statistics rate")
             else:
                 # The pass is charged ONCE for this (parent, profile) by the
                 # caller, because `StatsCache` shares it across every
@@ -1009,7 +994,7 @@ def price_search(root_spec: ArchSpec, target_spec: ArchSpec,
         if key not in stats_cost:
             flops = calibration_tokens * forward_flops_per_token(parent_spec, seq_len)
             stats_cost[key] = (hardware.seconds_for(flops),
-                               calibration_tokens * CPU_STATS_SECONDS_PER_TOKEN)
+                               hardware.stats_upper_seconds(calibration_tokens))
         return stats_cost[key]
 
     # level -> parent_spec_hash -> [Expansion], one entry per distinct

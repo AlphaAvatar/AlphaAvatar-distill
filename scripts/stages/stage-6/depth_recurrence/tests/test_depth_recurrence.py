@@ -3,7 +3,10 @@
 * the schedule is the committed mapping's (16 blocks, 36 logical layers) and the recurrent config is the base config
   through `recurrent_config_from`, byte for byte;
 * the selection rule: MERGED only when comparison 1 is complete and the pooled and every seed's delta exceed 0;
-  ties and disagreement select KEPT; an incomplete comparison selects nothing;
+  ties and disagreement select KEPT; an incomplete or invalid comparison selects nothing (``complete`` not True, a
+  missing, extra, non-finite or boolean delta, another pair, protocol, seed set or item count, a session incomplete);
+  a selection stands only while it re-derives from the comparison-1 record it read (both re-hashed); C2 and C3 read
+  the initialization the trained units' plans bound, never a later selection;
 * the recurrent init record binds only the two legal paths, the selection that chose it, the base's weights and
   relay copy and the committed config; anything else is refused;
 * the loop arms' plans are SOB1's depth unit outside the declared fields: the stage, and for variant 3 exactly the
@@ -56,9 +59,17 @@ def test_the_schedule_is_the_mappings_and_the_config_is_the_derivation():
 
 # ---- the selection --------------------------------------------------------------------------------------------------
 
-def _c1(pooled, s1, s2, complete=True):
-    return {"modes": {"H-T": {"complete": complete, "delta": pooled,
-                              "per_seed": {"20260726": {"delta": s1}, "20260801": {"delta": s2}}}}}
+def _c1(pooled, s1, s2, complete=True, **over):
+    """Comparison 1's record as `analysis.comparison` writes it (the fields the selection reads)."""
+    from stages.depth_merge import analysis as A
+    proto = A.protocol_identity()
+    doc = {"schema": A.SCHEMA, "id": "C1", "pair": ["depth_merge", "depth_only"], "protocol": proto,
+           "seeds": proto["seeds"], "n_items": 570, "n_groups": 558,
+           "sessions": {"depth_merge": {"complete": True}, "depth_only": {"complete": True}},
+           "modes": {"H-T": {"complete": complete, "delta": pooled,
+                             "per_seed": {"20260726": {"delta": s1}, "20260801": {"delta": s2}}}}}
+    doc.update(over)
+    return doc
 
 
 def test_the_selection_rule_prefers_kept_unless_both_seeds_and_the_pool_favour_merged():
@@ -73,11 +84,43 @@ def test_the_selection_rule_prefers_kept_unless_both_seeds_and_the_pool_favour_m
     assert SCH.decide(sig)["choice"] == "MERGED"
 
 
-def _selection(root: Path, choice: str, base_ref: dict) -> Path:
+@pytest.mark.parametrize("why,edit", [
+    ("complete is not the boolean True", lambda c: c["modes"]["H-T"].update(complete="yes")),
+    ("no per-seed deltas", lambda c: c["modes"]["H-T"].update(per_seed={})),
+    ("another seed", lambda c: c["modes"]["H-T"].update(per_seed={"20260726": {"delta": 0.1}, "1": {"delta": 0.1}})),
+    ("a missing seed", lambda c: c["modes"]["H-T"]["per_seed"].pop("20260801")),
+    ("a NaN seed delta", lambda c: c["modes"]["H-T"]["per_seed"]["20260801"].update(delta=float("nan"))),
+    ("an infinite pooled delta", lambda c: c["modes"]["H-T"].update(delta=float("inf"))),
+    ("a boolean delta", lambda c: c["modes"]["H-T"].update(delta=True)),
+    ("another pair", lambda c: c.update(pair=["depth_loop", "depth_only"])),
+    ("another comparison", lambda c: c.update(id="C2")),
+    ("another protocol", lambda c: c["protocol"].update(manifest_sha256="0" * 64)),
+    ("other seeds", lambda c: c.update(seeds=[1, 2])),
+    ("another item count", lambda c: c.update(n_items=569)),
+    ("an incomplete session", lambda c: c["sessions"]["depth_merge"].update(complete=False)),
+])
+def test_an_invalid_or_incomplete_comparison_1_selects_nothing(why, edit):
+    c = _c1(0.05, 0.05, 0.05)
+    edit(c)
+    dec = SCH.decide(c)
+    assert dec["status"] == "REFUSED" and "choice" not in dec and dec["problems"], why
+
+
+def _selection(root: Path, choice: str, path: dict | None = None) -> Path:
+    """Comparison 1's record giving ``choice`` and the selection `schedule.selection` derives from it, written where
+    the round writes them (``path`` replaces the derived path: a forged selection)."""
+    cp = root / "logs/stages/stage-1/depth_merge/results/comparison_1.json"
+    cp.parent.mkdir(parents=True, exist_ok=True)
+    cp.write_text(json.dumps(_c1(0.02, 0.03, 0.01) if choice == "MERGED" else _c1(-0.01, -0.02, 0.01)))
+    if path is None:
+        doc = SCH.selection(cp, root=root)
+        assert doc["choice"] == choice
+    else:
+        doc = {**SCH.decide(json.loads(cp.read_text())), "schema": SCH.SELECTION_SCHEMA, "path": path,
+               "comparison_1": {"path": str(cp.relative_to(root)), "sha256": sha(cp)}}
     p = root / "logs/stages/stage-6/depth_recurrence/plans/init_selection.json"
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps({"schema": SCH.SELECTION_SCHEMA, "status": "COMPLETE", "choice": choice,
-                             "path": {"base_init_record": base_ref}}))
+    p.write_text(json.dumps(doc))
     return p
 
 
@@ -86,7 +129,7 @@ def _kept_root(tmp: Path) -> tuple[Path, dict]:
     link_into(tmp, k["path"])
     link_into(tmp, DC.design()["baseline"]["training_plan"]["path"])
     link_into(tmp, "configs/stages/stage-6/depth_recurrence/recurrent_config.json")
-    sel = _selection(tmp, "KEPT", {"path": k["path"], "sha256": k["sha256"]})
+    sel = _selection(tmp, "KEPT")
     rec = SCH.init_record(sel, root=tmp)
     p = tmp / "logs/stages/stage-6/depth_recurrence/inits/KEPT/init_record.json"
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -121,11 +164,43 @@ def test_a_selection_naming_the_other_paths_base_is_refused(tmp_path, monkeypatc
     k = DC.stage6_design()["base"]["kept_init"]
     link_into(tmp_path, k["path"])
     #: MERGED, but the record it names is SOB1's depth init: not variant 1's
-    sel = _selection(tmp_path, "MERGED", {"path": k["path"], "sha256": k["sha256"]})
+    sel = _selection(tmp_path, "MERGED", path={"base_init_record": {"path": k["path"], "sha256": k["sha256"]},
+                                               "control_arm": "depth_merge"})
     from stages.depth_merge import plan as PL
     monkeypatch.setattr(PL, "out_path", lambda arm: tmp_path / "no_plan.json")
     with pytest.raises(SCH.ScheduleError):
         SCH.init_record(sel, root=tmp_path)
+
+
+def test_the_selection_stands_only_while_it_rederives_from_the_comparison_1_record_it_read(tmp_path):
+    p, rec = _kept_root(tmp_path)
+    assert SCH.selection_problems(rec["selection"], root=tmp_path) == []
+    cp = tmp_path / "logs/stages/stage-1/depth_merge/results/comparison_1.json"
+    keep = cp.read_text()
+    cp.write_text(json.dumps(_c1(0.02, 0.03, 0.01)))                  #: comparison 1 rewritten afterwards
+    assert SCH.selection_problems(rec["selection"], root=tmp_path)
+    assert SCH.init_record_problems(rec, arm="depth_loop", root=tmp_path)
+    cp.write_text(keep)
+    sp = tmp_path / rec["selection"]["path"]
+    doc = json.loads(sp.read_text())
+    sp.write_text(json.dumps({**doc, "choice": "MERGED"}))            #: the selection file edited afterwards
+    assert SCH.selection_problems(rec["selection"], root=tmp_path)
+
+
+def test_c2_and_c3_read_the_initialization_the_trained_units_bound_not_a_later_selection(tmp_path, monkeypatch):
+    from stages.depth_merge import analysis as A
+    from stages.depth_merge import plan as PL
+    p, rec = _kept_root(tmp_path)
+    plans = {}
+    for arm in ("depth_loop", "depth_loop_hidden"):
+        plans[arm] = tmp_path / f"plan_{arm}.json"
+        plans[arm].write_text(json.dumps({"init_record": {"path": str(p.relative_to(tmp_path)), "sha256": sha(p)}}))
+    monkeypatch.setattr(PL, "out_path", lambda arm: plans[arm])
+    b = A.bound_init("depth_loop", root=tmp_path)
+    assert b["path"] == "KEPT" and b["selection_problems"] == []
+    sp = tmp_path / rec["selection"]["path"]
+    sp.write_text(json.dumps({**json.loads(sp.read_text()), "choice": "MERGED"}))     #: a later selector
+    assert A.bound_init("depth_loop", root=tmp_path)["selection_problems"]
 
 
 def _merged_root(tmp: Path, monkeypatch) -> tuple[Path, dict]:
@@ -140,7 +215,7 @@ def _merged_root(tmp: Path, monkeypatch) -> tuple[Path, dict]:
     plan_p.write_text(json.dumps({"init_record": {"path": rel, "sha256": sha(ir)}}))
     real_out = PL.out_path
     monkeypatch.setattr(PL, "out_path", lambda arm: plan_p if arm == "depth_merge" else real_out(arm))
-    sel = _selection(tmp, "MERGED", {"path": rel, "sha256": sha(ir)})
+    sel = _selection(tmp, "MERGED")
     rec = SCH.init_record(sel, root=tmp)
     p = tmp / "logs/stages/stage-6/depth_recurrence/inits/MERGED/init_record.json"
     p.parent.mkdir(parents=True, exist_ok=True)

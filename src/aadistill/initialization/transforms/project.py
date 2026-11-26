@@ -18,6 +18,9 @@ so late layers (whose residual magnitudes are much larger) do not dominate.
 
 from __future__ import annotations
 
+import math
+from collections.abc import Mapping
+
 import torch
 
 from aadistill.initialization.statistics.collect import statistics_denominator
@@ -28,6 +31,49 @@ def uncentered_moment(state: dict[str, torch.Tensor], point: int) -> torch.Tenso
     if count < 2:
         raise ValueError(f"Need at least 2 tokens, have {count}")
     return state["residual_sqsum"][point].to(torch.float64) / statistics_denominator(state)
+
+
+def stream_weighting(spec, n_layers: int) -> tuple[list[int], list[float]]:
+    """The residual collection points and their weights a CALLER declares, validated, for `stream_projection`.
+
+    The core holds no weighting of its own: which stream points enter the projection and how much each counts is a
+    recipe's choice, supplied by the configuration or the application that runs it, with where the numbers come
+    from. ``spec`` is either
+
+    * ``{"points": [p, ...], "weights": [w, ...], "source": ...}`` -- explicit points (each in ``0..n_layers``, the
+      pre-norm stream states and ``n_layers`` the post-final-norm point; no repeats) and one weight each, or
+    * ``{"endpoint_weights": {"first": a, "interior": b, "last": c}, "source": ...}`` -- every point
+      ``0..n_layers``, the first weighted ``a``, the last ``c`` and each other ``b`` (one rule for any depth).
+
+    Every weight is a finite number > 0. ``source`` (a non-empty string) is required. Returns ``(points, weights)``.
+    """
+    if not isinstance(spec, Mapping):
+        raise ValueError("a stream weighting must be a mapping (the caller's declaration; the core has no default)")
+    if not isinstance(spec.get("source"), str) or not spec["source"].strip():
+        raise ValueError("a stream weighting must name its source (where the weights come from)")
+    forms = [k for k in ("points", "endpoint_weights") if k in spec]
+    if len(forms) != 1:
+        raise ValueError("a stream weighting declares either points + weights or endpoint_weights")
+    n = int(n_layers)
+    if forms == ["endpoint_weights"]:
+        ew = spec["endpoint_weights"]
+        if not isinstance(ew, Mapping) or set(ew) != {"first", "interior", "last"}:
+            raise ValueError("endpoint_weights must be {first, interior, last}")
+        points = list(range(n + 1))
+        weights = [ew["first"]] + [ew["interior"]] * (n - 1) + [ew["last"]]
+    else:
+        points, weights = spec["points"], spec.get("weights")
+        if (not isinstance(points, list) or not points
+                or not all(isinstance(x, int) and not isinstance(x, bool) for x in points)):
+            raise ValueError("points must be a non-empty list of ints")
+        if len(set(points)) != len(points) or not all(0 <= x <= n for x in points):
+            raise ValueError(f"points must be distinct and in 0..{n}")
+        if not isinstance(weights, list) or len(weights) != len(points):
+            raise ValueError("weights must be a list with one weight per point")
+    if not all(isinstance(w, (int, float)) and not isinstance(w, bool) and math.isfinite(w) and w > 0
+               for w in weights):
+        raise ValueError("every stream weight must be a finite number > 0")
+    return list(points), [float(w) for w in weights]
 
 
 def stream_projection(
@@ -43,8 +89,9 @@ def stream_projection(
     In practice the mid-stream points are captured almost perfectly by any
     reasonable P (their outlier directions dominate each moment), while the
     embedding-output and post-final-norm points — the two interfaces wired to
-    the tied embedding/head — are the worst-captured, so callers upweight
-    those ends (see init_student).
+    the tied embedding/head — are the worst-captured, so a recipe may upweight
+    those ends; which points and weights is the caller's declaration
+    (`stream_weighting`), never a core default.
     """
     if not points:
         raise ValueError("points must be non-empty")

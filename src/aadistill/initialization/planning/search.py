@@ -311,6 +311,14 @@ class SearchConfig:
     #: not be pruned by a measurer reading another -- and OMITTED from `as_dict`
     #: when `None`, so every committed search keeps its `config_hash`.
     forward_context: Any = None
+    #: Per implementation, the configuration the RUN declares for it (an
+    #: instance fact the operator needs and the core does not hold -- e.g. the
+    #: stream weighting of `width.global_pca_v0`), merged into that operator's
+    #: hashed config as `declared` (`hashed_operator_config`), so a declaration
+    #: forks the state ids it reaches and no other. OMITTED from `as_dict` when
+    #: unset, so every committed search keeps its `config_hash`; an operator
+    #: that needs a declaration refuses at apply when the run gives none.
+    operator_configs: Mapping[str, Mapping[str, Any]] | None = None
     max_depth: int | None = None
     allow_kind_repeat: bool = False
     device: str = "cpu"
@@ -370,6 +378,8 @@ class SearchConfig:
                if self.measurement_protocol_id else {}),
             **({} if self.forward_context is None else
                {"forward_context": self.forward_context.as_dict()}),
+            **({"operator_configs": {k: dict(v) for k, v in sorted(self.operator_configs.items())}}
+               if self.operator_configs else {}),
             "max_depth": self.max_depth,
             "allow_kind_repeat": self.allow_kind_repeat,
             "device": self.device,
@@ -624,6 +634,12 @@ class BeamSearch:
         `allowed_impls`, so the target becomes unreachable several expensive
         levels later instead of now.
         """
+        for impl_id in sorted(self.config.operator_configs or {}):
+            try:
+                get_implementation(impl_id)
+            except Exception as exc:  # noqa: BLE001
+                raise SearchError(f"operator_configs declares {impl_id!r}, which is not a registered "
+                                  f"implementation: {exc}") from exc
         if not self.config.impl_profiles:
             return
         active = {p.qualified_id for p in self.config.profiles}
@@ -999,6 +1015,7 @@ class BeamSearch:
             implementation=impl, policy=self.config.position_policy,
             support=self.config.distribution_support,
             items=self.calibration_for(profile),
+            declared=(self.config.operator_configs or {}).get(impl.impl_id),
             objective=self.config.scoring_objective,
             forward_context=self.config.forward_context)
         plan = impl.plan(parent.spec, self.config.target_spec, self.adapter, operator_config)

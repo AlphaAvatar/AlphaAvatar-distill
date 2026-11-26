@@ -46,6 +46,42 @@ def comparisons() -> dict:
     return DC.stage6_design()["analysis"]["comparisons"]
 
 
+def protocol_identity(d: dict | None = None) -> dict:
+    """What a comparison record was scored under, by identity: the set's manifest, the decoding, the action protocol,
+    the modes' template arguments, the registered primary items and the independence file. A consumer (the
+    initialization selection) checks a record's against this tree's before reading it."""
+    d = d or DC.design()
+    ev, an = d["evaluation"]["protocol"], d["analysis"]
+    return {"eval_set": ev["eval_set"], "manifest_sha256": ev["manifest_sha256"],
+            "decoding_sha256": ev["decoding"]["sha256"], "action_protocol": ev["action_protocol"],
+            "modes": {m: ev["modes"][m]["template_kwargs"] for m in MODES},
+            "primary_items": {"n": int(an["primary_items"]["n"]), "sha256": an["primary_items"]["sha256"]},
+            "independence": {"groups": int(an["units_of_independence"]["groups"]),
+                             "sha256": an["units_of_independence"]["sha256"]},
+            "seeds": [int(x) for x in d["training"]["seeds"]]}
+
+
+def bound_init(arm: str, root: Path = REPO) -> dict:
+    """The recurrent initialization a loop arm's committed training plan binds, read through the plan (never through
+    the current selection file): the init record (re-hashed), its path (KEPT / MERGED), the selection it names and
+    whether that selection still re-derives from comparison 1 (`schedule.selection_problems`)."""
+    from stages.depth_merge import plan as PL
+    from stages.depth_recurrence import schedule as SCH
+    plan_p = PL.out_path(arm)
+    if plan_p.is_relative_to(REPO) and Path(root) != REPO:
+        plan_p = Path(root) / plan_p.relative_to(REPO)
+    plan = SCH.read_json(plan_p)
+    ref = plan["init_record"]
+    p = Path(root) / ref["path"]
+    if not p.is_file() or SCH.sha256_file(p) != ref["sha256"]:
+        raise SystemExit(f"{arm}: the init record its plan binds ({ref['path']}) is not here as bound")
+    rec = SCH.read_json(p)
+    if rec.get("path") not in SCH.PATHS or (rec.get("selection") or {}).get("choice") != rec["path"]:
+        raise SystemExit(f"{arm}: the bound init record names no consistent selection")
+    return {"init_record": ref, "path": rec["path"], "selection": rec["selection"],
+            "selection_problems": SCH.selection_problems(rec["selection"], root=root)}
+
+
 def result_path(cid: str) -> Path:
     return (RESULTS if cid == "C1" else STAGE6_RESULTS) / f"comparison_{cid[1:]}.json"
 
@@ -130,9 +166,17 @@ def comparison(cid: str, a_out: Path, b_out: Path | None = None) -> dict:
     reg = comparisons()[cid]
     a_arm = reg["pair"][0]
     b_arm = reg["pair"][1]
+    binding = None
+    if cid in ("C2", "C3"):
+        #: the control is fixed by the initialization the TRAINED units bound, never by a later selection file
+        binding = {a: bound_init(a) for a in (("depth_loop",) if cid == "C2" else ("depth_loop_hidden", "depth_loop"))}
+        bad = {a: b["selection_problems"] for a, b in binding.items() if b["selection_problems"]}
+        if bad:
+            raise SystemExit(f"{cid}: a bound selection does not re-derive from comparison 1: {bad}")
+        if cid == "C3" and binding["depth_loop_hidden"]["init_record"] != binding["depth_loop"]["init_record"]:
+            raise SystemExit("C3: the two loop arms bound different initializations")
     if cid == "C2":
-        sel = DC.read_json(DC.STAGE6_LOGS / "plans/init_selection.json")
-        b_arm = {"KEPT": DC.SOB1_DEPTH, "MERGED": "depth_merge"}[sel["choice"]]
+        b_arm = {"KEPT": DC.SOB1_DEPTH, "MERGED": "depth_merge"}[binding["depth_loop"]["path"]]
     b_out = Path(b_out) if b_out is not None else (DC.sob1_depth_evidence() if b_arm == DC.SOB1_DEPTH else None)
     if b_out is None:
         raise SystemExit(f"{cid}: the control {b_arm}'s evidence is needed (--b-evidence)")
@@ -153,12 +197,23 @@ def comparison(cid: str, a_out: Path, b_out: Path | None = None) -> dict:
                 row.pop("verdict", None)
     for row in res["modes"].values():
         row["complete"] = bool(row.get("complete")) and all(s["complete"] for s in sessions.values())
-    return {"schema": SCHEMA, "id": cid, "pair": [a_arm, b_arm], "question": reg["question"],
-            "n_items": len(primary), "n_groups": len(groups), "seeds": seeds, "sessions": sessions,
-            "evidence": {a_arm: str(a_out), b_arm: str(b_out)}, **res,
-            "scored_digests": {**da, **db}, "terminations": {**ta, **tb},
-            "exposure": "eval-set-1 is development-exposed: nothing here is a never-seen blind result",
-            "measures": "item and group sampling with each arm's two checkpoints fixed, not training randomness"}
+    out = {"schema": SCHEMA, "id": cid, "pair": [a_arm, b_arm], "question": reg["question"],
+           "protocol": protocol_identity(d), "n_items": len(primary), "n_groups": len(groups), "seeds": seeds,
+           "sessions": sessions, "evidence": {a_arm: str(a_out), b_arm: str(b_out)}, **res,
+           "scored_digests": {**da, **db}, "terminations": {**ta, **tb},
+           "exposure": "eval-set-1 is development-exposed: nothing here is a never-seen blind result",
+           "measures": "item and group sampling with each arm's two checkpoints fixed, not training randomness",
+           "error_rate_scope": "this comparison's own family (thinking at 0.05, non-thinking only after it); no "
+                               "error rate is claimed for the round's three comparisons together"}
+    if binding is not None:
+        out["initialization"] = binding
+    if cid == "C2":
+        out["selection_conditioning"] = (
+            "both arms start from the initialization comparison 1 chose on these same eval-set-1 items (the "
+            "selection read C1's thinking-mode deltas; C1's control or variant 1 is this comparison's control): C2 "
+            "estimates the recurrence's effect AT the chosen initialization, conditional on that selection -- not "
+            "its effect at an initialization chosen independently of this set")
+    return out
 
 
 def sensitivity() -> dict:

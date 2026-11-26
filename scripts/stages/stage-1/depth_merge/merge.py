@@ -168,39 +168,74 @@ def calibration(s, model, device: str, d: dict | None = None):
 
 # ---- statistics and alignments, each pair durable the moment it exists -------------------------------------------
 
+def _f64_sha256(*tensors) -> str:
+    """The identity of a tuple of tensors: each one's shape and float64 bytes, in order."""
+    import torch
+    h = hashlib.sha256()
+    for t in tensors:
+        x = t.detach().to("cpu", torch.float64).contiguous()
+        h.update(json.dumps(list(x.shape)).encode())
+        h.update(x.numpy().tobytes())
+    return h.hexdigest()
+
+
 def correlation_sha256(c) -> str:
-    """The identity of one pair's Pearson correlation matrix: its float64 bytes."""
+    """The identity of one pair's Pearson correlation matrix: its float64 bytes (what the FFN assignment reads)."""
     import torch
     return hashlib.sha256(c.detach().to("cpu", torch.float64).contiguous().numpy().tobytes()).hexdigest()
 
 
+def alignment_code():
+    """The code a pair's three permutations are computed by: RI-LM1's `alignments` and the core pieces it calls."""
+    from aadistill.initialization.planning import layer_merge as LM
+    return (LM.PearsonMoments, LM.GramMoments, LM.group_sum, LM.linear_assignment, lmx().alignments)
+
+
+def pair_inputs(st, key, n_q: int, n_kv: int) -> dict:
+    """Everything a pair's alignment reads, by identity (`LMX.alignments`): the FFN assignment reads the pair's Pearson
+    correlation; the KV-group and query-head assignments read the pair's head-write Gram (cross products and both
+    sides' energies), the two blocks' own head Grams (the group energies) and the head geometry; all three read the
+    alignment code. A pair persisted under other inputs is never reused, whichever of them changed."""
+    a, b = key
+    hm = st.heads[key]
+    return {"ffn_correlation_sha256": correlation_sha256(st.pearson[key].correlation()),
+            "attention_sha256": _f64_sha256(hm.cross, hm.energy_a, hm.energy_b, st.self_heads[a].cross,
+                                            st.self_heads[b].cross),
+            "head_geometry": {"n_q": int(n_q), "n_kv": int(n_kv)},
+            "code_sha256": lmx().code_identity(*alignment_code())["sha256"]}
+
+
 def pair_alignments(st, n_q: int, n_kv: int, *, persisted: dict | None = None, on_pair=None) -> tuple[dict, dict]:
-    """RI-LM1's `alignments`, one pair at a time: a pair persisted by an earlier attempt is reused only when its
-    record's correlation sha256 is this statistics pass's (the permutations are then the same function of the same
-    numbers); otherwise it is computed and handed to ``on_pair(key, record)`` at once. Returns (alignments,
-    reuse report)."""
+    """RI-LM1's `alignments`, one pair at a time: a pair persisted by an earlier attempt is reused only when every
+    input it was computed from (`pair_inputs`: the FFN correlation, the attention Grams, the head geometry and the
+    alignment code) is this statistics pass's -- the permutations are then the same function of the same numbers;
+    otherwise it is computed and handed to ``on_pair(key, record)`` at once. Returns (alignments, reuse report)."""
     import torch
     LMX = lmx()
     out, report = {}, {}
     for key, pm in st.pearson.items():
-        csha = correlation_sha256(pm.correlation())
+        inputs = pair_inputs(st, key, n_q, n_kv)
         tag = f"{key[0]}->{key[1]}"
         prev = (persisted or {}).get(tag)
-        if prev is not None and prev.get("correlation_sha256") == csha:
+        if prev is not None and prev.get("inputs") == inputs:
             out[key] = {"ffn_perm": torch.as_tensor(prev["ffn_perm"], dtype=torch.long),
                         "kv_perm": torch.as_tensor(prev["kv_perm"], dtype=torch.long),
                         "q_perm_within": torch.as_tensor(prev["q_perm_within"], dtype=torch.long),
                         "summary": prev["summary"]}
-            report[tag] = "reused (same correlation)"
+            report[tag] = "reused (same inputs)"
             continue
         one = type(st)(positions=st.positions, sequences=st.sequences, abs_sum=st.abs_sum, self_heads=st.self_heads,
                        pearson={key: pm}, heads={key: st.heads[key]})
         t0 = time.time()
         al = LMX.alignments(one, n_q, n_kv)[key]
         out[key] = al
-        report[tag] = "computed" if prev is None else "recomputed (another correlation)"
+        if prev is None:
+            report[tag] = "computed"
+        else:
+            differ = sorted(k for k in inputs if (prev.get("inputs") or {}).get(k) != inputs[k])
+            report[tag] = f"recomputed ({', '.join(differ)} differ)"
         if on_pair is not None:
-            on_pair(tag, {"correlation_sha256": csha, "ffn_perm": al["ffn_perm"].tolist(),
+            on_pair(tag, {"inputs": inputs, "ffn_perm": al["ffn_perm"].tolist(),
                           "kv_perm": al["kv_perm"].tolist(), "q_perm_within": al["q_perm_within"].tolist(),
                           "summary": al["summary"], "seconds": round(time.time() - t0, 1)})
     return out, report
@@ -225,7 +260,8 @@ def method_identity() -> dict:
     """The code that computes the statistics and the candidate (RI-LM1's `code_identity` over its own lists, plus this
     module's calibration and per-pair persistence)."""
     LMX = lmx()
-    return {"statistics": LMX.code_identity(*LMX.statistics_code(), calibration, pair_alignments, correlation_sha256),
+    return {"statistics": LMX.code_identity(*LMX.statistics_code(), calibration, pair_alignments, pair_inputs,
+                                            correlation_sha256, _f64_sha256),
             "candidate": LMX.code_identity(*LMX.candidate_code())}
 
 

@@ -105,16 +105,58 @@ def execution_digest(weights_sha256: str, config_sha256: str) -> str:
 
 # ---- the selection --------------------------------------------------------------------------------------------------
 
+def _finite(x) -> bool:
+    import math
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(float(x))
+
+
+def comparison_1_problems(c1: dict) -> list[str]:
+    """Why ``c1`` is not comparison 1's record of THIS round (empty when it is): its schema and id, its pair
+    (variant 1 against SOB1's depth arm), its protocol (`analysis.protocol_identity`: set, decoding, modes, the 570
+    primary items, the 558 groups, the two registered seeds), and both sessions complete."""
+    from stages.depth_merge import analysis as A
+    bad = []
+    if c1.get("schema") != A.SCHEMA or c1.get("id") != "C1":
+        bad.append(f"not a comparison-1 record ({c1.get('schema')!r}, {c1.get('id')!r})")
+    if c1.get("pair") != list(A.comparisons()["C1"]["pair"]):
+        bad.append(f"its pair is {c1.get('pair')}, comparison 1's is {A.comparisons()['C1']['pair']}")
+    want = A.protocol_identity()
+    if c1.get("protocol") != want:
+        bad.append("it was scored under another protocol (set, decoding, modes, items, groups or seeds)")
+    if c1.get("seeds") != want["seeds"] or c1.get("n_items") != want["primary_items"]["n"] \
+            or c1.get("n_groups") != want["independence"]["groups"]:
+        bad.append(f"seeds {c1.get('seeds')} / {c1.get('n_items')} items / {c1.get('n_groups')} groups are not the "
+                   f"registered {want['seeds']} / {want['primary_items']['n']} / {want['independence']['groups']}")
+    ses = c1.get("sessions") or {}
+    if sorted(ses) != sorted(c1.get("pair") or []) or not all((v or {}).get("complete") is True for v in ses.values()):
+        bad.append("both arms' sessions are not recorded complete")
+    return bad
+
+
 def decide(c1: dict) -> dict:
     """The design's rule (``initialization_selection``) on comparison 1's record: MERGED iff the thinking-mode primary
-    units are complete AND the pooled delta > 0 AND each seed's delta > 0; otherwise KEPT. Refused (None) when
-    comparison 1 is incomplete. The p-value is never read."""
+    units are complete AND the pooled delta > 0 AND each registered seed's delta > 0; otherwise KEPT. REFUSED -- no
+    selection -- when the record is not comparison 1's of this round (`comparison_1_problems`), is incomplete
+    (``complete`` must be the boolean True), or its deltas are not a finite pooled one and one finite per registered
+    seed. The p-value is never read."""
+    bad = comparison_1_problems(c1)
     ht = (c1.get("modes") or {}).get("H-T") or {}
-    if not ht.get("complete"):
-        return {"status": "REFUSED", "why": "comparison 1's thinking-mode primary units are not complete: no "
-                                            "selection; the maintainer decides"}
+    if ht.get("complete") is not True:
+        bad.append(f"the thinking-mode primary units are not complete (complete = {ht.get('complete')!r})")
+    seeds = [str(s) for s in (c1.get("seeds") or [])]
+    per = ht.get("per_seed")
+    if not _finite(ht.get("delta")):
+        bad.append(f"the pooled delta {ht.get('delta')!r} is not a finite number")
+    if not isinstance(per, dict) or sorted(per) != sorted(seeds) or not seeds:
+        bad.append(f"the per-seed deltas name {sorted(per) if isinstance(per, dict) else per!r}, the registered "
+                   f"seeds are {seeds}")
+    elif not all(_finite((per[s] or {}).get("delta")) for s in seeds):
+        bad.append("a seed's delta is not a finite number")
+    if bad:
+        return {"status": "REFUSED", "problems": bad,
+                "why": "comparison 1 is not complete and valid: no selection; the maintainer decides"}
     pooled = float(ht["delta"])
-    per_seed = {s: float(v["delta"]) for s, v in ht["per_seed"].items()}
+    per_seed = {s: float(per[s]["delta"]) for s in seeds}
     merged = pooled > 0 and all(x > 0 for x in per_seed.values())
     why = ("pooled and every seed's delta > 0" if merged else
            "pooled delta <= 0" if pooled <= 0 else "the seeds' deltas do not all exceed 0")
@@ -144,10 +186,39 @@ def selection(comparison: Path = COMPARISON_1, root: Path = REPO) -> dict:
     dec = decide(c1)
     doc = {"schema": SELECTION_SCHEMA, **dec, "rule": DC.stage6_design()["initialization_selection"]["rule"],
            "comparison_1": {"path": rel(comparison, root), "sha256": sha256_file(comparison)},
-           "role": "an engineering choice of the training-pre initialization, not a statistical claim"}
+           "role": "an engineering choice of the training-pre initialization, not a statistical claim",
+           "exposure": "decided on eval-set-1's development-exposed items, the same items C2 and C3 are scored on"}
     if dec["status"] == "COMPLETE":
         doc["path"] = legal_path(dec["choice"], root)
     return doc
+
+
+def selection_problems(ref: dict, root: Path = REPO) -> list[str]:
+    """Why the selection ``ref`` (``{path, sha256, choice}``, as a recurrent init record names it) does not stand
+    (empty when it does): its file is here with that sha256, COMPLETE with that choice, and re-derived from the
+    comparison-1 record it names -- that record here with its sha256, `decide` on it giving the same choice and
+    deltas, the same legal path."""
+    sp = Path(root) / ref["path"]
+    if not sp.is_file() or sha256_file(sp) != ref["sha256"]:
+        return [f"{ref['path']} is not the selection that was bound (sha256 {ref['sha256'][:12]})"]
+    sel = read_json(sp)
+    if sel.get("schema") != SELECTION_SCHEMA or sel.get("status") != "COMPLETE" or sel.get("choice") != ref["choice"]:
+        return [f"the selection is {sel.get('status')!r} / {sel.get('choice')!r}, the binding names {ref['choice']!r}"]
+    c = sel.get("comparison_1") or {}
+    cp = Path(root) / str(c.get("path"))
+    if not cp.is_file() or sha256_file(cp) != c.get("sha256"):
+        return [f"the comparison-1 record the selection read ({c.get('path')}) is not here with its sha256"]
+    again = decide(read_json(cp))
+    keys = ("status", "choice", "pooled_delta", "per_seed_delta")
+    if {k: again.get(k) for k in keys} != {k: sel.get(k) for k in keys}:
+        return [f"comparison 1 re-derives {again.get('status')} / {again.get('choice')}, the selection says "
+                f"{sel.get('status')} / {sel.get('choice')}"]
+    try:
+        if legal_path(sel["choice"], root) != sel.get("path"):
+            return ["the selection's path is not its choice's legal path"]
+    except ScheduleError as exc:
+        return [str(exc)]
+    return []
 
 
 # ---- the recurrent init record ----------------------------------------------------------------------------------
@@ -157,6 +228,10 @@ def init_record(sel_path: Path = SELECTION, root: Path = REPO) -> dict:
     sel = read_json(sel_path)
     if sel.get("status") != "COMPLETE" or sel.get("choice") not in PATHS:
         raise ScheduleError(f"{rel(sel_path, root)} is not a COMPLETE selection")
+    bad = selection_problems({"path": rel(sel_path, root), "sha256": sha256_file(sel_path), "choice": sel["choice"]},
+                             root)
+    if bad:
+        raise ScheduleError("; ".join(bad))
     base_ref = legal_path(sel["choice"], root)["base_init_record"]
     if base_ref != sel["path"]["base_init_record"]:
         raise ScheduleError("the selection names another base than its path's")
@@ -213,6 +288,7 @@ def init_record_problems(rec: dict, *, arm: str, root: Path = REPO) -> list[str]
     sel = read_json(sp)
     if sel.get("status") != "COMPLETE" or sel.get("choice") != rec.get("path"):
         bad.append("the selection is not COMPLETE or names another path")
+    bad += selection_problems(rec["selection"], root)
     try:
         want = legal_path(rec.get("path"), root)["base_init_record"]
     except ScheduleError as exc:
@@ -271,8 +347,12 @@ def main(argv=None) -> int:
     if a.cmd == "select":
         doc = selection(Path(a.comparison))
         if a.write and doc["status"] == "COMPLETE":
+            text = json.dumps(doc, indent=1) + "\n"
+            if SELECTION.is_file() and SELECTION.read_text() != text:
+                #: a selection is decided once: training units bind it by sha256, and C2 reads its control from it
+                raise ScheduleError(f"{rel(SELECTION)} exists with another content: a selection is never rewritten")
             SELECTION.parent.mkdir(parents=True, exist_ok=True)
-            SELECTION.write_text(json.dumps(doc, indent=1) + "\n")
+            SELECTION.write_text(text)
         print(json.dumps(doc, indent=1))
         return 0 if doc["status"] == "COMPLETE" else 12
     doc = init_record()

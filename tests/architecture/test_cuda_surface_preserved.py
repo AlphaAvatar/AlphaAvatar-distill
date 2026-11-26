@@ -2760,6 +2760,56 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "resume, evaluation readers) resolve the recurrent family once a caller registers the families. No "
             "existing family changes.",
      }),
+    ("49ce20143bb8f2c756b88a2f8b119505a71c3c44",
+     "DMR1 repair round (2026-11-26, $0): the PCA stream weighting and the cost model's hardware become caller "
+     "inputs; the hidden-state targets' lifetime",
+     {
+        "src/aadistill/initialization/transforms/sandwich.py":
+            "`init_student` takes the caller's `stream_weighting` (required unless `proj_override` replaces the "
+            "projection); the end-point weights 9 / 1 / 8 that came from one 2026-07-14 Qwen3-4B ablation are no "
+            "longer a core constant. A caller that declares the historical recipe "
+            "(configs/shared/initialization/stream_weighting.json :: endpoints_9_1_8_v0) gets the same points, "
+            "weights and projection as before: tests/initialization/test_stage1.py (the historical weights "
+            "reproduced; no default; malformed declarations refused), scripts/stages/stage-3/e8/tests/"
+            "test_frozen_records.py (the composite equals init_student bit for bit). NOT ON THE CALIBRATION CUDA "
+            "SURFACE; arithmetic unchanged for the same declaration.",
+        "src/aadistill/initialization/transforms/project.py":
+            "NEW FUNCTION `stream_weighting(spec, n_layers)`: validates a caller's declaration (explicit points + "
+            "weights, or first / interior / last end-point weights over every point; finite weights > 0; a source) "
+            "and returns (points, weights). `stream_projection` is unchanged.",
+        "src/aadistill/initialization/operators/width/residual/global_pca.py":
+            "`width.global_pca_v0` reads its points and weights from the run's declared operator config "
+            "(`stream_weighting`: a fixed-path step's config or `SearchConfig.operator_configs`) and refuses at "
+            "apply when the run declares none; the projection arithmetic is unchanged for the historical "
+            "declaration. A run that declares it hashes it into the operator's config (new state ids, as any "
+            "declared config); an undeclared historical replay derives the hash it recorded but can no longer "
+            "apply width (the historical tree applies it). Signature hash unchanged (its description is not in "
+            "the signature).",
+        "src/aadistill/initialization/operators/composite/stage1_sandwich.py":
+            "`composite.stage1_sandwich_v0` reads `stream_weighting` from its config and passes it to both "
+            "`init_student` calls, the `verify_full_assignment` one included; refuses at apply without it.",
+        "src/aadistill/initialization/planning/search.py":
+            "`SearchConfig.operator_configs` (impl_id -> declared config), merged into that operator's hashed "
+            "config; OMITTED from `as_dict` when unset (every committed search keeps its config_hash); an "
+            "unregistered impl id is refused. tests/initialization (searches declaring it run unchanged).",
+        "src/aadistill/runtime/cost.py":
+            "The hardware instances (L40S / A100 / dev-box CPU profiles, their prices and throughputs) and the "
+            "dev-box CPU statistics rate move to configs/shared/infrastructure/hardware_profiles.json (read by "
+            "scripts/shared/hardware_profiles.py, the historical values and sources unchanged); `HardwareProfile` "
+            "gains `stats_seconds_per_token_upper` / `stats_rate_source`, and a profile without a rate refuses to "
+            "price a statistics pass (`CostModelError`) instead of using another setup's. Formulas unchanged: "
+            "scripts/shared/tests/test_cost_and_recovery.py, scripts/stages/stage-1/phase_b/tests/"
+            "test_cost_model_replay.py reproduce the historical prices; tests/runtime/test_forward_pass_pricing.py.",
+        "src/aadistill/training/hidden_state.py":
+            "`HiddenSupervision.finish` drops the object's own references to the teacher targets, inverse energies "
+            "and rows (the autograd graph keeps what the backward needs); `count` is recorded at construction. "
+            "Values unchanged: tests/training/test_hidden_state.py (12, two of them the lifetime regressions).",
+        "src/aadistill/training/train.py":
+            "`_step_body` and `_eval_blocks` drop the local reference to a micro-batch's hidden supervision (and the "
+            "step's loss tensors) at the end of its iteration, so no micro-batch's teacher targets are alive at the "
+            "next micro-batch's forward or at the optimizer step. No arithmetic changes; without "
+            "`loss.hidden_state` the step is the one before.",
+     }),
 )
 
 

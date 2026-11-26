@@ -22,6 +22,7 @@ expanded rather than by eviction order.
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -164,7 +165,7 @@ def test_the_search_sizes_the_cache_from_the_ACTIVE_profiles(
     from aadistill.initialization.planning.search import BeamSearch, SearchConfig
 
     def build(profiles, name):
-        config = SearchConfig(
+        config = SearchConfig(operator_configs=WEIGHTED_OPERATOR_CONFIGS,
             run_id=name, target_spec=target_spec, schedule=SCHEDULE_V1, seed=7,
             workdir=tmp_path / name, profiles=tuple(profiles), policy=PARETO_V1,
             suite=eval_suite)

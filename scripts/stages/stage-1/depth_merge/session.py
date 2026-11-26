@@ -293,7 +293,8 @@ def checkpoint_bytes(root: Path = REPO) -> dict:
 
 
 def relay_room(v: Variant, kind: str, arm: str | None, evidence: dict) -> tuple[bool, str]:
-    """A build session: its products. A training session: first the superseded save points a lost pod left are
+    """A build session: its products and the training session after them (`storage.sequence`). A training session:
+    first the superseded save points a lost pod left are
     removed (SOB1's `reclaim_superseded`, dev-box side), then what the REMAINING rotation adds (`rotation_need` from
     `relay_state`), asked of the relay's live headroom."""
     from aadistill.runtime.hub_capacity import would_accept
@@ -304,10 +305,16 @@ def relay_room(v: Variant, kind: str, arm: str | None, evidence: dict) -> tuple[
         return False, "no hub token on the dev box to ask the relay"
     sizes = checkpoint_bytes()
     if kind == v.build_kind:
-        need = [int(sizes["init_bf16"]), 64 * 2 ** 20]
-        res = would_accept(MAIN_RELAY, need, tok.read_text().strip())
+        #: the WHOLE chain, not the build's products alone: an init built for a training session the relay cannot
+        #: hold would wait on storage after its money was spent (storage.py; design storage.chain_rule)
+        from stages.depth_merge import storage as STO
+        seq = STO.sequence()["relay"]
+        evidence["relay_need"] = {k: seq[k] for k in ("peak_gib", "peak_at", "margin_bytes", "need_gib")}
+        res = would_accept(MAIN_RELAY, SL.chunks(seq["need_bytes"]), tok.read_text().strip())
         evidence["relay_room"] = str(res)
-        return res.accepted, f"the relay would accept the build's products: {res}"
+        return res.accepted, (f"the relay would accept the build's products AND the training session after them "
+                              f"({seq['peak_gib']} GiB at its peak, {seq['peak_at']}, plus the margin: "
+                              f"{seq['need_gib']} GiB): {res}")
     arm = v.arm_of(kind, arm)
     before = DC.bind_for(arm)
     try:
@@ -427,7 +434,8 @@ def launch_spec(v: Variant, authorization: type, kind: str, minutes: float = 0.0
 
 def completion(v: Variant, kind: str, arm: str | None, run_id: str, scr: Path, *, root: Path = REPO,
                lfs_sha=None) -> dict:
-    """A build session: the init record durable on the secured copy (`build_driver.durable_init`). A training
+    """A build session: the init record durable on the secured copy under this tree's identity of the build's
+    products (`build_driver.durable_init`, `build_driver.current_identity`). A training
     session: its two finals and four sets complete against them (`completion.session`, SOB1's chain bound to the
     arm's design) and both finals at their placement (`single_operator_budget.launch.retain`). Writes
     ``runs/<run_id>/closeout/session_completion.json``."""
@@ -437,10 +445,13 @@ def completion(v: Variant, kind: str, arm: str | None, run_id: str, scr: Path, *
     doc: dict = {"schema": "aadistill.dmr1.session_completion/v1", "run_id": run_id, "kind": kind, "arm": arm,
                  "scr": str(scr)}
     if kind == v.build_kind:
-        rec = BD.durable_init(out) if out.is_dir() else None
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:          #: this tree's identity of the build's products ($0, CPU)
+            ident = BD.current_identity(Path(tmp))
+        rec = BD.durable_init(out, ident) if out.is_dir() else None
         if rec is None:
             p = out / BD.ARM / "init_record.json"
-            unfinished["init"] = BD.product_problems(json.loads(p.read_text()) if p.is_file() else None)
+            unfinished["init"] = BD.product_problems(json.loads(p.read_text()) if p.is_file() else None, ident)
         doc["init_record"] = None if rec is None else str((out / BD.ARM / "init_record.json"))
     else:
         from stages.single_operator_budget import common as SC

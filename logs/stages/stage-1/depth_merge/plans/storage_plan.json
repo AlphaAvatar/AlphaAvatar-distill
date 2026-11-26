@@ -1,0 +1,228 @@
+{
+ "schema": "aadistill.dmr1.storage_plan/v1",
+ "variant": "DMR1-M",
+ "live": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "headroom_bytes": 46271561728,
+  "headroom_gib": 43.094,
+  "refused_at_gib": 43.109,
+  "used_bytes": 47754043952,
+  "used_gib": 44.474,
+  "utc": "2026-11-26T15:16:28Z",
+  "rule": "LFS batch endpoint bisection with fresh oids in objects of <= 10 GiB (nothing stored); used = the sum of list_lfs_files (the billing basis)"
+ },
+ "relay": {
+  "steps": [
+   {
+    "step": "build: the init (bf16) and the statistics put",
+    "net_bytes": 4074812416,
+    "net_gib": 3.79
+   },
+   {
+    "step": "build closeout: its evidence archive",
+    "net_bytes": 4209030144,
+    "net_gib": 3.92
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point 1104 uploaded",
+    "net_bytes": 25143602176,
+    "net_gib": 23.42
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point 2208 uploaded",
+    "net_bytes": 46078174208,
+    "net_gib": 42.91
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point before 2208 removed",
+    "net_bytes": 25143602176,
+    "net_gib": 23.42
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point 3312 uploaded",
+    "net_bytes": 46078174208,
+    "net_gib": 42.91
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point before 3312 removed",
+    "net_bytes": 25143602176,
+    "net_gib": 23.42
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point 4416 uploaded",
+    "net_bytes": 46078174208,
+    "net_gib": 42.91
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point before 4416 removed",
+    "net_bytes": 25143602176,
+    "net_gib": 23.42
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point 5520 uploaded",
+    "net_bytes": 46078174208,
+    "net_gib": 42.91
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point before 5520 removed",
+    "net_bytes": 25143602176,
+    "net_gib": 23.42
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point 6624 uploaded",
+    "net_bytes": 46078174208,
+    "net_gib": 42.91
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point before 6624 removed",
+    "net_bytes": 25143602176,
+    "net_gib": 23.42
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point 7728 uploaded",
+    "net_bytes": 46078174208,
+    "net_gib": 42.91
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point before 7728 removed",
+    "net_bytes": 25143602176,
+    "net_gib": 23.42
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point 8832 uploaded",
+    "net_bytes": 46078174208,
+    "net_gib": 42.91
+   },
+   {
+    "step": "training: depth_merge-s20260726: save point before 8832 removed",
+    "net_bytes": 25143602176,
+    "net_gib": 23.42
+   },
+   {
+    "step": "training: depth_merge-s20260726: final uploaded",
+    "net_bytes": 33159009280,
+    "net_gib": 30.88
+   },
+   {
+    "step": "training: depth_merge-s20260726: save points retired after the final",
+    "net_bytes": 12224437248,
+    "net_gib": 11.38
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point 1104 uploaded",
+    "net_bytes": 33159009280,
+    "net_gib": 30.88
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point 2208 uploaded",
+    "net_bytes": 54093581312,
+    "net_gib": 50.38
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point before 2208 removed",
+    "net_bytes": 33159009280,
+    "net_gib": 30.88
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point 3312 uploaded",
+    "net_bytes": 54093581312,
+    "net_gib": 50.38
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point before 3312 removed",
+    "net_bytes": 33159009280,
+    "net_gib": 30.88
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point 4416 uploaded",
+    "net_bytes": 54093581312,
+    "net_gib": 50.38
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point before 4416 removed",
+    "net_bytes": 33159009280,
+    "net_gib": 30.88
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point 5520 uploaded",
+    "net_bytes": 54093581312,
+    "net_gib": 50.38
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point before 5520 removed",
+    "net_bytes": 33159009280,
+    "net_gib": 30.88
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point 6624 uploaded",
+    "net_bytes": 54093581312,
+    "net_gib": 50.38
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point before 6624 removed",
+    "net_bytes": 33159009280,
+    "net_gib": 30.88
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point 7728 uploaded",
+    "net_bytes": 54093581312,
+    "net_gib": 50.38
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point before 7728 removed",
+    "net_bytes": 33159009280,
+    "net_gib": 30.88
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point 8832 uploaded",
+    "net_bytes": 54093581312,
+    "net_gib": 50.38
+   },
+   {
+    "step": "training: depth_merge-s20260801: save point before 8832 removed",
+    "net_bytes": 33159009280,
+    "net_gib": 30.88
+   },
+   {
+    "step": "training: depth_merge-s20260801: final uploaded",
+    "net_bytes": 41174416384,
+    "net_gib": 38.35
+   },
+   {
+    "step": "training: depth_merge-s20260801: save points retired after the final",
+    "net_bytes": 20239844352,
+    "net_gib": 18.85
+   },
+   {
+    "step": "training closeout: its evidence archive",
+    "net_bytes": 20374062080,
+    "net_gib": 18.97
+   }
+  ],
+  "peak_bytes": 54093581312,
+  "peak_gib": 50.38,
+  "end_bytes": 20374062080,
+  "end_gib": 18.97,
+  "margin_bytes": 1073741824,
+  "need_bytes": 55167323136,
+  "need_gib": 51.38,
+  "peak_at": "training: depth_merge-s20260801: save point 2208 uploaded"
+ },
+ "dev_box": {
+  "evidence_bound_gib": {
+   "dmr1_merge_build": 0.5,
+   "dmr1_merge_train": 1.5
+  },
+  "peak_gib": 1.5,
+  "rule": "one session's evidence, pull archive and teardown archive at a time (evidence_bound_gib)"
+ },
+ "sizes": {
+  "final_fp32": 8015407104,
+  "init_bf16": 4007703552,
+  "save_point": 20934572032
+ },
+ "rule": "net bytes the relay must accept vs what it holds now, in the drivers' order (module docstring)",
+ "relay_shortfall_bytes": 8895761408,
+ "relay_shortfall_gib": 8.28,
+ "fits": false
+}

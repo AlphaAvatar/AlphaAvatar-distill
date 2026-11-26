@@ -4,7 +4,7 @@ Stage 1 owns this variant; its training is `stage3_recovery`. It is the first of
 review report: [`../reasoning_inheritance/DMR1_REVIEW.md`](../reasoning_inheritance/DMR1_REVIEW.md); variants 2 and
 3: [`../../stage-6/depth_recurrence/README.md`](../../stage-6/depth_recurrence/README.md)).
 
-**Status: PREPARED at $0, READY_FOR_REVIEW (2026-11-26 UTC). Nothing is granted, issued or run.** Branch
+**Status: PREPARED and REPAIRED at $0, READY_FOR_REVIEW (2026-11-26 UTC; repair round: review report section 0). Nothing is granted, issued or run; the build waits on the relay-room decision.** Branch
 `research/reasoning-inheritance`, not merged into `main`.
 
 | file | what it is |
@@ -94,15 +94,22 @@ RI-LM1 measured under the same session; the build stops on any other). 29 blocks
 
 | step | where | what |
 | --- | --- | --- |
-| build | `dmr1_merge_build`, `build_driver.py` | contract, base check, statistics, 20 alignments (each persisted with its correlation sha256), checks, candidate, save / reload, diagnostics, relay copies, `init_record.json` COMPLETE only when every copy verifies |
+| build | `dmr1_merge_build`, `build_driver.py` | contract and the products' scientific identity; base check; statistics (each of the 20 alignments persisted with the identity of every input it read) -> relay at once; checks, candidate, save / reload -> relay at once; diagnostics (each candidate block on the teacher's device); `init_record.json` COMPLETE only when both copies verify under this identity |
 | retain / bind | dev box, $0 | commit the init record; `plan.py --arm depth_merge --init-record <it> --write` |
 | train + evaluate | `dmr1_merge_train`, `train_driver.py` | SOB1's state machine bound to this design: both seeds, finals durable, four sets complete against them |
 | closeout | dev box | `session.completion`: the init record (build) / finals + four sets + placement (training) |
 | analysis | dev box, $0 | `analysis.py comparison --id C1 --a-evidence <secured out> --write` |
 
-A replacement attempt takes over what exists: a COMPLETE init record is never rebuilt; persisted pairs are reused only
-under the same correlation; a final that exists anywhere is restored, never retrained; save points resume optimizer,
-schedule, RNG and data position; sealed evaluation parts are reused and only missing items generated.
+A replacement attempt takes over what exists, product by product, under the same **scientific identity**
+(`build_driver.identity`: teacher, base, mapping and spans, calibration with its packing and positions, statistics and
+candidate code by ast digest -- never the design file's bytes, so a changed description recomputes nothing): a durable
+init record is never rebuilt; weights whose relay copy verified (relay.json, or the relay's own listing when the pod
+was lost before the dev box pulled it) are never rebuilt or re-sent, and are restored from that copy, re-hashed, only
+when the diagnostics still need them; statistics that survived are never recollected (the weights are rebuilt from
+the statistics file); persisted pairs are reused only when the FFN correlation, the attention Grams, the head
+geometry and the alignment code are all the same. A build record made under another identity is set aside, never
+reused. A final that exists anywhere is restored, never retrained; save points resume optimizer, schedule, RNG and data
+position; sealed evaluation parts are reused and only missing items generated.
 
 ```text
 launch.py budget --kind dmr1_merge_build
@@ -121,6 +128,10 @@ launch.py launch --kind dmr1_merge_train --run-id <id> --session-commit <c> --bu
 
 ## 6. Storage and money
 
-See the review report, sections 9 and 10. In short: the relay's live headroom (35.24 GiB) is 11.2 GiB short of the
-training session's 46.46 GiB rotation peak, and its launch gate refuses until the maintainer frees room; the two
-proposals total $71.89 with reserves, inside the $74.79 the project cap leaves.
+See the review report, sections 9 and 10, and `logs/stages/stage-1/depth_merge/plans/storage_plan.json`
+(`storage.py --write`). The build session's launch gate asks the relay for the WHOLE chain -- the init and statistics,
+the closeout archives and the training session's rotation peak (seed 1's final held while seed 2 rotates two save
+points), 50.38 GiB, plus a 1 GiB margin -- not for the build's products alone. The relay's live headroom (35.27 GiB,
+2026-11-26) is 16.11 GiB short of it, so both of variant 1's sessions refuse until the maintainer decides how the
+room is made (report section 9). The two proposals total $71.89 with reserves, inside the $74.79 the project cap
+leaves.

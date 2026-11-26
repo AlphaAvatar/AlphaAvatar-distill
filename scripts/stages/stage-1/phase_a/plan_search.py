@@ -38,13 +38,12 @@ from aadistill.initialization.adapters import register_builtin_adapters  # noqa:
 from aadistill.initialization.calibration.profiles import profile_summary
 from shared.calibration import V1_PROFILES
 from aadistill.runtime.cost import (  # noqa: E402
-    A100_80GB_ESTIMATED,
-    L40S_MEASURED,
     activation_stats_bytes,
     branching_estimate,
     checkpoint_bytes,
     price_search,
 )
+from shared.hardware_profiles import A100_80GB_ESTIMATED, L40S_MEASURED  # noqa: E402
 from aadistill.initialization.operators import (  # noqa: E402
     V1_IMPLEMENTATIONS,
     registry_ledger,

@@ -26,6 +26,7 @@ import torch
 from aadistill.initialization.transforms.project import (
     final_norm_weights,
     stream_projection,
+    stream_weighting,
 )
 from aadistill.initialization.transforms.sandwich import _in_proj as fold_and_project
 from aadistill.initialization.specs.arch import (
@@ -44,6 +45,7 @@ from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.statistics.collect import RESIDUAL_WEIGHT
 from aadistill.initialization.operators.base import (
     OperatorContext,
+    OperatorError,
     OperatorImplementation,
     OperatorOutcome,
     OperatorPlan,
@@ -58,9 +60,8 @@ class WidthGlobalPCAV0(OperatorImplementation):
     version = 0
     description = (
         "One global orthonormal projection from the trace-normalized average of "
-        "the uncentered residual second moments, with the two stream end points "
-        "(embedding output, post-final-norm) upweighted 9/8 because they are the "
-        "worst-captured and are the interfaces the tied embedding reads.")
+        "the uncentered residual second moments, over the stream points and "
+        "weights the run declares (its stream_weighting, in the hashed config).")
     required_capabilities = frozenset({Capability.RESIDUAL_STREAM,
                                        Capability.PRENORM_BLOCKS,
                                        Capability.RMS_NORM,
@@ -119,10 +120,13 @@ class WidthGlobalPCAV0(OperatorImplementation):
             compute, batch_size=batch_size, packing=packing,
             active=active, forward_context=ctx.forward_context)), compute)
 
-        # Same point set and weights as the incumbent recipe: all pre-norm stream
-        # states plus the post-final-norm point, ends upweighted 9/8.
-        points = list(range(n_layers + 1))
-        weights = [9.0] + [1.0] * (n_layers - 1) + [8.0]
+        # The points and weights are the run's declaration (a fixed path's step
+        # config or the search's `operator_configs`), never a core default.
+        weighting = (ctx.config or {}).get("stream_weighting")
+        if weighting is None:
+            raise OperatorError(f"{self.impl_id}: the run declares no stream_weighting (the points the projection "
+                                "reads and their weights); the core has none of its own")
+        points, weights = stream_weighting(weighting, n_layers)
         proj, proj_diag = stream_projection(state, d_c, points, weights)
         proj_diag["point_weights"] = weights
         scale = (d_p / d_c) ** 0.5

@@ -307,7 +307,10 @@ def _suffix_body(cfg, case, geometry, work, profile, adapter, build_root, *,
             steps=tuple(steps), root_repo_id=case["root_repo_id"],
             root_revision=case["root_revision"], device=device)
 
-    prefix = [FixedPathStep(i, pid) for i in prefix_ids]
+    #: the stream weighting the width step is applied with: the case's declaration (the core holds none)
+    from shared import stream_weighting as SW
+    declared = SW.operator_configs(case["stream_weighting"]) if case.get("stream_weighting") else {}
+    prefix = [FixedPathStep(i, pid, config=declared.get(i)) for i in prefix_ids]
     inc_tail = FixedPathStep(case["incumbent_impl_id"], case["incumbent_profile_id"])
 
     # 1. unpinned probe -- learn the digests.
@@ -319,7 +322,7 @@ def _suffix_body(cfg, case, geometry, work, profile, adapter, build_root, *,
 
     # 2. the PINNED incumbent -- this is stage D, and it gates the parent.
     pinned_prefix = [*prefix[:start - 1],
-                     FixedPathStep(prefix_ids[-1], pid,
+                     FixedPathStep(prefix_ids[-1], pid, config=declared.get(prefix_ids[-1]),
                                    expected_artifact_digest=parent_digest,
                                    label="pre-ATTENTION parent")]
     incumbent = spec(

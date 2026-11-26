@@ -23,6 +23,7 @@ What is exercised here that enumeration cannot reach:
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -87,7 +88,7 @@ def p2(tmp_path_factory):
         asked.append(profile.qualified_id)
         return per_profile[profile.qualified_id]
 
-    config = SearchConfig(
+    config = SearchConfig(operator_configs=WEIGHTED_OPERATOR_CONFIGS,
         run_id="p2", target_spec=target_spec, schedule=SCHEDULE, seed=4242,
         workdir=tmp_path_factory.mktemp("p2"),
         profiles=(balanced, reasoning), policy=PARETO_V1, suite=suite)

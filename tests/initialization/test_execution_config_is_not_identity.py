@@ -15,6 +15,7 @@ evidence.
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -83,12 +84,14 @@ def registered():
 
 
 def context(model, items, batch_size, target, packing="original_order_v1"):
-    """The SAME science every time; only `execution` moves."""
+    """The SAME science every time; only `execution` moves. The config carries the run's stream-weighting
+    declaration (`support.recipes.DECLARED`, the same at every batch size), which the hashed config therefore holds
+    and nothing else does."""
     return OperatorContext(
         adapter=QWEN3_ADAPTER, model=model,
         parent_spec=ArchSpec.of("qwen3", TEACHER_GEOMETRY), target_spec=target,
         profile=NO_CALIBRATION, calibration_items=items, seed=0, device="cpu",
-        config={"n_calibration_items": len(items)},
+        config=declared({"n_calibration_items": len(items)}),
         execution=ExecutionConfig(micro_batch_size=batch_size,
                                   calibration_batch_packing=packing))
 
@@ -118,7 +121,7 @@ class TestTheBoundaryIsStructural:
                       ArchSpec.of("qwen3", TEACHER_GEOMETRY))
         config_hash = sha256_json(
             {k: v for k, v in ctx.config.items() if k != "n_calibration_items"})
-        assert config_hash == sha256_json({})
+        assert config_hash == sha256_json(DECLARED)
 
     @pytest.mark.parametrize("batch_size", BATCH_SIZES)
     def test_the_state_id_is_the_same_at_every_batch_size(self, batch_size):
@@ -144,7 +147,7 @@ class TestTheBoundaryIsStructural:
             impl_id="attention.activation_importance_v1",
             impl_signature_hash="sig", profile_id=NO_CALIBRATION.qualified_id,
             profile_hash=NO_CALIBRATION.profile_hash,
-            config_hash=sha256_json({}), seed=0, result_spec_hash="spec"),))
+            config_hash=sha256_json(DECLARED), seed=0, result_spec_hash="spec"),))
         assert got == expected
 
     @pytest.mark.parametrize("packing",
@@ -169,7 +172,7 @@ class TestTheBoundaryIsStructural:
             "OperatorStep.config_hash")
         config_hash = sha256_json(
             {k: v for k, v in ctx.config.items() if k != "n_calibration_items"})
-        assert config_hash == sha256_json({}), (
+        assert config_hash == sha256_json(DECLARED), (
             "the hashed config moved with the packing policy")
 
     def test_execution_settings_are_absent_from_the_identity_tuple(self):

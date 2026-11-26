@@ -6,6 +6,7 @@ nothing downstream could tell. So each builder is run beside its operator on the
 compared bit for bit; the width transform is recomputed from the statistics the width operator itself collected.
 """
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -29,7 +30,7 @@ ADAPTER = get_adapter("qwen3")
 def _ctx(model, target_spec, items, profile, cache=None):
     return OperatorContext(adapter=ADAPTER, model=model, parent_spec=ADAPTER.spec_of(model),
                            target_spec=target_spec, profile=profile, calibration_items=items, seed=1234,
-                           config={}, stats_cache=cache, stats_cache_key=None if cache is None else "parent")
+                           config=declared(), stats_cache=cache, stats_cache_key=None if cache is None else "parent")
 
 
 def _same(a, b) -> list[str]:

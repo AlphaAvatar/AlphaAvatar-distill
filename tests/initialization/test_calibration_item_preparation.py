@@ -21,6 +21,7 @@ have said so. That one needs no GPU to test, only the refusal to trust
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED  # noqa: E402
 
 import hashlib
 import json
@@ -244,7 +245,7 @@ def path_spec(steps, *, device: str = "cpu") -> FixedPathSpec:
 def c1_shaped_steps(profile_id: str) -> list[FixedPathStep]:
     """DEPTH -> FFN -> WIDTH -> ATTENTION: the C1 path's own kinds and order."""
     return [FixedPathStep(DEPTH, profile_id), FixedPathStep(FFN, profile_id),
-            FixedPathStep(WIDTH, profile_id), FixedPathStep(ATTENTION, profile_id)]
+            FixedPathStep(WIDTH, profile_id, config=DECLARED), FixedPathStep(ATTENTION, profile_id)]
 
 
 def test_the_fixed_path_resolves_and_prepares_without_any_override(tiny_mixture):

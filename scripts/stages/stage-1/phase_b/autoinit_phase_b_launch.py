@@ -39,7 +39,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
 from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
-from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
+from aadistill.runtime.cost import price_search  # noqa: E402
+from shared.hardware_profiles import L40S_MEASURED  # noqa: E402
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 from stages.phase_b.plan import CANONICAL_CONTROL, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 from aadistill.infrastructure.session import (

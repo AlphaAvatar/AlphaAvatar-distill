@@ -53,7 +53,8 @@ from stages.phase_a.plan_search import (  # noqa: E402
     TARGET, TEACHER, probe_cost,
 )
 
-from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
+from aadistill.runtime.cost import price_search  # noqa: E402
+from shared.hardware_profiles import L40S_MEASURED  # noqa: E402
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 
 #: Attempt 7's probe records — the only Phase-A behavioural evidence that exists.

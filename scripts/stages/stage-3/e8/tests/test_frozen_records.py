@@ -142,14 +142,16 @@ def test_the_composite_operator_is_the_incumbent_recipe_bitwise(
 
     direct = ADAPTER.build_model(
         ADAPTER.build_config(teacher.config, target_spec), torch.float32, 999)
-    diag = init_student(teacher, direct, state)
+    from shared import stream_weighting as SW
+    weighting = SW.recipe(SW.HISTORICAL)          #: the recipe 86fbba78... ran under, declared explicitly
+    diag = init_student(teacher, direct, state, stream_weighting=weighting)
 
     impl = get_implementation("composite.stage1_sandwich_v0")
     outcome = impl.execute(OperatorContext(
         adapter=ADAPTER, model=teacher, parent_spec=teacher_spec,
         target_spec=target_spec, profile=profile,
         calibration_items=calibration_items, seed=999,
-        config={"activation_state": state, "verify_full_assignment": True}))
+        config={"activation_state": state, "verify_full_assignment": True, "stream_weighting": weighting}))
 
     for (name, a), (_, b) in zip(direct.named_parameters(),
                                  outcome.model.named_parameters()):
@@ -173,7 +175,8 @@ def test_the_composite_accepts_a_contribution_map_as_the_single_variable(
             adapter=ADAPTER, model=teacher, parent_spec=teacher_spec,
             target_spec=target_spec, profile=profile,
             calibration_items=calibration_items, seed=5,
-            config={"activation_state": state, "kept_layers": kept}))
+            config={"activation_state": state, "kept_layers": kept,
+                    "stream_weighting": __import__("shared.stream_weighting", fromlist=["recipe"]).recipe("endpoints_9_1_8_v0")}))
 
     positional = [s["representative"] for s in depth_span_map(6, 4)]
     control = run(None)

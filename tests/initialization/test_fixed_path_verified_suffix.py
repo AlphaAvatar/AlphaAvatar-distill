@@ -29,6 +29,7 @@ premise is not a missing optimization, it is the entire risk.
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 import types
@@ -106,7 +107,7 @@ def arms(tmp_path_factory):
     pid = profile.qualified_id
 
     prefix = [FixedPathStep(DEPTH, pid), FixedPathStep(FFN, pid),
-              FixedPathStep(WIDTH, pid)]
+              FixedPathStep(WIDTH, pid, config=DECLARED)]
     probe = _spec([*prefix, FixedPathStep(INCUMBENT_ATTENTION, NO_CALIB)],
                   "test.incumbent.probe")
     observed = materialize_fixed_path(
@@ -117,7 +118,7 @@ def arms(tmp_path_factory):
     incumbent_digest = observed[3].identity.artifact_digest
 
     pinned_prefix = [*prefix[:2], FixedPathStep(
-        WIDTH, pid, expected_artifact_digest=parent_digest,
+        WIDTH, pid, config=DECLARED, expected_artifact_digest=parent_digest,
         label="pre-ATTENTION parent")]
     incumbent = _spec(
         [*pinned_prefix,

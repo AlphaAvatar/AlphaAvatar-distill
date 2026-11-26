@@ -6,6 +6,7 @@ that caching 34 GiB of reference logits looks free.
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -418,7 +419,7 @@ def test_width_and_ffn_share_one_pass_on_the_same_parent_and_never_across_parent
         return get_implementation(impl_id).execute(OperatorContext(
             adapter=ADAPTER, model=teacher, parent_spec=teacher_spec,
             target_spec=target_spec, profile=profile,
-            calibration_items=calibration_items, seed=1,
+            calibration_items=calibration_items, seed=1, config=declared(),
             stats_cache=cache, stats_cache_key=key))
 
     run("width.global_pca_v0", key_a)

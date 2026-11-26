@@ -1,6 +1,7 @@
 """End-to-end beam search on real (tiny) checkpoints, and family-agnosticism."""
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import json
 import sys
@@ -43,7 +44,7 @@ def make_search(tmp_path, teacher, target_spec, eval_suite, suite_items, profile
     from support.toy import make_items
     items = make_items()
 
-    config = SearchConfig(
+    config = SearchConfig(operator_configs=WEIGHTED_OPERATOR_CONFIGS,
         run_id=run_id, target_spec=target_spec,
         schedule=schedule or BeamSchedule("test.beam", 1, "test", warmup_levels=0,
                                           width=2),
@@ -294,7 +295,7 @@ def test_a_new_family_and_a_new_operator_kind_need_no_core_edit(tmp_path):
                         "state.critical_token_kl": float(logits.std()),
                         "state.nll.general": float(-logits.log_softmax(-1).mean())})
 
-        config = SearchConfig(
+        config = SearchConfig(operator_configs=WEIGHTED_OPERATOR_CONFIGS,
             run_id="toy", target_spec=target,
             schedule=BeamSchedule("toy.beam", 1, "toy", warmup_levels=0, width=2),
             seed=7, workdir=tmp_path / "toy",

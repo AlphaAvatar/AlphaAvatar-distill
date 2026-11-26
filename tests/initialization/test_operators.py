@@ -1,6 +1,7 @@
 """What each v1 operator does, and what the framework refuses to let it do."""
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -45,7 +46,7 @@ def run(impl_id, model, parent_spec, target_spec, items, profile, **config):
     ctx = OperatorContext(
         adapter=ADAPTER, model=model, parent_spec=parent_spec,
         target_spec=target_spec, profile=profile, calibration_items=items,
-        seed=1234, config=config)
+        seed=1234, config=declared(config))
     return impl, impl.execute(ctx)
 
 

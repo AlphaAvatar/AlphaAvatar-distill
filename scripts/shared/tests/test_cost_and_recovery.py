@@ -18,9 +18,6 @@ from aadistill.initialization.specs.artifact import (  # noqa: E402
     ShardRecord,
 )
 from aadistill.runtime.cost import (  # noqa: E402
-    A100_80GB_ESTIMATED,
-    CPU_STATS_SECONDS_PER_TOKEN,
-    L40S_MEASURED,
     activation_stats_bytes,
     branching_estimate,
     checkpoint_bytes,
@@ -30,6 +27,7 @@ from aadistill.runtime.cost import (  # noqa: E402
     price_search,
     profile_multiplicity,
 )
+from shared.hardware_profiles import A100_80GB_ESTIMATED, CPU_STATS_SECONDS_PER_TOKEN, L40S_MEASURED  # noqa: E402
 from aadistill.initialization.specs.metrics import StateEvaluation  # noqa: E402
 from aadistill.initialization.operators import V1_IMPLEMENTATIONS  # noqa: E402
 from aadistill.initialization.planning.recovery import (

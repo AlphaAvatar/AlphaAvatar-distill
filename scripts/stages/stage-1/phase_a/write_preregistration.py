@@ -34,12 +34,12 @@ from aadistill.initialization.calibration.profiles import NO_CALIBRATION
 from shared.epsilon_response import EPSILON_RESPONSE_V1  # noqa: E402
 from shared.calibration import DOMAIN_BALANCED_V1
 from aadistill.runtime.cost import (  # noqa: E402
-    L40S_MEASURED,
     activation_stats_bytes,
     branching_estimate,
     checkpoint_bytes,
     price_search,
 )
+from shared.hardware_profiles import L40S_MEASURED  # noqa: E402
 from aadistill.initialization.operators import (  # noqa: E402
     V1_IMPLEMENTATIONS,
     registry_ledger,

@@ -17,14 +17,20 @@ problem-solving**:
 > answers or complete tasks.
 
 Knowledge retention is a supporting capability, not a replacement for
-reasoning ([`AGENTS.md`](./AGENTS.md) P10.2).
+reasoning ([`AGENTS.md`](./AGENTS.md) P10.2); every other practical capability
+is still measured and reported on its own.
+
+Work runs in two separate environments: a data-generation environment (the
+vLLM engine that generates teacher data and evaluation rollouts) and a training
+environment (the trainer, including the online KD teacher's forward pass).
 
 The framework is designed to extend across model sizes, architectures,
 compression ratios and deployment environments: the reusable core in
 `src/aadistill/` takes models, targets and budgets as inputs rather than
 hard-coding them. The work so far is a dense text baseline, distilling
 [Qwen3-4B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507)
-and the hybrid [Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B) into sub-1B students. Other model families, MoE and multimodal models are
+and the hybrid [Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B) into smaller students (0.6B-class and, since
+the single-operator rounds, ~2.0B). Other model families, MoE and multimodal models are
 design goals and have not been validated.
 
 ---

@@ -17,6 +17,7 @@ map's own representatives as an explicit map must reproduce the positional
 initialization **bitwise**, so a depth-map experiment changes the depth map and
 nothing else.
 """
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -318,9 +319,9 @@ def test_the_explicit_positional_map_reproduces_the_init_bitwise():
     positional_kept = [s["representative"] for s in depth_span_map(4, 3)]
 
     a = build_student(cfg, torch.float32, seed=1)
-    diag_a = init_student(teacher, a, state)
+    diag_a = init_student(teacher, a, state, stream_weighting=STREAM_WEIGHTING_V0)
     b = build_student(cfg, torch.float32, seed=2)
-    diag_b = init_student(teacher, b, state, kept_layers=positional_kept)
+    diag_b = init_student(teacher, b, state, kept_layers=positional_kept, stream_weighting=STREAM_WEIGHTING_V0)
 
     assert diag_a["depth_map_source"] == "positional_pairwise_merge"
     assert diag_b["depth_map_source"] == "explicit_kept_layers"
@@ -338,9 +339,9 @@ def test_a_different_kept_set_changes_the_student_and_is_recorded():
     cfg = build_student_config(teacher.config, geometry(teacher.config,
                                                        num_hidden_layers=3))
     a = build_student(cfg, torch.float32, seed=1)
-    init_student(teacher, a, state, kept_layers=[0, 1, 2])
+    init_student(teacher, a, state, kept_layers=[0, 1, 2], stream_weighting=STREAM_WEIGHTING_V0)
     b = build_student(cfg, torch.float32, seed=1)
-    diag = init_student(teacher, b, state, kept_layers=[0, 1, 3])
+    diag = init_student(teacher, b, state, kept_layers=[0, 1, 3], stream_weighting=STREAM_WEIGHTING_V0)
 
     assert diag["kept_teacher_layers"] == [0, 1, 3]
     assert diag["removed_teacher_layers"] == [2]
@@ -359,4 +360,4 @@ def test_a_kept_list_of_the_wrong_length_is_refused():
                                                        num_hidden_layers=3))
     student = build_student(cfg, torch.float32, seed=1)
     with pytest.raises(ValueError, match="kept_layers has 2 entries"):
-        init_student(teacher, student, state, kept_layers=[0, 1])
+        init_student(teacher, student, state, kept_layers=[0, 1], stream_weighting=STREAM_WEIGHTING_V0)

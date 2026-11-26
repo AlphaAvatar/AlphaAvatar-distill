@@ -28,6 +28,7 @@ import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
@@ -141,8 +142,14 @@ def main() -> None:
         print(f"depth map from {config['depth_map_path']}: keeping {kept_layers}",
               flush=True)
 
+    # The projection's stream points and weights: the config's declaration, or -- for a config written before the
+    # key existed -- the historical recipe every such config ran under, named here explicitly (never a core default).
+    from shared import stream_weighting as SW
+    weighting_name = config.get("stream_weighting", SW.HISTORICAL)
+    weighting = SW.recipe(weighting_name)
     started = time.time()
-    diagnostics = init_student(teacher, student, state, kept_layers=kept_layers)
+    diagnostics = init_student(teacher, student, state, kept_layers=kept_layers, stream_weighting=weighting)
+    diagnostics["stream_weighting"] = {"recipe": weighting_name, "declared_in_config": "stream_weighting" in config}
     init_seconds = time.time() - started
     print(f"Init done in {init_seconds:.0f}s; projection energy captured "
           f"{diagnostics['projection']['energy_captured_frac']:.4f}", flush=True)

@@ -6,6 +6,7 @@ everything, final-norm solve) must reproduce the teacher's logits. That
 verifies the algebra end to end; the compressed cases then only need shape,
 finiteness, determinism, and selection-logic checks.
 """
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -131,7 +132,7 @@ def test_compressed_init_forward_and_determinism():
         intermediate_size=24, num_attention_heads=2,
     ))
     student = build_student(cfg, torch.float32, seed=123)
-    diag = init_student(teacher, student, state)
+    diag = init_student(teacher, student, state, stream_weighting=STREAM_WEIGHTING_V0)
 
     assert diag["projection"]["orthonormality_error"] < 1e-9
     assert 0.0 < diag["projection"]["energy_captured_frac"] <= 1.0 + 1e-12
@@ -149,7 +150,7 @@ def test_compressed_init_forward_and_determinism():
 
     # Same stats + same seed → bitwise-identical second init (P4/P5).
     student2 = build_student(cfg, torch.float32, seed=123)
-    init_student(teacher, student2, state)
+    init_student(teacher, student2, state, stream_weighting=STREAM_WEIGHTING_V0)
     for (n1, p1), (_, p2) in zip(student.named_parameters(), student2.named_parameters()):
         assert torch.equal(p1, p2), n1
 
@@ -164,7 +165,7 @@ def test_compressed_save_load_roundtrip(tmp_path):
         intermediate_size=24, num_attention_heads=2,
     ))
     student = build_student(cfg, torch.float32, seed=123)
-    init_student(teacher, student, state)
+    init_student(teacher, student, state, stream_weighting=STREAM_WEIGHTING_V0)
     student.save_pretrained(tmp_path / "ckpt")
     reloaded = Qwen3ForCausalLM.from_pretrained(tmp_path / "ckpt").eval()
 
@@ -181,7 +182,7 @@ def test_init_rejects_geometry_mismatch():
         teacher.config, num_key_value_heads=1, num_attention_heads=2))
     student = build_student(cfg, torch.float32, seed=1)
     with pytest.raises(ValueError, match="KV head count"):
-        init_student(teacher, student, state)
+        init_student(teacher, student, state, stream_weighting=STREAM_WEIGHTING_V0)
 
 
 # --- RoPE base / transformers version skew --------------------------------
@@ -278,3 +279,26 @@ def test_manifest_records_the_library_that_decides_rope():
     from aadistill.infrastructure.env import hardware_report
     libs = hardware_report()["libraries"]
     assert "transformers" in libs and libs["transformers"]
+
+
+def test_the_projection_weighting_is_the_callers_declaration_never_a_core_default():
+    """`init_student` computes no projection without the caller's stream weighting, and a malformed declaration is
+    refused before any weight is written; the historical recipe, declared explicitly, gives its recorded weights."""
+    from aadistill.initialization.transforms.project import stream_weighting
+    teacher = tiny_teacher()
+    state = collect_stats(teacher)
+    cfg = build_student_config(teacher.config, geometry(
+        teacher.config, hidden_size=16, num_hidden_layers=3, intermediate_size=24, num_attention_heads=2))
+    student = build_student(cfg, torch.float32, seed=123)
+    with pytest.raises(ValueError, match="stream_weighting"):
+        init_student(teacher, student, state)
+    for bad in ({"endpoint_weights": {"first": 9.0, "interior": 1.0, "last": 8.0}},              # no source
+                {"endpoint_weights": {"first": 9.0, "interior": 0.0, "last": 8.0}, "source": "x"},  # a zero weight
+                {"points": [0, 0], "weights": [1.0, 1.0], "source": "x"},                         # a repeated point
+                {"points": [0, 99], "weights": [1.0, 1.0], "source": "x"}):                       # out of range
+        with pytest.raises(ValueError):
+            init_student(teacher, student, state, stream_weighting=bad)
+    n = teacher.config.num_hidden_layers
+    assert stream_weighting(STREAM_WEIGHTING_V0, n) == (list(range(n + 1)), [9.0] + [1.0] * (n - 1) + [8.0])
+    diag = init_student(teacher, student, state, stream_weighting=STREAM_WEIGHTING_V0)
+    assert diag["projection"]["point_weights"] == [9.0] + [1.0] * (n - 1) + [8.0]

@@ -35,7 +35,8 @@ from aadistill.runtime.cost import HardwareProfile, operator_cost  # noqa: E402
 
 HARDWARE = HardwareProfile(name="synthetic", price_per_hour_usd=1.0,
                            effective_tflops=100.0, vram_gb=48.0,
-                           measured=False, source="synthetic test fixture")
+                           measured=False, source="synthetic test fixture",
+                           stats_seconds_per_token_upper=1e-3, stats_rate_source="synthetic test fixture")
 
 
 def _specs():
@@ -296,3 +297,21 @@ def test_shipped_operators_still_declare_exactly_one_kind():
             f"{impl.impl_id} declares both; its price changes and that needs a "
             "deliberate review")
     assert checked == len(BUILTIN_OPERATORS), "an operator was skipped"
+
+
+def test_a_profile_without_a_statistics_rate_refuses_to_price_a_statistics_pass():
+    """The core has no statistics rate of its own: a profile that declares none cannot price the pass, rather than
+    pricing it with a rate measured for another teacher, device or implementation (or at zero)."""
+    import dataclasses
+    from aadistill.runtime import cost as cost_mod
+    bare = dataclasses.replace(HARDWARE, stats_seconds_per_token_upper=None, stats_rate_source=None)
+    with pytest.raises(cost_mod.CostModelError, match="statistics rate"):
+        bare.stats_upper_seconds(1000)
+
+
+def test_the_core_cost_model_holds_no_hardware_instance():
+    """Prices, throughputs and statistics rates are the caller's data (configs/shared/infrastructure/
+    hardware_profiles.json through the application layer), never module-level instances of the core."""
+    from aadistill.runtime import cost as cost_mod
+    held = [n for n, v in vars(cost_mod).items() if isinstance(v, cost_mod.HardwareProfile)]
+    assert held == [] and not hasattr(cost_mod, "CPU_STATS_SECONDS_PER_TOKEN")

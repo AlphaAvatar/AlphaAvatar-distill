@@ -17,6 +17,7 @@ the other's class, which is why both exist.
 """
 
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import sys
 from pathlib import Path
@@ -170,7 +171,7 @@ def test_init_student_builds_its_head_index_on_the_weights_it_slices(
 
     sandwich._head_rows = spy
     try:
-        init_student(teacher, student, state)
+        init_student(teacher, student, state, stream_weighting=STREAM_WEIGHTING_V0)
     finally:
         sandwich._head_rows = real
 

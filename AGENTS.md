@@ -434,6 +434,9 @@ only the failures and their minimal neighbourhood. When all of them are closed:
 
 So a normal development round contains **at most one post-convergence full
 suite, plus at most one final full suite after fixes** — not one per commit.
+These are upper bounds, not a quota: a round whose changes and their risks are
+covered by narrower relevant checks owes no full suite, and the bound is never a
+reason to run one.
 
 Once a round's structure is still changing, an early full suite is *premature
 development evidence*, not final validation, and must not be presented as

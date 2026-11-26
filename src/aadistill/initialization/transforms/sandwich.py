@@ -38,6 +38,7 @@ from aadistill.initialization.transforms.project import (
     ffn_neuron_importance,
     final_norm_weights,
     stream_projection,
+    stream_weighting as resolve_stream_weighting,
 )
 
 
@@ -166,6 +167,7 @@ def init_student(
     proj_override: torch.Tensor | None = None,
     kept_layers: list[int] | None = None,
     adapter=None,
+    stream_weighting=None,
 ) -> dict:
     """Initialize a student Qwen3-style model in place from the teacher.
 
@@ -181,6 +183,11 @@ def init_student(
     Q-head rule, the FFN neuron rule, the norm treatment and the scale
     compensation below are reached identically either way. That is what makes a
     depth-map experiment a single-variable experiment.
+
+    ``stream_weighting`` is the caller's declaration of which residual points
+    the projection reads and how much each counts (`project.stream_weighting`):
+    required unless ``proj_override`` replaces the projection. The core has no
+    default weighting; a recipe supplies its own, with its source.
     """
     t_cfg, s_cfg = teacher.config, student.config
     if s_cfg.num_key_value_heads != t_cfg.num_key_value_heads:
@@ -210,20 +217,19 @@ def init_student(
     scale = math.sqrt(d_t / d_s)
     dtype = adapter.embedding(student).weight.dtype
 
-    # All pre-norm stream states plus the post-final-norm point, with the two
-    # end points upweighted: the tied embedding reads point 0 and the tied lm
-    # head reads point N (post-norm), and both are otherwise the worst-captured
-    # points (0.74/0.75 vs >0.94 mid-stream on Qwen3-4B). Weights 9/8 chosen by
-    # the 2026-07-14 width-only ablation (holdout top-1 0.036 -> 0.082).
+    # The residual points the projection reads and their weights are the
+    # caller's declaration (`project.stream_weighting`), validated here.
     n_l = t_cfg.num_hidden_layers
-    stream_points = list(range(n_l + 1))
-    point_weights = [9.0] + [1.0] * (n_l - 1) + [8.0]
     if proj_override is not None:
         if proj_override.shape != (d_t, d_s):
             raise ValueError(f"proj_override shape {tuple(proj_override.shape)} != ({d_t}, {d_s})")
         proj = proj_override.to(torch.float64)
-        proj_diag = {"override": True, "points": stream_points}
+        proj_diag = {"override": True, "points": list(range(n_l + 1))}
     else:
+        if stream_weighting is None:
+            raise ValueError("init_student needs the caller's stream_weighting (the points the projection reads "
+                             "and their weights): the core has no default")
+        stream_points, point_weights = resolve_stream_weighting(stream_weighting, n_l)
         proj, proj_diag = stream_projection(state, d_s, stream_points, point_weights)
         proj_diag["point_weights"] = point_weights
 

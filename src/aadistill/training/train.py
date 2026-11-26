@@ -1290,7 +1290,10 @@ class Trainer:
                 hidden_acc += float(sup.loss_sum.detach())
                 for k, v in sup.by_layer.items():
                     hidden_by_layer[k] = hidden_by_layer.get(k, 0.0) + float(v)
-            self._micro_hidden = None
+            #: nothing of this micro-batch outlives its backward: not its hidden supervision (the local ``sup`` as
+            #: well as the attribute -- the next micro-batch's forward and the optimizer step run after this line)
+            self._micro_hidden = sup = None
+            del loss, ce_sum, kd_sum
         # The extra stream joins the *same* update. It is deliberately after the
         # rollout microbatches and before the clip: the rollout stream's block
         # selection, its normalizers and its position against the LR schedule
@@ -1401,7 +1404,7 @@ class Trainer:
                 h_n += sup.count
                 for k, v in sup.by_layer.items():
                     h_layers[k] = h_layers.get(k, 0.0) + float(v)
-            self._micro_hidden = None
+            self._micro_hidden = sup = None        #: released before the next micro-batch's forward
         if was_training:
             self.student.train()
         out = {"val_blocks": n}

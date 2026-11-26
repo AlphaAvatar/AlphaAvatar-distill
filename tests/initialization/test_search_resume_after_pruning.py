@@ -10,6 +10,7 @@ twice. With the historical `prune_weights=True` the released states cannot be
 restored, and the resume recomputes them: that behaviour is unchanged.
 """
 from __future__ import annotations
+from support.recipes import DECLARED, STREAM_WEIGHTING_V0, WEIGHTED_OPERATOR_CONFIGS, declared  # noqa: E402,F401
 
 import pytest
 
@@ -40,7 +41,7 @@ def _search(workdir, teacher, target_spec, eval_suite, suite_items, profile, *,
         calls["n"] += 1
         return evaluator.evaluate(model, sha)
 
-    config = SearchConfig(
+    config = SearchConfig(operator_configs=WEIGHTED_OPERATOR_CONFIGS,
         run_id="resume_pruned", target_spec=target_spec,
         schedule=BeamSchedule("test.beam", 1, "test", warmup_levels=0, width=1),
         seed=4242, workdir=workdir, profiles=(profile,), policy=PARETO_V1,

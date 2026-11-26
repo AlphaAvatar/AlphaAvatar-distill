@@ -4,7 +4,7 @@ Stage 6 owns these variants (AGENTS.md 4.8: shared-parameter repeated execution)
 variants (review report: [`../../stage-1/reasoning_inheritance/DMR1_REVIEW.md`](../../stage-1/reasoning_inheritance/DMR1_REVIEW.md);
 variant 1: [`../../stage-1/depth_merge/README.md`](../../stage-1/depth_merge/README.md)).
 
-**Status: PREPARED at $0, READY_FOR_REVIEW (2026-11-26 UTC). No paid run of either variant is authorized this
+**Status: PREPARED and REPAIRED at $0, READY_FOR_REVIEW (2026-11-26 UTC; review report section 0). No paid run of either variant is authorized this
 round; their sessions are estimated, not proposed.**
 
 | file | what it is |
@@ -47,7 +47,10 @@ cache entry. Gradients flow through every iteration and sum into the shared para
    **MERGED iff comparison 1's thinking-mode primary units are complete AND its pooled delta > 0 AND each seed's
    delta > 0; otherwise KEPT.** A tie or seeds that disagree select KEPT (the simpler initialization, whose
    single-execution control is already measured). The p-value plays no part: this is an engineering choice, not a
-   statistical claim. An incomplete comparison 1 selects nothing and the maintainer decides;
+   statistical claim. An incomplete or invalid comparison 1 selects nothing and the maintainer decides: `complete`
+   must be the boolean True, the record must be comparison 1's (its pair, protocol, the 570 items, 558 groups and the
+   two registered seeds), and the pooled delta and each registered seed's delta must be finite numbers
+   (`schedule.decide`, `comparison_1_problems`);
 3. the recurrent init is the selected base's weights, byte for byte, with `recurrent_config.json` (both bases share
    the base config file). Its identity is weights AND config: `execution_digest(weights, config)`.
 
@@ -55,6 +58,17 @@ cache entry. Gradients flow through every iteration and sum into the shared para
 | --- | --- | --- |
 | KEPT | SOB1's depth init (`413686f2…`) | SOB1's `depth_only` arm, its sealed sets |
 | MERGED | variant 1's COMPLETE build record (bound by its training plan) | variant 1's `depth_merge` arm |
+
+The selection is written once and never rewritten (`select --write` refuses another content); it names comparison 1's
+record by path and sha256 and stands only while that record re-derives the same choice and deltas
+(`schedule.selection_problems`). Comparisons 2 and 3 read the initialization a trained unit's committed plan bound
+(`analysis.bound_init`: plan → recurrent init record → selection), never the current selection file.
+
+**What C2 then measures.** Both arms start from the initialization comparison 1 chose on the same development-exposed
+eval-set-1 items C2 is scored on, so C2 is the recurrence's effect at that selected initialization, conditional on the
+selection -- not its effect at an initialization chosen independently of this set. Each comparison is its own family
+at alpha 0.05; no error rate is controlled or claimed over the round's three comparisons together (the Holm line over
+the three is a sensitivity report only).
 
 `schedule.py select --write` → `plans/init_selection.json`; `schedule.py init-record --write` →
 `inits/<path>/init_record.json`; `plan.py --arm depth_loop|depth_loop_hidden --init-record <it> --write`.
@@ -73,15 +87,20 @@ and the launchers refuse (no plan, no proposal, no grant).
 | iterations | every iteration of a looped block, the first included |
 | single-execution blocks | included (0, 4, 5, 6, 18, 22, 23): the one-iteration case of the same rule |
 | rows | the KD rows (assistant prediction positions): row t is the position whose state predicts token t + 1, the same rows, with no extra offset, whose final states reach the head for KD |
-| error | per (pair, row) `||s - h||^2 / ||h||^2` (the target's own energy; dimensionless, the width cancels; not bounded above) |
+| error | per (pair, row) `||s - h||^2 / ||h||^2`: a per-position **relative** squared error (each term divided by that row's target energy), not ordinary MSE (whose scale would follow the residual norm at each depth and position); dimensionless, the width cancels, not bounded above |
 | normalization | the step's sum over pairs and rows / (36 x the step's KD rows) |
 | teacher side | the same packed ids, no position ids (cross_context), no gradient; layer outputs by forward hooks in the forward the KD sketch comes from, each layer once; targets only, never the student's input |
 | student side | handed over by the model's own logical-layer loop, outside the checkpointed block calls (a recomputation never registers it twice); no detach between iterations |
 
-lambda_hidden = 1.0 is proposed, not tuned (no search, no eval-set-1 reading). Measured at $0 on the dev box's CPU
-(`logs/stages/stage-6/depth_recurrence/plans/step0_diagnostic_20261126.json`): on the KEPT recurrent init the hidden
-term starts at about KD's size (14.56 against 12.30), and that init itself starts far from the teacher (CE 12.46
-against the single-execution base's 3.46 on the same rows). Review report, section 5.
+lambda_hidden = 1.0 is a **proposal**, not tuned and not validated (no search, no eval-set-1 reading); 0.25 is an
+equally unvalidated alternative, not a "KD-dominant" setting. Measured at $0 on the dev box's CPU
+(`logs/stages/stage-6/depth_recurrence/plans/step0_diagnostic_20261126.json`) is only the scalar size at step 0: on
+the KEPT recurrent init the hidden term is 14.56 against KD 12.30. That does not make their gradient contributions
+similar (not measured); the global gradient-norm clip rescales the summed gradient and so neither guarantees that KD
+dominates nor changes the terms' shares; and it bounds the gradient's norm, not AdamW's per-coordinate update. The
+same diagnostic shows the untrained init itself starts degenerate (CE 12.46 against the single-execution base's
+3.46 on the same two sequences): evidence about this initialization, not a verdict on recovery training, and no
+reason to change the registered schedule, scaling or initialization. Review report, section 5.
 
 ## 5. Training, evaluation, compute
 
