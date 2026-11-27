@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-26 (UTC), DMR1's third repair round done at $0 and READY_FOR_REVIEW again (variant 1's per-product identity, handoff and sync-window takeover, the takeover's room; forward baseline v3 declares the width stream weighting; SOB1's FFN + attention finals moved to the dev box under the maintainer's storage option a; the review report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md` section 0). Nothing running, nothing billing (0 pods, 0 volumes); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-27 (UTC), DMR1 variant 1 authorized and executing: the build COMPLETE, the training session running on one L40S (0 volumes); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,35 +9,22 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**DMR1 (DEPTH RECOVERY AT SOB1'S DEPTH-ONLY STRUCTURE): PREPARED AND REPAIRED AT $0, READY_FOR_REVIEW (2026-11-26) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
-- Report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md`: section 0 is the third round (the fixes, the moved
-  finals, storage, the search configuration, what is not GPU-validated, conditions, money); 0A is the second round
-  (with the principle audit). Designs `configs/stages/stage-1/depth_merge/design.json` (variant 1, Stage 1 +
-  stage3_recovery) and `configs/stages/stage-6/depth_recurrence/design.json` (variants 2 and 3, Stage 6, and the
-  round's registered analysis).
-- Variants: (1) `depth_merge`, the alpha merge of each kept block's span (RI-LM1's M-act at this structure); (2)
-  `depth_loop`, SOB1's 16 kept blocks on a 36-logical-layer schedule from the selected training-pre init; (3)
-  `depth_loop_hidden`, (2) plus a per-iteration hidden-state term (lambda 1.0, a proposal). Every arm trains with SOB1's
-  depth recipe; SOB1's depth arm and its sealed sets are the control.
-- Core: the recurrent-depth family and `training/hidden_state.py` (round `4a76fde2`, NOT MEASURED ON CUDA).
-  - Round `49ce2014`: the PCA stream weighting and the cost model's hardware became caller inputs
-    (`configs/shared/initialization/stream_weighting.json`, `configs/shared/infrastructure/hardware_profiles.json`);
-    the hidden targets no longer outlive their micro-batch.
-  - The third round (after `d92f48f8`): `OperatorImplementation.required_config`, refused before compute (search,
-    fixed path, the operators); `ForwardBaseline.operator_configs`.
-- **Forward baseline v3 selected** (`configs/shared/baselines/initialization_forward_baseline_v3.json`): v2's method with
-  the width stream weighting declared (the historical 9 / 1 / 8, `endpoints_9_1_8_v0`). New searches pass it through
-  `session_terms()["operator_configs"]`. The packed search and its sessions (TPI1, SOB1, DMR1's statistics session) pin
-  v2, so their identities are unchanged. v1 / v2 are superseded and still loadable.
-- Storage (`logs/stages/stage-1/depth_merge/plans/storage_plan.json`, live 2026-11-26 18:19Z):
-  - SOB1's two FFN + attention finals moved to the dev box: re-hashed, read back, registered, and their relay copies
-    retired behind tombstones (maintainer's storage option a; `relocate_relay_finals.py`);
-  - the relay accepts **58.13 GiB** against variant 1's first-run need of 51.38, so **6.75 GiB spare**; a takeover asks
-    only for what the chain still adds;
-  - the dev box has 7.00 GiB free (shared; at most 1.5 GiB of one session's evidence).
-- Money: balance $123.73; $1,086.27 committed, $74.79 under the $1,161.06 cap; variant 1 proposed at $5.43 + $64.46 caps
-  + $2 reserves = $71.89 (not granted). Variants 2 and 3 estimated only.
-- Owed to the maintainer: the review and variant 1's two grants (the relay room fits). Branch not merged.
+**DMR1 VARIANT 1 (ALPHA-MERGED INIT AT SOB1'S DEPTH STRUCTURE, THEN SOB1'S DEPTH RECOVERY): AUTHORIZED 2026-11-27 AND EXECUTING -- ONE L40S BILLING (TRAINING SESSION `dmr1_merge_train_20261127_095843`, tmux `dmr1t`).**
+- Authorization (maintainer, 2026-11-27): `dmr1_merge_build` $5.43 + `dmr1_merge_train` $64.46, each + $1.00 teardown
+  reserve ($71.89; grants `logs/budget/approvals/dmr1_dmr1_merge_{build,train}_grant.json`). V2 / V3 and their GPU
+  engine validation are NOT authorized.
+- Build COMPLETE (`logs/stages/stage-1/depth_merge/runs/dmr1_merge_build_20261127_083526`, $1.4043; attempt 1
+  `..._081622` ran out of memory in the statistics pass, $0.2048, repaired span-major with bitwise-equal statistics):
+  init `17fc769b...` (model.safetensors `99f63821...`) and its statistics durable on the relay
+  (`durable/stage1_depth_merge/depth_merge/`); equivalence worst 2.5e-6. Diagnostic only: pre-recovery teacher KL 7.20
+  vs the deletion init's 3.47.
+- Training plan `logs/stages/stage-1/depth_merge/plans/training_plan_depth_merge.json` (SOB1's depth recipe; only the
+  initialization changed). The training session trains both seeds and evaluates eval-set-1 in both modes; then the
+  closeout, C1 (`analysis.py comparison --id C1`) against SOB1's sealed depth sets, and the report
+  (`docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md`).
+- Before the build: two non-blocking fixes from the review of `6e3ee3a7` (the init record's method from its checkpoint
+  identity; the search's config check by applicability). After it: the dev box's identity check now derives the pod's
+  (the build device; `ast.dump` in the 3.12 form on any interpreter).
 
 **SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): COMPLETE (2026-11-25) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Report `docs/stages/stage-1/single_operator_budget/REPORT.md`; decision `logs/stages/stage-1/single_operator_budget/

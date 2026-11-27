@@ -24,7 +24,7 @@
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "blocker": "BLOCKED NO. Research A CLOSED 2026-11-11: CURRENT_METHOD_NO_GO frozen; the A-TM and A-E grants closed (study_engineering.require_open). Owner: PACKED_ROUND.md section 21.",
- "branch": "research/reasoning-inheritance (from main 50ed1a4f; not merged): RI-S1 COMPLETE and CLOSED 2026-11-14",
+ "branch": "research/reasoning-inheritance (from main 50ed1a4f; not merged)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "SOB1 COMPLETE 2026-11-25 ($112.0621 of $185.87, provider-settled $112.0825; sob1_train closed); $0 closeout round done 2026-11-26: the maintainer reviews docs/stages/stage-1/single_operator_budget/REPORT.md, then decides the merge and the next round",
+ "next": "DMR1 V1 authorized 2026-11-27 ($71.89 with reserves): build COMPLETE ($1.6091 over 2 attempts); training dmr1_merge_train_20261127_095843 RUNNING; then closeout, C1 (analysis.py), report. V2/V3 not authorized",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -197,10 +197,10 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": false,
-  "pods": 0,
+  "paid_compute": true,
+  "pods": 1,
   "network_volumes": 0,
-  "run": null,
+  "run": "dmr1_merge_train_20261127_095843 (DMR1 V1 training, 1 L40S $1.09/h, tmux dmr1t; hard cap $64.46)",
   "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",

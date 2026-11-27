@@ -17446,3 +17446,29 @@ on a paid pod.
     hybrid teacher;
   - the dev box now holds the only copies of all six SOB1 finals, on a disk shared with another project.
 - Revisit when: a new initialization search is designed (it reads v3), or the dev box's disk changes.
+
+## 2026-11-27 (UTC) — DMR1 variant 1 authorized and executed: two grants, the build in two attempts
+
+- Context: the maintainer's independent review of `6e3ee3a7` accepted the third repair round, asked for two
+  non-blocking fixes (the init record's top-level method; the search's pre-forward config check for operators that
+  never apply) and authorized variant 1's two kinds, with V2 / V3 and their GPU engine validation explicitly not
+  authorized.
+- Decision:
+  - grants written by `launch.py grant` from the reviewed proposals, unchanged but for the decision:
+    `dmr1_merge_build` $5.43 and `dmr1_merge_train` $64.46, each cumulative over its attempts, each + $1.00 teardown
+    reserve ($71.89 total), under the unchanged $1,161.06 project cap;
+  - the build ran twice. Attempt 1 (`dmr1_merge_build_20261127_081622`, $0.2048) ran out of the L40S's memory in
+    the statistics pass, an engineering failure before any science; the collector was made span-major with
+    bitwise-equal statistics. Attempt 2 (`dmr1_merge_build_20261127_083526`, $1.4043) completed: the init and its
+    statistics are durable on the relay. Two dev-box identity checks were corrected to derive the pod's identity (the
+    build device; `ast.dump`'s form across Python versions); no product changed;
+  - the training plan was derived from the committed init record and the training session launched under the
+    second grant.
+- Alternatives considered: an A100 for the build (refused: the L40S fits once the collector streams by span; AGENTS.md
+  P8.2 and the card rule); raising the build's driver bound (not needed: 210 min against 95 expected, within the
+  envelope after attempt 1).
+- Expected upside: C1 (the alpha-merged init vs deletion at the same structure and recovery) measured on
+  eval-set-1's static fluid core in both modes.
+- Risks: the merged init starts far from the teacher (state KL 7.20 vs 3.47; a diagnostic only); two seeds; eval-set-1
+  is development-exposed.
+- Revisit when: the training session closes (its completion, C1, the report).
