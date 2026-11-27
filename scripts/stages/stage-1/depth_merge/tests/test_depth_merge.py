@@ -818,11 +818,14 @@ def test_the_launchers_kinds_grants_and_an_artifact_for_another_arm_is_refused(t
         "dmr1_merge_train": "logs/budget/approvals/dmr1_dmr1_merge_train_grant.json"}
     cond = L.kind_conditions(L.BUILD_KIND)
     assert cond["digests_sha256"] == sha(M.DIGESTS) and "identity:configs/stages/stage-1/depth_merge/design.json" in cond
-    #: nothing is granted: a real issue refuses at $0
-    for k in L.STUDY.kinds:
-        assert not (REPO / L.VARIANT.grant_path(k)).exists()
-    with pytest.raises(S.SE.AuthorizationError):
-        S.kind_grant(L.VARIANT, L.TRAIN_KIND)
+    #: variant 1's two kinds are granted (maintainer, 2026-11-27) exactly as proposed: the caps and the reserves
+    for k, cap in ((L.BUILD_KIND, 5.43), (L.TRAIN_KIND, 64.46)):
+        g = S.kind_grant(L.VARIANT, k)
+        prop = json.loads((REPO / L.VARIANT.proposal_path(k)).read_text())
+        assert g["status"] == "granted" and g["ceiling_usd"] == g["per_session_hard_cap_usd"] == cap
+        assert g["teardown_reserve_usd"] == 1.0 and g["project_cumulative_cap_usd"] == 1161.06
+        assert g["kinds"] == prop["kinds"] and g["gpus"] == prop["gpus"] == {"NVIDIA L40S": 1.11}
+        assert g["proposal"]["path"] == str(L.VARIANT.proposal_path(k))
     #: the loop kinds have no proposal this round: budget refuses
     with pytest.raises(S.SE.AuthorizationError):
         S.kind_grant(L6.VARIANT, L6.LOOP_KIND, dry_run=True)
