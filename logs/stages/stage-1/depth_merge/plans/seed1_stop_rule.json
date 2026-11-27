@@ -1,0 +1,14 @@
+{
+ "schema": "aadistill.dmr1.seed1_stop_rule/v1",
+ "recorded_utc": "2026-11-27T18:26:19Z",
+ "decided_by": "maintainer, 2026-11-27 (chat): 如果seed1的评估结果和 depth-only 差很多的话，就停下，不用训练seed2了，报告结果，等我review",
+ "operationalized": "STOP before seed 2 iff, in thinking mode (the registered primary), on eval-set-1's static fluid formal core (570 items, 558 groups), V1 (depth_merge) seed 20260726 minus SOB1 depth_only seed 20260726, paired by item, has a mean paired difference <= -5.0 pp AND its 95% group-bootstrap interval's upper bound < 0. Non-thinking is reported, not part of the rule. Otherwise seed 2 trains as planned.",
+ "fixed_before": "any seed-1 evaluation result was read (seed 1 was at training step ~6,100 of 9,701)",
+ "check": {
+  "path": "scripts/stages/stage-1/depth_merge/seed1_check.py",
+  "sha256": "16c43a99ff687c996f8a521ddc2ce5ff84b04bf661312140b78978a34233b185"
+ },
+ "action_if_stop": "end the driver's process group on the pod once seed 2's TRAIN_START is written (seed 1's final durable on the relay, both its sets sealed and secured on the dev box); the launcher records the exit, secures the evidence and deletes the pod; report and wait for the maintainer's review",
+ "consequence": "a stop leaves C1 descriptive (its formal test needs both seeds); seed 1's final and sets stay durable, so a later attempt under the same grant could train seed 2 only",
+ "at_commit": "44ad0bf0884a95e5f1f71b3e8fca51c455f09c96"
+}
