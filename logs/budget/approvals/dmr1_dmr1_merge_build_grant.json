@@ -1,0 +1,80 @@
+{
+ "schema": "aadistill.dmr1.proposal/v1",
+ "study": "DMR1-M",
+ "status": "granted",
+ "kind": "dmr1_merge_build",
+ "recorded_utc": "2026-11-26",
+ "design_sha256": "e9ec8fc6118f1cfcbfa533357b81012d302c9d6c1d2d9a5edf763c402acd36cd",
+ "scope": "DMR1 variant 1, session kind dmr1_merge_build only",
+ "ceiling_usd": 5.43,
+ "per_session_hard_cap_usd": 5.43,
+ "teardown_reserve_usd": 1.0,
+ "kinds": {
+  "dmr1_merge_build": {
+   "driver_minutes": 223.7,
+   "expected_usd": 2.5,
+   "per_session_hard_cap_usd": 5.43
+  }
+ },
+ "gpus": {
+  "NVIDIA L40S": 1.11
+ },
+ "gpu_count_max": 1,
+ "hardware": "one NVIDIA L40S, secure cloud, at most $1.11/h, 150 GB container disk, no network volume",
+ "usd_per_hour_all_in": 1.1105,
+ "project_cumulative_cap_usd": 1161.06,
+ "position_at_proposal": {
+  "read_utc": "2026-11-26T11:48:05Z",
+  "committed_usd": 1086.2713,
+  "project_cap_usd": 1161.06,
+  "project_remaining_usd": 74.7887,
+  "balance_usd": 123.7283,
+  "pods": 0,
+  "volumes": 0,
+  "spend_per_hour": 0.0,
+  "relay_headroom_gib": [
+   35.24,
+   35.28
+  ],
+  "dev_box_free_gib": 23
+ },
+ "terms": {
+  "minutes_expected": {
+   "session_and_contract": 3,
+   "teacher_load_and_base_check": 3,
+   "statistics_pass": 4.0,
+   "assignments_20_x_178s": 59.3,
+   "merge_9_spans_cpu_float64": 8,
+   "equivalence_checks": 1,
+   "save_reload": 2,
+   "state_evaluation": 10,
+   "diagnostics": 3,
+   "relay_init_and_statistics_expected": 2
+  },
+  "driver_minutes_expected": 95.3,
+  "driver_minutes": 223.7,
+  "expected_usd": 2.5,
+  "hard_cap": {
+   "driver_minutes": 223.7,
+   "billable_minutes": 288.08,
+   "usd": 5.43
+  },
+  "per_session_hard_cap_usd": 5.43,
+  "basis": "RI-LM1's measured statistics pass (117 s for 14 blocks) and assignments (1,420 s for 8 on the pod's CPU), scaled to 29 blocks and 20 pairs; the bound doubles every compute step and takes the init's verify download at the 2.6 MB/s floor x 1.25"
+ },
+ "money_rules": {
+  "own_envelope": "its own grant; the envelope counts only this kind's runs; SOB1's closed grants' remainders are void and fund nothing here",
+  "balance": "the provider balance must cover the hard cap plus the reserve at issue and at launch; a top-up is not a grant",
+  "teardown_reserve": "$1.00 held outside the ceiling, never issued"
+ },
+ "decision": "Maintainer, 2026-11-27 (review of 6e3ee3a7): \"\u672c\u6d88\u606f\u6388\u6743\u4ee5\u4e0b\u4e24\u4e2a kind\uff1admr1_merge_build \u2014 V1 \u521d\u59cb\u5316\u6784\u5efa\u3001\u767b\u8bb0\u8bca\u65ad\u53ca\u6301\u4e45\u5316\uff0c\u7d2f\u8ba1\u786c\u4e0a\u9650 $5.43\uff0c\u5173\u95ed\u9884\u7559 $1.00\uff1bdmr1_merge_train \u2014 \u4e24\u4e2a\u79cd\u5b50\u7684\u6062\u590d\u8bad\u7ec3\u3001\u601d\u8003\u4e0e\u975e\u601d\u8003\u6b63\u5f0f\u8bc4\u6d4b\u53ca\u6536\u5c3e\uff0c\u7d2f\u8ba1\u786c\u4e0a\u9650 $64.46\uff0c\u5173\u95ed\u9884\u7559 $1.00\uff1b\u5408\u8ba1 V1 \u5168\u94fe\u8def $69.89\uff0c\u5173\u95ed\u9884\u7559 $2.00\u3002\u603b\u6388\u6743\u4e0a\u9650\u4e3a $71.89\uff0c\u9879\u76ee\u603b\u4e0a\u9650\u4fdd\u6301 $1,161.06\u3002\u6309\u5df2\u5ba1\u6838\u7684 proposal \u7b7e\u53d1\u5bf9\u5e94 grant\u3002\u4ee5\u4e0a\u989d\u5ea6\u8986\u76d6\u5404 kind \u7684\u5168\u90e8 attempts\uff0c\u91cd\u8bd5\u6216\u66f4\u6362 Pod \u4e0d\u4f1a\u91cd\u7f6e\u989d\u5ea6\uff1b\u5173\u95ed\u9884\u7559\u4ec5\u7528\u4e8e\u6536\u5c3e\u3002\u4f18\u5148\u4f7f\u7528 L40S\uff0c\u9075\u5faa\u767b\u8bb0\u7684\u4ef7\u683c\u4e0e\u8d44\u6e90\u4e0a\u9650\u3002\u4e0d\u6269\u5f00\u53d1\u673a\u78c1\u76d8\uff0c\u4e0d\u8d2d\u4e70 HF PRO \u6216\u5176\u4ed6\u989d\u5916\u5b58\u50a8\u3002\u672c\u6b21\u4e0d\u6388\u6743 V2\u3001V3\uff0c\u4e5f\u4e0d\u6388\u6743\u5b83\u4eec\u7684 GPU \u5f15\u64ce\u9a8c\u8bc1\u3002\"",
+ "granted_by": "maintainer",
+ "authorizes": "DMR1-M's phase only (scope): its session kinds ['dmr1_merge_build'], inside ceiling_usd cumulatively, per_session_hard_cap_usd per session and the project cap; one-use artifacts from `issue`; no other study and no follow-up",
+ "granted_utc": "2026-11-27",
+ "proposal": {
+  "path": "logs/stages/stage-1/depth_merge/plans/proposal_dmr1_merge_build.json",
+  "sha256": "46b8192c8e28ffe22e73f13f4050eeab68f06e2eebd8067951828aafd1ff4174"
+ },
+ "study_identity_sha256": "297d341a3703ec08036c2480c03a433d3fc0cd058f8e863c1b5a6f671559bf63",
+ "granted_at_commit": "506e83e369a7205c28b25f460d7033c3b9842643"
+}
