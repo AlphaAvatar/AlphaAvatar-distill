@@ -191,11 +191,20 @@ def collect_statistics(adapter, teacher, spans, batches, active, *, chunk: int =
     """One teacher forward over the calibration (module docstring): FFN features (the down projection's input) and
     head writes (the output projection's input, per head, through its column block), at the statistics positions, for
     every block of every span. Per packed sequence the cross products are float32 of bf16 activations; every sum
-    across sequences is float64 (`PearsonMoments`, `GramMoments`)."""
+    across sequences is float64 (`PearsonMoments`, `GramMoments`).
+
+    Memory: each block's activations are kept only at the statistics positions (indexed in the hook), the FFN
+    features released once their moments are taken, and the head writes are made one span at a time (every pair lies within its span), so
+    what is resident beside the accumulators is one copy of the positions' activations and one span's writes -- not
+    every involved block's (29 blocks, 20 pairs at DMR1's depth structure ran an L40S out of memory). Each accumulator
+    receives the same additions in the same order as with every block's writes resident; the spans must be disjoint
+    for that to hold, and are refused otherwise."""
     n_q, n_kv, hd = adapter.head_groups(adapter.spec_of(teacher))
     blocks = adapter.blocks(teacher)
     dev = next(teacher.parameters()).device
     involved = sorted({b for s in spans for b in s})
+    if sum(len(s) for s in spans) != len(involved):
+        raise ValueError(f"the merged spans {[list(s) for s in spans]} overlap; each block belongs to one span")
     pairs = [(s[0], b) for s in spans for b in s[1:]]
     width_ffn = adapter.stream_out_projections(blocks[involved[0]])["ffn_out"].weight.shape[1]
     st = Statistics()
@@ -206,35 +215,42 @@ def collect_statistics(adapter, teacher, spans, batches, active, *, chunk: int =
         st.pearson[p] = LM.PearsonMoments(width_ffn, width_ffn, device=dev)
         st.heads[p] = LM.GramMoments(n_q, n_q, device=dev)
     captured: dict = {}
+    rows: dict = {}                     #: this sequence's statistics positions, known before its forward
     handles = []
     for b in involved:
         outs = adapter.stream_out_projections(blocks[b])
         for role in ("ffn_out", "attn_out"):
             def hook(_m, args, _b=b, _r=role):
-                captured[(_b, _r)] = args[0].reshape(-1, args[0].shape[-1]).detach()
+                captured[(_b, _r)] = args[0].reshape(-1, args[0].shape[-1]).detach()[rows["valid"]]
             handles.append(outs[role].register_forward_pre_hook(hook))
     try:
         for packed in batches():
             captured.clear()
-            forward(teacher, packed)
             valid = valid_rows(packed, active).to(dev)
             n = int(valid.sum())
             if n == 0:
                 continue
-            feats = {b: captured[(b, "ffn_out")][valid] for b in involved}
-            attn = {b: captured[(b, "attn_out")][valid] for b in involved}
+            rows["valid"] = valid
+            forward(teacher, packed)
+            feats = {b: captured.pop((b, "ffn_out")) for b in involved}
+            attn = {b: captured.pop((b, "attn_out")) for b in involved}
             for b in involved:
                 st.abs_sum[b] += feats[b].to(torch.float64).abs().sum(0)
             for p in pairs:
                 st.pearson[p].add(feats[p[0]], feats[p[1]])
-            for lo in range(0, n, chunk):
-                w = {b: head_writes(attn[b][lo:lo + chunk], adapter.stream_out_projections(blocks[b])["attn_out"].weight,
-                                    n_q, hd) for b in involved}
-                for b in involved:
-                    st.self_heads[b].add(w[b], w[b])
-                for p in pairs:
-                    st.heads[p].add(w[p[0]], w[p[1]])
-                del w
+            del feats
+            for s in spans:
+                for lo in range(0, n, chunk):
+                    w = {b: head_writes(attn[b][lo:lo + chunk],
+                                        adapter.stream_out_projections(blocks[b])["attn_out"].weight, n_q, hd)
+                         for b in s}
+                    for b in s:
+                        st.self_heads[b].add(w[b], w[b])
+                    for b in s[1:]:
+                        st.heads[(s[0], b)].add(w[s[0]], w[b])
+                    del w
+                for b in s:
+                    del attn[b]
             st.positions += n
             st.sequences += 1
     finally:

@@ -1,0 +1,36 @@
+{
+ "schema": "aadistill.dmr1.failure/v1",
+ "run_id": "dmr1_merge_build_20261127_081622",
+ "kind": "dmr1_merge_build",
+ "classification": "engineering, pre-science: CUDA out of memory in the statistics pass (nothing measured, nothing made durable)",
+ "terminal": "RUN_FAILED",
+ "error": {
+  "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 320.00 MiB. GPU 0 has a total capacity of 44.39 GiB of which 5.31 MiB is free. Including non-PyTorch memory, this process has 44.38 GiB memory in use. Of the allocated memory 41.68 GiB is allocated by PyTorch, and 2.20 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-1/depth_merge/build_driver.py\", line 875, in main\n    res = run(out, work, a.device, status, a.run_id, report[\"identity\"])\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/depth_merge/build_driver.py\", line 661, in run\n    made = statistics_step(gpu(), rec, out, status, run_id)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/depth_merge/build_driver.py\", line 274, in statistics_step\n    st = LMX.collect_statistics(g.adapter, g.teacher, g.spans, g.batches, g.active)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/reasoning_inheritance/layer_merge.py\", line 234, in collect_statistics\n    st.self_heads[b].add(w[b], w[b])\n  File \"/opt/train/lib/python3.12/site-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/planning/layer_merge.py\", line 261, in add\n    self.cross += torch.einsum(\"tid,tjd->ij\", a32, b32).to(torch.float64)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/functional.py\", line 373, in einsum\n    return _VF.einsum(equation, operands)  # type: ignore[attr-defined]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 320.00 MiB. GPU 0 has a total capacity of 44.39 GiB of which 5.31 MiB is free. Including non-PyTorch memory, this process has 44.38 GiB memory in use. Of the allocated memory 41.68 GiB is allocated by PyTorch, and 2.20 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n"
+ },
+ "markers": [
+  "2026-11-27T08:25:07Z MARKER:ENV_READY",
+  "2026-11-27T08:25:17Z MARKER:REPO_READY",
+  "2026-11-27T08:25:17Z MARKER:ASSETS_STAGED",
+  "2026-11-27T08:25:58Z MARKER:TRAIN_ENV",
+  "2026-11-27T08:26:45Z MARKER:VLLM_READY",
+  "2026-11-27T08:26:52Z MARKER:TEACHER_READY",
+  "2026-11-27T08:26:52Z MARKER:AUTHORIZATION_OK",
+  "2026-11-27T08:26:52Z MARKER:SETUP_DONE",
+  "2026-11-27T08:27:03Z MARKER:CONTRACT_OK",
+  "2026-11-27T08:27:53Z MARKER:BASE_IS_SOB1_DEPTH",
+  "2026-11-27T08:28:12Z MARKER:RUN_FAILED"
+ ],
+ "cause": "layer_merge.collect_statistics held every involved block's activations twice (the full captured rows and their statistics-position copy) and every block's head writes for a chunk at once: at DMR1's 29 blocks and 20 pairs, 9.7 GB of writes + 6.5 GB of captured rows + 2.4 GB of copies beside the 8 GB teacher and the 15.1 GB of float64 Pearson moments: 41.68 GiB allocated when a 320 MiB request failed on the 44.39 GiB L40S. RI-LM1 (14 blocks, 8 pairs) fit; the proposal scaled its time, not its memory.",
+ "repair": "rows kept only at the statistics positions (indexed in the hook), FFN features released after their moments, head writes one span at a time; every accumulator receives the same additions in the same order (bit-for-bit equality test against the old collector; overlapping spans refused). Estimated peak ~29-31 GB on the L40S, same card.",
+ "money": {
+  "all_in_usd": 0.2048,
+  "gpu_usd": 0.201,
+  "disk_usd": 0.0038,
+  "elapsed_minutes": 11.06,
+  "price_per_hour": 1.09,
+  "authorized_usd": 5.43,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": true
+}

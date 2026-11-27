@@ -1,0 +1,49 @@
+{
+ "schema": "aadistill.stage1.depth_merge.authorization_outcome/v1",
+ "run_id": "dmr1_merge_build_20261127_081622",
+ "study": "DMR1-M",
+ "recorded_utc": "2026-11-27T08:29:58+00:00",
+ "status": "INCOMPLETE",
+ "validation_passed": null,
+ "validation": "not applicable: this kind defines no verdict (Launch.verdict is None); completion is status, from the secured products or the verified evidence",
+ "products_secured": {
+  "ok": false,
+  "why": "not all finished work is secured (driver done: False, pending: 0, final listing: verified)"
+ },
+ "terminal": "RUN_FAILED",
+ "runner_terminal": "RUN_FAILED",
+ "provider_resource_created": true,
+ "evidence": null,
+ "verdict_rederived": null,
+ "money": {
+  "all_in_usd": 0.2048,
+  "gpu_usd": 0.201,
+  "disk_usd": 0.0038,
+  "elapsed_minutes": 11.06,
+  "price_per_hour": 1.09,
+  "authorized_usd": 5.43,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [],
+  "error": null,
+  "accounted": [],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 0 resource(s) the records account for"
+ },
+ "kind": "dmr1_merge_build",
+ "scientific_use": true,
+ "authorizes": "nothing",
+ "study_completion": {
+  "status": "INCOMPLETE",
+  "unfinished": [
+   "init"
+  ],
+  "record": "logs/stages/stage-1/depth_merge/runs/dmr1_merge_build_20261127_081622/closeout/session_completion.json"
+ }
+}

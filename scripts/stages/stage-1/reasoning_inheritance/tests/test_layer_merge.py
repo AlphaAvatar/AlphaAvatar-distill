@@ -179,6 +179,90 @@ def test_the_pipeline_builds_both_candidates_on_the_toy_teacher(teacher):
                 assert r["positions"] == 120 and r["normalized_error"] is not None and r["rms_reference"] > 0
 
 
+@torch.no_grad()
+def _statistics_all_blocks_resident(adapter, teacher, spans, batches, active, *, chunk):
+    """The collector as it was before 2026-11-27: every involved block's activations and head writes resident at
+    once. The reference the span-major collector must equal bit for bit."""
+    n_q, _n_kv, hd = adapter.head_groups(adapter.spec_of(teacher))
+    blocks = adapter.blocks(teacher)
+    involved = sorted({b for s in spans for b in s})
+    pairs = [(s[0], b) for s in spans for b in s[1:]]
+    width = adapter.stream_out_projections(blocks[involved[0]])["ffn_out"].weight.shape[1]
+    st = LMX.Statistics()
+    for b in involved:
+        st.abs_sum[b] = torch.zeros(width, dtype=torch.float64)
+        st.self_heads[b] = LMX.LM.GramMoments(n_q, n_q)
+    for q in pairs:
+        st.pearson[q] = LMX.LM.PearsonMoments(width, width)
+        st.heads[q] = LMX.LM.GramMoments(n_q, n_q)
+    captured, handles = {}, []
+    for b in involved:
+        for role, m in adapter.stream_out_projections(blocks[b]).items():
+            if role in ("ffn_out", "attn_out"):
+                handles.append(m.register_forward_pre_hook(
+                    lambda _m, a, _b=b, _r=role: captured.__setitem__((_b, _r), a[0].reshape(-1, a[0].shape[-1]))))
+    try:
+        for packed in batches():
+            captured.clear()
+            LMX.forward(teacher, packed)
+            valid = LMX.valid_rows(packed, active)
+            n = int(valid.sum())
+            feats = {b: captured[(b, "ffn_out")][valid] for b in involved}
+            attn = {b: captured[(b, "attn_out")][valid] for b in involved}
+            for b in involved:
+                st.abs_sum[b] += feats[b].to(torch.float64).abs().sum(0)
+            for q in pairs:
+                st.pearson[q].add(feats[q[0]], feats[q[1]])
+            for lo in range(0, n, chunk):
+                w = {b: LMX.head_writes(attn[b][lo:lo + chunk],
+                                        adapter.stream_out_projections(blocks[b])["attn_out"].weight, n_q, hd)
+                     for b in involved}
+                for b in involved:
+                    st.self_heads[b].add(w[b], w[b])
+                for q in pairs:
+                    st.heads[q].add(w[q[0]], w[q[1]])
+            st.positions += n
+            st.sequences += 1
+    finally:
+        for h in handles:
+            h.remove()
+    return st
+
+
+def _moments(st) -> dict:
+    out = {f"abs{b}": t for b, t in st.abs_sum.items()}
+    for name, group in (("self", st.self_heads), ("pearson", st.pearson), ("heads", st.heads)):
+        for k, m in group.items():
+            for f, v in vars(m).items():
+                if torch.is_tensor(v):
+                    out[f"{name}{k}.{f}"] = v
+                elif isinstance(v, (int, float)):
+                    out[f"{name}{k}.{f}"] = torch.tensor(float(v), dtype=torch.float64)
+    return out
+
+
+def test_the_span_major_statistics_equal_the_all_blocks_resident_ones_bit_for_bit(teacher):
+    """The 2026-11-27 memory repair (DMR1's build ran an L40S out of memory at 29 blocks and 20 pairs): activations
+    released as indexed, FFN features freed after their moments, head writes made one span at a time. Every
+    accumulator receives the same additions in the same order, so every moment is EQUAL to the old collector's, over
+    several packed sequences and several chunks per sequence, with a three-block span. Overlapping spans refuse."""
+    spans = [(0, 1, 2), (3, 4)]
+    batches = _batches()
+    g = torch.Generator().manual_seed(11)
+    mask = torch.rand(1, 40, generator=g) > 0.4                 #: a position policy admitting some positions only
+    some = SimpleNamespace(token_mask_for=lambda _b, _idx: mask)
+    for active, positions in ((None, 120), (some, 3 * int(mask.sum()))):
+        new = LMX.collect_statistics(ADAPTER, teacher, spans, batches, active, chunk=16)
+        ref = _statistics_all_blocks_resident(ADAPTER, teacher, spans, batches, active, chunk=16)
+        assert (new.sequences, new.positions) == (ref.sequences, ref.positions) == (3, positions)
+        a, b = _moments(new), _moments(ref)
+        assert set(a) == set(b) and len(a) > 20
+        assert [k for k in a if not torch.equal(a[k], b[k])] == []
+    assert 0 < int(mask.sum()) < 40
+    with pytest.raises(ValueError, match="overlap"):
+        LMX.collect_statistics(ADAPTER, teacher, [(0, 1), (1, 2)], batches, None, chunk=16)
+
+
 def test_the_teardown_reserve_and_the_budget_terminal_state_refuse():
     from reasoning_inheritance import layer_merge_launch as L
     assert L.relay_object_sizes() == [1_211_169_792 + 2**20] * 2 + [64 * 2**20]       #: two deltas, the statistics

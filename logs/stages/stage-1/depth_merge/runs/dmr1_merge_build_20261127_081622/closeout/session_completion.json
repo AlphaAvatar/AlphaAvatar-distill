@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.dmr1.session_completion/v1",
+ "run_id": "dmr1_merge_build_20261127_081622",
+ "kind": "dmr1_merge_build",
+ "arm": null,
+ "scr": "/home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_build_20261127_081622",
+ "init_record": null,
+ "status": "INCOMPLETE",
+ "unfinished": {
+  "init": [
+   "no init record"
+  ]
+ },
+ "checked_utc": "2026-11-27T08:30:00Z"
+}
