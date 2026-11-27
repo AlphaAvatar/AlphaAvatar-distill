@@ -503,6 +503,14 @@ def test_a_checkpoint_identity_change_reuses_the_statistics_and_rebuilds_only_th
     assert old["relay"]["identity_sha256"] == ident["checkpoint"]
     assert json.loads((BD.records(out) / "relay.json").read_text())["superseded"][0]["identity_sha256"] == \
         ident["checkpoint"]
+    #: the record's method is the one its weights were built with, never the earlier build record's
+    assert doc["method"] == doc["checkpoint"]["identity"]["parts"]["merge"]["method"] == new["parts"]["merge"]["method"]
+    assert json.loads((BD.records(out) / "build.json").read_text())["method"] == doc["method"]
+    if change == "method":
+        assert doc["method"] == "M-other"
+        assert old["record"]["checkpoint"]["identity"]["parts"]["merge"]["method"] == ident["parts"]["merge"]["method"]
+        stale = {**doc, "method": ident["parts"]["merge"]["method"]}         #: a record contradicting its weights
+        assert any("method" in b for b in BD.product_problems(stale, new)), BD.product_problems(stale, new)
 
 
 def test_a_handoff_that_does_not_verify_keeps_the_files_and_the_next_attempt_completes_only_it(tmp_path, contract,

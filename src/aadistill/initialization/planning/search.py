@@ -764,23 +764,52 @@ class BeamSearch:
             raise SearchError(
                 f"target differs from the teacher in {orphan}, and no registered "
                 "implementation modifies those fields; the target is unreachable")
-        #: An implementation that could act on this target and needs a declared
-        #: config (`OperatorImplementation.required_config`, e.g. a projection's
-        #: stream weighting) that the search does not declare would otherwise be
-        #: refused only when the beam first expands its kind -- after the root's
-        #: and every earlier level's forwards.
+        #: An implementation the beam can expand on its way to this target and
+        #: that needs a declared config (`OperatorImplementation.required_config`,
+        #: e.g. a projection's stream weighting) the search does not declare would
+        #: otherwise be refused only when the beam first expands it -- after the
+        #: root's and every earlier level's forwards. Which implementations the beam
+        #: can expand is the operators' own `applicable` along the search's paths
+        #: (`_expandable_implementations`), not the fields they could modify: an
+        #: all-at-once recipe that never applies to this target asks nothing.
         from aadistill.initialization.operators.base import missing_config
         undeclared = {}
-        for impl_id in self._allowed_impl_ids():
-            impl = get_implementation(impl_id)
-            if impl.modifies & differing:
-                miss = missing_config(impl, (self.config.operator_configs or {}).get(impl_id))
-                if miss:
-                    undeclared[impl_id] = miss
+        for impl_id in sorted(self._expandable_implementations(root_spec)):
+            miss = missing_config(get_implementation(impl_id), (self.config.operator_configs or {}).get(impl_id))
+            if miss:
+                undeclared[impl_id] = miss
         if undeclared:
             raise SearchError(
-                f"allowed implementations that can act on this target need a declared config the search does not "
-                f"give them: {undeclared}; declare it in SearchConfig.operator_configs (the core has no default)")
+                f"allowed implementations the search can expand toward this target need a declared config it does "
+                f"not give them: {undeclared}; declare it in SearchConfig.operator_configs (the core has no default)")
+
+    def _expandable_implementations(self, root_spec: ArchSpec) -> set[str]:
+        """Every allowed implementation the beam could expand at some state reachable from ``root_spec``: the
+        search's own expansion rule (`applicable_implementations` on a state's spec, the kinds it already applied
+        excluded unless ``allow_kind_repeat``) walked over the implementations' planned result specs. $0: no model,
+        no calibration, no forward. A superset of what a pruned or shallow beam expands, never a subset."""
+        from aadistill.initialization.operators.base import OperatorError
+        allowed, target = self._allowed_impl_ids(), self.config.target_spec
+        repeat = self.config.allow_kind_repeat
+        found: set[str] = set()
+        seen: set[tuple] = set()
+        todo: list[tuple[ArchSpec, tuple[str, ...]]] = [(root_spec, ())]
+        while todo:
+            spec, kinds = todo.pop()
+            key = (spec.spec_hash, () if repeat else kinds)
+            if key in seen:
+                continue
+            seen.add(key)
+            for impl, _ in applicable_implementations(self.adapter, spec, target,
+                                                      exclude_kinds=() if repeat else kinds, allow_impls=allowed):
+                found.add(impl.impl_id)
+                try:
+                    nxt = impl.plan(spec, target, self.adapter, None).result_spec
+                except OperatorError:
+                    continue                    #: the beam's own expansion would refuse it there
+                if nxt.spec_hash != spec.spec_hash:
+                    todo.append((nxt, tuple(sorted(set(kinds) | {impl.kind}))))
+        return found
 
     def _allowed_impl_ids(self) -> list[str]:
         from aadistill.initialization.operators.base import registered_implementations

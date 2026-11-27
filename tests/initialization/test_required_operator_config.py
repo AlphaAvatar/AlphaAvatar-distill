@@ -4,8 +4,9 @@
 (`OperatorImplementation.required_config`). Each layer refuses an undeclared one before the work it would follow:
 
 * the operators themselves -- before the statistics pass (and a malformed one is refused there too);
-* a search -- when its root is known and before the first forward: an allowed implementation that could act on the
-  target and is not given its config by `SearchConfig.operator_configs`;
+* a search -- when its root is known and before the first forward: an allowed implementation the beam can expand on
+  some path toward the target (its own `applicable`, walked over the planned specs at $0) and that is not given its
+  config by `SearchConfig.operator_configs`; one that never applies to the target asks nothing;
 * a fixed path -- before its root is loaded, for every step that would run (a spec is still constructed without one:
   deriving a historical step's config hash needs no execution).
 
@@ -95,6 +96,40 @@ def test_a_search_that_could_apply_width_without_its_weighting_stops_before_the_
                    allowed_impls=("width.global_pca_v0", "ffn.activation_importance_v0", "depth.positional_v0",
                                   "attention.weight_proxy_v0"))
     assert s.root_state() is not None
+
+
+@pytest.mark.parametrize("compressed", [("num_hidden_layers",), ("intermediate_size",), ("num_attention_heads",),
+                                        ("num_hidden_layers", "intermediate_size", "num_attention_heads")])
+def test_the_default_operator_set_asks_nothing_of_a_target_that_keeps_the_width(
+        tmp_path, teacher, target_spec, eval_suite, suite_items, profile, compressed):
+    """Every registered implementation allowed (the default), a target that compresses depth, the FFN or the heads
+    but not the width: neither projection can be expanded on any path toward it -- the width is already at target,
+    and the all-at-once recipe applies only when every structural field differs -- so nothing is asked of the
+    search. The root state is built."""
+    root = QWEN3_ADAPTER.spec_of(teacher)
+    keep = {f: root[f] for f in ("hidden_size", "num_hidden_layers", "intermediate_size", "num_attention_heads")
+            if f not in compressed}
+    target = target_spec.replace(**keep)
+    assert target.diff(root) == set(compressed)
+    s, measured = _search(tmp_path, teacher, target, eval_suite, suite_items, profile)
+    assert s.config.allowed_impls is None
+    assert s.root_state().remaining_differences()
+    assert not {WIDTH, COMPOSITE} & s._expandable_implementations(root)
+    assert measured == []
+
+
+def test_the_all_at_once_recipe_is_asked_for_its_weighting_where_it_applies(
+        tmp_path, teacher, target_spec, eval_suite, suite_items, profile):
+    """The composite recipe, allowed without the width projection, toward a target differing in every structural
+    field (where it applies, from the root): refused before the first forward, naming it."""
+    root = QWEN3_ADAPTER.spec_of(teacher)
+    assert root.diff(target_spec) >= get_implementation(COMPOSITE).modifies
+    s, measured = _search(tmp_path, teacher, target_spec, eval_suite, suite_items, profile,
+                          allowed_impls=(COMPOSITE, "ffn.activation_importance_v0", "depth.positional_v0",
+                                         "attention.weight_proxy_v0"))
+    with pytest.raises(SearchError, match="composite.stage1_sandwich_v0.*stream_weighting") as e:
+        s.run()
+    assert WIDTH not in str(e.value) and measured == []
 
 
 def test_a_fixed_path_step_without_its_weighting_stops_before_the_root_is_loaded(tmp_path):

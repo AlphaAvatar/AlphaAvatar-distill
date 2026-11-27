@@ -699,6 +699,7 @@ def run(out: Path, work: Path, device: str, status: Status, run_id: str, ident: 
             actions.append("statistics: fetched from their verified relay copy (re-hashed) for the weights build")
         m, made = weights_step(gpu(), rec, out, work, status)
         rec["checkpoint"] = {**made, "identity": stamp(ident, "checkpoint")}
+        rec["method"] = ident["parts"]["merge"]["method"]       #: the method these weights were built with
         write_json(rec_p, rec)
         status.mark("INIT_BUILT")
         w_local = True
@@ -778,10 +779,16 @@ def init_record(rec: dict, relay: dict, ident: dict) -> dict:
                                           "artifact_digest": ck["artifact_digest"],
                                           "single_shard_sha256": ck["shards"][0]["sha256"]}]},
             "identity": ident, "checkpoint": ck, "base": DC.design()["baseline"]["init_record"],
-            "method": rec["method"], "method_identity": rec["method_identity"], "statistics": rec["statistics"],
+            "method": _checkpoint_method(ck), "method_identity": rec["method_identity"],
+            "statistics": rec["statistics"],
             "checks": rec["checks"], "candidate": rec["candidate"], "state_evaluation": rec.get("state_evaluation"),
             "diagnostics": rec.get("diagnostics"), "relay": relay, "attempts": rec.get("attempts", []),
             "superseded": rec.get("superseded", []), "finished_utc": utc()}
+
+
+def _checkpoint_method(ck: dict) -> str | None:
+    """The merge method the checkpoint's own identity names: what the init record's ``method`` must say."""
+    return (((ck.get("identity") or {}).get("parts") or {}).get("merge") or {}).get("method")
 
 
 def product_problems(doc: dict | None, ident: dict | None = None) -> list[str]:
@@ -807,6 +814,9 @@ def product_problems(doc: dict | None, ident: dict | None = None) -> list[str]:
         bad.append("the manifest's weights are not the checkpoint's shard")
     if ck.get("statistics_sha256") != (doc.get("statistics") or {}).get("tensors_sha256"):
         bad.append("the weights were not made from the recorded statistics")
+    if doc.get("method") != _checkpoint_method(ck):
+        bad.append(f"the init record says method {doc.get('method')!r}, its checkpoint was built with "
+                   f"{_checkpoint_method(ck)!r}")
     eq = (doc.get("checks") or {}).get("equivalence") or {}
     tol = float(DC.design()["checks"]["fold_equivalence"]["tolerance"])
     if not (eq.get("passed") is True and float(eq.get("worst", float("inf"))) <= tol):
