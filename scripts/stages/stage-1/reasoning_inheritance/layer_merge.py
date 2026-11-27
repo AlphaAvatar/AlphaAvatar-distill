@@ -428,10 +428,17 @@ def candidate_tensor_digests(model, names) -> dict[str, str]:
     return {n: tensor_sha256(sd[n]) for n in names}
 
 
+#: `ast.dump` omits empty fields by default from Python 3.13 on; ``show_empty=True`` keeps the 3.12 form, in which
+#: the pods (/opt/train, 3.12) dump and every recorded identity was made: the same source digests the same on any
+#: interpreter (the dev box's 3.14 read the pod's DMR1 build as made under other code)
+_DUMP_FORM = {"show_empty": True} if sys.version_info >= (3, 13) else {}
+
+
 def code_identity(*objs) -> dict:
     """What computes a product, as code: each function's or class's source parsed, its docstrings dropped and dumped
-    without positions (`ast.dump`), so a comment, a docstring or a moved line elsewhere in the file changes nothing,
-    and a changed statement does. A later attempt reuses a product only under the same code identity."""
+    without positions (`ast.dump`, in the 3.12 form on every interpreter: `_DUMP_FORM`), so a comment, a docstring or
+    a moved line elsewhere in the file changes nothing, and a changed statement does. A later attempt reuses a product
+    only under the same code identity."""
     out = {}
     for o in objs:
         tree = ast.parse(textwrap.dedent(inspect.getsource(o)))
@@ -442,7 +449,7 @@ def code_identity(*objs) -> dict:
                     and isinstance(body[0].value.value, str)):
                 node.body = body[1:] or [ast.Pass()]
         out[f"{o.__module__}.{o.__qualname__}"] = hashlib.sha256(
-            ast.dump(tree, include_attributes=False).encode()).hexdigest()
+            ast.dump(tree, include_attributes=False, **_DUMP_FORM).encode()).hexdigest()
     return {"objects": out, "sha256": hashlib.sha256(json.dumps(out, sort_keys=True).encode()).hexdigest(),
             "rule": "sha256 of ast.dump (no positions, docstrings dropped) of each object's source"}
 

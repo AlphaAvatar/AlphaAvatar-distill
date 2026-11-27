@@ -406,8 +406,9 @@ def command(v: Variant, launch, kind: str, arm: str | None, ctx, plan) -> str:
           f"{SE.POD_REPO}/scripts/stages/stage-1:{SE.POD_REPO}/scripts/stages/stage-0/calibration_volume "
           "/opt/train/bin/python")
     if kind == v.build_kind:
+        from stages.depth_merge import build_driver as BD
         cmd = (f"{DRIVERS['build']} --run-id {shlex.quote(ctx.args.run_id)} --out {ev} "
-               f"--work {DC.pod_root('depth_merge')}/build_work --status {status} --device cuda {resume}")
+               f"--work {DC.pod_root('depth_merge')}/build_work --status {status} --device {BD.BUILD_DEVICE} {resume}")
     else:
         arm = v.arm_of(kind, arm)
         auth = f"{SE.POD_REPO}/{v.study().authorization_path(ctx.args.run_id)}"

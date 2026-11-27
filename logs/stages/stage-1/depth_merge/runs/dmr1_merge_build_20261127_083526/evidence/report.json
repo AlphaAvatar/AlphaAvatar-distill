@@ -1,0 +1,483 @@
+{
+ "schema": "aadistill.stage1.depth_merge.build_report/v1",
+ "run_id": "dmr1_merge_build_20261127_083526",
+ "started_utc": "2026-11-27T08:44:20Z",
+ "contract": {
+  "design_sha256": "e9ec8fc6118f1cfcbfa533357b81012d302c9d6c1d2d9a5edf763c402acd36cd",
+  "digests_sha256": "3edfb5de761e8f22fa99dc8d51e6bb33242eb7cbd7ddef54b8e59c943044fbb5",
+  "spans": [
+   [
+    1,
+    2,
+    3
+   ],
+   [
+    7,
+    8,
+    9
+   ],
+   [
+    10,
+    11
+   ],
+   [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   [
+    19,
+    20,
+    21
+   ],
+   [
+    24,
+    25,
+    26,
+    27,
+    28
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    31,
+    32,
+    33
+   ],
+   [
+    34,
+    35
+   ]
+  ],
+  "pairs": [
+   [
+    1,
+    2
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    7,
+    8
+   ],
+   [
+    7,
+    9
+   ],
+   [
+    10,
+    11
+   ],
+   [
+    12,
+    13
+   ],
+   [
+    12,
+    14
+   ],
+   [
+    12,
+    15
+   ],
+   [
+    12,
+    16
+   ],
+   [
+    12,
+    17
+   ],
+   [
+    19,
+    20
+   ],
+   [
+    19,
+    21
+   ],
+   [
+    24,
+    25
+   ],
+   [
+    24,
+    26
+   ],
+   [
+    24,
+    27
+   ],
+   [
+    24,
+    28
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    31,
+    32
+   ],
+   [
+    31,
+    33
+   ],
+   [
+    34,
+    35
+   ]
+  ],
+  "session_contract": {
+   "design_sha256": "423eb41222af704d647becb0aba6146a5d5109ea3df8c122c69bc044fd9c51dd",
+   "selection_sha256": "c523a6d1dd18e7cafb52a81060336144c04de2791a1cb2acdf7bc742c52601f8",
+   "selection_reproduced_from_journal": null,
+   "session": {
+    "config_hash": "457d5adbe0696631a168c038afd14122d49d6c0fd1ca363115a27b99d026fea5",
+    "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+    "forward_context": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1",
+     "sequence_length": 8192,
+     "shuffle_seed": 20261105
+    },
+    "profiles": {
+     "calib.hybrid_d4_base@v2": "d835fad13756d21cf5a2e5cc66c7c9b7badbf251133aa13c53ab033056b2fb45",
+     "calib.hybrid_d4_rh@v2": "6a20196d550d0f1c7570faf5b84366fb0e5e1404fa6b82cc40c24129b1efa590"
+    }
+   },
+   "config_hashes": [
+    {
+     "step": "FFN",
+     "impl_id": "ffn.activation_importance_v0",
+     "profile_id": "calib.hybrid_d4_base@v2",
+     "derived": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+     "journal": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+     "matches": true
+    },
+    {
+     "step": "DEPTH",
+     "impl_id": "depth.causal_kl_greedy_v1",
+     "profile_id": "calib.hybrid_d4_base@v2",
+     "derived": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+     "journal": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+     "matches": true
+    },
+    {
+     "step": "ATTENTION",
+     "impl_id": "attention.activation_importance_v1",
+     "profile_id": "calib.hybrid_d4_rh@v2",
+     "derived": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+     "journal": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+     "matches": true
+    },
+    {
+     "step": "RESIDUAL_WIDTH",
+     "impl_id": "width.global_pca_v0",
+     "profile_id": "calib.hybrid_d4_rh@v2",
+     "derived": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+     "journal": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+     "matches": true
+    }
+   ]
+  },
+  "method_identity": {
+   "statistics": {
+    "objects": {
+     "aadistill.initialization.planning.layer_merge.PearsonMoments": "15381382b90b5fd139e0b7727d74c1eef385bceadcfbe6e5929926431139ce1d",
+     "aadistill.initialization.planning.layer_merge.GramMoments": "fcde2f48c17e115586866dbc0c5521fd389201e8b78a315748ddd9c5eb9722e0",
+     "aadistill.initialization.planning.layer_merge.group_sum": "5f29732af3d573d54d2d5b49363b961dbbc07bab45474398913df283553897b9",
+     "aadistill.initialization.planning.layer_merge.linear_assignment": "6b4d40979238d5fb825baef3ab3fb34f19fb98b85d09f6d2138a342c73d6a906",
+     "stages.reasoning_inheritance.layer_merge.calibration": "628ae9b6e4006299002b66ac1d4ebce0744b22162cdcb8fddf2556d3ec35c5ad",
+     "stages.reasoning_inheritance.layer_merge.valid_rows": "cf6695127142d622858da4a414dd99ce6b0aee22ba608b8ec39268e82115bd21",
+     "stages.reasoning_inheritance.layer_merge.forward": "f43bb528d1980453eeaa7c1ab8f312c24ef1edd110f79b02023a5f322b5c0c7d",
+     "stages.reasoning_inheritance.layer_merge.head_writes": "bb3dc5b0134f3fe29247e8e6c65a5783746eb637f0a0d2f23ff3734c4b63afd6",
+     "stages.reasoning_inheritance.layer_merge.collect_statistics": "ca4c67c8775573d1d6043b7daf383faac7513429c71b3be66c18db6a587f9043",
+     "stages.reasoning_inheritance.layer_merge.alignments": "ed92df954218875c92f25a7facc1f56c87e1981420f31c00bf06ac5527b49abd",
+     "stages.reasoning_inheritance.layer_merge.statistics_tensors": "432aed6ad8b6f1f864efa43c006577bf9d09e140cd47b10ad542a48db8520b8b",
+     "stages.depth_merge.merge.calibration": "0d37b233e29a1667d437cb13304572c139b72306bf1c19289638b011fdd526e2",
+     "stages.depth_merge.merge.pair_alignments": "e157f97c6df16702bc3884ee318c382b13cdf8e38cb060a082516e68df3a5442",
+     "stages.depth_merge.merge.pair_inputs": "592fce687a09d7b5429174d7755fac87e5efd274e58df264737a44e03b1f3a12",
+     "stages.depth_merge.merge.correlation_sha256": "55c5288962065b2c3e0b1f56c1dbd04e85f480b200bed8597aafca39933c7ff9",
+     "stages.depth_merge.merge._f64_sha256": "fdf773618d88425ad3e61bd6f067ca7763f7c4640074d0500aa3fe1a8996fce7"
+    },
+    "sha256": "c861b512dee9c0bdb4afed546fe9c4bc865fc2fce306308689d9dedd7831688e",
+    "rule": "sha256 of ast.dump (no positions, docstrings dropped) of each object's source"
+   },
+   "candidate": {
+    "objects": {
+     "aadistill.initialization.planning.layer_merge.block_tensors": "74106875bd6b5eea0b76b4e5b60190cd22b5a3ad86098bbd1d181840c5b661d2",
+     "aadistill.initialization.planning.layer_merge._params": "b6fc2d989610a16e5dc0af7234ec81433a7275a4f4fd5a016598847b948a080f",
+     "aadistill.initialization.planning.layer_merge.fold_norm_gains": "9153b244192d1953a2c13f932875a32e816be2c7349c1063434809a7b37914b8",
+     "aadistill.initialization.planning.layer_merge.permute_block": "71087b235d76021b44368d8285708b761ffe07806a0871a7430c1dada61b8c8a",
+     "aadistill.initialization.planning.layer_merge.query_head_order": "0ed1f2fffcaf5860573c25f7118bb7911b17cdf267984b511fdd4eef2291d78b",
+     "aadistill.initialization.planning.layer_merge.head_rows": "8757071af5e6b39f8915889faffe23993d473e864634cf9539590342a4e2dc9d",
+     "aadistill.initialization.planning.layer_merge.convex_weights": "a60f7d02b0ad7f26d3e40a565d71ffb0232d69ec06fc643713cfc8989e7d2a37",
+     "aadistill.initialization.planning.layer_merge.MergeWeights": "71f72d8083c0fafe1bdd3c0ca3b9cc0e3fcdb291c2d007f9a7f7809e172281dd",
+     "aadistill.initialization.planning.layer_merge.merge_blocks": "5917eee6250f9f963dfbe16c21147f54a19b3b9eba1354203f8383694c65b22f",
+     "aadistill.initialization.planning.layer_merge.write_block": "2a9126c9906b8bb81f4775883657dfdef8b3fd6e40c6bcd5c5b61556e0eedb32",
+     "stages.reasoning_inheritance.layer_merge.merged_tensors": "cfa8dcb94dfedaa6f164c50e64b4c13fac2a7bb36901ac0cee1961ce7fe5177c",
+     "stages.reasoning_inheritance.layer_merge.build_candidate": "1f804c26df63a1f7c97f3969ba0d82267dbfe96d2c67e73b6fb86f91d6f6d99d"
+    },
+    "sha256": "40196fac72d419c1d97faf701cca1df5eb2d928d570848406dcd45bef094f30d",
+    "rule": "sha256 of ast.dump (no positions, docstrings dropped) of each object's source"
+   }
+  },
+  "execution": {
+   "micro_batch_size": 1,
+   "calibration_batch_packing": "original_order_v1",
+   "prediction_rows": "scored_v1"
+  },
+  "position_policy": {
+   "qualified_id": "positions.supervised_target_v1@v1",
+   "policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12"
+  }
+ },
+ "identity": {
+  "parts": {
+   "teacher": {
+    "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+    "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192",
+    "config_sha256": "8ba006f74fecfaaeb392872a60f4a480e7ec9860153d2e1b769ec81f9a147f8a",
+    "num_parameters": 4022468096
+   },
+   "base": {
+    "sha256": "413686f23fa23f25b0c5bb6534ff9dbd3029fc5c40493a84296d987cd73b02de",
+    "artifact_digest": "2c738b963335dcb286b9eabec35901f089b383c6077d0979b4e6d4308bed73c6",
+    "model_safetensors_sha256": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+    "config_json_sha256": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019",
+    "num_parameters": 2003851776,
+    "tensor_digests_sha256": "53a1633e86e9e37a0717425ede23b2ceb4426356dd550da9dc18c7de413bcfb3"
+   },
+   "mapping": {
+    "n_root_blocks": 36,
+    "kept_blocks": [
+     0,
+     1,
+     4,
+     5,
+     6,
+     7,
+     10,
+     12,
+     18,
+     19,
+     22,
+     23,
+     24,
+     29,
+     31,
+     34
+    ],
+    "merged_spans": [
+     [
+      1,
+      2,
+      3
+     ],
+     [
+      7,
+      8,
+      9
+     ],
+     [
+      10,
+      11
+     ],
+     [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+     ],
+     [
+      19,
+      20,
+      21
+     ],
+     [
+      24,
+      25,
+      26,
+      27,
+      28
+     ],
+     [
+      29,
+      30
+     ],
+     [
+      31,
+      32,
+      33
+     ],
+     [
+      34,
+      35
+     ]
+    ],
+    "pairs": [
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      10,
+      11
+     ],
+     [
+      12,
+      13
+     ],
+     [
+      12,
+      14
+     ],
+     [
+      12,
+      15
+     ],
+     [
+      12,
+      16
+     ],
+     [
+      12,
+      17
+     ],
+     [
+      19,
+      20
+     ],
+     [
+      19,
+      21
+     ],
+     [
+      24,
+      25
+     ],
+     [
+      24,
+      26
+     ],
+     [
+      24,
+      27
+     ],
+     [
+      24,
+      28
+     ],
+     [
+      29,
+      30
+     ],
+     [
+      31,
+      32
+     ],
+     [
+      31,
+      33
+     ],
+     [
+      34,
+      35
+     ]
+    ]
+   },
+   "calibration": {
+    "profile_id": "calib.hybrid_d4_base@v2",
+    "positions_of_operator": "ffn.activation_importance_v0",
+    "expected": {
+     "examples": 558,
+     "packed_sequences": 79,
+     "statistics_positions": 231242,
+     "source": "RI-LM1's statistics pass measured 79 packed sequences and 231,242 statistics positions on this profile under the same session (both RI-S1's and TPI1's sessions are packed_full_search.build_session(which='v3'): one session); the build stops on any other count"
+    },
+    "profiles": {
+     "calib.hybrid_d4_base@v2": "d835fad13756d21cf5a2e5cc66c7c9b7badbf251133aa13c53ab033056b2fb45",
+     "calib.hybrid_d4_rh@v2": "6a20196d550d0f1c7570faf5b84366fb0e5e1404fa6b82cc40c24129b1efa590"
+    },
+    "session_config_hash": "457d5adbe0696631a168c038afd14122d49d6c0fd1ca363115a27b99d026fea5",
+    "measurement_protocol_id": "b760ab7ec7ab4b557dc4eb971801835d",
+    "forward_context": {
+     "packing": "sequential_truncate_v1",
+     "truncate": true,
+     "materialization": "prefix_restart_v1",
+     "shuffle": "sha256_keyed_v1",
+     "attention": "causal_continuous_positions_v1",
+     "sequence_length": 8192,
+     "shuffle_seed": 20261105
+    },
+    "operator_config_hashes": {
+     "FFN": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+     "DEPTH": "58c86cde00f2dad8c16214f156607a49c2c91f828bcb74eaac5a6e0118169dfc",
+     "ATTENTION": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a",
+     "RESIDUAL_WIDTH": "958e14e68ee013cab1b7031b636126d96b22b69d1521c3d0c04f4a03d340666a"
+    },
+    "execution": {
+     "micro_batch_size": 1,
+     "calibration_batch_packing": "original_order_v1",
+     "prediction_rows": "scored_v1"
+    },
+    "position_policy": {
+     "qualified_id": "positions.supervised_target_v1@v1",
+     "policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12"
+    }
+   },
+   "statistics_code": "c861b512dee9c0bdb4afed546fe9c4bc865fc2fce306308689d9dedd7831688e",
+   "merge": {
+    "method": "M-act",
+    "seed": 20260815,
+    "candidate_code": "40196fac72d419c1d97faf701cca1df5eb2d928d570848406dcd45bef094f30d"
+   }
+  },
+  "statistics": "c088e943bd58238a6e0bbc02bffeb1427bd965c5ef0b86c9f4481457de9226b3",
+  "checkpoint": "28d77207996c35b9d088befa42e0cca449eaf2c9ad2bb5aa7b727e2891f17453",
+  "rule": "sha256 of canonical JSON: statistics = teacher, mapping, calibration, statistics code; checkpoint = the statistics' identity, the base, the merge (method, seed, candidate code)"
+ },
+ "init": {
+  "selected_rows": [
+   {
+    "state_id": "depth_merge/17fc769bd874e40176bd605e151d55b2",
+    "path": "SOB1's depth selection, alpha-merged (M-act) at its spans",
+    "artifact_digest": "17fc769bd874e40176bd605e151d55b2856f01716a3bc34d4d28c6648860597d",
+    "single_shard_sha256": "99f638218762ee3d2b8a09940e860e3efbb9e181cb759ecfe94ca6bfeadefc63"
+   }
+  ]
+ },
+ "actions": [
+  "statistics: computed",
+  "weights: built from the statistics file",
+  "diagnostics: computed"
+ ],
+ "finished_utc": "2026-11-27T09:51:14Z",
+ "terminal": "ALL_DONE"
+}

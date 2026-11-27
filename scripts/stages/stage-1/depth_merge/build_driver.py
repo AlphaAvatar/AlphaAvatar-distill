@@ -841,10 +841,16 @@ def durable_init(out: Path, ident: dict | None = None) -> dict | None:
     return doc if doc is not None and not product_problems(doc, ident) else None
 
 
-def current_identity(work: Path) -> dict:
-    """This tree's identity of the build's products ($0, CPU: `contract` then `identity`), for a dev-box check of a
-    record (the session's closeout, the training plan's derivation)."""
-    return identity(contract(Path(work), "cpu"))
+#: the device a build runs on (`session.command`: ``--device cuda``); the session's config hash, part of the
+#: calibration's identity, includes it
+BUILD_DEVICE = "cuda"
+
+
+def current_identity(work: Path, device: str = BUILD_DEVICE) -> dict:
+    """This tree's identity of the build's products as the pod derives it ($0, no GPU: `contract` then `identity`,
+    for the build's device -- only its name enters the session config), for a dev-box check of a record (the session's
+    closeout, the training plan's derivation, a takeover's room)."""
+    return identity(contract(Path(work), device))
 
 
 def main(argv=None) -> int:

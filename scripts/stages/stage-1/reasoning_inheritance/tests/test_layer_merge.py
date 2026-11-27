@@ -348,6 +348,20 @@ def test_the_code_identity_ignores_comments_and_docstrings_but_not_statements(tm
 
 # ---- the driver reuses a product only under this attempt's identity ----------------------------------------------------
 
+def test_the_code_identity_is_the_pods_on_any_interpreter():
+    """The pod dumps the source under Python 3.12; the dev box may run 3.13+ (3.14 read DMR1's build as made under
+    other code: `ast.dump` dropped empty fields from 3.13 on). The dump is the 3.12 form on every interpreter: this
+    string is 3.12's own `ast.dump(..., include_attributes=False)` of the source below."""
+    import ast
+    src = 'def f(x, *, y=None):\n    """doc"""\n    return [x for x in range(3)]\n'
+    want = ("Module(body=[FunctionDef(name='f', args=arguments(posonlyargs=[], args=[arg(arg='x')], kwonlyargs=["
+            "arg(arg='y')], kw_defaults=[Constant(value=None)], defaults=[]), body=[Expr(value=Constant(value='doc')), "
+            "Return(value=ListComp(elt=Name(id='x', ctx=Load()), generators=[comprehension(target=Name(id='x', "
+            "ctx=Store()), iter=Call(func=Name(id='range', ctx=Load()), args=[Constant(value=3)], keywords=[]), "
+            "ifs=[], is_async=0)]))], decorator_list=[], type_params=[])], type_ignores=[])")
+    assert ast.dump(ast.parse(src), include_attributes=False, **LMX._DUMP_FORM) == want
+
+
 def _ids(out: Path, cand_sha: dict) -> None:
     LMD.RI.write_json(out / "state" / "identities.json",
                       {"candidates": {g: {"kind": "candidate", "sha256": h} for g, h in cand_sha.items()}})

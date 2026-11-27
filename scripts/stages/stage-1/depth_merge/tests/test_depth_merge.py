@@ -453,6 +453,24 @@ def test_products_made_under_another_identity_are_set_aside_and_never_adopted(tm
     assert BD.durable_init(out, ident) is None
 
 
+def test_the_dev_box_derives_the_identity_for_the_device_the_build_runs_on(tmp_path, monkeypatch):
+    """The session config hash (part of the calibration's identity) includes the device: the dev box's check derives
+    the pod's identity, for the device the launch command gives the driver (it once used "cpu" and read the pod's
+    COMPLETE build as made under another calibration)."""
+    from stages.depth_merge import build_driver as BD
+    from stages.depth_merge import launch as L
+    from stages.depth_merge import session as S
+    seen = []
+    monkeypatch.setattr(BD, "contract", lambda work, device: seen.append(device) or {"device": device})
+    monkeypatch.setattr(BD, "identity", lambda c: c)
+    assert BD.current_identity(tmp_path) == {"device": BD.BUILD_DEVICE} and seen == ["cuda"]
+    launch = SimpleNamespace(relay_inputs=(), status=lambda: "/s", audit=lambda: "a")
+    ctx = SimpleNamespace(args=SimpleNamespace(run_id="r"), evidence={})
+    cmd = S.command(L.VARIANT, launch, L.BUILD_KIND, None, ctx, None)
+    import re
+    assert re.search(rf"--device {BD.BUILD_DEVICE}[ ;]", cmd), cmd
+
+
 @pytest.mark.parametrize("change", ["candidate_code", "base", "method"])
 def test_a_checkpoint_identity_change_reuses_the_statistics_and_rebuilds_only_the_weights(tmp_path, contract,
                                                                                           monkeypatch, change):
