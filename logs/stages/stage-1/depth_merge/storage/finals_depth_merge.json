@@ -1,0 +1,16 @@
+{
+ "schema": "aadistill.stage1.single_operator_budget.local/v1",
+ "store": "/home/ecs-user/aad-artifacts/stage1_depth_merge",
+ "products": {},
+ "status": "INCOMPLETE",
+ "missing": {
+  "depth_merge-s20260726/final": "no verified final record with its files in the secured evidence",
+  "depth_merge-s20260801/final": "no verified final record with its files in the secured evidence"
+ },
+ "expected_products": [
+  "depth_merge-s20260726/final",
+  "depth_merge-s20260801/final"
+ ],
+ "last_run": "dmr1_merge_train_20261127_095843",
+ "checked_utc": "2026-11-27T20:05:58Z"
+}

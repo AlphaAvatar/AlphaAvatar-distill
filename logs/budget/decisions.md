@@ -17472,3 +17472,35 @@ on a paid pod.
 - Risks: the merged init starts far from the teacher (state KL 7.20 vs 3.47; a diagnostic only); two seeds; eval-set-1
   is development-exposed.
 - Revisit when: the training session closes (its completion, C1, the report).
+
+## 2026-11-27 (UTC) — DMR1 V1 training attempt 1 ended by the launcher's poll limit; seed 1 resumes from its save point
+
+- Context: `dmr1_merge_train_20261127_095843` (one L40S, $1.09/h) trained V1 seed 20260726 to step 7,310 of 9,701
+  and was then torn down by its own launcher at 605.6 min: `polling ended: POLL_LIMIT`. The plan's hard bound was
+  3,420 min. The shared study launcher (`study_engineering.build_parser`) gave `--poll-limit-min` a fixed default of
+  600 min, and the launch did not set it. Phase B met the same failure on 2026-08-27 and fixed it in its own launcher
+  only (`poll_lifetime_gate`), so the shared launcher never received the fix. The launcher secured the evidence,
+  the provider confirmed the pod gone, and the closeout recorded the attempt INCOMPLETE ($11.2083 all-in). No final
+  exists and no evaluation started. Seed 1's last durable save point is step 6,624 (model + trainer state, uploaded,
+  downloaded again and re-hashed: `savepoints.json`); steps 6,625–7,310 (~57 min) are lost.
+- Decision:
+  - an engineering failure inside the granted envelope, repaired in the shared core rather than per launcher:
+    `session_runner.poll_lifetime` derives an unset limit from the priced plan's hard bound plus two poll intervals,
+    and refuses at $0, before any provider resource exists, a given limit that would end polling before the pod's hard
+    bound. `--poll-limit-min` now defaults to unset in the shared parser. Regression: `tests/infrastructure/test_poll_lifetime.py`;
+  - attempt 2 resumes seed 1 from step 6,624 through the registered state machine (SOB1 phase 2: the latest
+    verified save point is restored with its optimizer, scheduler, RNG and data position; a unit with no final is
+    trained, never retrained from step 0), then trains and evaluates seed 2. It is the same frozen unit and seed
+    under the same protocol, one replacement endpoint, with no pooling and no measurement repeated;
+  - attempt 2's bound uses the proposal's own term model (`proposal.train_session`):
+    - seed 1: 3,077 steps at 7.241 s, the save point's restore at the bound download rate, the rest of seed 1's
+      copies, and its evaluation;
+    - seed 2: everything;
+    - total 2,575.8 driver minutes, a hard cap of $51.97 (expected $22.86);
+    - the kind's envelope leaves $53.2517, so with the $1.00 reserve this fits.
+- Alternatives considered: retraining seed 1 from step 0 (refused: it repeats 9 h of paid training that the design's
+  save points exist to keep); asking for more budget (not needed).
+- Risks: seed 1's endpoint comes from a resumed run (resume identity checked by the trainer); kernel
+  nondeterminism means the resumed steps are not bitwise those an uninterrupted run would take; the cap leaves
+  $0.28 of margin, so a third attempt is not fundable without a new decision.
+- Revisit when: attempt 2 closes.

@@ -835,7 +835,8 @@ def build_parser(description: str, *, gpu: str):
     ap.add_argument("--image-digest", default=None)
     ap.add_argument("--setup-timeout-s", type=float, default=3600.0)
     ap.add_argument("--poll-seconds", type=float, default=60.0)
-    ap.add_argument("--poll-limit-min", type=float, default=600.0)
+    ap.add_argument("--poll-limit-min", type=float, default=None,
+                    help="unset: derived from the priced plan's hard bound (SessionRunner: poll_lifetime)")
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--gpu-count", type=int, default=1, help="GPUs on the one pod; --max-price is the POD's price")
     ap.add_argument("--phases", default=None, help="a formal driver's phase selection (its own --phases)")

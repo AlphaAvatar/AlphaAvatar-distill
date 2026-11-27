@@ -243,6 +243,2016 @@
       "utc": "2026-11-27T10:03:20+00:00",
       "elapsed_min": 2.96,
       "msg": "driver detached, pid 2106, confirmed by descriptor_probe \u2014 $0.05"
+    },
+    {
+      "utc": "2026-11-27T10:04:31+00:00",
+      "elapsed_min": 4.14,
+      "msg": "  2026-11-27T10:03:44Z MARKER:TRAIN_START:depth_merge-s20260726 \u2014 $0.08"
+    },
+    {
+      "utc": "2026-11-27T10:04:45+00:00",
+      "elapsed_min": 4.38,
+      "msg": "secured 2 file(s) (2 held)"
+    },
+    {
+      "utc": "2026-11-27T10:06:14+00:00",
+      "elapsed_min": 5.86,
+      "msg": "secured 3 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:07:43+00:00",
+      "elapsed_min": 7.34,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:09:12+00:00",
+      "elapsed_min": 8.83,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:10:40+00:00",
+      "elapsed_min": 10.3,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:12:09+00:00",
+      "elapsed_min": 11.79,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:13:38+00:00",
+      "elapsed_min": 13.27,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:15:07+00:00",
+      "elapsed_min": 14.74,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:16:36+00:00",
+      "elapsed_min": 16.22,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:18:04+00:00",
+      "elapsed_min": 17.7,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:19:33+00:00",
+      "elapsed_min": 19.18,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:21:02+00:00",
+      "elapsed_min": 20.66,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:22:30+00:00",
+      "elapsed_min": 22.13,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:23:59+00:00",
+      "elapsed_min": 23.62,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:25:28+00:00",
+      "elapsed_min": 25.1,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:26:57+00:00",
+      "elapsed_min": 26.58,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:28:26+00:00",
+      "elapsed_min": 28.07,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:29:55+00:00",
+      "elapsed_min": 29.55,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:31:24+00:00",
+      "elapsed_min": 31.03,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:32:53+00:00",
+      "elapsed_min": 32.51,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:34:21+00:00",
+      "elapsed_min": 33.98,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:35:50+00:00",
+      "elapsed_min": 35.47,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:37:19+00:00",
+      "elapsed_min": 36.95,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:38:48+00:00",
+      "elapsed_min": 38.43,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:40:17+00:00",
+      "elapsed_min": 39.91,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:41:46+00:00",
+      "elapsed_min": 41.39,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:43:14+00:00",
+      "elapsed_min": 42.87,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:44:43+00:00",
+      "elapsed_min": 44.35,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:46:12+00:00",
+      "elapsed_min": 45.83,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:47:41+00:00",
+      "elapsed_min": 47.31,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:49:09+00:00",
+      "elapsed_min": 48.79,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:50:39+00:00",
+      "elapsed_min": 50.28,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:52:08+00:00",
+      "elapsed_min": 51.76,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:53:36+00:00",
+      "elapsed_min": 53.24,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:55:05+00:00",
+      "elapsed_min": 54.72,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:56:34+00:00",
+      "elapsed_min": 56.19,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:58:02+00:00",
+      "elapsed_min": 57.67,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T10:59:31+00:00",
+      "elapsed_min": 59.15,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:01:01+00:00",
+      "elapsed_min": 60.64,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:02:29+00:00",
+      "elapsed_min": 62.12,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:03:58+00:00",
+      "elapsed_min": 63.6,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:05:27+00:00",
+      "elapsed_min": 65.08,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:06:56+00:00",
+      "elapsed_min": 66.56,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:08:25+00:00",
+      "elapsed_min": 68.04,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:09:53+00:00",
+      "elapsed_min": 69.52,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:11:22+00:00",
+      "elapsed_min": 71.0,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:12:51+00:00",
+      "elapsed_min": 72.48,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:14:20+00:00",
+      "elapsed_min": 73.96,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:15:49+00:00",
+      "elapsed_min": 75.44,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:17:17+00:00",
+      "elapsed_min": 76.92,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:18:46+00:00",
+      "elapsed_min": 78.4,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:20:15+00:00",
+      "elapsed_min": 79.88,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:21:44+00:00",
+      "elapsed_min": 81.36,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:23:13+00:00",
+      "elapsed_min": 82.84,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:24:41+00:00",
+      "elapsed_min": 84.32,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:26:10+00:00",
+      "elapsed_min": 85.8,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:27:39+00:00",
+      "elapsed_min": 87.28,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:29:08+00:00",
+      "elapsed_min": 88.76,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:30:37+00:00",
+      "elapsed_min": 90.24,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:32:06+00:00",
+      "elapsed_min": 91.72,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:33:35+00:00",
+      "elapsed_min": 93.21,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:35:05+00:00",
+      "elapsed_min": 94.72,
+      "msg": "secured 2 file(s) (5 held)"
+    },
+    {
+      "utc": "2026-11-27T11:37:57+00:00",
+      "elapsed_min": 97.59,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:39:26+00:00",
+      "elapsed_min": 99.07,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:40:55+00:00",
+      "elapsed_min": 100.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:42:24+00:00",
+      "elapsed_min": 102.03,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:43:53+00:00",
+      "elapsed_min": 103.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:45:22+00:00",
+      "elapsed_min": 105.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:46:52+00:00",
+      "elapsed_min": 106.49,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:48:21+00:00",
+      "elapsed_min": 107.98,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:49:50+00:00",
+      "elapsed_min": 109.47,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:51:20+00:00",
+      "elapsed_min": 110.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:52:49+00:00",
+      "elapsed_min": 112.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:54:18+00:00",
+      "elapsed_min": 113.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:55:47+00:00",
+      "elapsed_min": 115.42,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:57:16+00:00",
+      "elapsed_min": 116.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T11:58:46+00:00",
+      "elapsed_min": 118.4,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:00:16+00:00",
+      "elapsed_min": 119.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:01:47+00:00",
+      "elapsed_min": 121.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:03:16+00:00",
+      "elapsed_min": 122.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:04:46+00:00",
+      "elapsed_min": 124.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:06:17+00:00",
+      "elapsed_min": 125.91,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:07:48+00:00",
+      "elapsed_min": 127.43,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:09:18+00:00",
+      "elapsed_min": 128.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:10:49+00:00",
+      "elapsed_min": 130.45,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:12:18+00:00",
+      "elapsed_min": 131.94,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:13:56+00:00",
+      "elapsed_min": 133.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:15:33+00:00",
+      "elapsed_min": 135.18,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:17:11+00:00",
+      "elapsed_min": 136.82,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:18:41+00:00",
+      "elapsed_min": 138.31,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:20:11+00:00",
+      "elapsed_min": 139.81,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:21:40+00:00",
+      "elapsed_min": 141.3,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:23:10+00:00",
+      "elapsed_min": 142.8,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:24:41+00:00",
+      "elapsed_min": 144.31,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:26:11+00:00",
+      "elapsed_min": 145.81,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:27:42+00:00",
+      "elapsed_min": 147.34,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:29:18+00:00",
+      "elapsed_min": 148.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:30:55+00:00",
+      "elapsed_min": 150.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:32:30+00:00",
+      "elapsed_min": 152.14,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:34:03+00:00",
+      "elapsed_min": 153.68,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:35:36+00:00",
+      "elapsed_min": 155.23,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:37:08+00:00",
+      "elapsed_min": 156.76,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:38:39+00:00",
+      "elapsed_min": 158.28,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:40:09+00:00",
+      "elapsed_min": 159.79,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:41:40+00:00",
+      "elapsed_min": 161.3,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:43:18+00:00",
+      "elapsed_min": 162.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:44:52+00:00",
+      "elapsed_min": 164.49,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:46:25+00:00",
+      "elapsed_min": 166.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:47:54+00:00",
+      "elapsed_min": 167.54,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:49:25+00:00",
+      "elapsed_min": 169.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:50:55+00:00",
+      "elapsed_min": 170.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:52:25+00:00",
+      "elapsed_min": 172.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:53:55+00:00",
+      "elapsed_min": 173.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:55:26+00:00",
+      "elapsed_min": 175.06,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:56:55+00:00",
+      "elapsed_min": 176.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T12:58:30+00:00",
+      "elapsed_min": 178.14,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:00:00+00:00",
+      "elapsed_min": 179.62,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:01:29+00:00",
+      "elapsed_min": 181.12,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:02:59+00:00",
+      "elapsed_min": 182.61,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:04:30+00:00",
+      "elapsed_min": 184.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:05:59+00:00",
+      "elapsed_min": 185.62,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:10:13+00:00",
+      "elapsed_min": 189.84,
+      "msg": "secured 3 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:11:46+00:00",
+      "elapsed_min": 191.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:13:16+00:00",
+      "elapsed_min": 192.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:14:47+00:00",
+      "elapsed_min": 194.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:16:18+00:00",
+      "elapsed_min": 195.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:17:48+00:00",
+      "elapsed_min": 197.43,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:19:18+00:00",
+      "elapsed_min": 198.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:20:48+00:00",
+      "elapsed_min": 200.43,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:22:17+00:00",
+      "elapsed_min": 201.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:23:47+00:00",
+      "elapsed_min": 203.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:25:17+00:00",
+      "elapsed_min": 204.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:26:48+00:00",
+      "elapsed_min": 206.43,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:28:18+00:00",
+      "elapsed_min": 207.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:29:48+00:00",
+      "elapsed_min": 209.42,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:31:19+00:00",
+      "elapsed_min": 210.95,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:32:57+00:00",
+      "elapsed_min": 212.57,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:34:29+00:00",
+      "elapsed_min": 214.11,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:36:08+00:00",
+      "elapsed_min": 215.76,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:37:50+00:00",
+      "elapsed_min": 217.47,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:39:35+00:00",
+      "elapsed_min": 219.22,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:41:16+00:00",
+      "elapsed_min": 220.89,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:43:03+00:00",
+      "elapsed_min": 222.68,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:44:43+00:00",
+      "elapsed_min": 224.35,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:46:19+00:00",
+      "elapsed_min": 225.94,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:47:48+00:00",
+      "elapsed_min": 227.43,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:49:17+00:00",
+      "elapsed_min": 228.91,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:50:46+00:00",
+      "elapsed_min": 230.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:52:15+00:00",
+      "elapsed_min": 231.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:53:43+00:00",
+      "elapsed_min": 233.35,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:55:12+00:00",
+      "elapsed_min": 234.83,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:56:41+00:00",
+      "elapsed_min": 236.32,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:58:10+00:00",
+      "elapsed_min": 237.8,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T13:59:39+00:00",
+      "elapsed_min": 239.28,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:01:08+00:00",
+      "elapsed_min": 240.76,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:02:37+00:00",
+      "elapsed_min": 242.25,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:04:06+00:00",
+      "elapsed_min": 243.74,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:05:35+00:00",
+      "elapsed_min": 245.22,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:07:04+00:00",
+      "elapsed_min": 246.7,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:08:33+00:00",
+      "elapsed_min": 248.19,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:10:02+00:00",
+      "elapsed_min": 249.67,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:11:31+00:00",
+      "elapsed_min": 251.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:13:01+00:00",
+      "elapsed_min": 252.65,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:14:32+00:00",
+      "elapsed_min": 254.16,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:16:02+00:00",
+      "elapsed_min": 255.66,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:17:31+00:00",
+      "elapsed_min": 257.14,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:19:00+00:00",
+      "elapsed_min": 258.62,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:20:29+00:00",
+      "elapsed_min": 260.11,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:21:57+00:00",
+      "elapsed_min": 261.59,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:23:27+00:00",
+      "elapsed_min": 263.08,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:24:56+00:00",
+      "elapsed_min": 264.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:26:25+00:00",
+      "elapsed_min": 266.04,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:27:54+00:00",
+      "elapsed_min": 267.52,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:29:22+00:00",
+      "elapsed_min": 269.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:30:52+00:00",
+      "elapsed_min": 270.49,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:32:20+00:00",
+      "elapsed_min": 271.97,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:33:49+00:00",
+      "elapsed_min": 273.45,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:35:18+00:00",
+      "elapsed_min": 274.94,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:36:49+00:00",
+      "elapsed_min": 276.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:39:38+00:00",
+      "elapsed_min": 279.26,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:41:07+00:00",
+      "elapsed_min": 280.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:42:36+00:00",
+      "elapsed_min": 282.23,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:44:05+00:00",
+      "elapsed_min": 283.71,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:45:34+00:00",
+      "elapsed_min": 285.2,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:47:04+00:00",
+      "elapsed_min": 286.7,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:48:44+00:00",
+      "elapsed_min": 288.37,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:50:25+00:00",
+      "elapsed_min": 290.04,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:51:55+00:00",
+      "elapsed_min": 291.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:53:24+00:00",
+      "elapsed_min": 293.03,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:54:53+00:00",
+      "elapsed_min": 294.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:56:22+00:00",
+      "elapsed_min": 296.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:57:51+00:00",
+      "elapsed_min": 297.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T14:59:25+00:00",
+      "elapsed_min": 299.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:01:07+00:00",
+      "elapsed_min": 300.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:02:43+00:00",
+      "elapsed_min": 302.34,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:05:40+00:00",
+      "elapsed_min": 305.29,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:07:09+00:00",
+      "elapsed_min": 306.78,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:08:38+00:00",
+      "elapsed_min": 308.27,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:10:07+00:00",
+      "elapsed_min": 309.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:11:37+00:00",
+      "elapsed_min": 311.24,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:13:06+00:00",
+      "elapsed_min": 312.72,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:14:34+00:00",
+      "elapsed_min": 314.2,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:16:03+00:00",
+      "elapsed_min": 315.69,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:17:32+00:00",
+      "elapsed_min": 317.17,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:19:02+00:00",
+      "elapsed_min": 318.66,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:20:31+00:00",
+      "elapsed_min": 320.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:22:01+00:00",
+      "elapsed_min": 321.64,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:23:29+00:00",
+      "elapsed_min": 323.12,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:24:58+00:00",
+      "elapsed_min": 324.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:26:28+00:00",
+      "elapsed_min": 326.09,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:27:57+00:00",
+      "elapsed_min": 327.58,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:29:26+00:00",
+      "elapsed_min": 329.06,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:30:55+00:00",
+      "elapsed_min": 330.54,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:32:24+00:00",
+      "elapsed_min": 332.02,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:33:53+00:00",
+      "elapsed_min": 333.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:35:22+00:00",
+      "elapsed_min": 334.99,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:36:51+00:00",
+      "elapsed_min": 336.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:38:20+00:00",
+      "elapsed_min": 337.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:39:49+00:00",
+      "elapsed_min": 339.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:41:18+00:00",
+      "elapsed_min": 340.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:42:47+00:00",
+      "elapsed_min": 342.42,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:44:16+00:00",
+      "elapsed_min": 343.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:45:45+00:00",
+      "elapsed_min": 345.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:47:14+00:00",
+      "elapsed_min": 346.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:48:43+00:00",
+      "elapsed_min": 348.35,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:50:12+00:00",
+      "elapsed_min": 349.83,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:51:41+00:00",
+      "elapsed_min": 351.32,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:53:10+00:00",
+      "elapsed_min": 352.8,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:54:39+00:00",
+      "elapsed_min": 354.28,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:56:08+00:00",
+      "elapsed_min": 355.77,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:57:37+00:00",
+      "elapsed_min": 357.25,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T15:59:06+00:00",
+      "elapsed_min": 358.74,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:00:35+00:00",
+      "elapsed_min": 360.22,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:02:04+00:00",
+      "elapsed_min": 361.7,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:03:33+00:00",
+      "elapsed_min": 363.19,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:05:03+00:00",
+      "elapsed_min": 364.67,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:06:32+00:00",
+      "elapsed_min": 366.17,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:08:01+00:00",
+      "elapsed_min": 367.65,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:13:31+00:00",
+      "elapsed_min": 373.14,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:15:01+00:00",
+      "elapsed_min": 374.64,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:16:30+00:00",
+      "elapsed_min": 376.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:17:59+00:00",
+      "elapsed_min": 377.61,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:19:30+00:00",
+      "elapsed_min": 379.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:20:59+00:00",
+      "elapsed_min": 380.61,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:22:28+00:00",
+      "elapsed_min": 382.1,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:23:58+00:00",
+      "elapsed_min": 383.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:25:27+00:00",
+      "elapsed_min": 385.08,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:26:56+00:00",
+      "elapsed_min": 386.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:28:25+00:00",
+      "elapsed_min": 388.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:29:54+00:00",
+      "elapsed_min": 389.53,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:31:23+00:00",
+      "elapsed_min": 391.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:32:52+00:00",
+      "elapsed_min": 392.5,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:34:21+00:00",
+      "elapsed_min": 393.98,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:35:51+00:00",
+      "elapsed_min": 395.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:37:20+00:00",
+      "elapsed_min": 396.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:38:49+00:00",
+      "elapsed_min": 398.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:40:18+00:00",
+      "elapsed_min": 399.93,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:41:47+00:00",
+      "elapsed_min": 401.42,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:43:16+00:00",
+      "elapsed_min": 402.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:44:45+00:00",
+      "elapsed_min": 404.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:46:14+00:00",
+      "elapsed_min": 405.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:47:44+00:00",
+      "elapsed_min": 407.36,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:49:13+00:00",
+      "elapsed_min": 408.84,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:50:42+00:00",
+      "elapsed_min": 410.33,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:52:13+00:00",
+      "elapsed_min": 411.84,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:53:42+00:00",
+      "elapsed_min": 413.32,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:55:11+00:00",
+      "elapsed_min": 414.81,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:56:42+00:00",
+      "elapsed_min": 416.32,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:58:12+00:00",
+      "elapsed_min": 417.83,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T16:59:41+00:00",
+      "elapsed_min": 419.31,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:01:10+00:00",
+      "elapsed_min": 420.8,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:02:40+00:00",
+      "elapsed_min": 422.29,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:04:09+00:00",
+      "elapsed_min": 423.77,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:05:38+00:00",
+      "elapsed_min": 425.26,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:07:07+00:00",
+      "elapsed_min": 426.74,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:08:36+00:00",
+      "elapsed_min": 428.23,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:10:05+00:00",
+      "elapsed_min": 429.71,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:11:34+00:00",
+      "elapsed_min": 431.19,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:13:03+00:00",
+      "elapsed_min": 432.68,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:14:32+00:00",
+      "elapsed_min": 434.17,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:16:02+00:00",
+      "elapsed_min": 435.66,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:17:31+00:00",
+      "elapsed_min": 437.14,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:19:00+00:00",
+      "elapsed_min": 438.63,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:20:29+00:00",
+      "elapsed_min": 440.12,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:21:58+00:00",
+      "elapsed_min": 441.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:23:29+00:00",
+      "elapsed_min": 443.12,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:24:58+00:00",
+      "elapsed_min": 444.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:26:28+00:00",
+      "elapsed_min": 446.09,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:27:57+00:00",
+      "elapsed_min": 447.57,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:29:26+00:00",
+      "elapsed_min": 449.06,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:30:55+00:00",
+      "elapsed_min": 450.54,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:32:24+00:00",
+      "elapsed_min": 452.03,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:33:53+00:00",
+      "elapsed_min": 453.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:35:22+00:00",
+      "elapsed_min": 455.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:36:51+00:00",
+      "elapsed_min": 456.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:38:20+00:00",
+      "elapsed_min": 457.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:41:09+00:00",
+      "elapsed_min": 460.78,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:42:38+00:00",
+      "elapsed_min": 462.27,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:44:07+00:00",
+      "elapsed_min": 463.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:45:36+00:00",
+      "elapsed_min": 465.23,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:47:06+00:00",
+      "elapsed_min": 466.72,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:48:35+00:00",
+      "elapsed_min": 468.21,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:50:04+00:00",
+      "elapsed_min": 469.69,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:51:33+00:00",
+      "elapsed_min": 471.19,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:53:02+00:00",
+      "elapsed_min": 472.67,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:54:32+00:00",
+      "elapsed_min": 474.16,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:56:01+00:00",
+      "elapsed_min": 475.64,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:57:30+00:00",
+      "elapsed_min": 477.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T17:58:59+00:00",
+      "elapsed_min": 478.61,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:00:28+00:00",
+      "elapsed_min": 480.1,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:01:58+00:00",
+      "elapsed_min": 481.59,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:03:29+00:00",
+      "elapsed_min": 483.11,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:04:58+00:00",
+      "elapsed_min": 484.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:06:27+00:00",
+      "elapsed_min": 486.08,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:07:56+00:00",
+      "elapsed_min": 487.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:09:25+00:00",
+      "elapsed_min": 489.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:10:54+00:00",
+      "elapsed_min": 490.53,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:12:23+00:00",
+      "elapsed_min": 492.02,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:13:52+00:00",
+      "elapsed_min": 493.5,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:15:22+00:00",
+      "elapsed_min": 495.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:16:51+00:00",
+      "elapsed_min": 496.49,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:18:21+00:00",
+      "elapsed_min": 497.98,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:19:50+00:00",
+      "elapsed_min": 499.47,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:21:19+00:00",
+      "elapsed_min": 500.95,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:22:48+00:00",
+      "elapsed_min": 502.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:24:18+00:00",
+      "elapsed_min": 503.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:25:47+00:00",
+      "elapsed_min": 505.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:27:16+00:00",
+      "elapsed_min": 506.89,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:28:45+00:00",
+      "elapsed_min": 508.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:30:14+00:00",
+      "elapsed_min": 509.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:31:43+00:00",
+      "elapsed_min": 511.35,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:33:12+00:00",
+      "elapsed_min": 512.83,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:34:41+00:00",
+      "elapsed_min": 514.32,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:36:10+00:00",
+      "elapsed_min": 515.8,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:37:39+00:00",
+      "elapsed_min": 517.29,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:39:09+00:00",
+      "elapsed_min": 518.77,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:40:38+00:00",
+      "elapsed_min": 520.26,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:42:07+00:00",
+      "elapsed_min": 521.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:43:36+00:00",
+      "elapsed_min": 523.23,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:45:05+00:00",
+      "elapsed_min": 524.72,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:46:34+00:00",
+      "elapsed_min": 526.2,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:48:04+00:00",
+      "elapsed_min": 527.69,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:49:33+00:00",
+      "elapsed_min": 529.18,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:51:02+00:00",
+      "elapsed_min": 530.66,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:52:31+00:00",
+      "elapsed_min": 532.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:54:00+00:00",
+      "elapsed_min": 533.63,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:55:29+00:00",
+      "elapsed_min": 535.12,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:56:58+00:00",
+      "elapsed_min": 536.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:58:28+00:00",
+      "elapsed_min": 538.09,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T18:59:57+00:00",
+      "elapsed_min": 539.58,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:01:26+00:00",
+      "elapsed_min": 541.06,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:02:55+00:00",
+      "elapsed_min": 542.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:04:24+00:00",
+      "elapsed_min": 544.03,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:05:53+00:00",
+      "elapsed_min": 545.52,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:07:22+00:00",
+      "elapsed_min": 547.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:08:51+00:00",
+      "elapsed_min": 548.49,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:10:20+00:00",
+      "elapsed_min": 549.97,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:13:09+00:00",
+      "elapsed_min": 552.78,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:14:38+00:00",
+      "elapsed_min": 554.27,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:16:07+00:00",
+      "elapsed_min": 555.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:17:36+00:00",
+      "elapsed_min": 557.24,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:19:06+00:00",
+      "elapsed_min": 558.73,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:20:35+00:00",
+      "elapsed_min": 560.21,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:22:04+00:00",
+      "elapsed_min": 561.7,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:23:33+00:00",
+      "elapsed_min": 563.19,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:25:02+00:00",
+      "elapsed_min": 564.67,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:26:31+00:00",
+      "elapsed_min": 566.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:28:00+00:00",
+      "elapsed_min": 567.64,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:29:30+00:00",
+      "elapsed_min": 569.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:30:59+00:00",
+      "elapsed_min": 570.61,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:32:28+00:00",
+      "elapsed_min": 572.1,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:33:58+00:00",
+      "elapsed_min": 573.59,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:35:27+00:00",
+      "elapsed_min": 575.08,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:36:56+00:00",
+      "elapsed_min": 576.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:38:25+00:00",
+      "elapsed_min": 578.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:39:54+00:00",
+      "elapsed_min": 579.53,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:41:23+00:00",
+      "elapsed_min": 581.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:42:52+00:00",
+      "elapsed_min": 582.5,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:44:21+00:00",
+      "elapsed_min": 583.98,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:45:50+00:00",
+      "elapsed_min": 585.47,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:47:19+00:00",
+      "elapsed_min": 586.95,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:48:48+00:00",
+      "elapsed_min": 588.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:50:18+00:00",
+      "elapsed_min": 589.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:51:47+00:00",
+      "elapsed_min": 591.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:53:16+00:00",
+      "elapsed_min": 592.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:54:45+00:00",
+      "elapsed_min": 594.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:56:14+00:00",
+      "elapsed_min": 595.86,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:57:43+00:00",
+      "elapsed_min": 597.35,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T19:59:12+00:00",
+      "elapsed_min": 598.83,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:00:42+00:00",
+      "elapsed_min": 600.33,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:02:11+00:00",
+      "elapsed_min": 601.81,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:03:40+00:00",
+      "elapsed_min": 603.3,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:03:43+00:00",
+      "elapsed_min": 603.35,
+      "msg": "polling ended: POLL_LIMIT \u2014 $10.96"
+    },
+    {
+      "utc": "2026-11-27T20:04:57+00:00",
+      "elapsed_min": 604.58,
+      "msg": "  manifest rc=0\n5 file(s) across 3 class(es) -> /workspace/manifest.json\n  final_required: 5 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-11-27T20:05:24+00:00",
+      "elapsed_min": 605.04,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:05:42+00:00",
+      "elapsed_min": 605.33,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:05:45+00:00",
+      "elapsed_min": 605.37,
+      "msg": "  PRODUCTS NOT SECURED: not all finished work is secured (driver done: False, pending: 0, final listing: verified)"
+    },
+    {
+      "utc": "2026-11-27T20:05:45+00:00",
+      "elapsed_min": 605.37,
+      "msg": "  RECORDED: PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK"
+    },
+    {
+      "utc": "2026-11-27T20:05:45+00:00",
+      "elapsed_min": 605.37,
+      "msg": "teardown gate: allowed=True failed=training_complete \u00b7 PRODUCTS_UNSECURED/ARTIFACT_LOSS_RISK"
+    },
+    {
+      "utc": "2026-11-27T20:05:45+00:00",
+      "elapsed_min": 605.37,
+      "msg": "deleting pod (gate passed after  with PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK)"
+    },
+    {
+      "utc": "2026-11-27T20:05:56+00:00",
+      "elapsed_min": 605.56,
+      "msg": "pod deleted \u2014 605.6 min, $11.00; provider confirms gone: True"
     }
   ],
   "stages": {
@@ -1054,5 +3064,78 @@
     "started_utc": "2026-11-27T10:03:17Z",
     "start_channel_closed": true,
     "confirmed_by": "descriptor_probe"
-  }
+  },
+  "secure_rounds": 394,
+  "secured_files": {
+    "files": 6,
+    "pending": 0,
+    "last_round_ok": true,
+    "last_round_files": 2
+  },
+  "terminal": "POLL_LIMIT",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "final_listing": {
+    "utc": "2026-11-27T20:05:45Z",
+    "withdrawn": [],
+    "files": 6,
+    "mismatched": [],
+    "missing_here": [],
+    "n_bad": 0,
+    "verified": true
+  },
+  "required_products_secured": {
+    "ok": false,
+    "why": "not all finished work is secured (driver done: False, pending: 0, final listing: verified)"
+  },
+  "artifact_loss_risk": {
+    "condition": "PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK",
+    "why": "not all finished work is secured (driver done: False, pending: 0, final listing: verified)",
+    "fetched": 0,
+    "note": "the bounded fetch ran and did not secure what this session owes off-pod; the pod is deleted anyway because an unbounded hold is a worse failure, and this record is what makes the risk visible"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": true,
+    "failed_check": "training_complete",
+    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (); the products of the stages that did not run do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['training_complete', 'evaluation_complete', 'required_products_secured'] are LOST.",
+    "checks": {
+      "training_complete": false,
+      "evaluation_complete": false,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": false,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 5,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 605.56,
+    "actual_usd": 11.001,
+    "extra_resources_usd": 0,
+    "authorized_usd": 64.46,
+    "within_authorization": true
+  },
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-11-27T20:05:56+00:00"
 }

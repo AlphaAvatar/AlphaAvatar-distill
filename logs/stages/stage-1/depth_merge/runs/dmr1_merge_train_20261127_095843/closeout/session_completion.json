@@ -1,0 +1,269 @@
+{
+ "schema": "aadistill.dmr1.session_completion/v1",
+ "run_id": "dmr1_merge_train_20261127_095843",
+ "kind": "dmr1_merge_train",
+ "arm": "depth_merge",
+ "scr": "/home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_095843",
+ "session": {
+  "schema": "aadistill.stage1.single_operator_budget.phase2_session_completion/v1",
+  "arm": "depth_merge",
+  "complete": false,
+  "finals": {
+   "depth_merge-s20260726": {
+    "problems": [
+     "depth_merge-s20260726: no final.json (no final weights secured)"
+    ],
+    "model_safetensors_sha256": null
+   },
+   "depth_merge-s20260801": {
+    "problems": [
+     "depth_merge-s20260801: no final.json (no final weights secured)"
+    ],
+    "model_safetensors_sha256": null
+   }
+  },
+  "sets": {
+   "depth_merge_s20260726/H-T": {
+    "complete": false,
+    "problems": {
+     "coverage": [
+      "fluid_reasoning_720__dev_v1: no generations",
+      "stage3_capability_846__math_verified: no generations",
+      "stage3_capability_846__gsm8k: no generations",
+      "stage3_capability_846__multihop: no generations",
+      "stage3_capability_846__rag: no generations",
+      "stage3_capability_846__answerability_paired: no generations",
+      "stage3_capability_846__safety_paired: no generations",
+      "stage3_capability_846__knowledge: no generations",
+      "stage3_capability_846__eval_behavior_v0: no generations",
+      "stage3_legacy_150__items: no generations"
+     ],
+     "formal_report": [
+      "not scorable: units without generations"
+     ],
+     "model_identity": [
+      "depth_merge_s20260726 has no verified final weights in /home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_095843/store/out"
+     ]
+    },
+    "binding": {
+     "target": "depth_merge_s20260726",
+     "arm": "depth_merge",
+     "seed": 20260726,
+     "unit": "depth_merge-s20260726",
+     "mode": "H-T",
+     "protocol_sha256": "2db89a2590b7f27434613656b0a39c1f3563098afbd9ac97454adbefab1744b0",
+     "weights_sha256": null
+    },
+    "protocol_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+   },
+   "depth_merge_s20260726/H-N": {
+    "complete": false,
+    "problems": {
+     "coverage": [
+      "fluid_reasoning_720__dev_v1: no generations",
+      "stage3_capability_846__math_verified: no generations",
+      "stage3_capability_846__gsm8k: no generations",
+      "stage3_capability_846__multihop: no generations",
+      "stage3_capability_846__rag: no generations",
+      "stage3_capability_846__answerability_paired: no generations",
+      "stage3_capability_846__safety_paired: no generations",
+      "stage3_capability_846__knowledge: no generations",
+      "stage3_capability_846__eval_behavior_v0: no generations",
+      "stage3_legacy_150__items: no generations"
+     ],
+     "formal_report": [
+      "not scorable: units without generations"
+     ],
+     "model_identity": [
+      "depth_merge_s20260726 has no verified final weights in /home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_095843/store/out"
+     ]
+    },
+    "binding": {
+     "target": "depth_merge_s20260726",
+     "arm": "depth_merge",
+     "seed": 20260726,
+     "unit": "depth_merge-s20260726",
+     "mode": "H-N",
+     "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+     "weights_sha256": null
+    },
+    "protocol_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+   },
+   "depth_merge_s20260801/H-T": {
+    "complete": false,
+    "problems": {
+     "coverage": [
+      "fluid_reasoning_720__dev_v1: no generations",
+      "stage3_capability_846__math_verified: no generations",
+      "stage3_capability_846__gsm8k: no generations",
+      "stage3_capability_846__multihop: no generations",
+      "stage3_capability_846__rag: no generations",
+      "stage3_capability_846__answerability_paired: no generations",
+      "stage3_capability_846__safety_paired: no generations",
+      "stage3_capability_846__knowledge: no generations",
+      "stage3_capability_846__eval_behavior_v0: no generations",
+      "stage3_legacy_150__items: no generations"
+     ],
+     "formal_report": [
+      "not scorable: units without generations"
+     ],
+     "model_identity": [
+      "depth_merge_s20260801 has no verified final weights in /home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_095843/store/out"
+     ]
+    },
+    "binding": {
+     "target": "depth_merge_s20260801",
+     "arm": "depth_merge",
+     "seed": 20260801,
+     "unit": "depth_merge-s20260801",
+     "mode": "H-T",
+     "protocol_sha256": "2db89a2590b7f27434613656b0a39c1f3563098afbd9ac97454adbefab1744b0",
+     "weights_sha256": null
+    },
+    "protocol_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+   },
+   "depth_merge_s20260801/H-N": {
+    "complete": false,
+    "problems": {
+     "coverage": [
+      "fluid_reasoning_720__dev_v1: no generations",
+      "stage3_capability_846__math_verified: no generations",
+      "stage3_capability_846__gsm8k: no generations",
+      "stage3_capability_846__multihop: no generations",
+      "stage3_capability_846__rag: no generations",
+      "stage3_capability_846__answerability_paired: no generations",
+      "stage3_capability_846__safety_paired: no generations",
+      "stage3_capability_846__knowledge: no generations",
+      "stage3_capability_846__eval_behavior_v0: no generations",
+      "stage3_legacy_150__items: no generations"
+     ],
+     "formal_report": [
+      "not scorable: units without generations"
+     ],
+     "model_identity": [
+      "depth_merge_s20260801 has no verified final weights in /home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_095843/store/out"
+     ]
+    },
+    "binding": {
+     "target": "depth_merge_s20260801",
+     "arm": "depth_merge",
+     "seed": 20260801,
+     "unit": "depth_merge-s20260801",
+     "mode": "H-N",
+     "protocol_sha256": "af020e83f6d9dfc8c3e2bd085d8c9dadcf57bb2618baa2c55bf6c8afa60c6dc6",
+     "weights_sha256": null
+    },
+    "protocol_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+   }
+  },
+  "modes": [],
+  "n_sets": 4,
+  "n_complete": 0
+ },
+ "final_placement": "relay",
+ "final_retention": {
+  "status": "INCOMPLETE",
+  "missing": {
+   "depth_merge-s20260726/final": "no verified final record with its files in the secured evidence",
+   "depth_merge-s20260801/final": "no verified final record with its files in the secured evidence"
+  }
+ },
+ "status": "INCOMPLETE",
+ "unfinished": {
+  "finals": {
+   "depth_merge-s20260726": [
+    "depth_merge-s20260726: no final.json (no final weights secured)"
+   ],
+   "depth_merge-s20260801": [
+    "depth_merge-s20260801: no final.json (no final weights secured)"
+   ]
+  },
+  "sets": {
+   "depth_merge_s20260726/H-T": {
+    "coverage": [
+     "fluid_reasoning_720__dev_v1: no generations",
+     "stage3_capability_846__math_verified: no generations",
+     "stage3_capability_846__gsm8k: no generations",
+     "stage3_capability_846__multihop: no generations",
+     "stage3_capability_846__rag: no generations",
+     "stage3_capability_846__answerability_paired: no generations",
+     "stage3_capability_846__safety_paired: no generations",
+     "stage3_capability_846__knowledge: no generations",
+     "stage3_capability_846__eval_behavior_v0: no generations",
+     "stage3_legacy_150__items: no generations"
+    ],
+    "formal_report": [
+     "not scorable: units without generations"
+    ],
+    "model_identity": [
+     "depth_merge_s20260726 has no verified final weights in /home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_095843/store/out"
+    ]
+   },
+   "depth_merge_s20260726/H-N": {
+    "coverage": [
+     "fluid_reasoning_720__dev_v1: no generations",
+     "stage3_capability_846__math_verified: no generations",
+     "stage3_capability_846__gsm8k: no generations",
+     "stage3_capability_846__multihop: no generations",
+     "stage3_capability_846__rag: no generations",
+     "stage3_capability_846__answerability_paired: no generations",
+     "stage3_capability_846__safety_paired: no generations",
+     "stage3_capability_846__knowledge: no generations",
+     "stage3_capability_846__eval_behavior_v0: no generations",
+     "stage3_legacy_150__items: no generations"
+    ],
+    "formal_report": [
+     "not scorable: units without generations"
+    ],
+    "model_identity": [
+     "depth_merge_s20260726 has no verified final weights in /home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_095843/store/out"
+    ]
+   },
+   "depth_merge_s20260801/H-T": {
+    "coverage": [
+     "fluid_reasoning_720__dev_v1: no generations",
+     "stage3_capability_846__math_verified: no generations",
+     "stage3_capability_846__gsm8k: no generations",
+     "stage3_capability_846__multihop: no generations",
+     "stage3_capability_846__rag: no generations",
+     "stage3_capability_846__answerability_paired: no generations",
+     "stage3_capability_846__safety_paired: no generations",
+     "stage3_capability_846__knowledge: no generations",
+     "stage3_capability_846__eval_behavior_v0: no generations",
+     "stage3_legacy_150__items: no generations"
+    ],
+    "formal_report": [
+     "not scorable: units without generations"
+    ],
+    "model_identity": [
+     "depth_merge_s20260801 has no verified final weights in /home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_095843/store/out"
+    ]
+   },
+   "depth_merge_s20260801/H-N": {
+    "coverage": [
+     "fluid_reasoning_720__dev_v1: no generations",
+     "stage3_capability_846__math_verified: no generations",
+     "stage3_capability_846__gsm8k: no generations",
+     "stage3_capability_846__multihop: no generations",
+     "stage3_capability_846__rag: no generations",
+     "stage3_capability_846__answerability_paired: no generations",
+     "stage3_capability_846__safety_paired: no generations",
+     "stage3_capability_846__knowledge: no generations",
+     "stage3_capability_846__eval_behavior_v0: no generations",
+     "stage3_legacy_150__items: no generations"
+    ],
+    "formal_report": [
+     "not scorable: units without generations"
+    ],
+    "model_identity": [
+     "depth_merge_s20260801 has no verified final weights in /home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_095843/store/out"
+    ]
+   }
+  },
+  "final_retention": {
+   "depth_merge-s20260726/final": "no verified final record with its files in the secured evidence",
+   "depth_merge-s20260801/final": "no verified final record with its files in the secured evidence"
+  }
+ },
+ "checked_utc": "2026-11-27T20:05:58Z"
+}

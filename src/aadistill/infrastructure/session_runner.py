@@ -30,6 +30,7 @@ Four budget layers, in the order they are trusted, unchanged:
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import shutil
@@ -190,6 +191,31 @@ def streams_at_risk(manifest: ArtifactManifest | None,
         return (tuple(manifest.completion_marker_failures)
                 + tuple(manifest.still_being_written))
     return () if not tuple(declared_streams) else None
+
+
+def poll_lifetime(args, hard_terminate_minutes: float) -> tuple[bool, str]:
+    """How long the launcher polls (`--poll-limit-min`), against how long the session's pod may run.
+
+    The poll loop ends at its limit and the launcher then collects and tears the pod down, whatever the driver is
+    doing. A limit shorter than the plan's hard bound therefore ends a session the plan funds: a launcher's 600 min
+    default once ended a training session at 605 of its 3,420 planned minutes, one seed mid-training.
+    So the limit is derived from the plan, not inherited: ``None`` resolves (on ``args``) to the hard bound plus two
+    poll intervals -- the watchdog ends the pod at the hard bound, and the next poll sees it gone. A value given
+    below that is refused before any provider resource exists. Polling past the hard bound costs nothing: the
+    pod is gone by then, and the loop ends on the first poll that sees it.
+    """
+    step = float(getattr(args, "poll_seconds", 60.0) or 60.0) / 60.0
+    floor = float(hard_terminate_minutes) + 2 * step
+    given = getattr(args, "poll_limit_min", None)
+    if given is None:
+        args.poll_limit_min = math.ceil(floor * 10) / 10
+        return True, (f"polling {args.poll_limit_min:.1f} min: the plan's {hard_terminate_minutes:.1f} min hard bound "
+                      f"plus two {step * 60:.0f} s polls (derived)")
+    if float(given) < floor:
+        return False, (f"--poll-limit-min {float(given):.1f} ends polling before the pod's {hard_terminate_minutes:.1f} "
+                       f"min hard bound (+ two polls = {floor:.1f}): the launcher would tear the session down while its "
+                       "driver still runs. Leave it unset to derive it from the plan.")
+    return True, f"polling {float(given):.1f} min against a {hard_terminate_minutes:.1f} min hard bound"
 
 
 #: What a poll saw, as distinct from WHY. `not state.billing` is one condition
@@ -445,6 +471,13 @@ class SessionRunner:
             self.say(f"ABORT: {type(exc).__name__}: {exc}")
             return False
         self.ev["budget_plan"] = self.plan.as_dict()
+        ok, why = poll_lifetime(self.a, self.plan.hard_terminate_minutes)
+        self.ev["poll_lifetime"] = {"ok": ok, "message": why,
+                                    "poll_limit_min": getattr(self.a, "poll_limit_min", None)}
+        if not ok:
+            self.say(f"ABORT at $0: {why}")
+            return False
+        self.say(why)
         try:
             self.auth.require_within_cap(self.plan.hard_terminate_usd,
                                          what="planned hard threshold")
