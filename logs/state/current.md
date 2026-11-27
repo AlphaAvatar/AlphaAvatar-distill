@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-27 (UTC), DMR1 variant 1 authorized and executing: the build COMPLETE, the training session running on one L40S (0 volumes); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-27 (UTC), DMR1 variant 1 authorized and executing: the build COMPLETE, training attempt 2 running on one L40S (0 volumes); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,12 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**DMR1 VARIANT 1 (ALPHA-MERGED INIT AT SOB1'S DEPTH STRUCTURE, THEN SOB1'S DEPTH RECOVERY): AUTHORIZED 2026-11-27 AND EXECUTING -- ONE L40S BILLING (TRAINING SESSION `dmr1_merge_train_20261127_095843`, tmux `dmr1t`).**
+**DMR1 VARIANT 1 (ALPHA-MERGED INIT AT SOB1'S DEPTH STRUCTURE, THEN SOB1'S DEPTH RECOVERY): AUTHORIZED 2026-11-27 AND EXECUTING -- ONE L40S BILLING (TRAINING ATTEMPT 2 `dmr1_merge_train_20261127_201532`, tmux `dmr1t`).**
+- Training attempt 1 (`dmr1_merge_train_20261127_095843`, $11.2083) was torn down by its own launcher at 605.6 of
+  3,420 planned minutes (the shared launcher's 600 min poll default), seed 20260726 at step 7,310. Repaired in
+  core (`session_runner.poll_lifetime`: derived from the plan's hard bound, a shorter one refused at $0). Attempt 2
+  resumes seed 1 from its verified step-6,624 save point, then seed 2: cap $51.97, expected $22.86, inside the
+  kind's $53.2517 remainder. The maintainer's seed-1 stop rule (`plans/seed1_stop_rule.json`) applies to it.
 - Authorization (maintainer, 2026-11-27): `dmr1_merge_build` $5.43 + `dmr1_merge_train` $64.46, each + $1.00 teardown
   reserve ($71.89; grants `logs/budget/approvals/dmr1_dmr1_merge_{build,train}_grant.json`). V2 / V3 and their GPU
   engine validation are NOT authorized.
