@@ -12,10 +12,13 @@ both modes, every set bound to that seed's final weights.
 It is SOB1's phase-2 state machine (`single_operator_budget.train_driver.run_unit`, on TPI1's durability helpers),
 bound to the arm's design (`depth_merge.common.bind_for`), with two additions:
 
-* **a recurrent arm's initialization** (depth_loop, depth_loop_hidden): `stage_init` fetches the BASE's verified relay
+* **a recurrent arm's initialization** (depth_loop_kept, depth_loop_merged): `stage_init` fetches the BASE's verified relay
   copy (its weights and config, re-hashed), then writes the plan's recurrent config text over the config and checks its
   sha256 -- so the trainer loads `RecurrentDepthForCausalLM` (36 logical layers over the 16 blocks) and the weights are
   the base's byte for byte. Training, its save points and its final carry that config; nothing else changes;
+* **the engine validation** (a plan with ``engine_validation.required``: the first V2 session): after the contract and
+  before any training, `engine_validation` stages the first unit's init and runs `depth_recurrence.engine_check`; a
+  FAIL ends the session (RUN_FAILED) with nothing trained, a PASS already in the taken-over evidence is not repeated;
 * **the evaluation engine** loads the recurrent architecture through the out-of-tree vLLM model: for a recurrent
   arm this driver puts ``src`` and the plugin directory on the runners' ``PYTHONPATH``
   (`shared.rollout.vllm_plugin_path`) before any of them start; a stock Qwen3 arm (depth_merge) keeps SOB1's runner
@@ -74,13 +77,39 @@ def write_recurrent_config(u: dict, student_path: Path) -> dict:
 
 
 def stage_init(u: dict, dur: dict) -> dict:
-    """A unit's initialization at its student path: the base's relay copy (`TD.fetch_init`), then, for a recurrent
-    unit, its config (`write_recurrent_config`)."""
+    """A unit's initialization at its student path: the base's relay copy (`TD.fetch_init`) unless the path already
+    holds the plan's weights (staged by `engine_validation`), then, for a recurrent unit, its config
+    (`write_recurrent_config`)."""
+    from stages.teacher_parent_initialization import relay as R
     from stages.teacher_parent_initialization import train_driver as TD
-    got = TD.fetch_init(u, dur)
+    w = Path(u["config"]["student_path"]) / "model.safetensors"
+    want = u["config"]["lineage"]["initialization"]["model_safetensors_sha256"]
+    if w.is_file() and R.sha256_file(w) == want:
+        got = {"path": str(w.parent), "from": "already staged on this pod, re-hashed", "utc": TD.utc()}
+    else:
+        got = TD.fetch_init(u, dur)
     if "recurrent_config" in u["initialization"]:
         got["recurrent_config"] = write_recurrent_config(u, Path(u["config"]["student_path"]))
     return got
+
+
+def engine_validation(u: dict, plan: dict, out: Path, dur: dict, vllm_python: str, mark) -> dict:
+    """The design's engine check before any training step (`depth_recurrence.engine_check`): a PASS already in the
+    evidence (a takeover) is kept and not repeated; otherwise the first unit's init is staged and the check runs; a
+    FAIL raises, so nothing trains."""
+    from stages.depth_recurrence import engine_check as EC
+    from stages.teacher_parent_initialization import train_driver as TD
+    p = Path(out) / "engine_check" / "engine_check.json"
+    if p.is_file() and TD.read_json(p).get("status") == "PASS":
+        return {"status": "PASS", "record": str(p), "reused": True}
+    mark("ENGINE_CHECK_START")
+    stage_init(u, dur)
+    doc = EC.run(plan, Path(u["config"]["student_path"]), Path(out) / "engine_check", vllm_python)
+    if doc["status"] != "PASS":
+        mark("ENGINE_CHECK_FAILED")
+        raise DriverError(f"the engine validation failed, nothing was trained: {doc['checks']}")
+    mark("ENGINE_CHECK_PASSED")
+    return {"status": "PASS", "record": str(p), "checks": doc["checks"]}
 
 
 def main(argv=None) -> int:
@@ -155,6 +184,9 @@ def main(argv=None) -> int:
         record["tokenizer"] = TP.stage_tokenizers(snap)
         save()
         mark("CONTRACT_OK")
+        if (plan.get("engine_validation") or {}).get("required"):
+            record["engine_validation"] = engine_validation(us[0], plan, out, dur, a.vllm_python, mark)
+            save()
         for u in us:
             SD.run_unit(u, out=out, record=record, dur=dur, prefix_root=prefix_root, snap=snap, a=a, attempt=attempt,
                         mark=mark, save=save, plan=plan, stage_init=stage_init)

@@ -242,3 +242,93 @@ def test_validation_releases_each_micro_batchs_targets_before_the_next(tmp_path,
     ev = tr.evaluate(3)
     assert ev["val_hidden"] > 0 and len(made) == 3
     assert seen == [0, 0, 0] and sum(_alive(m) for m in made) == 0
+
+
+# ---- the eval-only state probe ----------------------------------------------------------------------------------------
+
+def probe_cfg(pairs=None, blocks=2, row_stride=3):
+    return {"pairs": pairs or [[p, p] for p in range(len(SCHED))], "blocks": blocks, "row_stride": row_stride}
+
+
+class _Record:
+    """Duck-typed hand-over that keeps each logical layer's raw output (for the test's own arithmetic)."""
+
+    def __init__(self, layers):
+        self.targets = {p: None for p in layers}
+        self.got = {}
+
+    def add(self, layer, hidden):
+        self.got[layer] = hidden.detach().reshape(-1, hidden.shape[-1]).double()
+
+
+def test_the_state_probe_reports_each_layers_error_norms_and_cosine_at_fixed_kd_rows(tmp_path):
+    from aadistill.training.train import prediction_mask
+    blocks = toy_blocks()
+    tr = Trainer(cfg(tmp_path, state_probe=probe_cfg()), student(), blocks, val_blocks=blocks, teacher=teacher(),
+                 device="cpu")
+    ev = tr.evaluate(2)
+    sp = ev["state_probe"]
+    assert sp["probe"] == HS.STATE_PROBE_MEASURES and sp["blocks"] == 2 and sp["row_stride"] == 3
+    #: the same numbers from the plain formulas, sequence by sequence
+    sums, n_rows = {}, 0
+    for i in range(2):
+        ids, mask = tr.val_ids[i:i + 1], tr.val_mask[i:i + 1]
+        content = None if tr.val_content is None else tr.val_content[i:i + 1]
+        kd = prediction_mask(mask, "assistant", content, input_ids=ids, think_ids=tr.think_ids).bool()
+        rows = HS.flat_rows(kd)[::3]
+        with torch.no_grad(), HS.capture_layer_outputs(tr.teacher, range(4), rows) as t_got:
+            tr.teacher.get_decoder()(input_ids=ids, use_cache=False)
+        rec = _Record(range(4))
+        with torch.no_grad():
+            tr.student.get_decoder()(input_ids=ids, use_cache=False, hidden_supervision=rec)
+        for p in range(4):
+            s, h = rec.got[p][rows], t_got[p].double()
+            vals = [(((s - h) ** 2).sum(-1) / (h * h).sum(-1)).sum(), s.norm(dim=-1).sum(), h.norm(dim=-1).sum(),
+                    ((s * h).sum(-1) / (s.norm(dim=-1) * h.norm(dim=-1))).sum()]
+            acc = sums.setdefault(p, [0.0] * 4)
+            for j, v in enumerate(vals):
+                acc[j] += float(v)
+        n_rows += int(rows.numel())
+    assert sp["rows"] == n_rows > 0
+    for p in range(4):
+        got = sp["by_layer"][str(p)]
+        for j, f in enumerate(HS.StateProbe.FIELDS):
+            assert got[f] == pytest.approx(sums[p][j] / n_rows, rel=1e-5, abs=1e-6), (p, f)
+    assert sp["by_layer"]["0"]["cosine"] <= 1.0 + 1e-9
+
+
+def test_the_state_probe_changes_no_training_step_and_no_loss(tmp_path):
+    blocks = toy_blocks()
+    runs = {}
+    for name, extra in (("plain", {}), ("probe", {"state_probe": probe_cfg()})):
+        tr = Trainer(cfg(tmp_path / name, **extra), student(), blocks, val_blocks=blocks, teacher=teacher(),
+                     device="cpu")
+        a = tr.step_once()
+        ev = tr.evaluate(2)
+        rng = torch.get_rng_state().clone()
+        b = tr.step_once()
+        runs[name] = (a, b, ev, rng, {n: p.detach().clone() for n, p in tr.student.named_parameters()})
+    (a0, b0, e0, r0, w0), (a1, b1, e1, r1, w1) = runs["plain"], runs["probe"]
+    for k in ("loss", "ce", "kd", "grad_norm"):
+        assert a0[k] == a1[k] and b0[k] == b1[k], k
+    assert e0["val_ce"] == e1["val_ce"] and e0["val_kd"] == e1["val_kd"]
+    assert "state_probe" not in e0 and "state_probe" in e1 and "hidden" not in a1
+    assert torch.equal(r0, r1)                                      #: the probe draws no random numbers
+    assert all(torch.equal(w0[n], w1[n]) for n in w0)
+
+
+def test_state_probe_configs_that_cannot_be_computed_are_refused(tmp_path):
+    from aadistill.training.train import validate_train_config
+    with pytest.raises(ValueError, match="unknown"):
+        validate_train_config(cfg(tmp_path, state_probe={**probe_cfg(), "weight": 1.0}))
+    with pytest.raises(ValueError, match="blocks"):
+        validate_train_config(cfg(tmp_path, state_probe=probe_cfg(blocks=0)))
+    with pytest.raises(ValueError, match="kd_support"):
+        validate_train_config(toy_cfg(tmp_path, loss={"ce_weight": 0.25, "kd_weight": 1.0, "kd_scope": "assistant"},
+                                      state_probe=probe_cfg()))
+    with pytest.raises(ValueError, match="supports_hidden_supervision"):
+        Trainer(cfg(tmp_path, state_probe=probe_cfg(pairs=[[0, 0]])), teacher(5, layers=2), toy_blocks(),
+                teacher=teacher(), device="cpu")
+    with pytest.raises(ValueError, match="outside"):
+        Trainer(cfg(tmp_path, state_probe=probe_cfg(pairs=[[0, 9]])), student(), toy_blocks(), teacher=teacher(),
+                device="cpu")

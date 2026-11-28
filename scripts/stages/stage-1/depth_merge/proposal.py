@@ -7,8 +7,10 @@
 * ``logs/stages/stage-1/depth_merge/plans/proposal_dmr1_merge_build.json`` and ``..._dmr1_merge_train.json``:
   variant 1's build session and its training session, each a proposal its own grant would bind (status
   ``proposed``); nothing is granted or issued.
-* ``logs/stages/stage-6/depth_recurrence/plans/estimates.json``: variants 2 and 3, estimated on the real 36-logical-
-  layer execution, NOT proposed this round (no paid authorization of either).
+* ``logs/stages/stage-1/depth_recurrence/plans/proposal_dmr1_loop_train.json`` (2026-11-28, the revised variant 2):
+  the kind ``dmr1_loop_train``, one session per arm (depth_loop_kept with the engine validation first, then
+  depth_loop_merged), one unit each; status ``proposed``, nothing granted. It replaces the 2026-11-26
+  ``estimates.json`` (variants 2 and 3 x two seeds, never proposed; in git history).
 
 Every hour figure is an estimate with its basis; ``bound`` is what a hard cap covers. The bases are measured, not
 assumed: SOB1's depth session (`sob1_train_depth_only_20261122_223829`: 4.83 s / optimizer step, 805-806 min per
@@ -45,6 +47,12 @@ GIB = 2 ** 30
 POSITION = {"read_utc": "2026-11-26T11:48:05Z", "committed_usd": 1086.2713, "project_cap_usd": 1161.06,
             "project_remaining_usd": 74.7887, "balance_usd": 123.7283, "pods": 0, "volumes": 0,
             "spend_per_hour": 0.0, "relay_headroom_gib": [35.24, 35.28], "dev_box_free_gib": 23}
+#: the 2026-11-28 position the revised variant 2 is priced against (read live at 10:25Z; read again at issue and launch)
+POSITION_V2 = {"read_utc": "2026-11-28T10:25:11Z", "committed_usd": 1113.5131, "project_cap_usd": 1161.06,
+               "project_remaining_usd": 47.5469, "balance_usd": 95.3743, "pods": 0, "volumes": 0,
+               "spend_per_hour": 0.0, "relay_headroom_gib": 27.219, "relay_used_gib": 60.36, "dev_box_free_gib": 6.85}
+#: the engine validation's hours (`depth_recurrence.engine_check`: two vLLM engines and two HF loads on a 2B model)
+ENGINE_CHECK_HOURS = {"expected": 0.4, "bound": 1.0}
 TEARDOWN_RESERVE = 1.00
 #: measured bases (module docstring)
 DEPTH = {"s_per_step": 4.83, "s_per_step_bound": 7.241, "steps": 9701, "eval_h_per_unit": 1.22,
@@ -77,8 +85,10 @@ def transfers(sizes: dict, up: float = 120e6, down: float = 2.6e6, margin: float
                                      "hours_expected": round(2 * sizes["save_point"] / 120e6 / 3600, 3)}}
 
 
-def train_session(work: float, decode: float, overhead: float = 1.0) -> dict:
-    """One arm's two seeds: training, evaluation and copies, expected and bound (driver hours), its cost and cap."""
+def train_session(work: float, decode: float, overhead: float = 1.0, seeds: int = 2,
+                  extra_hours: dict | None = None) -> dict:
+    """One arm's ``seeds`` units: training, evaluation and copies (plus ``extra_hours`` -- an engine validation --
+    before them), expected and bound (driver hours), its cost and cap."""
     from stages.depth_merge import session as S
     SP = sob1_proposal()
     cm = cost_model()
@@ -90,17 +100,19 @@ def train_session(work: float, decode: float, overhead: float = 1.0) -> dict:
                 "hours_expected": round(sps * DEPTH["steps"] / 3600, 2),
                 "hours_bound": round(spb * DEPTH["steps"] / 3600, 2)}
     ev = {"expected": round(DEPTH["eval_h_per_unit"] * decode, 2), "bound": round(DEPTH["eval_h_per_unit_bound"] * decode, 2)}
-    copies_e = tr["init_fetch"]["hours_expected"] + 2 * (tr["final_copy_per_seed"]["hours_expected"]
-                                                         + tr["last_save_point_copy"]["hours_expected"])
-    copies_b = tr["init_fetch"]["hours_bound"] + 2 * (tr["final_copy_per_seed"]["hours_bound"]
-                                                      + tr["last_save_point_copy"]["hours_bound"])
-    drv_e = 2 * (per_seed["hours_expected"] + ev["expected"]) + copies_e
-    drv_b = 2 * (per_seed["hours_bound"] + ev["bound"]) + copies_b
+    copies_e = tr["init_fetch"]["hours_expected"] + seeds * (tr["final_copy_per_seed"]["hours_expected"]
+                                                             + tr["last_save_point_copy"]["hours_expected"])
+    copies_b = tr["init_fetch"]["hours_bound"] + seeds * (tr["final_copy_per_seed"]["hours_bound"]
+                                                          + tr["last_save_point_copy"]["hours_bound"])
+    x = extra_hours or {"expected": 0.0, "bound": 0.0}
+    drv_e = seeds * (per_seed["hours_expected"] + ev["expected"]) + copies_e + x["expected"]
+    drv_b = seeds * (per_seed["hours_bound"] + ev["bound"]) + copies_b + x["bound"]
     rate = SP.rate(cm)
     expected = round((drv_e + (25 + 5 + 10) / 60) * rate, 2)
     cap = SP.hard_cap(drv_b * 60, cm)
-    return {"units": 2, "training_per_seed": per_seed, "post_recovery_evaluation_hours_per_unit": ev,
-            "copies": tr, "driver_hours_expected": round(drv_e, 2), "driver_hours_bound": round(drv_b, 2),
+    return {"units": seeds, "training_per_seed": per_seed, "post_recovery_evaluation_hours_per_unit": ev,
+            "copies": tr, **({"engine_validation_hours": x} if extra_hours else {}),
+            "driver_hours_expected": round(drv_e, 2), "driver_hours_bound": round(drv_b, 2),
             "driver_minutes": round(drv_b * 60, 1), "unit_deadline_hours": round(per_seed["hours_bound"], 1),
             "expected_usd": expected, "hard_cap": cap, "per_session_hard_cap_usd": cap["usd"]}
 
@@ -155,26 +167,69 @@ def documents() -> dict[Path, dict]:
     depth_terms = sob1["kinds"]["sob1_train"]["per_arm"]["depth_only"]
     t["sob1_depth_proposal_terms"] = depth_terms
     t["measured_sob1_depth_session"] = {"minutes": DEPTH["session_minutes_measured"], "usd": DEPTH["session_usd_measured"]}
-    loop = train_session(LOOP_WORK, LOOP_DECODE)
-    hidden = train_session(LOOP_WORK, LOOP_DECODE, HIDDEN_OVERHEAD)
     total_v1 = b["per_session_hard_cap_usd"] + t["per_session_hard_cap_usd"] + 2 * TEARDOWN_RESERVE
-    est = {"schema": SCHEMA.replace("proposal", "estimates"), "status": "estimate, NOT proposed this round",
-           "recorded_utc": "2026-11-26", "position": POSITION,
-           "rule": "work per token 1.8x the depth arm's (teacher 36 + 4 x 36 student logical layers vs 36 + 4 x 16), "
-                   "decode 2.25x; the hidden-state term 5% on top (proposal.py docstring); not measured",
-           "arms": {"depth_loop": loop, "depth_loop_hidden": hidden},
-           "memory_gib": memory_estimates(),
-           "relay": {"rotation_peak_gib": round((2 * S_bytes("save_point") + S_bytes("final_fp32")) / GIB, 2),
-                     "headroom_read_gib": POSITION["relay_headroom_gib"],
-                     "finals_per_arm_gib": round(2 * S_bytes("final_fp32") / GIB, 2)},
-           "needs": {"project_cap": "above the $1,161.06 cap after variant 1: each loop session's cap plus its $1.00 "
-                                    "reserve, cumulatively", "grant": "a grant per kind",
-                     "engine_validation": "the recurrent vLLM model's agreement with the HF reference on a GPU first "
-                                          "(REVIEW section 8)"}}
     return {DC.LOGS / "plans/proposal_dmr1_merge_build.json": proposal("dmr1_merge_build", b),
             DC.LOGS / "plans/proposal_dmr1_merge_train.json": {**proposal("dmr1_merge_train", t, per_arm="depth_merge"),
                                                                "variant_1_total_with_reserves_usd": round(total_v1, 2)},
-            DC.STAGE6_LOGS / "plans/estimates.json": est}
+            DC.RECURRENCE_LOGS / "plans/proposal_dmr1_loop_train.json": proposal_v2()}
+
+
+def proposal_v2() -> dict:
+    """The revised variant 2's kind (module docstring): one session per arm, one unit each, the engine validation in
+    the first; the money it needs against the 2026-11-28 position, and what that position does not cover."""
+    import hashlib
+    kept = train_session(LOOP_WORK, LOOP_DECODE, seeds=1, extra_hours=ENGINE_CHECK_HOURS)
+    merged = train_session(LOOP_WORK, LOOP_DECODE, seeds=1)
+    arms = {"depth_loop_kept": kept, "depth_loop_merged": merged}
+    blocks = {a: {k: v[k] for k in ("driver_minutes", "expected_usd", "per_session_hard_cap_usd", "unit_deadline_hours")}
+              for a, v in arms.items()}
+    caps = sum(v["per_session_hard_cap_usd"] for v in arms.values())
+    ceiling = round(caps, 2)
+    need = round(ceiling + 2 * TEARDOWN_RESERVE, 2)
+    expected = round(sum(v["expected_usd"] for v in arms.values()), 2)
+    pos = POSITION_V2
+    return {"schema": SCHEMA, "study": "DMR1-R", "status": "proposed", "kind": "dmr1_loop_train",
+            "recorded_utc": "2026-11-28",
+            "design_sha256": hashlib.sha256(DC.RECURRENCE_DESIGN.read_bytes()).hexdigest(),
+            "scope": "DMR1 variant 2 as revised 2026-11-28: depth_loop_kept and depth_loop_merged, seed 20260726 each, "
+                     "one session per arm; the first runs the engine validation before training",
+            "ceiling_usd": ceiling, "teardown_reserve_usd": TEARDOWN_RESERVE,
+            "per_session_hard_cap_usd": max(v["per_session_hard_cap_usd"] for v in arms.values()),
+            "per_session_rule": "each session's own cap is its arm's (kinds.dmr1_loop_train.per_arm); this field is "
+                                "the larger, which no single session may exceed; the ceiling is both sessions'",
+            "kinds": {"dmr1_loop_train": {"per_arm": blocks}},
+            "gpus": {"NVIDIA L40S": 1.11}, "gpu_count_max": 1,
+            "hardware": "one NVIDIA L40S, secure cloud, at most $1.11/h, 150 GB container disk, no network volume",
+            "usd_per_hour_all_in": round(sob1_proposal().rate(cost_model()), 4),
+            "terms": arms, "expected_usd_total": expected, "hard_caps_total_usd": ceiling,
+            "needed_with_reserves_usd": need,
+            "project_cumulative_cap_usd": pos["project_cap_usd"], "position_at_proposal": pos,
+            "fits_position": {
+                "project_cap": {"remaining_usd": pos["project_remaining_usd"], "needed_usd": need,
+                                "fits": need <= pos["project_remaining_usd"],
+                                "shortfall_usd": round(max(0.0, need - pos["project_remaining_usd"]), 2)},
+                "balance": {"balance_usd": pos["balance_usd"], "first_session_needs_usd":
+                            round(kept["per_session_hard_cap_usd"] + TEARDOWN_RESERVE, 2),
+                            "fits_first_session": kept["per_session_hard_cap_usd"] + TEARDOWN_RESERVE <= pos["balance_usd"],
+                            "rule": "checked at each issue and launch against that session's cap plus the reserve"}},
+            "basis": {"step_time": f"SOB1's measured 4.83 s / step (V1 measured 4.87) and the 7.241 s bound, x {LOOP_WORK:.2f} "
+                                   "(teacher 36 + 4 x 36 student logical-layer forward-equivalents vs 36 + 4 x 16): "
+                                   "NOT measured -- the first four steps measure it",
+                      "evaluation": f"SOB1's 1.22 h expected / 3.0 h bound per unit, x {LOOP_DECODE:.2f} (36 / 16 "
+                                    "logical layers of decode work and KV cache)",
+                      "engine_validation": ENGINE_CHECK_HOURS,
+                      "not_the_same_compute": "same data and optimizer steps as the single-execution controls, about "
+                                              f"{LOOP_WORK:.1f}x the training work per token and {LOOP_DECODE:.2f}x the "
+                                              "decode work: reported as measured GPU time, never as matched compute"},
+            "memory_gib": memory_estimates(),
+            "money_rules": {
+                "own_envelope": "its own grant; variant 1's grants (dmr1_merge_build, dmr1_merge_train) are not "
+                                "carried over and fund nothing here; SOB1's closed grants' remainders are void",
+                "cumulative": "the two sessions share the kind's envelope; a retry's cap is what the envelope leaves "
+                              "after every earlier attempt's closeout, minus the reserve",
+                "teardown_reserve": "$1.00 per session, held outside the ceiling, never issued"},
+            "authorizes": "nothing: a proposal; the grant is the maintainer's", "decision": "PENDING",
+            "granted_by": "nobody"}
 
 
 def S_bytes(k: str) -> int:
@@ -184,23 +239,20 @@ def S_bytes(k: str) -> int:
 
 def memory_estimates() -> dict:
     """L40S memory of the loop arms from SOB1's MEASURED depth peaks (39.39 GiB allocated, 40.98 GiB reserved), plus
-    what the schedule adds: 20 more checkpointed block inputs ([8,192, 2,560] fp32 each), and for the hidden arm the
-    teacher's bf16 targets at the KD rows (36 layers) and the backward's one [8,192, 2,560] gradient buffer."""
+    what the schedule adds: 20 more checkpointed block inputs ([8,192, 2,560] fp32 each), and the
+    eval-only state probe's teacher rows at validation (36 layers x about 900 rows, bf16)."""
     inputs = 20 * 8192 * 2560 * 4 / GIB
-    targets_median = 36 * 1790 * 2560 * 2 / GIB
-    targets_full = 36 * 8191 * 2560 * 2 / GIB
-    grad_buf = 8192 * 2560 * 4 / GIB
     base_a, base_r = 39.39, 40.98
     return {"device_gib": 44.39, "rule": "SOB1's measured depth peak plus the added tensors (not measured)",
-            "depth_loop": {"peak_allocated_gib": round(base_a + inputs, 2), "peak_reserved_gib": round(base_r + inputs, 2)},
-            "depth_loop_hidden": {"peak_allocated_gib_median_rows": round(base_a + inputs + targets_median + grad_buf, 2),
-                                  "peak_allocated_gib_full_rows": round(base_a + inputs + targets_full + grad_buf, 2),
-                                  "peak_reserved_gib_full_rows": round(base_r + inputs + targets_full + grad_buf, 2)},
-            "added": {"checkpointed_inputs_gib": round(inputs, 2), "teacher_targets_gib_median_rows": round(targets_median, 2),
-                      "teacher_targets_gib_full_rows": round(targets_full, 2), "gradient_buffer_gib": round(grad_buf, 3)},
-            "risk": "depth_loop_hidden at full-row sequences is within ~1 GiB of the device: the recipe's OOM steps "
-                    "(expandable segments, kd_chunk, AdamW without multi-tensor temporaries) first, an 80 GB card "
-                    "only after a measured OOM"}
+            "depth_loop_kept_and_merged": {"peak_allocated_gib": round(base_a + inputs, 2),
+                                           "peak_reserved_gib": round(base_r + inputs, 2),
+                                           "margin_to_device_gib": round(44.39 - (base_r + inputs), 2)},
+            "state_probe_at_validation": round(36 * 2 * 3600 / 8 * 2560 * 2 / GIB, 3),
+            "added": {"checkpointed_inputs_gib": round(inputs, 2)},
+            "risk": "the loop arms' estimated reserved peak leaves about 1.9 GiB of the L40S: real. The first four "
+                    "steps' memory_probe measures it; an out-of-memory error is answered first by the recipe's "
+                    "protocol-neutral steps (expandable segments, kd_chunk), then -- only after a measured OOM and "
+                    "under a decision of its own -- an 80 GB card"}
 
 
 def render(doc: dict) -> str:

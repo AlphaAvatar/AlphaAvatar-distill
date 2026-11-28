@@ -4,6 +4,7 @@ Everything this experiment produced, in one place.
 
 | area | what it holds |
 | --- | --- |
+| [`inits/`](inits/) | material |
 | [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
 | runs | registered from components; see the index |
 

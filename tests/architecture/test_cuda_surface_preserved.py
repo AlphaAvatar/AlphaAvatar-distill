@@ -2840,6 +2840,38 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "present. Records without it (v1, v2) parse and identify exactly as before. tests/initialization/"
             "test_forward_baseline.py.",
      }),
+    ("6e3ee3a780ea8638da61fa8cacdd15ff60c799b6",
+     "DMR1 V1 execution and the V2 revision (2026-11-27/28): the search's config check by applicability; the "
+     "launcher polls for the plan's whole hard bound; the trainer's eval-only state probe",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "NEW FUNCTION `poll_lifetime(args, hard_terminate_minutes)`, called by `make_plan` after the plan is "
+            "priced: an unset `--poll-limit-min` is derived from the plan's hard bound plus two poll intervals; a "
+            "given limit below that is refused at $0, before any provider resource (DMR1 V1 training attempt 1 was "
+            "torn down by a fixed 600 min default mid-training). The shared parser's default becomes unset. "
+            "tests/infrastructure/test_poll_lifetime.py.",
+        "src/aadistill/initialization/planning/search.py":
+            "`_assert_target_reachable`'s declared-config check (third round) asks only the implementations the beam "
+            "can expand toward the target -- NEW METHOD `_expandable_implementations`, the search's own expansion "
+            "rule (`applicable_implementations`, kinds already applied excluded unless `allow_kind_repeat`) walked "
+            "over the planned result specs at $0 -- instead of every allowed implementation whose `modifies` "
+            "intersects the differing fields: a recipe that never applies to the target (an all-at-once width "
+            "operator for a depth-only target) is no longer asked for a `stream_weighting` (the maintainer's review "
+            "of 6e3ee3a7, fix 2; committed in 506e83e3). A search the old check let through is unchanged. "
+            "tests/initialization/test_required_operator_config.py.",
+        "src/aadistill/training/hidden_state.py":
+            "NEW: `validate_probe_config`, `StateProbe` (the `HiddenSupervision` hand-over interface without a graph: "
+            "per layer the sums of the relative squared error, both states' L2 norms and their cosine at fixed rows) "
+            "and `STATE_PROBE_MEASURES`. The loss path (`HiddenSupervision`, the error and its backward) is unchanged.",
+        "src/aadistill/training/train.py":
+            "NEW optional config `state_probe` {pairs, blocks, row_stride}, validated (it needs `loss.kd_support`, the "
+            "online teacher and a student that hands over its logical-layer outputs); `evaluate()` adds "
+            "`state_probe` (`_state_probe`: the first `blocks` validation sequences, every `row_stride`-th KD row, "
+            "both decoders without their heads, no graph) and `execution_record` names it. Never in a training step, "
+            "never in a loss; without the key the trainer is the one before. tests/training/test_hidden_state.py "
+            "(the probe's arithmetic against the plain formulas; identical losses, gradients, weights and RNG state "
+            "with and without it; its refusals).",
+     }),
 )
 
 

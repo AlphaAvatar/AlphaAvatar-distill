@@ -3,7 +3,7 @@
 
     PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python scripts/stages/stage-1/depth_merge/plan.py \\
         --arm depth_merge --init-record <its committed init_record.json> --write
-    ... plan.py --arm depth_loop --init-record logs/stages/stage-6/depth_recurrence/inits/<path>/init_record.json --write
+    ... plan.py --arm depth_loop_kept --init-record logs/stages/stage-1/depth_recurrence/inits/KEPT/init_record.json --write
     ... plan.py --arm <arm> --check          # the committed plan is what a fresh derivation writes
 
 Each unit is SOB1's depth unit of the same seed (``logs/stages/stage-1/single_operator_budget/plans/
@@ -15,12 +15,14 @@ schedule, seeds, save points).
 
 * **depth_merge** (variant 1): the unit and arm names, the run name, the student path, the output directory and
   ``lineage.initialization`` (the alpha-merged init's weights and its committed init record).
-* **depth_loop / depth_loop_hidden** (variants 2, 3): the same, plus ``config.stage`` = the Stage-6 execution stage,
-  and for depth_loop_hidden ``config.loss.hidden_state`` (the Stage-6 design's registered configuration). Their
-  initialization is the recurrent init record over the SELECTED base (`depth_recurrence.schedule`): the base's
-  weights byte for byte and the recurrent config, whose exact text the plan carries (``initialization.
-  recurrent_config``) so the pod writes it over the base's config and checks its sha256. Refused without a COMPLETE
-  selection, or for a base that is not the selection's legal path.
+* **depth_loop_kept / depth_loop_merged** (variant 2, revised 2026-11-28): the same -- ``config.stage`` stays SOB1's
+  ``stage3_recovery`` -- plus ``config.state_probe`` (the design's eval-only diagnostic, alike for both), for the
+  arm's own seeds (``arms.<arm>.seeds``: 20260726). Their initialization is the recurrent init record over the base
+  the design FIXES for the arm (`depth_recurrence.schedule`): the base's weights byte for byte and the recurrent
+  config, whose exact text the plan carries (``initialization.recurrent_config``) so the pod writes it over the base's
+  config and checks its sha256. The two plans differ in the initialization and the arm's names only (tested). The
+  design's engine validation is bound into the plan of the arm whose session runs it (``engine_validation``).
+  depth_loop_hidden (variant 3) has no base this round and is refused.
 """
 from __future__ import annotations
 
@@ -62,7 +64,26 @@ def allowed_fields(d: dict, arm: str) -> set[str]:
     f = {x.removeprefix("config.") for x in d["training"]["changed_fields"] if x.startswith("config.")}
     if arm != "depth_loop_hidden":
         f.discard("loss.hidden_state")
+    if not DC.is_recurrent(arm):
+        f.discard("state_probe")
     return f
+
+
+def seeds_of(d: dict, arm: str) -> list[int]:
+    """The arm's own seeds (``arms.<arm>.seeds``), else the design's training seeds."""
+    return [int(s) for s in ((d["arms"].get(arm) or {}).get("seeds") or d["training"]["seeds"])]
+
+
+def engine_validation(d: dict, arm: str) -> dict | None:
+    """The design's engine validation, bound into the plan of the arm whose session runs it (None for others)."""
+    ev = d.get("engine_validation")
+    if not ev or not DC.is_recurrent(arm):
+        return None
+    first = d["training"]["unit_order"]["arms"][0]
+    if arm != first:
+        return {"required": False, "run_in": f"the {first} session (its engine_check.json)"}
+    return {"required": True, "script": ev["script"], "gate": ev["gate"], "inputs": ev["inputs"],
+            "control_config": "configs/stages/stage-1/depth_recurrence/base_config.json"}
 
 
 def outside(diff: list[str], allowed: set[str]) -> list[str]:
@@ -119,8 +140,10 @@ def derive(arm: str, init_record: Path, root: Path = REPO) -> dict:
             raise PlanError("the init record names another root teacher")
         allowed = allowed_fields(d, arm)
         pod = d["storage"]["pod_root"]
+        seeds = seeds_of(d, arm)
         units, checks = [], {}
-        for u in sorted(src["units"], key=lambda x: src["seed_order"].index(x["seed"])):
+        for u in sorted((x for x in src["units"] if int(x["seed"]) in seeds),
+                        key=lambda x: src["seed_order"].index(x["seed"])):
             a = copy.deepcopy(u)
             name = unit_name(arm, u["seed"])
             a["unit"], a["arm"] = name, arm
@@ -149,6 +172,8 @@ def derive(arm: str, init_record: Path, root: Path = REPO) -> dict:
                 c["loss"]["hidden_state"] = copy.deepcopy(d["hidden_state"]["config"])
             elif "hidden_state" in c["loss"]:
                 raise PlanError(f"{name}: a hidden-state term in a unit that registers none")
+            if "state_probe" in allowed:
+                c["state_probe"] = copy.deepcopy(d["diagnostics"]["state_probe"]["config"])
             diff = differences(u["config"], c)
             out = outside(diff, allowed)
             if out:
@@ -158,18 +183,19 @@ def derive(arm: str, init_record: Path, root: Path = REPO) -> dict:
                 raise PlanError(f"{name}: batch {b}")
             checks[name] = {"differs_from_sob1_depth_unit": diff, "sob1_unit": u["unit"], "outside_declared": out}
             units.append(a)
-        if [u["seed"] for u in units] != d["training"]["seeds"]:
-            raise PlanError(f"seeds {[u['seed'] for u in units]}, not the design's")
+        if [u["seed"] for u in units] != seeds:
+            raise PlanError(f"seeds {[u['seed'] for u in units]}, not the design's {seeds} for {arm}")
         return {"schema": SCHEMA, "study_id": d["study_id"], "arm": arm,
                 "derived_from": {"path": d["training"]["derived_from"]["path"],
                                  "sha256": d["training"]["derived_from"]["sha256"]},
                 "design_sha256": sha256_file(DC.files_of(arm)[0]),
                 "init_record": {"path": rel, "sha256": rec_sha, "artifact_digest": rec["checkpoint"]["artifact_digest"],
                                 "model_safetensors_sha256": sha},
-                "seed_order": src["seed_order"], "unit_order": [unit_name(arm, s) for s in d["training"]["seeds"]],
+                "seed_order": src["seed_order"], "unit_order": [unit_name(arm, s) for s in seeds],
                 "units_dir": UNITS_DIR, "pod_root": pod, "relay_prefix_root": d["storage"]["relay_prefix_root"],
                 "durability": d["training"]["durability"], "evaluation_protocol": SC.protocol(),
                 "checkpoint_policy": src["checkpoint_policy"], "units": units, "derivation_checks": checks,
+                **({"engine_validation": engine_validation(d, arm)} if engine_validation(d, arm) else {}),
                 "authorizes": "nothing"}
     finally:
         SC.restore(before)

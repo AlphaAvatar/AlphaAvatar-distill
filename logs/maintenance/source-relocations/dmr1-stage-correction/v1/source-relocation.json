@@ -1,0 +1,151 @@
+{
+ "schema": "aadistill.source_relocation/v1",
+ "migration": "dmr1-stage-correction",
+ "version": "v1",
+ "recorded_utc": "2026-11-28",
+ "decision": "the maintainer's stage correction of 2026-11-28 (AGENTS.md 4.8 clarified; DMR1_REVIEW.md 0S)",
+ "rule": "git mv of four trees, content unchanged at the move (blob_at_move = the moved blob). Records derived from the design and not yet consumed by any run (init records, plans, proposal, storage plan) were then regenerated under the corrected identity; measurement records keep their bytes (their blob is unchanged); frozen records that cite an old path resolve it through logs/index.json :: historical_paths.map",
+ "trees": {
+  "configs/stages/stage-6/depth_recurrence": "configs/stages/stage-1/depth_recurrence",
+  "scripts/stages/stage-6/depth_recurrence": "scripts/stages/stage-1/depth_recurrence",
+  "docs/stages/stage-6/depth_recurrence": "docs/stages/stage-1/depth_recurrence",
+  "logs/stages/stage-6/depth_recurrence": "logs/stages/stage-1/depth_recurrence"
+ },
+ "files": [
+  {
+   "old": "configs/stages/stage-6/depth_recurrence/README.md",
+   "new": "configs/stages/stage-1/depth_recurrence/README.md",
+   "blob_at_head": "95f29c12ea5aaa8fbda89bd19dabb2c2245347e7",
+   "blob_at_move": "f1a3ec39b64b628ec8fc02a005ada2a82fc07947"
+  },
+  {
+   "old": "configs/stages/stage-6/depth_recurrence/artifacts.json",
+   "new": "configs/stages/stage-1/depth_recurrence/artifacts.json",
+   "blob_at_head": "62d06cdd200983a0356350e339358024b6daffd6",
+   "blob_at_move": "02e8267e839b8a1f6929ed19e26c9a647664ebcb"
+  },
+  {
+   "old": "configs/stages/stage-6/depth_recurrence/base_config.json",
+   "new": "configs/stages/stage-1/depth_recurrence/base_config.json",
+   "blob_at_head": "35a12cd9edb2cb13a47fc6c278dd1836eee2b4c8",
+   "blob_at_move": "35a12cd9edb2cb13a47fc6c278dd1836eee2b4c8"
+  },
+  {
+   "old": "configs/stages/stage-6/depth_recurrence/design.json",
+   "new": "configs/stages/stage-1/depth_recurrence/design.json",
+   "blob_at_head": "d309f720f58d91aeb057e1c685f07bd7523c97d8",
+   "blob_at_move": "c2646dc67734825a9af763ea479da3ea5f7ee364"
+  },
+  {
+   "old": "configs/stages/stage-6/depth_recurrence/recurrent_config.json",
+   "new": "configs/stages/stage-1/depth_recurrence/recurrent_config.json",
+   "blob_at_head": "f3091040bfa93355f311edd3fe1aae23e4761bd0",
+   "blob_at_move": "f3091040bfa93355f311edd3fe1aae23e4761bd0"
+  },
+  {
+   "old": "docs/stages/stage-6/depth_recurrence/README.md",
+   "new": "docs/stages/stage-1/depth_recurrence/README.md",
+   "blob_at_head": "eb3fd6ce31b16b2ab170efd16e2f0f8ed3b6ea96",
+   "blob_at_move": "4068d13f954b222a6e5273a2f8e52d86ecfe588f"
+  },
+  {
+   "old": "logs/stages/stage-6/depth_recurrence/README.md",
+   "new": "logs/stages/stage-1/depth_recurrence/README.md",
+   "blob_at_head": "19eeb6c9d9978c88845b0725d42b804c253d15d8",
+   "blob_at_move": "67c99c17b790a72e1664d85890ce5e5d34cadb45"
+  },
+  {
+   "old": "logs/stages/stage-6/depth_recurrence/inits/KEPT/init_record.json",
+   "new": "logs/stages/stage-1/depth_recurrence/inits/KEPT/init_record.json",
+   "blob_at_head": null,
+   "blob_at_move": "fa45867ab8dabaac5176d650eabc1759754885ec"
+  },
+  {
+   "old": "logs/stages/stage-6/depth_recurrence/inits/MERGED/init_record.json",
+   "new": "logs/stages/stage-1/depth_recurrence/inits/MERGED/init_record.json",
+   "blob_at_head": null,
+   "blob_at_move": "3931eba0ded31bbc1aabe0df4d8b2a8efbfeb18e"
+  },
+  {
+   "old": "logs/stages/stage-6/depth_recurrence/plans/proposal_dmr1_loop_train.json",
+   "new": "logs/stages/stage-1/depth_recurrence/plans/proposal_dmr1_loop_train.json",
+   "blob_at_head": null,
+   "blob_at_move": "fe696d5e72b508a66e6a7bb3e9f12bdb5c3795c8"
+  },
+  {
+   "old": "logs/stages/stage-6/depth_recurrence/plans/step0_diagnostic_20261126.json",
+   "new": "logs/stages/stage-1/depth_recurrence/plans/step0_diagnostic_20261126.json",
+   "blob_at_head": "7745e24a52d17d2c2e5d4478b03ad50f517ab4e0",
+   "blob_at_move": "7745e24a52d17d2c2e5d4478b03ad50f517ab4e0"
+  },
+  {
+   "old": "logs/stages/stage-6/depth_recurrence/plans/storage_plan.json",
+   "new": "logs/stages/stage-1/depth_recurrence/plans/storage_plan.json",
+   "blob_at_head": null,
+   "blob_at_move": "b9c59938eb2242d3899e714af2e0e1ac30b25c71"
+  },
+  {
+   "old": "logs/stages/stage-6/depth_recurrence/plans/training_plan_depth_loop_kept.json",
+   "new": "logs/stages/stage-1/depth_recurrence/plans/training_plan_depth_loop_kept.json",
+   "blob_at_head": null,
+   "blob_at_move": "c5887a49220aa5556733d5d1d3470ec41486df18"
+  },
+  {
+   "old": "logs/stages/stage-6/depth_recurrence/plans/training_plan_depth_loop_merged.json",
+   "new": "logs/stages/stage-1/depth_recurrence/plans/training_plan_depth_loop_merged.json",
+   "blob_at_head": null,
+   "blob_at_move": "31223e0a73d7878c91c7bb24072ec426a62deee9"
+  },
+  {
+   "old": "scripts/stages/stage-6/depth_recurrence/README.md",
+   "new": "scripts/stages/stage-1/depth_recurrence/README.md",
+   "blob_at_head": "492fad1f54a3f370a3a6168241fcd024074d6e4b",
+   "blob_at_move": "484f0ba49b631c817edbc0bcd7c2fcd12ae2688e"
+  },
+  {
+   "old": "scripts/stages/stage-6/depth_recurrence/__init__.py",
+   "new": "scripts/stages/stage-1/depth_recurrence/__init__.py",
+   "blob_at_head": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+   "blob_at_move": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+  },
+  {
+   "old": "scripts/stages/stage-6/depth_recurrence/engine_check.py",
+   "new": "scripts/stages/stage-1/depth_recurrence/engine_check.py",
+   "blob_at_head": null,
+   "blob_at_move": "ffe9ac13a2927ecadde87d56b6ced510ee434843"
+  },
+  {
+   "old": "scripts/stages/stage-6/depth_recurrence/launch.py",
+   "new": "scripts/stages/stage-1/depth_recurrence/launch.py",
+   "blob_at_head": "e3b6a328b3ac2020c3771bb96b33d676308a6414",
+   "blob_at_move": "ce7f122d600fd877b7152d991362ef37a5838b0f"
+  },
+  {
+   "old": "scripts/stages/stage-6/depth_recurrence/schedule.py",
+   "new": "scripts/stages/stage-1/depth_recurrence/schedule.py",
+   "blob_at_head": "89eb522430b36164fa492577c83cbf0e209aee80",
+   "blob_at_move": "ac56bf8adaba3e09061339ba25a4ed3a24360f43"
+  },
+  {
+   "old": "scripts/stages/stage-6/depth_recurrence/tests/__init__.py",
+   "new": "scripts/stages/stage-1/depth_recurrence/tests/__init__.py",
+   "blob_at_head": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+   "blob_at_move": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+  },
+  {
+   "old": "scripts/stages/stage-6/depth_recurrence/tests/test_depth_recurrence.py",
+   "new": "scripts/stages/stage-1/depth_recurrence/tests/test_depth_recurrence.py",
+   "blob_at_head": "40d7764a88e7498f0dfce4572730220e5ea503af",
+   "blob_at_move": "1926f230b1793600b76d0d4ed8c057ebacc2e9f8"
+  }
+ ],
+ "frozen_measurements": [
+  {
+   "path": "logs/stages/stage-1/depth_recurrence/plans/step0_diagnostic_20261126.json",
+   "blob": "7745e24a52d17d2c2e5d4478b03ad50f517ab4e0",
+   "unchanged": true
+  }
+ ],
+ "relay": "nothing was ever written under durable/stage6_depth_recurrence; the bases (SOB1's depth init, V1's alpha-merged init) keep their own relay prefixes and hashes",
+ "not_moved": "V1's run records (governance/authorization.json, runtime/session.json) and its design.json name the old script and config paths as bound identity: kept verbatim, resolved through the map"
+}

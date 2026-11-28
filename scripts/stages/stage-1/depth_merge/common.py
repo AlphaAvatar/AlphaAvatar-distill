@@ -1,5 +1,5 @@
-"""What every DMR1 script reads the same way: the round's two designs (variant 1 here, Stage 1; variants 2 and 3 in
-``configs/stages/stage-6/depth_recurrence``), which variant an arm belongs to, and the binding of SOB1's phase-2 chain
+"""What every DMR1 script reads the same way: the round's two designs (variant 1 in ``configs/stages/stage-1/depth_merge``;
+variants 2 and 3 in ``configs/stages/stage-1/depth_recurrence`` -- all Stage 1 research, recovered by Stage 3), which variant an arm belongs to, and the binding of SOB1's phase-2 chain
 (`single_operator_budget.common.bind`) to that variant's design and logs. Nothing here runs a model.
 
 The round reuses SOB1's chain -- what a complete evaluation set is (`single_operator_budget.completion`), the unit
@@ -16,14 +16,15 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[4]
 DESIGN = REPO / "configs/stages/stage-1/depth_merge/design.json"
 LOGS = REPO / "logs/stages/stage-1/depth_merge"
-STAGE6_DESIGN = REPO / "configs/stages/stage-6/depth_recurrence/design.json"
-STAGE6_LOGS = REPO / "logs/stages/stage-6/depth_recurrence"
-RECURRENT_CONFIG = REPO / "configs/stages/stage-6/depth_recurrence/recurrent_config.json"
+RECURRENCE_DESIGN = REPO / "configs/stages/stage-1/depth_recurrence/design.json"
+RECURRENCE_LOGS = REPO / "logs/stages/stage-1/depth_recurrence"
+RECURRENT_CONFIG = REPO / "configs/stages/stage-1/depth_recurrence/recurrent_config.json"
 
 #: arm -> (variant, its design, its logs)
 ARMS = {"depth_merge": ("DMR1-M", DESIGN, LOGS),
-        "depth_loop": ("DMR1-R", STAGE6_DESIGN, STAGE6_LOGS),
-        "depth_loop_hidden": ("DMR1-RH", STAGE6_DESIGN, STAGE6_LOGS)}
+        "depth_loop_kept": ("DMR1-R", RECURRENCE_DESIGN, RECURRENCE_LOGS),
+        "depth_loop_merged": ("DMR1-R", RECURRENCE_DESIGN, RECURRENCE_LOGS),
+        "depth_loop_hidden": ("DMR1-RH", RECURRENCE_DESIGN, RECURRENCE_LOGS)}
 #: the control arm of SOB1 (its sealed sets are reused, never regenerated)
 SOB1_DEPTH = "depth_only"
 
@@ -40,8 +41,8 @@ def design() -> dict:
     return read_json(DESIGN)
 
 
-def stage6_design() -> dict:
-    return read_json(STAGE6_DESIGN)
+def recurrence_design() -> dict:
+    return read_json(RECURRENCE_DESIGN)
 
 
 def design_of(arm: str) -> dict:
@@ -76,6 +77,17 @@ def relay_root(arm: str) -> str:
 
 def pod_root(arm: str) -> str:
     return design_of(arm)["storage"]["pod_root"]
+
+
+def merged_control_evidence() -> Path:
+    """Variant 1's seed-20260726 control on the dev box (its training session's secured ``<scr>/store/out``, as the
+    recurrence design names it; only that seed's final and sets are read)."""
+    ses = recurrence_design()["base"]["merged_control"]["session"]
+    p = REPO / ses["completion"]["path"]
+    doc = read_json(p)
+    if doc.get("arm") != "depth_merge" or doc.get("run_id") != ses["run_id"]:
+        raise DMR1Error(f"{ses['completion']['path']} is not variant 1's training session {ses['run_id']}")
+    return Path(doc["scr"]) / "store" / "out"
 
 
 def sob1_depth_evidence() -> Path:

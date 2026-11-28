@@ -82,6 +82,31 @@ def durability(plan: dict | None = None) -> dict:
     return {**DURABILITY, **((plan or {}).get("durability") or {})}
 
 
+def savepoint_copies(d: dict | None) -> int:
+    """How many save points of a unit the relay may hold at once (``durability.savepoint_copies``): 2, the registered
+    rotation (a new one is uploaded while the previous is still there, which goes only after the new one hands off);
+    or 1, a single copy (the previous is removed before the next upload, and the last before the final's upload),
+    for a relay without room for two. A single copy has a window per save point -- its upload -- in which the unit
+    holds no durable save point."""
+    n = int((d or {}).get("savepoint_copies", 2))
+    if n not in (1, 2):
+        raise DriverError(f"durability.savepoint_copies must be 1 or 2, not {n}")
+    return n
+
+
+def remove_before_upload(ev_unit: Path, name: str, before: str) -> bool:
+    """Single-copy rotation: every verified, unretired save point of the unit removed from the relay before the
+    upload of ``before`` (a later save point, or the final). True only when the relay confirms each one absent."""
+    sp_path = Path(ev_unit) / "savepoints.json"
+    recs = read_json(sp_path) if sp_path.is_file() else []
+    ok = True
+    for sp in recs:
+        if sp.get("verified") and not retired(sp) and sp.get("tag") != before:
+            ok = remove_now(sp, f"{name}: {sp['tag']} removed before {before}'s upload (single copy)") and ok
+            write_json(sp_path, recs)
+    return ok
+
+
 def transfer_seconds(nbytes: float, d: dict, *, up: bool = True, down: bool = True) -> float:
     """The longest a copy of ``nbytes`` takes at the floor rates: upload, the verifying download, or both."""
     t = (nbytes / d["upload_floor_bytes_per_second"] if up else 0.0) + \
@@ -276,6 +301,8 @@ class SavepointMirror(threading.Thread):
             return None
         if rec is None:
             retry_pending_removals(self.ev_unit, self.unit)     #: a failed removal frees its bytes before the upload
+            if savepoint_copies(self.d) == 1 and not remove_before_upload(self.ev_unit, self.unit, tag):
+                return None                     #: the relay holds no room for a second copy: retried next round
             recs = self.records()
             ckpt = self.out_dir / "checkpoints" / tag
             files = savepoint_files(ckpt)

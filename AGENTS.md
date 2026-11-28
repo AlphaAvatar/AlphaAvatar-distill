@@ -1275,7 +1275,7 @@ never changed as a performance optimization.
 | Stage 0 | not packed by rule; data a Stage-1 forward consumes is read under Stage 1's rule |
 | Stage 2 | prepares teacher-native data; builds Stage 3's packed training set |
 | Stage 4 / 5 rollout and on-policy training; deployment validation | the real context, fixed BEFORE generation; standard causal attention; rollouts are batched (padding), never packed together or re-composed after generation |
-| Stage 6 (recurrent depth) | decided by its own research design and recorded as scientific identity before its first run; neither Stage 3's packing nor the deployment rule above is inherited by default |
+| Stage 6 (recurrent depth) | decided by its own research design and recorded as scientific identity before its first run; neither Stage 3's packing nor the deployment rule above is inherited by default. A Stage-1 initialization study whose student Stage 3 recovers -- recurrent initializations included -- trains under Stage 3's rule |
 
 The packing is the maintainer's reference algorithm
 (`aadistill.data.sequence_packing.packing_conversation`, `truncate=True`) over a
@@ -2414,27 +2414,54 @@ training such a student needs. It replaces Stage 6's earlier role; deployment
 validation is kept, as an engineering duty rather than a numbered stage
 (below). There is no Stage 7.
 
-Goal: find out whether repeated execution of shared parameters recovers depth
--- and with it reasoning -- that a compressed student lost, at a parameter count
-the deployment budget allows, and at what compute and latency cost.
+Goal: find out what repeated execution of shared parameters adds to the reasoning of the model Stage 5 completes,
+and at what compute and latency cost.
+
+**MAINTAINER CLARIFICATION 2026-11-28: the starting point and the boundary.**
+- **Starting point.** Stage 6 starts from the model Stage 5 completes, after recovery training (Stage 3) and Stage 5's
+  on-policy / RL training.
+- **Designed when it begins.** How a recurrent model is built from that model, which structure it takes, and how it
+  is trained and evaluated are designed separately, when Stage 6 begins. Nothing here fixes a structure, an
+  implementation or a training recipe, and no paper's method is adopted by default.
+- **Not Stage 6.** Shared-parameter repeated execution used as a structural initialization of a student derived
+  from the teacher before any recovery is Stage 1 research on initialization and reasoning inheritance (4.3), and the
+  training that tests its recovery is Stage 3 (4.5), under Stage 3's recipe and packing (P19). Examples:
+  - kept blocks executed once per teacher layer of their span, from unmerged or merged initializations;
+  - the same with a hidden-state alignment loss during recovery.
+
+  DMR1's variants 2 and 3 are such Stage 1 research; their trees moved from `stage-6` on 2026-11-28
+  (`logs/index.json :: historical_paths.map`).
+- **The mechanisms stay.** A recurrent model family, one KV cache per logical layer and a hidden-state term are
+  reusable core (P3) whichever stage uses them.
+
+**Status: NOT STARTED.** Stage 6 has no experiment, plan, budget, initialization record or measurement, and nothing is
+pre-built for it (P2).
 
 What a Stage-6 design must decide and record before its first run, because
-nothing is inherited by default: which blocks are shared and how many
-recurrent iterations run (fixed, or chosen per input); how the shared block is
-initialized (from which teacher blocks, under which mapping); the training data,
-its organisation and packing (P19), its objective and its teacher lineage
-(P17.1); and how compute is counted (recurrent iterations multiply FLOPs per
-token without adding parameters, so parameter-matched, FLOPs-matched and
-latency-matched comparisons are different comparisons and are reported
-separately). Its evaluation is the permanent registry's (P10.3), each
-capability apart.
+nothing is inherited by default:
+- its starting checkpoint, a Stage-5-complete model, and its identity;
+- the recurrent structure, and how it is built from that model;
+- the training data, its organisation and packing (P19);
+- its objective and its teacher lineage (P17.1);
+- how compute is counted: recurrent iterations multiply FLOPs per token without adding parameters, so
+  parameter-matched, FLOPs-matched and latency-matched comparisons are different comparisons and are reported
+  separately.
+
+Its evaluation is the permanent registry's (P10.3), each capability apart.
+
+References the maintainer provided (2026-11-28; queued, not yet read for this project):
+* HRM-Text reading notes —
+  <https://aipapernotes.alphaavatar.io/architecture/transformer/recurrent-transformer/2026/HRM-Text>
+* HRM-Text paper — <https://arxiv.org/abs/2605.20613>
 
 Default action policy: as Stage 5's -- toy implementations, unit tests and small
 local runs directly; serious training, paid GPUs or a new official recipe after
 the maintainer approves it.
 
-**History.** Records written before 2026-11-13 that name "Stage 6" mean
-deployment validation and keep that meaning; nothing is rewritten.
+**History.** Nothing is rewritten.
+- Records written before 2026-11-13 that name "Stage 6" mean deployment validation and keep that meaning.
+- Records written between 2026-11-13 and 2026-11-28 that call DMR1's recurrent variants "Stage 6" keep their
+  wording; the current classification is the clarification above.
 
 ### Deployment validation (engineering duty, at any stage)
 

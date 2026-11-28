@@ -39,9 +39,15 @@ ROW_SETS = ("kd",)
 REDUCTION_ID = ("sum over pairs and KD rows of ||s - h||^2 / ||h||^2, divided by (pairs x the step's KD rows); "
                 "s the student's logical-layer output, h the teacher's layer output, both before the final norm")
 
-__all__ = ["OBJECTIVE_ID", "ERRORS", "ROW_SETS", "REDUCTION_ID", "HiddenStateError", "validate_config",
-           "objective_identity", "flat_rows", "relative_squared_error_sum", "HiddenSupervision",
-           "capture_layer_outputs"]
+__all__ = ["OBJECTIVE_ID", "ERRORS", "ROW_SETS", "REDUCTION_ID", "STATE_PROBE_MEASURES", "HiddenStateError",
+           "validate_config", "validate_probe_config", "objective_identity", "flat_rows", "relative_squared_error_sum",
+           "HiddenSupervision", "StateProbe", "capture_layer_outputs"]
+
+#: the eval-only state diagnostic (`StateProbe`): what it measures, never a loss
+STATE_PROBE_MEASURES = ("state_probe/v1: per (student layer, teacher layer) pair at fixed KD rows of the first "
+                        "validation sequences (every row_stride-th row), no graph: the mean relative squared error "
+                        "||s - h||^2 / ||h||^2, the mean L2 norms ||s|| and ||h||, and the mean cosine similarity of "
+                        "s and h")
 
 
 class HiddenStateError(ValueError):
@@ -71,6 +77,22 @@ def validate_config(spec) -> dict:
         raise HiddenStateError(f"loss.hidden_state.rows must be one of {ROW_SETS}")
     if spec.get("error") not in ERRORS:
         raise HiddenStateError(f"loss.hidden_state.error must be one of {ERRORS}")
+    return spec
+
+
+def validate_probe_config(spec) -> dict:
+    """``state_probe``: ``{pairs: [[student_layer, teacher_layer], ...], blocks: int >= 1, row_stride: int >= 1}`` --
+    a diagnostic computed at validation only (`StateProbe`); it adds nothing to any loss."""
+    if not isinstance(spec, dict):
+        raise HiddenStateError("state_probe must be an object")
+    extra = sorted(set(spec) - {"pairs", "blocks", "row_stride"})
+    if extra:
+        raise HiddenStateError(f"state_probe has unknown keys {extra}")
+    validate_config({"weight": 1.0, "pairs": spec.get("pairs"), "rows": "kd", "error": ERRORS[0]})
+    for k in ("blocks", "row_stride"):
+        v = spec.get(k)
+        if not isinstance(v, int) or isinstance(v, bool) or v < 1:
+            raise HiddenStateError(f"state_probe.{k} must be an integer >= 1")
     return spec
 
 
@@ -180,6 +202,54 @@ class HiddenSupervision:
         if missing:
             raise HiddenStateError(f"the student's forward handed over no state for layers {missing}")
         self.targets, self.inv_energy, self.rows = None, None, None
+
+
+class StateProbe:
+    """The state diagnostic of one forward (`STATE_PROBE_MEASURES`), handed to the student's logical-layer loop like
+    `HiddenSupervision` (``targets``, ``add``, ``finish``), but without a graph and outside every loss.
+
+    ``rows``: flat row indices; ``targets``: student layer -> ``[N, H]`` teacher states at those rows. Per layer,
+    ``sums[layer]`` holds the float64 sums over the rows of the relative squared error, ``||s||``, ``||h||`` and the
+    cosine similarity; `summary` turns sums (over any number of forwards) into means."""
+
+    FIELDS = ("rel_sq_err", "student_norm", "teacher_norm", "cosine")
+
+    def __init__(self, rows: torch.Tensor, targets: Mapping[int, torch.Tensor]):
+        self.rows = rows
+        self.targets = dict(targets)
+        self.sums: dict[int, list[float]] = {}
+        self.n_rows = int(rows.shape[0])
+
+    def add(self, layer: int, hidden: torch.Tensor) -> None:
+        if self.targets is None:
+            raise HiddenStateError("a state handed over after finish()")
+        if layer in self.sums:
+            raise HiddenStateError(f"logical layer {layer} handed over twice in one forward")
+        with torch.no_grad():
+            s = hidden.detach().reshape(-1, hidden.shape[-1]).index_select(0, self.rows).double()
+            h = self.targets[layer].double()
+            ns, nh = s.norm(dim=-1), h.norm(dim=-1)
+            if bool((nh <= 0).any()):
+                raise HiddenStateError(f"layer {layer}: a target row with zero energy has no relative error")
+            rel = ((s - h) ** 2).sum(-1) / (nh * nh)
+            cos = (s * h).sum(-1) / (ns * nh).clamp_min(torch.finfo(torch.float64).tiny)
+            self.sums[layer] = [float(rel.sum()), float(ns.sum()), float(nh.sum()), float(cos.sum())]
+
+    def finish(self) -> None:
+        if self.targets is None:
+            raise HiddenStateError("finish() called twice")
+        missing = sorted(set(self.targets) - set(self.sums))
+        if missing:
+            raise HiddenStateError(f"the student's forward handed over no state for layers {missing}")
+        self.targets, self.rows = None, None
+
+    @classmethod
+    def summary(cls, sums: Mapping[int, Sequence[float]], rows: int) -> dict[str, dict[str, float]]:
+        """Per student layer, each field's mean over ``rows`` (for logs)."""
+        if not rows:
+            return {}
+        return {str(k): {f: round(float(v[i]) / rows, 6) for i, f in enumerate(cls.FIELDS)}
+                for k, v in sorted(sums.items())}
 
 
 @contextlib.contextmanager

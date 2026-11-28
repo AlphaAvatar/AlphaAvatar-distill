@@ -1407,8 +1407,8 @@ assert not bad, f'the artifact binds other records than this pod holds: {sorted(
 print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "dmr1_depth_recurrence" ]; then
-  # DMR1 variants 2 and 3 (study DMR1-R, `stages.depth_recurrence.launch`): two training kinds
-  # (dmr1_loop_train, dmr1_loop_hidden_train). FORMAL, never a dry-run artifact. The study identity (its designs and
+  # DMR1 variant 2 (study DMR1-R, `stages.depth_recurrence.launch`, Stage 1 research with Stage 3 recovery): one
+  # training kind (dmr1_loop_train), one session per arm. FORMAL, never a dry-run artifact. The study identity (its designs and
   # pinned configs), the harness and the kind's bound records (a training arm's plan and its init record) are
   # recomputed HERE from the pod's own files.
   cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \

@@ -1,11 +1,358 @@
 # DMR1: depth recovery at SOB1's depth-only structure -- review report
 
-**State: VARIANT 1 STOPPED BY THE MAINTAINER DURING SEED 2; seed 1 reported descriptively, waiting for review**
-(2026-11-28 UTC). V1 was authorized on 2026-11-27, built, trained and evaluated for seed 20260726, and stopped at
-seed 20260801's step 6,590 of 9,701 at the maintainer's request after reading seed 1's result (section 00). Nothing
-is running and nothing is billing: no pod, no volume. V2 and V3 have no paid authorization. Committed and pushed on
-`research/reasoning-inheritance`, not merged into `main`. Sections 0 onward are the READY_FOR_REVIEW report of
-2026-11-26, kept as written.
+**State: READY_FOR_REVIEW (2026-11-28 UTC), the variant-2 revision.**
+- **V1:** stopped by the maintainer during seed 2, and closed out. Seed 1 is complete and reported descriptively
+  (section 00).
+- **V2:** revised at $0 into two initializations x seed 20260726, with code, plans, budget and storage prepared
+  (section 0R).
+- **Not authorized:** no V2 paid run until the budget and the storage decision are approved. V3 is not started.
+- **Resources:** nothing is running and nothing is billing: no pod, no volume, no watcher.
+- **Stage:** DMR1's three variants are Stage 1 research (structural initialization and reasoning inheritance),
+  and their recovery training is Stage 3 (`stage3_recovery`). Variants 2 and 3 moved from `stage-6` on 2026-11-28
+  (section 0S). Stage 6 (AGENTS.md 4.8, clarified) starts from the model Stage 5 completes and has no experiment.
+- **Branch:** committed and pushed on `research/reasoning-inheritance`, not merged into `main`.
+- **Earlier sections:** sections 0 onward are the READY_FOR_REVIEW report of 2026-11-26, kept as written. Their
+  "Stage 6" for variants 2 and 3, `stage6_recurrent_depth` and `stage-6/...` paths read as section 0S states;
+  where the V2 design differs, section 0R holds.
+
+## 0S. The stage correction (the maintainer's message of 2026-11-28, folded into this round)
+
+### 0S.1 Scope
+
+- **AGENTS.md 4.8.** It keeps its generic name, "Stage 6 — Recurrent depth: shared-parameter repeated execution";
+  the root README is unchanged, at the maintainer's request. A 2026-11-28 clarification adds three things:
+  - **Starting point:** the model Stage 5 completes (after Stage 3 recovery and Stage 5 RL). Its structure,
+    construction, training and evaluation are designed when Stage 6 begins.
+  - **Boundary:** shared-parameter repeated execution used as a structural initialization of a teacher-derived
+    student before recovery is Stage 1 research, and its recovery is Stage 3, under Stage 3's recipe and packing.
+  - **Status:** NOT STARTED.
+
+  Also: the generic mechanisms stay in core; the maintainer's HRM-Text references are queued, not adopted as a
+  design; P19's Stage-6 row notes that such Stage-1 studies train under Stage 3's rule; and the history note keeps
+  the 2026-11-13 to 2026-11-28 records' wording.
+- **The moves** (`git mv`, content unchanged at the move; 21 files with their blob hashes in
+  `logs/maintenance/source-relocations/dmr1-stage-correction/v1/source-relocation.json`):
+
+  | from | to |
+  | --- | --- |
+  | `configs/stages/stage-6/depth_recurrence` | `configs/stages/stage-1/depth_recurrence` |
+  | `scripts/stages/stage-6/depth_recurrence` | `scripts/stages/stage-1/depth_recurrence` |
+  | `docs/stages/stage-6/depth_recurrence` | `docs/stages/stage-1/depth_recurrence` |
+  | `logs/stages/stage-6/depth_recurrence` | `logs/stages/stage-1/depth_recurrence` |
+
+  The four pairs are in `logs/index.json :: historical_paths.map` (`run_layout.resolve_historical`). No stage-6
+  directory remains, because a stage exists only with evidence (P2, `test_every_stage_present_has_repository_evidence`);
+  Stage 6's definition lives in AGENTS.md 4.8 and the README.
+- **The design** (`configs/stages/stage-1/depth_recurrence/design.json`):
+  - schema `aadistill.stage1.depth_recurrence.design/v1`, `stage: 1`, execution stage `stage3_recovery`;
+  - `config.stage` removed from the changed fields, so V2's units keep SOB1's `stage3_recovery`, and a unit that
+    changed it would be refused as outside the declared fields;
+  - `stage_6_identity` renamed `recurrent_execution_identity`, its data and packing being Stage 3's registered recipe
+    (random order, sequential packing with truncation, 8,192 tokens, causal attention, the registered proportions
+    and pre-packing counts);
+  - relay root `durable/stage1_depth_recurrence` (nothing was ever written under `durable/stage6_depth_recurrence`),
+    local store `~/aad-artifacts/stage1_depth_recurrence` (never created);
+  - `stage_correction_2026_11_28` records all of this; `superseded_2026_11_28` is kept as it was written.
+- **The chain:**
+  - `depth_merge/common.py`: `RECURRENCE_DESIGN`, `RECURRENCE_LOGS`, `RECURRENT_CONFIG`, `recurrence_design()`;
+  - analysis, plan, proposal, storage and session read them; the session commit's script list names the Stage-1
+    paths;
+  - the launcher's study `plan_id` is `stage1.depth_recurrence`, so its authorizations' wire schema is
+    `aadistill.stage1.depth_recurrence.authorization/v1`; its logs, identity files and artifact spec are the Stage-1
+    paths;
+  - the init records' and the engine check's schemas are `aadistill.stage1.*`;
+  - pod setup's `dmr1_depth_recurrence` branch imports `stages.depth_recurrence` through the `stages` package path,
+    so it is unchanged apart from its comment.
+- **The indexes:** the stage attribution moves the experiment to Stage 1 and drops Stage 6's definition; the run
+  index, the stage index and the navigation are regenerated; the checkpoint registry's `referenced_by` names the
+  moved design.
+- **Regenerated, not yet consumed by any run:** the two init records, the two plans, the proposal and the storage
+  plan. **Not rewritten:**
+  - the 2026-11-26 step-0 diagnostic (moved byte for byte; its schema string keeps `stage6`);
+  - V1's run records (authorizations and session records naming the old script paths as bound identity);
+  - V1's `design.json` (bound by V1's plan, grants and session commits);
+  - the decision records.
+
+  Their old paths resolve through the map.
+
+### 0S.2 What did not change
+
+- **The science:** the two V2 conditions, seed 20260726, the 36-call schedule, the losses (CE / Top-200 + tail KD;
+  no hidden-state term), the recipe, the comparisons R1-R4, the engine validation, the budget terms ($60.39
+  expected, $113.25 in caps) and the storage need (28.09 GiB).
+- **The artifacts:**
+  - execution identities: KEPT `c09176af…`, MERGED `ccdc8f5e…`, as before the move;
+  - the weights (`76c8ca19…`, `99f63821…`), the bases' init records (`413686f2…`, `f5713179…`) and their relay
+    copies are untouched;
+  - nothing was rebuilt, re-counted, retrained or regenerated because of the move;
+  - the identity checks are not relaxed: `init_record_problems` still binds base, weights, relay copy, config,
+    schedule and digest.
+- **Takeover and reuse:**
+  - V1's attempts (`--resume-from` their secured evidence) and every relay save point and final keep their
+    prefixes and records;
+  - the V2 chain's takeover is the tested one (`test_each_arm_runs_through_the_real_driver_..._a_takeover_does_nothing`,
+    for depth_merge and both loop arms).
+
+### 0S.3 Verified after the correction ($0)
+
+```text
+experiment suites at the new location (depth_merge, depth_recurrence) + tests/docs
+                                         : 217 passed / 0 failed (after re-deriving the plans and the proposal
+                                           against the final design, and repointing two link targets in this
+                                           report's 2026-11-26 sections; their prose unchanged)
+tests/architecture + test_hidden_state   : passed in the same convergence run (the core declaration covers this
+                                           round's core changes; nothing in src/aadistill moved)
+SOB1 / TPI1 suites                       : 112 passed / 3 skipped before the move; their code was not touched after
+live, read-only                          : `launch.py --kind dmr1_loop_train --arm <arm> budget` refuses for both arms
+                                           ONLY for the project cap; both committed init records pass
+                                           `init_record_problems` (KEPT c09176af..., MERGED ccdc8f5e...); the plans,
+                                           the proposal and V1's plan are their derivations; V1's training kind
+                                           still reads $26.7722 spent / $37.6878 left
+old paths                                :
+  - `resolve_historical("logs/stages/stage-6/depth_recurrence/plans/step0_diagnostic_20261126.json")` gives the
+    Stage-1 file, byte-identical to HEAD's blob;
+  - V1's bound script paths resolve to `scripts/stages/stage-1/depth_recurrence/...`
+stage index                              : stages present = stage-0, stage-1, stage-2, stage-3 (no stage-6)
+resources                                : no pod, no volume, $0/h (runpodctl and the live position)
+GPU validation                           : none; the engine validation is still owed in the first approved session
+```
+
+### 0S.4 What still needs your decision (the real open questions)
+
+1. **Money.**
+   - The proposal itself: $60.39 expected, $113.25 in caps plus $2.00 in reserves, one session per arm.
+   - A **project-cap raise**: the cap leaves $46.41, so both sessions need about **$68.8** more, or about **$11.8**
+     to run V2-D's session alone first.
+   - A grant for `dmr1_loop_train`.
+2. **Storage.** The single save-point copy, and removing the relay copies of SOB1's residual_width and ffn_attention
+   inits (7.50 GiB; dev-box copies verified). This is needed only before the V2-M session. The alternative is to free
+   V1's seed-2 save point, which you asked to keep.
+3. **The engine gate's thresholds.** For both checks: mean |dlogp| <= 3 x control + 0.02 nats and top-1 agreement
+   >= control - 0.02, with the shared-cache fault required to fail. They are fixed now, before any reading; change
+   them now or never.
+4. **Memory on the L40S.** The estimated margin is 1.85 GiB, not measured. If a measured OOM survives the
+   protocol-neutral steps, the 80 GB card is a separate decision.
+5. **V1's seed-2 save point** (19.50 GiB on the relay, resumable from step 5,520). It is kept as you asked; whether
+   it stays after this round is yours to decide.
+
+## 0R. Variant 2 revised: two initializations x one seed (the maintainer's brief of 2026-11-28)
+
+### 0R.1 V1's stop: closeout and resources (verified, not re-run)
+
+- **Records** (section 00, decisions.md 2026-11-28):
+  - seed 20260726 is complete: final `ed0ee3e1...` with both modes' sets;
+  - seed 20260801 was stopped at step 6,590 by the maintainer's decision;
+  - the pre-fixed rule's CONTINUE (`runs/dmr1_merge_train_20261127_201532/evidence/seed1_stop_check.json`) and the
+    maintainer's later stop are kept as two records; the threshold is unchanged;
+  - V1 is NOT the registered two-seed completion.
+- **Kept:** seed 1's final (relay), evaluation sets, training log and identity records (the dev box's secured
+  evidence and the repo's closeout). Also kept: seed 2's verified save point at step 5,520 on the relay -- model,
+  AdamW state, CPU and CUDA RNG states, `consumed_blocks` (the data position) and the resume identity. A later
+  resume takes it over; it never retrains from step 0.
+- **Resources** (2026-11-28 10:18-10:25Z):
+  - the pod was deleted and the provider confirms it gone;
+  - `runpodctl pod list` and `network-volume list` both read `[]`;
+  - the watchers ended (`bh4vyz4so` the stop-rule watch, `bopinhajf` the session watch), and two stale log tails
+    left from the build sessions were stopped.
+- **Money:**
+  - training kind: $26.7722 of $64.46 (two attempts);
+  - build kind: $1.6091 of $5.43;
+  - neither grant carries over to V2.
+
+The conclusion is the brief's: the current alpha merge, on the completed seed 1 under the current recovery recipe, is
+below the depth baseline, so no second seed was funded and the programme moves to the mechanism question below. This
+says nothing about layer merging in general or about whether the representation is recoverable.
+
+### 0R.2 The two conditions and their identities
+
+| | single execution (16 block calls) | recurrent (36 block calls) |
+| --- | --- | --- |
+| **D**: the kept teacher blocks, unmerged | SOB1 depth_only s20260726 (reused, sealed) | **V2-D** = `depth_loop_kept-s20260726` (new) |
+| **M**: V1's alpha-merged blocks | V1 depth_merge s20260726 (reused, sealed) | **V2-M** = `depth_loop_merged-s20260726` (new) |
+
+D is the kept layers' original teacher weights, not a uniform average. M is V1's built and verified alpha-merged
+init. Both V2 units start from their training-pre initialization, never from SOB1's or V1's recovered finals. No
+statistics, alignment, mapping or initialization is rebuilt.
+
+| | V2-D (`depth_loop_kept`) | V2-M (`depth_loop_merged`) |
+| --- | --- | --- |
+| fixed by | `design.json :: arms.depth_loop_kept.base = KEPT` | `arms.depth_loop_merged.base = MERGED` |
+| base init record | SOB1 `sob1_phase1_20261119_194259/evidence/depth_only/init_record.json` (`413686f2...`) | V1 `dmr1_merge_build_20261127_083526/evidence/depth_merge/init_record.json` (`f5713179...`), via V1's training plan |
+| weights (model.safetensors) | `76c8ca19...` | `99f63821...` |
+| relay copy (verified) | `durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6` | `durable/stage1_depth_merge/depth_merge/init/17fc769bd874e401` |
+| recurrent config | `recurrent_config.json` `3b8c0a8a...` (the same file) | the same |
+| recurrent init record | `logs/stages/stage-1/depth_recurrence/inits/KEPT/init_record.json` (`50fdbb03...`) | `.../inits/MERGED/init_record.json` (`b43b4927...`) |
+| execution identity (`execution_digest`: weights + config) | `c09176af...` | `ccdc8f5e...` |
+| training plan | `plans/training_plan_depth_loop_kept.json` | `plans/training_plan_depth_loop_merged.json` |
+| engine validation | in this session, before training | none (it runs once, in V2-D's session) |
+
+**Only the initialization differs.** Both plans are derived from SOB1's depth unit of seed 20260726 with the same
+declared fields replaced (`plan.py`). Their configs differ in the initialization (weights sha, init record and its
+sha) and in the names that follow from the arm (run name, student path, output directory) -- tested
+(`test_the_loop_arms_plans_differ_..._only_in_the_init`).
+
+Everything else is identical:
+- **Schedule:** 16 blocks on 36 logical-layer calls, derived from the real mapping. Each call reads the previous
+  call's output, with no detach, and every call's gradient sums into the shared parameters.
+- **Generation:** one KV cache per logical layer.
+- **Data:** the same teacher lineage, data, proportions, seeded order and packing (8,192 tokens, sequential, with
+  truncation, causal attention).
+- **Optimization:** micro-batch 1 x 2 accumulation steps, 9,701 optimizer steps, the same AdamW and learning rate,
+  CE 0.25 + Top-200 + tail KD 1.0, fp32 weights with bf16 autocast, and the same trainable set.
+- **Evaluation:** the same tokenizer, chat template, evaluation protocol and per-item seeds.
+
+Nothing is changed for one condition only: no hidden-state loss, iteration count, residual scaling or learning rate.
+Recurrence keeps the training data and the optimizer steps, but NOT the compute: about 1.8x the training work per
+token and 2.25x the decode work. The report gives measured GPU time, memory and evaluation time, never
+"same compute".
+
+### 0R.3 What changed from the 2026-11-26 design, and where
+
+| | 2026-11-26 (kept in `design.json :: superseded_2026_11_28`) | 2026-11-28 | code |
+| --- | --- | --- | --- |
+| initialization | ONE base, selected by C1 two-seed rule (MERGED iff pooled and both seeds > 0) | BOTH bases, each a fixed condition | `schedule.py` (`base_of`, `init_record(arm)`, `init_record_problems`); `select` / `decide` removed from the chain (git history) |
+| arms | `depth_loop`, `depth_loop_hidden` | `depth_loop_kept`, `depth_loop_merged`; `depth_loop_hidden` NOT STARTED (no base, plan or kind) | `depth_merge/common.py :: ARMS`; `depth_recurrence/launch.py` (kind `dmr1_loop_train`, `--arm`) |
+| seeds | 20260726, 20260801 | 20260726 per arm; no second seed starts | `design.json :: arms.<arm>.seeds`; `plan.py :: seeds_of` |
+| comparisons | C2 (loop vs the selected single arm), C3 (V3 vs V2), tested, pooled over two seeds | R1 = V2-D - D, R2 = V2-M - M, R3 = V2-M - V2-D, R4 = I = (V2-M - V2-D) - (M - D); descriptive, single seed, 95% group-bootstrap intervals | `analysis.py :: recurrence`, `recurrence_modes`, `interaction_groups` |
+| engine validation | "owed before or at the first paid run" | an explicit first stage of V2-D's session, in its budget, gated | `depth_recurrence/engine_check.py`; `depth_merge/train_driver.py :: engine_validation` |
+| diagnostics | val CE / KD | + the eval-only state probe per logical layer | core: `hidden_state.StateProbe`, `train.py :: state_probe` |
+| save points on the relay | two copies (registered rotation) | one copy, PROPOSED (0R.6) | TPI1 `train_driver.savepoint_copies` / `remove_before_upload`; SOB1 `launch.rotation_need`, `train_driver.secure_final` |
+| money | an estimate, never proposed (`estimates.json`, removed) | a proposal per arm (`plans/proposal_dmr1_loop_train.json`) | `proposal.py :: proposal_v2` |
+
+C1 is not completed: no C1 state is written, nothing is derived from the old selector, and V1's seed 2 is not resumed
+to satisfy it.
+
+The core stays generic. `src/aadistill` gains the eval-only probe (pairs, sequences and stride are the caller's) and
+nothing names an arm, a model size or a schedule. The arms, the 36-layer schedule, the seeds and the probe's
+settings live in the design and the experiment scripts.
+
+### 0R.4 The question, the statistics and how a result is read
+
+- **Question:** does the alpha merge's single-execution deficit persist when the same block is executed
+  recurrently?
+- **What is reported:**
+  - R1-R4 with the four conditions' accuracies, in both modes;
+  - primary: thinking mode, the static fluid formal core (570 items, 558 independence groups), seed 20260726;
+  - the item contrast is per item; R4 is formed per item from its four records (V2-M, V2-D, M, D), so each group
+    resample keeps their pairing (10,000 resamples, `default_rng(20261120)`). Its arithmetic is tested: R4 = R3 -
+    (M - D) item for item, and identical conditions give exactly [0, 0].
+- **Reported beside it, as registered:** non-thinking, the interactive episodes and every supporting unit.
+- **Not a test:** this is a single-seed exploration with no test and no verdict. The intervals cover items with each
+  checkpoint fixed, not training randomness. eval-set-1 is development-exposed.
+- **Reading:**
+  - for reference, M - D is -3.86 pp in thinking mode (seed 20260726);
+  - if the two recurrent conditions come out close, the deficit shrinks under recurrence. That does not mean the
+    merge is better; the absolute accuracies are read beside it;
+  - the round cannot separate "the weighting damaged the representation" from "the recipe suits it less", because
+    recurrence also changes the graph, the state distribution and gradient flow. No mechanism is concluded, and V3 is
+    discussed after these results;
+  - nothing is changed after a result: not the metric, the rules or the threshold.
+- **Diagnostics** (the same for both inits, never a loss, never a reason to drop or re-tune a run):
+  - the state probe at every validation (step 0, every 1,212 steps, the final step), per logical layer against its
+    teacher layer, at fixed rows (the first 2 validation sequences, every 8th KD row): relative squared error, both
+    norms, and cosine;
+  - validation CE / KD curves;
+  - measured seconds per step, first-four-steps memory, evaluation time and termination types;
+  - the KEPT recurrent init's 2026-11-26 CPU step-0 reading (val CE 12.46, against the single-execution base's
+    3.46) is recorded as it is. It is not a verdict on recurrent training, and both inits get their own step-0
+    reading from the run.
+
+### 0R.5 Verification done, and what only a GPU can answer
+
+Run at $0 this round (development checks only where a result decided the next step, then one convergence
+validation; no full core suite was run: the changed core is covered by the convergence set, and P8.3 does not owe
+one):
+
+```text
+core convergence (tests/training, tests/architecture, tests/models,
+  tests/infrastructure)                    : all pass after the core changes were declared (the declaration
+                                             also covers two earlier undeclared ones: session_runner's
+                                             poll_lifetime, e5482309, and search.py's applicability check,
+                                             506e83e3)
+experiment suites (depth_merge, depth_recurrence, SOB1, TPI1)
+                                           : 112 passed / 0 failed / 3 skipped (5.6 min)
+budget chain, live and read-only           : `launch.py --kind dmr1_loop_train --arm <arm> budget` refuses ONLY for
+                                             the project cap (0R.7)
+GPU validation                             : none (no GPU)
+```
+
+What the tests establish:
+- the state probe through the real trainer: its arithmetic against the plain formulas, and identical losses,
+  gradients, weights and RNG state with and without it;
+- the single-copy rotation: removal confirmed before each upload, an unconfirmed removal holding the upload back,
+  and the relay arithmetic;
+- the real driver end to end for depth_merge and both loop arms: the engine check runs before any training, a
+  failed check trains nothing, and a takeover repeats nothing;
+- the HF cache check on a tiny real recurrent model: the true cache passes against the control, and the
+  wrong-iteration-keys fault fails;
+- R1-R4's arithmetic.
+
+NOT VALIDATED until the first approved session's engine-validation stage (`engine_validation`, before any training):
+- vLLM 0.27.1 importing the recurrent plugin under its own environment;
+- torch.compile and CUDA graphs over 36 per-logical-layer `Attention` modules, and the KV-cache sizing;
+- HF / vLLM agreement on generation and on independent KV caches -- the check compares each against the same weights
+  as a stock 16-layer Qwen3 in the same session, and requires a deliberate shared-cache fault to fail;
+- the recurrent model's L40S memory and step time (the first four steps' memory probe);
+- the vLLM half of `engine_check.py`, which has never executed.
+
+Gate (fixed now): for both checks, recurrent mean |dlogp| <= 3 x control + 0.02 nats and top-1 agreement >= control -
+0.02, the fault failing, and one cache entry per logical layer. A FAIL ends the session with nothing trained.
+
+### 0R.6 Storage (live 2026-11-28 10:25Z; `logs/stages/stage-1/depth_recurrence/plans/storage_plan.json`)
+
+The relay holds 60.36 GiB and accepts 27.22 GiB more. That includes V1's seed-1 final (7.46), V1's seed-2 save point
+(19.50), V1's init (3.73: V2-M's base) and SOB1's depth init (3.73: V2-D's base), all kept. The dev box has 6.85 GiB
+free (no expansion), and a session's evidence is bounded at 1.5 GiB.
+
+| rotation | relay need for both sessions (peak + 1 GiB) | as is (27.22) | with the two duplicates removed (34.72) |
+| --- | --- | --- | --- |
+| registered: two save points | 47.58 GiB | does not fit | does not fit |
+| **single copy** (proposed) | **28.09 GiB** | V2-D fits; V2-M short by 0.87 GiB | **fits, 6.64 GiB margin** |
+
+The peak is during V2-M's first save point, with V2-D's final on the relay.
+
+The proposal, for your decision:
+1. **Single save-point copy** (`training.durability.savepoint_copies = 1`; already in the plans, implemented and
+   tested):
+   - the previous save point is removed before each upload, and the last one before the final's;
+   - cost: during each upload (about 2-3 min, eight times per unit) the unit holds no durable save point; a pod lost
+     exactly then restarts that unit's training from step 0 (up to about 24 h).
+2. **Remove the relay copies of SOB1's residual_width and ffn_attention inits** (7.50 GiB):
+   - their dev-box copies are re-hashed equal to the records, so no artifact is deleted;
+   - this is needed only before the V2-M session.
+
+Not proposed: deleting V1's seed-2 save point (you asked to keep it), buying storage, or expanding the dev box.
+
+### 0R.7 Money, and the launch conditions (`logs/stages/stage-1/depth_recurrence/plans/proposal_dmr1_loop_train.json`)
+
+| session | expected | hard cap | basis |
+| --- | --- | --- | --- |
+| V2-D: engine validation + 9,701 steps + evaluation | $30.42 (26.7 driver h) | $57.22 (47.4 driver h bound) | 8.69 s / step expected (SOB1's 4.83 x 1.8), 13.03 bound; evaluation 2.75 h / 6.75 h (x 2.25); engine check 0.4 / 1.0 h |
+| V2-M: 9,701 steps + evaluation | $29.97 | $56.03 | the same, without the engine check |
+| **both** | **$60.39** | **$113.25** (+ $2.00 reserves = **$115.25**) | |
+
+- **The project cap does not cover it.** It leaves **$46.41** as the provider bills it (live at commit time, $1,161.06
+  cap; $46.99 at 10:25Z, the difference being V1 attempt 2's last billing rows posting after its teardown, with no
+  resource existing and the balance moving $0.02). Even the first session's $57.22 cap + $1 reserve does not fit,
+  and the budget command refuses for that reason alone.
+  - Both sessions at their caps need a cap raise of about **$68.8**.
+  - A raise of about **$11.8** covers V2-D's session alone.
+- **The balance does cover the first session.** $95.37 covers V2-D's $58.22; the second session is checked again at
+  its issue.
+- **The step time is not measured.** The 1.8x work model has not been measured on a GPU. The first four steps
+  measure it, and the bound is 1.5x the expected time.
+- **The memory risk is real.** The estimated reserved peak is 42.54 GiB on a 44.39 GiB L40S (1.85 GiB margin). An
+  OOM is met first by protocol-neutral steps (expandable segments, `kd_chunk`); an 80 GB card would need a measured
+  OOM and a decision of its own.
+
+**Launch conditions**, after which the two sessions run without stopping in between:
+- the maintainer approves this design, the budget, and the project-cap raise;
+- a grant for `dmr1_loop_train` is written;
+- the storage decision (0R.6), needed before V2-M;
+- each session's issue and launch gates pass live (session commit, room, balance, envelope).
+
+Both units then train and are evaluated, and the round stops for review: no seed 2 is started, and V2-M is not
+cancelled whatever V2-D shows.
 
 ## 00. Variant 1 executed (2026-11-27/28 UTC)
 
@@ -387,11 +734,11 @@ The round **DMR1** (reasoning-inheritance research) has three variants:
 | variant | arm | stage | design | question |
 | --- | --- | --- | --- | --- |
 | 1, DMR1-M | `depth_merge` | Stage 1 init, `stage3_recovery` training | [`configs/stages/stage-1/depth_merge/design.json`](../../../../configs/stages/stage-1/depth_merge/design.json) | alpha-merged init vs direct deletion, same recovery |
-| 2, DMR1-R | `depth_loop` | Stage 6 (`stage6_recurrent_depth`) | [`configs/stages/stage-6/depth_recurrence/design.json`](../../../../configs/stages/stage-6/depth_recurrence/design.json) | 16 shared blocks on 36 logical layers vs single execution, same init |
+| 2, DMR1-R | `depth_loop` | Stage 6 (`stage6_recurrent_depth`) | [`configs/stages/stage-6/depth_recurrence/design.json`](../../../../configs/stages/stage-1/depth_recurrence/design.json) | 16 shared blocks on 36 logical layers vs single execution, same init |
 | 3, DMR1-RH | `depth_loop_hidden` | Stage 6 | the same | variant 2 + per-iteration hidden-state loss |
 
 Design documents: [`docs/stages/stage-1/depth_merge/README.md`](../depth_merge/README.md),
-[`docs/stages/stage-6/depth_recurrence/README.md`](../../stage-6/depth_recurrence/README.md).
+[`docs/stages/stage-6/depth_recurrence/README.md`](../depth_recurrence/README.md).
 
 **Changed, by area** (commit message lists every file):
 

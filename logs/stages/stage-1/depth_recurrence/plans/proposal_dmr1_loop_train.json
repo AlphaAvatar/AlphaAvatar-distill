@@ -1,0 +1,187 @@
+{
+ "schema": "aadistill.dmr1.proposal/v1",
+ "study": "DMR1-R",
+ "status": "proposed",
+ "kind": "dmr1_loop_train",
+ "recorded_utc": "2026-11-28",
+ "design_sha256": "97626d862ed729a6904280d7e16d0be99845b48d86cd9e0c5e3e7e4c8f660e5e",
+ "scope": "DMR1 variant 2 as revised 2026-11-28: depth_loop_kept and depth_loop_merged, seed 20260726 each, one session per arm; the first runs the engine validation before training",
+ "ceiling_usd": 113.25,
+ "teardown_reserve_usd": 1.0,
+ "per_session_hard_cap_usd": 57.22,
+ "per_session_rule": "each session's own cap is its arm's (kinds.dmr1_loop_train.per_arm); this field is the larger, which no single session may exceed; the ceiling is both sessions'",
+ "kinds": {
+  "dmr1_loop_train": {
+   "per_arm": {
+    "depth_loop_kept": {
+     "driver_minutes": 2841.3,
+     "expected_usd": 30.42,
+     "per_session_hard_cap_usd": 57.22,
+     "unit_deadline_hours": 35.1
+    },
+    "depth_loop_merged": {
+     "driver_minutes": 2781.3,
+     "expected_usd": 29.97,
+     "per_session_hard_cap_usd": 56.03,
+     "unit_deadline_hours": 35.1
+    }
+   }
+  }
+ },
+ "gpus": {
+  "NVIDIA L40S": 1.11
+ },
+ "gpu_count_max": 1,
+ "hardware": "one NVIDIA L40S, secure cloud, at most $1.11/h, 150 GB container disk, no network volume",
+ "usd_per_hour_all_in": 1.1105,
+ "terms": {
+  "depth_loop_kept": {
+   "units": 1,
+   "training_per_seed": {
+    "seconds_per_step_expected": 8.694,
+    "seconds_per_step_bound": 13.034,
+    "hours_expected": 23.43,
+    "hours_bound": 35.12
+   },
+   "post_recovery_evaluation_hours_per_unit": {
+    "expected": 2.75,
+    "bound": 6.75
+   },
+   "copies": {
+    "init_fetch": {
+     "bytes": 4007703552,
+     "hours_bound": 0.535,
+     "hours_expected": 0.009
+    },
+    "final_copy_per_seed": {
+     "bytes": 8015407104,
+     "hours_bound": 1.094,
+     "hours_expected": 0.037
+    },
+    "last_save_point_copy": {
+     "bytes": 20934572032,
+     "hours_bound": 2.856,
+     "hours_expected": 0.097
+    }
+   },
+   "engine_validation_hours": {
+    "expected": 0.4,
+    "bound": 1.0
+   },
+   "driver_hours_expected": 26.72,
+   "driver_hours_bound": 47.35,
+   "driver_minutes": 2841.3,
+   "unit_deadline_hours": 35.1,
+   "expected_usd": 30.42,
+   "hard_cap": {
+    "driver_minutes": 2841.3,
+    "billable_minutes": 3036.61,
+    "usd": 57.22
+   },
+   "per_session_hard_cap_usd": 57.22
+  },
+  "depth_loop_merged": {
+   "units": 1,
+   "training_per_seed": {
+    "seconds_per_step_expected": 8.694,
+    "seconds_per_step_bound": 13.034,
+    "hours_expected": 23.43,
+    "hours_bound": 35.12
+   },
+   "post_recovery_evaluation_hours_per_unit": {
+    "expected": 2.75,
+    "bound": 6.75
+   },
+   "copies": {
+    "init_fetch": {
+     "bytes": 4007703552,
+     "hours_bound": 0.535,
+     "hours_expected": 0.009
+    },
+    "final_copy_per_seed": {
+     "bytes": 8015407104,
+     "hours_bound": 1.094,
+     "hours_expected": 0.037
+    },
+    "last_save_point_copy": {
+     "bytes": 20934572032,
+     "hours_bound": 2.856,
+     "hours_expected": 0.097
+    }
+   },
+   "driver_hours_expected": 26.32,
+   "driver_hours_bound": 46.35,
+   "driver_minutes": 2781.3,
+   "unit_deadline_hours": 35.1,
+   "expected_usd": 29.97,
+   "hard_cap": {
+    "driver_minutes": 2781.3,
+    "billable_minutes": 2973.61,
+    "usd": 56.03
+   },
+   "per_session_hard_cap_usd": 56.03
+  }
+ },
+ "expected_usd_total": 60.39,
+ "hard_caps_total_usd": 113.25,
+ "needed_with_reserves_usd": 115.25,
+ "project_cumulative_cap_usd": 1161.06,
+ "position_at_proposal": {
+  "read_utc": "2026-11-28T10:25:11Z",
+  "committed_usd": 1113.5131,
+  "project_cap_usd": 1161.06,
+  "project_remaining_usd": 47.5469,
+  "balance_usd": 95.3743,
+  "pods": 0,
+  "volumes": 0,
+  "spend_per_hour": 0.0,
+  "relay_headroom_gib": 27.219,
+  "relay_used_gib": 60.36,
+  "dev_box_free_gib": 6.85
+ },
+ "fits_position": {
+  "project_cap": {
+   "remaining_usd": 47.5469,
+   "needed_usd": 115.25,
+   "fits": false,
+   "shortfall_usd": 67.7
+  },
+  "balance": {
+   "balance_usd": 95.3743,
+   "first_session_needs_usd": 58.22,
+   "fits_first_session": true,
+   "rule": "checked at each issue and launch against that session's cap plus the reserve"
+  }
+ },
+ "basis": {
+  "step_time": "SOB1's measured 4.83 s / step (V1 measured 4.87) and the 7.241 s bound, x 1.80 (teacher 36 + 4 x 36 student logical-layer forward-equivalents vs 36 + 4 x 16): NOT measured -- the first four steps measure it",
+  "evaluation": "SOB1's 1.22 h expected / 3.0 h bound per unit, x 2.25 (36 / 16 logical layers of decode work and KV cache)",
+  "engine_validation": {
+   "expected": 0.4,
+   "bound": 1.0
+  },
+  "not_the_same_compute": "same data and optimizer steps as the single-execution controls, about 1.8x the training work per token and 2.25x the decode work: reported as measured GPU time, never as matched compute"
+ },
+ "memory_gib": {
+  "device_gib": 44.39,
+  "rule": "SOB1's measured depth peak plus the added tensors (not measured)",
+  "depth_loop_kept_and_merged": {
+   "peak_allocated_gib": 40.95,
+   "peak_reserved_gib": 42.54,
+   "margin_to_device_gib": 1.85
+  },
+  "state_probe_at_validation": 0.154,
+  "added": {
+   "checkpointed_inputs_gib": 1.56
+  },
+  "risk": "the loop arms' estimated reserved peak leaves about 1.9 GiB of the L40S: real. The first four steps' memory_probe measures it; an out-of-memory error is answered first by the recipe's protocol-neutral steps (expandable segments, kd_chunk), then -- only after a measured OOM and under a decision of its own -- an 80 GB card"
+ },
+ "money_rules": {
+  "own_envelope": "its own grant; variant 1's grants (dmr1_merge_build, dmr1_merge_train) are not carried over and fund nothing here; SOB1's closed grants' remainders are void",
+  "cumulative": "the two sessions share the kind's envelope; a retry's cap is what the envelope leaves after every earlier attempt's closeout, minus the reserve",
+  "teardown_reserve": "$1.00 per session, held outside the ceiling, never issued"
+ },
+ "authorizes": "nothing: a proposal; the grant is the maintainer's",
+ "decision": "PENDING",
+ "granted_by": "nobody"
+}

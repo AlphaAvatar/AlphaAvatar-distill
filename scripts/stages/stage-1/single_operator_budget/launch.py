@@ -186,6 +186,9 @@ def rotation_need(plan: dict, state: dict, sizes: dict) -> dict:
     bytes removed) over the sequence, against the relay's LIVE headroom (which already excludes them). The latest
     resumable save point is never removed before a later one is uploaded."""
     sp, fin = int(sizes["save_point"]), int(sizes["final_fp32"])
+    #: `durability.savepoint_copies` (TPI1's `savepoint_copies`): 2, each new save point beside the previous until it
+    #: hands off; 1, the previous removed before each upload and the last before the final's
+    single = int((plan.get("durability") or {}).get("savepoint_copies", 2)) == 1
     net, peak, trace = 0, 0, []
 
     def step(what: str, delta: int):
@@ -207,10 +210,18 @@ def rotation_need(plan: dict, state: dict, sizes: dict) -> dict:
         for k in range(every, total, every):
             if k <= latest:
                 continue
+            if single:
+                for _ in current:
+                    step(f"{name}: save point before {k} removed (single copy)", -sp)
             step(f"{name}: save point {k} uploaded", sp)
-            for _ in current:
-                step(f"{name}: save point before {k} removed", -sp)
+            if not single:
+                for _ in current:
+                    step(f"{name}: save point before {k} removed", -sp)
             current = [k]
+        if single:
+            for _ in current:
+                step(f"{name}: last save point removed before the final (single copy)", -sp)
+            current = []
         step(f"{name}: final uploaded", fin)
         for _ in current:
             step(f"{name}: save points retired after the final", -sp)

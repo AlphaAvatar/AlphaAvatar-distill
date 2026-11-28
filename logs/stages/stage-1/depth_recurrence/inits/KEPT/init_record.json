@@ -1,0 +1,236 @@
+{
+ "schema": "aadistill.stage1.depth_recurrence.init_record/v2",
+ "status": "COMPLETE",
+ "arms": [
+  "depth_loop_kept"
+ ],
+ "path": "KEPT",
+ "root_teacher": {
+  "verified": [
+   "model-00001-of-00003.safetensors",
+   "model-00002-of-00003.safetensors",
+   "model-00003-of-00003.safetensors"
+  ],
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192"
+ },
+ "commit": {
+  "selected_rows": [
+   {
+    "state_id": "recurrent_kept/c09176afd1c6c6e10d5b348d8654f0ab",
+    "path": "the KEPT base executed on the 36-layer schedule",
+    "artifact_digest": "c09176afd1c6c6e10d5b348d8654f0abef27902f5fa2df7dea00366ce53b35fb",
+    "single_shard_sha256": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222"
+   }
+  ]
+ },
+ "checkpoint": {
+  "artifact_digest": "c09176afd1c6c6e10d5b348d8654f0abef27902f5fa2df7dea00366ce53b35fb",
+  "artifact_digest_rule": "execution_digest: sha256 over the weights' and the config file's sha256 (identify_checkpoint's digest is the base's)",
+  "shards": [
+   {
+    "filename": "model.safetensors",
+    "sha256": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+    "size_bytes": 4007724000
+   }
+  ],
+  "files_sha256": {
+   "model.safetensors": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+   "config.json": "3b8c0a8a6f5552c20246256a52f10ea14bfd53d736393d02ab5fb4dff630636c"
+  },
+  "num_parameters": 2003851776,
+  "base_artifact_digest": "2c738b963335dcb286b9eabec35901f089b383c6077d0979b4e6d4308bed73c6"
+ },
+ "execution": {
+  "layer_to_block": [
+   0,
+   1,
+   1,
+   1,
+   2,
+   3,
+   4,
+   5,
+   5,
+   5,
+   6,
+   6,
+   7,
+   7,
+   7,
+   7,
+   7,
+   7,
+   8,
+   9,
+   9,
+   9,
+   10,
+   11,
+   12,
+   12,
+   12,
+   12,
+   12,
+   13,
+   13,
+   14,
+   14,
+   14,
+   15,
+   15
+  ],
+  "root_layer_of_layer": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35
+  ],
+  "n_logical_layers": 36,
+  "n_parameter_blocks": 16,
+  "spans": [
+   [
+    0
+   ],
+   [
+    1,
+    2,
+    3
+   ],
+   [
+    4
+   ],
+   [
+    5
+   ],
+   [
+    6
+   ],
+   [
+    7,
+    8,
+    9
+   ],
+   [
+    10,
+    11
+   ],
+   [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   [
+    18
+   ],
+   [
+    19,
+    20,
+    21
+   ],
+   [
+    22
+   ],
+   [
+    23
+   ],
+   [
+    24,
+    25,
+    26,
+    27,
+    28
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    31,
+    32,
+    33
+   ],
+   [
+    34,
+    35
+   ]
+  ],
+  "config": {
+   "path": "configs/stages/stage-1/depth_recurrence/recurrent_config.json",
+   "sha256": "3b8c0a8a6f5552c20246256a52f10ea14bfd53d736393d02ab5fb4dff630636c"
+  }
+ },
+ "base": {
+  "init_record": {
+   "path": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/depth_only/init_record.json",
+   "sha256": "413686f23fa23f25b0c5bb6534ff9dbd3029fc5c40493a84296d987cd73b02de"
+  },
+  "arm": "depth_only",
+  "artifact_digest": "2c738b963335dcb286b9eabec35901f089b383c6077d0979b4e6d4308bed73c6"
+ },
+ "fixed_by": "configs/stages/stage-1/depth_recurrence/design.json :: arms.depth_loop_kept.base = KEPT",
+ "relay": {
+  "init": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6",
+   "files_sha256": {
+    "init/model.safetensors": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+    "init/config.json": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019"
+   },
+   "bytes": {
+    "init/model.safetensors": 4007724000,
+    "init/config.json": 1154
+   },
+   "quota": "2 object(s), 3.73 GiB: ACCEPTED (200) 2/2 granted an upload action",
+   "uploaded": [
+    "init/config.json",
+    "init/model.safetensors"
+   ],
+   "upload_seconds": 13.5,
+   "downloaded_sha256": {
+    "init/config.json": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019",
+    "init/model.safetensors": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222"
+   },
+   "verified": true,
+   "verify_seconds": 9.5,
+   "utc": "2026-11-19T21:45:25Z",
+   "rule": "uploaded, downloaded again into a fresh cache and re-hashed"
+  }
+ },
+ "staging": "the pod fetches the base's relay copy (its weights and config, re-hashed) and writes the recurrent config over the config (depth_merge.train_driver.stage_init)"
+}

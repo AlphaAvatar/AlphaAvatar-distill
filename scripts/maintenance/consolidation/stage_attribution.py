@@ -368,34 +368,6 @@ STAGES = [
             "KD have all been tested; the conclusions and the ones they do "
             "**not** support are in `logs/state/experiment_index.md`."),
     ),
-    dict(
-        stage_id="6",
-        purpose=(
-            "Study recurrent forward execution: a block whose parameters are shared and executed repeatedly, one "
-            "iteration after another, and the training such a student needs (AGENTS.md 4.8, maintainer decision "
-            "2026-11-13). Whether repetition recovers depth -- and with it reasoning -- a compressed student lost, at "
-            "the parameter count the budget allows, and at what compute and latency cost."),
-        inputs=[
-            "a training-pre initialization of a depth-compressed student and the teacher lineage it came from",
-            "a recovery data set and recipe each Stage-6 design registers for itself (nothing inherited by default)",
-        ],
-        data=[],
-        execution=[
-            "the shared blocks, how often each runs, the initialization, the data and packing, the objective and "
-            "the compute accounting are recorded as the design's identity before its first run",
-            "parameter-matched, FLOPs-matched and latency-matched comparisons are different comparisons, reported "
-            "apart",
-        ],
-        outputs=["recovered recurrent students' weights on the relay, their sealed eval-set-1 sets on the dev box"],
-        configs=[
-            E("configs/stages/stage-6/depth_recurrence/design.json",
-              "DMR1's variants 2 and 3: the 36-logical-layer schedule over SOB1's 16 kept blocks, the "
-              "initialization selection, the hidden-state term, the round's registered analysis",
-              field="stage", equals=6),
-        ],
-        code=[],
-        status=("Prepared at $0 (DMR1, 2026-11-26): no Stage-6 run exists; nothing is authorized."),
-    ),
 ]
 
 
@@ -1830,9 +1802,9 @@ STAGE_1 = [
         id="depth_merge",
         kind="experiment",
         stage_id="1",
-        status=("PREPARED at $0 (DMR1 variant 1, READY_FOR_REVIEW 2026-11-26; nothing granted, issued or run): the "
-                "alpha (importance-normalized) merge of each kept block's span at SOB1's 16-of-36 depth selection, "
-                "then SOB1's depth recovery recipe; its two sessions proposed"),
+        status=("EXECUTED and STOPPED by the maintainer during seed 2 (DMR1 variant 1, 2026-11-27/28): the build "
+                "COMPLETE; seed 20260726 trained and evaluated, reported descriptively (below SOB1's same-seed "
+                "depth_only); seed 20260801 stopped at step 6,590, its save point kept; not the two-seed completion"),
         title="Depth recovery, variant 1: importance-merged initialization at SOB1's depth-only structure (DMR1-M)",
         question=("At SOB1's depth-only structure, does writing each kept block from its whole span by the alpha "
                   "merge, instead of keeping it as it is, leave more static fluid reasoning after the same Stage-3 "
@@ -1858,43 +1830,43 @@ STAGE_1 = [
             "Stage 1 by subject: how the initialization of a depth-compressed student is written (AGENTS.md 4.3); "
             "the Stage-3 recovery (execution stage stage3_recovery) and eval-set-1 are its fixed instruments."),
     ),
-]
-
-#: ---------------------------------------------------------------------------
-#: STAGE 6 -- recurrent depth (AGENTS.md 4.8)
-#: ---------------------------------------------------------------------------
-STAGE_6 = [
     dict(
         id="depth_recurrence",
         kind="experiment",
-        stage_id="6",
-        status=("PREPARED at $0 (DMR1 variants 2 and 3, READY_FOR_REVIEW 2026-11-26; no paid run authorized): SOB1's "
-                "16 kept blocks executed on the 36-logical-layer schedule from the selected training-pre "
-                "initialization, with and without a per-iteration hidden-state term; estimated, not proposed"),
-        title="Depth recovery, variants 2 and 3: recurrent execution of the kept blocks, and per-iteration hidden-state "
-              "distillation (DMR1-R, DMR1-RH)",
-        question=("Does executing each kept block once per teacher layer of its span leave more static fluid "
-                  "reasoning after the same recovery than executing it once, from the same initialization; and does "
-                  "a per-iteration hidden-state loss change what survives?"),
-        canonical_config="configs/stages/stage-6/depth_recurrence/design.json",
+        stage_id="1",
+        status=("REVISED at $0, READY_FOR_REVIEW (DMR1 variant 2, 2026-11-28; nothing granted, issued or run): "
+                "SOB1's 16 kept blocks executed on the 36-logical-layer schedule from BOTH training-pre "
+                "initializations (kept / alpha-merged) x seed 20260726, recovered by Stage 3; proposed, not granted. "
+                "Variant 3 not started"),
+        title="Depth recovery, variants 2 and 3: recurrent execution of the kept blocks from both initializations, "
+              "and per-iteration hidden-state distillation (DMR1-R, DMR1-RH)",
+        question=("Does the alpha merge's single-execution deficit persist when the same blocks are executed "
+                  "recurrently, from the kept and from the merged initialization alike, after the same Stage-3 "
+                  "recovery?"),
+        canonical_config="configs/stages/stage-1/depth_recurrence/design.json",
         evidence=[
-            E("configs/stages/stage-6/depth_recurrence/design.json",
-              "the schedule, the initialization selection and its two legal paths, the hidden-state term, the "
-              "round's registered analysis and the compute accounting",
-              field="authorizes", equals="nothing"),
-            E("logs/stages/stage-6/depth_recurrence/plans/estimates.json",
-              "variants 2 and 3's time, money and memory on the real execution graph, not proposed",
-              field="status", equals="estimate, NOT proposed this round"),
+            E("configs/stages/stage-1/depth_recurrence/design.json",
+              "the schedule, each loop arm's fixed base (the old selection kept as superseded), the engine "
+              "validation, the state probe, R1-R4 and the compute accounting",
+              field="stage", equals=1),
+            E("logs/stages/stage-1/depth_recurrence/plans/proposal_dmr1_loop_train.json",
+              "the revised variant 2's two sessions' time, money and memory, proposed and not granted",
+              field="status", equals="proposed"),
         ],
         external_material=[
-            "docs/stages/stage-6/depth_recurrence/README.md -- variants 2 and 3's design",
+            "docs/stages/stage-1/depth_recurrence/README.md -- variants 2 and 3's design",
             "docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md -- the round's review report",
         ],
-        decisions=["the maintainer's brief of 2026-11-26 (DMR1: variants 2 and 3 prepared, not authorized)"],
-        canonical_log_destination="logs/stages/stage-6/depth_recurrence",
+        decisions=["the maintainer's brief of 2026-11-26 (DMR1: variants 2 and 3 prepared, not authorized)",
+                   "the maintainer's brief of 2026-11-28 (variant 2: both initializations x seed 20260726, at $0 "
+                   "to READY_FOR_REVIEW)",
+                   "the maintainer's stage correction of 2026-11-28 (Stage 1 research, Stage 3 recovery; moved from "
+                   "stage-6, AGENTS.md 4.8 clarified)"],
+        canonical_log_destination="logs/stages/stage-1/depth_recurrence",
         classification_reason=(
-            "Stage 6 by subject: shared-parameter repeated execution and the training it needs (AGENTS.md 4.8, "
-            "maintainer 2026-11-13); its recovery data and recipe are registered explicitly as the design's."),
+            "Stage 1 by subject: how the initialization of a depth-compressed student is written and executed "
+            "(AGENTS.md 4.3), from the teacher before any recovery -- not a Stage-5 model (4.8); the Stage-3 "
+            "recovery (execution stage stage3_recovery) and eval-set-1 are its fixed instruments."),
     ),
 ]
 
@@ -2654,7 +2626,7 @@ def _row(rec: dict) -> dict:
     return out
 
 
-INVENTORY = [_row(r) for r in (*STAGE_0, *STAGE_1, *STAGE_2, *STAGE_3, *STAGE_6, *SHARED)]
+INVENTORY = [_row(r) for r in (*STAGE_0, *STAGE_1, *STAGE_2, *STAGE_3, *SHARED)]
 
 
 def _dig(doc, dotted: str):

@@ -160,6 +160,16 @@ def validate_train_config(cfg: dict) -> None:
             raise ValueError(str(exc)) from exc
         if "kd_support" not in loss:
             raise ValueError("loss.hidden_state runs on the head-row path: it needs loss.kd_support")
+    # Optional. `state_probe`: an eval-only state diagnostic (`hidden_state.StateProbe`): {pairs, blocks, row_stride}.
+    # At each validation it compares the student's logical-layer outputs with the teacher's layer outputs at fixed KD
+    # rows of the first `blocks` validation sequences. It adds nothing to any loss and never runs in a training step.
+    if "state_probe" in cfg:
+        try:
+            HS.validate_probe_config(cfg["state_probe"])
+        except HS.HiddenStateError as exc:
+            raise ValueError(str(exc)) from exc
+        if "kd_support" not in loss:
+            raise ValueError("state_probe reads the KD rows of the head-row path: it needs loss.kd_support")
     optim = need(cfg, "optim", dict)
     for key in ("lr", "weight_decay", "eps", "grad_clip"):
         need(optim, key, (int, float), "optim.")
@@ -832,6 +842,21 @@ class Trainer:
             if bad:
                 raise ValueError(f"loss.hidden_state pairs {bad} name layers outside the student's {n_s} logical "
                                  f"layers or the teacher's {n_t}")
+        # The eval-only state probe (`state_probe`): the same hand-over and the same pair rule, no loss.
+        self.probe_cfg = self.cfg.get("state_probe")
+        self.probe_pairs = HS.pairs_of(self.probe_cfg) if self.probe_cfg else []
+        if self.probe_cfg:
+            if self.teacher is None:
+                raise ValueError("state_probe needs the online teacher")
+            if not getattr(self.student.get_decoder(), "supports_hidden_supervision", False):
+                raise ValueError(f"{type(self.student).__name__}'s decoder does not hand over its logical-layer "
+                                 "outputs (supports_hidden_supervision); state_probe cannot be computed")
+            n_s = int(self.student.config.num_hidden_layers)
+            n_t = len(self.teacher.get_decoder().layers)
+            bad = [p for p in self.probe_pairs if not (p[0] < n_s and p[1] < n_t)]
+            if bad:
+                raise ValueError(f"state_probe pairs {bad} name layers outside the student's {n_s} logical "
+                                 f"layers or the teacher's {n_t}")
         # Per-step sums of the head-row KD diagnostics (see _row_micro_losses).
         self._step_kd_diag = {"rows": 0, "teacher_tail_mass": 0.0, "target_in_support": 0}
 
@@ -1422,9 +1447,59 @@ class Trainer:
         """Metrics over the primary val set (see _eval_blocks)."""
         if self.val_ids is None:
             raise ValueError("trainer has no validation blocks")
-        return self._eval_blocks(
+        out = self._eval_blocks(
             self.val_ids, self.val_mask, max_blocks, self.val_content, self.val_pos
         )
+        if self.probe_cfg:
+            out["state_probe"] = self._state_probe(self.val_ids, self.val_mask, self.val_content, self.val_pos)
+        return out
+
+    @torch.no_grad()
+    def _state_probe(self, val_ids, val_mask, val_content=None, val_pos=None) -> dict:
+        """The eval-only state diagnostic (`state_probe`, `hidden_state.STATE_PROBE_MEASURES`): the first ``blocks``
+        validation sequences, every ``row_stride``-th KD row (fixed: the validation order never changes), the
+        teacher's layer outputs taken by hooks and the student's handed over by its own loop, both decoders without
+        their heads."""
+        spec = self.probe_cfg
+        n = min(int(spec["blocks"]), int(val_ids.shape[0]))
+        micro = self.cfg["batch"]["micro_blocks"]
+        stride = int(spec["row_stride"])
+        loss_cfg = self.cfg["loss"]
+        was_training = self.student.training
+        self.student.eval()
+        sums: dict[int, list[float]] = {}
+        rows_total = 0
+        for i in range(0, n, micro):
+            ids = val_ids[i : min(i + micro, n)].to(self.device)
+            mask = val_mask[i : min(i + micro, n)].to(self.device)
+            content = None if val_content is None else val_content[i : min(i + micro, n)].to(self.device)
+            pos = None if val_pos is None else val_pos[i : min(i + micro, n)].to(self.device)
+            if self.truncate_padding and content is not None:
+                extent = nonpad_extent(content)
+                ids, mask, content = ids[:, :extent], mask[:, :extent], content[:, :extent]
+                pos = None if pos is None else pos[:, :extent]
+            fwd = {} if pos is None else {"position_ids": pos}
+            kd_pos = prediction_mask(mask, loss_cfg["kd_scope"], content, input_ids=ids,
+                                     think_ids=self.think_ids).bool()
+            rows = HS.flat_rows(kd_pos)[::stride]
+            if rows.numel() == 0:
+                continue
+            with self._autocast():
+                with HS.capture_layer_outputs(self.teacher, HS.teacher_layers(self.probe_pairs), rows) as got:
+                    self.teacher.get_decoder()(input_ids=ids, use_cache=False, **fwd)
+                probe = HS.StateProbe(rows, {s: got[t] for s, t in self.probe_pairs})
+                self.student.get_decoder()(input_ids=ids, use_cache=False, hidden_supervision=probe, **fwd)
+            probe.finish()
+            for k, v in probe.sums.items():
+                acc = sums.setdefault(k, [0.0] * len(v))
+                for j, x in enumerate(v):
+                    acc[j] += x
+            rows_total += probe.n_rows
+            del got, probe
+        if was_training:
+            self.student.train()
+        return {"probe": HS.STATE_PROBE_MEASURES, "blocks": n, "row_stride": stride, "rows": rows_total,
+                "by_layer": HS.StateProbe.summary(sums, rows_total)}
 
     def _eval_and_log(self, eval_blocks, suffix: str = "") -> dict:
         """Evaluate primary + named extra val sets, log one event each."""
@@ -1492,6 +1567,7 @@ class Trainer:
                     self.kd_support, loss_cfg["kd_scope"], loss_cfg["kd_temperature"])}
                if self.kd_support is not None else {}),
             **({"hidden_state_objective": HS.objective_identity(self.hidden_cfg)} if self.hidden_cfg else {}),
+            **({"state_probe": {"probe": HS.STATE_PROBE_MEASURES, **self.probe_cfg}} if self.probe_cfg else {}),
             **({"resume_identity": self.resume_identity} if self.resume_identity else {}),
             **({"target_policy": self.target_policy} if self.target_policy else {}),
             # batch semantics as executed

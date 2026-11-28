@@ -80,6 +80,73 @@ def sequence(root: Path = REPO) -> dict:
             "rule": "net bytes the relay must accept vs what it holds now, in the drivers' order (module docstring)"}
 
 
+V2_RECORD = DC.RECURRENCE_LOGS / "plans/storage_plan.json"
+#: relay objects with a verified copy on the dev box (re-hashed 2026-11-28 against their records), so removing the
+#: relay copy deletes no artifact: the maintainer's decision, proposed for the revised variant 2's room
+DUPLICATES = {
+    "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c":
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
+    "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f":
+        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/ffn_attention/init_record.json"}
+
+
+def v2_sequence(root: Path = REPO, copies: int | None = None) -> dict:
+    """The revised variant 2's relay steps against what the relay holds now: the depth_loop_kept session, then the
+    depth_loop_merged one, each its plan's rotation (`single_operator_budget.launch.rotation_need` under the plan's
+    ``durability.savepoint_copies``, or ``copies``) and its closeout archive; the first session's final stays on the
+    relay while the second rotates. No build: both initializations are on the relay already."""
+    from stages.depth_merge import plan as PL
+    from stages.single_operator_budget import launch as SL
+    sz = sizes(root)
+    st = DC.design()["storage"]
+    archive = int(st["closeout_archive_bytes_bound"])
+    steps, net = [], 0
+    for arm in ("depth_loop_kept", "depth_loop_merged"):
+        plan = json.loads(PL.out_path(arm).read_text())
+        if copies is not None:
+            plan = {**plan, "durability": {**plan["durability"], "savepoint_copies": int(copies)}}
+        rot = SL.rotation_need(plan, {}, sz)
+        for s in rot["trace"]:
+            steps.append({"step": f"{arm}: {s['step']}", "net_bytes": net + s["net_bytes"],
+                          "net_gib": round((net + s["net_bytes"]) / GIB, 2)})
+        net += rot["end_bytes"] + archive
+        steps.append({"step": f"{arm} closeout: its evidence archive", "net_bytes": net, "net_gib": round(net / GIB, 2)})
+    peak = max(s["net_bytes"] for s in steps)
+    margin = int(float(st["relay_margin_gib"]) * GIB)
+    return {"steps": steps, "peak_bytes": peak, "peak_gib": round(peak / GIB, 2), "margin_bytes": margin,
+            "need_bytes": peak + margin, "need_gib": round((peak + margin) / GIB, 2),
+            "peak_at": max(steps, key=lambda s: s["net_bytes"])["step"],
+            "savepoint_copies": copies if copies is not None else "the plans'"}
+
+
+def v2_plan(live_state: dict, root: Path = REPO, dev_box: dict | None = None) -> dict:
+    """The revised variant 2's storage: the need under each rotation, against the live headroom as it is and as it
+    would be with the relay copies of `DUPLICATES` removed (their dev-box copies stay)."""
+    head = int(live_state["headroom_bytes"])
+    dup = {}
+    for prefix, rec_path in DUPLICATES.items():
+        rec = json.loads((root / rec_path).read_text())["relay"]["init"]
+        dup[prefix] = {"bytes": int(sum((rec.get("bytes") or {}).values())), "record": rec_path,
+                       "relay_sha256": rec["files_sha256"]}
+    freed = sum(v["bytes"] for v in dup.values())
+    options = {}
+    for copies in (1, 2):
+        seq = v2_sequence(root, copies)
+        for label, room in (("as_is", head), ("duplicates_removed", head + freed)):
+            options[f"copies_{copies}_{label}"] = {
+                "need_gib": seq["need_gib"], "headroom_gib": round(room / GIB, 2),
+                "fits": seq["need_bytes"] <= room, "margin_gib": round((room - seq["need_bytes"]) / GIB, 2),
+                "peak_at": seq["peak_at"]}
+    return {"schema": "aadistill.dmr1.v2_storage_plan/v1", "variant": "DMR1-R", "live": live_state,
+            "dev_box_live": dev_box, "sequence_as_planned": v2_sequence(root), "duplicates": dup,
+            "duplicates_bytes": freed, "duplicates_gib": round(freed / GIB, 2), "options": options,
+            "kept": {"V1 seed 20260726 final (7.46 GiB)": "kept (maintainer 2026-11-28)",
+                     "V1 seed 20260801 save point step 5,520 (19.50 GiB)": "kept: resumable (maintainer 2026-11-28)",
+                     "V1 alpha-merged init (3.73 GiB)": "kept: V2-M's base", "SOB1 depth init (3.73 GiB)": "kept: V2-D's base"},
+            "rule": "need = the two sessions' peak (net bytes vs now, the drivers' order) + the 1 GiB margin; headroom = "
+                    "the live LFS bisection; nothing is deleted or bought by this plan"}
+
+
 def S_variant():
     from stages.depth_merge import launch as L
     return L.VARIANT
@@ -165,7 +232,15 @@ def plan(live_state: dict, root: Path = REPO, dev_box: dict | None = None) -> di
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--write", action="store_true")
+    ap.add_argument("--variant", choices=("1", "2"), default="1")
     a = ap.parse_args(argv)
+    if a.variant == "2":
+        doc = v2_plan(live(), dev_box=dev_box_live())
+        if a.write:
+            V2_RECORD.parent.mkdir(parents=True, exist_ok=True)
+            V2_RECORD.write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({"options": doc["options"], "duplicates_gib": doc["duplicates_gib"]}, indent=1))
+        return 0
     doc = plan(live(), dev_box=dev_box_live())
     if a.write:
         RECORD.parent.mkdir(parents=True, exist_ok=True)

@@ -2,9 +2,9 @@
 
 Stage 1 owns this variant; its training is `stage3_recovery`. It is the first of the three DMR1 variants (the round's
 review report: [`../reasoning_inheritance/DMR1_REVIEW.md`](../reasoning_inheritance/DMR1_REVIEW.md); variants 2 and
-3: [`../../stage-6/depth_recurrence/README.md`](../../stage-6/depth_recurrence/README.md)).
+3: [`../depth_recurrence/README.md`](../depth_recurrence/README.md)).
 
-**Status: PREPARED and REPAIRED at $0, READY_FOR_REVIEW (2026-11-26 UTC; third repair round: review report section 0). Nothing is granted, issued or run; the relay room fits (SOB1's FFN + attention finals moved to the dev box, storage option a); the build waits on the review and its grant.** Branch
+**Status: EXECUTED 2026-11-27/28 and STOPPED by the maintainer during seed 2 (2026-11-28 UTC): the build COMPLETE, seed 20260726 trained (resumed once from save point 6,624) and evaluated, reported descriptively; seed 20260801 stopped at step 6,590, its step-5,520 save point kept. Not the registered two-seed completion (review report section 00).** Branch
 `research/reasoning-inheritance`, not merged into `main`.
 
 | file | what it is |
@@ -87,8 +87,8 @@ RI-LM1 measured under the same session; the build stops on any other). 29 blocks
 * **Evaluation**: SOB1's one protocol, verbatim (eval-set-1, every item, both modes, `nucleus_v1`, 8,192 tokens,
   action protocol v2, the teacher's tokenizer sidecars). eval-set-1 is development-exposed. The untrained merged init
   is not evaluated on eval-set-1 (SOB1: every untrained arm 0/570); its state evaluation is the diagnostic.
-* **Analysis**: the round's registered plan (`configs/stages/stage-6/depth_recurrence/design.json :: analysis`,
-  comparison C1; review report section 6).
+* **Analysis**: comparison C1 (`scripts/stages/stage-1/depth_merge/analysis.py :: C1`; registered 2026-11-26 in
+  the recurrence design, kept there under `superseded_2026_11_28`; review report section 6).
 
 ## 5. Execution chain
 

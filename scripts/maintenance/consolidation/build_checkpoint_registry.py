@@ -153,7 +153,7 @@ CLASSIFY: dict[str, dict] = {
                      "consumers (AGENTS.md 2.5). DECLARED CONSUMERS (DMR1, prepared 2026-11-26): the depth "
                      "initialization is variant 1's base (its tensor digests, configs/stages/stage-1/depth_merge/"
                      "depth_init_tensor_digests.json) and the KEPT path's training-pre initialization of variants 2 "
-                     "and 3 (its relay copy; configs/stages/stage-6/depth_recurrence/design.json :: base.kept_init); "
+                     "and 3 (its relay copy; configs/stages/stage-1/depth_recurrence/design.json :: base.kept_init); "
                      "the two depth finals are the retained weights of comparison 1's and the KEPT path's comparison "
                      "2's control (their sealed sets are what the comparisons read; maintainer 2026-11-26: keep)",
         reconstruction="phase1_driver.py's build of the arm from the teacher and selection.json (journal-gated)",

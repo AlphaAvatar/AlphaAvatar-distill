@@ -6,7 +6,8 @@
 | `depth_init_tensor_digests.json` | the base's 178 tensor digests, from the dev box's copy (`merge.py digests`); the build compares every unmerged tensor with them bit for bit | study identity |
 | `artifacts.json` | the collector's spec for `dmr1_depth_merge` sessions (every entry may match nothing) | |
 
-The round's registered analysis (its three comparisons) lives in the Stage-6 design,
-`configs/stages/stage-6/depth_recurrence/design.json :: analysis`; comparison 1 is this variant's. Instance facts
+This variant's comparison C1 is registered in `scripts/stages/stage-1/depth_merge/analysis.py :: C1` (first
+registered 2026-11-26 in the recurrence design, `configs/stages/stage-1/depth_recurrence/design.json`, kept there
+under `superseded_2026_11_28`). Instance facts
 (kept blocks, spans, seeds, prefixes, prices) live here and in `scripts/stages/stage-1/depth_merge/`, never in
 `src/aadistill`. Nothing here authorizes anything.

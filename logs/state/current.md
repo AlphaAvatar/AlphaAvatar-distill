@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-28 (UTC), DMR1 variant 1 STOPPED by the maintainer during seed 2 (seed 1 complete, reported descriptively); nothing running, nothing billing (no pod, no volume); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-28 (UTC), DMR1 variant 1 STOPPED by the maintainer during seed 2 (seed 1 complete, reported descriptively); variant 2 revised at $0, READY_FOR_REVIEW; nothing running, nothing billing (no pod, no volume); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -20,8 +20,21 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   The maintainer then stopped seed 20260801 at step 6,590 of 9,701. Its verified save point at step 5,520 (model,
   optimizer, RNG, data position) is kept on the relay. Not the registered two-seed completion; C1 not tested.
 - Money: training kind $26.7722 of $64.46 (two attempts); build kind $1.6091 of $5.43. Neither grant carries over.
-- Next (maintainer brief, 2026-11-28): V2 with both initializations (D = deletion, M = V1's alpha merge) × seed
-  20260726, revised at $0 to READY_FOR_REVIEW. No paid run before the budget is approved; V3 not started.
+
+**DMR1 VARIANT 2 (STAGE 1: RECURRENT EXECUTION OF THE KEPT BLOCKS, BOTH INITIALIZATIONS x SEED 20260726, STAGE 3 RECOVERY): REVISED AT $0, READY_FOR_REVIEW (2026-11-28) -- NOT AUTHORIZED; NOTHING RUNNING.**
+- Report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md` section 0R; design
+  `configs/stages/stage-1/depth_recurrence/design.json` (old selection under `superseded_2026_11_28`); decisions.md
+  2026-11-28.
+- Stage (maintainer correction 2026-11-28): DMR1's three variants are Stage 1 research recovered by Stage 3
+  (`stage3_recovery`); the V2/V3 trees moved from `stage-6` (`logs/maintenance/source-relocations/dmr1-stage-correction/v1`).
+  Stage 6 (AGENTS.md 4.8, clarified) starts from the model Stage 5 completes and has no experiment.
+- Conditions: V2-D `depth_loop_kept` (SOB1's depth init) and V2-M `depth_loop_merged` (V1's alpha-merged init), each
+  one unit from its training-pre init, identical but for the initialization. R1-R4 (incl. the interaction) are
+  descriptive, single seed. V3 is not started.
+- Proposal `logs/stages/stage-1/depth_recurrence/plans/proposal_dmr1_loop_train.json`: expected $60.39, caps $113.25
+  + $2 reserves. The project cap leaves $46.41 (live), so a cap raise is needed (about $68.8). Storage needs one save-point
+  copy plus removing two SOB1 init relay duplicates (`plans/storage_plan.json`). Engine validation (vLLM / HF,
+  independent KV caches) is the first stage of V2-D's session: NOT YET RUN.
 
 **SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): COMPLETE (2026-11-25) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Report `docs/stages/stage-1/single_operator_budget/REPORT.md`; decision `logs/stages/stage-1/single_operator_budget/

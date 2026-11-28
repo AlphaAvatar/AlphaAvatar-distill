@@ -17532,3 +17532,87 @@ on a paid pod.
   validation CE gap to depth-only (+0.090 at step 6,060) tracked seed 1's (+0.091 at the same step, +0.099 final), so
   the training-time diagnostic points the same way, but it is not a score.
 - Revisit when: the maintainer reviews V1 (resume seed 2, close V1 as one seed, or retire its relay bytes).
+
+## 2026-11-28 (UTC) — DMR1 variant 2 revised: both initializations x seed 20260726, prepared at $0 for review
+
+- Context: V1 (depth_merge) seed 20260726 read below SOB1's same-seed depth_only (thinking −3.86 pp [−6.79, −0.87]),
+  and the maintainer stopped V1 during seed 2 (entry above). The maintainer's brief of 2026-11-28 asks whether the
+  merge's single-execution deficit persists under recurrent execution. That needs both initializations under
+  recurrence, not the one a C1 two-seed rule would have selected.
+- Decision (design `configs/stages/stage-6/depth_recurrence/design.json`, revised; the old rule, arms and
+  comparisons are kept under `superseded_2026_11_28`; DMR1_REVIEW.md section 0R):
+  - **conditions:** two, each with a fixed base and one seed (20260726):
+    - V2-D (`depth_loop_kept`, over SOB1's depth init);
+    - V2-M (`depth_loop_merged`, over V1's verified alpha-merged init);
+    - both from their training-pre initialization;
+  - **only the initialization differs:** the schedule (16 blocks, 36 calls), data, packing, steps, optimizer, loss
+    and protocol are SOB1's depth recipe in both; no hidden-state term, no residual scaling, no arm-specific
+    learning rate;
+  - **analysis:** R1 = V2-D − D, R2 = V2-M − M, R3 = V2-M − V2-D and R4 = (V2-M − V2-D) − (M − D), each with an
+    item-paired group-bootstrap interval; descriptive, single seed, no test. The controls' sealed same-seed sets are
+    reused;
+  - **engine validation:** an explicit first stage of V2-D's session (`engine_check.py`), budgeted; a FAIL trains
+    nothing;
+  - **diagnostics:** an eval-only state probe per logical layer (core `hidden_state.StateProbe`), declared, never a
+    loss;
+  - **variant 3:** not started;
+  - **C1:** not completed and not forged; V1's seed 2 is not resumed for it.
+- Money (`logs/stages/stage-6/depth_recurrence/plans/proposal_dmr1_loop_train.json`, proposed):
+  - expected $60.39 for the two sessions;
+  - hard caps $113.25, plus $2.00 of reserves;
+  - the project cap leaves $46.99 now, so the proposal needs a cap raise (about $68.3 for both sessions at their
+    caps, about $11.2 for V2-D alone);
+  - V1's grants do not carry over.
+- Storage (`plans/storage_plan.json`, live 10:25Z): the relay accepts 27.22 GiB, but the two sessions need 28.09 GiB
+  with one save-point copy, or 47.58 GiB with the registered two. Proposed:
+  - a single copy (implemented: TPI1 `savepoint_copies`, SOB1 `rotation_need`);
+  - removal of the relay copies of SOB1's residual_width and ffn_attention inits (7.50 GiB; their dev-box copies are
+    verified);
+  - result: 6.64 GiB of margin. Nothing was deleted or bought.
+- Alternatives considered:
+  - the registered two-copy rotation: does not fit even after the removal, unless V1's seed-2 save point goes, and
+    the maintainer keeps it;
+  - save points only on the pod: no relay room needed, but a pod loss would cost a whole unit;
+  - a GPU validation session separate from training: a second pod setup for the same check, and P8.3 asks for none.
+- Risks:
+  - the step time (1.8x) and the memory (1.85 GiB margin on the L40S) are not measured until the first steps;
+  - the vLLM half of the engine check has never run;
+  - one seed is limited evidence;
+  - the single save-point copy leaves a window of a few minutes per save point with no durable save point.
+- Revisit when: the maintainer reviews section 0R (budget, project cap, storage), and again after V2-D and V2-M are
+  evaluated.
+
+## 2026-11-28 (UTC) — DMR1's stage corrected: Stage 1 research with Stage 3 recovery; Stage 6 clarified (maintainer)
+
+- Context: the V2 revision kept DMR1's variants 2 and 3 under `stage-6` (execution stage `stage6_recurrent_depth`),
+  following AGENTS.md 4.8 as worded on 2026-11-13 ("the study of recurrent forward execution ... and the training
+  such a student needs"). The maintainer corrected this:
+  - all three DMR1 variants are Stage 1 research on structural initialization and reasoning inheritance;
+  - each starts from a teacher-derived student before any recovery;
+  - the training that tests them is Stage 3 recovery;
+  - Stage 6 starts from the model Stage 5 completes, and has no experiment yet.
+- Decision:
+  - **AGENTS.md 4.8.** It keeps its generic name ("Recurrent depth: shared-parameter repeated execution"; the README
+    is unchanged, at the maintainer's request). A 2026-11-28 clarification adds the starting point (the Stage-5
+    model) and the boundary: recurrent structural initializations recovered by Stage 3 are Stage 1. Status: NOT
+    STARTED. The maintainer's references (HRM-Text notes and paper) are queued, not adopted as a design. P19's
+    Stage-6 row says such Stage-1 studies train under Stage 3's rule;
+  - **The moves.** `configs|scripts|docs|logs/stages/stage-6/depth_recurrence` → `.../stage-1/depth_recurrence` by
+    `git mv`, content unchanged at the move (`logs/maintenance/source-relocations/dmr1-stage-correction/v1`). The
+    old paths are mapped in `logs/index.json :: historical_paths.map`. V1's run records and its design keep the old
+    paths verbatim;
+  - **The design.** It becomes `aadistill.stage1.depth_recurrence.design/v1`, stage 1, execution stage
+    `stage3_recovery`. `config.stage` is no longer a changed field: V2's units keep SOB1's `stage3_recovery`. The
+    relay root is `durable/stage1_depth_recurrence` (nothing was ever written under the stage-6 one);
+  - **The derived records.** The init records, plans, proposal and storage plan were regenerated. The execution
+    identities are unchanged (KEPT `c09176af…`, MERGED `ccdc8f5e…`) and so are the weights, the bases and their
+    relay copies;
+  - **The attribution.** The stage attribution moves the experiment to Stage 1 and drops the Stage-6 definition:
+    no stage-6 directory remains, since a stage exists only with evidence;
+  - **What does not change:** the two V2 conditions, the seed, the recurrent schedule, the losses and the budget
+    terms.
+- Alternatives considered: keeping a `stage-6/README.md` placeholder. It is refused by the repository's own rule (P2,
+  `test_every_stage_present_has_repository_evidence`); the stage-level definition lives in AGENTS.md 4.8.
+- Risks: records written between 2026-11-13 and 2026-11-28 still say "Stage 6" for DMR1. AGENTS.md 4.8's history
+  note and the path map state the current reading.
+- Revisit when: Stage 6 is designed, from a Stage-5-complete model.

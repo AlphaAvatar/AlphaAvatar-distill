@@ -68,6 +68,17 @@ def test_the_proposals_and_estimates_reproduce():
     total = t["per_session_hard_cap_usd"] + b["per_session_hard_cap_usd"] + 2 * P.TEARDOWN_RESERVE
     assert total == pytest.approx(t["variant_1_total_with_reserves_usd"])
     assert total <= P.POSITION["project_remaining_usd"]          #: fits the cap's remainder as read 2026-11-26
+    #: the revised variant 2: proposed, two sessions (one per arm), the engine validation only in the first; it does
+    #: not fit the project cap's 2026-11-28 remainder, and the proposal says so
+    v2 = json.loads((DC.RECURRENCE_LOGS / "plans/proposal_dmr1_loop_train.json").read_text())
+    assert v2["status"] == "proposed" and v2["decision"] == "PENDING" and v2["authorizes"].startswith("nothing")
+    assert sorted(v2["kinds"]["dmr1_loop_train"]["per_arm"]) == ["depth_loop_kept", "depth_loop_merged"]
+    assert "engine_validation_hours" in v2["terms"]["depth_loop_kept"]
+    assert "engine_validation_hours" not in v2["terms"]["depth_loop_merged"]
+    caps = sum(a["per_session_hard_cap_usd"] for a in v2["kinds"]["dmr1_loop_train"]["per_arm"].values())
+    assert v2["needed_with_reserves_usd"] == pytest.approx(caps + 2 * P.TEARDOWN_RESERVE)
+    assert v2["fits_position"]["project_cap"]["fits"] is (v2["needed_with_reserves_usd"]
+                                                          <= P.POSITION_V2["project_remaining_usd"])
 
 
 # ---- the alpha merge on the toy teacher ---------------------------------------------------------------------------
@@ -750,11 +761,14 @@ def test_each_comparison_is_its_own_fixed_sequence_family_and_formal_only_when_c
     assert miss["modes"]["H-T"]["status"] == miss["modes"]["H-N"]["status"] == "descriptive_only"
 
 
-def test_the_comparison_registry_names_the_three_direct_questions():
+def test_the_comparison_registry_names_c1_and_the_four_recurrence_contrasts():
     from stages.depth_merge import analysis as A
     c = A.comparisons()
-    assert c["C1"]["pair"] == ["depth_merge", "depth_only"] and c["C3"]["pair"] == ["depth_loop_hidden", "depth_loop"]
-    assert A.result_path("C1").parent == DC.LOGS / "results"
+    assert c["C1"]["pair"] == ["depth_merge", "depth_only"]
+    assert c["R1"]["pair"] == ["depth_loop_kept", "depth_only"] and c["R2"]["pair"] == ["depth_loop_merged", "depth_merge"]
+    assert c["R3"]["pair"] == ["depth_loop_merged", "depth_loop_kept"] and len(c["R4"]["arms"]) == 4
+    assert "C2" not in c and "C3" not in c
+    assert A.result_path("C1").parent == DC.LOGS / "results" and A.result_path("R").parent == DC.RECURRENCE_LOGS / "results"
 
 
 # ---- the plan -----------------------------------------------------------------------------------------------------
@@ -830,7 +844,8 @@ def test_the_launchers_kinds_grants_and_an_artifact_for_another_arm_is_refused(t
     from stages.depth_merge import session as S
     from stages.depth_recurrence import launch as L6
     assert L.STUDY.kinds == ("dmr1_merge_build", "dmr1_merge_train") and L.STUDY.formal
-    assert L6.STUDY.kinds == ("dmr1_loop_train", "dmr1_loop_hidden_train")
+    assert L6.STUDY.kinds == ("dmr1_loop_train",)
+    assert L6.VARIANT.train_kinds == {"dmr1_loop_train": ("depth_loop_kept", "depth_loop_merged")}
     assert {k: str(g) for k, g, _ in L.STUDY.kind_grants} == {
         "dmr1_merge_build": "logs/budget/approvals/dmr1_dmr1_merge_build_grant.json",
         "dmr1_merge_train": "logs/budget/approvals/dmr1_dmr1_merge_train_grant.json"}
@@ -844,11 +859,13 @@ def test_the_launchers_kinds_grants_and_an_artifact_for_another_arm_is_refused(t
         assert g["teardown_reserve_usd"] == 1.0 and g["project_cumulative_cap_usd"] == 1161.06
         assert g["kinds"] == prop["kinds"] and g["gpus"] == prop["gpus"] == {"NVIDIA L40S": 1.11}
         assert g["proposal"]["path"] == str(L.VARIANT.proposal_path(k))
-    #: the loop kinds have no proposal this round: budget refuses
+    #: the loop kind is proposed (2026-11-28), not granted: no real grant exists, and an arm must be named
+    assert not (REPO / L6.VARIANT.grant_path(L6.LOOP_KIND)).exists()
     with pytest.raises(S.SE.AuthorizationError):
-        S.kind_grant(L6.VARIANT, L6.LOOP_KIND, dry_run=True)
-    with pytest.raises(S.SE.AuthorizationError, match="no grant and no proposal"):
-        L6.launch_spec(L6.LOOP_KIND)
+        S.kind_grant(L6.VARIANT, L6.LOOP_KIND)
+    with pytest.raises(S.SE.AuthorizationError):
+        L6.VARIANT.arm_of(L6.LOOP_KIND, None)
+    assert L6.VARIANT.arm_of(L6.LOOP_KIND, "depth_loop_merged") == "depth_loop_merged"
     assert L.launch_spec(L.BUILD_KIND).driver.endswith("build_driver.py")
     #: an artifact naming another arm's plan is refused before anything is read
     sc = {"kind": L.TRAIN_KIND, "arm": "depth_merge", "plan": "x", "plan_sha256": "y", "init_record_sha256": "z"}

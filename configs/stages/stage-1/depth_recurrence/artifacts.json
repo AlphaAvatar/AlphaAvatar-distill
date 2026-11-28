@@ -33,6 +33,13 @@
    "min_matches": 0
   },
   {
+   "artifact_class": "engine_validation",
+   "pattern": "audit/dmr1_depth_recurrence/*/engine_check/*",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
    "artifact_class": "train_logs",
    "pattern": "audit/dmr1_depth_recurrence/*/*/train/*",
    "required": false,
