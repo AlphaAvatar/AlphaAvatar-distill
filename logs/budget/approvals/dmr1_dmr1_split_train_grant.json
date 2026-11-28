@@ -1,0 +1,106 @@
+{
+ "schema": "aadistill.dmr1.proposal/v1",
+ "study": "DMR1-M",
+ "status": "granted",
+ "kind": "dmr1_split_train",
+ "recorded_utc": "2026-11-28",
+ "design_sha256": "7557c7595991059dd21aa85631f5a2f9e7b750a82a831bc3b7a6ea74d5f7c243",
+ "scope": "DMR1 v1-new (depth_merge_split), its one-seed training session only",
+ "ceiling_usd": 35.94,
+ "per_session_hard_cap_usd": 35.94,
+ "teardown_reserve_usd": 1.0,
+ "kinds": {
+  "dmr1_split_train": {
+   "per_arm": {
+    "depth_merge_split": {
+     "driver_minutes": 1765.8,
+     "expected_usd": 18.05,
+     "per_session_hard_cap_usd": 35.94,
+     "unit_deadline_hours": 21.1
+    }
+   }
+  }
+ },
+ "gpus": {
+  "NVIDIA L40S": 1.11
+ },
+ "gpu_count_max": 1,
+ "hardware": "one NVIDIA L40S, secure cloud, at most $1.11/h, 150 GB container disk, no network volume",
+ "usd_per_hour_all_in": 1.1105,
+ "project_cumulative_cap_usd": 1161.06,
+ "position_at_proposal": {
+  "read_utc": "2026-11-28T12:36:08Z",
+  "committed_usd": 1114.6477,
+  "project_cap_usd": 1161.06,
+  "project_remaining_usd": 46.4123,
+  "balance_usd": 95.3518,
+  "pods": 0,
+  "volumes": 0,
+  "spend_per_hour": 0.0,
+  "relay_headroom_gib": 54.219,
+  "relay_used_gib": 33.359,
+  "dev_box_free_gib": 6.85,
+  "note": "one reading of the ledger (SE.live_position) for the cap and the balance; committed rose $1.1346 since 10:25Z as V1 attempt 2's last billing rows posted (no resource existed)"
+ },
+ "terms": {
+  "units": 1,
+  "training_per_seed": {
+   "seconds_per_step_expected": 5.216,
+   "seconds_per_step_bound": 7.82,
+   "hours_expected": 14.06,
+   "hours_bound": 21.07
+  },
+  "post_recovery_evaluation_hours_per_unit": {
+   "expected": 1.37,
+   "bound": 3.38
+  },
+  "copies": {
+   "init_fetch": {
+    "bytes": 4411426816,
+    "hours_bound": 0.589,
+    "hours_expected": 0.01
+   },
+   "final_copy_per_seed": {
+    "bytes": 8822853632,
+    "hours_bound": 1.204,
+    "hours_expected": 0.041
+   },
+   "last_save_point_copy": {
+    "bytes": 23356911616,
+    "hours_bound": 3.187,
+    "hours_expected": 0.108
+   }
+  },
+  "driver_hours_expected": 15.59,
+  "driver_hours_bound": 29.43,
+  "driver_minutes": 1765.8,
+  "unit_deadline_hours": 21.1,
+  "expected_usd": 18.05,
+  "hard_cap": {
+   "driver_minutes": 1765.8,
+   "billable_minutes": 1907.34,
+   "usd": 35.94
+  },
+  "per_session_hard_cap_usd": 35.94,
+  "basis": {
+   "step_time": "V1's measured 4.87 s / step (SOB1's 4.83) and the 7.241 s bound x 1.08 (36 + 4 x 18 against 36 + 4 x 16 forward-equivalents): NOT measured",
+   "evaluation": "SOB1's 1.22 h / 3.0 h per unit x 1.125 (18 / 16 layers of decode)",
+   "sizes": "split.checkpoint_bytes (the 18-layer config, SOB1's 2P / 4P / 4P + 8T rule)"
+  }
+ },
+ "money_rules": {
+  "own_envelope": "its own grant; the envelope counts only this kind's runs; SOB1's closed grants' remainders are void and fund nothing here",
+  "balance": "the provider balance must cover the hard cap plus the reserve at issue and at launch; a top-up is not a grant",
+  "teardown_reserve": "$1.00 held outside the ceiling, never issued"
+ },
+ "decision": "Maintainer, 2026-11-29 (review of 76e1ff5e, after the final-placement fix c90e6417): \"\u672c\u8f6e\u6267\u884c\u8303\u56f4\u786e\u5b9a\uff1a\u5148\u5b8c\u6210 v1-new \u7684\u6784\u5efa\u3001\u5355\u79cd\u5b50\u5b8c\u6574\u6062\u590d\u8bad\u7ec3\u3001\u8bc4\u6d4b\u548c\u6536\u5c3e\uff0c\u7136\u540e\u4ea4\u7ed9\u6211 review\u3002V2-D\u3001V2-M\u3001V3 \u6682\u7f13\u3002\u6682\u65f6\u4e0d\u5408\u5165 main\u3002\u2026\u4e0a\u8ff0\u4fee\u590d\u548c\u9a8c\u8bc1\u5b8c\u6210\u540e\uff0c\u6279\u51c6\u4ee5\u4e0b\u4e24\u4e2a\u72ec\u7acb kind \u7684 grant\uff0c\u5e76\u5141\u8bb8\u542f\u52a8\u5bf9\u5e94\u4f1a\u8bdd\uff1admr1_split_build \u2014 v1-new \u6784\u5efa\uff0c\u7d2f\u8ba1\u652f\u51fa\u4e0a\u9650 $4.30\uff0c\u5173\u95ed\u9884\u7559 $1.00\uff1bdmr1_split_train \u2014 v1-new \u5355\u79cd\u5b50\u6062\u590d\u8bad\u7ec3\u53ca\u8bc4\u6d4b\uff0c\u7d2f\u8ba1\u652f\u51fa\u4e0a\u9650 $35.94\uff0c\u5173\u95ed\u9884\u7559 $1.00\u3002\u672c\u6b21\u5408\u8ba1\u6700\u591a $42.24\uff0c\u5305\u542b\u4e24\u4efd\u5173\u95ed\u9884\u7559\u3002\u9884\u8ba1\u8d39\u7528\u5408\u8ba1 $19.69\u3002\u6240\u6709 attempt\u3001\u4fee\u590d\u548c\u63a5\u7ba1\u4ea7\u751f\u7684\u8d39\u7528\u90fd\u8ba1\u5165\u5404\u81ea grant \u7684\u7d2f\u8ba1\u4e0a\u9650\uff0c\u91cd\u8bd5\u4e0d\u4ea7\u751f\u989d\u5916\u6388\u6743\u3002\u9879\u76ee\u603b\u4e0a\u9650\u4fdd\u6301 $1,161.06\uff0c\u672c\u8f6e\u4e0d\u63d0\u9ad8\u4e0a\u9650\u3001\u4e0d\u5145\u503c\u3002\u7b7e\u53d1\u548c\u542f\u52a8\u524d\u91cd\u65b0\u8bfb\u53d6\u5b9e\u65f6\u8d26\u672c\u3001\u4f59\u989d\u53ca\u8d44\u6e90\u72b6\u6001\uff1b\u7b26\u5408\u65e2\u6709\u9884\u7b97\u95e8\u63a7\u540e\u7ee7\u7eed\u3002\u672c\u6b21\u6388\u6743\u53ea\u8986\u76d6 v1-new\uff0c\u4e0d\u8986\u76d6 V2-D\u3001V2-M\u3001V3\uff0c\u4e5f\u4e0d\u8986\u76d6\u989d\u5916\u5b58\u50a8\u8d2d\u4e70\u3002\u2026\u4f18\u5148\u4f7f\u7528\u63d0\u6848\u4e2d\u7684\u5355\u5f20 L40S\u2026\u672c\u6d88\u606f\u6ca1\u6709\u6388\u6743\u6362\u5361\u3002\"",
+ "granted_by": "maintainer",
+ "authorizes": "DMR1-M's phase only (scope): its session kinds ['dmr1_split_train'], inside ceiling_usd cumulatively, per_session_hard_cap_usd per session and the project cap; one-use artifacts from `issue`; no other study and no follow-up",
+ "granted_utc": "2026-11-28",
+ "proposal": {
+  "path": "logs/stages/stage-1/depth_merge/plans/proposal_dmr1_split_train.json",
+  "sha256": "0128ddab81cb29106fcb24d77bb74f813812a2e9785688a17fbc3c52e6a2abe3"
+ },
+ "study_identity_sha256": "297d341a3703ec08036c2480c03a433d3fc0cd058f8e863c1b5a6f671559bf63",
+ "granted_at_commit": "c90e64170ea37cd14996bc146845fd7ec1d2677d"
+}

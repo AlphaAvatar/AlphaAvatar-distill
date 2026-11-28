@@ -1,0 +1,84 @@
+{
+ "schema": "aadistill.dmr1.proposal/v1",
+ "study": "DMR1-M",
+ "status": "granted",
+ "kind": "dmr1_split_build",
+ "recorded_utc": "2026-11-28",
+ "design_sha256": "7557c7595991059dd21aa85631f5a2f9e7b750a82a831bc3b7a6ea74d5f7c243",
+ "scope": "DMR1 v1-new (depth_merge_split), its build session only",
+ "ceiling_usd": 4.3,
+ "per_session_hard_cap_usd": 4.3,
+ "teardown_reserve_usd": 1.0,
+ "kinds": {
+  "dmr1_split_build": {
+   "driver_minutes": 166.4,
+   "expected_usd": 1.64,
+   "per_session_hard_cap_usd": 4.3
+  }
+ },
+ "gpus": {
+  "NVIDIA L40S": 1.11
+ },
+ "gpu_count_max": 1,
+ "hardware": "one NVIDIA L40S, secure cloud, at most $1.11/h, 150 GB container disk, no network volume",
+ "usd_per_hour_all_in": 1.1105,
+ "project_cumulative_cap_usd": 1161.06,
+ "position_at_proposal": {
+  "read_utc": "2026-11-28T12:36:08Z",
+  "committed_usd": 1114.6477,
+  "project_cap_usd": 1161.06,
+  "project_remaining_usd": 46.4123,
+  "balance_usd": 95.3518,
+  "pods": 0,
+  "volumes": 0,
+  "spend_per_hour": 0.0,
+  "relay_headroom_gib": 54.219,
+  "relay_used_gib": 33.359,
+  "dev_box_free_gib": 6.85,
+  "note": "one reading of the ledger (SE.live_position) for the cap and the balance; committed rose $1.1346 since 10:25Z as V1 attempt 2's last billing rows posted (no resource existed)"
+ },
+ "terms": {
+  "minutes_expected": {
+   "session_and_contract": 3,
+   "teacher_load_and_base_check": 3,
+   "statistics_pass_9_blocks": 1.3,
+   "assignments_7_x_178s": 20.8,
+   "merge_2_spans_cpu_float64": 2.5,
+   "equivalence_checks": 1,
+   "save_reload": 2,
+   "state_evaluation": 10,
+   "diagnostics": 3,
+   "v1_init_fetch_expected": 0.6,
+   "relay_init_and_statistics_expected": 1.2
+  },
+  "driver_minutes_expected": 48.4,
+  "driver_minutes": 166.4,
+  "expected_usd": 1.64,
+  "hard_cap": {
+   "driver_minutes": 166.4,
+   "billable_minutes": 228.0,
+   "usd": 4.3
+  },
+  "per_session_hard_cap_usd": 4.3,
+  "basis": "RI-LM1's statistics pass (117 s for 14 blocks) and assignments (178 s each on the pod's CPU), V1's merge (8 min for 29 blocks); the bound doubles each compute step and takes V1's init (in) and the new init's verify (out) at the 2.6 MB/s floor x 1.25",
+  "measured_v1_build": {
+   "usd": 1.4043,
+   "run": "dmr1_merge_build_20261127_083526"
+  }
+ },
+ "money_rules": {
+  "own_envelope": "its own grant; the envelope counts only this kind's runs; SOB1's closed grants' remainders are void and fund nothing here",
+  "balance": "the provider balance must cover the hard cap plus the reserve at issue and at launch; a top-up is not a grant",
+  "teardown_reserve": "$1.00 held outside the ceiling, never issued"
+ },
+ "decision": "Maintainer, 2026-11-29 (review of 76e1ff5e, after the final-placement fix c90e6417): \"\u672c\u8f6e\u6267\u884c\u8303\u56f4\u786e\u5b9a\uff1a\u5148\u5b8c\u6210 v1-new \u7684\u6784\u5efa\u3001\u5355\u79cd\u5b50\u5b8c\u6574\u6062\u590d\u8bad\u7ec3\u3001\u8bc4\u6d4b\u548c\u6536\u5c3e\uff0c\u7136\u540e\u4ea4\u7ed9\u6211 review\u3002V2-D\u3001V2-M\u3001V3 \u6682\u7f13\u3002\u6682\u65f6\u4e0d\u5408\u5165 main\u3002\u2026\u4e0a\u8ff0\u4fee\u590d\u548c\u9a8c\u8bc1\u5b8c\u6210\u540e\uff0c\u6279\u51c6\u4ee5\u4e0b\u4e24\u4e2a\u72ec\u7acb kind \u7684 grant\uff0c\u5e76\u5141\u8bb8\u542f\u52a8\u5bf9\u5e94\u4f1a\u8bdd\uff1admr1_split_build \u2014 v1-new \u6784\u5efa\uff0c\u7d2f\u8ba1\u652f\u51fa\u4e0a\u9650 $4.30\uff0c\u5173\u95ed\u9884\u7559 $1.00\uff1bdmr1_split_train \u2014 v1-new \u5355\u79cd\u5b50\u6062\u590d\u8bad\u7ec3\u53ca\u8bc4\u6d4b\uff0c\u7d2f\u8ba1\u652f\u51fa\u4e0a\u9650 $35.94\uff0c\u5173\u95ed\u9884\u7559 $1.00\u3002\u672c\u6b21\u5408\u8ba1\u6700\u591a $42.24\uff0c\u5305\u542b\u4e24\u4efd\u5173\u95ed\u9884\u7559\u3002\u9884\u8ba1\u8d39\u7528\u5408\u8ba1 $19.69\u3002\u6240\u6709 attempt\u3001\u4fee\u590d\u548c\u63a5\u7ba1\u4ea7\u751f\u7684\u8d39\u7528\u90fd\u8ba1\u5165\u5404\u81ea grant \u7684\u7d2f\u8ba1\u4e0a\u9650\uff0c\u91cd\u8bd5\u4e0d\u4ea7\u751f\u989d\u5916\u6388\u6743\u3002\u9879\u76ee\u603b\u4e0a\u9650\u4fdd\u6301 $1,161.06\uff0c\u672c\u8f6e\u4e0d\u63d0\u9ad8\u4e0a\u9650\u3001\u4e0d\u5145\u503c\u3002\u7b7e\u53d1\u548c\u542f\u52a8\u524d\u91cd\u65b0\u8bfb\u53d6\u5b9e\u65f6\u8d26\u672c\u3001\u4f59\u989d\u53ca\u8d44\u6e90\u72b6\u6001\uff1b\u7b26\u5408\u65e2\u6709\u9884\u7b97\u95e8\u63a7\u540e\u7ee7\u7eed\u3002\u672c\u6b21\u6388\u6743\u53ea\u8986\u76d6 v1-new\uff0c\u4e0d\u8986\u76d6 V2-D\u3001V2-M\u3001V3\uff0c\u4e5f\u4e0d\u8986\u76d6\u989d\u5916\u5b58\u50a8\u8d2d\u4e70\u3002\u2026\u4f18\u5148\u4f7f\u7528\u63d0\u6848\u4e2d\u7684\u5355\u5f20 L40S\u2026\u672c\u6d88\u606f\u6ca1\u6709\u6388\u6743\u6362\u5361\u3002\"",
+ "granted_by": "maintainer",
+ "authorizes": "DMR1-M's phase only (scope): its session kinds ['dmr1_split_build'], inside ceiling_usd cumulatively, per_session_hard_cap_usd per session and the project cap; one-use artifacts from `issue`; no other study and no follow-up",
+ "granted_utc": "2026-11-28",
+ "proposal": {
+  "path": "logs/stages/stage-1/depth_merge/plans/proposal_dmr1_split_build.json",
+  "sha256": "20f5d0b983c232f596cd0ba8257426413c1e6b0e15994672f557ec727687ce5c"
+ },
+ "study_identity_sha256": "297d341a3703ec08036c2480c03a433d3fc0cd058f8e863c1b5a6f671559bf63",
+ "granted_at_commit": "c90e64170ea37cd14996bc146845fd7ec1d2677d"
+}

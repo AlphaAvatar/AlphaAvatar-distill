@@ -259,14 +259,16 @@ def test_v1news_kinds_bind_its_files_and_v1s_kinds_do_not(monkeypatch):
     assert not any("split" in k for k in v1) and "build_arm" not in v1
     assert new["build_arm"] == "depth_merge_split" and new["split_config_sha256"] == sha(SPLIT.CONFIG)
     assert new["identity:configs/stages/stage-1/depth_merge/split_design.json"] == sha(SPLIT.DESIGN)
-    #: no v1-new grant exists: it is proposed, never granted here
-    for k in (L.SPLIT_BUILD_KIND, L.SPLIT_TRAIN_KIND):
-        assert not (REPO / L.VARIANT.grant_path(k)).exists()
-        with pytest.raises(S.SE.AuthorizationError):
-            S.kind_grant(L.VARIANT, k)
+    #: each v1-new kind's grant (maintainer 2026-11-29) is its reviewed proposal's terms, over this design
+    for k, cap in ((L.SPLIT_BUILD_KIND, 4.30), (L.SPLIT_TRAIN_KIND, 35.94)):
         prop = json.loads((REPO / L.VARIANT.proposal_path(k)).read_text())
         assert prop["status"] == "proposed" and prop["authorizes"].startswith("nothing")
         assert prop["design_sha256"] == sha(SPLIT.DESIGN)
+        g = S.kind_grant(L.VARIANT, k)
+        assert g["status"] == "granted" and g["kind"] == k and g["design_sha256"] == sha(SPLIT.DESIGN)
+        assert g["ceiling_usd"] == g["per_session_hard_cap_usd"] == prop["per_session_hard_cap_usd"] == cap
+        assert g["teardown_reserve_usd"] == 1.0 and g["proposal"]["sha256"] == sha(REPO / L.VARIANT.proposal_path(k))
+        assert "2026-11-29" in g["decision"]
     assert L.VARIANT.arm_of(L.SPLIT_TRAIN_KIND, None) == "depth_merge_split"
 
 
