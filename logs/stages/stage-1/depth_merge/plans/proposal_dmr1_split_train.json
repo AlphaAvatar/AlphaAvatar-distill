@@ -4,7 +4,7 @@
  "status": "proposed",
  "kind": "dmr1_split_train",
  "recorded_utc": "2026-11-28",
- "design_sha256": "6480c9a618e90c3e4904378c93ac2ce2f764e8d60257e862f192deed59d41e81",
+ "design_sha256": "7557c7595991059dd21aa85631f5a2f9e7b750a82a831bc3b7a6ea74d5f7c243",
  "scope": "DMR1 v1-new (depth_merge_split), its one-seed training session only",
  "ceiling_usd": 35.94,
  "per_session_hard_cap_usd": 35.94,

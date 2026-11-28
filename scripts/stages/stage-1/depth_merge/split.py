@@ -24,8 +24,9 @@ How each layer is initialized (`build_candidate`), and what is reused by identit
   the run, the run's first block the alignment anchor, its own statistics pass and alignments (`new_spans`). It is
   never V1's span block with the kept block put back in front.
 
-Every layer runs once; no recurrence, no hidden-state loss. Recovery is SOB1's depth recipe (Stage 3); nothing is
-frozen beyond it.
+Every layer runs once; no recurrence, no hidden-state loss. "The kept layer unchanged" describes the initialization
+only. Recovery is SOB1's depth recipe (Stage 3) with SOB1's trainable patterns (`TRAINABLE`): one seed, one final, both
+evaluation modes.
 """
 from __future__ import annotations
 
@@ -254,8 +255,17 @@ def build_candidate(adapter, teacher, stats, d_digests: dict, v1_init: Path, *, 
 # ---- the design, derived from V1's --------------------------------------------------------------------------------
 
 #: the only top-level keys of V1's design that v1-new's design changes (`design_doc`); every other key is V1's
-CHANGED = ("schema", "status", "recorded_utc", "question", "decided_by", "merge", "statistics", "reuse", "arms",
-           "training", "analysis", "checks", "variant")
+CHANGED = ("schema", "status", "recorded_utc", "question", "decided_by", "baseline", "merge", "statistics", "reuse",
+           "arms", "training", "evaluation", "analysis", "storage", "checks", "variant")
+
+#: what recovery trains: SOB1's depth unit's trainable patterns, inherited field by field (`plan.py`), nothing added
+TRAINABLE = ("SOB1's trainable patterns, unchanged: every block's attention (q/k/v/o projections, q/k norms), MLP "
+             "(gate/up/down projections) and both layer norms, and the final norm, train; the embedding, tied with the "
+             "head, stays frozen; no further freezing")
+#: V1's wording this design replaces: two seeds and "the same trainable patterns" (`design_doc` refuses to run if
+#: V1's text no longer holds it, so a changed V1 is never silently half-rewritten)
+_V1_SEEDS = "seeds 20260726 and 20260801 in that order"
+_V1_TRAINABLE = "the same trainable patterns (embedding / tied head frozen)"
 
 
 def design_doc() -> dict:
@@ -291,7 +301,8 @@ def design_doc() -> dict:
                     "is not part of it. An absorbed span is V1's merge, unchanged"),
         "slots": v1["merge"]["slots"],
         "never": "V1's merged block of a long span with the kept block put back in front of it",
-        "execution": "every layer once: no recurrence, no hidden-state loss; nothing frozen at initialization or after",
+        "execution": ("every layer once: no recurrence, no hidden-state loss. The kept layer before a separate run is "
+                      "unchanged at INITIALIZATION only; recovery trains " + TRAINABLE),
     }
     d["statistics"] = {**v1["statistics"],
                        "spans": [list(x) for x in new_spans(g)],
@@ -301,6 +312,15 @@ def design_doc() -> dict:
                                "the separate runs' blocks and pairs only; the absorbed spans' statistics are V1's and are "
                                "not recomputed (their blocks are reused whole)"}
     d["reuse"] = {**v1["reuse"],
+                  "reused": [*v1["reuse"]["reused"][:3],
+                             "SOB1's depth recovery recipe and plan; the same-seed (20260726) controls: SOB1's depth_only "
+                             "and V1's depth_merge, their registered finals and sealed sets (never retrained or "
+                             "regenerated)",
+                             "V1's calibration statistics session's profile and positions; V1's built blocks for the "
+                             "absorbed groups (v1_init)"],
+                  "recomputed": [f"the statistics of the {len({b for x in new_spans(g) for b in x})} blocks and the "
+                                 f"{len(M.pairs(new_spans(g)))} pairs of the separate runs only",
+                                 "their permutations", "the separate layers' merged tensors"],
                   "v1_init": {"what": "the absorbed groups' blocks, byte for byte", "init_record": v1["reuse"].get(
                       "init_record") or "logs/stages/stage-1/depth_merge/plans/training_plan_depth_merge.json :: "
                                         "init_record", "checked": "each reused tensor equal to V1's init file's"},
@@ -312,6 +332,10 @@ def design_doc() -> dict:
                        "execution": "each layer once", "seeds": [int(x) for x in s["seeds"]],
                        "config": str(CONFIG.relative_to(REPO)), "checkpoint_bytes": checkpoint_bytes()}}
     t = copy.deepcopy(v1["training"])
+    if _V1_SEEDS not in t["recipe"] or _V1_TRAINABLE not in t["recipe"]:
+        raise SplitError("V1's training.recipe no longer reads as split.py expects; derive v1-new's wording anew")
+    t["recipe"] = t["recipe"].replace(_V1_SEEDS, "seed 20260726 only (one seed: training.single_seed)").replace(
+        _V1_TRAINABLE, TRAINABLE)
     t["seeds"] = [int(x) for x in s["seeds"]]
     t["unit_order"] = {"arms": [ARM], "seeds": [int(x) for x in s["seeds"]]}
     t["plans"] = f"logs/stages/stage-1/depth_merge/plans/training_plan_{ARM}.json (plan.py, from the build's init record)"
@@ -319,6 +343,26 @@ def design_doc() -> dict:
     t["memory"] = {**t["memory"], "expected": s["memory_estimate"]}
     d["training"] = t
     d["analysis"] = s["analysis"]
+    d["baseline"] = {**v1["baseline"],
+                     "what": ("SOB1's depth-only arm: its TRAINING-PRE initialization is this variant's base (the kept "
+                              "layers, the embedding, the final norm, the tied head); its seed-20260726 final and sealed "
+                              "eval-set-1 sets are control D (reused, never retrained or regenerated)")}
+    d["evaluation"] = {**v1["evaluation"],
+                       "models": {"post_recovery": f"{ARM}'s one seed (20260726) after recovery: one final, both "
+                                                   "modes (H-T, H-N), every item",
+                                  "control": "D = SOB1 depth_only s20260726 and M = V1 depth_merge s20260726: their "
+                                             "registered finals and sealed sets, reused"}}
+    st = copy.deepcopy(v1["storage"])
+    st["phase_2_finals"] = {
+        "placement": {ARM: "relay"},
+        "_placement": (f"{ARM}'s one fp32 final ({checkpoint_bytes()['final_fp32']:,} B) stays at its relay prefix, "
+                       "checked there by LFS sha256 at closeout (`launch.retain`); nothing is downloaded: the dev box is "
+                       "shared and has about 7 GiB free. It is kept with the init and the evaluation evidence for the "
+                       "maintainer's review (2026-11-29) and is not retired ahead of any later round's storage")}
+    st["relay_rotation"] = "keep (the final is not rotated off; a later round's room is planned against the live headroom)"
+    st["storage_plan"] = ("logs/stages/stage-1/depth_merge/plans/programme_storage_plan.json (storage.py --variant "
+                          "programme --write: v1-new's sessions' needs against the relay's live headroom)")
+    d["storage"] = st
     d["checks"] = {**v1["checks"],
                    "base": "the base rebuilt from the teacher is compared tensor by tensor with V1's base digests before "
                            "any merge; the kept layers, the embedding, the final norm and the tied head must equal them",

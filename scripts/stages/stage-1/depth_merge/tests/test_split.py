@@ -147,14 +147,15 @@ def test_the_builds_identity_is_its_own_and_binding_it_leaves_v1s_untouched(tmp_
     assert BD.product_problems(rec, v1) == []
 
 
-def test_the_plan_is_sob1s_depth_unit_of_one_seed_at_v1news_sizes(tmp_path):
+def split_init_record(root: Path) -> tuple[Path, Path]:
+    """A COMPLETE v1-new init record as its build writes it (V1's fixture under v1-new's identity, its own prefix),
+    at a committed-like path under ``root``; returns it and V1's record (which is not v1-new's)."""
     import tempfile
     from stages.depth_merge import build_driver as BD
-    from stages.depth_merge import plan as PL
     V1T = _v1_tests()
     link_into, merge_init_record = V1T.link_into, V1T.merge_init_record
-    link_into(tmp_path, DC.design()["baseline"]["training_plan"]["path"])
-    p = merge_init_record(tmp_path)
+    link_into(root, DC.design()["baseline"]["training_plan"]["path"])
+    p = merge_init_record(root)
     doc = json.loads(p.read_text())
     with BD.bound("depth_merge_split"), tempfile.TemporaryDirectory() as tmp:
         ident = BD.current_identity(Path(tmp))
@@ -166,9 +167,15 @@ def test_the_plan_is_sob1s_depth_unit_of_one_seed_at_v1news_sizes(tmp_path):
         doc = {**doc, "arm": "depth_merge_split", "schema": BD.SCHEMA, "identity": ident,
                "method": BD._checkpoint_method(doc["checkpoint"])}
         assert BD.product_problems(doc, ident) == []
-    q = tmp_path / "logs/stages/stage-1/depth_merge/runs/dmr1_split_build_x/evidence/depth_merge_split/init_record.json"
+    q = root / "logs/stages/stage-1/depth_merge/runs/dmr1_split_build_x/evidence/depth_merge_split/init_record.json"
     q.parent.mkdir(parents=True)
     q.write_text(json.dumps(doc))
+    return q, p
+
+
+def test_the_plan_is_sob1s_depth_unit_of_one_seed_at_v1news_sizes(tmp_path):
+    from stages.depth_merge import plan as PL
+    q, p = split_init_record(tmp_path)
     plan = PL.derive("depth_merge_split", q, root=tmp_path)
     assert [u["unit"] for u in plan["units"]] == ["depth_merge_split-s20260726"]
     u = plan["units"][0]
@@ -179,6 +186,67 @@ def test_the_plan_is_sob1s_depth_unit_of_one_seed_at_v1news_sizes(tmp_path):
     #: V1's init record is not v1-new's
     with pytest.raises(PL.PlanError):
         PL.derive("depth_merge_split", p, root=tmp_path)
+
+
+def test_a_complete_v1new_session_closes_complete_with_its_one_final_kept_on_the_relay(tmp_path, monkeypatch):
+    """The closeout's real entry (`session.completion` -> `completion.session` and `launch.retain` ->
+    `common.final_placement`) bound to v1-new's REAL design: the real training driver (SOB1's stand-in trainer and
+    engine, the relay faked) leaves one final and both modes' sets, the completion is COMPLETE, and the final is
+    checked where the design places it -- on the relay, by LFS sha256 -- with nothing fetched to the dev box."""
+    import importlib
+    RT = importlib.import_module("stages.depth_recurrence.tests.test_depth_recurrence")
+    RT._eval_set_or_skip()
+    from stages.depth_merge import launch as L
+    from stages.depth_merge import plan as PL
+    from stages.depth_merge import session as S
+    from stages.single_operator_budget import common as C
+    from stages.single_operator_budget import completion as CP
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    arm, run_id = SPLIT.ARM, "dmr1_split_train_t1"
+    relay = FakeRelay()
+    monkeypatch.setattr(R, "run_online", relay)
+    fetched = []
+    monkeypatch.setattr(R, "get", lambda *a, **k: fetched.append(a) or {"error": "nothing may be fetched"})
+    root = tmp_path / "root"
+    q, _ = split_init_record(root)
+    plan = PL.derive(arm, q, root=root)
+    for u in plan["units"]:
+        u["config"]["out_dir"] = str(tmp_path / "pod" / u["unit"] / "train")
+        u["config"]["student_path"] = str(tmp_path / "pod" / "init" / arm)
+    (tmp_path / f"plan_{arm}.json").write_text(json.dumps(plan))
+    out = tmp_path / "attempt1/store/out"
+    got = RT._run(tmp_path, monkeypatch, arm, out)
+    assert got["rc"] == 0 and got["units"]["terminal"] == "ALL_DONE", got["units"].get("error")
+    assert got["trained"] == [20260726]
+    before = DC.bind_for(arm)
+    try:
+        assert C.final_placement(arm) == "relay"
+        with pytest.raises(KeyError):                     #: V1's arm is not this design's
+            C.final_placement("depth_merge")
+        ses = CP.session(out, arm, plan=plan)
+        assert ses["complete"] and ses["n_complete"] == 2 and list(ses["finals"]) == [f"{arm}-s20260726"]
+    finally:
+        C.restore(before)
+    pp = root / S.plan_path(arm)
+    pp.parent.mkdir(parents=True, exist_ok=True)
+    pp.write_text(json.dumps(plan))
+
+    def lfs(paths):
+        return {x: (hashlib.sha256(relay.files[x]).hexdigest() if isinstance(relay.files[x], (bytes, bytearray))
+                    else sha(relay.files[x])) for x in paths if x in relay.files}
+    res = S.completion(L.VARIANT, L.SPLIT_TRAIN_KIND, arm, run_id, tmp_path / "attempt1", root=root, lfs_sha=lfs)
+    assert res["status"] == "COMPLETE", res
+    doc = json.loads((root / res["record"]).read_text())
+    assert doc["final_placement"] == "relay" and doc["final_retention"]["status"] == "COMPLETE"
+    kept = json.loads((root / L.VARIANT.logs / f"storage/finals_{arm}.json").read_text())["products"]
+    assert list(kept) == [f"{arm}-s20260726/final"]
+    assert kept[f"{arm}-s20260726/final"]["kept_on"] == "relay" and kept[f"{arm}-s20260726/final"]["verified"]
+    assert fetched == []                                  #: nothing downloaded to the dev box
+    #: a final missing from the relay leaves the closeout INCOMPLETE, naming it
+    res2 = S.completion(L.VARIANT, L.SPLIT_TRAIN_KIND, arm, run_id, tmp_path / "attempt1", root=root,
+                        lfs_sha=lambda paths: {})
+    assert res2["status"] == "INCOMPLETE" and "final_retention" in res2["unfinished"]
 
 
 def test_v1news_kinds_bind_its_files_and_v1s_kinds_do_not(monkeypatch):

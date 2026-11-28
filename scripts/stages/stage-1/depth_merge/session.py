@@ -19,8 +19,9 @@ Gates read at $0 before the create, beyond the mechanism's:
 * the dev box's filesystem under ``--scr`` holds the session's evidence bound.
 
 Every closeout (the formal launch's after teardown and a manual ``closeout``) runs the variant's completion: a build
-session's init record durable on the secured copy; a training session's two finals and four sets complete against them
-(`single_operator_budget.completion.session`) and both finals at their placement (`retain`).
+session's init record durable on the secured copy; a training session's finals (one per seed of its arm's design) and
+their sets in both modes complete against them (`single_operator_budget.completion.session`) and every final at its
+placement (`retain`, the arm's design's `storage.phase_2_finals.placement`).
 """
 from __future__ import annotations
 
@@ -570,8 +571,8 @@ def completion(v: Variant, kind: str, arm: str | None, run_id: str, scr: Path, *
                lfs_sha=None) -> dict:
     """A build session: the init record durable on the secured copy under this tree's identity of the build's
     products (`build_driver.durable_init`, `build_driver.current_identity`). A training
-    session: its two finals and four sets complete against them (`completion.session`, SOB1's chain bound to the
-    arm's design) and both finals at their placement (`single_operator_budget.launch.retain`). Writes
+    session: each seed's final and its sets in both modes complete against it (`completion.session`, SOB1's chain
+    bound to the arm's design) and every final at its placement (`single_operator_budget.launch.retain`). Writes
     ``runs/<run_id>/closeout/session_completion.json``."""
     from stages.depth_merge import build_driver as BD
     out = Path(scr) / "store" / "out"

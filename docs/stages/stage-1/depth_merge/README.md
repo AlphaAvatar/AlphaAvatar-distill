@@ -182,7 +182,9 @@ a new layer from 26-29. That gives 18 layers and 2,205,713,408 parameters, count
 
 A separate layer is never V1's span block with the kept layer put back in front of it. Every layer runs once: there
 is no recurrence and no hidden-state loss. "The preceding layer unchanged" applies at initialization only. Recovery
-is SOB1's depth recipe (Stage 3), with nothing frozen beyond it.
+is SOB1's depth recipe (Stage 3) with SOB1's trainable patterns: every block's attention, MLP and layer norms and the
+final norm train, the embedding / tied head stays frozen, and no further freezing is added. One seed (20260726), one
+final, both evaluation modes.
 
 **Reused by identity, never recomputed:**
 

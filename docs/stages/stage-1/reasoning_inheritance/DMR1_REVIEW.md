@@ -49,7 +49,8 @@ How each layer starts (`split.build_candidate`, every provenance checked before 
   first block. The kept layer before the run is not part of it, and V1's span block is never reused for it.
 
 Each layer executes once: no recurrence, no hidden-state loss. "The preceding layer unchanged" holds at
-initialization; recovery trains every parameter of SOB1's depth recipe, with nothing frozen beyond it.
+initialization only. Recovery keeps SOB1's trainable patterns: every block's attention, MLP and layer norms and the
+final norm train, the embedding / tied head stays frozen, and no further freezing is added.
 
 The toy test builds V1's init and then v1-new's candidate on the 6-block toy teacher. It checks:
 

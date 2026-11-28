@@ -34,7 +34,7 @@
   "num_parameters": 4022468096
  },
  "baseline": {
-  "what": "SOB1's depth-only arm: its TRAINING-PRE initialization is this variant's base and its two recovered seeds and their sealed eval-set-1 sets are the direct control (reused, never retrained or regenerated)",
+  "what": "SOB1's depth-only arm: its TRAINING-PRE initialization is this variant's base (the kept layers, the embedding, the final norm, the tied head); its seed-20260726 final and sealed eval-set-1 sets are control D (reused, never retrained or regenerated)",
   "sob1_design": {
    "path": "configs/stages/stage-1/single_operator_budget/design.json",
    "sha256": "ad6694bf2be33a607e6ef0232949a3609fa8fcfe2b08a92829c5a4a2dd7dbe5d"
@@ -359,7 +359,7 @@
    "block": "q_norm, k_norm and the (folded, unit) norm gains: each block's share of the span's total head energy"
   },
   "never": "V1's merged block of a long span with the kept block put back in front of it",
-  "execution": "every layer once: no recurrence, no hidden-state loss; nothing frozen at initialization or after"
+  "execution": "every layer once: no recurrence, no hidden-state loss. The kept layer before a separate run is unchanged at INITIALIZATION only; recovery trains SOB1's trainable patterns, unchanged: every block's attention (q/k/v/o projections, q/k norms), MLP (gate/up/down projections) and both layer norms, and the final norm, train; the embedding, tied with the head, stays frozen; no further freezing"
  },
  "statistics": {
   "profile_id": "calib.hybrid_d4_base@v2",
@@ -438,12 +438,13 @@
    "the method's code, by identity",
    "the calibration profile, positions and packing (the packed search's session)",
    "SOB1's depth selection and base initialization (rebuilt from the teacher by frozen_mapping.keep_blocks and checked against the base's tensor digests)",
-   "SOB1's depth recovery recipe, plan and its two recovered seeds and sealed sets as the control"
+   "SOB1's depth recovery recipe and plan; the same-seed (20260726) controls: SOB1's depth_only and V1's depth_merge, their registered finals and sealed sets (never retrained or regenerated)",
+   "V1's calibration statistics session's profile and positions; V1's built blocks for the absorbed groups (v1_init)"
   ],
   "recomputed": [
-   "the statistics of the 29 blocks and the 20 pairs at THIS structure's spans",
-   "every permutation",
-   "every merged tensor"
+   "the statistics of the 9 blocks and the 7 pairs of the separate runs only",
+   "their permutations",
+   "the separate layers' merged tensors"
   ],
   "not_reused": "RI-LM1's statistics, permutations and merged deltas: its spans were [2,3], [10,11], [16,17,18], [24,25,26], [29,30], [31,32] at another kept set, and alpha's normalization runs over S_j, so no merged tensor carries over; 5 of its 8 pairs ((10,11), (24,25), (24,26), (29,30), (31,32)) are pairs here too and are compared as a reproduction diagnostic, never used as inputs",
   "v1_init": {
@@ -502,7 +503,7 @@
    "config.out_dir",
    "config.lineage.initialization"
   ],
-  "recipe": "every other field of SOB1's depth unit, compared field by field (`plan.py`): stage stage3_recovery; seeds 20260726 and 20260801 in that order; 9,701 optimizer steps, 3 epochs of 6,467 packed sequences of 8,192 tokens; batch size 2, micro-batch size 1, 2 gradient accumulation steps; fp32 parameters with bf16 autocast and gradient checkpointing; the teacher in bf16 as the online KD teacher; CE 0.25 + KD 1.0, temperature 1.0, assistant scope, Top-200 + tail; AdamW lr 5e-5, weight decay 0.01, betas (0.9, 0.95), eps 1e-8, clip 1.0; 485 warmup steps, cosine to 0.1; the same trainable patterns (embedding / tied head frozen); cross_context packing (sequential, truncation allowed, standard causal attention); the same pack, tokenizer and save points (every 1,104 steps, keep 1)",
+  "recipe": "every other field of SOB1's depth unit, compared field by field (`plan.py`): stage stage3_recovery; seed 20260726 only (one seed: training.single_seed); 9,701 optimizer steps, 3 epochs of 6,467 packed sequences of 8,192 tokens; batch size 2, micro-batch size 1, 2 gradient accumulation steps; fp32 parameters with bf16 autocast and gradient checkpointing; the teacher in bf16 as the online KD teacher; CE 0.25 + KD 1.0, temperature 1.0, assistant scope, Top-200 + tail; AdamW lr 5e-5, weight decay 0.01, betas (0.9, 0.95), eps 1e-8, clip 1.0; 485 warmup steps, cosine to 0.1; SOB1's trainable patterns, unchanged: every block's attention (q/k/v/o projections, q/k norms), MLP (gate/up/down projections) and both layer norms, and the final norm, train; the embedding, tied with the head, stays frozen; no further freezing; cross_context packing (sequential, truncation allowed, standard causal attention); the same pack, tokenizer and save points (every 1,104 steps, keep 1)",
   "data": {
    "before_packing": {
     "examples": 45363,
@@ -635,8 +636,8 @@
    "think_state_rule": "the think state every rendered prompt of the mode carries, as the A-MIX plan's evaluations declare it (training_plan.json :: evaluations[].think_state): thinking self_opening, non-thinking preclosed; checked record by record (completion.py)"
   },
   "models": {
-   "post_recovery": "each of depth_merge's two seeds after recovery",
-   "control": "SOB1's depth_only seeds, their sealed sets reused"
+   "post_recovery": "depth_merge_split's one seed (20260726) after recovery: one final, both modes (H-T, H-N), every item",
+   "control": "D = SOB1 depth_only s20260726 and M = V1 depth_merge s20260726: their registered finals and sealed sets, reused"
   },
   "untrained": "not evaluated on eval-set-1: SOB1 found every untrained arm at 0/570 in both modes; the build's state evaluation is the diagnostic"
  },
@@ -675,17 +676,17 @@
   "local_store": "~/aad-artifacts/stage1_depth_merge",
   "phase_2_finals": {
    "placement": {
-    "depth_merge": "relay"
+    "depth_merge_split": "relay"
    },
-   "_placement": "the two fp32 finals stay at their relay prefix (the dev box is shared and has about 7 GiB free since SOB1's FFN + attention finals moved there on 2026-11-26, storage option a): their next consumer is variant 2 if the selection rule chooses this initialization's path -- variant 2 trains from the TRAINING-PRE initialization, never from these finals, so the finals are the control's weights only"
+   "_placement": "depth_merge_split's one fp32 final (8,822,853,632 B) stays at its relay prefix, checked there by LFS sha256 at closeout (`launch.retain`); nothing is downloaded: the dev box is shared and has about 7 GiB free. It is kept with the init and the evaluation evidence for the maintainer's review (2026-11-29) and is not retired ahead of any later round's storage"
   },
-  "relay_rotation": "keep (the finals are not rotated off; a later round's room is planned against the live headroom)",
+  "relay_rotation": "keep (the final is not rotated off; a later round's room is planned against the live headroom)",
   "relay_margin_gib": 1.0,
   "statistics_bytes_bound": 67108864,
   "closeout_archive_bytes_bound": 134217728,
   "_bounds": "statistics: 29 blocks x 9,728 float64 E|a| + head energies + 20 pairs' int64 permutations (~4 MB), bounded at 64 MiB; closeout archive: SOB1's phase-2 evidence archives held 0.113 GiB for three sessions (about 0.04 GiB each), bounded at 128 MiB",
   "chain_rule": "a FIRST build session's launch gate asks the relay for the WHOLE chain (storage.py: the build's products, its closeout archive, the training session's rotation peak and the margin), not the build's products alone; a build TAKEOVER asks for what the chain still adds (session.build_need: the chain less each product the attempt holds on the relay under this identity with its files present, at the chain's own count; build_driver.held), against a live headroom that already excludes them, with the same margin",
-  "storage_plan": "logs/stages/stage-1/depth_merge/plans/storage_plan.json (storage.py --write: the relay's live headroom and the dev box's live free space, the sequence, the first-run need and the takeover needs)"
+  "storage_plan": "logs/stages/stage-1/depth_merge/plans/programme_storage_plan.json (storage.py --variant programme --write: v1-new's sessions' needs against the relay's live headroom)"
  },
  "cost_model": {
   "basis": "SOB1's measured depth session (sob1_train_depth_only_20261122_223829: 1,708.3 min, $31.6179; 4.83 s / step; evaluation 34.5-35.5 / 6.9-7.2 min per seed and mode) for training; RI-LM1's measured statistics (117 s for 14 blocks) and assignment (178 s each) for the build",
