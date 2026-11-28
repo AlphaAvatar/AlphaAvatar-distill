@@ -81,62 +81,45 @@ def sequence(root: Path = REPO) -> dict:
 
 
 V2_RECORD = DC.RECURRENCE_LOGS / "plans/storage_plan.json"
-#: relay objects with a verified copy on the dev box (re-hashed 2026-11-28 against their records), so removing the
-#: relay copy deletes no artifact: the maintainer's decision, proposed for the revised variant 2's room
-DUPLICATES = {
-    "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c":
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
-    "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f":
-        "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/ffn_attention/init_record.json"}
+#: storage option (a), executed 2026-11-28 (the maintainer's decision; logs/maintenance/storage/
+#: dmr1_storage_option_a_20261128.json): V1 seed 2's save point and SOB1's two init relay duplicates are retired
+RETIRED_20261128 = "logs/maintenance/storage/dmr1_storage_option_a_20261128.json"
 
 
 def v2_sequence(root: Path = REPO) -> dict:
-    """The revised variant 2's relay steps against what the relay holds now, under the registered two-copy rotation
-    (`single_operator_budget.launch.rotation_need`: each new save point beside the previous until it hands off, the
-    final beside the last): the depth_loop_kept session, then the depth_loop_merged one, each with its closeout
-    archive; the first session's final stays on the relay while the second rotates. Per session: its own peak (from
-    the bytes it starts with) and need (+ the margin), which its launch gate asks the live headroom for."""
+    """The revised variant 2's relay steps against what the relay holds now, under the registered two-copy rotation:
+    the depth_loop_kept session, then the depth_loop_merged one; the first session's final and archive stay on the
+    relay while the second rotates. Each session's need is `session.training_relay_need` -- the computation its
+    launch gate makes -- from an empty state (a first run)."""
     from stages.depth_merge import plan as PL
-    from stages.single_operator_budget import launch as SL
+    from stages.depth_merge import session as S
     sz = sizes(root)
-    st = DC.design()["storage"]
-    archive = int(st["closeout_archive_bytes_bound"])
-    margin = int(float(st["relay_margin_gib"]) * GIB)
     steps, net, sessions = [], 0, {}
     for arm in ("depth_loop_kept", "depth_loop_merged"):
         plan = json.loads(PL.out_path(arm).read_text())
-        start = net
-        rot = SL.rotation_need(plan, {}, sz)
-        for s in rot["trace"]:
+        need = S.training_relay_need(arm, plan, {}, sz)
+        for s in need["trace"]:
             steps.append({"step": f"{arm}: {s['step']}", "net_bytes": net + s["net_bytes"],
                           "net_gib": round((net + s["net_bytes"]) / GIB, 2)})
-        net += rot["end_bytes"] + archive
+        sessions[arm] = {"held_before_bytes": net, **{k: v for k, v in need.items() if k != "trace"}}
+        net += need["end_bytes"] + need["archive_bytes"]
         steps.append({"step": f"{arm} closeout: its evidence archive", "net_bytes": net, "net_gib": round(net / GIB, 2)})
-        own_peak = max(rot["peak_bytes"], rot["end_bytes"] + archive)
-        sessions[arm] = {"held_before_bytes": start, "own_peak_bytes": own_peak, "own_peak_gib": round(own_peak / GIB, 2),
-                         "need_bytes": own_peak + margin, "need_gib": round((own_peak + margin) / GIB, 2),
-                         "rule": "the session's launch gate: its own rotation peak + the margin, against the live "
-                                 "headroom (which already excludes what earlier sessions left)"}
-    peak = max(s["net_bytes"] for s in steps)
-    return {"steps": steps, "peak_bytes": peak, "peak_gib": round(peak / GIB, 2), "margin_bytes": margin,
-            "need_bytes": peak + margin, "need_gib": round((peak + margin) / GIB, 2),
-            "peak_at": max(steps, key=lambda s: s["net_bytes"])["step"], "sessions": sessions,
-            "rotation": "registered two-copy (no single-copy branch exists)"}
+    return {"steps": steps, "sessions": sessions, "held_after_both_bytes": net,
+            "rotation": "registered two-copy (no single-copy branch exists)",
+            "rule": "each session's need = session.training_relay_need (the launch gate's computation)"}
 
 
 #: the relay's objects by group (`inventory`): why each stays, or what it would take to free it
 INVENTORY_RULES = (
-    ("durable/stage1_depth_merge/depth_merge/depth_merge-s20260801", "KEEP", "V1 seed 2's durable save point (step "
-     "5,520): kept by the maintainer (2026-11-28); freeing it needs that decision"),
     ("durable/stage1_depth_merge/depth_merge/depth_merge-s20260726", "KEEP", "V1 seed 1's final: the M control's "
      "weights, their only copy (kept by the maintainer)"),
     ("durable/stage1_depth_merge/depth_merge/init", "KEEP", "V2-M's base (the only copy)"),
     ("durable/stage1_depth_merge/depth_merge/statistics", "KEEP", "V1's build statistics (the init's provenance)"),
     ("durable/stage1_single_operator_budget/depth_only/init", "KEEP", "V2-D's base: the pod stages it from here"),
-    ("durable/stage1_single_operator_budget/residual_width/init", "PROPOSE", "a duplicate: the dev box holds a "
-     "verified copy; no plan reads the relay copy"),
-    ("durable/stage1_single_operator_budget/ffn_attention/init", "PROPOSE", "a duplicate: the dev box holds a "
-     "verified copy; no plan reads the relay copy"),
+    ("durable/stage1_single_operator_budget/residual_width/init", "KEEP", "the init's mapping files (no dev-box "
+     "copy); its init/ copy was retired 2026-11-28"),
+    ("durable/stage1_single_operator_budget/ffn_attention/init", "KEEP", "the init's mapping file (no dev-box copy); "
+     "its init/ copy was retired 2026-11-28"),
     ("permanent_controls/", "KEEP", "permanent controls (protected)"),
     ("stage1/qwen3_0p6b_init_v0/", "KEEP", "the canonical 0.6B init and its random baseline (anchors)"),
     ("stage0_calvol/finalists/", "KEEP", "named by Stage-2 configs"),
@@ -164,44 +147,28 @@ def inventory(root: Path = REPO) -> dict:
         g["gib"] = round(g["bytes"] / GIB, 3)
     total = sum(g["bytes"] for g in groups.values())
     by = {c: round(sum(g["bytes"] for g in groups.values() if g["class"] == c) / GIB, 2)
-          for c in ("KEEP", "PROPOSE", "UNCLASSIFIED")}
+          for c in ("KEEP", "UNCLASSIFIED")}
     return {"groups": dict(sorted(groups.items(), key=lambda kv: -kv[1]["bytes"])), "total_gib": round(total / GIB, 2),
             "by_class_gib": by}
 
 
 def v2_plan(live_state: dict, root: Path = REPO, dev_box: dict | None = None, inv: dict | None = None) -> dict:
-    """The revised variant 2's storage under the registered rotation: each session's need against the live
-    headroom, as it is and as it would be after each option, and the gap that remains (nothing is deleted)."""
+    """The revised variant 2's storage under the registered rotation, after storage option (a): each session's need
+    (`session.training_relay_need`) against the live headroom, V2-M's after V2-D's final and archive are held."""
     head = int(live_state["headroom_bytes"])
     seq = v2_sequence(root)
-    dup = {}
-    for prefix, rec_path in DUPLICATES.items():
-        rec = json.loads((root / rec_path).read_text())["relay"]["init"]
-        dup[prefix] = {"bytes": int(sum((rec.get("bytes") or {}).values())), "record": rec_path,
-                       "relay_sha256": rec["files_sha256"]}
-    freed_dup = sum(v["bytes"] for v in dup.values())
-    v1_sp = int(sizes(root)["save_point"])
-    options = {"as_is": 0, "duplicates_removed": freed_dup, "v1_seed2_save_point_freed": v1_sp,
-               "duplicates_and_v1_seed2_save_point": freed_dup + v1_sp}
     rows = {}
-    for label, freed in options.items():
-        room = head + freed
-        d_need = seq["sessions"]["depth_loop_kept"]["need_bytes"]
-        #: V2-M starts with V2-D's final and archive held: the headroom then is lower by them
-        held = seq["sessions"]["depth_loop_merged"]["held_before_bytes"]
-        m_need = seq["sessions"]["depth_loop_merged"]["need_bytes"]
-        rows[label] = {"freed_gib": round(freed / GIB, 2), "headroom_gib": round(room / GIB, 2),
-                       "v2d": {"need_gib": round(d_need / GIB, 2), "fits": d_need <= room,
-                               "gap_gib": round(max(0, d_need - room) / GIB, 2)},
-                       "v2m": {"need_gib": round(m_need / GIB, 2), "headroom_then_gib": round((room - held) / GIB, 2),
-                               "fits": m_need <= room - held, "gap_gib": round(max(0, m_need - (room - held)) / GIB, 2)},
-                       "authorized": label == "as_is"}
-    return {"schema": "aadistill.dmr1.v2_storage_plan/v2", "variant": "DMR1-R", "live": live_state,
-            "dev_box_live": dev_box, "sequence": seq, "duplicates": dup, "duplicates_gib": round(freed_dup / GIB, 2),
-            "options": rows, "inventory": inv,
-            "rule": "the registered two-copy rotation: a valid, discoverable save point exists at every moment after "
-                    "the first; need = a session's own peak + the 1 GiB margin, against the live headroom; nothing "
-                    "is deleted or bought by this plan; every option but as_is needs the maintainer's decision"}
+    for arm, s in seq["sessions"].items():
+        room = head - int(s["held_before_bytes"])
+        rows[arm] = {"need_gib": s["need_gib"], "headroom_then_gib": round(room / GIB, 2),
+                     "fits": s["need_bytes"] <= room, "margin_gib": round((room - s["need_bytes"]) / GIB, 2),
+                     "held_before_gib": round(s["held_before_bytes"] / GIB, 2)}
+    return {"schema": "aadistill.dmr1.v2_storage_plan/v3", "variant": "DMR1-R", "live": live_state,
+            "dev_box_live": dev_box, "sequence": seq, "sessions": rows, "inventory": inv,
+            "storage_option_a": RETIRED_20261128,
+            "rule": "the registered two-copy rotation; need = session.training_relay_need (rotation peak or end + "
+                    "archive, + the registered margin), the launch gate's computation; headroom = the live LFS "
+                    "bisection; nothing is deleted or bought by this plan"}
 
 
 def S_variant():
@@ -296,10 +263,8 @@ def main(argv=None) -> int:
         if a.write:
             V2_RECORD.parent.mkdir(parents=True, exist_ok=True)
             V2_RECORD.write_text(json.dumps(doc, indent=1) + "\n")
-        print(json.dumps({"options": doc["options"], "sessions": doc["sequence"]["sessions"],
-                          "inventory_by_class": doc["inventory"]["by_class_gib"],
-                          "groups": {k: (g["gib"], g["class"]) for k, g in doc["inventory"]["groups"].items()}},
-                         indent=1))
+        print(json.dumps({"sessions": doc["sessions"], "inventory_by_class": doc["inventory"]["by_class_gib"],
+                          "live": {k: doc["live"][k] for k in ("headroom_gib", "used_gib", "utc")}}, indent=1))
         return 0
     doc = plan(live(), dev_box=dev_box_live())
     if a.write:

@@ -19,6 +19,7 @@
   "frozen_results_location",
   "historical_paths",
   "identity",
+  "live_check_before_removal",
   "maintainer_decision",
   "members",
   "n_files",
@@ -30,6 +31,7 @@
   "references_at_deletion",
   "relay_hash_verified",
   "relay_path",
+  "resumable_after_deletion",
   "retention_tier",
   "same_hash_copies",
   "scientific_role",
@@ -46,10 +48,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 161,
-  "active": 159,
-  "active_retired_bytes": 693674888021,
-  "active_retired_human": "646.035 GiB",
+  "tombstones_total": 164,
+  "active": 162,
+  "active_retired_bytes": 722666357728,
+  "active_retired_human": "673.035 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -11594,6 +11596,260 @@
      "error": null
     }
    }
+  },
+  {
+   "canonical_id": "relay_dmr1_merge_train_20261127_201532_depth_merge-s20260801_step_005520",
+   "historical_paths": [
+    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/model/config.json",
+    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/model/generation_config.json",
+    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/model/model.safetensors",
+    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/resume_identity.json",
+    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/trainer_state.pt"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520",
+   "retention_tier": "RETIRED_BY_MAINTAINER_DECISION",
+   "experiment": "DMR1-M (V1)",
+   "seed": 20260801,
+   "scientific_role": "depth_merge-s20260801's durable save point at step 5,520 (model fp32 + AdamW / RNG / data position): the only copy; the unit stopped at step 6,590 by the maintainer's decision",
+   "weights_sha256": "51ea0fe73c668b0f4cadee27dacf14c28d1728d2d53fc89a1848a4633532e14d",
+   "config_sha256": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+   "architecture": null,
+   "size_bytes": 20934764575,
+   "size_human": "19.497 GiB",
+   "n_files": 5,
+   "members": [
+    {
+     "path": "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/model/config.json",
+     "sha256": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890"
+    },
+    {
+     "path": "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/model/generation_config.json",
+     "sha256": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0"
+    },
+    {
+     "path": "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/model/model.safetensors",
+     "sha256": "51ea0fe73c668b0f4cadee27dacf14c28d1728d2d53fc89a1848a4633532e14d"
+    },
+    {
+     "path": "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/resume_identity.json",
+     "sha256": "718ec9a0a88b95e2d5a4ff6c6c7ffcc81d11da8500907d3ad8723ede2bd82450"
+    },
+    {
+     "path": "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/trainer_state.pt",
+     "sha256": "69938df4ee8dbc0f872e0b084886533c2b3607df4df6d3406072e93714e363b5"
+    }
+   ],
+   "references_at_deletion": [],
+   "deletion_criterion": "maintainer_decision",
+   "deletion_criterion_meaning": "the maintainer abandoned resuming this unit and retired its resumable state",
+   "same_hash_copies": [],
+   "canonical_surviving_evidence": "the unit's training log, records and the stop decision (/home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_201532/store/out/depth_merge-s20260801)",
+   "resumable_after_deletion": false,
+   "frozen_results_location": "logs/stages/stage-1/depth_merge/runs/dmr1_merge_train_20261127_201532/closeout/session_completion.json",
+   "live_check_before_removal": {
+    "relay_files": 5,
+    "relay_missing": [],
+    "relay_lfs_differs": [],
+    "relay_also_under_prefix": [],
+    "ok": true
+   },
+   "protection_lifted": {
+    "class": "the maintainer's 2026-11-28 keep instruction",
+    "maintainer_decision": "maintainer brief 2026-11-28 (after the review of 277586ba): 「我确定放弃恢复 V1 的 seed 2，批准采用存储方案 (a)：退役它的恢复存档，并删除 SOB1 两份已有本地核验副本的初始化在 HF 上的冗余副本。」"
+   },
+   "maintainer_decision": "maintainer brief 2026-11-28 (after the review of 277586ba): 「我确定放弃恢复 V1 的 seed 2，批准采用存储方案 (a)：退役它的恢复存档，并删除 SOB1 两份已有本地核验副本的初始化在 HF 上的冗余副本。」",
+   "tombstone_written_utc": "2026-11-28T12:23:58Z",
+   "deleted_utc": "2026-11-28T12:25:27Z",
+   "deletion": {
+    "status": "DELETED",
+    "utc": "2026-11-28T12:25:27Z",
+    "relay_remove": {
+     "removed_paths": [],
+     "lfs_objects_deleted": 0,
+     "lfs_left": [],
+     "paths_left": [],
+     "shared_oids_kept": [],
+     "freed_bytes": 0,
+     "error": null
+    },
+    "relay_left_under_prefix": [],
+    "lfs_objects_still_billed": [],
+    "continued": "a re-run after the first run's read-back failed (a 404 on the emptied prefix, read as an error): the first removal's answer -- its freed bytes -- was not captured; the absence of every path and LFS object is read here",
+    "freed_bytes_derived": 20934762735,
+    "freed_basis": "the two LFS objects' recorded sizes: both absent from the LFS listing after the removal (the call that freed them lost its answer to a read-back error)"
+   },
+   "reason_physical_weights_deleted": "storage option (a), the maintainer's decision of 2026-11-28: V1 seed 2's resume is abandoned, so its resumable state has no consumer; its room is DMR1 variant 2's two-copy rotation"
+  },
+  {
+   "canonical_id": "relay_sob1_phase1_residual_width_init_c853640b1ce2392c",
+   "historical_paths": [
+    "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/config.json",
+    "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+   "retention_tier": "REDUNDANT_REMOTE_COPY",
+   "experiment": "SOB1",
+   "seed": null,
+   "scientific_role": "SOB1 residual_width's training-pre initialization: the relay COPY of init/; the dev box keeps the copy (mapping/ stays on the relay: it has no dev-box copy)",
+   "weights_sha256": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
+   "config_sha256": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8",
+   "architecture": null,
+   "size_bytes": 4022524682,
+   "size_human": "3.746 GiB",
+   "n_files": 2,
+   "members": [
+    {
+     "path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/config.json",
+     "sha256": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors",
+     "sha256": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada"
+    }
+   ],
+   "references_at_deletion": [
+    "scripts/stages/stage-1/depth_merge/storage.py"
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+     "kind": "local",
+     "verified": "every file re-hashed to the record just before the removal"
+    }
+   ],
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+   "frozen_results_location": "logs/stages/stage-1/single_operator_budget/results/study_completion.json",
+   "live_check_before_removal": {
+    "relay_files": 2,
+    "relay_missing": [],
+    "relay_lfs_differs": [],
+    "relay_also_under_prefix": [
+     "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/mapping.json",
+     "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/tensors.safetensors"
+    ],
+    "survivor_rehash": {
+     "init/model.safetensors": true,
+     "init/config.json": true
+    },
+    "ok": true
+   },
+   "protection_lifted": {
+    "class": "registry protected / never_delete_clause",
+    "maintainer_decision": "maintainer brief 2026-11-28 (after the review of 277586ba): 「我确定放弃恢复 V1 的 seed 2，批准采用存储方案 (a)：退役它的恢复存档，并删除 SOB1 两份已有本地核验副本的初始化在 HF 上的冗余副本。」"
+   },
+   "maintainer_decision": "maintainer brief 2026-11-28 (after the review of 277586ba): 「我确定放弃恢复 V1 的 seed 2，批准采用存储方案 (a)：退役它的恢复存档，并删除 SOB1 两份已有本地核验副本的初始化在 HF 上的冗余副本。」",
+   "tombstone_written_utc": "2026-11-28T12:25:30Z",
+   "deleted_utc": "2026-11-28T12:25:47Z",
+   "deletion": {
+    "status": "DELETED",
+    "utc": "2026-11-28T12:25:47Z",
+    "relay_remove": {
+     "removed_paths": [
+      "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/config.json",
+      "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors"
+     ],
+     "lfs_objects_deleted": 1,
+     "lfs_left": [],
+     "paths_left": [],
+     "shared_oids_kept": [],
+     "freed_bytes": 4022523088,
+     "error": null
+    },
+    "relay_left_under_prefix": [
+     "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/mapping.json",
+     "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/tensors.safetensors"
+    ],
+    "lfs_objects_still_billed": []
+   },
+   "reason_physical_weights_deleted": "storage option (a): a redundant remote copy; the dev box keeps the verified copy, and the room is DMR1 variant 2's"
+  },
+  {
+   "canonical_id": "relay_sob1_phase1_ffn_attention_init_4429c94994a5bd1f",
+   "historical_paths": [
+    "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/config.json",
+    "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/model.safetensors"
+   ],
+   "store": "relay",
+   "relay_path": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+   "retention_tier": "REDUNDANT_REMOTE_COPY",
+   "experiment": "SOB1",
+   "seed": null,
+   "scientific_role": "SOB1 ffn_attention's training-pre initialization: the relay COPY of init/; the dev box keeps the copy (mapping/ stays on the relay: it has no dev-box copy)",
+   "weights_sha256": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14",
+   "config_sha256": "80e72c4b2b5f27edaddaa933cb50f57be664c252e94793c6c399a42e529941a1",
+   "architecture": null,
+   "size_bytes": 4034180450,
+   "size_human": "3.757 GiB",
+   "n_files": 2,
+   "members": [
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/config.json",
+     "sha256": "80e72c4b2b5f27edaddaa933cb50f57be664c252e94793c6c399a42e529941a1"
+    },
+    {
+     "path": "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/model.safetensors",
+     "sha256": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14"
+    }
+   ],
+   "references_at_deletion": [
+    "scripts/stages/stage-1/depth_merge/storage.py"
+   ],
+   "deletion_criterion": "byte_identical_duplicate",
+   "deletion_criterion_meaning": "byte-identical to a copy that survives",
+   "same_hash_copies": [
+    {
+     "location": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+     "kind": "local",
+     "verified": "every file re-hashed to the record just before the removal"
+    }
+   ],
+   "canonical_surviving_evidence": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+   "frozen_results_location": "logs/stages/stage-1/single_operator_budget/results/study_completion.json",
+   "live_check_before_removal": {
+    "relay_files": 2,
+    "relay_missing": [],
+    "relay_lfs_differs": [],
+    "relay_also_under_prefix": [
+     "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/mapping/mapping.json"
+    ],
+    "survivor_rehash": {
+     "init/model.safetensors": true,
+     "init/config.json": true
+    },
+    "ok": true
+   },
+   "protection_lifted": {
+    "class": "registry protected / never_delete_clause",
+    "maintainer_decision": "maintainer brief 2026-11-28 (after the review of 277586ba): 「我确定放弃恢复 V1 的 seed 2，批准采用存储方案 (a)：退役它的恢复存档，并删除 SOB1 两份已有本地核验副本的初始化在 HF 上的冗余副本。」"
+   },
+   "maintainer_decision": "maintainer brief 2026-11-28 (after the review of 277586ba): 「我确定放弃恢复 V1 的 seed 2，批准采用存储方案 (a)：退役它的恢复存档，并删除 SOB1 两份已有本地核验副本的初始化在 HF 上的冗余副本。」",
+   "tombstone_written_utc": "2026-11-28T12:27:07Z",
+   "deleted_utc": "2026-11-28T12:27:24Z",
+   "deletion": {
+    "status": "DELETED",
+    "utc": "2026-11-28T12:27:24Z",
+    "relay_remove": {
+     "removed_paths": [
+      "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/config.json",
+      "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/init/model.safetensors"
+     ],
+     "lfs_objects_deleted": 1,
+     "lfs_left": [],
+     "paths_left": [],
+     "shared_oids_kept": [],
+     "freed_bytes": 4034178856,
+     "error": null
+    },
+    "relay_left_under_prefix": [
+     "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/mapping/mapping.json"
+    ],
+    "lfs_objects_still_billed": []
+   },
+   "reason_physical_weights_deleted": "storage option (a): a redundant remote copy; the dev box keeps the verified copy, and the room is DMR1 variant 2's"
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant.",

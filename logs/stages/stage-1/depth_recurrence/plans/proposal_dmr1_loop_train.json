@@ -4,7 +4,7 @@
  "status": "proposed",
  "kind": "dmr1_loop_train",
  "recorded_utc": "2026-11-28",
- "design_sha256": "8d255edad6afc9a5d5aa112345769d381807c2cedf19f81f9ccac96e4c496892",
+ "design_sha256": "a613186681b6c18a264cc92c118d43c0407f3ba65956ae9d983df00d0a411deb",
  "scope": "DMR1 variant 2 as revised 2026-11-28: depth_loop_kept and depth_loop_merged, seed 20260726 each, one session per arm; the first runs the engine validation before training",
  "ceiling_usd": 113.25,
  "teardown_reserve_usd": 1.0,
@@ -127,7 +127,7 @@
  "needed_with_reserves_usd": 115.25,
  "project_cumulative_cap_usd": 1161.06,
  "position_at_proposal": {
-  "read_utc": "2026-11-28T11:58:20Z",
+  "read_utc": "2026-11-28T12:36:08Z",
   "committed_usd": 1114.6477,
   "project_cap_usd": 1161.06,
   "project_remaining_usd": 46.4123,
@@ -135,13 +135,13 @@
   "pods": 0,
   "volumes": 0,
   "spend_per_hour": 0.0,
-  "relay_headroom_gib": 27.219,
-  "relay_used_gib": 60.36,
+  "relay_headroom_gib": 54.219,
+  "relay_used_gib": 33.359,
   "dev_box_free_gib": 6.85,
   "note": "one reading of the ledger (SE.live_position) for the cap and the balance; committed rose $1.1346 since 10:25Z as V1 attempt 2's last billing rows posted (no resource existed)"
  },
  "fits_position": {
-  "read_utc": "2026-11-28T11:58:20Z",
+  "read_utc": "2026-11-28T12:36:08Z",
   "both_sessions_at_their_caps_with_reserves_usd": 115.25,
   "project_cap": {
    "remaining_usd": 46.4123,

@@ -1,23 +1,23 @@
 {
- "schema": "aadistill.dmr1.v2_storage_plan/v2",
+ "schema": "aadistill.dmr1.v2_storage_plan/v3",
  "variant": "DMR1-R",
  "live": {
   "relay": "AlphaAvatar/aadistill-artifacts",
-  "headroom_bytes": 29225910272,
-  "headroom_gib": 27.219,
-  "refused_at_gib": 27.234,
-  "used_bytes": 64810820765,
-  "used_gib": 60.36,
-  "utc": "2026-11-28T11:57:50Z",
+  "headroom_bytes": 58216939520,
+  "headroom_gib": 54.219,
+  "refused_at_gib": 54.234,
+  "used_bytes": 35819356086,
+  "used_gib": 33.359,
+  "utc": "2026-11-28T12:35:50Z",
   "rule": "LFS batch endpoint bisection with fresh oids in objects of <= 10 GiB (nothing stored); used = the sum of list_lfs_files (the billing basis)"
  },
  "dev_box_live": {
   "path": "/home/ecs-user/aad-artifacts/stage1_depth_merge",
-  "free_bytes": 7251324928,
-  "free_gib": 6.75,
+  "free_bytes": 6573961216,
+  "free_gib": 6.12,
   "peak_evidence_gib": 1.5,
-  "margin_after_peak_gib": 5.25,
-  "utc": "2026-11-28T11:57:50Z",
+  "margin_after_peak_gib": 4.62,
+  "utc": "2026-11-28T12:35:50Z",
   "note": "the filesystem is shared with another project; its use moves without this project"
  },
  "sequence": {
@@ -203,126 +203,52 @@
     "net_gib": 15.18
    }
   ],
-  "peak_bytes": 50018768896,
-  "peak_gib": 46.58,
-  "margin_bytes": 1073741824,
-  "need_bytes": 51092510720,
-  "need_gib": 47.58,
-  "peak_at": "depth_loop_merged: depth_loop_merged-s20260726: save point 2208 uploaded",
   "sessions": {
    "depth_loop_kept": {
     "held_before_bytes": 0,
-    "own_peak_bytes": 41869144064,
-    "own_peak_gib": 38.99,
+    "rotation_peak_bytes": 41869144064,
+    "end_bytes": 8015407104,
+    "archive_bytes": 134217728,
+    "peak_bytes": 41869144064,
+    "margin_bytes": 1073741824,
     "need_bytes": 42942885888,
     "need_gib": 39.99,
-    "rule": "the session's launch gate: its own rotation peak + the margin, against the live headroom (which already excludes what earlier sessions left)"
+    "rule": "max(rotation peak, rotation end + closeout archive) + the registered margin"
    },
    "depth_loop_merged": {
     "held_before_bytes": 8149624832,
-    "own_peak_bytes": 41869144064,
-    "own_peak_gib": 38.99,
+    "rotation_peak_bytes": 41869144064,
+    "end_bytes": 8015407104,
+    "archive_bytes": 134217728,
+    "peak_bytes": 41869144064,
+    "margin_bytes": 1073741824,
     "need_bytes": 42942885888,
     "need_gib": 39.99,
-    "rule": "the session's launch gate: its own rotation peak + the margin, against the live headroom (which already excludes what earlier sessions left)"
+    "rule": "max(rotation peak, rotation end + closeout archive) + the registered margin"
    }
   },
-  "rotation": "registered two-copy (no single-copy branch exists)"
+  "held_after_both_bytes": 16299249664,
+  "rotation": "registered two-copy (no single-copy branch exists)",
+  "rule": "each session's need = session.training_relay_need (the launch gate's computation)"
  },
- "duplicates": {
-  "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c": {
-   "bytes": 4022524682,
-   "record": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/residual_width/init_record.json",
-   "relay_sha256": {
-    "init/model.safetensors": "599f86fe6c77339aaf09062ee29264c2769b90f0029beed33c774ed84bfd7ada",
-    "init/config.json": "33bc3b46c75ee8bca9e67e11426e3e532820d8a13e00f4f5d21ed6372adc6ab8"
-   }
+ "sessions": {
+  "depth_loop_kept": {
+   "need_gib": 39.99,
+   "headroom_then_gib": 54.22,
+   "fits": true,
+   "margin_gib": 14.23,
+   "held_before_gib": 0.0
   },
-  "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f": {
-   "bytes": 4034180450,
-   "record": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/ffn_attention/init_record.json",
-   "relay_sha256": {
-    "init/model.safetensors": "1b8eaa4c85d9a0309e390d2b3169c1af00d286ad64ad4394f77089a27bd27d14",
-    "init/config.json": "80e72c4b2b5f27edaddaa933cb50f57be664c252e94793c6c399a42e529941a1"
-   }
-  }
- },
- "duplicates_gib": 7.5,
- "options": {
-  "as_is": {
-   "freed_gib": 0.0,
-   "headroom_gib": 27.22,
-   "v2d": {
-    "need_gib": 39.99,
-    "fits": false,
-    "gap_gib": 12.77
-   },
-   "v2m": {
-    "need_gib": 39.99,
-    "headroom_then_gib": 19.63,
-    "fits": false,
-    "gap_gib": 20.36
-   },
-   "authorized": true
-  },
-  "duplicates_removed": {
-   "freed_gib": 7.5,
-   "headroom_gib": 34.72,
-   "v2d": {
-    "need_gib": 39.99,
-    "fits": false,
-    "gap_gib": 5.27
-   },
-   "v2m": {
-    "need_gib": 39.99,
-    "headroom_then_gib": 27.13,
-    "fits": false,
-    "gap_gib": 12.86
-   },
-   "authorized": false
-  },
-  "v1_seed2_save_point_freed": {
-   "freed_gib": 19.5,
-   "headroom_gib": 46.72,
-   "v2d": {
-    "need_gib": 39.99,
-    "fits": true,
-    "gap_gib": 0.0
-   },
-   "v2m": {
-    "need_gib": 39.99,
-    "headroom_then_gib": 39.13,
-    "fits": false,
-    "gap_gib": 0.87
-   },
-   "authorized": false
-  },
-  "duplicates_and_v1_seed2_save_point": {
-   "freed_gib": 27.0,
-   "headroom_gib": 54.22,
-   "v2d": {
-    "need_gib": 39.99,
-    "fits": true,
-    "gap_gib": 0.0
-   },
-   "v2m": {
-    "need_gib": 39.99,
-    "headroom_then_gib": 46.63,
-    "fits": true,
-    "gap_gib": 0.0
-   },
-   "authorized": false
+  "depth_loop_merged": {
+   "need_gib": 39.99,
+   "headroom_then_gib": 46.63,
+   "fits": true,
+   "margin_gib": 6.64,
+   "held_before_gib": 7.59
   }
  },
  "inventory": {
   "groups": {
-   "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801": {
-    "bytes": 20934762735,
-    "objects": 2,
-    "class": "KEEP",
-    "why": "V1 seed 2's durable save point (step 5,520): kept by the maintainer (2026-11-28); freeing it needs that decision",
-    "gib": 19.497
-   },
    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260726": {
     "bytes": 8015427400,
     "objects": 1,
@@ -343,20 +269,6 @@
     "class": "KEEP",
     "why": "permanent controls (protected)",
     "gib": 4.441
-   },
-   "durable/stage1_single_operator_budget/residual_width/init": {
-    "bytes": 4048747904,
-    "objects": 2,
-    "class": "PROPOSE",
-    "why": "a duplicate: the dev box holds a verified copy; no plan reads the relay copy",
-    "gib": 3.771
-   },
-   "durable/stage1_single_operator_budget/ffn_attention/init": {
-    "bytes": 4034178856,
-    "objects": 1,
-    "class": "PROPOSE",
-    "why": "a duplicate: the dev box holds a verified copy; no plan reads the relay copy",
-    "gib": 3.757
    },
    "durable/stage1_depth_merge/depth_merge/init": {
     "bytes": 4007724000,
@@ -532,6 +444,13 @@
     "class": "UNCLASSIFIED",
     "why": "small or unrelated; consumers not audited here",
     "gib": 0.025
+   },
+   "durable/stage1_single_operator_budget/residual_width/init": {
+    "bytes": 26224816,
+    "objects": 1,
+    "class": "KEEP",
+    "why": "the init's mapping files (no dev-box copy); its init/ copy was retired 2026-11-28",
+    "gib": 0.024
    },
    "stage1/phase_d2/d2_search_20261015_051722": {
     "bytes": 26043743,
@@ -961,12 +880,12 @@
     "gib": 0.0
    }
   },
-  "total_gib": 60.36,
+  "total_gib": 33.36,
   "by_class_gib": {
-   "KEEP": 49.93,
-   "PROPOSE": 7.53,
+   "KEEP": 30.46,
    "UNCLASSIFIED": 2.9
   }
  },
- "rule": "the registered two-copy rotation: a valid, discoverable save point exists at every moment after the first; need = a session's own peak + the 1 GiB margin, against the live headroom; nothing is deleted or bought by this plan; every option but as_is needs the maintainer's decision"
+ "storage_option_a": "logs/maintenance/storage/dmr1_storage_option_a_20261128.json",
+ "rule": "the registered two-copy rotation; need = session.training_relay_need (rotation peak or end + archive, + the registered margin), the launch gate's computation; headroom = the live LFS bisection; nothing is deleted or bought by this plan"
 }

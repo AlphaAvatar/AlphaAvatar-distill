@@ -51,10 +51,16 @@ and the check validates the execution path for this schedule, not a weight file.
 every arm whose plan binds the same schedule, control, inputs, gate and implementation, run under the same
 environment.
 
-**Reuse.** `record_problems` re-derives everything before a record is reused: the binding against the plan it is
-asked for (and the live environment on a pod), the completeness, and the verdict recomputed from the saved metrics.
-The stored status string is never trusted. `adopt` writes the canonical copy V2-M's plan names, only for a record
-with no problem.
+**Reuse.** `record_problems` re-derives everything before a record is reused:
+- its SOURCE (`source_problems`): made in the registered V2-D's session (arm, unit, init record, execution digest)
+  on D's registered initialization weights; a missing or other source is refused;
+- the binding against the plan it is asked for (the pack by its CONTENT: files, packed content, manifest and
+  documents hashes, not its path), and on a pod the live environment;
+- the completeness, and the verdict recomputed from the saved metrics; the stored status is never trusted;
+- with ``verify_inputs`` (adopt, the dev-box launch gate, the pod): the pack re-hashed and the prompts rebuilt from
+  it, their digest equal to the record's ``prompts_sha256``.
+
+`adopt` writes the canonical copy V2-M's plan names, only for the registered V2-D's record with no problem.
 """
 from __future__ import annotations
 
@@ -222,7 +228,11 @@ def expected_binding(plan: dict, root: Path = REPO) -> dict:
     return {"recurrent_config_sha256": u["initialization"]["recurrent_config"]["sha256"],
             "execution": u["initialization"]["execution"],
             "control_config_sha256": hashlib.sha256(BASE_CONFIG.read_bytes()).hexdigest(),
-            "inputs": INPUTS, "pack": {"data_dir": c["data_dir"], "rung": c["rung"], "val_blocks": c.get("val_blocks")},
+            "inputs": INPUTS,
+            "pack": {"data_dir": c["data_dir"], "rung": c["rung"], "val_blocks": c.get("val_blocks"),
+                     "files_sha256": u["data"]["files_sha256"], "packed_content_sha256": u["data"]["packed_content_sha256"],
+                     "data_manifest_sha256": u["data"]["data_manifest_sha256"],
+                     "documents_sha256": (u["data"].get("documents_file") or {}).get("sha256")},
             "gate": GATE, "implementation": source_identity(root=root), "check_code": check_code()}
 
 
@@ -242,13 +252,76 @@ def environment(vllm_python: str | None = None) -> dict:
     return env
 
 
-def record_problems(rec: dict, plan: dict, env: dict | None = None, root: Path = REPO) -> list[str]:
+def registered_source(plan: dict) -> dict:
+    """Where a record for ``plan`` must come from: the arm whose session runs the check (``plan`` itself for ``mode:
+    run``; for ``mode: reuse`` its ``from_arm``, which must be the design's first loop arm -- the registered V2-D) and
+    that arm's registered unit, init record and initialization weights."""
+    from stages.depth_merge import common as DC
+    from stages.depth_merge import plan as PL
+    ev = plan.get("engine_validation") or {}
+    first = DC.recurrence_design()["training"]["unit_order"]["arms"][0]
+    arm = ev.get("from_arm") if ev.get("mode") == "reuse" else plan["arm"]
+    if arm != first:
+        raise EngineCheckError(f"an engine validation comes from {first}'s session, not {arm!r}")
+    src = plan if arm == plan["arm"] else json.loads(PL.out_path(arm).read_text())
+    u = src["units"][0]
+    return {"arm": arm, "unit": u["unit"], "init_record_sha256": src["init_record"]["sha256"],
+            "execution_digest": u["initialization"]["artifact_digest"],
+            "registered_weights_sha256": u["config"]["lineage"]["initialization"]["model_safetensors_sha256"]}
+
+
+def source_problems(rec: dict, plan: dict) -> list[str]:
+    """Is the record LEGITIMATE: made in the registered V2-D's session (`registered_source`) on D's registered
+    initialization weights? A missing or different source is refused."""
+    try:
+        want = registered_source(plan)
+    except EngineCheckError as exc:
+        return [str(exc)]
+    got = rec.get("source")
+    if not isinstance(got, dict):
+        return ["the record names no source (arm, unit, init record, execution, weights)"]
+    bad = [f"source.{k} is {str(got.get(k))[:16]!r}, the registered {want[k][:16]!r}" for k in want if got.get(k) != want[k]]
+    validated = (rec.get("validated_weights_sha256") or {}).get("model.safetensors")
+    if validated != want["registered_weights_sha256"]:
+        bad.append(f"the weights it validated ({str(validated)[:12]}) are not {want['arm']}'s registered init "
+                   f"({want['registered_weights_sha256'][:12]})")
+    return bad
+
+
+def prompts_digest(sequences) -> str:
+    import hashlib
+    return hashlib.sha256(json.dumps([[int(x) for x in s] for s in sequences], separators=(",", ":")).encode()).hexdigest()
+
+
+def pack_problems(plan: dict, root: Path = REPO) -> list[str]:
+    """The pack's files re-hashed against the plan's ``data.files_sha256`` (the content, not the path)."""
+    u = plan["units"][0]
+    d = Path(u["config"]["data_dir"])
+    d = d if d.is_absolute() else Path(root) / d
+    return [f"pack file {n}: not the plan's content" for n, s in u["data"]["files_sha256"].items()
+            if not (d / n).is_file() or _sha(d / n) != s]
+
+
+def input_problems(rec: dict, plan: dict, root: Path = REPO) -> list[str]:
+    """The record's inputs re-derived: the pack re-hashed (`pack_problems`), then the prompts rebuilt from it
+    (`pack_prompts`) and their digest compared with the record's ``prompts_sha256``. Run where the pack is: the dev box
+    (adopt, the launch gate) and the pod (before reuse or training)."""
+    bad = pack_problems(plan, root)
+    if bad:
+        return bad
+    got = prompts_digest(pack_prompts(plan["units"][0]))
+    want = (rec.get("binding") or {}).get("prompts_sha256")
+    return [] if got == want else [f"the record's prompts ({str(want)[:12]}) are not this pack's ({got[:12]})"]
+
+
+def record_problems(rec: dict, plan: dict, env: dict | None = None, root: Path = REPO,
+                    verify_inputs: bool = False) -> list[str]:
     """Why ``rec`` may not stand as ``plan``'s arm's engine validation (empty when it may): its schema, its binding
     against the plan's (and, given ``env``, the live environment), its completeness, and its verdict re-derived from
     the saved metrics -- the stored status is never trusted."""
     if not isinstance(rec, dict) or rec.get("schema") != SCHEMA:
         return [f"not an engine-check record of {SCHEMA}"]
-    bad = []
+    bad = source_problems(rec, plan)
     want, got = expected_binding(plan, root), rec.get("binding") or {}
     for k, v in want.items():
         if got.get(k) != v:
@@ -263,6 +336,8 @@ def record_problems(rec: dict, plan: dict, env: dict | None = None, root: Path =
         bad.append(f"the saved metrics re-derive {again['status']} ({again['checks']})")
     if rec.get("status") != again["status"]:
         bad.append(f"the record says {rec.get('status')!r}, its metrics say {again['status']!r}")
+    if verify_inputs and not bad:
+        bad += input_problems(rec, plan, root)
     return bad
 
 
@@ -436,19 +511,22 @@ def _sha(p: Path) -> str:
     return h.hexdigest()
 
 
-def adopt(record: Path, arm: str, root: Path = REPO) -> dict:
+def adopt(record: Path, arm: str, root: Path = REPO, dest: Path | None = None) -> dict:
     """The canonical copy (`CANONICAL`) of a session's record, for the plans that reuse it: written byte for byte, and
     only when `record_problems` finds nothing against ``arm``'s committed plan (the environment is the pod's to check)."""
     from stages.depth_merge import plan as PL
+    from stages.depth_merge import common as DC
+    if arm != DC.recurrence_design()["training"]["unit_order"]["arms"][0]:
+        raise EngineCheckError(f"only the registered first loop arm's session record is adopted, not {arm}'s")
     rec = json.loads(Path(record).read_text())
     plan = json.loads(PL.out_path(arm).read_text())
-    bad = record_problems(rec, plan, root=root)
+    bad = record_problems(rec, plan, root=root, verify_inputs=True)
     if bad:
         raise EngineCheckError(f"{record} cannot be adopted for {arm}: {bad}")
-    dest = Path(root) / CANONICAL
+    dest = Path(dest) if dest is not None else Path(root) / CANONICAL
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(Path(record).read_bytes())
-    return {"adopted": str(dest.relative_to(root)), "sha256": _sha(dest), "from": str(record), "arm": arm}
+    return {"adopted": str(dest), "sha256": _sha(dest), "from": str(record), "arm": arm}
 
 
 def control_dir(student: Path, work: Path) -> Path:
@@ -488,6 +566,9 @@ def run(plan: dict, student: Path, work: Path, vllm_python: str, train_python: s
     work.mkdir(parents=True, exist_ok=True)
     log = work / "engine_check.log"
     t0 = time.time()
+    bad = pack_problems(plan)
+    if bad:
+        raise EngineCheckError(f"the pack on this pod is not the plan's: {bad}")
     prompts = {**INPUTS, "sequences": pack_prompts(plan["units"][0])}
     write_json(work / "prompts.json", prompts)
     models = {"recurrent": Path(student), "control": control_dir(Path(student), work)}
@@ -508,9 +589,9 @@ def run(plan: dict, student: Path, work: Path, vllm_python: str, train_python: s
     ex = plan["units"][0]["initialization"]["execution"]
     import hashlib
     binding = {**expected_binding(plan), "environment": environment(vllm_python),
-               "prompts_sha256": hashlib.sha256((work / "prompts.json").read_bytes()).hexdigest()}
+               "prompts_sha256": prompts_digest(prompts["sequences"])}
     doc = {"schema": SCHEMA, "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "inputs": INPUTS,
-           "binding": binding, "arm": plan["arm"],
+           "binding": binding, "arm": plan["arm"], "source": registered_source(plan),
            "validated_weights_sha256": {"model.safetensors": _sha(Path(student) / "model.safetensors"),
                                         "rule": "recorded, not bound: the weights are the experiment's variable"},
            "models": {n: str(d) for n, d in models.items()}, "metrics": metrics, "vllm_outputs": outputs,

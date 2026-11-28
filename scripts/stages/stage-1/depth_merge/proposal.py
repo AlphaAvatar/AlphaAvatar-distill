@@ -48,9 +48,9 @@ POSITION = {"read_utc": "2026-11-26T11:48:05Z", "committed_usd": 1086.2713, "pro
             "project_remaining_usd": 74.7887, "balance_usd": 123.7283, "pods": 0, "volumes": 0,
             "spend_per_hour": 0.0, "relay_headroom_gib": [35.24, 35.28], "dev_box_free_gib": 23}
 #: the 2026-11-28 position the revised variant 2 is priced against (read live at 10:25Z; read again at issue and launch)
-POSITION_V2 = {"read_utc": "2026-11-28T11:58:20Z", "committed_usd": 1114.6477, "project_cap_usd": 1161.06,
+POSITION_V2 = {"read_utc": "2026-11-28T12:36:08Z", "committed_usd": 1114.6477, "project_cap_usd": 1161.06,
                "project_remaining_usd": 46.4123, "balance_usd": 95.3518, "pods": 0, "volumes": 0,
-               "spend_per_hour": 0.0, "relay_headroom_gib": 27.219, "relay_used_gib": 60.36, "dev_box_free_gib": 6.85,
+               "spend_per_hour": 0.0, "relay_headroom_gib": 54.219, "relay_used_gib": 33.359, "dev_box_free_gib": 6.85,
                "note": "one reading of the ledger (SE.live_position) for the cap and the balance; committed rose "
                        "$1.1346 since 10:25Z as V1 attempt 2's last billing rows posted (no resource existed)"}
 #: the engine validation's hours (`depth_recurrence.engine_check`: two vLLM engines and two HF loads on a 2B model)

@@ -17652,3 +17652,26 @@ on a paid pod.
   - the vLLM half of the engine check still has not executed;
   - the L40S memory margin is still unmeasured.
 - Revisit when: the maintainer decides storage, money and the grant.
+
+## 2026-11-28 (UTC) — Storage option (a) executed; the launch gate's margin and the engine record's provenance fixed
+
+- Context: the maintainer's brief after the review of 277586ba:
+  - resuming V1 seed 2 is abandoned;
+  - storage option (a) is approved: retire seed 2's step-5,520 save point, and the HF copies of SOB1's
+    residual_width and ffn_attention initializations, after re-verifying their dev-box copies;
+  - two fixes are owed: the launch gate omitted the registered 1 GiB margin, and the engine record lacked its
+    provenance and the pack's content identity.
+- Decision:
+  - **The three retirements.** Executed with tombstones first (`retire_dmr1_storage_option_a.py`; record
+    `logs/maintenance/storage/dmr1_storage_option_a_20261128.json`). 27.00 GiB was freed; the relay went from 27.22 to
+    54.22 GiB free. The init copies' `mapping/` files stay, as they have no dev-box copy;
+  - **The margin.** `session.training_relay_need` is the one computation for the launch gate and the storage plan:
+    peak + the registered margin, first run and takeover alike. 39.50 GiB of headroom now refuses a 39.99 GiB first
+    run. V2-D's margin is 14.23 GiB; V2-M's, after V2-D's final, 6.64 GiB;
+  - **The engine record.** It carries its `source` (the registered V2-D's arm, unit, init record, execution and
+    weights), checked on adopt, takeover and reuse. The pack is bound by content hashes. `prompts_sha256` is verified
+    by rebuilding the prompts from the re-hashed pack. D → M reuse stays valid without equal weights.
+- Alternatives considered: buying storage (not needed after (a)).
+- Risks: V1 seed 2 can no longer be resumed (accepted by the maintainer). The money is unchanged and still needs
+  approval: $115.25 at the caps with reserves, a $68.84 project-cap raise and a $19.90 top-up.
+- Revisit when: the maintainer reviews money, the grant and the paid start.

@@ -1804,7 +1804,8 @@ STAGE_1 = [
         stage_id="1",
         status=("EXECUTED and STOPPED by the maintainer during seed 2 (DMR1 variant 1, 2026-11-27/28): the build "
                 "COMPLETE; seed 20260726 trained and evaluated, reported descriptively (below SOB1's same-seed "
-                "depth_only); seed 20260801 stopped at step 6,590, durable save point 5,520 kept (1,070 steps unpersisted); "
+                "depth_only); seed 20260801 stopped at step 6,590 (durable to 5,520), its resume abandoned and save point "
+                "retired 2026-11-28; "
                 "not the two-seed completion"),
         title="Depth recovery, variant 1: importance-merged initialization at SOB1's depth-only structure (DMR1-M)",
         question=("At SOB1's depth-only structure, does writing each kept block from its whole span by the alpha "

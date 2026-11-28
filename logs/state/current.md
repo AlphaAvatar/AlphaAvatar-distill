@@ -18,8 +18,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   - non-thinking: 12.11% vs 17.54%, −5.44 pp [−8.39, −2.46].
 - The pre-fixed seed-1 rule read CONTINUE (`runs/dmr1_merge_train_20261127_201532/evidence/seed1_stop_check.json`).
   The maintainer then stopped seed 20260801 at step 6,590 of 9,701. Its last durable save point is step 5,520
-  (model, optimizer, RNG, data position), kept on the relay: a resume, if authorized, continues from 5,520 and
-  recomputes the 1,070 unpersisted steps. Not the registered two-seed completion; C1 not tested.
+  (model, optimizer, RNG, data position); the maintainer then ABANDONED its resume and the save point was retired
+  (2026-11-28, storage option (a), tombstone relay_dmr1_merge_train_20261127_201532_depth_merge-s20260801_step_005520).
+  Not the registered two-seed completion; C1 not tested.
 - Money: training kind $26.7722 of $64.46 (two attempts); build kind $1.6091 of $5.43. Neither grant carries over.
 
 **DMR1 VARIANT 2 (STAGE 1: RECURRENT EXECUTION OF THE KEPT BLOCKS, BOTH INITIALIZATIONS x SEED 20260726, STAGE 3 RECOVERY): REVISED AT $0, READY_FOR_REVIEW (2026-11-28) -- NOT AUTHORIZED; NOTHING RUNNING.**
@@ -34,10 +35,11 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   descriptive, single seed. V3 is not started.
 - Proposal `logs/stages/stage-1/depth_recurrence/plans/proposal_dmr1_loop_train.json`: expected $60.39, caps $113.25
   + $2 reserves. One ledger reading (11:58Z): the project cap leaves $46.41 (raise $68.84), the balance is $95.35
-  (top up $19.90 for both at their caps). Storage under the registered two-copy rotation (the single copy was refused
-  in review): each session needs 39.99 GiB, the relay accepts 27.22 GiB, so even V2-D is short 12.77 GiB; the options
-  are the maintainer's (`plans/storage_plan.json`, DMR1_REVIEW.md 0U.2). Engine validation (bound, re-derived on reuse;
-  V2-M depends on V2-D's adopted PASS) is the first stage of V2-D's session: NOT YET RUN.
+  (top up $19.90 for both at their caps). Storage RESOLVED by option (a) (the maintainer, 2026-11-28; 27.00 GiB
+  freed, relay 54.22 GiB free): under the registered rotation and the launch gate's need (peak + 1 GiB), V2-D's margin
+  is 14.23 GiB and V2-M's, after V2-D's final, 6.64 GiB (`plans/storage_plan.json`, DMR1_REVIEW.md 0V). Engine
+  validation (source-checked, input-verified, re-derived on reuse; V2-M depends on V2-D's adopted PASS) is the first
+  stage of V2-D's session: NOT YET RUN.
 
 **SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): COMPLETE (2026-11-25) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Report `docs/stages/stage-1/single_operator_budget/REPORT.md`; decision `logs/stages/stage-1/single_operator_budget/

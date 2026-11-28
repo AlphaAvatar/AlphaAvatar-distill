@@ -6,7 +6,7 @@
   "path": "logs/stages/stage-1/single_operator_budget/plans/training_plan_depth_only.json",
   "sha256": "4eeab53fee1d8c0ca22d7cf15ff79416eef57af52cc37b659d25818f257aa359"
  },
- "design_sha256": "8d255edad6afc9a5d5aa112345769d381807c2cedf19f81f9ccac96e4c496892",
+ "design_sha256": "a613186681b6c18a264cc92c118d43c0407f3ba65956ae9d983df00d0a411deb",
  "init_record": {
   "path": "logs/stages/stage-1/depth_recurrence/inits/KEPT/init_record.json",
   "sha256": "1bf97e862ba2d88b22852a9576403f0d105ac048316809960e800e488f40f7d7",

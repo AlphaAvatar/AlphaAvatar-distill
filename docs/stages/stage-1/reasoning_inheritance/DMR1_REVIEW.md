@@ -1,6 +1,6 @@
 # DMR1: depth recovery at SOB1's depth-only structure -- review report
 
-**State: READY_FOR_REVIEW (2026-11-28 UTC), the variant-2 revision after the review of `1e42b144` (section 0U).**
+**State: READY_FOR_REVIEW (2026-11-28 UTC), the variant-2 revision after the review of `277586ba`: storage option (a) executed, the launch gate's margin and the engine record's provenance fixed (section 0V).**
 - **V1:** stopped by the maintainer during seed 2, and closed out. Seed 1 is complete and reported descriptively
   (section 00).
 - **V2:** revised at $0 into two initializations x seed 20260726, with code, plans, budget and storage prepared
@@ -14,6 +14,143 @@
 - **Earlier sections:** sections 0 onward are the READY_FOR_REVIEW report of 2026-11-26, kept as written. Their
   "Stage 6" for variants 2 and 3, `stage6_recurrent_depth` and `stage-6/...` paths read as section 0S states;
   where the V2 design differs, section 0R holds.
+
+## 0V. The review of `277586ba` (2026-11-28): storage option (a) executed, two fixes
+
+The maintainer chose storage option (a). They abandoned resuming V1's seed 2: its save point and SOB1's two init
+relay duplicates are retired. The design, the seeds, the recipe and the comparisons are unchanged. $0: no pod, no
+volume, no cap raise, no top-up, no grant.
+
+### 0V.1 What was retired, what stays, where it is recorded
+
+| retired (tombstone, `logs/maintenance/inventories/checkpoint_tombstones.json`) | bytes freed | survives |
+| --- | --- | --- |
+| `relay_dmr1_merge_train_20261127_201532_depth_merge-s20260801_step_005520`: V1 seed 2's save point at step 5,520 (model + AdamW / RNG / data position), its pointer and small files | 20,934,762,735 | nothing: seed 2 can no longer be resumed (the maintainer's decision); its training log, records and stop decision stay |
+| `relay_sob1_phase1_residual_width_init_c853640b1ce2392c`: `init/model.safetensors` + `init/config.json` | 4,022,523,088 | the dev-box copy, re-hashed equal just before; the relay keeps the init's `mapping/` (no dev-box copy) |
+| `relay_sob1_phase1_ffn_attention_init_4429c94994a5bd1f`: the same two files | 4,034,178,856 | the dev-box copy, re-hashed equal; the relay keeps `mapping/mapping.json` |
+
+- **How:** `scripts/maintenance/consolidation/retire_dmr1_storage_option_a.py`, following `relocate_relay_finals.py`:
+  1. a live check: every recorded file on the relay with the record's LFS sha256, the survivors re-hashed;
+  2. a consumer audit (no code reads the bytes);
+  3. the tombstone FIRST, with the protection the decision lifts;
+  4. `relay.remove`: permanent, the record's pointer with it, and an LFS object another path still references is
+     kept (`shared_oids_kept`: none);
+  5. the relay read back: paths and LFS listing absent.
+- **Other records:**
+  - the registry's two init-copy entries have `relay_path` cleared and the retirement noted;
+  - V1's seed-2 record in the dev box's secured evidence carries the `removed` answer;
+  - the run record is `logs/maintenance/storage/dmr1_storage_option_a_20261128.json`.
+- **Three invocations, honestly:** the first removed V1's save point and stopped at its read-back (a 404 on the
+  emptied prefix, read as an error), losing that call's own answer. The second recorded it and removed the
+  residual_width copy, then stopped at the registry update (a dict read as a list). The third skipped both as
+  recorded and removed the ffn_attention copy. Each bug is fixed in the script, and no object was touched twice
+  destructively. V1's freed bytes are derived from its two LFS objects' recorded sizes, both absent from the
+  listing.
+- **Kept:**
+  - V1 seed 1's final (7.46 GiB) and its evaluation evidence;
+  - V2-D's base (SOB1's depth init) and V2-M's base (V1's merged init);
+  - V1's statistics and both attempts' logs, costs, evaluations, the stop rule's CONTINUE and the maintainer's stop;
+  - everything protected or with a consumer.
+- **V1 stays what it is:** seed 1 complete; seed 2 stopped at step 6,590, durable to step 5,520, its resume now
+  abandoned and the save point retired. Not the registered two-seed completion, and not retrained.
+
+### 0V.2 Capacity, and the two sessions under the fixed gate (live 12:35Z; `plans/storage_plan.json`)
+
+| relay | headroom | used |
+| --- | --- | --- |
+| before (11:57Z) | 27.22 GiB | 60.36 GiB |
+| after (12:29 / 12:35Z) | **54.22 GiB** | 33.36 GiB |
+
+Freed: 27.00 GiB, as planned. The inventory left is 30.46 GiB kept and 2.90 GiB small unclassified.
+
+| session (need = `session.training_relay_need`: peak + the 1 GiB margin) | need | headroom then | margin |
+| --- | --- | --- | --- |
+| V2-D, first run | 39.99 GiB | 54.22 | **14.23 GiB** |
+| V2-M, after V2-D's final + archive (7.59) are held | 39.99 | 46.63 | **6.64 GiB** |
+| a takeover holding one valid save point (either arm) | 20.50 (the next save point + the margin) | -- | -- |
+
+### 0V.3 Fix: the launch gate asks for the storage plan's need, margin included
+
+`session.relay_room` asked the relay for the rotation's bare `peak_bytes` (38.99 GiB), while the storage plan
+required 39.99. Both now use ONE computation, `session.training_relay_need`:
+- the remaining rotation from what the relay holds of the arm (a first run `{}`, a takeover its valid save points or
+  final);
+- the closeout archive after the rotation;
+- the design's registered `storage.relay_margin_gib`, now also written in the recurrence design.
+
+The storage plan's per-session needs call the same function. Test
+(`test_the_launch_gate_asks_the_relay_for_the_storage_plans_need_margin_included`, both arms):
+- at 39.50 GiB of headroom the first run is REFUSED, and at 40.5 accepted;
+- the relay is asked for exactly the plan's figure, never the bare peak;
+- a takeover holding save point 1104 asks for one save point + the margin, refused one byte below, accepted at it.
+
+V1's gate gets the same margin (its storage plan registered it too).
+
+### 0V.4 Fix: the engine record's source and its inputs
+
+The completeness, the re-derived verdict, and V2-M's dev-box and pod dependency are kept, and the thresholds are
+unchanged. Two questions are now kept apart:
+- **Is the record legitimate** (`source_problems`)? It names its `source`: the registered V2-D's arm, unit, init
+  record, execution digest and registered weights. It is refused when the source is missing or different, or when
+  the weights it validated are not D's registered init (`76c8ca19…`). `adopt` takes only the first loop arm's
+  record. The same check applies to a takeover's record and to reuse.
+- **Does it apply to V2-M** (the binding)? It does when the schedule, execution, control, inputs, gate,
+  implementation and environment match. M's weights are NOT required to equal D's, and no M GPU check is added.
+
+Inputs:
+- the pack is bound by its CONTENT (the plan's `data.files_sha256`, packed-content, manifest and documents hashes),
+  not by `data_dir`;
+- `prompts_sha256` is VERIFIED, not merely recorded: with `verify_inputs` (in `adopt`, the dev-box launch gate and
+  the pod, before reuse or training) the pack is re-hashed and the prompts rebuilt from it, and their digest must
+  equal the record's;
+- `run()` refuses a pack that does not re-hash before it builds any prompt.
+
+Counterexamples (all pass):
+- source missing, another arm's session, another unit, init record or execution, M's weights validated in place of
+  D's, or no weights recorded: refused, both for V2-D's own use and for V2-M's reuse (7 cases);
+- the same `data_dir` with other `blocks.npz` content: refused; a directory with the plan's file names but other
+  bytes: refused (3 files);
+- prompts that do not rebuild from the pack: refused; matching prompts: pass, and D → M reuse passes with inputs
+  verified;
+- on the real pack: it re-hashes to the plan, and its first 4 validation sequences give the registered 4 x 448-token
+  prompts;
+- `adopt` refuses a record without a source and any arm but the registered V2-D.
+
+### 0V.5 Money (one ledger reading, 2026-11-28 12:36:08Z)
+
+| | |
+| --- | --- |
+| both sessions' hard caps + two $1.00 reserves | **$115.25** ($57.22 + $56.03 + $2.00; expected $60.39) |
+| project cap $1,161.06, committed $1,114.6477, left | **$46.41** → a raise of **$68.84** (or $11.81 for V2-D alone) |
+| RunPod balance | **$95.35** → covers V2-D ($58.22); a top-up of **$19.90** for both at their caps |
+
+Storage is resolved and cost nothing: the relay is not billed by RunPod. No term changed.
+
+### 0V.6 Verification
+
+```text
+convergence (one run): depth_recurrence, depth_merge, SOB1, tests/docs, tests/architecture, the registry-identity and
+                       forward-baseline suites : 626 passed / 2 failed (9.0 min)
+  - mine: the three new tombstones lacked `reason_physical_weights_deleted`; added (and in the script); tests/docs +
+    depth_recurrence rerun: 221 passed / 0 failed
+  - PRE-EXISTING: test_artifact_registry_identities::test_every_logical_artifact_survives_deletion_of_its_bytes
+    (stage0_calvol_d1_top1_72b76a1c has no `materialization`); it fails identically at HEAD 277586ba in a clean
+    worktree, and this round touched nothing of it
+live, read-only        : the relay before / after (27.22 -> 54.22 GiB); every retired path and LFS object absent; the
+                         ledger at 12:36:08Z; no pod, no volume
+GPU validation         : none; still owed in the first approved session, before training
+```
+
+### 0V.7 What awaits your approval
+
+1. **Money:**
+   - the proposal ($115.25 at the caps with reserves);
+   - a project-cap raise of $68.84;
+   - a top-up of $19.90 (or none, if V2-M is issued only after V2-D's actual spend leaves room);
+   - a grant for `dmr1_loop_train`.
+2. **The paid start:** V2-D first, with the engine validation before training; then V2-M after V2-D's PASS is
+   adopted (`engine_check.py adopt`).
+3. **The memory risk on the L40S** (1.85 GiB estimated margin, unmeasured).
 
 ## 0U. The review of `1e42b144` (2026-11-28): the fixes, the counterexamples, storage and money
 
@@ -69,7 +206,10 @@ This round fixed what had to be fixed before a launch, at $0. No grant, cap rais
   "About 2-3 minutes" was the upload alone. Under the registered rotation the previous save point covers all of
   it.
 
-### 0U.2 Storage under the registered rotation (live 2026-11-28 11:57Z; `plans/storage_plan.json`)
+### 0U.2 Storage under the registered rotation (live 2026-11-28 11:57Z) -- RESOLVED, see 0V
+
+The maintainer chose option 1 below; it was executed on 2026-11-28 (0V.1-0V.2). The text is kept as it was.
+
 
 Each V2 session needs **39.99 GiB** on the relay: its two overlapping 19.50 GiB save points + the 1 GiB margin. Its
 final (7.46) uploads beside the last save point, below that peak. V2-M starts with V2-D's final and closeout

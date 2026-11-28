@@ -166,7 +166,7 @@ def engine_validation_problems(arm: str | None, root: Path = REPO) -> list[str]:
     p = root / ev["record"]
     if not p.is_file():
         return [f"{ev['record']} does not exist: {ev['from_arm']}'s session has not produced an adopted PASS"]
-    return EC.record_problems(json.loads(p.read_text()), plan, root=root)
+    return EC.record_problems(json.loads(p.read_text()), plan, root=root, verify_inputs=True)
 
 
 def kind_grant(v: Variant, kind: str, *, dry_run: bool = False) -> dict:
@@ -372,6 +372,24 @@ def build_need(ident: dict, rec: dict, prev: dict, present) -> dict:
     return STO.remaining(BD.held(ident, rec, prev, present))
 
 
+def training_relay_need(arm: str, plan: dict, state: dict, sizes: dict | None = None) -> dict:
+    """What a training session of ``arm`` must still be able to add to the relay: ONE computation, which the launch gate
+    (`relay_room`) and the storage plan (`storage.v2_sequence`) both use. It is the remaining rotation's peak
+    (`single_operator_budget.launch.rotation_need` from ``state``, what the relay already holds of this arm: a first run
+    is ``{}``, a takeover its valid save points or final), the closeout archive after the rotation ends, and the
+    margin the arm's design registers (``storage.relay_margin_gib``), for a first run and a takeover alike."""
+    from stages.single_operator_budget import launch as SL
+    sizes = sizes or checkpoint_bytes()
+    st = DC.design_of(arm)["storage"]
+    archive, margin = int(st["closeout_archive_bytes_bound"]), int(float(st["relay_margin_gib"]) * GIB)
+    rot = SL.rotation_need(plan, state, sizes)
+    peak = max(int(rot["peak_bytes"]), int(rot["end_bytes"]) + archive)
+    return {"rotation_peak_bytes": int(rot["peak_bytes"]), "end_bytes": int(rot["end_bytes"]), "archive_bytes": archive,
+            "peak_bytes": peak, "margin_bytes": margin, "need_bytes": peak + margin,
+            "need_gib": round((peak + margin) / GIB, 2), "trace": rot["trace"],
+            "rule": "max(rotation peak, rotation end + closeout archive) + the registered margin"}
+
+
 def relay_room(v: Variant, kind: str, arm: str | None, evidence: dict, *,
                resume_from: str | None = None) -> tuple[bool, str]:
     """A build session: what the chain still adds -- its products (less those a takeover holds on the relay) and the
@@ -413,13 +431,12 @@ def relay_room(v: Variant, kind: str, arm: str | None, evidence: dict, *,
     finally:
         from stages.single_operator_budget import common as SC
         SC.restore(before)
-    need = SL.rotation_need(plan, state, sizes)
+    need = training_relay_need(arm, plan, state, sizes)
     evidence["relay_state"], evidence["relay_need"] = state, {k: x for k, x in need.items() if k != "trace"}
-    if need["peak_bytes"] <= 0:
-        return True, "the remaining rotation adds nothing beyond what the relay holds"
-    res = would_accept(MAIN_RELAY, SL.chunks(need["peak_bytes"]), tok.read_text().strip())
+    res = would_accept(MAIN_RELAY, SL.chunks(need["need_bytes"]), tok.read_text().strip())
     evidence["relay_room"] = str(res)
-    return res.accepted, f"the remaining rotation needs {need['peak_gib']} GiB more at its peak: {res}"
+    return res.accepted, (f"the remaining rotation needs {need['need_gib']} GiB (its peak {need['peak_bytes'] / GIB:.2f} "
+                          f"GiB + the {need['margin_bytes'] / GIB:.2f} GiB margin): {res}")
 
 
 # ---- the launch ---------------------------------------------------------------------------------------------------

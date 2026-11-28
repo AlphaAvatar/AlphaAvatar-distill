@@ -1,0 +1,135 @@
+{
+ "schema": "aadistill.maintenance.relay_retirement/v1",
+ "decision": "maintainer brief 2026-11-28 (after the review of 277586ba): 「我确定放弃恢复 V1 的 seed 2，批准采用存储方案 (a)：退役它的恢复存档，并删除 SOB1 两份已有本地核验副本的初始化在 HF 上的冗余副本。」",
+ "plan": {
+  "relay_dmr1_merge_train_20261127_201532_depth_merge-s20260801_step_005520": {
+   "size_gib": 19.497,
+   "survivor": null,
+   "consumers": [],
+   "check": {
+    "relay_files": 5,
+    "relay_missing": [
+     "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/model/config.json",
+     "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/model/generation_config.json",
+     "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/model/model.safetensors",
+     "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/trainer_state.pt",
+     "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801/savepoints/step_005520/resume_identity.json"
+    ],
+    "relay_lfs_differs": [],
+    "relay_also_under_prefix": [],
+    "ok": true
+   }
+  },
+  "relay_sob1_phase1_residual_width_init_c853640b1ce2392c": {
+   "size_gib": 3.746,
+   "survivor": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c",
+   "consumers": [
+    "scripts/stages/stage-1/depth_merge/storage.py"
+   ],
+   "check": {
+    "relay_files": 2,
+    "relay_missing": [
+     "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/model.safetensors",
+     "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/init/config.json"
+    ],
+    "relay_lfs_differs": [],
+    "relay_also_under_prefix": [
+     "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/mapping.json",
+     "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/tensors.safetensors"
+    ],
+    "survivor_rehash": {
+     "init/model.safetensors": true,
+     "init/config.json": true
+    },
+    "ok": true
+   }
+  },
+  "relay_sob1_phase1_ffn_attention_init_4429c94994a5bd1f": {
+   "size_gib": 3.757,
+   "survivor": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f",
+   "consumers": [
+    "scripts/stages/stage-1/depth_merge/storage.py"
+   ],
+   "check": {
+    "relay_files": 2,
+    "relay_missing": [],
+    "relay_lfs_differs": [],
+    "relay_also_under_prefix": [
+     "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/mapping/mapping.json"
+    ],
+    "survivor_rehash": {
+     "init/model.safetensors": true,
+     "init/config.json": true
+    },
+    "ok": true
+   }
+  }
+ },
+ "objects": {
+  "relay_dmr1_merge_train_20261127_201532_depth_merge-s20260801_step_005520": {
+   "verified_absent": true,
+   "freed_bytes": 0,
+   "recorded": "earlier in this retirement",
+   "left_under_prefix": []
+  },
+  "relay_sob1_phase1_residual_width_init_c853640b1ce2392c": {
+   "verified_absent": true,
+   "freed_bytes": 4022523088,
+   "recorded": "earlier in this retirement",
+   "left_under_prefix": [
+    "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/mapping.json",
+    "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c/mapping/tensors.safetensors"
+   ]
+  },
+  "relay_sob1_phase1_ffn_attention_init_4429c94994a5bd1f": {
+   "verified_absent": true,
+   "freed_bytes": 4034178856,
+   "shared_oids_kept": [],
+   "left_under_prefix": [
+    "durable/stage1_single_operator_budget/ffn_attention/init/4429c94994a5bd1f/mapping/mapping.json"
+   ]
+  }
+ },
+ "utc": "2026-11-28T12:28:03Z",
+ "capacity": {
+  "before": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "headroom_bytes": 29225910272,
+   "headroom_gib": 27.219,
+   "refused_at_gib": 27.234,
+   "used_bytes": 64810820765,
+   "used_gib": 60.36,
+   "utc": "2026-11-28T11:57:50Z",
+   "rule": "LFS batch endpoint bisection with fresh oids in objects of <= 10 GiB (nothing stored); used = the sum of list_lfs_files (the billing basis)"
+  },
+  "after": {
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "headroom_bytes": 58216939520,
+   "headroom_gib": 54.219,
+   "refused_at_gib": 54.234,
+   "used_bytes": 35819356086,
+   "used_gib": 33.359,
+   "utc": "2026-11-28T12:28:56Z",
+   "rule": "LFS batch endpoint bisection with fresh oids in objects of <= 10 GiB (nothing stored); used = the sum of list_lfs_files (the billing basis)"
+  },
+  "headroom_gained_gib": 27.0,
+  "used_dropped_gib": 27.0,
+  "rule": "before = the storage plan's live reading at 11:57Z (the last before any removal); after = read live once all three were confirmed absent"
+ },
+ "freed_by_object": {
+  "relay_dmr1_merge_train_20261127_201532_depth_merge-s20260801_step_005520": {
+   "bytes": 20934762735,
+   "basis": "the record's two LFS object sizes; both are absent from the LFS listing (the removal call's own answer was lost to a read-back error, the second call found nothing left)"
+  },
+  "relay_sob1_phase1_residual_width_init_c853640b1ce2392c": {
+   "bytes": 4022523088,
+   "basis": "relay.remove"
+  },
+  "relay_sob1_phase1_ffn_attention_init_4429c94994a5bd1f": {
+   "bytes": 4034178856,
+   "basis": "relay.remove"
+  }
+ },
+ "freed_total_gib": 27.0,
+ "runs": "three invocations: the first removed V1's save point and stopped at its read-back (a 404 on the emptied prefix); the second recorded it, removed the residual_width copy and stopped at the registry update (a dict read as a list); the third skipped both as recorded and removed the ffn_attention copy. Each fix is in the script; no object was touched twice"
+}

@@ -107,7 +107,7 @@ def engine_validation(u: dict, plan: dict, out: Path, dur: dict, vllm_python: st
     env = EC.environment(vllm_python)
     if ev.get("mode") == "reuse":
         p = REPO / ev["record"]
-        bad = (EC.record_problems(TD.read_json(p), plan, env=env) if p.is_file()
+        bad = (EC.record_problems(TD.read_json(p), plan, env=env, verify_inputs=True) if p.is_file()
                else [f"{ev['record']} is not in this checkout"])
         if bad:
             mark("ENGINE_CHECK_NOT_APPLICABLE")
@@ -115,12 +115,12 @@ def engine_validation(u: dict, plan: dict, out: Path, dur: dict, vllm_python: st
         mark("ENGINE_CHECK_REUSED")
         return {"status": "PASS", "record": ev["record"], "reused": True, "from_arm": ev.get("from_arm")}
     p = Path(out) / "engine_check" / "engine_check.json"
-    if p.is_file() and not EC.record_problems(TD.read_json(p), plan, env=env):
+    if p.is_file() and not EC.record_problems(TD.read_json(p), plan, env=env, verify_inputs=True):
         return {"status": "PASS", "record": str(p), "reused": True}
     mark("ENGINE_CHECK_START")
     stage_init(u, dur)
     doc = EC.run(plan, Path(u["config"]["student_path"]), Path(out) / "engine_check", vllm_python)
-    bad = EC.record_problems(doc, plan, env=env)
+    bad = EC.record_problems(doc, plan, env=env, verify_inputs=True)
     if bad:
         mark("ENGINE_CHECK_FAILED")
         raise DriverError(f"the engine validation failed, nothing was trained: {bad}")

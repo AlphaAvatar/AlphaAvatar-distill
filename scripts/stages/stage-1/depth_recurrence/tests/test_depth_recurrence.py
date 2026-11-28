@@ -67,9 +67,11 @@ def good_record(plan: dict, env: dict = ENV, **edit) -> dict:
             node = node[k]
         node[keys[-1]] = v
     ll = {"recurrent": ex["n_logical_layers"], "control": ex["n_parameter_blocks"]}
-    return {"schema": EC.SCHEMA, "arm": plan["arm"], "binding": {**EC.expected_binding(plan), "environment": env},
-            "validated_weights_sha256": {"model.safetensors": "0" * 64}, "metrics": m, "vllm_outputs": outs,
-            **EC.verdict(m, outs, EC.GATE, EC.INPUTS, ll)}
+    src = EC.registered_source(plan)
+    return {"schema": EC.SCHEMA, "arm": src["arm"], "source": src,
+            "binding": {**EC.expected_binding(plan), "environment": env, "prompts_sha256": "p" * 64},
+            "validated_weights_sha256": {"model.safetensors": src["registered_weights_sha256"]},
+            "metrics": m, "vllm_outputs": outs, **EC.verdict(m, outs, EC.GATE, EC.INPUTS, ll)}
 
 
 # ---- schedule, config ---------------------------------------------------------------------------------------------
@@ -243,9 +245,8 @@ def _plan_for(tmp: Path, arm: str, monkeypatch) -> tuple[Path, dict]:
         u["config"]["student_path"] = str(tmp / "pod" / "init" / arm)
     if arm == "depth_loop_merged":
         #: the record V2-D's session would leave: made for the KEPT plan, adopted where V2-M's plan looks
-        kp, _ = _kept_root(root)
-        rec = tmp / "adopted_engine_check.json"
-        rec.write_text(json.dumps(good_record(PL.derive("depth_loop_kept", kp, root=root))))
+        rec = tmp / "adopted_engine_check.json"            #: as V2-D's real session would have written it
+        rec.write_text(json.dumps(good_record(json.loads(PL.out_path("depth_loop_kept").read_text()))))
         plan["engine_validation"]["record"] = str(rec)
     p = tmp / f"plan_{arm}.json"
     p.write_text(json.dumps(plan))
@@ -312,6 +313,8 @@ def _run(tmp: Path, monkeypatch, arm: str, out: Path, resume: Path | None = None
         return doc
     monkeypatch.setattr(EC, "run", engine)
     monkeypatch.setattr(EC, "environment", lambda vllm_python=None: ENV)
+    #: the pod's input re-derivation (the pack re-hashed, the prompts rebuilt) is tested on its own below
+    monkeypatch.setattr(EC, "input_problems", lambda rec, plan, root=None: [])
     monkeypatch.setattr(RID, "_run_bounded", T._mode_engine(asked))
     monkeypatch.setattr(C, "package", lambda model_dir, dest: {
         "weights_sha256": {"model.safetensors": sha(Path(model_dir) / "model.safetensors")},
@@ -484,6 +487,49 @@ def test_the_rotation_never_leaves_the_relay_without_a_durable_save_point():
             assert "uploaded" in trace[i - 1]["step"] or "removed" in trace[i - 1]["step"]
 
 
+@pytest.mark.parametrize("arm", ["depth_loop_kept", "depth_loop_merged"])
+def test_the_launch_gate_asks_the_relay_for_the_storage_plans_need_margin_included(monkeypatch, arm):
+    """The launch gate (`session.relay_room`) and the storage plan share `session.training_relay_need`: a first run
+    needs two overlapping save points + the registered 1 GiB margin (39.99 GiB), so 39.50 GiB of headroom is REFUSED
+    and 40.5 GiB accepted; a takeover holding a valid save point needs its remaining rotation + the same margin."""
+    from types import SimpleNamespace
+    import aadistill.runtime.hub_capacity as HC
+    from stages.depth_merge import plan as PL
+    from stages.depth_merge import session as S
+    from stages.depth_merge import storage as ST
+    from stages.depth_recurrence import launch as L
+    from stages.single_operator_budget import launch as SL
+    G = 2 ** 30
+    if not Path("~/.cache/huggingface/token").expanduser().is_file():
+        pytest.skip("no hub token file to read (the gate reads it before asking)")
+    plan = json.loads(PL.out_path(arm).read_text())
+    unit = plan["unit_order"][0]
+    state = {"now": {}}
+    monkeypatch.setattr(SL, "reclaim_superseded", lambda arm_, plan=None, record=None: {"stub": True})
+    monkeypatch.setattr(SL, "relay_state", lambda arm_, plan=None: state["now"])
+    room = {"bytes": 0}
+    asked = []
+    monkeypatch.setattr(HC, "would_accept", lambda repo, sizes, tok: asked.append(sum(sizes)) or SimpleNamespace(
+        accepted=sum(sizes) <= room["bytes"], __str__=lambda self: "answer"))
+    first = S.training_relay_need(arm, plan, {})
+    assert first["need_gib"] == 39.99 and first["margin_bytes"] == G
+    assert first["need_bytes"] == ST.v2_sequence()["sessions"][arm]["need_bytes"]       #: the plan's own figure
+    for gib, ok in ((39.50, False), (40.5, True)):
+        room["bytes"] = int(gib * G)
+        got, msg = S.relay_room(L.VARIANT, L.LOOP_KIND, arm, {})
+        assert got is ok, (gib, msg)
+        assert asked[-1] == first["need_bytes"]                    #: margin included, never the bare peak
+    #: a takeover that holds a valid save point: the rest of the rotation + the margin
+    state["now"] = {unit: {"save_points": [1104]}}
+    take = S.training_relay_need(arm, plan, state["now"])
+    sp = S.checkpoint_bytes()["save_point"]
+    assert take["need_bytes"] == sp + G                            #: the next save point beside the held one
+    room["bytes"] = take["need_bytes"] - 1
+    assert S.relay_room(L.VARIANT, L.LOOP_KIND, arm, {})[0] is False
+    room["bytes"] = take["need_bytes"]
+    assert S.relay_room(L.VARIANT, L.LOOP_KIND, arm, {})[0] is True
+
+
 def test_a_failed_engine_check_trains_nothing(tmp_path, monkeypatch):
     _eval_set_or_skip()
     from stages.teacher_parent_initialization import relay as R
@@ -562,7 +608,8 @@ def test_one_pass_covers_both_initializations_but_not_another_schedule(tmp_path)
     from stages.depth_recurrence import engine_check as EC
     plans = _plans()
     rec = good_record(plans["depth_loop_kept"])
-    rec["validated_weights_sha256"] = {"model.safetensors": plans["depth_loop_kept"]["init_record"]["model_safetensors_sha256"]}
+    assert rec["validated_weights_sha256"]["model.safetensors"] == \
+        plans["depth_loop_kept"]["init_record"]["model_safetensors_sha256"]
     assert EC.record_problems(rec, plans["depth_loop_merged"], env=ENV) == []
     assert (plans["depth_loop_kept"]["init_record"]["model_safetensors_sha256"]
             != plans["depth_loop_merged"]["init_record"]["model_safetensors_sha256"])
@@ -582,6 +629,83 @@ def test_one_pass_covers_both_initializations_but_not_another_schedule(tmp_path)
     assert EC.source_identity(root=root)[EC.IMPLEMENTATION[0]] == base
     (root / EC.IMPLEMENTATION[0]).write_text(text + "\nX_CHANGED = 1\n")
     assert EC.source_identity(root=root)[EC.IMPLEMENTATION[0]] != base
+
+
+@pytest.mark.parametrize("why,edit", [
+    ("a missing source", lambda r, P: r.pop("source")),
+    ("another arm's session", lambda r, P: r["source"].update(arm="depth_loop_merged")),
+    ("another unit", lambda r, P: r["source"].update(unit="depth_loop_kept-s20260801")),
+    ("another init record", lambda r, P: r["source"].update(init_record_sha256="0" * 64)),
+    ("another execution", lambda r, P: r["source"].update(execution_digest="0" * 64)),
+    ("M's weights validated, not D's", lambda r, P: r.update(validated_weights_sha256={
+        "model.safetensors": P["depth_loop_merged"]["init_record"]["model_safetensors_sha256"]})),
+    ("no weights recorded", lambda r, P: r.pop("validated_weights_sha256")),
+])
+def test_a_record_not_made_in_the_registered_v2d_session_on_ds_init_is_refused(why, edit):
+    from stages.depth_recurrence import engine_check as EC
+    plans = _plans()
+    for asked in ("depth_loop_kept", "depth_loop_merged"):                 #: the source decides for both uses
+        rec = good_record(plans["depth_loop_kept"])
+        edit(rec, plans)
+        assert EC.source_problems(rec, plans[asked]) and EC.record_problems(rec, plans[asked], env=ENV), (why, asked)
+    assert EC.source_problems(good_record(plans["depth_loop_kept"]), plans["depth_loop_merged"]) == []
+
+
+def test_the_inputs_are_the_packs_content_and_the_prompts_are_rebuilt_from_it(tmp_path, monkeypatch):
+    """The same data_dir with other content is another input; the prompts are not merely recorded: re-derived."""
+    from stages.depth_recurrence import engine_check as EC
+    plans = _plans()
+    rec = good_record(plans["depth_loop_kept"])
+    other = json.loads(json.dumps(plans["depth_loop_merged"]))
+    other["units"][0]["data"]["files_sha256"]["blocks.npz"] = "1" * 64          #: same path, other bytes
+    assert any("binding.pack" in x for x in EC.record_problems(rec, other, env=ENV))
+    #: the pack on disk is re-hashed: a directory with the plan's file names but other bytes is refused
+    fake = tmp_path / "pack"
+    fake.mkdir()
+    for n in plans["depth_loop_kept"]["units"][0]["data"]["files_sha256"]:
+        (fake / n).write_bytes(b"other bytes")
+    moved = json.loads(json.dumps(plans["depth_loop_kept"]))
+    moved["units"][0]["config"]["data_dir"] = str(fake)
+    assert len(EC.pack_problems(moved)) == 3
+    #: the prompts: rebuilt and compared (the pack check stubbed here; the real one just above)
+    seqs = [[1, 2, 3], [4, 5, 6]]
+    monkeypatch.setattr(EC, "pack_problems", lambda plan, root=None: [])
+    monkeypatch.setattr(EC, "pack_prompts", lambda u: seqs)
+    rec = good_record(plans["depth_loop_kept"])        #: made under the patched probe (its code identity included)
+    rec["binding"]["prompts_sha256"] = EC.prompts_digest(seqs)
+    assert EC.input_problems(rec, plans["depth_loop_kept"]) == []
+    assert EC.record_problems(rec, plans["depth_loop_merged"], env=ENV, verify_inputs=True) == []   #: D -> M
+    rec["binding"]["prompts_sha256"] = EC.prompts_digest([[1, 2, 3], [4, 5, 7]])
+    assert EC.input_problems(rec, plans["depth_loop_kept"])
+    assert EC.record_problems(rec, plans["depth_loop_merged"], env=ENV, verify_inputs=True)
+
+
+def test_the_real_pack_rehashes_to_the_plan_and_gives_the_registered_prompts():
+    from stages.depth_recurrence import engine_check as EC
+    kept = _plans()["depth_loop_kept"]
+    if EC.pack_problems(kept):
+        pytest.skip("the training pack is not on this machine")
+    seqs = EC.pack_prompts(kept["units"][0])
+    assert len(seqs) == EC.INPUTS["n_prompts"] and all(len(s) == EC.INPUTS["prompt_tokens"] + EC.INPUTS["new_tokens"]
+                                                       for s in seqs)
+    rec = good_record(kept)
+    rec["binding"]["prompts_sha256"] = EC.prompts_digest(seqs)
+    assert EC.input_problems(rec, kept) == []
+
+
+def test_adopt_takes_only_the_registered_v2d_record(tmp_path):
+    from stages.depth_recurrence import engine_check as EC
+    plans = _plans()
+    bad = good_record(plans["depth_loop_kept"])
+    bad.pop("source")
+    p = tmp_path / "rec.json"
+    p.write_text(json.dumps(bad))
+    out = tmp_path / "adopted.json"
+    with pytest.raises(EC.EngineCheckError, match="no source"):
+        EC.adopt(p, "depth_loop_kept", dest=out)
+    with pytest.raises(EC.EngineCheckError, match="first loop arm"):
+        EC.adopt(p, "depth_loop_merged", dest=out)
+    assert not out.exists()
 
 
 def test_v2m_cannot_train_without_a_pass_that_stands_for_its_plan(tmp_path, monkeypatch):
