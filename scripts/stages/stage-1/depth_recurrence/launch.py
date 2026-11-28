@@ -28,7 +28,7 @@ from stages.depth_merge import session as S  # noqa: E402
 LOOP_KIND = "dmr1_loop_train"
 VARIANT = S.Variant(
     key="DMR1-R", plan_id="stage1.depth_recurrence", logs=Path("logs/stages/stage-1/depth_recurrence"),
-    session_kind="dmr1_depth_recurrence", build_kind=None,
+    session_kind="dmr1_depth_recurrence",
     train_kinds={LOOP_KIND: ("depth_loop_kept", "depth_loop_merged")},
     identity_files=("configs/stages/stage-1/depth_recurrence/design.json",
                     "configs/stages/stage-1/depth_recurrence/recurrent_config.json",

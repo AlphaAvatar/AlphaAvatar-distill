@@ -2103,6 +2103,22 @@ a deviation.
   keeps answering for past rounds, and selecting a baseline rewrites no
   historical verdict.
 
+**One seed per condition by default (maintainer decision 2026-11-28).** New
+depth-initialization experiments train and evaluate each condition once, at
+seed 20260726, unless their own registered design says otherwise.
+- **Nothing is shortened.** Each condition gets the full recovery: the
+  recipe's steps, data and evaluation.
+- **Then report and wait.** A second seed is never started automatically. The
+  report does not invent a promotion threshold; whether to add seeds is the
+  maintainer's decision after review.
+- **Read it as exploration.** A single-seed result is exploratory evidence. An
+  interval from resampling items measures item sampling with each checkpoint
+  fixed. It is not evidence about training randomness.
+- **Where it lives.** The design's `training.single_seed`. Plan generation
+  copies it into the plan and refuses a plan with more than one seed under it.
+- **History is unchanged.** Earlier experiments keep their registered seeds and
+  protocols.
+
 Default action policy:
 
 * **Act directly** for implementing initialization code, toy-model shape checks, small CPU/GPU dry runs, local baseline scaffolding, and metadata logging.

@@ -843,12 +843,12 @@ def test_the_launchers_kinds_grants_and_an_artifact_for_another_arm_is_refused(t
     from stages.depth_merge import launch as L
     from stages.depth_merge import session as S
     from stages.depth_recurrence import launch as L6
-    assert L.STUDY.kinds == ("dmr1_merge_build", "dmr1_merge_train") and L.STUDY.formal
+    assert L.STUDY.kinds == ("dmr1_merge_build", "dmr1_split_build", "dmr1_merge_train", "dmr1_split_train")
+    assert L.STUDY.formal
     assert L6.STUDY.kinds == ("dmr1_loop_train",)
     assert L6.VARIANT.train_kinds == {"dmr1_loop_train": ("depth_loop_kept", "depth_loop_merged")}
     assert {k: str(g) for k, g, _ in L.STUDY.kind_grants} == {
-        "dmr1_merge_build": "logs/budget/approvals/dmr1_dmr1_merge_build_grant.json",
-        "dmr1_merge_train": "logs/budget/approvals/dmr1_dmr1_merge_train_grant.json"}
+        k: f"logs/budget/approvals/dmr1_{k}_grant.json" for k in L.STUDY.kinds}
     cond = L.kind_conditions(L.BUILD_KIND)
     assert cond["digests_sha256"] == sha(M.DIGESTS) and "identity:configs/stages/stage-1/depth_merge/design.json" in cond
     #: variant 1's two kinds are granted (maintainer, 2026-11-27) exactly as proposed: the caps and the reserves

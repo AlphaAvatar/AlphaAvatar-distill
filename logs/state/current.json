@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "DMR1: V1 stopped by the maintainer (seed 1 descriptive, decisions.md 2026-11-28); V2 revised at $0 to READY_FOR_REVIEW (both inits x seed 20260726; DMR1_REVIEW.md 0R): needs budget, project-cap raise and storage decision",
+ "next": "DMR1 (decisions.md 2026-11-28): V1 stopped, seed 1 descriptive; V2 READY_FOR_REVIEW (DMR1_REVIEW.md 0R); v1-new prepared at $0, READY_FOR_REVIEW (0W): v1-new first recommended; no grant issued",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",

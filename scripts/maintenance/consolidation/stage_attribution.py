@@ -1806,7 +1806,8 @@ STAGE_1 = [
                 "COMPLETE; seed 20260726 trained and evaluated, reported descriptively (below SOB1's same-seed "
                 "depth_only); seed 20260801 stopped at step 6,590 (durable to 5,520), its resume abandoned and save point "
                 "retired 2026-11-28; "
-                "not the two-seed completion"),
+                "not the two-seed completion. v1-new (arm depth_merge_split: runs of >= 3 removed layers merged into "
+                "a new layer, 18 layers, seed 20260726) PREPARED at $0, READY_FOR_REVIEW 2026-11-28, nothing granted"),
         title="Depth recovery, variant 1: importance-merged initialization at SOB1's depth-only structure (DMR1-M)",
         question=("At SOB1's depth-only structure, does writing each kept block from its whole span by the alpha "
                   "merge, instead of keeping it as it is, leave more static fluid reasoning after the same Stage-3 "
@@ -1821,12 +1822,21 @@ STAGE_1 = [
               "the build session's proposal", field="status", equals="proposed"),
             E("logs/stages/stage-1/depth_merge/plans/proposal_dmr1_merge_train.json",
               "the training session's proposal", field="status", equals="proposed"),
+            E("configs/stages/stage-1/depth_merge/split_design.json",
+              "v1-new's design: V1's outside its declared keys (the groups, the separate runs' statistics, the reuse "
+              "of V1's init, one seed, the descriptive comparisons with D and M)",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/depth_merge/plans/proposal_dmr1_split_build.json",
+              "v1-new's build session's proposal", field="status", equals="proposed"),
+            E("logs/stages/stage-1/depth_merge/plans/proposal_dmr1_split_train.json",
+              "v1-new's one-seed training session's proposal", field="status", equals="proposed"),
         ],
         external_material=[
             "docs/stages/stage-1/depth_merge/README.md -- variant 1's design",
             "docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md -- the round's review report",
         ],
-        decisions=["the maintainer's brief of 2026-11-26 (DMR1: three variants; variant 1 first, after review)"],
+        decisions=["the maintainer's brief of 2026-11-26 (DMR1: three variants; variant 1 first, after review)",
+                   "the maintainer's brief of 2026-11-28 (v1-new registered beside V1; one seed per condition)"],
         canonical_log_destination="logs/stages/stage-1/depth_merge",
         classification_reason=(
             "Stage 1 by subject: how the initialization of a depth-compressed student is written (AGENTS.md 4.3); "

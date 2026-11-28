@@ -72,6 +72,31 @@ def spans_from_kept_blocks(n_root: int, kept: Sequence[int]) -> list[tuple[int, 
     return [tuple(range(k, b)) for k, b in zip(kept, bounds)]
 
 
+def groups_from_kept_blocks(n_root: int, kept: Sequence[int], *, separate_run_min: int | None = None) -> list[dict]:
+    """The student's layers in order, each a group of root blocks it is initialized from, from a depth selection.
+
+    For each kept block ``k``, the run of removed blocks after it (up to the next kept block) is either absorbed into
+    ``k`` -- one group ``(k, *run)`` anchored at ``k``, `spans_from_kept_blocks`'s span -- or, when ``separate_run_min``
+    is given and the run has at least that many blocks (the kept block itself is not counted), split off: ``k`` stays
+    a group of its own and the run becomes a NEW group of its own, anchored at its first block, placed right after
+    ``k``. ``kind`` is ``kept`` (one kept block alone), ``absorbed`` (a kept block with its removed run) or
+    ``separate`` (a run of removed blocks alone). Nothing here names a model, a depth or a threshold: the selection and
+    the rule are the caller's."""
+    if separate_run_min is not None and (not isinstance(separate_run_min, int) or separate_run_min < 1):
+        raise LayerMergeError(f"separate_run_min must be a positive integer, not {separate_run_min!r}")
+    out = []
+    for span in spans_from_kept_blocks(n_root, kept):
+        k, run = span[0], span[1:]
+        if not run:
+            out.append({"layers": (k,), "anchor": k, "kind": "kept"})
+        elif separate_run_min is not None and len(run) >= separate_run_min:
+            out.append({"layers": (k,), "anchor": k, "kind": "kept"})
+            out.append({"layers": tuple(run), "anchor": run[0], "kind": "separate"})
+        else:
+            out.append({"layers": tuple(span), "anchor": k, "kind": "absorbed"})
+    return out
+
+
 # ---- exact linear assignment ----------------------------------------------------------------------------------------
 
 @torch.no_grad()

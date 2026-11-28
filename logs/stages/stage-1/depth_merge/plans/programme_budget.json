@@ -1,0 +1,127 @@
+{
+ "schema": "aadistill.dmr1.programme_budget/v1",
+ "recorded_utc": "2026-11-28",
+ "order": [
+  "v1new_build",
+  "v1new_train",
+  "v2d",
+  "v2m"
+ ],
+ "position": {
+  "read_utc": "2026-11-28T12:36:08Z",
+  "committed_usd": 1114.6477,
+  "project_cap_usd": 1161.06,
+  "project_remaining_usd": 46.4123,
+  "balance_usd": 95.3518,
+  "pods": 0,
+  "volumes": 0,
+  "spend_per_hour": 0.0,
+  "relay_headroom_gib": 54.219,
+  "relay_used_gib": 33.359,
+  "dev_box_free_gib": 6.85,
+  "note": "one reading of the ledger (SE.live_position) for the cap and the balance; committed rose $1.1346 since 10:25Z as V1 attempt 2's last billing rows posted (no resource existed)"
+ },
+ "sessions": [
+  {
+   "session": "v1new_build",
+   "expected_usd": 1.64,
+   "cap_usd": 4.3,
+   "reserve_usd": 1.0,
+   "needs_usd": 5.3,
+   "expected_path": {
+    "project_remaining_usd": 46.41,
+    "project_cap_fits": true,
+    "project_raise_needed_usd": 0.0,
+    "balance_usd": 95.35,
+    "balance_fits": true,
+    "top_up_needed_usd": 0.0
+   },
+   "worst_path": {
+    "project_remaining_usd": 46.41,
+    "project_cap_fits": true,
+    "project_raise_needed_usd": 0.0,
+    "balance_usd": 95.35,
+    "balance_fits": true,
+    "top_up_needed_usd": 0.0
+   }
+  },
+  {
+   "session": "v1new_train",
+   "expected_usd": 18.05,
+   "cap_usd": 35.94,
+   "reserve_usd": 1.0,
+   "needs_usd": 36.94,
+   "expected_path": {
+    "project_remaining_usd": 44.77,
+    "project_cap_fits": true,
+    "project_raise_needed_usd": 0.0,
+    "balance_usd": 93.71,
+    "balance_fits": true,
+    "top_up_needed_usd": 0.0
+   },
+   "worst_path": {
+    "project_remaining_usd": 42.11,
+    "project_cap_fits": true,
+    "project_raise_needed_usd": 0.0,
+    "balance_usd": 91.05,
+    "balance_fits": true,
+    "top_up_needed_usd": 0.0
+   }
+  },
+  {
+   "session": "v2d",
+   "expected_usd": 30.42,
+   "cap_usd": 57.22,
+   "reserve_usd": 1.0,
+   "needs_usd": 58.22,
+   "expected_path": {
+    "project_remaining_usd": 26.72,
+    "project_cap_fits": false,
+    "project_raise_needed_usd": 31.5,
+    "balance_usd": 75.66,
+    "balance_fits": true,
+    "top_up_needed_usd": 0.0
+   },
+   "worst_path": {
+    "project_remaining_usd": 6.17,
+    "project_cap_fits": false,
+    "project_raise_needed_usd": 52.05,
+    "balance_usd": 55.11,
+    "balance_fits": false,
+    "top_up_needed_usd": 3.11
+   }
+  },
+  {
+   "session": "v2m",
+   "expected_usd": 29.97,
+   "cap_usd": 56.03,
+   "reserve_usd": 1.0,
+   "needs_usd": 57.03,
+   "expected_path": {
+    "project_remaining_usd": -3.7,
+    "project_cap_fits": false,
+    "project_raise_needed_usd": 60.73,
+    "balance_usd": 45.24,
+    "balance_fits": false,
+    "top_up_needed_usd": 11.79
+   },
+   "worst_path": {
+    "project_remaining_usd": -51.05,
+    "project_cap_fits": false,
+    "project_raise_needed_usd": 108.08,
+    "balance_usd": -2.11,
+    "balance_fits": false,
+    "top_up_needed_usd": 59.14
+   }
+  }
+ ],
+ "totals": {
+  "expected_usd": 80.08,
+  "caps_with_reserves_usd": 157.49,
+  "v1new_caps_with_reserves_usd": 42.24,
+  "v2_caps_with_reserves_usd": 115.25,
+  "project_raise_to_fund_all_at_caps_usd": 111.08
+ },
+ "rule": "each session is checked alone at its issue and its launch against the live position; the rows are the two bounding paths of what earlier sessions would have spent",
+ "authorizes": "nothing: no cap raise, top-up or grant is implied"
+}

@@ -89,6 +89,10 @@ from stages.reasoning_inheritance.driver import Status, _gpu_peak, _ident_record
 
 SCHEMA = "aadistill.stage1.depth_merge.init_record/v1"
 ARM = "depth_merge"
+#: the arms this driver builds (`bind`): V1 (the alpha merge at the spans) and v1-new (long runs split off, `split`)
+SCHEMAS = {"depth_merge": "aadistill.stage1.depth_merge.init_record/v1",
+           "depth_merge_split": "aadistill.stage1.depth_merge_split.init_record/v1"}
+SPLIT_ARM = "depth_merge_split"
 GROUPS = ("statistics", "init")
 #: what a product's identity is made of (`identity`): the statistics', then the checkpoint's on top
 STATISTICS_PARTS = ("teacher", "mapping", "calibration", "statistics_code")
@@ -106,6 +110,62 @@ class DriverError(RuntimeError):
     pass
 
 
+def bind(arm: str) -> str:
+    """Which arm this process builds (``--arm``): its design, schema, records and relay prefixes. Returns the previous
+    arm (a caller that binds temporarily restores it: `bound`)."""
+    global ARM, SCHEMA
+    if arm not in SCHEMAS:
+        raise DriverError(f"{arm!r} is not an arm this driver builds ({sorted(SCHEMAS)})")
+    prev, ARM, SCHEMA = ARM, arm, SCHEMAS[arm]
+    return prev
+
+
+class bound:
+    """``with bound(arm):`` -- `bind` for the block, the previous arm restored after it."""
+
+    def __init__(self, arm: str):
+        self.arm = arm
+
+    def __enter__(self):
+        self.prev = bind(self.arm)
+        return self
+
+    def __exit__(self, *exc):
+        bind(self.prev)
+        return False
+
+
+def design() -> dict:
+    """The bound arm's design: V1's through `common.design` exactly as before the binding, another arm's by its file."""
+    return DC.design() if ARM == "depth_merge" else DC.design_of(ARM)
+
+
+def is_split() -> bool:
+    return ARM == SPLIT_ARM
+
+
+def stat_spans(d: dict | None = None) -> list[tuple[int, ...]]:
+    """The spans this build merges (its statistics pass, its alignments): V1's merged spans; v1-new's separate runs."""
+    if is_split():
+        from stages.depth_merge import split as SPLIT
+        return SPLIT.new_spans()
+    return M.merge_spans(d or design())
+
+
+def checkpoint_parts() -> tuple[str, ...]:
+    return CHECKPOINT_PARTS + (("reuse",) if is_split() else ())
+
+
+def v1_init_ref() -> dict:
+    """v1-new's reuse source: V1's training-pre initialization as V1's committed training plan binds it."""
+    from stages.depth_merge import plan as PL
+    with bound("depth_merge"):
+        plan = read_json(PL.out_path("depth_merge"))
+    u = plan["units"][0]
+    return {"init_record": plan["init_record"], "relay": u["initialization"]["relay"],
+            "model_safetensors_sha256": plan["init_record"]["model_safetensors_sha256"]}
+
+
 def records(out: Path) -> Path:
     return Path(out) / ARM / "records"
 
@@ -121,20 +181,32 @@ def contract(work: Path, device: str) -> dict:
     the session derives the journal's operator config hashes; and what of the session the statistics read (its
     execution and its position policy), for `identity`."""
     from stages.teacher_parent_initialization import init_driver as TI
-    d = DC.design()
+    d = design()
     b = d["baseline"]
     bad = [f"{v['path']} hashes to {sha256_file(REPO / v['path'])[:12]}, the design pins {v['sha256'][:12]}"
            for v in (b["sob1_design"], b["init_record"], b["training_plan"], b["study_completion"],
                      b["control_sessions"]["completion"]) if sha256_file(REPO / v["path"]) != v["sha256"]]
     if bad:
         raise DriverError("; ".join(bad))
-    spans = M.merge_spans(d)
+    spans = stat_spans(d)
     M.base_digests(d)
     base = TI.contract(work, device)
     s = TI.session(work / "session", device)
     pp = s.config.position_policy
-    return {"design_sha256": sha256_file(DC.DESIGN), "digests_sha256": sha256_file(M.DIGESTS),
-            "spans": [list(x) for x in spans], "pairs": [list(p) for p in M.pairs(spans)],
+    split = {}
+    if is_split():
+        from stages.depth_merge import split as SPLIT
+        bad = SPLIT.groups_problems()
+        if bad:
+            raise DriverError("; ".join(bad))
+        split = {"groups": [{"layers": list(x["layers"]), "anchor": int(x["anchor"]), "kind": x["kind"]}
+                            for x in SPLIT.groups()],
+                 "config_sha256": sha256_file(SPLIT.CONFIG),
+                 "split_code": M.lmx().code_identity(SPLIT.groups, SPLIT.student_layers, SPLIT.v1_layer_tensors,
+                                                     SPLIT.build_candidate)["sha256"],
+                 "v1_init": {k: v for k, v in v1_init_ref().items() if k != "relay"}}
+    return {"design_sha256": sha256_file(DC.files_of(ARM)[0]), "digests_sha256": sha256_file(M.DIGESTS),
+            "spans": [list(x) for x in spans], "pairs": [list(p) for p in M.pairs(spans)], **split,
             "session_contract": base, "method_identity": M.method_identity(),
             #: the byte-affecting execution fields only (micro-batch, packing, prediction rows), not its trace
             "execution": s.execution.as_fingerprint(),
@@ -144,7 +216,7 @@ def contract(work: Path, device: str) -> dict:
 def identity(c: dict, d: dict | None = None) -> dict:
     """Each product's scientific identity (module docstring) from the contract and the design's facts -- never from
     the design file's bytes, so a changed description recomputes nothing."""
-    d = d or DC.design()
+    d = d or design()
     t, b, st = d["teacher"], d["baseline"], d["statistics"]
     sel = M.selection_view(d)
     ses = c["session_contract"]
@@ -154,7 +226,7 @@ def identity(c: dict, d: dict | None = None) -> dict:
                                                       "config_json_sha256", "num_parameters")},
                  "tensor_digests_sha256": canonical_sha256(M.base_digests(d))},
         "mapping": {"n_root_blocks": int(b["mapping"]["n_root_blocks"]), "kept_blocks": sel["kept_blocks"],
-                    "merged_spans": c["spans"], "pairs": c["pairs"]},
+                    "merged_spans": c["spans"], "pairs": c["pairs"], **({"groups": c["groups"]} if "groups" in c else {})},
         "calibration": {"profile_id": st["profile_id"], "positions_of_operator": st["positions_of_operator"],
                         "expected": st["expected"], "profiles": ses["session"]["profiles"],
                         "session_config_hash": ses["session"]["config_hash"],
@@ -164,17 +236,21 @@ def identity(c: dict, d: dict | None = None) -> dict:
                         "execution": c["execution"], "position_policy": c["position_policy"]},
         "statistics_code": c["method_identity"]["statistics"]["sha256"],
         "merge": {"method": M.METHOD, "seed": int(sel["source"]["seed"]),
-                  "candidate_code": c["method_identity"]["candidate"]["sha256"]},
+                  "candidate_code": c["method_identity"]["candidate"]["sha256"],
+                  **({"config_sha256": c["config_sha256"], "split_code": c["split_code"]} if "config_sha256" in c
+                     else {})},
     }
+    if "v1_init" in c:
+        parts["reuse"] = {"v1_init": c["v1_init"]}
     stats = canonical_sha256({k: parts[k] for k in STATISTICS_PARTS})
     return {"parts": parts, "statistics": stats,
-            "checkpoint": canonical_sha256({"statistics": stats, **{k: parts[k] for k in CHECKPOINT_PARTS}}),
+            "checkpoint": canonical_sha256({"statistics": stats, **{k: parts[k] for k in checkpoint_parts()}}),
             "rule": "sha256 of canonical JSON: statistics = teacher, mapping, calibration, statistics code; "
                     "checkpoint = the statistics' identity, the base, the merge (method, seed, candidate code)"}
 
 
 def _parts_of(what: str) -> tuple[str, ...]:
-    return STATISTICS_PARTS + (CHECKPOINT_PARTS if what == "checkpoint" else ())
+    return STATISTICS_PARTS + (checkpoint_parts() if what == "checkpoint" else ())
 
 
 def stamp(ident: dict, what: str) -> dict:
@@ -211,7 +287,7 @@ class Gpu:
         from stages.teacher_parent_initialization import init_driver as TI
         torch.backends.cuda.matmul.allow_tf32 = False             #: PearsonMoments refuses TF32
         torch.set_float32_matmul_precision("highest")
-        d = DC.design()
+        d = design()
         self.device = device
         self.s = TI.session(work / "session", device)
         self.adapter = get_adapter(self.s.config.target_spec.family)
@@ -220,7 +296,7 @@ class Gpu:
         if root["root_teacher_sha256"] != d["teacher"]["root_teacher_sha256"]:
             raise DriverError("the loaded teacher is not the design's root")
         self.n_q, self.n_kv, _hd = self.adapter.head_groups(self.adapter.spec_of(self.teacher))
-        self.sel, self.spans, self.digests = M.selection_view(d), M.merge_spans(d), M.base_digests(d)
+        self.sel, self.spans, self.digests = M.selection_view(d), stat_spans(d), M.base_digests(d)
         self.base, rec.setdefault("checks", {})["base"] = check_base(self.adapter, self.teacher, self.sel, self.digests)
         self.items, self.active, self.batches = M.calibration(self.s, self.teacher, device, d)
 
@@ -244,13 +320,20 @@ def check_base(adapter, teacher, sel: dict, digests: dict) -> tuple:
     return base, {"tensors": len(names), "equal_to_base": len(names)}
 
 
-def span_candidates(adapter, base, merged, sel: dict, spans, device) -> dict:
+def span_candidates(adapter, base, merged, sel: dict, spans, device, teacher=None) -> dict:
     """The diagnostics' candidate blocks per merged span start, each on the teacher's ``device``: the base's kept block
     (only those blocks are moved; the rest of the base stays on the host) and the merged model's (already there).
     The caller drops the result after the diagnostics, which frees the moved blocks with it."""
+    bm = adapter.blocks(merged)
+    if is_split():
+        #: a separate run's references: its first teacher block alone (the run otherwise deleted), and the new layer
+        from stages.depth_merge import split as SPLIT
+        at = {a: j for j, a in enumerate(SPLIT.student_layers())}
+        return {"anchor_alone": {s[0]: adapter.blocks(teacher)[s[0]] for s in spans},
+                "merged": {s[0]: bm[at[s[0]]] for s in spans}}
     kept = [int(x) for x in sel["kept_blocks"]]
     idx = {s[0]: kept.index(s[0]) for s in spans}
-    bb, bm = adapter.blocks(base), adapter.blocks(merged)
+    bb = adapter.blocks(base)
     return {"kept": {s0: bb[i].to(device) for s0, i in idx.items()},
             "merged": {s0: bm[i] for s0, i in idx.items()}}
 
@@ -269,7 +352,7 @@ def statistics_step(g: Gpu, rec: dict, out: Path, status: Status, run_id: str) -
     import torch
     from safetensors.torch import save_file
     LMX = M.lmx()
-    d = DC.design()
+    d = design()
     t0 = time.time()
     st = LMX.collect_statistics(g.adapter, g.teacher, g.spans, g.batches, g.active)
     exp = d["statistics"]["expected"]
@@ -311,7 +394,7 @@ def weights_step(g: Gpu, rec: dict, out: Path, work: Path, status: Status):
     from safetensors.torch import load_file
     from stages.teacher_parent_initialization import init_driver as TI
     LMX = M.lmx()
-    d = DC.design()
+    d = design()
     ten_p = records(out) / f"{M.STATS}.safetensors"
     if sha256_file(ten_p) != rec["statistics"]["tensors_sha256"]:
         raise DriverError("the statistics file is not the one the build record names")
@@ -323,19 +406,33 @@ def weights_step(g: Gpu, rec: dict, out: Path, work: Path, status: Status):
     if not eq["passed"]:
         raise DriverError(f"folding / permutation does not reproduce the block: worst {eq['worst']}, non-finite "
                           f"{eq['non_finite']} (tolerance {tol})")
-    model, rec["candidate"] = LMX.build_candidate(g.adapter, g.teacher, g.sel, g.spans, M.METHOD, stats, g.digests,
-                                                  seed=int(g.sel["source"]["seed"]))
+    if is_split():
+        from stages.depth_merge import split as SPLIT
+        v1_dir = fetch_v1_init(work)
+        rec["v1_init"] = {"path": str(v1_dir), "model_safetensors_sha256": v1_init_ref()["model_safetensors_sha256"]}
+        model, rec["candidate"] = SPLIT.build_candidate(g.adapter, g.teacher, stats, g.digests, v1_dir,
+                                                        seed=int(g.sel["source"]["seed"]))
+    else:
+        model, rec["candidate"] = LMX.build_candidate(g.adapter, g.teacher, g.sel, g.spans, M.METHOD, stats,
+                                                      g.digests, seed=int(g.sel["source"]["seed"]))
     ckpt = work / "products" / "init"
     ident = TI._save(g.adapter, model, ckpt)
     want = d["baseline"]["init_record"]
     files = {"model.safetensors": ident.shards[0].sha256, "config.json": sha256_file(ckpt / "config.json")}
     n_params = int(sum(p.numel() for p in model.parameters()))
     ck = {**_ident_record(ident), "files_sha256": files, "num_parameters_counted": n_params,
-          "statistics_sha256": rec["statistics"]["tensors_sha256"],
-          "config_file_is_the_base_s": files["config.json"] == want["config_json_sha256"],
-          "num_parameters_match_base": n_params == int(want["num_parameters"])}
-    if not (len(ident.shards) == 1 and ck["config_file_is_the_base_s"] and ck["num_parameters_match_base"]):
-        raise DriverError(f"the candidate is not the base's structure: {ck}")
+          "statistics_sha256": rec["statistics"]["tensors_sha256"]}
+    if is_split():
+        from stages.depth_merge import split as SPLIT
+        ck.update(config_file_is_the_derived_one=files["config.json"] == sha256_file(SPLIT.CONFIG),
+                  num_parameters_match_design=n_params == int(d["arms"][ARM]["num_parameters"]))
+        ok = ck["config_file_is_the_derived_one"] and ck["num_parameters_match_design"]
+    else:
+        ck.update(config_file_is_the_base_s=files["config.json"] == want["config_json_sha256"],
+                  num_parameters_match_base=n_params == int(want["num_parameters"]))
+        ok = ck["config_file_is_the_base_s"] and ck["num_parameters_match_base"]
+    if not (len(ident.shards) == 1 and ok):
+        raise DriverError(f"the candidate is not the design's structure: {ck}")
     del model
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
@@ -346,6 +443,29 @@ def weights_step(g: Gpu, rec: dict, out: Path, work: Path, status: Status):
     if not ck["reload_forward_finite"]:
         raise DriverError("the reloaded candidate gives non-finite logits")
     return m, ck
+
+
+def fetch_v1_init(work: Path) -> Path:
+    """v1-new's reuse source on the pod: V1's init from its verified relay copy, every file re-hashed
+    (`train_driver.fetch_init`'s rule), under ``work/v1_init``."""
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization import train_driver as TD
+    ref = v1_init_ref()
+    dest = Path(work) / "v1_init"
+    w = dest / "model.safetensors"
+    if not (w.is_file() and sha256_file(w) == ref["model_safetensors_sha256"]):
+        rec = ref["relay"]
+        sub = {k: v for k, v in rec["files_sha256"].items() if k.startswith("init/")}
+        flat = {**rec, "files_sha256": {k.removeprefix("init/"): v for k, v in sub.items()},
+                "prefix": f"{rec['prefix']}/init"}
+        nbytes = sum(v for k, v in (rec.get("bytes") or {}).items() if k.startswith("init/"))
+        got = R.run_online("get", {"record": flat, "dest": str(dest)},
+                           timeout_s=max(3600.0, TD.transfer_seconds(nbytes, durability(), up=False) + 600))
+        if not got.get("verified"):
+            raise DriverError(f"V1's init did not restore from the relay: {str(got)[:400]}")
+    if sha256_file(w) != ref["model_safetensors_sha256"]:
+        raise DriverError("V1's init on the pod is not the one V1's plan binds")
+    return dest
 
 
 def diagnostics_step(g: Gpu, rec: dict, out: Path, work: Path, m=None) -> None:
@@ -366,7 +486,7 @@ def diagnostics_step(g: Gpu, rec: dict, out: Path, work: Path, m=None) -> None:
     cands = None
     try:
         dev = next(g.teacher.parameters()).device
-        cands = span_candidates(g.adapter, g.base, m, g.sel, g.spans, dev)
+        cands = span_candidates(g.adapter, g.base, m, g.sel, g.spans, dev, teacher=g.teacher)
         rec["diagnostics"] = M.lmx().diagnostics(g.adapter, g.teacher, g.spans, cands, g.batches, g.active)
     except Exception as exc:  # noqa: BLE001
         rec["diagnostics"] = {"error": f"{type(exc).__name__}: {str(exc)[:1500]}", "role": "diagnostic only"}
@@ -384,11 +504,11 @@ def diagnostics_step(g: Gpu, rec: dict, out: Path, work: Path, m=None) -> None:
 
 def durability() -> dict:
     from stages.teacher_parent_initialization import train_driver as TD
-    return {**TD.DURABILITY, **DC.design()["training"]["durability"]}
+    return {**TD.DURABILITY, **design()["training"]["durability"]}
 
 
 def group_root(name: str) -> str:
-    return f"{DC.design()['storage']['relay_prefix_root']}/{ARM}/{name}"
+    return f"{design()['storage']['relay_prefix_root']}/{ARM}/{name}"
 
 
 def group_files(name: str, rec: dict) -> dict[str, str]:
@@ -775,10 +895,12 @@ def init_record(rec: dict, relay: dict, ident: dict) -> dict:
     ck = rec["checkpoint"]
     return {"schema": SCHEMA, "status": "COMPLETE", "arm": ARM, "run_id": rec["run_id"], "root_teacher": rec["root"],
             "commit": {"selected_rows": [{"state_id": f"{ARM}/{ck['artifact_digest'][:32]}",
-                                          "path": "SOB1's depth selection, alpha-merged (M-act) at its spans",
+                                          "path": ("SOB1's depth selection, long removed runs merged into new layers "
+                                                   "(M-act over each run), short runs V1's" if is_split() else
+                                                   "SOB1's depth selection, alpha-merged (M-act) at its spans"),
                                           "artifact_digest": ck["artifact_digest"],
                                           "single_shard_sha256": ck["shards"][0]["sha256"]}]},
-            "identity": ident, "checkpoint": ck, "base": DC.design()["baseline"]["init_record"],
+            "identity": ident, "checkpoint": ck, "base": design()["baseline"]["init_record"],
             "method": _checkpoint_method(ck), "method_identity": rec["method_identity"],
             "statistics": rec["statistics"],
             "checks": rec["checks"], "candidate": rec["candidate"], "state_evaluation": rec.get("state_evaluation"),
@@ -818,7 +940,7 @@ def product_problems(doc: dict | None, ident: dict | None = None) -> list[str]:
         bad.append(f"the init record says method {doc.get('method')!r}, its checkpoint was built with "
                    f"{_checkpoint_method(ck)!r}")
     eq = (doc.get("checks") or {}).get("equivalence") or {}
-    tol = float(DC.design()["checks"]["fold_equivalence"]["tolerance"])
+    tol = float(design()["checks"]["fold_equivalence"]["tolerance"])
     if not (eq.get("passed") is True and float(eq.get("worst", float("inf"))) <= tol):
         bad.append(f"the equivalence checks are not passed within the design's tolerance {tol}")
     if ident is not None:
@@ -862,7 +984,9 @@ def main(argv=None) -> int:
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--resume", default=None)
     ap.add_argument("--check-only", action="store_true")
+    ap.add_argument("--arm", default="depth_merge", choices=sorted(SCHEMAS))
     a = ap.parse_args(argv)
+    bind(a.arm)
     out, work, status = Path(a.out), Path(a.work), Status(a.status)
     out.mkdir(parents=True, exist_ok=True)
     work.mkdir(parents=True, exist_ok=True)

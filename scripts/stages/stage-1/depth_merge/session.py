@@ -47,7 +47,8 @@ GIB = 2 ** 30
 #: TPI1 / RI / teacher-modes chain it binds
 COMMON_SCRIPTS = (
     "scripts/stages/stage-1/depth_merge/__init__.py", "scripts/stages/stage-1/depth_merge/common.py",
-    "scripts/stages/stage-1/depth_merge/merge.py", "scripts/stages/stage-1/depth_merge/build_driver.py",
+    "scripts/stages/stage-1/depth_merge/merge.py", "scripts/stages/stage-1/depth_merge/split.py",
+    "scripts/stages/stage-1/depth_merge/build_driver.py",
     "scripts/stages/stage-1/depth_merge/train_driver.py", "scripts/stages/stage-1/depth_merge/plan.py",
     "scripts/stages/stage-1/depth_merge/session.py", "scripts/stages/stage-1/depth_merge/launch.py",
     "scripts/stages/stage-1/depth_merge/analysis.py",
@@ -88,15 +89,19 @@ class Variant:
     plan_id: str
     logs: Path                                 #: repo-relative
     session_kind: str                          #: setup's authorization branch
-    build_kind: str | None                     #: the init build's kind (variant 1 only)
+    build_kinds: dict = field(default_factory=dict)   #: kind -> the arm whose initialization it builds
     train_kinds: dict = field(default_factory=dict)   #: kind -> the arms it trains
     identity_files: tuple = ()
+    kind_files: dict = field(default_factory=dict)    #: kind -> identity files only that kind's artifacts bind
     artifact_spec: str = ""
     label: str = ""
 
     @property
     def kinds(self) -> tuple[str, ...]:
-        return tuple(k for k in ((self.build_kind,) if self.build_kind else ()) + tuple(self.train_kinds))
+        return tuple(self.build_kinds) + tuple(self.train_kinds)
+
+    def is_build(self, kind: str) -> bool:
+        return kind in self.build_kinds
 
     def grant_path(self, kind: str) -> Path:
         return Path("logs/budget/approvals") / f"dmr1_{kind}_grant.json"
@@ -115,7 +120,7 @@ class Variant:
             claims=frozenset({"formal", "training", "evaluation"}), kinds=self.kinds)
 
     def arm_of(self, kind: str, arm: str | None) -> str | None:
-        if kind == self.build_kind:
+        if self.is_build(kind):
             return None
         arms = self.train_kinds.get(kind)
         if arms is None:
@@ -134,9 +139,18 @@ def plan_path(arm: str) -> str:
 
 def kind_conditions(v: Variant, kind: str, root: Path = REPO, arm: str | None = None) -> dict:
     """The records an artifact of ``kind`` binds, by sha256 (setup re-derives them from the pod's files)."""
-    out = {f"identity:{p}": SE.sha256_file(root / p) for p in v.identity_files}
-    if kind == v.build_kind:
+    out = {f"identity:{p}": SE.sha256_file(root / p) for p in (*v.identity_files, *v.kind_files.get(kind, ()))}
+    if v.is_build(kind):
         out["digests_sha256"] = SE.sha256_file(root / "configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json")
+        if v.build_kinds[kind] != "depth_merge":
+            out["build_arm"] = v.build_kinds[kind]
+            #: v1-new's build reuses V1's init: the artifact pins the record it reuses and the derived config
+            from stages.depth_merge import build_driver as BD
+            from stages.depth_merge import split as SPLIT
+            with BD.bound(v.build_kinds[kind]):
+                ref = BD.v1_init_ref()
+            out["v1_init_record_sha256"] = ref["init_record"]["sha256"]
+            out["split_config_sha256"] = SE.sha256_file(root / SPLIT.CONFIG.relative_to(REPO))
         return out
     arm = v.arm_of(kind, arm)
     plan = json.loads((root / plan_path(arm)).read_text())
@@ -251,12 +265,12 @@ def gates(v: Variant, arm: str | None) -> tuple:
         return (not bad, f"the artifact funds the plan this launch runs ({arm})" if not bad else "; ".join(bad))
 
     def the_initialization_is_durable(ctx) -> tuple[bool, str]:
-        if _kind(ctx) == v.build_kind:
+        if v.is_build(_kind(ctx)):
             return True, "a build session"
         return initialization_on_relay(v.arm_of(_kind(ctx), _arm(ctx)))
 
     def the_engine_validation_applies(ctx) -> tuple[bool, str]:
-        a = None if _kind(ctx) == v.build_kind else v.arm_of(_kind(ctx), _arm(ctx))
+        a = None if v.is_build(_kind(ctx)) else v.arm_of(_kind(ctx), _arm(ctx))
         bad = engine_validation_problems(a)
         return (not bad, "no engine validation to reuse, or the reused record stands for this plan" if not bad
                 else "; ".join(bad))
@@ -282,7 +296,7 @@ def evidence_bound_gib(kind: str, v: Variant) -> float:
     """What a session brings back to the dev box at most (its evidence, the pull archive and the teardown archive),
     from SOB1's measured sessions (321-348 MB of evidence for two seeds and four sets) with a factor of 3; the weights
     stay on the relay."""
-    return 0.5 if kind == v.build_kind else 1.5
+    return 0.5 if v.is_build(kind) else 1.5
 
 
 def arm_binding_problems(v: Variant, sc: dict, arm: str | None, root: Path = REPO) -> list[str]:
@@ -317,8 +331,13 @@ def initialization_on_relay(arm: str) -> tuple[bool, str]:
             f"{arm}'s initialization is not on the relay as recorded: {bad}")
 
 
-def checkpoint_bytes(root: Path = REPO) -> dict:
-    """The depth structure's sizes (every DMR1 arm has SOB1's depth arm's 16 blocks): SOB1's structures.json."""
+def checkpoint_bytes(root: Path = REPO, arm: str | None = None) -> dict:
+    """An arm's checkpoint sizes: the ones its design registers (v1-new's 18 layers, `split.checkpoint_bytes`), else
+    the depth structure's (SOB1's 16 blocks: every other DMR1 arm), SOB1's structures.json."""
+    if arm is not None:
+        reg = (DC.design_of(arm)["arms"].get(arm) or {}).get("checkpoint_bytes")
+        if reg:
+            return reg
     s = json.loads((root / "logs/stages/stage-1/single_operator_budget/plans/structures.json").read_text())
     return s["arms"][DC.SOB1_DEPTH]["checkpoint_bytes"]
 
@@ -362,14 +381,15 @@ def relay_present(token: str):
     return present
 
 
-def build_need(ident: dict, rec: dict, prev: dict, present) -> dict:
+def build_need(ident: dict, rec: dict, prev: dict, present, arm: str = "depth_merge") -> dict:
     """What a build session asks of the relay's live headroom: the whole chain (`storage.sequence`) less what the
     attempt takes over there (`build_driver.held` on the records it resumes from: its products under this identity,
     their files present), counted as the chain counts them (`storage.remaining`). A first run holds nothing and asks
     for the whole chain; the live headroom already excludes what is held, so nothing is subtracted twice."""
     from stages.depth_merge import build_driver as BD
     from stages.depth_merge import storage as STO
-    return STO.remaining(BD.held(ident, rec, prev, present))
+    with BD.bound(arm):
+        return STO.remaining(BD.held(ident, rec, prev, present), arm=arm)
 
 
 def training_relay_need(arm: str, plan: dict, state: dict, sizes: dict | None = None) -> dict:
@@ -379,7 +399,7 @@ def training_relay_need(arm: str, plan: dict, state: dict, sizes: dict | None = 
     is ``{}``, a takeover its valid save points or final), the closeout archive after the rotation ends, and the
     margin the arm's design registers (``storage.relay_margin_gib``), for a first run and a takeover alike."""
     from stages.single_operator_budget import launch as SL
-    sizes = sizes or checkpoint_bytes()
+    sizes = sizes or checkpoint_bytes(arm=arm)
     st = DC.design_of(arm)["storage"]
     archive, margin = int(st["closeout_archive_bytes_bound"]), int(float(st["relay_margin_gib"]) * GIB)
     rot = SL.rotation_need(plan, state, sizes)
@@ -402,17 +422,17 @@ def relay_room(v: Variant, kind: str, arm: str | None, evidence: dict, *,
     tok = Path(os.path.expanduser("~/.cache/huggingface/token"))
     if not tok.is_file():
         return False, "no hub token on the dev box to ask the relay"
-    sizes = checkpoint_bytes()
-    if kind == v.build_kind:
+    sizes = checkpoint_bytes(arm=None if v.is_build(kind) else v.arm_of(kind, arm))
+    if v.is_build(kind):
         #: the WHOLE chain, not the build's products alone: an init built for a training session the relay cannot
         #: hold would wait on storage after its money was spent (storage.py; design storage.chain_rule)
         import tempfile
         from stages.depth_merge import build_driver as BD
         try:
             rec, prev = resume_records(resume_from)
-            with tempfile.TemporaryDirectory() as tmp:
+            with BD.bound(v.build_kinds[kind]), tempfile.TemporaryDirectory() as tmp:
                 ident = BD.current_identity(Path(tmp))
-            need = build_need(ident, rec, prev, relay_present(tok.read_text().strip()))
+            need = build_need(ident, rec, prev, relay_present(tok.read_text().strip()), arm=v.build_kinds[kind])
         except Exception as exc:  # noqa: BLE001
             return False, f"what the relay already holds of this build is unknown: {type(exc).__name__}: {exc}"
         evidence["relay_need"] = need
@@ -452,10 +472,12 @@ def command(v: Variant, launch, kind: str, arm: str | None, ctx, plan) -> str:
     py = (f"cd {SE.POD_REPO} && HF_HUB_OFFLINE=1 PYTHONPATH={SE.POD_REPO}/src:{SE.POD_REPO}/scripts:"
           f"{SE.POD_REPO}/scripts/stages/stage-1:{SE.POD_REPO}/scripts/stages/stage-0/calibration_volume "
           "/opt/train/bin/python")
-    if kind == v.build_kind:
+    if v.is_build(kind):
         from stages.depth_merge import build_driver as BD
-        cmd = (f"{DRIVERS['build']} --run-id {shlex.quote(ctx.args.run_id)} --out {ev} "
-               f"--work {DC.pod_root('depth_merge')}/build_work --status {status} --device {BD.BUILD_DEVICE} {resume}")
+        b_arm = v.build_kinds[kind]
+        work = f"{DC.pod_root('depth_merge')}/build_work" + ("" if b_arm == "depth_merge" else f"_{b_arm}")
+        cmd = (f"{DRIVERS['build']} --arm {b_arm} --run-id {shlex.quote(ctx.args.run_id)} --out {ev} "
+               f"--work {work} --status {status} --device {BD.BUILD_DEVICE} {resume}")
     else:
         arm = v.arm_of(kind, arm)
         auth = f"{SE.POD_REPO}/{v.study().authorization_path(ctx.args.run_id)}"
@@ -512,16 +534,22 @@ def launch_spec(v: Variant, authorization: type, kind: str, minutes: float = 0.0
 
     def asset(path: str) -> LocalAsset:
         return LocalAsset(repo_path=path, dest_name=Path(path).name, install_to=str(Path(path).parent))
-    if kind == v.build_kind:
+    if v.is_build(kind):
         assets = (asset("artifacts/stages/stage-2/teacher_modes/calibration_v3"),
                   asset("artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v3"))
-        relay, desc, driver = (), "DMR1-M build: the alpha-merged initialization from the teacher", DRIVERS["build"]
+        relay, driver = (), DRIVERS["build"]
+        desc = ("DMR1-M build: the alpha-merged initialization from the teacher" if v.build_kinds[kind] == "depth_merge"
+                else f"DMR1-M build of {v.build_kinds[kind]} (v1-new): the separate runs merged, V1's spans reused")
     else:
         from stages.teacher_modes import token_matched_phase as TM
         arm = v.arm_of(kind, arm)
         assets = (asset("artifacts/stages/stage-3/eval/battery_v2"),)
         relay = TM.stage3_relay_inputs("train_sr_mix")                   #: the A-MIX pack, at hub speed
-        desc, driver = f"{v.key}: {arm}'s two seeds trained (SOB1's depth recipe) and evaluated at 8,192 tokens", DRIVERS["train"]
+        from stages.depth_merge import plan as PL
+        n = len(PL.seeds_of(DC.design_of(arm), arm))
+        seeds = {1: "one seed", 2: "two seeds"}.get(n, f"{n} seeds")
+        desc, driver = (f"{v.key}: {arm}'s {seeds} trained (SOB1's depth recipe) and evaluated at 8,192 tokens",
+                        DRIVERS["train"])
     relay += resume_input(v, resume_from)
     launch = SE.Launch(
         session_kind=v.session_kind, authorization=authorization, teacher_model=d["teacher"]["model"],
@@ -550,15 +578,17 @@ def completion(v: Variant, kind: str, arm: str | None, run_id: str, scr: Path, *
     unfinished: dict = {}
     doc: dict = {"schema": "aadistill.dmr1.session_completion/v1", "run_id": run_id, "kind": kind, "arm": arm,
                  "scr": str(scr)}
-    if kind == v.build_kind:
+    if v.is_build(kind):
         import tempfile
-        with tempfile.TemporaryDirectory() as tmp:          #: this tree's identity of the build's products ($0, CPU)
-            ident = BD.current_identity(Path(tmp))
-        rec = BD.durable_init(out, ident) if out.is_dir() else None
-        if rec is None:
-            p = out / BD.ARM / "init_record.json"
-            unfinished["init"] = BD.product_problems(json.loads(p.read_text()) if p.is_file() else None, ident)
-        doc["init_record"] = None if rec is None else str((out / BD.ARM / "init_record.json"))
+        with BD.bound(v.build_kinds[kind]):
+            with tempfile.TemporaryDirectory() as tmp:      #: this tree's identity of the build's products ($0, CPU)
+                ident = BD.current_identity(Path(tmp))
+            rec = BD.durable_init(out, ident) if out.is_dir() else None
+            if rec is None:
+                p = out / BD.ARM / "init_record.json"
+                unfinished["init"] = BD.product_problems(json.loads(p.read_text()) if p.is_file() else None, ident)
+            doc["init_record"] = None if rec is None else str((out / BD.ARM / "init_record.json"))
+            doc["build_arm"] = BD.ARM
     else:
         from stages.single_operator_budget import common as SC
         from stages.single_operator_budget import completion as CP

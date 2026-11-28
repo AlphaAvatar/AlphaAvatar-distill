@@ -227,3 +227,19 @@ def test_update_moments_summarize_norms_cosine_and_error():
     s = m.summary()
     assert s["norm_ratio"] == pytest.approx(0.5) and s["cosine"] == pytest.approx(1.0)
     assert s["normalized_error"] == pytest.approx(0.25)
+
+
+def test_groups_split_off_long_removed_runs_after_their_kept_block():
+    from aadistill.initialization.planning.layer_merge import groups_from_kept_blocks
+    #: the brief's example, 0-based: teacher 0..5, removed 2, 3, 4 (a run of 3 after kept 1)
+    assert [g["layers"] for g in groups_from_kept_blocks(6, [0, 1, 5])] == [(0,), (1, 2, 3, 4), (5,)]
+    got = groups_from_kept_blocks(6, [0, 1, 5], separate_run_min=3)
+    assert [(g["layers"], g["anchor"], g["kind"]) for g in got] == [((0,), 0, "kept"), ((1,), 1, "kept"),
+                                                                     ((2, 3, 4), 2, "separate"), ((5,), 5, "kept")]
+    #: runs of 1 and 2 are absorbed as before; the threshold counts removed blocks only
+    got = groups_from_kept_blocks(8, [0, 2, 4], separate_run_min=3)
+    assert [g["layers"] for g in got] == [(0, 1), (2, 3), (4,), (5, 6, 7)]
+    assert [g["kind"] for g in got] == ["absorbed", "absorbed", "kept", "separate"]
+    assert sorted(b for g in got for b in g["layers"]) == list(range(8))
+    with pytest.raises(Exception):
+        groups_from_kept_blocks(6, [0, 1, 5], separate_run_min=0)

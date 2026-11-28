@@ -36,21 +36,27 @@ RECORD = DC.LOGS / "plans/storage_plan.json"
 GROUPS_HELD = ("statistics", "init")
 
 
-def sizes(root: Path = REPO) -> dict:
+def sizes(root: Path = REPO, arm: str | None = None) -> dict:
     from stages.depth_merge import session as S
-    return S.checkpoint_bytes(root)
+    return S.checkpoint_bytes(root, arm=arm)
 
 
-def sequence(root: Path = REPO) -> dict:
-    """The chain's relay steps (net bytes added vs now) and the dev box's bound (module docstring)."""
+def sequence(root: Path = REPO, arm: str = "depth_merge") -> dict:
+    """The chain's relay steps (net bytes added vs now) and the dev box's bound (module docstring): ``arm``'s build
+    (its init at its own size and the statistics bound), then its training session's rotation -- SOB1's depth units
+    of the arm's seeds, at the arm's sizes."""
     from stages.depth_merge import session as S
     from stages.single_operator_budget import launch as SL
-    d = DC.design()
-    sz = sizes(root)
+    d = DC.design_of(arm)
+    sz = sizes(root, arm)
     st = d["storage"]
     build = int(sz["init_bf16"]) + int(st["statistics_bytes_bound"])
     archive = int(st["closeout_archive_bytes_bound"])
     src = json.loads((root / d["baseline"]["training_plan"]["path"]).read_text())
+    seeds = [int(x) for x in ((d["arms"].get(arm) or {}).get("seeds") or d["training"]["seeds"])]
+    src = {**src, "units": [u for u in src["units"] if int(u["seed"]) in seeds],
+           "unit_order": [n for n in src["unit_order"] if any(u["unit"] == n and int(u["seed"]) in seeds
+                                                              for u in src["units"])]}
     rot = SL.rotation_need(src, {}, sz)
     steps, net = [], 0
 
@@ -69,7 +75,7 @@ def sequence(root: Path = REPO) -> dict:
     add("training closeout: its evidence archive", archive)
     peak = max(s["net_bytes"] for s in steps)
     margin = int(float(st["relay_margin_gib"]) * GIB)
-    dev = {k: S.evidence_bound_gib(k, S_variant()) for k in (S_variant().build_kind, *S_variant().train_kinds)}
+    dev = {k: S.evidence_bound_gib(k, S_variant()) for k in (*S_variant().build_kinds, *S_variant().train_kinds)}
     return {"relay": {"steps": steps, "peak_bytes": peak, "peak_gib": round(peak / GIB, 2), "end_bytes": net,
                       "end_gib": round(net / GIB, 2), "margin_bytes": margin, "need_bytes": peak + margin,
                       "need_gib": round((peak + margin) / GIB, 2),
@@ -171,6 +177,104 @@ def v2_plan(live_state: dict, root: Path = REPO, dev_box: dict | None = None, in
                     "bisection; nothing is deleted or bought by this plan"}
 
 
+#: the sessions of the three-unit programme (v1-new's build and training, V2-D, V2-M), as `program` sequences them
+SESSIONS = {"v1new_build": ("build", "depth_merge_split"), "v1new_train": ("train", "depth_merge_split"),
+            "v2d": ("train", "depth_loop_kept"), "v2m": ("train", "depth_loop_merged")}
+
+
+def session_need(name: str, root: Path = REPO) -> dict:
+    """One session's relay need as ITS launch gate computes it (first run), and what it leaves held after it:
+    a build asks for its whole chain (`sequence`: its products and the training rotation after them, + the margin)
+    and leaves its init, statistics and archive; a training session asks `session.training_relay_need` and leaves its
+    final and archive."""
+    from stages.depth_merge import plan as PL
+    from stages.depth_merge import session as S
+    kind, arm = SESSIONS[name]
+    st = DC.design_of(arm)["storage"]
+    archive = int(st["closeout_archive_bytes_bound"])
+    if kind == "build":
+        seq = sequence(root, arm)["relay"]
+        sz = sizes(root, arm)
+        return {"session": name, "need_bytes": int(seq["need_bytes"]),
+                "leaves_bytes": int(sz["init_bf16"]) + int(st["statistics_bytes_bound"]) + archive,
+                "rule": "the build's whole chain (storage.sequence) + the margin"}
+    plan_p = PL.out_path(arm)
+    if plan_p.is_file():
+        plan = json.loads(plan_p.read_text())
+    else:                                   #: before the build: SOB1's depth unit of the arm's seed at the arm's sizes
+        src = json.loads((root / DC.design()["baseline"]["training_plan"]["path"]).read_text())
+        seeds = [int(x) for x in DC.design_of(arm)["arms"][arm].get("seeds") or DC.design_of(arm)["training"]["seeds"]]
+        units = [u for u in src["units"] if int(u["seed"]) in seeds]
+        plan = {**src, "units": units, "unit_order": [u["unit"] for u in units],
+                "durability": DC.design_of(arm)["training"]["durability"]}
+    need = S.training_relay_need(arm, plan, {}, sizes(root, arm))
+    return {"session": name, "need_bytes": int(need["need_bytes"]),
+            "leaves_bytes": int(need["end_bytes"]) + int(need["archive_bytes"]),
+            "rule": "session.training_relay_need (the launch gate's) + what it leaves: its final and archive"}
+
+
+#: objects that could be freed once their last declared consumer has finished (none is freed by this plan; each is
+#: a maintainer's decision or AGENTS.md 2.5's standing retirement once its conditions hold): name -> (bytes, after)
+FREEABLE = {
+    "sob1_depth_init_relay_copy": (4007703552 + 1154, "v2d",
+                                   "SOB1's depth init on the relay: V2-D's base; a verified dev-box copy exists"),
+    "v1_init": (4007703552 + 1154, "v2m+v1new_build", "V1's merged init: V2-M's base and v1-new's reuse source; its only "
+                                                      "copy"),
+    "v2d_final": (8015407104, "v2d", "V2-D's trained final: no declared consumer once its sets are sealed (2.5)"),
+    "v2m_final": (8015407104, "v2m", "V2-M's trained final: no declared consumer once its sets are sealed (2.5)"),
+    "v1new_init": (4411426816, "v1new_train", "v1-new's training-pre init: its only copy; its consumer is its training"),
+    "v1new_final": (8822853632, "v1new_train", "v1-new's trained final: no declared consumer once its sets are sealed")}
+
+
+def program(order: list[str], headroom_bytes: int, root: Path = REPO, frees: dict | None = None) -> dict:
+    """The sessions in ``order`` one after another against ``headroom_bytes`` (the live relay headroom now): each
+    session's need against the headroom it would find, then what it leaves. ``frees``: session -> [FREEABLE names]
+    freed right after that session (a scenario: nothing here frees anything)."""
+    room, rows, ok = int(headroom_bytes), [], True
+    frees = frees or {}
+    for name in order:
+        s = session_need(name, root)
+        fits = s["need_bytes"] <= room
+        ok = ok and fits
+        rows.append({"session": name, "need_gib": round(s["need_bytes"] / GIB, 2), "headroom_gib": round(room / GIB, 2),
+                     "fits": fits, "margin_gib": round((room - s["need_bytes"]) / GIB, 2),
+                     "leaves_gib": round(s["leaves_bytes"] / GIB, 2)})
+        room -= s["leaves_bytes"]
+        for f in frees.get(name, ()):
+            room += int(FREEABLE[f][0])
+            rows[-1].setdefault("then_freed", []).append({"object": f, "gib": round(FREEABLE[f][0] / GIB, 2)})
+    return {"order": order, "fits": ok, "sessions": rows, "headroom_after_gib": round(room / GIB, 2),
+            "frees": frees}
+
+
+def split_plan(live_state: dict, root: Path = REPO) -> dict:
+    """The three-unit programme's storage (v1-new and variant 2), by order and by what would have to be freed."""
+    H = int(live_state["headroom_bytes"])
+    orders = {"v2_first": ["v2d", "v2m", "v1new_build", "v1new_train"],
+              "v1new_first": ["v1new_build", "v1new_train", "v2d", "v2m"],
+              "interleaved": ["v2d", "v1new_build", "v1new_train", "v2m"]}
+    scen = {"v2_first + SOB1 depth init relay copy and V2-D's final freed after V2-D":
+            (orders["v2_first"], {"v2d": ["sob1_depth_init_relay_copy", "v2d_final"]}),
+            "v2_first + both V2 finals freed after their sessions":
+            (orders["v2_first"], {"v2d": ["v2d_final"], "v2m": ["v2m_final"]}),
+            "v1new_first + v1-new's final freed after its session":
+            (orders["v1new_first"], {"v1new_train": ["v1new_final"]}),
+            "v1new_first + SOB1 depth init relay copy freed after V2-D and v1-new's final after its session":
+            (orders["v1new_first"], {"v1new_train": ["v1new_final"], "v2d": ["sob1_depth_init_relay_copy"]}),
+            "v1new_first + SOB1 depth init relay copy after V2-D and v1-new's init after its training":
+            (orders["v1new_first"], {"v1new_train": ["v1new_init"], "v2d": ["sob1_depth_init_relay_copy"]})}
+    return {"schema": "aadistill.dmr1.programme_storage/v1", "live": live_state,
+            "sessions": {n: {(k.replace("_bytes", "_gib") if k.endswith("_bytes") else k):
+                             (round(v / GIB, 2) if k.endswith("_bytes") else v) for k, v in session_need(n, root).items()}
+                         for n in SESSIONS},
+            "as_is": {k: program(o, H, root) for k, o in orders.items()},
+            "with_frees": {k: program(o, H, root, f) for k, (o, f) in scen.items()},
+            "freeable": {k: {"gib": round(v[0] / GIB, 2), "after": v[1], "what": v[2]} for k, v in FREEABLE.items()},
+            "rule": "each session's need as its own launch gate computes it (a build: its whole chain; training: "
+                    "training_relay_need), against the headroom the earlier sessions leave; nothing is freed or bought "
+                    "by this plan"}
+
+
 def S_variant():
     from stages.depth_merge import launch as L
     return L.VARIANT
@@ -195,19 +299,20 @@ def live(repo: str | None = None) -> dict:
                     "the sum of list_lfs_files (the billing basis)"}
 
 
-def counted(groups, root: Path = REPO) -> dict[str, int]:
+def counted(groups, root: Path = REPO, arm: str = "depth_merge") -> dict[str, int]:
     """How the chain counts each build product it starts with (the init at its bf16 size, the statistics at their
     bound): what a takeover that holds the group on the relay no longer adds."""
-    count = {"init": int(sizes(root)["init_bf16"]), "statistics": int(DC.design()["storage"]["statistics_bytes_bound"])}
+    count = {"init": int(sizes(root, arm)["init_bf16"]),
+             "statistics": int(DC.design_of(arm)["storage"]["statistics_bytes_bound"])}
     return {g: count[g] for g in groups}
 
 
-def remaining(held: dict, root: Path = REPO) -> dict:
+def remaining(held: dict, root: Path = REPO, arm: str = "depth_merge") -> dict:
     """What the chain still adds when a build takeover holds ``held`` (group -> its relay record, `build_driver.held`):
     every step of the chain includes the build's products, so each held group's count comes off every step -- the
     peak with them -- and the margin stays. The live headroom it is asked of already excludes the held bytes."""
-    seq = sequence(root)["relay"]
-    credit = counted(held, root)
+    seq = sequence(root, arm)["relay"]
+    credit = counted(held, root, arm)
     peak = seq["peak_bytes"] - sum(credit.values())
     return {"held": sorted(held), "credit_bytes": credit,
             "held_actual_bytes": {g: int(sum((r.get("bytes") or {}).values())) for g, r in held.items()},
@@ -256,8 +361,18 @@ def plan(live_state: dict, root: Path = REPO, dev_box: dict | None = None) -> di
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--write", action="store_true")
-    ap.add_argument("--variant", choices=("1", "2"), default="1")
+    ap.add_argument("--variant", choices=("1", "2", "programme"), default="1")
     a = ap.parse_args(argv)
+    if a.variant == "programme":
+        doc = split_plan(live())
+        if a.write:
+            p = DC.LOGS / "plans/programme_storage_plan.json"
+            p.write_text(json.dumps(doc, indent=1) + "\n")
+        print(json.dumps({"as_is": {k: (v["fits"], [(s["session"], s["margin_gib"]) for s in v["sessions"]])
+                                    for k, v in doc["as_is"].items()},
+                          "with_frees": {k: (v["fits"], [(s["session"], s["margin_gib"]) for s in v["sessions"]])
+                                         for k, v in doc["with_frees"].items()}}, indent=1))
+        return 0
     if a.variant == "2":
         doc = v2_plan(live(), dev_box=dev_box_live(), inv=inventory())
         if a.write:

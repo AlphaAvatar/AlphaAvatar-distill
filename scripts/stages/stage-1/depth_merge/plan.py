@@ -114,7 +114,7 @@ def init_problems(arm: str, rec: dict, rec_path: str, root: Path = REPO) -> list
         bad = [] if rec.get("arm") == arm else [f"{rec_path} is {rec.get('arm')!r}'s init record, not {arm}'s"]
         if not all((v or {}).get("verified") for v in (rec.get("relay") or {}).values()) or not rec.get("relay"):
             bad.append(f"{rec_path}: the initialization's relay copies are not all verified")
-        with tempfile.TemporaryDirectory() as tmp:          #: made under this tree's identity of the build ($0)
+        with BD.bound(arm), tempfile.TemporaryDirectory() as tmp:     #: this tree's identity of the arm's build ($0)
             bad += [f"{rec_path}: {b}" for b in BD.product_problems(rec, BD.current_identity(Path(tmp)))
                     if b not in bad]
         return bad
@@ -161,6 +161,10 @@ def derive(arm: str, init_record: Path, root: Path = REPO) -> dict:
                 "model_safetensors_sha256": sha, "provenance": {"record": rel, "record_sha256": rec_sha}}
             a["initialization"] = {"artifact_digest": rec["checkpoint"]["artifact_digest"],
                                    "relay": rec["relay"]["init"], "init_record": rel}
+            reg = (d["arms"].get(arm) or {}).get("checkpoint_bytes")
+            if reg:                                  #: an arm of another structure: its own sizes (deadline, relay)
+                a["bytes"] = {"save_point": int(reg["save_point"]), "final": int(reg["final_fp32"]),
+                              "init": int(reg["init_bf16"])}
             if DC.is_recurrent(arm):
                 c["stage"] = d["training_execution_stage"]
                 cfg_p = root / rec["execution"]["config"]["path"]
@@ -190,6 +194,9 @@ def derive(arm: str, init_record: Path, root: Path = REPO) -> dict:
             units.append(a)
         if [u["seed"] for u in units] != seeds:
             raise PlanError(f"seeds {[u['seed'] for u in units]}, not the design's {seeds} for {arm}")
+        policy = d["training"].get("single_seed")
+        if policy and len(seeds) != 1:          #: AGENTS.md 4.3: one seed per condition unless the design says so
+            raise PlanError(f"{arm}: the design registers one seed per condition and names {seeds}")
         return {"schema": SCHEMA, "study_id": d["study_id"], "arm": arm,
                 "derived_from": {"path": d["training"]["derived_from"]["path"],
                                  "sha256": d["training"]["derived_from"]["sha256"]},
@@ -200,6 +207,7 @@ def derive(arm: str, init_record: Path, root: Path = REPO) -> dict:
                 "units_dir": UNITS_DIR, "pod_root": pod, "relay_prefix_root": d["storage"]["relay_prefix_root"],
                 "durability": d["training"]["durability"], "evaluation_protocol": SC.protocol(),
                 "checkpoint_policy": src["checkpoint_policy"], "units": units, "derivation_checks": checks,
+                **({"seed_policy": policy} if policy else {}),
                 **({"engine_validation": engine_validation(d, arm)} if engine_validation(d, arm) else {}),
                 "authorizes": "nothing"}
     finally:

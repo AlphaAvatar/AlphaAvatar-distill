@@ -1,6 +1,9 @@
 # DMR1: depth recovery at SOB1's depth-only structure -- review report
 
-**State: READY_FOR_REVIEW (2026-11-28 UTC), the variant-2 revision after the review of `277586ba`: storage option (a) executed, the launch gate's margin and the engine record's provenance fixed (section 0V).**
+**State: READY_FOR_REVIEW (2026-11-28 UTC): v1-new registered and prepared at $0 beside V1 (section 0W); variant 2 as revised after the review of `277586ba` (section 0V), unchanged.**
+- **v1-new:** SOB1's depth selection; runs of three or more removed layers are merged into a NEW layer after the
+  unchanged kept layer. 18 layers, 2,205,713,408 parameters, one seed. Design, code, plans, budget, storage and
+  memory are prepared (section 0W). Nothing is granted.
 - **V1:** stopped by the maintainer during seed 2, and closed out. Seed 1 is complete and reported descriptively
   (section 00).
 - **V2:** revised at $0 into two initializations x seed 20260726, with code, plans, budget and storage prepared
@@ -14,6 +17,184 @@
 - **Earlier sections:** sections 0 onward are the READY_FOR_REVIEW report of 2026-11-26, kept as written. Their
   "Stage 6" for variants 2 and 3, `stage6_recurrent_depth` and `stage-6/...` paths read as section 0S states;
   where the V2 design differs, section 0R holds.
+
+## 0W. v1-new (2026-11-28): long removed runs merged into a new layer, prepared at $0
+
+The maintainer's brief of 2026-11-28 registers v1-new as a new variant (arm `depth_merge_split`). V1's design, results
+and identity are kept as they are. V2's plans are unchanged: V2-M keeps V1's init, there is no recurrent v1-new, and
+there is no V3. $0 throughout: no pod, no volume, no cap raise, no top-up, no grant.
+
+### 0W.1 The rule, the groups, the parameters
+
+The rule is derived in core from the mapping: `layer_merge.groups_from_kept_blocks(n_root, kept, separate_run_min)`.
+No layer number appears in core. The instance values are in `configs/stages/stage-1/depth_merge/split.json` (threshold
+3, seed 20260726). Per kept layer and the run of removed layers after it:
+
+* none: keep the layer;
+* 1-2: merge them into it, as V1 does;
+* 3 or more: keep the layer's original weights and merge the run alone into a new layer after it.
+
+At SOB1's selection (1-based): layer 13 is kept with a new layer from 14-18, and layer 25 is kept with a new layer
+from 26-29. The full layout is 9 kept layers, 7 absorbed spans (V1's) and 2 new layers: 18 layers.
+`split.py params` instantiates the config on the meta device and counts 2,205,713,408 parameters. That equals the
+registered figure and the brief's. The config is the base's file with `num_hidden_layers` 18 and 18 `layer_types`,
+and nothing else changes (`split.py config`). The design is V1's except for the keys listed in `split.CHANGED`, and
+it is what `split.py design` derives. Both are checked by `tests/test_split.py`.
+
+How each layer starts (`split.build_candidate`, every provenance checked before saving):
+
+* a kept layer is the base's tensor-for-tensor (base digests);
+* an absorbed layer is V1's built layer, byte for byte, from V1's init `99f63821...` (re-hashed when fetched);
+* a new layer is M-act over the run's own blocks: alpha = I / sum I normalized within the run, aligned to the run's
+  first block. The kept layer before the run is not part of it, and V1's span block is never reused for it.
+
+Each layer executes once: no recurrence, no hidden-state loss. "The preceding layer unchanged" holds at
+initialization; recovery trains every parameter of SOB1's depth recipe, with nothing frozen beyond it.
+
+The toy test builds V1's init and then v1-new's candidate on the 6-block toy teacher. It checks:
+
+* the absorbed layer equals V1's layer;
+* the kept layers equal the base's;
+* the new layer's gate rows equal alpha within {3, 4} recomputed from the definitions, and differ from V1's block;
+* a base that is not the base's refuses.
+
+### 0W.2 What is reused and what is new
+
+| | reused by identity | new |
+| --- | --- | --- |
+| selection | SOB1's committed depth selection; the base digests | -- |
+| calibration | V1's (the same profile, positions, session) | -- |
+| statistics | -- (the absorbed layers come whole from V1's init) | the 9 blocks of the two runs and 7 alignments (13->14..17, 25->26..28); V1's pairs are anchored at 12 and 24 |
+| init | V1's init (relay `durable/stage1_depth_merge/depth_merge/init/17fc769bd874e401`), 7 absorbed layers | the 18-layer init, 4.11 GiB bf16, `durable/stage1_depth_merge/depth_merge_split/init/...` |
+| training | SOB1's depth recipe and data (plan: SOB1's depth unit outside the declared fields) | one unit; save points 21.75 GiB, two at a time; final 8.22 GiB fp32 |
+| controls | D = SOB1 `depth_only` s20260726, M = V1 `depth_merge` s20260726: registered finals and sets, never retrained | -- |
+
+The build has its own identity, distinct from V1's in both statistics and checkpoint. It is made of the groups, the
+derived config's sha256, `split.py`'s candidate code by ast digest, and the V1 init record it reuses.
+Binding the driver to v1-new leaves V1's identity as it was, and V1's committed init record still passes
+(`test_split.py`). Takeover and completion are V1's state machine, bound to the arm (`build_driver.bind`,
+`session.Variant.build_kinds`). The launcher has two new kinds, `dmr1_split_build` and `dmr1_split_train`. Each binds
+v1-new's three files; V1's kinds' conditions are unchanged.
+
+### 0W.3 The comparison (no matched control)
+
+There are two comparisons, both descriptive at seed 20260726 (`analysis.py split`):
+
+* X1 = v1-new - D;
+* X2 = v1-new - M.
+
+Each is the per-item paired difference over the 570 registered items, with the percentile 95% group-bootstrap
+interval over 558 groups. There is no test and no verdict. Read against the real controls on the dev box, the
+code reproduces D 16.14% / 17.54% and M 12.28% / 12.11% (thinking / non-thinking).
+
+18 layers against 16 and 2.206B against 2.004B parameters are **not parameter-matched**. A difference belongs to the
+whole new scheme and is not attributed to the merge alone. The intervals measure item sampling with each checkpoint
+fixed, not training randomness.
+
+### 0W.4 One seed per condition: now the rule
+
+AGENTS.md 4.3 (maintainer 2026-11-28): new depth-initialization experiments train and evaluate each condition once,
+at seed 20260726.
+
+* Nothing is shortened: the full steps, data and evaluation.
+* Then a report and a wait for review. There is no automatic second seed and no invented promotion threshold.
+* Single-seed results are exploratory.
+
+The design carries it as `training.single_seed`. `plan.py` copies it into the plan as `seed_policy` and refuses
+more than one seed under it. Historical protocols are unchanged; V2 already registers one seed per arm.
+
+### 0W.5 Cost (one ledger reading, 2026-11-28 12:36:08Z: committed $1,114.65, project cap $1,161.06, remaining $46.41, balance $95.35)
+
+| session | expected | cap | reserve | basis |
+| --- | --- | --- | --- | --- |
+| v1-new build | $1.64 (48 min) | $4.30 (166 min bound) | $1.00 | RI-LM1's statistics and assignments, V1's merge, scaled; V1's build cost $1.40 |
+| v1-new training | $18.05 (15.6 h) | $35.94 (29.4 h bound) | $1.00 | V1's 4.87 s/step x 1.08 for 18 layers (NOT measured); evaluation x 1.125 |
+| V2-D | $30.42 | $57.22 | $1.00 | unchanged (0R) |
+| V2-M | $29.97 | $56.03 | $1.00 | unchanged (0R) |
+
+* **v1-new in all:** $42.24 with reserves, inside the project cap's remaining $46.41 and the balance. v1-new needs no
+  raise and no top-up.
+* **All four sessions:** expected $80.08; $157.49 at their caps with reserves. Funding all four at their caps would
+  need a project-cap raise of $111.08.
+
+### 0W.6 Recommended order: v1-new first, then V2-D, then V2-M
+
+**Why v1-new first:**
+
+* it is the only work that fits the current project cap and balance;
+* it has no engine-validation dependency;
+* its result is quick to read (about 16 hours);
+* V2 can follow with its plans unchanged. V2-M's base is V1's init, which v1-new only reads.
+
+**Money along that order** (`plans/programme_budget.json`). The expected path assumes each earlier session cost its
+expected amount; the worst path assumes each cost its cap. The test before each session is its cap plus its reserve.
+
+| before | project remaining (expected / worst) | raise needed | balance (expected / worst) | top-up needed |
+| --- | --- | --- | --- | --- |
+| v1-new build ($5.30) | $46.41 / $46.41 | none | $95.35 / $95.35 | none |
+| v1-new training ($36.94) | $44.77 / $42.11 | none | $93.71 / $91.05 | none |
+| V2-D ($58.22) | $26.72 / $6.17 | $31.50 / $52.05 | $75.66 / $55.11 | none / $3.11 |
+| V2-M ($57.03) | -$3.70 / -$51.05 | $60.73 / $108.08 | $45.24 / -$2.11 | $11.79 / $59.14 |
+
+Each issue and launch checks the live position again; these rows are only the two bounding paths. No top-up is a
+condition of v1-new's sessions.
+
+**Storage along that order** (`plans/programme_storage_plan.json`). The relay's live headroom is 54.22 GiB
+(13:13Z, LFS bisection). Each session's need is what its own launch gate computes:
+
+* a build asks for its whole chain plus the margin;
+* a training session asks for `training_relay_need`.
+
+| session | needs | leaves | margin, nothing freed | margin, v1-new's final retired after its seal |
+| --- | --- | --- | --- | --- |
+| v1-new build | 48.80 GiB | 4.30 (init, statistics, archive) | +5.42 | +5.42 |
+| v1-new training | 44.51 | 8.34 (final, archive) | +5.42 | +5.42 |
+| V2-D | 39.99 | 7.59 | +1.59 | +9.80 |
+| V2-M | 39.99 | 7.59 | **-6.00** | +2.21 (+5.95 if SOB1's depth-init relay copy also goes after V2-D) |
+
+The other orders were evaluated the same way:
+
+* V2 first: v1-new's build is short by 9.76 GiB;
+* interleaved: short by 2.17 GiB, then 6.00 GiB.
+
+**No order fits all four sessions without freeing about 6 GiB.** Nothing is deleted by this plan. The candidates
+(`programme_storage_plan.json :: freeable`), each to be freed only once its last declared consumer has finished:
+
+* v1-new's final, 8.22 GiB: no declared consumer once its sets are sealed. Retiring it falls under AGENTS.md 2.5's
+  standing rule after the review;
+* SOB1's depth init relay copy, 3.73 GiB: consumed by V2-D; a verified dev-box copy exists;
+* either V2 final, after its own sets are sealed.
+
+V1's init (3.73 GiB, its only copy) has two consumers, v1-new's build and V2-M, and is not a candidate before both
+finish. The dev box (6.85 GiB free) takes one session's evidence at a time.
+
+### 0W.7 Memory
+
+The estimate starts from V1's measured L40S peaks at 16 layers with the same recipe: 39.24 GiB allocated,
+40.48-41.39 GiB reserved, 3.06 GiB least free. Two more trainable blocks add:
+
+* 3.01 GiB of fp32 weights, gradients and AdamW m and v;
+* 0.16 GiB of checkpointed inputs.
+
+**Estimated peak:** about 42.4 GiB allocated and 43.6-44.6 GiB reserved, against about 43.9 GiB usable.
+
+**HIGH out-of-memory risk.** The first steps' memory probe measures it. An OOM is answered first by protocol-neutral
+steps: expandable segments, `kd_chunk`. Only after a measured OOM, and a decision of its own, would an 80 GB card be
+used.
+
+### 0W.8 Verification ($0, once, after the implementation)
+
+The v1-new tests (6), V1's depth_merge and depth_recurrence experiment suites, the core layer_merge tests and the
+core-change declaration (`groups_from_kept_blocks`, round 6e3ee3a7). The results are in the commit's report.
+
+### 0W.9 What awaits your decision
+
+1. The order (v1-new first recommended).
+2. v1-new's two grants: build cap $4.30, training cap $35.94, $1 reserve each. Both fit the current cap and balance.
+3. The storage decision before V2-M: which finished object goes. The recommended candidate is v1-new's final after
+   its review.
+4. For V2, unchanged from 0V: a project-cap raise and, depending on the path, a top-up before V2-M.
+5. If the training runs out of memory on the L40S, whether to move to an 80 GB card.
 
 ## 0V. The review of `277586ba` (2026-11-28): storage option (a) executed, two fixes
 

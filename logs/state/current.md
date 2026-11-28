@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-28 (UTC), DMR1 variant 1 STOPPED by the maintainer during seed 2 (seed 1 complete, reported descriptively); variant 2 revised at $0, READY_FOR_REVIEW; nothing running, nothing billing (no pod, no volume); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-28 (UTC), DMR1 variant 1 STOPPED by the maintainer during seed 2 (seed 1 complete, reported descriptively); variant 2 revised at $0, READY_FOR_REVIEW; v1-new (long removed runs merged into new layers) prepared at $0, READY_FOR_REVIEW; nothing running, nothing billing (no pod, no volume); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -40,6 +40,18 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
   is 14.23 GiB and V2-M's, after V2-D's final, 6.64 GiB (`plans/storage_plan.json`, DMR1_REVIEW.md 0V). Engine
   validation (source-checked, input-verified, re-derived on reuse; V2-M depends on V2-D's adopted PASS) is the first
   stage of V2-D's session: NOT YET RUN.
+
+**DMR1 V1-NEW (STAGE 1: SOB1'S DEPTH SELECTION, RUNS OF >= 3 REMOVED LAYERS MERGED INTO A NEW LAYER, 18 LAYERS / 2,205,713,408 PARAMETERS, STAGE 3 RECOVERY, SEED 20260726): PREPARED AT $0, READY_FOR_REVIEW (2026-11-28) -- NOT AUTHORIZED; NOTHING RUNNING.**
+- Report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md` section 0W; spec
+  `configs/stages/stage-1/depth_merge/split.json`, design `split_design.json` (V1's outside its declared keys), config
+  `split_config.json`; decisions.md 2026-11-28. V1's design, results and identity are unchanged.
+- Compared only with SOB1's depth-only and V1 at seed 20260726 (reused, not retrained), descriptively: 18 layers
+  against 16, NOT parameter-matched. One seed per condition is now the default (AGENTS.md 4.3).
+- Proposals `logs/stages/stage-1/depth_merge/plans/proposal_dmr1_split_{build,train}.json`: build expected $1.64,
+  cap $4.30; training expected $18.05, cap $35.94; $1 reserve each ($42.24 in all, inside the project cap's $46.41).
+  Order and money: `plans/programme_budget.json`; storage by order: `plans/programme_storage_plan.json` (no order
+  fits all four sessions without freeing about 6 GiB of finished objects; a maintainer decision). Memory: estimated
+  peak about 42.4 GiB allocated on the L40S, HIGH out-of-memory risk, measured in the first steps.
 
 **SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): COMPLETE (2026-11-25) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Report `docs/stages/stage-1/single_operator_budget/REPORT.md`; decision `logs/stages/stage-1/single_operator_budget/

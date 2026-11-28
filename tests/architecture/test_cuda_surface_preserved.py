@@ -2871,6 +2871,13 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "never in a loss; without the key the trainer is the one before. tests/training/test_hidden_state.py "
             "(the probe's arithmetic against the plain formulas; identical losses, gradients, weights and RNG state "
             "with and without it; its refusals).",
+        "src/aadistill/initialization/planning/layer_merge.py":
+            "NEW FUNCTION `groups_from_kept_blocks(n_root, kept, *, separate_run_min=None)` (DMR1 v1-new, maintainer "
+            "2026-11-28): the student's layer groups from a kept-block mapping -- each kept block with its run of "
+            "removed blocks (`spans_from_kept_blocks`, unchanged), or, when the run of removed blocks has at least "
+            "`separate_run_min`, the kept block alone and the run as a group of its own anchored at its first block. "
+            "Without the threshold every group is a span. No caller of the existing functions changes. "
+            "tests/initialization/test_layer_merge.py.",
      }),
 )
 

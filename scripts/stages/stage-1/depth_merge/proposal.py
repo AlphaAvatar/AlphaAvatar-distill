@@ -88,13 +88,13 @@ def transfers(sizes: dict, up: float = 120e6, down: float = 2.6e6, margin: float
 
 
 def train_session(work: float, decode: float, overhead: float = 1.0, seeds: int = 2,
-                  extra_hours: dict | None = None) -> dict:
+                  extra_hours: dict | None = None, sizes: dict | None = None) -> dict:
     """One arm's ``seeds`` units: training, evaluation and copies (plus ``extra_hours`` -- an engine validation --
     before them), expected and bound (driver hours), its cost and cap."""
     from stages.depth_merge import session as S
     SP = sob1_proposal()
     cm = cost_model()
-    sizes = S.checkpoint_bytes()
+    sizes = sizes or S.checkpoint_bytes()
     tr = transfers(sizes)
     sps = DEPTH["s_per_step"] * work * overhead
     spb = DEPTH["s_per_step_bound"] * work * overhead
@@ -140,26 +140,63 @@ def build_session() -> dict:
                      "init's verify download at the 2.6 MB/s floor x 1.25"}
 
 
-def proposal(kind: str, terms: dict, *, per_arm: str | None = None) -> dict:
+def proposal(kind: str, terms: dict, *, per_arm: str | None = None, design: Path | None = None,
+             recorded: str = "2026-11-26", scope: str | None = None, position: dict | None = None) -> dict:
     cap = float(terms["per_session_hard_cap_usd"])
     block = {k: terms[k] for k in ("driver_minutes", "expected_usd", "per_session_hard_cap_usd")}
     if "unit_deadline_hours" in terms:
         block["unit_deadline_hours"] = terms["unit_deadline_hours"]
     return {"schema": SCHEMA, "study": "DMR1-M", "status": "proposed", "kind": kind,
-            "recorded_utc": "2026-11-26", "design_sha256": __import__("hashlib").sha256(DC.DESIGN.read_bytes()).hexdigest(),
-            "scope": f"DMR1 variant 1, session kind {kind} only",
+            "recorded_utc": recorded,
+            "design_sha256": __import__("hashlib").sha256((design or DC.DESIGN).read_bytes()).hexdigest(),
+            "scope": scope or f"DMR1 variant 1, session kind {kind} only",
             "ceiling_usd": cap, "per_session_hard_cap_usd": cap, "teardown_reserve_usd": TEARDOWN_RESERVE,
             "kinds": {kind: ({"per_arm": {per_arm: block}} if per_arm else block)},
             "gpus": {"NVIDIA L40S": 1.11}, "gpu_count_max": 1,
             "hardware": "one NVIDIA L40S, secure cloud, at most $1.11/h, 150 GB container disk, no network volume",
             "usd_per_hour_all_in": round(sob1_proposal().rate(cost_model()), 4),
-            "project_cumulative_cap_usd": POSITION["project_cap_usd"], "position_at_proposal": POSITION,
+            "project_cumulative_cap_usd": (position or POSITION)["project_cap_usd"],
+            "position_at_proposal": position or POSITION,
             "terms": terms, "money_rules": {
                 "own_envelope": "its own grant; the envelope counts only this kind's runs; SOB1's closed grants' "
                                 "remainders are void and fund nothing here",
                 "balance": "the provider balance must cover the hard cap plus the reserve at issue and at launch; a "
                            "top-up is not a grant", "teardown_reserve": "$1.00 held outside the ceiling, never issued"},
             "authorizes": "nothing: a proposal; the grant is the maintainer's", "decision": "PENDING", "granted_by": "nobody"}
+
+
+#: v1-new's step time and decode scale on its work (module docstring's rule): 36 + 4 x 18 against 36 + 4 x 16
+SPLIT_WORK = (36 + 4 * 18) / (36 + 4 * 16)          #: 1.08
+SPLIT_DECODE = 18 / 16                              #: 1.125
+
+
+def split_build_session() -> dict:
+    """v1-new's build (`build_driver --arm depth_merge_split`): the teacher and the base check, the statistics pass
+    over the separate runs' 9 blocks, 7 assignments, 2 merges, the checks, V1's init fetched from the relay, save /
+    reload, the state evaluation, diagnostics, the relay copies. Scaled from RI-LM1's and V1's measured bases; the
+    bound doubles every compute step and takes both relay copies (V1's init in, the new init's verify) at the floor."""
+    from stages.depth_merge import session as S
+    SP = sob1_proposal()
+    cm = cost_model()
+    sz = S.checkpoint_bytes(arm="depth_merge_split")
+    v1_init = int(S.checkpoint_bytes()["init_bf16"])
+    minutes = {"session_and_contract": 3, "teacher_load_and_base_check": 3,
+               "statistics_pass_9_blocks": round(117 / 60 * 9 / 14, 1),
+               "assignments_7_x_178s": round(7 * 178 / 60, 1), "merge_2_spans_cpu_float64": round(8 * 9 / 29, 1),
+               "equivalence_checks": 1, "save_reload": 2, "state_evaluation": 10, "diagnostics": 3,
+               "v1_init_fetch_expected": round(v1_init / 120e6 / 60, 1),
+               "relay_init_and_statistics_expected": round(2 * int(sz["init_bf16"]) / 120e6 / 60, 1)}
+    expected = sum(minutes.values())
+    compute = expected - minutes["v1_init_fetch_expected"] - minutes["relay_init_and_statistics_expected"]
+    bound = (2 * compute + v1_init / 2.6e6 / 60 * 1.25 + int(sz["init_bf16"]) / 2.6e6 / 60 * 1.25
+             + int(sz["init_bf16"]) / 120e6 / 60 * 1.25 + 5)
+    return {"minutes_expected": minutes, "driver_minutes_expected": round(expected, 1),
+            "driver_minutes": round(bound, 1), "expected_usd": round((expected + 25 + 5 + 10) / 60 * SP.rate(cm), 2),
+            "hard_cap": SP.hard_cap(bound, cm), "per_session_hard_cap_usd": SP.hard_cap(bound, cm)["usd"],
+            "basis": "RI-LM1's statistics pass (117 s for 14 blocks) and assignments (178 s each on the pod's CPU), "
+                     "V1's merge (8 min for 29 blocks); the bound doubles each compute step and takes V1's init (in) "
+                     "and the new init's verify (out) at the 2.6 MB/s floor x 1.25",
+            "measured_v1_build": {"usd": 1.4043, "run": "dmr1_merge_build_20261127_083526"}}
 
 
 def documents() -> dict[Path, dict]:
@@ -173,7 +210,74 @@ def documents() -> dict[Path, dict]:
     return {DC.LOGS / "plans/proposal_dmr1_merge_build.json": proposal("dmr1_merge_build", b),
             DC.LOGS / "plans/proposal_dmr1_merge_train.json": {**proposal("dmr1_merge_train", t, per_arm="depth_merge"),
                                                                "variant_1_total_with_reserves_usd": round(total_v1, 2)},
-            DC.RECURRENCE_LOGS / "plans/proposal_dmr1_loop_train.json": proposal_v2()}
+            DC.RECURRENCE_LOGS / "plans/proposal_dmr1_loop_train.json": proposal_v2(),
+            **split_documents(),
+            DC.LOGS / "plans/programme_budget.json": programme_budget()}
+
+
+def programme_budget(order: tuple[str, ...] = ("v1new_build", "v1new_train", "v2d", "v2m")) -> dict:
+    """The money of the three-unit programme in ``order``, from the four sessions' proposals and the 2026-11-28
+    position: before each session, the project cap's remainder and the balance on the expected path (every earlier
+    session at its expected cost) and on the worst path (every earlier one at its cap), against that session's cap
+    plus its teardown reserve -- what its issue and its launch check. The balance, the project cap and the grants
+    stay separate; nothing is raised, topped up or granted here."""
+    from stages.depth_merge import session as S  # noqa: F401
+    sb = split_documents()
+    v2 = proposal_v2()["kinds"]["dmr1_loop_train"]["per_arm"]
+    sess = {"v1new_build": sb[DC.LOGS / "plans/proposal_dmr1_split_build.json"]["kinds"]["dmr1_split_build"],
+            "v1new_train": sb[DC.LOGS / "plans/proposal_dmr1_split_train.json"]["kinds"]["dmr1_split_train"]
+            ["per_arm"]["depth_merge_split"],
+            "v2d": v2["depth_loop_kept"], "v2m": v2["depth_loop_merged"]}
+    pos = POSITION_V2
+    rows, exp_spent, cap_spent = [], 0.0, 0.0
+    for name in order:
+        s = sess[name]
+        need = round(float(s["per_session_hard_cap_usd"]) + TEARDOWN_RESERVE, 2)
+        row = {"session": name, "expected_usd": s["expected_usd"], "cap_usd": s["per_session_hard_cap_usd"],
+               "reserve_usd": TEARDOWN_RESERVE, "needs_usd": need}
+        for path, spent in (("expected_path", exp_spent), ("worst_path", cap_spent)):
+            rem = round(float(pos["project_remaining_usd"]) - spent, 2)
+            bal = round(float(pos["balance_usd"]) - spent, 2)
+            row[path] = {"project_remaining_usd": rem, "project_cap_fits": need <= rem,
+                         "project_raise_needed_usd": round(max(0.0, need - rem), 2),
+                         "balance_usd": bal, "balance_fits": need <= bal,
+                         "top_up_needed_usd": round(max(0.0, need - bal), 2)}
+        rows.append(row)
+        exp_spent += float(s["expected_usd"])
+        cap_spent += float(s["per_session_hard_cap_usd"])
+    total_caps = round(sum(float(sess[n]["per_session_hard_cap_usd"]) for n in order) + TEARDOWN_RESERVE * len(order), 2)
+    return {"schema": "aadistill.dmr1.programme_budget/v1", "recorded_utc": "2026-11-28", "order": list(order),
+            "position": pos, "sessions": rows,
+            "totals": {"expected_usd": round(sum(float(sess[n]["expected_usd"]) for n in order), 2),
+                       "caps_with_reserves_usd": total_caps,
+                       "v1new_caps_with_reserves_usd": round(sum(float(sess[n]["per_session_hard_cap_usd"])
+                                                                 for n in ("v1new_build", "v1new_train"))
+                                                             + 2 * TEARDOWN_RESERVE, 2),
+                       "v2_caps_with_reserves_usd": round(sum(float(sess[n]["per_session_hard_cap_usd"])
+                                                              for n in ("v2d", "v2m")) + 2 * TEARDOWN_RESERVE, 2),
+                       "project_raise_to_fund_all_at_caps_usd": round(max(0.0, total_caps
+                                                                          - float(pos["project_remaining_usd"])), 2)},
+            "rule": "each session is checked alone at its issue and its launch against the live position; the "
+                    "rows are the two bounding paths of what earlier sessions would have spent",
+            "authorizes": "nothing: no cap raise, top-up or grant is implied"}
+
+
+def split_documents() -> dict[Path, dict]:
+    """v1-new's two kinds: its build and its one-seed training session, each its own proposal (V1's grants are not
+    reused), priced against the same 2026-11-28 position as variant 2's."""
+    from stages.depth_merge import session as S
+    sb = split_build_session()
+    st = train_session(SPLIT_WORK, SPLIT_DECODE, seeds=1, sizes=S.checkpoint_bytes(arm="depth_merge_split"))
+    st["basis"] = {"step_time": f"V1's measured 4.87 s / step (SOB1's 4.83) and the 7.241 s bound x {SPLIT_WORK:.2f} "
+                                "(36 + 4 x 18 against 36 + 4 x 16 forward-equivalents): NOT measured",
+                   "evaluation": f"SOB1's 1.22 h / 3.0 h per unit x {SPLIT_DECODE:.3f} (18 / 16 layers of decode)",
+                   "sizes": "split.checkpoint_bytes (the 18-layer config, SOB1's 2P / 4P / 4P + 8T rule)"}
+    kw = dict(design=DC.SPLIT_DESIGN, recorded="2026-11-28", position=POSITION_V2)
+    return {DC.LOGS / "plans/proposal_dmr1_split_build.json":
+            proposal("dmr1_split_build", sb, scope="DMR1 v1-new (depth_merge_split), its build session only", **kw),
+            DC.LOGS / "plans/proposal_dmr1_split_train.json":
+            proposal("dmr1_split_train", st, per_arm="depth_merge_split",
+                     scope="DMR1 v1-new (depth_merge_split), its one-seed training session only", **kw)}
 
 
 def proposal_v2() -> dict:

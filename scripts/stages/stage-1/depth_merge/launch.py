@@ -29,11 +29,19 @@ from shared import study_engineering as SE  # noqa: E402
 from stages.depth_merge import session as S  # noqa: E402
 
 BUILD_KIND, TRAIN_KIND = "dmr1_merge_build", "dmr1_merge_train"
+#: v1-new (2026-11-28): its own build and training kinds, each funded by a grant of its own (V1's are not reused)
+SPLIT_BUILD_KIND, SPLIT_TRAIN_KIND = "dmr1_split_build", "dmr1_split_train"
 VARIANT = S.Variant(
     key="DMR1-M", plan_id="stage1.depth_merge", logs=Path("logs/stages/stage-1/depth_merge"),
-    session_kind="dmr1_depth_merge", build_kind=BUILD_KIND, train_kinds={TRAIN_KIND: ("depth_merge",)},
+    session_kind="dmr1_depth_merge",
+    build_kinds={BUILD_KIND: "depth_merge", SPLIT_BUILD_KIND: "depth_merge_split"},
+    train_kinds={TRAIN_KIND: ("depth_merge",), SPLIT_TRAIN_KIND: ("depth_merge_split",)},
     identity_files=("configs/stages/stage-1/depth_merge/design.json",
                     "configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json"),
+    kind_files={k: ("configs/stages/stage-1/depth_merge/split.json",
+                    "configs/stages/stage-1/depth_merge/split_design.json",
+                    "configs/stages/stage-1/depth_merge/split_config.json")
+                for k in (SPLIT_BUILD_KIND, SPLIT_TRAIN_KIND)},
     artifact_spec="configs/stages/stage-1/depth_merge/artifacts.json", label="variant 1")
 STUDY = VARIANT.study()
 

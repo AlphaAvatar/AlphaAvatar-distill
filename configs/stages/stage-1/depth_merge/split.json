@@ -1,0 +1,57 @@
+{
+ "schema": "aadistill.stage1.depth_merge_split.spec/v1",
+ "label": "v1-new",
+ "recorded_utc": "2026-11-28",
+ "decided_by": "the maintainer's brief of 2026-11-28: 「将下面的新合并方案登记为 v1-new，保留原 V1 的设计、结果和身份，不覆盖历史记录。」 with the rule for runs of removed layers (0 / 1-2 / >= 3), the alpha formula kept, no matched 18-layer control, one seed per condition",
+ "question": "At SOB1's depth selection, does merging each long run of removed layers (>= 3) into a NEW layer of its own -- the kept layer before it left unchanged -- while short runs stay merged into their kept layer as in V1, leave more static fluid reasoning after the same Stage-3 recovery than SOB1's deletion (D) and V1's merge (M)? An exploratory single-seed comparison across DIFFERENT structures (18 layers, 2.206B vs 16 layers, 2.004B): an improvement is not attributed to the merge alone and is not a parameter-matched win",
+ "separate_run_min": 3,
+ "num_parameters": 2205713408,
+ "seeds": [
+  20260726
+ ],
+ "single_seed_rule": "one seed per condition by default (AGENTS.md 4.3, maintainer 2026-11-28): seed 20260726, paired with D's and V1's same-seed results; the full recovery (9,701 steps, the same data and recipe) and evaluation; then report and wait for review -- no second seed starts on its own, and no promotion threshold is defined here",
+ "memory_estimate": {
+  "basis": "V1's MEASURED L40S peaks at 16 layers (the same recipe): 39.24 GiB allocated, 40.48-41.39 GiB reserved, 3.06 GiB least free of about 43.9 GiB usable (memory_probe, dmr1_merge_train_2026112*)",
+  "added_gib": {
+   "two_trainable_fp32_blocks_weights_grads_adamw": 3.008,
+   "two_checkpointed_block_inputs": 0.156
+  },
+  "estimate_gib": {
+   "peak_allocated": 42.4,
+   "peak_reserved": [
+    43.64,
+    44.55
+   ]
+  },
+  "risk": "HIGH: the estimated peak (about 42.4 GiB allocated, 43.6-44.6 reserved) is within about 1.5 GiB of the L40S's usable memory and may exceed it. The first four steps' memory_probe measures it; an out-of-memory error is answered first by protocol-neutral steps (expandable segments, kd_chunk), and only after a measured OOM and a decision of its own by an 80 GB card"
+ },
+ "analysis": {
+  "comparisons": {
+   "X1": {
+    "what": "v1-new - D",
+    "pair": [
+     "depth_merge_split",
+     "depth_only"
+    ],
+    "question": "the new grouping against SOB1's deletion"
+   },
+   "X2": {
+    "what": "v1-new - M",
+    "pair": [
+     "depth_merge_split",
+     "depth_merge"
+    ],
+    "question": "the new grouping against V1's merge"
+   }
+  },
+  "controls": "reused, never retrained or regenerated: D = SOB1 depth_only s20260726, M = V1 depth_merge s20260726, each bound to its registered final (analysis.registered_controls)",
+  "primary": "thinking mode, the static fluid formal core (570 items, 558 groups), seed 20260726",
+  "key_secondary": "non-thinking mode; the interactive episodes and every supporting unit reported beside",
+  "statistic": "per item the paired difference; the mean over 570 items in percentage points",
+  "effect_interval": "the percentile 95% group-bootstrap interval, 10,000 resamples, numpy default_rng(20261120)",
+  "test": "none: a single-seed exploration; no p-value, no verdict",
+  "structures": "v1-new 18 layers / 2,205,713,408 parameters; D and M 16 layers / 2,003,851,776: NOT parameter-matched",
+  "reading": "whether the whole new scheme is worth continuing; a gain is not attributed to the merge method alone (the two extra layers are part of it) and is never written as a win at equal parameters; the intervals measure item sampling with each checkpoint fixed, not training randomness",
+  "no_matched_control": "no 18-layer original-weight / back-filled control and no 36 -> 18 search this round (the maintainer's decision)"
+ }
+}

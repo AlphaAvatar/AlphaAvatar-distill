@@ -331,6 +331,68 @@ def recurrence(kept_out: Path, merged_out: Path, *, d_out: Path | None = None, m
             "measures": "item and group sampling with each checkpoint fixed (one training seed), not training randomness"}
 
 
+SPLIT_SCHEMA = "aadistill.dmr1.split_comparisons/v1"
+#: v1-new's conditions: its own arm and the two reused controls (the registered D and M finals of its seed)
+SPLIT_CONDITIONS = {"v1-new": "depth_merge_split", "D": DC.SOB1_DEPTH, "M": "depth_merge"}
+
+
+def split_comparisons(new_out: Path, *, d_out: Path | None = None, m_out: Path | None = None) -> dict:
+    """v1-new's comparisons X1 (v1-new - D) and X2 (v1-new - M), descriptive, at its one seed (split_design.json
+    ``analysis``): the paired difference over the registered items, the percentile 95% group-bootstrap interval, no
+    test. D and M are the registered controls, read and checked by `control_problems`, never retrained."""
+    from stages.single_operator_budget import analysis as SA
+    from stages.teacher_parent_initialization import analysis as TA
+    sd = DC.design_of("depth_merge_split")
+    seeds = [int(x) for x in sd["arms"]["depth_merge_split"]["seeds"]]
+    if len(seeds) != 1:
+        raise SystemExit(f"v1-new registers one seed, not {seeds}")
+    seed = seeds[0]
+    if int(DC.recurrence_design()["arms"]["depth_loop_kept"]["seeds"][0]) != seed:
+        raise SystemExit("the registered controls are of another seed")
+    d = DC.design()
+    primary = TA.registered_items(d)
+    groups = TA.independence_groups(primary, d)
+    items = [i for v in groups.values() for i in v]
+    outs = {"v1-new": Path(new_out), "D": Path(d_out) if d_out else DC.sob1_depth_evidence(),
+            "M": Path(m_out) if m_out else DC.merged_control_evidence()}
+    y, digests, terms, units = {}, {}, {}, {}
+    with tempfile.TemporaryDirectory() as tmp:
+        for c, arm in SPLIT_CONDITIONS.items():
+            units[c] = {"arm": arm, "evidence": str(outs[c]), **unit_sets_complete(outs[c], arm, seed)}
+            if c in ("D", "M"):
+                bad = control_problems(c, units[c])
+                if bad:
+                    raise SystemExit(f"the {c} control read from {outs[c]} is not the registered one: {bad}")
+            yc, dc, tc = read_arm(outs[c], arm, [seed], primary, Path(tmp) / c)
+            digests.update(dc)
+            terms.update(tc)
+            for m in MODES:
+                if units[c].get(m) and units[c]["final"] and seed in (yc.get(m) or {}):
+                    y.setdefault(m, {})[c] = yc[m][seed]
+    modes = {}
+    for m in MODES:
+        ym = y.get(m) or {}
+        covered = {c: ym.get(c) is not None and all(i in ym[c] for i in items) for c in SPLIT_CONDITIONS}
+        row = {"accuracy_pct": {c: (round(100 * sum(int(ym[c][i]) for i in items) / len(items), 2) if covered[c]
+                                    else None) for c in SPLIT_CONDITIONS}, "covered": covered}
+        for xid, (a, b) in (("X1", ("v1-new", "D")), ("X2", ("v1-new", "M"))):
+            if covered[a] and covered[b]:
+                r = SA._paired({seed: ym[a]}, {seed: ym[b]}, groups, [seed])
+                row[xid] = {"estimate_pp": round(100 * r["delta"], 2),
+                            "ci95_pp": [round(100 * x, 2) for x in r["effect_interval"]["ci95_percentile"]],
+                            "n_items": r["n_paired_records"], "raw": r}
+            else:
+                row[xid] = {"status": "not_computed", "why": f"{a} or {b} does not cover the {len(items)} items"}
+        modes[m] = row
+    an = sd["analysis"]
+    return {"schema": SPLIT_SCHEMA, "seed": seed, "conditions": SPLIT_CONDITIONS, "comparisons": an["comparisons"],
+            "protocol": protocol_identity(d) | {"seeds": [seed]}, "n_items": len(primary), "n_groups": len(groups),
+            "units": units, "modes": modes, "scored_digests": digests, "terminations": terms,
+            "structures": an["structures"], "reading": an["reading"], "test": an["test"],
+            "exposure": "eval-set-1 is development-exposed: nothing here is a never-seen blind result",
+            "measures": "item and group sampling with each checkpoint fixed (one training seed), not training randomness"}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -343,6 +405,9 @@ def main(argv=None) -> int:
     r.add_argument("--kept-evidence", required=True)
     r.add_argument("--merged-evidence", required=True)
     r.add_argument("--write", action="store_true")
+    s = sub.add_parser("split")
+    s.add_argument("--evidence", required=True, help="v1-new's secured training evidence")
+    s.add_argument("--write", action="store_true")
     a = ap.parse_args(argv)
     if a.cmd == "comparison":
         doc = comparison(a.id, Path(a.a_evidence), Path(a.b_evidence) if a.b_evidence else None)
@@ -350,6 +415,11 @@ def main(argv=None) -> int:
         brief = {"id": doc["id"], "pair": doc["pair"],
                  "modes": {m: {k: r_.get(k) for k in ("status", "delta", "p_two_sided", "verdict")}
                            for m, r_ in doc["modes"].items()}}
+    elif a.cmd == "split":
+        doc = split_comparisons(Path(a.evidence))
+        p = RESULTS / f"split_seed{doc['seed']}.json"
+        brief = {m: {k: (v.get("estimate_pp") if isinstance(v, dict) and "estimate_pp" in v else v)
+                     for k, v in row.items() if k in ("accuracy_pct", "X1", "X2")} for m, row in doc["modes"].items()}
     else:
         doc = recurrence(Path(a.kept_evidence), Path(a.merged_evidence))
         p = result_path("R")

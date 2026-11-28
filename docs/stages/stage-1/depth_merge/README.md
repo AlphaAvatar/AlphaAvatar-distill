@@ -4,6 +4,8 @@ Stage 1 owns this variant; its training is `stage3_recovery`. It is the first of
 review report: [`../reasoning_inheritance/DMR1_REVIEW.md`](../reasoning_inheritance/DMR1_REVIEW.md); variants 2 and
 3: [`../depth_recurrence/README.md`](../depth_recurrence/README.md)).
 
+**v1-new (section 7): PREPARED at $0 on 2026-11-28, READY_FOR_REVIEW; nothing granted, issued, built or run.**
+
 **Status: EXECUTED 2026-11-27/28 and STOPPED by the maintainer during seed 2 (2026-11-28 UTC): the build COMPLETE, seed 20260726 trained (resumed once from save point 6,624) and evaluated, reported descriptively; seed 20260801 stopped at step 6,590 (durable to step 5,520); its resume was abandoned by the maintainer and that save point retired (2026-11-28, storage option (a)). Not the registered two-seed completion (review report section 00).** Branch
 `research/reasoning-inheritance`, not merged into `main`.
 
@@ -12,7 +14,8 @@ review report: [`../reasoning_inheritance/DMR1_REVIEW.md`](../reasoning_inherita
 | [`configs/stages/stage-1/depth_merge/design.json`](../../../../configs/stages/stage-1/depth_merge/design.json) | the design: base, spans, the alpha merge, statistics, reuse, recipe, evaluation, storage, cost basis |
 | [`configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json`](../../../../configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json) | the base's 178 tensor digests (`merge.py digests`, from the dev box's copy) |
 | [`logs/stages/stage-1/depth_merge/plans/`](../../../../logs/stages/stage-1/depth_merge/plans/) | the two sessions' proposals (`proposal.py`) |
-| [`scripts/stages/stage-1/depth_merge/`](../../../../scripts/stages/stage-1/depth_merge/) | `merge.py` (the instance), `build_driver.py`, `train_driver.py`, `plan.py`, `session.py` + `launch.py`, `analysis.py`, `proposal.py`, `tests/` |
+| [`scripts/stages/stage-1/depth_merge/`](../../../../scripts/stages/stage-1/depth_merge/) | `merge.py` (the instance), `split.py` (v1-new's instance), `build_driver.py`, `train_driver.py`, `plan.py`, `session.py` + `launch.py`, `analysis.py`, `proposal.py`, `storage.py`, `tests/` |
+| [`configs/stages/stage-1/depth_merge/split.json`](../../../../configs/stages/stage-1/depth_merge/split.json), [`split_design.json`](../../../../configs/stages/stage-1/depth_merge/split_design.json), [`split_config.json`](../../../../configs/stages/stage-1/depth_merge/split_config.json) | v1-new (section 7): the maintainer's facts, the design (V1's outside its declared keys, `split.py design`), the 18-layer config (`split.py config`) |
 
 ## 1. Question
 
@@ -151,3 +154,69 @@ See the review report, sections 0.3, 9 and 10, and `logs/stages/stage-1/depth_me
   option a), the relay accepts 58.13 GiB, which is 6.75 GiB to spare. The dev box has 7.00 GiB free for at most
   1.5 GiB of one session's evidence.
 * **Money:** the two proposals total $71.89 with reserves, inside the $74.79 the project cap leaves.
+
+## 7. v1-new: long removed runs merged into a new layer (arm `depth_merge_split`)
+
+Registered on 2026-11-28 beside V1, which keeps its design, results and identity. **PREPARED at $0,
+READY_FOR_REVIEW: nothing granted, issued, built or run.** The review report's section 0W holds the order, the storage
+and the money.
+
+**The rule** (`layer_merge.groups_from_kept_blocks(36, kept, separate_run_min=3)`; the threshold counts removed layers
+only). It starts from SOB1's committed depth selection, which is not searched again. For each kept layer and the run
+of removed layers after it:
+
+* **no removed layer:** the kept layer, as it is;
+* **one or two removed layers:** merged into the kept layer, exactly as V1 merged them;
+* **three or more removed layers:** the kept layer keeps its original weights, and the run alone becomes a NEW layer
+  right after it.
+
+At this selection two runs split off: 1-based, layer 13 is kept with a new layer from 14-18, and layer 25 is kept with
+a new layer from 26-29. That gives 18 layers and 2,205,713,408 parameters, counted by instantiating
+`split_config.json` on the meta device. V1 and D have 16 layers and 2,003,851,776 parameters.
+
+| groups (1-based teacher layers) | kind | how the layer starts |
+| --- | --- | --- |
+| 1, 5, 6, 7, 13, 19, 23, 24, 25 | kept (9) | the base's layer (SOB1's depth init, rebuilt from the teacher, checked against its digests) |
+| 2-4, 8-10, 11-12, 20-22, 30-31, 32-34, 35-36 | absorbed (7) | V1's built layer, byte for byte, from V1's init (`f57131792b50...`) |
+| 14-18, 26-29 | separate (2) | M-act over the run's blocks only: alpha = I / sum I within the run, the run's first block the anchor |
+
+A separate layer is never V1's span block with the kept layer put back in front of it. Every layer runs once: there
+is no recurrence and no hidden-state loss. "The preceding layer unchanged" applies at initialization only. Recovery
+is SOB1's depth recipe (Stage 3), with nothing frozen beyond it.
+
+**Reused by identity, never recomputed:**
+
+* SOB1's selection and the base digests;
+* V1's calibration (the same profile, positions and session);
+* V1's init, for the seven absorbed layers: fetched from its relay copy and re-hashed against V1's plan;
+* SOB1's depth recovery recipe and data, and eval-set-1's protocol;
+* the controls D (SOB1 `depth_only` s20260726) and M (V1 `depth_merge` s20260726), with their registered finals
+  and sets.
+
+**New:**
+
+* the statistics of the separate runs' 9 blocks and their 7 alignments (13->14..17, 25->26..28; V1's pairs are
+  anchored at 12 and 24, so they do not apply);
+* the 18-layer init (4.11 GiB bf16);
+* the training's save points (21.75 GiB each, rotated two at a time);
+* the final (8.22 GiB fp32), the evaluation sets and the closeout archives.
+
+**Chain** (the same state machine as V1's, bound to the arm):
+
+* the build is `build_driver.py --arm depth_merge_split`, kind `dmr1_split_build`. Its identity covers the groups,
+  the derived config, `split.py`'s candidate code and the V1 init it reuses. Takeover and completion are V1's, per
+  arm;
+* then `plan.py --arm depth_merge_split --init-record <it> --write`: one unit, seed 20260726, SOB1's depth unit
+  outside the declared fields;
+* then training, kind `dmr1_split_train`;
+* then `analysis.py split --evidence <secured out>`: X1 = v1-new - D and X2 = v1-new - M, descriptive, with the
+  percentile 95% group-bootstrap interval and no test.
+
+**One seed per condition** (AGENTS.md 4.3): the full recovery and evaluation, then a report and a wait for review.
+There is no automatic second seed and no promotion threshold.
+
+**Memory:** about 42.4 GiB allocated at peak (V1's measured 39.24 GiB, plus about 3.0 GiB of fp32 weights, gradients
+and AdamW state for two more trainable blocks, plus 0.16 GiB of activations). That is within about 1.5 GiB of the
+L40S's usable memory: **HIGH out-of-memory risk**. The first steps' memory probe measures it. An out-of-memory error
+is answered first by protocol-neutral steps; an 80 GB card needs a measured OOM and a decision of its own.
+

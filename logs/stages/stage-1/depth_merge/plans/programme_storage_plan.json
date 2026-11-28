@@ -1,0 +1,518 @@
+{
+ "schema": "aadistill.dmr1.programme_storage/v1",
+ "live": {
+  "relay": "AlphaAvatar/aadistill-artifacts",
+  "headroom_bytes": 58216939520,
+  "headroom_gib": 54.219,
+  "refused_at_gib": 54.234,
+  "used_bytes": 35819356086,
+  "used_gib": 33.359,
+  "utc": "2026-11-28T13:13:36Z",
+  "rule": "LFS batch endpoint bisection with fresh oids in objects of <= 10 GiB (nothing stored); used = the sum of list_lfs_files (the billing basis)"
+ },
+ "sessions": {
+  "v1new_build": {
+   "session": "v1new_build",
+   "need_gib": 48.8,
+   "leaves_gib": 4.3,
+   "rule": "the build's whole chain (storage.sequence) + the margin"
+  },
+  "v1new_train": {
+   "session": "v1new_train",
+   "need_gib": 44.51,
+   "leaves_gib": 8.34,
+   "rule": "session.training_relay_need (the launch gate's) + what it leaves: its final and archive"
+  },
+  "v2d": {
+   "session": "v2d",
+   "need_gib": 39.99,
+   "leaves_gib": 7.59,
+   "rule": "session.training_relay_need (the launch gate's) + what it leaves: its final and archive"
+  },
+  "v2m": {
+   "session": "v2m",
+   "need_gib": 39.99,
+   "leaves_gib": 7.59,
+   "rule": "session.training_relay_need (the launch gate's) + what it leaves: its final and archive"
+  }
+ },
+ "as_is": {
+  "v2_first": {
+   "order": [
+    "v2d",
+    "v2m",
+    "v1new_build",
+    "v1new_train"
+   ],
+   "fits": false,
+   "sessions": [
+    {
+     "session": "v2d",
+     "need_gib": 39.99,
+     "headroom_gib": 54.22,
+     "fits": true,
+     "margin_gib": 14.23,
+     "leaves_gib": 7.59
+    },
+    {
+     "session": "v2m",
+     "need_gib": 39.99,
+     "headroom_gib": 46.63,
+     "fits": true,
+     "margin_gib": 6.64,
+     "leaves_gib": 7.59
+    },
+    {
+     "session": "v1new_build",
+     "need_gib": 48.8,
+     "headroom_gib": 39.04,
+     "fits": false,
+     "margin_gib": -9.76,
+     "leaves_gib": 4.3
+    },
+    {
+     "session": "v1new_train",
+     "need_gib": 44.51,
+     "headroom_gib": 34.74,
+     "fits": false,
+     "margin_gib": -9.76,
+     "leaves_gib": 8.34
+    }
+   ],
+   "headroom_after_gib": 26.4,
+   "frees": {}
+  },
+  "v1new_first": {
+   "order": [
+    "v1new_build",
+    "v1new_train",
+    "v2d",
+    "v2m"
+   ],
+   "fits": false,
+   "sessions": [
+    {
+     "session": "v1new_build",
+     "need_gib": 48.8,
+     "headroom_gib": 54.22,
+     "fits": true,
+     "margin_gib": 5.42,
+     "leaves_gib": 4.3
+    },
+    {
+     "session": "v1new_train",
+     "need_gib": 44.51,
+     "headroom_gib": 49.92,
+     "fits": true,
+     "margin_gib": 5.42,
+     "leaves_gib": 8.34
+    },
+    {
+     "session": "v2d",
+     "need_gib": 39.99,
+     "headroom_gib": 41.58,
+     "fits": true,
+     "margin_gib": 1.59,
+     "leaves_gib": 7.59
+    },
+    {
+     "session": "v2m",
+     "need_gib": 39.99,
+     "headroom_gib": 33.99,
+     "fits": false,
+     "margin_gib": -6.0,
+     "leaves_gib": 7.59
+    }
+   ],
+   "headroom_after_gib": 26.4,
+   "frees": {}
+  },
+  "interleaved": {
+   "order": [
+    "v2d",
+    "v1new_build",
+    "v1new_train",
+    "v2m"
+   ],
+   "fits": false,
+   "sessions": [
+    {
+     "session": "v2d",
+     "need_gib": 39.99,
+     "headroom_gib": 54.22,
+     "fits": true,
+     "margin_gib": 14.23,
+     "leaves_gib": 7.59
+    },
+    {
+     "session": "v1new_build",
+     "need_gib": 48.8,
+     "headroom_gib": 46.63,
+     "fits": false,
+     "margin_gib": -2.17,
+     "leaves_gib": 4.3
+    },
+    {
+     "session": "v1new_train",
+     "need_gib": 44.51,
+     "headroom_gib": 42.33,
+     "fits": false,
+     "margin_gib": -2.17,
+     "leaves_gib": 8.34
+    },
+    {
+     "session": "v2m",
+     "need_gib": 39.99,
+     "headroom_gib": 33.99,
+     "fits": false,
+     "margin_gib": -6.0,
+     "leaves_gib": 7.59
+    }
+   ],
+   "headroom_after_gib": 26.4,
+   "frees": {}
+  }
+ },
+ "with_frees": {
+  "v2_first + SOB1 depth init relay copy and V2-D's final freed after V2-D": {
+   "order": [
+    "v2d",
+    "v2m",
+    "v1new_build",
+    "v1new_train"
+   ],
+   "fits": true,
+   "sessions": [
+    {
+     "session": "v2d",
+     "need_gib": 39.99,
+     "headroom_gib": 54.22,
+     "fits": true,
+     "margin_gib": 14.23,
+     "leaves_gib": 7.59,
+     "then_freed": [
+      {
+       "object": "sob1_depth_init_relay_copy",
+       "gib": 3.73
+      },
+      {
+       "object": "v2d_final",
+       "gib": 7.46
+      }
+     ]
+    },
+    {
+     "session": "v2m",
+     "need_gib": 39.99,
+     "headroom_gib": 57.83,
+     "fits": true,
+     "margin_gib": 17.83,
+     "leaves_gib": 7.59
+    },
+    {
+     "session": "v1new_build",
+     "need_gib": 48.8,
+     "headroom_gib": 50.24,
+     "fits": true,
+     "margin_gib": 1.43,
+     "leaves_gib": 4.3
+    },
+    {
+     "session": "v1new_train",
+     "need_gib": 44.51,
+     "headroom_gib": 45.94,
+     "fits": true,
+     "margin_gib": 1.43,
+     "leaves_gib": 8.34
+    }
+   ],
+   "headroom_after_gib": 37.6,
+   "frees": {
+    "v2d": [
+     "sob1_depth_init_relay_copy",
+     "v2d_final"
+    ]
+   }
+  },
+  "v2_first + both V2 finals freed after their sessions": {
+   "order": [
+    "v2d",
+    "v2m",
+    "v1new_build",
+    "v1new_train"
+   ],
+   "fits": true,
+   "sessions": [
+    {
+     "session": "v2d",
+     "need_gib": 39.99,
+     "headroom_gib": 54.22,
+     "fits": true,
+     "margin_gib": 14.23,
+     "leaves_gib": 7.59,
+     "then_freed": [
+      {
+       "object": "v2d_final",
+       "gib": 7.46
+      }
+     ]
+    },
+    {
+     "session": "v2m",
+     "need_gib": 39.99,
+     "headroom_gib": 54.09,
+     "fits": true,
+     "margin_gib": 14.1,
+     "leaves_gib": 7.59,
+     "then_freed": [
+      {
+       "object": "v2m_final",
+       "gib": 7.46
+      }
+     ]
+    },
+    {
+     "session": "v1new_build",
+     "need_gib": 48.8,
+     "headroom_gib": 53.97,
+     "fits": true,
+     "margin_gib": 5.17,
+     "leaves_gib": 4.3
+    },
+    {
+     "session": "v1new_train",
+     "need_gib": 44.51,
+     "headroom_gib": 49.67,
+     "fits": true,
+     "margin_gib": 5.17,
+     "leaves_gib": 8.34
+    }
+   ],
+   "headroom_after_gib": 41.33,
+   "frees": {
+    "v2d": [
+     "v2d_final"
+    ],
+    "v2m": [
+     "v2m_final"
+    ]
+   }
+  },
+  "v1new_first + v1-new's final freed after its session": {
+   "order": [
+    "v1new_build",
+    "v1new_train",
+    "v2d",
+    "v2m"
+   ],
+   "fits": true,
+   "sessions": [
+    {
+     "session": "v1new_build",
+     "need_gib": 48.8,
+     "headroom_gib": 54.22,
+     "fits": true,
+     "margin_gib": 5.42,
+     "leaves_gib": 4.3
+    },
+    {
+     "session": "v1new_train",
+     "need_gib": 44.51,
+     "headroom_gib": 49.92,
+     "fits": true,
+     "margin_gib": 5.42,
+     "leaves_gib": 8.34,
+     "then_freed": [
+      {
+       "object": "v1new_final",
+       "gib": 8.22
+      }
+     ]
+    },
+    {
+     "session": "v2d",
+     "need_gib": 39.99,
+     "headroom_gib": 49.8,
+     "fits": true,
+     "margin_gib": 9.8,
+     "leaves_gib": 7.59
+    },
+    {
+     "session": "v2m",
+     "need_gib": 39.99,
+     "headroom_gib": 42.21,
+     "fits": true,
+     "margin_gib": 2.21,
+     "leaves_gib": 7.59
+    }
+   ],
+   "headroom_after_gib": 34.62,
+   "frees": {
+    "v1new_train": [
+     "v1new_final"
+    ]
+   }
+  },
+  "v1new_first + SOB1 depth init relay copy freed after V2-D and v1-new's final after its session": {
+   "order": [
+    "v1new_build",
+    "v1new_train",
+    "v2d",
+    "v2m"
+   ],
+   "fits": true,
+   "sessions": [
+    {
+     "session": "v1new_build",
+     "need_gib": 48.8,
+     "headroom_gib": 54.22,
+     "fits": true,
+     "margin_gib": 5.42,
+     "leaves_gib": 4.3
+    },
+    {
+     "session": "v1new_train",
+     "need_gib": 44.51,
+     "headroom_gib": 49.92,
+     "fits": true,
+     "margin_gib": 5.42,
+     "leaves_gib": 8.34,
+     "then_freed": [
+      {
+       "object": "v1new_final",
+       "gib": 8.22
+      }
+     ]
+    },
+    {
+     "session": "v2d",
+     "need_gib": 39.99,
+     "headroom_gib": 49.8,
+     "fits": true,
+     "margin_gib": 9.8,
+     "leaves_gib": 7.59,
+     "then_freed": [
+      {
+       "object": "sob1_depth_init_relay_copy",
+       "gib": 3.73
+      }
+     ]
+    },
+    {
+     "session": "v2m",
+     "need_gib": 39.99,
+     "headroom_gib": 45.94,
+     "fits": true,
+     "margin_gib": 5.95,
+     "leaves_gib": 7.59
+    }
+   ],
+   "headroom_after_gib": 38.35,
+   "frees": {
+    "v1new_train": [
+     "v1new_final"
+    ],
+    "v2d": [
+     "sob1_depth_init_relay_copy"
+    ]
+   }
+  },
+  "v1new_first + SOB1 depth init relay copy after V2-D and v1-new's init after its training": {
+   "order": [
+    "v1new_build",
+    "v1new_train",
+    "v2d",
+    "v2m"
+   ],
+   "fits": true,
+   "sessions": [
+    {
+     "session": "v1new_build",
+     "need_gib": 48.8,
+     "headroom_gib": 54.22,
+     "fits": true,
+     "margin_gib": 5.42,
+     "leaves_gib": 4.3
+    },
+    {
+     "session": "v1new_train",
+     "need_gib": 44.51,
+     "headroom_gib": 49.92,
+     "fits": true,
+     "margin_gib": 5.42,
+     "leaves_gib": 8.34,
+     "then_freed": [
+      {
+       "object": "v1new_init",
+       "gib": 4.11
+      }
+     ]
+    },
+    {
+     "session": "v2d",
+     "need_gib": 39.99,
+     "headroom_gib": 45.69,
+     "fits": true,
+     "margin_gib": 5.7,
+     "leaves_gib": 7.59,
+     "then_freed": [
+      {
+       "object": "sob1_depth_init_relay_copy",
+       "gib": 3.73
+      }
+     ]
+    },
+    {
+     "session": "v2m",
+     "need_gib": 39.99,
+     "headroom_gib": 41.83,
+     "fits": true,
+     "margin_gib": 1.84,
+     "leaves_gib": 7.59
+    }
+   ],
+   "headroom_after_gib": 34.24,
+   "frees": {
+    "v1new_train": [
+     "v1new_init"
+    ],
+    "v2d": [
+     "sob1_depth_init_relay_copy"
+    ]
+   }
+  }
+ },
+ "freeable": {
+  "sob1_depth_init_relay_copy": {
+   "gib": 3.73,
+   "after": "v2d",
+   "what": "SOB1's depth init on the relay: V2-D's base; a verified dev-box copy exists"
+  },
+  "v1_init": {
+   "gib": 3.73,
+   "after": "v2m+v1new_build",
+   "what": "V1's merged init: V2-M's base and v1-new's reuse source; its only copy"
+  },
+  "v2d_final": {
+   "gib": 7.46,
+   "after": "v2d",
+   "what": "V2-D's trained final: no declared consumer once its sets are sealed (2.5)"
+  },
+  "v2m_final": {
+   "gib": 7.46,
+   "after": "v2m",
+   "what": "V2-M's trained final: no declared consumer once its sets are sealed (2.5)"
+  },
+  "v1new_init": {
+   "gib": 4.11,
+   "after": "v1new_train",
+   "what": "v1-new's training-pre init: its only copy; its consumer is its training"
+  },
+  "v1new_final": {
+   "gib": 8.22,
+   "after": "v1new_train",
+   "what": "v1-new's trained final: no declared consumer once its sets are sealed"
+  }
+ },
+ "rule": "each session's need as its own launch gate computes it (a build: its whole chain; training: training_relay_need), against the headroom the earlier sessions leave; nothing is freed or bought by this plan"
+}

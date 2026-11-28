@@ -17675,3 +17675,41 @@ on a paid pod.
 - Risks: V1 seed 2 can no longer be resumed (accepted by the maintainer). The money is unchanged and still needs
   approval: $115.25 at the caps with reserves, a $68.84 project-cap raise and a $19.90 top-up.
 - Revisit when: the maintainer reviews money, the grant and the paid start.
+
+## 2026-11-28 (UTC) — DMR1 v1-new registered beside V1 and prepared at $0; one seed per condition becomes the default
+
+- Context: the maintainer's brief of 2026-11-28:
+  - register v1-new beside V1, keeping V1's design, results and identity: SOB1's depth selection, with each run of
+    three or more removed layers merged into a NEW layer after the unchanged kept layer (shorter runs merged as in
+    V1), the alpha formula kept;
+  - compare it only with the same-seed SOB1 depth-only and V1 (reused), with no matched control;
+  - make one seed per condition the default for later depth-initialization experiments;
+  - keep V2's plans as they are;
+  - no top-up for now; $0 only.
+- Decision:
+  - **The rule, in core:** `layer_merge.groups_from_kept_blocks` (separate_run_min 3 from
+    `configs/stages/stage-1/depth_merge/split.json`).
+  - **The instance:** `split.py` (groups, config, parameter count, candidate). 18 layers and 2,205,713,408
+    parameters, counted on the meta device.
+  - **The design:** `split_design.json`, V1's design outside the keys `split.CHANGED` names.
+  - **Identity:** its own build identity (the groups, the derived config, the candidate code, the V1 init reused).
+  - **The chain:** two kinds, `dmr1_split_build` and `dmr1_split_train`, on V1's launcher; their proposals are at
+    `logs/stages/stage-1/depth_merge/plans/proposal_dmr1_split_{build,train}.json`.
+  - **The comparisons:** descriptive X1 and X2 (`analysis.py split`).
+  - **The seed rule:** AGENTS.md 4.3 "One seed per condition by default"; the design's `training.single_seed`,
+    copied into the plan by `plan.py`, which refuses a second seed under it.
+  - **Recommended order:** v1-new first, then V2-D, then V2-M (`plans/programme_budget.json`,
+    `plans/programme_storage_plan.json`).
+- Alternatives considered:
+  - replacing V2-M's init with v1-new's: refused by the brief;
+  - a matched 18-layer control or a 36 -> 18 search: not this round (the maintainer);
+  - V2 first: it needs a project-cap raise before anything runs, and v1-new's build is then 9.76 GiB short of relay.
+- Expected upside: a quick, cap-fitting reading of whether giving long removed runs a layer of their own does better
+  than deletion and V1's merge.
+- Risks:
+  - **Not parameter-matched:** 18 layers / 2.206B against 16 / 2.004B, so a difference is the whole scheme's.
+  - **Memory:** HIGH out-of-memory risk on the L40S (estimated about 42.4 GiB allocated).
+  - **Storage:** no order fits all four sessions without freeing about 6 GiB of finished objects.
+  - **Evidence:** single-seed results are exploratory.
+- Revisit when: the maintainer has reviewed it (the order, the two grants, the storage decision before V2-M).
+

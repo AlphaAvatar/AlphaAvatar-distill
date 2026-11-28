@@ -15,6 +15,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[4]
 DESIGN = REPO / "configs/stages/stage-1/depth_merge/design.json"
+#: v1-new (2026-11-28): V1's design with only its declared keys replaced (`split.design_doc`), its own arm and identity
+SPLIT_DESIGN = REPO / "configs/stages/stage-1/depth_merge/split_design.json"
 LOGS = REPO / "logs/stages/stage-1/depth_merge"
 RECURRENCE_DESIGN = REPO / "configs/stages/stage-1/depth_recurrence/design.json"
 RECURRENCE_LOGS = REPO / "logs/stages/stage-1/depth_recurrence"
@@ -22,6 +24,7 @@ RECURRENT_CONFIG = REPO / "configs/stages/stage-1/depth_recurrence/recurrent_con
 
 #: arm -> (variant, its design, its logs)
 ARMS = {"depth_merge": ("DMR1-M", DESIGN, LOGS),
+        "depth_merge_split": ("DMR1-M", SPLIT_DESIGN, LOGS),
         "depth_loop_kept": ("DMR1-R", RECURRENCE_DESIGN, RECURRENCE_LOGS),
         "depth_loop_merged": ("DMR1-R", RECURRENCE_DESIGN, RECURRENCE_LOGS),
         "depth_loop_hidden": ("DMR1-RH", RECURRENCE_DESIGN, RECURRENCE_LOGS)}

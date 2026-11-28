@@ -1,0 +1,730 @@
+{
+ "schema": "aadistill.stage1.depth_merge_split.design/v1",
+ "study_id": "DMR1-M",
+ "round": {
+  "id": "DMR1",
+  "title": "depth recovery at SOB1's depth-only structure: importance merging, recurrent execution and per-iteration hidden-state distillation",
+  "variants": {
+   "DMR1-M": "variant 1, this design (Stage 1 initialization, Stage 3 recovery)",
+   "DMR1-R": "variant 2 (Stage 6): configs/stages/stage-6/depth_recurrence/design.json",
+   "DMR1-RH": "variant 3 (Stage 6): configs/stages/stage-6/depth_recurrence/design.json"
+  },
+  "index": "docs/stages/stage-1/reasoning_inheritance/README.md (the research index)",
+  "review": "docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md"
+ },
+ "experiment": "depth_merge",
+ "stage": 1,
+ "training_execution_stage": "stage3_recovery",
+ "recorded_utc": "2026-11-28",
+ "status": "PREPARED at $0 (2026-11-28), READY_FOR_REVIEW: nothing granted, issued, built or run",
+ "branch": "research/reasoning-inheritance",
+ "question": "At SOB1's depth selection, does merging each long run of removed layers (>= 3) into a NEW layer of its own -- the kept layer before it left unchanged -- while short runs stay merged into their kept layer as in V1, leave more static fluid reasoning after the same Stage-3 recovery than SOB1's deletion (D) and V1's merge (M)? An exploratory single-seed comparison across DIFFERENT structures (18 layers, 2.206B vs 16 layers, 2.004B): an improvement is not attributed to the merge alone and is not a parameter-matched win",
+ "decided_by": "the maintainer's brief of 2026-11-28: \u300c\u5c06\u4e0b\u9762\u7684\u65b0\u5408\u5e76\u65b9\u6848\u767b\u8bb0\u4e3a v1-new\uff0c\u4fdd\u7559\u539f V1 \u7684\u8bbe\u8ba1\u3001\u7ed3\u679c\u548c\u8eab\u4efd\uff0c\u4e0d\u8986\u76d6\u5386\u53f2\u8bb0\u5f55\u3002\u300d with the rule for runs of removed layers (0 / 1-2 / >= 3), the alpha formula kept, no matched 18-layer control, one seed per condition",
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192",
+  "identity": {
+   "path": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+   "sha256": "624027db1f8608f9637a72ef77e82e30c2a8b1b4c1ebd513422f89bbdeba7b7f"
+  },
+  "lineage": "the hybrid Qwen3-4B, NOT Qwen3-4B-Thinking-2507 (AGENTS.md P17.1): selection, calibration, statistics, training data, the online KD teacher, tokenizer, chat template and configuration all derive from this one checkpoint",
+  "config_sha256": "8ba006f74fecfaaeb392872a60f4a480e7ec9860153d2e1b769ec81f9a147f8a",
+  "num_parameters": 4022468096
+ },
+ "baseline": {
+  "what": "SOB1's depth-only arm: its TRAINING-PRE initialization is this variant's base and its two recovered seeds and their sealed eval-set-1 sets are the direct control (reused, never retrained or regenerated)",
+  "sob1_design": {
+   "path": "configs/stages/stage-1/single_operator_budget/design.json",
+   "sha256": "ad6694bf2be33a607e6ef0232949a3609fa8fcfe2b08a92829c5a4a2dd7dbe5d"
+  },
+  "init_record": {
+   "path": "logs/stages/stage-1/single_operator_budget/runs/sob1_phase1_20261119_194259/evidence/depth_only/init_record.json",
+   "sha256": "413686f23fa23f25b0c5bb6534ff9dbd3029fc5c40493a84296d987cd73b02de",
+   "artifact_digest": "2c738b963335dcb286b9eabec35901f089b383c6077d0979b4e6d4308bed73c6",
+   "model_safetensors_sha256": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+   "config_json_sha256": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019",
+   "num_parameters": 2003851776,
+   "relay": {
+    "relay": "AlphaAvatar/aadistill-artifacts",
+    "prefix": "durable/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6",
+    "files_sha256": {
+     "init/model.safetensors": "76c8ca19f0d9a7df3669b80b9c80788d206a73d4ef8ffbc3150099a726336222",
+     "init/config.json": "191c51bba334acefae547b6f563f8229f6ca6b55ece3ff6d89b5e22807d9f019"
+    },
+    "bytes": {
+     "init/model.safetensors": 4007724000,
+     "init/config.json": 1154
+    }
+   },
+   "dev_box_copy": "~/aad-artifacts/stage1_single_operator_budget/depth_only/init/36888440ef83bfd6/init/"
+  },
+  "mapping": {
+   "content_digest": "36888440ef83bfd69a32db1808e7930e3edfbd8a59f79a74eaf6431c9273bb7b",
+   "kept_blocks": [
+    0,
+    1,
+    4,
+    5,
+    6,
+    7,
+    10,
+    12,
+    18,
+    19,
+    22,
+    23,
+    24,
+    29,
+    31,
+    34
+   ],
+   "removal_order": [
+    2,
+    32,
+    3,
+    26,
+    30,
+    8,
+    20,
+    28,
+    27,
+    9,
+    16,
+    35,
+    15,
+    21,
+    14,
+    25,
+    11,
+    17,
+    33,
+    13
+   ],
+   "n_root_blocks": 36,
+   "rule": "the depth selection is SOB1's, unchanged: no depth search is run again"
+  },
+  "tensor_digests": "configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json (merge.py digests: every tensor of the base's model.safetensors; the build checks every tensor outside the merged blocks against them bit for bit)",
+  "training_plan": {
+   "path": "logs/stages/stage-1/single_operator_budget/plans/training_plan_depth_only.json",
+   "sha256": "4eeab53fee1d8c0ca22d7cf15ff79416eef57af52cc37b659d25818f257aa359"
+  },
+  "control_sessions": {
+   "run_id": "sob1_train_depth_only_20261122_223829",
+   "completion": {
+    "path": "logs/stages/stage-1/single_operator_budget/runs/sob1_train_depth_only_20261122_223829/closeout/phase2_completion.json",
+    "sha256": "1faf0b0ec3389d900dc746190902ddc9fddf3e040251383750ff1c09ffef7f8a"
+   },
+   "secured_evidence": "~/aad-artifacts/stage1_single_operator_budget/sob1_train_depth_only_20261122_223829/store/out (the dev box; the relay's phase2_evidence archive holds the same bytes)",
+   "finals_sha256": {
+    "depth_only-s20260726": "5635c33e6b414bd0bd361c450f132c41050e69c68cd948a734c2bfd27a86f80b",
+    "depth_only-s20260801": "e4159f1fc5b1f884b5bd43017651a7f70f4ef54d5fa58ff14165962b4e341f98"
+   }
+  },
+  "study_completion": {
+   "path": "logs/stages/stage-1/single_operator_budget/results/study_completion.json",
+   "sha256": "1801b66c222e6df684d91b9a2d3b9216910aa6b4b0108df6f2db7a45b0e29c9e"
+  },
+  "not_the_control": "RI-LM1 (merges at RI-S1's 28-block structure, untrained) is history: another structure, no recovery; its negative result does not stand in for this comparison"
+ },
+ "merge": {
+  "method": "alpha_importance_merge: RI-LM1's M-act, unchanged (the brief keeps alpha; no beta, no weight search)",
+  "groups": {
+   "rule": "layer_merge.groups_from_kept_blocks(36, kept_blocks, separate_run_min=3): each kept block keeps its run of 1-2 removed blocks (V1's span); a run of >= 3 removed blocks (the kept block not counted) becomes a NEW layer after the unchanged kept block, merged from the run's own blocks",
+   "separate_run_min": 3,
+   "table": [
+    {
+     "layers": [
+      0
+     ],
+     "anchor": 0,
+     "kind": "kept"
+    },
+    {
+     "layers": [
+      1,
+      2,
+      3
+     ],
+     "anchor": 1,
+     "kind": "absorbed"
+    },
+    {
+     "layers": [
+      4
+     ],
+     "anchor": 4,
+     "kind": "kept"
+    },
+    {
+     "layers": [
+      5
+     ],
+     "anchor": 5,
+     "kind": "kept"
+    },
+    {
+     "layers": [
+      6
+     ],
+     "anchor": 6,
+     "kind": "kept"
+    },
+    {
+     "layers": [
+      7,
+      8,
+      9
+     ],
+     "anchor": 7,
+     "kind": "absorbed"
+    },
+    {
+     "layers": [
+      10,
+      11
+     ],
+     "anchor": 10,
+     "kind": "absorbed"
+    },
+    {
+     "layers": [
+      12
+     ],
+     "anchor": 12,
+     "kind": "kept"
+    },
+    {
+     "layers": [
+      13,
+      14,
+      15,
+      16,
+      17
+     ],
+     "anchor": 13,
+     "kind": "separate"
+    },
+    {
+     "layers": [
+      18
+     ],
+     "anchor": 18,
+     "kind": "kept"
+    },
+    {
+     "layers": [
+      19,
+      20,
+      21
+     ],
+     "anchor": 19,
+     "kind": "absorbed"
+    },
+    {
+     "layers": [
+      22
+     ],
+     "anchor": 22,
+     "kind": "kept"
+    },
+    {
+     "layers": [
+      23
+     ],
+     "anchor": 23,
+     "kind": "kept"
+    },
+    {
+     "layers": [
+      24
+     ],
+     "anchor": 24,
+     "kind": "kept"
+    },
+    {
+     "layers": [
+      25,
+      26,
+      27,
+      28
+     ],
+     "anchor": 25,
+     "kind": "separate"
+    },
+    {
+     "layers": [
+      29,
+      30
+     ],
+     "anchor": 29,
+     "kind": "absorbed"
+    },
+    {
+     "layers": [
+      31,
+      32,
+      33
+     ],
+     "anchor": 31,
+     "kind": "absorbed"
+    },
+    {
+     "layers": [
+      34,
+      35
+     ],
+     "anchor": 34,
+     "kind": "absorbed"
+    }
+   ],
+   "n_layers": 18,
+   "absorbed": [
+    [
+     1,
+     2,
+     3
+    ],
+    [
+     7,
+     8,
+     9
+    ],
+    [
+     10,
+     11
+    ],
+    [
+     19,
+     20,
+     21
+    ],
+    [
+     29,
+     30
+    ],
+    [
+     31,
+     32,
+     33
+    ],
+    [
+     34,
+     35
+    ]
+   ],
+   "separate": [
+    [
+     13,
+     14,
+     15,
+     16,
+     17
+    ],
+    [
+     25,
+     26,
+     27,
+     28
+    ]
+   ],
+   "one_based": {
+    "separate": [
+     [
+      14,
+      15,
+      16,
+      17,
+      18
+     ],
+     [
+      26,
+      27,
+      28,
+      29
+     ]
+    ],
+    "kept_before_separate": [
+     13,
+     25
+    ]
+   }
+  },
+  "formula": "for a separate run R: theta~ = sum_{i in R} alpha_i A_{r0<-i}(theta_i), alpha_i = I_i / sum_{k in R} I_k per parameter slot, r0 the run's first block (the alignment anchor); the kept block before R is not part of it. An absorbed span is V1's merge, unchanged",
+  "slots": {
+   "ffn": "per FFN neuron (gate row, up row, down column together): I = E|a| x ||down column||_2 (ffn.activation_importance_v0's statistic)",
+   "query_head": "per query head (its q rows and o_proj columns): I = mean_t ||W_o,h a_h(t)||^2, its residual write energy (attention.activation_importance_v1's statistic)",
+   "kv_group": "per KV group (its k / v rows): the summed energy of its query heads",
+   "block": "q_norm, k_norm and the (folded, unit) norm gains: each block's share of the span's total head energy"
+  },
+  "never": "V1's merged block of a long span with the kept block put back in front of it",
+  "execution": "every layer once: no recurrence, no hidden-state loss; nothing frozen at initialization or after"
+ },
+ "statistics": {
+  "profile_id": "calib.hybrid_d4_base@v2",
+  "positions_of_operator": "ffn.activation_importance_v0",
+  "session": "the packed search's own session (packed_full_search.build_session(which='v3'), as SOB1 phase 1 and RI-LM1 built it: profiles, the packed forward context, the position policy), whose operator config hashes the build checks against the journal before anything runs (teacher_parent_initialization.init_driver.contract)",
+  "expected": {
+   "examples": 558,
+   "packed_sequences": 79,
+   "statistics_positions": 231242,
+   "source": "RI-LM1's statistics pass measured 79 packed sequences and 231,242 statistics positions on this profile under the same session (both RI-S1's and TPI1's sessions are packed_full_search.build_session(which='v3'): one session); the build stops on any other count"
+  },
+  "where": "each block's statistics on its OWN input in the teacher's forward, for the 29 blocks of the 9 merged spans (9 kept + 20 absorbed): 20 (kept, absorbed) pairs",
+  "memory": "20 FFN pairs x 9,728^2 float64 Pearson cross moments = 15.1 GB beside the 8 GB teacher (L40S)",
+  "persisted": "records/merge_statistics.safetensors (per block E|a| and head energies; per pair the three permutations) and records/merge_statistics.json; each pair's permutations are written the moment they are computed, with the sha256 of the correlation they came from (a later attempt recomputes the one-pass statistics and reuses a pair only when its correlation hashes the same)",
+  "assignment_time": "RI-LM1 measured 1,420 s for 8 assignments on the pod's CPU (178 s each): 20 here, about 1 h",
+  "spans": [
+   [
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   [
+    25,
+    26,
+    27,
+    28
+   ]
+  ],
+  "pairs": [
+   [
+    13,
+    14
+   ],
+   [
+    13,
+    15
+   ],
+   [
+    13,
+    16
+   ],
+   [
+    13,
+    17
+   ],
+   [
+    25,
+    26
+   ],
+   [
+    25,
+    27
+   ],
+   [
+    25,
+    28
+   ]
+  ],
+  "blocks": [
+   13,
+   14,
+   15,
+   16,
+   17,
+   25,
+   26,
+   27,
+   28
+  ],
+  "rule": "one teacher forward over V1's calibration (the same profile, positions and session) for the separate runs' blocks and pairs only; the absorbed spans' statistics are V1's and are not recomputed (their blocks are reused whole)"
+ },
+ "reuse": {
+  "reused": [
+   "the method's code, by identity",
+   "the calibration profile, positions and packing (the packed search's session)",
+   "SOB1's depth selection and base initialization (rebuilt from the teacher by frozen_mapping.keep_blocks and checked against the base's tensor digests)",
+   "SOB1's depth recovery recipe, plan and its two recovered seeds and sealed sets as the control"
+  ],
+  "recomputed": [
+   "the statistics of the 29 blocks and the 20 pairs at THIS structure's spans",
+   "every permutation",
+   "every merged tensor"
+  ],
+  "not_reused": "RI-LM1's statistics, permutations and merged deltas: its spans were [2,3], [10,11], [16,17,18], [24,25,26], [29,30], [31,32] at another kept set, and alpha's normalization runs over S_j, so no merged tensor carries over; 5 of its 8 pairs ((10,11), (24,25), (24,26), (29,30), (31,32)) are pairs here too and are compared as a reproduction diagnostic, never used as inputs",
+  "v1_init": {
+   "what": "the absorbed groups' blocks, byte for byte",
+   "init_record": "logs/stages/stage-1/depth_merge/plans/training_plan_depth_merge.json :: init_record",
+   "checked": "each reused tensor equal to V1's init file's"
+  },
+  "base": "SOB1's depth init (rebuilt from the teacher, checked against its per-tensor digests) for the kept groups, the embedding, the final norm and the tied head"
+ },
+ "arms": {
+  "depth_merge_split": {
+   "label": "v1-new: depth only, long removed runs merged into a new layer",
+   "geometry": {
+    "num_hidden_layers": 18
+   },
+   "num_parameters": 2205713408,
+   "unchanged": [
+    "hidden_size",
+    "intermediate_size",
+    "num_attention_heads",
+    "num_key_value_heads",
+    "head_dim"
+   ],
+   "build": [
+    "MERGE_SPLIT"
+   ],
+   "execution": "each layer once",
+   "seeds": [
+    20260726
+   ],
+   "config": "configs/stages/stage-1/depth_merge/split_config.json",
+   "checkpoint_bytes": {
+    "init_bf16": 4411426816,
+    "final_fp32": 8822853632,
+    "save_point": 23356911616,
+    "num_parameters": 2205713408,
+    "trainable_parameters": 1816757248,
+    "rule": "derived: 2P / 4P / 4P + 8T (single_operator_budget.structures' rule), P and T from the config"
+   }
+  }
+ },
+ "lineage": {
+  "rule": "one teacher lineage (AGENTS.md P17.1): the original hybrid Qwen3-4B for calibration, statistics, initialization, the online KD teacher, the tokenizer, chat template and configuration; the training pack is that teacher's"
+ },
+ "training": {
+  "derived_from": {
+   "path": "logs/stages/stage-1/single_operator_budget/plans/training_plan_depth_only.json",
+   "sha256": "4eeab53fee1d8c0ca22d7cf15ff79416eef57af52cc37b659d25818f257aa359",
+   "rule": "each unit is SOB1's depth unit of the same seed with only changed_fields replaced (depth_merge/plan.py compares every other field): SOB1's depth recovery recipe, unchanged"
+  },
+  "changed_fields": [
+   "unit",
+   "arm",
+   "config.run_name",
+   "config.student_path",
+   "config.out_dir",
+   "config.lineage.initialization"
+  ],
+  "recipe": "every other field of SOB1's depth unit, compared field by field (`plan.py`): stage stage3_recovery; seeds 20260726 and 20260801 in that order; 9,701 optimizer steps, 3 epochs of 6,467 packed sequences of 8,192 tokens; batch size 2, micro-batch size 1, 2 gradient accumulation steps; fp32 parameters with bf16 autocast and gradient checkpointing; the teacher in bf16 as the online KD teacher; CE 0.25 + KD 1.0, temperature 1.0, assistant scope, Top-200 + tail; AdamW lr 5e-5, weight decay 0.01, betas (0.9, 0.95), eps 1e-8, clip 1.0; 485 warmup steps, cosine to 0.1; the same trainable patterns (embedding / tied head frozen); cross_context packing (sequential, truncation allowed, standard causal attention); the same pack, tokenizer and save points (every 1,104 steps, keep 1)",
+  "data": {
+   "before_packing": {
+    "examples": 45363,
+    "turns": 56408,
+    "unique_supervised_tokens": 11862564,
+    "reasoning_tokens": 4945744,
+    "answer_tokens": 6916820,
+    "tool_calling_tokens": 995341,
+    "thinking_unique_supervised_tokens": 5935809,
+    "non_thinking_unique_supervised_tokens": 5926755
+   },
+   "after_packing": {
+    "packed_sequences": 6467,
+    "sequence_length": 8192,
+    "epochs": 3,
+    "optimizer_steps": 9701,
+    "kd_positions_per_step_median_measured": [
+     3541.5,
+     3585.5
+    ],
+    "note": "supervised-token exposure is counted from the trainer's log (sum of kd_positions), never derived"
+   },
+   "source": "logs/stages/stage-2/teacher_modes/plans/mixed_training_plan.json :: units[*].data"
+  },
+  "seeds": [
+   20260726
+  ],
+  "unit_order": {
+   "arms": [
+    "depth_merge_split"
+   ],
+   "seeds": [
+    20260726
+   ]
+  },
+  "plans": "logs/stages/stage-1/depth_merge/plans/training_plan_depth_merge_split.json (plan.py, from the build's init record)",
+  "durability": {
+   "listing_attempts": 5,
+   "listing_wait_seconds": 60,
+   "listing_timeout_seconds": 600,
+   "handoff_attempts": 4,
+   "handoff_wait_seconds": 120,
+   "upload_floor_bytes_per_second": 120000000.0,
+   "download_floor_bytes_per_second": 2600000.0,
+   "transfer_margin": 1.25,
+   "closeout_reserve_seconds": 1800,
+   "memory_probe_steps": 4,
+   "basis": "TPI1's 20 save points and finals: uploads 121-161 MB/s; verifying downloads 128-386 MB/s, with an episode of 2.6-4.6 MB/s on the private-repo download path (2026-11-17/18). A 2B save point is 20.9-22.6 GB, so a floor-rate verify takes up to 2.4 h: copies get their time from their bytes, and a session stops training early enough to secure its last save point and the final before its hard deadline",
+   "rules": [
+    "an unreadable relay listing is retried and never read as empty: a unit goes back to step 0 only when a listing that WAS read holds no save point (train_driver.restore_savepoint)",
+    "weights uploaded and verified are never sent again: only their record's publication (the handoff) is retried (SavepointMirror.mirror_once, hand_off_with_retries)",
+    "a save point is retired only after the next one hands off; save points only after the final hands off"
+   ]
+  },
+  "memory": {
+   "card": "one NVIDIA L40S",
+   "expected": {
+    "basis": "V1's MEASURED L40S peaks at 16 layers (the same recipe): 39.24 GiB allocated, 40.48-41.39 GiB reserved, 3.06 GiB least free of about 43.9 GiB usable (memory_probe, dmr1_merge_train_2026112*)",
+    "added_gib": {
+     "two_trainable_fp32_blocks_weights_grads_adamw": 3.008,
+     "two_checkpointed_block_inputs": 0.156
+    },
+    "estimate_gib": {
+     "peak_allocated": 42.4,
+     "peak_reserved": [
+      43.64,
+      44.55
+     ]
+    },
+    "risk": "HIGH: the estimated peak (about 42.4 GiB allocated, 43.6-44.6 reserved) is within about 1.5 GiB of the L40S's usable memory and may exceed it. The first four steps' memory_probe measures it; an out-of-memory error is answered first by protocol-neutral steps (expandable segments, kd_chunk), and only after a measured OOM and a decision of its own by an 80 GB card"
+   },
+   "first_steps": "every unit's trainer logs, for its first `durability.memory_probe_steps` optimizer steps, the peak allocated, peak reserved and the device's free memory after each phase (forward + KD/CE loss, backward, gradient clip, optimizer step: AdamW allocates its state at the first one), and an out-of-memory error with the phase it was raised in (aadistill.training.train.MEMORY_PROBE_ENV; execution only, never in the config hash); the driver keeps them in units.json :: memory",
+   "on_oom": [
+    "locate the phase (units.json :: memory.oom_phase)",
+    "in the forward / KD phase: PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True, then a smaller loss.kd_chunk (512 -> 256; the same reduction in smaller row chunks), recorded as a deviation",
+    "in the optimizer step: PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True, then AdamW without the multi-tensor (foreach) temporaries, recorded as a deviation",
+    "never: a shorter sequence, another attention, another effective batch size",
+    "an 80 GB card only for the affected arm, after these fail on a measured OOM, as a proposal to the maintainer (AGENTS.md P8.2)"
+   ]
+  },
+  "single_seed": "one seed per condition by default (AGENTS.md 4.3, maintainer 2026-11-28): seed 20260726, paired with D's and V1's same-seed results; the full recovery (9,701 steps, the same data and recipe) and evaluation; then report and wait for review -- no second seed starts on its own, and no promotion threshold is defined here"
+ },
+ "evaluation": {
+  "set": "eval-set-1 (development-exposed: no result here is a never-seen blind one)",
+  "every_item": "every item of every unit, in both modes, for every model evaluated",
+  "protocol": {
+   "eval_set": "eval-set-1",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "decoding": {
+    "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+    "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+   },
+   "context": {
+    "tokens": 8192,
+    "rule": "every model here -- each untrained arm, the teacher, each recovered arm -- generates until EOS or 8,192 tokens minus its rendered prompt, passed explicitly to both runners (--trained-context 8192): the recovered students' trained context, and the same value for the other two so the three are read under one context (maintainer 2026-11-19)"
+   },
+   "action_protocol": "v2",
+   "system_message": "You are a helpful Assistant.",
+   "degeneration_check_every": 256,
+   "modes": {
+    "H-T": {
+     "template_kwargs": {
+      "enable_thinking": true
+     },
+     "dir": "evaluation_thinking",
+     "role": "primary",
+     "think_state": "self_opening"
+    },
+    "H-N": {
+     "template_kwargs": {
+      "enable_thinking": false
+     },
+     "dir": "evaluation_non_thinking",
+     "role": "key secondary",
+     "think_state": "preclosed"
+    }
+   },
+   "package": {
+    "rule": "teacher_sidecars_v1",
+    "sidecars": [
+     "tokenizer.json",
+     "tokenizer_config.json",
+     "vocab.json",
+     "merges.txt",
+     "generation_config.json"
+    ],
+    "what": "the model's weights and config linked, the teacher's tokenizer files and generation config copied and hashed against teacher_identity.json -- one rule for every model evaluated (common.package), as RI-S1 packaged its groups"
+   },
+   "resume": "each finished sample is streamed and sealed (reasoning_inheritance.driver.fluid / capability with this protocol passed in): a later attempt generates only the samples without a sealed record, each under the seed its item derives; nothing is generated twice and nothing is chosen by outcome",
+   "think_state_rule": "the think state every rendered prompt of the mode carries, as the A-MIX plan's evaluations declare it (training_plan.json :: evaluations[].think_state): thinking self_opening, non-thinking preclosed; checked record by record (completion.py)"
+  },
+  "models": {
+   "post_recovery": "each of depth_merge's two seeds after recovery",
+   "control": "SOB1's depth_only seeds, their sealed sets reused"
+  },
+  "untrained": "not evaluated on eval-set-1: SOB1 found every untrained arm at 0/570 in both modes; the build's state evaluation is the diagnostic"
+ },
+ "analysis": {
+  "comparisons": {
+   "X1": {
+    "what": "v1-new - D",
+    "pair": [
+     "depth_merge_split",
+     "depth_only"
+    ],
+    "question": "the new grouping against SOB1's deletion"
+   },
+   "X2": {
+    "what": "v1-new - M",
+    "pair": [
+     "depth_merge_split",
+     "depth_merge"
+    ],
+    "question": "the new grouping against V1's merge"
+   }
+  },
+  "controls": "reused, never retrained or regenerated: D = SOB1 depth_only s20260726, M = V1 depth_merge s20260726, each bound to its registered final (analysis.registered_controls)",
+  "primary": "thinking mode, the static fluid formal core (570 items, 558 groups), seed 20260726",
+  "key_secondary": "non-thinking mode; the interactive episodes and every supporting unit reported beside",
+  "statistic": "per item the paired difference; the mean over 570 items in percentage points",
+  "effect_interval": "the percentile 95% group-bootstrap interval, 10,000 resamples, numpy default_rng(20261120)",
+  "test": "none: a single-seed exploration; no p-value, no verdict",
+  "structures": "v1-new 18 layers / 2,205,713,408 parameters; D and M 16 layers / 2,003,851,776: NOT parameter-matched",
+  "reading": "whether the whole new scheme is worth continuing; a gain is not attributed to the merge method alone (the two extra layers are part of it) and is never written as a win at equal parameters; the intervals measure item sampling with each checkpoint fixed, not training randomness",
+  "no_matched_control": "no 18-layer original-weight / back-filled control and no 36 -> 18 search this round (the maintainer's decision)"
+ },
+ "storage": {
+  "relay_prefix_root": "durable/stage1_depth_merge",
+  "pod_root": "/workspace/depth_merge",
+  "local_store": "~/aad-artifacts/stage1_depth_merge",
+  "phase_2_finals": {
+   "placement": {
+    "depth_merge": "relay"
+   },
+   "_placement": "the two fp32 finals stay at their relay prefix (the dev box is shared and has about 7 GiB free since SOB1's FFN + attention finals moved there on 2026-11-26, storage option a): their next consumer is variant 2 if the selection rule chooses this initialization's path -- variant 2 trains from the TRAINING-PRE initialization, never from these finals, so the finals are the control's weights only"
+  },
+  "relay_rotation": "keep (the finals are not rotated off; a later round's room is planned against the live headroom)",
+  "relay_margin_gib": 1.0,
+  "statistics_bytes_bound": 67108864,
+  "closeout_archive_bytes_bound": 134217728,
+  "_bounds": "statistics: 29 blocks x 9,728 float64 E|a| + head energies + 20 pairs' int64 permutations (~4 MB), bounded at 64 MiB; closeout archive: SOB1's phase-2 evidence archives held 0.113 GiB for three sessions (about 0.04 GiB each), bounded at 128 MiB",
+  "chain_rule": "a FIRST build session's launch gate asks the relay for the WHOLE chain (storage.py: the build's products, its closeout archive, the training session's rotation peak and the margin), not the build's products alone; a build TAKEOVER asks for what the chain still adds (session.build_need: the chain less each product the attempt holds on the relay under this identity with its files present, at the chain's own count; build_driver.held), against a live headroom that already excludes them, with the same margin",
+  "storage_plan": "logs/stages/stage-1/depth_merge/plans/storage_plan.json (storage.py --write: the relay's live headroom and the dev box's live free space, the sequence, the first-run need and the takeover needs)"
+ },
+ "cost_model": {
+  "basis": "SOB1's measured depth session (sob1_train_depth_only_20261122_223829: 1,708.3 min, $31.6179; 4.83 s / step; evaluation 34.5-35.5 / 6.9-7.2 min per seed and mode) for training; RI-LM1's measured statistics (117 s for 14 blocks) and assignment (178 s each) for the build",
+  "rate_usd_per_h": 1.1105,
+  "price_cap_usd_per_h": 1.11,
+  "container_disk_gb": 150
+ },
+ "authorizes": "nothing",
+ "checks": {
+  "fold_equivalence": {
+   "what": "every merged span's block with its gains folded, alone, against the unmodified block",
+   "tolerance": 0.0001
+  },
+  "permutation_equivalence": {
+   "what": "every absorbed block with its alignment permutation alone, against the unmodified block",
+   "tolerance": 0.0001
+  },
+  "rule": "RI-LM1's: float32 copies of the bf16 teacher blocks on every position of the first packed sequence; error ||y' - y||_F / ||y - x||_F; a non-finite error or one above the tolerance is a defect of the mechanism and stops the build before the candidate is saved",
+  "base": "the base rebuilt from the teacher is compared tensor by tensor with V1's base digests before any merge; the kept layers, the embedding, the final norm and the tied head must equal them",
+  "config": "the candidate's config.json equals configs/stages/stage-1/depth_merge/split_config.json (the base's file with 18 layers), compared file with file",
+  "provenance": "the absorbed layers equal V1's init tensors; the separate layers differ from their anchor's original block (split.build_candidate)",
+  "parameters": "2,205,713,408 (split.parameter_count, the config on the meta device)"
+ },
+ "diagnostics": {
+  "residual_updates": "for each merged span on the statistics positions: the teacher span's attention, FFN and whole residual update against the kept block's (the base) and the merged block's on the span's teacher input: norms, ratio, cosine, normalized error (layer_merge.UpdateMoments; RI-LM1's diagnostics)",
+  "state_evaluation": "the merged initialization against the teacher on the state evaluation suite, beside the base's recorded 3.47 equal-domain KL",
+  "role": "diagnostic only: nothing selects, gates or drops a run"
+ },
+ "variant": {
+  "id": "v1-new",
+  "arm": "depth_merge_split",
+  "derived_from": {
+   "path": "configs/stages/stage-1/depth_merge/design.json",
+   "sha256": "e9ec8fc6118f1cfcbfa533357b81012d302c9d6c1d2d9a5edf763c402acd36cd"
+  },
+  "spec": {
+   "path": "configs/stages/stage-1/depth_merge/split.json",
+   "sha256": "3d889c6edfabae2bec20641718ca134e695028f6e382d926fafd2bccfba7dd74"
+  },
+  "rule": "V1's design with only the keys `split.CHANGED` names replaced"
+ }
+}
