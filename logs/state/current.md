@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-27 (UTC), DMR1 variant 1 authorized and executing: the build COMPLETE, training attempt 2 running on one L40S (0 volumes); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
+**Updated:** 2026-11-28 (UTC), DMR1 variant 1 STOPPED by the maintainer during seed 2 (seed 1 complete, reported descriptively); nothing running, nothing billing (no pod, no volume); on branch `research/reasoning-inheritance` (from `main` `50ed1a4f`, not merged). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,27 +9,19 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**DMR1 VARIANT 1 (ALPHA-MERGED INIT AT SOB1'S DEPTH STRUCTURE, THEN SOB1'S DEPTH RECOVERY): AUTHORIZED 2026-11-27 AND EXECUTING -- ONE L40S BILLING (TRAINING ATTEMPT 2 `dmr1_merge_train_20261127_201532`, tmux `dmr1t`).**
-- Training attempt 1 (`dmr1_merge_train_20261127_095843`, $11.2083) was torn down by its own launcher at 605.6 of
-  3,420 planned minutes (the shared launcher's 600 min poll default), seed 20260726 at step 7,310. Repaired in
-  core (`session_runner.poll_lifetime`: derived from the plan's hard bound, a shorter one refused at $0). Attempt 2
-  resumes seed 1 from its verified step-6,624 save point, then seed 2: cap $51.97, expected $22.86, inside the
-  kind's $53.2517 remainder. The maintainer's seed-1 stop rule (`plans/seed1_stop_rule.json`) applies to it.
-- Authorization (maintainer, 2026-11-27): `dmr1_merge_build` $5.43 + `dmr1_merge_train` $64.46, each + $1.00 teardown
-  reserve ($71.89; grants `logs/budget/approvals/dmr1_dmr1_merge_{build,train}_grant.json`). V2 / V3 and their GPU
-  engine validation are NOT authorized.
-- Build COMPLETE (`logs/stages/stage-1/depth_merge/runs/dmr1_merge_build_20261127_083526`, $1.4043; attempt 1
-  `..._081622` ran out of memory in the statistics pass, $0.2048, repaired span-major with bitwise-equal statistics):
-  init `17fc769b...` (model.safetensors `99f63821...`) and its statistics durable on the relay
-  (`durable/stage1_depth_merge/depth_merge/`); equivalence worst 2.5e-6. Diagnostic only: pre-recovery teacher KL 7.20
-  vs the deletion init's 3.47.
-- Training plan `logs/stages/stage-1/depth_merge/plans/training_plan_depth_merge.json` (SOB1's depth recipe; only the
-  initialization changed). The training session trains both seeds and evaluates eval-set-1 in both modes; then the
-  closeout, C1 (`analysis.py comparison --id C1`) against SOB1's sealed depth sets, and the report
-  (`docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md`).
-- Before the build: two non-blocking fixes from the review of `6e3ee3a7` (the init record's method from its checkpoint
-  identity; the search's config check by applicability). After it: the dev box's identity check now derives the pod's
-  (the build device; `ast.dump` in the 3.12 form on any interpreter).
+**DMR1 VARIANT 1 (ALPHA-MERGED INIT AT SOB1'S DEPTH STRUCTURE, THEN SOB1'S DEPTH RECOVERY): STOPPED BY THE MAINTAINER DURING SEED 2 (2026-11-28) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
+- Report `docs/stages/stage-1/reasoning_inheritance/DMR1_REVIEW.md` section 00; decisions.md 2026-11-28.
+- Seed 20260726 complete (final `ed0ee3e1...`, relay; resumed once from save point 6,624 after attempt 1's
+  poll-limit teardown, repaired in core: `session_runner.poll_lifetime`). On the static fluid core, descriptive and
+  one seed, V1 is below SOB1's same-seed depth-only:
+  - thinking: 12.28% vs 16.14%, −3.86 pp [−6.79, −0.87];
+  - non-thinking: 12.11% vs 17.54%, −5.44 pp [−8.39, −2.46].
+- The pre-fixed seed-1 rule read CONTINUE (`runs/dmr1_merge_train_20261127_201532/evidence/seed1_stop_check.json`).
+  The maintainer then stopped seed 20260801 at step 6,590 of 9,701. Its verified save point at step 5,520 (model,
+  optimizer, RNG, data position) is kept on the relay. Not the registered two-seed completion; C1 not tested.
+- Money: training kind $26.7722 of $64.46 (two attempts); build kind $1.6091 of $5.43. Neither grant carries over.
+- Next (maintainer brief, 2026-11-28): V2 with both initializations (D = deletion, M = V1's alpha merge) × seed
+  20260726, revised at $0 to READY_FOR_REVIEW. No paid run before the budget is approved; V3 not started.
 
 **SOB1 (STAGE 1 SINGLE-OPERATOR COMPRESSION AT N ~ 2): COMPLETE (2026-11-25) -- NOTHING RUNNING; NOTHING BILLING: NO POD, NO VOLUME.**
 - Report `docs/stages/stage-1/single_operator_budget/REPORT.md`; decision `logs/stages/stage-1/single_operator_budget/
@@ -4784,7 +4776,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$1034.3802` spent of `$1161.0600`, leaving `$126.6798` |
+| project cap | `$1062.7615` spent of `$1161.0600`, leaving `$98.2985` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

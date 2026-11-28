@@ -1,12 +1,109 @@
-# DMR1: depth recovery at SOB1's depth-only structure -- review report (READY_FOR_REVIEW)
+# DMR1: depth recovery at SOB1's depth-only structure -- review report
 
-**Terminal state of this round: READY_FOR_REVIEW** (2026-11-26 UTC, after the third repair round: the maintainer's
-review of `d92f48f8`). The designs, the code of all three variants, three rounds of repairs, the principle audit, the
-$0 verification, the authorized storage move and this report are committed and pushed on
-`research/reasoning-inheritance` (not merged into `main`). **This is not a scientific COMPLETE:** no initialization was
-built, nothing trained or generated, no pod or volume created, no grant written, no artifact issued. Variant 1 starts
-only after this review and the maintainer's explicit authorization of its two kinds; its relay room now fits (0.3).
-Variants 2 and 3 have no paid authorization.
+**State: VARIANT 1 STOPPED BY THE MAINTAINER DURING SEED 2; seed 1 reported descriptively, waiting for review**
+(2026-11-28 UTC). V1 was authorized on 2026-11-27, built, trained and evaluated for seed 20260726, and stopped at
+seed 20260801's step 6,590 of 9,701 at the maintainer's request after reading seed 1's result (section 00). Nothing
+is running and nothing is billing: no pod, no volume. V2 and V3 have no paid authorization. Committed and pushed on
+`research/reasoning-inheritance`, not merged into `main`. Sections 0 onward are the READY_FOR_REVIEW report of
+2026-11-26, kept as written.
+
+## 00. Variant 1 executed (2026-11-27/28 UTC)
+
+### 00.1 What ran
+
+| step | run | result | all-in |
+| --- | --- | --- | --- |
+| build, attempt 1 | `dmr1_merge_build_20261127_081622` | statistics pass out of memory; repaired span-major (bitwise-equal statistics) | $0.2048 |
+| build, attempt 2 | `dmr1_merge_build_20261127_083526` | COMPLETE: init `17fc769b...`, equivalence worst 2.5e-6 | $1.4043 |
+| training, attempt 1 | `dmr1_merge_train_20261127_095843` | the shared launcher's 600 min poll default tore it down at 605.6 min; seed 1 at step 7,310; repaired in core (`session_runner.poll_lifetime`) | $11.2083 |
+| training, attempt 2 | `dmr1_merge_train_20261127_201532` | seed 1 resumed from save point 6,624, trained to 9,701 and evaluated in both modes; seed 2 stopped by the maintainer at step 6,590 | $15.5639 |
+
+Seed 1's final is `ed0ee3e1...` (model.safetensors), durable on the relay. Its steps 6,625-7,310 ran twice (attempt
+1, lost; attempt 2, kept). The train log holds both copies, and a diagnostic takes the later row per step. The
+resumed losses matched attempt 1's to the fourth decimal (step 6,630: 0.2795 vs 0.2799; same learning rate).
+
+### 00.2 Seed 1 against depth-only (static fluid formal core, 570 items, 558 groups; descriptive, one seed)
+
+The registered per-seed statistic (`single_operator_budget.analysis._paired`): mean paired difference by item and its
+95% group-bootstrap interval. It is the same seed (20260726) and the same protocol as SOB1's depth-only control.
+Record: `logs/stages/stage-1/depth_merge/runs/dmr1_merge_train_20261127_201532/evidence/seed1_stop_check.json`.
+
+| mode | V1 | depth-only | difference | 95% interval |
+| --- | --- | --- | --- | --- |
+| thinking (primary) | 12.28% | 16.14% | −3.86 pp | [−6.79, −0.87] |
+| non-thinking | 12.11% | 17.54% | −5.44 pp | [−8.39, −2.46] |
+
+- The stop rule (STOP iff thinking ≤ −5.0 pp and the upper bound < 0, fixed before any seed-1 result) read
+  CONTINUE. The maintainer then stopped the run on reading these numbers.
+- Both intervals lie below 0, so on this seed V1 is below depth-only in both modes. The interval works over items
+  with each checkpoint fixed. It does not measure training randomness, so this is not a verdict, and C1's registered
+  two-seed test did not run.
+- Terminations on the core, out of 570 turns per arm:
+  - thinking: V1 had 448 natural terminations, 110 degeneration stops and 12 context-limit hits; depth-only had
+    433, 106 and 31;
+  - non-thinking: V1 519 / 51 / 0, depth-only 529 / 41 / 0.
+  - Context-limit hits are right-censored and are scored by the registered scorer like every other turn.
+
+### 00.3 The other units, seed 1 (descriptive; `evidence/seed1_supporting_units.json`)
+
+| unit (n) | thinking V1 | thinking depth-only | non-thinking V1 | non-thinking depth-only |
+| --- | --- | --- | --- | --- |
+| interactive episodes (144) | 2.78% | 2.08% | 8.33% | 6.94% |
+| rag (100) | 51.0% | 58.0% | 67.0% | 77.0% |
+| multihop (100) | 35.0% | 49.0% | 55.0% | 63.0% |
+| gsm8k (100) | 20.0% | 21.0% | 11.0% | 17.0% |
+| math_verified (100) | 0.0% | 6.0% | 3.0% | 8.0% |
+| answerability_paired (120) | 32.5% | 39.17% | 33.33% | 45.0% |
+| safety_paired (100) | 28.0% | 28.0% | 40.0% | 47.0% |
+| knowledge (150) | 2.67% | 2.0% | 2.67% | 4.67% |
+| stage3_legacy_150 (150, in-sample: training prompts) | 52.67% | 54.0% | 50.67% | 54.0% |
+
+V1 is at or below depth-only on every supporting unit except the interactive episodes. Those are 1-2 episodes out
+of 144, inside noise. Each unit is reported on its own and no pooled score is defined.
+
+### 00.4 Training diagnostic (not a score)
+
+Validation CE gap, V1 minus depth-only, same seed and step:
+
+| step | 0 | 1,212 | 4,848 | 6,060 | 9,701 (final) |
+| --- | --- | --- | --- | --- | --- |
+| seed 1 | +3.61 | +0.158 | +0.099 | +0.091 | +0.099 (0.646 vs 0.547) |
+| seed 2 | +3.61 | +0.178 | +0.089 | +0.090 | — (stopped at 6,590) |
+
+The alpha-merged initialization starts far worse (pre-recovery teacher KL 7.20 vs the deletion init's 3.47). After
+about 4,000 steps the gap stops closing and holds near +0.09-0.10 to the end. Seed 2 follows the same path.
+
+### 00.5 Conclusion, as far as it reaches
+
+On the completed seed 1, under the current recovery recipe, the current alpha merge is below the depth baseline.
+That is why no more was spent on a second seed, and the programme moves to the next mechanism question (V2 with
+both initializations, section 0 of the next revision). This says nothing about layer merging in general, and
+nothing about whether the representation is recoverable.
+
+How the stop happened, kept as two separate records:
+- the pre-fixed rule's reading, CONTINUE (`evidence/seed1_stop_check.json`, committed `93b4b179` before any seed-2
+  result);
+- the maintainer's later decision to stop (decisions.md 2026-11-28).
+
+The stop did not meet the rule's threshold, and the threshold is not changed. V1 is not the registered two-seed
+scientific completion: seed 1 is complete, and seed 2 was stopped early by the maintainer.
+
+### 00.6 What is kept, money, and what is open
+
+- Kept (nothing deleted):
+  - on the relay: seed 1's final (7.46 GiB) and seed 2's verified save point at step 5,520 (19.50 GiB: model +
+    trainer state, resumable under the registered contract);
+  - on the dev box: the secured evidence of both attempts (`~/aad-artifacts/stage1_depth_merge/<run>/store/out`);
+  - in the repo: closeouts, `storage/finals_depth_merge.json` (seed 1 verified, seed 2 missing).
+- Money:
+  - training kind: $26.7722 of $64.46;
+  - build kind: $1.6091 of $5.43;
+  - DMR1 total: $28.3813;
+  - project: $1,113.5131 billed of the $1,161.06 cap ($47.5469 left).
+- For the maintainer's review:
+  - resume seed 2 from step 5,520 (about 4,181 steps, ~5.7 h plus evaluation, inside the training kind's remainder);
+  - or close V1 on one seed;
+  - and the relay bytes' fate.
 
 Contents: **0 this round** (fixes, the moved finals, storage, the search configuration, what is not GPU-validated,
 conditions, money and state) · **0A the second round's report** (kept; section 0 holds where they differ) · 1 scope

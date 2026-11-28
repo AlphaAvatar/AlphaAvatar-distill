@@ -1,0 +1,4094 @@
+{
+  "schema": "aadistill.stage1.depth_merge.authorization_session/v1",
+  "provider_cli": {
+    "path": "/home/ecs-user/.local/bin/runpodctl",
+    "version": "runpodctl 3.0.1-551d6a4",
+    "pod_create_terminate_after": false
+  },
+  "session_id": "dmr1_depth_merge-dmr1_merge_train",
+  "session_spec": {
+    "session_id": "dmr1_depth_merge-dmr1_merge_train",
+    "schema": "aadistill.stage1.depth_merge.authorization_session/v1",
+    "description": "DMR1-M: depth_merge's two seeds trained (SOB1's depth recipe) and evaluated at 8,192 tokens",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-1/depth_merge/runs/dmr1_merge_train_20261127_201532/governance/authorization.json",
+    "authorization_type": "EngineeringAuthorization.load",
+    "plan_id": "stage1.depth_merge",
+    "plan_hash": "297d341a3703ec08036c2480c03a433d3fc0cd058f8e863c1b5a6f671559bf63",
+    "status_path": "/workspace/dmr1_depth_merge.status",
+    "run_log_path": "/workspace/dmr1_depth_merge_run.log",
+    "driver_job_id": "dmr1_depth_merge_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "dmr1_depth_merge",
+      "evidence_filename": "report.json",
+      "archive_basename": "dmr1_depth_merge",
+      "spec_success": "configs/stages/stage-1/depth_merge/artifacts.json",
+      "spec_failed": "configs/stages/stage-1/depth_merge/artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "dmr1_depth_merge",
+        "TEACHER_MODEL": "Qwen/Qwen3-4B"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION",
+        "TEACHER_MODEL"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage3_sr/A-MIX-6cat-sr/4c794692a1d6072c/blocks.npz",
+          "dest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr",
+          "sha256": "4c794692a1d6072ced81c2192aa3493b14dab9a6904132a44645c93107cdbfee",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage3_sr/A-MIX-6cat-sr/aaa6fcb0b708f766/ladder.json",
+          "dest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr",
+          "sha256": "aaa6fcb0b708f7665c4e7b4f9c8fe94666f024425075984ecf90250b735d0519",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage3_sr/A-MIX-6cat-sr/63ad3c7fbc8dd2ca/audit.jsonl",
+          "dest": "artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr",
+          "sha256": "63ad3c7fbc8dd2ca2ee4992565f4f85f79184487dea15c512f41a9d40fb0b598",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "transfer/stage1_depth_merge/dmr1_merge_train_20261127_201532/resume_dmr1_merge_train_20261127_201532.tgz",
+          "dest": "artifacts/stages/stage-1/depth_merge/resume",
+          "sha256": "b1aa52a0854fa9db47e0a56fb635bb7737849105f3a64cb5fbbfe14580b25b8b",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "battery_v2:artifacts/stages/stage-3/eval"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 14,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-11-27T20:17:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "polling 2758.6 min: the plan's 2756.6 min hard bound plus two 60 s polls (derived)"
+    },
+    {
+      "utc": "2026-11-27T20:17:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 2606 min $48.21 \u00b7 soft $50.81 \u00b7 hard $51.00 (authorized $51.97)"
+    },
+    {
+      "utc": "2026-11-27T20:17:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-11-27T20:17:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $110.9163 against the $50.9969 this session must be able to fund"
+    },
+    {
+      "utc": "2026-11-27T20:17:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account resources OK: the provider account holds only the 0 resource(s) the records account for"
+    },
+    {
+      "utc": "2026-11-27T20:17:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "DMR1-M and its dmr1_merge_train kind are open"
+    },
+    {
+      "utc": "2026-11-27T20:17:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "a DMR1-M dmr1_merge_train artifact, unused"
+    },
+    {
+      "utc": "2026-11-27T20:17:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "1 x NVIDIA L40S at no more than $1.11/h for the pod, as granted"
+    },
+    {
+      "utc": "2026-11-27T20:17:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "all-in $51.9639 over 2757.84 min, inside $51.97"
+    },
+    {
+      "utc": "2026-11-27T20:17:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "study identity 297d341a3703 is the authorized one"
+    },
+    {
+      "utc": "2026-11-27T20:17:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "every bound file is in the session commit"
+    },
+    {
+      "utc": "2026-11-27T20:17:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "$51.97 inside the envelope ($53.2517) and the $62.8773 the project cap leaves now"
+    },
+    {
+      "utc": "2026-11-27T20:17:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the authorization is in session commit 3fc32e8c7b2d"
+    },
+    {
+      "utc": "2026-11-27T20:17:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the cap and the teardown reserve fit"
+    },
+    {
+      "utc": "2026-11-27T20:17:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the artifact binds this tree's records"
+    },
+    {
+      "utc": "2026-11-27T20:17:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "depth_merge's initialization is on the relay with its recorded hashes"
+    },
+    {
+      "utc": "2026-11-27T20:17:34+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the remaining rotation needs 26.96 GiB more at its peak: 3 object(s), 26.96 GiB: ACCEPTED (200) 3/3 granted an upload action"
+    },
+    {
+      "utc": "2026-11-27T20:17:34+00:00",
+      "elapsed_min": 0.0,
+      "msg": "/home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_201532: 6.98 GiB free for the session's 1.50 GiB evidence bound"
+    },
+    {
+      "utc": "2026-11-27T20:17:34+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the artifact funds the plan this launch runs (depth_merge)"
+    },
+    {
+      "utc": "2026-11-27T20:17:34+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 4 relay inputs (4 from AlphaAvatar/aadistill-artifacts), 1 local assets"
+    },
+    {
+      "utc": "2026-11-27T20:17:36+00:00",
+      "elapsed_min": 0.02,
+      "msg": "watchdog detached \u2014 hard 2757 min = $51.00"
+    },
+    {
+      "utc": "2026-11-27T20:17:36+00:00",
+      "elapsed_min": 0.02,
+      "msg": "created z4025h5bufx23b at $1.09/h in an unread datacenter"
+    },
+    {
+      "utc": "2026-11-27T20:18:30+00:00",
+      "elapsed_min": 0.92,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-11-27T20:19:34+00:00",
+      "elapsed_min": 1.99,
+      "msg": "  starting (120s) \u2014 $0.04"
+    },
+    {
+      "utc": "2026-11-27T20:19:55+00:00",
+      "elapsed_min": 2.34,
+      "msg": "TCP 22 at 202.181.159.228:17631 after 2.3 min"
+    },
+    {
+      "utc": "2026-11-27T20:19:58+00:00",
+      "elapsed_min": 2.38,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-11-27T20:20:21+00:00",
+      "elapsed_min": 2.76,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.112.07"
+    },
+    {
+      "utc": "2026-11-27T20:20:21+00:00",
+      "elapsed_min": 2.76,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-11-27T20:22:42+00:00",
+      "elapsed_min": 5.11,
+      "msg": "draw 1: setup complete \u2014 $0.09"
+    },
+    {
+      "utc": "2026-11-27T20:22:47+00:00",
+      "elapsed_min": 5.19,
+      "msg": "driver detached, pid 2369, confirmed by descriptor_probe \u2014 $0.09"
+    },
+    {
+      "utc": "2026-11-27T20:23:56+00:00",
+      "elapsed_min": 6.36,
+      "msg": "  2026-11-27T20:22:44Z MARKER:CONTRACT_OK \u2014 $0.12"
+    },
+    {
+      "utc": "2026-11-27T20:24:10+00:00",
+      "elapsed_min": 6.58,
+      "msg": "secured 6 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:25:23+00:00",
+      "elapsed_min": 7.79,
+      "msg": "  2026-11-27T20:24:15Z MARKER:TRAIN_START:depth_merge-s20260726 \u2014 $0.14"
+    },
+    {
+      "utc": "2026-11-27T20:25:36+00:00",
+      "elapsed_min": 8.02,
+      "msg": "secured 4 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:27:03+00:00",
+      "elapsed_min": 9.47,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:28:30+00:00",
+      "elapsed_min": 10.91,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:29:56+00:00",
+      "elapsed_min": 12.36,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:31:23+00:00",
+      "elapsed_min": 13.79,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:32:49+00:00",
+      "elapsed_min": 15.23,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:34:15+00:00",
+      "elapsed_min": 16.67,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:35:42+00:00",
+      "elapsed_min": 18.11,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:37:08+00:00",
+      "elapsed_min": 19.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:38:35+00:00",
+      "elapsed_min": 20.99,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:40:01+00:00",
+      "elapsed_min": 22.43,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:41:27+00:00",
+      "elapsed_min": 23.87,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:42:54+00:00",
+      "elapsed_min": 25.31,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:44:21+00:00",
+      "elapsed_min": 26.76,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:45:47+00:00",
+      "elapsed_min": 28.21,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:47:14+00:00",
+      "elapsed_min": 29.65,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:48:40+00:00",
+      "elapsed_min": 31.09,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:50:06+00:00",
+      "elapsed_min": 32.52,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:51:33+00:00",
+      "elapsed_min": 33.97,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:53:00+00:00",
+      "elapsed_min": 35.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:54:25+00:00",
+      "elapsed_min": 36.84,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:55:52+00:00",
+      "elapsed_min": 38.28,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:57:18+00:00",
+      "elapsed_min": 39.71,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T20:58:45+00:00",
+      "elapsed_min": 41.16,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:00:11+00:00",
+      "elapsed_min": 42.61,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:01:38+00:00",
+      "elapsed_min": 44.04,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:03:04+00:00",
+      "elapsed_min": 45.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:04:30+00:00",
+      "elapsed_min": 46.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:05:57+00:00",
+      "elapsed_min": 48.37,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:07:24+00:00",
+      "elapsed_min": 49.81,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:08:50+00:00",
+      "elapsed_min": 51.24,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:10:16+00:00",
+      "elapsed_min": 52.68,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:11:42+00:00",
+      "elapsed_min": 54.12,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:13:08+00:00",
+      "elapsed_min": 55.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:14:35+00:00",
+      "elapsed_min": 56.99,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:16:01+00:00",
+      "elapsed_min": 58.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:17:28+00:00",
+      "elapsed_min": 59.88,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:18:54+00:00",
+      "elapsed_min": 61.31,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:20:20+00:00",
+      "elapsed_min": 62.75,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:21:46+00:00",
+      "elapsed_min": 64.18,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:23:12+00:00",
+      "elapsed_min": 65.62,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:24:39+00:00",
+      "elapsed_min": 67.06,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:26:05+00:00",
+      "elapsed_min": 68.5,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:27:31+00:00",
+      "elapsed_min": 69.94,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:28:58+00:00",
+      "elapsed_min": 71.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:30:25+00:00",
+      "elapsed_min": 72.84,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:31:52+00:00",
+      "elapsed_min": 74.28,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:33:18+00:00",
+      "elapsed_min": 75.71,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:34:44+00:00",
+      "elapsed_min": 77.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:36:11+00:00",
+      "elapsed_min": 78.59,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:37:37+00:00",
+      "elapsed_min": 80.03,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:39:03+00:00",
+      "elapsed_min": 81.47,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:40:30+00:00",
+      "elapsed_min": 82.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:41:57+00:00",
+      "elapsed_min": 84.36,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:43:24+00:00",
+      "elapsed_min": 85.82,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:44:50+00:00",
+      "elapsed_min": 87.25,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:46:17+00:00",
+      "elapsed_min": 88.69,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:47:43+00:00",
+      "elapsed_min": 90.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:49:10+00:00",
+      "elapsed_min": 91.57,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:50:36+00:00",
+      "elapsed_min": 93.02,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:52:03+00:00",
+      "elapsed_min": 94.47,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:53:29+00:00",
+      "elapsed_min": 95.91,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:54:56+00:00",
+      "elapsed_min": 97.34,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:57:40+00:00",
+      "elapsed_min": 100.08,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T21:59:06+00:00",
+      "elapsed_min": 101.52,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:00:33+00:00",
+      "elapsed_min": 102.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:01:59+00:00",
+      "elapsed_min": 104.4,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:03:25+00:00",
+      "elapsed_min": 105.83,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:04:51+00:00",
+      "elapsed_min": 107.27,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:06:18+00:00",
+      "elapsed_min": 108.71,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:07:44+00:00",
+      "elapsed_min": 110.16,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:09:11+00:00",
+      "elapsed_min": 111.6,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:10:38+00:00",
+      "elapsed_min": 113.05,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:12:04+00:00",
+      "elapsed_min": 114.49,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:13:31+00:00",
+      "elapsed_min": 115.94,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:14:57+00:00",
+      "elapsed_min": 117.37,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:16:24+00:00",
+      "elapsed_min": 118.81,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:17:50+00:00",
+      "elapsed_min": 120.25,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:19:16+00:00",
+      "elapsed_min": 121.69,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:20:43+00:00",
+      "elapsed_min": 123.13,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:22:09+00:00",
+      "elapsed_min": 124.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:23:35+00:00",
+      "elapsed_min": 126.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:25:01+00:00",
+      "elapsed_min": 127.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:26:29+00:00",
+      "elapsed_min": 128.89,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:27:55+00:00",
+      "elapsed_min": 130.33,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:29:22+00:00",
+      "elapsed_min": 131.78,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:30:48+00:00",
+      "elapsed_min": 133.22,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:32:14+00:00",
+      "elapsed_min": 134.65,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:33:41+00:00",
+      "elapsed_min": 136.09,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:35:07+00:00",
+      "elapsed_min": 137.54,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:36:33+00:00",
+      "elapsed_min": 138.97,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:38:00+00:00",
+      "elapsed_min": 140.41,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:39:26+00:00",
+      "elapsed_min": 141.85,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:40:53+00:00",
+      "elapsed_min": 143.3,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:42:19+00:00",
+      "elapsed_min": 144.74,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:43:46+00:00",
+      "elapsed_min": 146.18,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:45:12+00:00",
+      "elapsed_min": 147.62,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:46:39+00:00",
+      "elapsed_min": 149.06,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:48:05+00:00",
+      "elapsed_min": 150.5,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:49:32+00:00",
+      "elapsed_min": 151.94,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:50:58+00:00",
+      "elapsed_min": 153.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:52:24+00:00",
+      "elapsed_min": 154.82,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:53:51+00:00",
+      "elapsed_min": 156.26,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:56:37+00:00",
+      "elapsed_min": 159.02,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:58:03+00:00",
+      "elapsed_min": 160.46,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T22:59:30+00:00",
+      "elapsed_min": 161.91,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:00:56+00:00",
+      "elapsed_min": 163.36,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:02:23+00:00",
+      "elapsed_min": 164.8,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:03:49+00:00",
+      "elapsed_min": 166.23,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:05:15+00:00",
+      "elapsed_min": 167.67,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:06:42+00:00",
+      "elapsed_min": 169.11,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:08:08+00:00",
+      "elapsed_min": 170.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:09:35+00:00",
+      "elapsed_min": 172.0,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:11:02+00:00",
+      "elapsed_min": 173.44,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:12:28+00:00",
+      "elapsed_min": 174.88,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:13:55+00:00",
+      "elapsed_min": 176.33,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:15:21+00:00",
+      "elapsed_min": 177.76,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:16:48+00:00",
+      "elapsed_min": 179.21,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:18:15+00:00",
+      "elapsed_min": 180.66,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:19:41+00:00",
+      "elapsed_min": 182.1,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:21:08+00:00",
+      "elapsed_min": 183.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:22:34+00:00",
+      "elapsed_min": 184.99,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:24:01+00:00",
+      "elapsed_min": 186.43,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:26:44+00:00",
+      "elapsed_min": 189.15,
+      "msg": "secured 1 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:28:11+00:00",
+      "elapsed_min": 190.59,
+      "msg": "secured 3 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:29:38+00:00",
+      "elapsed_min": 192.04,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:31:04+00:00",
+      "elapsed_min": 193.48,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:32:30+00:00",
+      "elapsed_min": 194.92,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:33:58+00:00",
+      "elapsed_min": 196.38,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:35:24+00:00",
+      "elapsed_min": 197.81,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:36:50+00:00",
+      "elapsed_min": 199.25,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:38:17+00:00",
+      "elapsed_min": 200.7,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:39:43+00:00",
+      "elapsed_min": 202.14,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:41:10+00:00",
+      "elapsed_min": 203.58,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:42:36+00:00",
+      "elapsed_min": 205.02,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:44:02+00:00",
+      "elapsed_min": 206.46,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:45:29+00:00",
+      "elapsed_min": 207.9,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:46:56+00:00",
+      "elapsed_min": 209.35,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:48:22+00:00",
+      "elapsed_min": 210.79,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:49:49+00:00",
+      "elapsed_min": 212.23,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:51:15+00:00",
+      "elapsed_min": 213.67,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:52:42+00:00",
+      "elapsed_min": 215.11,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:54:08+00:00",
+      "elapsed_min": 216.55,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:55:34+00:00",
+      "elapsed_min": 217.99,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:57:00+00:00",
+      "elapsed_min": 219.42,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:58:27+00:00",
+      "elapsed_min": 220.86,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-27T23:59:53+00:00",
+      "elapsed_min": 222.3,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:01:20+00:00",
+      "elapsed_min": 223.74,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:02:46+00:00",
+      "elapsed_min": 225.18,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:04:12+00:00",
+      "elapsed_min": 226.62,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:05:39+00:00",
+      "elapsed_min": 228.06,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:07:05+00:00",
+      "elapsed_min": 229.51,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:08:32+00:00",
+      "elapsed_min": 230.96,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:09:59+00:00",
+      "elapsed_min": 232.39,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:11:25+00:00",
+      "elapsed_min": 233.83,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:12:52+00:00",
+      "elapsed_min": 235.28,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:14:18+00:00",
+      "elapsed_min": 236.72,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:15:44+00:00",
+      "elapsed_min": 238.15,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:17:11+00:00",
+      "elapsed_min": 239.59,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:18:37+00:00",
+      "elapsed_min": 241.03,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:20:03+00:00",
+      "elapsed_min": 242.47,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:21:30+00:00",
+      "elapsed_min": 243.91,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:22:57+00:00",
+      "elapsed_min": 245.36,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:24:23+00:00",
+      "elapsed_min": 246.8,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:25:49+00:00",
+      "elapsed_min": 248.24,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:27:16+00:00",
+      "elapsed_min": 249.68,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:28:42+00:00",
+      "elapsed_min": 251.12,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:30:09+00:00",
+      "elapsed_min": 252.56,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:31:35+00:00",
+      "elapsed_min": 254.01,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:33:02+00:00",
+      "elapsed_min": 255.45,
+      "msg": "secured 2 file(s) (6 held)"
+    },
+    {
+      "utc": "2026-11-28T00:34:15+00:00",
+      "elapsed_min": 256.67,
+      "msg": "  2026-11-28T00:34:05Z MARKER:TRAINED:depth_merge-s20260726 \u2014 $4.66"
+    },
+    {
+      "utc": "2026-11-28T00:34:29+00:00",
+      "elapsed_min": 256.89,
+      "msg": "secured 5 file(s) (7 held)"
+    },
+    {
+      "utc": "2026-11-28T00:35:55+00:00",
+      "elapsed_min": 258.33,
+      "msg": "secured 4 file(s) (8 held)"
+    },
+    {
+      "utc": "2026-11-28T00:37:08+00:00",
+      "elapsed_min": 259.55,
+      "msg": "  2026-11-28T00:35:52Z MARKER:EVAL_GENERATE:depth_merge_s20260726:H-T:dmr1_merge_train_20261127_201532-depth_merge_s20260726-H-T-g1 \u2014 $4.72"
+    },
+    {
+      "utc": "2026-11-28T00:37:21+00:00",
+      "elapsed_min": 259.77,
+      "msg": "secured 2 file(s) (10 held)"
+    },
+    {
+      "utc": "2026-11-28T00:38:47+00:00",
+      "elapsed_min": 261.2,
+      "msg": "secured 1 file(s) (10 held)"
+    },
+    {
+      "utc": "2026-11-28T00:40:15+00:00",
+      "elapsed_min": 262.66,
+      "msg": "secured 2 file(s) (11 held)"
+    },
+    {
+      "utc": "2026-11-28T00:41:41+00:00",
+      "elapsed_min": 264.09,
+      "msg": "secured 1 file(s) (11 held)"
+    },
+    {
+      "utc": "2026-11-28T00:43:08+00:00",
+      "elapsed_min": 265.54,
+      "msg": "secured 2 file(s) (12 held)"
+    },
+    {
+      "utc": "2026-11-28T00:44:35+00:00",
+      "elapsed_min": 267.0,
+      "msg": "secured 2 file(s) (13 held)"
+    },
+    {
+      "utc": "2026-11-28T00:46:02+00:00",
+      "elapsed_min": 268.45,
+      "msg": "secured 2 file(s) (14 held)"
+    },
+    {
+      "utc": "2026-11-28T00:47:28+00:00",
+      "elapsed_min": 269.88,
+      "msg": "secured 1 file(s) (14 held)"
+    },
+    {
+      "utc": "2026-11-28T00:48:55+00:00",
+      "elapsed_min": 271.33,
+      "msg": "secured 2 file(s) (15 held)"
+    },
+    {
+      "utc": "2026-11-28T00:50:22+00:00",
+      "elapsed_min": 272.79,
+      "msg": "secured 2 file(s) (16 held)"
+    },
+    {
+      "utc": "2026-11-28T00:51:48+00:00",
+      "elapsed_min": 274.22,
+      "msg": "secured 1 file(s) (16 held)"
+    },
+    {
+      "utc": "2026-11-28T00:53:15+00:00",
+      "elapsed_min": 275.67,
+      "msg": "secured 2 file(s) (17 held)"
+    },
+    {
+      "utc": "2026-11-28T00:54:45+00:00",
+      "elapsed_min": 277.16,
+      "msg": "secured 8 file(s) (24 held)"
+    },
+    {
+      "utc": "2026-11-28T00:56:11+00:00",
+      "elapsed_min": 278.6,
+      "msg": "secured 5 file(s) (28 held)"
+    },
+    {
+      "utc": "2026-11-28T00:57:39+00:00",
+      "elapsed_min": 280.06,
+      "msg": "secured 7 file(s) (34 held)"
+    },
+    {
+      "utc": "2026-11-28T00:59:06+00:00",
+      "elapsed_min": 281.52,
+      "msg": "secured 4 file(s) (38 held)"
+    },
+    {
+      "utc": "2026-11-28T01:00:33+00:00",
+      "elapsed_min": 282.97,
+      "msg": "secured 11 file(s) (48 held)"
+    },
+    {
+      "utc": "2026-11-28T01:02:01+00:00",
+      "elapsed_min": 284.43,
+      "msg": "secured 3 file(s) (50 held)"
+    },
+    {
+      "utc": "2026-11-28T01:03:14+00:00",
+      "elapsed_min": 285.65,
+      "msg": "  2026-11-28T01:03:09Z MARKER:EVAL_GENERATE:depth_merge_s20260726:H-N:dmr1_merge_train_20261127_201532-depth_merge_s20260726-H-N-g1 \u2014 $5.19"
+    },
+    {
+      "utc": "2026-11-28T01:03:29+00:00",
+      "elapsed_min": 285.9,
+      "msg": "secured 12 file(s) (59 held)"
+    },
+    {
+      "utc": "2026-11-28T01:04:55+00:00",
+      "elapsed_min": 287.34,
+      "msg": "secured 1 file(s) (59 held)"
+    },
+    {
+      "utc": "2026-11-28T01:06:23+00:00",
+      "elapsed_min": 288.8,
+      "msg": "secured 8 file(s) (66 held)"
+    },
+    {
+      "utc": "2026-11-28T01:07:50+00:00",
+      "elapsed_min": 290.25,
+      "msg": "secured 15 file(s) (80 held)"
+    },
+    {
+      "utc": "2026-11-28T01:09:03+00:00",
+      "elapsed_min": 291.46,
+      "msg": "  2026-11-28T01:08:47Z MARKER:TRAIN_START:depth_merge-s20260801 \u2014 $5.29"
+    },
+    {
+      "utc": "2026-11-28T01:09:17+00:00",
+      "elapsed_min": 291.69,
+      "msg": "secured 20 file(s) (97 held)"
+    },
+    {
+      "utc": "2026-11-28T01:10:42+00:00",
+      "elapsed_min": 293.12,
+      "msg": "secured 3 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:12:08+00:00",
+      "elapsed_min": 294.56,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:13:35+00:00",
+      "elapsed_min": 295.99,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:15:01+00:00",
+      "elapsed_min": 297.43,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:16:27+00:00",
+      "elapsed_min": 298.87,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:17:54+00:00",
+      "elapsed_min": 300.32,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:19:21+00:00",
+      "elapsed_min": 301.76,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:20:47+00:00",
+      "elapsed_min": 303.2,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:22:13+00:00",
+      "elapsed_min": 304.62,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:23:39+00:00",
+      "elapsed_min": 306.06,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:25:05+00:00",
+      "elapsed_min": 307.49,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:26:31+00:00",
+      "elapsed_min": 308.93,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:27:57+00:00",
+      "elapsed_min": 310.36,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:29:23+00:00",
+      "elapsed_min": 311.8,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:30:49+00:00",
+      "elapsed_min": 313.24,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:32:15+00:00",
+      "elapsed_min": 314.67,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:33:41+00:00",
+      "elapsed_min": 316.1,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:35:07+00:00",
+      "elapsed_min": 317.53,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:36:33+00:00",
+      "elapsed_min": 318.97,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:37:59+00:00",
+      "elapsed_min": 320.4,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:39:25+00:00",
+      "elapsed_min": 321.84,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:40:51+00:00",
+      "elapsed_min": 323.27,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:42:18+00:00",
+      "elapsed_min": 324.71,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:43:44+00:00",
+      "elapsed_min": 326.14,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:45:10+00:00",
+      "elapsed_min": 327.58,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:46:36+00:00",
+      "elapsed_min": 329.02,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:48:02+00:00",
+      "elapsed_min": 330.45,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:49:29+00:00",
+      "elapsed_min": 331.89,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:50:55+00:00",
+      "elapsed_min": 333.33,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:52:21+00:00",
+      "elapsed_min": 334.76,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:53:46+00:00",
+      "elapsed_min": 336.19,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:55:13+00:00",
+      "elapsed_min": 337.63,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:56:39+00:00",
+      "elapsed_min": 339.06,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:58:05+00:00",
+      "elapsed_min": 340.5,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T01:59:31+00:00",
+      "elapsed_min": 341.93,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:00:58+00:00",
+      "elapsed_min": 343.39,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:02:25+00:00",
+      "elapsed_min": 344.83,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:03:51+00:00",
+      "elapsed_min": 346.27,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:05:17+00:00",
+      "elapsed_min": 347.7,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:06:44+00:00",
+      "elapsed_min": 349.14,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:08:10+00:00",
+      "elapsed_min": 350.58,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:09:36+00:00",
+      "elapsed_min": 352.02,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:11:02+00:00",
+      "elapsed_min": 353.45,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:12:29+00:00",
+      "elapsed_min": 354.9,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:13:55+00:00",
+      "elapsed_min": 356.33,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:15:21+00:00",
+      "elapsed_min": 357.77,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:16:47+00:00",
+      "elapsed_min": 359.2,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:18:13+00:00",
+      "elapsed_min": 360.64,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:19:39+00:00",
+      "elapsed_min": 362.07,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:21:05+00:00",
+      "elapsed_min": 363.51,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:22:32+00:00",
+      "elapsed_min": 364.95,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:23:59+00:00",
+      "elapsed_min": 366.39,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:25:25+00:00",
+      "elapsed_min": 367.84,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:26:51+00:00",
+      "elapsed_min": 369.27,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:28:17+00:00",
+      "elapsed_min": 370.7,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:29:43+00:00",
+      "elapsed_min": 372.14,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:31:09+00:00",
+      "elapsed_min": 373.57,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:32:36+00:00",
+      "elapsed_min": 375.01,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:34:02+00:00",
+      "elapsed_min": 376.45,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:35:28+00:00",
+      "elapsed_min": 377.88,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:36:54+00:00",
+      "elapsed_min": 379.32,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:38:20+00:00",
+      "elapsed_min": 380.75,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:39:47+00:00",
+      "elapsed_min": 382.19,
+      "msg": "secured 2 file(s) (100 held)"
+    },
+    {
+      "utc": "2026-11-28T02:42:31+00:00",
+      "elapsed_min": 384.93,
+      "msg": "secured 1 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:43:57+00:00",
+      "elapsed_min": 386.37,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:45:23+00:00",
+      "elapsed_min": 387.8,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:46:49+00:00",
+      "elapsed_min": 389.24,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:48:16+00:00",
+      "elapsed_min": 390.68,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:49:42+00:00",
+      "elapsed_min": 392.11,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:51:08+00:00",
+      "elapsed_min": 393.54,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:52:34+00:00",
+      "elapsed_min": 394.98,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:54:00+00:00",
+      "elapsed_min": 396.41,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:55:26+00:00",
+      "elapsed_min": 397.85,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:56:52+00:00",
+      "elapsed_min": 399.28,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:58:18+00:00",
+      "elapsed_min": 400.72,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T02:59:45+00:00",
+      "elapsed_min": 402.17,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:01:12+00:00",
+      "elapsed_min": 403.61,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:02:38+00:00",
+      "elapsed_min": 405.05,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:04:04+00:00",
+      "elapsed_min": 406.48,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:05:30+00:00",
+      "elapsed_min": 407.92,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:08:21+00:00",
+      "elapsed_min": 410.77,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:09:47+00:00",
+      "elapsed_min": 412.2,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:11:13+00:00",
+      "elapsed_min": 413.64,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:12:40+00:00",
+      "elapsed_min": 415.08,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:14:06+00:00",
+      "elapsed_min": 416.52,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:15:33+00:00",
+      "elapsed_min": 417.96,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:16:59+00:00",
+      "elapsed_min": 419.39,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:18:25+00:00",
+      "elapsed_min": 420.83,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:19:51+00:00",
+      "elapsed_min": 422.26,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:21:17+00:00",
+      "elapsed_min": 423.7,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:22:43+00:00",
+      "elapsed_min": 425.13,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:24:09+00:00",
+      "elapsed_min": 426.57,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:25:36+00:00",
+      "elapsed_min": 428.01,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:27:02+00:00",
+      "elapsed_min": 429.44,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:28:28+00:00",
+      "elapsed_min": 430.88,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:29:54+00:00",
+      "elapsed_min": 432.32,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:31:20+00:00",
+      "elapsed_min": 433.75,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:32:46+00:00",
+      "elapsed_min": 435.17,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:34:12+00:00",
+      "elapsed_min": 436.62,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:35:39+00:00",
+      "elapsed_min": 438.06,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:37:05+00:00",
+      "elapsed_min": 439.49,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:38:31+00:00",
+      "elapsed_min": 440.92,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:39:56+00:00",
+      "elapsed_min": 442.36,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:41:23+00:00",
+      "elapsed_min": 443.79,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:42:49+00:00",
+      "elapsed_min": 445.23,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:44:15+00:00",
+      "elapsed_min": 446.67,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:45:41+00:00",
+      "elapsed_min": 448.1,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:47:07+00:00",
+      "elapsed_min": 449.54,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:48:34+00:00",
+      "elapsed_min": 450.98,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:50:00+00:00",
+      "elapsed_min": 452.42,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:51:26+00:00",
+      "elapsed_min": 453.85,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:52:52+00:00",
+      "elapsed_min": 455.28,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:54:18+00:00",
+      "elapsed_min": 456.72,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:55:44+00:00",
+      "elapsed_min": 458.15,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:57:11+00:00",
+      "elapsed_min": 459.6,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T03:58:37+00:00",
+      "elapsed_min": 461.04,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:00:03+00:00",
+      "elapsed_min": 462.47,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:01:29+00:00",
+      "elapsed_min": 463.91,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:02:56+00:00",
+      "elapsed_min": 465.35,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:04:22+00:00",
+      "elapsed_min": 466.79,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:05:48+00:00",
+      "elapsed_min": 468.22,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:07:15+00:00",
+      "elapsed_min": 469.67,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:08:42+00:00",
+      "elapsed_min": 471.11,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:11:26+00:00",
+      "elapsed_min": 473.85,
+      "msg": "secured 1 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:12:52+00:00",
+      "elapsed_min": 475.28,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:14:18+00:00",
+      "elapsed_min": 476.72,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:15:44+00:00",
+      "elapsed_min": 478.15,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:17:10+00:00",
+      "elapsed_min": 479.59,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:18:36+00:00",
+      "elapsed_min": 481.02,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:20:03+00:00",
+      "elapsed_min": 482.46,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:21:30+00:00",
+      "elapsed_min": 483.91,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:22:56+00:00",
+      "elapsed_min": 485.35,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:24:22+00:00",
+      "elapsed_min": 486.78,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:27:06+00:00",
+      "elapsed_min": 489.52,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:28:33+00:00",
+      "elapsed_min": 490.96,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:29:59+00:00",
+      "elapsed_min": 492.4,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:31:26+00:00",
+      "elapsed_min": 493.84,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:32:52+00:00",
+      "elapsed_min": 495.28,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:34:19+00:00",
+      "elapsed_min": 496.72,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:35:44+00:00",
+      "elapsed_min": 498.16,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:37:11+00:00",
+      "elapsed_min": 499.6,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:38:37+00:00",
+      "elapsed_min": 501.04,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:40:03+00:00",
+      "elapsed_min": 502.46,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:41:29+00:00",
+      "elapsed_min": 503.9,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:42:55+00:00",
+      "elapsed_min": 505.33,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:44:21+00:00",
+      "elapsed_min": 506.77,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:45:47+00:00",
+      "elapsed_min": 508.21,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:47:14+00:00",
+      "elapsed_min": 509.64,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:48:40+00:00",
+      "elapsed_min": 511.08,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:50:07+00:00",
+      "elapsed_min": 512.53,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:51:33+00:00",
+      "elapsed_min": 513.97,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:52:59+00:00",
+      "elapsed_min": 515.4,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:54:25+00:00",
+      "elapsed_min": 516.83,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:55:51+00:00",
+      "elapsed_min": 518.27,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:57:18+00:00",
+      "elapsed_min": 519.71,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T04:58:44+00:00",
+      "elapsed_min": 521.15,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:00:10+00:00",
+      "elapsed_min": 522.58,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:01:37+00:00",
+      "elapsed_min": 524.03,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:03:03+00:00",
+      "elapsed_min": 525.47,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:04:30+00:00",
+      "elapsed_min": 526.91,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:05:56+00:00",
+      "elapsed_min": 528.35,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:07:22+00:00",
+      "elapsed_min": 529.79,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:08:49+00:00",
+      "elapsed_min": 531.23,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:10:15+00:00",
+      "elapsed_min": 532.66,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:11:41+00:00",
+      "elapsed_min": 534.1,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:13:08+00:00",
+      "elapsed_min": 535.54,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:14:34+00:00",
+      "elapsed_min": 536.98,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:16:00+00:00",
+      "elapsed_min": 538.41,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:17:26+00:00",
+      "elapsed_min": 539.84,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:18:52+00:00",
+      "elapsed_min": 541.28,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:20:18+00:00",
+      "elapsed_min": 542.72,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:21:44+00:00",
+      "elapsed_min": 544.16,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:23:11+00:00",
+      "elapsed_min": 545.59,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:24:37+00:00",
+      "elapsed_min": 547.03,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:26:03+00:00",
+      "elapsed_min": 548.46,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:27:29+00:00",
+      "elapsed_min": 549.89,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:28:55+00:00",
+      "elapsed_min": 551.33,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:30:21+00:00",
+      "elapsed_min": 552.76,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:31:47+00:00",
+      "elapsed_min": 554.2,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:33:14+00:00",
+      "elapsed_min": 555.64,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:34:40+00:00",
+      "elapsed_min": 557.08,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:36:06+00:00",
+      "elapsed_min": 558.51,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:37:32+00:00",
+      "elapsed_min": 559.95,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:40:17+00:00",
+      "elapsed_min": 562.7,
+      "msg": "secured 1 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:41:43+00:00",
+      "elapsed_min": 564.14,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:43:10+00:00",
+      "elapsed_min": 565.58,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:44:36+00:00",
+      "elapsed_min": 567.01,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:46:02+00:00",
+      "elapsed_min": 568.45,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:47:28+00:00",
+      "elapsed_min": 569.89,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:48:55+00:00",
+      "elapsed_min": 571.33,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:50:22+00:00",
+      "elapsed_min": 572.78,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:51:48+00:00",
+      "elapsed_min": 574.22,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:53:14+00:00",
+      "elapsed_min": 575.65,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:54:40+00:00",
+      "elapsed_min": 577.08,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:56:06+00:00",
+      "elapsed_min": 578.52,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:57:33+00:00",
+      "elapsed_min": 579.97,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T05:58:59+00:00",
+      "elapsed_min": 581.4,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:00:25+00:00",
+      "elapsed_min": 582.84,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:01:52+00:00",
+      "elapsed_min": 584.28,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:03:18+00:00",
+      "elapsed_min": 585.72,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:04:44+00:00",
+      "elapsed_min": 587.15,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:06:10+00:00",
+      "elapsed_min": 588.59,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:07:36+00:00",
+      "elapsed_min": 590.02,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:09:03+00:00",
+      "elapsed_min": 591.47,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:10:29+00:00",
+      "elapsed_min": 592.91,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:11:56+00:00",
+      "elapsed_min": 594.35,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:13:22+00:00",
+      "elapsed_min": 595.78,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:14:49+00:00",
+      "elapsed_min": 597.22,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:16:15+00:00",
+      "elapsed_min": 598.66,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:17:42+00:00",
+      "elapsed_min": 600.11,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:19:08+00:00",
+      "elapsed_min": 601.55,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:20:34+00:00",
+      "elapsed_min": 602.99,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:22:00+00:00",
+      "elapsed_min": 604.42,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:23:26+00:00",
+      "elapsed_min": 605.86,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:24:53+00:00",
+      "elapsed_min": 607.3,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:26:19+00:00",
+      "elapsed_min": 608.73,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:27:45+00:00",
+      "elapsed_min": 610.17,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:29:11+00:00",
+      "elapsed_min": 611.6,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:30:38+00:00",
+      "elapsed_min": 613.05,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:32:04+00:00",
+      "elapsed_min": 614.49,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:33:31+00:00",
+      "elapsed_min": 615.93,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:34:57+00:00",
+      "elapsed_min": 617.37,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:36:24+00:00",
+      "elapsed_min": 618.81,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:37:50+00:00",
+      "elapsed_min": 620.24,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:39:16+00:00",
+      "elapsed_min": 621.68,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:40:42+00:00",
+      "elapsed_min": 623.12,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:42:09+00:00",
+      "elapsed_min": 624.56,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:43:35+00:00",
+      "elapsed_min": 626.0,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:45:01+00:00",
+      "elapsed_min": 627.44,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:46:28+00:00",
+      "elapsed_min": 628.88,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:47:55+00:00",
+      "elapsed_min": 630.32,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:49:21+00:00",
+      "elapsed_min": 631.76,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:50:47+00:00",
+      "elapsed_min": 633.2,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:52:14+00:00",
+      "elapsed_min": 634.65,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:53:40+00:00",
+      "elapsed_min": 636.09,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:55:07+00:00",
+      "elapsed_min": 637.52,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:56:33+00:00",
+      "elapsed_min": 638.96,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:57:59+00:00",
+      "elapsed_min": 640.4,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T06:59:26+00:00",
+      "elapsed_min": 641.84,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:00:52+00:00",
+      "elapsed_min": 643.28,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:02:19+00:00",
+      "elapsed_min": 644.73,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:03:45+00:00",
+      "elapsed_min": 646.16,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:05:11+00:00",
+      "elapsed_min": 647.6,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:06:38+00:00",
+      "elapsed_min": 649.05,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:09:23+00:00",
+      "elapsed_min": 651.8,
+      "msg": "secured 1 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:10:49+00:00",
+      "elapsed_min": 653.24,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:12:15+00:00",
+      "elapsed_min": 654.67,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:13:41+00:00",
+      "elapsed_min": 656.11,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:15:08+00:00",
+      "elapsed_min": 657.55,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:16:35+00:00",
+      "elapsed_min": 659.0,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:18:01+00:00",
+      "elapsed_min": 660.43,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:19:28+00:00",
+      "elapsed_min": 661.88,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:20:54+00:00",
+      "elapsed_min": 663.31,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:22:20+00:00",
+      "elapsed_min": 664.75,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:23:46+00:00",
+      "elapsed_min": 666.18,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:25:12+00:00",
+      "elapsed_min": 667.62,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:26:39+00:00",
+      "elapsed_min": 669.06,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:28:04+00:00",
+      "elapsed_min": 670.49,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:29:31+00:00",
+      "elapsed_min": 671.92,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:30:58+00:00",
+      "elapsed_min": 673.38,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:32:24+00:00",
+      "elapsed_min": 674.82,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:33:50+00:00",
+      "elapsed_min": 676.25,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:35:16+00:00",
+      "elapsed_min": 677.69,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:36:43+00:00",
+      "elapsed_min": 679.13,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:38:09+00:00",
+      "elapsed_min": 680.57,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:39:36+00:00",
+      "elapsed_min": 682.01,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:42:20+00:00",
+      "elapsed_min": 684.76,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:43:46+00:00",
+      "elapsed_min": 686.19,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:45:13+00:00",
+      "elapsed_min": 687.63,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:46:40+00:00",
+      "elapsed_min": 689.08,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:48:06+00:00",
+      "elapsed_min": 690.52,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:49:32+00:00",
+      "elapsed_min": 691.95,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:50:59+00:00",
+      "elapsed_min": 693.39,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:52:25+00:00",
+      "elapsed_min": 694.83,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:53:51+00:00",
+      "elapsed_min": 696.27,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:55:18+00:00",
+      "elapsed_min": 697.72,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:56:44+00:00",
+      "elapsed_min": 699.15,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:58:10+00:00",
+      "elapsed_min": 700.59,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T07:59:37+00:00",
+      "elapsed_min": 702.03,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:01:03+00:00",
+      "elapsed_min": 703.47,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:02:30+00:00",
+      "elapsed_min": 704.91,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:03:56+00:00",
+      "elapsed_min": 706.34,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:05:22+00:00",
+      "elapsed_min": 707.78,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:06:48+00:00",
+      "elapsed_min": 709.22,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:08:15+00:00",
+      "elapsed_min": 710.66,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:09:41+00:00",
+      "elapsed_min": 712.11,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:11:08+00:00",
+      "elapsed_min": 713.55,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:12:35+00:00",
+      "elapsed_min": 714.99,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:14:01+00:00",
+      "elapsed_min": 716.43,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:15:28+00:00",
+      "elapsed_min": 717.88,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:16:55+00:00",
+      "elapsed_min": 719.33,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:18:22+00:00",
+      "elapsed_min": 720.78,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:19:48+00:00",
+      "elapsed_min": 722.22,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:21:15+00:00",
+      "elapsed_min": 723.66,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:22:41+00:00",
+      "elapsed_min": 725.1,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:24:08+00:00",
+      "elapsed_min": 726.55,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:25:34+00:00",
+      "elapsed_min": 727.99,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:27:00+00:00",
+      "elapsed_min": 729.42,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:28:27+00:00",
+      "elapsed_min": 730.86,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:29:53+00:00",
+      "elapsed_min": 732.3,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:31:19+00:00",
+      "elapsed_min": 733.73,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:32:46+00:00",
+      "elapsed_min": 735.18,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:34:12+00:00",
+      "elapsed_min": 736.61,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:35:38+00:00",
+      "elapsed_min": 738.05,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:38:24+00:00",
+      "elapsed_min": 740.82,
+      "msg": "secured 1 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:39:51+00:00",
+      "elapsed_min": 742.26,
+      "msg": "secured 3 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:41:17+00:00",
+      "elapsed_min": 743.7,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:42:44+00:00",
+      "elapsed_min": 745.14,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:44:10+00:00",
+      "elapsed_min": 746.59,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:45:37+00:00",
+      "elapsed_min": 748.03,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:47:03+00:00",
+      "elapsed_min": 749.47,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:48:29+00:00",
+      "elapsed_min": 750.91,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:49:56+00:00",
+      "elapsed_min": 752.34,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:51:22+00:00",
+      "elapsed_min": 753.78,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:52:48+00:00",
+      "elapsed_min": 755.22,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:54:15+00:00",
+      "elapsed_min": 756.67,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:55:42+00:00",
+      "elapsed_min": 758.11,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:57:09+00:00",
+      "elapsed_min": 759.57,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T08:58:35+00:00",
+      "elapsed_min": 761.0,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:00:01+00:00",
+      "elapsed_min": 762.44,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:01:28+00:00",
+      "elapsed_min": 763.88,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:02:54+00:00",
+      "elapsed_min": 765.32,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:04:21+00:00",
+      "elapsed_min": 766.76,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:05:47+00:00",
+      "elapsed_min": 768.2,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:07:13+00:00",
+      "elapsed_min": 769.63,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:08:39+00:00",
+      "elapsed_min": 771.07,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:10:06+00:00",
+      "elapsed_min": 772.51,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:11:32+00:00",
+      "elapsed_min": 773.95,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:12:58+00:00",
+      "elapsed_min": 775.39,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:14:25+00:00",
+      "elapsed_min": 776.83,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:15:52+00:00",
+      "elapsed_min": 778.27,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:17:18+00:00",
+      "elapsed_min": 779.72,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:18:44+00:00",
+      "elapsed_min": 781.15,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:20:10+00:00",
+      "elapsed_min": 782.59,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:21:36+00:00",
+      "elapsed_min": 784.02,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:23:02+00:00",
+      "elapsed_min": 785.46,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:24:29+00:00",
+      "elapsed_min": 786.9,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:25:55+00:00",
+      "elapsed_min": 788.34,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:27:22+00:00",
+      "elapsed_min": 789.78,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:28:48+00:00",
+      "elapsed_min": 791.22,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:30:15+00:00",
+      "elapsed_min": 792.66,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:31:41+00:00",
+      "elapsed_min": 794.11,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:33:07+00:00",
+      "elapsed_min": 795.54,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:34:34+00:00",
+      "elapsed_min": 796.98,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:36:01+00:00",
+      "elapsed_min": 798.43,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:37:27+00:00",
+      "elapsed_min": 799.87,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:38:53+00:00",
+      "elapsed_min": 801.3,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:40:20+00:00",
+      "elapsed_min": 802.74,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:41:46+00:00",
+      "elapsed_min": 804.18,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:43:12+00:00",
+      "elapsed_min": 805.62,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:44:39+00:00",
+      "elapsed_min": 807.06,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:46:05+00:00",
+      "elapsed_min": 808.5,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:47:31+00:00",
+      "elapsed_min": 809.93,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:48:58+00:00",
+      "elapsed_min": 811.38,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:50:25+00:00",
+      "elapsed_min": 812.83,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:51:51+00:00",
+      "elapsed_min": 814.27,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:53:18+00:00",
+      "elapsed_min": 815.72,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:54:45+00:00",
+      "elapsed_min": 817.16,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:56:11+00:00",
+      "elapsed_min": 818.6,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:57:37+00:00",
+      "elapsed_min": 820.04,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T09:59:04+00:00",
+      "elapsed_min": 821.48,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T10:00:30+00:00",
+      "elapsed_min": 822.92,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T10:00:35+00:00",
+      "elapsed_min": 822.99,
+      "msg": "  driver unanswered for 0 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:01:58+00:00",
+      "elapsed_min": 824.38,
+      "msg": "secured 2 file(s) (101 held)"
+    },
+    {
+      "utc": "2026-11-28T10:02:01+00:00",
+      "elapsed_min": 824.44,
+      "msg": "  driver unanswered for 87 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:03:20+00:00",
+      "elapsed_min": 825.74,
+      "msg": "  driver unanswered for 165 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:04:38+00:00",
+      "elapsed_min": 827.05,
+      "msg": "  driver unanswered for 244 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:05:56+00:00",
+      "elapsed_min": 828.36,
+      "msg": "  driver unanswered for 322 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:07:15+00:00",
+      "elapsed_min": 829.66,
+      "msg": "  driver unanswered for 400 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:08:33+00:00",
+      "elapsed_min": 830.96,
+      "msg": "  driver unanswered for 478 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:09:51+00:00",
+      "elapsed_min": 832.26,
+      "msg": "  driver unanswered for 556 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:11:09+00:00",
+      "elapsed_min": 833.57,
+      "msg": "  driver unanswered for 634 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:12:28+00:00",
+      "elapsed_min": 834.87,
+      "msg": "  driver unanswered for 713 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:13:46+00:00",
+      "elapsed_min": 836.18,
+      "msg": "  driver unanswered for 791 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:15:04+00:00",
+      "elapsed_min": 837.49,
+      "msg": "  driver unanswered for 870 s on a billing pod; still looking"
+    },
+    {
+      "utc": "2026-11-28T10:16:25+00:00",
+      "elapsed_min": 838.83,
+      "msg": "driver no longer running: UNKNOWN"
+    },
+    {
+      "utc": "2026-11-28T10:16:25+00:00",
+      "elapsed_min": 838.83,
+      "msg": "polling ended: DRIVER_UNKNOWN \u2014 $15.24"
+    },
+    {
+      "utc": "2026-11-28T10:17:57+00:00",
+      "elapsed_min": 840.37,
+      "msg": "  manifest rc=0\n22 file(s) across 4 class(es) -> /workspace/manifest.json\n  final_required: 22 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-11-28T10:18:17+00:00",
+      "elapsed_min": 840.7,
+      "msg": "  PRODUCTS NOT SECURED: not all finished work is secured (driver done: False, pending: 0, final listing: verified)"
+    },
+    {
+      "utc": "2026-11-28T10:18:17+00:00",
+      "elapsed_min": 840.7,
+      "msg": "  RECORDED: PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK"
+    },
+    {
+      "utc": "2026-11-28T10:18:17+00:00",
+      "elapsed_min": 840.7,
+      "msg": "teardown gate: allowed=True failed=training_complete \u00b7 PRODUCTS_UNSECURED/ARTIFACT_LOSS_RISK"
+    },
+    {
+      "utc": "2026-11-28T10:18:17+00:00",
+      "elapsed_min": 840.7,
+      "msg": "deleting pod (gate passed after DRIVER_UNKNOWN with PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK)"
+    },
+    {
+      "utc": "2026-11-28T10:18:28+00:00",
+      "elapsed_min": 840.89,
+      "msg": "pod deleted \u2014 840.9 min, $15.28; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage1.depth_merge.authorization/v1",
+    "authorization_id": "stage1.depth_merge.dmr1_merge_train_20261127_201532",
+    "version": 1,
+    "granted_utc": "2026-11-27T20:15:51+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "stage1.depth_merge",
+    "study_identity_sha256": "297d341a3703ec08036c2480c03a433d3fc0cd058f8e863c1b5a6f671559bf63",
+    "expected_usd": 22.86,
+    "hard_cap_usd": 51.97,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "identity:configs/stages/stage-1/depth_merge/design.json": "e9ec8fc6118f1cfcbfa533357b81012d302c9d6c1d2d9a5edf763c402acd36cd",
+      "identity:configs/stages/stage-1/depth_merge/depth_init_tensor_digests.json": "3edfb5de761e8f22fa99dc8d51e6bb33242eb7cbd7ddef54b8e59c943044fbb5",
+      "arm": "depth_merge",
+      "plan": "logs/stages/stage-1/depth_merge/plans/training_plan_depth_merge.json",
+      "plan_sha256": "f32e422f78f2a1681361b2ee6d9b644167f7007f02da0f467979ae885425187c",
+      "init_record_sha256": "f57131792b5068ee8bf5ad199edd228a3f60ba6618c2b0f49226ee02d3097db5",
+      "resume_from": "transfer/stage1_depth_merge/dmr1_merge_train_20261127_201532/resume_dmr1_merge_train_20261127_201532.tgz@b1aa52a0854fa9db47e0a56fb635bb7737849105f3a64cb5fbbfe14580b25b8b",
+      "kind": "dmr1_merge_train",
+      "study": "DMR1-M",
+      "dry_run": "false",
+      "grant": "logs/budget/approvals/dmr1_dmr1_merge_train_grant.json",
+      "grant_sha256": "4eb29fefabed5d30571c96d379e00a696354ffece4032e2ad5143212fa3f8b57",
+      "gpus": "{\"NVIDIA L40S\": 1.11}",
+      "gpu_count_max": "1",
+      "envelope": "{\"ceiling_usd\": 64.46, \"spent_usd\": 11.2083, \"remaining_usd\": 53.2517, \"runs\": [{\"run_id\": \"dmr1_merge_train_20261127_095843\", \"usd\": 11.2083}]}",
+      "live_position": "{\"fetched_utc\": \"2026-11-27T20:15:49+00:00\", \"provider_billed_usd\": 1098.1827, \"committed_usd\": 1098.1827, \"project_cap_usd\": 1161.06, \"project_remaining_usd\": 62.8773, \"account_pods\": [], \"account_volumes\": [], \"balance_usd\": 110.9163352945, \"spend_per_hour\": 0.0, \"rule\": \"shared.project_position: mixed_governance.position + engineering-campaign subruns\", \"unposted_sessions\": 0, \"campaign_unposted\": 0, \"campaign_teardown_confirmed_by\": {\"subrun record\": 25, \"reconciliation\": 30}}"
+    },
+    "scope_note": "DMR1 V1 attempt 2 of the dmr1_merge_train grant: seed 20260726 resumed from its step-6,624 save point, then seed 20260801; attempt 1 (dmr1_merge_train_20261127_095843, $11.2083) ended by the launcher's poll limit",
+    "authorizes_engineering_validation": false,
+    "authorizes_formal": true,
+    "authorizes_training": true,
+    "authorizes_evaluation": true,
+    "authorizes_teacher_generation": false,
+    "authorizes_paid_storage": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "124e0cf47297b7ed5b8d539b0ab56f592b7481788cadc3859dd74fb06a127182",
+    "harness_source_files": [
+      "src/aadistill/__init__.py",
+      "src/aadistill/data/__init__.py",
+      "src/aadistill/data/cleaning.py",
+      "src/aadistill/data/code_exec.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/diversity.py",
+      "src/aadistill/data/e5_pack.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/mixture.py",
+      "src/aadistill/data/nested_ladder.py",
+      "src/aadistill/data/paired_corpus.py",
+      "src/aadistill/data/prefix_split.py",
+      "src/aadistill/data/recovery.py",
+      "src/aadistill/data/sequence_packing.py",
+      "src/aadistill/data/sessions.py",
+      "src/aadistill/data/target_policy.py",
+      "src/aadistill/data/target_quality.py",
+      "src/aadistill/data/token_documents.py",
+      "src/aadistill/data/tool_calls.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/eval_registry.py",
+      "src/aadistill/evaluation/function_error.py",
+      "src/aadistill/evaluation/general_text.py",
+      "src/aadistill/evaluation/init_nll.py",
+      "src/aadistill/evaluation/isolation.py",
+      "src/aadistill/evaluation/oracle_reasoning.py",
+      "src/aadistill/evaluation/paired_stats.py",
+      "src/aadistill/evaluation/protocol_field.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/__init__.py",
+      "src/aadistill/governance/artifact_manifest.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/governance/post_freeze.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/source_identity.py",
+      "src/aadistill/infrastructure/transfer.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/__init__.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/families.py",
+      "src/aadistill/initialization/adapters/projected_residual.py",
+      "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/adapters/recurrent_depth.py",
+      "src/aadistill/initialization/adapters/recurrent_depth_vllm.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/calibration/__init__.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/__init__.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/frozen_mapping.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/layer_merge.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_import.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/__init__.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/kl_reference.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/__init__.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/identity_collapse.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/__init__.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/reweight.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/__init__.py",
+      "src/aadistill/initialization/transforms/nll_gate.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/projected_residual.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/__init__.py",
+      "src/aadistill/models/cost_model.py",
+      "src/aadistill/models/quant.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/rollout/__init__.py",
+      "src/aadistill/rollout/engines.py",
+      "src/aadistill/rollout/generate.py",
+      "src/aadistill/rollout/snapshots.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/durable_store.py",
+      "src/aadistill/runtime/hub_capacity.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/setup_steps.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/__init__.py",
+      "src/aadistill/training/accounting.py",
+      "src/aadistill/training/hidden_state.py",
+      "src/aadistill/training/lineage.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/topk_kd.py",
+      "src/aadistill/training/train.py",
+      "scripts/stages/stage-1/depth_merge/__init__.py",
+      "scripts/stages/stage-1/depth_merge/common.py",
+      "scripts/stages/stage-1/depth_merge/merge.py",
+      "scripts/stages/stage-1/depth_merge/build_driver.py",
+      "scripts/stages/stage-1/depth_merge/train_driver.py",
+      "scripts/stages/stage-1/depth_merge/plan.py",
+      "scripts/stages/stage-1/depth_merge/session.py",
+      "scripts/stages/stage-1/depth_merge/launch.py",
+      "scripts/stages/stage-1/depth_merge/analysis.py",
+      "scripts/stages/stage-6/depth_recurrence/__init__.py",
+      "scripts/stages/stage-6/depth_recurrence/schedule.py",
+      "scripts/stages/stage-6/depth_recurrence/launch.py",
+      "scripts/stages/stage-1/single_operator_budget/__init__.py",
+      "scripts/stages/stage-1/single_operator_budget/common.py",
+      "scripts/stages/stage-1/single_operator_budget/train_driver.py",
+      "scripts/stages/stage-1/single_operator_budget/completion.py",
+      "scripts/stages/stage-1/single_operator_budget/launch.py",
+      "scripts/stages/stage-1/single_operator_budget/analysis.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/__init__.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/init_driver.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/train_driver.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/relay.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/plan.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/analysis.py",
+      "scripts/stages/stage-1/teacher_parent_initialization/b_evidence.py",
+      "scripts/stages/stage-1/reasoning_inheritance/analysis.py",
+      "scripts/stages/stage-1/reasoning_inheritance/layer_merge.py",
+      "scripts/stages/stage-1/reasoning_inheritance/layer_merge_analysis.py",
+      "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+      "scripts/stages/stage-1/reasoning_inheritance/launch.py",
+      "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+      "scripts/stages/stage-2/teacher_modes/a1_units.py",
+      "scripts/stages/stage-2/teacher_modes/training_plan.py",
+      "scripts/stages/stage-2/teacher_modes/packed_training_plan.py",
+      "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+      "scripts/stages/stage-2/teacher_modes/full_search.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "scripts/shared/evaluation/eval_set_scoring.py",
+      "scripts/shared/training/train_stage3.py",
+      "scripts/shared/training/initialization_provenance.py",
+      "scripts/shared/rollout/vllm_plugin_path.py",
+      "scripts/shared/rollout/vllm_plugin/aadistill_vllm_plugin-1.0.dist-info/entry_points.txt",
+      "scripts/shared/study_engineering.py"
+    ],
+    "per_launch_hard_usd": 51.97,
+    "provenance_commit": "e5482309e7687923102412d00e57a82596a13169",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the study identity and the harness on disk, is not a dry run, has not been used, and its hard cap covers the planned all-in bound and fits the project cap as the provider bills it at launch; setup re-checks the binding on the pod; one artifact funds one run inside the grant's envelope",
+    "authorization_sha256": "1671f5a0bbcb7748357b25cb440132a3b2665bacf5c8a27a72af5239d523e290"
+  },
+  "session_plan_hash": "297d341a3703ec08036c2480c03a433d3fc0cd058f8e863c1b5a6f671559bf63",
+  "harness_source_digest": "124e0cf47297b7ed5b8d539b0ab56f592b7481788cadc3859dd74fb06a127182",
+  "harness_source_files": [
+    "scripts/shared/evaluation/eval_set_scoring.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/rollout/vllm_plugin/aadistill_vllm_plugin-1.0.dist-info/entry_points.txt",
+    "scripts/shared/rollout/vllm_plugin_path.py",
+    "scripts/shared/study_engineering.py",
+    "scripts/shared/training/initialization_provenance.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-1/depth_merge/__init__.py",
+    "scripts/stages/stage-1/depth_merge/analysis.py",
+    "scripts/stages/stage-1/depth_merge/build_driver.py",
+    "scripts/stages/stage-1/depth_merge/common.py",
+    "scripts/stages/stage-1/depth_merge/launch.py",
+    "scripts/stages/stage-1/depth_merge/merge.py",
+    "scripts/stages/stage-1/depth_merge/plan.py",
+    "scripts/stages/stage-1/depth_merge/session.py",
+    "scripts/stages/stage-1/depth_merge/train_driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/analysis.py",
+    "scripts/stages/stage-1/reasoning_inheritance/driver.py",
+    "scripts/stages/stage-1/reasoning_inheritance/launch.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_analysis.py",
+    "scripts/stages/stage-1/reasoning_inheritance/layer_merge_launch.py",
+    "scripts/stages/stage-1/single_operator_budget/__init__.py",
+    "scripts/stages/stage-1/single_operator_budget/analysis.py",
+    "scripts/stages/stage-1/single_operator_budget/common.py",
+    "scripts/stages/stage-1/single_operator_budget/completion.py",
+    "scripts/stages/stage-1/single_operator_budget/launch.py",
+    "scripts/stages/stage-1/single_operator_budget/train_driver.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/__init__.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/analysis.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/b_evidence.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/init_driver.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/plan.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/relay.py",
+    "scripts/stages/stage-1/teacher_parent_initialization/train_driver.py",
+    "scripts/stages/stage-2/teacher_modes/a1_units.py",
+    "scripts/stages/stage-2/teacher_modes/full_search.py",
+    "scripts/stages/stage-2/teacher_modes/packed_full_search.py",
+    "scripts/stages/stage-2/teacher_modes/packed_training_plan.py",
+    "scripts/stages/stage-2/teacher_modes/training_plan.py",
+    "scripts/stages/stage-6/depth_recurrence/__init__.py",
+    "scripts/stages/stage-6/depth_recurrence/launch.py",
+    "scripts/stages/stage-6/depth_recurrence/schedule.py",
+    "src/aadistill/__init__.py",
+    "src/aadistill/data/__init__.py",
+    "src/aadistill/data/cleaning.py",
+    "src/aadistill/data/code_exec.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/diversity.py",
+    "src/aadistill/data/e5_pack.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/mixture.py",
+    "src/aadistill/data/nested_ladder.py",
+    "src/aadistill/data/paired_corpus.py",
+    "src/aadistill/data/prefix_split.py",
+    "src/aadistill/data/recovery.py",
+    "src/aadistill/data/sequence_packing.py",
+    "src/aadistill/data/sessions.py",
+    "src/aadistill/data/target_policy.py",
+    "src/aadistill/data/target_quality.py",
+    "src/aadistill/data/token_documents.py",
+    "src/aadistill/data/tool_calls.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/function_error.py",
+    "src/aadistill/evaluation/general_text.py",
+    "src/aadistill/evaluation/init_nll.py",
+    "src/aadistill/evaluation/isolation.py",
+    "src/aadistill/evaluation/oracle_reasoning.py",
+    "src/aadistill/evaluation/paired_stats.py",
+    "src/aadistill/evaluation/protocol_field.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/__init__.py",
+    "src/aadistill/governance/artifact_manifest.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/governance/post_freeze.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/source_identity.py",
+    "src/aadistill/infrastructure/transfer.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/__init__.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/families.py",
+    "src/aadistill/initialization/adapters/projected_residual.py",
+    "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/adapters/recurrent_depth.py",
+    "src/aadistill/initialization/adapters/recurrent_depth_vllm.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/calibration/__init__.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/__init__.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/frozen_mapping.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/layer_merge.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_import.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/__init__.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/kl_reference.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/__init__.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/identity_collapse.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/__init__.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/reweight.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/__init__.py",
+    "src/aadistill/initialization/transforms/nll_gate.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/projected_residual.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/__init__.py",
+    "src/aadistill/models/cost_model.py",
+    "src/aadistill/models/quant.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/rollout/__init__.py",
+    "src/aadistill/rollout/engines.py",
+    "src/aadistill/rollout/generate.py",
+    "src/aadistill/rollout/snapshots.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/durable_store.py",
+    "src/aadistill/runtime/hub_capacity.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/setup_steps.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/__init__.py",
+    "src/aadistill/training/accounting.py",
+    "src/aadistill/training/hidden_state.py",
+    "src/aadistill/training/lineage.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/topk_kd.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.11,
+    "authorized_usd": 51.97,
+    "expected_minutes": 2605.8,
+    "soft_stop_minutes": 2746.59,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 2756.59,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: the validation is one phase (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 25.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 5.0
+      },
+      {
+        "name": "DMR1-M_dmr1_merge_train",
+        "minutes": 2575.8
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "closeout_and_teardown",
+        "minutes": 10.5
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 10.5,
+    "expected_usd": 48.2073,
+    "soft_stop_usd": 50.8119,
+    "artifact_recovery_reserve_usd": 0.185,
+    "hard_terminate_usd": 50.9969
+  },
+  "poll_lifetime": {
+    "ok": true,
+    "message": "polling 2758.6 min: the plan's 2756.6 min hard bound plus two 60 s polls (derived)",
+    "poll_limit_min": 2758.6
+  },
+  "quoted_price_per_hour": 1.09,
+  "gpu_count": 1,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 110.9163352945,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 50.9969,
+    "ok": true,
+    "why": "the provider account holds $110.9163 against the $50.9969 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "account_resources": {
+    "checked": true,
+    "known": true,
+    "pods": [],
+    "network_volumes": [],
+    "error": null,
+    "accounted": [],
+    "unaccounted": [],
+    "ok": true,
+    "why": "the provider account holds only the 0 resource(s) the records account for"
+  },
+  "prechecks": [
+    {
+      "check": "the_study_is_open",
+      "ok": true,
+      "message": "DMR1-M and its dmr1_merge_train kind are open"
+    },
+    {
+      "check": "the_artifact_is_this_studys_and_unused",
+      "ok": true,
+      "message": "a DMR1-M dmr1_merge_train artifact, unused"
+    },
+    {
+      "check": "the_gpu_and_price_are_the_grants",
+      "ok": true,
+      "message": "1 x NVIDIA L40S at no more than $1.11/h for the pod, as granted"
+    },
+    {
+      "check": "all_in_within_cap",
+      "ok": true,
+      "message": "all-in $51.9639 over 2757.84 min, inside $51.97"
+    },
+    {
+      "check": "the_study_identity_is_the_authorized_one",
+      "ok": true,
+      "message": "study identity 297d341a3703 is the authorized one"
+    },
+    {
+      "check": "bound_files_are_in_the_session_commit",
+      "ok": true,
+      "message": "every bound file is in the session commit"
+    },
+    {
+      "check": "the_project_cap_holds_now",
+      "ok": true,
+      "message": "$51.97 inside the envelope ($53.2517) and the $62.8773 the project cap leaves now"
+    },
+    {
+      "check": "the_authorization_is_in_the_session_commit",
+      "ok": true,
+      "message": "the authorization is in session commit 3fc32e8c7b2d"
+    },
+    {
+      "check": "the_teardown_reserve_stays",
+      "ok": true,
+      "message": "the cap and the teardown reserve fit"
+    },
+    {
+      "check": "the_kind_records_are_the_bound_ones",
+      "ok": true,
+      "message": "the artifact binds this tree's records"
+    },
+    {
+      "check": "the_initialization_is_durable",
+      "ok": true,
+      "message": "depth_merge's initialization is on the relay with its recorded hashes"
+    },
+    {
+      "check": "the_relay_has_room",
+      "ok": true,
+      "message": "the remaining rotation needs 26.96 GiB more at its peak: 3 object(s), 26.96 GiB: ACCEPTED (200) 3/3 granted an upload action"
+    },
+    {
+      "check": "the_dev_box_has_room",
+      "ok": true,
+      "message": "/home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_201532: 6.98 GiB free for the session's 1.50 GiB evidence bound"
+    },
+    {
+      "check": "the_launch_runs_the_authorized_arm_and_plan",
+      "ok": true,
+      "message": "the artifact funds the plan this launch runs (depth_merge)"
+    }
+  ],
+  "all_in_bound": {
+    "billable_minutes": 2757.84,
+    "price_per_hour": 1.11,
+    "container_disk_gb": 150,
+    "gpu_usd": 51.02,
+    "disk_usd": 0.9438,
+    "all_in_usd": 51.9639,
+    "highest_price_inside_cap": 1.11
+  },
+  "live_position": {
+    "fetched_utc": "2026-11-27T20:17:21+00:00",
+    "provider_billed_usd": 1098.1827,
+    "committed_usd": 1098.1827,
+    "project_cap_usd": 1161.06,
+    "project_remaining_usd": 62.8773,
+    "account_pods": [],
+    "account_volumes": [],
+    "balance_usd": 110.9163352945,
+    "spend_per_hour": 0.0,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 0,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+      "subrun record": 25,
+      "reconciliation": 30
+    }
+  },
+  "envelope": {
+    "ceiling_usd": 64.46,
+    "spent_usd": 11.2083,
+    "remaining_usd": 53.2517,
+    "runs": [
+      {
+        "run_id": "dmr1_merge_train_20261127_095843",
+        "usd": 11.2083
+      },
+      {
+        "run_id": "dmr1_merge_train_20261127_201532",
+        "usd": 0.0
+      }
+    ]
+  },
+  "relay_reclaim": {
+    "schema": "aadistill.stage1.single_operator_budget.relay_reclaim/v1",
+    "arm": "depth_merge",
+    "units": {
+      "depth_merge-s20260726": {
+        "kept": {
+          "tag": "step_006624",
+          "step": 6624,
+          "prefix": "durable/stage1_depth_merge/depth_merge/depth_merge-s20260726/savepoints/step_006624",
+          "why": "the latest valid save point: the one a takeover restores"
+        },
+        "removed": [],
+        "not_removed": [],
+        "invalid": []
+      },
+      "depth_merge-s20260801": {
+        "kept": null,
+        "removed": [],
+        "not_removed": [],
+        "invalid": []
+      }
+    },
+    "checked_utc": "2026-11-27T20:17:29Z"
+  },
+  "relay_state": {
+    "depth_merge-s20260726": {
+      "save_points": [
+        6624
+      ],
+      "final": false,
+      "not_reusable": []
+    },
+    "depth_merge-s20260801": {
+      "save_points": [],
+      "final": false,
+      "not_reusable": []
+    }
+  },
+  "relay_need": {
+    "peak_bytes": 28949979136,
+    "peak_gib": 26.96,
+    "end_bytes": -4903757824,
+    "rule": "the peak of bytes uploaded minus bytes removed over the remaining rotation (rotation_need)"
+  },
+  "relay_room": "3 object(s), 26.96 GiB: ACCEPTED (200) 3/3 granted an upload action",
+  "dev_box_room": {
+    "free_bytes": 7495593984,
+    "bound_bytes": 1610612736,
+    "path": "/home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_201532"
+  },
+  "precheck": {
+    "relay_needed": [
+      "transfer/stage3_sr/A-MIX-6cat-sr/4c794692a1d6072c/blocks.npz",
+      "transfer/stage3_sr/A-MIX-6cat-sr/aaa6fcb0b708f766/ladder.json",
+      "transfer/stage3_sr/A-MIX-6cat-sr/63ad3c7fbc8dd2ca/audit.jsonl",
+      "transfer/stage1_depth_merge/dmr1_merge_train_20261127_201532/resume_dmr1_merge_train_20261127_201532.tgz"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 4
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1346
+    },
+    "local_assets": [
+      "artifacts/stages/stage-3/eval/battery_v2"
+    ],
+    "local_missing": []
+  },
+  "acquisition": {
+    "create_attempts": 72,
+    "create_retry_seconds": 300.0,
+    "attempts": [
+      {
+        "draw": 1,
+        "attempt": 1,
+        "request": "d1a161eb06",
+        "placement": [],
+        "request_utc": "2026-11-27T20:17:34+00:00",
+        "terminate_after_utc": "2026-11-29T18:14:10Z",
+        "outcome": "created",
+        "pod_id": "z4025h5bufx23b"
+      }
+    ]
+  },
+  "pod_id": "z4025h5bufx23b",
+  "actual_price_per_hour": 1.09,
+  "pod_record": {
+    "dataCenterId": null,
+    "createdAt": "2026-11-27T20:17:35.572Z",
+    "costPerHr": null,
+    "cost": 1.09,
+    "machineId": null,
+    "name": "aadistill-dmr1_depth_merge-dmr1_merge_train-d1a161eb06"
+  },
+  "start": {
+    "basis": "provider createdAt",
+    "request_utc": "2026-11-27T20:17:34+00:00",
+    "provider_created_utc": "2026-11-27T20:17:35.572Z",
+    "start_epoch": 1795810655.572
+  },
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_201532/watchdog_z4025h5bufx23b.jsonl"
+  ],
+  "watchdog_owns_pod": "z4025h5bufx23b",
+  "billed_window_deadline_utc": "2026-11-29T18:14:10Z",
+  "terminate_after_utc": null,
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.112.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.112.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_3fc32e8c.bundle",
+    "SESSION_ASSETS": "battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/depth_merge/runs/dmr1_merge_train_20261127_201532/governance/authorization.json",
+    "SESSION_COMMIT": "3fc32e8c7b2dc5976e7a8ca2d419d6a81c76ab6d",
+    "SESSION_KIND": "dmr1_depth_merge",
+    "SESSION_PLAN_HASH": "297d341a3703ec08036c2480c03a433d3fc0cd058f8e863c1b5a6f671559bf63",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr\",\"path\":\"transfer/stage3_sr/A-MIX-6cat-sr/4c794692a1d6072c/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"4c794692a1d6072ced81c2192aa3493b14dab9a6904132a44645c93107cdbfee\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr\",\"path\":\"transfer/stage3_sr/A-MIX-6cat-sr/aaa6fcb0b708f766/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"aaa6fcb0b708f7665c4e7b4f9c8fe94666f024425075984ecf90250b735d0519\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-2/teacher_modes/packs_6cat/A-MIX-6cat-sr\",\"path\":\"transfer/stage3_sr/A-MIX-6cat-sr/63ad3c7fbc8dd2ca/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"63ad3c7fbc8dd2ca2ee4992565f4f85f79184487dea15c512f41a9d40fb0b598\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/depth_merge/resume\",\"path\":\"transfer/stage1_depth_merge/dmr1_merge_train_20261127_201532/resume_dmr1_merge_train_20261127_201532.tgz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"b1aa52a0854fa9db47e0a56fb635bb7737849105f3a64cb5fbbfe14580b25b8b\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/dmr1_depth_merge.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_MODEL": "Qwen/Qwen3-4B",
+    "TEACHER_REVISION": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "dmr1_depth_merge_driver",
+    "pid": 2369,
+    "workdir": "/workspace/aad",
+    "command": "mkdir -p /workspace/aad/artifacts/audit/dmr1_depth_merge/dmr1_merge_train_20261127_201532 && cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts:/workspace/aad/scripts/stages/stage-1:/workspace/aad/scripts/stages/stage-0/calibration_volume /opt/train/bin/python scripts/stages/stage-1/depth_merge/train_driver.py --authorization /workspace/aad/logs/stages/stage-1/depth_merge/runs/dmr1_merge_train_20261127_201532/governance/authorization.json --out /workspace/aad/artifacts/audit/dmr1_depth_merge/dmr1_merge_train_20261127_201532 --status /workspace/dmr1_depth_merge.status --plan logs/stages/stage-1/depth_merge/plans/training_plan_depth_merge.json --prefix-root durable/stage1_depth_merge --unit-deadline-hours 19.5 --session-deadline-utc 2026-11-29T18:14:10Z --vllm-python /opt/vllm/bin/python --attempt dmr1_merge_train_20261127_201532 --resume /workspace/aad/artifacts/stages/stage-1/depth_merge/resume/resume_dmr1_merge_train_20261127_201532.tgz; grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' /workspace/dmr1_depth_merge.status || echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> /workspace/dmr1_depth_merge.status",
+    "log_path": "/workspace/dmr1_depth_merge_run.log",
+    "status_path": "/workspace/dmr1_depth_merge.status",
+    "pid_path": "/workspace/jobs/dmr1_depth_merge_driver.pid",
+    "descriptor_path": "/workspace/jobs/dmr1_depth_merge_driver.job.json",
+    "exit_path": "/workspace/jobs/dmr1_depth_merge_driver.exit",
+    "started_utc": "2026-11-27T20:22:44Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "secure_rounds": 560,
+  "secured_files": {
+    "files": 101,
+    "pending": 0,
+    "listed": 101
+  },
+  "terminal": "DRIVER_UNKNOWN",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "final_listing": {
+    "utc": "2026-11-28T10:18:17Z",
+    "withdrawn": [],
+    "files": 101,
+    "mismatched": [],
+    "missing_here": [],
+    "n_bad": 0,
+    "verified": true
+  },
+  "required_products_secured": {
+    "ok": false,
+    "why": "not all finished work is secured (driver done: False, pending: 0, final listing: verified)"
+  },
+  "artifact_loss_risk": {
+    "condition": "PRODUCTS_UNSECURED / ARTIFACT_LOSS_RISK",
+    "why": "not all finished work is secured (driver done: False, pending: 0, final listing: verified)",
+    "fetched": 0,
+    "note": "the bounded fetch ran and did not secure what this session owes off-pod; the pod is deleted anyway because an unbounded hold is a worse failure, and this record is what makes the risk visible"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": true,
+    "failed_check": "training_complete",
+    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (DRIVER_UNKNOWN); the products of the stages that did not run do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['training_complete', 'evaluation_complete', 'required_products_secured'] are LOST.",
+    "checks": {
+      "training_complete": false,
+      "evaluation_complete": false,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": false,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 22,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 840.89,
+    "actual_usd": 15.2761,
+    "extra_resources_usd": 0,
+    "authorized_usd": 51.97,
+    "within_authorization": true
+  },
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-11-28T10:18:28+00:00"
+}

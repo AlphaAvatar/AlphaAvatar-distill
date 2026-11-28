@@ -17504,3 +17504,31 @@ on a paid pod.
   nondeterminism means the resumed steps are not bitwise those an uninterrupted run would take; the cap leaves
   $0.28 of margin, so a third attempt is not fundable without a new decision.
 - Revisit when: attempt 2 closes.
+
+## 2026-11-28 (UTC) — DMR1 V1 stopped by the maintainer during seed 2; seed 1 reported descriptively
+
+- Context: training attempt 2 (`dmr1_merge_train_20261127_201532`, one L40S, $1.09/h) resumed seed 20260726 from
+  its step-6,624 save point, trained it to step 9,701 (final `ed0ee3e1...`, durable on the relay) and evaluated
+  eval-set-1 in both modes. The maintainer's seed-1 stop rule (`plans/seed1_stop_rule.json`, fixed before any seed-1
+  result) read CONTINUE at seed 2's start. Thinking mode was −3.86 pp (V1 12.28% vs depth-only 16.14%), with a 95%
+  group-bootstrap interval of [−6.79, −0.87], above the −5.0 pp line. Non-thinking mode is reported and not in the
+  rule: −5.44 pp [−8.39, −2.46] (`runs/.../evidence/seed1_stop_check.json`). Seed 2 trained. The maintainer read the
+  result and asked to stop ("先停下来"). The driver's process group was ended at 10:00 UTC with seed 2 at step 6,590
+  of 9,701. The launcher waited its 900 s grace (DRIVER_UNKNOWN), secured the evidence and deleted the pod; the
+  provider confirmed it gone and the account holds no pod and no volume. Closeout INCOMPLETE, $15.5639 all-in
+  (`closeout/outcome.json`).
+- Decision:
+  - V1 is not completed. C1 has one seed and stays descriptive only, with no test and no verdict. The two-seed
+    comparison does not run;
+  - the products are kept as they are, and nothing is deleted:
+    - seed 1's final (7.46 GiB) on the relay;
+    - seed 2's latest verified save point, step 5,520 (19.50 GiB: model + trainer state), on the relay;
+    - the secured evidence on the dev box;
+  - the training kind has spent $26.7722 of $64.46 over two attempts and the build kind $1.6091 of $5.43. Neither
+    grant is used again without the maintainer's decision.
+- Alternatives considered: continuing seed 2 to completion (about $6 more at the stop; the maintainer chose not to).
+  Resuming it later from step 5,520 stays possible under the registered resume contract, as a maintainer decision.
+- Risks: one seed is limited evidence about training randomness; eval-set-1 is development-exposed. Seed 2's
+  validation CE gap to depth-only (+0.090 at step 6,060) tracked seed 1's (+0.091 at the same step, +0.099 final), so
+  the training-time diagnostic points the same way, but it is not a score.
+- Revisit when: the maintainer reviews V1 (resume seed 2, close V1 as one seed, or retire its relay bytes).

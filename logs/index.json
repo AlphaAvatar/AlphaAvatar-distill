@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 205,
+  "runs_unrecorded": 209,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -773,6 +773,11 @@
     "recorded": 5,
     "unrecorded": 0,
     "total": 5
+   },
+   "depth_merge": {
+    "recorded": 0,
+    "unrecorded": 4,
+    "total": 4
    },
    "device_canary": {
     "recorded": 2,
@@ -3138,6 +3143,38 @@
    "n_files": 2,
    "digest": "fa26f8248e4eff52ac7d77f54ebdbcd40bf0e4f1649a8842732438d85e2da8bd",
    "why": "no run manifest; its closeout states: NO_RESOURCE_CREATED"
+  },
+  {
+   "experiment_id": "depth_merge",
+   "run_id": "dmr1_merge_build_20261127_081622",
+   "root": "logs/stages/stage-1/depth_merge/runs/dmr1_merge_build_20261127_081622",
+   "n_files": 5,
+   "digest": "3bb258efd6d55c469abd4c85f2d50a5bea7ab4f9ada429c7f698c76fb7a11ee0",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "depth_merge",
+   "run_id": "dmr1_merge_build_20261127_083526",
+   "root": "logs/stages/stage-1/depth_merge/runs/dmr1_merge_build_20261127_083526",
+   "n_files": 29,
+   "digest": "ba65c41508c315dfef97b15c8b49b2eb33aab31f9da0cab90995ac39fa6a6322",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "depth_merge",
+   "run_id": "dmr1_merge_train_20261127_095843",
+   "root": "logs/stages/stage-1/depth_merge/runs/dmr1_merge_train_20261127_095843",
+   "n_files": 4,
+   "digest": "e43b934b0bb33760e79b3bf7fcebc6bcc2ff90a1d052886cc187c8e8ed5b9590",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "depth_merge",
+   "run_id": "dmr1_merge_train_20261127_201532",
+   "root": "logs/stages/stage-1/depth_merge/runs/dmr1_merge_train_20261127_201532",
+   "n_files": 6,
+   "digest": "c333730f15b8c1b95a08b98de5351ca7535f1c58c1faf60f67751aabe3e38be3",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
   },
   {
    "experiment_id": "phase_a3",

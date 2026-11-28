@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 1161.06,
-  "cumulative_spend_usd": 1034.3802,
+  "cumulative_spend_usd": 1062.7615,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 126.6798,
+  "remaining_usd": 98.2985,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "DMR1 V1: training attempt 2 dmr1_merge_train_20261127_201532 RUNNING (seed 1 resumed at step 6,624; attempt 1 $11.2083, poll-limit teardown); seed-1 stop rule, then seed 2, closeout, C1, report. V2/V3 not authorized",
+ "next": "DMR1 V1 STOPPED by the maintainer during seed 2 (2026-11-28): seed 1 complete, descriptive only (thinking -3.86 pp vs depth-only; decisions.md 2026-11-28); seed 2's step-5,520 save point kept. Next: V2 revision at $0 (D and M inits x seed 20260726), READY_FOR_REVIEW",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -197,10 +197,10 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": true,
-  "pods": 1,
+  "paid_compute": false,
+  "pods": 0,
   "network_volumes": 0,
-  "run": "dmr1_merge_train_20261127_201532 (DMR1 V1 training attempt 2, 1 L40S, tmux dmr1t; hard cap $51.97)",
+  "run": "none: nothing is running, nothing is billing (last: dmr1_merge_train_20261127_201532, pod deleted 2026-11-28T10:18Z, provider confirms gone)",
   "volume": "none since 2026-11-14T10:46Z (maintainer)"
  },
  "schema": "aadistill.current_state/v2",

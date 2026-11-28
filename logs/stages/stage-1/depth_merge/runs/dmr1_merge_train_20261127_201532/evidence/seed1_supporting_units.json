@@ -1,0 +1,179 @@
+{
+ "schema": "aadistill.dmr1.seed1_supporting_units/v1",
+ "seed": 20260726,
+ "pair": [
+  "depth_merge",
+  "depth_only"
+ ],
+ "scope": "one training seed, descriptive: no test, no verdict; eval-set-1 is development-exposed; stage3_legacy_150__items is in-sample (training prompts)",
+ "evidence": {
+  "depth_merge": "/home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_201532/store/out",
+  "depth_only": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_depth_only_20261122_223829/store/out"
+ },
+ "readings": {
+  "depth_merge/H-T": {
+   "interactive_episodes": {
+    "n": 144,
+    "accuracy_pct": 2.78
+   },
+   "units": {
+    "stage3_legacy_150__items": {
+     "n": 150,
+     "accuracy_pct": 52.67
+    },
+    "stage3_capability_846__rag": {
+     "n": 100,
+     "accuracy_pct": 51.0
+    },
+    "stage3_capability_846__math_verified": {
+     "n": 100,
+     "accuracy_pct": 0.0
+    },
+    "stage3_capability_846__knowledge": {
+     "n": 150,
+     "accuracy_pct": 2.67
+    },
+    "stage3_capability_846__safety_paired": {
+     "n": 100,
+     "accuracy_pct": 28.0
+    },
+    "stage3_capability_846__multihop": {
+     "n": 100,
+     "accuracy_pct": 35.0
+    },
+    "stage3_capability_846__gsm8k": {
+     "n": 100,
+     "accuracy_pct": 20.0
+    },
+    "stage3_capability_846__answerability_paired": {
+     "n": 120,
+     "accuracy_pct": 32.5
+    }
+   },
+   "digest": "46ceea17ae647e83d4b1e56f06c2e9410819c04660e9df681927231073ed1a90"
+  },
+  "depth_merge/H-N": {
+   "interactive_episodes": {
+    "n": 144,
+    "accuracy_pct": 8.33
+   },
+   "units": {
+    "stage3_legacy_150__items": {
+     "n": 150,
+     "accuracy_pct": 50.67
+    },
+    "stage3_capability_846__rag": {
+     "n": 100,
+     "accuracy_pct": 67.0
+    },
+    "stage3_capability_846__math_verified": {
+     "n": 100,
+     "accuracy_pct": 3.0
+    },
+    "stage3_capability_846__knowledge": {
+     "n": 150,
+     "accuracy_pct": 2.67
+    },
+    "stage3_capability_846__safety_paired": {
+     "n": 100,
+     "accuracy_pct": 40.0
+    },
+    "stage3_capability_846__multihop": {
+     "n": 100,
+     "accuracy_pct": 55.0
+    },
+    "stage3_capability_846__gsm8k": {
+     "n": 100,
+     "accuracy_pct": 11.0
+    },
+    "stage3_capability_846__answerability_paired": {
+     "n": 120,
+     "accuracy_pct": 33.33
+    }
+   },
+   "digest": "219a6d584d8692549f7aff64d3ec4a5b0e06b92c353d250c48a43abbe0d11395"
+  },
+  "depth_only/H-T": {
+   "interactive_episodes": {
+    "n": 144,
+    "accuracy_pct": 2.08
+   },
+   "units": {
+    "stage3_legacy_150__items": {
+     "n": 150,
+     "accuracy_pct": 54.0
+    },
+    "stage3_capability_846__rag": {
+     "n": 100,
+     "accuracy_pct": 58.0
+    },
+    "stage3_capability_846__math_verified": {
+     "n": 100,
+     "accuracy_pct": 6.0
+    },
+    "stage3_capability_846__knowledge": {
+     "n": 150,
+     "accuracy_pct": 2.0
+    },
+    "stage3_capability_846__safety_paired": {
+     "n": 100,
+     "accuracy_pct": 28.0
+    },
+    "stage3_capability_846__multihop": {
+     "n": 100,
+     "accuracy_pct": 49.0
+    },
+    "stage3_capability_846__gsm8k": {
+     "n": 100,
+     "accuracy_pct": 21.0
+    },
+    "stage3_capability_846__answerability_paired": {
+     "n": 120,
+     "accuracy_pct": 39.17
+    }
+   },
+   "digest": "88ca2e212b52e9d4174e43a283bbb27bf9c5124524890b26a366f1e8028fb220"
+  },
+  "depth_only/H-N": {
+   "interactive_episodes": {
+    "n": 144,
+    "accuracy_pct": 6.94
+   },
+   "units": {
+    "stage3_legacy_150__items": {
+     "n": 150,
+     "accuracy_pct": 54.0
+    },
+    "stage3_capability_846__rag": {
+     "n": 100,
+     "accuracy_pct": 77.0
+    },
+    "stage3_capability_846__math_verified": {
+     "n": 100,
+     "accuracy_pct": 8.0
+    },
+    "stage3_capability_846__knowledge": {
+     "n": 150,
+     "accuracy_pct": 4.67
+    },
+    "stage3_capability_846__safety_paired": {
+     "n": 100,
+     "accuracy_pct": 47.0
+    },
+    "stage3_capability_846__multihop": {
+     "n": 100,
+     "accuracy_pct": 63.0
+    },
+    "stage3_capability_846__gsm8k": {
+     "n": 100,
+     "accuracy_pct": 17.0
+    },
+    "stage3_capability_846__answerability_paired": {
+     "n": 120,
+     "accuracy_pct": 45.0
+    }
+   },
+   "digest": "871676e464122948684084baaf051729925f61f49539ab56fa7b91ea68fac17e"
+  }
+ }
+}

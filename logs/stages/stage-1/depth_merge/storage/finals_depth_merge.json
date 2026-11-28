@@ -1,16 +1,36 @@
 {
  "schema": "aadistill.stage1.single_operator_budget.local/v1",
  "store": "/home/ecs-user/aad-artifacts/stage1_depth_merge",
- "products": {},
+ "products": {
+  "depth_merge-s20260726/final": {
+   "kept_on": "relay",
+   "relay": "AlphaAvatar/aadistill-artifacts",
+   "prefix": "durable/stage1_depth_merge/depth_merge/depth_merge-s20260726/final/ed0ee3e1841e5982",
+   "files_sha256": {
+    "model.safetensors": "ed0ee3e1841e59825467bcda7c6e2d09e2a530eeed03e953dc43b1fb232cec6e",
+    "config.json": "405012dfc7e768b6b6b14d62c3a68bd4e0dbb54f0138bda714c6a174e601b890",
+    "generation_config.json": "5599cb300341fdfd678ed3e6eb392a6e1489be92cf836b3163c33f200bd5b5b0",
+    "run_completion_resume_step009701.json": "6b03fc5274ff812591d6cb4e249e619bcc67b0093f947e545c522ec78955b58c"
+   },
+   "relay_lfs_sha256": {
+    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260726/final/ed0ee3e1841e5982/model.safetensors": "ed0ee3e1841e59825467bcda7c6e2d09e2a530eeed03e953dc43b1fb232cec6e",
+    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260726/final/ed0ee3e1841e5982/config.json": null,
+    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260726/final/ed0ee3e1841e5982/generation_config.json": null,
+    "durable/stage1_depth_merge/depth_merge/depth_merge-s20260726/final/ed0ee3e1841e5982/run_completion_resume_step009701.json": null
+   },
+   "verified": true,
+   "producer_run": "dmr1_merge_train_20261127_201532",
+   "checked": "every file listed at its relay prefix and each weight object's LFS sha256 the record's (placement: relay)"
+  }
+ },
  "status": "INCOMPLETE",
  "missing": {
-  "depth_merge-s20260726/final": "no verified final record with its files in the secured evidence",
   "depth_merge-s20260801/final": "no verified final record with its files in the secured evidence"
  },
  "expected_products": [
   "depth_merge-s20260726/final",
   "depth_merge-s20260801/final"
  ],
- "last_run": "dmr1_merge_train_20261127_095843",
- "checked_utc": "2026-11-27T20:05:58Z"
+ "last_run": "dmr1_merge_train_20261127_201532",
+ "checked_utc": "2026-11-28T10:18:34Z"
 }
