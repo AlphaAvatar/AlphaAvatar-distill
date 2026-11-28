@@ -40,6 +40,38 @@ def sha(p: Path) -> str:
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 
+ENV = {"train": {"torch": "t", "transformers": "x", "cuda": "c", "gpu": "NVIDIA L40S"},
+       "vllm": {"vllm": "0.27.1", "torch": "t2"}}
+
+
+def good_record(plan: dict, env: dict = ENV, **edit) -> dict:
+    """An engine-check record as `engine_check.run` writes it for ``plan``: complete, PASS, bound to the plan."""
+    from stages.depth_recurrence import engine_check as EC
+    n = EC.INPUTS["n_prompts"] * EC.INPUTS["new_tokens"]
+    ex = plan["units"][0]["initialization"]["execution"]
+    ok = {"positions": n, "top1_agreement": 0.99, "mean_abs_dlogp": 0.01, "max_abs_dlogp": 0.2}
+    m = {"hf_cache": {"recurrent": {**ok, "cache_entries": ex["n_logical_layers"], "logical_layers": ex["n_logical_layers"]},
+                      "control": {**ok, "cache_entries": ex["n_parameter_blocks"],
+                                  "logical_layers": ex["n_parameter_blocks"]},
+                      "shared_cache_fault": {**ok, "top1_agreement": 0.31, "mean_abs_dlogp": 2.4,
+                                             "cache_entries": ex["n_logical_layers"],
+                                             "logical_layers": ex["n_logical_layers"]}},
+         "vllm_generation": {"recurrent": dict(ok), "control": dict(ok)}}
+    outs = {k: {"n_outputs": EC.INPUTS["n_prompts"], "lengths": [EC.INPUTS["new_tokens"]] * EC.INPUTS["n_prompts"],
+                "logprob_lengths": [EC.INPUTS["new_tokens"]] * EC.INPUTS["n_prompts"],
+                "finish_reasons": ["length"] * EC.INPUTS["n_prompts"], "all_logprobs_finite": True,
+                "prompt_lengths": [EC.INPUTS["prompt_tokens"]] * EC.INPUTS["n_prompts"]} for k in ("recurrent", "control")}
+    for path, v in edit.items():                      #: "a.b.c" -> value, applied before the verdict
+        node, keys = {"metrics": m, "vllm_outputs": outs}, path.split(".")
+        for k in keys[:-1]:
+            node = node[k]
+        node[keys[-1]] = v
+    ll = {"recurrent": ex["n_logical_layers"], "control": ex["n_parameter_blocks"]}
+    return {"schema": EC.SCHEMA, "arm": plan["arm"], "binding": {**EC.expected_binding(plan), "environment": env},
+            "validated_weights_sha256": {"model.safetensors": "0" * 64}, "metrics": m, "vllm_outputs": outs,
+            **EC.verdict(m, outs, EC.GATE, EC.INPUTS, ll)}
+
+
 # ---- schedule, config ---------------------------------------------------------------------------------------------
 
 def test_the_schedule_is_the_mappings_and_the_config_is_the_derivation():
@@ -172,9 +204,10 @@ def test_the_loop_arms_plans_differ_from_sob1s_depth_unit_only_where_declared_an
             assert c["loss"]["ce_weight"] == 0.25 and c["loss"]["kd_weight"] == 1.0
             assert doc["derivation_checks"][u["unit"]]["outside_declared"] == []
         assert doc["relay_prefix_root"] == "durable/stage1_depth_recurrence"
-        assert doc["durability"]["savepoint_copies"] == 1
-    assert docs["depth_loop_kept"]["engine_validation"]["required"] is True
-    assert docs["depth_loop_merged"]["engine_validation"]["required"] is False
+        assert "savepoint_copies" not in doc["durability"]
+    ek, em = docs["depth_loop_kept"]["engine_validation"], docs["depth_loop_merged"]["engine_validation"]
+    assert ek["required"] is em["required"] is True and ek["record"] == em["record"]
+    assert ek["mode"] == "run" and em["mode"] == "reuse" and em["from_arm"] == "depth_loop_kept"
     #: the two conditions differ in the initialization and the arm's names only
     k, m = docs["depth_loop_kept"]["units"][0], docs["depth_loop_merged"]["units"][0]
     assert set(differences(k["config"], m["config"])) <= {
@@ -208,6 +241,12 @@ def _plan_for(tmp: Path, arm: str, monkeypatch) -> tuple[Path, dict]:
     for u in plan["units"]:
         u["config"]["out_dir"] = str(tmp / "pod" / u["unit"] / "train")
         u["config"]["student_path"] = str(tmp / "pod" / "init" / arm)
+    if arm == "depth_loop_merged":
+        #: the record V2-D's session would leave: made for the KEPT plan, adopted where V2-M's plan looks
+        kp, _ = _kept_root(root)
+        rec = tmp / "adopted_engine_check.json"
+        rec.write_text(json.dumps(good_record(PL.derive("depth_loop_kept", kp, root=root))))
+        plan["engine_validation"]["record"] = str(rec)
     p = tmp / f"plan_{arm}.json"
     p.write_text(json.dumps(plan))
     return p, plan
@@ -256,19 +295,23 @@ def _run(tmp: Path, monkeypatch, arm: str, out: Path, resume: Path | None = None
 
     def train(cfg_path, *, resume, deadline_s, log):
         cfg = json.loads(Path(cfg_path).read_text())
+        latest = Path(cfg["out_dir"]) / "checkpoints" / "latest.txt"
         seen.append({"config_json": json.loads((Path(cfg["student_path"]) / "config.json").read_text()),
-                     "hidden": cfg["loss"].get("hidden_state"), "stage": cfg["stage"]})
+                     "hidden": cfg["loss"].get("hidden_state"), "stage": cfg["stage"], "resume": resume,
+                     "resumed_from": latest.read_text().strip() if latest.is_file() else None})
         return inner(cfg_path, resume=resume, deadline_s=deadline_s, log=log)
     monkeypatch.setattr(AU, "train", train)
     from stages.depth_recurrence import engine_check as EC
 
     def engine(plan, student, work, vllm_python, **k):
         seen.append({"engine_check": str(student), "student_has_weights": (Path(student) / "model.safetensors").is_file()})
-        doc = {"status": engine_status[0], "checks": {"stub": engine_status[0] == "PASS"}}
+        doc = (good_record(plan) if engine_status[0] == "PASS" else
+               good_record(plan, **{"metrics.vllm_generation.recurrent.positions": 0}))
         Path(work).mkdir(parents=True, exist_ok=True)
         (Path(work) / "engine_check.json").write_text(json.dumps(doc))
         return doc
     monkeypatch.setattr(EC, "run", engine)
+    monkeypatch.setattr(EC, "environment", lambda vllm_python=None: ENV)
     monkeypatch.setattr(RID, "_run_bounded", T._mode_engine(asked))
     monkeypatch.setattr(C, "package", lambda model_dir, dest: {
         "weights_sha256": {"model.safetensors": sha(Path(model_dir) / "model.safetensors")},
@@ -343,6 +386,104 @@ def test_each_arm_runs_through_the_real_driver_to_a_complete_session_and_a_takeo
     assert not [s for s in again["seen"] if "engine_check" in s]         #: a PASS taken over is not repeated
 
 
+# ---- the save-point rotation, interrupted, through the real takeover entry ------------------------------------------
+
+def _cut(relay, when: str, tag: str = "step_002208"):
+    """Attempt 1's pod lost at one point of the rotation that publishes ``tag`` (the second save point) over the first:
+    the new save point uploading, being verified (`relay.put` re-downloads and re-hashes: it answers unverified), its
+    handoff unfinished (pointer written, the listing never confirmed), or the old one's removal refused."""
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization.tests.test_takeover import PodLost
+    real_put, real_remove = relay.put, relay.remove
+    if when == "uploading the new save point":
+        relay.crash = lambda op, p, ph: op == "put" and tag in (p.get("prefix") or "") and ph == "before"
+    elif when == "verifying the new save point":
+        def put(p):
+            if tag in p["prefix"] and set(p["files"]) != {R.POINTER}:
+                real_put(p)                                     #: the bytes arrived; the verifying download failed
+                return {"verified": False, "error": "the verifying download did not re-hash"}
+            return real_put(p)
+        relay.put = put
+        relay.crash = lambda op, p, ph: op == "records" and ph == "before"      #: then the pod goes
+    elif when == "handoff not finished":
+        relay.crash = lambda op, p, ph: op == "put" and set(p.get("files") or {}) == {R.POINTER} and ph == "after"
+    elif when == "the old save point's removal failed":
+        def remove(p):
+            return {"verified_absent": False, "error": "refused"}
+        relay.remove = remove
+        relay.crash = lambda op, p, ph: op == "remove" and ph == "after"
+    else:
+        raise AssertionError(when)
+    return PodLost, (real_put, real_remove)
+
+
+@pytest.mark.parametrize("when", ["uploading the new save point", "verifying the new save point",
+                                  "handoff not finished", "the old save point's removal failed"])
+def test_an_interrupted_rotation_is_taken_over_from_a_durable_save_point_never_from_step_0(tmp_path, monkeypatch,
+                                                                                         when):
+    """The registered two-copy rotation (the review of 2026-11-28): from the first durable save point on, a valid and
+    discoverable copy exists at every interruption. Attempt 1's mirror publishes step 1104, then is cut while publishing
+    step 2208; the dev box holds only what its last poll pulled (step 1104's record). Attempt 2 enters through the real
+    driver (`train_driver.main --resume`): it restores the latest save point the relay lists and verifies, and the
+    trainer resumes from it -- never from the initialization."""
+    _eval_set_or_skip()
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization import train_driver as TD
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay, save_point
+    relay = FakeRelay()
+    monkeypatch.setattr(R, "run_online", relay)
+    arm = "depth_loop_kept"
+    _, plan = _plan_for(tmp_path, arm, monkeypatch)
+    u = plan["units"][0]
+    out1 = tmp_path / "attempt1/store/out"
+    out_dir, ev_unit = Path(u["config"]["out_dir"]), out1 / u["unit"]
+    prefix = f"{plan['relay_prefix_root']}/{arm}/{u['unit']}"
+    m = TD.SavepointMirror(u["unit"], out_dir, ev_unit, int(u["config"]["schedule"]["total_steps"]), prefix,
+                           d=TD.durability(plan))
+    save_point(out_dir, 1104)
+    assert m.mirror_once()["handoff"]["verified"]
+    devbox = tmp_path / "devbox/store/out"
+    shutil.copytree(out1, devbox)                                  #: the poll's last copy: step 1104 only
+    save_point(out_dir, 2208)
+    PodLost, _ = _cut(relay, when)
+    try:
+        m.mirror_once()
+        m.mirror_once()                                            #: a second round: removal / listing / handoff
+    except PodLost:
+        pass
+    relay.crash = lambda op, p, ph: False
+    shutil.rmtree(tmp_path / "pod")                                #: the pod and its local checkpoints are gone
+    listed = {t for t in ("step_001104", "step_002208")
+              if f"{prefix}/savepoints/{t}/{R.POINTER}" in relay.files
+              and f"{prefix}/savepoints/{t}/model/model.safetensors" in relay.files}
+    assert "step_001104" in listed or "step_002208" in listed      #: never zero durable copies
+    got = _run(tmp_path, monkeypatch, arm, tmp_path / "attempt2/store/out", resume=devbox)
+    assert got["rc"] == 0, got["units"].get("error")
+    train = [s for s in got["seen"] if "engine_check" not in s]
+    assert len(train) == 1 and train[0]["resume"] is True, train
+    assert train[0]["resumed_from"] in listed
+    row = got["units"]["units"][u["unit"]]
+    assert row["restored_savepoint"]["tag"] == train[0]["resumed_from"]
+
+
+def test_the_rotation_never_leaves_the_relay_without_a_durable_save_point():
+    """The relay arithmetic the launch gate asks for is the two-copy rotation's: each new save point beside the
+    previous one, the final beside the last; no single-copy branch exists."""
+    from stages.depth_merge import plan as PL
+    from stages.single_operator_budget import launch as SL
+    from stages.teacher_parent_initialization import train_driver as TD
+    assert not hasattr(TD, "savepoint_copies") and not hasattr(TD, "remove_before_upload")
+    sizes = __import__("stages.depth_merge.session", fromlist=["x"]).checkpoint_bytes()
+    plan = json.loads(PL.out_path("depth_loop_kept").read_text())
+    assert "savepoint_copies" not in plan["durability"]
+    need = SL.rotation_need(plan, {}, sizes)
+    assert need["peak_bytes"] == 2 * sizes["save_point"]
+    trace = need["trace"]
+    for i, row in enumerate(trace):
+        if "removed" in row["step"]:
+            assert "uploaded" in trace[i - 1]["step"] or "removed" in trace[i - 1]["step"]
+
+
 def test_a_failed_engine_check_trains_nothing(tmp_path, monkeypatch):
     _eval_set_or_skip()
     from stages.teacher_parent_initialization import relay as R
@@ -358,19 +499,126 @@ def test_a_failed_engine_check_trains_nothing(tmp_path, monkeypatch):
 
 # ---- the engine check's gate and its HF part on the CPU ---------------------------------------------------------------
 
+def _plans():
+    from stages.depth_merge import plan as PL
+    return {a: json.loads(PL.out_path(a).read_text()) for a in ("depth_loop_kept", "depth_loop_merged")}
+
+
 def test_the_engine_gate_reads_each_check_against_the_control_and_needs_the_fault_to_fail():
     from stages.depth_recurrence import engine_check as EC
-    ok = {"top1_agreement": 1.0, "mean_abs_dlogp": 0.01}
-    m = {"hf_cache": {"recurrent": {**ok, "cache_entries": 36, "logical_layers": 36}, "control": ok,
-                      "shared_cache_fault": {"top1_agreement": 0.4, "mean_abs_dlogp": 2.0}},
-         "vllm_generation": {"recurrent": {"top1_agreement": 0.99, "mean_abs_dlogp": 0.04}, "control": ok}}
-    assert EC.verdict(m)["status"] == "PASS"
-    worse = {**m, "vllm_generation": {**m["vllm_generation"], "recurrent": {"top1_agreement": 0.9, "mean_abs_dlogp": 0.04}}}
-    assert EC.verdict(worse)["status"] == "FAIL"
-    blind = {**m, "hf_cache": {**m["hf_cache"], "shared_cache_fault": ok}}       #: the gate cannot see a cache bug
-    assert EC.verdict(blind)["status"] == "FAIL" and not EC.verdict(blind)["checks"]["sensitivity_fault_fails"]
-    short = {**m, "hf_cache": {**m["hf_cache"], "recurrent": {**ok, "cache_entries": 16, "logical_layers": 36}}}
-    assert EC.verdict(short)["status"] == "FAIL"
+    kept = _plans()["depth_loop_kept"]
+    assert good_record(kept)["status"] == "PASS"
+    worse = good_record(kept, **{"metrics.vllm_generation.recurrent.top1_agreement": 0.9})
+    assert worse["status"] == "FAIL" and not worse["checks"]["vllm_generation"]
+    blind = good_record(kept, **{"metrics.hf_cache.shared_cache_fault.top1_agreement": 0.99,
+                                 "metrics.hf_cache.shared_cache_fault.mean_abs_dlogp": 0.01})
+    assert blind["status"] == "FAIL" and not blind["checks"]["sensitivity_fault_fails"]
+    short = good_record(kept, **{"metrics.hf_cache.recurrent.cache_entries": 16})
+    assert short["status"] == "FAIL"
+    assert EC.record_problems(good_record(kept), kept, env=ENV) == []
+
+
+@pytest.mark.parametrize("why,edit", [
+    ("vLLM scored no position", {"metrics.vllm_generation.recurrent.positions": 0,
+                                 "metrics.vllm_generation.recurrent.top1_agreement": None,
+                                 "metrics.vllm_generation.recurrent.mean_abs_dlogp": None,
+                                 "metrics.vllm_generation.recurrent.max_abs_dlogp": None}),
+    ("both paths zero, which a relative gate would pass", {
+        "metrics.vllm_generation.recurrent.positions": 0, "metrics.vllm_generation.control.positions": 0,
+        "metrics.vllm_generation.recurrent.mean_abs_dlogp": 0.0, "metrics.vllm_generation.control.mean_abs_dlogp": 0.0}),
+    ("a short vLLM output", {"vllm_outputs.recurrent.lengths": [64, 64, 64, 12]}),
+    ("a missing output", {"vllm_outputs.control.n_outputs": 3}),
+    ("a stop that is not the length rule", {"vllm_outputs.recurrent.finish_reasons": ["length", "stop", "length",
+                                                                                      "length"]}),
+    ("log-probabilities that do not match the tokens", {"vllm_outputs.recurrent.logprob_lengths": [64, 64, 63, 64]}),
+    ("a non-finite log-probability", {"vllm_outputs.control.all_logprobs_finite": False}),
+    ("a non-finite metric", {"metrics.hf_cache.control.mean_abs_dlogp": float("nan")}),
+    ("a missing check", {"metrics.hf_cache.shared_cache_fault": None}),
+])
+def test_an_incomplete_or_empty_engine_result_is_never_a_pass(why, edit):
+    from stages.depth_recurrence import engine_check as EC
+    kept = _plans()["depth_loop_kept"]
+    rec = good_record(kept, **edit)
+    assert rec["status"] == "FAIL" and rec["checks"] == {"complete": False}, why
+    forged = {**rec, "status": "PASS"}                          #: a PASS string over incomplete metrics
+    assert EC.record_problems(forged, kept, env=ENV), why
+
+
+@pytest.mark.parametrize("what", ["recurrent_config_sha256", "execution", "control_config_sha256", "inputs", "pack",
+                                  "gate", "implementation", "check_code"])
+def test_a_pass_bound_to_another_model_config_input_threshold_or_code_is_refused(what):
+    from stages.depth_recurrence import engine_check as EC
+    kept = _plans()["depth_loop_kept"]
+    rec = good_record(kept)
+    rec["binding"][what] = "another"
+    assert any(what in x for x in EC.record_problems(rec, kept, env=ENV))
+    #: the thresholds in force are the registered ones: a record whose gate differs is not this protocol's
+    assert EC.record_problems(good_record(kept), kept, env={**ENV, "vllm": {"vllm": "0.28.0", "torch": "t2"}})
+
+
+def test_one_pass_covers_both_initializations_but_not_another_schedule(tmp_path):
+    """D's and M's weights differ by design: a PASS made on V2-D's init stands for V2-M's plan (same schedule, control,
+    inputs, gate, implementation), while a plan with another schedule is refused."""
+    from stages.depth_recurrence import engine_check as EC
+    plans = _plans()
+    rec = good_record(plans["depth_loop_kept"])
+    rec["validated_weights_sha256"] = {"model.safetensors": plans["depth_loop_kept"]["init_record"]["model_safetensors_sha256"]}
+    assert EC.record_problems(rec, plans["depth_loop_merged"], env=ENV) == []
+    assert (plans["depth_loop_kept"]["init_record"]["model_safetensors_sha256"]
+            != plans["depth_loop_merged"]["init_record"]["model_safetensors_sha256"])
+    other = json.loads(json.dumps(plans["depth_loop_merged"]))
+    other["units"][0]["initialization"]["recurrent_config"]["sha256"] = "1" * 64
+    other["units"][0]["initialization"]["execution"]["layer_to_block"] = list(range(36))
+    assert EC.record_problems(rec, other, env=ENV)
+    #: a docstring edit leaves the implementation's identity alone; a statement edit does not
+    src = REPO / EC.IMPLEMENTATION[0]
+    root = tmp_path / "root"
+    for rel in EC.IMPLEMENTATION:
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(REPO / rel, root / rel)
+    base = EC.source_identity(root=root)[EC.IMPLEMENTATION[0]]
+    text = src.read_text()
+    (root / EC.IMPLEMENTATION[0]).write_text(text.replace('"""', '"""Reworded. ', 1))
+    assert EC.source_identity(root=root)[EC.IMPLEMENTATION[0]] == base
+    (root / EC.IMPLEMENTATION[0]).write_text(text + "\nX_CHANGED = 1\n")
+    assert EC.source_identity(root=root)[EC.IMPLEMENTATION[0]] != base
+
+
+def test_v2m_cannot_train_without_a_pass_that_stands_for_its_plan(tmp_path, monkeypatch):
+    """On the dev box: the bound conditions and the launch gate refuse; on the pod: the driver trains nothing."""
+    _eval_set_or_skip()
+    from stages.depth_merge import plan as PL
+    from stages.depth_merge import session as S
+    from stages.depth_recurrence import launch as L
+    from stages.teacher_parent_initialization import relay as R
+    from stages.teacher_parent_initialization.tests.test_takeover import FakeRelay
+    merged = json.loads(PL.out_path("depth_loop_merged").read_text())
+    assert merged["engine_validation"]["mode"] == "reuse" and merged["engine_validation"]["from_arm"] == "depth_loop_kept"
+    canon = REPO / merged["engine_validation"]["record"]
+    if not canon.is_file():                                      #: today: V2-D has not run
+        with pytest.raises(S.SE.AuthorizationError, match="does not exist"):
+            L.kind_conditions(L.LOOP_KIND, arm="depth_loop_merged")
+        assert S.engine_validation_problems("depth_loop_merged")
+    assert S.engine_validation_problems("depth_loop_kept") == []        #: V2-D runs its own
+    monkeypatch.setattr(R, "run_online", FakeRelay())
+    for case in ("absent", "bound to another schedule", "incomplete"):
+        sub = tmp_path / case.replace(" ", "_")
+        _, plan = _plan_for(sub, "depth_loop_merged", monkeypatch)
+        rec_p = Path(plan["engine_validation"]["record"])
+        if case == "absent":
+            rec_p.unlink()
+        elif case == "bound to another schedule":
+            rec = json.loads(rec_p.read_text())
+            rec["binding"]["recurrent_config_sha256"] = "1" * 64
+            rec_p.write_text(json.dumps(rec))
+        else:
+            rec = json.loads(rec_p.read_text())
+            rec["metrics"]["vllm_generation"]["recurrent"]["positions"] = 0
+            rec_p.write_text(json.dumps(rec))
+        (sub / "plan_depth_loop_merged.json").write_text(json.dumps(plan))
+        got = _run(sub, monkeypatch, "depth_loop_merged", sub / "a/store/out")
+        assert got["rc"] != 0 and got["trained"] == [] and "no engine validation stands" in got["units"]["error"]["error"]
+        assert "TRAIN_START" not in (sub / "status_depth_loop_merged.log").read_text()
 
 
 def test_the_hf_cache_check_passes_the_real_cache_and_fails_the_shared_one_on_a_tiny_model():
@@ -417,6 +665,30 @@ def test_the_interaction_is_formed_item_by_item_and_resampled_with_all_four_reco
     rp = A.recurrence_modes({"H-T": part}, groups, 1)["H-T"]
     assert rp["R2"]["status"] == rp["R3"]["status"] == rp["R4"]["status"] == "not_computed"
     assert "estimate_pp" in rp["R1"] and rp["accuracy_pct"]["V2-M"] is None
+
+
+def test_the_d_and_m_controls_are_the_registered_weights_whatever_path_they_are_read_from(monkeypatch):
+    """The real D and M evidence passes; a replacement that is complete and self-consistent but bound to other weights
+    -- through the default path or an explicit d_out / m_out -- is refused before anything is computed."""
+    _eval_set_or_skip()
+    from stages.depth_merge import analysis as A
+    reg = A.registered_controls()
+    assert reg["D"]["final_sha256"].startswith("5635c33e") and reg["M"]["final_sha256"].startswith("ed0ee3e1")
+    real = {c: A.unit_sets_complete(o, reg[c]["arm"], 20260726)
+            for c, o in (("D", DC.sob1_depth_evidence()), ("M", DC.merged_control_evidence()))}
+    assert A.control_problems("D", real["D"]) == [] and A.control_problems("M", real["M"]) == []
+    other = {**real["D"], "final_sha256": "e4159f1f" + "0" * 56,               #: SOB1 depth's seed-2 final, say
+             "set_weights_sha256": {m: "e4159f1f" + "0" * 56 for m in A.MODES}}
+    assert len(A.control_problems("D", other)) == 3
+    half = {**real["M"], "set_weights_sha256": {**real["M"]["set_weights_sha256"], "H-N": "1" * 64}}
+    assert A.control_problems("M", half) and "H-N" in A.control_problems("M", half)[0]
+    real_usc = A.unit_sets_complete
+    monkeypatch.setattr(A, "unit_sets_complete", lambda out, arm, seed: (
+        other if arm == DC.SOB1_DEPTH else real_usc(out, arm, seed)))
+    with pytest.raises(SystemExit, match="the D control"):
+        A.recurrence(Path("/nonexistent/kept"), Path("/nonexistent/merged"), d_out=Path("/elsewhere/depth_only_copy"))
+    with pytest.raises(SystemExit, match="the D control"):
+        A.recurrence(Path("/nonexistent/kept"), Path("/nonexistent/merged"))
 
 
 def test_a_recurrent_config_that_does_not_hash_to_the_plans_is_refused(tmp_path):

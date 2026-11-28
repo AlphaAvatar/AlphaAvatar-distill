@@ -1719,24 +1719,6 @@ def test_the_relay_preflight_asks_only_what_the_remaining_rotation_adds(tmp_path
     assert ok and round(asked[0] / G, 2) == 28.52 and ctx.evidence["relay_need"]["peak_gib"] == 28.52
 
 
-def test_a_single_copy_rotation_needs_one_save_point_and_the_finals(tmp_path):
-    """``durability.savepoint_copies: 1``: each save point is removed before the next upload and the last before the
-    final's, so the relay peak is one save point (plus every earlier unit's final), never two."""
-    from stages.single_operator_budget import launch as L
-    plan = json.loads((REPO / L.plan_path(ARM)).read_text())
-    sizes = json.loads((REPO / L.STRUCTURES).read_text())["arms"][ARM]["checkpoint_bytes"]
-    single = {**plan, "durability": {**(plan.get("durability") or {}), "savepoint_copies": 1}}
-    u1 = plan["unit_order"][0]
-    got = L.rotation_need(single, {}, sizes)
-    assert got["peak_bytes"] == sizes["final_fp32"] + sizes["save_point"]       #: seed 2 rotates beside seed 1's final
-    assert L.rotation_need(plan, {}, sizes)["peak_bytes"] == 2 * sizes["save_point"] + sizes["final_fp32"]
-    trace = got["trace"]
-    for i, row in enumerate(trace):
-        if "uploaded" in row["step"] and "save point" in row["step"] and i > 0:
-            assert row["net_bytes"] <= sizes["final_fp32"] + sizes["save_point"]
-    assert L.rotation_need(single, {u1: {"save_points": [2208]}}, sizes)["peak_bytes"] <= got["peak_bytes"]
-
-
 def test_a_failed_removal_stays_pending_and_the_next_takeover_retires_it(tmp_path, monkeypatch):
     """Counter-example 4: the rotation's first removal of the previous save point fails (``{"verified": false}``); the
     record stays PENDING (still on the relay, never read as retired). The pod is lost; the next attempt retries it

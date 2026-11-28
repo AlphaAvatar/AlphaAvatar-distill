@@ -4,6 +4,7 @@ and before any training step. A FAIL stops the session before anything trains.
 
     /opt/train/bin/python scripts/stages/stage-1/depth_recurrence/engine_check.py run --plan <training plan> \\
         --student <the staged recurrent init dir> --work <dir> --vllm-python /opt/vllm/bin/python
+    ... engine_check.py adopt --record <a session's engine_check.json> --arm depth_loop_kept --write   # dev box, $0
     (internal) ... engine_check.py vllm --model <dir> --prompts <json> --out <json>     # under the vLLM env
     (internal) ... engine_check.py hf --model <dir> --prompts <json> --out <json> [--continuations <json>]
                    [--shared-cache-fault]
@@ -26,6 +27,34 @@ difference of the compared token's log-probability. The gate (fixed before any G
 both checks the recurrent model's mean |dlogp| <= 3 x the control's + 0.02 and its top-1 agreement >= the control's -
 0.02, AND the faulty cache FAILS the hf_cache gate. Each model runs in its own subprocess, so no GPU memory outlives
 the check.
+
+**Complete or FAIL.** Before any threshold is read, the record must hold what the protocol registers
+(`completeness_problems`):
+- every check has exactly ``n_prompts x new_tokens`` scored positions and finite metrics;
+- vLLM returned ``n_prompts`` outputs of ``new_tokens`` tokens each, ended by length (``ignore_eos``), with one
+  finite log-probability per token;
+- every prompt is ``prompt_tokens`` long;
+- the cache entries are one per logical layer for both models.
+
+An empty, missing or partial result is a FAIL, never a relative pass of zeros.
+
+**What a record is bound to** (`binding`):
+- the recurrent config (the schedule) and the execution the plan carries;
+- the control config;
+- the inputs, the training pack's identity and the gate;
+- the implementation: docstring-free ast digests of the recurrent model's HF and vLLM files, the module they import
+  and the plugin path, the plugin's entry points, and `code_identity` of this check's own probe functions;
+- the environment: the train and vLLM environments' versions and the GPU.
+
+The validated weights are recorded but are NOT part of the binding: D's and M's weights are the experiment's variable,
+and the check validates the execution path for this schedule, not a weight file. A PASS of one arm therefore covers
+every arm whose plan binds the same schedule, control, inputs, gate and implementation, run under the same
+environment.
+
+**Reuse.** `record_problems` re-derives everything before a record is reused: the binding against the plan it is
+asked for (and the live environment on a pod), the completeness, and the verdict recomputed from the saved metrics.
+The stored status string is never trusted. `adopt` writes the canonical copy V2-M's plan names, only for a record
+with no problem.
 """
 from __future__ import annotations
 
@@ -43,10 +72,19 @@ for _p in ("src", "scripts", "scripts/stages/stage-1"):
     if str(REPO / _p) not in sys.path:
         sys.path.insert(0, str(REPO / _p))
 
-SCHEMA = "aadistill.stage1.depth_recurrence.engine_check/v1"
+SCHEMA = "aadistill.stage1.depth_recurrence.engine_check/v2"
 GATE = {"dlogp_factor": 3.0, "dlogp_slack": 0.02, "top1_slack": 0.02}
 INPUTS = {"n_prompts": 4, "prompt_tokens": 384, "new_tokens": 64, "top_logprobs": 20}
 BASE_CONFIG = REPO / "configs/stages/stage-1/depth_recurrence/base_config.json"
+CANONICAL = "logs/stages/stage-1/depth_recurrence/engine_check.json"
+#: the execution path the check validates (module docstring: the implementation half of the binding)
+IMPLEMENTATION = ("src/aadistill/initialization/adapters/recurrent_depth.py",
+                  "src/aadistill/initialization/adapters/recurrent_depth_vllm.py",
+                  "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+                  "scripts/shared/rollout/vllm_plugin_path.py",
+                  "scripts/shared/rollout/vllm_plugin/aadistill_vllm_plugin-1.0.dist-info/entry_points.txt")
+CHECKS = (("hf_cache", "recurrent"), ("hf_cache", "control"), ("hf_cache", "shared_cache_fault"),
+          ("vllm_generation", "recurrent"), ("vllm_generation", "control"))
 
 
 class EngineCheckError(RuntimeError):
@@ -69,17 +107,163 @@ def passes(rec: dict, ctrl: dict, g: dict = GATE) -> bool:
             and rec["top1_agreement"] >= ctrl["top1_agreement"] - g["top1_slack"])
 
 
-def verdict(m: dict, g: dict = GATE) -> dict:
-    """``m``: {"hf_cache": {"recurrent", "control", "shared_cache_fault"}, "vllm_generation": {"recurrent", "control"}}
-    -> the gate's reading, check by check."""
+def _finite(x) -> bool:
+    import math
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(float(x))
+
+
+def completeness_problems(m: dict, outputs: dict, inputs: dict = INPUTS, logical_layers: dict | None = None) -> list:
+    """Why ``m`` (the metrics) and ``outputs`` (each model's vLLM output summary, `summarize`) are not the registered
+    protocol's complete result (empty when they are). ``logical_layers``: {"recurrent": n, "control": n}."""
+    bad = []
+    n = int(inputs["n_prompts"]) * int(inputs["new_tokens"])
+    for check, model in CHECKS:
+        r = ((m or {}).get(check) or {}).get(model)
+        if not isinstance(r, dict):
+            bad.append(f"{check}.{model}: missing")
+            continue
+        if r.get("positions") != n:
+            bad.append(f"{check}.{model}: {r.get('positions')!r} scored positions, the protocol's {n}")
+        for k in ("top1_agreement", "mean_abs_dlogp", "max_abs_dlogp"):
+            if not _finite(r.get(k)):
+                bad.append(f"{check}.{model}: {k} = {r.get(k)!r} is not a finite number")
+        if _finite(r.get("top1_agreement")) and not 0.0 <= r["top1_agreement"] <= 1.0:
+            bad.append(f"{check}.{model}: top-1 agreement {r['top1_agreement']} outside [0, 1]")
+        if _finite(r.get("mean_abs_dlogp")) and r["mean_abs_dlogp"] < 0:
+            bad.append(f"{check}.{model}: a negative mean |dlogp|")
+    for model in ("recurrent", "control"):
+        r = ((m or {}).get("hf_cache") or {}).get(model) or {}
+        want = (logical_layers or {}).get(model, r.get("logical_layers"))
+        if r.get("cache_entries") is None or r.get("cache_entries") != want:
+            bad.append(f"hf_cache.{model}: {r.get('cache_entries')!r} cache entries for {want!r} logical layers")
+        o = (outputs or {}).get(model)
+        if not isinstance(o, dict):
+            bad.append(f"vllm.{model}: no output summary")
+            continue
+        if o.get("n_outputs") != int(inputs["n_prompts"]):
+            bad.append(f"vllm.{model}: {o.get('n_outputs')!r} outputs for {inputs['n_prompts']} prompts")
+        if o.get("lengths") != [int(inputs["new_tokens"])] * int(inputs["n_prompts"]):
+            bad.append(f"vllm.{model}: output lengths {o.get('lengths')!r}, the protocol's {inputs['new_tokens']} each")
+        if o.get("logprob_lengths") != o.get("lengths"):
+            bad.append(f"vllm.{model}: log-probabilities {o.get('logprob_lengths')!r} for tokens {o.get('lengths')!r}")
+        if o.get("finish_reasons") != ["length"] * int(inputs["n_prompts"]):
+            bad.append(f"vllm.{model}: finish reasons {o.get('finish_reasons')!r}, the protocol's length stop")
+        if o.get("all_logprobs_finite") is not True:
+            bad.append(f"vllm.{model}: a log-probability is not finite")
+        if o.get("prompt_lengths") != [int(inputs["prompt_tokens"])] * int(inputs["n_prompts"]):
+            bad.append(f"vllm.{model}: prompt lengths {o.get('prompt_lengths')!r}")
+    return bad
+
+
+def verdict(m: dict, outputs: dict, g: dict = GATE, inputs: dict = INPUTS, logical_layers: dict | None = None) -> dict:
+    """The gate's reading, check by check, after `completeness_problems`: an incomplete result is FAIL."""
+    incomplete = completeness_problems(m, outputs, inputs, logical_layers)
+    if incomplete:
+        return {"status": "FAIL", "checks": {"complete": False}, "completeness_problems": incomplete, "gate": g,
+                "rule": "an incomplete result is FAIL before any threshold is read"}
     hf, vl = m["hf_cache"], m["vllm_generation"]
-    rows = {"hf_cache": passes(hf["recurrent"], hf["control"], g),
+    rows = {"complete": True,
+            "hf_cache": passes(hf["recurrent"], hf["control"], g),
             "vllm_generation": passes(vl["recurrent"], vl["control"], g),
             "sensitivity_fault_fails": not passes(hf["shared_cache_fault"], hf["control"], g),
             "cache_entries": hf["recurrent"].get("cache_entries") == hf["recurrent"].get("logical_layers")}
     return {"status": "PASS" if all(rows.values()) else "FAIL", "checks": rows, "gate": g,
-            "rule": "PASS iff hf_cache and vllm_generation pass against the control, the shared-cache fault fails "
-                    "hf_cache, and the recurrent cache holds one entry per logical layer"}
+            "rule": "PASS iff the result is complete, hf_cache and vllm_generation pass against the control, the "
+                    "shared-cache fault fails hf_cache, and the recurrent cache holds one entry per logical layer"}
+
+
+def summarize(vllm_doc: dict, prompts: dict) -> dict:
+    """One model's vLLM outputs as `completeness_problems` reads them."""
+    import math
+    outs = (vllm_doc or {}).get("outputs") or []
+    return {"n_outputs": len(outs), "lengths": [len(o.get("token_ids") or []) for o in outs],
+            "logprob_lengths": [len(o.get("logprobs") or []) for o in outs],
+            "finish_reasons": [o.get("finish_reason") for o in outs],
+            "all_logprobs_finite": bool(outs) and all(isinstance(x, (int, float)) and math.isfinite(x)
+                                                      for o in outs for x in (o.get("logprobs") or [])),
+            "prompt_lengths": [len(s[:int(prompts["prompt_tokens"])]) for s in prompts.get("sequences") or []]}
+
+
+def source_identity(paths=IMPLEMENTATION, root: Path = REPO) -> dict:
+    """Each file's identity: a Python file's ast dumped without positions and with its docstrings dropped (RI-LM1's
+    `code_identity` rule, at file level: the vLLM model module cannot be imported off a pod), any other file's bytes."""
+    import ast
+    import hashlib
+    from stages.reasoning_inheritance.layer_merge import _DUMP_FORM
+    out = {}
+    for rel in paths:
+        src = (Path(root) / rel).read_bytes()
+        if rel.endswith(".py"):
+            tree = ast.parse(src)
+            for node in ast.walk(tree):
+                body = getattr(node, "body", None)
+                if (isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)) and body
+                        and isinstance(body[0], ast.Expr) and isinstance(getattr(body[0], "value", None), ast.Constant)
+                        and isinstance(body[0].value.value, str)):
+                    node.body = body[1:] or [ast.Pass()]
+            out[rel] = hashlib.sha256(ast.dump(tree, include_attributes=False, **_DUMP_FORM).encode()).hexdigest()
+        else:
+            out[rel] = hashlib.sha256(src).hexdigest()
+    return out
+
+
+def check_code() -> str:
+    """`code_identity` of the probe itself: what it measures and how it decides (not the CLI or the orchestration)."""
+    from stages.reasoning_inheritance.layer_merge import code_identity
+    return code_identity(passes, completeness_problems, verdict, summarize, shared_cache_fault, _agreement,
+                         hf_cache_check, hf_rescore, vllm_main, pack_prompts, control_dir)["sha256"]
+
+
+def expected_binding(plan: dict, root: Path = REPO) -> dict:
+    """What a record must be bound to for ``plan``'s arm (module docstring); the environment is compared apart."""
+    import hashlib
+    u = plan["units"][0]
+    c = u["config"]
+    return {"recurrent_config_sha256": u["initialization"]["recurrent_config"]["sha256"],
+            "execution": u["initialization"]["execution"],
+            "control_config_sha256": hashlib.sha256(BASE_CONFIG.read_bytes()).hexdigest(),
+            "inputs": INPUTS, "pack": {"data_dir": c["data_dir"], "rung": c["rung"], "val_blocks": c.get("val_blocks")},
+            "gate": GATE, "implementation": source_identity(root=root), "check_code": check_code()}
+
+
+def environment(vllm_python: str | None = None) -> dict:
+    """The versions the check ran under: the train environment's (in-process) and, with ``vllm_python``, the vLLM
+    environment's (a subprocess, seconds), and the GPU."""
+    import torch
+    import transformers
+    env = {"train": {"torch": torch.__version__, "transformers": transformers.__version__,
+                     "cuda": torch.version.cuda,
+                     "gpu": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None}}
+    if vllm_python:
+        got = subprocess.run([vllm_python, "-c", "import json, torch, vllm; print(json.dumps({'vllm': vllm.__version__, "
+                              "'torch': torch.__version__}))"], capture_output=True, text=True, timeout=600)
+        env["vllm"] = json.loads(got.stdout.strip().splitlines()[-1]) if got.returncode == 0 else {
+            "error": got.stderr[-400:]}
+    return env
+
+
+def record_problems(rec: dict, plan: dict, env: dict | None = None, root: Path = REPO) -> list[str]:
+    """Why ``rec`` may not stand as ``plan``'s arm's engine validation (empty when it may): its schema, its binding
+    against the plan's (and, given ``env``, the live environment), its completeness, and its verdict re-derived from
+    the saved metrics -- the stored status is never trusted."""
+    if not isinstance(rec, dict) or rec.get("schema") != SCHEMA:
+        return [f"not an engine-check record of {SCHEMA}"]
+    bad = []
+    want, got = expected_binding(plan, root), rec.get("binding") or {}
+    for k, v in want.items():
+        if got.get(k) != v:
+            bad.append(f"binding.{k} is not this plan's (the record validated another {k})")
+    if env is not None and got.get("environment") != env:
+        bad.append(f"the record ran under {got.get('environment')}, this pod is {env}")
+    again = verdict(rec.get("metrics") or {}, rec.get("vllm_outputs") or {}, GATE, INPUTS,
+                    {"recurrent": int(plan["units"][0]["initialization"]["execution"]["n_logical_layers"]),
+                     "control": int(plan["units"][0]["initialization"]["execution"]["n_parameter_blocks"])})
+    bad += [f"incomplete: {x}" for x in again.get("completeness_problems", [])]
+    if again["status"] != "PASS":
+        bad.append(f"the saved metrics re-derive {again['status']} ({again['checks']})")
+    if rec.get("status") != again["status"]:
+        bad.append(f"the record says {rec.get('status')!r}, its metrics say {again['status']!r}")
+    return bad
 
 
 # ---- HF ------------------------------------------------------------------------------------------------------------
@@ -189,9 +373,10 @@ def hf_rescore(model, prompts: list[list[int]], continuations: list[dict]) -> di
             tok = torch.as_tensor(toks, device=dev)
             top1 += (lp[pos].argmax(-1) == tok).float().tolist()
             dl += (lp[pos, tok] - torch.as_tensor(c["logprobs"], device=dev)).abs().tolist()
-    n = max(1, len(dl))
-    return {"positions": len(dl), "top1_agreement": sum(top1) / n, "mean_abs_dlogp": sum(dl) / n,
-            "max_abs_dlogp": max(dl) if dl else 0.0}
+    if not dl:                          #: nothing scored: no metric exists (completeness refuses it, never a zero)
+        return {"positions": 0, "top1_agreement": None, "mean_abs_dlogp": None, "max_abs_dlogp": None}
+    return {"positions": len(dl), "top1_agreement": sum(top1) / len(dl), "mean_abs_dlogp": sum(dl) / len(dl),
+            "max_abs_dlogp": max(dl)}
 
 
 def hf_main(a) -> int:
@@ -233,13 +418,38 @@ def vllm_main(a) -> int:
     for r in res:
         o = r.outputs[0]
         ids = list(o.token_ids)
-        outs.append({"token_ids": ids, "logprobs": [float(o.logprobs[t][tok].logprob) for t, tok in enumerate(ids)]})
+        outs.append({"token_ids": ids, "logprobs": [float(o.logprobs[t][tok].logprob) for t, tok in enumerate(ids)],
+                     "finish_reason": o.finish_reason})
     write_json(Path(a.out), {"model": a.model, "engine_init_seconds": init_s, "seconds": round(time.time() - t0, 1),
                              "outputs": outs})
     return 0
 
 
 # ---- the orchestration on the pod ----------------------------------------------------------------------------------
+
+def _sha(p: Path) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    with Path(p).open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 24), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def adopt(record: Path, arm: str, root: Path = REPO) -> dict:
+    """The canonical copy (`CANONICAL`) of a session's record, for the plans that reuse it: written byte for byte, and
+    only when `record_problems` finds nothing against ``arm``'s committed plan (the environment is the pod's to check)."""
+    from stages.depth_merge import plan as PL
+    rec = json.loads(Path(record).read_text())
+    plan = json.loads(PL.out_path(arm).read_text())
+    bad = record_problems(rec, plan, root=root)
+    if bad:
+        raise EngineCheckError(f"{record} cannot be adopted for {arm}: {bad}")
+    dest = Path(root) / CANONICAL
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(Path(record).read_bytes())
+    return {"adopted": str(dest.relative_to(root)), "sha256": _sha(dest), "from": str(record), "arm": arm}
+
 
 def control_dir(student: Path, work: Path) -> Path:
     """The same weight file under the stock 16-layer config (``base_config.json``)."""
@@ -294,8 +504,18 @@ def run(plan: dict, student: Path, work: Path, vllm_python: str, train_python: s
     metrics = {"hf_cache": {"recurrent": hf["recurrent"]["hf_cache"], "control": hf["control"]["hf_cache"],
                             "shared_cache_fault": hf["recurrent"]["shared_cache_fault"]},
                "vllm_generation": {n: hf[n]["vllm_rescore"] for n in models}}
+    outputs = {n: summarize(v, prompts) for n, v in vl.items()}
+    ex = plan["units"][0]["initialization"]["execution"]
+    import hashlib
+    binding = {**expected_binding(plan), "environment": environment(vllm_python),
+               "prompts_sha256": hashlib.sha256((work / "prompts.json").read_bytes()).hexdigest()}
     doc = {"schema": SCHEMA, "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "inputs": INPUTS,
-           "models": {n: str(d) for n, d in models.items()}, "metrics": metrics, **verdict(metrics),
+           "binding": binding, "arm": plan["arm"],
+           "validated_weights_sha256": {"model.safetensors": _sha(Path(student) / "model.safetensors"),
+                                        "rule": "recorded, not bound: the weights are the experiment's variable"},
+           "models": {n: str(d) for n, d in models.items()}, "metrics": metrics, "vllm_outputs": outputs,
+           **verdict(metrics, outputs, GATE, INPUTS, {"recurrent": int(ex["n_logical_layers"]),
+                                                      "control": int(ex["n_parameter_blocks"])}),
            "timing_seconds": {"total": round(time.time() - t0, 1),
                               **{f"vllm_{n}_engine_init": v["engine_init_seconds"] for n, v in vl.items()},
                               **{f"hf_{n}": h["seconds"] for n, h in hf.items()}},
@@ -319,6 +539,10 @@ def main(argv=None) -> int:
     h.add_argument("--out", required=True)
     h.add_argument("--continuations", default=None)
     h.add_argument("--shared-cache-fault", action="store_true")
+    ad = sub.add_parser("adopt")
+    ad.add_argument("--record", required=True)
+    ad.add_argument("--arm", required=True)
+    ad.add_argument("--write", action="store_true")
     r = sub.add_parser("run")
     r.add_argument("--plan", required=True)
     r.add_argument("--student", required=True)
@@ -329,6 +553,14 @@ def main(argv=None) -> int:
         return vllm_main(a)
     if a.cmd == "hf":
         return hf_main(a)
+    if a.cmd == "adopt":
+        if not a.write:
+            from stages.depth_merge import plan as PL
+            bad = record_problems(json.loads(Path(a.record).read_text()), json.loads(PL.out_path(a.arm).read_text()))
+            print(json.dumps({"problems": bad}))
+            return 0 if not bad else 1
+        print(json.dumps(adopt(Path(a.record), a.arm)))
+        return 0
     doc = run(json.loads(Path(a.plan).read_text()), Path(a.student), Path(a.work), a.vllm_python)
     print(json.dumps({"status": doc["status"], "checks": doc["checks"]}))
     return 0 if doc["status"] == "PASS" else 1

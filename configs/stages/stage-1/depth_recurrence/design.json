@@ -601,8 +601,7 @@
     "weights uploaded and verified are never sent again: only their record's publication (the handoff) is retried (SavepointMirror.mirror_once, hand_off_with_retries)",
     "a save point is retired only after the next one hands off; save points only after the final hands off"
    ],
-   "savepoint_copies": 1,
-   "savepoint_copies_rule": "PROPOSED for review (storage.md / REVIEW section 0.5): the relay accepts 27.22 GiB (2026-11-28 10:25Z) and two 19.50 GiB save points cannot fit; a single copy removes the previous save point before each upload and the last before the final's (TPI1 train_driver.savepoint_copies), so a unit holds no durable save point during each upload (about 2-3 min)"
+   "rotation_rule": "SOB1's registered rotation, unchanged: each new save point is uploaded, re-downloaded and re-hashed, and its pointer handed off, while the previous one is still on the relay; only then is the previous one removed (TPI1 SavepointMirror). From the first durable save point on, a valid discoverable copy exists at every moment; the review of 2026-11-28 refused a single-copy rotation (it left no durable copy for up to 2.86 h per save point)"
   },
   "memory": {
    "card": "one NVIDIA L40S",
@@ -771,7 +770,8 @@
    }
   },
   "sizes": "the depth arm's: init 4,007,724,000 B (bf16, the base's file), save point 20,934,572,032 B, final 8,015,407,104 B (fp32) -- 16 blocks whatever the schedule",
-  "shortfall": "2026-11-28 10:25Z: the relay accepts 27.22 GiB (60.36 GiB held, including V1's seed-1 final and its seed-2 save point, both kept). The two sessions need 28.09 GiB with a single save-point copy (47.58 with the registered two): the V2-D session fits as is, the V2-M session does not by 0.87 GiB. Proposed for the maintainer (logs/stages/stage-1/depth_recurrence/plans/storage_plan.json): the single copy (training.durability.savepoint_copies = 1) AND removing the relay copies of SOB1's residual_width and ffn_attention inits (7.50 GiB; their verified dev-box copies stay), which leaves 6.64 GiB of margin. Nothing is deleted or bought before that decision"
+  "shortfall": "2026-11-28 11:57Z, under the registered two-copy rotation (the review of 2026-11-28 refused a single copy): the relay accepts 27.22 GiB (60.36 GiB held); each V2 session needs 39.99 GiB (two 19.50 GiB save points + the 1 GiB margin), V2-M with V2-D's final (7.46) and archive already held. As is: V2-D short 12.77 GiB, V2-M 20.36. With SOB1's residual_width / ffn_attention init relay duplicates removed (7.50 GiB): 5.27 / 12.86. With V1's seed-2 save point freed (19.50): V2-D fits, V2-M short 0.87. With both: both fit (V2-M margin 6.64). Nothing authorized closes the gap; the options are the maintainer's (logs/stages/stage-1/depth_recurrence/plans/storage_plan.json, DMR1_REVIEW.md section 0U). Nothing is deleted or bought before that decision",
+  "copy_time": "one save point's copy (relay put = upload, a verifying re-download and re-hash), V1's 13 save points: measured 151-298 s (upload 104-121, verify 38-185); expected about 5.8 min at the registered ~120 MB/s each way; bounded at 2.86 h at the registered floors (120 MB/s up, 2.6 MB/s down, x 1.25); the pointer handoff adds up to 4 x 120 s of retries. Under the two-copy rotation the previous save point stays through all of it"
  },
  "authorizes": "nothing",
  "step0_diagnostic": {
@@ -780,7 +780,7 @@
   "scope": "2 validation sequences truncated to 2,048 tokens on the dev box's CPU, the untrained KEPT recurrent init: evidence that THIS initialization starts degenerate on the 36-layer schedule (val CE 12.46, above the uniform 11.93; the single-execution base 3.46 on the same rows), nothing more. It says nothing about whether recovery training repairs it, and it is no reason to change the registered schedule, add a residual scale or change the initialization rule: the registered design runs as registered and the training log measures the recovery"
  },
  "engine_validation": {
-  "where": "the first approved V2 session (depth_loop_kept), on the pod, after setup and before any training step; its time is in that session's budget. A FAIL stops the session (RUN_FAILED): nothing is trained, the evidence is collected and the pod is deleted. A PASS is recorded and the session trains",
+  "where": "the first approved V2 session (depth_loop_kept), on the pod, after setup and before any training step; its time is in that session's budget. A result that does not stand (record_problems) stops the session (RUN_FAILED) with nothing trained, the evidence collected and the pod deleted; a PASS that stands is adopted at logs/stages/stage-1/depth_recurrence/engine_check.json (engine_check.py adopt, $0)",
   "script": "scripts/stages/stage-1/depth_recurrence/engine_check.py",
   "models": {
    "recurrent": "the staged depth_loop_kept init (SOB1's depth weights + recurrent_config.json, 36 logical layers)",
@@ -794,7 +794,10 @@
   },
   "metrics": "per check: top-1 agreement (the reference's argmax equals the compared path's token) and the mean absolute difference of the compared token's log-probability",
   "gate": "PASS iff for hf_cache and vllm_generation alike: recurrent mean |dlogp| <= 3 x control's + 0.02 nats AND recurrent top-1 agreement >= control's - 0.02; AND the shared-cache variant FAILS the hf_cache gate. Fixed before any GPU reading; the thresholds bound bf16 noise relative to the measured control, not an absolute accuracy",
-  "not_validated_until_then": "the vLLM plugin's import under the vLLM env, torch.compile / CUDA graphs over 36 per-logical-layer Attention modules, the KV-cache sizing, HF / vLLM agreement, the recurrent model's L40S memory and step time (the first four training steps' memory_probe)"
+  "not_validated_until_then": "the vLLM plugin's import under the vLLM env, torch.compile / CUDA graphs over 36 per-logical-layer Attention modules, the KV-cache sizing, HF / vLLM agreement, the recurrent model's L40S memory and step time (the first four training steps' memory_probe)",
+  "reuse": "depth_loop_merged REUSES that adopted record and trains only when it stands for ITS plan: the same recurrent config (schedule) and execution, control config, inputs and pack, gate, implementation (docstring-free ast digests of the recurrent model's HF and vLLM files, the module they import, the plugin path, its entry points) and the check's own code; on the pod also the same environment versions and GPU. The weights validated are recorded and NOT compared: D's and M's are the experiment's variable, and the check validates the execution path for this schedule. Checked on the dev box (the artifact pins the record's sha256; launch gate the_engine_validation_applies) and on the pod before training (train_driver.engine_validation); the check is never re-run for V2-M",
+  "complete_or_fail": "before any threshold: every check scores exactly n_prompts x new_tokens positions with finite metrics; vLLM returns n_prompts outputs of new_tokens tokens each, ended by length, with one finite log-probability per token; every prompt is prompt_tokens long; one cache entry per logical layer for both models. Anything else is FAIL",
+  "reuse_rederives": "the verdict is recomputed from the saved metrics; a stored PASS string is never trusted"
  },
  "diagnostics": {
   "role": "mechanism diagnostics: never a loss term, never a reason to drop, select or re-tune a run",

@@ -90,9 +90,11 @@ def unit_sets_complete(out: Path, arm: str, seed: int) -> dict:
         unit = f"{arm}-s{int(seed)}"
         fin = (ses["finals"].get(unit) or {})
         got = {"final": not fin.get("problems", ["absent"]) and bool(fin.get("model_safetensors_sha256")),
-               "final_sha256": fin.get("model_safetensors_sha256")}
+               "final_sha256": fin.get("model_safetensors_sha256"), "set_weights_sha256": {}}
         for m in MODES:
-            got[m] = bool((ses["sets"].get(f"{arm}_s{int(seed)}/{m}") or {}).get("complete"))
+            row = ses["sets"].get(f"{arm}_s{int(seed)}/{m}") or {}
+            got[m] = bool(row.get("complete"))
+            got["set_weights_sha256"][m] = ((row.get("binding") or {}).get("weights_sha256") or {}).get("model.safetensors")
         return got
     finally:
         SC.restore(before)
@@ -206,6 +208,38 @@ def comparison(cid: str, a_out: Path, b_out: Path | None = None) -> dict:
             "error_rate_scope": "this comparison's own family (thinking at 0.05, non-thinking only after it)"}
 
 
+def registered_controls(d: dict | None = None) -> dict:
+    """The single-execution controls the recurrence design FIXES (``base.kept_control`` / ``base.merged_control``):
+    each one's arm, unit, final weights' sha256 and completion record (path and sha256)."""
+    b = (d or DC.recurrence_design())["base"]
+    seed = int((d or DC.recurrence_design())["arms"]["depth_loop_kept"]["seeds"][0])
+    kc, mc = b["kept_control"]["sessions"], b["merged_control"]["session"]
+    d_unit, m_unit = f"{DC.SOB1_DEPTH}-s{seed}", f"depth_merge-s{seed}"
+    return {"D": {"arm": DC.SOB1_DEPTH, "unit": d_unit, "final_sha256": kc["finals_sha256"][d_unit],
+                  "completion": kc["completion"]},
+            "M": {"arm": "depth_merge", "unit": m_unit, "final_sha256": mc["final_sha256"][m_unit],
+                  "completion": mc["completion"]}}
+
+
+def control_problems(cond: str, unit: dict, root: Path = REPO) -> list[str]:
+    """Why the D or M records read (``unit``: `unit_sets_complete`'s answer for that evidence) are not the registered
+    control (empty when they are): the completion record by sha256, the final weights' sha256, and each mode's set
+    bound to those weights. A copy anywhere passes; a different, internally consistent record does not."""
+    reg = registered_controls()[cond]
+    bad = []
+    cp = Path(root) / reg["completion"]["path"]
+    from stages.teacher_parent_initialization.relay import sha256_file
+    if not cp.is_file() or sha256_file(cp) != reg["completion"]["sha256"]:
+        bad.append(f"{cond}: the completion record {reg['completion']['path']} is not the registered one")
+    if unit.get("final_sha256") != reg["final_sha256"]:
+        bad.append(f"{cond}: final {str(unit.get('final_sha256'))[:12]} is not the registered {reg['final_sha256'][:12]}")
+    for m in MODES:
+        if (unit.get("set_weights_sha256") or {}).get(m) != reg["final_sha256"]:
+            bad.append(f"{cond}: the {m} set is bound to {str((unit.get('set_weights_sha256') or {}).get(m))[:12]}, "
+                       f"not the registered final {reg['final_sha256'][:12]}")
+    return bad
+
+
 def interaction_groups(y: dict[str, dict], groups: dict[str, list[str]]) -> tuple[list[str], "np.ndarray",
                                                                                  "np.ndarray"]:
     """(group keys, d_g, n_g) for R4: d_g sums, over the group's items, the item's interaction
@@ -276,6 +310,10 @@ def recurrence(kept_out: Path, merged_out: Path, *, d_out: Path | None = None, m
     with tempfile.TemporaryDirectory() as tmp:
         for c, arm in CONDITIONS.items():
             units[c] = {"arm": arm, "evidence": str(outs[c]), **unit_sets_complete(outs[c], arm, seed)}
+            if c in ("D", "M"):
+                bad = control_problems(c, units[c])
+                if bad:
+                    raise SystemExit(f"the {c} control read from {outs[c]} is not the registered one: {bad}")
             yc, dc, tc = read_arm(outs[c], arm, [seed], primary, Path(tmp) / c)
             digests.update(dc)
             terms.update(tc)

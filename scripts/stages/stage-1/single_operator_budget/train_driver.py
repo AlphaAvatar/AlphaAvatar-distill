@@ -174,8 +174,6 @@ def secure_final(name: str, model_dir: Path, out_dir: Path, cfg: dict, ev_unit: 
                           f"pod holds other final weights {sha[:12]}; a unit never holds two finals")
     if not prev.get("verified"):
         row["removals_before_final"] = TD.retry_pending_removals(ev_unit, name)     #: room first, then the upload
-        if TD.savepoint_copies(dur) == 1:
-            row["single_copy_removed_before_final"] = TD.remove_before_upload(ev_unit, name, "final")
         files = {n: str(model_dir / n) for n in AU.FINAL_FILES if (model_dir / n).is_file()}
         files[done.name] = str(done)        #: the training's completion travels with its weights
         nbytes = sum(Path(f).stat().st_size for f in files.values())

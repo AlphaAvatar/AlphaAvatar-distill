@@ -142,7 +142,31 @@ def kind_conditions(v: Variant, kind: str, root: Path = REPO, arm: str | None = 
     plan = json.loads((root / plan_path(arm)).read_text())
     out |= {"arm": arm, "plan": plan_path(arm), "plan_sha256": SE.sha256_file(root / plan_path(arm)),
             "init_record_sha256": SE.sha256_file(root / plan["init_record"]["path"])}
+    ev = plan.get("engine_validation") or {}
+    if ev.get("mode") == "reuse":
+        #: the record this arm trains under is pinned by the artifact; setup re-derives it from the pod's checkout
+        rec = root / ev["record"]
+        if not rec.is_file():
+            raise SE.AuthorizationError(f"{arm} reuses the engine validation of {ev['from_arm']}, and {ev['record']} "
+                                        "does not exist: run and adopt it first (engine_check.py adopt)")
+        out["engine_record_sha256"] = SE.sha256_file(rec)
     return out
+
+
+def engine_validation_problems(arm: str | None, root: Path = REPO) -> list[str]:
+    """For an arm whose plan reuses an engine validation: why the canonical record does not stand for THIS plan
+    (`engine_check.record_problems`, everything but the pod's environment). Empty for any other arm."""
+    if arm is None or not DC.is_recurrent(arm):
+        return []
+    plan = json.loads((root / plan_path(arm)).read_text())
+    ev = plan.get("engine_validation") or {}
+    if ev.get("mode") != "reuse":
+        return []
+    from stages.depth_recurrence import engine_check as EC
+    p = root / ev["record"]
+    if not p.is_file():
+        return [f"{ev['record']} does not exist: {ev['from_arm']}'s session has not produced an adopted PASS"]
+    return EC.record_problems(json.loads(p.read_text()), plan, root=root)
 
 
 def kind_grant(v: Variant, kind: str, *, dry_run: bool = False) -> dict:
@@ -231,6 +255,12 @@ def gates(v: Variant, arm: str | None) -> tuple:
             return True, "a build session"
         return initialization_on_relay(v.arm_of(_kind(ctx), _arm(ctx)))
 
+    def the_engine_validation_applies(ctx) -> tuple[bool, str]:
+        a = None if _kind(ctx) == v.build_kind else v.arm_of(_kind(ctx), _arm(ctx))
+        bad = engine_validation_problems(a)
+        return (not bad, "no engine validation to reuse, or the reused record stands for this plan" if not bad
+                else "; ".join(bad))
+
     def the_relay_has_room(ctx) -> tuple[bool, str]:
         return relay_room(v, _kind(ctx), _arm(ctx), ctx.evidence, resume_from=getattr(ctx.args, "resume_from", None))
 
@@ -244,7 +274,7 @@ def gates(v: Variant, arm: str | None) -> tuple:
         return free >= need, f"{scr}: {free / GIB:.2f} GiB free for the session's {need / GIB:.2f} GiB evidence bound"
 
     out = (the_authorization_is_in_the_session_commit, the_teardown_reserve_stays, the_kind_records_are_the_bound_ones,
-           the_initialization_is_durable, the_relay_has_room, the_dev_box_has_room)
+           the_initialization_is_durable, the_engine_validation_applies, the_relay_has_room, the_dev_box_has_room)
     return out + ((the_launch_runs_the_authorized_arm_and_plan,) if arm is not None else ())
 
 

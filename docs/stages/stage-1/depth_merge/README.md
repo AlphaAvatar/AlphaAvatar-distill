@@ -4,7 +4,7 @@ Stage 1 owns this variant; its training is `stage3_recovery`. It is the first of
 review report: [`../reasoning_inheritance/DMR1_REVIEW.md`](../reasoning_inheritance/DMR1_REVIEW.md); variants 2 and
 3: [`../depth_recurrence/README.md`](../depth_recurrence/README.md)).
 
-**Status: EXECUTED 2026-11-27/28 and STOPPED by the maintainer during seed 2 (2026-11-28 UTC): the build COMPLETE, seed 20260726 trained (resumed once from save point 6,624) and evaluated, reported descriptively; seed 20260801 stopped at step 6,590, its step-5,520 save point kept. Not the registered two-seed completion (review report section 00).** Branch
+**Status: EXECUTED 2026-11-27/28 and STOPPED by the maintainer during seed 2 (2026-11-28 UTC): the build COMPLETE, seed 20260726 trained (resumed once from save point 6,624) and evaluated, reported descriptively; seed 20260801 stopped at step 6,590; its last durable save point, step 5,520, is kept (a resume would recompute the 1,070 unpersisted steps). Not the registered two-seed completion (review report section 00).** Branch
 `research/reasoning-inheritance`, not merged into `main`.
 
 | file | what it is |

@@ -139,41 +139,6 @@ def test_the_mirror_keeps_one_save_point_and_never_the_final(tmp_path, monkeypat
     assert m.mirror_once() is None                                  #: the final step goes out as final.json
 
 
-def test_a_single_copy_mirror_removes_the_previous_save_point_before_the_next_upload(tmp_path, monkeypatch):
-    """``durability.savepoint_copies: 1``: the relay never holds two save points of the unit -- the previous one is
-    removed (confirmed absent) BEFORE the next is uploaded; a removal the relay does not confirm holds the upload back
-    for the next round. The default (2) is the registered rotation above."""
-    from stages.teacher_parent_initialization import relay as R
-    from .test_takeover import FakeRelay
-    fake = FakeRelay()
-    monkeypatch.setattr(R, "run_online", fake)
-    out, ev = tmp_path / "train", tmp_path / "ev"
-    m = TD.SavepointMirror("u", out, ev, total_steps=4000, prefix="durable/u", d={**TD.DURABILITY, "savepoint_copies": 1})
-
-    def save(step):
-        ck = out / "checkpoints" / f"step_{step:06d}"
-        (ck / "model").mkdir(parents=True)
-        (ck / "model" / "model.safetensors").write_bytes(b"w")
-        (ck / "trainer_state.pt").write_bytes(b"s")
-        (out / "checkpoints" / "latest.txt").write_text(f"step_{step:06d}\n")
-    save(1104)
-    assert m.mirror_once()["verified"]
-    save(2208)
-    assert m.mirror_once()["verified"]
-    ops = [c for c in fake.calls if c[0] in ("put", "remove")]
-    i_rm = ops.index(("remove", "durable/u/savepoints/step_001104"))
-    i_up = ops.index(("put", "durable/u/savepoints/step_002208"))
-    assert i_rm < i_up                                              #: removed first, then uploaded
-    real = R.run_online
-    monkeypatch.setattr(R, "run_online", lambda op, payload, timeout_s=3600: (
-        {"verified_absent": False, "error": "refused"} if op == "remove" else real(op, payload, timeout_s)))
-    save(3312)
-    assert m.mirror_once() is None                                  #: not confirmed absent: nothing uploaded
-    assert [r["tag"] for r in m.records()] == ["step_001104", "step_002208"]
-    with pytest.raises(TD.DriverError):
-        TD.savepoint_copies({"savepoint_copies": 3})
-
-
 def test_a_replacement_pod_resumes_the_latest_save_point_with_the_units_whole_log(tmp_path, monkeypatch):
     got = []
 

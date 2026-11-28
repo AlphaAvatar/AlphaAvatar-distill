@@ -94,20 +94,36 @@ def stage_init(u: dict, dur: dict) -> dict:
 
 
 def engine_validation(u: dict, plan: dict, out: Path, dur: dict, vllm_python: str, mark) -> dict:
-    """The design's engine check before any training step (`depth_recurrence.engine_check`): a PASS already in the
-    evidence (a takeover) is kept and not repeated; otherwise the first unit's init is staged and the check runs; a
-    FAIL raises, so nothing trains."""
+    """The plan's engine validation before any training step (`depth_recurrence.engine_check`), checked on this pod
+    against this plan and this pod's environment (`record_problems`, which re-derives the verdict from the metrics):
+
+    * ``mode: reuse`` (an arm after the first): the canonical record the plan names must stand; otherwise nothing
+      trains -- the check is not re-run here;
+    * ``mode: run``: a record already in the taken-over evidence is kept only if it stands; otherwise the first unit's
+      init is staged and the check runs, and a result that does not stand trains nothing."""
     from stages.depth_recurrence import engine_check as EC
     from stages.teacher_parent_initialization import train_driver as TD
+    ev = plan["engine_validation"]
+    env = EC.environment(vllm_python)
+    if ev.get("mode") == "reuse":
+        p = REPO / ev["record"]
+        bad = (EC.record_problems(TD.read_json(p), plan, env=env) if p.is_file()
+               else [f"{ev['record']} is not in this checkout"])
+        if bad:
+            mark("ENGINE_CHECK_NOT_APPLICABLE")
+            raise DriverError(f"no engine validation stands for this plan, nothing was trained: {bad}")
+        mark("ENGINE_CHECK_REUSED")
+        return {"status": "PASS", "record": ev["record"], "reused": True, "from_arm": ev.get("from_arm")}
     p = Path(out) / "engine_check" / "engine_check.json"
-    if p.is_file() and TD.read_json(p).get("status") == "PASS":
+    if p.is_file() and not EC.record_problems(TD.read_json(p), plan, env=env):
         return {"status": "PASS", "record": str(p), "reused": True}
     mark("ENGINE_CHECK_START")
     stage_init(u, dur)
     doc = EC.run(plan, Path(u["config"]["student_path"]), Path(out) / "engine_check", vllm_python)
-    if doc["status"] != "PASS":
+    bad = EC.record_problems(doc, plan, env=env)
+    if bad:
         mark("ENGINE_CHECK_FAILED")
-        raise DriverError(f"the engine validation failed, nothing was trained: {doc['checks']}")
+        raise DriverError(f"the engine validation failed, nothing was trained: {bad}")
     mark("ENGINE_CHECK_PASSED")
     return {"status": "PASS", "record": str(p), "checks": doc["checks"]}
 

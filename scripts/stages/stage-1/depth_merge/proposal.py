@@ -48,9 +48,11 @@ POSITION = {"read_utc": "2026-11-26T11:48:05Z", "committed_usd": 1086.2713, "pro
             "project_remaining_usd": 74.7887, "balance_usd": 123.7283, "pods": 0, "volumes": 0,
             "spend_per_hour": 0.0, "relay_headroom_gib": [35.24, 35.28], "dev_box_free_gib": 23}
 #: the 2026-11-28 position the revised variant 2 is priced against (read live at 10:25Z; read again at issue and launch)
-POSITION_V2 = {"read_utc": "2026-11-28T10:25:11Z", "committed_usd": 1113.5131, "project_cap_usd": 1161.06,
-               "project_remaining_usd": 47.5469, "balance_usd": 95.3743, "pods": 0, "volumes": 0,
-               "spend_per_hour": 0.0, "relay_headroom_gib": 27.219, "relay_used_gib": 60.36, "dev_box_free_gib": 6.85}
+POSITION_V2 = {"read_utc": "2026-11-28T11:58:20Z", "committed_usd": 1114.6477, "project_cap_usd": 1161.06,
+               "project_remaining_usd": 46.4123, "balance_usd": 95.3518, "pods": 0, "volumes": 0,
+               "spend_per_hour": 0.0, "relay_headroom_gib": 27.219, "relay_used_gib": 60.36, "dev_box_free_gib": 6.85,
+               "note": "one reading of the ledger (SE.live_position) for the cap and the balance; committed rose "
+                       "$1.1346 since 10:25Z as V1 attempt 2's last billing rows posted (no resource existed)"}
 #: the engine validation's hours (`depth_recurrence.engine_check`: two vLLM engines and two HF loads on a 2B model)
 ENGINE_CHECK_HOURS = {"expected": 0.4, "bound": 1.0}
 TEARDOWN_RESERVE = 1.00
@@ -205,13 +207,22 @@ def proposal_v2() -> dict:
             "needed_with_reserves_usd": need,
             "project_cumulative_cap_usd": pos["project_cap_usd"], "position_at_proposal": pos,
             "fits_position": {
+                "read_utc": pos["read_utc"],
+                "both_sessions_at_their_caps_with_reserves_usd": need,
                 "project_cap": {"remaining_usd": pos["project_remaining_usd"], "needed_usd": need,
                                 "fits": need <= pos["project_remaining_usd"],
-                                "shortfall_usd": round(max(0.0, need - pos["project_remaining_usd"]), 2)},
-                "balance": {"balance_usd": pos["balance_usd"], "first_session_needs_usd":
-                            round(kept["per_session_hard_cap_usd"] + TEARDOWN_RESERVE, 2),
+                                "raise_needed_usd": round(max(0.0, need - pos["project_remaining_usd"]), 2),
+                                "raise_needed_for_v2d_alone_usd": round(max(0.0, kept["per_session_hard_cap_usd"]
+                                                                            + TEARDOWN_RESERVE
+                                                                            - pos["project_remaining_usd"]), 2)},
+                "balance": {"balance_usd": pos["balance_usd"], "needed_usd": need,
+                            "fits": need <= pos["balance_usd"],
+                            "top_up_needed_usd": round(max(0.0, need - pos["balance_usd"]), 2),
+                            "first_session_needs_usd": round(kept["per_session_hard_cap_usd"] + TEARDOWN_RESERVE, 2),
                             "fits_first_session": kept["per_session_hard_cap_usd"] + TEARDOWN_RESERVE <= pos["balance_usd"],
-                            "rule": "checked at each issue and launch against that session's cap plus the reserve"}},
+                            "rule": "the worst case of both sessions at their caps; each issue and launch also checks "
+                                    "its own session's cap plus the reserve against the live balance"},
+                "not_authorized": "no cap raise, top-up or grant is implied; V1's closed grants fund nothing here"},
             "basis": {"step_time": f"SOB1's measured 4.83 s / step (V1 measured 4.87) and the 7.241 s bound, x {LOOP_WORK:.2f} "
                                    "(teacher 36 + 4 x 36 student logical-layer forward-equivalents vs 36 + 4 x 16): "
                                    "NOT measured -- the first four steps measure it",

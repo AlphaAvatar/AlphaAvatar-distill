@@ -1,6 +1,6 @@
 # DMR1: depth recovery at SOB1's depth-only structure -- review report
 
-**State: READY_FOR_REVIEW (2026-11-28 UTC), the variant-2 revision.**
+**State: READY_FOR_REVIEW (2026-11-28 UTC), the variant-2 revision after the review of `1e42b144` (section 0U).**
 - **V1:** stopped by the maintainer during seed 2, and closed out. Seed 1 is complete and reported descriptively
   (section 00).
 - **V2:** revised at $0 into two initializations x seed 20260726, with code, plans, budget and storage prepared
@@ -14,6 +14,205 @@
 - **Earlier sections:** sections 0 onward are the READY_FOR_REVIEW report of 2026-11-26, kept as written. Their
   "Stage 6" for variants 2 and 3, `stage6_recurrent_depth` and `stage-6/...` paths read as section 0S states;
   where the V2 design differs, section 0R holds.
+
+## 0U. The review of `1e42b144` (2026-11-28): the fixes, the counterexamples, storage and money
+
+The design and the stage were approved and are unchanged:
+- two conditions from their own untrained initializations, one seed;
+- everything but the initialization the same;
+- no hidden-state term;
+- the D / M controls reused;
+- R1-R4 descriptive;
+- Stage 1 research with Stage 3 recovery; Stage 6 not started.
+
+This round fixed what had to be fixed before a launch, at $0. No grant, cap raise, top-up or paid run.
+
+### 0U.1 Save-point rotation: a durable copy at every moment
+
+- **Removed.** The single-copy rotation is gone entirely: TPI1 `savepoint_copies` / `remove_before_upload` and its
+  `SavepointMirror` branch, SOB1 `secure_final`'s "remove the last save point, then upload the final" branch (which
+  went on uploading even when the removal was refused), and the single branch of `rotation_need`.
+  - Those files are byte-identical to before the V2 revision, and the design states the registered rotation
+    (`training.durability.rotation_rule`).
+  - From the first durable save point on, a valid, discoverable copy exists at every moment: each new save point is
+    uploaded, re-downloaded and re-hashed, and handed off while the previous one is still on the relay, which only
+    then is removed.
+  - A failed removal stays PENDING and is never counted as freed. It is retried before the next large upload and at
+    a takeover; `rotation_need` credits a superseded save point only when it goes.
+- **Proven through the real takeover entry** (`test_an_interrupted_rotation_is_taken_over_from_a_durable_save_point_never_from_step_0`):
+  - **Setup.** Attempt 1's mirror publishes step 1104, then is cut while publishing 2208. The dev box holds only
+    what its last poll pulled. Attempt 2 runs `depth_merge.train_driver.main --resume <that evidence>`.
+  - **Cuts and outcomes:**
+
+    | cut | the trainer resumed from |
+    | --- | --- |
+    | the new save point uploading | 1104 (the only one listed and verified) |
+    | being verified (the put answered unverified) | 1104 |
+    | its handoff unfinished (pointer written, listing never confirmed) | the latest listed and verified |
+    | the old one's removal refused | 2208 (handed off; 1104's removal still pending) |
+
+  - **Never step 0.** Each cut leaves at least one durable copy, and the trainer was started with `resume=True`
+    from the restored tag every time. The test would fail on the refused single-copy design (its upload cut leaves
+    no copy).
+  - **Arithmetic.** `test_the_rotation_never_leaves_the_relay_without_a_durable_save_point` checks the launch
+    gate's arithmetic: peak = two save points, and no single-copy branch exists. TPI1's and SOB1's existing
+    takeover tests (five interruption points, a failed removal retried at the takeover) pass unchanged.
+- **The window, corrected.** A copy is the relay `put`: upload, a verifying re-download and a re-hash.
+
+  | | one save point's copy (20.9 GB) |
+  | --- | --- |
+  | measured (V1's 13 save points) | 151-298 s (upload 104-121 s, verify 38-185 s) |
+  | expected (the registered ~120 MB/s each way) | about 5.8 min |
+  | bound (the registered floors: 120 MB/s up, 2.6 MB/s down, x 1.25) | **2.86 h** |
+  | handoff (pointer, listing) | up to 4 x 120 s more |
+
+  "About 2-3 minutes" was the upload alone. Under the registered rotation the previous save point covers all of
+  it.
+
+### 0U.2 Storage under the registered rotation (live 2026-11-28 11:57Z; `plans/storage_plan.json`)
+
+Each V2 session needs **39.99 GiB** on the relay: its two overlapping 19.50 GiB save points + the 1 GiB margin. Its
+final (7.46) uploads beside the last save point, below that peak. V2-M starts with V2-D's final and closeout
+archive already held (7.59 GiB).
+
+| what is freed first | relay headroom | V2-D | V2-M (after V2-D) |
+| --- | --- | --- | --- |
+| nothing (the only authorized state) | 27.22 | **short 12.77** | short 20.36 |
+| SOB1's residual_width + ffn_attention init relay duplicates (7.50) | 34.72 | short 5.27 | short 12.86 |
+| V1's seed-2 save point (19.50) | 46.72 | fits (6.73 margin) | short 0.87 |
+| both | 54.22 | fits | **fits, 6.64 margin** |
+
+The relay inventory (60.36 GiB, read live; `storage_plan.json :: inventory`):
+- **KEEP, 49.93 GiB:**
+  - V1 seed 2's save point (19.50, kept by you);
+  - V1 seed 1's final (7.46, the M control's only weights);
+  - the two V2 bases (V1's init 3.73 and SOB1's depth init 3.73);
+  - the wheelhouses (7.42, every pod installs from them);
+  - the permanent controls (4.44);
+  - the canonical 0.6B init and random baseline (2.22);
+  - the Stage-0 finalist (1.11, named by Stage-2 configs);
+  - V2's training pack (0.31);
+  - V1's statistics.
+- **PROPOSE, 7.53 GiB:** the two SOB1 init duplicates. Their dev-box copies are re-hashed equal to the records and no
+  plan reads the relay copies.
+- **UNCLASSIFIED, 2.90 GiB:** small packs, corpora and old bundles. Their consumers are not audited, and even all of
+  them would close no gap.
+
+**The gap remains.** Even V2-D cannot launch under the recovery guarantee with what is authorized: its launch gate
+(`the_relay_has_room`) refuses at 27.22 GiB, as it should. I removed nothing: the duplicates alone unblock nothing,
+and V1's save point is yours to keep. Options for your decision:
+1. **Free V1 seed 2's save point and the two SOB1 duplicates (27.0 GiB):** both sessions fit, with 6.64 GiB of
+   margin at V2-M's peak. The cost: V1 seed 2 could then only be retrained from its initialization (its 5,520 durable
+   steps lost).
+2. **More relay storage** (an HF storage upgrade): at least 12.8 GiB for V2-D alone, and at least 20.4 GiB for both
+   sessions (12.9 GiB if the duplicates go). It is a purchase; I bought nothing.
+3. **A second durable backend for the overlapping save point** (for example a RunPod network volume of about 45 GB):
+   it is NOT implemented, it pins the session's datacenter and it is a paid resource; listed only.
+
+### 0U.3 The engine validation: what a PASS is bound to, and V2-M's dependency
+
+- **The binding.** The record (`engine_check.json`, schema v2) carries a `binding`:
+  - the recurrent config (the schedule) and the execution;
+  - the control config;
+  - the inputs and the training pack's identity;
+  - the gate;
+  - the implementation: docstring-free ast digests of `recurrent_depth.py`, `recurrent_depth_vllm.py`, the
+    `projected_residual_vllm.py` it imports, `vllm_plugin_path.py`, and the plugin's entry points; plus
+    `code_identity` of the check's own probe functions;
+  - the environment: the train and vLLM environments' versions and the GPU.
+
+  It binds neither a whole document nor a git commit: a docstring edit changes nothing, a statement edit does
+  (tested). The validated weights are recorded and NOT bound: D's and M's weights are the experiment's variable, and
+  the check validates the execution path for this schedule. So V2-D's PASS covers V2-M, which has the same schedule,
+  control, inputs, gate and implementation (tested), and a plan with another schedule is refused.
+- **Reuse re-derives** (`record_problems`):
+  - the binding is compared against the plan it is asked for, and on a pod against the live environment;
+  - completeness is checked;
+  - the verdict is recomputed from the saved metrics; a stored `PASS` string is never trusted.
+- **Complete or FAIL.** Before any threshold, the result must match the protocol:
+  - exactly n_prompts x new_tokens scored positions per check, with finite metrics;
+  - n_prompts vLLM outputs of new_tokens tokens each, ended by length, with one finite log-probability per token;
+  - prompts of the registered length;
+  - one cache entry per logical layer for both models.
+
+  An empty result scores None, never 0, so two zeros can no longer pass a relative gate.
+- **V2-M's dependency, both places:**
+  - **plans:** V2-D's plan says `mode: run`; V2-M's says `mode: reuse` from `depth_loop_kept`, naming the canonical
+    record `logs/stages/stage-1/depth_recurrence/engine_check.json`. `engine_check.py adopt` writes it only for a
+    record without problems;
+  - **dev box:** V2-M's bound conditions pin that record's sha256 (setup re-derives them on the pod), and issuing
+    refuses while it does not exist; the launch gate `the_engine_validation_applies` re-checks it against V2-M's plan;
+  - **pod:** the driver re-checks it against V2-M's plan and the pod's environment before any training, and trains
+    nothing otherwise. The check is never re-run for V2-M.
+- **The thresholds** are unchanged (the registered ones). The real GPU validation stays in the first approved
+  session, before training.
+- **Counterexamples** (all pass):
+  - a PASS bound to another recurrent config, execution, control, inputs, pack, gate, implementation, check code
+    or environment is refused (8 + 1 cases);
+  - zero scored vLLM positions, both paths zero, a short or missing output, a non-length stop, mismatched
+    log-probabilities, a non-finite log-probability, a non-finite metric, or a missing check are FAIL, and a forged
+    PASS over them is refused (9 cases);
+  - V2-M with no record, a record bound to another schedule, or an incomplete record: RUN_FAILED with nothing
+    trained and no TRAIN_START; and on the dev box, `kind_conditions` refuses while no record exists;
+  - a valid record made on V2-D's init stands for V2-M;
+  - the shared-cache fault on a tiny real recurrent model still fails the gate.
+
+### 0U.4 The D / M controls are the registered weights
+
+- **The check.** `analysis.recurrence` refuses unless the control it reads is the registered one
+  (`registered_controls`, `control_problems`):
+  - D: its completion record hashes to the design's, its final weights are `5635c33e…` (SOB1 depth_only seed
+    20260726), and both modes' sets are bound to them;
+  - M: the same with `ed0ee3e1…` (V1 seed 20260726).
+- **Explicit paths too.** The same check applies when `d_out` / `m_out` is passed: a copy anywhere passes, and a
+  complete, self-consistent record bound to other weights does not.
+- **Tested:** the real evidence passes; a replacement bound to SOB1's other seed's weights, or a half-bound one, is
+  refused on both paths. Nothing was retrained or regenerated.
+
+### 0U.5 V1 seed 2, stated precisely
+
+Seed 2 stopped at step **6,590**; its durable, resumable save point is step **5,520**. A resume, if ever authorized,
+continues from 5,520 and recomputes the **1,070** steps that were never persisted; it is not a lossless continuation
+from 6,590. It stays kept and is not resumed. The pre-fixed rule's CONTINUE and your later stop stay two separate
+records. Corrected in sections 00 and 0R.1, the state file, the V1 README, the stage index and the storage plan.
+
+### 0U.6 Money (one ledger reading, 2026-11-28 11:58:20Z; `plans/proposal_dmr1_loop_train.json :: fits_position`)
+
+The sessions' terms do not change: the registered rotation is what the pricing always assumed. The last save
+point's copy is bounded at 2.856 h and each final at 1.094 h. V2-M reuses the check, so it has no engine hours.
+
+| | |
+| --- | --- |
+| V2-D: expected / hard cap | $30.42 / $57.22 (26.7 / 47.4 driver h) |
+| V2-M: expected / hard cap | $29.97 / $56.03 (26.3 / 46.4 driver h) |
+| both caps + two $1.00 reserves | **$115.25** |
+| project cap $1,161.06, billed $1,114.6477, left | **$46.41** → raise **$68.84** (or $11.81 for V2-D alone) |
+| RunPod balance | **$95.35** → covers V2-D's $58.22; for both at their caps, top up **$19.90** |
+
+Expected spend is $60.39. Nothing is approved by this table, and V1's closed grants fund nothing here.
+
+### 0U.7 Verification this round ($0)
+
+```text
+convergence (one run): depth_recurrence, depth_merge, TPI1, SOB1, tests/docs, tests/architecture
+                       : 607 passed / 1 failed / 3 skipped (9.0 min). The failure was the stage index, stale after the
+                         seed-2 wording fix in the attribution row; regenerated, tests/docs rerun: 177 passed / 0 failed
+live, read-only        : the V2 budget refuses for the project cap; V2-M's bound conditions refuse while no adopted
+                         engine record exists; the storage plan and the inventory read live (relay 27.22 GiB free)
+GPU validation         : none; still owed in the first approved session, before training
+```
+
+### 0U.8 What awaits your decision
+
+1. **Storage** (0U.2): option 1, 2 or 3. Until then no V2 session can launch under the recovery guarantee.
+2. **Money:**
+   - the proposal ($115.25 at the caps with reserves, $60.39 expected);
+   - a project-cap raise of $68.84;
+   - a $19.90 top-up for the worst case of both sessions;
+   - a grant for `dmr1_loop_train`.
+3. **The memory risk on the L40S** (1.85 GiB estimated margin, unmeasured) and, only after a measured OOM, an
+   80 GB card.
+4. **Unchanged and still open:** whether V1 seed 2's save point stays (it is part of storage option 1).
 
 ## 0S. The stage correction (the maintainer's message of 2026-11-28, folded into this round)
 
@@ -124,15 +323,14 @@ GPU validation                           : none; the engine validation is still 
    - A **project-cap raise**: the cap leaves $46.41, so both sessions need about **$68.8** more, or about **$11.8**
      to run V2-D's session alone first.
    - A grant for `dmr1_loop_train`.
-2. **Storage.** The single save-point copy, and removing the relay copies of SOB1's residual_width and ffn_attention
-   inits (7.50 GiB; dev-box copies verified). This is needed only before the V2-M session. The alternative is to free
-   V1's seed-2 save point, which you asked to keep.
+2. **Storage.** Superseded: see 0U.2 (the single copy was refused; a decision is needed before either session).
 3. **The engine gate's thresholds.** For both checks: mean |dlogp| <= 3 x control + 0.02 nats and top-1 agreement
    >= control - 0.02, with the shared-cache fault required to fail. They are fixed now, before any reading; change
    them now or never.
 4. **Memory on the L40S.** The estimated margin is 1.85 GiB, not measured. If a measured OOM survives the
    protocol-neutral steps, the 80 GB card is a separate decision.
-5. **V1's seed-2 save point** (19.50 GiB on the relay, resumable from step 5,520). It is kept as you asked; whether
+5. **V1's seed-2 save point** (19.50 GiB on the relay). Seed 2 stopped at step 6,590; the durable, resumable point
+   is step 5,520, so a resume would recompute 1,070 steps. It is kept as you asked; whether
    it stays after this round is yours to decide.
 
 ## 0R. Variant 2 revised: two initializations x one seed (the maintainer's brief of 2026-11-28)
@@ -147,8 +345,10 @@ GPU validation                           : none; the engine validation is still 
   - V1 is NOT the registered two-seed completion.
 - **Kept:** seed 1's final (relay), evaluation sets, training log and identity records (the dev box's secured
   evidence and the repo's closeout). Also kept: seed 2's verified save point at step 5,520 on the relay -- model,
-  AdamW state, CPU and CUDA RNG states, `consumed_blocks` (the data position) and the resume identity. A later
-  resume takes it over; it never retrains from step 0.
+  AdamW state, CPU and CUDA RNG states, `consumed_blocks` (the data position) and the resume identity. Seed 2
+  stopped at step 6,590, but the last DURABLE save point is step 5,520. A later resume, if authorized, continues from
+  5,520 and recomputes the 1,070 steps that were never persisted -- not a lossless continuation from 6,590, and
+  never a retraining from step 0.
 - **Resources** (2026-11-28 10:18-10:25Z):
   - the pod was deleted and the provider confirms it gone;
   - `runpodctl pod list` and `network-volume list` both read `[]`;
@@ -216,7 +416,7 @@ token and 2.25x the decode work. The report gives measured GPU time, memory and 
 | comparisons | C2 (loop vs the selected single arm), C3 (V3 vs V2), tested, pooled over two seeds | R1 = V2-D - D, R2 = V2-M - M, R3 = V2-M - V2-D, R4 = I = (V2-M - V2-D) - (M - D); descriptive, single seed, 95% group-bootstrap intervals | `analysis.py :: recurrence`, `recurrence_modes`, `interaction_groups` |
 | engine validation | "owed before or at the first paid run" | an explicit first stage of V2-D's session, in its budget, gated | `depth_recurrence/engine_check.py`; `depth_merge/train_driver.py :: engine_validation` |
 | diagnostics | val CE / KD | + the eval-only state probe per logical layer | core: `hidden_state.StateProbe`, `train.py :: state_probe` |
-| save points on the relay | two copies (registered rotation) | one copy, PROPOSED (0R.6) | TPI1 `train_driver.savepoint_copies` / `remove_before_upload`; SOB1 `launch.rotation_need`, `train_driver.secure_final` |
+| save points on the relay | two copies (registered rotation) | two copies, unchanged (a single copy was proposed 2026-11-28 and REFUSED in review; removed again, 0U.1) | -- |
 | money | an estimate, never proposed (`estimates.json`, removed) | a proposal per arm (`plans/proposal_dmr1_loop_train.json`) | `proposal.py :: proposal_v2` |
 
 C1 is not completed: no C1 state is written, nothing is derived from the old selector, and V1's seed 2 is not resumed
@@ -279,8 +479,8 @@ GPU validation                             : none (no GPU)
 What the tests establish:
 - the state probe through the real trainer: its arithmetic against the plain formulas, and identical losses,
   gradients, weights and RNG state with and without it;
-- the single-copy rotation: removal confirmed before each upload, an unconfirmed removal holding the upload back,
-  and the relay arithmetic;
+- (superseded: the single-copy rotation's tests were removed with it; the interrupted-rotation takeovers are
+  in 0U.1)
 - the real driver end to end for depth_merge and both loop arms: the engine check runs before any training, a
   failed check trains nothing, and a takeover repeats nothing;
 - the HF cache check on a tiny real recurrent model: the true cache passes against the control, and the
@@ -298,7 +498,12 @@ NOT VALIDATED until the first approved session's engine-validation stage (`engin
 Gate (fixed now): for both checks, recurrent mean |dlogp| <= 3 x control + 0.02 nats and top-1 agreement >= control -
 0.02, the fault failing, and one cache entry per logical layer. A FAIL ends the session with nothing trained.
 
-### 0R.6 Storage (live 2026-11-28 10:25Z; `logs/stages/stage-1/depth_recurrence/plans/storage_plan.json`)
+### 0R.6 Storage (live 2026-11-28 10:25Z) -- SUPERSEDED by 0U.2
+
+**Superseded.** The review refused the single-copy rotation below: it left no durable copy for up to 2.86 h per
+save point (not "about 2-3 min": that was the upload alone). Section 0U.2 recomputes storage under the registered
+rotation. The text below is kept as it was proposed.
+
 
 The relay holds 60.36 GiB and accepts 27.22 GiB more. That includes V1's seed-1 final (7.46), V1's seed-2 save point
 (19.50), V1's init (3.73: V2-M's base) and SOB1's depth init (3.73: V2-D's base), all kept. The dev box has 6.85 GiB
@@ -348,7 +553,7 @@ Not proposed: deleting V1's seed-2 save point (you asked to keep it), buying sto
 **Launch conditions**, after which the two sessions run without stopping in between:
 - the maintainer approves this design, the budget, and the project-cap raise;
 - a grant for `dmr1_loop_train` is written;
-- the storage decision (0R.6), needed before V2-M;
+- a storage decision (0U.2), needed before V2-D as well: nothing authorized makes room for either session;
 - each session's issue and launch gates pass live (session commit, room, balance, envelope).
 
 Both units then train and are evaluated, and the round stops for review: no seed 2 is started, and V2-M is not
@@ -439,7 +644,8 @@ scientific completion: seed 1 is complete, and seed 2 was stopped early by the m
 
 - Kept (nothing deleted):
   - on the relay: seed 1's final (7.46 GiB) and seed 2's verified save point at step 5,520 (19.50 GiB: model +
-    trainer state, resumable under the registered contract);
+    trainer state, resumable under the registered contract). Seed 2 stopped at step 6,590; a resume continues from
+    5,520 and recomputes the 1,070 unpersisted steps;
   - on the dev box: the secured evidence of both attempts (`~/aad-artifacts/stage1_depth_merge/<run>/store/out`);
   - in the repo: closeouts, `storage/finals_depth_merge.json` (seed 1 verified, seed 2 missing).
 - Money:
@@ -448,7 +654,8 @@ scientific completion: seed 1 is complete, and seed 2 was stopped early by the m
   - DMR1 total: $28.3813;
   - project: $1,113.5131 billed of the $1,161.06 cap ($47.5469 left).
 - For the maintainer's review:
-  - resume seed 2 from step 5,520 (about 4,181 steps, ~5.7 h plus evaluation, inside the training kind's remainder);
+  - resume seed 2 from its durable save point at step 5,520 (4,181 steps to 9,701, of which 1,070 repeat the
+    unpersisted steps 5,521-6,590; ~5.7 h plus evaluation, inside the training kind's remainder);
   - or close V1 on one seed;
   - and the relay bytes' fate.
 

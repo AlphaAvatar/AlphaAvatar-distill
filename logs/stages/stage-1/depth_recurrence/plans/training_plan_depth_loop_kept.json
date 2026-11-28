@@ -6,7 +6,7 @@
   "path": "logs/stages/stage-1/single_operator_budget/plans/training_plan_depth_only.json",
   "sha256": "4eeab53fee1d8c0ca22d7cf15ff79416eef57af52cc37b659d25818f257aa359"
  },
- "design_sha256": "97626d862ed729a6904280d7e16d0be99845b48d86cd9e0c5e3e7e4c8f660e5e",
+ "design_sha256": "8d255edad6afc9a5d5aa112345769d381807c2cedf19f81f9ccac96e4c496892",
  "init_record": {
   "path": "logs/stages/stage-1/depth_recurrence/inits/KEPT/init_record.json",
   "sha256": "1bf97e862ba2d88b22852a9576403f0d105ac048316809960e800e488f40f7d7",
@@ -40,8 +40,7 @@
    "weights uploaded and verified are never sent again: only their record's publication (the handoff) is retried (SavepointMirror.mirror_once, hand_off_with_retries)",
    "a save point is retired only after the next one hands off; save points only after the final hands off"
   ],
-  "savepoint_copies": 1,
-  "savepoint_copies_rule": "PROPOSED for review (storage.md / REVIEW section 0.5): the relay accepts 27.22 GiB (2026-11-28 10:25Z) and two 19.50 GiB save points cannot fit; a single copy removes the previous save point before each upload and the last before the final's (TPI1 train_driver.savepoint_copies), so a unit holds no durable save point during each upload (about 2-3 min)"
+  "rotation_rule": "SOB1's registered rotation, unchanged: each new save point is uploaded, re-downloaded and re-hashed, and its pointer handed off, while the previous one is still on the relay; only then is the previous one removed (TPI1 SavepointMirror). From the first durable save point on, a valid discoverable copy exists at every moment; the review of 2026-11-28 refused a single-copy rotation (it left no durable copy for up to 2.86 h per save point)"
  },
  "evaluation_protocol": {
   "eval_set": "eval-set-1",
@@ -685,10 +684,12 @@
  },
  "engine_validation": {
   "required": true,
+  "record": "logs/stages/stage-1/depth_recurrence/engine_check.json",
   "script": "scripts/stages/stage-1/depth_recurrence/engine_check.py",
   "gate": "PASS iff for hf_cache and vllm_generation alike: recurrent mean |dlogp| <= 3 x control's + 0.02 nats AND recurrent top-1 agreement >= control's - 0.02; AND the shared-cache variant FAILS the hf_cache gate. Fixed before any GPU reading; the thresholds bound bf16 noise relative to the measured control, not an absolute accuracy",
   "inputs": "the first 4 validation sequences of the training pack, their first 384 tokens as prompts; 64 greedy continuation tokens each",
-  "control_config": "configs/stages/stage-1/depth_recurrence/base_config.json"
+  "control_config": "configs/stages/stage-1/depth_recurrence/base_config.json",
+  "mode": "run"
  },
  "authorizes": "nothing"
 }

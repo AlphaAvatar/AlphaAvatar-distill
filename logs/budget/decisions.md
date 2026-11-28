@@ -17616,3 +17616,39 @@ on a paid pod.
 - Risks: records written between 2026-11-13 and 2026-11-28 still say "Stage 6" for DMR1. AGENTS.md 4.8's history
   note and the path map state the current reading.
 - Revisit when: Stage 6 is designed, from a Stage-5-complete model.
+
+## 2026-11-28 (UTC) — DMR1 V2 pre-launch fixes after the maintainer's review of 1e42b144 ($0)
+
+- Context: the maintainer approved V2's design and the Stage 1 / Stage 3 classification, and refused four things
+  before any launch:
+  - the single-copy save-point rotation (no durable copy during each copy, up to 2.86 h);
+  - an engine-check reuse that trusted a PASS string;
+  - unbound D / M controls;
+  - an imprecise statement of V1 seed 2's resumable progress.
+
+  The maintainer also asked for storage and money to be recomputed from one ledger reading.
+- Decision (DMR1_REVIEW.md section 0U):
+  - **Rotation.** The single-copy rotation is removed; the registered two-copy rotation is the only one. Takeover
+    from a durable save point is proven through `train_driver.main --resume` at four cut points (upload,
+    verification, unfinished handoff, refused removal);
+  - **Engine record.** It is bound to the schedule, the control, the inputs and pack, the gate, the implementation
+    (docstring-free ast digests) and the environment, but not to the weights. It is reused only after re-deriving
+    the binding, the completeness and the verdict. V2-M reuses V2-D's adopted record and trains only if it stands
+    for V2-M's plan, checked on the dev box (pinned in the artifact, a launch gate) and on the pod. An empty or
+    partial result is FAIL;
+  - **Controls.** D and M are bound to their registered completion records and final weights (`5635c33e…`,
+    `ed0ee3e1…`), on the default and on explicit paths;
+  - **V1 seed 2.** Stopped at 6,590; durable save point 5,520; a resume recomputes 1,070 steps;
+  - **Storage.** Each V2 session needs 39.99 GiB, and the relay accepts 27.22 GiB: V2-D is short 12.77 GiB, V2-M
+    20.36 GiB. Nothing authorized closes the gap, and nothing was deleted or bought. The options (free V1 seed 2's
+    save point plus the two SOB1 duplicates; buy storage; a second backend) are the maintainer's;
+  - **Money** (11:58:20Z): the caps with reserves are $115.25, against a project-cap remainder of $46.41 (a raise of
+    $68.84) and a balance of $95.35 (a $19.90 top-up for both sessions at their caps). Nothing is approved.
+- Alternatives considered: keeping a single copy with a smaller window (refused by the review: any window without a
+  durable copy breaks cross-attempt reuse); running the engine check again in V2-M's session (needless: the same
+  execution path, re-checked by its record's binding).
+- Risks:
+  - the storage gap blocks both sessions until a decision;
+  - the vLLM half of the engine check still has not executed;
+  - the L40S memory margin is still unmeasured.
+- Revisit when: the maintainer decides storage, money and the grant.

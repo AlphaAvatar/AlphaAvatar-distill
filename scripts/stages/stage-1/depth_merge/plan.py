@@ -75,15 +75,20 @@ def seeds_of(d: dict, arm: str) -> list[int]:
 
 
 def engine_validation(d: dict, arm: str) -> dict | None:
-    """The design's engine validation, bound into the plan of the arm whose session runs it (None for others)."""
+    """The design's engine validation as each loop arm's plan binds it (None for a stock arm): the first arm's session
+    RUNS it (``mode: run``) and its PASS is adopted at the canonical path; every later arm REUSES that record
+    (``mode: reuse``) and may train only when the record stands for ITS plan (`engine_check.record_problems`: the
+    same schedule, control, inputs, gate and implementation, re-derived; on a pod, the same environment)."""
+    from stages.depth_recurrence import engine_check as EC
     ev = d.get("engine_validation")
     if not ev or not DC.is_recurrent(arm):
         return None
     first = d["training"]["unit_order"]["arms"][0]
-    if arm != first:
-        return {"required": False, "run_in": f"the {first} session (its engine_check.json)"}
-    return {"required": True, "script": ev["script"], "gate": ev["gate"], "inputs": ev["inputs"],
-            "control_config": "configs/stages/stage-1/depth_recurrence/base_config.json"}
+    common = {"required": True, "record": EC.CANONICAL, "script": ev["script"], "gate": ev["gate"],
+              "inputs": ev["inputs"], "control_config": "configs/stages/stage-1/depth_recurrence/base_config.json"}
+    if arm == first:
+        return {**common, "mode": "run"}
+    return {**common, "mode": "reuse", "from_arm": first}
 
 
 def outside(diff: list[str], allowed: set[str]) -> list[str]:

@@ -1,5 +1,5 @@
 {
- "schema": "aadistill.dmr1.v2_storage_plan/v1",
+ "schema": "aadistill.dmr1.v2_storage_plan/v2",
  "variant": "DMR1-R",
  "live": {
   "relay": "AlphaAvatar/aadistill-artifacts",
@@ -8,19 +8,19 @@
   "refused_at_gib": 27.234,
   "used_bytes": 64810820765,
   "used_gib": 60.36,
-  "utc": "2026-11-28T11:14:39Z",
+  "utc": "2026-11-28T11:57:50Z",
   "rule": "LFS batch endpoint bisection with fresh oids in objects of <= 10 GiB (nothing stored); used = the sum of list_lfs_files (the billing basis)"
  },
  "dev_box_live": {
   "path": "/home/ecs-user/aad-artifacts/stage1_depth_merge",
-  "free_bytes": 7351537664,
-  "free_gib": 6.85,
+  "free_bytes": 7251324928,
+  "free_gib": 6.75,
   "peak_evidence_gib": 1.5,
-  "margin_after_peak_gib": 5.35,
-  "utc": "2026-11-28T11:14:39Z",
+  "margin_after_peak_gib": 5.25,
+  "utc": "2026-11-28T11:57:50Z",
   "note": "the filesystem is shared with another project; its use moves without this project"
  },
- "sequence_as_planned": {
+ "sequence": {
   "steps": [
    {
     "step": "depth_loop_kept: depth_loop_kept-s20260726: save point 1104 uploaded",
@@ -28,82 +28,82 @@
     "net_gib": 19.5
    },
    {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 2208 removed (single copy)",
-    "net_bytes": 0,
-    "net_gib": 0.0
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point 2208 uploaded",
+    "net_bytes": 41869144064,
+    "net_gib": 38.99
    },
    {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point 2208 uploaded",
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 2208 removed",
     "net_bytes": 20934572032,
     "net_gib": 19.5
-   },
-   {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 3312 removed (single copy)",
-    "net_bytes": 0,
-    "net_gib": 0.0
    },
    {
     "step": "depth_loop_kept: depth_loop_kept-s20260726: save point 3312 uploaded",
-    "net_bytes": 20934572032,
-    "net_gib": 19.5
+    "net_bytes": 41869144064,
+    "net_gib": 38.99
    },
    {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 4416 removed (single copy)",
-    "net_bytes": 0,
-    "net_gib": 0.0
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 3312 removed",
+    "net_bytes": 20934572032,
+    "net_gib": 19.5
    },
    {
     "step": "depth_loop_kept: depth_loop_kept-s20260726: save point 4416 uploaded",
-    "net_bytes": 20934572032,
-    "net_gib": 19.5
+    "net_bytes": 41869144064,
+    "net_gib": 38.99
    },
    {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 5520 removed (single copy)",
-    "net_bytes": 0,
-    "net_gib": 0.0
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 4416 removed",
+    "net_bytes": 20934572032,
+    "net_gib": 19.5
    },
    {
     "step": "depth_loop_kept: depth_loop_kept-s20260726: save point 5520 uploaded",
-    "net_bytes": 20934572032,
-    "net_gib": 19.5
+    "net_bytes": 41869144064,
+    "net_gib": 38.99
    },
    {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 6624 removed (single copy)",
-    "net_bytes": 0,
-    "net_gib": 0.0
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 5520 removed",
+    "net_bytes": 20934572032,
+    "net_gib": 19.5
    },
    {
     "step": "depth_loop_kept: depth_loop_kept-s20260726: save point 6624 uploaded",
-    "net_bytes": 20934572032,
-    "net_gib": 19.5
+    "net_bytes": 41869144064,
+    "net_gib": 38.99
    },
    {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 7728 removed (single copy)",
-    "net_bytes": 0,
-    "net_gib": 0.0
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 6624 removed",
+    "net_bytes": 20934572032,
+    "net_gib": 19.5
    },
    {
     "step": "depth_loop_kept: depth_loop_kept-s20260726: save point 7728 uploaded",
-    "net_bytes": 20934572032,
-    "net_gib": 19.5
+    "net_bytes": 41869144064,
+    "net_gib": 38.99
    },
    {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 8832 removed (single copy)",
-    "net_bytes": 0,
-    "net_gib": 0.0
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 7728 removed",
+    "net_bytes": 20934572032,
+    "net_gib": 19.5
    },
    {
     "step": "depth_loop_kept: depth_loop_kept-s20260726: save point 8832 uploaded",
+    "net_bytes": 41869144064,
+    "net_gib": 38.99
+   },
+   {
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: save point before 8832 removed",
     "net_bytes": 20934572032,
     "net_gib": 19.5
    },
    {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: last save point removed before the final (single copy)",
-    "net_bytes": 0,
-    "net_gib": 0.0
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: final uploaded",
+    "net_bytes": 28949979136,
+    "net_gib": 26.96
    },
    {
-    "step": "depth_loop_kept: depth_loop_kept-s20260726: final uploaded",
+    "step": "depth_loop_kept: depth_loop_kept-s20260726: save points retired after the final",
     "net_bytes": 8015407104,
     "net_gib": 7.46
    },
@@ -118,82 +118,82 @@
     "net_gib": 27.09
    },
    {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 2208 removed (single copy)",
-    "net_bytes": 8149624832,
-    "net_gib": 7.59
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point 2208 uploaded",
+    "net_bytes": 50018768896,
+    "net_gib": 46.58
    },
    {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point 2208 uploaded",
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 2208 removed",
     "net_bytes": 29084196864,
     "net_gib": 27.09
-   },
-   {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 3312 removed (single copy)",
-    "net_bytes": 8149624832,
-    "net_gib": 7.59
    },
    {
     "step": "depth_loop_merged: depth_loop_merged-s20260726: save point 3312 uploaded",
-    "net_bytes": 29084196864,
-    "net_gib": 27.09
+    "net_bytes": 50018768896,
+    "net_gib": 46.58
    },
    {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 4416 removed (single copy)",
-    "net_bytes": 8149624832,
-    "net_gib": 7.59
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 3312 removed",
+    "net_bytes": 29084196864,
+    "net_gib": 27.09
    },
    {
     "step": "depth_loop_merged: depth_loop_merged-s20260726: save point 4416 uploaded",
-    "net_bytes": 29084196864,
-    "net_gib": 27.09
+    "net_bytes": 50018768896,
+    "net_gib": 46.58
    },
    {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 5520 removed (single copy)",
-    "net_bytes": 8149624832,
-    "net_gib": 7.59
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 4416 removed",
+    "net_bytes": 29084196864,
+    "net_gib": 27.09
    },
    {
     "step": "depth_loop_merged: depth_loop_merged-s20260726: save point 5520 uploaded",
-    "net_bytes": 29084196864,
-    "net_gib": 27.09
+    "net_bytes": 50018768896,
+    "net_gib": 46.58
    },
    {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 6624 removed (single copy)",
-    "net_bytes": 8149624832,
-    "net_gib": 7.59
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 5520 removed",
+    "net_bytes": 29084196864,
+    "net_gib": 27.09
    },
    {
     "step": "depth_loop_merged: depth_loop_merged-s20260726: save point 6624 uploaded",
-    "net_bytes": 29084196864,
-    "net_gib": 27.09
+    "net_bytes": 50018768896,
+    "net_gib": 46.58
    },
    {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 7728 removed (single copy)",
-    "net_bytes": 8149624832,
-    "net_gib": 7.59
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 6624 removed",
+    "net_bytes": 29084196864,
+    "net_gib": 27.09
    },
    {
     "step": "depth_loop_merged: depth_loop_merged-s20260726: save point 7728 uploaded",
-    "net_bytes": 29084196864,
-    "net_gib": 27.09
+    "net_bytes": 50018768896,
+    "net_gib": 46.58
    },
    {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 8832 removed (single copy)",
-    "net_bytes": 8149624832,
-    "net_gib": 7.59
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 7728 removed",
+    "net_bytes": 29084196864,
+    "net_gib": 27.09
    },
    {
     "step": "depth_loop_merged: depth_loop_merged-s20260726: save point 8832 uploaded",
+    "net_bytes": 50018768896,
+    "net_gib": 46.58
+   },
+   {
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: save point before 8832 removed",
     "net_bytes": 29084196864,
     "net_gib": 27.09
    },
    {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: last save point removed before the final (single copy)",
-    "net_bytes": 8149624832,
-    "net_gib": 7.59
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: final uploaded",
+    "net_bytes": 37099603968,
+    "net_gib": 34.55
    },
    {
-    "step": "depth_loop_merged: depth_loop_merged-s20260726: final uploaded",
+    "step": "depth_loop_merged: depth_loop_merged-s20260726: save points retired after the final",
     "net_bytes": 16165031936,
     "net_gib": 15.05
    },
@@ -203,13 +203,31 @@
     "net_gib": 15.18
    }
   ],
-  "peak_bytes": 29084196864,
-  "peak_gib": 27.09,
+  "peak_bytes": 50018768896,
+  "peak_gib": 46.58,
   "margin_bytes": 1073741824,
-  "need_bytes": 30157938688,
-  "need_gib": 28.09,
-  "peak_at": "depth_loop_merged: depth_loop_merged-s20260726: save point 1104 uploaded",
-  "savepoint_copies": "the plans'"
+  "need_bytes": 51092510720,
+  "need_gib": 47.58,
+  "peak_at": "depth_loop_merged: depth_loop_merged-s20260726: save point 2208 uploaded",
+  "sessions": {
+   "depth_loop_kept": {
+    "held_before_bytes": 0,
+    "own_peak_bytes": 41869144064,
+    "own_peak_gib": 38.99,
+    "need_bytes": 42942885888,
+    "need_gib": 39.99,
+    "rule": "the session's launch gate: its own rotation peak + the margin, against the live headroom (which already excludes what earlier sessions left)"
+   },
+   "depth_loop_merged": {
+    "held_before_bytes": 8149624832,
+    "own_peak_bytes": 41869144064,
+    "own_peak_gib": 38.99,
+    "need_bytes": 42942885888,
+    "need_gib": 39.99,
+    "rule": "the session's launch gate: its own rotation peak + the margin, against the live headroom (which already excludes what earlier sessions left)"
+   }
+  },
+  "rotation": "registered two-copy (no single-copy branch exists)"
  },
  "duplicates": {
   "durable/stage1_single_operator_budget/residual_width/init/c853640b1ce2392c": {
@@ -229,43 +247,726 @@
    }
   }
  },
- "duplicates_bytes": 8056705132,
  "duplicates_gib": 7.5,
  "options": {
-  "copies_1_as_is": {
-   "need_gib": 28.09,
+  "as_is": {
+   "freed_gib": 0.0,
    "headroom_gib": 27.22,
-   "fits": false,
-   "margin_gib": -0.87,
-   "peak_at": "depth_loop_merged: depth_loop_merged-s20260726: save point 1104 uploaded"
+   "v2d": {
+    "need_gib": 39.99,
+    "fits": false,
+    "gap_gib": 12.77
+   },
+   "v2m": {
+    "need_gib": 39.99,
+    "headroom_then_gib": 19.63,
+    "fits": false,
+    "gap_gib": 20.36
+   },
+   "authorized": true
   },
-  "copies_1_duplicates_removed": {
-   "need_gib": 28.09,
+  "duplicates_removed": {
+   "freed_gib": 7.5,
    "headroom_gib": 34.72,
-   "fits": true,
-   "margin_gib": 6.64,
-   "peak_at": "depth_loop_merged: depth_loop_merged-s20260726: save point 1104 uploaded"
+   "v2d": {
+    "need_gib": 39.99,
+    "fits": false,
+    "gap_gib": 5.27
+   },
+   "v2m": {
+    "need_gib": 39.99,
+    "headroom_then_gib": 27.13,
+    "fits": false,
+    "gap_gib": 12.86
+   },
+   "authorized": false
   },
-  "copies_2_as_is": {
-   "need_gib": 47.58,
-   "headroom_gib": 27.22,
-   "fits": false,
-   "margin_gib": -20.36,
-   "peak_at": "depth_loop_merged: depth_loop_merged-s20260726: save point 2208 uploaded"
+  "v1_seed2_save_point_freed": {
+   "freed_gib": 19.5,
+   "headroom_gib": 46.72,
+   "v2d": {
+    "need_gib": 39.99,
+    "fits": true,
+    "gap_gib": 0.0
+   },
+   "v2m": {
+    "need_gib": 39.99,
+    "headroom_then_gib": 39.13,
+    "fits": false,
+    "gap_gib": 0.87
+   },
+   "authorized": false
   },
-  "copies_2_duplicates_removed": {
-   "need_gib": 47.58,
-   "headroom_gib": 34.72,
-   "fits": false,
-   "margin_gib": -12.86,
-   "peak_at": "depth_loop_merged: depth_loop_merged-s20260726: save point 2208 uploaded"
+  "duplicates_and_v1_seed2_save_point": {
+   "freed_gib": 27.0,
+   "headroom_gib": 54.22,
+   "v2d": {
+    "need_gib": 39.99,
+    "fits": true,
+    "gap_gib": 0.0
+   },
+   "v2m": {
+    "need_gib": 39.99,
+    "headroom_then_gib": 46.63,
+    "fits": true,
+    "gap_gib": 0.0
+   },
+   "authorized": false
   }
  },
- "kept": {
-  "V1 seed 20260726 final (7.46 GiB)": "kept (maintainer 2026-11-28)",
-  "V1 seed 20260801 save point step 5,520 (19.50 GiB)": "kept: resumable (maintainer 2026-11-28)",
-  "V1 alpha-merged init (3.73 GiB)": "kept: V2-M's base",
-  "SOB1 depth init (3.73 GiB)": "kept: V2-D's base"
+ "inventory": {
+  "groups": {
+   "durable/stage1_depth_merge/depth_merge/depth_merge-s20260801": {
+    "bytes": 20934762735,
+    "objects": 2,
+    "class": "KEEP",
+    "why": "V1 seed 2's durable save point (step 5,520): kept by the maintainer (2026-11-28); freeing it needs that decision",
+    "gib": 19.497
+   },
+   "durable/stage1_depth_merge/depth_merge/depth_merge-s20260726": {
+    "bytes": 8015427400,
+    "objects": 1,
+    "class": "KEEP",
+    "why": "V1 seed 1's final: the M control's weights, their only copy (kept by the maintainer)",
+    "gib": 7.465
+   },
+   "transfer/wheelhouse_": {
+    "bytes": 7962512189,
+    "objects": 169,
+    "class": "KEEP",
+    "why": "the pods' environments (every session installs from them)",
+    "gib": 7.416
+   },
+   "permanent_controls/": {
+    "bytes": 4768469936,
+    "objects": 2,
+    "class": "KEEP",
+    "why": "permanent controls (protected)",
+    "gib": 4.441
+   },
+   "durable/stage1_single_operator_budget/residual_width/init": {
+    "bytes": 4048747904,
+    "objects": 2,
+    "class": "PROPOSE",
+    "why": "a duplicate: the dev box holds a verified copy; no plan reads the relay copy",
+    "gib": 3.771
+   },
+   "durable/stage1_single_operator_budget/ffn_attention/init": {
+    "bytes": 4034178856,
+    "objects": 1,
+    "class": "PROPOSE",
+    "why": "a duplicate: the dev box holds a verified copy; no plan reads the relay copy",
+    "gib": 3.757
+   },
+   "durable/stage1_depth_merge/depth_merge/init": {
+    "bytes": 4007724000,
+    "objects": 1,
+    "class": "KEEP",
+    "why": "V2-M's base (the only copy)",
+    "gib": 3.732
+   },
+   "durable/stage1_single_operator_budget/depth_only/init": {
+    "bytes": 4007724000,
+    "objects": 1,
+    "class": "KEEP",
+    "why": "V2-D's base: the pod stages it from here",
+    "gib": 3.732
+   },
+   "stage1/qwen3_0p6b_init_v0/": {
+    "bytes": 2384270192,
+    "objects": 2,
+    "class": "KEEP",
+    "why": "the canonical 0.6B init and its random baseline (anchors)",
+    "gib": 2.221
+   },
+   "stage0_calvol/finalists/": {
+    "bytes": 1192135096,
+    "objects": 1,
+    "class": "KEEP",
+    "why": "named by Stage-2 configs",
+    "gib": 1.11
+   },
+   "stage3_recovery_corpus_v2/candidates.jsonl": {
+    "bytes": 897625556,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.836
+   },
+   "transfer/stage3_sr/A-MIX-6cat-sr": {
+    "bytes": 334788931,
+    "objects": 2,
+    "class": "KEEP",
+    "why": "V2's training pack (relay input of every training session)",
+    "gib": 0.312
+   },
+   "transfer/tool_generation/hybrid": {
+    "bytes": 261698622,
+    "objects": 3,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.244
+   },
+   "transfer/stage3_sr/A2-6cat-sr": {
+    "bytes": 261582546,
+    "objects": 2,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.244
+   },
+   "durable/stage3_sr/evidence": {
+    "bytes": 241239331,
+    "objects": 4,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.225
+   },
+   "durable/stage1_single_operator_budget/phase2_evidence": {
+    "bytes": 121647970,
+    "objects": 3,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.113
+   },
+   "stage3_recovery_corpus_v2/sessions.jsonl": {
+    "bytes": 76664450,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.071
+   },
+   "transfer/stage3_sr/A1-6cat-sr": {
+    "bytes": 72008454,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.067
+   },
+   "stage0_calibration_volume/battery_20261018_092345/teacher_dev": {
+    "bytes": 66095435,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.062
+   },
+   "phase_c2_full_search/attempt3/states.jsonl": {
+    "bytes": 64386774,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.06
+   },
+   "stage3_teacher_corpus_20260730/rollout_snapshot/rollouts.jsonl": {
+    "bytes": 63094824,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.059
+   },
+   "transfer/stage3_sr/C1-6cat-sr": {
+    "bytes": 62817030,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.059
+   },
+   "stage0_calibration_volume/teachercal_20261018_112755/teacher_cal": {
+    "bytes": 59193209,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.055
+   },
+   "transfer/aad_autoinit_3fc32e8c.bundle": {
+    "bytes": 58242034,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.054
+   },
+   "transfer/aad_autoinit_bafb41b7.bundle": {
+    "bytes": 58230929,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.054
+   },
+   "transfer/aad_autoinit_8d7b899c.bundle": {
+    "bytes": 57624277,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.054
+   },
+   "transfer/aad_autoinit_34f02adc.bundle": {
+    "bytes": 57484768,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.054
+   },
+   "durable/stage1_reasoning_inheritance/evidence": {
+    "bytes": 52450012,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.049
+   },
+   "durable/stage1_single_operator_budget/phase1_evidence": {
+    "bytes": 29614165,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.028
+   },
+   "durable/stage1_teacher_parent_init/evidence": {
+    "bytes": 28981348,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.027
+   },
+   "transfer/stage2_data_20260726.tar.zst": {
+    "bytes": 26553594,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.025
+   },
+   "stage1/phase_d2/d2_search_20261015_051722": {
+    "bytes": 26043743,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.024
+   },
+   "transfer/aad_autoinit_51762aff.bundle": {
+    "bytes": 25586178,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.024
+   },
+   "transfer/aad_autoinit_778e2bcb.bundle": {
+    "bytes": 25459999,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.024
+   },
+   "stage2_h1pa/units/evidence": {
+    "bytes": 25173944,
+    "objects": 6,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.023
+   },
+   "durable/packed_full_search/research_a_packed_hybrid_full_search": {
+    "bytes": 21396795,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.02
+   },
+   "durable/stage1_teacher_parent_init/A_teacher_parent": {
+    "bytes": 20979888,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.02
+   },
+   "durable/stage1_reasoning_inheritance/913433664fce0fed": {
+    "bytes": 20979888,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.02
+   },
+   "transfer/stage1_reasoning_inheritance/ri_diagnosis_20261113_193508": {
+    "bytes": 20968891,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.02
+   },
+   "transfer/stage1_reasoning_inheritance/ri_diagnosis_20261113_180718": {
+    "bytes": 20906051,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.019
+   },
+   "transfer/stage1_reasoning_inheritance/ri_diagnosis_20261113_161911": {
+    "bytes": 20812251,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.019
+   },
+   "transfer/stage1_reasoning_inheritance/ri_diagnosis_20261113_130551": {
+    "bytes": 20563107,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.019
+   },
+   "durable/tool_generation_sessions/a_tool_generation_sr_20261105_153741": {
+    "bytes": 18221797,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.017
+   },
+   "stage2_h1pa/packs/D4A_fluid_final_sessions.jsonl": {
+    "bytes": 17983482,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.017
+   },
+   "stage2_h1pa/packs/D4A_fluid_whole_sessions.jsonl": {
+    "bytes": 16990088,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.016
+   },
+   "stage3_recovery_corpus_v2/ladder_weighted/blocks.npz": {
+    "bytes": 14429712,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.013
+   },
+   "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz": {
+    "bytes": 14388647,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.013
+   },
+   "stage1/phase_d2/d2_screening_20261015_203346": {
+    "bytes": 11474699,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.011
+   },
+   "stage3/s1_ffn_norm_v0/step_000660": {
+    "bytes": 11422650,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.011
+   },
+   "durable/stage1_reasoning_inheritance/layer_merge": {
+    "bytes": 11243678,
+    "objects": 2,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.01
+   },
+   "stage0_calibration_volume/battery_20261018_092345/e1_r2960k_sa_pca_dev": {
+    "bytes": 10907266,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.01
+   },
+   "e7_streams_20260809/e7_control_kd/blocks.npz": {
+    "bytes": 9016848,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.008
+   },
+   "e7_streams_20260809/e7_fineweb_kd/blocks.npz": {
+    "bytes": 9016848,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.008
+   },
+   "e5_start/e5_arm_r_corpora.tar.gz": {
+    "bytes": 8687380,
+    "objects": 2,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.008
+   },
+   "stage2_h1/generation/h1pat_20261024_115517": {
+    "bytes": 8592782,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.008
+   },
+   "stage2_h1pa/packs/D4A_merged_final": {
+    "bytes": 8344933,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.008
+   },
+   "stage2_h1pa/packs/D4A_merged_whole": {
+    "bytes": 8331713,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.008
+   },
+   "transfer/stage3_corpus_transfer_20260730.tar.gz": {
+    "bytes": 7522410,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.007
+   },
+   "stage2_h1/units/evidence": {
+    "bytes": 5471318,
+    "objects": 4,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.005
+   },
+   "stage1/phase_d3/d3_probes_20261017_110022": {
+    "bytes": 4547800,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.004
+   },
+   "e5_start/e5_arm_r.tar.gz": {
+    "bytes": 4461186,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.004
+   },
+   "e5_start/e5_arm_c.tar.gz": {
+    "bytes": 4441823,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.004
+   },
+   "stage1/phase_d2/d2_confirmation_20261016_105802": {
+    "bytes": 4338735,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.004
+   },
+   "durable/tool_generation_sessions/a_tool_generation_sr_t2507_20261105_164515": {
+    "bytes": 4108091,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.004
+   },
+   "durable/stage1_depth_merge/depth_merge/statistics": {
+    "bytes": 3837152,
+    "objects": 1,
+    "class": "KEEP",
+    "why": "V1's build statistics (the init's provenance)",
+    "gib": 0.004
+   },
+   "transfer/aad_e8a_75a30746.bundle": {
+    "bytes": 2890756,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.003
+   },
+   "stage2_h1pa/packs/D4A_fluid_final": {
+    "bytes": 2866563,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.003
+   },
+   "stage2_h1pa/packs/D4A_fluid_whole": {
+    "bytes": 2715164,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.003
+   },
+   "e7_streams_20260809/e7_fineweb_val/blocks.npz": {
+    "bytes": 2621968,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.002
+   },
+   "e2p1_20260803/rung_0860k_clean_median/blocks.npz": {
+    "bytes": 1842403,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.002
+   },
+   "transfer/pilot_transfer_20260730.tar.gz": {
+    "bytes": 1652092,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.002
+   },
+   "transfer/repo_e2p1e_20260803.bundle": {
+    "bytes": 1639778,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.002
+   },
+   "transfer/repo_e2p1f_20260803.bundle": {
+    "bytes": 1630295,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.002
+   },
+   "transfer/repo_e2p1d_20260803.bundle": {
+    "bytes": 1630238,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.002
+   },
+   "transfer/repo_e2p1b_20260803.bundle": {
+    "bytes": 1627764,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.002
+   },
+   "transfer/repo_e2p1_20260803.bundle": {
+    "bytes": 1622851,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.002
+   },
+   "transfer/repo_e2p1g_20260803.bundle": {
+    "bytes": 1612229,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.002
+   },
+   "transfer/repo_e2p1c_20260803.bundle": {
+    "bytes": 1603970,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/repo_20260801.bundle": {
+    "bytes": 1302691,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/stage3_pilot_20260730.tar.gz": {
+    "bytes": 1259924,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/repo_20260730d.bundle": {
+    "bytes": 1158569,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/repo_20260730c.bundle": {
+    "bytes": 1117929,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/repo_20260730b.bundle": {
+    "bytes": 1075036,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/repo_20260730.bundle": {
+    "bytes": 890902,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/repo_20260729.bundle": {
+    "bytes": 845984,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/repo_20260728b.bundle": {
+    "bytes": 775224,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/repo_20260728.bundle": {
+    "bytes": 715680,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.001
+   },
+   "transfer/repo_20260727.bundle": {
+    "bytes": 536334,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.0
+   },
+   "transfer/repo_20260726.bundle": {
+    "bytes": 396587,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.0
+   },
+   "durable/tool_generation_sessions/a_tool_generation_sr_20261105_162909": {
+    "bytes": 68400,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.0
+   },
+   "transfer/stage1_depth_merge/dmr1_merge_train_20261127_201532": {
+    "bytes": 66510,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.0
+   },
+   "transfer/stage1_teacher_parent/tpi_train_20261117_180111": {
+    "bytes": 26584,
+    "objects": 1,
+    "class": "UNCLASSIFIED",
+    "why": "small or unrelated; consumers not audited here",
+    "gib": 0.0
+   }
+  },
+  "total_gib": 60.36,
+  "by_class_gib": {
+   "KEEP": 49.93,
+   "PROPOSE": 7.53,
+   "UNCLASSIFIED": 2.9
+  }
  },
- "rule": "need = the two sessions' peak (net bytes vs now, the drivers' order) + the 1 GiB margin; headroom = the live LFS bisection; nothing is deleted or bought by this plan"
+ "rule": "the registered two-copy rotation: a valid, discoverable save point exists at every moment after the first; need = a session's own peak + the 1 GiB margin, against the live headroom; nothing is deleted or bought by this plan; every option but as_is needs the maintainer's decision"
 }
