@@ -1,0 +1,153 @@
+{
+ "schema": "aadistill.dmr1.seed1_stop_check/v1",
+ "seed": 20260726,
+ "pair": [
+  "depth_merge",
+  "depth_only"
+ ],
+ "rule": "STOP iff thinking-mode delta <= -5.0 pp AND its 95% group-bootstrap upper bound < 0 (maintainer, 2026-11-27: stop before seed 2 if seed 1 is much worse; threshold fixed before any seed-1 result)",
+ "decision": "CONTINUE",
+ "modes": {
+  "H-T": {
+   "delta_pp": -3.86,
+   "accuracy_pct": {
+    "depth_merge": 12.28,
+    "depth_only": 16.14
+   },
+   "ci95_pp": [
+    -6.79,
+    -0.87
+   ],
+   "n_paired_records": 570,
+   "raw": {
+    "delta": -0.03859649122807018,
+    "n_paired_records": 570,
+    "accuracy": [
+     0.12280701754385964,
+     0.16140350877192983
+    ],
+    "effect_interval": {
+     "estimate": -0.03859649122807018,
+     "ci95_percentile": [
+      -0.06794510792667344,
+      -0.008680555555555556
+     ],
+     "draws": 10000,
+     "seed": 20261120,
+     "groups": 558,
+     "label": "effect interval, unadjusted for multiplicity; not the decision"
+    }
+   }
+  },
+  "H-N": {
+   "delta_pp": -5.44,
+   "accuracy_pct": {
+    "depth_merge": 12.11,
+    "depth_only": 17.54
+   },
+   "ci95_pp": [
+    -8.39,
+    -2.46
+   ],
+   "n_paired_records": 570,
+   "raw": {
+    "delta": -0.054385964912280704,
+    "n_paired_records": 570,
+    "accuracy": [
+     0.12105263157894737,
+     0.17543859649122806
+    ],
+    "effect_interval": {
+     "estimate": -0.054385964912280704,
+     "ci95_percentile": [
+      -0.08391608391608392,
+      -0.02464788732394366
+     ],
+     "draws": 10000,
+     "seed": 20261120,
+     "groups": 558,
+     "label": "effect interval, unadjusted for multiplicity; not the decision"
+    }
+   }
+  }
+ },
+ "scored_digests": {
+  "depth_merge_s20260726/H-T": "46ceea17ae647e83d4b1e56f06c2e9410819c04660e9df681927231073ed1a90",
+  "depth_merge_s20260726/H-N": "219a6d584d8692549f7aff64d3ec4a5b0e06b92c353d250c48a43abbe0d11395",
+  "depth_only_s20260726/H-T": "88ca2e212b52e9d4174e43a283bbb27bf9c5124524890b26a366f1e8028fb220",
+  "depth_only_s20260726/H-N": "871676e464122948684084baaf051729925f61f49539ab56fa7b91ea68fac17e"
+ },
+ "terminations": {
+  "depth_merge_s20260726/H-T": {
+   "primary_static_fluid_core": {
+    "turns": 570,
+    "natural_termination": 448,
+    "degeneration_stop": 110,
+    "context_limit_hit": 12,
+    "other_stop": 0
+   },
+   "whole_set": {
+    "turns": 1896,
+    "natural_termination": 1498,
+    "degeneration_stop": 358,
+    "context_limit_hit": 40,
+    "other_stop": 0
+   }
+  },
+  "depth_merge_s20260726/H-N": {
+   "primary_static_fluid_core": {
+    "turns": 570,
+    "natural_termination": 519,
+    "degeneration_stop": 51,
+    "context_limit_hit": 0,
+    "other_stop": 0
+   },
+   "whole_set": {
+    "turns": 2492,
+    "natural_termination": 2370,
+    "degeneration_stop": 121,
+    "context_limit_hit": 1,
+    "other_stop": 0
+   }
+  },
+  "depth_only_s20260726/H-T": {
+   "primary_static_fluid_core": {
+    "turns": 570,
+    "natural_termination": 433,
+    "degeneration_stop": 106,
+    "context_limit_hit": 31,
+    "other_stop": 0
+   },
+   "whole_set": {
+    "turns": 1870,
+    "natural_termination": 1438,
+    "degeneration_stop": 361,
+    "context_limit_hit": 71,
+    "other_stop": 0
+   }
+  },
+  "depth_only_s20260726/H-N": {
+   "primary_static_fluid_core": {
+    "turns": 570,
+    "natural_termination": 529,
+    "degeneration_stop": 41,
+    "context_limit_hit": 0,
+    "other_stop": 0
+   },
+   "whole_set": {
+    "turns": 2472,
+    "natural_termination": 2362,
+    "degeneration_stop": 109,
+    "context_limit_hit": 1,
+    "other_stop": 0
+   }
+  }
+ },
+ "n_items": 570,
+ "n_groups": 558,
+ "evidence": {
+  "depth_merge": "/home/ecs-user/aad-artifacts/stage1_depth_merge/dmr1_merge_train_20261127_201532/store/out",
+  "depth_only": "/home/ecs-user/aad-artifacts/stage1_single_operator_budget/sob1_train_depth_only_20261122_223829/store/out"
+ },
+ "scope": "one training seed, descriptive: no test, no verdict; eval-set-1 is development-exposed"
+}
